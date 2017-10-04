@@ -1,0 +1,16 @@
+{
+	firebus:{
+		name:"firebus",
+		password:"firebuspassword0"
+	},
+	services: [
+		{
+			type:"ObjectServer",
+			name:"rbos",
+			config:{
+				configdb:"mongo",
+				objectdb:"mongo"
+			}
+		}
+	]
+}
