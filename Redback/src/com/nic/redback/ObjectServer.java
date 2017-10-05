@@ -1,12 +1,16 @@
 package com.nic.redback;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
+import com.nic.firebus.utils.JSONEntity;
 import com.nic.firebus.utils.JSONException;
+import com.nic.firebus.utils.JSONList;
+import com.nic.firebus.utils.JSONLiteral;
 import com.nic.firebus.utils.JSONObject;
 
 public class ObjectServer extends RedbackService
@@ -82,12 +86,73 @@ public class ObjectServer extends RedbackService
 
 	protected JSONObject getObjectList(String object, JSONObject requestData) throws FunctionErrorException, JSONException
 	{
-		JSONObject response = null;
 		JSONObject objectConfig = getObjectConfig(object);
 		String collection = objectConfig.getString("collection");
 		Payload dataPayload = firebus.requestService(objectDB, new Payload("{object:" + collection + ",filter:" + requestData + "}"));
-		JSONObject data = new JSONObject(dataPayload.getString());
-		response = data;
+		JSONObject dbResult = new JSONObject(dataPayload.getString());
+		JSONList dbResultList = dbResult.getList("result");
+		
+		JSONObject response = new JSONObject();
+		JSONList list = new JSONList();
+		response.put("result", list);
+		for(int i = 0; i < dbResultList.size(); i++)
+		{
+			JSONObject dbObj = dbResultList.getObject(i);
+			JSONObject obj = new JSONObject();
+			JSONList attributeList = objectConfig.getList("attributes");
+			for(int j = 0; j < attributeList.size(); j++)
+			{
+				JSONObject attributeConfig = attributeList.getObject(j);
+				String attrKey = attributeConfig.getString("key");
+				String attrName = attributeConfig.getString("name");
+				String attrEditable = attributeConfig.getString("editable");
+				JSONList attrLOV = attributeConfig.getList("listofvalues");
+				JSONObject attributeObject = new JSONObject();
+				attributeObject.put("value", dbObj.getString(attrKey));
+				attributeObject.put("editable", attrEditable);
+				if(attrLOV != null)
+					attributeObject.put("listofvalues", attrLOV);
+				obj.put(attrName, attributeObject);
+			}
+			list.add(obj);
+		}
 		return response;
 	}
+	
+	/*
+	protected JSONObject processDBObject(JSONObject dbObj)
+	{
+		JSONObject obj = new JSONObject();
+		Iterator<String> it = dbObj.keySet().iterator();
+		while(it.hasNext())
+		{
+			String key = it.next();
+			JSONEntity dbEntity = dbObj.get(key);
+			if(dbEntity instanceof JSONLiteral)
+			{
+				JSONLiteral literal = (JSONLiteral)dbEntity;
+				JSONObject subObj = new JSONObject();
+				subObj.put("value", literal);
+				obj.put(key, subObj);
+			}
+			else if(dbEntity instanceof JSONObject)
+			{
+				JSONObject subObj = processDBObject((JSONObject)dbEntity);
+				obj.put(key, subObj);
+			}
+			else if(dbEntity instanceof JSONList)
+			{
+				JSONList dbList = (JSONList)dbEntity;
+				JSONList list = new JSONList();
+				for(int i = 0; i < dbList.size(); i++)
+				{
+					JSONObject subObj = processDBObject(list.getObject(i));
+					list.add(subObj);
+				}
+				obj.put(key, list);
+			}
+		}
+		return obj;		
+	}
+	*/
 }
