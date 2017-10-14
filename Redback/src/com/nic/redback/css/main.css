@@ -1,0 +1,20 @@
+.hsection {
+	display:inline-flex;
+	border: 0px Solid;
+	vertical-align:top;
+}
+
+.vsection {
+	display:inline-block;
+	border: 0px Solid;
+	vertical-align:top;
+}
+
+.attributediv {
+	display:block;
+	border: 0px Solid;
+}
+
+md-input-container .md-errors-spacer{
+ min-height: 0px !important;
+}
