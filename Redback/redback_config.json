@@ -1,16 +1,40 @@
 {
-	firebus:{
-		name:"firebus",
-		password:"firebuspassword0"
-	},
+	network:"firebus",
+	password:"firebuspassword0",
 	services: [
 		{
-			type:"ObjectServer",
+			type:"objectserver",
 			name:"rbos",
 			config:{
-				configdb:"mongo",
-				objectdb:"mongo"
+				configservice:"mongo",
+				dataservice:"mongo"
 			}
-		}
+		},
+		{
+			type:"uiserver",
+			name:"rbui",
+			config:{
+				configservice:"mongo",
+				resourceservicetype:"filestorage",
+				resourceservice:"rbfiles"
+			}
+		}		
+	],
+	adapters:[
+		{
+			"type":"httplistener",
+			"config": {
+				"port":"8000",
+				"services": ["rbos", "rbui"]		
+			}
+		},
+		{
+			"type":"filestorage",
+			"servicename":"rbfiles",
+			"consumername":"rbfiles",
+			"config": {
+				"path":"D:\Scratch\sharefiles"						
+			}
+		}	
 	]
 }

@@ -6,36 +6,28 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.nic.firebus.Firebus;
 import com.nic.firebus.logging.FirebusSimpleFormatter;
+import com.nic.firebus.standalone.StandaloneContainer;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 
-public class RedbackServer
+public class RedbackServer extends StandaloneContainer
 {
-	protected JSONObject config;
-	protected Firebus firebus;
 	protected ArrayList<RedbackService> services;
 	
-	public RedbackServer(JSONObject c)
+	public RedbackServer(JSONObject config)
 	{
-		config = c;
-		
-		JSONObject firebusConfig = config.getObject("firebus");
-		if(firebusConfig != null)
-		{
-			firebus = new Firebus(firebusConfig.getString("name"), firebusConfig.getString("password"));
-		}
+		super(config);
 		
 		services = new ArrayList<RedbackService>();
 		JSONList list = config.getList("services");
 		for(int i = 0; i < list.size(); i++)
 		{
-			JSONObject serviceConfig = list.getObject(i);
-			String type = serviceConfig.getString("type");
-			String name = serviceConfig.getString("name");
-			JSONObject config = serviceConfig.getObject("config");
-			RedbackService service = RedbackService.instantiate(type, config);
+			JSONObject deploymentConfig = list.getObject(i);
+			String type = deploymentConfig.getString("type");
+			String name = deploymentConfig.getString("name");
+			JSONObject serviceConfig = deploymentConfig.getObject("config");
+			RedbackService service = RedbackService.instantiate(type, serviceConfig);
 			services.add(service);
 			if(firebus != null)
 			{
@@ -52,12 +44,20 @@ public class RedbackServer
 			try
 			{
 				Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
-				Logger logger = Logger.getLogger("com.nic.redback");
-				FileHandler fh = new FileHandler("RedbackServer.log");
-				fh.setFormatter(new FirebusSimpleFormatter());
-				fh.setLevel(Level.FINEST);
-				logger.addHandler(fh);
-				logger.setLevel(Level.FINEST);
+				
+				Logger rbLogger = Logger.getLogger("com.nic.redback");
+				FileHandler rbfh = new FileHandler("RedbackServer.log");
+				rbfh.setFormatter(new FirebusSimpleFormatter());
+				rbfh.setLevel(Level.FINEST);
+				rbLogger.addHandler(rbfh);
+				rbLogger.setLevel(Level.FINEST);
+				
+				Logger fbLogger = Logger.getLogger("com.nic.firebus");
+				FileHandler fbfh = new FileHandler("RedbackServer.log");
+				fbfh.setFormatter(new FirebusSimpleFormatter());
+				fbfh.setLevel(Level.FINEST);
+				fbLogger.addHandler(fbfh);
+				fbLogger.setLevel(Level.FINEST);
 
 				JSONObject config = new JSONObject(new FileInputStream(args[0]));
 				new RedbackServer(config);

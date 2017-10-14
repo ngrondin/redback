@@ -21,9 +21,13 @@ public abstract class RedbackService implements  ServiceProvider
 	
 	public static RedbackService instantiate(String type, JSONObject config)
 	{
-		if(type.equalsIgnoreCase("ObjectServer"))
+		if(type.equalsIgnoreCase("objectserver"))
 		{
 			return new ObjectServer(config);
+		}
+		else if(type.equalsIgnoreCase("uiserver"))
+		{
+			return new UIServer(config);
 		}
 		return null;
 	}
