@@ -197,61 +197,63 @@ public class UIServer extends RedbackService
 			}
 			else if(type.equals("list"))
 			{
-				String data1 = obj.getString("data1");
-				String data2 = obj.getString("data2");
-				if(data1 != null  &&  data2 != null)
+				String line1 = obj.getString("line1");
+				String line2 = obj.getString("line2");
+				if(line1 != null  &&  line2 != null)
 				{
-					preString = "<md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"selectItem(item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>{{item.data." + data1 + "}}</h3><h4>{{item.data." + data2 + "}}</h4>";
+					line1 = line1.replace("{{", "{{item.");
+					line2 = line2.replace("{{", "{{item.");
+					preString = "<md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"selectItem(item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
 					postString = "</md-list-item></md-list>";
 				}
 			}
 			else if(type.equals("text"))
 			{
-				String data = obj.getString("data");
-				if(data != null)
+				String attribute = obj.getString("attribute");
+				if(attribute != null)
 				{
-					preString = "<div>{{object.data." + data + "}}";
+					preString = "<div>{{object.data." + attribute + "}}";
 					postString = "</div>";
 				}
 			}
 			else if(type.equals("input"))
 			{
 				String label = obj.getString("label");
-				String data = obj.getString("data");
-				if(data != null)
+				String attribute = obj.getString("attribute");
+				if(attribute != null)
 				{
-					preString = "<md-input-container class=\"md-block\" ><label>" + label + "</label><input ng-model=\"object.data." + data + "\">";
+					preString = "<md-input-container class=\"md-block\" ><label>" + label + "</label><input ng-model=\"object.data." + attribute + "\">";
 					postString = "</md-input-container>";
 				}
 			}
 			else if(type.equals("datepicker"))
 			{
 				String label = obj.getString("label");
-				String data = obj.getString("data");
-				if(data != null)
+				String attribute = obj.getString("attribute");
+				if(attribute != null)
 				{
-					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-datepicker  ng-model=\"object.data." + data + "\">";
+					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-datepicker  ng-model=\"object.data." + attribute + "\">";
 					postString = "</md-datepicker></md-input-container>";
 				}
 			}
 			else if(type.equals("select"))
 			{
 				String label = obj.getString("label");
-				String data = obj.getString("data");
-				if(data != null)
+				String attribute = obj.getString("attribute");
+				if(attribute != null)
 				{
-					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-select  ng-model=\"object.data." + data + "\"><md-option ng-repeat=\"val in object.ctrl." + data + ".listofvalues\" value=\"{{val}}\">{{val}}";
+					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-select  ng-model=\"object.data." + attribute + "\"><md-option ng-repeat=\"val in object.validation." + attribute + ".listofvalues\" value=\"{{val}}\">{{val}}";
 					postString = "</md-option></md-select></md-input-container>";
 				}
 			}
 			else if(type.equals("autocomplete"))
 			{
 				String label = obj.getString("label");
-				String data = obj.getString("data");
+				String attribute = obj.getString("attribute");
 				String relatedObjectDisplyAttribute= obj.getString("relatedobject.displayattribute");
-				if(data != null)
+				if(attribute != null)
 				{
-					preString = "<md-autocomplete cflex=\"\" required=\"\" md-input-name=\"autocompleteField\"  md-items=\"item in loadRelatedObjectList('" + data +"')\" md-selected-item=\"object.related." + data+ "\" md-item-text=\"object.related." + data+ ".data." + relatedObjectDisplyAttribute + "\" md-search-text=\"dynamicSearchText\" md-require-match=\"\" md-floating-label=\"" + label + "\">";
+					preString = "<md-autocomplete cflex=\"\" required=\"\" md-input-name=\"autocompleteField\"  md-items=\"item in loadRelatedObjectList('" + attribute +"')\" md-selected-item=\"object.related." + attribute+ "\" md-selected-item-change=\"relatedObjectHasChanged('" + attribute +"')\" md-search-text=\"dynamicSearchText\" md-item-text=\"item.data." + relatedObjectDisplyAttribute + "\" md-require-match=\"\" md-floating-label=\"" + label + "\">";
 					preString +=	 "<md-item-template>{{item.data.name}}";
 					postString = "</md-item-template></md-autocomplete>";
 				}

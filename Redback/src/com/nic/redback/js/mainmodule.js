@@ -22,7 +22,19 @@
 		}
 	};
 	
-	
+	function getFilterFromRelationship(object, relationship)
+	{
+		var filter = {};
+		for (var key in relationship) {
+			var value = relationship[key];
+			if(value.startsWith("{{") &&  value.endsWith("}}")) {
+				var parentEval = 'object.' + value.substring(2, value.length - 2);
+				value = eval(parentEval);
+			}
+			filter[key] = value;
+		}
+		return filter;
+	};
 	
 	var mainModule = angular.module("mainmodule", ['ngMaterial']);	
 	
@@ -35,46 +47,15 @@
 		
 		$scope.setObject = function(object) {
 			$scope.object = object;
-			if(!$scope.object.hasOwnProperty('related'))
-				$scope.object['related'] = {};
-			for (var key in object.data) {
-				if(object.ctrl[key].hasOwnProperty('relatedobject')  &&  object.data[key] != null  &&  object.related[key] == null) 
-					$scope.loadRelatedObject(key);
-			}
 		}
 
-		$scope.loadRelatedObject = function(attributeName) {
-			var relatedObjectId = $scope.object.data[attributeName];
-			if(relatedObjectId != null)
-			{
-				var relatedObjectName = $scope.object.ctrl[attributeName].relatedobject.name;
-				var req = {action:"get", object:relatedObjectName, id:relatedObjectId};
-				$http.post("../../rbos", req)
-				.success(function(response) {
-					convertDateStringsToDates(response);
-					$scope.object.related[attributeName] = response;
-				})
-				.error(function(error, status) {
-					alert('realted load error');
-				});
-			}
-		}
 		
 		$scope.loadRelatedObjectList = function(attributeName)
 		{
-			var relationship = $scope.object.ctrl[attributeName].relatedobject.relationship;
-			var relatedObjectName = $scope.object.ctrl[attributeName].relatedobject.name;
-			var filter = {};
-			for (var key in relationship) {
-				var value = relationship[key];
-				if(value.startsWith("{") &&  value.endsWith("}"))
-				{
-					var parentKey = value.substring(1, value.length() - 2);
-					value = $scope.object.data[parentKey];
-				}
-				filter[key] = value;
-			}
-			filter._any = $scope.dynamicSearchText;
+			var relationship = $scope.object.validation[attributeName].relatedobject.relationship;
+			var relatedObjectName = $scope.object.validation[attributeName].relatedobject.name;
+			var filter = getFilterFromRelationship($scope.object, relationship)
+			filter._any = '*' + $scope.dynamicSearchText + '*';
 
 			var req = {action:"list", object:relatedObjectName, filter:filter};
 			return $http.post("../../rbos", req)
@@ -82,7 +63,18 @@
 					return response.data.list;
 				});
 		};
-
+		
+		$scope.relatedObjectHasChanged = function(attributeName)
+		{
+			var newSelectedItem = $scope.object.related[attributeName];
+			var newId = '';
+			if(newSelectedItem != null)
+				newId = $scope.object.related[attributeName].id;
+			if($scope.object.data[attributeName] != newId)
+			{
+				$scope.object.data[attributeName] = newId;
+			}
+		}
 		
 		$scope.$on('ObjectSelected', function($event, object){
 			if(object.objectname == $scope.objectName)
@@ -91,7 +83,7 @@
 
 		
 		$scope.save = function() {
-			var req = {action:"update", object:$scope.objectName, id:$scope.id, data:$scope.data};
+			var req = {action:"update", object:$scope.objectName, id:$scope.object.id, data:$scope.object.data, options:{addrelated:"true"}};
 			$http.post("../../rbos", req)
 			.success(function(response) {
 				convertDateStringsToDates(response);
@@ -120,7 +112,7 @@
 
 		$scope.load = function() {
 			if($scope.filter != null) {
-				var req = {action:"list", object:$scope.objectName, filter:$scope.filter};
+				var req = {action:"list", object:$scope.objectName, filter:$scope.filter, options:{addrelated:"true"}};
 				$http.post("../../rbos", req)
 				.success(function(response) {
 					convertDateStringsToDates(response);
@@ -139,11 +131,7 @@
 		$scope.$on('ObjectSelected', function($event, object){
 			if($scope.masterConfig != null && object.objectname == $scope.masterConfig.objectname)
 			{
-				$scope.filter = {};
-				for (var key in $scope.masterConfig.relationship) {
-					var parentObjectKey = $scope.masterConfig.relationship[key];
-					$scope.filter[key] = object.data[parentObjectKey];
-				}
+				$scope.filter = getFilterFromRelationship(object, $scope.masterConfig.relationship)
 				$scope.load();
 			}
 		});
