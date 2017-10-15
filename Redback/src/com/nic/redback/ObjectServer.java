@@ -1,5 +1,6 @@
 package com.nic.redback;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -41,18 +42,27 @@ public class ObjectServer extends RedbackService
 			if(action.equals("get"))
 			{
 				String id = request.getString("id");
-				responseData = getObject(object, id);
+				if(id != null)
+					responseData = getObject(object, id);
+				else
+					responseData = new JSONObject("{error:\"A 'get' action requires an 'id' attribute\"}");
 			}
 			if(action.equals("list"))
 			{
 				JSONObject filter = request.getObject("filter");
-				responseData = getObjectList(object, filter);
+				if(filter != null)
+					responseData = getObjectList(object, filter, null);
+				else
+					responseData = new JSONObject("{error:\"A 'list' action requires a 'filter' attribute\"}");
 			}
 			if(action.equals("update"))
 			{
 				String id = request.getString("id");
 				JSONObject data = request.getObject("data");
-				responseData = updateObject(object, id, data);
+				if(id != null  &&  data != null)
+					responseData = updateObject(object, id, data);
+				else
+					responseData = new JSONObject("{error:\"An 'update' action requires an 'id' and a 'data' attribute\"}");
 			}
 
 			response.setData(responseData.toString());
@@ -152,7 +162,7 @@ public class ObjectServer extends RedbackService
 		return object;
 	}
 	
-	protected JSONObject getObjectList(String objectName, JSONObject filterData) throws FunctionErrorException, JSONException
+	protected JSONObject getObjectList(String objectName, JSONObject filterData, JSONObject options) throws FunctionErrorException, JSONException
 	{
 		JSONObject objectConfig = getObjectConfig(objectName);
 		String dbCollectionName = objectConfig.getString("collection");
@@ -169,6 +179,37 @@ public class ObjectServer extends RedbackService
 			JSONObject object = processDBObject(objectName, dbObject);
 			objectList.add(object);
 		}
+		
+		String doRelatedStr = options.getString("dorelated");
+		if(doRelatedStr != null  &&  doRelatedStr.equals("true"))
+		{
+			HashMap<String, ArrayList<String>> relatedIds = new HashMap<String, ArrayList<String>>(); 
+			for(int i = 0; i < objectList.size(); i++)
+			{
+				JSONObject object = objectList.getObject(i);
+				Iterator<String> it = object.getObject("attributes").keySet().iterator();
+				while(it.hasNext())
+				{
+					String attrName = it.next();
+					String relatedObjectName = object.getString("ctrl." + attrName + ".relatedobject.name");
+					if(relatedObjectName != null)
+					{
+						String relatedObjectId = object.getString("data." + attrName);
+						ArrayList<String> ids = relatedIds.get(relatedObjectName);
+						if(ids == null)
+						{
+							ids = new ArrayList<String>();
+							relatedIds.put(relatedObjectName, ids);
+						}
+						if(!ids.contains(relatedObjectId))
+						{
+							ids.add(relatedObjectId);
+						}
+					}
+				}
+			}
+		}
+		
 		return response;
 	}
 	
