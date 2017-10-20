@@ -10,6 +10,11 @@
 	vertical-align:top;
 }
 
+.vscroll {
+	overflow-y: scroll;
+	height: 100%;
+}
+
 .attributediv {
 	display:block;
 	border: 0px Solid;
