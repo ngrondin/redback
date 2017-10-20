@@ -15,8 +15,8 @@ import com.nic.firebus.utils.JSONObject;
 public class ObjectServer extends RedbackService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
-	protected String configService;
 	protected String dataService;
+	protected String idGeneratorService;
 	protected HashMap<String, JSONObject> objectConfigs;
 
 	public ObjectServer(JSONObject c)
@@ -24,6 +24,7 @@ public class ObjectServer extends RedbackService
 		super(c);
 		configService = config.getString("configservice");
 		dataService = config.getString("dataservice");
+		idGeneratorService = config.getString("idgeneratorservice");
 		objectConfigs = new HashMap<String, JSONObject>();
 	}
 
@@ -40,13 +41,13 @@ public class ObjectServer extends RedbackService
 			
 			if(action.equals("get"))
 			{
-				String id = request.getString("id");
-				if(id != null)
-					responseData = getObject(object, id, options);
+				String uid = request.getString("uid");
+				if(uid != null)
+					responseData = getObject(object, uid, options);
 				else
-					responseData = new JSONObject("{error:\"A 'get' action requires an 'id' attribute\"}");
+					responseData = new JSONObject("{error:\"A 'get' action requires a 'uid' attribute\"}");
 			}
-			if(action.equals("list"))
+			else if(action.equals("list"))
 			{
 				JSONObject filter = request.getObject("filter");
 				if(filter != null)
@@ -54,14 +55,18 @@ public class ObjectServer extends RedbackService
 				else
 					responseData = new JSONObject("{error:\"A 'list' action requires a 'filter' attribute\"}");
 			}
-			if(action.equals("update"))
+			else if(action.equals("update"))
 			{
-				String id = request.getString("id");
+				String uid = request.getString("uid");
 				JSONObject data = request.getObject("data");
-				if(id != null  &&  data != null)
-					responseData = updateObject(object, id, data, options);
+				if(uid != null  &&  data != null)
+					responseData = updateObject(object, uid, data, options);
 				else
-					responseData = new JSONObject("{error:\"An 'update' action requires an 'id' and a 'data' attribute\"}");
+					responseData = new JSONObject("{error:\"An 'update' action requires a 'uid' and a 'data' attribute\"}");
+			}
+			else if(action.equals("create"))
+			{
+				responseData = createObject(object, options);
 			}
 
 			response.setData(responseData.toString());
@@ -80,15 +85,6 @@ public class ObjectServer extends RedbackService
 		return null;
 	}
 	
-	protected JSONObject request(String service, String request) throws JSONException, FunctionErrorException
-	{
-		Payload reqPayload = new Payload(request);
-		Payload respPayload = firebus.requestService(configService, reqPayload);
-		String respStr = respPayload.getString();
-		JSONObject result = new JSONObject(respStr);
-		return result;
-	}
-
 	protected JSONObject getObjectConfig(String object) throws JSONException, FunctionErrorException
 	{
 		JSONObject objectConfig = objectConfigs.get(object);
@@ -104,6 +100,16 @@ public class ObjectServer extends RedbackService
 		return objectConfig;
 	}
 	
+	protected JSONObject getAttributeConfig(String object, String attribute) throws JSONException, FunctionErrorException
+	{
+		JSONObject objectConfig = getObjectConfig(object);
+		JSONList attributeList = objectConfig.getList("attributes");
+		for(int i = 0; i < attributeList.size(); i++)
+			if(attributeList.getObject(i).getString("name").equals(attribute))
+				return attributeList.getObject(i);
+		return null;
+	}
+	
 	protected JSONObject generateDBFilter(String objectName, JSONObject objectFilter) throws JSONException, FunctionErrorException
 	{
 		JSONObject objectConfig = getObjectConfig(objectName);
@@ -114,8 +120,8 @@ public class ObjectServer extends RedbackService
 		if(objectFilter.get("_any") != null)
 			anyFilterDBValue =	generateDBAttributeFilterValue(objectFilter.get("_any"));
 
-		if(objectFilter.get("id") != null)
-			dbFilter.put(objectConfig.getString("uid"), generateDBAttributeFilterValue(objectFilter.get("id")));
+		if(objectFilter.get("uid") != null)
+			dbFilter.put(objectConfig.getString("uid"), generateDBAttributeFilterValue(objectFilter.get("uid")));
 		
 		JSONList attributes = objectConfig.getList("attributes");
 		for(int i = 0; i < attributes.size(); i++)
@@ -126,7 +132,7 @@ public class ObjectServer extends RedbackService
 			JSONEntity attrFilter = objectFilter.get(attrName);
 			if(attrFilter != null)
 			{
-					dbFilter.put(attrDBKey, generateDBAttributeFilterValue(attrFilter));
+				dbFilter.put(attrDBKey, generateDBAttributeFilterValue(attrFilter));
 			}
 			else if(anyFilterDBValue != null)
 			{
@@ -219,7 +225,7 @@ public class ObjectServer extends RedbackService
 		
 		String uidKey = objectConfig.getString("uid");
 		String uid = dbObject.getString(uidKey);
-		object.put("id", uid);
+		object.put("uid", uid);
 		object.put("objectname", objectName);
 		
 		JSONList attributeList = objectConfig.getList("attributes");
@@ -251,6 +257,7 @@ public class ObjectServer extends RedbackService
 	
 	protected void addRelatedValues(String objectName, JSONEntity entity) throws JSONException, FunctionErrorException
 	{
+
 		JSONList objectList = null;
 		if(entity instanceof JSONList)
 			objectList = (JSONList)entity;
@@ -267,41 +274,39 @@ public class ObjectServer extends RedbackService
 			JSONObject attributeConfig = attributesList.getObject(i);
 			String attributeName = attributeConfig.getString("name");
 			String relatedObjectName = attributeConfig.getString("relatedobject.name");
-			if(relatedObjectName != null)
+			String relatedObjectValueAttribute = attributeConfig.getString("relatedobject.valueattribute");
+			if(relatedObjectName != null  &&  relatedObjectValueAttribute != null)
 			{
-				JSONObject relatedObjectConfig = getObjectConfig(relatedObjectName);
-				String relatedObjectUIDKey = relatedObjectConfig.getString("uid");
-				JSONList orClause = new JSONList();
+				JSONList inList = new JSONList();
 				for(int j = 0; j < objectList.size(); j++)
 				{
 					JSONObject object = objectList.getObject(j);
-					String relatedObjectId = object.getString("data." + attributeName);
-					if(relatedObjectId != null)
-					{
-						JSONObject idClause = new JSONObject();
-						idClause.put(relatedObjectUIDKey, relatedObjectId);
-						orClause.add(idClause);
-					}
+					String linkValue = object.getString("data." + attributeName);
+					if(linkValue != null)
+						inList.add(new JSONLiteral(linkValue));
+					if(object.getObject("related") == null)
+						object.put("related", new JSONObject());
+					if(object.getObject("related." + attributeName) == null)
+						object.getObject("related").put(attributeName, new JSONObject());
 				}
-				JSONObject relatedObjectDBFilter = new JSONObject();
-				relatedObjectDBFilter.put("$or", orClause);
-				//JSONObject dbResult = request(dataService, "{object:" + relatedObjectDBCollectionName + ",filter:" + relatedObjectDBFilter + "}");
-				JSONObject result = getObjectList(relatedObjectName, new JSONObject(), new JSONObject("{addrelated:false, addvalidation:false}"));
+				JSONObject relatedObjectFilter = new JSONObject();
+				relatedObjectFilter.put(relatedObjectValueAttribute, inList);
+				JSONObject result = getObjectList(relatedObjectName, relatedObjectFilter, new JSONObject("{addrelated:false, addvalidation:false}"));
 				JSONList resultList = result.getList("list"); 
 				for(int k = 0; k < resultList.size(); k++)
 				{
 					JSONObject resultObject = resultList.getObject(k);
-					String dbResultId = resultObject.getString("id");
+					String resultObjectLinkValue = null;
+					if(relatedObjectValueAttribute.equals("uid"))
+						resultObjectLinkValue = resultObject.getString("uid");
+					else
+						resultObjectLinkValue = resultObject.getString("data." + relatedObjectValueAttribute);
 					for(int j = 0; j < objectList.size(); j++)
 					{
 						JSONObject object = objectList.getObject(j);
-						String relatedObjectId = object.getString("data." + attributeName);
-						if(relatedObjectId != null  &&  relatedObjectId.equals(dbResultId))
-						{
-							if(object.getObject("related") == null)
-								object.put("related", new JSONObject());
+						String linkValue = object.getString("data." + attributeName);
+						if(linkValue != null  &&  linkValue.equals(resultObjectLinkValue))
 							object.getObject("related").put(attributeName, resultObject);
-						}
 					}
 				}
 			}
@@ -344,6 +349,42 @@ public class ObjectServer extends RedbackService
 			if(options != null  &&  options.get("addrelated") != null  &&  options.getString("addrelated").equals("true"))
 				addRelatedValues(objectName, object);
 		}
+		return object;
+	}
+	
+	protected JSONObject createObject(String objectName, JSONObject options) throws JSONException, FunctionErrorException
+	{
+		JSONObject object = null;
+		JSONObject dbData = new JSONObject();
+		JSONObject objectConfig = getObjectConfig(objectName);
+		String dbCollectionName = objectConfig.getString("collection");
+		String uidDBKey = objectConfig.getString("uid");
+		String uidGeneratorName = objectConfig.getString("uidgenerator");
+		String uid = firebus.requestService(idGeneratorService, new Payload(uidGeneratorName)).getString();
+		dbData.put(uidDBKey, uid);
+		
+		JSONList attributeList = objectConfig.getList("attributes");
+		for(int j = 0; j < attributeList.size(); j++)
+		{
+			JSONObject attributeConfig = attributeList.getObject(j);
+			String attrDBKey = attributeConfig.getString("key");
+			String value = "";
+			String idGeneratorName = attributeConfig.getString("idgenerator");
+			if(idGeneratorName != null)
+			{
+				value = firebus.requestService(idGeneratorService, new Payload(idGeneratorName)).getString();
+				dbData.put(attrDBKey, value);
+			}
+			String defaultValue = attributeConfig.getString("default");
+			if(defaultValue != null)
+				value = defaultValue;
+			dbData.put(attrDBKey, value);
+		}
+		
+		firebus.publish(dataService, new Payload("{object:" + dbCollectionName + ",data:" + dbData + "}"));
+		object = processDBObject(objectName, dbData, options);
+		if(options != null  &&  options.get("addrelated") != null  &&  options.getString("addrelated").equals("true"))
+			addRelatedValues(objectName, object);
 		return object;
 	}
 }

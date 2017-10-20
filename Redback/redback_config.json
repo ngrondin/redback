@@ -7,7 +7,8 @@
 			name:"rbos",
 			config:{
 				configservice:"mongo",
-				dataservice:"mongo"
+				dataservice:"mongo",
+				idgeneratorservice:"rbid"
 			}
 		},
 		{
@@ -16,7 +17,15 @@
 			config:{
 				configservice:"mongo",
 				resourceservicetype:"filestorage",
-				resourceservice:"rbfiles"
+				resourceservice:"rbfiles",
+				objectservice:rbos
+			}
+		},
+		{
+			type:"idgenerator",
+			name:"rbid",
+			config:{
+				configservice:"mongo"
 			}
 		}		
 	],
@@ -33,7 +42,16 @@
 			"servicename":"rbfiles",
 			"consumername":"rbfiles",
 			"config": {
-				"path":"D:\Scratch\sharefiles"						
+				"path":"C:\temp\sharefiles"						
+			}
+		},
+		{
+			"type":"mongo",
+			"servicename":"mongo",
+			"consumername":"mongo",
+			"config": {
+				"connectionstring":"localhost",
+				"database":"local"						
 			}
 		}	
 	]

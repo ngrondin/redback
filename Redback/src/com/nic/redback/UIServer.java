@@ -6,14 +6,12 @@ import java.util.logging.Logger;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
-import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 
 public class UIServer extends RedbackService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
-	protected String configService;
 	protected String resourceService;
 	protected String resourceServiceType;
 
@@ -83,15 +81,12 @@ public class UIServer extends RedbackService
 						String controllerName = viewConfig.getString("controller");
 						String objectName = viewConfig.getString("object");
 						JSONObject masterObject = viewConfig.getObject("master");
-						//JSONObject parentRelationship = viewConfig.getObject("parentrelationship");
 						JSONObject initialFilter = viewConfig.getObject("initialfilter");
 						String attrStr = "";
 						if(objectName != null)
 							attrStr += " rb-object=\"" + objectName + "\"";
 						if(masterObject != null)
 							attrStr += " rb-master=\"" +  convertJSONToAttributeString(masterObject) + "\"";
-						//if(parentRelationship != null)
-						//	attrStr += " rb-master-relationship=\"" + convertJSONToAttributeString(parentRelationship) + "\"";
 						if(initialFilter != null)
 							attrStr += " rb-initial-filter=\"" + convertJSONToAttributeString(initialFilter) + "\"";
 						sb.append("<div ng-controller=\"" + controllerName + "\"" + attrStr + ">");
@@ -150,14 +145,6 @@ public class UIServer extends RedbackService
 		return null;
 	}
 	
-	protected JSONObject request(String service, String request) throws JSONException, FunctionErrorException
-	{
-		Payload reqPayload = new Payload(request);
-		Payload respPayload = firebus.requestService(configService, reqPayload);
-		String respStr = respPayload.getString();
-		JSONObject result = new JSONObject(respStr);
-		return result;
-	}
 	
 	protected String convertJSONToAttributeString(JSONObject obj)
 	{
@@ -186,6 +173,11 @@ public class UIServer extends RedbackService
 				preString = "<div class=\"" + sectionClass + "\">";
 				postString = "</div>";
 			}
+			else if(type.equals("vscroll"))
+			{
+				preString = "<div class=\"vscroll\">";
+				postString = "</div>";
+			}
 			else if(type.equals("view"))
 			{
 				String name = obj.getString("name");
@@ -203,7 +195,7 @@ public class UIServer extends RedbackService
 				{
 					line1 = line1.replace("{{", "{{item.");
 					line2 = line2.replace("{{", "{{item.");
-					preString = "<md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"selectItem(item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
+					preString = "<md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"$emit('ObjectSelectedEmit', item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
 					postString = "</md-list-item></md-list>";
 				}
 			}
@@ -222,9 +214,15 @@ public class UIServer extends RedbackService
 				String attribute = obj.getString("attribute");
 				if(attribute != null)
 				{
-					preString = "<md-input-container class=\"md-block\" ><label>" + label + "</label><input ng-model=\"object.data." + attribute + "\">";
+					
+					preString = "<md-input-container class=\"md-block\" ><label>" + label + "</label><input ng-model=\"object.data." + attribute + "\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
 					postString = "</md-input-container>";
 				}
+			}
+			else if(type.equals("search"))
+			{
+				preString = "<md-input-container class=\"md-block\" ><input ng-model=\"searchText\" ng-change=\"search(searchText)\" aria-label=\"Search\">";
+				postString = "</md-input-container>";
 			}
 			else if(type.equals("datepicker"))
 			{
@@ -232,7 +230,7 @@ public class UIServer extends RedbackService
 				String attribute = obj.getString("attribute");
 				if(attribute != null)
 				{
-					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-datepicker  ng-model=\"object.data." + attribute + "\">";
+					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-datepicker  ng-model=\"object.data." + attribute + "\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
 					postString = "</md-datepicker></md-input-container>";
 				}
 			}
@@ -240,9 +238,11 @@ public class UIServer extends RedbackService
 			{
 				String label = obj.getString("label");
 				String attribute = obj.getString("attribute");
-				if(attribute != null)
+				String displayExpression = obj.getString("displayexpression");
+				if(attribute != null  &&  displayExpression != null)
 				{
-					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-select  ng-model=\"object.data." + attribute + "\"><md-option ng-repeat=\"val in object.validation." + attribute + ".listofvalues\" value=\"{{val}}\">{{val}}";
+					displayExpression = "'" + displayExpression.replace("{{", "' + item.data.").replace("}}", " + '") + "'";
+					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-select ng-model=\"object.related." + attribute + "\" md-on-open=\"loadRelatedObjectList('" + attribute +"', null)\" ng-change=\"relatedObjectHasChanged('" + attribute +"')\" ng-disabled=\"!object.validation." + attribute + ".editable\"><md-option ng-repeat=\"item in relatedObjectList." + attribute +"\" ng-value=\"item\">{{" + displayExpression + "}}";
 					postString = "</md-option></md-select></md-input-container>";
 				}
 			}
@@ -250,21 +250,25 @@ public class UIServer extends RedbackService
 			{
 				String label = obj.getString("label");
 				String attribute = obj.getString("attribute");
-				String relatedObjectDisplyAttribute= obj.getString("relatedobject.displayattribute");
-				if(attribute != null)
+				String displayExpression = obj.getString("displayexpression");
+				String listExpression = obj.getString("listexpression");
+				if(attribute != null  &&  displayExpression != null)
 				{
-					preString = "<md-autocomplete cflex=\"\" required=\"\" md-input-name=\"autocompleteField\"  md-items=\"item in loadRelatedObjectList('" + attribute +"')\" md-selected-item=\"object.related." + attribute+ "\" md-selected-item-change=\"relatedObjectHasChanged('" + attribute +"')\" md-search-text=\"dynamicSearchText\" md-item-text=\"item.data." + relatedObjectDisplyAttribute + "\" md-require-match=\"\" md-floating-label=\"" + label + "\">";
-					preString +=	 "<md-item-template>{{item.data.name}}";
-					postString = "</md-item-template></md-autocomplete>";
+					displayExpression = "'" + displayExpression.replace("{{", "' + item.data.").replace("}}", " + '") + "'";
+					listExpression = listExpression.replace("{{", "{{item.data.");
+					preString = "<md-autocomplete cflex=\"\" required=\"\" md-input-name=\"autocompleteField\"  md-items=\"item in loadRelatedObjectList('" + attribute +"', dynamicSearchText)\" md-selected-item=\"object.related." + attribute + "\" md-selected-item-change=\"relatedObjectHasChanged('" + attribute +"')\" md-search-text=\"dynamicSearchText\" md-item-text=\"" + displayExpression + "\" md-require-match=\"\" md-floating-label=\"" + label + "\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
+					preString += "<md-item-template>" + listExpression + "</md-item-template>";
+					postString = "</md-autocomplete>";
 				}
 			}
 			else if(type.equals("button"))
 			{
-				String function = obj.getString("function");
+				String action = obj.getString("action");
+				String param = obj.getString("param");
 				String label = obj.getString("label");
-				if(function != null  &&  label != null)
+				if(action != null  &&  label != null)
 				{
-					preString = "<md-button class=\"md-primary md-raised\" ng-click=\"" + function + "()\">" + label;
+					preString = "<md-button class=\"md-primary md-raised\" ng-click=\"" + action + "(" + (param != null ? ("'" + param + "'") : "") + ");\">" + label;
 					postString = "</md-button>";
 				}
 			}
