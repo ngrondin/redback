@@ -164,13 +164,14 @@ public class UIServer extends RedbackService
 		{
 			String preString = null;
 			String postString = null;
-			if(type.equals("section"))
+			if(type.equals("vsection"))
 			{
-				String orientation = obj.getString("orientation");
-				String sectionClass = "vsection";
-				if(orientation != null && orientation.equals("horizontal"))
-					sectionClass = "hsection";
-				preString = "<div class=\"" + sectionClass + "\">";
+				preString = "<div class=\"vsection\">";
+				postString = "</div>";
+			}
+			else if(type.equals("hsection"))
+			{
+				preString = "<div class=\"hsection\">";
 				postString = "</div>";
 			}
 			else if(type.equals("vscroll"))
@@ -195,8 +196,8 @@ public class UIServer extends RedbackService
 				{
 					line1 = line1.replace("{{", "{{item.");
 					line2 = line2.replace("{{", "{{item.");
-					preString = "<md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"$emit('ObjectSelectedEmit', item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
-					postString = "</md-list-item></md-list>";
+					preString = "<div class=\"listscroll\"><md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"$emit('ObjectSelectedEmit', item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
+					postString = "</md-list-item></md-list></div>";
 				}
 			}
 			else if(type.equals("text"))

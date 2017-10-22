@@ -286,8 +286,6 @@ public class ObjectServer extends RedbackService
 						inList.add(new JSONLiteral(linkValue));
 					if(object.getObject("related") == null)
 						object.put("related", new JSONObject());
-					if(object.getObject("related." + attributeName) == null)
-						object.getObject("related").put(attributeName, new JSONObject());
 				}
 				JSONObject relatedObjectFilter = new JSONObject();
 				relatedObjectFilter.put(relatedObjectValueAttribute, inList);
