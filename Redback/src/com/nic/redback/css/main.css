@@ -2,6 +2,7 @@ body {
 	height: 100%;
 	width: 100%;
 	background: white;
+	display: flex;
 }
 
 .ng-scope {
@@ -12,7 +13,6 @@ body {
 	display:flex;
 	flex-direction: row
 	flex-wrap: nowrap;
-	flex: 1 1 auto;
 	border: 0px Solid;
 	vertical-align:top;
 }
@@ -21,18 +21,16 @@ body {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
-	flex: 1 1 auto;
 	border: 0px Solid;
 }
 
 .vscroll {
-	flex: 1;
 	overflow: auto;
 	height: 100%;
 }
 
 .listscroll {
-	flex: 1 0 auto;
+	display: flex;
 	overflow: auto;
 }
 
