@@ -67,8 +67,8 @@ public class UIServer extends RedbackService
 						sb.append("</head>\r\n");
 						sb.append("<body>\r\n");
 						sb.append("<script src = \"../resource/" + moduleName + ".js\"></script>\r\n");
-						sb.append("<div ng-app=\"" + moduleName + "\">\r\n");
-						sb.append("<ng-include src=\"'../view/" + view + "'\"></ng-include>\r\n");
+						sb.append("<div ng-app=\"" + moduleName + "\" class=\"rb-module\">\r\n");
+						sb.append("<ng-include src=\"'../view/" + view + "'\" class=\"rb-include\"></ng-include>\r\n");
 						sb.append("</div></body></html>");
 					}
 				}
@@ -89,7 +89,7 @@ public class UIServer extends RedbackService
 							attrStr += " rb-master=\"" +  convertJSONToAttributeString(masterObject) + "\"";
 						if(initialFilter != null)
 							attrStr += " rb-initial-filter=\"" + convertJSONToAttributeString(initialFilter) + "\"";
-						sb.append("<div ng-controller=\"" + controllerName + "\"" + attrStr + ">");
+						sb.append("<div ng-controller=\"" + controllerName + "\"" + attrStr + "  class=\"rb-controller\">");
 						JSONList content = viewConfig.getList("content");
 						if(content != null)
 							for(int i = 0; i < content.size(); i++)
@@ -164,19 +164,29 @@ public class UIServer extends RedbackService
 		{
 			String preString = null;
 			String postString = null;
+			String inlineStyle = "";
+			String grow = obj.getString("grow");
+			String shrink = obj.getString("shrink");
+			if(grow != null)
+				inlineStyle += "flex-grow:" + ((int)Double.parseDouble(grow)) + ";";
+			if(shrink != null)
+				inlineStyle += "flex-shrink:" + ((int)Double.parseDouble(shrink)) + ";";
+			if(inlineStyle.length() > 0)
+				inlineStyle = " style=\"" + inlineStyle + "\"";
+			
 			if(type.equals("vsection"))
 			{
-				preString = "<div class=\"vsection\">";
+				preString = "<div class=\"vsection\" " + inlineStyle + ">";
 				postString = "</div>";
 			}
 			else if(type.equals("hsection"))
 			{
-				preString = "<div class=\"hsection\">";
+				preString = "<div class=\"hsection\"" + inlineStyle + ">";
 				postString = "</div>";
 			}
 			else if(type.equals("vscroll"))
 			{
-				preString = "<div class=\"vscroll\">";
+				preString = "<div class=\"vscroll\"" + inlineStyle + ">";
 				postString = "</div>";
 			}
 			else if(type.equals("view"))
@@ -184,7 +194,7 @@ public class UIServer extends RedbackService
 				String name = obj.getString("name");
 				if(name != null)
 				{
-					preString = "<ng-include src=\"'../view/" + name + "'\">";
+					preString = "<ng-include src=\"'../view/" + name + "'\" class=\"rb-include\" " + inlineStyle + ">";
 					postString = "</ng-include>";
 				}
 			}
@@ -196,7 +206,7 @@ public class UIServer extends RedbackService
 				{
 					line1 = line1.replace("{{", "{{item.");
 					line2 = line2.replace("{{", "{{item.");
-					preString = "<div class=\"listscroll\"><md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"$emit('ObjectSelectedEmit', item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
+					preString = "<div class=\"listscroll\" " + inlineStyle + "><md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"$emit('ObjectSelectedEmit', item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
 					postString = "</md-list-item></md-list></div>";
 				}
 			}
