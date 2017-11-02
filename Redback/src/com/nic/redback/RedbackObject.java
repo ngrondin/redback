@@ -11,8 +11,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import com.nic.firebus.exceptions.FunctionErrorException;
-import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 
@@ -29,7 +27,7 @@ public class RedbackObject
 	protected Bindings jsBindings;
 
 	
-	public RedbackObject(ObjectManager om, ObjectConfig cfg, JSONObject d, boolean loadRelated) throws FunctionErrorException
+	public RedbackObject(ObjectManager om, ObjectConfig cfg, JSONObject d, boolean loadRelated) throws RedbackException
 	{
 		objectManager = om;
 		config = cfg;
@@ -40,7 +38,7 @@ public class RedbackObject
 		executeScriptsForEvent("onload");
 	}
 	
-	public RedbackObject(ObjectManager om, ObjectConfig cfg, String i, boolean loadRelated) throws FunctionErrorException
+	public RedbackObject(ObjectManager om, ObjectConfig cfg, String i, boolean loadRelated) throws RedbackException
 	{
 		objectManager = om;
 		config = cfg;
@@ -59,34 +57,41 @@ public class RedbackObject
 				executeScriptsForEvent("onload");
 			}
 		}
-		catch(JSONException e)
+		catch(Exception e)
 		{
 			logger.severe(e.getMessage());
+			throw new RedbackException("Problem initiating object", e);
 		}
 	}
 	
-	public RedbackObject(ObjectManager om, ObjectConfig cfg) throws FunctionErrorException
+	public RedbackObject(ObjectManager om, ObjectConfig cfg) throws RedbackException
 	{
 		objectManager = om;
 		config = cfg;
-		init();
-		
-		uid = objectManager.getID(config.getUIDGeneratorName());
-		
-		Iterator<String> it = config.getAttributeNames().iterator();
-		while(it.hasNext())
+		init();		
+		try
 		{
-			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-			String attributeName = attributeConfig.getName();
-			String idGeneratorName = attributeConfig.getIdGeneratorName();
-			if(idGeneratorName != null)
-				put(attributeName, objectManager.getID(idGeneratorName));
-
-			String defaultValue = attributeConfig.getDefaultValue();
-			if(defaultValue != null)
-				put(attributeName, defaultValue);
+			uid = objectManager.getID(config.getUIDGeneratorName());
+			Iterator<String> it = config.getAttributeNames().iterator();
+			while(it.hasNext())
+			{
+				AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+				String attributeName = attributeConfig.getName();
+				String idGeneratorName = attributeConfig.getIdGeneratorName();
+				if(idGeneratorName != null)
+					put(attributeName, objectManager.getID(idGeneratorName));
+	
+				String defaultValue = attributeConfig.getDefaultValue();
+				if(defaultValue != null)
+					put(attributeName, defaultValue);
+			}
+			executeScriptsForEvent("oncreate");
 		}
-		save();
+		catch(Exception e)
+		{
+			logger.severe(e.getMessage());
+			throw new RedbackException("Problem initiating object", e);
+		}
 	}
 	
 	protected void init()
@@ -145,7 +150,7 @@ public class RedbackObject
 	}
 	
 
-	public void loadRelated() throws FunctionErrorException
+	public void loadRelated() throws RedbackException
 	{
 		Iterator<String> it = config.getAttributeNames().iterator();
 		while(it.hasNext())
@@ -195,7 +200,8 @@ public class RedbackObject
 		if((currentValue != null  &&  value == null) || (currentValue == null  &&  value != null) || (currentValue!= null  && !currentValue.equals(value)))
 		{
 			data.put(name, value);
-			updatedAttributes.add(name);			
+			updatedAttributes.add(name);	
+			executeAttributeScriptsForEvent(name, "onload");
 		}
 	}
 
@@ -216,6 +222,7 @@ public class RedbackObject
 	
 	public void save()
 	{
+		executeScriptsForEvent("onsave");
 		JSONObject dbData = new JSONObject();
 		dbData.put(config.getUIDDBKey(), uid);
 		for(int i = 0; i < updatedAttributes.size(); i++)
@@ -230,6 +237,11 @@ public class RedbackObject
 		}
 		updatedAttributes.clear();
 		objectManager.publishData(config.getCollection(), dbData);
+	}
+	
+	public void execute(String eventName)
+	{
+		executeScriptsForEvent(eventName);
 	}
 	
 	public JSONObject getJSON(boolean addValidation, boolean addRelated)
@@ -317,15 +329,17 @@ public class RedbackObject
 	protected void executeScriptsForEvent(String event)
 	{
 		ArrayList<String> scripts = config.getScriptsForEvent(event);
-		for(int i = 0; i < scripts.size(); i++)
-			executeScript(scripts.get(i));
+		if(scripts != null)
+			for(int i = 0; i < scripts.size(); i++)
+				executeScript(scripts.get(i));
 	}
 
 	protected void executeAttributeScriptsForEvent(String attributeName, String event)
 	{
 		ArrayList<String> scripts = config.getAttributeConfig(attributeName).getScriptsForEvent(event);
-		for(int i = 0; i < scripts.size(); i++)
-			executeScript(scripts.get(i));
+		if(scripts != null)
+			for(int i = 0; i < scripts.size(); i++)
+				executeScript(scripts.get(i));
 	}
 	
 	protected void executeScript(String script)

@@ -45,64 +45,87 @@ public class ObjectServer extends RedbackService
 			boolean addValidation = false;
 			boolean addRelated = false;
 
-			if(options != null)
+			if(action != null  &&  objectName != null)
 			{
-				String addValidationStr = options.getString("addvalidation");
-				String addRelatedStr = options.getString("addrelated");
-				if(addValidationStr != null  &&  addValidationStr.equals("true"))
-					addValidation = true;
-				if(addRelatedStr != null  &&  addRelatedStr.equals("true"))
-					addRelated = true;
-			}
-			
-			if(action.equals("get"))
-			{
-				String uid = request.getString("uid");
-				if(uid != null)
+				if(options != null)
 				{
-					RedbackObject object = objectManager.getObject(objectName, uid, addRelated); 
+					String addValidationStr = options.getString("addvalidation");
+					String addRelatedStr = options.getString("addrelated");
+					if(addValidationStr != null  &&  addValidationStr.equals("true"))
+						addValidation = true;
+					if(addRelatedStr != null  &&  addRelatedStr.equals("true"))
+						addRelated = true;
+				}
+				
+				if(action.equals("get"))
+				{
+					String uid = request.getString("uid");
+					if(uid != null)
+					{
+						RedbackObject object = objectManager.getObject(objectName, uid, addRelated); 
+						responseData = object.getJSON(addValidation, addRelated);
+					}
+					else
+					{
+						responseData = new JSONObject("{error:\"A 'get' action requires a 'uid' attribute\"}");
+					}
+				}
+				else if(action.equals("list"))
+				{
+					JSONObject filter = request.getObject("filter");
+					if(filter != null)
+					{
+						ArrayList<RedbackObject> objects = objectManager.getObjectList(objectName, filter, addRelated);
+						responseData = new JSONObject();
+						JSONList list = new JSONList();
+						for(int i = 0; i < objects.size(); i++)
+							list.add(objects.get(i).getJSON(addValidation, addRelated));
+						responseData.put("list", list);
+					}
+					else
+					{
+						responseData = new JSONObject("{error:\"A 'list' action requires a 'filter' attribute\"}");
+					}
+				}
+				else if(action.equals("update"))
+				{
+					String uid = request.getString("uid");
+					JSONObject data = request.getObject("data");
+					if(uid != null  &&  data != null)
+					{
+						RedbackObject object = objectManager.updateObject(objectName, uid, data, addRelated);
+						responseData = object.getJSON(addValidation, addRelated);
+					}
+					else
+					{
+						responseData = new JSONObject("{error:\"An 'update' action requires a 'uid' and a 'data' attribute\"}");
+					}
+				}
+				else if(action.equals("create"))
+				{
+					JSONObject data = request.getObject("data");
+					RedbackObject object = objectManager.createObject(objectName, data, addRelated);
 					responseData = object.getJSON(addValidation, addRelated);
 				}
-				else
+				else if(action.equals("execute"))
 				{
-					responseData = new JSONObject("{error:\"A 'get' action requires a 'uid' attribute\"}");
+					String uid = request.getString("uid");
+					String function = request.getString("function");
+					JSONObject data = request.getObject("data");
+					if(uid != null)
+					{
+						RedbackObject object = objectManager.executeFunction(objectName, uid, function, data, addRelated);
+						responseData = object.getJSON(addValidation, addRelated);
+					}
+					else
+					{
+						responseData = new JSONObject("{error:\"An 'create' action requires a 'uid' and a 'function' attribute\"}");
+					}
 				}
 			}
-			else if(action.equals("list"))
+			else
 			{
-				JSONObject filter = request.getObject("filter");
-				if(filter != null)
-				{
-					ArrayList<RedbackObject> objects = objectManager.getObjectList(objectName, filter, addRelated);
-					responseData = new JSONObject();
-					JSONList list = new JSONList();
-					for(int i = 0; i < objects.size(); i++)
-						list.add(objects.get(i).getJSON(addValidation, addRelated));
-					responseData.put("list", list);
-				}
-				else
-				{
-					responseData = new JSONObject("{error:\"A 'list' action requires a 'filter' attribute\"}");
-				}
-			}
-			else if(action.equals("update"))
-			{
-				String uid = request.getString("uid");
-				JSONObject data = request.getObject("data");
-				if(uid != null  &&  data != null)
-				{
-					RedbackObject object = objectManager.updateObject(objectName, uid, data, addRelated);
-					responseData = object.getJSON(addValidation, addRelated);
-				}
-				else
-				{
-					responseData = new JSONObject("{error:\"An 'update' action requires a 'uid' and a 'data' attribute\"}");
-				}
-			}
-			else if(action.equals("create"))
-			{
-				RedbackObject object = objectManager.createObject(objectName, addRelated);
-				responseData = object.getJSON(addValidation, addRelated);
+				responseData = new JSONObject("{error:\"Requests must have at least an 'action' and an 'object' attribute\"}");
 			}
 
 			response.setData(responseData.toString());

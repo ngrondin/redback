@@ -34,7 +34,7 @@ public class ObjectManager
 		firebus = fb;
 	}
 	
-	protected ObjectConfig getObjectConfig(String object) throws FunctionErrorException
+	protected ObjectConfig getObjectConfig(String object) throws RedbackException
 	{
 		ObjectConfig objectConfig = objectConfigs.get(object);
 		if(objectConfig == null)
@@ -60,9 +60,10 @@ public class ObjectManager
 				objectConfigs.put(object, objectConfig);
 			}
 			}
-			catch(JSONException e)
+			catch(Exception e)
 			{
 				logger.severe(e.getMessage());
+				throw new RedbackException("Exception getting object config", e);
 			}
 		}
 		return objectConfig;
@@ -70,14 +71,14 @@ public class ObjectManager
 
 	
 	
-	protected void addRelatedBulk(RedbackObject object) throws FunctionErrorException
+	protected void addRelatedBulk(RedbackObject object) throws RedbackException
 	{
 		ArrayList<RedbackObject> objects = new ArrayList<RedbackObject>();
 		objects.add(object);
 		addRelatedBulk(objects);
 	}
 	
-	protected void addRelatedBulk(ArrayList<RedbackObject> objects) throws FunctionErrorException
+	protected void addRelatedBulk(ArrayList<RedbackObject> objects) throws RedbackException
 	{
 		ObjectConfig objectConfig = objects.get(0).getObjectConfig();
 		Iterator<String> it = objectConfig.getAttributeNames().iterator();
@@ -115,7 +116,7 @@ public class ObjectManager
 	}
 
 	
-	public RedbackObject getObject(String objectName, String id, boolean addRelated) throws FunctionErrorException
+	public RedbackObject getObject(String objectName, String id, boolean addRelated) throws RedbackException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		RedbackObject object = new RedbackObject(this, objectConfig, id, addRelated);;
@@ -123,7 +124,7 @@ public class ObjectManager
 	}
 	
 	
-	public ArrayList<RedbackObject> getObjectList(String objectName, JSONObject filterData, boolean addRelated) throws FunctionErrorException
+	public ArrayList<RedbackObject> getObjectList(String objectName, JSONObject filterData, boolean addRelated) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
@@ -142,15 +143,16 @@ public class ObjectManager
 			if(addRelated)
 				addRelatedBulk(objectList);
 		}
-		catch(JSONException e)
+		catch(Exception e)
 		{
 			logger.severe(e.getMessage());
+			throw new RedbackException("Error getting object list", e);
 		}
 		return objectList;
 	}
 	
 	
-	public RedbackObject updateObject(String objectName, String id, JSONObject updateData, boolean addRelated) throws JSONException, FunctionErrorException
+	public RedbackObject updateObject(String objectName, String id, JSONObject updateData, boolean addRelated) throws RedbackException
 	{
 		RedbackObject object = getObject(objectName, id, false);
 		if(object != null)
@@ -161,17 +163,48 @@ public class ObjectManager
 				String attributeName = it.next();
 				object.put(attributeName, updateData.getString(attributeName));
 			}
-			object.save();
 			if(addRelated)
 				object.loadRelated();
+			object.save();
 		}
 		return object;
 	}
 	
-	public RedbackObject createObject(String objectName, boolean addRelated) throws JSONException, FunctionErrorException
+	public RedbackObject createObject(String objectName, JSONObject initialData, boolean addRelated) throws RedbackException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		RedbackObject object = new RedbackObject(this, objectConfig);
+		Iterator<String> it = initialData.keySet().iterator();
+		while(it.hasNext())
+		{
+			String attributeName = it.next();
+			object.put(attributeName, initialData.getString(attributeName));
+		}
+		if(addRelated)
+			object.loadRelated();
+		object.save();
+		return object;
+	}
+	
+	public RedbackObject executeFunction(String objectName, String id, String function, JSONObject updateData, boolean addRelated) throws RedbackException
+	{
+		RedbackObject object = getObject(objectName, id, false);
+		if(object != null)
+		{
+			if(updateData != null)
+			{
+				Iterator<String> it = updateData.keySet().iterator();
+				while(it.hasNext())
+				{
+					String attributeName = it.next();
+					object.put(attributeName, updateData.getString(attributeName));
+				}
+			}
+			if(addRelated)
+				object.loadRelated();
+			object.execute(function);
+			object.save();
+		}
 		return object;
 	}
 	
