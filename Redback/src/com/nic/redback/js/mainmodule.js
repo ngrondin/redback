@@ -41,6 +41,8 @@
 	};
 	
 	var mainModule = angular.module("mainmodule", ['ngMaterial']);	
+
+	//mainModule.config(function($compileProvider) {  $compileProvider.preAssignBindingsEnabled(true);});
 	
 	
 	
@@ -66,7 +68,7 @@
 			if(searchText != null)
 				filter._any = '*' + searchText + '*';
 
-			var req = {action:"list", object:relatedObjectName, filter:filter, options:{addvalidation:"false"}};
+			var req = {action:"list", object:relatedObjectName, filter:filter};
 			return $http.post("../../rbos", req)
 				.then(function(response) {
 					processResponseJSON(response);
@@ -105,7 +107,7 @@
 
 		$scope.save = function(){
 			if($scope.object != null) {
-				var req = {action:"update", object:$scope.objectName, uid:$scope.object.uid, data:$scope.object.data, options:{addrelated:"true"}};
+				var req = {action:"update", object:$scope.objectName, uid:$scope.object.uid, data:$scope.object.data, options:{addrelated:"true", addvalidation:"true"}};
 				$http.post("../../rbos", req)
 				.success(function(response) {
 					processResponseJSON(response);
@@ -119,7 +121,7 @@
 
 
 		$scope.create = function(){
-			var req = {action:"create", object:$scope.objectName, options:{addrelated:"true"}};
+			var req = {action:"create", object:$scope.objectName, options:{addrelated:"true", addvalidation:"true"}};
 			$http.post("../../rbos", req)
 			.success(function(response) {
 				processResponseJSON(response);
@@ -164,7 +166,7 @@
 
 		$scope.load = function() {
 			if($scope.filter != null) {
-				var req = {action:"list", object:$scope.objectName, filter:$scope.filter, options:{addrelated:"true"}};
+				var req = {action:"list", object:$scope.objectName, filter:$scope.filter, options:{addrelated:"true", addvalidation:"true"}};
 				$http.post("../../rbos", req)
 				.success(function(response) {
 					processResponseJSON(response);

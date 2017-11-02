@@ -5,8 +5,19 @@ body {
 	display: flex;
 }
 
-.ng-scope {
+.rb-module {
 	display: flex;
+	#flex: 1 0 auto;
+}
+
+.rb-controller {
+	display: flex;
+	#flex: 1 0 auto;
+}
+
+.rb-include {
+	display: flex;
+	#flex: 1 0 auto;
 }
 
 .hsection {
@@ -40,7 +51,7 @@ body {
 }
 
 md-input-container .md-errors-spacer{
- min-height: 0px !important;
+	min-height: 0px !important;
 }
 
 ::-webkit-scrollbar-track
