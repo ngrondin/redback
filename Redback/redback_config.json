@@ -42,7 +42,7 @@
 			"servicename":"rbfiles",
 			"consumername":"rbfiles",
 			"config": {
-				"path":"C:\temp\sharefiles"						
+				"path":"D:\Scratch\sharefiles"						
 			}
 		},
 		{

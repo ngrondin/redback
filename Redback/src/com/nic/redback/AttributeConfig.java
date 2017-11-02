@@ -1,16 +1,32 @@
 package com.nic.redback;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import com.nic.firebus.utils.JSONObject;
 
 public class AttributeConfig 
 {
 	protected JSONObject config;	
+	protected HashMap<String, ArrayList<String>> scripts;
 	
 	public AttributeConfig(JSONObject cfg)
 	{
 		config = cfg;
+		scripts = new HashMap<String, ArrayList<String>>();
 	}
 
+	public void addScript(String event, String script)
+	{
+		ArrayList<String> eventScripts = scripts.get(event);
+		if(eventScripts == null)
+		{
+			eventScripts = new ArrayList<String>();
+			scripts.put(event, eventScripts);
+		}
+		eventScripts.add(script);
+	}
+	
 	public String getName()
 	{
 		return config.getString("name");
@@ -18,7 +34,12 @@ public class AttributeConfig
 	
 	public String getDBKey()
 	{
-		return config.getString("key");
+		return config.getString("dbkey");
+	}
+	
+	public String getExpression()
+	{
+		return config.getString("expression");
 	}
 	
 	public String getEditableExpression()
@@ -38,29 +59,19 @@ public class AttributeConfig
 
 	public boolean hasRelatedObject()
 	{
-		return config.getString("relatedobject.name") != null;
+		return config.getObject("relatedobject") != null;
 	}
 	
-	public JSONObject getRelatedObject()
+	public RelatedObjectConfig getRelatedObjectConfig()
 	{
-		return config.getObject("relatedobject");
+		return new RelatedObjectConfig(config.getObject("relatedobject"));
 	}
 	
-	public String getRelatedObjectName()
+	public ArrayList<String> getScriptsForEvent(String event)
 	{
-		return config.getString("relatedobject.name");
+		return scripts.get(event);
 	}
-	
-	public String getRelatedObjectValueAttribute()
-	{
-		return config.getString("relatedobject.valueattribute");
-	}
-	
-	public JSONObject getRelatedObjectRelationship()
-	{
-		return config.getObject("relatedobject.relationship");
-	}
-	
+		
 	protected JSONObject getJSON()
 	{
 		return config;

@@ -1,5 +1,6 @@
 package com.nic.redback;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -15,11 +16,13 @@ public class ObjectConfig
 {
 	protected JSONObject config;
 	protected HashMap<String, AttributeConfig> attributes;
+	protected HashMap<String, ArrayList<String>> scripts;
 	
 	public ObjectConfig(JSONObject cfg)
 	{
 		config = cfg;
 		attributes = new HashMap<String, AttributeConfig>();
+		scripts = new HashMap<String, ArrayList<String>>();
 		JSONList list = config.getList("attributes");
 		for(int i = 0; i < list.size(); i++)
 		{
@@ -28,6 +31,22 @@ public class ObjectConfig
 		}
 	}
 	
+	public void addScript(String event, String script)
+	{
+		ArrayList<String> eventScripts = scripts.get(event);
+		if(eventScripts == null)
+		{
+			eventScripts = new ArrayList<String>();
+			scripts.put(event, eventScripts);
+		}
+		eventScripts.add(script);
+	}
+	
+	public void addAttributeScript(String name, String event, String script)
+	{
+		getAttributeConfig(name).addScript(event, script);
+	}
+
 	public String getName()
 	{
 		return config.getString("name");
@@ -58,62 +77,79 @@ public class ObjectConfig
 		return attributes.get(name);
 	}
 	
+	public ArrayList<String> getScriptsForEvent(String event)
+	{
+		return scripts.get(event);
+	}
+	
 	protected JSONObject generateDBFilter(JSONObject objectFilter) throws JSONException, FunctionErrorException
 	{
 		JSONObject dbFilter = new JSONObject();
-
-		JSONList anyFilterList = new JSONList();
-		JSONEntity anyFilterDBValue = null;
-		if(objectFilter.get("_any") != null)
-			anyFilterDBValue =	generateDBAttributeFilterValue(objectFilter.get("_any"));
-
-		if(objectFilter.get("uid") != null)
-			dbFilter.put(getUIDDBKey(), generateDBAttributeFilterValue(objectFilter.get("uid")));
-		
-		Iterator<String> it = getAttributeNames().iterator();
+		Iterator<String> it = objectFilter.keySet().iterator();
 		while(it.hasNext())
 		{
-			AttributeConfig attributeConfig = getAttributeConfig(it.next());
-			String attrName = attributeConfig.getName();
-			String attrDBKey = attributeConfig.getDBKey();
-			JSONEntity attrFilter = objectFilter.get(attrName);
-			if(attrFilter != null)
+			String key = it.next();
+			if(key.equals("$eq")  ||  key.equals("$gt")  ||  key.equals("$gte")  ||  key.equals("$lt")  ||  key.equals("$lte")  ||  key.equals("$ne"))
 			{
-				dbFilter.put(attrDBKey, generateDBAttributeFilterValue(attrFilter));
+				dbFilter.put(key, objectFilter.getString(key));
 			}
-			else if(anyFilterDBValue != null)
+			else if(key.equals("$in")  ||  key.equals("$nin"))
 			{
-				JSONObject orTerm = new JSONObject();
-				orTerm.put(attrDBKey, anyFilterDBValue);
-				anyFilterList.add(orTerm);
+				dbFilter.put(key, objectFilter.getList(key));
+			}
+			else if(key.equals("$or"))
+			{
+				JSONList objectOrList = objectFilter.getList(key);
+				JSONList dbOrList = new JSONList();
+				for(int i = 0; i < objectOrList.size(); i++)
+				{
+					dbOrList.add(generateDBFilter(objectOrList.getObject(i)));
+				}
+				dbFilter.put("$or", dbOrList);
+			}
+			else if(key.equals("$multi"))
+			{
+				JSONList dbOrList = new JSONList();
+				Iterator<String> it2 = getAttributeNames().iterator();
+				while(it2.hasNext())
+				{
+					AttributeConfig attributeConfig = getAttributeConfig(it2.next());
+					JSONObject orTerm = new JSONObject();
+					orTerm.put(attributeConfig.getName(), objectFilter.get(key));
+					dbOrList.add(generateDBFilter(orTerm));
+				}
+				dbFilter.put("$or", dbOrList);
+			}			
+			else if(key.equals("uid"))
+			{
+				dbFilter.put(getUIDDBKey(), objectFilter.getString(key));
+			}
+			else
+			{
+				AttributeConfig attributeConfig = getAttributeConfig(key);
+				if(attributeConfig != null)
+				{
+					String attributeDBKey = attributeConfig.getDBKey();
+					JSONEntity objectFilterValue = objectFilter.get(key);
+					JSONEntity dbFilterValue = null;
+					if(objectFilterValue instanceof JSONObject)
+					{
+						dbFilterValue = generateDBFilter((JSONObject)objectFilterValue);
+					}
+					else if(objectFilterValue instanceof JSONLiteral)
+					{
+						String filterValueStr = objectFilter.getString(key);
+						if(filterValueStr.startsWith("*")  &&  filterValueStr.endsWith("*")  &&  filterValueStr.length() >= 2)
+							dbFilterValue =  new JSONObject("{$regex:\"" + filterValueStr.substring(1, filterValueStr.length() - 1) + "\"}");
+						else
+							dbFilterValue = new JSONLiteral(filterValueStr);
+					}
+					dbFilter.put(attributeDBKey, dbFilterValue);
+				}				
 			}
 		}
-		if(anyFilterList.size() > 0)
-			dbFilter.put("$or", anyFilterList);
+
 		return dbFilter;
 	}
 	
-	protected JSONEntity generateDBAttributeFilterValue(JSONEntity attrFilterValue) throws JSONException
-	{
-		JSONEntity dbAttributeFilterValue = null;
-		if(attrFilterValue != null)
-		{
-			if(attrFilterValue instanceof JSONLiteral)
-			{
-				String filterValueStr = ((JSONLiteral)attrFilterValue).getString();
-				if(filterValueStr.startsWith("*")  &&  filterValueStr.endsWith("*")  &&  filterValueStr.length() >= 2)
-					dbAttributeFilterValue = new JSONObject("{$regex:\"" + filterValueStr.substring(1, filterValueStr.length() - 1) + "\"}");
-				else
-					dbAttributeFilterValue = attrFilterValue;
-			}
-			if(attrFilterValue instanceof JSONList)
-			{
-				JSONList attrValueList = (JSONList)attrFilterValue;
-				dbAttributeFilterValue = new JSONObject();
-				((JSONObject)dbAttributeFilterValue).put("$in", attrValueList);
-			}
-		}
-		return dbAttributeFilterValue;
-	}
-
 }
