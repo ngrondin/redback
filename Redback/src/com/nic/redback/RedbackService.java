@@ -49,6 +49,10 @@ public abstract class RedbackService implements  ServiceProvider
 		{
 			return new IDGenerator(config);
 		}
+		else if(type.equalsIgnoreCase("accessmanager"))
+		{
+			return new AccessManager(config);
+		}
 		return null;
 	}
 
