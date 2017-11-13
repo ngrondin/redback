@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
+import com.nic.firebus.exceptions.FunctionTimeoutException;
 import com.nic.firebus.information.ServiceInformation;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONObject;
@@ -11,8 +12,6 @@ import com.nic.firebus.utils.JSONObject;
 public class IDGenerator extends RedbackService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
-	//protected HashMap<String, JSONObject> idConfigs;
-
 
 	public IDGenerator(JSONObject c) 
 	{
@@ -55,7 +54,7 @@ public class IDGenerator extends RedbackService
 		return null;
 	}
 
-	protected JSONObject getIDConfig(String name) throws JSONException, FunctionErrorException
+	protected JSONObject getIDConfig(String name) throws JSONException, FunctionErrorException, FunctionTimeoutException
 	{
 		JSONObject idConfig = null;
 		JSONObject configList = request(configService, "{object:rbid_config,filter:{name:" + name + "}}");

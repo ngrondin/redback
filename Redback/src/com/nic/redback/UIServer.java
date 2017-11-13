@@ -45,11 +45,11 @@ public class UIServer extends RedbackService
 			{
 				String[] parts = get.split("/");
 				String category = parts[0];
-				String object = parts[1];
+				String name = parts[1];
 				
 				if(category.equals("app"))
 				{
-					JSONObject result = request(configService, "{object:rbui_app,filter:{name:" + object + "}}");
+					JSONObject result = request(configService, "{object:rbui_app,filter:{name:" + name + "}}");
 					if(result != null)
 					{
 						JSONObject appConfig = result.getObject("result.0");
@@ -57,13 +57,13 @@ public class UIServer extends RedbackService
 						String view = appConfig.getString("view");
 						sb.append("<html>\r\n");
 						sb.append("<head>\r\n");
-						sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"../resource/main.css\"></head>\r\n");
 						sb.append("<link rel=\"stylesheet\" href=\"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css\">\r\n");
 						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js\"></script>\r\n");
 						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js\"></script>\r\n");
 						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js\"></script>\r\n");
 						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js\"></script>\r\n");
 						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js\"></script>\r\n");
+						sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"../resource/main.css\"></head>\r\n");
 						sb.append("</head>\r\n");
 						sb.append("<body>\r\n");
 						sb.append("<script src = \"../resource/" + moduleName + ".js\"></script>\r\n");
@@ -74,46 +74,25 @@ public class UIServer extends RedbackService
 				}
 				else if(category.equals("view"))
 				{
-					JSONObject result = request(configService, "{object:rbui_view,filter:{name:" + object + "}}");
-					if(result != null)
-					{
-						JSONObject viewConfig = result.getObject("result.0");
-						String controllerName = viewConfig.getString("controller");
-						String objectName = viewConfig.getString("object");
-						JSONObject masterObject = viewConfig.getObject("master");
-						JSONObject initialFilter = viewConfig.getObject("initialfilter");
-						String attrStr = "";
-						if(objectName != null)
-							attrStr += " rb-object=\"" + objectName + "\"";
-						if(masterObject != null)
-							attrStr += " rb-master=\"" +  convertJSONToAttributeString(masterObject) + "\"";
-						if(initialFilter != null)
-							attrStr += " rb-initial-filter=\"" + convertJSONToAttributeString(initialFilter) + "\"";
-						sb.append("<div ng-controller=\"" + controllerName + "\"" + attrStr + "  class=\"rb-controller\">");
-						JSONList content = viewConfig.getList("content");
-						if(content != null)
-							for(int i = 0; i < content.size(); i++)
-								sb.append(processFormObject(content.getObject(i), 0));
-						sb.append("</div>");
-					}
+					sb.append(getView(name, 0, null));
 				}
 				else if(category.equals("resource"))
 				{
 					String fileStr = null;
 					if(resourceServiceType.equals("filestorage"))
 					{
-						Payload result = firebus.requestService(resourceService, new Payload(object));
+						Payload result = firebus.requestService(resourceService, new Payload(name));
 						fileStr = result.getString();
 					}
 					else if(resourceServiceType.equals("db"))
 					{
-						JSONObject result = request(resourceService, "{object:rbui_resource,filter:{name:" + object + "}}");
+						JSONObject result = request(resourceService, "{object:rbui_resource,filter:{name:" + name + "}}");
 						fileStr = result.getList("result").getObject(0).getString("content");
 						sb.append(fileStr);
 					}
 					else
 					{
-						InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/css/" + object);
+						InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/css/" + name);
 						byte[] bytes = new byte[is.available()];
 						is.read(bytes);
 						fileStr = new String(bytes);
@@ -122,9 +101,9 @@ public class UIServer extends RedbackService
 					if(fileStr != null)
 					{
 						sb.append(fileStr);
-						if(object.endsWith(".js"))
+						if(name.endsWith(".js"))
 							mime = "application/javascript";
-						else if(object.endsWith(".css"))
+						else if(name.endsWith(".css"))
 							mime = "text/css";
 					}
 				}
@@ -156,7 +135,64 @@ public class UIServer extends RedbackService
 		return ret;
 	}
 	
-	protected String processFormObject(JSONObject obj, int indent)
+	protected String formatErrorMessage(Exception e)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(e.getMessage());
+		Throwable t = e;
+		while((t = t.getCause()) != null)
+			sb.append("<br/>" + t.getMessage());
+		sb.append("</div>");
+		return sb.toString();
+	}
+	
+	protected String getIndentation(int indent)
+	{
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < indent; i++)
+			sb.append('\t');
+		return sb.toString();
+	}
+	
+	protected String getView(String viewName, int indent, String inlineStyle)
+	{
+		StringBuilder sb = new StringBuilder();
+		try
+		{
+			JSONObject result = request(configService, "{object:rbui_view,filter:{name:" + viewName + "}}");
+			if(result != null)
+			{
+				JSONObject viewConfig = result.getObject("result.0");
+				String controllerName = viewConfig.getString("controller");
+				String objectName = viewConfig.getString("object");
+				JSONObject masterObject = viewConfig.getObject("master");
+				JSONObject initialFilter = viewConfig.getObject("initialfilter");
+				String attrStr = "";
+				if(objectName != null)
+					attrStr += " rb-object=\"" + objectName + "\"";
+				if(masterObject != null)
+					attrStr += " rb-master=\"" +  convertJSONToAttributeString(masterObject) + "\"";
+				if(initialFilter != null)
+					attrStr += " rb-initial-filter=\"" + convertJSONToAttributeString(initialFilter) + "\"";
+				if(inlineStyle == null)
+					inlineStyle = "";
+				
+				sb.append("<div ng-controller=\"" + controllerName + "\"" + attrStr + "  class=\"rb-controller\" " + inlineStyle +">\r\n");
+				JSONList content = viewConfig.getList("content");
+				if(content != null)
+					for(int i = 0; i < content.size(); i++)
+						sb.append(processViewContent(content.getObject(i), indent + 1));
+				sb.append(getIndentation(indent) + "</div>\r\n");
+			}
+		}
+		catch(Exception e)
+		{
+			sb.append(formatErrorMessage(e));
+		}
+		return sb.toString();
+	}
+	
+	protected String processViewContent(JSONObject obj, int indent)
 	{
 		StringBuilder sb = new StringBuilder();
 		String type = obj.getString("type");
@@ -174,7 +210,16 @@ public class UIServer extends RedbackService
 			if(inlineStyle.length() > 0)
 				inlineStyle = " style=\"" + inlineStyle + "\"";
 			
-			if(type.equals("vsection"))
+			if(type.equals("view"))
+			{
+				String name = obj.getString("name");
+				if(name != null)
+				{
+					preString = getView(name, indent, inlineStyle);
+					postString = "";
+				}
+			}
+			else if(type.equals("vsection"))
 			{
 				preString = "<div class=\"vsection\" " + inlineStyle + ">";
 				postString = "</div>";
@@ -189,15 +234,6 @@ public class UIServer extends RedbackService
 				preString = "<div class=\"vscroll\"" + inlineStyle + ">";
 				postString = "</div>";
 			}
-			else if(type.equals("view"))
-			{
-				String name = obj.getString("name");
-				if(name != null)
-				{
-					preString = "<ng-include src=\"'../view/" + name + "'\" class=\"rb-include\" " + inlineStyle + ">";
-					postString = "</ng-include>";
-				}
-			}
 			else if(type.equals("list"))
 			{
 				String line1 = obj.getString("line1");
@@ -207,7 +243,7 @@ public class UIServer extends RedbackService
 					line1 = line1.replace("{{", "{{item.");
 					line2 = line2.replace("{{", "{{item.");
 					preString = "<div class=\"listscroll\" " + inlineStyle + "><md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"$emit('ObjectSelectedEmit', item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
-					postString = "</md-list-item></md-list></div>";
+					postString = "</div></md-list-item></md-list></div>";
 				}
 			}
 			else if(type.equals("text"))
@@ -226,7 +262,7 @@ public class UIServer extends RedbackService
 				if(attribute != null)
 				{
 					
-					preString = "<md-input-container class=\"md-block\" ><label>" + label + "</label><input ng-model=\"object.data." + attribute + "\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
+					preString = "<md-input-container class=\"md-block\" ><label>" + label + "</label><input ng-model=\"object.data." + attribute + "\" ng-change=\"attributeHasChanged('" + attribute +"')\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
 					postString = "</md-input-container>";
 				}
 			}
@@ -241,7 +277,7 @@ public class UIServer extends RedbackService
 				String attribute = obj.getString("attribute");
 				if(attribute != null)
 				{
-					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-datepicker  ng-model=\"object.data." + attribute + "\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
+					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-datepicker  ng-model=\"object.data." + attribute + "\" ng-change=\"attributeHasChanged('" + attribute +"')\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
 					postString = "</md-datepicker></md-input-container>";
 				}
 			}
@@ -286,19 +322,15 @@ public class UIServer extends RedbackService
 			
 			if(preString != null  &&  postString != null)
 			{
-				for(int i = 0; i < indent; i++)
-					sb.append('\t');
-				sb.append(preString);
+				sb.append(getIndentation(indent) + preString);
 				sb.append("\r\n");
 				JSONList content = obj.getList("content");
 				if(content != null)
 				{
 					for(int i = 0; i < content.size(); i++)
-						sb.append(processFormObject(content.getObject(i), indent + 1));
+						sb.append(processViewContent(content.getObject(i), indent + 1));
 				}
-				for(int i = 0; i < indent; i++)
-					sb.append('\t');
-				sb.append(postString);	
+				sb.append(getIndentation(indent) + postString);	
 				sb.append("\r\n");
 			}
 		}

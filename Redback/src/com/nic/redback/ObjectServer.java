@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import javax.script.ScriptException;
+
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
+import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 
@@ -24,7 +27,7 @@ public class ObjectServer extends RedbackService
 	public ObjectServer(JSONObject c)
 	{
 		super(c);
-		objectManager = new ObjectManager(config.getString("configservice"), config.getString("dataservice"), config.getString("idgeneratorservice"));
+		objectManager = new ObjectManager(config);
 	}
 
 	public void setFirebus(Firebus fb)
@@ -67,7 +70,7 @@ public class ObjectServer extends RedbackService
 					}
 					else
 					{
-						responseData = new JSONObject("{error:\"A 'get' action requires a 'uid' attribute\"}");
+						responseData = new JSONObject("{requesterror:\"A 'get' action requires a 'uid' attribute\"}");
 					}
 				}
 				else if(action.equals("list"))
@@ -84,7 +87,7 @@ public class ObjectServer extends RedbackService
 					}
 					else
 					{
-						responseData = new JSONObject("{error:\"A 'list' action requires a 'filter' attribute\"}");
+						responseData = new JSONObject("{requesterror:\"A 'list' action requires a 'filter' attribute\"}");
 					}
 				}
 				else if(action.equals("update"))
@@ -98,7 +101,7 @@ public class ObjectServer extends RedbackService
 					}
 					else
 					{
-						responseData = new JSONObject("{error:\"An 'update' action requires a 'uid' and a 'data' attribute\"}");
+						responseData = new JSONObject("{requesterror:\"An 'update' action requires a 'uid' and a 'data' attribute\"}");
 					}
 				}
 				else if(action.equals("create"))
@@ -119,21 +122,41 @@ public class ObjectServer extends RedbackService
 					}
 					else
 					{
-						responseData = new JSONObject("{error:\"An 'create' action requires a 'uid' and a 'function' attribute\"}");
+						responseData = new JSONObject("{requesterror:\"An 'create' action requires a 'uid' and a 'function' attribute\"}");
 					}
 				}
 			}
 			else
 			{
-				responseData = new JSONObject("{error:\"Requests must have at least an 'action' and an 'object' attribute\"}");
+				responseData = new JSONObject("{requesterror:\"Requests must have at least an 'action' and an 'object' attribute\"}");
 			}
-
 			response.setData(responseData.toString());
 		}
+		catch(ScriptException e)
+		{
+			logger.severe(e.getMessage());
+			try
+			{
+				JSONObject responseData = new JSONObject("{scripterror:\"" + e.getCause().getMessage() + "\"}");
+				response.setData(responseData.toString());
+			}
+			catch(JSONException e2)
+			{
+				logger.severe(e2.getMessage());
+			}
+		}		
 		catch(Exception e)
 		{
 			logger.severe(e.getMessage());
-			throw new FunctionErrorException(e.getMessage());
+			try
+			{
+				JSONObject responseData = new JSONObject("{generalerror:\"" + e.getMessage() + "\"}");
+				response.setData(responseData.toString());
+			}
+			catch(JSONException e2)
+			{
+				logger.severe(e2.getMessage());
+			}
 		}
 		return response;
 	}

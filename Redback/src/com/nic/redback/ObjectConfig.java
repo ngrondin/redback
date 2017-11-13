@@ -114,9 +114,12 @@ public class ObjectConfig
 				while(it2.hasNext())
 				{
 					AttributeConfig attributeConfig = getAttributeConfig(it2.next());
-					JSONObject orTerm = new JSONObject();
-					orTerm.put(attributeConfig.getName(), objectFilter.get(key));
-					dbOrList.add(generateDBFilter(orTerm));
+					if(attributeConfig.getDBKey() != null)
+					{
+						JSONObject orTerm = new JSONObject();
+						orTerm.put(attributeConfig.getName(), objectFilter.get(key));
+						dbOrList.add(generateDBFilter(orTerm));
+					}
 				}
 				dbFilter.put("$or", dbOrList);
 			}			
@@ -130,21 +133,24 @@ public class ObjectConfig
 				if(attributeConfig != null)
 				{
 					String attributeDBKey = attributeConfig.getDBKey();
-					JSONEntity objectFilterValue = objectFilter.get(key);
-					JSONEntity dbFilterValue = null;
-					if(objectFilterValue instanceof JSONObject)
+					if(attributeDBKey != null)
 					{
-						dbFilterValue = generateDBFilter((JSONObject)objectFilterValue);
+						JSONEntity objectFilterValue = objectFilter.get(key);
+						JSONEntity dbFilterValue = null;
+						if(objectFilterValue instanceof JSONObject)
+						{
+							dbFilterValue = generateDBFilter((JSONObject)objectFilterValue);
+						}
+						else if(objectFilterValue instanceof JSONLiteral)
+						{
+							String filterValueStr = objectFilter.getString(key);
+							if(filterValueStr.startsWith("*")  &&  filterValueStr.endsWith("*")  &&  filterValueStr.length() >= 2)
+								dbFilterValue =  new JSONObject("{$regex:\"" + filterValueStr.substring(1, filterValueStr.length() - 1) + "\"}");
+							else
+								dbFilterValue = new JSONLiteral(filterValueStr);
+						}
+						dbFilter.put(attributeDBKey, dbFilterValue);
 					}
-					else if(objectFilterValue instanceof JSONLiteral)
-					{
-						String filterValueStr = objectFilter.getString(key);
-						if(filterValueStr.startsWith("*")  &&  filterValueStr.endsWith("*")  &&  filterValueStr.length() >= 2)
-							dbFilterValue =  new JSONObject("{$regex:\"" + filterValueStr.substring(1, filterValueStr.length() - 1) + "\"}");
-						else
-							dbFilterValue = new JSONLiteral(filterValueStr);
-					}
-					dbFilter.put(attributeDBKey, dbFilterValue);
 				}				
 			}
 		}

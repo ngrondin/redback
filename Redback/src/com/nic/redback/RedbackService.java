@@ -3,6 +3,7 @@ package com.nic.redback;
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
+import com.nic.firebus.exceptions.FunctionTimeoutException;
 import com.nic.firebus.interfaces.ServiceProvider;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONObject;
@@ -24,7 +25,7 @@ public abstract class RedbackService implements  ServiceProvider
 		firebus = fb;
 	}
 	
-	protected JSONObject request(String service, String request) throws JSONException, FunctionErrorException
+	protected JSONObject request(String service, String request) throws JSONException, FunctionErrorException, FunctionTimeoutException
 	{
 		Payload reqPayload = new Payload(request);
 		Payload respPayload = firebus.requestService(configService, reqPayload);

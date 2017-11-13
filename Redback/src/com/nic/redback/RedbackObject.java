@@ -27,7 +27,7 @@ public class RedbackObject
 	protected Bindings jsBindings;
 
 	
-	public RedbackObject(ObjectManager om, ObjectConfig cfg, JSONObject d, boolean loadRelated) throws RedbackException
+	public RedbackObject(ObjectManager om, ObjectConfig cfg, JSONObject d, boolean loadRelated) throws RedbackException, ScriptException
 	{
 		objectManager = om;
 		config = cfg;
@@ -59,8 +59,9 @@ public class RedbackObject
 		}
 		catch(Exception e)
 		{
-			logger.severe(e.getMessage());
-			throw new RedbackException("Problem initiating object", e);
+			String msg = "Problem initiating object : " + e.getMessage();
+			logger.severe(msg);
+			throw new RedbackException(msg, e);
 		}
 	}
 	
@@ -71,26 +72,35 @@ public class RedbackObject
 		init();		
 		try
 		{
-			uid = objectManager.getID(config.getUIDGeneratorName());
-			Iterator<String> it = config.getAttributeNames().iterator();
-			while(it.hasNext())
+			if(config.getUIDGeneratorName() != null)
 			{
-				AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-				String attributeName = attributeConfig.getName();
-				String idGeneratorName = attributeConfig.getIdGeneratorName();
-				if(idGeneratorName != null)
-					put(attributeName, objectManager.getID(idGeneratorName));
-	
-				String defaultValue = attributeConfig.getDefaultValue();
-				if(defaultValue != null)
-					put(attributeName, defaultValue);
+				uid = objectManager.getID(config.getUIDGeneratorName());
+				Iterator<String> it = config.getAttributeNames().iterator();
+				while(it.hasNext())
+				{
+					AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+					String attributeName = attributeConfig.getName();
+					String idGeneratorName = attributeConfig.getIdGeneratorName();
+					String defaultValue = attributeConfig.getDefaultValue();
+					if(idGeneratorName != null)
+						put(attributeName, objectManager.getID(idGeneratorName));
+					else if(defaultValue != null)
+						put(attributeName, defaultValue);
+				}
+				executeScriptsForEvent("oncreate");
 			}
-			executeScriptsForEvent("oncreate");
+			else
+			{
+				String msg = "No UID Generator has been configured for object " + config.getName();
+				logger.severe(msg);
+				throw new RedbackException(msg);
+			}
 		}
 		catch(Exception e)
 		{
-			logger.severe(e.getMessage());
-			throw new RedbackException("Problem initiating object", e);
+			String msg = "Problem initiating object : " + e.getMessage();
+			logger.severe(msg);
+			throw new RedbackException(msg, e);
 		}
 	}
 	
@@ -186,26 +196,32 @@ public class RedbackObject
 		else
 		{
 			AttributeConfig attributeConfig = config.getAttributeConfig(name);
-			if(attributeConfig.getExpression() != null)
-				return evaluateExpression(attributeConfig.getExpression());
-			else if(data.containsKey(name))
-				return data.get(name);
+			if(attributeConfig != null)
+			{
+				if(attributeConfig.getExpression() != null)
+					return evaluateExpression(attributeConfig.getExpression());
+				else if(data.containsKey(name))
+					return data.get(name);
+			}
 		}
 		return null;
 	}
 	
-	public void put(String name, String value)
+	public void put(String name, String value) throws ScriptException
 	{
-		String currentValue = getString(name);
-		if((currentValue != null  &&  value == null) || (currentValue == null  &&  value != null) || (currentValue!= null  && !currentValue.equals(value)))
+		if(config.getAttributeConfig(name) != null)
 		{
-			data.put(name, value);
-			updatedAttributes.add(name);	
-			executeAttributeScriptsForEvent(name, "onload");
+			String currentValue = getString(name);
+			if((currentValue != null  &&  value == null) || (currentValue == null  &&  value != null) || (currentValue!= null  && !currentValue.equals(value)))
+			{
+				data.put(name, value);
+				updatedAttributes.add(name);	
+				executeAttributeScriptsForEvent(name, "onupdate");
+			}
 		}
 	}
 
-	public void put(String name, RedbackObject relatedObject)
+	public void put(String name, RedbackObject relatedObject) throws ScriptException
 	{
 		if(config.getAttributeConfig(name).hasRelatedObject())
 		{
@@ -220,7 +236,7 @@ public class RedbackObject
 		}
 	}
 	
-	public void save()
+	public void save() throws ScriptException
 	{
 		executeScriptsForEvent("onsave");
 		JSONObject dbData = new JSONObject();
@@ -239,7 +255,7 @@ public class RedbackObject
 		objectManager.publishData(config.getCollection(), dbData);
 	}
 	
-	public void execute(String eventName)
+	public void execute(String eventName) throws ScriptException
 	{
 		executeScriptsForEvent(eventName);
 	}
@@ -326,7 +342,7 @@ public class RedbackObject
 		return returnValue;
 	}
 	
-	protected void executeScriptsForEvent(String event)
+	protected void executeScriptsForEvent(String event) throws ScriptException
 	{
 		ArrayList<String> scripts = config.getScriptsForEvent(event);
 		if(scripts != null)
@@ -334,7 +350,7 @@ public class RedbackObject
 				executeScript(scripts.get(i));
 	}
 
-	protected void executeAttributeScriptsForEvent(String attributeName, String event)
+	protected void executeAttributeScriptsForEvent(String attributeName, String event) throws ScriptException
 	{
 		ArrayList<String> scripts = config.getAttributeConfig(attributeName).getScriptsForEvent(event);
 		if(scripts != null)
@@ -342,7 +358,7 @@ public class RedbackObject
 				executeScript(scripts.get(i));
 	}
 	
-	protected void executeScript(String script)
+	protected void executeScript(String script) throws ScriptException
 	{
 		Iterator<String> it = data.keySet().iterator();
 		while(it.hasNext())
@@ -351,6 +367,7 @@ public class RedbackObject
 			jsBindings.put(key, data.get(key));
 		}
 		jsBindings.put("self", this);
+		jsBindings.put("om", objectManager);
 		try
 		{
 			js.eval(script);
@@ -358,6 +375,7 @@ public class RedbackObject
 		catch (ScriptException e)
 		{
 			logger.severe(e.getMessage());
+			throw e;
 		}		
 	}
 

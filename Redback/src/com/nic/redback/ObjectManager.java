@@ -5,27 +5,35 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+import javax.script.ScriptException;
+
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
+import com.nic.firebus.exceptions.FunctionTimeoutException;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.utils.StringUtils;
 
 public class ObjectManager
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected Firebus firebus;
 	protected String configService;
+	protected boolean cacheConfigs;
 	protected String dataService;
 	protected String idGeneratorService;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 
-	public ObjectManager(String cs, String ds, String igs)
+	public ObjectManager(JSONObject config)
 	{
-		configService = cs;
-		dataService = ds;
-		idGeneratorService = igs;
+		cacheConfigs = true;
+		configService = config.getString("configservice");
+		dataService = config.getString("dataservice");
+		idGeneratorService = config.getString("idgeneratorservice");
+		if(config.containsKey("cacheconfigs") &&  config.getString("cacheconfigs").equalsIgnoreCase("false"))
+			cacheConfigs = false;
 		objectConfigs = new HashMap<String, ObjectConfig>();
 	}
 	
@@ -51,13 +59,14 @@ public class ObjectManager
 					JSONObject scriptEntry = scriptList.getList("result").getObject(i);
 					String event = scriptEntry.getString("event");
 					String attribute = scriptEntry.getString("attribute");
-					String script = scriptEntry.getString("script");
+					String script = StringUtils.unescape(scriptEntry.getString("script"));
 					if(attribute != null)
 						objectConfig.addAttributeScript(attribute, event, script);
 					else
 						objectConfig.addScript(event, script);
 				}
-				objectConfigs.put(object, objectConfig);
+				if(cacheConfigs)
+					objectConfigs.put(object, objectConfig);
 			}
 			}
 			catch(Exception e)
@@ -71,14 +80,14 @@ public class ObjectManager
 
 	
 	
-	protected void addRelatedBulk(RedbackObject object) throws RedbackException
+	protected void addRelatedBulk(RedbackObject object) throws RedbackException, ScriptException
 	{
 		ArrayList<RedbackObject> objects = new ArrayList<RedbackObject>();
 		objects.add(object);
 		addRelatedBulk(objects);
 	}
 	
-	protected void addRelatedBulk(ArrayList<RedbackObject> objects) throws RedbackException
+	protected void addRelatedBulk(ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
 	{
 		ObjectConfig objectConfig = objects.get(0).getObjectConfig();
 		Iterator<String> it = objectConfig.getAttributeNames().iterator();
@@ -152,7 +161,7 @@ public class ObjectManager
 	}
 	
 	
-	public RedbackObject updateObject(String objectName, String id, JSONObject updateData, boolean addRelated) throws RedbackException
+	public RedbackObject updateObject(String objectName, String id, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
 	{
 		RedbackObject object = getObject(objectName, id, false);
 		if(object != null)
@@ -170,7 +179,7 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject createObject(String objectName, JSONObject initialData, boolean addRelated) throws RedbackException
+	public RedbackObject createObject(String objectName, JSONObject initialData, boolean addRelated) throws RedbackException, ScriptException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		RedbackObject object = new RedbackObject(this, objectConfig);
@@ -186,7 +195,7 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject executeFunction(String objectName, String id, String function, JSONObject updateData, boolean addRelated) throws RedbackException
+	public RedbackObject executeFunction(String objectName, String id, String function, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
 	{
 		RedbackObject object = getObject(objectName, id, false);
 		if(object != null)
@@ -208,14 +217,14 @@ public class ObjectManager
 		return object;
 	}
 	
-	public String getID(String name) throws FunctionErrorException
+	public String getID(String name) throws FunctionErrorException, FunctionTimeoutException
 	{
 		String value = firebus.requestService(idGeneratorService, new Payload(name)).getString();
 		return value;
 	}
 
 	
-	protected JSONObject request(String service, JSONObject request) throws JSONException, FunctionErrorException
+	protected JSONObject request(String service, JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException
 	{
 		Payload reqPayload = new Payload(request.toString());
 		Payload respPayload = firebus.requestService(configService, reqPayload);
@@ -224,7 +233,7 @@ public class ObjectManager
 		return result;
 	}
 	
-	public JSONObject requestData(String objectName, JSONObject filter) throws JSONException, FunctionErrorException
+	public JSONObject requestData(String objectName, JSONObject filter) throws JSONException, FunctionErrorException, FunctionTimeoutException
 	{
 		JSONObject request = new JSONObject();
 		request.put("object", objectName);

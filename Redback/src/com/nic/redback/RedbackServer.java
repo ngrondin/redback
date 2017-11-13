@@ -53,7 +53,7 @@ public class RedbackServer extends StandaloneContainer
 				rbLogger.setLevel(Level.FINEST);
 				
 				Logger fbLogger = Logger.getLogger("com.nic.firebus");
-				FileHandler fbfh = new FileHandler("RedbackServer.log");
+				FileHandler fbfh = new FileHandler("Firebus.log");
 				fbfh.setFormatter(new FirebusSimpleFormatter());
 				fbfh.setLevel(Level.FINEST);
 				fbLogger.addHandler(fbfh);
