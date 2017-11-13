@@ -32,6 +32,7 @@ public class ObjectServer extends RedbackService
 
 	public void setFirebus(Firebus fb)
 	{
+		super.setFirebus(fb);
 		objectManager.setFirebus(fb);
 	}
 	
