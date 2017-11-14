@@ -8,12 +8,14 @@ import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.security.UserProfile;
 
 public class UIServer extends RedbackService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected String resourceService;
 	protected String resourceServiceType;
+	protected String accessManagementService;
 
 	public UIServer(JSONObject c)
 	{
@@ -21,6 +23,7 @@ public class UIServer extends RedbackService
 		configService = config.getString("configservice");
 		resourceServiceType = config.getString("resourceservicetype");
 		resourceService = config.getString("resourceservice");
+		accessManagementService = config.getString("accessmanagementservice");
 	}
 
 	public Payload service(Payload payload) throws FunctionErrorException
@@ -29,18 +32,40 @@ public class UIServer extends RedbackService
 		try
 		{
 			StringBuilder sb = new StringBuilder();
-			String mime = "";
+			UserProfile userProfile = null;
+			String sessionId = payload.metadata.get("sessionid");
 			String get = payload.metadata.get("get");
-			if(get == null  &&  payload.getString().length() > 0)
+			String username = null;
+			String password = null;
+			String mime = "";
+
+			if(payload.getString().length() > 0)
 			{
 				try
 				{
 					JSONObject request = new JSONObject(payload.getString());
-					get = request.getString("get");
+					if(get == null) 
+						get = request.getString("get");
+					username = request.getString("username");
+					password = request.getString("password");
 				}
 				catch(Exception e)	{}
 			}
 			
+			if(username != null  &&  password != null)
+			{
+				JSONObject userProfileJSON = request(accessManagementService, "{action:authenticate, username:\"" + username + "\", password:\"" + password + "\"}");
+				if(userProfileJSON != null  &&  userProfileJSON.getString("result").equals("ok"))
+					userProfile = new UserProfile(userProfileJSON);
+				response.metadata.put("sessionid", userProfileJSON.getString("sessionid"));
+			}
+			else if(sessionId != null)
+			{
+				JSONObject userProfileJSON = request(accessManagementService, "{action:validate, sessionid:\"" + sessionId + "\"}");
+				if(userProfileJSON != null  &&  userProfileJSON.getString("result").equals("ok"))
+					userProfile = new UserProfile(userProfileJSON);
+			}
+						
 			if(get != null)
 			{
 				String[] parts = get.split("/");
@@ -49,64 +74,93 @@ public class UIServer extends RedbackService
 				
 				if(category.equals("app"))
 				{
-					JSONObject result = request(configService, "{object:rbui_app,filter:{name:" + name + "}}");
-					if(result != null)
+					if(userProfile != null)
 					{
-						JSONObject appConfig = result.getObject("result.0");
-						String moduleName = appConfig.getString("module");
-						String view = appConfig.getString("view");
+						JSONObject result = request(configService, "{object:rbui_app,filter:{name:" + name + "}}");
+						if(result != null)
+						{
+							JSONObject appConfig = result.getObject("result.0");
+							String moduleName = appConfig.getString("module");
+							String view = appConfig.getString("view");
+							sb.append("<html>\r\n");
+							sb.append("<head>\r\n");
+							sb.append("<link rel=\"stylesheet\" href=\"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css\">\r\n");
+							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js\"></script>\r\n");
+							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js\"></script>\r\n");
+							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js\"></script>\r\n");
+							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js\"></script>\r\n");
+							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js\"></script>\r\n");
+							sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"../resource/main.css\"></head>\r\n");
+							sb.append("</head>\r\n");
+							sb.append("<body>\r\n");
+							sb.append("<script src = \"../resource/" + moduleName + ".js\"></script>\r\n");
+							sb.append("<div ng-app=\"" + moduleName + "\" class=\"rb-module\">\r\n");
+							sb.append("<ng-include src=\"'../view/" + view + "'\" class=\"rb-include\"></ng-include>\r\n");
+							sb.append("</div></body></html>");
+						}
+						else
+						{
+							sb.append("<html><head></head>\r\n");
+							sb.append("<body>\r\n");
+							sb.append("Application " + name + " does not exist\r\n");
+							sb.append("</div></body></html>");					
+						}
+					}
+					else
+					{
 						sb.append("<html>\r\n");
 						sb.append("<head>\r\n");
 						sb.append("<link rel=\"stylesheet\" href=\"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css\">\r\n");
-						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js\"></script>\r\n");
-						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js\"></script>\r\n");
-						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js\"></script>\r\n");
-						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js\"></script>\r\n");
-						sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js\"></script>\r\n");
 						sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"../resource/main.css\"></head>\r\n");
 						sb.append("</head>\r\n");
 						sb.append("<body>\r\n");
-						sb.append("<script src = \"../resource/" + moduleName + ".js\"></script>\r\n");
-						sb.append("<div ng-app=\"" + moduleName + "\" class=\"rb-module\">\r\n");
-						sb.append("<ng-include src=\"'../view/" + view + "'\" class=\"rb-include\"></ng-include>\r\n");
-						sb.append("</div></body></html>");
+						sb.append("<form method=\"post\" action=\"../" + get + "\">Username<br/><input name=\"username\"/><br/>Password<br/><input type=\"password\" name=\"password\"/><br/><input type=\"submit\" value=\"Login\"/></form>\r\n");
+						sb.append("</div></body></html>");					
 					}
 				}
 				else if(category.equals("view"))
 				{
-					sb.append(getView(name, 0, null));
-				}
-				else if(category.equals("resource"))
-				{
-					String fileStr = null;
-					if(resourceServiceType.equals("filestorage"))
+					if(userProfile != null)
 					{
-						Payload result = firebus.requestService(resourceService, new Payload(name));
-						fileStr = result.getString();
-					}
-					else if(resourceServiceType.equals("db"))
-					{
-						JSONObject result = request(resourceService, "{object:rbui_resource,filter:{name:" + name + "}}");
-						fileStr = result.getList("result").getObject(0).getString("content");
-						sb.append(fileStr);
+						sb.append(getView(name, 0, null));
 					}
 					else
 					{
-						InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/css/" + name);
-						byte[] bytes = new byte[is.available()];
-						is.read(bytes);
-						fileStr = new String(bytes);
-					}
-
-					if(fileStr != null)
-					{
-						sb.append(fileStr);
-						if(name.endsWith(".js"))
-							mime = "application/javascript";
-						else if(name.endsWith(".css"))
-							mime = "text/css";
+						sb.append("Not logged in");
 					}
 				}
+				else if(category.equals("resource"))
+				{
+					if(name.endsWith(".js"))
+						mime = "application/javascript";
+					else if(name.endsWith(".css"))
+						mime = "text/css";
+
+					if(userProfile != null)
+					{
+						String fileStr = null;
+						if(resourceServiceType.equals("filestorage"))
+						{
+							Payload result = firebus.requestService(resourceService, new Payload(name));
+							fileStr = result.getString();
+						}
+						else if(resourceServiceType.equals("db"))
+						{
+							JSONObject result = request(resourceService, "{object:rbui_resource,filter:{name:" + name + "}}");
+							fileStr = result.getList("result").getObject(0).getString("content");
+						}
+						else
+						{
+							InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/css/" + name);
+							byte[] bytes = new byte[is.available()];
+							is.read(bytes);
+							fileStr = new String(bytes);
+						}
+	
+						if(fileStr != null)
+							sb.append(fileStr);
+					}
+				}					
 			}
 			response.setData(sb.toString());
 			response.metadata.put("mime", mime);
@@ -337,5 +391,6 @@ public class UIServer extends RedbackService
 
 		return sb.toString();
 	}
+
 
 }

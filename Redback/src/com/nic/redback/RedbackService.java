@@ -25,13 +25,20 @@ public abstract class RedbackService implements  ServiceProvider
 		firebus = fb;
 	}
 	
-	protected JSONObject request(String service, String request) throws JSONException, FunctionErrorException, FunctionTimeoutException
+	protected JSONObject request(String service, String request) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
-		Payload reqPayload = new Payload(request);
-		Payload respPayload = firebus.requestService(service, reqPayload);
-		String respStr = respPayload.getString();
-		JSONObject result = new JSONObject(respStr);
-		return result;
+		if(service != null)
+		{
+			Payload reqPayload = new Payload(request);
+			Payload respPayload = firebus.requestService(service, reqPayload);
+			String respStr = respPayload.getString();
+			JSONObject result = new JSONObject(respStr);
+			return result;
+		}
+		else
+		{
+			throw new RedbackException("Service name has not been defined for request: " + request);
+		}
 	}
 
 

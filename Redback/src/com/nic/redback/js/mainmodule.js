@@ -1,31 +1,78 @@
 	var regexIso8601 = /^(\d{4}|\+\d{6})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2}):(\d{2}):(\d{2})\.(\d{1,})(Z|([\-+])(\d{2}):(\d{2}))?)?)?)?$/;
+	
+	var objectMaster = [];
 
-	function processResponseJSON(input) {
-		// Ignore things that aren't objects.
-		if (typeof input !== "object") return input;
+	function processResponseJSONList(input) {
+		var outputList = [];
+		if (Array.isArray(input)) {
+			for(var i = 0; i < input.length; i++) {
+				outputList.push(processResponseJSONObject(input[i]));
+			}
+		}		
+		return outputList;
+	}
+	
+	function processResponseJSONObject(input) {
+		var obj = null;
+		if (typeof input == "object") {
+			convertResponseJSONToObject(input);
 
-		for (var key in input) {
-			if (!input.hasOwnProperty(key)) continue;
-
-			var value = input[key];
-			var match;
-			if (typeof value === "string") {
-				if(match = value.match(regexIso8601)) {
-					var milliseconds = Date.parse(match[0])
-					if (!isNaN(milliseconds)) {
-						input[key] = new Date(milliseconds);
+			for (var i = 0; i < objectMaster.length; i++) {
+				if(objectMaster[i].objectname == input.objectname  &&  objectMaster[i].uid == input.uid) {
+					obj = objectMaster[i];
+				}
+			}
+			
+			if(obj != null) {
+				for (var key in input.data) {
+					var inputval = input.data[key];
+					if(obj.data.hasOwnProperty(key)  &&  !(obj.hasOwnProperty("updatedattributes")  &&  obj.updatedattributes.includes(key))  &&  obj.data[key] != inputval) {
+						obj.data[key] = inputval;
+						if(obj.hasOwnProperty("related")  &&  obj.related.hasOwnProperty(key)) {
+							var relatedobj = processResponseJSONObject(input.related[key]);
+							obj.related[key] = relatedobj;
+						}
 					}
 				}
-				else if(value == 'true')
-					input[key] = true;
-				else if(value == 'false')
-					input[key] = false;
-			} else if (typeof value === "object") {
-				processResponseJSON(value);
+			} else {
+				obj = input;
+				objectMaster.push(obj);
+				if(obj.hasOwnProperty("related")) {
+					for (var key in obj.related) {
+						var relatedObj = processResponseJSONObject(obj.related[key]);
+						obj.related[key] = relatedObj;
+					}
+				}
+			}
+		}
+		return obj;
+	};
+	
+	function convertResponseJSONToObject(input) {
+		if (typeof input == "object") {
+			for (var key in input) {
+				if (!input.hasOwnProperty(key)) continue;
+
+				var value = input[key];
+				var match;
+				if (typeof value === "string") {
+					if(match = value.match(regexIso8601)) {
+						var milliseconds = Date.parse(match[0])
+						if (!isNaN(milliseconds)) {
+							input[key] = new Date(milliseconds);
+						}
+					}
+					else if(value == 'true')
+						input[key] = true;
+					else if(value == 'false')
+						input[key] = false;
+				} else if (typeof value === "object") {
+					convertResponseJSONToObject(value);
+				}
 			}
 		}
 	};
-	
+			
 	function getFilterFromRelationship(object, relationship)
 	{
 		var filter = {};
@@ -56,6 +103,7 @@
 			$scope.object = object;
 			for (var key in object.related) {
 				$scope.relatedObjectList[key] = [object.related[key]];
+				$scope.updatedAttributes = {};
 			}
 		}
 
@@ -71,11 +119,11 @@
 			var req = {action:"list", object:relatedObjectName, filter:filter};
 			return $http.post("../../rbos", req)
 				.then(function(response) {
-					processResponseJSON(response);
+					var responseList = processResponseJSONList(response.data.list);
 					if(!$scope.relatedObjectList.hasOwnProperty(attributeName))
 						$scope.relatedObjectList[attributeName] = [];
-					$scope.relatedObjectList[attributeName] = response.data.list;
-					return response.data.list;
+					$scope.relatedObjectList[attributeName] = responseList;
+					return responseList;
 				});
 		};
 		
@@ -85,18 +133,28 @@
 			var newLinkValue = '';
 			if(newRelatedObject != null)
 			{
-				var relatedObjectValueAttribute = $scope.object.validation[attributeName].relatedobject.valueattribute;
-				if(relatedObjectValueAttribute == 'uid')
+				var relatedObjectLinkAttribute = $scope.object.validation[attributeName].relatedobject.linkattribute;
+				if(relatedObjectLinkAttribute == 'uid')
 					newLinkValue = $scope.object.related[attributeName].uid;
 				else
-					newLinkValue = $scope.object.related[attributeName].data[relatedObjectValueAttribute];
+					newLinkValue = $scope.object.related[attributeName].data[relatedObjectLinkAttribute];
 			}
 			if($scope.object.data[attributeName] != newLinkValue)
 			{
 				$scope.object.data[attributeName] = newLinkValue;
+				$scope.attributeHasChanged(attributeName);
 			}
 		}
 
+		
+		$scope.attributeHasChanged = function(attributeName)
+		{
+			if (!$scope.object.hasOwnProperty('updatedattributes')) 
+				$scope.object.updatedattributes = [];
+			if(!$scope.object.updatedattributes.includes(attributeName))
+				$scope.object.updatedattributes.push(attributeName);
+		}
+		
 		
 		$scope.$on('ObjectSelected', function($event, object){
 			if(object.objectname == $scope.objectName)
@@ -107,11 +165,20 @@
 
 		$scope.save = function(){
 			if($scope.object != null) {
-				var req = {action:"update", object:$scope.objectName, uid:$scope.object.uid, data:$scope.object.data, options:{addrelated:"true", addvalidation:"true"}};
+				var req = {action:"update", object:$scope.objectName, uid:$scope.object.uid, data:{}, options:{addrelated:"true", addvalidation:"true"}};
+				for(i = 0; i < $scope.object.updatedattributes.length; i++)
+				{
+					var attributeName = $scope.object.updatedattributes[i];
+					req.data[attributeName] = $scope.object.data[attributeName];
+				}
 				$http.post("../../rbos", req)
 				.success(function(response) {
-					processResponseJSON(response);
-					$scope.setObject(response);
+					var responseObject = processResponseJSONObject(response);
+					$scope.object.data = responseObject.data;
+					$scope.object.related = responseObject.related;
+					$scope.object.validation = responseObject.validation;
+					$scope.object.updatedattributes = [];
+					$scope.setObject($scope.object);
 				})
 				.error(function(error, status) {
 					alert('save error');
@@ -124,8 +191,8 @@
 			var req = {action:"create", object:$scope.objectName, options:{addrelated:"true", addvalidation:"true"}};
 			$http.post("../../rbos", req)
 			.success(function(response) {
-				processResponseJSON(response);
-				$scope.setObject(response);
+				var responseObject = processResponseJSONObject(response);
+				$scope.setObject(responseObject);
 				$scope.$emit('refresh', $scope.objectName);
 			})
 			.error(function(error, status) {
@@ -133,6 +200,18 @@
 			});
 		};		
 
+		$scope.objectfunction = function(functionName){
+			var req = {action:"execute", object:$scope.objectName, uid:$scope.object.uid, "function":functionName};
+			$http.post("../../rbos", req)
+			.success(function(response) {
+				var responseObject = processResponseJSONObject(response);
+				$scope.setObject(responseObject);
+				$scope.$emit('refresh', $scope.objectName);
+			})
+			.error(function(error, status) {
+				alert('execute error');
+			});
+		};	
 	 });
 	 
 
@@ -158,7 +237,7 @@
 		$scope.search = function(searchText) {
 			if($scope.filter == null)
 				$scope.filter = {};
-			$scope.filter._any = '*' + $scope.searchText + '*';
+			$scope.filter.$multi = '*' + $scope.searchText + '*';
 			$scope.load();
 		}
 
@@ -169,8 +248,8 @@
 				var req = {action:"list", object:$scope.objectName, filter:$scope.filter, options:{addrelated:"true", addvalidation:"true"}};
 				$http.post("../../rbos", req)
 				.success(function(response) {
-					processResponseJSON(response);
-					$scope.list = response.list;
+					var responseList = processResponseJSONList(response.list);
+					$scope.list = responseList;
 				})
 				.error(function(error, status) {
 					alert('load error');

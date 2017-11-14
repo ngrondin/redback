@@ -54,7 +54,7 @@ public class IDGenerator extends RedbackService
 		return null;
 	}
 
-	protected JSONObject getIDConfig(String name) throws JSONException, FunctionErrorException, FunctionTimeoutException
+	protected JSONObject getIDConfig(String name) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		JSONObject idConfig = null;
 		JSONObject configList = request(configService, "{object:rbid_config,filter:{name:" + name + "}}");
