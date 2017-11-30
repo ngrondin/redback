@@ -1,0 +1,14 @@
+<md-input-container 
+	class="md-block">
+	<label>#label#</label>
+	<md-icon class="md-hue-3"> list </md-icon>
+	<md-select 
+		ng-model="object.related.#attribute#" 
+		md-on-open="loadRelatedObjectList('#attribute#', null)" 
+		ng-change="object.relatedObjectHasChanged('#attribute#')" 
+		ng-disabled="!object.validation.#attribute#.editable">
+		<md-option 
+			ng-repeat="item in object.validation.#attribute#.listofvalues" 
+			ng-value="item">{{item.data.#displayattribute#}}</md-option>
+	</md-select>
+</md-input-container>

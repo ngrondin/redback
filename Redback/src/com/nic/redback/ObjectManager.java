@@ -14,7 +14,6 @@ import com.nic.firebus.exceptions.FunctionTimeoutException;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
-import com.nic.redback.utils.StringUtils;
 
 public class ObjectManager
 {
@@ -55,16 +54,7 @@ public class ObjectManager
 				objectConfig = new ObjectConfig(configList.getObject("result.0"));
 				JSONObject scriptList = request(configService, new JSONObject("{object:rbo_script,filter:{object:" + object + "}}"));
 				for(int i = 0; i < scriptList.getList("result").size(); i++)
-				{
-					JSONObject scriptEntry = scriptList.getList("result").getObject(i);
-					String event = scriptEntry.getString("event");
-					String attribute = scriptEntry.getString("attribute");
-					String script = StringUtils.unescape(scriptEntry.getString("script"));
-					if(attribute != null)
-						objectConfig.addAttributeScript(attribute, event, script);
-					else
-						objectConfig.addScript(event, script);
-				}
+					objectConfig.addScript(new Script(scriptList.getList("result").getObject(i)));
 				if(cacheConfigs)
 					objectConfigs.put(object, objectConfig);
 			}
@@ -89,35 +79,38 @@ public class ObjectManager
 	
 	protected void addRelatedBulk(ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
 	{
-		ObjectConfig objectConfig = objects.get(0).getObjectConfig();
-		Iterator<String> it = objectConfig.getAttributeNames().iterator();
-		while(it.hasNext())
+		if(objects != null  && objects.size() > 0)
 		{
-			AttributeConfig attributeConfig = objectConfig.getAttributeConfig(it.next());
-			String attributeName = attributeConfig.getName();
-			if(attributeConfig.hasRelatedObject())
+			ObjectConfig objectConfig = objects.get(0).getObjectConfig();
+			Iterator<String> it = objectConfig.getAttributeNames().iterator();
+			while(it.hasNext())
 			{
-				RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
-				JSONList orList = new JSONList();
-				for(int j = 0; j < objects.size(); j++)
+				AttributeConfig attributeConfig = objectConfig.getAttributeConfig(it.next());
+				String attributeName = attributeConfig.getName();
+				if(attributeConfig.hasRelatedObject())
 				{
-					RedbackObject object = objects.get(j);
-					if(object.getString(attributeName) != null)
-						orList.add(object.getRelatedObjectFindFilter(attributeName));
-				}
-				JSONObject relatedObjectFilter = new JSONObject();
-				relatedObjectFilter.put("$or", orList);
-				ArrayList<RedbackObject> result = getObjectList(relatedObjectConfig.getObjectName(), relatedObjectFilter, false);
-				for(int k = 0; k < result.size(); k++)
-				{
-					RedbackObject resultObject = result.get(k);
-					String resultObjectLinkValue = resultObject.getString(relatedObjectConfig.getLinkAttributeName());
+					RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
+					JSONList orList = new JSONList();
 					for(int j = 0; j < objects.size(); j++)
 					{
 						RedbackObject object = objects.get(j);
-						String linkValue = object.getString(attributeName);
-						if(linkValue != null  &&  linkValue.equals(resultObjectLinkValue))
-							object.put(attributeName, resultObject);
+						if(object.getString(attributeName) != null)
+							orList.add(object.getRelatedObjectFindFilter(attributeName));
+					}
+					JSONObject relatedObjectFilter = new JSONObject();
+					relatedObjectFilter.put("$or", orList);
+					ArrayList<RedbackObject> result = getObjectList(relatedObjectConfig.getObjectName(), relatedObjectFilter, false);
+					for(int k = 0; k < result.size(); k++)
+					{
+						RedbackObject resultObject = result.get(k);
+						String resultObjectLinkValue = resultObject.getString(relatedObjectConfig.getLinkAttributeName());
+						for(int j = 0; j < objects.size(); j++)
+						{
+							RedbackObject object = objects.get(j);
+							String linkValue = object.getString(attributeName);
+							if(linkValue != null  &&  linkValue.equals(resultObjectLinkValue))
+								object.put(attributeName, resultObject);
+						}
 					}
 				}
 			}

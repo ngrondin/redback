@@ -344,7 +344,7 @@ public class RedbackObject
 	
 	protected void executeScriptsForEvent(String event) throws ScriptException
 	{
-		ArrayList<String> scripts = config.getScriptsForEvent(event);
+		ArrayList<Script> scripts = config.getScriptsForEvent(event);
 		if(scripts != null)
 			for(int i = 0; i < scripts.size(); i++)
 				executeScript(scripts.get(i));
@@ -352,13 +352,13 @@ public class RedbackObject
 
 	protected void executeAttributeScriptsForEvent(String attributeName, String event) throws ScriptException
 	{
-		ArrayList<String> scripts = config.getAttributeConfig(attributeName).getScriptsForEvent(event);
+		ArrayList<Script> scripts = config.getAttributeConfig(attributeName).getScriptsForEvent(event);
 		if(scripts != null)
 			for(int i = 0; i < scripts.size(); i++)
 				executeScript(scripts.get(i));
 	}
 	
-	protected void executeScript(String script) throws ScriptException
+	protected void executeScript(Script script) throws ScriptException
 	{
 		Iterator<String> it = data.keySet().iterator();
 		while(it.hasNext())
@@ -370,7 +370,8 @@ public class RedbackObject
 		jsBindings.put("om", objectManager);
 		try
 		{
-			js.eval(script);
+			js.put(ScriptEngine.FILENAME, script.getObjectName() + (script.getAttributeName() != null ? "." + script.getAttributeName() : "") + "!" + script.getEventName());
+			js.eval(script.getSource());
 		} 
 		catch (ScriptException e)
 		{

@@ -16,13 +16,13 @@ public class ObjectConfig
 {
 	protected JSONObject config;
 	protected HashMap<String, AttributeConfig> attributes;
-	protected HashMap<String, ArrayList<String>> scripts;
+	protected HashMap<String, ArrayList<Script>> scripts;
 	
 	public ObjectConfig(JSONObject cfg)
 	{
 		config = cfg;
 		attributes = new HashMap<String, AttributeConfig>();
-		scripts = new HashMap<String, ArrayList<String>>();
+		scripts = new HashMap<String, ArrayList<Script>>();
 		JSONList list = config.getList("attributes");
 		for(int i = 0; i < list.size(); i++)
 		{
@@ -31,21 +31,26 @@ public class ObjectConfig
 		}
 	}
 	
-	public void addScript(String event, String script)
+	public void addScript(Script script)
 	{
-		ArrayList<String> eventScripts = scripts.get(event);
-		if(eventScripts == null)
+		String attributeName = script.getAttributeName();
+		if(attributeName != null)
 		{
-			eventScripts = new ArrayList<String>();
-			scripts.put(event, eventScripts);
+			getAttributeConfig(attributeName).addScript(script);
 		}
-		eventScripts.add(script);
+		else
+		{
+			String eventName = script.getEventName();
+			ArrayList<Script> eventScripts = scripts.get(eventName);
+			if(eventScripts == null)
+			{
+				eventScripts = new ArrayList<Script>();
+				scripts.put(eventName, eventScripts);
+			}
+			eventScripts.add(script);
+		}
 	}
-	
-	public void addAttributeScript(String name, String event, String script)
-	{
-		getAttributeConfig(name).addScript(event, script);
-	}
+
 
 	public String getName()
 	{
@@ -77,7 +82,7 @@ public class ObjectConfig
 		return attributes.get(name);
 	}
 	
-	public ArrayList<String> getScriptsForEvent(String event)
+	public ArrayList<Script> getScriptsForEvent(String event)
 	{
 		return scripts.get(event);
 	}

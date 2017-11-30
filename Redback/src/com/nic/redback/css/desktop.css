@@ -3,6 +3,7 @@ body {
 	width: 100%;
 	background: white;
 	display: flex;
+	flex-direction: column;
 }
 
 .rb-module {
@@ -21,7 +22,7 @@ body {
 }
 
 .hsection {
-	display:flex;
+	display: flex;
 	flex-direction: row
 	flex-wrap: nowrap;
 	border: 0px Solid;
@@ -48,6 +49,14 @@ body {
 .attributediv {
 	display:block;
 	border: 0px Solid;
+}
+
+.menuitem {
+	font-size: 90%;
+}
+
+md-input-container {
+	margin: 25px 25px;
 }
 
 md-input-container .md-errors-spacer{

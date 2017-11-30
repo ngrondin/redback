@@ -1,12 +1,17 @@
 package com.nic.redback;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
+import com.nic.firebus.exceptions.FunctionTimeoutException;
 import com.nic.firebus.information.ServiceInformation;
+import com.nic.firebus.utils.JSONEntity;
+import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
+import com.nic.firebus.utils.JSONLiteral;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.security.UserProfile;
 
@@ -61,6 +66,7 @@ public class UIServer extends RedbackService
 			}
 			else if(sessionId != null)
 			{
+				//TODO: Can speed up with caching
 				JSONObject userProfileJSON = request(accessManagementService, "{action:validate, sessionid:\"" + sessionId + "\"}");
 				if(userProfileJSON != null  &&  userProfileJSON.getString("result").equals("ok"))
 					userProfile = new UserProfile(userProfileJSON);
@@ -74,93 +80,22 @@ public class UIServer extends RedbackService
 				
 				if(category.equals("app"))
 				{
-					if(userProfile != null)
-					{
-						JSONObject result = request(configService, "{object:rbui_app,filter:{name:" + name + "}}");
-						if(result != null)
-						{
-							JSONObject appConfig = result.getObject("result.0");
-							String moduleName = appConfig.getString("module");
-							String view = appConfig.getString("view");
-							sb.append("<html>\r\n");
-							sb.append("<head>\r\n");
-							sb.append("<link rel=\"stylesheet\" href=\"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css\">\r\n");
-							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js\"></script>\r\n");
-							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js\"></script>\r\n");
-							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js\"></script>\r\n");
-							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js\"></script>\r\n");
-							sb.append("<script src = \"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js\"></script>\r\n");
-							sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"../resource/main.css\"></head>\r\n");
-							sb.append("</head>\r\n");
-							sb.append("<body>\r\n");
-							sb.append("<script src = \"../resource/" + moduleName + ".js\"></script>\r\n");
-							sb.append("<div ng-app=\"" + moduleName + "\" class=\"rb-module\">\r\n");
-							sb.append("<ng-include src=\"'../view/" + view + "'\" class=\"rb-include\"></ng-include>\r\n");
-							sb.append("</div></body></html>");
-						}
-						else
-						{
-							sb.append("<html><head></head>\r\n");
-							sb.append("<body>\r\n");
-							sb.append("Application " + name + " does not exist\r\n");
-							sb.append("</div></body></html>");					
-						}
-					}
-					else
-					{
-						sb.append("<html>\r\n");
-						sb.append("<head>\r\n");
-						sb.append("<link rel=\"stylesheet\" href=\"https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css\">\r\n");
-						sb.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"../resource/main.css\"></head>\r\n");
-						sb.append("</head>\r\n");
-						sb.append("<body>\r\n");
-						sb.append("<form method=\"post\" action=\"../" + get + "\">Username<br/><input name=\"username\"/><br/>Password<br/><input type=\"password\" name=\"password\"/><br/><input type=\"submit\" value=\"Login\"/></form>\r\n");
-						sb.append("</div></body></html>");					
-					}
+					sb.append(getApp(name, userProfile));
 				}
 				else if(category.equals("view"))
 				{
-					if(userProfile != null)
-					{
-						sb.append(getView(name, 0, null));
-					}
-					else
-					{
-						sb.append("Not logged in");
-					}
+					sb.append(getView(name, userProfile));
 				}
 				else if(category.equals("resource"))
 				{
+					sb.append(getResource(name, userProfile));
 					if(name.endsWith(".js"))
 						mime = "application/javascript";
 					else if(name.endsWith(".css"))
 						mime = "text/css";
-
-					if(userProfile != null)
-					{
-						String fileStr = null;
-						if(resourceServiceType.equals("filestorage"))
-						{
-							Payload result = firebus.requestService(resourceService, new Payload(name));
-							fileStr = result.getString();
-						}
-						else if(resourceServiceType.equals("db"))
-						{
-							JSONObject result = request(resourceService, "{object:rbui_resource,filter:{name:" + name + "}}");
-							fileStr = result.getList("result").getObject(0).getString("content");
-						}
-						else
-						{
-							InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/css/" + name);
-							byte[] bytes = new byte[is.available()];
-							is.read(bytes);
-							fileStr = new String(bytes);
-						}
-	
-						if(fileStr != null)
-							sb.append(fileStr);
-					}
-				}					
+					else if(name.endsWith(".ico"))
+						mime = "image/x-icon";
+				}
 			}
 			response.setData(sb.toString());
 			response.metadata.put("mime", mime);
@@ -178,6 +113,142 @@ public class UIServer extends RedbackService
 		return null;
 	}
 	
+	protected String getApp(String name, UserProfile userProfile) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	{
+		StringBuilder sb = new StringBuilder();
+		if(userProfile != null)
+		{
+			JSONObject result = request(configService, "{object:rbui_app,filter:{name:" + name + "}}");
+			if(result != null)
+			{
+				JSONObject appConfig = result.getObject("result.0");
+				String page = appConfig.getString("html");
+				String defaultView = appConfig.getString("defaultview");
+				String label = appConfig.getString("label");
+				String html = getHTMLPage(page).replace("#defaultview#", defaultView).replace("#appname#", label);
+				
+				String menuFragment = getHTMLFragment("navigation");
+				String menuGroupFragment = getHTMLFragment("navigationgroup");
+				String menuItemFragment = getHTMLFragment("navigationitem");
+				StringBuilder menuGroupBuilder = new StringBuilder();
+				for(int i = 0; i < appConfig.getList("menugroups").size(); i++)
+				{
+					JSONObject menuGroup = appConfig.getList("menugroups").getObject(i);
+					JSONList itemList = menuGroup.getList("menuitems");
+					StringBuilder menuItemBuilder = new StringBuilder();
+					for(int j = 0; j < itemList.size(); j++)
+					{
+						JSONObject menuItem = itemList.getObject(j);
+						menuItemBuilder.append(menuItemFragment.replace("#itemlabel#", menuItem.getString("label")).replace("#viewname#", menuItem.getString("view")) + "\r\n");
+					}
+					menuGroupBuilder.append(menuGroupFragment.replace("#grouplabel#", menuGroup.getString("label")).replace("#content#", menuItemBuilder.toString().trim()).replace("#groupid#", "group" + i) + "\r\n");
+				}			
+				menuFragment = injectInHTML(menuFragment, "content", menuGroupBuilder.toString().trim());
+				
+				html = injectInHTML(html, "menu", menuFragment);
+				sb.append(html);
+			}
+			else
+			{
+				sb.append("<html><head></head>\r\n");
+				sb.append("<body>\r\n");
+				sb.append("Application " + name + " does not exist\r\n");
+				sb.append("</div></body></html>");					
+			}
+		}
+		else
+		{
+			sb.append(getHTMLPage("login").replace("#get#", "app/" + name));
+		}
+		return sb.toString();
+	}
+	
+
+	
+	protected String getView(String name, UserProfile userProfile) throws JSONException
+	{
+		StringBuilder sb = new StringBuilder();
+		if(userProfile != null)
+		{
+			sb.append(processComponentJSON(new JSONObject("{type:view, name:" + name + "}")));
+		}
+		else
+		{
+			sb.append("Not logged in");
+		}
+		return sb.toString();
+	}
+	
+	
+	protected String getResource(String name, UserProfile userProfile) throws FunctionErrorException, FunctionTimeoutException, JSONException, RedbackException, IOException
+	{
+		String fileStr = null;
+		String type = "";
+		if(name.endsWith(".js"))
+			type = "js";
+		else if(name.endsWith(".css"))
+			type = "css";
+		else if(name.endsWith(".ico"))
+			type = "icons";
+
+		if(resourceServiceType.equals("filestorage"))
+		{
+			Payload result = firebus.requestService(resourceService, new Payload(name));
+			fileStr = result.getString();
+		}
+		else if(resourceServiceType.equals("db"))
+		{
+			JSONObject result = request(resourceService, "{object:rbui_resource,filter:{name:" + name + "}}");
+			fileStr = result.getList("result").getObject(0).getString("content");
+		}
+		else
+		{
+			InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/" + type + "/" + name);
+			byte[] bytes = new byte[is.available()];
+			is.read(bytes);
+			fileStr = new String(bytes);
+		}
+		return fileStr;
+	}
+	
+	
+	protected String getHTMLPage(String name)
+	{
+		return getHTML("pages/" + name);
+	}
+	
+	protected String getHTMLFragment(String name)
+	{
+		return getHTML("fragments/" + name);
+	}
+	
+	protected String getHTML(String name)
+	{
+		try
+		{
+			InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/html/" + name + ".html");
+			byte[] bytes = new byte[is.available()];
+			is.read(bytes);
+			is.close();
+			String str = new String(bytes);
+			return str;
+		}
+		catch(IOException e)
+		{
+			logger.severe("Error when trying to retreive " + name + ".html : " + e.getMessage());
+			return formatErrorMessage("Error when trying to retreive " + name + ".html", e);
+		}		
+	}	
+	
+	protected String injectInHTML(String html, String tag, String fragment)
+	{
+		int posContent = html.indexOf("#" + tag + "#");
+		int posNewLine = html.substring(0, posContent).lastIndexOf("\r\n");
+		String indentStr = html.substring(posNewLine + 2, posContent);
+		fragment = fragment.replace("\r\n", "\r\n" + indentStr);
+		html = html.replace("#" + tag + "#", fragment);		
+		return html;
+	}
 	
 	protected String convertJSONToAttributeString(JSONObject obj)
 	{
@@ -189,9 +260,10 @@ public class UIServer extends RedbackService
 		return ret;
 	}
 	
-	protected String formatErrorMessage(Exception e)
+	protected String formatErrorMessage(String msg, Exception e)
 	{
 		StringBuilder sb = new StringBuilder();
+		sb.append("<div>" + msg + "<br/>");
 		sb.append(e.getMessage());
 		Throwable t = e;
 		while((t = t.getCause()) != null)
@@ -200,197 +272,91 @@ public class UIServer extends RedbackService
 		return sb.toString();
 	}
 	
-	protected String getIndentation(int indent)
-	{
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < indent; i++)
-			sb.append('\t');
-		return sb.toString();
-	}
 	
-	protected String getView(String viewName, int indent, String inlineStyle)
+	protected String processComponentJSON(JSONObject componentJSON)
 	{
-		StringBuilder sb = new StringBuilder();
-		try
-		{
-			JSONObject result = request(configService, "{object:rbui_view,filter:{name:" + viewName + "}}");
-			if(result != null)
-			{
-				JSONObject viewConfig = result.getObject("result.0");
-				String controllerName = viewConfig.getString("controller");
-				String objectName = viewConfig.getString("object");
-				JSONObject masterObject = viewConfig.getObject("master");
-				JSONObject initialFilter = viewConfig.getObject("initialfilter");
-				String attrStr = "";
-				if(objectName != null)
-					attrStr += " rb-object=\"" + objectName + "\"";
-				if(masterObject != null)
-					attrStr += " rb-master=\"" +  convertJSONToAttributeString(masterObject) + "\"";
-				if(initialFilter != null)
-					attrStr += " rb-initial-filter=\"" + convertJSONToAttributeString(initialFilter) + "\"";
-				if(inlineStyle == null)
-					inlineStyle = "";
-				
-				sb.append("<div ng-controller=\"" + controllerName + "\"" + attrStr + "  class=\"rb-controller\" " + inlineStyle +">\r\n");
-				JSONList content = viewConfig.getList("content");
-				if(content != null)
-					for(int i = 0; i < content.size(); i++)
-						sb.append(processViewContent(content.getObject(i), indent + 1));
-				sb.append(getIndentation(indent) + "</div>\r\n");
-			}
-		}
-		catch(Exception e)
-		{
-			sb.append(formatErrorMessage(e));
-		}
-		return sb.toString();
-	}
-	
-	protected String processViewContent(JSONObject obj, int indent)
-	{
-		StringBuilder sb = new StringBuilder();
-		String type = obj.getString("type");
+		String type = componentJSON.getString("type");
+		String componentStr = getHTMLFragment(type);
 		if(type != null)
 		{
-			String preString = null;
-			String postString = null;
 			String inlineStyle = "";
-			String grow = obj.getString("grow");
-			String shrink = obj.getString("shrink");
+			String grow = componentJSON.getString("grow");
+			String shrink = componentJSON.getString("shrink");
 			if(grow != null)
 				inlineStyle += "flex-grow:" + ((int)Double.parseDouble(grow)) + ";";
 			if(shrink != null)
 				inlineStyle += "flex-shrink:" + ((int)Double.parseDouble(shrink)) + ";";
-			if(inlineStyle.length() > 0)
-				inlineStyle = " style=\"" + inlineStyle + "\"";
-			
+
 			if(type.equals("view"))
 			{
-				String name = obj.getString("name");
-				if(name != null)
+				String viewName = componentJSON.getString("name");
+				try
 				{
-					preString = getView(name, indent, inlineStyle);
-					postString = "";
+					JSONObject result = request(configService, "{object:rbui_view,filter:{name:" + viewName + "}}");
+					if(result != null)
+						componentJSON = result.getObject("result.0");
 				}
-			}
-			else if(type.equals("vsection"))
-			{
-				preString = "<div class=\"vsection\" " + inlineStyle + ">";
-				postString = "</div>";
-			}
-			else if(type.equals("hsection"))
-			{
-				preString = "<div class=\"hsection\"" + inlineStyle + ">";
-				postString = "</div>";
-			}
-			else if(type.equals("vscroll"))
-			{
-				preString = "<div class=\"vscroll\"" + inlineStyle + ">";
-				postString = "</div>";
-			}
-			else if(type.equals("list"))
-			{
-				String line1 = obj.getString("line1");
-				String line2 = obj.getString("line2");
-				if(line1 != null  &&  line2 != null)
+				catch(Exception e)
 				{
-					line1 = line1.replace("{{", "{{item.");
-					line2 = line2.replace("{{", "{{item.");
-					preString = "<div class=\"listscroll\" " + inlineStyle + "><md-list flex=\"\"><md-list-item class=\"md-2-line\" ng-repeat=\"item in list\" ng-click=\"$emit('ObjectSelectedEmit', item)\"><div class=\"md-list-item-text\" layout=\"column\"><h3>" + line1 + "</h3><h4>" + line2 + "</h4>";
-					postString = "</div></md-list-item></md-list></div>";
+					componentStr = formatErrorMessage("Error retrieving view " + viewName, e);
 				}
-			}
-			else if(type.equals("text"))
+			}			
+
+			if(inlineStyle.length() > 0)
+				componentJSON.put("inlineStyle", inlineStyle);
+			
+			int pos1 = 0;
+			int pos2 = 0;
+			while(pos1 > -1)
 			{
-				String attribute = obj.getString("attribute");
-				if(attribute != null)
+				pos1 = componentStr.indexOf("#", pos1 + 1);
+				if(pos1 > -1)
 				{
-					preString = "<div>{{object.data." + attribute + "}}";
-					postString = "</div>";
-				}
-			}
-			else if(type.equals("input"))
-			{
-				String label = obj.getString("label");
-				String attribute = obj.getString("attribute");
-				if(attribute != null)
-				{
-					
-					preString = "<md-input-container class=\"md-block\" ><label>" + label + "</label><input ng-model=\"object.data." + attribute + "\" ng-change=\"attributeHasChanged('" + attribute +"')\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
-					postString = "</md-input-container>";
-				}
-			}
-			else if(type.equals("search"))
-			{
-				preString = "<md-input-container class=\"md-block\" ><input ng-model=\"searchText\" ng-change=\"search(searchText)\" aria-label=\"Search\">";
-				postString = "</md-input-container>";
-			}
-			else if(type.equals("datepicker"))
-			{
-				String label = obj.getString("label");
-				String attribute = obj.getString("attribute");
-				if(attribute != null)
-				{
-					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-datepicker  ng-model=\"object.data." + attribute + "\" ng-change=\"attributeHasChanged('" + attribute +"')\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
-					postString = "</md-datepicker></md-input-container>";
-				}
-			}
-			else if(type.equals("select"))
-			{
-				String label = obj.getString("label");
-				String attribute = obj.getString("attribute");
-				String displayExpression = obj.getString("displayexpression");
-				if(attribute != null  &&  displayExpression != null)
-				{
-					displayExpression = "'" + displayExpression.replace("{{", "' + item.data.").replace("}}", " + '") + "'";
-					preString = "<md-input-container class=\"md-block\" flex-gt-sm=\"\"><label>" + label + "</label><md-select ng-model=\"object.related." + attribute + "\" md-on-open=\"loadRelatedObjectList('" + attribute +"', null)\" ng-change=\"relatedObjectHasChanged('" + attribute +"')\" ng-disabled=\"!object.validation." + attribute + ".editable\"><md-option ng-repeat=\"item in relatedObjectList." + attribute +"\" ng-value=\"item\">{{" + displayExpression + "}}";
-					postString = "</md-option></md-select></md-input-container>";
-				}
-			}
-			else if(type.equals("autocomplete"))
-			{
-				String label = obj.getString("label");
-				String attribute = obj.getString("attribute");
-				String displayExpression = obj.getString("displayexpression");
-				String listExpression = obj.getString("listexpression");
-				if(attribute != null  &&  displayExpression != null)
-				{
-					displayExpression = "'" + displayExpression.replace("{{", "' + item.data.").replace("}}", " + '") + "'";
-					listExpression = listExpression.replace("{{", "{{item.data.");
-					preString = "<md-autocomplete cflex=\"\" required=\"\" md-input-name=\"autocompleteField\"  md-items=\"item in loadRelatedObjectList('" + attribute +"', dynamicSearchText)\" md-selected-item=\"object.related." + attribute + "\" md-selected-item-change=\"relatedObjectHasChanged('" + attribute +"')\" md-search-text=\"dynamicSearchText\" md-item-text=\"" + displayExpression + "\" md-require-match=\"\" md-floating-label=\"" + label + "\" ng-disabled=\"!object.validation." + attribute + ".editable\">";
-					preString += "<md-item-template>" + listExpression + "</md-item-template>";
-					postString = "</md-autocomplete>";
-				}
-			}
-			else if(type.equals("button"))
-			{
-				String action = obj.getString("action");
-				String param = obj.getString("param");
-				String label = obj.getString("label");
-				if(action != null  &&  label != null)
-				{
-					preString = "<md-button class=\"md-primary md-raised\" ng-click=\"" + action + "(" + (param != null ? ("'" + param + "'") : "") + ");\">" + label;
-					postString = "</md-button>";
+					pos2 = componentStr.indexOf("#", pos1 + 1);
+					if(pos2 > -1)
+					{
+						String propStr = componentStr.substring(pos1 + 1, pos2);
+						if(propStr.matches("[a-zA-Z0-9]+")  &&  !propStr.equals("content"))
+						{
+							JSONEntity valEntity = componentJSON.get(propStr);
+							String value = "";
+							if(propStr.equals("show"))
+								value = "true";
+							if(valEntity instanceof JSONLiteral)
+								value = ((JSONLiteral)valEntity).getString();
+							else if(valEntity instanceof JSONObject)
+								value = convertJSONToAttributeString((JSONObject)valEntity);
+							componentStr = componentStr.substring(0, pos1) + value + componentStr.substring(pos2 + 1);
+						}
+					}
 				}
 			}
 			
-			if(preString != null  &&  postString != null)
+			if(componentStr != null  &&  componentStr.indexOf("#content#") >= 0)
 			{
-				sb.append(getIndentation(indent) + preString);
-				sb.append("\r\n");
-				JSONList content = obj.getList("content");
+				int posContent = componentStr.indexOf("#content#");
+				int posNewLine = componentStr.substring(0, posContent).lastIndexOf("\r\n");
+				String indentStr = componentStr.substring(posNewLine + 2, posContent);
+				StringBuilder sb = new StringBuilder();
+				JSONList content = componentJSON.getList("content");
 				if(content != null)
 				{
 					for(int i = 0; i < content.size(); i++)
-						sb.append(processViewContent(content.getObject(i), indent + 1));
+					{
+						if(i > 0)
+							sb.append("\r\n");
+						sb.append(processComponentJSON(content.getObject(i)));
+					}
 				}
-				sb.append(getIndentation(indent) + postString);	
-				sb.append("\r\n");
+				String contentStr = sb.toString();
+				contentStr = contentStr.replace("\r\n", "\r\n" + indentStr);
+				componentStr = componentStr.replace("#content#", contentStr);
 			}
 		}
 
-		return sb.toString();
+		return componentStr;
 	}
+
 
 
 }

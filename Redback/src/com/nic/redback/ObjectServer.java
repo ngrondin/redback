@@ -11,7 +11,6 @@ import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
-import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 
@@ -135,29 +134,15 @@ public class ObjectServer extends RedbackService
 		}
 		catch(ScriptException e)
 		{
-			logger.severe(e.getMessage());
-			try
-			{
-				JSONObject responseData = new JSONObject("{scripterror:\"" + e.getCause().getMessage() + "\"}");
-				response.setData(responseData.toString());
-			}
-			catch(JSONException e2)
-			{
-				logger.severe(e2.getMessage());
-			}
+			String errorMsg = e.getCause().getMessage();
+			logger.severe(errorMsg);
+			response.setData("{\"scripterror\":\"" + errorMsg.replace("\"", "'") + "\"}");
 		}		
 		catch(Exception e)
 		{
-			logger.severe(e.getMessage());
-			try
-			{
-				JSONObject responseData = new JSONObject("{generalerror:\"" + e.getMessage() + "\"}");
-				response.setData(responseData.toString());
-			}
-			catch(JSONException e2)
-			{
-				logger.severe(e2.getMessage());
-			}
+			String errorMsg = e.getMessage();
+			logger.severe(errorMsg);
+			response.setData("{\"generalerror\":\"" + errorMsg + "\"}");
 		}
 		return response;
 	}

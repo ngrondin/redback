@@ -1,0 +1,14 @@
+<md-autocomplete 
+	cflex="" 
+	required="" 
+	md-input-name="autocompleteField"  
+	md-items="item in loadRelatedObjectList('#attribute#', dynamicSearchText)" 
+	md-selected-item="object.related.#attribute#" 
+	md-selected-item-change="object.relatedObjectHasChanged('#attribute#')" 
+	md-search-text="dynamicSearchText" 
+	md-item-text="item.data.#displayattribute#" 
+	md-require-match="" 
+	md-floating-label="#label#" 
+	ng-disabled="!object.validation.#attribute#.editable">
+	<md-item-template>#listexpression#</md-item-template>
+</md-autocomplete>

@@ -8,21 +8,22 @@ import com.nic.firebus.utils.JSONObject;
 public class AttributeConfig 
 {
 	protected JSONObject config;	
-	protected HashMap<String, ArrayList<String>> scripts;
+	protected HashMap<String, ArrayList<Script>> scripts;
 	
 	public AttributeConfig(JSONObject cfg)
 	{
 		config = cfg;
-		scripts = new HashMap<String, ArrayList<String>>();
+		scripts = new HashMap<String, ArrayList<Script>>();
 	}
 
-	public void addScript(String event, String script)
+	public void addScript(Script script)
 	{
-		ArrayList<String> eventScripts = scripts.get(event);
+		String eventName = script.getEventName();
+		ArrayList<Script> eventScripts = scripts.get(eventName);
 		if(eventScripts == null)
 		{
-			eventScripts = new ArrayList<String>();
-			scripts.put(event, eventScripts);
+			eventScripts = new ArrayList<Script>();
+			scripts.put(eventName, eventScripts);
 		}
 		eventScripts.add(script);
 	}
@@ -67,7 +68,7 @@ public class AttributeConfig
 		return new RelatedObjectConfig(config.getObject("relatedobject"));
 	}
 	
-	public ArrayList<String> getScriptsForEvent(String event)
+	public ArrayList<Script> getScriptsForEvent(String event)
 	{
 		return scripts.get(event);
 	}
