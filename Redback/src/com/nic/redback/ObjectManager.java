@@ -14,6 +14,7 @@ import com.nic.firebus.exceptions.FunctionTimeoutException;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.security.UserProfile;
 
 public class ObjectManager
 {
@@ -68,16 +69,9 @@ public class ObjectManager
 		return objectConfig;
 	}
 
+
 	
-	
-	protected void addRelatedBulk(RedbackObject object) throws RedbackException, ScriptException
-	{
-		ArrayList<RedbackObject> objects = new ArrayList<RedbackObject>();
-		objects.add(object);
-		addRelatedBulk(objects);
-	}
-	
-	protected void addRelatedBulk(ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
+	protected void addRelatedBulk(UserProfile userProfile, ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
 	{
 		if(objects != null  && objects.size() > 0)
 		{
@@ -99,15 +93,15 @@ public class ObjectManager
 					}
 					JSONObject relatedObjectFilter = new JSONObject();
 					relatedObjectFilter.put("$or", orList);
-					ArrayList<RedbackObject> result = getObjectList(relatedObjectConfig.getObjectName(), relatedObjectFilter, false);
+					ArrayList<RedbackObject> result = getObjectList(userProfile, relatedObjectConfig.getObjectName(), relatedObjectFilter, false);
 					for(int k = 0; k < result.size(); k++)
 					{
 						RedbackObject resultObject = result.get(k);
-						String resultObjectLinkValue = resultObject.getString(relatedObjectConfig.getLinkAttributeName());
+						Value resultObjectLinkValue = resultObject.get(relatedObjectConfig.getLinkAttributeName());
 						for(int j = 0; j < objects.size(); j++)
 						{
 							RedbackObject object = objects.get(j);
-							String linkValue = object.getString(attributeName);
+							Value linkValue = object.get(attributeName);
 							if(linkValue != null  &&  linkValue.equals(resultObjectLinkValue))
 								object.put(attributeName, resultObject);
 						}
@@ -118,32 +112,33 @@ public class ObjectManager
 	}
 
 	
-	public RedbackObject getObject(String objectName, String id, boolean addRelated) throws RedbackException
+	public RedbackObject getObject(UserProfile userProfile, String objectName, String id, boolean addRelated) throws RedbackException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
-		RedbackObject object = new RedbackObject(this, objectConfig, id, addRelated);;
+		RedbackObject object = new RedbackObject(userProfile, this, objectConfig, id, addRelated);;
 		return object;
 	}
 	
 	
-	public ArrayList<RedbackObject> getObjectList(String objectName, JSONObject filterData, boolean addRelated) throws RedbackException
+	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, JSONObject filterData, boolean addRelated) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		try
 		{
 			JSONObject dbFilter = objectConfig.generateDBFilter(filterData);
-			JSONObject dbResult = request(dataService, new JSONObject("{object:" + objectConfig.getCollection() + ",filter:" + dbFilter + "}"));
+			dbFilter.put("domain", userProfile.getDBFilterDomainClause());
+			JSONObject dbResult = requestData(objectConfig.getCollection(), dbFilter);
 			JSONList dbResultList = dbResult.getList("result");
 			
 			for(int i = 0; i < dbResultList.size(); i++)
 			{
 				JSONObject dbData = dbResultList.getObject(i);
-				RedbackObject object = new RedbackObject(this, objectConfig, dbData, false);
+				RedbackObject object = new RedbackObject(userProfile, this, objectConfig, dbData, false);
 				objectList.add(object);
 			}
 			if(addRelated)
-				addRelatedBulk(objectList);
+				addRelatedBulk(userProfile, objectList);
 		}
 		catch(Exception e)
 		{
@@ -154,16 +149,16 @@ public class ObjectManager
 	}
 	
 	
-	public RedbackObject updateObject(String objectName, String id, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
+	public RedbackObject updateObject(UserProfile userProfile, String objectName, String id, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
 	{
-		RedbackObject object = getObject(objectName, id, false);
+		RedbackObject object = getObject(userProfile, objectName, id, false);
 		if(object != null)
 		{
 			Iterator<String> it = updateData.keySet().iterator();
 			while(it.hasNext())
 			{
 				String attributeName = it.next();
-				object.put(attributeName, updateData.getString(attributeName));
+				object.put(attributeName, new Value(updateData.get(attributeName)));
 			}
 			if(addRelated)
 				object.loadRelated();
@@ -172,15 +167,15 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject createObject(String objectName, JSONObject initialData, boolean addRelated) throws RedbackException, ScriptException
+	public RedbackObject createObject(UserProfile userProfile, String objectName, JSONObject initialData, boolean addRelated) throws RedbackException, ScriptException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
-		RedbackObject object = new RedbackObject(this, objectConfig);
+		RedbackObject object = new RedbackObject(userProfile, this, objectConfig);
 		Iterator<String> it = initialData.keySet().iterator();
 		while(it.hasNext())
 		{
 			String attributeName = it.next();
-			object.put(attributeName, initialData.getString(attributeName));
+			object.put(attributeName, new Value(initialData.get(attributeName)));
 		}
 		if(addRelated)
 			object.loadRelated();
@@ -188,9 +183,9 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject executeFunction(String objectName, String id, String function, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
+	public RedbackObject executeFunction(UserProfile userProfile, String objectName, String id, String function, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
 	{
-		RedbackObject object = getObject(objectName, id, false);
+		RedbackObject object = getObject(userProfile, objectName, id, false);
 		if(object != null)
 		{
 			if(updateData != null)
@@ -210,17 +205,19 @@ public class ObjectManager
 		return object;
 	}
 	
-	public String getID(String name) throws FunctionErrorException, FunctionTimeoutException
+	public Value getID(String name) throws FunctionErrorException, FunctionTimeoutException
 	{
 		String value = firebus.requestService(idGeneratorService, new Payload(name)).getString();
-		return value;
+		return new Value(value);
 	}
 
 	
 	protected JSONObject request(String service, JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException
 	{
 		Payload reqPayload = new Payload(request.toString());
-		Payload respPayload = firebus.requestService(configService, reqPayload);
+		logger.info("Requesting firebus service : " + service);
+		Payload respPayload = firebus.requestService(service, reqPayload);
+		logger.info("Receiving firebus service respnse from : " + service);
 		String respStr = respPayload.getString();
 		JSONObject result = new JSONObject(respStr);
 		return result;

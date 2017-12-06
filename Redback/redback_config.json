@@ -9,7 +9,8 @@
 				configservice:"mongo",
 				cacheconfigs:true,
 				dataservice:"mongo",
-				idgeneratorservice:"rbid"
+				idgeneratorservice:"rbid",
+				accessmanagementservice:"rbam"
 			}
 		},
 		{

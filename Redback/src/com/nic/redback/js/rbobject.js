@@ -12,7 +12,7 @@
 		
 		
 		obj.getUpdateRequestMessage = function(http) {
-			var req = {action:"update", object:this.objectname, uid:this.uid, data:{}, options:{addrelated:"true", addvalidation:"true"}};
+			var req = {action:"update", object:this.objectname, uid:this.uid, data:{}, options:{addrelated:true, addvalidation:true}};
 			for(i = 0; i < this.updatedattributes.length; i++) {
 				var attributeName = this.updatedattributes[i];
 				req.data[attributeName] = this.data[attributeName];
@@ -22,9 +22,8 @@
 		
 		
 		obj.getRelatedObjectListRequestMessage = function(attributeName, searchText) {
-			var relationship = this.validation[attributeName].relatedobject.relationship;
 			var relatedObjectName = this.validation[attributeName].relatedobject.name;
-			var filter = getFilterFromRelationship(this, relationship)
+			var filter = getFilterFromRelationship(this, this.validation[attributeName].relatedobject.listfilter)
 			if(searchText != null)
 				filter.$multi = '*' + searchText + '*';
 			var req = {action:"list", object:relatedObjectName, filter:filter};

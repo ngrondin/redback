@@ -28,6 +28,7 @@ public class RedbackServer extends StandaloneContainer
 			String name = deploymentConfig.getString("name");
 			JSONObject serviceConfig = deploymentConfig.getObject("config");
 			RedbackService service = RedbackService.instantiate(type, serviceConfig);
+			service.setName(name);
 			services.add(service);
 			if(firebus != null)
 			{

@@ -42,6 +42,7 @@ public class AccessManager extends RedbackService
 
 	public Payload service(Payload payload) throws FunctionErrorException 
 	{
+		logger.info("Access manager service start");
 		Payload responsePayload = new Payload();
 		JSONObject response = new JSONObject();
 		try
@@ -91,6 +92,7 @@ public class AccessManager extends RedbackService
 							response.put("username", userProfile.getUsername());
 							response.put("roles", userProfile.getJSON().getList("roles"));
 							response.put("domains", userProfile.getJSON().getList("domains"));
+							response.put("defaultdomain", userProfile.getDefaultDomain());
 						}
 						else
 						{
@@ -145,6 +147,7 @@ public class AccessManager extends RedbackService
 						response.put("username", session.userProfile.getUsername());
 						response.put("roles", session.userProfile.getJSON().getList("roles"));
 						response.put("domains", session.userProfile.getJSON().getList("domains"));
+						response.put("defaultdomain", session.userProfile.getDefaultDomain());
 					}
 					else
 					{
@@ -166,6 +169,7 @@ public class AccessManager extends RedbackService
 		}
 		
 		responsePayload.setData(response.toString());
+		logger.info("Access manager service finish");
 		return responsePayload;
 	}
 

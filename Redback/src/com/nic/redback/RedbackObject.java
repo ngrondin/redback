@@ -13,24 +13,29 @@ import javax.script.ScriptException;
 
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.security.UserProfile;
 
 public class RedbackObject 
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
+	protected UserProfile userProfile;
 	protected ObjectManager objectManager;
 	protected ObjectConfig config;
-	protected String uid;
-	protected HashMap<String, String> data;
+	protected Value uid;
+	protected HashMap<String, Value> data;
 	protected HashMap<String, RedbackObject> related;
 	protected ArrayList<String> updatedAttributes;
 	protected ScriptEngine js;
 	protected Bindings jsBindings;
+	protected boolean isNewObject;
 
 	
-	public RedbackObject(ObjectManager om, ObjectConfig cfg, JSONObject d, boolean loadRelated) throws RedbackException, ScriptException
+	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, JSONObject d, boolean loadRelated) throws RedbackException, ScriptException
 	{
+		userProfile = up;
 		objectManager = om;
 		config = cfg;
+		isNewObject = false;
 		init();
 		setDataFromDBData(d);
 		if(loadRelated)
@@ -38,14 +43,17 @@ public class RedbackObject
 		executeScriptsForEvent("onload");
 	}
 	
-	public RedbackObject(ObjectManager om, ObjectConfig cfg, String i, boolean loadRelated) throws RedbackException
+	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, String id, boolean loadRelated) throws RedbackException
 	{
+		userProfile = up;
 		objectManager = om;
 		config = cfg;
+		isNewObject = false;
 		init();
 		try
 		{
-			JSONObject dbFilter = new JSONObject("{" + config.getUIDDBKey() + ":" + i +"}");
+			JSONObject dbFilter = new JSONObject("{\"" + config.getUIDDBKey() + "\":\"" + id +"\"}");
+			dbFilter.put("domain", userProfile.getDBFilterDomainClause());
 			JSONObject dbResult = objectManager.requestData(config.getCollection(), dbFilter);
 			JSONList dbResultList = dbResult.getList("result");
 			if(dbResultList.size() > 0)
@@ -65,10 +73,12 @@ public class RedbackObject
 		}
 	}
 	
-	public RedbackObject(ObjectManager om, ObjectConfig cfg) throws RedbackException
+	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg) throws RedbackException
 	{
+		userProfile = up;
 		objectManager = om;
 		config = cfg;
+		isNewObject = true;
 		init();		
 		try
 		{
@@ -106,7 +116,7 @@ public class RedbackObject
 	
 	protected void init()
 	{
-		data = new HashMap<String, String>();
+		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
 		js = new ScriptEngineManager().getEngineByName("javascript");
@@ -116,14 +126,17 @@ public class RedbackObject
 	
 	protected void setDataFromDBData(JSONObject dbData)
 	{
-		uid = dbData.getString(config.getUIDDBKey());
+		uid = new Value(dbData.getString(config.getUIDDBKey()));
 		Iterator<String> it = config.getAttributeNames().iterator();
 		while(it.hasNext())
 		{
 			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
 			String dbKey = attributeConfig.getDBKey();
 			if(dbKey != null)
-				data.put(attributeConfig.getName(), dbData.getString(dbKey));
+			{
+				Value val = new Value(dbData.get(dbKey));
+				data.put(attributeConfig.getName(), val);
+			}
 		}
 	}
 	
@@ -134,13 +147,16 @@ public class RedbackObject
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
 		if(roc != null)
 		{
-			JSONObject relationship = roc.getRelationship();
 			filter = new JSONObject();
-			Iterator<String> it = relationship.keySet().iterator();
-			while(it.hasNext())
+			JSONObject listFilter = roc.getListFilter();
+			if(listFilter != null)
 			{
-				String key = it.next();
-				filter.put(key, evaluateExpression(relationship.getString(key)));
+				Iterator<String> it = listFilter.keySet().iterator();
+				while(it.hasNext())
+				{
+					String key = it.next();
+					filter.put(key, evaluateExpression(listFilter.getString(key)).getObject());
+				}
 			}
 		}
 		return filter;
@@ -153,8 +169,8 @@ public class RedbackObject
 		{
 			RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
 			String linkAttribute = roc.getLinkAttributeName();
-			String linkValue = getString(attributeName);
-			filter.put(linkAttribute, linkValue);
+			Value linkValue = get(attributeName);
+			filter.put(linkAttribute, linkValue.getObject());
 		}
 		return filter;
 	}
@@ -170,7 +186,9 @@ public class RedbackObject
 			if(attributeConfig.hasRelatedObject()  &&  getString(attributeName) != null)
 			{
 				RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
-				ArrayList<RedbackObject> resultList = objectManager.getObjectList(relatedObjectConfig.getObjectName(), getRelatedObjectFindFilter(attributeName), false);
+				String relatedObjectName = relatedObjectConfig.getObjectName();
+				JSONObject relatedObjectFindFilter = getRelatedObjectFindFilter(attributeName);
+				ArrayList<RedbackObject> resultList = objectManager.getObjectList(userProfile, relatedObjectName, relatedObjectFindFilter, false);
 				if(resultList.size() > 0)
 					related.put(attributeName, resultList.get(0));
 			}
@@ -182,45 +200,58 @@ public class RedbackObject
 		return config;
 	}
 
-	public String getUID()
+	public Value getUID()
 	{
 		return  uid;
 	}
 	
 	public String getString(String name)
 	{
+		return get(name).getString();
+	}
+	
+	public Value get(String name)
+	{
+		AttributeConfig attributeConfig = config.getAttributeConfig(name);
 		if(name.equals("uid"))
 		{
-			return uid;
+			return getUID();
 		}
-		else
+		else if(attributeConfig != null)
 		{
-			AttributeConfig attributeConfig = config.getAttributeConfig(name);
-			if(attributeConfig != null)
-			{
-				if(attributeConfig.getExpression() != null)
-					return evaluateExpression(attributeConfig.getExpression());
-				else if(data.containsKey(name))
-					return data.get(name);
-			}
-		}
+			String expression = attributeConfig.getExpression();
+			if(expression != null)
+				return evaluateExpression(expression);
+			else if(data.containsKey(name))
+				return data.get(name);
+			else
+				return new Value(null);
+		}		
 		return null;
 	}
 	
-	public void put(String name, String value) throws ScriptException
+	public void put(String name, Value value) throws ScriptException
 	{
 		if(config.getAttributeConfig(name) != null)
 		{
-			String currentValue = getString(name);
-			if((currentValue != null  &&  value == null) || (currentValue == null  &&  value != null) || (currentValue!= null  && !currentValue.equals(value)))
+			if(isEditable(name) || isNewObject)
 			{
-				data.put(name, value);
-				updatedAttributes.add(name);	
-				executeAttributeScriptsForEvent(name, "onupdate");
+				Value currentValue = get(name);
+				if(!currentValue.equals(value))
+				{
+					data.put(name, value);
+					updatedAttributes.add(name);	
+					executeAttributeScriptsForEvent(name, "onupdate");
+				}
 			}
 		}
 	}
 
+	public void put(String name, String value) throws ScriptException
+	{
+		put(name, new Value(value));
+	}
+	
 	public void put(String name, RedbackObject relatedObject) throws ScriptException
 	{
 		if(config.getAttributeConfig(name).hasRelatedObject())
@@ -229,30 +260,41 @@ public class RedbackObject
 			if(relatedObject.getObjectConfig().getName().equals(roc.getObjectName()))
 			{
 				String relatedObjectLinkAttribute = roc.getLinkAttributeName();
-				String linkValue = relatedObject.getString(relatedObjectLinkAttribute);
+				Value linkValue = relatedObject.get(relatedObjectLinkAttribute);
 				put(name, linkValue);
 				related.put(name, relatedObject);
 			}			
 		}
 	}
 	
+	public boolean isEditable(String name)
+	{
+		return evaluateExpression(config.getAttributeConfig(name).getEditableExpression()).getBoolean();
+	}
+	
 	public void save() throws ScriptException
 	{
-		executeScriptsForEvent("onsave");
-		JSONObject dbData = new JSONObject();
-		dbData.put(config.getUIDDBKey(), uid);
-		for(int i = 0; i < updatedAttributes.size(); i++)
+		if(updatedAttributes.size() > 0  ||  isNewObject == true)
 		{
-			AttributeConfig attributeConfig = config.getAttributeConfig(updatedAttributes.get(i));
-			String attributeName = attributeConfig.getName();
-			String attributeDBKey = attributeConfig.getDBKey();
-			if(attributeDBKey != null)
+			executeScriptsForEvent("onsave");
+			JSONObject dbData = new JSONObject();
+			dbData.put(config.getUIDDBKey(), getUID().getObject());
+			for(int i = 0; i < updatedAttributes.size(); i++)
 			{
-				dbData.put(attributeDBKey, getString(attributeName));
+				AttributeConfig attributeConfig = config.getAttributeConfig(updatedAttributes.get(i));
+				String attributeName = attributeConfig.getName();
+				String attributeDBKey = attributeConfig.getDBKey();
+				if(attributeDBKey != null)
+				{
+					dbData.put(attributeDBKey, get(attributeName).getObject());
+				}
 			}
+			if(isNewObject)
+				dbData.put("domain", userProfile.getDefaultDomain());
+			updatedAttributes.clear();
+			objectManager.publishData(config.getCollection(), dbData);
+			isNewObject = false;
 		}
-		updatedAttributes.clear();
-		objectManager.publishData(config.getCollection(), dbData);
 	}
 	
 	public void execute(String eventName) throws ScriptException
@@ -263,7 +305,7 @@ public class RedbackObject
 	public JSONObject getJSON(boolean addValidation, boolean addRelated)
 	{
 		JSONObject object = new JSONObject();
-		object.put("uid", uid);
+		object.put("uid", uid.getObject());
 		object.put("objectname", config.getName());
 
 		JSONObject dataNode = new JSONObject();
@@ -275,14 +317,11 @@ public class RedbackObject
 		{
 			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
 			String attrName = attributeConfig.getName();
-			String attrValue = getString(attrName);
-			String attrEditable = attributeConfig.getEditableExpression();
+			Value attrValue = get(attrName);
 
 			JSONObject attributeValidation = new JSONObject();			
-			attributeValidation.put("editable", evaluateExpression(attrEditable));
+			attributeValidation.put("editable", isEditable(attrName));
 			
-			/*if(attrLOV != null)
-				attributeValidation.put("listofvalues", attrLOV);*/
 			if(attributeConfig.hasRelatedObject())
 			{
 				attributeValidation.put("relatedobject", attributeConfig.getRelatedObjectConfig().getJSON());
@@ -292,7 +331,7 @@ public class RedbackObject
 			}
 			
 			validatonNode.put(attrName, attributeValidation);
-			dataNode.put(attrName, attrValue);
+			dataNode.put(attrName, attrValue.getObject());
 		}
 		object.put("data", dataNode);
 		
@@ -304,9 +343,9 @@ public class RedbackObject
 		return object;
 	}
 	
-	protected String evaluateExpression(String expression)
+	protected Value evaluateExpression(String expression)
 	{
-		String returnValue = null;
+		Value returnValue = null;
 		if(expression.startsWith("{{")  &&  expression.endsWith("}}"))
 		{
 			expression = "returnValue = (" + expression.substring(2, expression.length() - 2) + ");";
@@ -314,7 +353,7 @@ public class RedbackObject
 			while(it.hasNext())
 			{	
 				String key = it.next();
-				jsBindings.put(key, data.get(key));
+				jsBindings.put(key, data.get(key).getObject());
 			}
 			jsBindings.put("self", this);
 			try
@@ -325,19 +364,16 @@ public class RedbackObject
 			{
 				logger.severe(e.getMessage());
 			}
-			Object returnObject = jsBindings.get("returnValue");
-			if(returnObject instanceof Boolean)
-				returnValue = (Boolean)returnObject ? "true" : "false";
-			else if(returnObject instanceof Integer)
-				returnValue = String.valueOf((int)returnObject);
-			else if(returnObject instanceof Double)
-				returnValue = String.valueOf((double)returnObject);
-			else
-				returnValue = (String)returnObject;				
+			returnValue = new Value(jsBindings.get("returnValue"));
 		}
 		else
 		{
-			returnValue = expression;
+			if(expression.matches("[-+]?\\d*\\.?\\d+"))
+				returnValue = new Value(Double.parseDouble(expression));
+			else if(expression.equalsIgnoreCase("true") ||  expression.equalsIgnoreCase("false"))
+				returnValue = new Value(expression.equalsIgnoreCase("true") ? true : false);
+			else
+				returnValue = new Value(expression);
 		}
 		return returnValue;
 	}

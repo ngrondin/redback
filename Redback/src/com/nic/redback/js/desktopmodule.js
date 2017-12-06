@@ -62,7 +62,7 @@
 		};		
 
 		$scope.objectfunction = function(functionName){
-			var req = {action:"execute", object:$scope.objectName, uid:$scope.object.uid, "function":functionName, options:{addrelated:"true", addvalidation:"true"}};
+			var req = {action:"execute", object:$scope.objectName, uid:$scope.object.uid, "function":functionName, options:{addrelated:true, addvalidation:true}};
 			$http.post("../../rbos", req)
 			.success(function(response) {
 				var responseObject = processResponseJSON(response);
@@ -141,7 +141,7 @@
 		}
 
 		$scope.load = function() {
-			var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:"true", addvalidation:"true"}};
+			var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:true, addvalidation:true}};
 			$http.post("../../rbos", req)
 			.success(function(response) {
 				var responseList = processResponseJSON(response);
@@ -155,7 +155,7 @@
 		
 
 		$scope.create = function(){
-			var req = {action:"create", object:$scope.objectName, data:$scope.getBaseAndRelationshipFilter(), options:{addrelated:"true", addvalidation:"true"}};
+			var req = {action:"create", object:$scope.objectName, data:$scope.getBaseAndRelationshipFilter(), options:{addrelated:true, addvalidation:true}};
 			$http.post("../../rbos", req)
 			.success(function(response) {
 				var responseObject = processResponseJSON(response);
@@ -171,7 +171,7 @@
 		};		
 		
 		
-		$scope.saveAll = function() {
+		$scope.save = function() {
 			for(var i = 0; i < $scope.list.length; i++) {
 				if($scope.list[i].isUpdated()) {
 					$http.post("../../rbos", $scope.list[i].getUpdateRequestMessage())
@@ -213,7 +213,7 @@
 
 		$scope.$on('saveRelated', function($event, object){
 			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
-				$scope.saveAll();
+				$scope.save();
 			}
 		});
 
@@ -235,23 +235,38 @@
 	module.controller('layout', function accountsCtl($scope,$attrs,$http) {
 
 		$scope.$on('objectSelectedEmit', function($event, object){
-			$scope.$broadcast('objectSelected', object);
+			if(!$event.defaultPrevented) {
+				$scope.$broadcast('objectSelected', object);
+				$event.defaultPrevented = true;
+			}
 		});
 		
 		$scope.$on('nullObjectSelectedEmit', function($event, name){
-			$scope.$broadcast('nullObjectSelected', name);
+			if(!$event.defaultPrevented) {
+				$scope.$broadcast('nullObjectSelected', name);
+				$event.defaultPrevented = true;
+			}
 		});
 
 		$scope.$on('createObjectEmit', function($event, name){
-			$scope.$broadcast('createObject', name);
+			if(!$event.defaultPrevented) {
+				$scope.$broadcast('createObject', name);
+				$event.defaultPrevented = true;
+			}
 		});
 
 		$scope.$on('saveRelatedEmit', function($event, object){
-			$scope.$broadcast('saveRelated', object);
+			if(!$event.defaultPrevented) {
+				$scope.$broadcast('saveRelated', object);
+				$event.defaultPrevented = true;
+			}
 		});
 
 		$scope.$on('refreshRelatedEmit', function($event, object){
-			$scope.$broadcast('refreshRelated', object);
+			if(!$event.defaultPrevented) {
+				$scope.$broadcast('refreshRelated', object);
+				$event.defaultPrevented = true;
+			}
 		});
 		
 	 });	 

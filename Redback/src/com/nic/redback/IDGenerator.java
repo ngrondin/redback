@@ -20,6 +20,8 @@ public class IDGenerator extends RedbackService
 
 	public Payload service(Payload payload) throws FunctionErrorException 
 	{
+		logger.info("ID generator service start");
+		//TODO: Add handling of next batch
 		Payload response = new Payload();
 		String id = "";
 		try
@@ -36,7 +38,7 @@ public class IDGenerator extends RedbackService
 				if(idConfig.containsKey("prefix"))
 					id = idConfig.getString("prefix") + id;
 				next++;
-				firebus.publish(configService, new Payload("{object:rbid_config, data:{_id:" + idConfig.getString("_id") + ", next:\"" + next + "\"}}"));
+				firebus.publish(configService, new Payload("{object:rbid_config, data:{_id:\"" + idConfig.getString("_id") + "\", next:\"" + next + "\"}}"));
 			}
 			response.setData(id);
 		}
@@ -45,6 +47,8 @@ public class IDGenerator extends RedbackService
 			logger.severe(e.getMessage());
 			throw new FunctionErrorException(e.getMessage());
 		}
+		
+		logger.info("ID generator service finish");
 		return response;
 	}
 

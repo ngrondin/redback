@@ -41,6 +41,23 @@ public class UserProfile
 			domains.add(list.getString(i));
 		return domains;
 	}
+	
+	public JSONObject getDBFilterDomainClause()
+	{
+		JSONObject inClause = new JSONObject();
+		inClause.put("$in", profile.getList("domains"));
+		return inClause;
+	}
+	
+	public String getDefaultDomain()
+	{
+		return profile.getString("defaultdomain");
+	}
+	
+	public String getSessionId()
+	{
+		return profile.getString("sessionid");
+	}
 
 	public JSONObject getJSON()
 	{

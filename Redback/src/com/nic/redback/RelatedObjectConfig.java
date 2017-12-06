@@ -21,9 +21,9 @@ public class RelatedObjectConfig
 		return config.getString("linkattribute");
 	}
 
-	public JSONObject getRelationship()
+	public JSONObject getListFilter()
 	{
-		return config.getObject("relationship");
+		return config.getObject("listfilter");
 	}
 	
 	public JSONObject getJSON()

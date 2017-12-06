@@ -15,24 +15,23 @@ import com.nic.firebus.utils.JSONLiteral;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.security.UserProfile;
 
-public class UIServer extends RedbackService
+public class UIServer extends RedbackAuthenticatedService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected String resourceService;
 	protected String resourceServiceType;
-	protected String accessManagementService;
 
-	public UIServer(JSONObject c)
+	public UIServer( JSONObject c)
 	{
 		super(c);
 		configService = config.getString("configservice");
 		resourceServiceType = config.getString("resourceservicetype");
 		resourceService = config.getString("resourceservice");
-		accessManagementService = config.getString("accessmanagementservice");
 	}
 
 	public Payload service(Payload payload) throws FunctionErrorException
 	{
+		logger.info("UI service start");
 		Payload response = new Payload();
 		try
 		{
@@ -57,37 +56,15 @@ public class UIServer extends RedbackService
 				catch(Exception e)	{}
 			}
 			
-			if(username != null  &&  password != null)
-			{
-				JSONObject userProfileJSON = request(accessManagementService, "{action:authenticate, username:\"" + username + "\", password:\"" + password + "\"}");
-				if(userProfileJSON != null  &&  userProfileJSON.getString("result").equals("ok"))
-					userProfile = new UserProfile(userProfileJSON);
-				response.metadata.put("sessionid", userProfileJSON.getString("sessionid"));
-			}
-			else if(sessionId != null)
-			{
-				//TODO: Can speed up with caching
-				JSONObject userProfileJSON = request(accessManagementService, "{action:validate, sessionid:\"" + sessionId + "\"}");
-				if(userProfileJSON != null  &&  userProfileJSON.getString("result").equals("ok"))
-					userProfile = new UserProfile(userProfileJSON);
-			}
-						
 			if(get != null)
 			{
 				String[] parts = get.split("/");
 				String category = parts[0];
 				String name = parts[1];
 				
-				if(category.equals("app"))
+				if(category.equals("resource"))
 				{
-					sb.append(getApp(name, userProfile));
-				}
-				else if(category.equals("view"))
-				{
-					sb.append(getView(name, userProfile));
-				}
-				else if(category.equals("resource"))
-				{
+					logger.info("Get resource " + name);
 					sb.append(getResource(name, userProfile));
 					if(name.endsWith(".js"))
 						mime = "application/javascript";
@@ -95,6 +72,29 @@ public class UIServer extends RedbackService
 						mime = "text/css";
 					else if(name.endsWith(".ico"))
 						mime = "image/x-icon";
+				}
+				else
+				{
+					if(username != null  &&  password != null)
+					{
+						userProfile = authenticate(username, password);
+						response.metadata.put("sessionid", userProfile.getSessionId());
+					}
+					else if(sessionId != null)
+					{
+						userProfile = validateSession(sessionId);
+					}					
+					
+					if(category.equals("app"))
+					{
+						logger.info("Get app " + name);
+						sb.append(getApp(name, userProfile));
+					}
+					else if(category.equals("view"))
+					{
+						logger.info("Get view " + name);
+						sb.append(getView(name, userProfile));
+					}
 				}
 			}
 			response.setData(sb.toString());
@@ -105,6 +105,8 @@ public class UIServer extends RedbackService
 			logger.severe(e.getMessage());
 			throw new FunctionErrorException(e.getMessage());
 		}
+		
+		logger.info("UI service finish");
 		return response;
 	}
 
@@ -193,7 +195,9 @@ public class UIServer extends RedbackService
 
 		if(resourceServiceType.equals("filestorage"))
 		{
+			logger.info("Requesting firebus service : " + resourceService);
 			Payload result = firebus.requestService(resourceService, new Payload(name));
+			logger.info("Received firebus service response from : " + resourceService);
 			fileStr = result.getString();
 		}
 		else if(resourceServiceType.equals("db"))

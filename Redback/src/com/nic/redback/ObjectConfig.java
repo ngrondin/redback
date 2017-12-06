@@ -148,11 +148,12 @@ public class ObjectConfig
 						}
 						else if(objectFilterValue instanceof JSONLiteral)
 						{
-							String filterValueStr = objectFilter.getString(key);
-							if(filterValueStr.startsWith("*")  &&  filterValueStr.endsWith("*")  &&  filterValueStr.length() >= 2)
-								dbFilterValue =  new JSONObject("{$regex:\"" + filterValueStr.substring(1, filterValueStr.length() - 1) + "\"}");
+							//JSONLiteral objectFilterValueJSONLiteral = (JSONLiteral)objectFilterValue;
+							String objectFilterValueString = ((JSONLiteral)objectFilterValue).getString();
+							if(objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
+								dbFilterValue =  new JSONObject("{$regex:\"" + objectFilterValueString.substring(1, objectFilterValueString.length() - 1) + "\"}");
 							else
-								dbFilterValue = new JSONLiteral(filterValueStr);
+								dbFilterValue = ((JSONLiteral)objectFilterValue).getCopy();
 						}
 						dbFilter.put(attributeDBKey, dbFilterValue);
 					}

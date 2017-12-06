@@ -25,6 +25,7 @@
 		if (typeof input == "object") {
 			if(input.hasOwnProperty('objectname') && input.hasOwnProperty('uid')) {
 			
+				// Convert dates
 				for (var key in input.data) {
 					var match;
 					if (typeof input.data[key] === "string") {
@@ -35,14 +36,9 @@
 							}
 						}
 					}
-					if(input.hasOwnProperty('validation')  &&  input.validation[key].hasOwnProperty('editable')) {
-						if(input.validation[key].editable == 'true')
-							input.validation[key].editable = true;
-						else 
-							input.validation[key].editable = false;
-					}
 				}
 
+				// Find existing object to merge with
 				for (var i = 0; i < objectMaster.length; i++) {
 					if(objectMaster[i].objectname == input.objectname  &&  objectMaster[i].uid == input.uid) {
 						obj = objectMaster[i];
@@ -50,30 +46,41 @@
 				}
 				
 				if(obj != null) {
+					//Merge with existing object
+					if(!obj.hasOwnProperty('validation')  &&  input.hasOwnProperty('validation'))
+						obj.validation = input.validation;
+
+					if(!obj.hasOwnProperty('related')  &&  input.hasOwnProperty('related')) {
+						obj.related = {};
+						for (var key in input.related)
+							obj.related[key] = processResponseJSONObject(input.related[key]);
+					}
+						
 					for (var key in input.data) {
 						if(obj.data.hasOwnProperty(key)) {
 							if(obj.hasOwnProperty("updatedattributes")  &&  obj.updatedattributes.includes(key)) {
-								if(obj.data[key] == input.data[key]) {
+								// Attribute is changed on the UI and not saved yet
+								if(obj.data[key] == input.data[key]) 
 									obj.updatedattributes.pop(key);
-								}
 							} else {
 								if(obj.data[key] != input.data[key]) {
+									// Attribute is unchanged in the UI but has changed on the server
 									obj.data[key] = input.data[key];
-									obj.validation[key] = input.validation[key];
-									if(obj.hasOwnProperty("related")  &&  obj.related.hasOwnProperty(key)) {
+									if(input.hasOwnProperty('validation'))
+										obj.validation[key] = input.validation[key];
+									if(input.hasOwnProperty('related')) 
 										obj.related[key] = processResponseJSONObject(input.related[key]);
-									}
 								}
 							}						
-						}
+						} 
 					}
 				} else {
+					// Create new object
 					obj = convertToRBObject(input);
 					objectMaster.push(obj);
 					if(obj.hasOwnProperty("related")) {
-						for (var key in obj.related) {
+						for (var key in obj.related) 
 							obj.related[key] = processResponseJSONObject(obj.related[key]);
-						}
 					}
 				}
 			} 
@@ -88,7 +95,7 @@
 		if(object != null  &&  relationship != null) {
 			for (var key in relationship) {
 				var value = relationship[key];
-				if(value.startsWith("{{") &&  value.endsWith("}}")) {
+				if(typeof value == "string"  &&  value.startsWith("{{") &&  value.endsWith("}}")) {
 					var parentEval = value.replace('{{', 'object.data.').replace('}}', '').replace('object.data.uid', 'object.uid');
 					value = eval(parentEval);
 				}

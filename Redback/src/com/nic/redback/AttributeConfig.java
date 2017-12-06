@@ -77,4 +77,9 @@ public class AttributeConfig
 	{
 		return config;
 	}
+	
+	public String toString()
+	{
+		return config.toString();
+	}
 }
