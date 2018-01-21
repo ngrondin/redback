@@ -72,6 +72,11 @@ public class ObjectConfig
 		return config.getString("uidgenerator");
 	}
 
+	public String getDomainDBKey()
+	{
+		return config.getString("domain");
+	}
+
 	public Set<String> getAttributeNames()
 	{
 		return attributes.keySet();

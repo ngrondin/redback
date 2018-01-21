@@ -42,6 +42,11 @@ public class ObjectManager
 		firebus = fb;
 	}
 	
+	public void refreshAllConfigs()
+	{
+		objectConfigs.clear();
+	}
+	
 	protected ObjectConfig getObjectConfig(String object) throws RedbackException
 	{
 		ObjectConfig objectConfig = objectConfigs.get(object);
@@ -148,6 +153,27 @@ public class ObjectManager
 		return objectList;
 	}
 	
+	
+	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, String uid, String attributeName, JSONObject filterData, boolean addRelated) throws RedbackException
+	{
+		RedbackObject object = getObject(userProfile, objectName, uid, false);
+		ObjectConfig objectConfig = getObjectConfig(objectName);
+		ArrayList<RedbackObject> objectList = null;
+		AttributeConfig attributeConfig = objectConfig.getAttributeConfig(attributeName);
+		if(attributeConfig.hasRelatedObject())
+		{
+			RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
+			JSONObject relatedObjectListFilter = object.getRelatedObjectListFilter(attributeName);
+			Iterator<String> it = filterData.keySet().iterator();
+			while(it.hasNext())
+			{
+				String key = it.next();
+				relatedObjectListFilter.put(key, filterData.get(key));
+			}
+			objectList = getObjectList(userProfile, relatedObjectConfig.getObjectName(), relatedObjectListFilter, false);
+		}
+		return objectList;
+	}
 	
 	public RedbackObject updateObject(UserProfile userProfile, String objectName, String id, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
 	{

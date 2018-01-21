@@ -18,11 +18,7 @@ public class UserProfile
 	{
 		return profile.getString("username");
 	}
-	
-	public String getPasswordHash()
-	{
-		return profile.getString("passwordhash");
-	}
+
 	
 	public ArrayList<String> getRoles()
 	{
@@ -49,14 +45,41 @@ public class UserProfile
 		return inClause;
 	}
 	
-	public String getDefaultDomain()
+	public String getAttribute(String name)
 	{
-		return profile.getString("defaultdomain");
+		return profile.getString("attributes." + name);
+	}
+
+	public String getRights(String name)
+	{
+		return profile.getString("rights." + name);
 	}
 	
-	public String getSessionId()
+	public boolean canRead(String name)
 	{
-		return profile.getString("sessionid");
+		String r = getRights(name);
+		if(r != null  &&  r.toLowerCase().contains("r"))
+			return true;
+		else
+			return false;
+	}
+
+	public boolean canWrite(String name)
+	{
+		String r = getRights(name);
+		if(r != null  &&  r.toLowerCase().contains("w"))
+			return true;
+		else
+			return false;
+	}
+
+	public boolean canExecute(String name)
+	{
+		String r = getRights(name);
+		if(r != null  &&  r.toLowerCase().contains("x"))
+			return true;
+		else
+			return false;
 	}
 
 	public JSONObject getJSON()

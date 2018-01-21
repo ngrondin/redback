@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>#appname#</title>
+	<title><%=config.getString('label')%></title>
 	<link rel="shortcut icon" href="../resource/favicon.ico" />
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css"/>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -16,7 +16,7 @@
 </head>
 <body
 	ng-app="desktopmodule" 
-	data-ng-init="page = '../view/#defaultview#'">
+	data-ng-init="page = '../view/<%=config.getString('defaultview')%>'">
 	<md-toolbar 
 		class="md-hue-2">
 		<div 
@@ -27,7 +27,7 @@
 				ng-disabled="true">
 				<md-icon>settings</md-icon>
 			</md-button>
-			<h3 flex="" md-truncate="">#appname#</h3>
+			<h3 flex="" md-truncate=""><%=config.getString('label')%></h3>
 		</div>
 	</md-toolbar>
 	<div

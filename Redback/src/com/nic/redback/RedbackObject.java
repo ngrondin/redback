@@ -22,6 +22,10 @@ public class RedbackObject
 	protected ObjectManager objectManager;
 	protected ObjectConfig config;
 	protected Value uid;
+	protected Value domain;
+	protected boolean canRead;
+	protected boolean canWrite;
+	protected boolean canExecute;
 	protected HashMap<String, Value> data;
 	protected HashMap<String, RedbackObject> related;
 	protected ArrayList<String> updatedAttributes;
@@ -29,7 +33,7 @@ public class RedbackObject
 	protected Bindings jsBindings;
 	protected boolean isNewObject;
 
-	
+	// Initiate existing object from pre-loaded data
 	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, JSONObject d, boolean loadRelated) throws RedbackException, ScriptException
 	{
 		userProfile = up;
@@ -37,12 +41,20 @@ public class RedbackObject
 		config = cfg;
 		isNewObject = false;
 		init();
-		setDataFromDBData(d);
-		if(loadRelated)
-			loadRelated();
-		executeScriptsForEvent("onload");
+		if(canRead)
+		{
+			setDataFromDBData(d);
+			if(loadRelated)
+				loadRelated();
+			executeScriptsForEvent("onload");
+		}
+		else
+		{
+			error("User does not have the right to read object " + config.getName());
+		}
 	}
 	
+	// Initiate existing object with Id and retreive data from database
 	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, String id, boolean loadRelated) throws RedbackException
 	{
 		userProfile = up;
@@ -50,29 +62,35 @@ public class RedbackObject
 		config = cfg;
 		isNewObject = false;
 		init();
-		try
+		if(canRead)
 		{
-			JSONObject dbFilter = new JSONObject("{\"" + config.getUIDDBKey() + "\":\"" + id +"\"}");
-			dbFilter.put("domain", userProfile.getDBFilterDomainClause());
-			JSONObject dbResult = objectManager.requestData(config.getCollection(), dbFilter);
-			JSONList dbResultList = dbResult.getList("result");
-			if(dbResultList.size() > 0)
+			try
 			{
-				JSONObject dbData = dbResultList.getObject(0);
-				setDataFromDBData(dbData);
-				if(loadRelated)
-					loadRelated();
-				executeScriptsForEvent("onload");
+				JSONObject dbFilter = new JSONObject("{\"" + config.getUIDDBKey() + "\":\"" + id +"\"}");
+				dbFilter.put("domain", userProfile.getDBFilterDomainClause());
+				JSONObject dbResult = objectManager.requestData(config.getCollection(), dbFilter);
+				JSONList dbResultList = dbResult.getList("result");
+				if(dbResultList.size() > 0)
+				{
+					JSONObject dbData = dbResultList.getObject(0);
+					setDataFromDBData(dbData);
+					if(loadRelated)
+						loadRelated();
+					executeScriptsForEvent("onload");
+				}
+			}
+			catch(Exception e)
+			{
+				error( "Problem initiating object : " + e.getMessage(), e);
 			}
 		}
-		catch(Exception e)
+		else
 		{
-			String msg = "Problem initiating object : " + e.getMessage();
-			logger.severe(msg);
-			throw new RedbackException(msg, e);
+			error("User does not have the right to read object " + config.getName());
 		}
 	}
 	
+	// Initiate new object
 	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg) throws RedbackException
 	{
 		userProfile = up;
@@ -80,42 +98,50 @@ public class RedbackObject
 		config = cfg;
 		isNewObject = true;
 		init();		
-		try
+		if(canWrite)
 		{
-			if(config.getUIDGeneratorName() != null)
+			try
 			{
-				uid = objectManager.getID(config.getUIDGeneratorName());
-				Iterator<String> it = config.getAttributeNames().iterator();
-				while(it.hasNext())
+				if(config.getUIDGeneratorName() != null)
 				{
-					AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-					String attributeName = attributeConfig.getName();
-					String idGeneratorName = attributeConfig.getIdGeneratorName();
-					String defaultValue = attributeConfig.getDefaultValue();
-					if(idGeneratorName != null)
-						put(attributeName, objectManager.getID(idGeneratorName));
-					else if(defaultValue != null)
-						put(attributeName, defaultValue);
+					uid = objectManager.getID(config.getUIDGeneratorName());
+					domain = new Value(userProfile.getAttribute("rb.defaultdomain"));
+					Iterator<String> it = config.getAttributeNames().iterator();
+					while(it.hasNext())
+					{
+						AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+						String attributeName = attributeConfig.getName();
+						String idGeneratorName = attributeConfig.getIdGeneratorName();
+						String defaultValue = attributeConfig.getDefaultValue();
+						if(idGeneratorName != null)
+							put(attributeName, objectManager.getID(idGeneratorName));
+						else if(defaultValue != null)
+							put(attributeName, defaultValue);
+					}
+					executeScriptsForEvent("oncreate");
 				}
-				executeScriptsForEvent("oncreate");
+				else
+				{
+					error("No UID Generator has been configured for object " + config.getName() , null);
+				}
 			}
-			else
+			catch(Exception e)
 			{
-				String msg = "No UID Generator has been configured for object " + config.getName();
-				logger.severe(msg);
-				throw new RedbackException(msg);
+				error("Problem initiating object " + config.getName() + " : " + e.getMessage(), e);
 			}
 		}
-		catch(Exception e)
+		else
 		{
-			String msg = "Problem initiating object : " + e.getMessage();
-			logger.severe(msg);
-			throw new RedbackException(msg, e);
+			error("User does not have the right to create object " + config.getName());
 		}
+		
 	}
 	
 	protected void init()
 	{
+		canRead = userProfile.canRead("rb.objects." + config.getName());
+		canWrite = userProfile.canWrite("rb.objects." + config.getName());
+		canExecute = userProfile.canExecute("rb.objects." + config.getName());
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
@@ -127,6 +153,7 @@ public class RedbackObject
 	protected void setDataFromDBData(JSONObject dbData)
 	{
 		uid = new Value(dbData.getString(config.getUIDDBKey()));
+		domain = new Value(dbData.getString(config.getDomainDBKey()));
 		Iterator<String> it = config.getAttributeNames().iterator();
 		while(it.hasNext())
 		{
@@ -205,6 +232,11 @@ public class RedbackObject
 		return  uid;
 	}
 	
+	public Value getDomain()
+	{
+		return domain;
+	}
+	
 	public String getString(String name)
 	{
 		return get(name).getString();
@@ -216,6 +248,10 @@ public class RedbackObject
 		if(name.equals("uid"))
 		{
 			return getUID();
+		}
+		else if(name.equals("domain"))
+		{
+			return getDomain();
 		}
 		else if(attributeConfig != null)
 		{
@@ -230,29 +266,37 @@ public class RedbackObject
 		return null;
 	}
 	
-	public void put(String name, Value value) throws ScriptException
+	public void put(String name, Value value) throws ScriptException, RedbackException
 	{
 		if(config.getAttributeConfig(name) != null)
 		{
-			if(isEditable(name) || isNewObject)
+			Value currentValue = get(name);
+			if(!currentValue.equals(value))
 			{
-				Value currentValue = get(name);
-				if(!currentValue.equals(value))
+				if(canWrite  &&  (isEditable(name) || isNewObject))
 				{
 					data.put(name, value);
 					updatedAttributes.add(name);	
 					executeAttributeScriptsForEvent(name, "onupdate");
 				}
+				else
+				{
+					error("User does not have the right to update object " + config.getName() + " or the attribute " + name);
+				}
 			}
+		}
+		else
+		{
+			error("This attribute '" + name + "' does not exist");
 		}
 	}
 
-	public void put(String name, String value) throws ScriptException
+	public void put(String name, String value) throws ScriptException, RedbackException
 	{
 		put(name, new Value(value));
 	}
 	
-	public void put(String name, RedbackObject relatedObject) throws ScriptException
+	public void put(String name, RedbackObject relatedObject) throws ScriptException, RedbackException
 	{
 		if(config.getAttributeConfig(name).hasRelatedObject())
 		{
@@ -272,42 +316,58 @@ public class RedbackObject
 		return evaluateExpression(config.getAttributeConfig(name).getEditableExpression()).getBoolean();
 	}
 	
-	public void save() throws ScriptException
+	public void save() throws ScriptException, RedbackException
 	{
 		if(updatedAttributes.size() > 0  ||  isNewObject == true)
 		{
-			executeScriptsForEvent("onsave");
-			JSONObject dbData = new JSONObject();
-			dbData.put(config.getUIDDBKey(), getUID().getObject());
-			for(int i = 0; i < updatedAttributes.size(); i++)
+			if(canWrite)
 			{
-				AttributeConfig attributeConfig = config.getAttributeConfig(updatedAttributes.get(i));
-				String attributeName = attributeConfig.getName();
-				String attributeDBKey = attributeConfig.getDBKey();
-				if(attributeDBKey != null)
+				executeScriptsForEvent("onsave");
+				JSONObject dbData = new JSONObject();
+				dbData.put(config.getUIDDBKey(), getUID().getObject());
+				if(isNewObject)
+					dbData.put(config.getDomainDBKey(), domain.getObject());
+				
+				for(int i = 0; i < updatedAttributes.size(); i++)
 				{
-					dbData.put(attributeDBKey, get(attributeName).getObject());
+					AttributeConfig attributeConfig = config.getAttributeConfig(updatedAttributes.get(i));
+					String attributeName = attributeConfig.getName();
+					String attributeDBKey = attributeConfig.getDBKey();
+					if(attributeDBKey != null)
+					{
+						dbData.put(attributeDBKey, get(attributeName).getObject());
+					}
 				}
+				updatedAttributes.clear();
+				objectManager.publishData(config.getCollection(), dbData);
+				isNewObject = false;
 			}
-			if(isNewObject)
-				dbData.put("domain", userProfile.getDefaultDomain());
-			updatedAttributes.clear();
-			objectManager.publishData(config.getCollection(), dbData);
-			isNewObject = false;
+			else
+			{
+				error("User does not have the right to update object " + config.getName());
+			}
 		}
 	}
 	
-	public void execute(String eventName) throws ScriptException
+	public void execute(String eventName) throws ScriptException, RedbackException
 	{
-		executeScriptsForEvent(eventName);
+		if(canExecute)
+		{
+			executeScriptsForEvent(eventName);
+		}
+		else
+		{
+			error("User does not have the right to execute functions in object " + config.getName());
+		}
 	}
 	
 	public JSONObject getJSON(boolean addValidation, boolean addRelated)
 	{
 		JSONObject object = new JSONObject();
-		object.put("uid", uid.getObject());
 		object.put("objectname", config.getName());
-
+		object.put("uid", uid.getObject());
+		object.put("domain", domain.getObject());
+		
 		JSONObject dataNode = new JSONObject();
 		JSONObject validatonNode = new JSONObject();
 		JSONObject relatedNode = new JSONObject();
@@ -414,6 +474,20 @@ public class RedbackObject
 			logger.severe(e.getMessage());
 			throw e;
 		}		
+	}
+	
+	protected void error(String msg) throws RedbackException
+	{
+		error(msg, null);
+	}
+	
+	protected void error(String msg, Exception cause) throws RedbackException
+	{
+		logger.severe(msg);
+		if(cause != null)
+			throw new RedbackException(msg, cause);
+		else
+			throw new RedbackException(msg);
 	}
 
 	public String toString()

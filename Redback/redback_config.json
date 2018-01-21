@@ -35,7 +35,7 @@
 			type:"accessmanager",
 			name:"rbam",
 			config:{
-				dataservice:"mongo"
+				configservice:"mongo"
 			}
 		}		
 	],

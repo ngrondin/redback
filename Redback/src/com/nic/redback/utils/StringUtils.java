@@ -1,5 +1,7 @@
 package com.nic.redback.utils;
 
+import com.nic.firebus.utils.JSONObject;
+
 public class StringUtils
 {
 	public static String unescape(String st)
@@ -73,5 +75,25 @@ public class StringUtils
 		    sb.append(ch);
 		}
 		return sb.toString();
+	}
+	
+	
+	
+	
+	public static String convertJSONToAttributeString(JSONObject obj)
+	{
+		if(obj != null)
+		{
+			String ret = obj.toString();
+			ret = ret.replaceAll("\r", "");
+			ret = ret.replaceAll("\n", "");
+			ret = ret.replaceAll("\t", "");
+			ret = ret.replaceAll("\"", "'");
+			return ret;
+		}
+		else
+		{
+			return "";
+		}
 	}
 }

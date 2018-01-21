@@ -14,7 +14,7 @@
 <body>
 	<div class="loginbox" ng-app="loginmodule" ng-controller="form">
 		<h2>Redback Login</h2>
-		<form name="form" method="post" action="../#get#" autocomplete="off">
+		<form name="form" method="post" action="../<%=get%>" autocomplete="off">
 			<md-input-container class="md-block" >
 				<label for="username">Username</label>
 				<input name="username" ng-model="username" required />

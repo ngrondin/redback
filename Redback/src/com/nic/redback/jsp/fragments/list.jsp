@@ -1,6 +1,6 @@
 <div 
 	class="listscroll" 
-	style="#inlineStyle#">
+	style="<%=config.getString('inlineStyle')%>">
 	<md-list 
 		flex="">
 		<md-list-item 
@@ -10,8 +10,8 @@
 			<div 
 				class="md-list-item-text" 
 				layout="column">
-				<h3>#line1#</h3>
-				<h4>#line2#</h4>
+				<h3><%=config.getString('line1')%></h3>
+				<h4><%=config.getString('line2')%></h4>
 			</div>
 		</md-list-item>
 	</md-list>
