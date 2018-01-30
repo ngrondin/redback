@@ -13,12 +13,12 @@ body {
 
 .rb-controller {
 	display: flex;
-	#flex: 1 0 auto;
+	flex: 1 0 auto;
 }
 
 .rb-include {
 	display: flex;
-	#flex: 1 0 auto;
+	flex: 1 0 auto;
 }
 
 .rb-margin {
@@ -44,6 +44,48 @@ body {
 	border: 0px Solid;
 }
 
+.tabsection {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	border: 0px Solid;
+}
+
+.tabheadersection {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-grow: 0;
+	flex-shrink: 0;
+	border: 0px Solid;
+}
+
+.tabcontentsection {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	border: 0px Solid;
+}
+
+.tabheader {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-grow: 0;
+	flex-shrink: 0;
+	border: 0px Solid;
+	cursor: pointer;
+	padding: 0px;
+}
+
+.tabcontent {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-grow:1;
+	border: 0px Solid;
+}
+
 .vscroll {
 	overflow: auto;
 	height: 100%;
@@ -54,6 +96,11 @@ body {
 	overflow: auto;
 }
 
+.list-item-active {
+  #background-color: #d5d5ff;
+  border-left: 4px Solid red;
+}
+
 .attributediv {
 	display:block;
 	border: 0px Solid;
@@ -61,6 +108,15 @@ body {
 
 .menuitem {
 	font-size: 90%;
+}
+
+.angular-google-map { 
+	display: flex;
+	flex:1;
+}
+
+.angular-google-map-container { 
+	flex:1;
 }
 
 md-input-container {

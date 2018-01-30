@@ -127,7 +127,7 @@ public class RedbackObject
 			}
 			catch(Exception e)
 			{
-				error("Problem initiating object " + config.getName() + " : " + e.getMessage(), e);
+				error("Problem initiating object " + config.getName(), e);
 			}
 		}
 		else
@@ -464,6 +464,7 @@ public class RedbackObject
 		}
 		jsBindings.put("self", this);
 		jsBindings.put("om", objectManager);
+		jsBindings.put("up", userProfile);
 		try
 		{
 			js.put(ScriptEngine.FILENAME, script.getObjectName() + (script.getAttributeName() != null ? "." + script.getAttributeName() : "") + "!" + script.getEventName());

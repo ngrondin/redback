@@ -20,7 +20,7 @@
 			return req;
 		};
 		
-		
+		/*
 		obj.getRelatedObjectListRequestMessage = function(attributeName, searchText) {
 			var relatedObjectName = this.validation[attributeName].relatedobject.name;
 			var filter = getFilterFromRelationship(this, this.validation[attributeName].relatedobject.listfilter)
@@ -29,6 +29,7 @@
 			var req = {action:"list", object:relatedObjectName, filter:filter};
 			return req;
 		}
+		*/
 		
 		obj.attributeHasChanged = function(attributeName) {
 			if(this.data.hasOwnProperty(attributeName)) {

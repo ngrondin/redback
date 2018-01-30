@@ -197,11 +197,14 @@ public class ObjectManager
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		RedbackObject object = new RedbackObject(userProfile, this, objectConfig);
-		Iterator<String> it = initialData.keySet().iterator();
-		while(it.hasNext())
+		if(initialData != null)
 		{
-			String attributeName = it.next();
-			object.put(attributeName, new Value(initialData.get(attributeName)));
+			Iterator<String> it = initialData.keySet().iterator();
+			while(it.hasNext())
+			{
+				String attributeName = it.next();
+				object.put(attributeName, new Value(initialData.get(attributeName)));
+			}
 		}
 		if(addRelated)
 			object.loadRelated();
@@ -233,7 +236,8 @@ public class ObjectManager
 	
 	public Value getID(String name) throws FunctionErrorException, FunctionTimeoutException
 	{
-		String value = firebus.requestService(idGeneratorService, new Payload(name)).getString();
+		Payload response = firebus.requestService(idGeneratorService, new Payload(name)); 
+		String value = response.getString();
 		return new Value(value);
 	}
 

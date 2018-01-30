@@ -30,19 +30,26 @@ public class IDGenerator extends RedbackService
 		{
 			String idName = payload.getString();
 			JSONObject idConfig = getIDConfig(idName);
-			if(idConfig.getString("type").equals("sequence"))
+			if(idConfig != null)
 			{
-				int next = Integer.parseInt(idConfig.getString("next"));
-				id = "" + next;
-				if(idConfig.containsKey("pad"))
-					while(id.length() < Integer.parseInt(idConfig.getString("pad")))
-						id = "0" + id;
-				if(idConfig.containsKey("prefix"))
-					id = idConfig.getString("prefix") + id;
-				next++;
-				firebus.publish(configService, new Payload("{object:rbid_config, data:{_id:\"" + idConfig.getString("_id") + "\", next:\"" + next + "\"}}"));
+				if(idConfig.getString("type").equals("sequence"))
+				{
+					int next = Integer.parseInt(idConfig.getString("next"));
+					id = "" + next;
+					if(idConfig.containsKey("pad"))
+						while(id.length() < Integer.parseInt(idConfig.getString("pad")))
+							id = "0" + id;
+					if(idConfig.containsKey("prefix"))
+						id = idConfig.getString("prefix") + id;
+					next++;
+					firebus.publish(configService, new Payload("{object:rbid_config, data:{_id:\"" + idConfig.getString("_id") + "\", next:\"" + next + "\"}}"));
+				}
+				response.setData(id);
 			}
-			response.setData(id);
+			else
+			{
+				throw new FunctionErrorException("No configuration exists for id '" + idName + "'");
+			}
 		}
 		catch(Exception e)
 		{

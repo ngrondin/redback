@@ -5,6 +5,7 @@
 		flex="">
 		<md-list-item 
 			class="md-2-line" 
+			ng-class="{ 'list-item-active': item == selectedObject }"
 			ng-repeat="item in list" 
 			ng-click="selectObject(item)">
 			<div 

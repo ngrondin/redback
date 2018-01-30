@@ -92,7 +92,7 @@ public class ObjectConfig
 		return scripts.get(event);
 	}
 	
-	protected JSONObject generateDBFilter(JSONObject objectFilter) throws JSONException, FunctionErrorException
+	public JSONObject generateDBFilter(JSONObject objectFilter) throws JSONException, FunctionErrorException
 	{
 		JSONObject dbFilter = new JSONObject();
 		Iterator<String> it = objectFilter.keySet().iterator();

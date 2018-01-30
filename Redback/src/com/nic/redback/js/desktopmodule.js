@@ -1,4 +1,4 @@
-	var module = angular.module("desktopmodule", ['ngMaterial']);	
+	var module = angular.module("desktopmodule", ['ngMaterial', 'uiGmapgoogle-maps']);	
 	
 	
 	
@@ -27,7 +27,10 @@
 		$scope.loadRelatedObjectList = function(attributeName, searchText)
 		{
 			if($scope.object != null) {
-				return $http.post("../../rbos", $scope.object.getRelatedObjectListRequestMessage(attributeName, searchText))
+				var req = {action:"list", object:$scope.objectName, uid:$scope.object.uid, filter:{}, attribute:attributeName};
+				if(searchText != null)
+					req.filter.$multi = '*' + searchText + '*';
+				return $http.post("../../rbos", req)
 					.then(function(response) {
 						var responseList = processResponseJSON(response.data);
 						if(responseList != null) {
@@ -106,6 +109,7 @@
 		$scope.relationshipFilter = {};
 		$scope.searchFilter = {};
 		$scope.baseFilter = {};
+		$scope.map = { center: { latitude: -34, longitude: 150 }, zoom: 8 };
 
 		if($attrs.rbRelated != null  &&  $attrs.rbRelated.length > 0) {
 			$scope.relatedConfig = JSON.parse($attrs.rbRelated.replace(/'/g, '"'));
@@ -227,9 +231,9 @@
 	 });	 
 
 	
-/***********************************/
-/** Layout Controller			 **/
-/***********************************/
+	/***********************************/
+	/** Layout Controller			 **/
+	/***********************************/
 
 	 
 	module.controller('layout', function accountsCtl($scope,$attrs,$http) {
@@ -268,5 +272,9 @@
 				$event.defaultPrevented = true;
 			}
 		});
+		
+		$scope.test = function() {
+			rb_tabs = [];
+		}
 		
 	 });	 
