@@ -1,4 +1,4 @@
-package com.nic.redback;
+package com.nic.redback.services.objectserver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import javax.script.ScriptException;
 
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.RedbackException;
 import com.nic.redback.security.UserProfile;
 
 public class RedbackObject 
@@ -29,8 +30,6 @@ public class RedbackObject
 	protected HashMap<String, Value> data;
 	protected HashMap<String, RedbackObject> related;
 	protected ArrayList<String> updatedAttributes;
-	protected ScriptEngine js;
-	protected Bindings jsBindings;
 	protected boolean isNewObject;
 
 	// Initiate existing object from pre-loaded data
@@ -145,9 +144,6 @@ public class RedbackObject
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
-		js = new ScriptEngineManager().getEngineByName("javascript");
-		jsBindings = js.getBindings(ScriptContext.ENGINE_SCOPE);
-		jsBindings.put("objectManager", objectManager);
 	}
 	
 	protected void setDataFromDBData(JSONObject dbData)
@@ -408,23 +404,24 @@ public class RedbackObject
 		Value returnValue = null;
 		if(expression.startsWith("{{")  &&  expression.endsWith("}}"))
 		{
-			expression = "returnValue = (" + expression.substring(2, expression.length() - 2) + ");";
+			expression = "var returnValue = (" + expression.substring(2, expression.length() - 2) + ");";
 			Iterator<String> it = data.keySet().iterator();
+			Bindings context = objectManager.jsEngine.createBindings();
+			context.put("self", this);
 			while(it.hasNext())
 			{	
 				String key = it.next();
-				jsBindings.put(key, data.get(key).getObject());
+				context.put(key, data.get(key).getObject());
 			}
-			jsBindings.put("self", this);
 			try
 			{
-				js.eval(expression);
+				objectManager.jsEngine.eval(expression, context);
 			} 
 			catch (ScriptException e)
 			{
 				logger.severe(e.getMessage());
 			}
-			returnValue = new Value(jsBindings.get("returnValue"));
+			returnValue = new Value(context.get("returnValue"));
 		}
 		else
 		{
@@ -440,7 +437,7 @@ public class RedbackObject
 	
 	protected void executeScriptsForEvent(String event) throws ScriptException
 	{
-		ArrayList<Script> scripts = config.getScriptsForEvent(event);
+		ArrayList<ScriptConfig> scripts = config.getScriptsForEvent(event);
 		if(scripts != null)
 			for(int i = 0; i < scripts.size(); i++)
 				executeScript(scripts.get(i));
@@ -448,27 +445,27 @@ public class RedbackObject
 
 	protected void executeAttributeScriptsForEvent(String attributeName, String event) throws ScriptException
 	{
-		ArrayList<Script> scripts = config.getAttributeConfig(attributeName).getScriptsForEvent(event);
+		ArrayList<ScriptConfig> scripts = config.getAttributeConfig(attributeName).getScriptsForEvent(event);
 		if(scripts != null)
 			for(int i = 0; i < scripts.size(); i++)
 				executeScript(scripts.get(i));
 	}
 	
-	protected void executeScript(Script script) throws ScriptException
+	protected void executeScript(ScriptConfig scriptConfig) throws ScriptException
 	{
+		Bindings context = objectManager.jsEngine.createBindings();
+		context.put("self", this);
+		context.put("om", objectManager);
+		context.put("up", userProfile);
 		Iterator<String> it = data.keySet().iterator();
 		while(it.hasNext())
 		{	
 			String key = it.next();
-			jsBindings.put(key, data.get(key));
+			context.put(key, data.get(key));
 		}
-		jsBindings.put("self", this);
-		jsBindings.put("om", objectManager);
-		jsBindings.put("up", userProfile);
 		try
 		{
-			js.put(ScriptEngine.FILENAME, script.getObjectName() + (script.getAttributeName() != null ? "." + script.getAttributeName() : "") + "!" + script.getEventName());
-			js.eval(script.getSource());
+			scriptConfig.getScript().eval(context);
 		} 
 		catch (ScriptException e)
 		{

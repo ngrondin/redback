@@ -13,10 +13,10 @@ import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
-import com.nic.redback.ObjectConfig;
-import com.nic.redback.ObjectManager;
-import com.nic.redback.RedbackObject;
 import com.nic.redback.security.Session;
+import com.nic.redback.services.objectserver.ObjectConfig;
+import com.nic.redback.services.objectserver.ObjectManager;
+import com.nic.redback.services.objectserver.RedbackObject;
 
 public class ObjectServer extends RedbackAuthenticatedService
 {

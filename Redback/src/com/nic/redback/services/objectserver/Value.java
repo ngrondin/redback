@@ -1,4 +1,4 @@
-package com.nic.redback;
+package com.nic.redback.services.objectserver;
 
 import java.util.Date;
 

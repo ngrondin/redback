@@ -1,10 +1,12 @@
-package com.nic.redback;
+package com.nic.redback.services.objectserver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import com.nic.firebus.Firebus;
@@ -14,24 +16,28 @@ import com.nic.firebus.exceptions.FunctionTimeoutException;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.RedbackException;
 import com.nic.redback.security.UserProfile;
 
 public class ObjectManager
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected Firebus firebus;
-	protected String configService;
 	protected boolean cacheConfigs;
-	protected String dataService;
-	protected String idGeneratorService;
+	protected String configServiceName;
+	protected String dataServiceName;
+	protected String idGeneratorServiceName;
 	protected HashMap<String, ObjectConfig> objectConfigs;
+	public ScriptEngine jsEngine;
+
 
 	public ObjectManager(JSONObject config)
 	{
 		cacheConfigs = true;
-		configService = config.getString("configservice");
-		dataService = config.getString("dataservice");
-		idGeneratorService = config.getString("idgeneratorservice");
+		configServiceName = config.getString("configservice");
+		dataServiceName = config.getString("dataservice");
+		idGeneratorServiceName = config.getString("idgeneratorservice");
+		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		if(config.containsKey("cacheconfigs") &&  config.getString("cacheconfigs").equalsIgnoreCase("false"))
 			cacheConfigs = false;
 		objectConfigs = new HashMap<String, ObjectConfig>();
@@ -54,16 +60,16 @@ public class ObjectManager
 		{
 			try
 			{
-			JSONObject configList = request(configService, new JSONObject("{object:rbo_config,filter:{name:" + object + "}}"));
-			if(configList.getList("result").size() > 0)
-			{
-				objectConfig = new ObjectConfig(configList.getObject("result.0"));
-				JSONObject scriptList = request(configService, new JSONObject("{object:rbo_script,filter:{object:" + object + "}}"));
-				for(int i = 0; i < scriptList.getList("result").size(); i++)
-					objectConfig.addScript(new Script(scriptList.getList("result").getObject(i)));
-				if(cacheConfigs)
-					objectConfigs.put(object, objectConfig);
-			}
+				JSONObject configList = request(configServiceName, new JSONObject("{object:rbo_config,filter:{name:" + object + "}}"));
+				if(configList.getList("result").size() > 0)
+				{
+					objectConfig = new ObjectConfig(configList.getObject("result.0"));
+					JSONObject scriptList = request(configServiceName, new JSONObject("{object:rbo_script,filter:{object:" + object + "}}"));
+					for(int i = 0; i < scriptList.getList("result").size(); i++)
+						objectConfig.addScript(new ScriptConfig(scriptList.getList("result").getObject(i), jsEngine));
+					if(cacheConfigs)
+						objectConfigs.put(object, objectConfig);
+				}
 			}
 			catch(Exception e)
 			{
@@ -236,7 +242,7 @@ public class ObjectManager
 	
 	public Value getID(String name) throws FunctionErrorException, FunctionTimeoutException
 	{
-		Payload response = firebus.requestService(idGeneratorService, new Payload(name)); 
+		Payload response = firebus.requestService(idGeneratorServiceName, new Payload(name)); 
 		String value = response.getString();
 		return new Value(value);
 	}
@@ -258,12 +264,12 @@ public class ObjectManager
 		JSONObject request = new JSONObject();
 		request.put("object", objectName);
 		request.put("filter", filter);
-		return request(dataService, request);
+		return request(dataServiceName, request);
 	}
 	
 	public void publishData(String collection, JSONObject data)
 	{
-		firebus.publish(dataService, new Payload("{object:" + collection + ",data:" + data + "}"));
+		firebus.publish(dataServiceName, new Payload("{object:" + collection + ",data:" + data + "}"));
 	}
 
 }

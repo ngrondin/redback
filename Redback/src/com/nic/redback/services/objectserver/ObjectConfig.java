@@ -1,4 +1,4 @@
-package com.nic.redback;
+package com.nic.redback.services.objectserver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,13 +16,13 @@ public class ObjectConfig
 {
 	protected JSONObject config;
 	protected HashMap<String, AttributeConfig> attributes;
-	protected HashMap<String, ArrayList<Script>> scripts;
+	protected HashMap<String, ArrayList<ScriptConfig>> scripts;
 	
 	public ObjectConfig(JSONObject cfg)
 	{
 		config = cfg;
 		attributes = new HashMap<String, AttributeConfig>();
-		scripts = new HashMap<String, ArrayList<Script>>();
+		scripts = new HashMap<String, ArrayList<ScriptConfig>>();
 		JSONList list = config.getList("attributes");
 		for(int i = 0; i < list.size(); i++)
 		{
@@ -31,7 +31,7 @@ public class ObjectConfig
 		}
 	}
 	
-	public void addScript(Script script)
+	public void addScript(ScriptConfig script)
 	{
 		String attributeName = script.getAttributeName();
 		if(attributeName != null)
@@ -41,10 +41,10 @@ public class ObjectConfig
 		else
 		{
 			String eventName = script.getEventName();
-			ArrayList<Script> eventScripts = scripts.get(eventName);
+			ArrayList<ScriptConfig> eventScripts = scripts.get(eventName);
 			if(eventScripts == null)
 			{
-				eventScripts = new ArrayList<Script>();
+				eventScripts = new ArrayList<ScriptConfig>();
 				scripts.put(eventName, eventScripts);
 			}
 			eventScripts.add(script);
@@ -87,7 +87,7 @@ public class ObjectConfig
 		return attributes.get(name);
 	}
 	
-	public ArrayList<Script> getScriptsForEvent(String event)
+	public ArrayList<ScriptConfig> getScriptsForEvent(String event)
 	{
 		return scripts.get(event);
 	}

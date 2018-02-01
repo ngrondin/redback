@@ -1,4 +1,4 @@
-package com.nic.redback;
+package com.nic.redback.services.objectserver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,21 +8,21 @@ import com.nic.firebus.utils.JSONObject;
 public class AttributeConfig 
 {
 	protected JSONObject config;	
-	protected HashMap<String, ArrayList<Script>> scripts;
+	protected HashMap<String, ArrayList<ScriptConfig>> scripts;
 	
 	public AttributeConfig(JSONObject cfg)
 	{
 		config = cfg;
-		scripts = new HashMap<String, ArrayList<Script>>();
+		scripts = new HashMap<String, ArrayList<ScriptConfig>>();
 	}
 
-	public void addScript(Script script)
+	public void addScript(ScriptConfig script)
 	{
 		String eventName = script.getEventName();
-		ArrayList<Script> eventScripts = scripts.get(eventName);
+		ArrayList<ScriptConfig> eventScripts = scripts.get(eventName);
 		if(eventScripts == null)
 		{
-			eventScripts = new ArrayList<Script>();
+			eventScripts = new ArrayList<ScriptConfig>();
 			scripts.put(eventName, eventScripts);
 		}
 		eventScripts.add(script);
@@ -68,7 +68,7 @@ public class AttributeConfig
 		return new RelatedObjectConfig(config.getObject("relatedobject"));
 	}
 	
-	public ArrayList<Script> getScriptsForEvent(String event)
+	public ArrayList<ScriptConfig> getScriptsForEvent(String event)
 	{
 		return scripts.get(event);
 	}
