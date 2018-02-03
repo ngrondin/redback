@@ -1,14 +1,18 @@
 package com.nic.redback.services.objectserver;
 
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.RedbackException;
 
 public class RelatedObjectConfig
 {
 	protected JSONObject config;
+	protected FilterConfig listFilter;
 	
-	public RelatedObjectConfig(JSONObject cfg)
+	public RelatedObjectConfig(JSONObject cfg) throws RedbackException
 	{
 		config = cfg;
+		if(config.get("listfilter") != null)
+			listFilter = new FilterConfig(config.getObject("listfilter"));
 	}
 	
 	public String getObjectName()
@@ -21,9 +25,9 @@ public class RelatedObjectConfig
 		return config.getString("linkattribute");
 	}
 
-	public JSONObject getListFilter()
+	public FilterConfig getListFilterConfig()
 	{
-		return config.getObject("listfilter");
+		return listFilter;
 	}
 	
 	public JSONObject getJSON()

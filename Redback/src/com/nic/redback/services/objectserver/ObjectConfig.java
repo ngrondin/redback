@@ -1,9 +1,14 @@
 package com.nic.redback.services.objectserver;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.utils.JSONEntity;
@@ -11,26 +16,52 @@ import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONLiteral;
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.RedbackException;
+import com.nic.redback.utils.StringUtils;
 
 public class ObjectConfig
 {
 	protected JSONObject config;
 	protected HashMap<String, AttributeConfig> attributes;
-	protected HashMap<String, ArrayList<ScriptConfig>> scripts;
+	protected HashMap<String, CompiledScript> scripts;
 	
-	public ObjectConfig(JSONObject cfg)
+	public ObjectConfig(JSONObject cfg) throws RedbackException
 	{
 		config = cfg;
 		attributes = new HashMap<String, AttributeConfig>();
-		scripts = new HashMap<String, ArrayList<ScriptConfig>>();
+		scripts = new HashMap<String, CompiledScript>();
 		JSONList list = config.getList("attributes");
 		for(int i = 0; i < list.size(); i++)
 		{
 			JSONObject attrCfg = list.getObject(i);
 			attributes.put(attrCfg.getString("name"), new AttributeConfig(attrCfg));
 		}
+		
+		JSONObject scriptsCfg = config.getObject("scripts");
+		if(scriptsCfg != null)
+		{
+			Iterator<String> events = scriptsCfg.keySet().iterator();
+			while(events.hasNext())
+			{
+				String event = events.next();
+				String scriptName = getName() + "." + event;
+				try
+				{
+					ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
+					jsEngine.put(ScriptEngine.FILENAME, scriptName);
+					String source = StringUtils.unescape(scriptsCfg.getString(event));
+					CompiledScript script = ((Compilable)jsEngine).compile(source);
+					scripts.put(event, script);
+				} 
+				catch(ScriptException e)
+				{
+					throw new RedbackException("Problem compiling script", e);
+				}
+			}			
+		}
 	}
 	
+	/*
 	public void addScript(ScriptConfig script)
 	{
 		String attributeName = script.getAttributeName();
@@ -50,7 +81,7 @@ public class ObjectConfig
 			eventScripts.add(script);
 		}
 	}
-
+*/
 
 	public String getName()
 	{
@@ -64,7 +95,7 @@ public class ObjectConfig
 
 	public String getUIDDBKey()
 	{
-		return config.getString("uid");
+		return config.getString("uiddbkey");
 	}
 
 	public String getUIDGeneratorName()
@@ -74,7 +105,7 @@ public class ObjectConfig
 
 	public String getDomainDBKey()
 	{
-		return config.getString("domain");
+		return config.getString("domaindbkey");
 	}
 
 	public Set<String> getAttributeNames()
@@ -87,7 +118,7 @@ public class ObjectConfig
 		return attributes.get(name);
 	}
 	
-	public ArrayList<ScriptConfig> getScriptsForEvent(String event)
+	public CompiledScript getScriptForEvent(String event)
 	{
 		return scripts.get(event);
 	}
