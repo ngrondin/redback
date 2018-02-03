@@ -1,31 +1,63 @@
 package com.nic.redback.services.objectserver;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.RedbackException;
+import com.nic.redback.utils.StringUtils;
 
 public class AttributeConfig 
 {
 	protected JSONObject config;	
-	protected HashMap<String, ArrayList<ScriptConfig>> scripts;
+	protected HashMap<String, CompiledScript> scripts;
+	protected RelatedObjectConfig relatedObjectConfig;
+	protected Expression editable;
+	protected Expression expression;
 	
-	public AttributeConfig(JSONObject cfg)
+	public AttributeConfig(JSONObject cfg) throws RedbackException
 	{
 		config = cfg;
-		scripts = new HashMap<String, ArrayList<ScriptConfig>>();
-	}
-
-	public void addScript(ScriptConfig script)
-	{
-		String eventName = script.getEventName();
-		ArrayList<ScriptConfig> eventScripts = scripts.get(eventName);
-		if(eventScripts == null)
+		scripts = new HashMap<String, CompiledScript>();
+		if(config.get("relatedobject") != null)
+			relatedObjectConfig = new RelatedObjectConfig(config.getObject("relatedobject"));
+		
+		if(config.get("editable") != null)
+			editable = new Expression(config.getString("editable"));
+		else 
+			editable = new Expression("true");
+		
+		if(config.get("expression") != null)
+			expression = new Expression(config.getString("expression"));
+		
+		JSONObject scriptsCfg = config.getObject("scripts");
+		if(scriptsCfg != null)
 		{
-			eventScripts = new ArrayList<ScriptConfig>();
-			scripts.put(eventName, eventScripts);
+			Iterator<String> events = scriptsCfg.keySet().iterator();
+			while(events.hasNext())
+			{
+				String event = events.next();
+				String scriptName = getName() + "." + event;
+				try
+				{
+					ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
+					jsEngine.put(ScriptEngine.FILENAME, scriptName);
+					String source = StringUtils.unescape(scriptsCfg.getString(event));
+					CompiledScript script = ((Compilable)jsEngine).compile(source);
+					scripts.put(event, script);
+				} 
+				catch(ScriptException e)
+				{
+					throw new RedbackException("Problem compiling script", e);
+				}
+			}			
 		}
-		eventScripts.add(script);
 	}
 	
 	public String getName()
@@ -38,14 +70,14 @@ public class AttributeConfig
 		return config.getString("dbkey");
 	}
 	
-	public String getExpression()
+	public Expression getExpression()
 	{
-		return config.getString("expression");
+		return expression;
 	}
 	
-	public String getEditableExpression()
+	public Expression getEditableExpression()
 	{
-		return config.getString("editable");
+		return editable;
 	}
 	
 	public String getIdGeneratorName()
@@ -65,10 +97,10 @@ public class AttributeConfig
 	
 	public RelatedObjectConfig getRelatedObjectConfig()
 	{
-		return new RelatedObjectConfig(config.getObject("relatedobject"));
+		return relatedObjectConfig;
 	}
 	
-	public ArrayList<ScriptConfig> getScriptsForEvent(String event)
+	public CompiledScript getScriptForEvent(String event)
 	{
 		return scripts.get(event);
 	}

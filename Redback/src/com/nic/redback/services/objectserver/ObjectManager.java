@@ -64,11 +64,13 @@ public class ObjectManager
 				if(configList.getList("result").size() > 0)
 				{
 					objectConfig = new ObjectConfig(configList.getObject("result.0"));
+					/*
 					JSONObject scriptList = request(configServiceName, new JSONObject("{object:rbo_script,filter:{object:" + object + "}}"));
 					for(int i = 0; i < scriptList.getList("result").size(); i++)
 						objectConfig.addScript(new ScriptConfig(scriptList.getList("result").getObject(i), jsEngine));
 					if(cacheConfigs)
 						objectConfigs.put(object, objectConfig);
+						*/
 				}
 			}
 			catch(Exception e)

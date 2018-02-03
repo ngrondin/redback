@@ -6,9 +6,7 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+import javax.script.CompiledScript;
 import javax.script.ScriptException;
 
 import com.nic.firebus.utils.JSONList;
@@ -164,28 +162,19 @@ public class RedbackObject
 	}
 	
 	
-	public JSONObject getRelatedObjectListFilter(String attributeName)
+	public JSONObject getRelatedObjectListFilter(String attributeName) throws RedbackException
 	{
 		JSONObject filter = null;
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
 		if(roc != null)
 		{
 			filter = new JSONObject();
-			JSONObject listFilter = roc.getListFilter();
-			if(listFilter != null)
-			{
-				Iterator<String> it = listFilter.keySet().iterator();
-				while(it.hasNext())
-				{
-					String key = it.next();
-					filter.put(key, evaluateExpression(listFilter.getString(key)).getObject());
-				}
-			}
+			filter = roc.getListFilterConfig().generateFilter(this);
 		}
 		return filter;
 	}
 	
-	public JSONObject getRelatedObjectFindFilter(String attributeName)
+	public JSONObject getRelatedObjectFindFilter(String attributeName) throws RedbackException
 	{
 		JSONObject filter = getRelatedObjectListFilter(attributeName);
 		if(filter != null)
@@ -233,12 +222,12 @@ public class RedbackObject
 		return domain;
 	}
 	
-	public String getString(String name)
+	public String getString(String name) throws RedbackException
 	{
 		return get(name).getString();
 	}
 	
-	public Value get(String name)
+	public Value get(String name) throws RedbackException
 	{
 		AttributeConfig attributeConfig = config.getAttributeConfig(name);
 		if(name.equals("uid"))
@@ -251,9 +240,9 @@ public class RedbackObject
 		}
 		else if(attributeConfig != null)
 		{
-			String expression = attributeConfig.getExpression();
+			Expression expression = attributeConfig.getExpression();
 			if(expression != null)
-				return evaluateExpression(expression);
+				return expression.eval(this);
 			else if(data.containsKey(name))
 				return data.get(name);
 			else
@@ -262,7 +251,31 @@ public class RedbackObject
 		return null;
 	}
 	
-	public void put(String name, Value value) throws ScriptException, RedbackException
+	public RedbackObject getRelated(String name)
+	{
+		AttributeConfig attributeConfig = config.getAttributeConfig(name);
+		 if(attributeConfig != null)
+		 {
+			if(attributeConfig.hasRelatedObject()  &&  !data.get(name).isNull())
+			{
+				if(related.get(name) == null)
+				{
+					try
+					{
+						loadRelated();
+					}
+					catch(RedbackException e)
+					{
+						//TODO: Handle somehow!
+					}
+				}
+				return related.get(name);
+			}
+		}
+		 return null;
+	}
+	
+	public void put(String name, Value value) throws RedbackException
 	{
 		if(config.getAttributeConfig(name) != null)
 		{
@@ -287,12 +300,12 @@ public class RedbackObject
 		}
 	}
 
-	public void put(String name, String value) throws ScriptException, RedbackException
+	public void put(String name, String value) throws RedbackException
 	{
 		put(name, new Value(value));
 	}
 	
-	public void put(String name, RedbackObject relatedObject) throws ScriptException, RedbackException
+	public void put(String name, RedbackObject relatedObject) throws RedbackException
 	{
 		if(config.getAttributeConfig(name).hasRelatedObject())
 		{
@@ -307,9 +320,14 @@ public class RedbackObject
 		}
 	}
 	
-	public boolean isEditable(String name)
+	public void clear(String name) throws ScriptException, RedbackException
 	{
-		return evaluateExpression(config.getAttributeConfig(name).getEditableExpression()).getBoolean();
+		put(name, new Value(null));
+	}
+	
+	public boolean isEditable(String name) throws RedbackException
+	{
+		return config.getAttributeConfig(name).getEditableExpression().eval(this).getBoolean();
 	}
 	
 	public void save() throws ScriptException, RedbackException
@@ -357,7 +375,7 @@ public class RedbackObject
 		}
 	}
 	
-	public JSONObject getJSON(boolean addValidation, boolean addRelated)
+	public JSONObject getJSON(boolean addValidation, boolean addRelated) throws RedbackException
 	{
 		JSONObject object = new JSONObject();
 		object.put("objectname", config.getName());
@@ -399,6 +417,7 @@ public class RedbackObject
 		return object;
 	}
 	
+	/*
 	protected Value evaluateExpression(String expression)
 	{
 		Value returnValue = null;
@@ -434,29 +453,29 @@ public class RedbackObject
 		}
 		return returnValue;
 	}
-	
-	protected void executeScriptsForEvent(String event) throws ScriptException
+*/	
+
+	protected void executeScriptsForEvent(String event) throws RedbackException
 	{
-		ArrayList<ScriptConfig> scripts = config.getScriptsForEvent(event);
-		if(scripts != null)
-			for(int i = 0; i < scripts.size(); i++)
-				executeScript(scripts.get(i));
+		CompiledScript script  = config.getScriptForEvent(event);
+		if(script != null)
+				executeScript(script);
 	}
 
-	protected void executeAttributeScriptsForEvent(String attributeName, String event) throws ScriptException
+	protected void executeAttributeScriptsForEvent(String attributeName, String event) throws RedbackException
 	{
-		ArrayList<ScriptConfig> scripts = config.getAttributeConfig(attributeName).getScriptsForEvent(event);
-		if(scripts != null)
-			for(int i = 0; i < scripts.size(); i++)
-				executeScript(scripts.get(i));
+		CompiledScript script  = config.getAttributeConfig(attributeName).getScriptForEvent(event);
+		if(script != null)
+				executeScript(script);
 	}
 	
-	protected void executeScript(ScriptConfig scriptConfig) throws ScriptException
+	protected void executeScript(CompiledScript script) throws RedbackException
 	{
-		Bindings context = objectManager.jsEngine.createBindings();
+		Bindings context = script.getEngine().createBindings();
 		context.put("self", this);
 		context.put("om", objectManager);
 		context.put("up", userProfile);
+		//context.put(ScriptEngine.FILENAME, "test");
 		Iterator<String> it = data.keySet().iterator();
 		while(it.hasNext())
 		{	
@@ -465,12 +484,11 @@ public class RedbackObject
 		}
 		try
 		{
-			scriptConfig.getScript().eval(context);
+			script.eval(context);
 		} 
 		catch (ScriptException e)
 		{
-			logger.severe(e.getMessage());
-			throw e;
+			error("Problem occurred executing a script", e);
 		}		
 	}
 	
@@ -490,7 +508,14 @@ public class RedbackObject
 
 	public String toString()
 	{
-		return getJSON(false, false).toString();
+		try
+		{
+			return getJSON(false, false).toString();
+		}
+		catch(RedbackException e)
+		{
+			return e.getMessage();
+		}
 	}
 
 }
