@@ -64,13 +64,8 @@ public class ObjectManager
 				if(configList.getList("result").size() > 0)
 				{
 					objectConfig = new ObjectConfig(configList.getObject("result.0"));
-					/*
-					JSONObject scriptList = request(configServiceName, new JSONObject("{object:rbo_script,filter:{object:" + object + "}}"));
-					for(int i = 0; i < scriptList.getList("result").size(); i++)
-						objectConfig.addScript(new ScriptConfig(scriptList.getList("result").getObject(i), jsEngine));
 					if(cacheConfigs)
 						objectConfigs.put(object, objectConfig);
-						*/
 				}
 			}
 			catch(Exception e)
@@ -84,7 +79,7 @@ public class ObjectManager
 
 
 	
-	protected void addRelatedBulk(UserProfile userProfile, ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
+	public void bulkLoadRelated(UserProfile userProfile, ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
 	{
 		if(objects != null  && objects.size() > 0)
 		{
@@ -106,7 +101,7 @@ public class ObjectManager
 					}
 					JSONObject relatedObjectFilter = new JSONObject();
 					relatedObjectFilter.put("$or", orList);
-					ArrayList<RedbackObject> result = getObjectList(userProfile, relatedObjectConfig.getObjectName(), relatedObjectFilter, false);
+					ArrayList<RedbackObject> result = getObjectList(userProfile, relatedObjectConfig.getObjectName(), relatedObjectFilter);
 					for(int k = 0; k < result.size(); k++)
 					{
 						RedbackObject resultObject = result.get(k);
@@ -125,15 +120,15 @@ public class ObjectManager
 	}
 
 	
-	public RedbackObject getObject(UserProfile userProfile, String objectName, String id, boolean addRelated) throws RedbackException
+	public RedbackObject getObject(UserProfile userProfile, String objectName, String id) throws RedbackException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
-		RedbackObject object = new RedbackObject(userProfile, this, objectConfig, id, addRelated);;
+		RedbackObject object = new RedbackObject(userProfile, this, objectConfig, id);;
 		return object;
 	}
 	
 	
-	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, JSONObject filterData, boolean addRelated) throws RedbackException
+	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, JSONObject filterData) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
@@ -147,11 +142,9 @@ public class ObjectManager
 			for(int i = 0; i < dbResultList.size(); i++)
 			{
 				JSONObject dbData = dbResultList.getObject(i);
-				RedbackObject object = new RedbackObject(userProfile, this, objectConfig, dbData, false);
+				RedbackObject object = new RedbackObject(userProfile, this, objectConfig, dbData);
 				objectList.add(object);
 			}
-			if(addRelated)
-				addRelatedBulk(userProfile, objectList);
 		}
 		catch(Exception e)
 		{
@@ -162,9 +155,9 @@ public class ObjectManager
 	}
 	
 	
-	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, String uid, String attributeName, JSONObject filterData, boolean addRelated) throws RedbackException
+	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, String uid, String attributeName, JSONObject filterData) throws RedbackException
 	{
-		RedbackObject object = getObject(userProfile, objectName, uid, false);
+		RedbackObject object = getObject(userProfile, objectName, uid);
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		ArrayList<RedbackObject> objectList = null;
 		AttributeConfig attributeConfig = objectConfig.getAttributeConfig(attributeName);
@@ -178,14 +171,14 @@ public class ObjectManager
 				String key = it.next();
 				relatedObjectListFilter.put(key, filterData.get(key));
 			}
-			objectList = getObjectList(userProfile, relatedObjectConfig.getObjectName(), relatedObjectListFilter, false);
+			objectList = getObjectList(userProfile, relatedObjectConfig.getObjectName(), relatedObjectListFilter);
 		}
 		return objectList;
 	}
 	
-	public RedbackObject updateObject(UserProfile userProfile, String objectName, String id, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
+	public RedbackObject updateObject(UserProfile userProfile, String objectName, String id, JSONObject updateData) throws RedbackException, ScriptException
 	{
-		RedbackObject object = getObject(userProfile, objectName, id, false);
+		RedbackObject object = getObject(userProfile, objectName, id);
 		if(object != null)
 		{
 			Iterator<String> it = updateData.keySet().iterator();
@@ -194,14 +187,12 @@ public class ObjectManager
 				String attributeName = it.next();
 				object.put(attributeName, new Value(updateData.get(attributeName)));
 			}
-			if(addRelated)
-				object.loadRelated();
 			object.save();
 		}
 		return object;
 	}
 	
-	public RedbackObject createObject(UserProfile userProfile, String objectName, JSONObject initialData, boolean addRelated) throws RedbackException, ScriptException
+	public RedbackObject createObject(UserProfile userProfile, String objectName, JSONObject initialData) throws RedbackException, ScriptException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		RedbackObject object = new RedbackObject(userProfile, this, objectConfig);
@@ -214,15 +205,13 @@ public class ObjectManager
 				object.put(attributeName, new Value(initialData.get(attributeName)));
 			}
 		}
-		if(addRelated)
-			object.loadRelated();
 		object.save();
 		return object;
 	}
 	
-	public RedbackObject executeFunction(UserProfile userProfile, String objectName, String id, String function, JSONObject updateData, boolean addRelated) throws RedbackException, ScriptException
+	public RedbackObject executeFunction(UserProfile userProfile, String objectName, String id, String function, JSONObject updateData) throws RedbackException, ScriptException
 	{
-		RedbackObject object = getObject(userProfile, objectName, id, false);
+		RedbackObject object = getObject(userProfile, objectName, id);
 		if(object != null)
 		{
 			if(updateData != null)
@@ -234,8 +223,6 @@ public class ObjectManager
 					object.put(attributeName, updateData.getString(attributeName));
 				}
 			}
-			if(addRelated)
-				object.loadRelated();
 			object.execute(function);
 			object.save();
 		}

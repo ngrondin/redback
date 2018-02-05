@@ -154,7 +154,15 @@ public class Value
 		return valueClass == null;
 	}
 	
-	public boolean equals(Value v)
+	public boolean equals(Object o)
+	{
+		if(o instanceof Value)
+			return _equals((Value)o);
+		else
+			return _equals(new Value(o));
+	}
+	
+	protected boolean _equals(Value v)
 	{
 		if(v == null)
 		{

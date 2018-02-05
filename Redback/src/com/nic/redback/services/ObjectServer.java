@@ -82,7 +82,7 @@ public class ObjectServer extends RedbackAuthenticatedService
 							String uid = request.getString("uid");
 							if(uid != null)
 							{
-								RedbackObject object = objectManager.getObject(session.getUserProfile(), objectName, uid, addRelated); 
+								RedbackObject object = objectManager.getObject(session.getUserProfile(), objectName, uid); 
 								responseData = object.getJSON(addValidation, addRelated);
 							}
 							else
@@ -100,10 +100,13 @@ public class ObjectServer extends RedbackAuthenticatedService
 								filter = new JSONObject();
 							
 							if(uid != null  &&  attribute != null)
-								objects = objectManager.getObjectList(session.getUserProfile(), objectName, uid, attribute, filter, addRelated);
+								objects = objectManager.getObjectList(session.getUserProfile(), objectName, uid, attribute, filter);
 							else
-								objects = objectManager.getObjectList(session.getUserProfile(), objectName, filter, addRelated);
+								objects = objectManager.getObjectList(session.getUserProfile(), objectName, filter);
 
+							if(addRelated)
+								objectManager.bulkLoadRelated(session.getUserProfile(), objects);
+							
 							responseData = new JSONObject();
 							JSONList list = new JSONList();
 							for(int i = 0; i < objects.size(); i++)
@@ -116,7 +119,7 @@ public class ObjectServer extends RedbackAuthenticatedService
 							JSONObject data = request.getObject("data");
 							if(uid != null  &&  data != null)
 							{
-								RedbackObject object = objectManager.updateObject(session.getUserProfile(), objectName, uid, data, addRelated);
+								RedbackObject object = objectManager.updateObject(session.getUserProfile(), objectName, uid, data);
 								responseData = object.getJSON(addValidation, addRelated);
 							}
 							else
@@ -127,7 +130,7 @@ public class ObjectServer extends RedbackAuthenticatedService
 						else if(action.equals("create"))
 						{
 							JSONObject data = request.getObject("data");
-							RedbackObject object = objectManager.createObject(session.getUserProfile(), objectName, data, addRelated);
+							RedbackObject object = objectManager.createObject(session.getUserProfile(), objectName, data);
 							responseData = object.getJSON(addValidation, addRelated);
 						}
 						else if(action.equals("execute"))
@@ -137,7 +140,7 @@ public class ObjectServer extends RedbackAuthenticatedService
 							JSONObject data = request.getObject("data");
 							if(uid != null)
 							{
-								RedbackObject object = objectManager.executeFunction(session.getUserProfile(), objectName, uid, function, data, addRelated);
+								RedbackObject object = objectManager.executeFunction(session.getUserProfile(), objectName, uid, function, data);
 								responseData = object.getJSON(addValidation, addRelated);
 							}
 							else

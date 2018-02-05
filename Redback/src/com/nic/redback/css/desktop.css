@@ -29,6 +29,11 @@ body {
 	width: 50px;
 }
 
+.rb-map { 
+	display: flex;
+	flex:1;
+}
+
 .hsection {
 	display: flex;
 	flex-direction: row

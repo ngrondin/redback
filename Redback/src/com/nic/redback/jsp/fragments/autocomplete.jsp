@@ -1,13 +1,11 @@
 <md-autocomplete 
 	cflex="" 
-	required="" 
 	md-input-name="autocomplete<%=config.getString('attribute')%>"  
 	md-items="item in loadRelatedObjectList('<%=config.getString('attribute')%>', dynamicSearchText<%=config.getString('attribute')%>)" 
 	md-selected-item="object.related.<%=config.getString('attribute')%>" 
 	md-selected-item-change="object.relatedObjectHasChanged('<%=config.getString('attribute')%>')" 
 	md-search-text="dynamicSearchText<%=config.getString('attribute')%>" 
 	md-item-text="item.data.<%=config.getString('displayattribute')%>" 
-	md-require-match="" 
 	md-floating-label="<%=config.getString('label')%>" 
 	ng-disabled="<%
 			if(canWrite) {		

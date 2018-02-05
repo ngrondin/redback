@@ -109,7 +109,6 @@
 		$scope.relationshipFilter = {};
 		$scope.searchFilter = {};
 		$scope.baseFilter = {};
-		$scope.map = { center: { latitude: -34, longitude: 150 }, zoom: 8 };
 
 		if($attrs.rbRelated != null  &&  $attrs.rbRelated.length > 0) {
 			$scope.relatedConfig = JSON.parse($attrs.rbRelated.replace(/'/g, '"'));
@@ -272,9 +271,39 @@
 				$event.defaultPrevented = true;
 			}
 		});
-		
-		$scope.test = function() {
-			rb_tabs = [];
-		}
+
 		
 	 });	 
+	 
+	 
+	/***********************************/
+	/** Map Controller		    	  **/
+	/***********************************/
+
+	 
+	module.controller('map', function accountsCtl($scope,$attrs,$http) {
+
+		$scope.center = { latitude: -34, longitude: 150 }; 
+		$scope.zoom = 8;
+		$scope.markeroptions = {
+			draggable: true,
+			label: 'Pout'
+		};
+				
+		$scope.events = {
+			dragend : function(marker, eventName, model, args) {
+				model.$parent.object.data.geometry = {
+					type: 'point',
+					coords: {
+						latitude: marker.position.lat(),
+						longitude: marker.position.lng()
+					}
+				}
+				model.$parent.object.attributeHasChanged('geometry');
+			},
+			click : function(marker, eventName, model, args) {
+				model.$parent.$parent.selectObject(model.$parent.object);
+			}			
+		};
+
+	 });	 	 

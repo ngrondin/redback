@@ -31,7 +31,7 @@ public class RedbackObject
 	protected boolean isNewObject;
 
 	// Initiate existing object from pre-loaded data
-	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, JSONObject d, boolean loadRelated) throws RedbackException, ScriptException
+	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, JSONObject d) throws RedbackException, ScriptException
 	{
 		userProfile = up;
 		objectManager = om;
@@ -41,8 +41,6 @@ public class RedbackObject
 		if(canRead)
 		{
 			setDataFromDBData(d);
-			if(loadRelated)
-				loadRelated();
 			executeScriptsForEvent("onload");
 		}
 		else
@@ -52,7 +50,7 @@ public class RedbackObject
 	}
 	
 	// Initiate existing object with Id and retreive data from database
-	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, String id, boolean loadRelated) throws RedbackException
+	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, String id) throws RedbackException
 	{
 		userProfile = up;
 		objectManager = om;
@@ -71,8 +69,6 @@ public class RedbackObject
 				{
 					JSONObject dbData = dbResultList.getObject(0);
 					setDataFromDBData(dbData);
-					if(loadRelated)
-						loadRelated();
 					executeScriptsForEvent("onload");
 				}
 			}
@@ -130,8 +126,7 @@ public class RedbackObject
 		else
 		{
 			error("User does not have the right to create object " + config.getName());
-		}
-		
+		}		
 	}
 	
 	protected void init()
@@ -187,7 +182,7 @@ public class RedbackObject
 		return filter;
 	}
 	
-
+	/*
 	public void loadRelated() throws RedbackException
 	{
 		Iterator<String> it = config.getAttributeNames().iterator();
@@ -200,12 +195,13 @@ public class RedbackObject
 				RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
 				String relatedObjectName = relatedObjectConfig.getObjectName();
 				JSONObject relatedObjectFindFilter = getRelatedObjectFindFilter(attributeName);
-				ArrayList<RedbackObject> resultList = objectManager.getObjectList(userProfile, relatedObjectName, relatedObjectFindFilter, false);
+				ArrayList<RedbackObject> resultList = objectManager.getObjectList(userProfile, relatedObjectName, relatedObjectFindFilter);
 				if(resultList.size() > 0)
 					related.put(attributeName, resultList.get(0));
 			}
 		}		
 	}
+*/
 	
 	public ObjectConfig getObjectConfig()
 	{
@@ -262,7 +258,12 @@ public class RedbackObject
 				{
 					try
 					{
-						loadRelated();
+						RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
+						String relatedObjectName = relatedObjectConfig.getObjectName();
+						JSONObject relatedObjectFindFilter = getRelatedObjectFindFilter(name);
+						ArrayList<RedbackObject> resultList = objectManager.getObjectList(userProfile, relatedObjectName, relatedObjectFindFilter);
+						if(resultList.size() > 0)
+							related.put(name, resultList.get(0));
 					}
 					catch(RedbackException e)
 					{
@@ -396,10 +397,10 @@ public class RedbackObject
 			JSONObject attributeValidation = new JSONObject();			
 			attributeValidation.put("editable", isEditable(attrName));
 			
-			if(attributeConfig.hasRelatedObject())
+			if(addRelated  &&  attributeConfig.hasRelatedObject())
 			{
 				attributeValidation.put("relatedobject", attributeConfig.getRelatedObjectConfig().getJSON());
-				RedbackObject relatedObject = related.get(attrName);
+				RedbackObject relatedObject = getRelated(attrName);
 				if(relatedObject != null)
 					relatedNode.put(attrName, relatedObject.getJSON(false, false));
 			}

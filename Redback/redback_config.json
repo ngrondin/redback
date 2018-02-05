@@ -54,6 +54,15 @@
 			"config": {
 				"path":"D:\Scratch\sharefiles"						
 			}
+		},
+		{
+			"type":"mongo-deactivate",
+			"servicename":"mongo",
+			"consumername":"mongo",
+			"config": {
+				"connectionstring":"192.168.1.4",
+				"database":"local"										
+			}
 		}
 	]
 }
