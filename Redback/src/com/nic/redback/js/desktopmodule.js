@@ -1,13 +1,12 @@
 	var module = angular.module("desktopmodule", ['ngMaterial', 'uiGmapgoogle-maps']);	
-	
-	
+
 	
 	/***********************************/
 	/** Form Controller			 	  **/
 	/***********************************/
 
 	
-	module.controller('form', function accountsCtl($scope,$attrs,$http) {
+	module.controller('form', function formCtl($scope,$attrs,$http) {
 		$scope.objectName = $attrs.rbObject;
 		$scope.object = null;
 		$scope.dynamicSearchText = "";
@@ -100,7 +99,7 @@
 
 	 
 	 
-	module.controller('list', function accountsCtl($scope,$attrs,$http) {
+	module.controller('list', function listCtl($scope,$attrs,$http) {
 		$scope.objectName = $attrs.rbObject;
 		$scope.list = null;
 		$scope.selectedObject = null;
@@ -235,7 +234,7 @@
 	/***********************************/
 
 	 
-	module.controller('layout', function accountsCtl($scope,$attrs,$http) {
+	module.controller('layout', function layoutCtl($scope,$attrs,$http) {
 
 		$scope.$on('objectSelectedEmit', function($event, object){
 			if(!$event.defaultPrevented) {
@@ -275,35 +274,99 @@
 		
 	 });	 
 	 
+	/***********************************/
+	/** Layout Controller			 **/
+	/***********************************/
+
 	 
+	module.controller('tab', function tabCtl($scope,$attrs,$http) {
+		$scope.tabs = [];
+		$scope.selected_tab = null;
+		
+		$scope.selectTab = function(tab) {
+			$scope.selected_tab = tab;
+		}
+
+	});
+	
+	
 	/***********************************/
 	/** Map Controller		    	  **/
 	/***********************************/
 
 	 
-	module.controller('map', function accountsCtl($scope,$attrs,$http) {
+	module.controller('map', function mapCtl($scope,$attrs,$http,$compile) {
 
+		$scope.mapcontrol = {};
 		$scope.center = { latitude: -34, longitude: 150 }; 
 		$scope.zoom = 8;
 		$scope.markeroptions = {
 			draggable: true,
 			label: 'Pout'
 		};
-				
-		$scope.events = {
-			dragend : function(marker, eventName, model, args) {
-				model.$parent.object.data.geometry = {
-					type: 'point',
-					coords: {
-						latitude: marker.position.lat(),
-						longitude: marker.position.lng()
-					}
-				}
-				model.$parent.object.attributeHasChanged('geometry');
-			},
-			click : function(marker, eventName, model, args) {
-				model.$parent.$parent.selectObject(model.$parent.object);
-			}			
-		};
+	
+		$scope.createObjectAtPosition = function(position) {
+			alert('allo');
+		}
+		
+		$scope.setSelectedObjectPosition = function(position) {
+			$scope.$parent.selectedObject.data.geometry = {
+				type: 'point',
+				coords: position
+			}
+			$scope.$parent.selectedObject.attributeHasChanged('geometry');
+			$scope.hideContextMenu();
+		}
+
+		$scope.markerHasMoved = function(marker, eventName, model, args) {
+			$scope.setSelectedObjectPosition({latitude:marker.position.lat(), longitude:marker.position.lng()});
+		}
+		
+		$scope.markerSelected = function(marker, eventName, model, args) {
+			model.$parent.$parent.selectObject(model.$parent.object);
+		}
+		
+		$scope.mapClicked = function(map, eventName, args) {
+			$scope.hideContextMenu();
+		}
+
+		$scope.mapDragStarted = function(map, eventName, args) {
+			$scope.hideContextMenu();
+		}
+		
+		$scope.showContextMenu = function(map, eventName, args) {
+			var clickLatLng = args[0].latLng;
+			$scope.hideContextMenu();
+			
+			var scale = Math.pow(2, map.getZoom());
+			var nw = new google.maps.LatLng(map.getBounds().getNorthEast().lat(), map.getBounds().getSouthWest().lng());
+			var worldCoordinateNW = map.getProjection().fromLatLngToPoint(nw);
+			var worldCoordinate = map.getProjection().fromLatLngToPoint(clickLatLng);
+			var clickedPosition = new google.maps.Point(Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale), Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale));	
+
+			var html = '<div id="contextmenu" class="contextmenu"><md-list>';
+			if($scope.$parent.selectedObject != null)
+				html = html + '<md-list-item ng-click="setSelectedObjectPosition({latitude:' + clickLatLng.lat() + ', longitude:' + clickLatLng.lng() + '})"><div style="white-space:nowrap">Set location here</div></md-list-item>';
+			html = html + '<md-list-item ng-click="createObjectAtPosition({latitude:' + clickLatLng.lat() + ', longitude:' + clickLatLng.lng() + '})"><div style="white-space:nowrap">Create new location here</div></md-list-item>';
+			html = html + '</md-list></div>';
+			var contextmenuDivFactory = $compile(html);
+			var contextmenuDiv = contextmenuDivFactory($scope);
+			angular.element(map.getDiv()).append(contextmenuDiv);
+
+			if((map.getDiv().offsetWidth - clickedPosition.x) < contextmenuDiv[0].offsetWidth)
+				clickedPosition.x = clickedPosition.x - contextmenuDiv[0].offsetWidth;
+			if((map.getDiv().offsetHeight - clickedPosition.y) < contextmenuDiv[0].offsetHeight)
+				clickedPosition.y = clickedPosition.y - contextmenuDiv[0].offsetHeight;
+
+			contextmenuDiv[0].style.left = (clickedPosition.x + 'px');
+			contextmenuDiv[0].style.top = (clickedPosition.y + 'px');
+			contextmenuDiv[0].style.visibility = 'visible';
+		}
+		
+		$scope.hideContextMenu = function() {
+			var existingContextMenu = document.getElementById('contextmenu');
+			if(existingContextMenu != null)
+				existingContextMenu.remove();		
+		}
 
 	 });	 	 

@@ -83,6 +83,10 @@ body {
 	padding: 0px;
 }
 
+.tabheader-active {
+  border-bottom: 2px Solid red;
+}
+
 .tabcontent {
 	display: flex;
 	flex-direction: row;
@@ -122,6 +126,14 @@ body {
 
 .angular-google-map-container { 
 	flex:1;
+}
+
+.contextmenu{
+  visibility:hidden;
+  background:#ffffff;
+  border:1px solid #8888FF;
+  z-index: 10;
+  position: absolute;
 }
 
 md-input-container {

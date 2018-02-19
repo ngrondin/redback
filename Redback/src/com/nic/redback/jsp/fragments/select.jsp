@@ -1,5 +1,6 @@
 <md-input-container 
-	class="md-block">
+	class="md-block"
+	ng-hide="!(<%=config.getString('show')%>)">
 	<label><%=config.getString('label')%></label>
 	<md-icon class="md-hue-3"> list </md-icon>
 	<md-select 

@@ -252,7 +252,7 @@ public class RedbackObject
 		AttributeConfig attributeConfig = config.getAttributeConfig(name);
 		 if(attributeConfig != null)
 		 {
-			if(attributeConfig.hasRelatedObject()  &&  !data.get(name).isNull())
+			if(attributeConfig.hasRelatedObject()  &&  data.get(name) != null  &&   !data.get(name).isNull())
 			{
 				if(related.get(name) == null)
 				{
