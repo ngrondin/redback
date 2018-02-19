@@ -105,7 +105,7 @@ public class ObjectServer extends RedbackAuthenticatedService
 								objects = objectManager.getObjectList(session.getUserProfile(), objectName, filter);
 
 							if(addRelated)
-								objectManager.bulkLoadRelated(session.getUserProfile(), objects);
+								objectManager.addRelatedBulk(session.getUserProfile(), objects);
 							
 							responseData = new JSONObject();
 							JSONList list = new JSONList();

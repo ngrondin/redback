@@ -64,8 +64,10 @@ public class ObjectManager
 				if(configList.getList("result").size() > 0)
 				{
 					objectConfig = new ObjectConfig(configList.getObject("result.0"));
+					/*
 					if(cacheConfigs)
 						objectConfigs.put(object, objectConfig);
+						*/
 				}
 			}
 			catch(Exception e)
@@ -79,7 +81,7 @@ public class ObjectManager
 
 
 	
-	public void bulkLoadRelated(UserProfile userProfile, ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
+	public void addRelatedBulk(UserProfile userProfile, ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
 	{
 		if(objects != null  && objects.size() > 0)
 		{
