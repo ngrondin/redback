@@ -9,6 +9,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import jdk.nashorn.internal.objects.NativeObject;
+
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
@@ -156,6 +158,11 @@ public class ObjectManager
 		return objectList;
 	}
 	
+
+	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, Object filterData) throws RedbackException
+	{
+		return null;
+	}
 	
 	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, String uid, String attributeName, JSONObject filterData) throws RedbackException
 	{

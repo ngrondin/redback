@@ -1,1 +1,1 @@
-<div>{{object.data.<%=config.getString('attribute')%>}}</div>
+<div class="rb-margin rb-text"><%=config.getString('expression')%></div>

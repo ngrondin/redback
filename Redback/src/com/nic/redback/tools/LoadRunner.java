@@ -5,11 +5,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
-import com.nic.firebus.exceptions.FunctionTimeoutException;
+import com.nic.firebus.exceptions.FunctionErrorException;
+import com.nic.firebus.information.ServiceInformation;
+import com.nic.firebus.interfaces.ServiceProvider;
+import com.nic.firebus.logging.FirebusSimpleFormatter;
 
 public class LoadRunner 
 {
@@ -17,25 +24,80 @@ public class LoadRunner
 	protected ArrayList<String> calls;
 	protected Random rnd;
 	protected int cycles;
-	protected HashMap<Integer, ArrayList<Long>> results;
+	protected HashMap<String, ArrayList<Long>> results;
+	protected int activeThreads;
 	
-	public LoadRunner(String netName, String pass, String filePath, int c)
+	protected class LoadRunnerThread extends Thread
+	{
+		protected Firebus firebus;
+		protected LoadRunner master;
+		protected int cyclesLeft;
+		
+		public LoadRunnerThread(Firebus fb, LoadRunner m, int c)
+		{
+			firebus = fb;
+			master = m;
+			cyclesLeft = c;
+			setName("rbLoadRunnerWorker" + getId());
+		}
+		
+		public void run()
+		{
+			while(cyclesLeft > 0)
+			{
+				String call = master.getNextCall();
+				int sep = call.indexOf(" ");
+				String service = call.substring(0, sep);
+				String msg = call.substring(sep);
+				long dur = 0;
+				long ct = System.currentTimeMillis();
+				try
+				{
+					firebus.requestService(service, new Payload(msg));
+					dur = System.currentTimeMillis() - ct;
+				}
+				catch(Exception e)
+				{
+					dur = -1;
+				}
+				master.finishedCall(call, dur);
+				cyclesLeft--;
+			}
+			master.finishedRun();
+		}
+	}
+	
+	public LoadRunner(String netName, String pass, String filePath, int at, int c)
 	{
 		firebus = new Firebus(netName, pass);
+		firebus.registerServiceProvider("stub", new ServiceProvider() {
+			public Payload service(Payload payload)	throws FunctionErrorException
+			{
+				return new Payload("allo " + payload.getString());
+			}
+
+			public ServiceInformation getServiceInformation()
+			{
+				return null;
+			}}, 10);
 		calls = new ArrayList<String>();
 		rnd = new Random();
+		activeThreads = at;
 		cycles = c;
-		results = new HashMap<Integer, ArrayList<Long>>();
-		int i = 0;
+		results = new HashMap<String, ArrayList<Long>>();
 		try
 		{
 			BufferedReader br = new BufferedReader(new FileReader(filePath));
 			String line = null;
 			while((line = br.readLine()) != null)
 			{
-				calls.add(line);
-				results.put(i, new ArrayList<Long>());
+				if(!line.startsWith("//"))
+				{
+					calls.add(line);
+					results.put(line, new ArrayList<Long>());
+				}
 			}
+			br.close();
 		}
 		catch(IOException e)
 		{
@@ -43,42 +105,93 @@ public class LoadRunner
 		}
 	}
 	
+	public String getNextCall()
+	{
+		int r = rnd.nextInt(calls.size());
+		String call = calls.get(r);
+		return call;
+	}
+	
+	public synchronized void finishedCall(String call, long dur)
+	{
+		results.get(call).add(dur);
+	}
+	
+	public synchronized void finishedRun()
+	{
+		activeThreads--;
+	}
+	
 	public void run()
 	{
-		for(int i = 0; i < cycles; i++)
+		for(int i = 0; i < activeThreads; i++)
 		{
-			int r = rnd.nextInt(calls.size()-1);
-			String call = calls.get(r);
-			int sep = call.indexOf(" ");
-			String service = call.substring(0, sep);
-			String msg = call.substring(sep);
-			long ct = System.currentTimeMillis();
-			try
+			LoadRunnerThread lrt = new LoadRunnerThread(firebus, this, cycles);
+			lrt.start();
+		}
+
+		boolean wait = true;
+		while(wait) 
+		{
+			synchronized(this)
 			{
-				Payload resp = firebus.requestService(service, new Payload(msg));
+				if(activeThreads == 0)
+					wait = false;
 			}
-			catch(Exception e)
-			{
-				
-			}
-			long dur = System.currentTimeMillis() - ct;
-			results.get(r).add(dur);
+			try { Thread.sleep(100); } catch(Exception e) {}
 		}
 		
-		for(int i = 0; i < calls.size(); i++)
+		Iterator<String> it = results.keySet().iterator();
+		while(it.hasNext())
 		{
 			long sum = 0;
-			ArrayList<Long> list = results.get(i);
+			long resultCount = 0;
+			long timeoutCount = 0;
+			String call = it.next();
+			ArrayList<Long> list = results.get(call);
 			for(int j = 0; j < list.size(); j++)
-				sum += list.get(j);
-			long avg = sum / list.size();
-			System.out.println(calls.get(i) + " : " + avg);
+			{
+				if(list.get(j) > 0)
+				{
+					resultCount++;
+					sum += list.get(j);
+				}
+				else
+				{
+					timeoutCount++;
+				}
+			}
+			long avg = -1;
+			if(list.size() > 0)
+				avg = sum / list.size();
+			String callDisp = String.format("%-40s", call);
+			if(callDisp.length() > 40)
+				callDisp = callDisp.substring(0, 40);
+			System.out.println(callDisp + "\t\t\tavg: " + avg + "\t\t\tresults: " + resultCount + "\t\t\ttimeouts: " + timeoutCount);
 		}
+		firebus.close();
 	}
 	
 	public static void main(String[] args)
 	{
-		LoadRunner lr = new LoadRunner(args[0], args[1], args[2], Integer.parseInt(args[3]));
-		lr.run();
+		try
+		{
+			Thread.currentThread().setName("rbLoadRunner");
+			Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
+			Logger logger = Logger.getLogger("com.nic.firebus");
+			FileHandler fh = new FileHandler("LoadRunner.log");
+			fh.setFormatter(new FirebusSimpleFormatter());
+			fh.setLevel(Level.FINEST);
+			logger.addHandler(fh);
+			logger.setLevel(Level.FINEST);
+			
+			LoadRunner lr = new LoadRunner(args[0], args[1], args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]));
+			Thread.sleep(2000);
+			lr.run();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

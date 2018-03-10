@@ -26,17 +26,19 @@
 			if(input.hasOwnProperty('objectname') && input.hasOwnProperty('uid')) {
 			
 				// Convert dates
+				/*
 				for (var key in input.data) {
 					var match;
 					if (typeof input.data[key] === "string") {
 						if(match = input.data[key].match(regexIso8601)) {
+							input.data[key] = new moment(input.data[key]);
 							var milliseconds = Date.parse(match[0])
 							if (!isNaN(milliseconds)) {
 								input.data[key] = new Date(milliseconds);
 							}
 						}
 					}
-				}
+				}*/
 
 				// Find existing object to merge with
 				for (var i = 0; i < objectMaster.length; i++) {
@@ -47,10 +49,10 @@
 				
 				if(obj != null) {
 					//Merge with existing object
-					if(!obj.hasOwnProperty('validation')  &&  input.hasOwnProperty('validation'))
+					if(input.hasOwnProperty('validation'))
 						obj.validation = input.validation;
 
-					if(!obj.hasOwnProperty('related')  &&  input.hasOwnProperty('related')) {
+					if(input.hasOwnProperty('related')) {
 						obj.related = {};
 						for (var key in input.related)
 							obj.related[key] = processResponseJSONObject(input.related[key]);

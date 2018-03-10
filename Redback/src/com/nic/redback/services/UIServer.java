@@ -29,6 +29,7 @@ public class UIServer extends RedbackAuthenticatedService
 	protected String resourceServiceType;
 	protected ScriptEngine jsEngine;
 	protected HashMap<String, CompiledScript> jspScripts;
+	protected HashMap<String, JSONObject> views;
 
 
 	public UIServer( JSONObject c)
@@ -39,6 +40,7 @@ public class UIServer extends RedbackAuthenticatedService
 		resourceService = config.getString("resourceservice");
 		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		jspScripts = new HashMap<String, CompiledScript>();
+		views = new HashMap<String, JSONObject>();
 	}
 
 	public Payload service(Payload payload) throws FunctionErrorException
@@ -314,10 +316,19 @@ public class UIServer extends RedbackAuthenticatedService
 				{
 					try
 					{
-						JSONObject result = request(configService, "{object:rbui_view,filter:{name:" + viewName + "}}");
-						if(result != null)
+						JSONObject viewConfig = views.get(viewName);
+						if(viewConfig == null)
 						{
-							componentJSON = result.getObject("result.0");
+							JSONObject result = request(configService, "{object:rbui_view,filter:{name:" + viewName + "}}");
+							if(result != null)
+							{
+								viewConfig = result.getObject("result.0");
+								views.put(viewName, viewConfig);
+							}
+						}
+						if(viewConfig != null)
+						{
+							componentJSON = viewConfig;
 							String objectName = componentJSON.getString("object");
 							context.put("objectName", objectName);
 							context.put("viewName", viewName);

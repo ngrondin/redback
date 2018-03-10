@@ -20,4 +20,4 @@
 		class="tabcontentsection">	
 		#content#
 	</div>
-</dov>
+</div>

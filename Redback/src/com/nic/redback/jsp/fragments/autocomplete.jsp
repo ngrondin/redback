@@ -7,6 +7,7 @@
 	md-search-text="dynamicSearchText<%=config.getString('attribute')%>" 
 	md-item-text="item.data.<%=config.getString('displayattribute')%>" 
 	md-floating-label="<%=config.getString('label')%>" 
+	ng-hide="!(<%=config.getString('show')%>)"
 	ng-disabled="<%
 			if(canWrite) {		
 				%>!object.validation.<%=config.getString('attribute')%>.editable<%

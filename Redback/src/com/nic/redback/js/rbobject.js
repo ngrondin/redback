@@ -19,43 +19,47 @@
 			}
 			return req;
 		};
+
 		
-		/*
-		obj.getRelatedObjectListRequestMessage = function(attributeName, searchText) {
-			var relatedObjectName = this.validation[attributeName].relatedobject.name;
-			var filter = getFilterFromRelationship(this, this.validation[attributeName].relatedobject.listfilter)
-			if(searchText != null)
-				filter.$multi = '*' + searchText + '*';
-			var req = {action:"list", object:relatedObjectName, filter:filter};
-			return req;
-		}
-		*/
-		
-		obj.attributeHasChanged = function(attributeName) {
+		obj.attributeHasChanged = function(attributeName, $http) {
 			if(this.data.hasOwnProperty(attributeName)) {
-				if(!this.updatedattributes.includes(attributeName))
-					this.updatedattributes.push(attributeName);
-			}
-		}
-		
-		
-		obj.relatedObjectHasChanged = function(attributeName) {
-			if(this.data.hasOwnProperty(attributeName)) {
-				var newRelatedObject = this.related[attributeName];
-				var newLinkValue = '';
-				if(newRelatedObject != null)
-				{
-					var relatedObjectLinkAttribute = this.validation[attributeName].relatedobject.linkattribute;
+				if(this.related[attributeName] != null) {
+					var newRelatedObject = this.related[attributeName];
+					var newLinkValue = '';
+					var relatedObjectLinkAttribute = this.validation[attributeName].related.link;
 					if(relatedObjectLinkAttribute == 'uid')
 						newLinkValue = this.related[attributeName].uid;
 					else
 						newLinkValue = this.related[attributeName].data[relatedObjectLinkAttribute];
-				}
-				if(this.data[attributeName] != newLinkValue)
-				{
-					this.data[attributeName] = newLinkValue;
-					this.attributeHasChanged(attributeName);
-				}
+					if(this.data[attributeName] != newLinkValue)
+					{
+						this.data[attributeName] = newLinkValue;
+					}
+				} 
+				if(!this.updatedattributes.includes(attributeName))
+					this.updatedattributes.push(attributeName);
+				//if(this.validation[attributeName].updatescript)
+					this.save($http);
+			}
+		}
+		
+		/*
+		obj.dateChange = function(attrName, newValue) {
+			if(!this.data[attrName].isSame(newValue)) {
+				this.attributeHasChanged(attrName);
+			}
+		}*/
+		
+		obj.save = function($http) {
+			if(this.isUpdated()) {
+				$http.post("../../rbos", this.getUpdateRequestMessage())
+				.success(function(response) {
+					var responseObject = processResponseJSON(response);
+				})
+				.error(function(error, status) {
+					alert('save error');
+				});
+				this.updatedattributes = [];
 			}
 		}
 		

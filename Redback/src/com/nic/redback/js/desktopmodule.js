@@ -1,5 +1,296 @@
-	var module = angular.module("desktopmodule", ['ngMaterial', 'uiGmapgoogle-maps']);	
+	var module = angular.module("desktopmodule", ['ngMaterial', 'uiGmapgoogle-maps', 'mdPickers']);	
 
+	/***********************************/
+	/** Related Input Direcive	 	  **/
+	/***********************************/
+	
+	module.directive('rbInput', function($compile) {
+		return {
+			restrict:'A',
+			scope:true,
+			controller: function($scope, $attrs, $http, $compile) {
+				$scope.element = null;
+				$scope.attributeName = $attrs.rbAttribute;
+				$scope.inputValue = '';
+				
+				$scope.keyProcessor = function(event) {
+					handled = false;
+					if(event.keyCode == 13  ||  event.keyCode == 9) {
+					} 
+				};
+				$scope.change = function(event) {
+					$scope.object.data[$scope.attributeName] = $scope.inputValue;			
+					$scope.object.attributeHasChanged($scope.attributeName, $http);
+				};
+				$scope.$watch('object.data.' + $scope.attributeName, function(newValue, oldValue) {
+					$scope.inputValue = newValue;
+				});
+			},
+			link: function($scope, $element, $attrs) {
+				$scope.element = $element;
+				$element.bind('keydown', $scope.keyProcessor);
+				$element.bind('change', $scope.change);
+			}
+		};
+	});	
+	
+	/***********************************/
+	/** Related Input Direcive	 	  **/
+	/***********************************/
+	
+	module.directive('rbRelatedInput', ['$compile', function($compile) {
+		return {
+			restrict:'A',
+			scope:true,
+			controller: function($scope, $attrs, $http, $compile, $mdPanel) {
+				$scope.mdPanel = $mdPanel;
+				$scope.mdPanelRef = null;
+				$scope.element = null;
+				$scope.inputValue = '';
+				$scope.attributeName = $attrs.rbAttribute;
+				$scope.displayAttributeName = $attrs.rbDisplayAttribute;
+				$scope.parentAttributeName = $attrs.rbParentAttribute;
+				$scope.childAttributeName = $attrs.rbChildAttribute;
+				$scope.listConfig = {
+					parents:[], 
+					list:[], 
+					hierachical:($scope.parentAttributeName != null  &&  $scope.childAttributeName != null),
+					selected:null,
+					highlightedIndex:-1,
+					loading:false,
+					open:false,
+					inputScope:$scope,
+					loadList:function(){
+						this.inputScope.loadList();
+					}
+				};
+				$scope.openDropDown = function(event) {
+					if($scope.listConfig.open == false)
+					{
+						var config = {
+							attachTo: angular.element(document.body),
+							template: '<div>' +
+										'<md-list>' +
+											'<md-list-item ng-repeat="listitem in listConfig.parents" ng-click="selectItem(listitem)" class="list-item-parent">' +
+												'<p style="white-space: nowrap">{{listitem.data.' + $scope.displayAttributeName + '}}</p>' +
+												'<md-button ng-click="colapseItem(listitem)" class="md-icon-button md-primary"><md-icon ng-show="listConfig.hierachical">expand_less</md-icon></md-button>' +
+											'</md-list-item>' +
+											'<md-progress-linear md-mode="indeterminate" ng-show="listConfig.loading"></md-progress-linear>' +
+											'<md-list-item ng-repeat="listitem in listConfig.list" ng-click="selectItem(listitem)" ng-class="{\'list-item-highlighted\': listConfig.highlightedIndex===$index}">' +
+												'<p style="white-space: nowrap">{{listitem.data.' + $scope.displayAttributeName + '}}</p>' +
+												'<md-button ng-click="expandItem(listitem)" class="md-icon-button md-primary"><md-icon ng-show="listConfig.hierachical">expand_more</md-icon></md-button>' +
+											'</md-list-item>' +
+										'</md-list>' +
+										'</div>',
+							controller: function($scope, mdPanelRef, listConfig) { 
+								$scope.listConfig = listConfig;
+								$scope.mdPanelRef = mdPanelRef;
+								$scope.selectItem = function(listitem) {
+									$scope.listConfig.selected = listitem;
+									$scope.mdPanelRef.close();
+								};
+								$scope.expandItem = function(listitem) {
+									$scope.listConfig.parents.push(listitem);
+									$scope.listConfig.list = [];
+									$scope.listConfig.loadList();
+								};
+								$scope.colapseItem = function(listitem) {
+									while($scope.listConfig.parents.pop().uid != listitem.uid);
+									$scope.listConfig.loadList();
+								};
+							},
+							position: $scope.mdPanel.newPanelPosition().relativeTo($scope.element).addPanelPosition($scope.mdPanel.xPosition.ALIGN_START, $scope.mdPanel.yPosition.BELOW),
+							locals: {
+								'listConfig' : $scope.listConfig
+							},
+							panelClass: 'rb-dropdown-panel',
+							openFrom: event,
+							clickOutsideToClose: true,
+							escapeToClose: true,
+							focusOnOpen: false,
+							zIndex: 2,
+							onRemoving: $scope.dropDownClosed
+						};
+						$scope.listConfig.open = true;
+						$scope.listConfig.parents = [];
+						//$scope.element.val('');
+						$scope.inputValue = '';
+						$scope.mdPanel.open(config).then(function(rez) {$scope.mdPanelRef = rez;});
+						$scope.loadList();
+					}
+				};
+				$scope.loadList = function() {
+					if($scope.listConfig.open == true) {
+						var filter = {$multi:'*' + $scope.inputValue + '*'};
+						if($scope.parentAttributeName != null  &&  $scope.childAttributeName != null) {
+							var lastParentKey = null;
+							if($scope.listConfig.parents.length > 0) {
+								var lastParent = $scope.listConfig.parents[$scope.listConfig.parents.length - 1];
+								lastParentKey = $scope.childAttributeName == 'uid' ? lastParent.uid : lastParent.data[$scope.childAttributeName];
+							} 
+							filter[$scope.parentAttributeName] = lastParentKey;
+						}
+						var req = {action:"list", object:$scope.object.objectname, uid:$scope.object.uid, attribute:$scope.attributeName, filter:filter, options:{addrelated:true}};
+						$scope.listConfig.loading = true;
+						$http.post("../../rbos", req)
+							.success(function(response) {
+								var responseList = processResponseJSON(response);
+								$scope.listConfig.loading = false;
+								if(responseList != null) 
+									$scope.listConfig.list = responseList;
+							});
+					}
+				};	
+				$scope.keyProcessor = function(event) {
+					handled = false;
+					if(event.keyCode == 38) {
+							$scope.listConfig.highlightedIndex--;
+							handled = true;
+					} else if(event.keyCode == 40) {
+							$scope.listConfig.highlightedIndex++;
+							handled = true;
+					} else if(event.keyCode == 13  ||  event.keyCode == 9) {
+							if($scope.listConfig.highlightedIndex > -1  &&  $scope.listConfig.highlightedIndex < $scope.listConfig.list.length)
+								$scope.listConfig.selected = $scope.listConfig.list[$scope.listConfig.highlightedIndex];
+							$scope.mdPanelRef.close();
+							handled = true;
+					} else {
+						setTimeout(function() {$scope.loadList()}, 100);
+					}					
+					if (handled) {
+						$scope.$apply();
+						event.preventDefault();
+						event.stopImmediatePropagation();
+						event.Handled = true;
+					}							
+				};
+				$scope.dropDownClosed = function() {
+					if($scope.listConfig.selected != null) {
+						$scope.object.related[$scope.attributeName] = $scope.listConfig.selected;
+						$scope.object.attributeHasChanged($scope.attributeName, $http);
+					}
+					$scope.listConfig.open = false;
+					$scope.listConfig.selected = null;
+					$scope.listConfig.highlightedIndex = -1;
+					$scope.listConfig.list = [];
+					$scope.inputValue = $scope.object.related[$scope.attributeName].data[$scope.displayAttributeName];
+				};
+				$scope.$watch('object.related.' + $scope.attributeName + '.data.' + $scope.displayAttributeName, function(newValue, oldValue) {
+					$scope.inputValue = newValue;
+				});
+			},
+			link: function($scope, $element, $attrs) {
+				$scope.element = $element;
+				$element.bind('focus', $scope.openDropDown);
+				$element.bind('keydown', $scope.keyProcessor);
+			}
+		};
+	}]);	
+
+
+	/***********************************/
+	/** Date Input Direcive 	 	  **/
+	/***********************************/
+	
+	module.directive('rbDatetimeInput', function() {
+		return {
+			restrict:'A',
+			scope:true,
+			controller: function($scope, $attrs, $http, $compile, $mdPanel) {
+				$scope.element = null;
+				$scope.formattedDateTime = '';
+				$scope.attributeName = $attrs.rbAttribute;
+				$scope.format = $attrs.rbFormat;
+				$scope.timepicker = {
+					time:null,
+					mdPanelRef:null,
+					open:false,
+					views:((($scope.format.includes('YY') ||  $scope.format.includes('MM')  ||  $scope.format.includes('DD')) ? 1 : 0) | ($scope.format.includes('HH') ? 2 : 0) | ($scope.format.includes('mm') ? 4 : 0)),
+					currentView:0,
+					pickFinalised:false,
+					switchView:function(){
+						this.currentView = this.currentView + 1;	
+						if((1 << this.currentView) <= this.views) {
+							while(((1 << this.currentView) & this.views) == 0)
+								this.currentView = this.currentView + 1;	
+						} else {
+							this.pickFinalised = true;
+							this.mdPanelRef.close();
+						}
+					}
+				};
+				$scope.openDropDown = function(event) {
+					if($scope.timepicker.open == false)
+					{
+						var config = {
+							attachTo: angular.element(document.body),
+							position: $mdPanel.newPanelPosition().relativeTo($scope.element).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW),
+							template:'<md-content>' +
+                                    '<div class="mdp-clock-switch-container" ng-switch="timepicker.currentView" layout layout-align="center center">' +
+										'<mdp-calendar date="timepicker.time" selectevent="timepicker.switchView()" auto-switch="1" ng-switch-when="0"></mdp-calendar>' +
+                                        '<mdp-clock time="timepicker.time" type="hours" auto-switch="1" ng-switch-when="1"></mdp-clock>' +
+                                        '<mdp-clock time="timepicker.time" type="minutes" auto-switch="1" ng-switch-when="2"></mdp-clock>' +
+                                        '<div ng-switch-when="4">Can close</div>' +
+                                    '</div>' +
+                                '</md-content>',
+							controller: function($scope, mdPanelRef, timepicker) { 
+								$scope.timepicker = timepicker;
+								$scope.mdPanelRef = mdPanelRef;
+								$scope.time = timepicker.time;
+							},
+							locals: {
+								'timepicker' : $scope.timepicker,
+							},
+							panelClass: 'rb-dropdown-panel',
+							openFrom: event,
+							clickOutsideToClose: true,
+							escapeToClose: true,
+							focusOnOpen: false,
+							zIndex: 2,
+							onRemoving: $scope.dropDownClosed
+						};
+						$scope.timepicker.open = true;
+						$scope.timepicker.currentView = -1;
+						$scope.timepicker.switchView();
+						$scope.timepicker.pickFinalised = false;
+						if($scope.timepicker.time == null) {
+							$scope.timepicker.time = moment();
+							$scope.timepicker.time.set({second:0,millisecond:0});
+						}
+						$mdPanel.open(config).then(function(rez) {$scope.timepicker.mdPanelRef = rez;});
+					}
+				};
+				$scope.keyProcessor = function(event) {
+					handled = false;	
+					if(event.keyCode == 13  ||  event.keyCode == 9) {
+						$scope.timepicker.mdPanelRef.close();
+					}						
+				};
+				$scope.dropDownClosed = function() {
+					$scope.timepicker.open = false;
+					if($scope.timepicker.pickFinalised) {
+						$scope.object.data[$scope.attributeName] = $scope.timepicker.time.toISOString();
+						$scope.object.attributeHasChanged($scope.attributeName, $http);
+					}
+				};
+				$scope.$watch('object.data.' + $scope.attributeName, function(newValue, oldValue) {
+					if(newValue == null) {
+						$scope.timepicker.time = null;
+						$scope.formattedDateTime = '';
+					} else {
+						$scope.timepicker.time = moment(newValue);
+						$scope.formattedDateTime = $scope.timepicker.time.format($scope.format);
+					}
+				});
+			},
+			link: function($scope, $element, $attrs) {
+				$scope.element = $element;
+				$element.bind('focus', $scope.openDropDown);
+				$element.bind('keydown', $scope.keyProcessor);
+			}
+		};
+	});			
+	
 	
 	/***********************************/
 	/** Form Controller			 	  **/
@@ -14,47 +305,12 @@
 		
 		$scope.setObject = function(object) {
 			$scope.object = object;
-			if(object != null) {
-				for (var key in object.related) {
-					if(!object.validation[key].hasOwnProperty('listofvalues'))
-						object.validation[key].listofvalues = [object.related[key]];
-				}
-			}
 		}
 
 		
-		$scope.loadRelatedObjectList = function(attributeName, searchText)
-		{
-			if($scope.object != null) {
-				var req = {action:"list", object:$scope.objectName, uid:$scope.object.uid, filter:{}, attribute:attributeName};
-				if(searchText != null)
-					req.filter.$multi = '*' + searchText + '*';
-				return $http.post("../../rbos", req)
-					.then(function(response) {
-						var responseList = processResponseJSON(response.data);
-						if(responseList != null) {
-							$scope.object.validation[attributeName].listofvalues = responseList;
-							return responseList;
-						}
-					});
-			}
-		};
-				
-		
 		$scope.save = function(){
 			if($scope.object != null) {
-				if($scope.object.isUpdated()) {
-					$http.post("../../rbos", $scope.object.getUpdateRequestMessage())
-					.success(function(response) {
-						var responseObject = processResponseJSON(response);
-						if(responseObject != null) 
-							$scope.setObject(responseObject);
-					})
-					.error(function(error, status) {
-						alert('save error');
-					});
-				}
-				$scope.$emit('saveRelatedEmit', $scope.object);
+				$scope.object.save($http);
 			}
 		};		
 
@@ -275,7 +531,7 @@
 	 });	 
 	 
 	/***********************************/
-	/** Layout Controller			 **/
+	/** Tab Controller	    		 **/
 	/***********************************/
 
 	 
@@ -314,7 +570,7 @@
 				type: 'point',
 				coords: position
 			}
-			$scope.$parent.selectedObject.attributeHasChanged('geometry');
+			$scope.$parent.selectedObject.attributeHasChanged('geometry', $http);
 			$scope.hideContextMenu();
 		}
 

@@ -1,5 +1,5 @@
 <md-input-container 
-	class="md-block"
+	class="md-block rb-input-container"
 	style="<%=config.getString('inlineStyle')%>" >
 	<label><%=config.getString('label')%></label>
 	<md-icon class="md-hue-3" >description</md-icon>

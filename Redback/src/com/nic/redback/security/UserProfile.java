@@ -18,6 +18,11 @@ public class UserProfile
 	{
 		return profile.getString("username");
 	}
+	
+	public String getPasswordHash()
+	{
+		return profile.getString("passwordhash");
+	}
 
 	
 	public ArrayList<String> getRoles()

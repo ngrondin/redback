@@ -1,5 +1,6 @@
 package com.nic.redback.services;
 
+import java.security.MessageDigest;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
@@ -7,9 +8,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.logging.Logger;
-
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
@@ -30,17 +28,19 @@ public class AccessManager extends RedbackService
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected HashMap<String, Role> roles;
 	protected ArrayList<Session> cachedSessions;
-	protected SecretKeyFactory secretKeyFactory;
+	protected ArrayList<UserProfile> cachedUserProfiles;
 	protected KeySpec keySpec;
+	protected MessageDigest digest;
 	
 	public AccessManager(JSONObject c) 
 	{
 		super(c);
 		cachedSessions = new ArrayList<Session>();
+		cachedUserProfiles = new ArrayList<UserProfile>();
 		roles = new HashMap<String, Role>();
 		try
 		{
-			secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			digest = MessageDigest.getInstance("SHA-256");
 		}
 		catch(Exception e)
 		{
@@ -64,37 +64,15 @@ public class AccessManager extends RedbackService
 				String password = request.getString("password");
 				if(username != null  &&  password != null)
 				{
-					JSONObject userResult = request(configService, "{object:rbam_user, filter:{username:\"" + username + "\"}}");
-					if(userResult.getList("result").size() > 0)
+					UserProfile userProfile = getUserProfile(username);
+					if(userProfile != null)
 					{
-						JSONObject userJSON = userResult.getObject("result.0");
 		 				String passwordHash = hashString(password);
-						if(userJSON.getString("passwordhash").equals(passwordHash))
+						if(userProfile.getPasswordHash().equals(passwordHash))
 						{
-							Session session = getCachedSessionByUsername(username);
-							if(session != null  &&  System.currentTimeMillis() > session.expiry)
-								session = null;
-							
+							Session session = getSessionByUsername(username);
 							if(session == null)
-							{
-								UserProfile userProfile = buildUserProfile(userJSON);
-								JSONObject sessionResult = request(configService, "{object:rbam_session, filter:{username:\"" + username + "\", expiry:{$gt:" + System.currentTimeMillis() + "}}}");
-								if(sessionResult.getList("result").size() > 0)
-								{
-									JSONObject sessionJSON = sessionResult.getObject("result.0");
-									long expiry = Long.parseLong(sessionJSON.getString("expiry"));
-									UUID sessionId = UUID.fromString(sessionJSON.getString("_id"));
-									session = new Session(sessionId, userProfile, expiry);
-								}
-								else
-								{
-									UUID sessionId = UUID.randomUUID();
-									long expiry = System.currentTimeMillis() + 1800000;
-									session = new Session(sessionId, userProfile, expiry);
-									firebus.publish(configService, new Payload("{object:rbam_session, data:{_id:\""+ sessionId.toString()+"\", username:\"" + username + "\", expiry:\"" + expiry + "\"}}"));
-								}
-								cachedSessions.add(session);
-							}
+								session = createSession(username);
 							
 							response.put("result", "ok");
 							response.put("session", session.getJSON());
@@ -123,26 +101,7 @@ public class AccessManager extends RedbackService
 			{
 				String sessionidStr = request.getString("sessionid");
 				UUID sessionId = UUID.fromString(sessionidStr);
-				Session session = getCachedSessionById(sessionId);
-
-				if(session == null)
-				{
-					JSONObject sessionResult = request(configService, "{object:rbam_session, filter:{_id:\"" + sessionId.toString() + "\"}}");
-					if(sessionResult.getList("result").size() > 0)
-					{
-						JSONObject sessionJSON = sessionResult.getObject("result.0");
-						String username = sessionJSON.getString("username");
-						long expiry = Long.parseLong(sessionJSON.getString("expiry"));
-						JSONObject userResult = request(configService, "{object:rbam_user, filter:{username:\"" + username + "\"}}");
-						if(userResult.getList("result").size() > 0)
-						{
-							JSONObject userJSON = userResult.getObject("result.0");
-							UserProfile userProfile = buildUserProfile(userJSON);
-							session = new Session(sessionId, userProfile, expiry);
-							cachedSessions.add(session);
-						}
-					}	
-				}
+				Session session = getSessionById(sessionId);
 				
 				if(session != null)
 				{
@@ -182,14 +141,10 @@ public class AccessManager extends RedbackService
 	
 	protected String hashString(String str) throws InvalidKeySpecException
 	{
-		if(secretKeyFactory != null)
-		{
-			byte[] salt = "redback_access_s".getBytes();
-			KeySpec keySpec = new PBEKeySpec(str.toCharArray(), salt, 65536, 128);
-			byte[] hash = secretKeyFactory.generateSecret(keySpec).getEncoded();
-			return Base64.encode(hash);
-		}
-		return "";
+		digest.update(str.getBytes());
+		byte[] hash = digest.digest();
+		String hashStr = Base64.encode(hash);
+		return hashStr;
 	}
 	
 	protected Role getRole(String name) throws RedbackException
@@ -213,22 +168,127 @@ public class AccessManager extends RedbackService
 		return role;		
 	}
 	
-	protected Session getCachedSessionById(UUID sessionId)
+	protected Session createSession(String username) throws RedbackException
 	{
-		for(int i = 0; i < cachedSessions.size(); i++)
-			if(cachedSessions.get(i).sessionId.equals(sessionId))
-				return cachedSessions.get(i);
-		return null;
-	}
-
-	protected Session getCachedSessionByUsername(String username)
-	{
-		for(int i = 0; i < cachedSessions.size(); i++)
-			if(cachedSessions.get(i).userProfile.getUsername().equals(username))
-				return cachedSessions.get(i);
-		return null;
+		UUID sessionId = UUID.randomUUID();
+		long expiry = System.currentTimeMillis() + 1800000;
+		Session session = new Session(sessionId, getUserProfile(username), expiry);
+		cachedSessions.add(session);
+		firebus.publish(configService, new Payload("{object:rbam_session, data:{_id:\""+ sessionId.toString()+"\", username:\"" + username + "\", expiry:" + expiry + "}}"));
+		return session;
 	}
 	
+	protected Session getSessionById(UUID sessionId) throws RedbackException
+	{
+		Session session = null;
+		for(int i = 0; i < cachedSessions.size(); i++)
+			if(cachedSessions.get(i).sessionId.equals(sessionId))
+				if(cachedSessions.get(i).expiry > System.currentTimeMillis())
+					session = cachedSessions.get(i);
+				else
+					cachedSessions.remove(i);
+		
+		if(session == null)
+		{
+			try
+			{
+				JSONObject sessionResult = request(configService, "{object:rbam_session, filter:{_id:\"" + sessionId.toString() + "\", expiry:{$gt:" + System.currentTimeMillis() + "}}}");
+				if(sessionResult.getList("result").size() > 0)
+				{
+					JSONObject sessionJSON = sessionResult.getObject("result.0");
+					String username = sessionJSON.getString("username");
+					long expiry = sessionJSON.getNumber("expiry").longValue();
+					session = new Session(sessionId, getUserProfile(username), expiry);
+					cachedSessions.add(session);
+				}
+			}
+			catch(Exception e)
+			{
+				logger.severe(e.getMessage());
+				throw new RedbackException("Exception getting session by id from database : ", e);
+			}
+		}
+		
+		return session;
+	}
+
+	protected Session getSessionByUsername(String username) throws RedbackException
+	{
+		Session session = null;
+		for(int i = 0; i < cachedSessions.size(); i++)
+			if(cachedSessions.get(i).userProfile.getUsername().equals(username))
+				if(cachedSessions.get(i).expiry > System.currentTimeMillis())
+					session = cachedSessions.get(i);
+				else
+					cachedSessions.remove(i);
+
+		
+		if(session == null)
+		{
+			try
+			{
+				JSONObject sessionResult = request(configService, "{object:rbam_session, filter:{username:\"" + username + "\", expiry:{$gt:" + System.currentTimeMillis() + "}}}");
+				if(sessionResult.getList("result").size() > 0)
+				{
+					JSONObject sessionJSON = sessionResult.getObject("result.0");
+					long expiry = sessionJSON.getNumber("expiry").longValue();
+					UUID sessionId = UUID.fromString(sessionJSON.getString("_id"));
+					session = new Session(sessionId, getUserProfile(username), expiry);
+					cachedSessions.add(session);
+				}
+			}
+			catch(Exception e)
+			{
+				logger.severe(e.getMessage());
+				throw new RedbackException("Exception getting session by username from database : ", e);
+			}
+
+		}
+		
+		return session;
+	}
+	
+	protected UserProfile getUserProfile(String username) throws RedbackException
+	{
+		UserProfile userProfile = null;
+		for(int i = 0; i < cachedUserProfiles.size(); i++)
+			if(cachedUserProfiles.get(i).getUsername().equals(username))
+				userProfile = cachedUserProfiles.get(i);
+
+		if(userProfile == null)
+		{
+			try
+			{
+				JSONObject userResult = request(configService, "{object:rbam_user, filter:{username:\"" + username + "\"}}");
+				if(userResult.getList("result").size() > 0)
+				{
+					JSONObject userJSON = userResult.getObject("result.0");
+					JSONList rolesList = userJSON.getList("roles");
+					JSONObject rights = new JSONObject();
+	
+					for(int i = 0; i < rolesList.size(); i++)
+					{
+						String roleName = rolesList.getString(i);
+						Role role = getRole(roleName);
+						JSONObject roleRights = role.getAllRights();
+						mergeRights(rights, roleRights);
+					}
+					userJSON.put("rights", rights);
+					userProfile = new UserProfile(userJSON);				
+					cachedUserProfiles.add(userProfile);
+				}			
+			}
+			catch(Exception e)
+			{
+				logger.severe(e.getMessage());
+				throw new RedbackException("Exception getting user profile from database : ", e);
+			}
+
+		}
+		return userProfile;
+	}
+	
+	/*
 	protected UserProfile buildUserProfile(JSONObject userJSON) throws RedbackException
 	{
 		String username =  userJSON.getString("username");
@@ -254,6 +314,7 @@ public class AccessManager extends RedbackService
 		
 		return new UserProfile(userProfileJSON);
 	}
+	*/
 	
 	protected void mergeRights(JSONObject to, JSONObject from)
 	{

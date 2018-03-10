@@ -396,16 +396,23 @@ public class RedbackObject
 
 			JSONObject attributeValidation = new JSONObject();			
 			attributeValidation.put("editable", isEditable(attrName));
+			attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
+			if(attributeConfig.hasRelatedObject())
+			{
+				JSONObject relatedObjectValidation = new JSONObject();
+				relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
+				relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
+				attributeValidation.put("related", relatedObjectValidation);
+			}
+			validatonNode.put(attrName, attributeValidation);
 			
 			if(addRelated  &&  attributeConfig.hasRelatedObject())
 			{
-				attributeValidation.put("relatedobject", attributeConfig.getRelatedObjectConfig().getJSON());
 				RedbackObject relatedObject = getRelated(attrName);
 				if(relatedObject != null)
 					relatedNode.put(attrName, relatedObject.getJSON(false, false));
 			}
 			
-			validatonNode.put(attrName, attributeValidation);
 			dataNode.put(attrName, attrValue.getObject());
 		}
 		object.put("data", dataNode);

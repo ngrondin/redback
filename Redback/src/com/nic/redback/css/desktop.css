@@ -25,6 +25,11 @@ body {
 	margin: 25px 25px;
 }
 
+.rb-text {
+	display: flex;
+	align-items: center;
+}
+
 .rb-hseparator {
 	width: 50px;
 }
@@ -32,6 +37,23 @@ body {
 .rb-map { 
 	display: flex;
 	flex:1;
+}
+
+.rb-dropdown-panel {
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
+      0 13px 19px 2px rgba(0, 0, 0, 0.14),
+      0 5px 24px 4px rgba(0, 0, 0, 0.12);
+  width: 256px;
+}	
+
+.rb-input-container {
+	margin: 25px 25px;
+}
+
+.rb-search-container {
+	margin: 5px 5px;
 }
 
 .hsection {
@@ -70,6 +92,7 @@ body {
 	flex-direction: row;
 	flex-wrap: nowrap;
 	border: 0px Solid;
+	margin-top: 25px;
 }
 
 .tabheader {
@@ -110,6 +133,14 @@ body {
   border-left: 4px Solid red;
 }
 
+.list-item-highlighted {
+  background: LightGrey;
+}
+
+.list-item-parent {
+  background: #EBEDEF;
+}
+
 .attributediv {
 	display:block;
 	border: 0px Solid;
@@ -136,9 +167,6 @@ body {
   position: absolute;
 }
 
-md-input-container {
-	margin: 25px 25px;
-}
 
 md-input-container .md-errors-spacer{
 	min-height: 0px !important;
