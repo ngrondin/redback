@@ -5,11 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-
-import jdk.nashorn.internal.objects.NativeObject;
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
@@ -30,7 +26,7 @@ public class ObjectManager
 	protected String dataServiceName;
 	protected String idGeneratorServiceName;
 	protected HashMap<String, ObjectConfig> objectConfigs;
-	public ScriptEngine jsEngine;
+	protected HashMap<Long, HashMap<String, RedbackObject>> transactions;
 
 
 	public ObjectManager(JSONObject config)
@@ -39,10 +35,10 @@ public class ObjectManager
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");
-		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		if(config.containsKey("cacheconfigs") &&  config.getString("cacheconfigs").equalsIgnoreCase("false"))
 			cacheConfigs = false;
 		objectConfigs = new HashMap<String, ObjectConfig>();
+		transactions = new HashMap<Long, HashMap<String, RedbackObject>>();
 	}
 	
 	public void setFirebus(Firebus fb)
@@ -66,10 +62,8 @@ public class ObjectManager
 				if(configList.getList("result").size() > 0)
 				{
 					objectConfig = new ObjectConfig(configList.getObject("result.0"));
-					/*
 					if(cacheConfigs)
 						objectConfigs.put(object, objectConfig);
-						*/
 				}
 			}
 			catch(Exception e)
@@ -126,8 +120,28 @@ public class ObjectManager
 	
 	public RedbackObject getObject(UserProfile userProfile, String objectName, String id) throws RedbackException
 	{
-		ObjectConfig objectConfig = getObjectConfig(objectName);
-		RedbackObject object = new RedbackObject(userProfile, this, objectConfig, id);;
+		RedbackObject object = getFromCurrentTransaction(objectName, id);
+		if(object == null)
+		{
+			ObjectConfig objectConfig = getObjectConfig(objectName);
+			try
+			{
+				JSONObject dbFilter = new JSONObject("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
+				dbFilter.put("domain", userProfile.getDBFilterDomainClause());
+				JSONObject dbResult = requestData(objectConfig.getCollection(), dbFilter);
+				JSONList dbResultList = dbResult.getList("result");
+				if(dbResultList.size() > 0)
+				{
+					JSONObject dbData = dbResultList.getObject(0);
+					object = new RedbackObject(userProfile, this, objectConfig, dbData);
+					putInCurrentTransaction(object);
+				}
+			}
+			catch(Exception e)
+			{
+				error( "Problem initiating object : " + e.getMessage(), e);
+			}		
+		}
 		return object;
 	}
 	
@@ -146,7 +160,12 @@ public class ObjectManager
 			for(int i = 0; i < dbResultList.size(); i++)
 			{
 				JSONObject dbData = dbResultList.getObject(i);
-				RedbackObject object = new RedbackObject(userProfile, this, objectConfig, dbData);
+				RedbackObject object = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
+				if(object == null)
+				{
+					object = new RedbackObject(userProfile, this, objectConfig, dbData);
+					putInCurrentTransaction(object);
+				}
 				objectList.add(object);
 			}
 		}
@@ -156,12 +175,6 @@ public class ObjectManager
 			throw new RedbackException("Error getting object list", e);
 		}
 		return objectList;
-	}
-	
-
-	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, Object filterData) throws RedbackException
-	{
-		return null;
 	}
 	
 	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, String uid, String attributeName, JSONObject filterData) throws RedbackException
@@ -196,7 +209,6 @@ public class ObjectManager
 				String attributeName = it.next();
 				object.put(attributeName, new Value(updateData.get(attributeName)));
 			}
-			object.save();
 		}
 		return object;
 	}
@@ -205,6 +217,7 @@ public class ObjectManager
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		RedbackObject object = new RedbackObject(userProfile, this, objectConfig);
+		putInCurrentTransaction(object);
 		if(initialData != null)
 		{
 			Iterator<String> it = initialData.keySet().iterator();
@@ -214,7 +227,6 @@ public class ObjectManager
 				object.put(attributeName, new Value(initialData.get(attributeName)));
 			}
 		}
-		object.save();
 		return object;
 	}
 	
@@ -238,7 +250,7 @@ public class ObjectManager
 		return object;
 	}
 	
-	public Value getID(String name) throws FunctionErrorException, FunctionTimeoutException
+	public Value getNewID(String name) throws FunctionErrorException, FunctionTimeoutException
 	{
 		Payload response = firebus.requestService(idGeneratorServiceName, new Payload(name)); 
 		String value = response.getString();
@@ -246,29 +258,89 @@ public class ObjectManager
 	}
 
 	
+	protected RedbackObject getFromCurrentTransaction(String objectName, String uid)
+	{
+		long txId = Thread.currentThread().getId();
+		if(transactions.containsKey(txId))
+		{
+			return transactions.get(txId).get(objectName + uid);
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	protected void putInCurrentTransaction(RedbackObject obj)
+	{
+		long txId = Thread.currentThread().getId();
+		synchronized(transactions)
+		{
+			if(!transactions.containsKey(txId))
+				transactions.put(txId, new HashMap<String, RedbackObject>());
+		}
+		transactions.get(txId).put(obj.getObjectConfig().getName() + obj.getUID().getString(), obj);
+	}
+	
+	public void commitCurrentTransaction() throws ScriptException, RedbackException
+	{
+		long txId = Thread.currentThread().getId();
+		if(transactions.containsKey(txId))
+		{
+			HashMap<String, RedbackObject> objects = transactions.get(txId);
+			Iterator<String> it = objects.keySet().iterator();
+			while(it.hasNext())
+			{
+				String key = it.next();
+				RedbackObject object = objects.get(key);
+				object.save();
+			}
+			synchronized(transactions)
+			{
+				transactions.remove(txId);
+			}
+		}		
+	}
+	
 	protected JSONObject request(String service, JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException
 	{
 		Payload reqPayload = new Payload(request.toString());
-		logger.info("Requesting firebus service : " + service);
+		logger.info("Requesting firebus service : " + service + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
 		Payload respPayload = firebus.requestService(service, reqPayload);
-		logger.info("Receiving firebus service respnse from : " + service);
+		logger.info("Receiving firebus service respnse");
 		String respStr = respPayload.getString();
 		JSONObject result = new JSONObject(respStr);
 		return result;
 	}
 	
-	public JSONObject requestData(String objectName, JSONObject filter) throws JSONException, FunctionErrorException, FunctionTimeoutException
+	protected JSONObject requestData(String objectName, JSONObject filter) throws JSONException, FunctionErrorException, FunctionTimeoutException
 	{
 		JSONObject request = new JSONObject();
 		request.put("object", objectName);
 		request.put("filter", filter);
 		return request(dataServiceName, request);
 	}
-	
-	public void publishData(String collection, JSONObject data)
+
+	protected void publishData(String collection, JSONObject data)
 	{
+		logger.info("Publishing to firebus service : " + dataServiceName + "  " + data.toString().replace("\r\n", "").replace("\t", ""));
 		firebus.publish(dataServiceName, new Payload("{object:" + collection + ",data:" + data + "}"));
 	}
+
+	protected void error(String msg) throws RedbackException
+	{
+		error(msg, null);
+	}
+	
+	protected void error(String msg, Exception cause) throws RedbackException
+	{
+		logger.severe(msg);
+		if(cause != null)
+			throw new RedbackException(msg, cause);
+		else
+			throw new RedbackException(msg);
+	}
+
 
 }
 

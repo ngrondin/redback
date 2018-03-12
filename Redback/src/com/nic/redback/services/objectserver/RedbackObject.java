@@ -7,12 +7,14 @@ import java.util.logging.Logger;
 
 import javax.script.Bindings;
 import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.UserProfile;
+import com.nic.redback.services.objectserver.js.ObjectManagerJSWrapper;
+import com.nic.redback.services.objectserver.js.RedbackObjectJSWrapper;
 
 public class RedbackObject 
 {
@@ -31,13 +33,10 @@ public class RedbackObject
 	protected boolean isNewObject;
 
 	// Initiate existing object from pre-loaded data
-	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, JSONObject d) throws RedbackException, ScriptException
+	protected RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, JSONObject d) throws RedbackException, ScriptException
 	{
-		userProfile = up;
-		objectManager = om;
-		config = cfg;
+		init(up, om, cfg);		
 		isNewObject = false;
-		init();
 		if(canRead)
 		{
 			setDataFromDBData(d);
@@ -50,6 +49,7 @@ public class RedbackObject
 	}
 	
 	// Initiate existing object with Id and retreive data from database
+	/*
 	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, String id) throws RedbackException
 	{
 		userProfile = up;
@@ -81,23 +81,20 @@ public class RedbackObject
 		{
 			error("User does not have the right to read object " + config.getName());
 		}
-	}
+	}*/
 	
 	// Initiate new object
-	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg) throws RedbackException
+	protected RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg) throws RedbackException
 	{
-		userProfile = up;
-		objectManager = om;
-		config = cfg;
+		init(up, om, cfg);		
 		isNewObject = true;
-		init();		
 		if(canWrite)
 		{
 			try
 			{
 				if(config.getUIDGeneratorName() != null)
 				{
-					uid = objectManager.getID(config.getUIDGeneratorName());
+					uid = objectManager.getNewID(config.getUIDGeneratorName());
 					domain = new Value(userProfile.getAttribute("rb.defaultdomain"));
 					Iterator<String> it = config.getAttributeNames().iterator();
 					while(it.hasNext())
@@ -107,7 +104,7 @@ public class RedbackObject
 						String idGeneratorName = attributeConfig.getIdGeneratorName();
 						String defaultValue = attributeConfig.getDefaultValue();
 						if(idGeneratorName != null)
-							put(attributeName, objectManager.getID(idGeneratorName));
+							put(attributeName, objectManager.getNewID(idGeneratorName));
 						else if(defaultValue != null)
 							put(attributeName, defaultValue);
 					}
@@ -129,8 +126,11 @@ public class RedbackObject
 		}		
 	}
 	
-	protected void init()
+	protected void init(UserProfile up, ObjectManager om, ObjectConfig cfg)
 	{
+		userProfile = up;
+		objectManager = om;
+		config = cfg;
 		canRead = userProfile.canRead("rb.objects." + config.getName());
 		canWrite = userProfile.canWrite("rb.objects." + config.getName());
 		canExecute = userProfile.canExecute("rb.objects." + config.getName());
@@ -479,17 +479,11 @@ public class RedbackObject
 	
 	protected void executeScript(CompiledScript script) throws RedbackException
 	{
+		String fileName = (String)script.getEngine().get(ScriptEngine.FILENAME);
+		logger.info("Start executing script : " + fileName);
 		Bindings context = script.getEngine().createBindings();
-		context.put("self", this);
-		context.put("om", objectManager);
-		context.put("up", userProfile);
-		//context.put(ScriptEngine.FILENAME, "test");
-		Iterator<String> it = data.keySet().iterator();
-		while(it.hasNext())
-		{	
-			String key = it.next();
-			context.put(key, data.get(key));
-		}
+		context.put("self", new RedbackObjectJSWrapper(this));
+		context.put("om", new ObjectManagerJSWrapper(objectManager, userProfile));
 		try
 		{
 			script.eval(context);
@@ -498,6 +492,7 @@ public class RedbackObject
 		{
 			error("Problem occurred executing a script", e);
 		}		
+		logger.info("Finish executing script : " + fileName);
 	}
 	
 	protected void error(String msg) throws RedbackException
