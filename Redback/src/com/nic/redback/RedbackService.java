@@ -12,6 +12,7 @@ import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.services.AccessManager;
 import com.nic.redback.services.IDGenerator;
 import com.nic.redback.services.ObjectServer;
+import com.nic.redback.services.ProcessServer;
 import com.nic.redback.services.UIServer;
 
 public abstract class RedbackService implements  ServiceProvider
@@ -68,6 +69,10 @@ public abstract class RedbackService implements  ServiceProvider
 		else if(type.equalsIgnoreCase("uiserver"))
 		{
 			return new UIServer(config);
+		}
+		else if(type.equalsIgnoreCase("processserver"))
+		{
+			return new ProcessServer(config);
 		}
 		else if(type.equalsIgnoreCase("idgenerator"))
 		{

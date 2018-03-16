@@ -25,6 +25,14 @@
 			}
 		},
 		{
+			type:"processserver",
+			name:"rbpm",
+			config:{
+				configservice:"mongo",
+				accessmanagementservice:"rbam"
+			}
+		},
+		{
 			type:"idgenerator",
 			name:"rbid",
 			config:{
@@ -52,15 +60,15 @@
 			"servicename":"rbfiles",
 			"consumername":"rbfiles",
 			"config": {
-				"path":"D:\Scratch\sharefiles"						
+				"path":"c:\tmp\sharefiles"						
 			}
 		},
 		{
-			"type":"mongo-deactivate",
+			"type":"mongo",
 			"servicename":"mongo",
 			"consumername":"mongo",
 			"config": {
-				"connectionstring":"192.168.1.4",
+				"connectionstring":"localhost",
 				"database":"local"										
 			}
 		}

@@ -1,0 +1,44 @@
+package com.nic.redback.services.processserver;
+
+import java.util.logging.Logger;
+
+import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.RedbackException;
+import com.nic.redback.security.UserProfile;
+
+public abstract class ProcessUnit 
+{
+	private Logger logger = Logger.getLogger("com.nic.redback");
+	protected String nodeId;
+	protected ProcessManager processManager;
+	
+	public ProcessUnit(ProcessManager pm, JSONObject config)
+	{
+		nodeId = config.getString("id");
+	}
+	
+	public String getId()
+	{
+		return nodeId;
+	}
+	
+	public void execute(UserProfile up, ProcessInstance pi) throws RedbackException
+	{
+		pi.setCurrentNode(null);
+	}
+
+	protected void error(String msg) throws RedbackException
+	{
+		error(msg, null);
+	}
+	
+	protected void error(String msg, Exception cause) throws RedbackException
+	{
+		logger.severe(msg);
+		if(cause != null)
+			throw new RedbackException(msg, cause);
+		else
+			throw new RedbackException(msg);
+	}
+
+}
