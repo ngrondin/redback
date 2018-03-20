@@ -4,7 +4,6 @@ import java.util.logging.Logger;
 
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
-import com.nic.redback.security.UserProfile;
 
 public abstract class ProcessUnit 
 {
@@ -15,6 +14,7 @@ public abstract class ProcessUnit
 	public ProcessUnit(ProcessManager pm, JSONObject config)
 	{
 		nodeId = config.getString("id");
+		processManager = pm;
 	}
 	
 	public String getId()
@@ -22,7 +22,7 @@ public abstract class ProcessUnit
 		return nodeId;
 	}
 	
-	public void execute(UserProfile up, ProcessInstance pi) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		pi.setCurrentNode(null);
 	}

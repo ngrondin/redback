@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import com.nic.firebus.utils.JSONList;
-import com.nic.firebus.utils.JSONLiteral;
 import com.nic.firebus.utils.JSONObject;
-import com.nic.redback.security.UserProfile;
 
 public class ProcessInstance 
 {
@@ -16,8 +14,8 @@ public class ProcessInstance
 	protected JSONObject data;
 	protected String currentNode;
 	protected boolean complete;
-	protected ArrayList<String> assigneeList;
-	protected String assigneeType;
+	protected JSONList assignees;
+	protected JSONList receivedNotifications;
 	
 	protected ProcessInstance(String pn, int v, JSONObject d)
 	{
@@ -26,7 +24,8 @@ public class ProcessInstance
 		id = UUID.randomUUID();
 		data = d;	
 		complete = false;
-		assigneeList = new ArrayList<String>();
+		assignees = new JSONList();
+		receivedNotifications = new JSONList();
 	}
 	
 	protected ProcessInstance(JSONObject c)
@@ -37,21 +36,15 @@ public class ProcessInstance
 		currentNode = c.getString("currentnode");
 		complete = c.getBoolean("compelte");
 		data = c.getObject("data");
-		assigneeList = new ArrayList<String>();
-		if(c.containsKey("assignee")  &&  c.containsKey("assigneetype"))
-		{
-			assigneeType = c.getString("assigneetype");
-			if(c.get("assignee") instanceof JSONList)
-			{
-				JSONList list = c.getList("assignee");
-				for(int i = 0; i < list.size(); i++)
-					assigneeList.add(list.getString(i));
-			}
-			else
-			{
-				assigneeList.add(c.getString("assignee"));
-			}
-		}
+		if(c.containsKey("assignees")  &&  c.get("assignees") instanceof JSONList)
+			assignees = c.getList("assignees");
+		else
+			assignees = new JSONList();
+		
+		if(c.containsKey("receivednotifications")  &&  c.get("receivednotifications") instanceof JSONList)
+			receivedNotifications = c.getList("receivednotifications");
+		else
+			receivedNotifications = new JSONList();
 	}
 	
 	public String getId()
@@ -74,6 +67,11 @@ public class ProcessInstance
 		return data;
 	}
 	
+	public void setData(JSONObject d)
+	{
+		data = d;
+	}
+	
 	public void setCurrentNode(String cn)
 	{
 		if(cn == null)
@@ -86,20 +84,32 @@ public class ProcessInstance
 		return currentNode;
 	}
 	
-	public void setAssignee(String t, String a)
+	public void addAssignee(Assignee a)
 	{
-		assigneeType = t;
-		assigneeList.add(a);
+		assignees.add(a.getJSON());
 	}
 	
-	public String getAssigneeType()
+	public void clearAssignees()
 	{
-		return assigneeType;
+		assignees = new JSONList();
 	}
 	
-	public ArrayList<String> getAssignees()
+	public ArrayList<Assignee> getAssignees()
 	{
-		return assigneeList;
+		ArrayList<Assignee> ret = new ArrayList<Assignee>();
+		for(int i = 0; i < assignees.size(); i++)
+			ret.add(new Assignee(assignees.getObject(i)));
+		return ret;
+	}
+	
+	public void addNotification(JSONObject notification)
+	{
+		receivedNotifications.add(notification);
+	}
+	
+	public JSONList getReceivedNotifications()
+	{
+		return receivedNotifications;
 	}
 	
 	public boolean isComplete()
@@ -114,21 +124,10 @@ public class ProcessInstance
 		retVal.put("process", processName);
 		retVal.put("version", processVersion);
 		retVal.put("currentnode", currentNode);
-		if(assigneeType != null  &&  assigneeList != null)
-		{
-			retVal.put("assgneeType", assigneeType);
-			if(assigneeList.size() == 1)
-			{
-				retVal.put("assignee", assigneeList.get(0));			
-			}
-			else
-			{
-				JSONList list = new JSONList();
-				for(int i = 0; i < assigneeList.size(); i++)
-					list.add(new JSONLiteral(assigneeList.get(i)));
-				retVal.put("assignee", list);
-			}
-		}
+		if(assignees.size() > 0)
+			retVal.put("assignees", assignees);
+		if(receivedNotifications.size() > 0)
+			retVal.put("receivednotifications", receivedNotifications);
 		retVal.put("data", data);
 		return retVal;
 	}

@@ -9,12 +9,15 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import jdk.nashorn.api.scripting.JSObject;
+
+import com.nic.firebus.utils.FirebusDataUtil;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
-import com.nic.redback.security.UserProfile;
 import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 import com.nic.redback.services.processserver.ProcessUnit;
+import com.nic.redback.services.processserver.js.ProcessManagerJSWrapper;
 import com.nic.redback.utils.StringUtils;
 
 public class ScriptUnit extends ProcessUnit 
@@ -27,7 +30,7 @@ public class ScriptUnit extends ProcessUnit
 	{
 		super(pm, config);
 		processManager = pm;
-		nextNode = config.getString("next");
+		nextNode = config.getString("nextnode");
 		ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		//jsEngine.put(ScriptEngine.FILENAME, scriptName);
 		String source = StringUtils.unescape(config.getString("source"));
@@ -41,17 +44,19 @@ public class ScriptUnit extends ProcessUnit
 		}
 	}
 
-	public void execute(UserProfile up, ProcessInstance pi) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		String fileName = (String)script.getEngine().get(ScriptEngine.FILENAME);
 		logger.info("Start executing script : " + fileName);
 		Bindings context = script.getEngine().createBindings();
-		context.put("pi", pi);
-		context.put("pm", processManager);
+		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
+		context.put("pm", new ProcessManagerJSWrapper(processManager));
+		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalData()));
 		try
 		{
 			script.eval(context);
 			pi.setCurrentNode(nextNode);
+			pi.setData(FirebusDataUtil.convertJSObjectToDataObject((JSObject)context.get("data")));
 		} 
 		catch (ScriptException e)
 		{

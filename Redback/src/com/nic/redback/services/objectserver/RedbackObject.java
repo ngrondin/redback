@@ -356,6 +356,7 @@ public class RedbackObject
 				updatedAttributes.clear();
 				objectManager.publishData(config.getCollection(), dbData);
 				isNewObject = false;
+				executeScriptsForEvent("aftersave");
 			}
 			else
 			{

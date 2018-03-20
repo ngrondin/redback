@@ -1,17 +1,19 @@
 package com.nic.redback.services.processserver;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.UserProfile;
 import com.nic.redback.services.processserver.units.InteractionUnit;
-import com.nic.redback.services.processserver.units.NotificationUnit;
+import com.nic.redback.services.processserver.units.ActionUnit;
 import com.nic.redback.services.processserver.units.ScriptUnit;
 
 public class Process 
 {
+	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected HashMap<String, ProcessUnit> nodes;
 	protected String startNode;
 	protected String name;
@@ -31,10 +33,12 @@ public class Process
 			ProcessUnit unit = null;
 			if(unitType.equals("script"))
 				unit = new ScriptUnit(pm, nodeConfig);
-			else if(unitType.equals("notification"))
-				unit = new NotificationUnit(pm, nodeConfig);
+			else if(unitType.equals("action"))
+				unit = new ActionUnit(pm, nodeConfig);
 			else if(unitType.equals("interaction"))
 				unit = new InteractionUnit(pm, nodeConfig);
+			else
+				error("Unit type '" + unitType + "' is not recognised");
 			nodes.put(unit.getId(), unit);
 		}
 	}
@@ -57,24 +61,66 @@ public class Process
 		execute(up, pi);
 	}
 	
-	public void processAction(UserProfile up, ProcessInstance pi, String action, JSONObject data) throws RedbackException
+	public void processAction(UserProfile up, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
 	{
-		if(nodes.get(pi.getCurrentNode()) instanceof InteractionUnit)
+		String currentNode = pi.getCurrentNode();
+		if(currentNode != null)
 		{
-			String
-			((InteractionUnit)nodes.get(pi.getCurrentNode())).processAction(up, pi, action, data);
-			execute(up, pi);
+			if(nodes.get(currentNode) instanceof InteractionUnit)
+			{
+				((InteractionUnit)nodes.get(currentNode)).processAction(up,extpid,  pi, action, data);
+				execute(up, pi);
+			}
+			else
+			{
+				error("Current node is not an interaction node");
+			}
 		}
+		else
+		{
+			if(pi.isComplete())
+				error("Process instance " + pi.getId() + " is complete");
+			else
+				error("Process instance " + pi.getId() + " has not been start yet");
+		}	
+
 	}
 	
 	protected void execute(UserProfile up, ProcessInstance pi) throws RedbackException
 	{
-		while(!(nodes.get(pi.getCurrentNode()) instanceof InteractionUnit)  &&  !pi.isComplete())
+		String currentNode = pi.getCurrentNode();
+		if(currentNode != null)
 		{
-			nodes.get(pi.getCurrentNode()).execute(up, pi);
+			while(currentNode != null  &&  !pi.isComplete()  &&  !(nodes.get(currentNode) instanceof InteractionUnit))
+			{
+				nodes.get(currentNode).execute(pi);
+				currentNode = pi.getCurrentNode();
+			}
+			
+			if(currentNode != null  &&  !pi.isComplete()  &&  nodes.get(currentNode) instanceof InteractionUnit)
+				((InteractionUnit)nodes.get(currentNode)).execute(pi);			
 		}
-		
-		if(nodes.get(pi.getCurrentNode()) instanceof InteractionUnit)
-			((InteractionUnit)nodes.get(pi.getCurrentNode())).execute(up, pi);
+		else
+		{
+			if(pi.isComplete())
+				error("Process instance " + pi.getId() + " is complete");
+			else
+				error("Process instance " + pi.getId() + " has not been start yet");
+		}	
 	}
+	
+	protected void error(String msg) throws RedbackException
+	{
+		error(msg, null);
+	}
+	
+	protected void error(String msg, Exception cause) throws RedbackException
+	{
+		logger.severe(msg);
+		if(cause != null)
+			throw new RedbackException(msg, cause);
+		else
+			throw new RedbackException(msg);
+	}
+
 }

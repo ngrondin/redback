@@ -7,7 +7,6 @@
 			name:"rbos",
 			config:{
 				configservice:"mongo",
-				cacheconfigs:true,
 				dataservice:"mongo",
 				idgeneratorservice:"rbid",
 				accessmanagementservice:"rbam"
@@ -29,7 +28,12 @@
 			name:"rbpm",
 			config:{
 				configservice:"mongo",
-				accessmanagementservice:"rbam"
+				accessmanagementservice:"rbam",
+				sysusername:"processuser",
+				sysuserpassword:"poil",
+				globaldata:{
+					"objectservicename":"rbos"
+				}
 			}
 		},
 		{
@@ -52,7 +56,7 @@
 			"type":"httplistener",
 			"config": {
 				"port":"8000",
-				"services": ["rbos", "rbui"]		
+				"services": ["rbos", "rbui", "rbpm"]		
 			}
 		},
 		{
@@ -60,7 +64,7 @@
 			"servicename":"rbfiles",
 			"consumername":"rbfiles",
 			"config": {
-				"path":"c:\tmp\sharefiles"						
+				"path":"D:\Scratch\sharefiles"						
 			}
 		},
 		{
@@ -68,8 +72,8 @@
 			"servicename":"mongo",
 			"consumername":"mongo",
 			"config": {
-				"connectionstring":"localhost",
-				"database":"local"										
+				"connectionstring":"192.168.1.4",
+				"database":"local"						
 			}
 		}
 	]

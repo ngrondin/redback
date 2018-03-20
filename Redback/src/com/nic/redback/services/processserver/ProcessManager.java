@@ -2,7 +2,10 @@ package com.nic.redback.services.processserver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
+
+import javax.script.ScriptException;
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
@@ -22,11 +25,19 @@ public class ProcessManager
 	protected Firebus firebus;
 	protected String configServiceName;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
+	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
+	protected String sysUserName;
+	protected String sysUserPassword;
+	protected JSONObject globalData;
 
 	public ProcessManager(JSONObject config)
 	{
 		configServiceName = config.getString("configservice");
+		sysUserName = config.getString("sysusername");
+		sysUserPassword = config.getString("sysuserpassword");
 		processes = new HashMap<String, HashMap<Integer, Process>>();
+		transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
+		globalData = config.getObject("globaldata");
 	}
 	
 	public void setFirebus(Firebus fb)
@@ -38,7 +49,7 @@ public class ProcessManager
 	{
 		try
 		{
-			JSONObject configList = requestConfig(new JSONObject("{object:rbpm_config,filter:{name:" + name + "}}"));
+			JSONObject configList = request(new JSONObject("{object:rbpm_config,filter:{name:" + name + "}}"));
 			JSONList list = configList.getList("result");
 			if(list.size() > 0)
 			{
@@ -78,49 +89,145 @@ public class ProcessManager
 	
 	protected ProcessInstance getProcessInstance(String pid) throws RedbackException
 	{
-		ProcessInstance pi = null;
-		try 
+		ProcessInstance pi = getFromCurrentTransaction(pid);
+		if(pi == null)
 		{
-			JSONObject piJSON = requestConfig(new JSONObject("{object:rbpm_instance,filter:{_id:\"" + pid + "\"}}"));
-			pi = new ProcessInstance(piJSON.getObject("result.0"));
-		} 
-		catch (Exception e) 
-		{
-			throw new RedbackException("Error retreiving process instance", e);
-		} 	
+			try 
+			{
+				JSONObject piJSON = request(new JSONObject("{object:rbpm_instance,filter:{_id:\"" + pid + "\"}}"));
+				pi = new ProcessInstance(piJSON.getObject("result.0"));
+				putInCurrentTransaction(pi);
+			} 
+			catch (Exception e) 
+			{
+				throw new RedbackException("Error retreiving process instance", e);
+			} 	
+		}
 		return pi;
+	}
+	
+	public UserProfile getSystemUserProfile()
+	{
+		JSONObject upObject = new JSONObject();
+		upObject.put("username", sysUserName);
+		upObject.put("attributes", new JSONObject());
+		upObject.getObject("attributes").put("rb", new JSONObject());
+		upObject.getObject("attributes.rb").put("process", new JSONObject());
+		upObject.getObject("attributes.rb.process").put("sysuser", true);
+		UserProfile up = new UserProfile(upObject);
+		return up;
+	}
+	
+	public JSONObject getGlobalData()
+	{
+		return globalData;
 	}
 	
 	public ProcessInstance initiateProcess(UserProfile up, String name, JSONObject data) throws RedbackException
 	{
 		Process process = getProcess(name);
 		ProcessInstance pi = process.createInstance(up, data);
+		putInCurrentTransaction(pi);
 		process.startInstance(up, pi);
-		publishInstance(pi);
 		return pi;
 	}
 
-	public ArrayList<String[]> getActions(UserProfile up, String pid) throws RedbackException
+	public JSONList getActions(UserProfile up, String pid) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);
 		Process process = getProcess(pi.getProcessName());
 		ProcessUnit node = process.getNode(pi.getCurrentNode());
 		if(node instanceof InteractionUnit)
-			return ((InteractionUnit)node).getActions();
+			return ((InteractionUnit)node).getActions(up, pid, pi);
 		else
 			return null;
 	}
 	
-	public ProcessInstance processEvent(UserProfile up, String pid, String event, JSONObject data) throws RedbackException
+	public ProcessInstance processAction(UserProfile up, String extpid, String pid, String event, JSONObject data) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);
 		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
-		process.processEvent(up, pi, event, data);
-		publishInstance(pi);
+		process.processAction(up, extpid, pi, event, data);
 		return pi;
 	}
 	
-	protected JSONObject requestConfig(JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException
+	public ArrayList<ProcessInstance> findProcesses(UserProfile up, JSONObject filter) throws RedbackException
+	{
+		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
+		try 
+		{
+			JSONObject result = request(new JSONObject("{object:rbpm_instance,filter:" + filter + "}"));
+			JSONList resultList = result.getList("result");
+			for(int i = 0; i < resultList.size(); i++)
+			{
+				ProcessInstance pi = getFromCurrentTransaction(resultList.getObject(i).getString("_id"));
+				if(pi == null)
+				{
+					pi = new ProcessInstance(resultList.getObject(i));
+					putInCurrentTransaction(pi);
+				}
+				list.add(pi);
+			}
+		} 
+		catch (Exception e) 
+		{
+			throw new RedbackException("Error retreiving process instance", e);
+		} 	
+		return list;
+	}
+	
+	public void notifyProcess(UserProfile up, String extpid, String pid, JSONObject notification) throws RedbackException
+	{
+		ProcessInstance pi = getProcessInstance(pid);
+		notification.put("user", up.getUsername());
+		if(extpid != null)
+			notification.put("extpid", extpid);
+		pi.addNotification(notification);
+	}
+	
+	
+	protected ProcessInstance getFromCurrentTransaction(String pid)
+	{
+		long txId = Thread.currentThread().getId();
+		if(transactions.containsKey(txId))
+			return transactions.get(txId).get(pid);
+		else
+			return null;
+	}
+
+	protected void putInCurrentTransaction(ProcessInstance pi)
+	{
+		long txId = Thread.currentThread().getId();
+		synchronized(transactions)
+		{
+			if(!transactions.containsKey(txId))
+				transactions.put(txId, new HashMap<String, ProcessInstance>());
+		}
+		transactions.get(txId).put(pi.getId(), pi);
+	}
+	
+	public void commitCurrentTransaction() throws ScriptException, RedbackException
+	{
+		long txId = Thread.currentThread().getId();
+		if(transactions.containsKey(txId))
+		{
+			HashMap<String, ProcessInstance> objects = transactions.get(txId);
+			Iterator<String> it = objects.keySet().iterator();
+			while(it.hasNext())
+			{
+				String key = it.next();
+				ProcessInstance pi = objects.get(key);
+				publishInstance(pi);
+			}
+			synchronized(transactions)
+			{
+				transactions.remove(txId);
+			}
+		}		
+	}
+	
+	
+	protected JSONObject request(JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException
 	{
 		Payload reqPayload = new Payload(request.toString());
 		logger.info("Requesting firebus config service : " + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
@@ -134,7 +241,7 @@ public class ProcessManager
 	protected void publishInstance(ProcessInstance pi)
 	{
 		logger.info("Publishing to firebus service : " + configServiceName + "  ");
-		firebus.publish(configServiceName, new Payload("{object:rbpm_instance,data:" + pi.getJSON() + "}"));
+		firebus.publish(configServiceName, new Payload("{object:rbpm_instance,data:" + pi.getJSON() + ", operation:replace}"));
 	}
 
 	protected void error(String msg) throws RedbackException

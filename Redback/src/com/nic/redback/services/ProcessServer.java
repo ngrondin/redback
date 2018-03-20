@@ -1,11 +1,7 @@
 package com.nic.redback.services;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Logger;
-
-import javax.script.ScriptException;
-
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
@@ -14,9 +10,6 @@ import com.nic.firebus.information.ServiceInformation;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.security.Session;
-import com.nic.redback.services.objectserver.ObjectConfig;
-import com.nic.redback.services.objectserver.ObjectManager;
-import com.nic.redback.services.objectserver.RedbackObject;
 import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 
@@ -50,11 +43,8 @@ public class ProcessServer extends RedbackAuthenticatedService
 			String username = request.getString("username");
 			String password = request.getString("password");
 			String action = request.getString("action");
-			String processId = request.getString("pid");
-			JSONObject options = request.getObject("options");
+			//JSONObject options = request.getObject("options");
 			JSONObject responseData = null;
-			boolean addValidation = false;
-			boolean addRelated = false;
 			
 			if(username != null  &&  password != null)
 			{
@@ -77,6 +67,7 @@ public class ProcessServer extends RedbackAuthenticatedService
 						if(name != null)
 						{
 							ProcessInstance pi = processManager.initiateProcess(session.getUserProfile(), name, data);
+							processManager.commitCurrentTransaction();
 							responseData = new JSONObject("{\"pid\":\"" + pi.getId() + "\"}");
 						}
 						else
@@ -84,19 +75,21 @@ public class ProcessServer extends RedbackAuthenticatedService
 							responseData = new JSONObject("{\"requesterror\":\"A 'initiate' action requires a 'name' attribute\"}");
 						}
 					}
-					else if(action.equals("event"))
+					else if(action.equals("processaction"))
 					{
+						String extpid = request.getString("extpid");
 						String pid = request.getString("pid");
-						String event = request.getString("event");
+						String processAction = request.getString("processaction");
 						JSONObject data = request.getObject("data");
-						if(pid != null)
+						if(pid != null &&  processAction != null)
 						{
-							ProcessInstance pi = processManager.processEvent(session.getUserProfile(), pid, event, data);
+							processManager.processAction(session.getUserProfile(), extpid, pid, processAction, data);
+							processManager.commitCurrentTransaction();
 							responseData = new JSONObject("{\"result\":\"OK\"}");
 						}
 						else
 						{
-							responseData = new JSONObject("{\"requesterror\":\"An 'event' action requires a 'pid' attribute\"}");
+							responseData = new JSONObject("{\"requesterror\":\"A 'processAction' request requires 'pid' and 'processaction' attributes\"}");
 						}
 					}
 					else if(action.equals("getactions"))
@@ -104,24 +97,48 @@ public class ProcessServer extends RedbackAuthenticatedService
 						String pid = request.getString("pid");
 						if(pid != null)
 						{
-							ArrayList<String[]> actions = processManager.getActions(session.getUserProfile(), pid);
+							JSONList actions = processManager.getActions(session.getUserProfile(), pid);
 							responseData = new JSONObject();
-							JSONList list = new JSONList();
-							for(int i = 0; i < actions.size(); i++)
-							{
-								JSONObject entry = new JSONObject();
-								entry.put("key", actions.get(i)[0]);
-								entry.put("name", actions.get(i)[1]);
-								list.add(entry);
-							}
-							responseData.put("list", list);
+							responseData.put("actions", actions);
 						}
 						else
 						{
 							responseData = new JSONObject("{\"requesterror\":\"A 'getactions' action requires a 'pid' attribute\"}");
 						}
 					}
-					
+					else if(action.equals("findprocesses"))
+					{
+						JSONObject filter = request.getObject("filter");
+						if(filter != null)
+						{
+							ArrayList<ProcessInstance> result = processManager.findProcesses(session.getUserProfile(), filter);
+							JSONList responseList = new JSONList();
+							for(int i = 0; i < result.size(); i++)
+								responseList.add(result.get(i).getId());
+							responseData = new JSONObject();
+							responseData.put("result", responseList);
+						}
+						else
+						{
+							responseData = new JSONObject("{\"requesterror\":\"A 'getactions' action requires a 'pid' attribute\"}");
+						}
+					}
+					else if(action.equals("notifyprocess"))
+					{
+						String extpid = request.getString("extpid");
+						String pid = request.getString("pid");
+						JSONObject notification = request.getObject("notification");
+						if(pid != null)
+						{
+							processManager.notifyProcess(session.getUserProfile(), extpid, pid, notification);
+							processManager.commitCurrentTransaction();
+							responseData = new JSONObject("{\"result\":\"OK\"}");
+						}
+						else
+						{
+							responseData = new JSONObject("{\"requesterror\":\"A 'processAction' request requires 'pid' and 'processaction' attributes\"}");
+						}
+					}					
 				}
 				else
 				{
