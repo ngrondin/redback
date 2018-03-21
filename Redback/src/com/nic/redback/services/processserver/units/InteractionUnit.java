@@ -10,6 +10,7 @@ import com.nic.redback.services.processserver.AssigneeConfig;
 import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 import com.nic.redback.services.processserver.ProcessUnit;
+import com.nic.redback.security.Session;
 import com.nic.redback.security.UserProfile;
 
 public class InteractionUnit extends ProcessUnit 
@@ -44,15 +45,15 @@ public class InteractionUnit extends ProcessUnit
 			Assignee assignee = new Assignee(assigneeConfigs.get(i).getType(), assigneeConfigs.get(i).evaluateId(pi));
 			pi.addAssignee(assignee);
 			if(assignee.getType() == Assignee.PROCESS  &&  notification.getString("method").equals("rbprocessnotification"))
-				processManager.notifyProcess(processManager.getSystemUserProfile(), pi.getId(), assignee.getId(), notificationMsg);
+				processManager.notifyProcess(processManager.getSystemUserSession(), pi.getId(), assignee.getId(), notificationMsg);
 			//TODO: Add more notificatio methods
 		}
 	}
 
-	public void processAction(UserProfile up, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
+	public void processAction(Session session, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
 	{
 		boolean foundAction = false;
-		if(isAssignee(up, extpid, pi))
+		if(isAssignee(session.getUserProfile(), extpid, pi))
 		{
 			for(int i = 0; i < actions.size(); i++)
 			{
@@ -76,9 +77,9 @@ public class InteractionUnit extends ProcessUnit
 		}		
 	}
 
-	public JSONList getActions(UserProfile up, String extpid, ProcessInstance pi)
+	public JSONList getActions(Session session, String extpid, ProcessInstance pi)
 	{
-		if(isAssignee(up, extpid, pi))
+		if(isAssignee(session.getUserProfile(), extpid, pi))
 		{
 			return getActions();
 		}

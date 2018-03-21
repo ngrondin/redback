@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
-import com.nic.redback.security.UserProfile;
+import com.nic.redback.security.Session;
 import com.nic.redback.services.processserver.units.InteractionUnit;
 import com.nic.redback.services.processserver.units.ActionUnit;
 import com.nic.redback.services.processserver.units.ScriptUnit;
@@ -48,28 +48,28 @@ public class Process
 		return nodes.get(n);
 	}
 
-	public ProcessInstance createInstance(UserProfile up, JSONObject data)
+	public ProcessInstance createInstance(Session session, JSONObject data)
 	{
 		ProcessInstance pi = new ProcessInstance(name, version, data);
 		return pi;
 	}
 	
-	public void startInstance(UserProfile up, ProcessInstance pi) throws RedbackException
+	public void startInstance(Session session, ProcessInstance pi) throws RedbackException
 	{
 		pi.setCurrentNode(startNode);
-		pi.getData().put("originator", up.getUsername());
-		execute(up, pi);
+		pi.getData().put("originator", session.getUserProfile().getUsername());
+		execute(session, pi);
 	}
 	
-	public void processAction(UserProfile up, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
+	public void processAction(Session session, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
 	{
 		String currentNode = pi.getCurrentNode();
 		if(currentNode != null)
 		{
 			if(nodes.get(currentNode) instanceof InteractionUnit)
 			{
-				((InteractionUnit)nodes.get(currentNode)).processAction(up,extpid,  pi, action, data);
-				execute(up, pi);
+				((InteractionUnit)nodes.get(currentNode)).processAction(session, extpid,  pi, action, data);
+				execute(session, pi);
 			}
 			else
 			{
@@ -86,7 +86,7 @@ public class Process
 
 	}
 	
-	protected void execute(UserProfile up, ProcessInstance pi) throws RedbackException
+	protected void execute(Session session, ProcessInstance pi) throws RedbackException
 	{
 		String currentNode = pi.getCurrentNode();
 		if(currentNode != null)

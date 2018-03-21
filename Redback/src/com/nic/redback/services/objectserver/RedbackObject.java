@@ -10,16 +10,18 @@ import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import com.nic.firebus.utils.FirebusDataUtil;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
-import com.nic.redback.security.UserProfile;
+import com.nic.redback.security.Session;
 import com.nic.redback.services.objectserver.js.ObjectManagerJSWrapper;
 import com.nic.redback.services.objectserver.js.RedbackObjectJSWrapper;
+import com.nic.redback.utils.FirebusJSWrapper;
 
 public class RedbackObject 
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
-	protected UserProfile userProfile;
+	protected Session session;
 	protected ObjectManager objectManager;
 	protected ObjectConfig config;
 	protected Value uid;
@@ -33,9 +35,9 @@ public class RedbackObject
 	protected boolean isNewObject;
 
 	// Initiate existing object from pre-loaded data
-	protected RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, JSONObject d) throws RedbackException, ScriptException
+	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, JSONObject d) throws RedbackException, ScriptException
 	{
-		init(up, om, cfg);		
+		init(s, om, cfg);		
 		isNewObject = false;
 		if(canRead)
 		{
@@ -84,9 +86,9 @@ public class RedbackObject
 	}*/
 	
 	// Initiate new object
-	protected RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg) throws RedbackException
+	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg) throws RedbackException
 	{
-		init(up, om, cfg);		
+		init(s, om, cfg);		
 		isNewObject = true;
 		if(canWrite)
 		{
@@ -95,7 +97,7 @@ public class RedbackObject
 				if(config.getUIDGeneratorName() != null)
 				{
 					uid = objectManager.getNewID(config.getUIDGeneratorName());
-					domain = new Value(userProfile.getAttribute("rb.defaultdomain"));
+					domain = new Value(session.getUserProfile().getAttribute("rb.defaultdomain"));
 					Iterator<String> it = config.getAttributeNames().iterator();
 					while(it.hasNext())
 					{
@@ -126,14 +128,14 @@ public class RedbackObject
 		}		
 	}
 	
-	protected void init(UserProfile up, ObjectManager om, ObjectConfig cfg)
+	protected void init(Session s, ObjectManager om, ObjectConfig cfg)
 	{
-		userProfile = up;
+		session = s;
 		objectManager = om;
 		config = cfg;
-		canRead = userProfile.canRead("rb.objects." + config.getName());
-		canWrite = userProfile.canWrite("rb.objects." + config.getName());
-		canExecute = userProfile.canExecute("rb.objects." + config.getName());
+		canRead = session.getUserProfile().canRead("rb.objects." + config.getName());
+		canWrite = session.getUserProfile().canWrite("rb.objects." + config.getName());
+		canExecute = session.getUserProfile().canExecute("rb.objects." + config.getName());
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
@@ -261,7 +263,7 @@ public class RedbackObject
 						RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
 						String relatedObjectName = relatedObjectConfig.getObjectName();
 						JSONObject relatedObjectFindFilter = getRelatedObjectFindFilter(name);
-						ArrayList<RedbackObject> resultList = objectManager.getObjectList(userProfile, relatedObjectName, relatedObjectFindFilter);
+						ArrayList<RedbackObject> resultList = objectManager.getObjectList(session, relatedObjectName, relatedObjectFindFilter);
 						if(resultList.size() > 0)
 							related.put(name, resultList.get(0));
 					}
@@ -484,7 +486,9 @@ public class RedbackObject
 		logger.info("Start executing script : " + fileName);
 		Bindings context = script.getEngine().createBindings();
 		context.put("self", new RedbackObjectJSWrapper(this));
-		context.put("om", new ObjectManagerJSWrapper(objectManager, userProfile));
+		context.put("om", new ObjectManagerJSWrapper(objectManager, session));
+		context.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session.getSessionId().toString()));
+		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(objectManager.getGlobalVariables()));
 		try
 		{
 			script.eval(context);

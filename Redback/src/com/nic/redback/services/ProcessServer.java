@@ -66,7 +66,7 @@ public class ProcessServer extends RedbackAuthenticatedService
 						JSONObject data = request.getObject("data");
 						if(name != null)
 						{
-							ProcessInstance pi = processManager.initiateProcess(session.getUserProfile(), name, data);
+							ProcessInstance pi = processManager.initiateProcess(session, name, data);
 							processManager.commitCurrentTransaction();
 							responseData = new JSONObject("{\"pid\":\"" + pi.getId() + "\"}");
 						}
@@ -83,7 +83,7 @@ public class ProcessServer extends RedbackAuthenticatedService
 						JSONObject data = request.getObject("data");
 						if(pid != null &&  processAction != null)
 						{
-							processManager.processAction(session.getUserProfile(), extpid, pid, processAction, data);
+							processManager.processAction(session, extpid, pid, processAction, data);
 							processManager.commitCurrentTransaction();
 							responseData = new JSONObject("{\"result\":\"OK\"}");
 						}
@@ -97,7 +97,7 @@ public class ProcessServer extends RedbackAuthenticatedService
 						String pid = request.getString("pid");
 						if(pid != null)
 						{
-							JSONList actions = processManager.getActions(session.getUserProfile(), pid);
+							JSONList actions = processManager.getActions(session, pid);
 							responseData = new JSONObject();
 							responseData.put("actions", actions);
 						}
@@ -111,7 +111,7 @@ public class ProcessServer extends RedbackAuthenticatedService
 						JSONObject filter = request.getObject("filter");
 						if(filter != null)
 						{
-							ArrayList<ProcessInstance> result = processManager.findProcesses(session.getUserProfile(), filter);
+							ArrayList<ProcessInstance> result = processManager.findProcesses(session, filter);
 							JSONList responseList = new JSONList();
 							for(int i = 0; i < result.size(); i++)
 								responseList.add(result.get(i).getId());
@@ -130,7 +130,7 @@ public class ProcessServer extends RedbackAuthenticatedService
 						JSONObject notification = request.getObject("notification");
 						if(pid != null)
 						{
-							processManager.notifyProcess(session.getUserProfile(), extpid, pid, notification);
+							processManager.notifyProcess(session, extpid, pid, notification);
 							processManager.commitCurrentTransaction();
 							responseData = new JSONObject("{\"result\":\"OK\"}");
 						}

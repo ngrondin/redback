@@ -15,7 +15,7 @@ import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
-import com.nic.redback.security.UserProfile;
+import com.nic.redback.security.Session;
 import com.nic.redback.services.processserver.units.InteractionUnit;
 
 
@@ -43,6 +43,11 @@ public class ProcessManager
 	public void setFirebus(Firebus fb)
 	{
 		firebus = fb;
+	}
+	
+	public Firebus getFirebus()
+	{
+		return firebus;
 	}
 	
 	protected void loadProcess(String name) throws RedbackException
@@ -106,16 +111,16 @@ public class ProcessManager
 		return pi;
 	}
 	
-	public UserProfile getSystemUserProfile()
+	public Session getSystemUserSession()
 	{
-		JSONObject upObject = new JSONObject();
-		upObject.put("username", sysUserName);
-		upObject.put("attributes", new JSONObject());
-		upObject.getObject("attributes").put("rb", new JSONObject());
-		upObject.getObject("attributes.rb").put("process", new JSONObject());
-		upObject.getObject("attributes.rb.process").put("sysuser", true);
-		UserProfile up = new UserProfile(upObject);
-		return up;
+		JSONObject sessionObject = new JSONObject();
+		sessionObject.put("userprofile", new JSONObject());
+		sessionObject.getObject("userprofile").put("username", sysUserName);
+		sessionObject.getObject("userprofile").put("attributes", new JSONObject());
+		sessionObject.getObject("userprofile.attributes").put("rb", new JSONObject());
+		sessionObject.getObject("userprofile.attributes.rb").put("process", new JSONObject());
+		sessionObject.getObject("userprofile.attributes.rb.process").put("sysuser", true);
+		return new Session(sessionObject);
 	}
 	
 	public JSONObject getGlobalData()
@@ -123,35 +128,35 @@ public class ProcessManager
 		return globalData;
 	}
 	
-	public ProcessInstance initiateProcess(UserProfile up, String name, JSONObject data) throws RedbackException
+	public ProcessInstance initiateProcess(Session session, String name, JSONObject data) throws RedbackException
 	{
 		Process process = getProcess(name);
-		ProcessInstance pi = process.createInstance(up, data);
+		ProcessInstance pi = process.createInstance(session, data);
 		putInCurrentTransaction(pi);
-		process.startInstance(up, pi);
+		process.startInstance(session, pi);
 		return pi;
 	}
 
-	public JSONList getActions(UserProfile up, String pid) throws RedbackException
+	public JSONList getActions(Session session, String pid) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);
 		Process process = getProcess(pi.getProcessName());
 		ProcessUnit node = process.getNode(pi.getCurrentNode());
 		if(node instanceof InteractionUnit)
-			return ((InteractionUnit)node).getActions(up, pid, pi);
+			return ((InteractionUnit)node).getActions(session, pid, pi);
 		else
 			return null;
 	}
 	
-	public ProcessInstance processAction(UserProfile up, String extpid, String pid, String event, JSONObject data) throws RedbackException
+	public ProcessInstance processAction(Session session, String extpid, String pid, String event, JSONObject data) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);
 		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
-		process.processAction(up, extpid, pi, event, data);
+		process.processAction(session, extpid, pi, event, data);
 		return pi;
 	}
 	
-	public ArrayList<ProcessInstance> findProcesses(UserProfile up, JSONObject filter) throws RedbackException
+	public ArrayList<ProcessInstance> findProcesses(Session session, JSONObject filter) throws RedbackException
 	{
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
 		try 
@@ -176,10 +181,10 @@ public class ProcessManager
 		return list;
 	}
 	
-	public void notifyProcess(UserProfile up, String extpid, String pid, JSONObject notification) throws RedbackException
+	public void notifyProcess(Session session, String extpid, String pid, JSONObject notification) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);
-		notification.put("user", up.getUsername());
+		notification.put("user", session.getUserProfile().getUsername());
 		if(extpid != null)
 			notification.put("extpid", extpid);
 		pi.addNotification(notification);

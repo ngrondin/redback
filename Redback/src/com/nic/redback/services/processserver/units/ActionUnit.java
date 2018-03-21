@@ -32,7 +32,7 @@ public class ActionUnit extends ProcessUnit
 					actionExists = true;
 			if(actionExists)
 			{
-				processManager.processAction(processManager.getSystemUserProfile(), pi.getId(), notification.getString("extpid"), action, null);
+				processManager.processAction(processManager.getSystemUserSession(), pi.getId(), notification.getString("extpid"), action, null);
 				notifications.remove(i);
 				i--;
 			}

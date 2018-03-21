@@ -15,7 +15,7 @@ import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
-import com.nic.redback.security.UserProfile;
+import com.nic.redback.security.Session;
 
 public class ObjectManager
 {
@@ -25,6 +25,7 @@ public class ObjectManager
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String idGeneratorServiceName;
+	protected JSONObject globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 	protected HashMap<Long, HashMap<String, RedbackObject>> transactions;
 
@@ -35,6 +36,7 @@ public class ObjectManager
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");
+		globalVariables = config.getObject("globalvariables");
 		if(config.containsKey("cacheconfigs") &&  config.getString("cacheconfigs").equalsIgnoreCase("false"))
 			cacheConfigs = false;
 		objectConfigs = new HashMap<String, ObjectConfig>();
@@ -44,6 +46,16 @@ public class ObjectManager
 	public void setFirebus(Firebus fb)
 	{
 		firebus = fb;
+	}
+	
+	public Firebus getFirebus()
+	{
+		return firebus;
+	}
+	
+	public JSONObject getGlobalVariables()
+	{
+		return globalVariables;
 	}
 	
 	public void refreshAllConfigs()
@@ -77,7 +89,7 @@ public class ObjectManager
 
 
 	
-	public void addRelatedBulk(UserProfile userProfile, ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
+	public void addRelatedBulk(Session session, ArrayList<RedbackObject> objects) throws RedbackException, ScriptException
 	{
 		if(objects != null  && objects.size() > 0)
 		{
@@ -99,7 +111,7 @@ public class ObjectManager
 					}
 					JSONObject relatedObjectFilter = new JSONObject();
 					relatedObjectFilter.put("$or", orList);
-					ArrayList<RedbackObject> result = getObjectList(userProfile, relatedObjectConfig.getObjectName(), relatedObjectFilter);
+					ArrayList<RedbackObject> result = getObjectList(session, relatedObjectConfig.getObjectName(), relatedObjectFilter);
 					for(int k = 0; k < result.size(); k++)
 					{
 						RedbackObject resultObject = result.get(k);
@@ -118,7 +130,7 @@ public class ObjectManager
 	}
 
 	
-	public RedbackObject getObject(UserProfile userProfile, String objectName, String id) throws RedbackException
+	public RedbackObject getObject(Session session, String objectName, String id) throws RedbackException
 	{
 		RedbackObject object = getFromCurrentTransaction(objectName, id);
 		if(object == null)
@@ -127,13 +139,13 @@ public class ObjectManager
 			try
 			{
 				JSONObject dbFilter = new JSONObject("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
-				dbFilter.put("domain", userProfile.getDBFilterDomainClause());
+				dbFilter.put("domain", session.getUserProfile().getDBFilterDomainClause());
 				JSONObject dbResult = requestData(objectConfig.getCollection(), dbFilter);
 				JSONList dbResultList = dbResult.getList("result");
 				if(dbResultList.size() > 0)
 				{
 					JSONObject dbData = dbResultList.getObject(0);
-					object = new RedbackObject(userProfile, this, objectConfig, dbData);
+					object = new RedbackObject(session, this, objectConfig, dbData);
 					putInCurrentTransaction(object);
 				}
 			}
@@ -146,14 +158,14 @@ public class ObjectManager
 	}
 	
 	
-	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, JSONObject filterData) throws RedbackException
+	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, JSONObject filterData) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		try
 		{
 			JSONObject dbFilter = objectConfig.generateDBFilter(filterData);
-			dbFilter.put("domain", userProfile.getDBFilterDomainClause());
+			dbFilter.put("domain", session.getUserProfile().getDBFilterDomainClause());
 			JSONObject dbResult = requestData(objectConfig.getCollection(), dbFilter);
 			JSONList dbResultList = dbResult.getList("result");
 			
@@ -163,7 +175,7 @@ public class ObjectManager
 				RedbackObject object = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
 				if(object == null)
 				{
-					object = new RedbackObject(userProfile, this, objectConfig, dbData);
+					object = new RedbackObject(session, this, objectConfig, dbData);
 					putInCurrentTransaction(object);
 				}
 				objectList.add(object);
@@ -177,9 +189,9 @@ public class ObjectManager
 		return objectList;
 	}
 	
-	public ArrayList<RedbackObject> getObjectList(UserProfile userProfile, String objectName, String uid, String attributeName, JSONObject filterData) throws RedbackException
+	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, String uid, String attributeName, JSONObject filterData) throws RedbackException
 	{
-		RedbackObject object = getObject(userProfile, objectName, uid);
+		RedbackObject object = getObject(session, objectName, uid);
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		ArrayList<RedbackObject> objectList = null;
 		AttributeConfig attributeConfig = objectConfig.getAttributeConfig(attributeName);
@@ -193,14 +205,14 @@ public class ObjectManager
 				String key = it.next();
 				relatedObjectListFilter.put(key, filterData.get(key));
 			}
-			objectList = getObjectList(userProfile, relatedObjectConfig.getObjectName(), relatedObjectListFilter);
+			objectList = getObjectList(session, relatedObjectConfig.getObjectName(), relatedObjectListFilter);
 		}
 		return objectList;
 	}
 	
-	public RedbackObject updateObject(UserProfile userProfile, String objectName, String id, JSONObject updateData) throws RedbackException, ScriptException
+	public RedbackObject updateObject(Session session, String objectName, String id, JSONObject updateData) throws RedbackException, ScriptException
 	{
-		RedbackObject object = getObject(userProfile, objectName, id);
+		RedbackObject object = getObject(session, objectName, id);
 		if(object != null)
 		{
 			Iterator<String> it = updateData.keySet().iterator();
@@ -213,10 +225,10 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject createObject(UserProfile userProfile, String objectName, JSONObject initialData) throws RedbackException, ScriptException
+	public RedbackObject createObject(Session session, String objectName, JSONObject initialData) throws RedbackException, ScriptException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
-		RedbackObject object = new RedbackObject(userProfile, this, objectConfig);
+		RedbackObject object = new RedbackObject(session, this, objectConfig);
 		putInCurrentTransaction(object);
 		if(initialData != null)
 		{
@@ -230,9 +242,9 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject executeFunction(UserProfile userProfile, String objectName, String id, String function, JSONObject updateData) throws RedbackException, ScriptException
+	public RedbackObject executeFunction(Session session, String objectName, String id, String function, JSONObject updateData) throws RedbackException, ScriptException
 	{
-		RedbackObject object = getObject(userProfile, objectName, id);
+		RedbackObject object = getObject(session, objectName, id);
 		if(object != null)
 		{
 			if(updateData != null)

@@ -12,6 +12,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
+import com.nic.redback.security.Session;
 import com.nic.redback.security.UserProfile;
 import com.nic.redback.services.objectserver.ObjectManager;
 import com.nic.redback.services.objectserver.RedbackObject;
@@ -19,17 +20,17 @@ import com.nic.redback.services.objectserver.RedbackObject;
 public class ObjectManagerJSWrapper
 {
 	protected ObjectManager objectManager;
-	protected UserProfile userProfile;
+	protected Session session;
 	
-	public ObjectManagerJSWrapper(ObjectManager om, UserProfile up)
+	public ObjectManagerJSWrapper(ObjectManager om, Session s)
 	{
 		objectManager = om;
-		userProfile = up;
+		session = s;
 	}
 	
 	public JSObject getObject(String objectName, String id) throws RedbackException
 	{
-		RedbackObject rbo = objectManager.getObject(userProfile, objectName, id);
+		RedbackObject rbo = objectManager.getObject(session, objectName, id);
 		if(rbo != null)
 			return new RedbackObjectJSWrapper(rbo);
 		else
@@ -38,17 +39,17 @@ public class ObjectManagerJSWrapper
 	
 	public JSObject getObjectList(String objectName, JSObject filterData) throws RedbackException
 	{
-		return convertToJSArray(objectManager.getObjectList(userProfile, objectName, convertToJSONObject(filterData)));
+		return convertToJSArray(objectManager.getObjectList(session, objectName, convertToJSONObject(filterData)));
 	}
 	
 	public JSObject getObjectList(String objectName, String uid, String attributeName, JSObject filterData) throws RedbackException
 	{
-		return convertToJSArray(objectManager.getObjectList(userProfile, objectName, uid, attributeName, convertToJSONObject(filterData)));
+		return convertToJSArray(objectManager.getObjectList(session, objectName, uid, attributeName, convertToJSONObject(filterData)));
 	}
 	
 	public JSObject updateObject(UserProfile userProfile, String objectName, String id, JSObject updateData) throws RedbackException, ScriptException
 	{
-		RedbackObject rbo = objectManager.updateObject(userProfile, objectName, id, convertToJSONObject(updateData));
+		RedbackObject rbo = objectManager.updateObject(session, objectName, id, convertToJSONObject(updateData));
 		if(rbo != null)
 			return new RedbackObjectJSWrapper(rbo);
 		else
@@ -57,7 +58,7 @@ public class ObjectManagerJSWrapper
 	
 	public JSObject createObject(UserProfile userProfile, String objectName, JSObject initialData) throws RedbackException, ScriptException
 	{
-		RedbackObject rbo = objectManager.createObject(userProfile, objectName, convertToJSONObject(initialData));
+		RedbackObject rbo = objectManager.createObject(session, objectName, convertToJSONObject(initialData));
 		if(rbo != null)
 			return new RedbackObjectJSWrapper(rbo);
 		else
