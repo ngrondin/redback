@@ -1,5 +1,7 @@
 package com.nic.redback.services;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -11,8 +13,10 @@ import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
+import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
+import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
 import com.nic.redback.services.objectserver.ObjectConfig;
 import com.nic.redback.services.objectserver.ObjectManager;
@@ -37,17 +41,13 @@ public class ObjectServer extends RedbackAuthenticatedService
 		objectManager.setFirebus(fb);
 	}
 	
-	public Payload service(Payload payload) throws FunctionErrorException
+	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
 	{
 		logger.info("Object service start");
 		Payload response = new Payload();
 		try
 		{
 			JSONObject request = new JSONObject(payload.getString());
-			Session session = null;
-			String sessionId = payload.metadata.get("sessionid");
-			String username = request.getString("username");
-			String password = request.getString("password");
 			String action = request.getString("action");
 			String objectName = request.getString("object");
 			JSONObject options = request.getObject("options");
@@ -55,151 +55,140 @@ public class ObjectServer extends RedbackAuthenticatedService
 			boolean addValidation = false;
 			boolean addRelated = false;
 			
-			if(username != null  &&  password != null)
+			if(action != null)
 			{
-				session = authenticate(username, password);
-				response.metadata.put("sessionid", session.getSessionId().toString());
-			}
-			else if(sessionId != null)
-			{
-				session = validateSession(sessionId);
-			}
-
-			if(session != null)
-			{
-				if(action != null)
+				if(objectName != null)
 				{
-					if(objectName != null)
+					if(options != null)
 					{
-						if(options != null)
+						addValidation = options.getBoolean("addvalidation");
+						addRelated = options.getBoolean("addrelated");
+					}
+					
+					if(action.equals("get"))
+					{
+						String uid = request.getString("uid");
+						if(uid != null)
 						{
-							addValidation = options.getBoolean("addvalidation");
-							addRelated = options.getBoolean("addrelated");
-						}
-						
-						if(action.equals("get"))
-						{
-							String uid = request.getString("uid");
-							if(uid != null)
-							{
-								RedbackObject object = objectManager.getObject(session, objectName, uid);
-								objectManager.commitCurrentTransaction();
-								responseData = object.getJSON(addValidation, addRelated);
-							}
-							else
-							{
-								responseData = new JSONObject("{\"requesterror\":\"A 'get' action requires a 'uid' attribute\"}");
-							}
-						}
-						else if(action.equals("list"))
-						{
-							ArrayList<RedbackObject> objects = null;
-							JSONObject filter = request.getObject("filter");
-							String attribute = request.getString("attribute");
-							String uid = request.getString("uid");
-							if(filter == null)
-								filter = new JSONObject();
-							
-							if(uid != null  &&  attribute != null)
-								objects = objectManager.getObjectList(session, objectName, uid, attribute, filter);
-							else
-								objects = objectManager.getObjectList(session, objectName, filter);
-							objectManager.commitCurrentTransaction();
-
-							if(addRelated)
-								objectManager.addRelatedBulk(session, objects);
-							
-							responseData = new JSONObject();
-							JSONList list = new JSONList();
-							for(int i = 0; i < objects.size(); i++)
-								list.add(objects.get(i).getJSON(addValidation, addRelated));
-							responseData.put("list", list);
-						}
-						else if(action.equals("update"))
-						{
-							String uid = request.getString("uid");
-							JSONObject data = request.getObject("data");
-							if(uid != null  &&  data != null)
-							{
-								RedbackObject object = objectManager.updateObject(session, objectName, uid, data);
-								objectManager.commitCurrentTransaction();
-								responseData = object.getJSON(addValidation, addRelated);
-							}
-							else
-							{
-								responseData = new JSONObject("{\"requesterror\":\"An 'update' action requires a 'uid' and a 'data' attribute\"}");
-							}
-						}
-						else if(action.equals("create"))
-						{
-							JSONObject data = request.getObject("data");
-							RedbackObject object = objectManager.createObject(session, objectName, data);
+							RedbackObject object = objectManager.getObject(session, objectName, uid);
 							objectManager.commitCurrentTransaction();
 							responseData = object.getJSON(addValidation, addRelated);
 						}
-						else if(action.equals("execute"))
+						else
 						{
-							String uid = request.getString("uid");
-							String function = request.getString("function");
-							JSONObject data = request.getObject("data");
-							if(uid != null)
-							{
-								RedbackObject object = objectManager.executeFunction(session, objectName, uid, function, data);
-								objectManager.commitCurrentTransaction();
-								responseData = object.getJSON(addValidation, addRelated);
-							}
-							else
-							{
-								responseData = new JSONObject("{\"requesterror\":\"A 'create' action requires a 'uid' and a 'function' attribute\"}");
-							}
+							throw new FunctionErrorException("A 'get' action requires a 'uid' attribute");
+							//responseData = new JSONObject("{\"requesterror\":\"A 'get' action requires a 'uid' attribute\"}");
+						}
+					}
+					else if(action.equals("list"))
+					{
+						ArrayList<RedbackObject> objects = null;
+						JSONObject filter = request.getObject("filter");
+						String attribute = request.getString("attribute");
+						String uid = request.getString("uid");
+						if(filter == null)
+							filter = new JSONObject();
+						
+						if(uid != null  &&  attribute != null)
+							objects = objectManager.getObjectList(session, objectName, uid, attribute, filter);
+						else
+							objects = objectManager.getObjectList(session, objectName, filter);
+						objectManager.commitCurrentTransaction();
+
+						if(addRelated)
+							objectManager.addRelatedBulk(session, objects);
+						
+						responseData = new JSONObject();
+						JSONList list = new JSONList();
+						for(int i = 0; i < objects.size(); i++)
+							list.add(objects.get(i).getJSON(addValidation, addRelated));
+						responseData.put("list", list);
+					}
+					else if(action.equals("update"))
+					{
+						String uid = request.getString("uid");
+						JSONObject data = request.getObject("data");
+						if(uid != null  &&  data != null)
+						{
+							RedbackObject object = objectManager.updateObject(session, objectName, uid, data);
+							objectManager.commitCurrentTransaction();
+							responseData = object.getJSON(addValidation, addRelated);
 						}
 						else
 						{
-							responseData = new JSONObject("{\"requesterror\":\"The '" + action + "' action is not valid as an object request\"}");
+							throw new FunctionErrorException("An 'update' action requires a 'uid' and a 'data' attribute");
+							//responseData = new JSONObject("{\"requesterror\":\"An 'update' action requires a 'uid' and a 'data' attribute\"}");
+						}
+					}
+					else if(action.equals("create"))
+					{
+						JSONObject data = request.getObject("data");
+						RedbackObject object = objectManager.createObject(session, objectName, data);
+						objectManager.commitCurrentTransaction();
+						responseData = object.getJSON(addValidation, addRelated);
+					}
+					else if(action.equals("execute"))
+					{
+						String uid = request.getString("uid");
+						String function = request.getString("function");
+						JSONObject data = request.getObject("data");
+						if(uid != null)
+						{
+							RedbackObject object = objectManager.executeFunction(session, objectName, uid, function, data);
+							objectManager.commitCurrentTransaction();
+							responseData = object.getJSON(addValidation, addRelated);
+						}
+						else
+						{
+							throw new FunctionErrorException("A 'create' action requires a 'uid' and a 'function' attribute");
+							//responseData = new JSONObject("{\"requesterror\":\"A 'create' action requires a 'uid' and a 'function' attribute\"}");
 						}
 					}
 					else
 					{
-						if(action.equals("refreshconfig"))
-						{
-							objectManager.refreshAllConfigs();
-							responseData = new JSONObject("{\"result\":\"Configs refreshed\"}");
-						}
-						else
-						{
-							responseData = new JSONObject("{\"requesterror\":\"The '" + action + "' action is not valid as an objectless request\"}");
-						}
+						throw new FunctionErrorException("The '" + action + "' action is not valid as an object request");
+						//responseData = new JSONObject("{\"requesterror\":\"The '" + action + "' action is not valid as an object request\"}");
 					}
 				}
 				else
 				{
-					responseData = new JSONObject("{\"requesterror\":\"Requests must have at least an 'action' attribute\"}");
-				}					
-				
+					if(action.equals("refreshconfig"))
+					{
+						objectManager.refreshAllConfigs();
+						responseData = new JSONObject("{\"result\":\"Configs refreshed\"}");
+					}
+					else
+					{
+						throw new FunctionErrorException("The '" + action + "' action is not valid as an objectless request");
+						//responseData = new JSONObject("{\"requesterror\":\"The '" + action + "' action is not valid as an objectless request\"}");
+					}
+				}
 			}
 			else
 			{
-				responseData = new JSONObject("{\"authenticationerror\":\"Not logged in or invalid username or password\"}");
-			}
+				throw new FunctionErrorException("Requests must have at least an 'action' attribute");
+				//responseData = new JSONObject("{\"requesterror\":\"Requests must have at least an 'action' attribute\"}");
+			}					
+				
 			response.setData(responseData.toString());
 		}
-		catch(ScriptException e)
+		catch(ScriptException | JSONException | RedbackException e)
 		{
 			String errorMsg = buildErrorMessage(e);
 			logger.severe(errorMsg);
-			response.setData("{\"scripterror\":\"" + errorMsg.replace("\"", "'") + "\"}");
+			logger.severe(getStackTrace(e));
+			throw new FunctionErrorException(errorMsg);
+			//response.setData("{\r\n\t\"scripterror\":\"" + errorMsg.replace("\"", "'") + "\"\r\n}");
 		}		
-		catch(Exception e)
-		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			response.setData("{\"generalerror\":\"" + errorMsg + "\"}");
-		}
 
 		logger.info("Object service finish");
-		return response;
+		return response;	}
+
+	public Payload unAuthenticatedService(Session session, Payload payload)	throws FunctionErrorException
+	{
+		throw new FunctionErrorException("All requests need to be authenticated");
 	}
-	
+
 	protected String buildErrorMessage(Exception e)
 	{
 		String msg = "";
@@ -213,12 +202,22 @@ public class ObjectServer extends RedbackAuthenticatedService
 		}
 		return msg;
 	}
+	
+	protected String getStackTrace(Exception e)
+	{
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		String sStackTrace = sw.toString(); 
+		return sStackTrace;
+	}
 
 	public ServiceInformation getServiceInformation()
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 	
 
 	

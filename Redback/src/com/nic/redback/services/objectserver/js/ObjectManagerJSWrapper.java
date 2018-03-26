@@ -56,7 +56,7 @@ public class ObjectManagerJSWrapper
 			return null;
 	}
 	
-	public JSObject createObject(UserProfile userProfile, String objectName, JSObject initialData) throws RedbackException, ScriptException
+	public JSObject createObject(String objectName, JSObject initialData) throws RedbackException, ScriptException
 	{
 		RedbackObject rbo = objectManager.createObject(session, objectName, convertToJSONObject(initialData));
 		if(rbo != null)

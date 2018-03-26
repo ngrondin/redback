@@ -33,9 +33,9 @@ public class AssigneeConfig
 		assigneeExpr = new Expression(assigneeStr);
 	}
 	
-	public String evaluateId(ProcessInstance pi) throws RedbackException
+	public Object evaluateId(ProcessInstance pi) throws RedbackException
 	{
-		return (String)assigneeExpr.eval(pi);
+		return assigneeExpr.eval(pi);
 	}
 	
 	public int getType()

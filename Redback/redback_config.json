@@ -9,7 +9,10 @@
 				configservice:"mongo",
 				dataservice:"mongo",
 				idgeneratorservice:"rbid",
-				accessmanagementservice:"rbam"
+				accessmanagementservice:"rbam",
+				globalvariables:{
+					"processservicename":"rbpm"
+				}
 			}
 		},
 		{
@@ -31,7 +34,7 @@
 				accessmanagementservice:"rbam",
 				sysusername:"processuser",
 				sysuserpassword:"poil",
-				globaldata:{
+				globalvariables:{
 					"objectservicename":"rbos"
 				}
 			}

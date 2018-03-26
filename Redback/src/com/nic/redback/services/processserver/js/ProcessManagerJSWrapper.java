@@ -25,9 +25,14 @@ public class ProcessManagerJSWrapper
 		return processManager.initiateProcess(processManager.getSystemUserSession(), name, data);
 	}
 
-	public JSObject getActions(String pid) throws RedbackException
+	public JSObject getNotifications(String extpid, JSObject filter, JSObject viewdata) throws RedbackException
 	{
-		return FirebusDataUtil.convertDataListToJSArray(processManager.getActions(processManager.getSystemUserSession(), pid));
+		ArrayList<JSONObject> list = processManager.getNotifications(processManager.getSystemUserSession(), extpid, FirebusDataUtil.convertJSObjectToDataObject(filter), FirebusDataUtil.convertJSArrayToDataList(viewdata));
+		RedbackJSArray array = new RedbackJSArray();
+		for(int i = 0; i < list.size(); i++)
+			array.setSlot(i,  FirebusDataUtil.convertDataObjectToJSObject(list.get(i)));
+		return array;
+		
 	}
 	
 	public ProcessInstance processAction(String extpid, String pid, String event, JSObject data) throws RedbackException

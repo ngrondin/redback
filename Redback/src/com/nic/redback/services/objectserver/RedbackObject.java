@@ -357,8 +357,12 @@ public class RedbackObject
 				}
 				updatedAttributes.clear();
 				objectManager.publishData(config.getCollection(), dbData);
-				isNewObject = false;
 				executeScriptsForEvent("aftersave");
+				if(isNewObject)
+				{
+					executeScriptsForEvent("aftercreate");
+					isNewObject = false;
+				}
 			}
 			else
 			{
@@ -497,6 +501,10 @@ public class RedbackObject
 		{
 			error("Problem occurred executing a script", e);
 		}		
+		catch(NullPointerException e)
+		{
+			error("Null pointer exception in script " + fileName, e);
+		}
 		logger.info("Finish executing script : " + fileName);
 	}
 	

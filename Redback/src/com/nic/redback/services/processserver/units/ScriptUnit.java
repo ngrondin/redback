@@ -18,6 +18,7 @@ import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 import com.nic.redback.services.processserver.ProcessUnit;
 import com.nic.redback.services.processserver.js.ProcessManagerJSWrapper;
+import com.nic.redback.utils.FirebusJSWrapper;
 import com.nic.redback.utils.StringUtils;
 
 public class ScriptUnit extends ProcessUnit 
@@ -51,7 +52,8 @@ public class ScriptUnit extends ProcessUnit
 		Bindings context = script.getEngine().createBindings();
 		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
 		context.put("pm", new ProcessManagerJSWrapper(processManager));
-		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalData()));
+		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalVariables()));
+		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getSystemUserSession().getSessionId().toString()));
 		try
 		{
 			script.eval(context);

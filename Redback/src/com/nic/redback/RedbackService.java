@@ -1,5 +1,7 @@
 package com.nic.redback;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.Logger;
 
 import com.nic.firebus.Firebus;
@@ -38,14 +40,18 @@ public abstract class RedbackService implements  ServiceProvider
 	{
 		firebus = fb;
 	}
-
+	
+	protected JSONObject request(String service, JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	{
+		return request(service, request.toString());
+	}
 	
 	protected JSONObject request(String service, String request) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		if(service != null)
 		{
 			Payload reqPayload = new Payload(request);
-			logger.info("Requesting firebus service : " + service);
+			logger.info("Requesting firebus config service : " + "  " + request.replace("\r\n", "").replace("\t", ""));
 			Payload respPayload = firebus.requestService(service, reqPayload);
 			logger.info("Received firebus service response from : " + service);
 			String respStr = respPayload.getString();
@@ -54,8 +60,46 @@ public abstract class RedbackService implements  ServiceProvider
 		}
 		else
 		{
-			throw new RedbackException("Missing sub-service configuration in service '" + serviceName + "' for request: " + request);
+			error("Service Name or Request is null in firebus request");
+			return null;
 		}
+	}
+
+	protected void error(String msg) throws RedbackException
+	{
+		error(msg, null);
+	}
+	
+	protected void error(String msg, Exception cause) throws RedbackException
+	{
+		logger.severe(msg);
+		if(cause != null)
+			throw new RedbackException(msg, cause);
+		else
+			throw new RedbackException(msg);
+	}
+
+	protected String buildErrorMessage(Exception e)
+	{
+		String msg = "";
+		Throwable t = e;
+		while(t != null)
+		{
+			if(msg.length() > 0)
+				msg += " : ";
+			msg += t.getMessage();
+			t = t.getCause();
+		}
+		return msg;
+	}
+	
+	protected String getStackTrace(Exception e)
+	{
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		String sStackTrace = sw.toString(); 
+		return sStackTrace;
 	}
 
 

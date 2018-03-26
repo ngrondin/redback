@@ -42,34 +42,14 @@ public class UIServer extends RedbackAuthenticatedService
 		jspScripts = new HashMap<String, CompiledScript>();
 		views = new HashMap<String, JSONObject>();
 	}
-
-	public Payload service(Payload payload) throws FunctionErrorException
+	
+	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
 	{
-		logger.info("UI service start");
-		Payload response = new Payload();
 		try
 		{
-			StringBuilder sb = new StringBuilder();
-			Session session = null;
-			String sessionId = payload.metadata.get("sessionid");
-			String get = payload.metadata.get("get");
-			String username = null;
-			String password = null;
-			String mime = "";
-
-			if(payload.getString().length() > 0)
-			{
-				try
-				{
-					JSONObject request = new JSONObject(payload.getString());
-					if(get == null) 
-						get = request.getString("get");
-					username = request.getString("username");
-					password = request.getString("password");
-				}
-				catch(Exception e)	{}
-			}
-			
+			logger.info("UI unauthenticated service start");
+			Payload response = new Payload();
+			String get = extractGetString(payload);
 			if(get != null)
 			{
 				String[] parts = get.split("/");
@@ -79,40 +59,59 @@ public class UIServer extends RedbackAuthenticatedService
 				if(category.equals("resource"))
 				{
 					logger.info("Get resource " + name);
-					sb.append(getResource(name));
-					if(name.endsWith(".js"))
-						mime = "application/javascript";
-					else if(name.endsWith(".css"))
-						mime = "text/css";
-					else if(name.endsWith(".ico"))
-						mime = "image/x-icon";
+					response.setData(getResource(name));
+					response.metadata.put("mime", getResourceMimeType(name));
 				}
 				else
 				{
-					if(username != null  &&  password != null)
-					{
-						session = authenticate(username, password);
-						response.metadata.put("sessionid", session.getSessionId().toString());
-					}
-					else if(sessionId != null)
-					{
-						session = validateSession(sessionId);
-					}					
-					
-					if(category.equals("app"))
-					{
-						logger.info("Get app " + name);
-						sb.append(getApp(name, session));
-					}
-					else if(category.equals("view"))
-					{
-						logger.info("Get view " + name);
-						sb.append(getView(name, session));
-					}
+					throw new FunctionErrorException("This request requires authentication");
 				}
 			}
-			response.setData(sb.toString());
-			response.metadata.put("mime", mime);
+			logger.info("UI unauthenticated service finish");
+			return response;
+		}
+		catch(Exception e)
+		{
+			logger.severe(e.getMessage());
+			throw new FunctionErrorException(e.getMessage());
+		}
+	}
+
+	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
+	{
+		try
+		{
+			logger.info("UI authenticated service start");
+			Payload response = new Payload();
+			String get = extractGetString(payload);
+
+			if(get != null)
+			{
+				String[] parts = get.split("/");
+				String category = parts[0];
+				String name = parts[1];
+				
+				if(category.equals("resource"))
+				{
+					logger.info("Get resource " + name);
+					response.setData(getResource(name));
+					response.metadata.put("mime", getResourceMimeType(name));
+				}
+				else if(category.equals("app"))
+				{
+					logger.info("Get app " + name);
+					response.setData(getApp(name, session));
+					response.metadata.put("mime", "text.html");
+				}
+				else if(category.equals("view"))
+				{
+					logger.info("Get view " + name);
+					response.setData(getView(name, session));
+					response.metadata.put("mime", "text.html");
+				}
+			}
+			logger.info("UI authenticated service finish");
+			return response;
 		}
 		catch(Exception e)
 		{
@@ -120,13 +119,23 @@ public class UIServer extends RedbackAuthenticatedService
 			throw new FunctionErrorException(e.getMessage());
 		}
 		
-		logger.info("UI service finish");
-		return response;
 	}
 
 	public ServiceInformation getServiceInformation()
 	{
 		return null;
+	}
+	
+	protected String extractGetString(Payload payload) throws JSONException
+	{
+		String get = payload.metadata.get("get");
+		if(payload.getString().length() > 0)
+		{
+			JSONObject request = new JSONObject(payload.getString());
+			if(get == null) 
+				get = request.getString("get");
+		}
+		return get;
 	}
 	
 	protected String getApp(String name, Session session) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
@@ -148,28 +157,31 @@ public class UIServer extends RedbackAuthenticatedService
 					
 					String menuFragment = executeJSP("fragments/navigation", context);
 					StringBuilder menuGroupBuilder = new StringBuilder();
-					for(int i = 0; i < appConfig.getList("menugroups").size(); i++)
+					if(appConfig.get("menugroups") != null)
 					{
-						JSONObject menuGroup = appConfig.getList("menugroups").getObject(i);
-						menuGroup.put("groupid", "group" + i);
-						JSONList itemList = menuGroup.getList("menuitems");
-						StringBuilder menuItemBuilder = new StringBuilder();
-						for(int j = 0; j < itemList.size(); j++)
+						for(int i = 0; i < appConfig.getList("menugroups").size(); i++)
 						{
-							JSONObject menuItem = itemList.getObject(j);
-							menuItem.put("groupid", "group" + i);
-							context.put("config", menuItem);
-							if(session.getUserProfile().canRead("rb.views." +  menuItem.getString("view")))
-								menuItemBuilder.append(executeJSP("fragments/navigationitem", context) + "\r\n");								
-						}
-						if(menuItemBuilder.length() > 0)
-						{
-							context.put("config", menuGroup);
-							menuGroupBuilder.append(executeJSP("fragments/navigationgroup", context).replace("#content#", menuItemBuilder.toString().trim()) + "\r\n");
-						}
-					}			
-					menuFragment = injectInHTML(menuFragment, "content", menuGroupBuilder.toString().trim());
-					html = injectInHTML(html, "menu", menuFragment);
+							JSONObject menuGroup = appConfig.getList("menugroups").getObject(i);
+							menuGroup.put("groupid", "group" + i);
+							JSONList itemList = menuGroup.getList("menuitems");
+							StringBuilder menuItemBuilder = new StringBuilder();
+							for(int j = 0; j < itemList.size(); j++)
+							{
+								JSONObject menuItem = itemList.getObject(j);
+								menuItem.put("groupid", "group" + i);
+								context.put("config", menuItem);
+								if(session.getUserProfile().canRead("rb.views." +  menuItem.getString("view")))
+									menuItemBuilder.append(executeJSP("fragments/navigationitem", context) + "\r\n");								
+							}
+							if(menuItemBuilder.length() > 0)
+							{
+								context.put("config", menuGroup);
+								menuGroupBuilder.append(executeJSP("fragments/navigationgroup", context).replace("#content#", menuItemBuilder.toString().trim()) + "\r\n");
+							}
+						}			
+						menuFragment = injectInHTML(menuFragment, "content", menuGroupBuilder.toString().trim());
+						html = injectInHTML(html, "menu", menuFragment);
+					}
 					sb.append(html);
 				}
 				else
@@ -232,12 +244,24 @@ public class UIServer extends RedbackAuthenticatedService
 		}
 		else
 		{
-			InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/" + type + "/" + name);
+			InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/client/" + type + "/" + name);
 			byte[] bytes = new byte[is.available()];
 			is.read(bytes);
 			fileStr = new String(bytes);
 		}
 		return fileStr;
+	}
+	
+	protected String getResourceMimeType(String name)
+	{
+		String mime = null;
+		if(name.endsWith(".js"))
+			mime = "application/javascript";
+		else if(name.endsWith(".css"))
+			mime = "text/css";
+		else if(name.endsWith(".ico"))
+			mime = "image/x-icon";
+		return mime;
 	}
 		
 	protected CompiledScript getCompiledJSP(String name) throws RedbackException
@@ -247,7 +271,7 @@ public class UIServer extends RedbackAuthenticatedService
 		{
 			try
 			{
-				InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/jsp/" + name + ".jsp");
+				InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/jsp/" + name + ".jsp");
 				byte[] bytes = new byte[is.available()];
 				is.read(bytes);
 				is.close();

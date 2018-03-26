@@ -34,7 +34,7 @@ public class ObjectConfig
 		for(int i = 0; i < list.size(); i++)
 		{
 			JSONObject attrCfg = list.getObject(i);
-			attributes.put(attrCfg.getString("name"), new AttributeConfig(attrCfg));
+			attributes.put(attrCfg.getString("name"), new AttributeConfig(attrCfg, getName()));
 		}
 		
 		JSONObject scriptsCfg = config.getObject("scripts");
@@ -60,28 +60,6 @@ public class ObjectConfig
 			}			
 		}
 	}
-	
-	/*
-	public void addScript(ScriptConfig script)
-	{
-		String attributeName = script.getAttributeName();
-		if(attributeName != null)
-		{
-			getAttributeConfig(attributeName).addScript(script);
-		}
-		else
-		{
-			String eventName = script.getEventName();
-			ArrayList<ScriptConfig> eventScripts = scripts.get(eventName);
-			if(eventScripts == null)
-			{
-				eventScripts = new ArrayList<ScriptConfig>();
-				scripts.put(eventName, eventScripts);
-			}
-			eventScripts.add(script);
-		}
-	}
-*/
 
 	public String getName()
 	{
@@ -186,7 +164,7 @@ public class ObjectConfig
 						{
 							//JSONLiteral objectFilterValueJSONLiteral = (JSONLiteral)objectFilterValue;
 							String objectFilterValueString = ((JSONLiteral)objectFilterValue).getString();
-							if(objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
+							if(objectFilterValueString != null  &&  objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
 								dbFilterValue =  new JSONObject("{$regex:\"" + objectFilterValueString.substring(1, objectFilterValueString.length() - 1) + "\"}");
 							else
 								dbFilterValue = ((JSONLiteral)objectFilterValue).getCopy();

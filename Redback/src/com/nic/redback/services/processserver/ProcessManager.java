@@ -19,25 +19,28 @@ import com.nic.redback.security.Session;
 import com.nic.redback.services.processserver.units.InteractionUnit;
 
 
-public class ProcessManager 
+public class ProcessManager
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected Firebus firebus;
 	protected String configServiceName;
+	protected String accessManagerServiceName;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
 	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
 	protected String sysUserName;
 	protected String sysUserPassword;
-	protected JSONObject globalData;
+	protected Session sysUserSession;
+	protected JSONObject globalVariables;
 
 	public ProcessManager(JSONObject config)
 	{
 		configServiceName = config.getString("configservice");
+		accessManagerServiceName = config.getString("accessmanagementservice");
 		sysUserName = config.getString("sysusername");
 		sysUserPassword = config.getString("sysuserpassword");
 		processes = new HashMap<String, HashMap<Integer, Process>>();
 		transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
-		globalData = config.getObject("globaldata");
+		globalVariables = config.getObject("globalvariables");
 	}
 	
 	public void setFirebus(Firebus fb)
@@ -54,7 +57,7 @@ public class ProcessManager
 	{
 		try
 		{
-			JSONObject configList = request(new JSONObject("{object:rbpm_config,filter:{name:" + name + "}}"));
+			JSONObject configList = request(configServiceName, new JSONObject("{object:rbpm_config,filter:{name:" + name + "}}"));
 			JSONList list = configList.getList("result");
 			if(list.size() > 0)
 			{
@@ -99,7 +102,7 @@ public class ProcessManager
 		{
 			try 
 			{
-				JSONObject piJSON = request(new JSONObject("{object:rbpm_instance,filter:{_id:\"" + pid + "\"}}"));
+				JSONObject piJSON = request(configServiceName, new JSONObject("{object:rbpm_instance,filter:{_id:\"" + pid + "\"}}"));
 				pi = new ProcessInstance(piJSON.getObject("result.0"));
 				putInCurrentTransaction(pi);
 			} 
@@ -111,21 +114,27 @@ public class ProcessManager
 		return pi;
 	}
 	
-	public Session getSystemUserSession()
+	public Session getSystemUserSession() throws RedbackException 
 	{
-		JSONObject sessionObject = new JSONObject();
-		sessionObject.put("userprofile", new JSONObject());
-		sessionObject.getObject("userprofile").put("username", sysUserName);
-		sessionObject.getObject("userprofile").put("attributes", new JSONObject());
-		sessionObject.getObject("userprofile.attributes").put("rb", new JSONObject());
-		sessionObject.getObject("userprofile.attributes.rb").put("process", new JSONObject());
-		sessionObject.getObject("userprofile.attributes.rb.process").put("sysuser", true);
-		return new Session(sessionObject);
+		if(sysUserSession == null)
+		{
+			try
+			{
+				JSONObject result = request(accessManagerServiceName, new JSONObject("{action:authenticate, username:\"" + sysUserName + "\", password:\"" + sysUserPassword + "\"}"));
+				if(result != null  &&  result.getString("result").equals("ok"))
+					sysUserSession = new Session(result.getObject("session"));
+			}
+			catch(Exception e)
+			{
+				error("Error authenticating sys user", e);
+			}
+		}
+		return sysUserSession;
 	}
 	
-	public JSONObject getGlobalData()
+	public JSONObject getGlobalVariables()
 	{
-		return globalData;
+		return globalVariables;
 	}
 	
 	public ProcessInstance initiateProcess(Session session, String name, JSONObject data) throws RedbackException
@@ -137,15 +146,41 @@ public class ProcessManager
 		return pi;
 	}
 
-	public JSONList getActions(Session session, String pid) throws RedbackException
+	public ArrayList<JSONObject> getNotifications(Session session, String extpid, JSONObject filter, JSONList viewdata) throws RedbackException
 	{
-		ProcessInstance pi = getProcessInstance(pid);
-		Process process = getProcess(pi.getProcessName());
-		ProcessUnit node = process.getNode(pi.getCurrentNode());
-		if(node instanceof InteractionUnit)
-			return ((InteractionUnit)node).getActions(session, pid, pi);
+		ArrayList<JSONObject> retList = new ArrayList<JSONObject>();
+		JSONObject fullFilter = null;
+		if(filter != null)
+			fullFilter = (JSONObject)filter.getCopy();
 		else
-			return null;
+			fullFilter = new JSONObject();
+		fullFilter.put("assignees.id", session.getUserProfile().getUsername());
+		ArrayList<ProcessInstance> instances = findProcesses(session, filter);
+		for(int i = 0; i < instances.size(); i++)
+		{
+			ProcessInstance pi = instances.get(i);
+			Process process = getProcess(pi.getProcessName());
+			ProcessUnit pu = process.getNode(pi.getCurrentNode());
+			if(pu instanceof InteractionUnit)
+			{
+				JSONObject notification = ((InteractionUnit)pu).getNotification(session, extpid, pi);
+				if(notification != null)
+				{
+					if(viewdata != null  &&  viewdata.size() > 0)
+					{
+						JSONObject data = new JSONObject();
+						for(int j = 0; j < viewdata.size(); j++)
+						{
+							String key = viewdata.getString(j); 
+							data.put(key, pi.getData().getString(key));
+						}
+						notification.put("data", data);
+					}
+					retList.add(notification);
+				}
+			}
+		}
+		return retList;
 	}
 	
 	public ProcessInstance processAction(Session session, String extpid, String pid, String event, JSONObject data) throws RedbackException
@@ -161,7 +196,7 @@ public class ProcessManager
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
 		try 
 		{
-			JSONObject result = request(new JSONObject("{object:rbpm_instance,filter:" + filter + "}"));
+			JSONObject result = request(configServiceName, new JSONObject("{object:rbpm_instance,filter:" + filter + "}"));
 			JSONList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 			{
@@ -186,7 +221,7 @@ public class ProcessManager
 		ProcessInstance pi = getProcessInstance(pid);
 		notification.put("user", session.getUserProfile().getUsername());
 		if(extpid != null)
-			notification.put("extpid", extpid);
+			notification.put("pid", extpid);
 		pi.addNotification(notification);
 	}
 	
@@ -232,15 +267,23 @@ public class ProcessManager
 	}
 	
 	
-	protected JSONObject request(JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException
+	protected JSONObject request(String service, JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
-		Payload reqPayload = new Payload(request.toString());
-		logger.info("Requesting firebus config service : " + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
-		Payload respPayload = firebus.requestService(configServiceName, reqPayload);
-		logger.info("Receiving firebus config service respnse");
-		String respStr = respPayload.getString();
-		JSONObject result = new JSONObject(respStr);
-		return result;
+		if(service != null  &&  request != null)
+		{
+			Payload reqPayload = new Payload(request.toString());
+			logger.info("Requesting firebus service : " + service + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
+			Payload respPayload = firebus.requestService(service, reqPayload);
+			logger.info("Receiving firebus config service respnse");
+			String respStr = respPayload.getString();
+			JSONObject result = new JSONObject(respStr);
+			return result;
+		}
+		else
+		{
+			error("Service Name or Request is null in firebus request");
+		}
+		return null;
 	}
 	
 	protected void publishInstance(ProcessInstance pi)
@@ -248,6 +291,8 @@ public class ProcessManager
 		logger.info("Publishing to firebus service : " + configServiceName + "  ");
 		firebus.publish(configServiceName, new Payload("{object:rbpm_instance,data:" + pi.getJSON() + ", operation:replace}"));
 	}
+
+	
 
 	protected void error(String msg) throws RedbackException
 	{

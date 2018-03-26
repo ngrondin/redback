@@ -45,9 +45,17 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 		try
 		{
 			if(name.equals("getRelated")  ||  name.equals("save")  ||  rbObject.getObjectConfig().getScriptForEvent(name) != null)
+			{
 				return new RedbackObjectFunctionJSWrapper(rbObject, name);
+			}
 			else
-				return rbObject.get(name).getObject();
+			{
+				Value val = rbObject.get(name);
+				if(val != null)
+					return rbObject.get(name).getObject();
+				else
+					return null;
+			}
 		} 
 		catch (RedbackException e)
 		{

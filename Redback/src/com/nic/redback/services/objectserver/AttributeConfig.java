@@ -16,14 +16,16 @@ import com.nic.redback.utils.StringUtils;
 public class AttributeConfig 
 {
 	protected JSONObject config;	
+	protected String objectName;
 	protected HashMap<String, CompiledScript> scripts;
 	protected RelatedObjectConfig relatedObjectConfig;
 	protected Expression editable;
 	protected Expression expression;
 	
-	public AttributeConfig(JSONObject cfg) throws RedbackException
+	public AttributeConfig(JSONObject cfg, String on) throws RedbackException
 	{
 		config = cfg;
+		objectName = on;
 		scripts = new HashMap<String, CompiledScript>();
 		if(config.get("relatedobject") != null)
 			relatedObjectConfig = new RelatedObjectConfig(config.getObject("relatedobject"));
@@ -43,7 +45,7 @@ public class AttributeConfig
 			while(events.hasNext())
 			{
 				String event = events.next();
-				String scriptName = getName() + "." + event;
+				String scriptName = objectName + "." + getName() + "." + event;
 				try
 				{
 					ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");

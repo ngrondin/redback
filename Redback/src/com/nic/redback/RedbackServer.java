@@ -56,9 +56,9 @@ public class RedbackServer extends StandaloneContainer
 				Logger fbLogger = Logger.getLogger("com.nic.firebus");
 				FileHandler fbfh = new FileHandler("Firebus.log");
 				fbfh.setFormatter(new FirebusSimpleFormatter());
-				fbfh.setLevel(Level.FINEST);
+				fbfh.setLevel(Level.INFO);
 				fbLogger.addHandler(fbfh);
-				fbLogger.setLevel(Level.FINEST);
+				fbLogger.setLevel(Level.INFO);
 
 				JSONObject config = new JSONObject(new FileInputStream(args[0]));
 				new RedbackServer(config);

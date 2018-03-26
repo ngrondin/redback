@@ -15,15 +15,15 @@ import com.nic.redback.security.UserProfile;
 
 public class InteractionUnit extends ProcessUnit 
 {
-	protected JSONList actions;
+	protected JSONList actionsConfig;
 	protected String assigneeType;
 	protected ArrayList<AssigneeConfig> assigneeConfigs;
-	protected JSONObject notification;
+	protected JSONObject notificationConfig;
 
 	public InteractionUnit(ProcessManager pm, JSONObject config) throws RedbackException 
 	{
 		super(pm, config);
-		actions = config.getList("actions");
+		actionsConfig = config.getList("actions");
 		assigneeConfigs = new ArrayList<AssigneeConfig>();
 		if(config.containsKey("assignees")  &&  config.get("assignees") instanceof JSONList)
 		{
@@ -31,22 +31,25 @@ public class InteractionUnit extends ProcessUnit
 			for(int i = 0; i < list.size(); i++)
 				assigneeConfigs.add(new AssigneeConfig(list.getObject(i)));
 		}
-		notification = config.getObject("notification");
+		notificationConfig = config.getObject("notification");
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		JSONObject notificationMsg = new JSONObject();
-		notificationMsg.put("extpid", pi.getId());
-		notificationMsg.put("message", notification.getString("message"));
-		notificationMsg.put("actions", getActions());
 		for(int i = 0; i < assigneeConfigs.size(); i++)
 		{
-			Assignee assignee = new Assignee(assigneeConfigs.get(i).getType(), assigneeConfigs.get(i).evaluateId(pi));
-			pi.addAssignee(assignee);
-			if(assignee.getType() == Assignee.PROCESS  &&  notification.getString("method").equals("rbprocessnotification"))
-				processManager.notifyProcess(processManager.getSystemUserSession(), pi.getId(), assignee.getId(), notificationMsg);
-			//TODO: Add more notificatio methods
+			AssigneeConfig assigneeConfig = assigneeConfigs.get(i);
+			Object assigneeObject = assigneeConfig.evaluateId(pi);
+			if(assigneeObject instanceof String)
+			{
+				addAssignee(pi, new Assignee(assigneeConfigs.get(i).getType(), (String)assigneeObject));
+			}
+			if(assigneeObject instanceof JSONList)
+			{
+				JSONList assigneeList = (JSONList)assigneeObject;
+				for(int j = 0; j < assigneeList.size(); j++)
+					addAssignee(pi, new Assignee(assigneeConfigs.get(i).getType(), assigneeList.getString(j)));
+			}
 		}
 	}
 
@@ -55,12 +58,12 @@ public class InteractionUnit extends ProcessUnit
 		boolean foundAction = false;
 		if(isAssignee(session.getUserProfile(), extpid, pi))
 		{
-			for(int i = 0; i < actions.size(); i++)
+			for(int i = 0; i < actionsConfig.size(); i++)
 			{
-				if(actions.getObject(i).getString("action").equals(action))
+				if(actionsConfig.getObject(i).getString("action").equals(action))
 				{
 					foundAction = true;
-					String nextNode = actions.getObject(i).getString("nextnode");
+					String nextNode = actionsConfig.getObject(i).getString("nextnode");
 					pi.clearAssignees();
 					pi.setCurrentNode(nextNode);
 				}
@@ -76,17 +79,47 @@ public class InteractionUnit extends ProcessUnit
 			error("Actionning user or process is not a current assignee");
 		}		
 	}
+	
+	protected void addAssignee(ProcessInstance pi, Assignee assignee) throws RedbackException
+	{
+		pi.addAssignee(assignee);
+		if(assignee.getType() == Assignee.PROCESS  &&  notificationConfig.getString("method").equals("rbprocessnotification"))
+			processManager.notifyProcess(processManager.getSystemUserSession(), pi.getId(), assignee.getId(), getNotification(pi));
+		//TODO: Add more notificatio methods
+		
+	}
 
-	public JSONList getActions(Session session, String extpid, ProcessInstance pi)
+	public JSONObject getNotification(Session session, String extpid, ProcessInstance pi)
 	{
 		if(isAssignee(session.getUserProfile(), extpid, pi))
 		{
-			return getActions();
+			return getNotification(pi);
 		}
 		return null;
 	}
 	
-	protected JSONList getActions()
+	protected JSONObject getNotification(ProcessInstance pi)
+	{
+		JSONObject notificationMsg = new JSONObject();
+		notificationMsg.put("process", pi.getProcessName());
+		notificationMsg.put("pid", pi.getId());
+		notificationMsg.put("interaction", nodeId);
+		notificationMsg.put("message", notificationConfig.getString("message"));
+		
+		JSONList actionList = new JSONList();
+		for(int i = 0; i < actionsConfig.size(); i++)
+		{
+			JSONObject action = new JSONObject();
+			action.put("action", actionsConfig.getObject(i).getString("action"));
+			action.put("description", actionsConfig.getObject(i).getString("description"));
+			actionList.add(action);
+		}
+		notificationMsg.put("actions", actionList);
+		return notificationMsg;		
+	}
+	
+	/*
+	protected JSONList getNotification()
 	{
 		JSONList list = new JSONList();
 		for(int i = 0; i < actions.size(); i++)
@@ -98,6 +131,7 @@ public class InteractionUnit extends ProcessUnit
 		}
 		return list;
 	}
+	*/
 	
 	protected boolean isAssignee(UserProfile up, String extpid, ProcessInstance pi)
 	{
