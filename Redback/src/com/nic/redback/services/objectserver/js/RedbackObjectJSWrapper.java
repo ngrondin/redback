@@ -48,6 +48,10 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 			{
 				return new RedbackObjectFunctionJSWrapper(rbObject, name);
 			}
+			else if(name.equals("objectname"))
+			{
+				return rbObject.getObjectConfig().getName();
+			}
 			else
 			{
 				Value val = rbObject.get(name);
@@ -59,8 +63,7 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 		} 
 		catch (RedbackException e)
 		{
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException("Error getting the Redback Object attribute '" + name + "'", e);
 		}
 	}
 
@@ -72,8 +75,7 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 		} 
 		catch (RedbackException e)
 		{
-			e.printStackTrace();
-			return false;
+			throw new RuntimeException("Error getting the Redback Object attribute '" + arg0 + "'", e);
 		}
 	}
 
@@ -94,7 +96,7 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 		} 
 		catch (RedbackException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException("Error setting the Redback Object attribute '" + arg0 + "' ", e);
 		}
 	}
 

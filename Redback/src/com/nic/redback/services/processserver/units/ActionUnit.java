@@ -27,7 +27,7 @@ public class ActionUnit extends ProcessUnit
 		for(int i = 0; i < notifications.size(); i++)
 		{
 			JSONObject notification = notifications.getObject(i);
-			if(interactionCode.equals(notification.get("interaction")))
+			if(interactionCode.equals(notification.getString("interaction")))
 			{
 				JSONList actions = notification.getList("actions");
 				boolean actionExists = false;

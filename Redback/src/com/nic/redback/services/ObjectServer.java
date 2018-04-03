@@ -13,6 +13,7 @@ import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
+import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
@@ -22,7 +23,7 @@ import com.nic.redback.services.objectserver.ObjectConfig;
 import com.nic.redback.services.objectserver.ObjectManager;
 import com.nic.redback.services.objectserver.RedbackObject;
 
-public class ObjectServer extends RedbackAuthenticatedService
+public class ObjectServer extends RedbackAuthenticatedService implements Consumer
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected ObjectManager objectManager;
@@ -112,7 +113,10 @@ public class ObjectServer extends RedbackAuthenticatedService
 						{
 							RedbackObject object = objectManager.updateObject(session, objectName, uid, data);
 							objectManager.commitCurrentTransaction();
-							responseData = object.getJSON(addValidation, addRelated);
+							if(object != null)
+								responseData = object.getJSON(addValidation, addRelated);
+							else
+								throw new FunctionErrorException("No such object to update");
 						}
 						else
 						{
@@ -148,19 +152,6 @@ public class ObjectServer extends RedbackAuthenticatedService
 					{
 						throw new FunctionErrorException("The '" + action + "' action is not valid as an object request");
 						//responseData = new JSONObject("{\"requesterror\":\"The '" + action + "' action is not valid as an object request\"}");
-					}
-				}
-				else
-				{
-					if(action.equals("refreshconfig"))
-					{
-						objectManager.refreshAllConfigs();
-						responseData = new JSONObject("{\"result\":\"Configs refreshed\"}");
-					}
-					else
-					{
-						throw new FunctionErrorException("The '" + action + "' action is not valid as an objectless request");
-						//responseData = new JSONObject("{\"requesterror\":\"The '" + action + "' action is not valid as an objectless request\"}");
 					}
 				}
 			}
@@ -216,6 +207,13 @@ public class ObjectServer extends RedbackAuthenticatedService
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void consume(Payload payload)
+	{
+		String msg = payload.getString();
+		if(msg.equals("refreshconfig"))
+			objectManager.refreshAllConfigs();		
 	}
 
 	

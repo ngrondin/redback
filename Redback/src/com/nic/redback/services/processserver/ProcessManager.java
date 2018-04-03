@@ -53,6 +53,12 @@ public class ProcessManager
 		return firebus;
 	}
 	
+	public void refreshAllConfigs()
+	{
+		processes.clear();
+	}
+	
+
 	protected void loadProcess(String name) throws RedbackException
 	{
 		try
@@ -70,7 +76,7 @@ public class ProcessManager
 		catch(Exception e)
 		{
 			logger.severe(e.getMessage());
-			throw new RedbackException("Exception getting object config", e);
+			throw new RedbackException("Exception getting process config", e);
 		}
 	
 	}

@@ -7,8 +7,8 @@
 <% if(config.getObject('master') != null) { %>
 	rb-related="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(config.getObject('master'))%>"
 <% } %>
-<% if(config.get('initialfilter') != null) { %>
-	rb-initial-filter="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(config.getObject('initialfilter'))%>"
+<% if(config.get('basefilter') != null) { %>
+	rb-base-filter="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(config.getObject('basefilter'))%>"
 <% } %>
 	style="<%=config.getString('inlineStyle')%>">
 	#content#

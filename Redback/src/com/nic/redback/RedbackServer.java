@@ -6,6 +6,8 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.nic.firebus.interfaces.Consumer;
+import com.nic.firebus.interfaces.ServiceProvider;
 import com.nic.firebus.logging.FirebusSimpleFormatter;
 import com.nic.firebus.standalone.StandaloneContainer;
 import com.nic.firebus.utils.JSONList;
@@ -33,7 +35,10 @@ public class RedbackServer extends StandaloneContainer
 			if(firebus != null)
 			{
 				service.setFirebus(firebus);
-				firebus.registerServiceProvider(name, service, 10);
+				if(service instanceof ServiceProvider)
+					firebus.registerServiceProvider(name, service, 10);
+				if(service instanceof Consumer)
+					firebus.registerConsumer(name, (Consumer)service, 10);
 			}
 		}
 	}

@@ -3,6 +3,7 @@ package com.nic.redback.services;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.script.Bindings;
@@ -62,6 +63,12 @@ public class UIServer extends RedbackAuthenticatedService
 					response.setData(getResource(name));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
+				else if(category.equals("app"))
+				{
+					Bindings context = jsEngine.createBindings();
+					context.put("get", "app/" + name);
+					response.setData(executeJSP(("pages/login"), context));
+				}
 				else
 				{
 					throw new FunctionErrorException("This request requires authentication");
@@ -101,13 +108,13 @@ public class UIServer extends RedbackAuthenticatedService
 				{
 					logger.info("Get app " + name);
 					response.setData(getApp(name, session));
-					response.metadata.put("mime", "text.html");
+					response.metadata.put("mime", "text/html");
 				}
 				else if(category.equals("view"))
 				{
 					logger.info("Get view " + name);
 					response.setData(getView(name, session));
-					response.metadata.put("mime", "text.html");
+					response.metadata.put("mime", "text/html");
 				}
 			}
 			logger.info("UI authenticated service finish");
@@ -347,6 +354,8 @@ public class UIServer extends RedbackAuthenticatedService
 							if(result != null)
 							{
 								viewConfig = result.getObject("result.0");
+								if(viewConfig.get("basefilter") != null)
+									viewConfig.put("basefilter", convertFilter(viewConfig.getObject("basefilter")));
 								views.put(viewName, viewConfig);
 							}
 						}
@@ -419,6 +428,23 @@ public class UIServer extends RedbackAuthenticatedService
 	}
 	
 
+	protected JSONObject convertFilter(JSONObject in)
+	{
+		JSONObject out = new JSONObject();
+		Iterator<String> it = in.keySet().iterator();
+		while(it.hasNext())
+		{
+			String inKey = it.next();
+			String outKey = inKey;
+			if(inKey.startsWith("_"))
+				outKey = "$" + inKey.substring(1);
+			if(in.get(inKey) instanceof JSONObject)
+				out.put(outKey, convertFilter(in.getObject(inKey)));
+			else
+				out.put(outKey, in.get(inKey));				
+		}
+		return out;
+	}
 	
 	protected String formatErrorMessage(String msg, Exception e)
 	{

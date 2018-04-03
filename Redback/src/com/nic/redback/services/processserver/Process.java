@@ -9,6 +9,8 @@ import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
 import com.nic.redback.services.processserver.units.InteractionUnit;
 import com.nic.redback.services.processserver.units.ActionUnit;
+import com.nic.redback.services.processserver.units.RedbackObjectExecuteUnit;
+import com.nic.redback.services.processserver.units.RedbackObjectUpdateUnit;
 import com.nic.redback.services.processserver.units.ScriptUnit;
 
 public class Process 
@@ -39,6 +41,10 @@ public class Process
 				unit = new ActionUnit(processManager, nodeConfig);
 			else if(unitType.equals("interaction"))
 				unit = new InteractionUnit(processManager, nodeConfig);
+			else if(unitType.equals("rbobjectupdate"))
+				unit = new RedbackObjectUpdateUnit(processManager, nodeConfig);
+			else if(unitType.equals("rbobjectexecute"))
+				unit = new RedbackObjectExecuteUnit(processManager, nodeConfig);
 			else
 				error("Unit type '" + unitType + "' is not recognised");
 			nodes.put(unit.getId(), unit);

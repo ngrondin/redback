@@ -42,25 +42,28 @@
 					this.save($http);
 			}
 		}
-		
-		/*
-		obj.dateChange = function(attrName, newValue) {
-			if(!this.data[attrName].isSame(newValue)) {
-				this.attributeHasChanged(attrName);
-			}
-		}*/
-		
+				
 		obj.save = function($http) {
 			if(this.isUpdated()) {
 				$http.post("../../rbos", this.getUpdateRequestMessage())
 				.success(function(response) {
-					var responseObject = processResponseJSON(response);
+					processResponseJSON(response);
 				})
 				.error(function(error, status) {
-					alert('save error');
+					alert(error.error);
 				});
 				this.updatedattributes = [];
 			}
+		}
+
+		obj.refresh = function($http) {
+			$http.post("../../rbos", {action:'get', object:this.objectname, uid:this.uid, options:{addrelated:true, addvalidation:true}})
+			.success(function(response) {
+				processResponseJSON(response);
+			})
+			.error(function(error, status) {
+				alert(error.error);
+			});
 		}
 		
 		return obj;

@@ -240,7 +240,7 @@ public class RedbackObject
 		{
 			Expression expression = attributeConfig.getExpression();
 			if(expression != null)
-				return expression.eval(this);
+				return expression.eval(this, session);
 			else if(data.containsKey(name))
 				return data.get(name);
 			else
@@ -330,7 +330,7 @@ public class RedbackObject
 	
 	public boolean isEditable(String name) throws RedbackException
 	{
-		return config.getAttributeConfig(name).getEditableExpression().eval(this).getBoolean();
+		return config.getAttributeConfig(name).getEditableExpression().eval(this, session).getBoolean();
 	}
 	
 	public void save() throws ScriptException, RedbackException

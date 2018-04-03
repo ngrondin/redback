@@ -1,7 +1,7 @@
 	var module = angular.module("desktopmodule", ['ngMaterial', 'uiGmapgoogle-maps', 'mdPickers']);	
 
 	/***********************************/
-	/** Related Input Direcive	 	  **/
+	/** Input Direcive			 	  **/
 	/***********************************/
 	
 	module.directive('rbInput', function($compile) {
@@ -314,7 +314,6 @@
 			}
 		};		
 
-
 		$scope.create = function(){
 			$scope.$emit('createObjectEmit', $scope.objectName);
 		};		
@@ -355,15 +354,17 @@
 
 	 
 	 
-	module.controller('list', function listCtl($scope,$attrs,$http) {
+	module.controller('list', function listCtl($scope,$attrs,$http,$element) {
 		$scope.objectName = $attrs.rbObject;
-		$scope.list = null;
+		$scope.list = [];
 		$scope.selectedObject = null;
 		$scope.relatedConfig = null;
+		$scope.relatedObject = null;
 		$scope.searchText = "";
-		$scope.relationshipFilter = {};
-		$scope.searchFilter = {};
 		$scope.baseFilter = {};
+		$scope.searchText = null;
+		$scope.element = $element;
+		$scope.visible = false; //($scope.element.prop('offsetParent') != null);
 
 		if($attrs.rbRelated != null  &&  $attrs.rbRelated.length > 0) {
 			$scope.relatedConfig = JSON.parse($attrs.rbRelated.replace(/'/g, '"'));
@@ -375,10 +376,8 @@
 
 
 		$scope.search = function(searchText) {
-			if(searchText == null || searchText == 0)
-				$scope.searchFilter = {};
-			else
-				$scope.searchFilter.$multi = '*' + $scope.searchText + '*';
+			$scope.clearList();		
+			$scope.searchText = searchText;
 			$scope.load();
 		}
 		
@@ -386,31 +385,36 @@
 			var filter = {};
 			for (var key in $scope.baseFilter)
 				filter[key] = $scope.baseFilter[key];
-			for (var key in $scope.relationshipFilter)
-				filter[key] = $scope.relationshipFilter[key];
+			if($scope.relatedConfig != null  &&  $scope.relatedObject != null) {
+				var relationshipFilter = getFilterFromRelationship($scope.relatedObject, $scope.relatedConfig.relationship)
+				for (var key in relationshipFilter)
+					filter[key] = relationshipFilter[key];
+			}
 			return filter;
 		}
 		
 		$scope.getFullFilter = function() {
 			var filter = $scope.getBaseAndRelationshipFilter();
-			for (var key in $scope.searchFilter)
-				filter[key] = $scope.searchFilter[key];
+			if($scope.searchText != null  &&  $scope.searchText != '') {
+				filter['$multi'] = '*' + $scope.searchText + '*';
+			}
 			return filter;
 		}
 
 		$scope.load = function() {
-			var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:true, addvalidation:true}};
-			$http.post("../../rbos", req)
-			.success(function(response) {
-				var responseList = processResponseJSON(response);
-				if(responseList != null) 
-					$scope.list = responseList;
-			})
-			.error(function(error, status) {
-				alert('load error');
-			});
-		}
-		
+			if($scope.visible  &&  $scope.list.length == 0  &&  ($scope.relatedConfig == null ||  ($scope.relatedConfig != null  &&  $scope.relatedObject != null))) {
+				var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:true, addvalidation:true}};
+				$http.post("../../rbos", req)
+				.success(function(response) {
+					var responseList = processResponseJSON(response);
+					if(responseList != null) 
+						$scope.list = responseList;
+				})
+				.error(function(error, status) {
+					alert(error.error);
+				});
+			}
+		}		
 
 		$scope.create = function(){
 			var req = {action:"create", object:$scope.objectName, data:$scope.getBaseAndRelationshipFilter(), options:{addrelated:true, addvalidation:true}};
@@ -424,22 +428,14 @@
 				}
 			})
 			.error(function(error, status) {
-				alert('create error');
+				alert(error.error);
 			});
 		};		
 		
 		
 		$scope.save = function() {
 			for(var i = 0; i < $scope.list.length; i++) {
-				if($scope.list[i].isUpdated()) {
-					$http.post("../../rbos", $scope.list[i].getUpdateRequestMessage())
-					.success(function(response) {
-						processResponseJSONObject(response);
-					})
-					.error(function(error, status) {
-						alert('save error');
-					});						
-				}
+				$scope.list[i].save($http);
 			}		
 		}		
 		
@@ -450,15 +446,16 @@
 			}
 		}
 
-		$scope.clearSelectedObject = function() {
+		$scope.clearList = function() {
+			$scope.list = [];
 			$scope.selectedObject = null;
 			$scope.$emit('nullObjectSelectedEmit', $scope.objectName);
 		}		
 		
 		$scope.$on('objectSelected', function($event, object){
 			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
-				$scope.clearSelectedObject();
-				$scope.relationshipFilter = getFilterFromRelationship(object, $scope.relatedConfig.relationship)
+				$scope.clearList();
+				$scope.relatedObject = object;
 				$scope.load();
 			}
 		});
@@ -479,6 +476,14 @@
 			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
 				$scope.load();
 			}
+		});
+		
+		$scope.$watch(function() {
+			return $scope.element.prop('offsetParent') != null;
+		}, function(newValue, oldValue) {
+			$scope.visible = newValue;
+			if(newValue == true)
+				$scope.load();
 		});
 		
 		$scope.load();
@@ -625,4 +630,41 @@
 				existingContextMenu.remove();		
 		}
 
-	 });	 	 
+	 });
+	 
+	 
+
+	/***********************************/
+	/** Workflow Actions Controller	  **/
+	/***********************************/
+
+	module.controller('workflowactions', function wfactionCtl($scope,$attrs,$http) {
+		$scope.notification = {};
+		
+		$scope.openMenu = function($mdOpenMenu, ev) {
+			$http.post("../../rbpm", {action:'getnotifications', filter:{'data.objectname':$scope.$parent.objectName, 'data.uid':$scope.$parent.object.uid}})
+			.success(function(response) {
+				if(response.result.length == 0) {
+					$scope.notification = {message:"No actions"};
+					$mdOpenMenu(ev);
+				} else if(response.result.length > 0) {
+					$scope.notification = response.result[0];
+					$mdOpenMenu(ev);
+				}
+			})
+			.error(function(error, status) {
+				alert(error.error);
+			});	
+		}
+		
+		$scope.processAction = function(action) {
+			$http.post("../../rbpm", {action:'processaction', processaction:action, pid:$scope.notification.pid})
+			.success(function(response) {
+				$scope.$parent.object.refresh($http);
+			})
+			.error(function(error, status) {
+				alert(error.error);
+			});	
+		}
+
+	});

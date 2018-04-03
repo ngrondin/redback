@@ -12,6 +12,7 @@ import com.nic.firebus.interfaces.ServiceProvider;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.services.AccessManager;
+import com.nic.redback.services.ConfigurationServer;
 import com.nic.redback.services.IDGenerator;
 import com.nic.redback.services.ObjectServer;
 import com.nic.redback.services.ProcessServer;
@@ -125,6 +126,10 @@ public abstract class RedbackService implements  ServiceProvider
 		else if(type.equalsIgnoreCase("accessmanager"))
 		{
 			return new AccessManager(config);
+		}
+		else if(type.equalsIgnoreCase("configurationserver"))
+		{
+			return new ConfigurationServer(config);
 		}
 		return null;
 	}

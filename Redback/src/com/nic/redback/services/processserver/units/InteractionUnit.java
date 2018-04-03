@@ -85,7 +85,7 @@ public class InteractionUnit extends ProcessUnit
 		pi.addAssignee(assignee);
 		if(assignee.getType() == Assignee.PROCESS  &&  notificationConfig.getString("method").equals("rbprocessnotification"))
 			processManager.notifyProcess(processManager.getSystemUserSession(), pi.getId(), assignee.getId(), getNotification(pi));
-		//TODO: Add more notificatio methods
+		//TODO: Add more notification methods
 		
 	}
 
@@ -103,7 +103,7 @@ public class InteractionUnit extends ProcessUnit
 		JSONObject notificationMsg = new JSONObject();
 		notificationMsg.put("process", pi.getProcessName());
 		notificationMsg.put("pid", pi.getId());
-		notificationMsg.put("interaction", nodeId);
+		notificationMsg.put("interaction", notificationConfig.getString("code"));
 		notificationMsg.put("message", notificationConfig.getString("message"));
 		
 		JSONList actionList = new JSONList();

@@ -56,6 +56,10 @@ body {
 	margin: 5px 5px;
 }
 
+.rb-form-button {
+	margin: 10px 10px;
+}
+
 .hsection {
 	display: flex;
 	flex-direction: row
@@ -181,6 +185,7 @@ md-input-container .md-errors-spacer{
 ::-webkit-scrollbar
 {
 	width: 8px;
+	height: 8px;
 	background-color: #FFFFFF;
 }
 

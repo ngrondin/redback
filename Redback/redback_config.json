@@ -35,7 +35,7 @@
 				sysusername:"processuser",
 				sysuserpassword:"poil",
 				globalvariables:{
-					"objectservicename":"rbos"
+					"rbobjectservice":"rbos"
 				}
 			}
 		},
@@ -52,14 +52,25 @@
 			config:{
 				configservice:"mongo"
 			}
-		}		
+		},
+		{
+			type:"configurationserver",
+			name:"rbcf",
+			config:{
+				configservice:"mongo",
+				processservice: "rbpm",
+				objectservice: "rbos",
+				accessmanagementservice:"rbam",
+				idgeneratorservice:"rbid"
+			}
+		}				
 	],
 	adapters:[
 		{
 			"type":"httplistener",
 			"config": {
 				"port":"8000",
-				"services": ["rbos", "rbui", "rbpm"]		
+				"services": ["rbos", "rbui", "rbpm", "rbcf"]		
 			}
 		},
 		{

@@ -236,7 +236,8 @@ public class ObjectManager
 			while(it.hasNext())
 			{
 				String attributeName = it.next();
-				object.put(attributeName, new Value(initialData.get(attributeName)));
+				if(!(initialData.get(attributeName) instanceof JSONObject))  //THis is to avoid complex base filters setting initial data
+					object.put(attributeName, new Value(initialData.get(attributeName)));
 			}
 		}
 		return object;

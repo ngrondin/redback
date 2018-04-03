@@ -1,628 +1,442 @@
-	var module = angular.module("desktopmodule", ['ngMaterial', 'uiGmapgoogle-maps', 'mdPickers']);	
+	var module = angular.module("configuratormodule", ['ngMaterial']);
 
-	/***********************************/
-	/** Related Input Direcive	 	  **/
-	/***********************************/
-	
-	module.directive('rbInput', function($compile) {
-		return {
-			restrict:'A',
-			scope:true,
-			controller: function($scope, $attrs, $http, $compile) {
-				$scope.element = null;
-				$scope.attributeName = $attrs.rbAttribute;
-				$scope.inputValue = '';
-				
-				$scope.keyProcessor = function(event) {
-					handled = false;
-					if(event.keyCode == 13  ||  event.keyCode == 9) {
-					} 
-				};
-				$scope.change = function(event) {
-					$scope.object.data[$scope.attributeName] = $scope.inputValue;			
-					$scope.object.attributeHasChanged($scope.attributeName, $http);
-				};
-				$scope.$watch('object.data.' + $scope.attributeName, function(newValue, oldValue) {
-					$scope.inputValue = newValue;
-				});
-			},
-			link: function($scope, $element, $attrs) {
-				$scope.element = $element;
-				$element.bind('keydown', $scope.keyProcessor);
-				$element.bind('change', $scope.change);
-			}
-		};
-	});	
-	
-	/***********************************/
-	/** Related Input Direcive	 	  **/
-	/***********************************/
-	
-	module.directive('rbRelatedInput', ['$compile', function($compile) {
-		return {
-			restrict:'A',
-			scope:true,
-			controller: function($scope, $attrs, $http, $compile, $mdPanel) {
-				$scope.mdPanel = $mdPanel;
-				$scope.mdPanelRef = null;
-				$scope.element = null;
-				$scope.inputValue = '';
-				$scope.attributeName = $attrs.rbAttribute;
-				$scope.displayAttributeName = $attrs.rbDisplayAttribute;
-				$scope.parentAttributeName = $attrs.rbParentAttribute;
-				$scope.childAttributeName = $attrs.rbChildAttribute;
-				$scope.listConfig = {
-					parents:[], 
-					list:[], 
-					hierachical:($scope.parentAttributeName != null  &&  $scope.childAttributeName != null),
-					selected:null,
-					highlightedIndex:-1,
-					loading:false,
-					open:false,
-					inputScope:$scope,
-					loadList:function(){
-						this.inputScope.loadList();
-					}
-				};
-				$scope.openDropDown = function(event) {
-					if($scope.listConfig.open == false)
-					{
-						var config = {
-							attachTo: angular.element(document.body),
-							template: '<div>' +
-										'<md-list>' +
-											'<md-list-item ng-repeat="listitem in listConfig.parents" ng-click="selectItem(listitem)" class="list-item-parent">' +
-												'<p style="white-space: nowrap">{{listitem.data.' + $scope.displayAttributeName + '}}</p>' +
-												'<md-button ng-click="colapseItem(listitem)" class="md-icon-button md-primary"><md-icon ng-show="listConfig.hierachical">expand_less</md-icon></md-button>' +
-											'</md-list-item>' +
-											'<md-progress-linear md-mode="indeterminate" ng-show="listConfig.loading"></md-progress-linear>' +
-											'<md-list-item ng-repeat="listitem in listConfig.list" ng-click="selectItem(listitem)" ng-class="{\'list-item-highlighted\': listConfig.highlightedIndex===$index}">' +
-												'<p style="white-space: nowrap">{{listitem.data.' + $scope.displayAttributeName + '}}</p>' +
-												'<md-button ng-click="expandItem(listitem)" class="md-icon-button md-primary"><md-icon ng-show="listConfig.hierachical">expand_more</md-icon></md-button>' +
-											'</md-list-item>' +
-										'</md-list>' +
-										'</div>',
-							controller: function($scope, mdPanelRef, listConfig) { 
-								$scope.listConfig = listConfig;
-								$scope.mdPanelRef = mdPanelRef;
-								$scope.selectItem = function(listitem) {
-									$scope.listConfig.selected = listitem;
-									$scope.mdPanelRef.close();
-								};
-								$scope.expandItem = function(listitem) {
-									$scope.listConfig.parents.push(listitem);
-									$scope.listConfig.list = [];
-									$scope.listConfig.loadList();
-								};
-								$scope.colapseItem = function(listitem) {
-									while($scope.listConfig.parents.pop().uid != listitem.uid);
-									$scope.listConfig.loadList();
-								};
-							},
-							position: $scope.mdPanel.newPanelPosition().relativeTo($scope.element).addPanelPosition($scope.mdPanel.xPosition.ALIGN_START, $scope.mdPanel.yPosition.BELOW),
-							locals: {
-								'listConfig' : $scope.listConfig
-							},
-							panelClass: 'rb-dropdown-panel',
-							openFrom: event,
-							clickOutsideToClose: true,
-							escapeToClose: true,
-							focusOnOpen: false,
-							zIndex: 2,
-							onRemoving: $scope.dropDownClosed
-						};
-						$scope.listConfig.open = true;
-						$scope.listConfig.parents = [];
-						//$scope.element.val('');
-						$scope.inputValue = '';
-						$scope.mdPanel.open(config).then(function(rez) {$scope.mdPanelRef = rez;});
-						$scope.loadList();
-					}
-				};
-				$scope.loadList = function() {
-					if($scope.listConfig.open == true) {
-						var filter = {$multi:'*' + $scope.inputValue + '*'};
-						if($scope.parentAttributeName != null  &&  $scope.childAttributeName != null) {
-							var lastParentKey = null;
-							if($scope.listConfig.parents.length > 0) {
-								var lastParent = $scope.listConfig.parents[$scope.listConfig.parents.length - 1];
-								lastParentKey = $scope.childAttributeName == 'uid' ? lastParent.uid : lastParent.data[$scope.childAttributeName];
-							} 
-							filter[$scope.parentAttributeName] = lastParentKey;
-						}
-						var req = {action:"list", object:$scope.object.objectname, uid:$scope.object.uid, attribute:$scope.attributeName, filter:filter, options:{addrelated:true}};
-						$scope.listConfig.loading = true;
-						$http.post("../../rbos", req)
-							.success(function(response) {
-								var responseList = processResponseJSON(response);
-								$scope.listConfig.loading = false;
-								if(responseList != null) 
-									$scope.listConfig.list = responseList;
-							});
-					}
-				};	
-				$scope.keyProcessor = function(event) {
-					handled = false;
-					if(event.keyCode == 38) {
-							$scope.listConfig.highlightedIndex--;
-							handled = true;
-					} else if(event.keyCode == 40) {
-							$scope.listConfig.highlightedIndex++;
-							handled = true;
-					} else if(event.keyCode == 13  ||  event.keyCode == 9) {
-							if($scope.listConfig.highlightedIndex > -1  &&  $scope.listConfig.highlightedIndex < $scope.listConfig.list.length)
-								$scope.listConfig.selected = $scope.listConfig.list[$scope.listConfig.highlightedIndex];
-							$scope.mdPanelRef.close();
-							handled = true;
-					} else {
-						setTimeout(function() {$scope.loadList()}, 100);
-					}					
-					if (handled) {
-						$scope.$apply();
-						event.preventDefault();
-						event.stopImmediatePropagation();
-						event.Handled = true;
-					}							
-				};
-				$scope.dropDownClosed = function() {
-					if($scope.listConfig.selected != null) {
-						$scope.object.related[$scope.attributeName] = $scope.listConfig.selected;
-						$scope.object.attributeHasChanged($scope.attributeName, $http);
-					}
-					$scope.listConfig.open = false;
-					$scope.listConfig.selected = null;
-					$scope.listConfig.highlightedIndex = -1;
-					$scope.listConfig.list = [];
-					$scope.inputValue = $scope.object.related[$scope.attributeName].data[$scope.displayAttributeName];
-				};
-				$scope.$watch('object.related.' + $scope.attributeName + '.data.' + $scope.displayAttributeName, function(newValue, oldValue) {
-					$scope.inputValue = newValue;
-				});
-			},
-			link: function($scope, $element, $attrs) {
-				$scope.element = $element;
-				$element.bind('focus', $scope.openDropDown);
-				$element.bind('keydown', $scope.keyProcessor);
-			}
-		};
-	}]);	
-
-
-	/***********************************/
-	/** Date Input Direcive 	 	  **/
-	/***********************************/
-	
-	module.directive('rbDatetimeInput', function() {
-		return {
-			restrict:'A',
-			scope:true,
-			controller: function($scope, $attrs, $http, $compile, $mdPanel) {
-				$scope.element = null;
-				$scope.formattedDateTime = '';
-				$scope.attributeName = $attrs.rbAttribute;
-				$scope.format = $attrs.rbFormat;
-				$scope.timepicker = {
-					time:null,
-					mdPanelRef:null,
-					open:false,
-					views:((($scope.format.includes('YY') ||  $scope.format.includes('MM')  ||  $scope.format.includes('DD')) ? 1 : 0) | ($scope.format.includes('HH') ? 2 : 0) | ($scope.format.includes('mm') ? 4 : 0)),
-					currentView:0,
-					pickFinalised:false,
-					switchView:function(){
-						this.currentView = this.currentView + 1;	
-						if((1 << this.currentView) <= this.views) {
-							while(((1 << this.currentView) & this.views) == 0)
-								this.currentView = this.currentView + 1;	
-						} else {
-							this.pickFinalised = true;
-							this.mdPanelRef.close();
-						}
-					}
-				};
-				$scope.openDropDown = function(event) {
-					if($scope.timepicker.open == false)
-					{
-						var config = {
-							attachTo: angular.element(document.body),
-							position: $mdPanel.newPanelPosition().relativeTo($scope.element).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW),
-							template:'<md-content>' +
-                                    '<div class="mdp-clock-switch-container" ng-switch="timepicker.currentView" layout layout-align="center center">' +
-										'<mdp-calendar date="timepicker.time" selectevent="timepicker.switchView()" auto-switch="1" ng-switch-when="0"></mdp-calendar>' +
-                                        '<mdp-clock time="timepicker.time" type="hours" auto-switch="1" ng-switch-when="1"></mdp-clock>' +
-                                        '<mdp-clock time="timepicker.time" type="minutes" auto-switch="1" ng-switch-when="2"></mdp-clock>' +
-                                        '<div ng-switch-when="4">Can close</div>' +
-                                    '</div>' +
-                                '</md-content>',
-							controller: function($scope, mdPanelRef, timepicker) { 
-								$scope.timepicker = timepicker;
-								$scope.mdPanelRef = mdPanelRef;
-								$scope.time = timepicker.time;
-							},
-							locals: {
-								'timepicker' : $scope.timepicker,
-							},
-							panelClass: 'rb-dropdown-panel',
-							openFrom: event,
-							clickOutsideToClose: true,
-							escapeToClose: true,
-							focusOnOpen: false,
-							zIndex: 2,
-							onRemoving: $scope.dropDownClosed
-						};
-						$scope.timepicker.open = true;
-						$scope.timepicker.currentView = -1;
-						$scope.timepicker.switchView();
-						$scope.timepicker.pickFinalised = false;
-						if($scope.timepicker.time == null) {
-							$scope.timepicker.time = moment();
-							$scope.timepicker.time.set({second:0,millisecond:0});
-						}
-						$mdPanel.open(config).then(function(rez) {$scope.timepicker.mdPanelRef = rez;});
-					}
-				};
-				$scope.keyProcessor = function(event) {
-					handled = false;	
-					if(event.keyCode == 13  ||  event.keyCode == 9) {
-						$scope.timepicker.mdPanelRef.close();
-					}						
-				};
-				$scope.dropDownClosed = function() {
-					$scope.timepicker.open = false;
-					if($scope.timepicker.pickFinalised) {
-						$scope.object.data[$scope.attributeName] = $scope.timepicker.time.toISOString();
-						$scope.object.attributeHasChanged($scope.attributeName, $http);
-					}
-				};
-				$scope.$watch('object.data.' + $scope.attributeName, function(newValue, oldValue) {
-					if(newValue == null) {
-						$scope.timepicker.time = null;
-						$scope.formattedDateTime = '';
-					} else {
-						$scope.timepicker.time = moment(newValue);
-						$scope.formattedDateTime = $scope.timepicker.time.format($scope.format);
-					}
-				});
-			},
-			link: function($scope, $element, $attrs) {
-				$scope.element = $element;
-				$element.bind('focus', $scope.openDropDown);
-				$element.bind('keydown', $scope.keyProcessor);
-			}
-		};
-	});			
-	
-	
-	/***********************************/
-	/** Form Controller			 	  **/
-	/***********************************/
-
-	
-	module.controller('form', function formCtl($scope,$attrs,$http) {
-		$scope.objectName = $attrs.rbObject;
-		$scope.object = null;
-		$scope.dynamicSearchText = "";
+	module.controller('processdesigner', function processdesigner($scope,$attrs,$http,$element) {
+		$scope.nodeTypes = [
+			{id:"interaction", name:"Interaction"},
+			{id:"script", name:"Script"},
+			{id:"action", name:"Action"},
+			{id:"rbobjectupdate", name:"Object Update"}
+		];
+		$scope.assigneeTypes = [
+			{id:"user", name:"User"},
+			{id:"group", name:"Group"},
+			{id:"process", name:"Process"},
+			{id:"rules", name:"Rules"}
+		];
+		$scope.notificationMethods = [
+			{id:"email", name:"Email"},
+			{id:"rbprocessnotification", name:"Process Notification"}
+		]
 		
-		
-		$scope.setObject = function(object) {
-			$scope.object = object;
-		}
+		$scope.list = [];
+		$scope.config = {};
+		$scope.selectedNode = null;
 
 		
-		$scope.save = function(){
-			if($scope.object != null) {
-				$scope.object.save($http);
-			}
-		};		
-
-
-		$scope.create = function(){
-			$scope.$emit('createObjectEmit', $scope.objectName);
-		};		
-
-		$scope.objectfunction = function(functionName){
-			var req = {action:"execute", object:$scope.objectName, uid:$scope.object.uid, "function":functionName, options:{addrelated:true, addvalidation:true}};
-			$http.post("../../rbos", req)
-			.success(function(response) {
-				var responseObject = processResponseJSON(response);
-				if(responseObject != null) {
-					$scope.setObject(responseObject);
-					$scope.$emit('refreshRelatedEmit', $scope.object);
-				}
-			})
-			.error(function(error, status) {
-				alert('execute error');
-			});
-		};
-
-		
-		$scope.$on('objectSelected', function($event, object){
-			if(object != null  &&  object.objectname == $scope.objectName)
-				$scope.setObject(object);
-		});
-
-
-		$scope.$on('nullObjectSelected', function($event, objectName){
-			if(objectName == $scope.objectName)
-				$scope.setObject(null);
-		});
-
-	 });
-	 
-
-	/***********************************/
-	/** List Controller				  **/
-	/***********************************/
-
-	 
-	 
-	module.controller('list', function listCtl($scope,$attrs,$http) {
-		$scope.objectName = $attrs.rbObject;
-		$scope.list = null;
-		$scope.selectedObject = null;
-		$scope.relatedConfig = null;
-		$scope.searchText = "";
-		$scope.relationshipFilter = {};
-		$scope.searchFilter = {};
-		$scope.baseFilter = {};
-
-		if($attrs.rbRelated != null  &&  $attrs.rbRelated.length > 0) {
-			$scope.relatedConfig = JSON.parse($attrs.rbRelated.replace(/'/g, '"'));
-			$scope.relationshipFilter = {uid:-1};
-		}
-			
-		if($attrs.rbInitialFilter != null  &&  $attrs.rbInitialFilter.length > 0)
-			$scope.baseFilter = JSON.parse($attrs.rbInitialFilter.replace(/'/g, '"'));
-
-
-		$scope.search = function(searchText) {
-			if(searchText == null || searchText == 0)
-				$scope.searchFilter = {};
-			else
-				$scope.searchFilter.$multi = '*' + $scope.searchText + '*';
-			$scope.load();
-		}
-		
-		$scope.getBaseAndRelationshipFilter = function() {
-			var filter = {};
-			for (var key in $scope.baseFilter)
-				filter[key] = $scope.baseFilter[key];
-			for (var key in $scope.relationshipFilter)
-				filter[key] = $scope.relationshipFilter[key];
-			return filter;
-		}
-		
-		$scope.getFullFilter = function() {
-			var filter = $scope.getBaseAndRelationshipFilter();
-			for (var key in $scope.searchFilter)
-				filter[key] = $scope.searchFilter[key];
-			return filter;
-		}
-
 		$scope.load = function() {
-			var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:true, addvalidation:true}};
-			$http.post("../../rbos", req)
+			var req = {action:"listprocesses"};
+			$http.post("../../rbcf", req)
 			.success(function(response) {
-				var responseList = processResponseJSON(response);
-				if(responseList != null) 
-					$scope.list = responseList;
+				$scope.list = response.result;
 			})
 			.error(function(error, status) {
 				alert('load error');
 			});
 		}
 		
-
-		$scope.create = function(){
-			var req = {action:"create", object:$scope.objectName, data:$scope.getBaseAndRelationshipFilter(), options:{addrelated:true, addvalidation:true}};
-			$http.post("../../rbos", req)
+		$scope.selectProcess = function(listitem) {
+			var req = {action:"getprocess", name:listitem.name, version:listitem.version};
+			$http.post("../../rbcf", req)
 			.success(function(response) {
-				var responseObject = processResponseJSON(response);
-				if(responseObject != null) {
-					$scope.list.push(responseObject);
-					$scope.selectObject(responseObject);
-					$scope.$emit('refreshRelatedEmit', responseObject);
-				}
+				$scope.config = response;
 			})
 			.error(function(error, status) {
-				alert('create error');
-			});
-		};		
-		
+				alert('load error');
+			});	
+		}
 		
 		$scope.save = function() {
-			for(var i = 0; i < $scope.list.length; i++) {
-				if($scope.list[i].isUpdated()) {
-					$http.post("../../rbos", $scope.list[i].getUpdateRequestMessage())
-					.success(function(response) {
-						processResponseJSONObject(response);
-					})
-					.error(function(error, status) {
-						alert('save error');
-					});						
-				}
-			}		
-		}		
+			var req = {action:"updateprocess", config:$scope.config};
+			$http.post("../../rbcf", req)
+			.success(function(response) {
+				alert("saved");
+			})
+			.error(function(error, status) {
+				alert('save error');
+			});	
+		}
 		
-		$scope.selectObject = function(object) {
-			if(object != null && $scope.list.includes(object)) {
-				$scope.selectedObject = object;
-				$scope.$emit('objectSelectedEmit', object);
+		$scope.addNode = function() {
+			if($scope.config != null) {
+				var nextId = 0;
+				for(var i = 0; i < $scope.config.nodes.length; i++) {
+					if($scope.config.nodes[i].id > nextId) nextId = $scope.config.nodes[i].id;
+				}
+				nextId += 1;
+				$scope.config.nodes.push({id:nextId + '', type:null, name:null, position:{x:0, y:0}});
 			}
 		}
 
-		$scope.clearSelectedObject = function() {
-			$scope.selectedObject = null;
-			$scope.$emit('nullObjectSelectedEmit', $scope.objectName);
-		}		
-		
-		$scope.$on('objectSelected', function($event, object){
-			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
-				$scope.clearSelectedObject();
-				$scope.relationshipFilter = getFilterFromRelationship(object, $scope.relatedConfig.relationship)
-				$scope.load();
+		$scope.removeNode = function() {
+			if($scope.config != null  &&  $scope.selectedNode != null) {
+				var index = -1;
+				for(var i = 0; i < $scope.config.nodes.length; i++)
+					if($scope.config.nodes[i] == $scope.selectedNode)
+						index = i;
+				if(i > -1) {
+					$scope.config.nodes.splice(index, 1);
+					$scope.$broadcast('drawConnectors');
+				}
 			}
-		});
+		}
 
-		$scope.$on('createObject', function($event, name){
-			if(name == $scope.objectName) {
-				$scope.create();
+		$scope.addAssignee = function() {
+			if($scope.config != null  &&  $scope.selectedNode != null) {
+				if($scope.selectedNode.assignees == null)
+					$scope.selectedNode.assignees = [];
+				$scope.selectedNode.assignees.push({type:null, id:null});
 			}
-		});
+		}
 
-		$scope.$on('saveRelated', function($event, object){
-			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
-				$scope.save();
+		$scope.removeAssignee = function(assignee) {
+			if($scope.config != null  &&  $scope.selectedNode != null) {
+				$scope.selectedNode.assignees.pop(assignee);
 			}
-		});
+		}
 
-		$scope.$on('refreshRelated', function($event, object){
-			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
-				$scope.load();
+		$scope.addAction = function() {
+			if($scope.config != null  &&  $scope.selectedNode != null) {
+				if($scope.selectedNode.actions == null)
+					$scope.selectedNode.actions = [];
+				$scope.selectedNode.actions.push({action:null, description:null, nextnode:null});
 			}
-		});
+		}
+
+		$scope.removeAction = function(action) {
+			if($scope.config != null  &&  $scope.selectedNode != null) {
+				$scope.selectedNode.actions.pop(action);
+			}
+		}
 		
 		$scope.load();
-	 });	 
-
-	
-	/***********************************/
-	/** Layout Controller			 **/
-	/***********************************/
-
-	 
-	module.controller('layout', function layoutCtl($scope,$attrs,$http) {
-
-		$scope.$on('objectSelectedEmit', function($event, object){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('objectSelected', object);
-				$event.defaultPrevented = true;
-			}
-		});
-		
-		$scope.$on('nullObjectSelectedEmit', function($event, name){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('nullObjectSelected', name);
-				$event.defaultPrevented = true;
-			}
-		});
-
-		$scope.$on('createObjectEmit', function($event, name){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('createObject', name);
-				$event.defaultPrevented = true;
-			}
-		});
-
-		$scope.$on('saveRelatedEmit', function($event, object){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('saveRelated', object);
-				$event.defaultPrevented = true;
-			}
-		});
-
-		$scope.$on('refreshRelatedEmit', function($event, object){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('refreshRelated', object);
-				$event.defaultPrevented = true;
-			}
-		});
-
-		
-	 });	 
-	 
-	/***********************************/
-	/** Tab Controller	    		 **/
-	/***********************************/
-
-	 
-	module.controller('tab', function tabCtl($scope,$attrs,$http) {
-		$scope.tabs = [];
-		$scope.selected_tab = null;
-		
-		$scope.selectTab = function(tab) {
-			$scope.selected_tab = tab;
-		}
-
 	});
 	
 	
-	/***********************************/
-	/** Map Controller		    	  **/
-	/***********************************/
-
-	 
-	module.controller('map', function mapCtl($scope,$attrs,$http,$compile) {
-
-		$scope.mapcontrol = {};
-		$scope.center = { latitude: -34, longitude: 150 }; 
-		$scope.zoom = 8;
-		$scope.markeroptions = {
-			draggable: true,
-			label: 'Pout'
-		};
-	
-		$scope.createObjectAtPosition = function(position) {
-			alert('allo');
+	module.controller('processcanvas', function processcanvas($scope,$attrs,$http,$element) {
+		$scope.element = $element;
+		$scope.canvasWidth = 0;
+		$scope.canvasHeight = 0;
+		$scope.dragging = false;
+		$scope.draggingNode = null;
+		$scope.dragOffset = null;
+		$scope.nodeDivs = {};
+		
+		$scope.canvas = document.getElementById("canvas");
+		$scope.ctx = canvas.getContext("2d");
+		
+		$scope.getNode = function(id){
+			for(var i = 0; i < $scope.config.nodes.length; i++) 
+				if($scope.config.nodes[i].id == id)
+					return $scope.config.nodes[i];
 		}
 		
-		$scope.setSelectedObjectPosition = function(position) {
-			$scope.$parent.selectedObject.data.geometry = {
-				type: 'point',
-				coords: position
+		$scope.drawConnectors = function() {
+			$scope.ctx.clearRect(0, 0, $scope.canvas.width, $scope.canvas.height);
+			$scope.ctx.beginPath();
+			for(var i = 0; i < $scope.config.nodes.length; i++) {
+				$scope.drawNodeConnectors($scope.config.nodes[i]);
 			}
-			$scope.$parent.selectedObject.attributeHasChanged('geometry', $http);
-			$scope.hideContextMenu();
-		}
-
-		$scope.markerHasMoved = function(marker, eventName, model, args) {
-			$scope.setSelectedObjectPosition({latitude:marker.position.lat(), longitude:marker.position.lng()});
 		}
 		
-		$scope.markerSelected = function(marker, eventName, model, args) {
-			model.$parent.$parent.selectObject(model.$parent.object);
+		$scope.drawNodeConnectors = function(node) {
+			if(node.type == 'interaction') {
+				if(node.actions != null) {
+					for(var i = 0; i < node.actions.length; i++) {
+						if(node.actions[i].nextnode != null) {
+							var toNode = $scope.getNode(node.actions[i].nextnode);
+							if(toNode != null)
+								$scope.drawConnector(node,toNode, node.actions[i].action);
+						}
+					}
+				}
+			} else {
+				if(node.nextnode != null) {
+					var toNode = $scope.getNode(node.nextnode);
+					if(toNode != null)
+						$scope.drawConnector(node, toNode, '');
+				}
+			}
 		}
 		
-		$scope.mapClicked = function(map, eventName, args) {
-			$scope.hideContextMenu();
-		}
-
-		$scope.mapDragStarted = function(map, eventName, args) {
-			$scope.hideContextMenu();
+		$scope.drawConnector = function(fromNode, toNode, label) {
+			var startX = fromNode.position.x + $scope.nodeDivs[fromNode.id][0].offsetWidth;
+			var startY = fromNode.position.y + ($scope.nodeDivs[fromNode.id][0].offsetHeight / 2);
+			var endX = toNode.position.x;
+			var endY = toNode.position.y + ($scope.nodeDivs[toNode.id][0].offsetHeight / 2);
+			if(startX < endX) {
+				var midX = startX + 20; 
+				if(endX < startX + 40) midX = (startX + endX) / 2;
+				$scope.ctx.moveTo(startX, startY);
+				$scope.ctx.lineTo(midX, startY);
+				$scope.ctx.stroke();			
+				$scope.ctx.lineTo(midX, endY);
+				$scope.ctx.stroke();			
+				$scope.ctx.lineTo(endX, endY);
+				$scope.ctx.stroke();	
+				$scope.ctx.font = "12px Arial";
+				$scope.ctx.fillText(label,midX + 3,endY - 2);				
+			} else {
+				var midX1 = startX + 20;
+				var midX2 = endX - 20;
+				var midY = startY - 40; //(startY + endY) / 2;
+				if(endY < startY) midY = endY - 40;
+				$scope.ctx.moveTo(startX, startY);
+				$scope.ctx.lineTo(midX1, startY);
+				$scope.ctx.stroke();			
+				$scope.ctx.lineTo(midX1, midY);
+				$scope.ctx.stroke();			
+				$scope.ctx.lineTo(midX2, midY);
+				$scope.ctx.stroke();			
+				$scope.ctx.lineTo(midX2, endY);
+				$scope.ctx.stroke();			
+				$scope.ctx.lineTo(endX, endY);
+				$scope.ctx.stroke();			
+				$scope.ctx.font = "12px Arial";
+				$scope.ctx.fillText(label,midX1 - 30,midY - 2);				
+			}
 		}
 		
-		$scope.showContextMenu = function(map, eventName, args) {
-			var clickLatLng = args[0].latLng;
-			$scope.hideContextMenu();
-			
-			var scale = Math.pow(2, map.getZoom());
-			var nw = new google.maps.LatLng(map.getBounds().getNorthEast().lat(), map.getBounds().getSouthWest().lng());
-			var worldCoordinateNW = map.getProjection().fromLatLngToPoint(nw);
-			var worldCoordinate = map.getProjection().fromLatLngToPoint(clickLatLng);
-			var clickedPosition = new google.maps.Point(Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale), Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale));	
-
-			var html = '<div id="contextmenu" class="contextmenu"><md-list>';
-			if($scope.$parent.selectedObject != null)
-				html = html + '<md-list-item ng-click="setSelectedObjectPosition({latitude:' + clickLatLng.lat() + ', longitude:' + clickLatLng.lng() + '})"><div style="white-space:nowrap">Set location here</div></md-list-item>';
-			html = html + '<md-list-item ng-click="createObjectAtPosition({latitude:' + clickLatLng.lat() + ', longitude:' + clickLatLng.lng() + '})"><div style="white-space:nowrap">Create new location here</div></md-list-item>';
-			html = html + '</md-list></div>';
-			var contextmenuDivFactory = $compile(html);
-			var contextmenuDiv = contextmenuDivFactory($scope);
-			angular.element(map.getDiv()).append(contextmenuDiv);
-
-			if((map.getDiv().offsetWidth - clickedPosition.x) < contextmenuDiv[0].offsetWidth)
-				clickedPosition.x = clickedPosition.x - contextmenuDiv[0].offsetWidth;
-			if((map.getDiv().offsetHeight - clickedPosition.y) < contextmenuDiv[0].offsetHeight)
-				clickedPosition.y = clickedPosition.y - contextmenuDiv[0].offsetHeight;
-
-			contextmenuDiv[0].style.left = (clickedPosition.x + 'px');
-			contextmenuDiv[0].style.top = (clickedPosition.y + 'px');
-			contextmenuDiv[0].style.visibility = 'visible';
+		$scope.mouseup = function(event) {
+			$scope.dragging = false;
+			$scope.draggingNode = null;
+			$scope.dragOffset = null;
 		}
 		
-		$scope.hideContextMenu = function() {
-			var existingContextMenu = document.getElementById('contextmenu');
-			if(existingContextMenu != null)
-				existingContextMenu.remove();		
+		$scope.mousemove = function(event) {
+			if($scope.dragging) {
+				$scope.draggingNode.position.x += (event.screenX - $scope.dragOffset.x);
+				$scope.draggingNode.position.y += (event.screenY - $scope.dragOffset.y);
+				$scope.dragOffset.x = event.screenX;
+				$scope.dragOffset.y = event.screenY;
+				$scope.updateCanvasSize();
+				$scope.drawConnectors();
+			}
+		}
+		
+		$scope.updateCanvasSize = function() {
+			var h  = 0;
+			var w = 0;
+			for(var i = 0; i < $scope.config.nodes.length; i++) {
+				var nodeId = $scope.config.nodes[i].id;
+				x = $scope.config.nodes[i].position.x + $scope.nodeDivs[nodeId][0].offsetWidth;
+				y = $scope.config.nodes[i].position.y + $scope.nodeDivs[nodeId][0].offsetHeight;
+				if(x > w) w = x;
+				if(y > h) h = y;
+			}	
+			w += 40;
+			h += 40;
+			$scope.canvas.height = h;
+			$scope.canvas.width = w;
+			$scope.element.css('height', h + 'px');
+			$scope.element.css('width', w + 'px');
+		}		
+		
+		$scope.$on('drawConnectors', function($event) {
+			$scope.drawConnectors();
+		});
+		
+	});
+
+	
+	module.controller('processnode', function processnode($scope,$attrs,$http,$element) {
+		$scope.element = $element;
+		$scope.$parent.$parent.nodeDivs[$scope.node.id] = $element;
+		
+		$scope.mousedown = function(event) {
+			$scope.$parent.$parent.dragging = true;
+			$scope.$parent.$parent.draggingNode = $scope.node;
+			$scope.$parent.$parent.dragOffset = {x: event.screenX, y: event.screenY};
+			$scope.$parent.$parent.$parent.selectedNode = $scope.node;
+		}
+		
+		if($scope.$last) {
+			$scope.$parent.$parent.updateCanvasSize();
+			$scope.$parent.$parent.drawConnectors();
+		}
+	});
+	
+	/****************************************************/
+	
+	module.controller('objectdesigner', function objectdesigner($scope,$attrs,$http,$element) {
+		$scope.list = [];
+		$scope.config = {};
+		$scope.selectedAttribute = null;
+		$scope.listfilter = [];
+		$scope.selectedView = null;
+		$scope.scripts = [];
+
+		
+		$scope.load = function() {
+			var req = {action:"listobjects"};
+			$http.post("../../rbcf", req)
+			.success(function(response) {
+				$scope.list = response.result;
+			})
+			.error(function(error, status) {
+				alert('load error');
+			});
+		}
+		
+		$scope.save = function() {
+			if($scope.config != null) {
+				$scope.cleanupConfig();
+				var req = {action:"updateobject", config:$scope.config};
+				$http.post("../../rbcf", req)
+				.success(function(response) {
+					alert("saved");
+				})
+				.error(function(error, status) {
+					alert('save error');
+				});	
+			}
+		}
+		
+		$scope.selectObject = function(listitem) {
+			$scope.selectedAttribute = null;			
+			var req = {action:"getobject", _id:listitem._id};
+			$http.post("../../rbcf", req)
+			.success(function(response) {
+				$scope.config = response;
+				$scope.readScripts();
+			})
+			.error(function(error, status) {
+				alert('load error');
+			});	
+		}
+		
+		$scope.selectAttribute = function(listitem) {
+			$scope.selectedAttribute = listitem;
+			$scope.readListFilter();
+		}
+		
+		$scope.readListFilter = function() {
+			if($scope.selectedAttribute != null  &&  $scope.selectedAttribute.relatedobject != null  &&  $scope.selectedAttribute.relatedobject.listfilter != null) {
+				$scope.listfilter = [];
+				for(var key in $scope.selectedAttribute.relatedobject.listfilter)
+					$scope.listfilter.push({name:key, value:$scope.selectedAttribute.relatedobject.listfilter[key]});
+			}
 		}
 
-	 });	 	 
+		$scope.readScripts = function() {
+			$scope.scripts = [];
+			if($scope.config != null  &&  $scope.config.scripts != null) {
+				for(var key in $scope.config.scripts)
+					$scope.scripts.push({name:key, value:$scope.config.scripts[key]});
+			} 
+		}
+
+		$scope.createObject = function() {
+			var req = {action:"createobject"};
+			$http.post("../../rbcf", req)
+			.success(function(response) {
+				$scope.config = response;
+				$scope.list.push(response);
+			})
+			.error(function(error, status) {
+				alert('load error');
+			});	
+		}
+
+		$scope.addAttribute = function() {
+			if($scope.config != null) {
+				if($scope.config.attributes == null)
+					$scope.config.attributes = [];
+				$scope.config.attributes.push({ name:null});
+			}
+		}
+
+		$scope.removeAttribute = function() {
+			if($scope.config != null  &&  $scope.selectedAttribute != null) {
+				var index = -1;
+				for(var i = 0; i < $scope.config.attributes.length; i++)
+					if($scope.config.attributes[i] == $scope.selectedAttribute)
+						index = i;
+				if(i > -1) {
+					$scope.config.attributes.splice(index, 1);
+				}
+			}
+		}
+
+		$scope.addRelatedFilter = function() {
+			if($scope.config != null  &&  $scope.selectedAttribute != null  &&  $scope.selectedAttribute.relatedobject != null) {
+				$scope.listfilter.push({name:'', value:''});
+			}
+		}
+
+		$scope.removeRelatedFilter = function(filter) {
+			if($scope.config != null  &&  $scope.selectedAttribute != null  &&  $scope.selectedAttribute.relatedobject != null) {
+				var index = -1;
+				for(var i = 0; i < $scope.listfilter.length; i++)
+					if($scope.listfilter[i] == filter)
+						index = i;
+				if(i > -1) {
+					$scope.listfilter.splice(index, 1);
+				}
+				$scope.writeListFilter();
+			}
+		}
+		
+		$scope.writeListFilter = function() {
+			if($scope.selectedAttribute != null  &&  $scope.selectedAttribute.relatedobject != null) {
+				$scope.selectedAttribute.relatedobject.listfilter = {};
+				for(var i = 0; i < $scope.listfilter.length; i++)
+					$scope.selectedAttribute.relatedobject.listfilter[$scope.listfilter[i].name] = $scope.listfilter[i].value; 
+			}			
+		}
+
+		$scope.addScript = function() {
+			if($scope.config != null) {
+				if($scope.config.scripts == null) {
+					$scope.config.scripts = {};
+					$scope.scripts = [];
+				}
+				$scope.scripts.push({name:'', value:''});
+			}
+		}
+		
+		$scope.removeScript = function(scriptitem) {
+			if($scope.config != null  &&  $scope.scripts != null) {
+				var index = -1;
+				for(var i = 0; i < $scope.scripts.length; i++)
+					if($scope.scripts[i] == scriptitem)
+						index = i;
+				if(i > -1) {
+					$scope.scripts.splice(index, 1);
+				}
+				$scope.writeScripts();
+			}
+		}
+
+		$scope.writeScripts = function() {
+			if($scope.config != null  &&  $scope.config.scripts != null) {
+				$scope.config.scripts = {};
+				for(var i = 0; i < $scope.scripts.length; i++)
+					$scope.config.scripts[$scope.scripts[i].name] = $scope.scripts[i].value; 
+			}			
+		}
+
+		$scope.cleanupConfig = function() {
+			if($scope.config != null) {
+				if($scope.config.attributes != null) {
+					for(var i = 0; i < $scope.config.attributes.length; i++) {
+						var attribute = $scope.config.attributes[i];
+						if(attribute.relatedobject != null  &&  (attribute.relatedobject.name == ''  ||  attribute.relatedobject.name == null))
+							delete attribute.relatedobject;
+						if(attribute.scripts != null) {
+							for(var key in attribute.scripts)
+								if(attribute.scripts[key] == ''  ||  attribute.scripts[key] == null)
+									delete attribute.scripts[key];
+							if(Object.getOwnPropertyNames(attribute.scripts).length === 0)
+								delete attribute.scripts;
+						}
+					}
+				}
+				if($scope.config.scripts != null) {
+					if(Object.getOwnPropertyNames($scope.config.scripts).length === 0)
+						delete $scope.config.scripts;
+				}
+			}
+		}
+
+		$scope.load();
+	});	

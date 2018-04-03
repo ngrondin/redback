@@ -30,7 +30,7 @@ public class FilterConfig
 		while(it.hasNext())
 		{
 			String key = it.next();
-			filter.put(key, expressions.get(key).eval(obj).getObject());
+			filter.put(key, expressions.get(key).eval(obj, null).getObject());
 		}
 		return filter;
 	}

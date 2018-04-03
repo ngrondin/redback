@@ -9,6 +9,7 @@ import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
+import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
@@ -17,7 +18,7 @@ import com.nic.redback.security.Session;
 import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 
-public class ProcessServer extends RedbackAuthenticatedService
+public class ProcessServer extends RedbackAuthenticatedService implements Consumer
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected ProcessManager processManager;
@@ -167,6 +168,13 @@ public class ProcessServer extends RedbackAuthenticatedService
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void consume(Payload payload)
+	{
+		String msg = payload.getString();
+		if(msg.equals("refreshconfig"))
+			processManager.refreshAllConfigs();		
 	}
 
 	

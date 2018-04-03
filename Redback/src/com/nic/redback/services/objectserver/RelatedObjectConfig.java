@@ -13,6 +13,8 @@ public class RelatedObjectConfig
 		config = cfg;
 		if(config.get("listfilter") != null)
 			listFilter = new FilterConfig(config.getObject("listfilter"));
+		else
+			listFilter = new FilterConfig(new JSONObject());
 	}
 	
 	public String getObjectName()
