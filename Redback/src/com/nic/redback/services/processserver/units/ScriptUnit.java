@@ -14,6 +14,7 @@ import jdk.nashorn.api.scripting.JSObject;
 import com.nic.firebus.utils.FirebusDataUtil;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
+import com.nic.redback.security.Session;
 import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 import com.nic.redback.services.processserver.ProcessUnit;
@@ -47,13 +48,14 @@ public class ScriptUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
+		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
 		String fileName = (String)script.getEngine().get(ScriptEngine.FILENAME);
 		logger.info("Start executing script : " + fileName);
 		Bindings context = script.getEngine().createBindings();
 		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
-		context.put("pm", new ProcessManagerJSWrapper(processManager));
+		context.put("pm", new ProcessManagerJSWrapper(processManager, sysUserSession));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalVariables()));
-		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getSystemUserSession().getSessionId().toString()));
+		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), sysUserSession.getSessionId().toString()));
 		try
 		{
 			script.eval(context);

@@ -84,7 +84,7 @@ public class InteractionUnit extends ProcessUnit
 	{
 		pi.addAssignee(assignee);
 		if(assignee.getType() == Assignee.PROCESS  &&  notificationConfig.getString("method").equals("rbprocessnotification"))
-			processManager.notifyProcess(processManager.getSystemUserSession(), pi.getId(), assignee.getId(), getNotification(pi));
+			processManager.notifyProcess(processManager.getSystemUserSession(pi.getDomain()), pi.getId(), assignee.getId(), getNotification(pi));
 		//TODO: Add more notification methods
 		
 	}

@@ -6,6 +6,7 @@ import com.nic.firebus.Payload;
 import com.nic.firebus.utils.FirebusDataUtil;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
+import com.nic.redback.security.Session;
 import com.nic.redback.services.processserver.Expression;
 import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
@@ -33,6 +34,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
+		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
 		JSONObject data = FirebusDataUtil.convertJSObjectToDataObject((JSObject)dataExpression.eval(pi));
 		String objectUID = (String)objectUIDExpression.eval(pi);
 		JSONObject req = new JSONObject();
@@ -43,7 +45,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 		req.put("data", data);
 		Payload payload = new Payload();
 		payload.setData(req.toString());
-		payload.metadata.put("sessionid", processManager.getSystemUserSession().getSessionId().toString());
+		payload.metadata.put("sessionid", sysUserSession.getSessionId().toString());
 		try
 		{
 			processManager.getFirebus().requestService(processManager.getGlobalVariables().getString("rbobjectservice"), payload);

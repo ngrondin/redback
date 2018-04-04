@@ -20,6 +20,7 @@ public class Process
 	protected String startNode;
 	protected String name;
 	protected int version;
+	protected String domain;
 	protected ProcessManager processManager;
 	
 	protected Process(ProcessManager pm, JSONObject config) throws RedbackException
@@ -28,6 +29,7 @@ public class Process
 		nodes = new HashMap<String, ProcessUnit>();
 		name = config.getString("name");
 		version = config.getNumber("version").intValue();
+		domain = config.getString("domain");
 		startNode = config.getString("startnode");
 		JSONList nodeList = config.getList("nodes");
 		for(int i = 0; i < nodeList.size(); i++)
@@ -58,14 +60,14 @@ public class Process
 
 	public ProcessInstance createInstance(Session session, JSONObject data)
 	{
-		ProcessInstance pi = new ProcessInstance(name, version, data);
+		ProcessInstance pi = new ProcessInstance(name, version, session.getUserProfile().getAttribute("rb.defaultdomain"), data);
 		return pi;
 	}
 	
 	public void startInstance(Session session, ProcessInstance pi) throws RedbackException
 	{
 		pi.setCurrentNode(startNode);
-		pi.getData().put("originator", session.getUserProfile().getUsername());
+		pi.getData().put("originator", session);
 		execute(pi);
 	}
 	
@@ -96,8 +98,8 @@ public class Process
 	
 	protected void execute(ProcessInstance pi) throws RedbackException
 	{
-		Session session = processManager.getSystemUserSession();
-		if(session != null  &&  session.getUserProfile().getAttribute("rb.process.sysuser").equals("true"))
+		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
+		if(sysUserSession != null  &&  sysUserSession.getUserProfile().getAttribute("rb.process.sysuser").equals("true"))
 		{
 			String currentNode = pi.getCurrentNode();
 			if(currentNode != null)

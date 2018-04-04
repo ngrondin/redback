@@ -10,6 +10,7 @@ public class ProcessInstance
 {
 	protected String processName;
 	protected int processVersion;
+	protected String domain;
 	protected UUID id;
 	protected JSONObject data;
 	protected String currentNode;
@@ -17,10 +18,11 @@ public class ProcessInstance
 	protected JSONList assignees;
 	protected JSONList receivedNotifications;
 	
-	protected ProcessInstance(String pn, int v, JSONObject d)
+	protected ProcessInstance(String pn, int v, String dom, JSONObject d)
 	{
 		processName = pn;
 		processVersion = v;
+		domain = dom;
 		id = UUID.randomUUID();
 		data = d;	
 		complete = false;
@@ -60,6 +62,11 @@ public class ProcessInstance
 	public int getProcessVersion()
 	{
 		return processVersion;
+	}
+	
+	public String getDomain()
+	{
+		return domain;
 	}
 	
 	public JSONObject getData()
@@ -123,6 +130,7 @@ public class ProcessInstance
 		retVal.put("_id", id.toString());
 		retVal.put("process", processName);
 		retVal.put("version", processVersion);
+		retVal.put("domain", domain);
 		retVal.put("currentnode", currentNode);
 		if(assignees.size() > 0)
 			retVal.put("assignees", assignees);

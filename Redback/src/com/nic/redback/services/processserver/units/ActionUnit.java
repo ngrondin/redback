@@ -3,6 +3,7 @@ package com.nic.redback.services.processserver.units;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
+import com.nic.redback.security.Session;
 import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 import com.nic.redback.services.processserver.ProcessUnit;
@@ -36,7 +37,8 @@ public class ActionUnit extends ProcessUnit
 						actionExists = true;
 				if(actionExists)
 				{
-					processManager.processAction(processManager.getSystemUserSession(), pi.getId(), notification.getString("pid"), action, null);
+					Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
+					processManager.processAction(sysUserSession, pi.getId(), notification.getString("pid"), action, null);
 					notifications.remove(i);
 					i--;
 				}

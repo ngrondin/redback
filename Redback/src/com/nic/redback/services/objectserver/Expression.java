@@ -10,7 +10,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import com.nic.redback.RedbackException;
-import com.nic.redback.security.Session;
+import com.nic.redback.utils.SessionRightsFunctionJSWrapper;
 
 
 public class Expression
@@ -42,7 +42,7 @@ public class Expression
 		}
 	}
 	
-	public Value eval(RedbackObject obj, Session session) throws RedbackException
+	public Value eval(RedbackObject obj) throws RedbackException
 	{
 		if(fixedValue != null)
 		{
@@ -51,7 +51,9 @@ public class Expression
 		else
 		{
 			executionContext.clear();
-			executionContext.put("session", session);
+			executionContext.put("canRead", new SessionRightsFunctionJSWrapper(obj.getUserSession(), "read"));
+			executionContext.put("canWrite", new SessionRightsFunctionJSWrapper(obj.getUserSession(), "write"));
+			executionContext.put("canExecute", new SessionRightsFunctionJSWrapper(obj.getUserSession(), "execute"));
 			executionContext.put("uid", obj.getUID().getString());
 			Iterator<String> it = obj.getObjectConfig().getAttributeNames().iterator();
 			while(it.hasNext())

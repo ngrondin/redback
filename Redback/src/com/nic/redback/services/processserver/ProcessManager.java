@@ -120,7 +120,7 @@ public class ProcessManager
 		return pi;
 	}
 	
-	public Session getSystemUserSession() throws RedbackException 
+	public Session getSystemUserSession(String domain) throws RedbackException 
 	{
 		if(sysUserSession == null)
 		{
@@ -143,9 +143,9 @@ public class ProcessManager
 		return globalVariables;
 	}
 	
-	public ProcessInstance initiateProcess(Session session, String name, JSONObject data) throws RedbackException
+	public ProcessInstance initiateProcess(Session session, String processName, JSONObject data) throws RedbackException
 	{
-		Process process = getProcess(name);
+		Process process = getProcess(processName);
 		ProcessInstance pi = process.createInstance(session, data);
 		putInCurrentTransaction(pi);
 		process.startInstance(session, pi);

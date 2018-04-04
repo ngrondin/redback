@@ -50,40 +50,6 @@ public class RedbackObject
 		}
 	}
 	
-	// Initiate existing object with Id and retreive data from database
-	/*
-	public RedbackObject(UserProfile up, ObjectManager om, ObjectConfig cfg, String id) throws RedbackException
-	{
-		userProfile = up;
-		objectManager = om;
-		config = cfg;
-		isNewObject = false;
-		init();
-		if(canRead)
-		{
-			try
-			{
-				JSONObject dbFilter = new JSONObject("{\"" + config.getUIDDBKey() + "\":\"" + id +"\"}");
-				dbFilter.put("domain", userProfile.getDBFilterDomainClause());
-				JSONObject dbResult = objectManager.requestData(config.getCollection(), dbFilter);
-				JSONList dbResultList = dbResult.getList("result");
-				if(dbResultList.size() > 0)
-				{
-					JSONObject dbData = dbResultList.getObject(0);
-					setDataFromDBData(dbData);
-					executeScriptsForEvent("onload");
-				}
-			}
-			catch(Exception e)
-			{
-				error( "Problem initiating object : " + e.getMessage(), e);
-			}
-		}
-		else
-		{
-			error("User does not have the right to read object " + config.getName());
-		}
-	}*/
 	
 	// Initiate new object
 	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg) throws RedbackException
@@ -184,30 +150,14 @@ public class RedbackObject
 		return filter;
 	}
 	
-	/*
-	public void loadRelated() throws RedbackException
-	{
-		Iterator<String> it = config.getAttributeNames().iterator();
-		while(it.hasNext())
-		{
-			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-			String attributeName = attributeConfig.getName();
-			if(attributeConfig.hasRelatedObject()  &&  getString(attributeName) != null)
-			{
-				RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
-				String relatedObjectName = relatedObjectConfig.getObjectName();
-				JSONObject relatedObjectFindFilter = getRelatedObjectFindFilter(attributeName);
-				ArrayList<RedbackObject> resultList = objectManager.getObjectList(userProfile, relatedObjectName, relatedObjectFindFilter);
-				if(resultList.size() > 0)
-					related.put(attributeName, resultList.get(0));
-			}
-		}		
-	}
-*/
-	
 	public ObjectConfig getObjectConfig()
 	{
 		return config;
+	}
+	
+	public Session getUserSession()
+	{
+		return session;
 	}
 
 	public Value getUID()
@@ -240,7 +190,7 @@ public class RedbackObject
 		{
 			Expression expression = attributeConfig.getExpression();
 			if(expression != null)
-				return expression.eval(this, session);
+				return expression.eval(this);
 			else if(data.containsKey(name))
 				return data.get(name);
 			else
@@ -330,7 +280,7 @@ public class RedbackObject
 	
 	public boolean isEditable(String name) throws RedbackException
 	{
-		return config.getAttributeConfig(name).getEditableExpression().eval(this, session).getBoolean();
+		return config.getAttributeConfig(name).getEditableExpression().eval(this).getBoolean();
 	}
 	
 	public void save() throws ScriptException, RedbackException
