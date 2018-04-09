@@ -1,11 +1,12 @@
-	var module = angular.module("configuratormodule", ['ngMaterial']);
+	var module = angular.module("configuratormodule", ['ngMaterial', 'ui.codemirror']);
 
 	module.controller('processdesigner', function processdesigner($scope,$attrs,$http,$element) {
 		$scope.nodeTypes = [
 			{id:"interaction", name:"Interaction"},
 			{id:"script", name:"Script"},
-			{id:"action", name:"Action"},
-			{id:"rbobjectupdate", name:"Object Update"}
+			{id:"action", name:"Process Action"},
+			{id:"rbobjectupdate", name:"Object Update"},
+			{id:"rbobjectexecute", name:"Object Execute"}
 		];
 		$scope.assigneeTypes = [
 			{id:"user", name:"User"},
@@ -257,13 +258,14 @@
 	
 	/****************************************************/
 	
-	module.controller('objectdesigner', function objectdesigner($scope,$attrs,$http,$element) {
+	module.controller('objectdesigner', function objectdesigner($scope,$attrs,$http,$element,$timeout) {
 		$scope.list = [];
 		$scope.config = {};
 		$scope.selectedAttribute = null;
 		$scope.listfilter = [];
 		$scope.selectedView = null;
 		$scope.scripts = [];
+		$scope.saveok = false;
 
 		
 		$scope.load = function() {
@@ -283,7 +285,8 @@
 				var req = {action:"updateobject", config:$scope.config};
 				$http.post("../../rbcf", req)
 				.success(function(response) {
-					alert("saved");
+					$scope.saveok = true;
+					$timeout(function(){$scope.saveok = false;}, 2000);
 				})
 				.error(function(error, status) {
 					alert('save error');
@@ -292,7 +295,9 @@
 		}
 		
 		$scope.selectObject = function(listitem) {
-			$scope.selectedAttribute = null;			
+			$scope.selectedAttribute = null;		
+			$scope.listfilter = [];
+			$scope.scripts = [];
 			var req = {action:"getobject", _id:listitem._id};
 			$http.post("../../rbcf", req)
 			.success(function(response) {
@@ -310,8 +315,8 @@
 		}
 		
 		$scope.readListFilter = function() {
+			$scope.listfilter = [];
 			if($scope.selectedAttribute != null  &&  $scope.selectedAttribute.relatedobject != null  &&  $scope.selectedAttribute.relatedobject.listfilter != null) {
-				$scope.listfilter = [];
 				for(var key in $scope.selectedAttribute.relatedobject.listfilter)
 					$scope.listfilter.push({name:key, value:$scope.selectedAttribute.relatedobject.listfilter[key]});
 			}

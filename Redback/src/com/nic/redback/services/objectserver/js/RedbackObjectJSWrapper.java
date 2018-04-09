@@ -7,6 +7,8 @@ import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.objects.NativeDate;
 
+import com.nic.firebus.utils.FirebusDataUtil;
+import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 import com.nic.redback.services.objectserver.RedbackObject;
 import com.nic.redback.services.objectserver.Value;
@@ -19,12 +21,18 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 	{
 		rbObject = o;
 	}
+	
+	protected RedbackObject getRedbackObject()
+	{
+		return rbObject;
+	}
 
 	public Object call(Object arg0, Object... args)
 	{
 		return null;
 	}
 	
+	/*
 	public JSObject getRelated(String name)
 	{
 		RedbackObject rbo = rbObject.getRelated(name);
@@ -32,9 +40,9 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 			return new RedbackObjectJSWrapper(rbo);
 		else
 			return null;
-		
 	}
-
+*/
+	
 	public String getClassName()
 	{
 		return "RedbackObject";
@@ -55,10 +63,14 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 			else
 			{
 				Value val = rbObject.get(name);
+				Object obj = null;
 				if(val != null)
-					return rbObject.get(name).getObject();
+					obj = val.getObject();
+				
+				if(obj instanceof JSONObject)
+					return FirebusDataUtil.convertDataObjectToJSObject((JSONObject)obj);
 				else
-					return null;
+					return obj;
 			}
 		} 
 		catch (RedbackException e)

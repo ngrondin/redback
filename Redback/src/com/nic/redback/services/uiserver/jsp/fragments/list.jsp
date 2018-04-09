@@ -1,6 +1,10 @@
 <div 
 	class="listscroll" 
 	style="<%=config.getString('inlineStyle')%>">
+	<md-progress-linear 
+		md-mode="indeterminate" 
+		ng-show="loading">
+	</md-progress-linear>
 	<md-list 
 		flex="">
 		<md-list-item 

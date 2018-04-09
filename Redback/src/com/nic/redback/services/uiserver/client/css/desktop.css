@@ -4,6 +4,7 @@ body {
 	background: white;
 	display: flex;
 	flex-direction: column;
+	overflow:hidden;
 }
 
 .rb-module {
@@ -14,6 +15,10 @@ body {
 .rb-controller {
 	display: flex;
 	flex: 1 0 auto;
+}
+
+.rb-sidebar {
+	flex: 0 0 auto;
 }
 
 .rb-include {
@@ -58,6 +63,10 @@ body {
 
 .rb-form-button {
 	margin: 10px 10px;
+}
+
+.rb-switch {
+	margin-left: 10px;
 }
 
 .hsection {

@@ -1,7 +1,7 @@
 	var module = angular.module("desktopmodule", ['ngMaterial', 'uiGmapgoogle-maps', 'mdPickers']);	
 
 	/***********************************/
-	/** Input Direcive			 	  **/
+	/** Input Directive			 	  **/
 	/***********************************/
 	
 	module.directive('rbInput', function($compile) {
@@ -293,6 +293,15 @@
 	
 	
 	/***********************************/
+	/** Root Controller			 	  **/
+	/***********************************/
+	
+	module.controller('desktoproot', function rootCtl($scope,$attrs,$http) {
+		
+	});
+	
+	  
+	/***********************************/
 	/** Form Controller			 	  **/
 	/***********************************/
 
@@ -364,15 +373,16 @@
 		$scope.baseFilter = {};
 		$scope.searchText = null;
 		$scope.element = $element;
-		$scope.visible = false; //($scope.element.prop('offsetParent') != null);
+		$scope.visible = false;
+		$scope.loading = false;
 
 		if($attrs.rbRelated != null  &&  $attrs.rbRelated.length > 0) {
 			$scope.relatedConfig = JSON.parse($attrs.rbRelated.replace(/'/g, '"'));
 			$scope.relationshipFilter = {uid:-1};
 		}
 			
-		if($attrs.rbInitialFilter != null  &&  $attrs.rbInitialFilter.length > 0)
-			$scope.baseFilter = JSON.parse($attrs.rbInitialFilter.replace(/'/g, '"'));
+		if($attrs.rbBaseFilter != null  &&  $attrs.rbBaseFilter.length > 0)
+			$scope.baseFilter = JSON.parse($attrs.rbBaseFilter.replace(/'/g, '"'));
 
 
 		$scope.search = function(searchText) {
@@ -404,13 +414,16 @@
 		$scope.load = function() {
 			if($scope.visible  &&  $scope.list.length == 0  &&  ($scope.relatedConfig == null ||  ($scope.relatedConfig != null  &&  $scope.relatedObject != null))) {
 				var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:true, addvalidation:true}};
+				$scope.loading = true;
 				$http.post("../../rbos", req)
 				.success(function(response) {
 					var responseList = processResponseJSON(response);
+					$scope.loading = false;
 					if(responseList != null) 
 						$scope.list = responseList;
 				})
 				.error(function(error, status) {
+					$scope.loading = false;
 					alert(error.error);
 				});
 			}

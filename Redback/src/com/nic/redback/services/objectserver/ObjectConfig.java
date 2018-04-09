@@ -8,7 +8,6 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.utils.JSONEntity;
@@ -53,7 +52,7 @@ public class ObjectConfig
 					CompiledScript script = ((Compilable)jsEngine).compile(source);
 					scripts.put(event, script);
 				} 
-				catch(ScriptException e)
+				catch(Exception e)
 				{
 					throw new RedbackException("Problem compiling script", e);
 				}
@@ -116,15 +115,15 @@ public class ObjectConfig
 			{
 				dbFilter.put(key, objectFilter.getList(key));
 			}
-			else if(key.equals("$or"))
+			else if(key.equals("$or") || key.equals("$and"))
 			{
-				JSONList objectOrList = objectFilter.getList(key);
-				JSONList dbOrList = new JSONList();
-				for(int i = 0; i < objectOrList.size(); i++)
+				JSONList objectList = objectFilter.getList(key);
+				JSONList dbList = new JSONList();
+				for(int i = 0; i < objectList.size(); i++)
 				{
-					dbOrList.add(generateDBFilter(objectOrList.getObject(i)));
+					dbList.add(generateDBFilter(objectList.getObject(i)));
 				}
-				dbFilter.put("$or", dbOrList);
+				dbFilter.put(key, dbList);
 			}
 			else if(key.equals("$multi"))
 			{
@@ -142,36 +141,33 @@ public class ObjectConfig
 				}
 				dbFilter.put("$or", dbOrList);
 			}			
-			else if(key.equals("uid"))
-			{
-				dbFilter.put(getUIDDBKey(), objectFilter.getString(key));
-			}
 			else
 			{
+				String attributeDBKey = null; 
 				AttributeConfig attributeConfig = getAttributeConfig(key);
-				if(attributeConfig != null)
+				if(key.equals("uid"))
+					attributeDBKey = getUIDDBKey();
+				else if(attributeConfig != null)
+					attributeDBKey = attributeConfig.getDBKey();
+				
+				if(attributeDBKey != null)
 				{
-					String attributeDBKey = attributeConfig.getDBKey();
-					if(attributeDBKey != null)
+					JSONEntity objectFilterValue = objectFilter.get(key);
+					JSONEntity dbFilterValue = null;
+					if(objectFilterValue instanceof JSONObject)
 					{
-						JSONEntity objectFilterValue = objectFilter.get(key);
-						JSONEntity dbFilterValue = null;
-						if(objectFilterValue instanceof JSONObject)
-						{
-							dbFilterValue = generateDBFilter((JSONObject)objectFilterValue);
-						}
-						else if(objectFilterValue instanceof JSONLiteral)
-						{
-							//JSONLiteral objectFilterValueJSONLiteral = (JSONLiteral)objectFilterValue;
-							String objectFilterValueString = ((JSONLiteral)objectFilterValue).getString();
-							if(objectFilterValueString != null  &&  objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
-								dbFilterValue =  new JSONObject("{$regex:\"" + objectFilterValueString.substring(1, objectFilterValueString.length() - 1) + "\"}");
-							else
-								dbFilterValue = ((JSONLiteral)objectFilterValue).getCopy();
-						}
-						dbFilter.put(attributeDBKey, dbFilterValue);
+						dbFilterValue = generateDBFilter((JSONObject)objectFilterValue);
 					}
-				}				
+					else if(objectFilterValue instanceof JSONLiteral)
+					{
+						String objectFilterValueString = ((JSONLiteral)objectFilterValue).getString();
+						if(objectFilterValueString != null  &&  objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
+							dbFilterValue =  new JSONObject("{$regex:\"" + objectFilterValueString.substring(1, objectFilterValueString.length() - 1) + "\"}");
+						else
+							dbFilterValue = ((JSONLiteral)objectFilterValue).getCopy();
+					}
+					dbFilter.put(attributeDBKey, dbFilterValue);
+				}
 			}
 		}
 

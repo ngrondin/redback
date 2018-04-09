@@ -161,34 +161,7 @@ public class UIServer extends RedbackAuthenticatedService
 					String page = appConfig.getString("page");
 					context.put("config", appConfig);
 					String html = executeJSP("pages/" + page, context);
-					
-					String menuFragment = executeJSP("fragments/navigation", context);
-					StringBuilder menuGroupBuilder = new StringBuilder();
-					if(appConfig.get("menugroups") != null)
-					{
-						for(int i = 0; i < appConfig.getList("menugroups").size(); i++)
-						{
-							JSONObject menuGroup = appConfig.getList("menugroups").getObject(i);
-							menuGroup.put("groupid", "group" + i);
-							JSONList itemList = menuGroup.getList("menuitems");
-							StringBuilder menuItemBuilder = new StringBuilder();
-							for(int j = 0; j < itemList.size(); j++)
-							{
-								JSONObject menuItem = itemList.getObject(j);
-								menuItem.put("groupid", "group" + i);
-								context.put("config", menuItem);
-								if(session.getUserProfile().canRead("rb.views." +  menuItem.getString("view")))
-									menuItemBuilder.append(executeJSP("fragments/navigationitem", context) + "\r\n");								
-							}
-							if(menuItemBuilder.length() > 0)
-							{
-								context.put("config", menuGroup);
-								menuGroupBuilder.append(executeJSP("fragments/navigationgroup", context).replace("#content#", menuItemBuilder.toString().trim()) + "\r\n");
-							}
-						}			
-						menuFragment = injectInHTML(menuFragment, "content", menuGroupBuilder.toString().trim());
-						html = injectInHTML(html, "menu", menuFragment);
-					}
+					html = injectInHTML(html, "menu", getMenu(session));
 					sb.append(html);
 				}
 				else
@@ -209,6 +182,39 @@ public class UIServer extends RedbackAuthenticatedService
 		return sb.toString();
 	}
 	
+	
+	protected String getMenu(Session session) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	{
+		JSONObject menu = new JSONObject("{type:menu, content:[]}");
+		JSONObject result = request(configService, "{object:rbui_menu,filter:{domain:" + session.getUserProfile().getDBFilterDomainClause() + "}}");
+		JSONList resultList = result.getList("result");
+		for(int i = 0; i < resultList.size(); i++)
+		{
+			if(resultList.getObject(i).getString("type").equals("menugroup"))
+			{
+				boolean validGroup = false;
+				JSONObject menuGroup = resultList.getObject(i);
+				menuGroup.put("content", new JSONList());
+				for(int j =0; j < resultList.size(); j++)
+				{
+					if(resultList.getObject(j).getString("type").equals("menulink")  &&  resultList.getObject(j).getString("group").equals(menuGroup.getString("_id")))
+					{
+						JSONObject menuLink = resultList.getObject(j);
+						if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
+						{
+							menuGroup.getList("content").add(menuLink);
+							validGroup = true;
+						}
+					}
+				}
+				if(validGroup)
+					menu.getList("content").add(menuGroup);
+			}
+		}
+		Bindings context = jsEngine.createBindings();
+		context.put("session", session);
+		return generateHTMLFromComponentJSON(menu, context);
+	}
 
 	
 	protected String getView(String name, Session session) throws JSONException
@@ -234,6 +240,8 @@ public class UIServer extends RedbackAuthenticatedService
 			type = "js";
 		else if(name.endsWith(".css"))
 			type = "css";
+		else if(name.endsWith(".woff"))
+			type = "woff";
 		else if(name.endsWith(".ico"))
 			type = "icons";
 
@@ -266,6 +274,8 @@ public class UIServer extends RedbackAuthenticatedService
 			mime = "application/javascript";
 		else if(name.endsWith(".css"))
 			mime = "text/css";
+		else if(name.endsWith(".woff"))
+			mime = "font/woff";
 		else if(name.endsWith(".ico"))
 			mime = "image/x-icon";
 		return mime;

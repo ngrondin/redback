@@ -56,11 +56,11 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 			{
 				if(action.equals("initiate"))
 				{
-					String name = request.getString("name");
+					String process = request.getString("process");
 					JSONObject data = request.getObject("data");
-					if(name != null)
+					if(process != null)
 					{
-						ProcessInstance pi = processManager.initiateProcess(session, name, data);
+						ProcessInstance pi = processManager.initiateProcess(session, process, data);
 						processManager.commitCurrentTransaction();
 						responseData = new JSONObject("{\"pid\":\"" + pi.getId() + "\"}");
 					}

@@ -67,7 +67,7 @@ public class Process
 	public void startInstance(Session session, ProcessInstance pi) throws RedbackException
 	{
 		pi.setCurrentNode(startNode);
-		pi.getData().put("originator", session);
+		pi.getData().put("originator", session.getUserProfile().getUsername());
 		execute(pi);
 	}
 	

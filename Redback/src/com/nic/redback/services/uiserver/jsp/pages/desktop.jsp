@@ -4,6 +4,7 @@
 	<link rel="shortcut icon" href="../resource/favicon.ico" />
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css"/>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="../resource/desktopicon.css"/>
 	<link rel="stylesheet" href="../resource/desktop.css" type="text/css" />
 	<link rel="stylesheet" href="../resource/mdPickers.css" type="text/css" />
 	<!--  <link rel="stylesheet" href="https://rawgit.com/indrimuska/angular-moment-picker/master/dist/angular-moment-picker.min.css">-->	
@@ -27,25 +28,38 @@
 </head>
 <body
 	ng-app="desktopmodule" 
+	ng-controller="desktoproot"
 	data-ng-init="page = '../view/<%=config.getString('defaultview')%>'">
 	<md-toolbar 
-		class="md-hue-2">
+		class="md-hue-2 md-toolbar-tools"
+		style="flex-direction:row">
 		<div 
-			class="md-toolbar-tools">
-			<md-button 
-				class="md-icon-button" 
-				aria-label="Settings" 
-				ng-disabled="true">
-				<md-icon>settings</md-icon>
-			</md-button>
+			style="display:flex; flex-direction:row; flex:0 0 auto;">
 			<h3 flex="" md-truncate=""><%=config.getString('label')%></h3>
+		</div>
+		<div			
+			style="flex:1 0 auto;text-align:right;">
+			<md-menu md-offset="0 60">
+				<image 
+					ng-click="$mdOpenMenu($event)"
+					src="data:<%=session.getUserProfile().getAttribute("image") %>">
+				<md-menu-content>
+			        		<md-menu-item>
+			        			<span><%=session.getUserProfile().getAttribute("fullname") %></span>        			
+			        		</md-menu-item>
+			        		<md-divider></md-divider>
+			        		<md-menu-item>
+			        			<span>Logout</span>
+					</md-menu-item>
+				</md-menu-content>	
+			</md-menu>			
 		</div>
 	</md-toolbar>
 	<div
 		class="hsection"
 		style="flex:1 1 auto">
 		<md-sidenav 
-			class="md-sidenav-left" 
+			class="md-sidenav-left rb-sidebar" 
 			md-component-id="left" 
 			md-is-locked-open="true" 
 			md-whiteframe="4">

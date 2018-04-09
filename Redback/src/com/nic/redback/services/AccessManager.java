@@ -31,10 +31,12 @@ public class AccessManager extends RedbackService
 	protected ArrayList<UserProfile> cachedUserProfiles;
 	protected KeySpec keySpec;
 	protected MessageDigest digest;
+	protected long expiryTime;
 	
 	public AccessManager(JSONObject c) 
 	{
 		super(c);
+		expiryTime = 1800000;
 		cachedSessions = new ArrayList<Session>();
 		cachedUserProfiles = new ArrayList<UserProfile>();
 		roles = new HashMap<String, Role>();
@@ -76,6 +78,7 @@ public class AccessManager extends RedbackService
 							
 							response.put("result", "ok");
 							response.put("session", session.getJSON());
+							extendSession(session);
 						}
 						else
 						{
@@ -109,6 +112,7 @@ public class AccessManager extends RedbackService
 					{
 						response.put("result", "ok");
 						response.put("session", session.getJSON());
+						extendSession(session);
 					}
 					else
 					{
@@ -171,7 +175,7 @@ public class AccessManager extends RedbackService
 	protected Session createSession(String username) throws RedbackException
 	{
 		UUID sessionId = UUID.randomUUID();
-		long expiry = System.currentTimeMillis() + 1800000;
+		long expiry = System.currentTimeMillis() + expiryTime;
 		Session session = new Session(sessionId, getUserProfile(username), expiry);
 		cachedSessions.add(session);
 		firebus.publish(configService, new Payload("{object:rbam_session, data:{_id:\""+ sessionId.toString()+"\", username:\"" + username + "\", expiry:" + expiry + "}}"));
@@ -288,33 +292,17 @@ public class AccessManager extends RedbackService
 		return userProfile;
 	}
 	
-	/*
-	protected UserProfile buildUserProfile(JSONObject userJSON) throws RedbackException
+
+	protected void extendSession(Session session)
 	{
-		String username =  userJSON.getString("username");
-		JSONList rolesList = userJSON.getList("roles");
-		JSONList domainsList = userJSON.getList("domains");
-		JSONObject attributes = userJSON.getObject("attributes");
-		JSONObject rights = new JSONObject();
-
-		for(int i = 0; i < rolesList.size(); i++)
+		if(session.expiry < System.currentTimeMillis() + (expiryTime / 2))
 		{
-			String roleName = rolesList.getString(i);
-			Role role = getRole(roleName);
-			JSONObject roleRights = role.getAllRights();
-			mergeRights(rights, roleRights);
+			long newExpiry = System.currentTimeMillis() + expiryTime;
+			session.expiry = newExpiry;
+			firebus.publish(configService, new Payload("{object:rbam_session, data:{_id:\""+ session.sessionId.toString()+"\", expiry:" + newExpiry + "}}"));
 		}
-
-		JSONObject userProfileJSON = new JSONObject();
-		userProfileJSON.put("username", username);
-		userProfileJSON.put("domains", domainsList);
-		userProfileJSON.put("roles", rolesList);
-		userProfileJSON.put("attributes", attributes);
-		userProfileJSON.put("rights", rights);
 		
-		return new UserProfile(userProfileJSON);
 	}
-	*/
 	
 	protected void mergeRights(JSONObject to, JSONObject from)
 	{

@@ -101,8 +101,9 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 						
 						responseData = new JSONObject();
 						JSONList list = new JSONList();
-						for(int i = 0; i < objects.size(); i++)
-							list.add(objects.get(i).getJSON(addValidation, addRelated));
+						if(objects != null)
+							for(int i = 0; i < objects.size(); i++)
+								list.add(objects.get(i).getJSON(addValidation, addRelated));
 						responseData.put("list", list);
 					}
 					else if(action.equals("update"))

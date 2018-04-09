@@ -10,6 +10,8 @@ import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import jdk.nashorn.api.scripting.JSObject;
+
 import com.nic.firebus.utils.FirebusDataUtil;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
@@ -17,6 +19,7 @@ import com.nic.redback.security.Session;
 import com.nic.redback.services.objectserver.js.ObjectManagerJSWrapper;
 import com.nic.redback.services.objectserver.js.RedbackObjectJSWrapper;
 import com.nic.redback.utils.FirebusJSWrapper;
+import com.nic.redback.utils.LoggerJSFunction;
 
 public class RedbackObject 
 {
@@ -124,32 +127,7 @@ public class RedbackObject
 		}
 	}
 	
-	
-	public JSONObject getRelatedObjectListFilter(String attributeName) throws RedbackException
-	{
-		JSONObject filter = null;
-		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
-		if(roc != null)
-		{
-			filter = new JSONObject();
-			filter = roc.getListFilterConfig().generateFilter(this);
-		}
-		return filter;
-	}
-	
-	public JSONObject getRelatedObjectFindFilter(String attributeName) throws RedbackException
-	{
-		JSONObject filter = getRelatedObjectListFilter(attributeName);
-		if(filter != null)
-		{
-			RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
-			String linkAttribute = roc.getLinkAttributeName();
-			Value linkValue = get(attributeName);
-			filter.put(linkAttribute, linkValue.getObject());
-		}
-		return filter;
-	}
-	
+
 	public ObjectConfig getObjectConfig()
 	{
 		return config;
@@ -168,11 +146,6 @@ public class RedbackObject
 	public Value getDomain()
 	{
 		return domain;
-	}
-	
-	public String getString(String name) throws RedbackException
-	{
-		return get(name).getString();
 	}
 	
 	public Value get(String name) throws RedbackException
@@ -199,6 +172,11 @@ public class RedbackObject
 		return null;
 	}
 	
+	public String getString(String name) throws RedbackException
+	{
+		return get(name).getString();
+	}
+	
 	public RedbackObject getRelated(String name)
 	{
 		AttributeConfig attributeConfig = config.getAttributeConfig(name);
@@ -210,10 +188,8 @@ public class RedbackObject
 				{
 					try
 					{
-						RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
-						String relatedObjectName = relatedObjectConfig.getObjectName();
-						JSONObject relatedObjectFindFilter = getRelatedObjectFindFilter(name);
-						ArrayList<RedbackObject> resultList = objectManager.getObjectList(session, relatedObjectName, relatedObjectFindFilter);
+						RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+						ArrayList<RedbackObject> resultList = objectManager.getObjectList(session, roc.getObjectName(), getRelatedFindFilter(name));
 						if(resultList.size() > 0)
 							related.put(name, resultList.get(0));
 					}
@@ -226,6 +202,70 @@ public class RedbackObject
 			}
 		}
 		 return null;
+	}
+	
+	public ArrayList<RedbackObject> getRelatedList(String attributeName, JSONObject additionalFilter) throws RedbackException
+	{
+		ArrayList<RedbackObject> relatedObjectList = null;
+		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
+		if(roc != null)
+		{
+			if(roc.getListScript() != null)
+			{
+				CompiledScript script = roc.getListScript();
+				Bindings context = executeScript(script);
+				JSObject jsList = (JSObject)context.get("list");
+				int count = (Integer)jsList.getMember("length");
+				relatedObjectList = new ArrayList<RedbackObject>();
+				for(int i = 0; i < count; i++)
+				{
+					JSObject jso = (JSObject)jsList.getSlot(i);
+					RedbackObject rbo = objectManager.getObject(session, (String)jso.getMember("objectname"), (String)jso.getMember("uid"));
+					relatedObjectList.add(rbo);
+				}
+			}
+			else
+			{
+				JSONObject relatedObjectListFilter = getRelatedListFilter(attributeName);
+				if(relatedObjectListFilter == null)
+					relatedObjectListFilter = new JSONObject();
+				Iterator<String> it = additionalFilter.keySet().iterator();
+				while(it.hasNext())
+				{
+					String key = it.next();
+					relatedObjectListFilter.put(key, additionalFilter.get(key));
+				}
+				relatedObjectList = objectManager.getObjectList(session, roc.getObjectName(), relatedObjectListFilter);
+			}
+		}
+		return relatedObjectList;		
+	}
+	
+	protected JSONObject getRelatedListFilter(String attributeName) throws RedbackException
+	{
+		JSONObject filter = null;
+		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
+		if(roc != null)
+		{
+			FilterConfig fc = roc.getListFilterConfig();
+			if(fc != null)
+				filter = fc.generateFilter(this);
+		}
+		return filter;
+	}
+	
+	public JSONObject getRelatedFindFilter(String attributeName) throws RedbackException
+	{
+		JSONObject filter = null;
+		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
+		if(roc != null)
+		{
+			filter = getRelatedListFilter(attributeName);
+			if(filter == null)
+				filter = new JSONObject();
+			filter.put(roc.getLinkAttributeName(), get(attributeName).getObject());
+		}
+		return filter;
 	}
 	
 	public void put(String name, Value value) throws RedbackException
@@ -382,43 +422,6 @@ public class RedbackObject
 		return object;
 	}
 	
-	/*
-	protected Value evaluateExpression(String expression)
-	{
-		Value returnValue = null;
-		if(expression.startsWith("{{")  &&  expression.endsWith("}}"))
-		{
-			expression = "var returnValue = (" + expression.substring(2, expression.length() - 2) + ");";
-			Iterator<String> it = data.keySet().iterator();
-			Bindings context = objectManager.jsEngine.createBindings();
-			context.put("self", this);
-			while(it.hasNext())
-			{	
-				String key = it.next();
-				context.put(key, data.get(key).getObject());
-			}
-			try
-			{
-				objectManager.jsEngine.eval(expression, context);
-			} 
-			catch (ScriptException e)
-			{
-				logger.severe(e.getMessage());
-			}
-			returnValue = new Value(context.get("returnValue"));
-		}
-		else
-		{
-			if(expression.matches("[-+]?\\d*\\.?\\d+"))
-				returnValue = new Value(Double.parseDouble(expression));
-			else if(expression.equalsIgnoreCase("true") ||  expression.equalsIgnoreCase("false"))
-				returnValue = new Value(expression.equalsIgnoreCase("true") ? true : false);
-			else
-				returnValue = new Value(expression);
-		}
-		return returnValue;
-	}
-*/	
 
 	protected void executeScriptsForEvent(String event) throws RedbackException
 	{
@@ -434,7 +437,7 @@ public class RedbackObject
 				executeScript(script);
 	}
 	
-	protected void executeScript(CompiledScript script) throws RedbackException
+	protected Bindings executeScript(CompiledScript script) throws RedbackException
 	{
 		String fileName = (String)script.getEngine().get(ScriptEngine.FILENAME);
 		logger.info("Start executing script : " + fileName);
@@ -443,6 +446,7 @@ public class RedbackObject
 		context.put("om", new ObjectManagerJSWrapper(objectManager, session));
 		context.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session.getSessionId().toString()));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(objectManager.getGlobalVariables()));
+		context.put("log", new LoggerJSFunction());
 		try
 		{
 			script.eval(context);
@@ -455,7 +459,12 @@ public class RedbackObject
 		{
 			error("Null pointer exception in script " + fileName, e);
 		}
+		catch(RuntimeException e)
+		{
+			error("Problem occurred executing a script", e);
+		}
 		logger.info("Finish executing script : " + fileName);
+		return context;
 	}
 	
 	protected void error(String msg) throws RedbackException

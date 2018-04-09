@@ -38,7 +38,7 @@ public class RedbackObjectFunctionJSWrapper extends AbstractJSObject
 		} 
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		} 
 		return retVal;
 	}

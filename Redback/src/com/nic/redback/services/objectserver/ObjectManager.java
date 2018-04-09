@@ -107,7 +107,7 @@ public class ObjectManager
 					{
 						RedbackObject object = objects.get(j);
 						if(object.getString(attributeName) != null)
-							orList.add(object.getRelatedObjectFindFilter(attributeName));
+							orList.add(object.getRelatedFindFilter(attributeName));
 					}
 					JSONObject relatedObjectFilter = new JSONObject();
 					relatedObjectFilter.put("$or", orList);
@@ -192,22 +192,10 @@ public class ObjectManager
 	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, String uid, String attributeName, JSONObject filterData) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
-		ObjectConfig objectConfig = getObjectConfig(objectName);
-		ArrayList<RedbackObject> objectList = null;
-		AttributeConfig attributeConfig = objectConfig.getAttributeConfig(attributeName);
-		if(attributeConfig.hasRelatedObject())
-		{
-			RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
-			JSONObject relatedObjectListFilter = object.getRelatedObjectListFilter(attributeName);
-			Iterator<String> it = filterData.keySet().iterator();
-			while(it.hasNext())
-			{
-				String key = it.next();
-				relatedObjectListFilter.put(key, filterData.get(key));
-			}
-			objectList = getObjectList(session, relatedObjectConfig.getObjectName(), relatedObjectListFilter);
-		}
-		return objectList;
+		if(object != null)
+			return object.getRelatedList(attributeName, filterData);
+		else
+			return new ArrayList<RedbackObject>();
 	}
 	
 	public RedbackObject updateObject(Session session, String objectName, String id, JSONObject updateData) throws RedbackException, ScriptException
