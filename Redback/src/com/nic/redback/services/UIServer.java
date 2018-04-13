@@ -22,6 +22,7 @@ import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
 import com.nic.redback.utils.RedbackStringBuilder;
+import com.nic.redback.utils.StringUtils;
 
 public class UIServer extends RedbackAuthenticatedService
 {
@@ -240,12 +241,18 @@ public class UIServer extends RedbackAuthenticatedService
 			type = "js";
 		else if(name.endsWith(".css"))
 			type = "css";
-		else if(name.endsWith(".woff"))
-			type = "woff";
+		else if(name.endsWith(".svg"))
+			type = "svg";
 		else if(name.endsWith(".ico"))
 			type = "icons";
-
-		if(resourceServiceType.equals("filestorage"))
+		
+		if(type.equals("svg"))
+		{
+			JSONObject result = request(configService, "{object:rbui_resource,filter:{\"name\":\"" + name + "\"}}");
+			if(result.getList("result").size() > 0)
+				fileStr = StringUtils.unescape(result.getList("result").getObject(0).getString("content"));
+		}
+		else if(resourceServiceType.equals("filestorage"))
 		{
 			logger.info("Requesting firebus service : " + resourceService);
 			Payload result = firebus.requestService(resourceService, new Payload(name));
@@ -274,8 +281,8 @@ public class UIServer extends RedbackAuthenticatedService
 			mime = "application/javascript";
 		else if(name.endsWith(".css"))
 			mime = "text/css";
-		else if(name.endsWith(".woff"))
-			mime = "font/woff";
+		else if(name.endsWith(".svg"))
+			mime = "image/svg+xml";
 		else if(name.endsWith(".ico"))
 			mime = "image/x-icon";
 		return mime;

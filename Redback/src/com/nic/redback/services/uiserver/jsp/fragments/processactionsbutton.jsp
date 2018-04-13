@@ -4,7 +4,7 @@
 		aria-label="Workflow actions" 
 		class="md-fab md-mini md-primary rb-form-button" 
 		ng-click="openMenu($mdOpenMenu, $event)">
-		wf
+		<md-icon md-svg-icon="wms:network"></md-icon>
 	</md-button>
 	<md-menu-content>
         		<md-menu-item>

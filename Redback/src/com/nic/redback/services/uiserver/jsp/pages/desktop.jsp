@@ -60,10 +60,30 @@
 		style="flex:1 1 auto">
 		<md-sidenav 
 			class="md-sidenav-left rb-sidebar" 
+			style="width:{{menuwidth}}px;overflow:hidden;"
 			md-component-id="left" 
-			md-is-locked-open="true" 
+			md-is-locked-open="true"
+			md-is-open="true" 
 			md-whiteframe="4">
-			#menu#
+			<div
+				style="flex:1 0 auto;">
+				#menu#
+			</div>
+			<div
+				style="flex:0 0 auto;">
+				<md-button
+					class="md-icon-button"
+					ng-click="toggleMenu()"
+					ng-show="largemenu">
+					<md-icon>chevron_left</md-icon>
+				</md-button>
+				<md-button
+					class="md-icon-button"
+					ng-click="toggleMenu()"
+					ng-show="!largemenu">
+					<md-icon>chevron_right</md-icon>
+				</md-button>
+			</div>
 		</md-sidenav>		
 		<ng-include  id="mainview" src="page" class="rb-include"></ng-include>
 	</div>

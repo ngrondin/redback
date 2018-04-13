@@ -53,7 +53,7 @@ public abstract class RedbackService implements  ServiceProvider
 		{
 			Payload reqPayload = new Payload(request);
 			logger.info("Requesting firebus config service : " + "  " + request.replace("\r\n", "").replace("\t", ""));
-			Payload respPayload = firebus.requestService(service, reqPayload);
+			Payload respPayload = firebus.requestService(service, reqPayload, 10000);
 			logger.info("Received firebus service response from : " + service);
 			String respStr = respPayload.getString();
 			JSONObject result = new JSONObject(respStr);
