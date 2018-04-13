@@ -297,7 +297,21 @@
 	/***********************************/
 	
 	module.controller('desktoproot', function rootCtl($scope,$attrs,$http) {
+		$scope.largemenu = true;
+		$scope.menuwidth = 300;
 		
+		$scope.toggleMenu = function() {
+			if($scope.largemenu) {
+				$scope.largemenu = false;
+				$scope.menuwidth = 50;
+			} else {
+				$scope.largemenu = true;
+				$scope.menuwidth = null;
+			}
+		}
+	}).config(function($mdIconProvider) {
+	    $mdIconProvider
+	       .iconSet('wms', '../resource/wms.svg', 492);
 	});
 	
 	  
