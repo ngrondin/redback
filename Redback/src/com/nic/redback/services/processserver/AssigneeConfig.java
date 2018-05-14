@@ -35,7 +35,7 @@ public class AssigneeConfig
 	
 	public Object evaluateId(ProcessInstance pi) throws RedbackException
 	{
-		return assigneeExpr.eval(pi);
+		return assigneeExpr.eval("data", pi.getData());
 	}
 	
 	public int getType()

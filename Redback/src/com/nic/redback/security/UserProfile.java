@@ -91,4 +91,12 @@ public class UserProfile
 	{
 		return profile;
 	}
+	
+	public JSONObject getSimpleJSON()
+	{
+		JSONObject ret = new JSONObject();
+		ret.put("username", getUsername());
+		ret.put("attributes", profile.getObject("attributes").getCopy());
+		return ret;
+	}
 }

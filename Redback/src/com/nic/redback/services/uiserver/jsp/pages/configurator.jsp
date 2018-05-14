@@ -39,7 +39,7 @@
 		class="rb-hsection"
 		style="flex:1 1 auto">
 		<md-sidenav 
-			class="md-sidenav-left" 
+			class="md-sidenav-left  rb-sidebar" 
 			md-component-id="left" 
 			md-is-locked-open="true" 
 			md-whiteframe="4">

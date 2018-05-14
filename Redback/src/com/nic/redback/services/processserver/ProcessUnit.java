@@ -7,7 +7,7 @@ import com.nic.redback.RedbackException;
 
 public abstract class ProcessUnit 
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	protected Logger logger = Logger.getLogger("com.nic.redback.services.processserver");
 	protected String nodeId;
 	protected ProcessManager processManager;
 	
@@ -22,7 +22,7 @@ public abstract class ProcessUnit
 		return nodeId;
 	}
 	
-	public void execute(ProcessInstance pi) throws RedbackException
+	public void execute(ProcessInstance pi, JSONObject result) throws RedbackException
 	{
 		pi.setCurrentNode(null);
 	}
@@ -34,7 +34,16 @@ public abstract class ProcessUnit
 	
 	protected void error(String msg, Exception cause) throws RedbackException
 	{
-		logger.severe(msg);
+		String extendedMsg = msg;
+		Throwable t = cause;
+		while(t != null)
+		{
+			if(extendedMsg.length() > 0)
+				extendedMsg += " : ";
+			extendedMsg += t.getMessage();
+			t = t.getCause();
+		}
+		logger.severe(extendedMsg);
 		if(cause != null)
 			throw new RedbackException(msg, cause);
 		else

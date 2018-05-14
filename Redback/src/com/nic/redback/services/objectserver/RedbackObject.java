@@ -189,9 +189,16 @@ public class RedbackObject
 					try
 					{
 						RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-						ArrayList<RedbackObject> resultList = objectManager.getObjectList(session, roc.getObjectName(), getRelatedFindFilter(name));
-						if(resultList.size() > 0)
-							related.put(name, resultList.get(0));
+						if(roc.getLinkAttributeName().equals("uid"))
+						{
+							related.put(name, objectManager.getObject(session, roc.getObjectName(), get(name).getString()));
+						}
+						else
+						{
+							ArrayList<RedbackObject> resultList = objectManager.getObjectList(session, roc.getObjectName(), getRelatedFindFilter(name));
+							if(resultList.size() > 0)
+								related.put(name, resultList.get(0));
+						}
 					}
 					catch(RedbackException e)
 					{

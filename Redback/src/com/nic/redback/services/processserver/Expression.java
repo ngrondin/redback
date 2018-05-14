@@ -7,7 +7,10 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import jdk.nashorn.api.scripting.JSObject;
+
 import com.nic.firebus.utils.FirebusDataUtil;
+import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 
 
@@ -21,16 +24,18 @@ public class Expression
 	public Expression(String s) throws RedbackException
 	{
 		expressionString = s;
-		if(s.matches("[-+]?\\d*\\.?\\d+"))
-			fixedValue = Double.parseDouble(s);
-		else if(s.equalsIgnoreCase("true") ||  s.equalsIgnoreCase("false"))
-			fixedValue = s.equalsIgnoreCase("true") ? true : false;
+		if(expressionString == null)
+			expressionString = "\"\"";
+		if(expressionString.matches("[-+]?\\d*\\.?\\d+"))
+			fixedValue = Double.parseDouble(expressionString);
+		else if(expressionString.equalsIgnoreCase("true") ||  expressionString.equalsIgnoreCase("false"))
+			fixedValue = expressionString.equalsIgnoreCase("true") ? true : false;
 		else
 		{
 			ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 			try
 			{
-				script = ((Compilable)jsEngine).compile("var returnValue = (" + s  + ");");
+				script = ((Compilable)jsEngine).compile("var returnValue = (" + expressionString  + ");");
 				executionContext = jsEngine.createBindings();
 			} 
 			catch (ScriptException e)
@@ -40,7 +45,7 @@ public class Expression
 		}
 	}
 	
-	public Object eval(ProcessInstance pi) throws RedbackException
+	public Object eval(String name, JSONObject data) throws RedbackException
 	{
 		if(fixedValue != null)
 		{
@@ -49,7 +54,7 @@ public class Expression
 		else
 		{
 			executionContext.clear();
-			executionContext.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
+			executionContext.put(name, FirebusDataUtil.convertDataObjectToJSObject(data));		
 			try
 			{
 				script.eval(executionContext);
@@ -58,7 +63,16 @@ public class Expression
 			{
 				throw new RedbackException("Problem executing the expression '" + expressionString + "'", e);
 			}
-			return executionContext.get("returnValue");
+			Object obj = executionContext.get("returnValue");
+			if(obj instanceof JSObject)
+			{
+				JSObject jso = (JSObject)obj;
+				if(jso.isArray())
+					obj = FirebusDataUtil.convertJSArrayToDataList(jso);
+				else
+					obj = FirebusDataUtil.convertJSObjectToDataObject(jso);
+			}
+			return obj;
 		}
 	}
 }

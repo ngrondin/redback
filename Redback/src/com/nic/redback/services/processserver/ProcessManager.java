@@ -21,7 +21,7 @@ import com.nic.redback.services.processserver.units.InteractionUnit;
 
 public class ProcessManager
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("com.nic.redback.services.processserver");
 	protected Firebus firebus;
 	protected String configServiceName;
 	protected String accessManagerServiceName;
@@ -143,13 +143,16 @@ public class ProcessManager
 		return globalVariables;
 	}
 	
-	public ProcessInstance initiateProcess(Session session, String processName, JSONObject data) throws RedbackException
+	public JSONObject initiateProcess(Session session, String processName, JSONObject data) throws RedbackException
 	{
+		logger.info("Initiating process '" + processName + "'");
 		Process process = getProcess(processName);
 		ProcessInstance pi = process.createInstance(session, data);
 		putInCurrentTransaction(pi);
-		process.startInstance(session, pi);
-		return pi;
+		JSONObject result = process.startInstance(session, pi);
+		result.put("pid", pi.getId());
+		logger.info("Initiated instance '" + pi.getId() + "' for process '" + processName + "'");
+		return result;
 	}
 
 	public ArrayList<JSONObject> getNotifications(Session session, String extpid, JSONObject filter, JSONList viewdata) throws RedbackException
@@ -189,16 +192,19 @@ public class ProcessManager
 		return retList;
 	}
 	
-	public ProcessInstance processAction(Session session, String extpid, String pid, String event, JSONObject data) throws RedbackException
+	public JSONObject processAction(Session session, String extpid, String pid, String event, JSONObject data) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);
+		logger.info("Processing action " + event + " on process " + pi.getProcessName() + ":" + pid);
 		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
-		process.processAction(session, extpid, pi, event, data);
-		return pi;
+		JSONObject result = process.processAction(session, extpid, pi, event, data);
+		logger.info("Finished processing action");
+		return result;
 	}
 	
 	public ArrayList<ProcessInstance> findProcesses(Session session, JSONObject filter) throws RedbackException
 	{
+		logger.info("Finding processes for " + filter.toString());
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
 		try 
 		{
@@ -213,22 +219,26 @@ public class ProcessManager
 					putInCurrentTransaction(pi);
 				}
 				list.add(pi);
+				logger.fine("Found process " + pi.getProcessName() + ":" + pi.getId());
 			}
 		} 
 		catch (Exception e) 
 		{
 			throw new RedbackException("Error retreiving process instance", e);
 		} 	
+		logger.info("Finished finding processes");
 		return list;
 	}
 	
 	public void notifyProcess(Session session, String extpid, String pid, JSONObject notification) throws RedbackException
 	{
+		logger.info("Notifying process " + pid + " with " + notification);
 		ProcessInstance pi = getProcessInstance(pid);
 		notification.put("user", session.getUserProfile().getUsername());
 		if(extpid != null)
 			notification.put("pid", extpid);
 		pi.addNotification(notification);
+		logger.info("Finished notifying process");
 	}
 	
 	

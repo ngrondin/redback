@@ -68,7 +68,15 @@ public class Expression
 			} 
 			catch (ScriptException e)
 			{
-				throw new RedbackException("Problem executing the expression '" + expressionString + "'", e);
+				throw new RedbackException("Script error executing the expression  '" + expressionString + "' with object '" + obj.getObjectConfig().getName() + ":" + obj.getUID() + "'", e);
+			}
+			catch(NullPointerException e)
+			{
+				throw new RedbackException("Null pointer exception in expression  '" + expressionString + "' with object '" + obj.getObjectConfig().getName() + ":" + obj.getUID() + "'", e);
+			}
+			catch(RuntimeException e)
+			{
+				throw new RedbackException("Runtime error executing a expression  '" + expressionString + "' with object '" + obj.getObjectConfig().getName() + ":" + obj.getUID() + "'", e);
 			}
 			return new Value(executionContext.get("returnValue"));
 		}

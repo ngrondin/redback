@@ -34,27 +34,34 @@ public class InteractionUnit extends ProcessUnit
 		notificationConfig = config.getObject("notification");
 	}
 
-	public void execute(ProcessInstance pi) throws RedbackException
+	public void execute(ProcessInstance pi, JSONObject result) throws RedbackException
 	{
+		logger.info("Starting interaction node execution");
 		for(int i = 0; i < assigneeConfigs.size(); i++)
 		{
 			AssigneeConfig assigneeConfig = assigneeConfigs.get(i);
 			Object assigneeObject = assigneeConfig.evaluateId(pi);
 			if(assigneeObject instanceof String)
 			{
+				logger.fine("Adding assignee " + (String)assigneeObject);
 				addAssignee(pi, new Assignee(assigneeConfigs.get(i).getType(), (String)assigneeObject));
 			}
-			if(assigneeObject instanceof JSONList)
+			else if(assigneeObject instanceof JSONList)
 			{
 				JSONList assigneeList = (JSONList)assigneeObject;
 				for(int j = 0; j < assigneeList.size(); j++)
+				{
+					logger.fine("Adding assignee " + assigneeList.getString(j));
 					addAssignee(pi, new Assignee(assigneeConfigs.get(i).getType(), assigneeList.getString(j)));
+				}
 			}
 		}
+		logger.info("Finished interaction node execution");
 	}
 
 	public void processAction(Session session, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
 	{
+		logger.info("Starting interaction node action");
 		boolean foundAction = false;
 		if(isAssignee(session.getUserProfile(), extpid, pi))
 		{
@@ -62,6 +69,7 @@ public class InteractionUnit extends ProcessUnit
 			{
 				if(actionsConfig.getObject(i).getString("action").equals(action))
 				{
+					logger.fine("Actionning interaction with '" + action + "'");
 					foundAction = true;
 					String nextNode = actionsConfig.getObject(i).getString("nextnode");
 					pi.clearAssignees();
@@ -78,12 +86,13 @@ public class InteractionUnit extends ProcessUnit
 		{
 			error("Actionning user or process is not a current assignee");
 		}		
+		logger.info("Finished interaction node action");
 	}
 	
 	protected void addAssignee(ProcessInstance pi, Assignee assignee) throws RedbackException
 	{
 		pi.addAssignee(assignee);
-		if(assignee.getType() == Assignee.PROCESS  &&  notificationConfig.getString("method").equals("rbprocessnotification"))
+		if(assignee.getType() == Assignee.PROCESS  &&  notificationConfig.getString("method") != null  &&  notificationConfig.getString("method").equals("rbprocessnotification"))
 			processManager.notifyProcess(processManager.getSystemUserSession(pi.getDomain()), pi.getId(), assignee.getId(), getNotification(pi));
 		//TODO: Add more notification methods
 		

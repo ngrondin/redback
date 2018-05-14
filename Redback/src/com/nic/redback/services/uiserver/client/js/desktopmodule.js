@@ -1,6 +1,55 @@
 	var module = angular.module("desktopmodule", ['ngMaterial', 'uiGmapgoogle-maps', 'mdPickers']);	
 
 	/***********************************/
+	/** Drag Directive			 	  **/
+	/***********************************/
+	
+	module.directive('rbDraggable', ['$rootScope', function($rootScope) {
+        return {
+            restrict: 'A',
+            link: function($scope, $element, $attrs, $controller) {
+                angular.element($element).attr("draggable", "true");
+				$scope.rbDragObjectName = $attrs.rbDraggable;
+                $element.bind("dragstart", function(e) {
+					var dragObject = eval('$scope.' + $scope.rbDragObjectName);
+                    $scope.$emit("rbDragStart", dragObject, e);
+                });
+
+                $element.bind("dragend", function(e) {
+					var dragObject = eval('$scope.' + $scope.rbDragObjectName);
+                    $scope.$emit("rbDragEnd", dragObject, e);
+                });
+            }
+        }
+    }]);
+	
+	module.directive('rbDropTarget', ['$rootScope', function($rootScope) {
+        return {
+            restrict: 'A',
+            link: function($scope, $element, $attrs, $controller) {
+				$scope.rbDropObjectName = $attrs.rbDropTarget;
+                $element.bind("dragover", function(e) {
+					if (e.preventDefault) 
+						e.preventDefault(); 
+					e.dataTransfer.dropEffect = 'move';
+					return false;
+                });
+
+                $element.bind("drop", function(e) {
+					if (e.preventDefault) 
+						e.preventDefault(); 
+					if (e.stopPropagation)
+						e.stopPropagation();
+					var dropObject = null;
+					if($scope.rbDropObjectName != null  &&  $scope.rbDropObjectName != '')
+						dropObject = eval('$scope.' + $scope.rbDropObjectName);
+                    $scope.$emit("rbDragDrop", dropObject, e);
+                });
+            }
+        }
+    }]);
+	
+	/***********************************/
 	/** Input Directive			 	  **/
 	/***********************************/
 	
@@ -173,7 +222,10 @@
 					$scope.listConfig.selected = null;
 					$scope.listConfig.highlightedIndex = -1;
 					$scope.listConfig.list = [];
-					$scope.inputValue = $scope.object.related[$scope.attributeName].data[$scope.displayAttributeName];
+					if($scope.object.related[$scope.attributeName] != null)
+						$scope.inputValue = $scope.object.related[$scope.attributeName].data[$scope.displayAttributeName];
+					else
+						$scope.inputValue = '';
 				};
 				$scope.$watch('object.related.' + $scope.attributeName + '.data.' + $scope.displayAttributeName, function(newValue, oldValue) {
 					$scope.inputValue = newValue;
@@ -299,19 +351,27 @@
 	module.controller('desktoproot', function rootCtl($scope,$attrs,$http) {
 		$scope.largemenu = true;
 		$scope.menuwidth = 300;
+		$scope.page = null;
+		$scope.pageLabel = 'Welcome';
 		
 		$scope.toggleMenu = function() {
 			if($scope.largemenu) {
 				$scope.largemenu = false;
-				$scope.menuwidth = 50;
+				$scope.menuwidth = 56;
 			} else {
 				$scope.largemenu = true;
 				$scope.menuwidth = null;
 			}
 		}
+		
+		$scope.navigate = function(view, label) {
+			$scope.page = '../view/' + view;
+			$scope.pageLabel = label;
+		}
+		
 	}).config(function($mdIconProvider) {
 	    $mdIconProvider
-	       .iconSet('wms', '../resource/wms.svg', 492);
+	       .iconSet('wms', '../resource/wms.svg', 24);
 	});
 	
 	  
@@ -342,18 +402,20 @@
 		};		
 
 		$scope.objectfunction = function(functionName){
-			var req = {action:"execute", object:$scope.objectName, uid:$scope.object.uid, "function":functionName, options:{addrelated:true, addvalidation:true}};
-			$http.post("../../rbos", req)
-			.success(function(response) {
-				var responseObject = processResponseJSON(response);
-				if(responseObject != null) {
-					$scope.setObject(responseObject);
-					$scope.$emit('refreshRelatedEmit', $scope.object);
-				}
-			})
-			.error(function(error, status) {
-				alert('execute error');
-			});
+			if($scope.object != null) {
+				var req = {action:"execute", object:$scope.objectName, uid:$scope.object.uid, 'function':functionName, options:{addrelated:true, addvalidation:true}};
+				$http.post("../../rbos", req)
+				.success(function(response) {
+					var responseObject = processResponseJSON(response);
+					if(responseObject != null) {
+						$scope.setObject(responseObject);
+						$scope.$emit('refreshRelatedEmit', $scope.object);
+					}
+				})
+				.error(function(error, status) {
+					alert('execute error');
+				});
+			}
 		};
 
 		
@@ -397,7 +459,6 @@
 			
 		if($attrs.rbBaseFilter != null  &&  $attrs.rbBaseFilter.length > 0)
 			$scope.baseFilter = JSON.parse($attrs.rbBaseFilter.replace(/'/g, '"'));
-
 
 		$scope.search = function(searchText) {
 			$scope.clearList();		
@@ -665,7 +726,7 @@
 	/** Workflow Actions Controller	  **/
 	/***********************************/
 
-	module.controller('workflowactions', function wfactionCtl($scope,$attrs,$http) {
+	module.controller('processactions', function processactionCtl($scope,$attrs,$http) {
 		$scope.notification = {};
 		
 		$scope.openMenu = function($mdOpenMenu, ev) {
@@ -687,7 +748,13 @@
 		$scope.processAction = function(action) {
 			$http.post("../../rbpm", {action:'processaction', processaction:action, pid:$scope.notification.pid})
 			.success(function(response) {
-				$scope.$parent.object.refresh($http);
+				if(response.rbobjectupdate != null) {
+					for(var i = 0; i < response.rbobjectupdate.length; i++) {
+						var obj = findExistingObject(response.rbobjectupdate[i].objectname, response.rbobjectupdate[i].uid);
+						if(obj != null)
+							obj.refresh($http);
+					}
+				}
 			})
 			.error(function(error, status) {
 				alert(error.error);
@@ -695,3 +762,256 @@
 		}
 
 	});
+	
+	
+	/***********************************/
+	/** Match Scheduler Controller	  **/
+	/***********************************/
+
+	
+	module.controller('matchscheduler', function matchscheduler($scope,$attrs,$http,$element) {
+		$scope.config = JSON.parse($attrs.rbConfig.replace(/'/g, '"'));		
+		$scope.spanDays = 3;
+		$scope.scale = 50000;
+		$scope.startDate = new Date();
+		$scope.startMS = $scope.startDate.getTime();
+		$scope.endMS = $scope.startMS + ($scope.spanDays * 86400000);
+		$scope.width = ($scope.spanDays * 86400000) / $scope.scale;
+		$scope.scrollLeft = 0;
+		$scope.dragging = null;
+		$scope.draggingOffset = 0;
+		$scope.offerContainer = angular.element($element[0].querySelector('.rb-sched-offer-container'));
+		$scope.demandContainer = angular.element($element[0].querySelector('.rb-sched-demand-container'));
+		$scope.rbobjects = {
+				demand:[],
+				offer:[]
+		}
+		
+		$scope.offerContainer.bind('scroll', function() {
+			$scope.scrollLeft = $scope.offerContainer.prop('scrollLeft');
+			$scope.demandContainer.prop('scrollLeft', $scope.scrollLeft);
+		});
+		
+		$scope.loadOffer = function() {
+			var filter = $scope.config.offer.filter;
+			filter[$scope.config.offer.start] = {'$lt': (new Date($scope.endMS)).toISOString()};
+			filter[$scope.config.offer.finish] = {'$gt': (new Date($scope.startMS)).toISOString()};
+			var req = {action:"list", object:$scope.config.offer.object, filter:filter};
+			$http.post("../../rbos", req)
+			.success(function(response) {
+				var responseList = processResponseJSON(response);
+				if(responseList != null) 
+					$scope.rbobjects.offer = responseList;
+				$scope.transform();
+			})
+			.error(function(error, status) {
+				alert(error.error);
+			});			
+		};
+		
+		$scope.loadDemand = function() {
+			var filter = $scope.config.demand.filter;
+			filter['$or'] = [{}, {}, {}] ;
+			filter['$or'][0][$scope.config.demand.start] = null;
+			filter['$or'][1][$scope.config.demand.finish] = null;
+			filter['$or'][2][$scope.config.demand.start] = {$lt: (new Date($scope.endMS)).toISOString()};
+			var req = {action:"list", object:$scope.config.demand.object, filter:filter};
+			$http.post("../../rbos", req)
+			.success(function(response) {
+				var responseList = processResponseJSON(response);
+				if(responseList != null) 
+					$scope.rbobjects.demand = responseList;
+				$scope.transform();
+			})
+			.error(function(error, status) {
+				alert(error.error);
+			});
+		}
+		
+		$scope.transform = function() {
+			$scope.data = {
+				demandgroups:[],
+				offergroups:[],
+				markers:[]
+			};
+			for(var i = 0; i < $scope.rbobjects.offer.length; i++) {
+				var rbo = $scope.rbobjects.offer[i];
+				var groupKey = $scope.config.offer.group == 'uid' ? rbo.uid : rbo.data[$scope.config.offer.group];
+				var groupLabel = rbo.data[$scope.config.offer.grouplabel];
+				var group = null;
+				for(var j = 0; j < $scope.data.offergroups.length; j++)
+					if($scope.data.offergroups[j].key == groupKey)
+						group = $scope.data.offergroups[j];
+				if(group == null) {
+					group = {
+						key:groupKey,
+						label:groupLabel,
+						offers:[],
+						matcheddemands:[]
+					}				
+					$scope.data.offergroups.push(group);
+				}
+				var offer = {
+					rbo:rbo,
+					start:$scope.dateToX(rbo.data[$scope.config.offer.start]),
+					finish:$scope.dateToX(rbo.data[$scope.config.offer.finish]),
+					capabilities:rbo.data[$scope.config.offer.capcodes],
+					canoffer:true
+				};
+				if(offer.start < 0)
+					offer.start = 0;
+				if(offer.finish > $scope.width)
+					offer.finish = $scope.width;
+				group.offers.push(offer);
+			}	
+
+			for(var i = 0; i < $scope.rbobjects.demand.length; i++) {
+				var rbo = $scope.rbobjects.demand[i];
+				var groupKey = $scope.config.demand.group == 'uid' ? rbo.uid : rbo.data[$scope.config.demand.group];
+				var groupLabel = rbo.data[$scope.config.demand.grouplabel];
+				var group = null;
+				for(var j = 0; j < $scope.data.demandgroups.length; j++)
+					if($scope.data.demandgroups[j].key == groupKey)
+						group = $scope.data.demandgroups[j];
+				if(group == null) {
+					group = {
+						key:groupKey,
+						label:groupLabel,
+						unmatched:[],
+						matched:[]
+					}				
+					$scope.data.demandgroups.push(group);
+				}
+				var demand = {
+					rbo:rbo,
+					start:$scope.dateToX(rbo.data[$scope.config.demand.start]),
+					finish:$scope.dateToX(rbo.data[$scope.config.demand.finish]),
+					requirements:rbo.data[$scope.config.demand.reqcodes]
+				};
+				if(demand.start < 0) {
+					demand.finish = (demand.finish - demand.start) == 0 ? 100 : (demand.finish - demand.start);
+					demand.start = 0;
+				}
+				var matched = false;
+				var demandlink = rbo.data[$scope.config.demand.link];
+				if(demandlink != null) {
+					var offergroup = null;
+					for(var j = 0; j < $scope.data.offergroups.length; j++) {
+						for(var k = 0; k < $scope.data.offergroups[j].offers.length; k++) {
+							var offerlink = $scope.config.offer.link == 'uid' ? $scope.data.offergroups[j].offers[k].rbo.uid : $scope.data.offergroups[j].offers[k].rbo.data[$scope.config.offer.link];
+							if(offerlink == demandlink) {
+								$scope.data.offergroups[j].matcheddemands.push(demand);
+								group.matched.push(demand);
+								matched = true;
+							}
+						}
+					}
+				}
+				if(!matched)
+					group.unmatched.push(demand);
+			}
+			
+			var d = new Date($scope.startMS + 86399999);
+			d.setHours(0,0,0,0);
+			var markerPos = $scope.dateToX(d);
+			var markerPeriod = (86400000 / $scope.scale);
+			while(markerPos < $scope.width) {
+				var marker = {
+					position:markerPos,
+					label:$scope.XToDate(markerPos).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+				};
+				markerPos = markerPos + markerPeriod;
+				$scope.data.markers.push(marker);
+			}			
+		};
+		
+		$scope.dateToX = function(dateStr) {
+			var x = ((new Date(dateStr)).getTime() - $scope.startMS) / $scope.scale;
+			return x;
+		};
+		
+		$scope.XToDate = function(x) {
+			var date = new Date((x * $scope.scale) + $scope.startMS);
+			return date;
+		};
+		
+		$scope.markOfferings = function(demand) {
+			for(var j = 0; j < $scope.data.offergroups.length; j++) 
+				for(var k = 0; k < $scope.data.offergroups[j].offers.length; k++)
+					if(demand != null)
+						$scope.data.offergroups[j].offers[k].canoffer = $scope.canMatch(demand, $scope.data.offergroups[j].offers[k]);
+					else
+						$scope.data.offergroups[j].offers[k].canoffer = true;
+		}
+		
+		$scope.canMatch = function(demand, offer) {
+			var matches = true;
+			if(demand.requirements != null  &&  demand.requirements.length > 0) {
+				if(offer.capabilities != null  &&  offer.capabilities.length > 0) {
+					for(var i = 0; i < demand.requirements.length; i++)
+						if(!offer.capabilities.includes(demand.requirements[i]))
+							matches = false;
+				} else {
+					matches = false;
+				}
+			} 
+			return matches;
+		}
+		
+		$scope.spanChanged = function() {
+			$scope.endMS = $scope.startMS + ($scope.spanDays * 86400000);
+			$scope.width = ($scope.spanDays * 86400000) / $scope.scale;
+			$scope.loadOffer();
+			$scope.loadDemand();
+		}
+		
+		$scope.zoomChanged = function() {
+			$scope.width = ($scope.spanDays * 86400000) / $scope.scale;
+			$scope.transform();
+		}
+
+		$scope.$on('rbDragStart', function($event, object, e){
+			$scope.dragging = object;
+			$scope.draggingOffset = e.clientX;
+			$scope.markOfferings(object);
+			$scope.$apply();
+		});
+
+		$scope.$on('rbDragDrop', function($event, object, e){
+			var update = {};
+			if(object != null) {
+				if($scope.canMatch($scope.dragging, object)  &&  $scope.config.demand.link.startsWith('data.')) {
+					var offerlink = $scope.config.offer.link == 'uid' ? object.rbo.uid : object.rbo.data[$scope.config.offer.link];
+					$scope.dragging.rbo.data[$scope.config.demand.link] = offerlink;
+					update[$scope.config.demand.link] = offerlink;
+				} else {
+					$scope.markOfferings(null);
+					$scope.$apply();
+					return;
+				}
+			} else {
+				$scope.dragging.rbo.data[$scope.config.demand.link] = null;
+				update[$scope.config.demand.link] = null;
+			}
+			var diffX = e.clientX - $scope.draggingOffset;
+			var newStartDate = $scope.XToDate($scope.dragging.start + diffX).toISOString();
+			var newFinishDate = $scope.XToDate($scope.dragging.finish + diffX).toISOString();
+			$scope.dragging.rbo.data[$scope.config.demand.star] = newStartDate;
+			$scope.dragging.rbo.data[$scope.config.demand.finish] = newFinishDate;
+			update[$scope.config.demand.start] = newStartDate;
+			update[$scope.config.demand.finish] = newFinishDate;
+			var req = {action:"update", object:$scope.config.demand.object, uid:$scope.dragging.rbo.uid, data:update, options:{addrelated:true, addvalidation:true}};
+			$http.post("../../rbos", req)
+			.success(function(response) {
+				processResponseJSON(response);
+				$scope.transform();
+			})
+			.error(function(error, status) {
+				alert(error.error);
+			});			
+			$scope.dragging = null;
+		});
+
+		$scope.loadOffer();
+		$scope.loadDemand();
+	});	

@@ -1,5 +1,5 @@
 <md-menu
-	ng-controller="workflowactions">
+	ng-controller="processactions">
 	<md-button 
 		aria-label="Workflow actions" 
 		class="md-fab md-mini md-primary rb-form-button" 

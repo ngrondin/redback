@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import jdk.nashorn.api.scripting.JSObject;
 
 import com.nic.firebus.utils.FirebusDataUtil;
+import com.nic.firebus.utils.FirebusJSArray;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
-import com.nic.redback.services.objectserver.js.RedbackJSArray;
 import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 
@@ -23,32 +23,32 @@ public class ProcessManagerJSWrapper
 		session = s;
 	}
 	
-	public ProcessInstance initiateProcess(String name, String domain, JSONObject data) throws RedbackException
+	public JSObject initiateProcess(String name, String domain, JSONObject data) throws RedbackException
 	{
-		return processManager.initiateProcess(session, name, data);
+		return FirebusDataUtil.convertDataObjectToJSObject(processManager.initiateProcess(session, name, data));
 	}
 
 	public JSObject getNotifications(String extpid, JSObject filter, JSObject viewdata) throws RedbackException
 	{
 		ArrayList<JSONObject> list = processManager.getNotifications(session, extpid, FirebusDataUtil.convertJSObjectToDataObject(filter), FirebusDataUtil.convertJSArrayToDataList(viewdata));
-		RedbackJSArray array = new RedbackJSArray();
+		FirebusJSArray array = new FirebusJSArray();
 		for(int i = 0; i < list.size(); i++)
 			array.setSlot(i,  FirebusDataUtil.convertDataObjectToJSObject(list.get(i)));
 		return array;
 		
 	}
 	
-	public ProcessInstance processAction(String extpid, String pid, String event, JSObject data) throws RedbackException
+	public JSObject processAction(String extpid, String pid, String event, JSObject data) throws RedbackException
 	{
-		return processManager.processAction(session, extpid, pid, event, FirebusDataUtil.convertJSObjectToDataObject(data));
+		return FirebusDataUtil.convertDataObjectToJSObject(processManager.processAction(session, extpid, pid, event, FirebusDataUtil.convertJSObjectToDataObject(data)));
 	}
 	
 	public JSObject findProcesses(JSObject filter) throws RedbackException
 	{
 		ArrayList<ProcessInstance> list = processManager.findProcesses(session, FirebusDataUtil.convertJSObjectToDataObject(filter));
-		RedbackJSArray array = new RedbackJSArray();
+		FirebusJSArray array = new FirebusJSArray();
 		for(int i = 0; i < list.size(); i++)
-			array.setSlot(i,  list.get(i));
+			array.setSlot(i,  new ProcessInstanceJSWrapper(list.get(i)));
 		return array;
 	}
 	

@@ -4,11 +4,16 @@ body {
 	background: white;
 	display: flex;
 	flex-direction: column;
+	overflow:hidden;
 }
 
 .rb-module {
 	display: flex;
 	#flex: 1 0 auto;
+}
+
+.rb-sidebar {
+	flex: 0 0 auto;
 }
 
 .rb-controller {
@@ -27,8 +32,9 @@ body {
 }
 
 .rb-wfconfig-canvas-container {
-	position:relative;
 	overflow:auto;
+	height:400px;
+	width:1200px;
 }
 
 .rb-wfconfig-canvas {
@@ -82,6 +88,14 @@ body {
 
 .rb-textarea {
 	resize: none;
+}
+
+.rb-contextmenu {
+  visibility:hidden;
+  background:#ffffff;
+  border:1px solid #8888FF;
+  z-index: 10;
+  position: absolute;
 }
 
 md-input-container .md-errors-spacer{

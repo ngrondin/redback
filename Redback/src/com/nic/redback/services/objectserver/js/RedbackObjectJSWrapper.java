@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.Set;
 
 import jdk.nashorn.api.scripting.AbstractJSObject;
-import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.objects.NativeDate;
 
 import com.nic.firebus.utils.FirebusDataUtil;
@@ -22,10 +21,11 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 		rbObject = o;
 	}
 	
+	/*
 	protected RedbackObject getRedbackObject()
 	{
 		return rbObject;
-	}
+	}*/
 
 	public Object call(Object arg0, Object... args)
 	{

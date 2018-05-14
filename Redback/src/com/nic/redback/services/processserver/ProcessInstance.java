@@ -1,6 +1,7 @@
 package com.nic.redback.services.processserver;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.UUID;
 
 import com.nic.firebus.utils.JSONList;
@@ -34,6 +35,7 @@ public class ProcessInstance
 	{
 		processName = c.getString("process");
 		processVersion = c.getNumber("version").intValue();
+		domain = c.getString("domain");
 		id = UUID.fromString(c.getString("_id"));
 		currentNode = c.getString("currentnode");
 		complete = c.getBoolean("compelte");
@@ -111,6 +113,9 @@ public class ProcessInstance
 	
 	public void addNotification(JSONObject notification)
 	{
+		for(int i = 0; i < receivedNotifications.size(); i++)
+			if(receivedNotifications.getObject(i).getString("pid").equals(notification.getString("pid"))  &&  receivedNotifications.getObject(i).getString("interaction").equals(notification.getString("interaction")))
+				receivedNotifications.remove(i--);
 		receivedNotifications.add(notification);
 	}
 	
@@ -132,6 +137,7 @@ public class ProcessInstance
 		retVal.put("version", processVersion);
 		retVal.put("domain", domain);
 		retVal.put("currentnode", currentNode);
+		retVal.put("lastupdate", new Date());
 		if(assignees.size() > 0)
 			retVal.put("assignees", assignees);
 		if(receivedNotifications.size() > 0)

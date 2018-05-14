@@ -35,7 +35,8 @@
 				sysusername:"processuser",
 				sysuserpassword:"poil",
 				globalvariables:{
-					"rbobjectservice":"rbos"
+					"rbobjectservice":"rbos",
+					"rbaccessservice":"rbam"
 				}
 			}
 		},
@@ -89,6 +90,26 @@
 				"connectionstring":"192.168.1.4",
 				"database":"local"						
 			}
+		}
+	],
+	loggers:[
+		{
+			"name":"com.nic.redback",
+			"formatter":"com.nic.firebus.logging.FirebusSimpleFormatter",
+			"filename":"RedbackServer.log",
+			"level":"INFO"
+		},
+		{
+			"name":"com.nic.firebus",
+			"formatter":"com.nic.firebus.logging.FirebusSimpleFormatter",
+			"filename":"Firebus.log",
+			"level":"INFO"
+		},
+		{
+			"name":"com.nic.redback.services.processserver",
+			"formatter":"com.nic.redback.services.processserver.ProcessLogger",
+			"filename":"RedbackProcess.log",
+			"level":"FINE"
 		}
 	]
 }

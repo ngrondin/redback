@@ -24,21 +24,28 @@ public class FirebusJSWrapper
 	
 	public JSObject request(String serviceName, JSObject jsRequest) throws RedbackException 
 	{
-		try
+		if(serviceName != null)
 		{
-			JSONObject requestObject = FirebusDataUtil.convertJSObjectToDataObject(jsRequest);
-			Payload request = new Payload(requestObject.toString());
-			request.metadata.put("sessionid", sessionId);
-			logger.info("Requesting firebus service : " + serviceName + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
-			Payload response = firebus.requestService(serviceName, request);
-			logger.info("Receiving firebus service respnse");
-			JSONObject responseObject = new JSONObject(response.getString());
-			JSObject jsResponse = FirebusDataUtil.convertDataObjectToJSObject(responseObject);
-			return jsResponse;
+			try
+			{
+				JSONObject requestObject = FirebusDataUtil.convertJSObjectToDataObject(jsRequest);
+				Payload request = new Payload(requestObject.toString());
+				request.metadata.put("sessionid", sessionId);
+				logger.info("Requesting firebus service : " + serviceName + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
+				Payload response = firebus.requestService(serviceName, request);
+				logger.info("Receiving firebus service respnse");
+				JSONObject responseObject = new JSONObject(response.getString());
+				JSObject jsResponse = FirebusDataUtil.convertDataObjectToJSObject(responseObject);
+				return jsResponse;
+			}
+			catch(Exception e)
+			{
+				throw new RedbackException("Error processing firebus request", e);
+			}
 		}
-		catch(Exception e)
+		else
 		{
-			throw new RedbackException("Error processing firebus request", e);
+			throw new RedbackException("No service name provided in javascript firebus request");
 		}
 	}
 

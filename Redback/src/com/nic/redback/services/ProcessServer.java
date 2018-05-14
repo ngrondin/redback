@@ -60,9 +60,8 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 					JSONObject data = request.getObject("data");
 					if(process != null)
 					{
-						ProcessInstance pi = processManager.initiateProcess(session, process, data);
+						responseData = processManager.initiateProcess(session, process, data);
 						processManager.commitCurrentTransaction();
-						responseData = new JSONObject("{\"pid\":\"" + pi.getId() + "\"}");
 					}
 					else
 					{
@@ -77,9 +76,8 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 					JSONObject data = request.getObject("data");
 					if(pid != null &&  processAction != null)
 					{
-						processManager.processAction(session, extpid, pid, processAction, data);
+						responseData = processManager.processAction(session, extpid, pid, processAction, data);
 						processManager.commitCurrentTransaction();
-						responseData = new JSONObject("{\"result\":\"OK\"}");
 					}
 					else
 					{

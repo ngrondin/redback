@@ -1,13 +1,13 @@
 package com.nic.redback.services.processserver.units;
 
+import java.util.logging.Logger;
+
 import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-
-import jdk.nashorn.api.scripting.JSObject;
 
 import com.nic.firebus.utils.FirebusDataUtil;
 import com.nic.firebus.utils.JSONObject;
@@ -20,61 +20,56 @@ import com.nic.redback.services.processserver.js.ProcessManagerJSWrapper;
 import com.nic.redback.utils.FirebusJSWrapper;
 import com.nic.redback.utils.StringUtils;
 
-public class ScriptUnit extends ProcessUnit 
+public class ConditionalUnit extends ProcessUnit 
 {
+	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected CompiledScript script;
-	protected String nextNode;
+	protected String trueNode;
+	protected String falseNode;
 	
-	public ScriptUnit(ProcessManager pm, JSONObject config) throws RedbackException 
+	public ConditionalUnit(ProcessManager pm, JSONObject config) throws RedbackException 
 	{
 		super(pm, config);
 		processManager = pm;
-		nextNode = config.getString("nextnode");
+		trueNode = config.getString("truenode");
+		falseNode = config.getString("falsenode");
 		ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
-		//jsEngine.put(ScriptEngine.FILENAME, scriptName);
-		String source = StringUtils.unescape(config.getString("source"));
+		String source = "var result = (" + StringUtils.unescape(config.getString("condition")) + ");";
 		try
 		{
 			script = ((Compilable)jsEngine).compile(source);
 		}
 		catch(ScriptException e)
 		{
-			error("Error creating script unit id '" + getId() + "'", e);
+			error("Error creating script unit", e);
 		}
 	}
 
 	public void execute(ProcessInstance pi, JSONObject result) throws RedbackException
 	{
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-		logger.info("Start executing script");
+		String fileName = (String)script.getEngine().get(ScriptEngine.FILENAME);
+		logger.info("Start executing condition : " + fileName);
 		Bindings context = script.getEngine().createBindings();
 		context.put("pid", pi.getId());
 		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
 		context.put("pm", new ProcessManagerJSWrapper(processManager, sysUserSession));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalVariables()));
 		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), sysUserSession.getSessionId().toString()));
-		context.put("result", FirebusDataUtil.convertDataObjectToJSObject(result));
 		try
 		{
 			script.eval(context);
-			pi.setCurrentNode(nextNode);
-			JSObject piDataJS = (JSObject)context.get("data");
-			pi.setData(FirebusDataUtil.convertJSObjectToDataObject(piDataJS));
-			result = FirebusDataUtil.convertJSObjectToDataObject((JSObject)context.get("result"));
+			boolean bool = (Boolean)context.get("result");
+			if(bool == true)
+				pi.setCurrentNode(trueNode);
+			else
+				pi.setCurrentNode(falseNode);
 		} 
 		catch (ScriptException e)
 		{
-			error("Problem occurred executing script of node " + nodeId, e);
+			error("Problem occurred executing a condition", e);
 		}		
-		catch(NullPointerException e)
-		{
-			error("Null pointer exception in script of node " + nodeId, e);
-		}
-		catch(RuntimeException e)
-		{
-			error("Problem occurred executing script of node " + nodeId, e);
-		}		
-		logger.info("Finish executing script ");		
+		logger.info("Finish executing condition : " + fileName);		
 	}
 
 }

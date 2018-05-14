@@ -40,17 +40,19 @@
 				<md-button
 					class="md-primary"
 					ng-click="save()">Save
+					<md-icon ng-show="saveok == true" class="md-hue-3" >done</md-icon>
 				</md-button>
 		</div>
 		<!-- Layout Canvas -->		
 		<div
-			class="rb-wfconfig-canvas-container"
-			style="width:100%;height:400px">
+			class="rb-wfconfig-canvas-container">
 			<div 
 				class="rb-wfconfig-canvas"
 				ng-controller="processcanvas" 
 				ng-mouseup="mouseup($event)"
-				ng-mousemove="mousemove($event)">
+				ng-mousemove="mousemove($event)"
+				ng-mousedown="mousedown($event)"
+				oncontextmenu="return false;">
 				<canvas id="canvas"></canvas>
 				<div
 					class="rb-wfconfig-node"
@@ -107,7 +109,26 @@
 					<textarea ui-codemirror ui-codemirror-opts="{lineNumbers: true, mode: 'application/x-javascript'}" rows="8" cols="80" ng-model="selectedNode.source" style="width:800px;"></textarea>
 					<md-input-container>
 						<label>Next Node</label>
-						<md-select ng-model="selectedNode.nextnode">
+						<md-select ng-model="selectedNode.nextnode" ng-change="drawConnectors()">
+							<md-option ng-value=""></md-option>
+							<md-option ng-repeat="node in config.nodes" ng-value="node.id">{{node.name}}</md-option>
+						</md-select>
+					</md-input-container><br>					
+				</div>		
+				<!-- Conditional Node -->
+				<div style="display:flex;flex-direction:column;overflow:auto" ng-show="selectedNode.type == 'condition'">
+					<label>Condition</label>
+					<textarea ui-codemirror ui-codemirror-opts="{lineNumbers: true, mode: 'application/x-javascript'}" rows="3" cols="80" ng-model="selectedNode.condition" style="width:800px;"></textarea>
+					<md-input-container>
+						<label>True</label>
+						<md-select ng-model="selectedNode.truenode" ng-change="drawConnectors()">
+							<md-option ng-value=""></md-option>
+							<md-option ng-repeat="node in config.nodes" ng-value="node.id">{{node.name}}</md-option>
+						</md-select>
+					</md-input-container><br>					
+					<md-input-container>
+						<label>False</label>
+						<md-select ng-model="selectedNode.falsenode" ng-change="drawConnectors()">
 							<md-option ng-value=""></md-option>
 							<md-option ng-repeat="node in config.nodes" ng-value="node.id">{{node.name}}</md-option>
 						</md-select>
@@ -125,7 +146,7 @@
 					</md-input-container>
 					<md-input-container>
 						<label>Next Node</label>
-						<md-select ng-model="selectedNode.nextnode">
+						<md-select ng-model="selectedNode.nextnode" ng-change="drawConnectors()">
 							<md-option ng-value=""></md-option>
 							<md-option ng-repeat="node in config.nodes" ng-value="node.id">{{node.name}}</md-option>
 						</md-select>
@@ -199,7 +220,7 @@
 						</md-input-container>
 						<md-input-container>
 							<label>Next Node</label>
-							<md-select ng-model="action.nextnode">
+							<md-select ng-model="action.nextnode" ng-change="drawConnectors()">
 								<md-option ng-value=""></md-option>
 								<md-option ng-repeat="node in config.nodes" ng-value="node.id">{{node.name}}</md-option>
 							</md-select>
@@ -217,12 +238,18 @@
 						<input type="text" ng-model="selectedNode.uid">
 					</md-input-container>
 					<md-input-container>
-						<label>Data</label>
-						<textarea rows="4" cols="80" ng-model="selectedNode.data"></textarea>
+						<label>Update Data</label>
+						<textarea rows="4" cols="50" ng-model="selectedNode.data"></textarea>
+					</md-input-container>
+				</div>	
+				<div style="display:flex;flex-direction:column" ng-show="selectedNode.type == 'rbobjectupdate'">
+					<md-input-container>
+						<label>Output Mapping</label>
+						<textarea rows="4" cols="50" ng-model="selectedNode.outmap"></textarea>
 					</md-input-container>
 					<md-input-container>
 						<label>Next Node</label>
-						<md-select ng-model="selectedNode.nextnode">
+						<md-select ng-model="selectedNode.nextnode" ng-change="drawConnectors()">
 							<md-option ng-value=""></md-option>
 							<md-option ng-repeat="node in config.nodes" ng-value="node.id">{{node.name}}</md-option>
 						</md-select>
@@ -243,12 +270,18 @@
 						<input type="text" ng-model="selectedNode.function">
 					</md-input-container>
 					<md-input-container>
-						<label>Data</label>
-						<textarea rows="4" cols="80" ng-model="selectedNode.data"></textarea>
+						<label>Function Parameters</label>
+						<textarea rows="4" cols="50" ng-model="selectedNode.data"></textarea>
+					</md-input-container>
+				</div>	
+				<div style="display:flex;flex-direction:column" ng-show="selectedNode.type == 'rbobjectexecute'">
+					<md-input-container>
+						<label>Ouput Mapping</label>
+						<textarea rows="4" cols="50" ng-model="selectedNode.outmap"></textarea>
 					</md-input-container>
 					<md-input-container>
 						<label>Next Node</label>
-						<md-select ng-model="selectedNode.nextnode">
+						<md-select ng-model="selectedNode.nextnode" ng-change="drawConnectors()">
 							<md-option ng-value=""></md-option>
 							<md-option ng-repeat="node in config.nodes" ng-value="node.id">{{node.name}}</md-option>
 						</md-select>

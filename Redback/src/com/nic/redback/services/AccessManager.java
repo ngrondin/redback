@@ -126,6 +126,18 @@ public class AccessManager extends RedbackService
 					response.put("error", "Not a valid session");						
 				}
 			}
+			else if(action.equals("listusers"))
+			{
+				JSONObject filter = request.getObject("filter");
+				if(filter != null)
+				{
+					JSONList respList = new JSONList();
+					ArrayList<UserProfile> list = listUserProfiles(filter);
+					for(int i = 0; i < list.size(); i++)
+						respList.add(list.get(i).getSimpleJSON());
+					response.put("result", respList);
+				}
+			}
 		}
 		catch(Exception e)
 		{	
@@ -263,24 +275,11 @@ public class AccessManager extends RedbackService
 		{
 			try
 			{
-				JSONObject userResult = request(configService, "{object:rbam_user, filter:{username:\"" + username + "\"}}");
-				if(userResult.getList("result").size() > 0)
+				ArrayList<UserProfile> list = listUserProfiles(new JSONObject("{username:\"" + username + "\"}"));
+				if(list.size() > 0)
 				{
-					JSONObject userJSON = userResult.getObject("result.0");
-					JSONList rolesList = userJSON.getList("roles");
-					JSONObject rights = new JSONObject();
-	
-					for(int i = 0; i < rolesList.size(); i++)
-					{
-						String roleName = rolesList.getString(i);
-						Role role = getRole(roleName);
-						JSONObject roleRights = role.getAllRights();
-						mergeRights(rights, roleRights);
-					}
-					userJSON.put("rights", rights);
-					userProfile = new UserProfile(userJSON);				
-					cachedUserProfiles.add(userProfile);
-				}			
+					userProfile = list.get(0);
+				}
 			}
 			catch(Exception e)
 			{
@@ -292,6 +291,44 @@ public class AccessManager extends RedbackService
 		return userProfile;
 	}
 	
+	protected ArrayList<UserProfile> listUserProfiles(JSONObject filter) throws RedbackException
+	{
+		ArrayList<UserProfile> list = new ArrayList<UserProfile>();
+		try
+		{
+			JSONObject userResult = request(configService, "{object:rbam_user, filter:" + filter.toString() + "}");
+			for(int i = 0; i < userResult.getList("result").size(); i++)
+			{
+				JSONObject userJSON = userResult.getObject("result." + i);
+				UserProfile userProfile = null;
+				for(int j = 0 ; j < cachedUserProfiles.size(); j++)
+					if(cachedUserProfiles.get(j).getUsername().equals(userJSON.getString("username")))
+						userProfile = cachedUserProfiles.get(j);
+				if(userProfile == null)
+				{
+					JSONList rolesList = userJSON.getList("roles");
+					JSONObject rights = new JSONObject();
+					for(int j = 0; j < rolesList.size(); j++)
+					{
+						String roleName = rolesList.getString(j);
+						Role role = getRole(roleName);
+						JSONObject roleRights = role.getAllRights();
+						mergeRights(rights, roleRights);
+					}
+					userJSON.put("rights", rights);
+					userProfile = new UserProfile(userJSON);	
+					cachedUserProfiles.add(userProfile);
+				}
+				list.add(userProfile);
+			}			
+		}
+		catch(Exception e)
+		{
+			logger.severe(e.getMessage());
+			throw new RedbackException("Exception listing user profiles from database : ", e);
+		}
+		return list;
+	}
 
 	protected void extendSession(Session session)
 	{

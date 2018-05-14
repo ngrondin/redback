@@ -162,7 +162,8 @@ public class UIServer extends RedbackAuthenticatedService
 					String page = appConfig.getString("page");
 					context.put("config", appConfig);
 					String html = executeJSP("pages/" + page, context);
-					html = injectInHTML(html, "menu", getMenu(session));
+					if(html.contains("#menu#"))
+							html = injectInHTML(html, "menu", getMenu(session));
 					sb.append(html);
 				}
 				else
@@ -445,7 +446,7 @@ public class UIServer extends RedbackAuthenticatedService
 	}
 	
 
-	protected JSONObject convertFilter(JSONObject in)
+	public static JSONObject convertFilter(JSONObject in)
 	{
 		JSONObject out = new JSONObject();
 		Iterator<String> it = in.keySet().iterator();

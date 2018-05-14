@@ -28,11 +28,12 @@ public class FirebusCallUnit extends ProcessUnit
 		nextNode = config.getString("nextnode");
 	}
 
-	public void execute(ProcessInstance pi) throws RedbackException
+	public void execute(ProcessInstance pi, JSONObject result) throws RedbackException
 	{
+		logger.info("Starting firebus call node");
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
 		String payloadStr = null;
-		Object jsData = payloadExpression.eval(pi);
+		Object jsData = payloadExpression.eval("data", pi.getData());
 		if(jsData instanceof JSObject)
 			payloadStr = (String)jsData;
 		else if(jsData instanceof String)
@@ -48,6 +49,7 @@ public class FirebusCallUnit extends ProcessUnit
 			error("Error executing firebus service '" + firebusServiceName + "' ",  e);
 		}
 		pi.setCurrentNode(nextNode);
+		logger.info("Finished firebus call node");
 	}
 
 }

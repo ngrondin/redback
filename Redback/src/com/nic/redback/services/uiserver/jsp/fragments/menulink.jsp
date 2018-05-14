@@ -1,9 +1,9 @@
 <md-list-item 
+	class="rb-menu-link"
 	ng-show="menutoggle.group<%=config.getString('group')%>"
-	ng-click="page = '../view/<%=config.getString('view')%>'">
+	ng-click="navigate('<%=config.getString('view')%>', '<%=config.getString('label')%>')">
 	<md-icon md-svg-icon="<%=config.getString('icon')%>"></md-icon>
 	<span 
-		class="menuitem"
 		ng-show="largemenu" 
 		flex>
 		<%=config.getString('label')%>

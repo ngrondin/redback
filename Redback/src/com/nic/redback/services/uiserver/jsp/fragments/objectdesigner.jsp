@@ -2,10 +2,22 @@
 	class="rb-hsection">
 	<div
 		class="rb-vsection">
-		<md-button
-			class="md-primary"
-			ng-click="createObject()">+
-		</md-button>
+		<div
+			class="rb-hsection"
+			style="flex:0 0 auto;">
+			<md-button
+				class="md-fab md-mini md-primary"
+				ng-click="createObject()">+
+			</md-button>
+			<md-input-container 
+				class="md-block rb-search-container" >
+				<md-icon class="md-hue-3"> search </md-icon>
+				<input 
+					ng-model="searchText" 
+					aria-label="Search"
+					size="15">
+			</md-input-container>		
+		</div>
 		<div
 			class="rb-listscroll">
 			<md-list 
@@ -13,7 +25,7 @@
 				<md-list-item 
 					class="md-2-line" 
 					ng-class="{ 'list-item-active': item == selectedObject }"
-					ng-repeat="listitem in list" 
+					ng-repeat="listitem in list | filter:searchText" 
 					ng-click="selectObject(listitem)">
 					<div 
 						class="md-list-item-text" 

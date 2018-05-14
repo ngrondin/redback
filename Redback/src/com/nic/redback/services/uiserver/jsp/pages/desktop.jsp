@@ -37,6 +37,10 @@
 			style="display:flex; flex-direction:row; flex:0 0 auto;">
 			<h3 flex="" md-truncate=""><%=config.getString('label')%></h3>
 		</div>
+		<div 
+			style="display:flex; flex-direction:row; flex:0 0 auto; font-size:80%;padding-top:5px;padding-left:10px;">
+			<h3 flex="" md-truncate="">&nbsp;|&nbsp;{{pageLabel}}</h3>
+		</div>
 		<div			
 			style="flex:1 0 auto;text-align:right;">
 			<md-menu md-offset="0 60">
@@ -57,7 +61,7 @@
 	</md-toolbar>
 	<div
 		class="hsection"
-		style="flex:1 1 auto">
+		style="flex:1 1 auto;">
 		<md-sidenav 
 			class="md-sidenav-left rb-sidebar" 
 			style="width:{{menuwidth}}px;overflow:hidden;"
@@ -85,7 +89,8 @@
 				</md-button>
 			</div>
 		</md-sidenav>		
-		<ng-include  id="mainview" src="page" class="rb-include"></ng-include>
+		<div  id="mainview" ng-include="page" class="rb-include">
+		</div>
 	</div>
 </body>
 </html>

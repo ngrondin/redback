@@ -9,6 +9,7 @@ import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
+import com.nic.firebus.utils.FirebusJSArray;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
@@ -147,9 +148,9 @@ public class ObjectManagerJSWrapper
 	}
 	 */
 	
-	protected RedbackJSArray convertToJSArray(ArrayList<RedbackObject> list)
+	protected FirebusJSArray convertToJSArray(ArrayList<RedbackObject> list)
 	{
-		RedbackJSArray array = new RedbackJSArray();
+		FirebusJSArray array = new FirebusJSArray();
 		for(int i = 0; i < list.size(); i++)
 		{
 			RedbackObjectJSWrapper ow = new RedbackObjectJSWrapper(list.get(i));

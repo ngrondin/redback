@@ -162,29 +162,36 @@ public class ObjectManager
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
-		try
+		if(objectConfig != null)
 		{
-			JSONObject dbFilter = objectConfig.generateDBFilter(filterData);
-			dbFilter.put("domain", session.getUserProfile().getDBFilterDomainClause());
-			JSONObject dbResult = requestData(objectConfig.getCollection(), dbFilter);
-			JSONList dbResultList = dbResult.getList("result");
-			
-			for(int i = 0; i < dbResultList.size(); i++)
+			try
 			{
-				JSONObject dbData = dbResultList.getObject(i);
-				RedbackObject object = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
-				if(object == null)
+				JSONObject dbFilter = objectConfig.generateDBFilter(filterData);
+				dbFilter.put("domain", session.getUserProfile().getDBFilterDomainClause());
+				JSONObject dbResult = requestData(objectConfig.getCollection(), dbFilter);
+				JSONList dbResultList = dbResult.getList("result");
+				
+				for(int i = 0; i < dbResultList.size(); i++)
 				{
-					object = new RedbackObject(session, this, objectConfig, dbData);
-					putInCurrentTransaction(object);
+					JSONObject dbData = dbResultList.getObject(i);
+					RedbackObject object = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
+					if(object == null)
+					{
+						object = new RedbackObject(session, this, objectConfig, dbData);
+						putInCurrentTransaction(object);
+					}
+					objectList.add(object);
 				}
-				objectList.add(object);
+			}
+			catch(Exception e)
+			{
+				logger.severe(e.getMessage());
+				throw new RedbackException("Error getting object list", e);
 			}
 		}
-		catch(Exception e)
+		else
 		{
-			logger.severe(e.getMessage());
-			throw new RedbackException("Error getting object list", e);
+			error("No object config is available for '" + objectName + "'");	
 		}
 		return objectList;
 	}

@@ -1,10 +1,10 @@
 body {
-	height: 100%;
-	width: 100%;
+	#height: 100%;
+	#width: 100%;
 	background: white;
 	display: flex;
 	flex-direction: column;
-	overflow:hidden;
+	#overflow:hidden;
 }
 
 .rb-module {
@@ -14,7 +14,8 @@ body {
 
 .rb-controller {
 	display: flex;
-	flex: 1 0 auto;
+	#flex: 1 0 auto;
+	overflow:hidden;
 }
 
 .rb-sidebar {
@@ -23,7 +24,8 @@ body {
 
 .rb-include {
 	display: flex;
-	flex: 1 0 auto;
+	#flex: 1 0 auto;
+	overflow:hidden;
 }
 
 .rb-margin {
@@ -69,13 +71,18 @@ body {
 	margin-left: 10px;
 }
 
-.rb-menu-line {
-	margin-left: 0px;
+.rb-menu-group {
+	font-size: 100%;
+	#background: #01579b;
+}
+
+.rb-menu-link {
+	font-size: 90%;
 }
 
 .hsection {
 	display: flex;
-	flex-direction: row
+	flex-direction: row;
 	flex-wrap: nowrap;
 	border: 0px Solid;
 	vertical-align:top;
@@ -86,6 +93,7 @@ body {
 	flex-direction: column;
 	flex-wrap: nowrap;
 	border: 0px Solid;
+	overflow:hidden;
 }
 
 .tabsection {
@@ -163,8 +171,160 @@ body {
 	border: 0px Solid;
 }
 
-.menuitem {
-	font-size: 90%;
+.rb-sched {
+	display: flex;
+	flex-direction: column;
+}
+
+.rb-sched-toolbar {
+	display: flex;
+	flex-direction: row;
+	padding: 5px;
+	margin-bottom: 10px;
+}
+
+.rb-sched-toolbar-item {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	margin:0px;
+	margin-left: 10px;
+}
+
+.rb-sched-marker {
+	display: flex;
+	border-left: 1px Solid;
+	padding-left: 3px;
+	color: #cccccc;
+	top:0px;
+	height:25px;
+	position:absolute;
+}
+
+.rb-sched-list {
+	display: flex;
+	flex-direction: column;
+	width:200px;
+	flex: 0 0 auto;
+	overflow:hidden;
+	white-space: nowrap;
+}
+
+.rb-sched-demand {
+	display: flex;
+	flex-direction: row;
+	padding: 12px
+}
+
+.rb-sched-demand-header {
+	display: flex;
+	flex: 0 0 auto;
+	height: 17px;
+	margin: 4px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;	
+}
+
+.rb-sched-demand-container {
+	display: flex;
+	flex-direction: row;
+	overflow-x:hidden;
+	overflow-y:auto;
+}
+
+.rb-sched-demand-canvas {
+	display: flex;
+	flex: 1 0 auto;
+	flex-direction: column;
+}
+
+.rb-sched-demand-line {
+	display: block;
+	position:relative;
+	height:25px;
+}
+
+.rb-sched-demand-block {
+	display: flex;
+	border-radius: 4px;
+	top:1px;
+	height:22px;
+	position:absolute;
+	background: #4286f4;
+}
+
+.rb-sched-demand-block-matched {
+	display: flex;
+	border: 1px Solid #9cabc1;
+	border-radius: 4px;
+	top:1px;
+	height:22px;
+	position:absolute;
+	background: #eff5ff;
+}
+
+.rb-sched-offer {
+	display: flex;
+	flex-direction: row;
+	padding: 12px
+}
+
+.rb-sched-offer-list {
+	display: flex;
+	flex-direction: column;
+	width:150px;
+	flex: 0 0 auto;
+	overflow:hidden;
+}
+
+.rb-sched-offer-header {
+	display: flex;
+	height: 17px;
+	margin: 4px;
+}
+
+.rb-sched-offer-container {
+	display: flex;
+	flex-direction: row;
+	overflow:auto;
+}
+
+.rb-sched-offer-canvas {
+	display: flex;
+	flex: 1 0 auto;
+	flex-direction: column;
+}
+
+.rb-sched-offer-line {
+	display: block;
+	position:relative;
+	height:25px;
+	background: #dddddd;
+}
+
+.rb-sched-offer-block {
+	display: flex;
+	top:0px;
+	height:25px;
+	position:absolute;
+}
+
+.rb-sched-offer-block-active {
+	background: white;
+}
+
+.rb-sched-offer-block-inactive {
+	background: #eeeeee;
+}
+
+.rb-sched-offer-block-matcheddemand {
+	display: flex;
+	background: #4286f4;
+	top:0px;
+	height:22px;
+	border-radius: 4px;
+	position:absolute;
 }
 
 .angular-google-map { 

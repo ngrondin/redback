@@ -1,9 +1,10 @@
 	var module = angular.module("configuratormodule", ['ngMaterial', 'ui.codemirror']);
 
-	module.controller('processdesigner', function processdesigner($scope,$attrs,$http,$element) {
+	module.controller('processdesigner', function processdesigner($scope,$attrs,$http,$element,$timeout) {
 		$scope.nodeTypes = [
 			{id:"interaction", name:"Interaction"},
 			{id:"script", name:"Script"},
+			{id:"condition", name:"Conditional"},
 			{id:"action", name:"Process Action"},
 			{id:"rbobjectupdate", name:"Object Update"},
 			{id:"rbobjectexecute", name:"Object Execute"}
@@ -22,6 +23,7 @@
 		$scope.list = [];
 		$scope.config = {};
 		$scope.selectedNode = null;
+		$scope.saveok = false;
 
 		
 		$scope.load = function() {
@@ -50,7 +52,8 @@
 			var req = {action:"updateprocess", config:$scope.config};
 			$http.post("../../rbcf", req)
 			.success(function(response) {
-				alert("saved");
+				$scope.saveok = true;
+				$timeout(function(){$scope.saveok = false;}, 2000);
 			})
 			.error(function(error, status) {
 				alert('save error');
@@ -61,7 +64,8 @@
 			if($scope.config != null) {
 				var nextId = 0;
 				for(var i = 0; i < $scope.config.nodes.length; i++) {
-					if($scope.config.nodes[i].id > nextId) nextId = $scope.config.nodes[i].id;
+					var id = parseInt($scope.config.nodes[i].id);
+					if(id > nextId) nextId = id;
 				}
 				nextId += 1;
 				$scope.config.nodes.push({id:nextId + '', type:null, name:null, position:{x:0, y:0}});
@@ -113,7 +117,7 @@
 	});
 	
 	
-	module.controller('processcanvas', function processcanvas($scope,$attrs,$http,$element) {
+	module.controller('processcanvas', function processcanvas($scope,$attrs,$http,$element,$compile) {
 		$scope.element = $element;
 		$scope.canvasWidth = 0;
 		$scope.canvasHeight = 0;
@@ -149,6 +153,17 @@
 								$scope.drawConnector(node,toNode, node.actions[i].action);
 						}
 					}
+				}
+			} else if(node.type == 'condition') {
+				if(node.truenode != null) {
+					var toNode = $scope.getNode(node.truenode);
+					if(toNode != null)
+						$scope.drawConnector(node,toNode, 'True');
+				}
+				if(node.falsenode != null) {
+					var toNode = $scope.getNode(node.falsenode);
+					if(toNode != null)
+						$scope.drawConnector(node,toNode, 'False');
 				}
 			} else {
 				if(node.nextnode != null) {
@@ -196,6 +211,12 @@
 				$scope.ctx.fillText(label,midX1 - 30,midY - 2);				
 			}
 		}
+
+		$scope.mousedown = function(event) {
+			if(event.which == 3) {
+				$scope.showContextMenu(event);
+			}
+		}
 		
 		$scope.mouseup = function(event) {
 			$scope.dragging = false;
@@ -235,7 +256,33 @@
 		$scope.$on('drawConnectors', function($event) {
 			$scope.drawConnectors();
 		});
+				
+		$scope.showContextMenu = function(event) {
+			$scope.hideContextMenu();
+			var html = '<div id="contextmenu" class="rb-contextmenu"><md-list>';
+			html = html + '<md-list-item ng-click="makeRoom(' + event.offsetX + ')"><div style="white-space:nowrap">Make room here</div></md-list-item>';
+			html = html + '</md-list></div>';
+			var contextmenuDivFactory = $compile(html);
+			var contextmenuDiv = contextmenuDivFactory($scope);
+			$scope.element.append(contextmenuDiv);
+			contextmenuDiv[0].style.left = (event.offsetX + 'px');
+			contextmenuDiv[0].style.top = (event.offsetY + 'px');
+			contextmenuDiv[0].style.visibility = 'visible';
+		}
 		
+		$scope.hideContextMenu = function() {
+			var existingContextMenu = document.getElementById('contextmenu');
+			if(existingContextMenu != null)
+				existingContextMenu.remove();		
+		}		
+		
+		$scope.makeRoom = function(posX) {
+			$scope.hideContextMenu();
+			for(var i = 0; i < $scope.config.nodes.length; i++) 
+				if($scope.config.nodes[i].position.x > posX)
+					$scope.config.nodes[i].position.x = $scope.config.nodes[i].position.x + 100;
+			$scope.drawConnectors();
+		}
 	});
 
 	
@@ -266,6 +313,7 @@
 		$scope.selectedView = null;
 		$scope.scripts = [];
 		$scope.saveok = false;
+		$scope.searchText = '';
 
 		
 		$scope.load = function() {

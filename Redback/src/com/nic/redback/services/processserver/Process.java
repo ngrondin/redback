@@ -7,6 +7,7 @@ import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
+import com.nic.redback.services.processserver.units.ConditionalUnit;
 import com.nic.redback.services.processserver.units.InteractionUnit;
 import com.nic.redback.services.processserver.units.ActionUnit;
 import com.nic.redback.services.processserver.units.RedbackObjectExecuteUnit;
@@ -15,7 +16,7 @@ import com.nic.redback.services.processserver.units.ScriptUnit;
 
 public class Process 
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("com.nic.redback.services.processserver");
 	protected HashMap<String, ProcessUnit> nodes;
 	protected String startNode;
 	protected String name;
@@ -39,6 +40,8 @@ public class Process
 			ProcessUnit unit = null;
 			if(unitType.equals("script"))
 				unit = new ScriptUnit(processManager, nodeConfig);
+			else if(unitType.equals("condition"))
+				unit = new ConditionalUnit(processManager, nodeConfig);
 			else if(unitType.equals("action"))
 				unit = new ActionUnit(processManager, nodeConfig);
 			else if(unitType.equals("interaction"))
@@ -64,22 +67,29 @@ public class Process
 		return pi;
 	}
 	
-	public void startInstance(Session session, ProcessInstance pi) throws RedbackException
+	public JSONObject startInstance(Session session, ProcessInstance pi) throws RedbackException
 	{
+		logger.info("Starting process '" + name + "' instance");
+		JSONObject result = new JSONObject();
 		pi.setCurrentNode(startNode);
 		pi.getData().put("originator", session.getUserProfile().getUsername());
-		execute(pi);
+		execute(pi, result);
+		logger.info("Process '" + name + "' started instance '" + pi.getId() + "'");
+		return result;
 	}
 	
-	public void processAction(Session session, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
+	public JSONObject processAction(Session session, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
 	{
-		String currentNode = pi.getCurrentNode();
-		if(currentNode != null)
+		logger.info("Processing action '" + action + "' of  process " + name + ":" + pi.getId() + "");
+		JSONObject result = new JSONObject();
+		String currentNodeId = pi.getCurrentNode();
+		if(currentNodeId != null)
 		{
-			if(nodes.get(currentNode) instanceof InteractionUnit)
+			ProcessUnit currentNode = nodes.get(currentNodeId);
+			if(currentNode instanceof InteractionUnit)
 			{
-				((InteractionUnit)nodes.get(currentNode)).processAction(session, extpid,  pi, action, data);
-				execute(pi);
+				((InteractionUnit)currentNode).processAction(session, extpid,  pi, action, data);
+				execute(pi, result);
 			}
 			else
 			{
@@ -93,35 +103,38 @@ public class Process
 			else
 				error("Process instance " + pi.getId() + " has not been start yet");
 		}	
-
+		logger.info("Finished processing action '" + action + "' of  " + name + ":" + pi.getId() + "");
+		return result;
 	}
 	
-	protected void execute(ProcessInstance pi) throws RedbackException
+	protected void execute(ProcessInstance pi, JSONObject result) throws RedbackException
 	{
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
 		if(sysUserSession != null  &&  sysUserSession.getUserProfile().getAttribute("rb.process.sysuser").equals("true"))
 		{
-			String currentNode = pi.getCurrentNode();
-			if(currentNode != null)
+			String currentNodeId = pi.getCurrentNode();
+			if(currentNodeId != null)
 			{
-				while(currentNode != null  &&  nodes.get(currentNode) != null  &&   !pi.isComplete()  &&  !(nodes.get(currentNode) instanceof InteractionUnit))
+				while(currentNodeId != null  &&  nodes.get(currentNodeId) != null  &&   !pi.isComplete()  &&  !(nodes.get(currentNodeId) instanceof InteractionUnit))
 				{
-					nodes.get(currentNode).execute(pi);
-					currentNode = pi.getCurrentNode();
+					logger.info("Executing node '" + currentNodeId + "'");
+					nodes.get(currentNodeId).execute(pi, result);
+					currentNodeId = pi.getCurrentNode();
 				}
 				
-				if(currentNode != null  &&  !pi.isComplete())
+				if(currentNodeId != null  &&  !pi.isComplete())
 				{
-					if(nodes.get(currentNode) != null)
+					if(nodes.get(currentNodeId) != null)
 					{
-						if(nodes.get(currentNode) instanceof InteractionUnit)
+						if(nodes.get(currentNodeId) instanceof InteractionUnit)
 						{
-							((InteractionUnit)nodes.get(currentNode)).execute(pi);			
+							logger.info("Executing node '" + currentNodeId + "'");
+							((InteractionUnit)nodes.get(currentNodeId)).execute(pi, result);			
 						}
 					}
 					else
 					{
-						throw new RedbackException("Current node '" + currentNode + " is unknown in process '" + name + "' version " + version);
+						throw new RedbackException("Current node '" + currentNodeId + " is unknown in process '" + name + "' version " + version);
 					}
 				}
 			}

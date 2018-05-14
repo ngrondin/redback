@@ -24,28 +24,14 @@
 		var obj = null;
 		if (typeof input == "object") {
 			if(input.hasOwnProperty('objectname') && input.hasOwnProperty('uid')) {
-			
-				// Convert dates
-				/*
-				for (var key in input.data) {
-					var match;
-					if (typeof input.data[key] === "string") {
-						if(match = input.data[key].match(regexIso8601)) {
-							input.data[key] = new moment(input.data[key]);
-							var milliseconds = Date.parse(match[0])
-							if (!isNaN(milliseconds)) {
-								input.data[key] = new Date(milliseconds);
-							}
-						}
-					}
-				}*/
 
 				// Find existing object to merge with
-				for (var i = 0; i < objectMaster.length; i++) {
+				obj = findExistingObject(input.objectname, input.uid);
+				/*for (var i = 0; i < objectMaster.length; i++) {
 					if(objectMaster[i].objectname == input.objectname  &&  objectMaster[i].uid == input.uid) {
 						obj = objectMaster[i];
 					}
-				}
+				}*/
 				
 				if(obj != null) {
 					//Merge with existing object
@@ -90,7 +76,15 @@
 		return obj;
 	};
 	
-			
+	function findExistingObject(objectname, uid)
+	{
+		for (var i = 0; i < objectMaster.length; i++) {
+			if(objectMaster[i].objectname == objectname  &&  objectMaster[i].uid == uid) {
+				return objectMaster[i];
+			}
+		}		
+	}
+	
 	function getFilterFromRelationship(object, relationship)
 	{
 		var filter = {};
