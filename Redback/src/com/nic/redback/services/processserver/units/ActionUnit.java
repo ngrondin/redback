@@ -27,6 +27,33 @@ public class ActionUnit extends ProcessUnit
 	public void execute(ProcessInstance pi, JSONObject result) throws RedbackException
 	{
 		logger.info("Starting Action node");
+		//JSONObject filter = new JSONObject();
+		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
+		ArrayList<JSONObject> assignments = processManager.getAssignments(sysUserSession, pi.getId(), null, null);
+		for(int i = 0; i < assignments.size(); i++)
+		{
+			JSONObject assignment = assignments.get(i);
+			if(interactionCode.equals(assignment.getString("interaction")))
+			{
+				boolean actionExists = false;
+				JSONList actions = assignment.getList("actions");
+				for(int j = 0; j < actions.size(); j++)
+					if(actions.getObject(j).getString("action").equals(action))
+						actionExists = true;
+				if(actionExists)
+				{
+					logger.fine("Actionning interaction '" + interactionCode + "' with action '" + action +"' in instance '" + assignment.getString("pid") +"'");
+					JSONObject actionResult = processManager.processAction(sysUserSession, pi.getId(), assignment.getString("pid"), action, null);
+					result.merge(actionResult);
+				}
+				else
+				{
+					logger.info("ActionUnit tried to process the interaction '" + interactionCode + "' with an invalid action '" + action + "'");
+				}
+			}
+		}	
+		
+		/*
 		JSONList notifications = pi.getReceivedNotifications();
 		ArrayList<Integer> relevantNotificationIds = new ArrayList<Integer>();
 		for(int i = 0; i < notifications.size(); i++)
@@ -63,7 +90,7 @@ public class ActionUnit extends ProcessUnit
 				notifications.remove(relevantNotificationIds.get(i));
 			}	
 		}
-
+*/
 		pi.setCurrentNode(nextNode);
 		logger.info("Finished Action node");
 	}

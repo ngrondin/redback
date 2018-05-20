@@ -91,7 +91,7 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 					JSONList viewdata = request.getList("viewdata");
 					if(filter != null)
 					{
-						ArrayList<JSONObject> result = processManager.getNotifications(session, extpid, filter, viewdata);
+						ArrayList<JSONObject> result = processManager.getAssignments(session, extpid, filter, viewdata);
 						JSONList responseList = new JSONList();
 						for(int i = 0; i < result.size(); i++)
 							responseList.add(result.get(i));

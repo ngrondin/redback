@@ -92,8 +92,8 @@ public class InteractionUnit extends ProcessUnit
 	protected void addAssignee(ProcessInstance pi, Assignee assignee) throws RedbackException
 	{
 		pi.addAssignee(assignee);
-		if(assignee.getType() == Assignee.PROCESS  &&  notificationConfig.getString("method") != null  &&  notificationConfig.getString("method").equals("rbprocessnotification"))
-			processManager.notifyProcess(processManager.getSystemUserSession(pi.getDomain()), pi.getId(), assignee.getId(), getNotification(pi));
+		//if(assignee.getType() == Assignee.PROCESS  &&  notificationConfig.getString("method") != null  &&  notificationConfig.getString("method").equals("rbprocessnotification"))
+		//	processManager.notifyProcess(processManager.getSystemUserSession(pi.getDomain()), pi.getId(), assignee.getId(), getNotification(pi));
 		//TODO: Add more notification methods
 		
 	}

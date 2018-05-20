@@ -31,7 +31,7 @@ public class UIServer extends RedbackAuthenticatedService
 	protected String resourceServiceType;
 	protected ScriptEngine jsEngine;
 	protected HashMap<String, CompiledScript> jspScripts;
-	protected HashMap<String, JSONObject> views;
+	protected HashMap<String, JSONObject> viewConfigs;
 
 
 	public UIServer( JSONObject c)
@@ -42,7 +42,7 @@ public class UIServer extends RedbackAuthenticatedService
 		resourceService = config.getString("resourceservice");
 		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		jspScripts = new HashMap<String, CompiledScript>();
-		views = new HashMap<String, JSONObject>();
+		viewConfigs = new HashMap<String, JSONObject>();
 	}
 	
 	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
@@ -114,7 +114,7 @@ public class UIServer extends RedbackAuthenticatedService
 				else if(category.equals("view"))
 				{
 					logger.info("Get view " + name);
-					response.setData(getView(name, session));
+					response.setData(getView(name, session, null));
 					response.metadata.put("mime", "text/html");
 				}
 			}
@@ -150,6 +150,7 @@ public class UIServer extends RedbackAuthenticatedService
 	{
 		StringBuilder sb = new StringBuilder();
 		Bindings context = jsEngine.createBindings();
+		context.put("global", config.getObject("globalvariables"));
 		if(session != null)
 		{
 			if(session.getUserProfile().canRead("rb.apps." + name))
@@ -215,22 +216,74 @@ public class UIServer extends RedbackAuthenticatedService
 		}
 		Bindings context = jsEngine.createBindings();
 		context.put("session", session);
-		return generateHTMLFromComponentJSON(menu, context);
+		return generateHTMLFromComponentConfig(menu, context);
 	}
 
 	
-	protected String getView(String name, Session session) throws JSONException
+	protected String getView(String viewName, Session session, Bindings context) 
 	{
+		String viewHTML = "";
 		if(session != null)
 		{
-			Bindings bindings = jsEngine.createBindings();
-			bindings.put("session", session);
-			return generateHTMLFromComponentJSON(new JSONObject("{type:view, name:" + name + "}"), bindings);
+			if(context == null)
+			{
+				context = jsEngine.createBindings();
+				context.put("session", session);
+				context.put("canWrite", true);
+				context.put("canExecute", true);
+			}
+
+			if(session.getUserProfile().canRead("rb.views." + viewName))
+			{
+				try
+				{
+					JSONObject viewConfig = viewConfigs.get(viewName);
+					if(viewConfig == null)
+					{
+						JSONObject result = request(configService, "{object:rbui_view,filter:{name:" + viewName + "}}");
+						if(result != null)
+						{
+							viewConfig = result.getObject("result.0");
+							//if(viewConfig.get("basefilter") != null)
+							//	viewConfig.put("basefilter", convertFilter(viewConfig.getObject("basefilter")));
+							viewConfigs.put(viewName, viewConfig);
+						}
+					}
+					if(viewConfig != null)
+					{
+						//componentJSON = viewConfig;
+						//String objectName = componentJSON.getString("object");
+						//context.put("objectName", objectName);
+						//context.put("viewName", viewName);
+						context.put("canWrite", session.getUserProfile().canWrite("rb.views." + viewName) & (boolean)context.get("canWrite"));
+						context.put("canExecute", session.getUserProfile().canExecute("rb.views." + viewName) & (boolean)context.get("canExecute"));
+						JSONList contentList = viewConfig.getList("content");
+						for(int i = 0; i < contentList.size(); i++)
+						{
+							viewHTML += generateHTMLFromComponentConfig(contentList.getObject(i), context);
+						}
+					}
+					else
+					{
+						viewHTML = "<div>View name does not exist</div>";
+					}
+				}
+				catch(Exception e)
+				{
+					viewHTML = formatErrorMessage("Error retrieving view " + viewName, e);
+				}
+			}
+			else
+			{
+				viewHTML = "";
+			}
+			//return generateHTMLFromComponentJSON(new JSONObject("{type:view, name:" + name + "}"), bindings);
 		}
 		else
 		{
-			return "Not logged in";
+			viewHTML = "Not logged in";
 		}
+		return viewHTML;
 	}
 	
 	
@@ -343,92 +396,55 @@ public class UIServer extends RedbackAuthenticatedService
 		}
 	}	
 	
-	protected String generateHTMLFromComponentJSON(JSONObject componentJSON, Bindings context)
+	protected String generateHTMLFromComponentConfig(JSONObject componentConfig, Bindings context)
 	{
-		String type = componentJSON.getString("type");
+		String type = componentConfig.getString("type");
 		String componentHTML = "";
 		if(type != null)
 		{
-			String inlineStyle = "";
-			String grow = componentJSON.getString("grow");
-			String shrink = componentJSON.getString("shrink");
-			if(grow != null)
-				inlineStyle += "flex-grow:" + ((int)Double.parseDouble(grow)) + ";";
-			if(shrink != null)
-				inlineStyle += "flex-shrink:" + ((int)Double.parseDouble(shrink)) + ";";
-
 			if(type.equals("view"))
 			{
-				String viewName = componentJSON.getString("name");
+				String viewName = componentConfig.getString("name");
 				Session session = (Session)context.get("session"); 
-				if(session.getUserProfile().canRead("rb.views." + viewName))
-				{
-					try
-					{
-						JSONObject viewConfig = views.get(viewName);
-						if(viewConfig == null)
-						{
-							JSONObject result = request(configService, "{object:rbui_view,filter:{name:" + viewName + "}}");
-							if(result != null)
-							{
-								viewConfig = result.getObject("result.0");
-								if(viewConfig.get("basefilter") != null)
-									viewConfig.put("basefilter", convertFilter(viewConfig.getObject("basefilter")));
-								views.put(viewName, viewConfig);
-							}
-						}
-						if(viewConfig != null)
-						{
-							componentJSON = viewConfig;
-							String objectName = componentJSON.getString("object");
-							context.put("objectName", objectName);
-							context.put("viewName", viewName);
-							context.put("canWrite", session.getUserProfile().canWrite("rb.views." + viewName) & session.getUserProfile().canWrite("rb.objects." + objectName));
-							context.put("canExecute", session.getUserProfile().canExecute("rb.views." + viewName) & session.getUserProfile().canExecute("rb.objects." + objectName));
-						}
-						else
-						{
-							return "<div>View name does not exist</div>";
-						}
-					}
-					catch(Exception e)
-					{
-						return formatErrorMessage("Error retrieving view " + viewName, e);
-					}
-				}
-				else
-				{
-					return "";
-				}
-			}			
-
-			if(inlineStyle.length() > 0)
-				componentJSON.put("inlineStyle", inlineStyle);
-			if(componentJSON.get("show") == null)
-				componentJSON.put("show", "true");
-			context.put("config", componentJSON);
-
-			componentHTML = executeJSP("fragments/" + type, context);
-					
-			if(componentHTML != null  &&  componentHTML.indexOf("#content#") >= 0)
+				componentHTML = getView(viewName, session, context);
+			}
+			else
 			{
-				int posContent = componentHTML.indexOf("#content#");
-				int posNewLine = componentHTML.substring(0, posContent).lastIndexOf("\r\n");
-				String indentStr = componentHTML.substring(posNewLine + 2, posContent);
-				StringBuilder sb = new StringBuilder();
-				JSONList content = componentJSON.getList("content");
-				if(content != null)
+				String inlineStyle = "";
+				String grow = componentConfig.getString("grow");
+				String shrink = componentConfig.getString("shrink");
+				if(grow != null)
+					inlineStyle += "flex-grow:" + ((int)Double.parseDouble(grow)) + ";";
+				if(shrink != null)
+					inlineStyle += "flex-shrink:" + ((int)Double.parseDouble(shrink)) + ";";
+
+				if(inlineStyle.length() > 0)
+					componentConfig.put("inlineStyle", inlineStyle);
+				if(componentConfig.get("show") == null)
+					componentConfig.put("show", "true");
+				context.put("config", componentConfig);
+				componentHTML = executeJSP("fragments/" + type, context);
+
+				if(componentHTML != null  &&  componentHTML.indexOf("#content#") >= 0)
 				{
-					for(int i = 0; i < content.size(); i++)
+					int posContent = componentHTML.indexOf("#content#");
+					int posNewLine = componentHTML.substring(0, posContent).lastIndexOf("\r\n");
+					String indentStr = componentHTML.substring(posNewLine + 2, posContent);
+					StringBuilder sb = new StringBuilder();
+					JSONList content = componentConfig.getList("content");
+					if(content != null)
 					{
-						if(i > 0)
-							sb.append("\r\n");
-						sb.append(generateHTMLFromComponentJSON(content.getObject(i), context));
+						for(int i = 0; i < content.size(); i++)
+						{
+							if(i > 0)
+								sb.append("\r\n");
+							sb.append(generateHTMLFromComponentConfig(content.getObject(i), context));
+						}
 					}
+					String contentStr = sb.toString();
+					contentStr = contentStr.replace("\r\n", "\r\n" + indentStr);
+					componentHTML = componentHTML.replace("#content#", contentStr);
 				}
-				String contentStr = sb.toString();
-				contentStr = contentStr.replace("\r\n", "\r\n" + indentStr);
-				componentHTML = componentHTML.replace("#content#", contentStr);
 			}
 		}
 

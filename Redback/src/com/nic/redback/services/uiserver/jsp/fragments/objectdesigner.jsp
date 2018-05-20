@@ -1,5 +1,6 @@
 <div
-	class="rb-hsection">
+	class="rb-hsection"
+	ng-controller="objectdesigner">
 	<div
 		class="rb-vsection">
 		<div

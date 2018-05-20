@@ -14,7 +14,7 @@
 	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.js"></script>
 	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.js"></script>
 	<script src = "https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.js"></script>
-	<script src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'></script>
+	<script src = 'https://maps.googleapis.com/maps/api/js?key=<%=global.getString('googlekey')%>'></script>
 	<!--<script src = "../resource/angular-simple-logger.js"></script>-->
 	<script src = "http://cdn.rawgit.com/nmccready/angular-simple-logger/master/dist/angular-simple-logger.js"></script>	
 	<!--<script src = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment-with-locales.js"></script>-->
@@ -39,7 +39,7 @@
 		</div>
 		<div 
 			style="display:flex; flex-direction:row; flex:0 0 auto; font-size:80%;padding-top:5px;padding-left:10px;">
-			<h3 flex="" md-truncate="">&nbsp;|&nbsp;{{pageLabel}}</h3>
+			<h3 flex="" md-truncate="">&nbsp;|&nbsp;&nbsp;{{pageLabel}}</h3>
 		</div>
 		<div			
 			style="flex:1 0 auto;text-align:right;">

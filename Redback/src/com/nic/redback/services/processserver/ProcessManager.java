@@ -3,6 +3,7 @@ package com.nic.redback.services.processserver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.script.ScriptException;
@@ -155,7 +156,7 @@ public class ProcessManager
 		return result;
 	}
 
-	public ArrayList<JSONObject> getNotifications(Session session, String extpid, JSONObject filter, JSONList viewdata) throws RedbackException
+	public ArrayList<JSONObject> getAssignments(Session session, String extpid, JSONObject filter, JSONList viewdata) throws RedbackException
 	{
 		ArrayList<JSONObject> retList = new ArrayList<JSONObject>();
 		JSONObject fullFilter = null;
@@ -163,8 +164,11 @@ public class ProcessManager
 			fullFilter = (JSONObject)filter.getCopy();
 		else
 			fullFilter = new JSONObject();
-		fullFilter.put("assignees.id", session.getUserProfile().getUsername());
-		ArrayList<ProcessInstance> instances = findProcesses(session, filter);
+		if(extpid == null)
+			fullFilter.put("assignees.id", session.getUserProfile().getUsername());
+		else
+			fullFilter.put("assignees.id", extpid);
+		ArrayList<ProcessInstance> instances = findProcesses(session, fullFilter);
 		for(int i = 0; i < instances.size(); i++)
 		{
 			ProcessInstance pi = instances.get(i);
@@ -230,17 +234,21 @@ public class ProcessManager
 		return list;
 	}
 	
+	/*
 	public void notifyProcess(Session session, String extpid, String pid, JSONObject notification) throws RedbackException
 	{
 		logger.info("Notifying process " + pid + " with " + notification);
-		ProcessInstance pi = getProcessInstance(pid);
-		notification.put("user", session.getUserProfile().getUsername());
+		//ProcessInstance pi = getProcessInstance(pid);
+		notification.put("_id", UUID.randomUUID().toString());
+		notification.put("pid", pid);
+		notification.put("fromuser", session.getUserProfile().getUsername());
 		if(extpid != null)
-			notification.put("pid", extpid);
-		pi.addNotification(notification);
+			notification.put("frompid", extpid);
+		//pi.addNotification(notification);
+		firebus.publish(configServiceName, new Payload("{object:rbpm_notification,data:" + notification.toString() + ", operation:replace}"));
 		logger.info("Finished notifying process");
 	}
-	
+	*/
 	
 	protected ProcessInstance getFromCurrentTransaction(String pid)
 	{

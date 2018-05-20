@@ -85,6 +85,7 @@
 		}		
 	}
 	
+	/*
 	function getFilterFromRelationship(object, relationship)
 	{
 		var filter = {};
@@ -101,10 +102,11 @@
 		return filter;
 	};
 	
+	
 	function navigate(view)
 	{
 		mainview.src = 'a';
 	};
 	
-
+*/
 	

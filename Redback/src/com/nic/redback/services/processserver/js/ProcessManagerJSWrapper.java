@@ -30,7 +30,7 @@ public class ProcessManagerJSWrapper
 
 	public JSObject getNotifications(String extpid, JSObject filter, JSObject viewdata) throws RedbackException
 	{
-		ArrayList<JSONObject> list = processManager.getNotifications(session, extpid, FirebusDataUtil.convertJSObjectToDataObject(filter), FirebusDataUtil.convertJSArrayToDataList(viewdata));
+		ArrayList<JSONObject> list = processManager.getAssignments(session, extpid, FirebusDataUtil.convertJSObjectToDataObject(filter), FirebusDataUtil.convertJSArrayToDataList(viewdata));
 		FirebusJSArray array = new FirebusJSArray();
 		for(int i = 0; i < list.size(); i++)
 			array.setSlot(i,  FirebusDataUtil.convertDataObjectToJSObject(list.get(i)));

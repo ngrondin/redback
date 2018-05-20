@@ -1,5 +1,6 @@
 <div
-	class="rb-hsection">
+	class="rb-hsection"
+	ng-controller="processdesigner">
 	<div
 		class="rb-vsection">
 		<md-list 

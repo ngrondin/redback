@@ -23,7 +23,11 @@
 				resourceservicetype:"filestorage",
 				resourceservice:"rbfiles",
 				objectservice:"rbos",
-				accessmanagementservice:"rbam"
+				accessmanagementservice:"rbam",
+				globalvariables:{
+					googlekey:"AIzaSyC78ZWKE3Shecj9QgDf84TW9kk7r5NrVPE"
+				}
+				
 			}
 		},
 		{
