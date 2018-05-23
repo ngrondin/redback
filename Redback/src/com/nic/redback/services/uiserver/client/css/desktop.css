@@ -12,9 +12,8 @@ body {
 	#flex: 1 0 auto;
 }
 
-.rb-controller {
+.rb-layout {
 	display: flex;
-	#flex: 1 0 auto;
 	overflow:hidden;
 }
 
@@ -63,8 +62,8 @@ body {
 	margin: 5px 5px;
 }
 
-.rb-form-button {
-	margin: 10px 10px;
+.rb-button {
+	flex: 0 0 auto;
 }
 
 .rb-switch {
@@ -80,7 +79,7 @@ body {
 	font-size: 90%;
 }
 
-.hsection {
+.rb-hsection {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
@@ -88,7 +87,7 @@ body {
 	vertical-align:top;
 }
 
-.vsection {
+.rb-vsection {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
@@ -96,14 +95,19 @@ body {
 	overflow:hidden;
 }
 
-.tabsection {
+.rb-form {
+	display: flex;
+	flex: 0 0 auto;
+}
+
+.rb-tabsection {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
 	border: 0px Solid;
 }
 
-.tabheadersection {
+.rb-tabheadersection {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
@@ -112,15 +116,16 @@ body {
 	border: 0px Solid;
 }
 
-.tabcontentsection {
+.rb-tabcontentsection {
 	display: flex;
+	flex: 0 0 auto;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	border: 0px Solid;
 	margin-top: 25px;
 }
 
-.tabheader {
+.rb-tabheader {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
@@ -131,11 +136,11 @@ body {
 	padding: 0px;
 }
 
-.tabheader-active {
+.rb-tabheader-active {
   border-bottom: 2px Solid red;
 }
 
-.tabcontent {
+.rb-tabcontent {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;

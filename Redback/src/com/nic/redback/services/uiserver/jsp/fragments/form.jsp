@@ -1,6 +1,6 @@
 <div 
 	ng-controller="form" 
-	class="rb-controller" <% 
+	class="rb-form" <% 
 if(config.get('object') != null) { %>
 	rb-object="<%=config.getString('object')%>"<% 
 } %>

@@ -1,53 +1,5 @@
 	var module = angular.module("mobilemodule", ['ngMaterial', 'mdPickers']);	
 
-	/***********************************/
-	/** Drag Directive			 	  **/
-	/***********************************/
-	
-	module.directive('rbDraggable', ['$rootScope', function($rootScope) {
-        return {
-            restrict: 'A',
-            link: function($scope, $element, $attrs, $controller) {
-                angular.element($element).attr("draggable", "true");
-				$scope.rbDragObjectName = $attrs.rbDraggable;
-                $element.bind("dragstart", function(e) {
-					var dragObject = eval('$scope.' + $scope.rbDragObjectName);
-                    $scope.$emit("rbDragStart", dragObject, e);
-                });
-
-                $element.bind("dragend", function(e) {
-					var dragObject = eval('$scope.' + $scope.rbDragObjectName);
-                    $scope.$emit("rbDragEnd", dragObject, e);
-                });
-            }
-        }
-    }]);
-	
-	module.directive('rbDropTarget', ['$rootScope', function($rootScope) {
-        return {
-            restrict: 'A',
-            link: function($scope, $element, $attrs, $controller) {
-				$scope.rbDropObjectName = $attrs.rbDropTarget;
-                $element.bind("dragover", function(e) {
-					if (e.preventDefault) 
-						e.preventDefault(); 
-					e.dataTransfer.dropEffect = 'move';
-					return false;
-                });
-
-                $element.bind("drop", function(e) {
-					if (e.preventDefault) 
-						e.preventDefault(); 
-					if (e.stopPropagation)
-						e.stopPropagation();
-					var dropObject = null;
-					if($scope.rbDropObjectName != null  &&  $scope.rbDropObjectName != '')
-						dropObject = eval('$scope.' + $scope.rbDropObjectName);
-                    $scope.$emit("rbDragDrop", dropObject, e);
-                });
-            }
-        }
-    }]);
 	
 	/***********************************/
 	/** Input Directive			 	  **/
@@ -599,43 +551,14 @@
 
 	 
 	module.controller('mobilelayout', function layoutCtl($scope,$attrs,$http) {
-
-		$scope.$on('objectSelectedEmit', function($event, object){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('objectSelected', object);
-				$event.defaultPrevented = true;
-			}
-		});
+		$scope.pages = [];
+		$scope.topPage = $attrs.rbStartPage;
+		$scope.pageOrder = [$scope.topPage];
 		
-		$scope.$on('nullObjectSelectedEmit', function($event, name){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('nullObjectSelected', name);
-				$event.defaultPrevented = true;
-			}
-		});
-
-		$scope.$on('createObjectEmit', function($event, name){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('createObject', name);
-				$event.defaultPrevented = true;
-			}
-		});
-
-		$scope.$on('saveRelatedEmit', function($event, object){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('saveRelated', object);
-				$event.defaultPrevented = true;
-			}
-		});
-
-		$scope.$on('refreshRelatedEmit', function($event, object){
-			if(!$event.defaultPrevented) {
-				$scope.$broadcast('refreshRelated', object);
-				$event.defaultPrevented = true;
-			}
-		});
-
-		
+		$scope.linkTo = function(page) {
+			$scope.pageOrder.push(page);
+			$scope.topPage = page;
+		}
 	 });	 
 	 
 	/***********************************/

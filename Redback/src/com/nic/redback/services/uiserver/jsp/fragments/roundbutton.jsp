@@ -7,7 +7,7 @@ if(((action.equals('create')  ||  action.equals('save'))  &&  canWrite) || ((!ac
 		param = action;
 	}
 %><md-button 
-	class="md-fab md-mini md-primary" 
+	class="md-fab md-mini md-primary rb-button" 
 	ng-click="<%=ctrlFunc%>('<%=param%>');"
 	ng-show="<%=config.getString('show')%>"><%=config.getString('label')%>
 	<md-icon class="md-hue-3" ><%=(config.get("icon") == null ? "" : config.getString("icon")) %></md-icon>

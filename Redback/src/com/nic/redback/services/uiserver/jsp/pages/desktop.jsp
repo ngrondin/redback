@@ -60,7 +60,7 @@
 		</div>
 	</md-toolbar>
 	<div
-		class="hsection"
+		class="rb-hsection"
 		style="flex:1 1 auto;">
 		<md-sidenav 
 			class="md-sidenav-left rb-sidebar" 

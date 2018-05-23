@@ -1,7 +1,7 @@
 <div
-	class="mobilepage"
-	style="<%=config.getString('inlineStyle')%>"
+	ng-controller="mobilepage" 
+	class="rb-mobile-page"
 	ng-init="pages.push('<%=config.getString('name')%>')"
-	ng-show="top_page == '<%=config.getString('name')%>'">
+	ng-show="topPage == '<%=config.getString('name')%>'">
 	#content#
 </div>
