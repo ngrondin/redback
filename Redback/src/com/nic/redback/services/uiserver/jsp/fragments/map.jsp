@@ -1,7 +1,5 @@
-<div
+<rb-map
 	id="testid"
-	class="rb-map"
-	ng-controller="map"
 	oncontextmenu="return false">
  	<ui-gmap-google-map 
 		center='center' 
@@ -22,5 +20,18 @@
 				%>}"
 			events="{dragend:markerHasMoved, click:markerSelected}">
 		</ui-gmap-marker>
+		<ui-gmap-marker 
+			ng-hide="object == null"
+			coords="object.data.geometry.coords" 
+			idkey="1"
+			options="{draggable:<%
+				if(canWrite) {		
+					%>object.validation.geometry.editable<%
+				} else {
+					%>false<%
+				}			
+				%>}"
+			events="{dragend:markerHasMoved, click:markerSelected}">
+		</ui-gmap-marker>
 	</ui-gmap-google-map>
-</div>
+</rb-map>

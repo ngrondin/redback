@@ -1,24 +1,52 @@
+html, 
 body {
-	#height: 100%;
-	#width: 100%;
 	background: white;
 	display: flex;
 	flex-direction: column;
-	#overflow:hidden;
+	overflow:hidden;
+	position: relative;
 }
 
-.rb-module {
+rb-mobile-layout {
 	display: flex;
-	#flex: 1 0 auto;
+	flex: 1 0 auto;
 }
 
-rb-layout {
+rb-mobile-page {
 	display: flex;
-	overflow: hidden;
+	flex: 1 0 auto;
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	background: white;
+	border: solid 0px black;
+}
+
+rb-mobile-page.rb-mobile-page-in {
+	left: 0px;
+	right: 0px;
+	transition: all ease 0.3s;
+	-webkit-transition: all ease 0.3s;
+}
+
+rb-mobile-page.rb-mobile-page-out {
+	left: 100%;
+	right: -100%;
+	transition: all ease 0.3s;
+	-webkit-transition: all ease 0.3s;
+}
+
+.rb-mobile-link {
+	display: flex;
+	margin: 15px 5px;
+	padding: 10px 0px;
 }
 
 rb-dataset {
 	display: flex;
+	#flex: 1 0 auto;
 	overflow: hidden;
 }
 
@@ -38,12 +66,13 @@ rb-form {
 }
 
 .rb-margin {
-	margin: 25px 25px;
+	margin: 5px 5px;
 }
 
 rb-text {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 }
 
 .rb-hseparator {
@@ -67,7 +96,15 @@ rb-map {
 }	
 
 .rb-input-container {
-	margin: 25px 25px;
+	margin: 25px 5px;
+}
+
+md-input-container .md-input[disabled] {
+	color: rgba(0, 0, 0, .80);
+}
+
+input {
+	font-size: 115%;
 }
 
 .rb-search-container {
@@ -78,22 +115,25 @@ rb-map {
 	flex: 0 0 auto;
 }
 
+.md-button.md-primary.md-fab {
+	background: rgba(0, 0, 0, 0);
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,0)
+}
+
+.md-button.md-primary.md-fab:hover {
+	background: rgba(0, 0, 0, 0);
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,0)
+}
+
+
 .rb-switch {
 	margin-left: 10px;
 }
 
-.rb-menu-group {
-	font-size: 100%;
-	#background: #01579b;
-}
-
-.rb-menu-link {
-	font-size: 90%;
-	border-left: 3px solid gray;
-}
 
 rb-hsection {
 	display: flex;
+	#flex: 0 1 auto;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	border: 0px Solid;
@@ -102,6 +142,7 @@ rb-hsection {
 
 rb-vsection {
 	display: flex;
+	#flex: 0 1 auto;
 	flex-direction: column;
 	flex-wrap: nowrap;
 	border: 0px Solid;
@@ -160,12 +201,15 @@ rb-tab-content {
 rb-vscroll {
 	display: flex;
 	overflow: auto;
-	flex: 1 0 auto;
+	#flex: 1 0 auto;
+	flex-direction: column;
 }
 
 rb-list-scroll {
 	display: flex;
 	overflow: auto;
+	flex: 1 0 auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 .list-item-active {
@@ -186,170 +230,7 @@ rb-list-scroll {
 	border: 0px Solid;
 }
 
-rb-match-scheduler {
-	display: flex;
-	flex-direction: column;
-}
 
-.rb-sched-toolbar {
-	display: flex;
-	flex-direction: row;
-	padding: 5px;
-	margin-bottom: 10px;
-}
-
-.rb-sched-toolbar-item {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	margin:0px;
-	margin-left: 10px;
-}
-
-.rb-sched-marker {
-	display: flex;
-	border-left: 1px Solid;
-	padding-left: 3px;
-	color: #cccccc;
-	top:0px;
-	height:25px;
-	position:absolute;
-}
-
-.rb-sched-list {
-	display: flex;
-	flex-direction: column;
-	width:200px;
-	flex: 0 0 auto;
-	overflow:hidden;
-	white-space: nowrap;
-}
-
-.rb-sched-demand {
-	display: flex;
-	flex-direction: row;
-	padding: 12px
-}
-
-.rb-sched-demand-header {
-	display: flex;
-	flex: 0 0 auto;
-	height: 17px;
-	margin: 4px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;	
-}
-
-.rb-sched-demand-container {
-	display: flex;
-	flex-direction: row;
-	overflow-x:hidden;
-	overflow-y:auto;
-}
-
-.rb-sched-demand-canvas {
-	display: flex;
-	flex: 1 0 auto;
-	flex-direction: column;
-}
-
-.rb-sched-demand-line {
-	display: block;
-	position:relative;
-	height:25px;
-}
-
-.rb-sched-demand-block {
-	display: flex;
-	border-radius: 4px;
-	top:1px;
-	height:22px;
-	position:absolute;
-	background: #4286f4;
-}
-
-.rb-sched-demand-block-matched {
-	display: flex;
-	border: 1px Solid #9cabc1;
-	border-radius: 4px;
-	top:1px;
-	height:22px;
-	position:absolute;
-	background: #eff5ff;
-}
-
-.rb-sched-offer {
-	display: flex;
-	flex-direction: row;
-	padding: 12px
-}
-
-.rb-sched-offer-list {
-	display: flex;
-	flex-direction: column;
-	width:150px;
-	flex: 0 0 auto;
-	overflow:hidden;
-}
-
-.rb-sched-offer-header {
-	display: flex;
-	height: 17px;
-	margin: 4px;
-}
-
-.rb-sched-offer-container {
-	display: flex;
-	flex-direction: row;
-	overflow:auto;
-}
-
-.rb-sched-offer-canvas {
-	display: flex;
-	flex: 1 0 auto;
-	flex-direction: column;
-}
-
-.rb-sched-offer-line {
-	display: block;
-	position:relative;
-	height:25px;
-	background: #dddddd;
-}
-
-.rb-sched-offer-block {
-	display: flex;
-	top:0px;
-	height:25px;
-	position:absolute;
-}
-
-.rb-sched-offer-block-active {
-	background: white;
-}
-
-.rb-sched-offer-block-inactive {
-	background: #eeeeee;
-}
-
-.rb-sched-offer-block-matcheddemand {
-	display: flex;
-	background: #4286f4;
-	top:0px;
-	height:22px;
-	border-radius: 4px;
-	position:absolute;
-}
-
-.angular-google-map { 
-	display: flex;
-	flex:1;
-}
-
-.angular-google-map-container { 
-	flex:1;
-}
 
 .contextmenu{
   visibility:hidden;

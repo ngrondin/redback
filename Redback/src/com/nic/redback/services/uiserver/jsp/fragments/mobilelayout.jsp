@@ -1,6 +1,4 @@
-<div 
-	ng-controller="mobilelayout" 
-	class="rb-layout"
-	rb-start-page="<%=config.getString('startpage')%>">
+<rb-mobile-layout 
+	rb-root-page="<%=config.getString('rootpage')%>">
 	#content#
-</div>
+</rb-mobile-layout>

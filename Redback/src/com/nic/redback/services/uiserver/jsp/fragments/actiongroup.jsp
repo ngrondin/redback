@@ -10,17 +10,11 @@ for(var i = 0; i < list.size(); i++) {
 	var actionConfig = list.getObject(i);
 	var action = actionConfig.get("action") != null ? actionConfig.getString('action') : 'noAction'	
 	if(((action.equals('create')  ||  action.equals('save'))  &&  canWrite) || ((!action.equals('create')  &&  !action.equals('save'))  &&  canExecute)) {
-		var ctrlFunc = action;
-		var param = config.getString('param');
-		if(!action.equals('create')  &&  !action.equals('save')) {
-			ctrlFunc = 'objectfunction';
-			param = action;
-		}
 	%>
         		<md-menu-item
         			ng-hide="!(<%=actionConfig.getString('show')%>)">
         			<md-button
-        				ng-click="<%=ctrlFunc%>('<%=param%>')"><%=actionConfig.getString('label') %></md-button>
+				ng-click="action('<%=action%>', '<%=actionConfig.getString('param')%>');"><%=actionConfig.getString('label') %></md-button>
         		</md-menu-item><%
 	}
 }        		

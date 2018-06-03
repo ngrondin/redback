@@ -1,5 +1,3 @@
-<div 
-	ng-controller="layout" 
-	class="rb-controller">
+<rb-layout>
 	#content#
-</div>
+</rb-layout>

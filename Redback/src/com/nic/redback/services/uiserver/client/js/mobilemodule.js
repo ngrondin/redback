@@ -1,4 +1,4 @@
-	var module = angular.module("mobilemodule", ['ngMaterial', 'mdPickers']);	
+	var module = angular.module("mobilemodule", ['ngMaterial', 'mdPickers', 'ngAnimate']);	
 
 	
 	/***********************************/
@@ -43,9 +43,9 @@
 		return {
 			restrict:'A',
 			scope:true,
-			controller: function($scope, $attrs, $http, $compile, $mdPanel) {
-				$scope.mdPanel = $mdPanel;
-				$scope.mdPanelRef = null;
+			controller: function($scope, $attrs, $http, $compile, $mdDialog) {
+				$scope.mdDialog = $mdDialog;
+				$scope.mdDialogRef = null;
 				$scope.element = null;
 				$scope.inputValue = '';
 				$scope.attributeName = $attrs.rbAttribute;
@@ -66,8 +66,7 @@
 					}
 				};
 				$scope.openDropDown = function(event) {
-					if($scope.listConfig.open == false)
-					{
+					if($scope.listConfig.open == false) {
 						var config = {
 							attachTo: angular.element(document.body),
 							template: '<div>' +
@@ -83,12 +82,12 @@
 											'</md-list-item>' +
 										'</md-list>' +
 										'</div>',
-							controller: function($scope, mdPanelRef, listConfig) { 
+							controller: function($scope, $mdDialog, listConfig) { 
 								$scope.listConfig = listConfig;
-								$scope.mdPanelRef = mdPanelRef;
+								$scope.mdDialog = $mdDialog;
 								$scope.selectItem = function(listitem) {
 									$scope.listConfig.selected = listitem;
-									$scope.mdPanelRef.close();
+									$scope.mdDialog.hide();
 								};
 								$scope.expandItem = function(listitem) {
 									$scope.listConfig.parents.push(listitem);
@@ -100,7 +99,7 @@
 									$scope.listConfig.loadList();
 								};
 							},
-							position: $scope.mdPanel.newPanelPosition().relativeTo($scope.element).addPanelPosition($scope.mdPanel.xPosition.ALIGN_START, $scope.mdPanel.yPosition.BELOW),
+							fullscreen: false,
 							locals: {
 								'listConfig' : $scope.listConfig
 							},
@@ -108,15 +107,15 @@
 							openFrom: event,
 							clickOutsideToClose: true,
 							escapeToClose: true,
-							focusOnOpen: false,
-							zIndex: 2,
+							focusOnOpen: true,
+							zIndex: 20,
 							onRemoving: $scope.dropDownClosed
 						};
 						$scope.listConfig.open = true;
 						$scope.listConfig.parents = [];
-						//$scope.element.val('');
+						//$scope.element.blur();
 						$scope.inputValue = '';
-						$scope.mdPanel.open(config).then(function(rez) {$scope.mdPanelRef = rez;});
+						$scope.mdDialog.show(config).then(function(rez) {$scope.mdDialogRef = rez;});
 						$scope.loadList();
 					}
 				};
@@ -185,8 +184,9 @@
 			},
 			link: function($scope, $element, $attrs) {
 				$scope.element = $element;
-				$element.bind('focus', $scope.openDropDown);
-				$element.bind('keydown', $scope.keyProcessor);
+				$scope.element.prop('readOnly', true);
+				$element.bind('click', $scope.openDropDown);
+				$element.bind('focus', function(event) {event.preventDefault();});
 			}
 		};
 	}]);	
@@ -200,14 +200,14 @@
 		return {
 			restrict:'A',
 			scope:true,
-			controller: function($scope, $attrs, $http, $compile, $mdPanel) {
+			controller: function($scope, $attrs, $http, $compile, $mdDialog) {
 				$scope.element = null;
 				$scope.formattedDateTime = '';
 				$scope.attributeName = $attrs.rbAttribute;
 				$scope.format = $attrs.rbFormat;
 				$scope.timepicker = {
 					time:null,
-					mdPanelRef:null,
+					mdDialog:null,
 					open:false,
 					views:((($scope.format.includes('YY') ||  $scope.format.includes('MM')  ||  $scope.format.includes('DD')) ? 1 : 0) | ($scope.format.includes('HH') ? 2 : 0) | ($scope.format.includes('mm') ? 4 : 0)),
 					currentView:0,
@@ -219,7 +219,7 @@
 								this.currentView = this.currentView + 1;	
 						} else {
 							this.pickFinalised = true;
-							this.mdPanelRef.close();
+							$mdDialog.hide();
 						}
 					}
 				};
@@ -228,7 +228,6 @@
 					{
 						var config = {
 							attachTo: angular.element(document.body),
-							position: $mdPanel.newPanelPosition().relativeTo($scope.element).addPanelPosition($mdPanel.xPosition.ALIGN_START, $mdPanel.yPosition.BELOW),
 							template:'<md-content>' +
                                     '<div class="mdp-clock-switch-container" ng-switch="timepicker.currentView" layout layout-align="center center">' +
 										'<mdp-calendar date="timepicker.time" selectevent="timepicker.switchView()" auto-switch="1" ng-switch-when="0"></mdp-calendar>' +
@@ -237,14 +236,15 @@
                                         '<div ng-switch-when="4">Can close</div>' +
                                     '</div>' +
                                 '</md-content>',
-							controller: function($scope, mdPanelRef, timepicker) { 
+							controller: function($scope, $mdDialog, timepicker) { 
 								$scope.timepicker = timepicker;
-								$scope.mdPanelRef = mdPanelRef;
+								$scope.mdDialog = $mdDialog;
 								$scope.time = timepicker.time;
 							},
 							locals: {
 								'timepicker' : $scope.timepicker,
 							},
+							fullScreen: false,
 							panelClass: 'rb-dropdown-panel',
 							openFrom: event,
 							clickOutsideToClose: true,
@@ -261,7 +261,7 @@
 							$scope.timepicker.time = moment();
 							$scope.timepicker.time.set({second:0,millisecond:0});
 						}
-						$mdPanel.open(config).then(function(rez) {$scope.timepicker.mdPanelRef = rez;});
+						$mdDialog.show(config).then(function(rez) {$scope.timepicker.mdPanelRef = rez;});
 					}
 				};
 				$scope.keyProcessor = function(event) {
@@ -289,8 +289,9 @@
 			},
 			link: function($scope, $element, $attrs) {
 				$scope.element = $element;
-				$element.bind('focus', $scope.openDropDown);
-				$element.bind('keydown', $scope.keyProcessor);
+				$scope.element.prop('readOnly', true);
+				$element.bind('click', $scope.openDropDown);
+				$element.bind('focus', function(event) {event.preventDefault();});
 			}
 		};
 	});			
@@ -300,7 +301,7 @@
 	/** Root Controller			 	  **/
 	/***********************************/
 	
-	module.controller('mobileroot', function rootCtl($scope,$attrs,$http) {
+	module.controller('mobileroot', function rootCtl($scope,$attrs,$http,$element) {
 		$scope.largemenu = true;
 		$scope.menuwidth = 300;
 		$scope.page = null;
@@ -321,272 +322,390 @@
 			$scope.pageLabel = label;
 		}
 		
+		$scope.action = function(action, param) {
+			
+		}
+		
+		$scope.touchMove = function(event) {
+			if ($scope.maybePreventPullToRefresh) {
+				$scope.maybePreventPullToRefresh = false;
+                event.preventDefault();
+			}
+		}
+
+		$scope.touchStart = function(event) {
+			$scope.maybePreventPullToRefresh = (window.pageYOffset === 0);
+		}
+		
+		$element.bind('touchmove', $scope.touchMove);
+		$element.bind('touchstart', $scope.touchStart);
+		
 	}).config(function($mdIconProvider) {
 	    $mdIconProvider
 	       .iconSet('wms', '../resource/wms.svg', 24);
 	});
 	
-	  
 	/***********************************/
-	/** Form Controller			 	  **/
+	/** Form Directive			 	  **/
 	/***********************************/
+	
+	module.directive('rbForm', function($compile) {
+		return {
+			restrict:'E',
+			scope:true,
+			controller: function($scope, $attrs, $http, $compile) {
+				$scope.objectName = $attrs.rbObject;
+				$scope.object = null;
+				$scope.dynamicSearchText = "";
+				
+				
+				$scope.setObject = function(object) {
+					$scope.object = object;
+				}
+
+				
+				$scope.save = function(){
+					if($scope.object != null) {
+						$scope.object.save($http);
+					}
+				};		
+
+				$scope.create = function(){
+					$scope.$emit('createObjectEmit', $scope.objectName);
+				};		
+
+				$scope.action = function(action, param){
+					if($scope.object != null) {
+						if(action == 'save') {
+							$scope.save();
+						} else if(action == 'create') {
+							$scope.create();
+						} else if(action == 'back') {
+							$scope.$parent.action(action, param);
+						}else {
+							var req = {action:"execute", object:$scope.objectName, uid:$scope.object.uid, 'function':action, options:{addrelated:true, addvalidation:true}};
+							$http.post("../../rbos", req)
+							.success(function(response) {
+								var responseObject = processResponseJSON(response);
+								if(responseObject != null) {
+									$scope.setObject(responseObject);
+									$scope.$emit('refreshRelatedEmit', $scope.object);
+								}
+							})
+							.error(function(error, status) {
+								alert(error.error);
+							});
+						}
+					}
+				};
+				
+				/*$scope.intent = function(target) {
+					$scope.$parent.intent(target);
+				};*/
+
+				$scope.$on('objectSelected', function($event, object){
+					if(object != null  &&  object.objectname == $scope.objectName)
+						$scope.setObject(object);
+				});
+
+
+				$scope.$on('nullObjectSelected', function($event, objectName){
+					if(objectName == $scope.objectName)
+						$scope.setObject(null);
+				});		
+			}
+		};
+	});	
+	
+
+
+	/***********************************/
+	/** Dataset Directive				  **/
+	/***********************************/
+
+	module.directive('rbDataset', function($compile) {
+		return {
+			restrict:'E',
+			scope:true,
+			controller: function($scope, $attrs, $http, $element, $compile) {
+				$scope.objectName = $attrs.rbObject;
+				$scope.list = [];
+				$scope.selectedObject = null;
+				$scope.relatedConfig = null;
+				$scope.relatedObject = null;
+				$scope.searchText = "";
+				$scope.baseFilter = {};
+				$scope.searchText = null;
+				$scope.element = $element;
+				$scope.visible = false;
+				$scope.loading = false;
+
+				if($attrs.rbRelated != null  &&  $attrs.rbRelated.length > 0) {
+					$scope.relatedConfig = JSON.parse($attrs.rbRelated.replace(/'/g, '"'));
+					$scope.relationshipFilter = {uid:-1};
+				}
+					
+				if($attrs.rbBaseFilter != null  &&  $attrs.rbBaseFilter.length > 0)
+					$scope.baseFilter = JSON.parse($attrs.rbBaseFilter.replace(/'/g, '"'));
+
+				$scope.today = function() {
+					return (new Date());			
+				}
+				
+				$scope.search = function(searchText) {
+					$scope.clearList();		
+					$scope.searchText = searchText;
+					$scope.load();
+				}
+				
+				$scope.getBaseAndRelationshipFilter = function() {
+					var filter = {};
+					for (var key in $scope.baseFilter) {
+						var value = $scope.baseFilter[key];
+						if(typeof value == "string"  &&  value.startsWith("{{") &&  value.endsWith("}}")) {
+							var evalExpr = 'value = ' + value.replace('{{', '').replace('}}', '');
+							eval(evalExpr);
+						}
+						filter[key] = value;
+					}
+					if($scope.relatedConfig != null  &&  $scope.relatedObject != null) {
+						for (var key in $scope.relatedConfig.relationship) {
+							var value = $scope.relatedConfig.relationship[key];
+							if(typeof value == "string"  &&  value.startsWith("{{") &&  value.endsWith("}}")) {
+								var evalExpr = 'value = ' + value.replace('{{', '$scope.relatedObject.data.').replace('}}', '').replace('.data.uid', '.uid');
+								eval(evalExpr);
+							}
+							filter[key] = value;
+						}
+					}
+					return filter;
+				}
+				
+				$scope.getFullFilter = function() {
+					var filter = $scope.getBaseAndRelationshipFilter();
+					if($scope.searchText != null  &&  $scope.searchText != '') {
+						filter['$multi'] = '*' + $scope.searchText + '*';
+					}
+					return filter;
+				}
+
+				$scope.load = function() {
+					if($scope.visible  &&  $scope.list.length == 0  &&  ($scope.relatedConfig == null ||  ($scope.relatedConfig != null  &&  $scope.relatedObject != null))) {
+						var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:true, addvalidation:true}};
+						$scope.loading = true;
+						$http.post("../../rbos", req)
+						.success(function(response) {
+							var responseList = processResponseJSON(response);
+							$scope.loading = false;
+							if(responseList != null) 
+								$scope.list = responseList;
+						})
+						.error(function(error, status) {
+							$scope.loading = false;
+							alert(error.error);
+						});
+					}
+				}		
+
+				$scope.create = function(){
+					var req = {action:"create", object:$scope.objectName, data:$scope.getBaseAndRelationshipFilter(), options:{addrelated:true, addvalidation:true}};
+					$http.post("../../rbos", req)
+					.success(function(response) {
+						var responseObject = processResponseJSON(response);
+						if(responseObject != null) {
+							$scope.list.push(responseObject);
+							$scope.selectObject(responseObject);
+							$scope.$emit('refreshRelatedEmit', responseObject);
+						}
+					})
+					.error(function(error, status) {
+						alert(error.error);
+					});
+				};		
+				
+				
+				$scope.save = function() {
+					for(var i = 0; i < $scope.list.length; i++) {
+						$scope.list[i].save($http);
+					}		
+				}		
+				
+				$scope.action = function(action, param){
+					if(action == 'save') {
+						$scope.save();
+					} else if(action == 'create') {
+						$scope.create();
+					} else {
+						$scope.$parent.action(action, param);
+					}
+				};
+				
+				$scope.selectObject = function(object) {
+					if(object != null && $scope.list.includes(object)) {
+						$scope.selectedObject = object;
+						$scope.$emit('objectSelectedEmit', object);
+					}
+				}
+
+				$scope.clearList = function() {
+					$scope.list = [];
+					$scope.selectedObject = null;
+					$scope.$emit('nullObjectSelectedEmit', $scope.objectName);
+				}		
+				
+				$scope.$on('objectSelected', function($event, object){
+					if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
+						$scope.clearList();
+						$scope.relatedObject = object;
+						$scope.load();
+					}
+				});
+
+				$scope.$on('createObject', function($event, name){
+					if(name == $scope.objectName) {
+						$scope.create();
+					}
+				});
+
+				$scope.$on('saveRelated', function($event, object){
+					if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
+						$scope.save();
+					}
+				});
+
+				$scope.$on('refreshRelated', function($event, object){
+					if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
+						$scope.load();
+					}
+				});
+				
+				$scope.$watch(function() {
+					return $scope.element.prop('offsetParent') != null;
+				}, function(newValue, oldValue) {
+					$scope.visible = newValue;
+					if(newValue == true)
+						$scope.load();
+				});
+				
+				$scope.load();
+			}			
+		};
+	});		
 
 	
-	module.controller('mobileform', function formCtl($scope,$attrs,$http) {
-		$scope.objectName = $attrs.rbObject;
-		$scope.object = null;
-		$scope.dynamicSearchText = "";
-		
-		
-		$scope.setObject = function(object) {
-			$scope.object = object;
-		}
+	/***********************************/
+	/** Mobile Layout Directive			 **/
+	/***********************************/
 
-		
-		$scope.save = function(){
-			if($scope.object != null) {
-				$scope.object.save($http);
-			}
-		};		
-
-		$scope.create = function(){
-			$scope.$emit('createObjectEmit', $scope.objectName);
-		};		
-
-		$scope.objectfunction = function(functionName){
-			if($scope.object != null) {
-				var req = {action:"execute", object:$scope.objectName, uid:$scope.object.uid, 'function':functionName, options:{addrelated:true, addvalidation:true}};
-				$http.post("../../rbos", req)
-				.success(function(response) {
-					var responseObject = processResponseJSON(response);
-					if(responseObject != null) {
-						$scope.setObject(responseObject);
-						$scope.$emit('refreshRelatedEmit', $scope.object);
+	module.directive('rbMobileLayout', function($compile) {
+		return {
+			restrict:'E',
+			scope:true,
+			controller: function($scope, $attrs, $http, $compile) {
+				$scope.pages = [];
+				$scope.topPage = null;
+				$scope.pageStack = [];
+				$scope.rootPageName = $attrs.rbRootPage;
+				
+				$scope.registerPage = function(pageScope) {
+					$scope.pages.push(pageScope);
+					pageScope.element.addClass('rb-mobile-page-out');
+					if($scope.pageStack.length == 0  &&  pageScope.name == $scope.rootPageName) {
+						$scope.pushPage(pageScope);
 					}
-				})
-				.error(function(error, status) {
-					alert(error.error);
+				}
+				
+				$scope.pushPage = function(pageScope) {
+					$scope.pageStack.push(pageScope);
+					$scope.topPage = pageScope;
+					pageScope.stackIndex = $scope.pageStack.length;
+					pageScope.element.removeClass('rb-mobile-page-out');
+					pageScope.element.addClass('rb-mobile-page-in');
+				}
+				
+				$scope.popPage = function() {
+					var pageScope = $scope.pageStack.pop();
+					$scope.topPage = $scope.pageStack[$scope.pageStack.length - 1];
+					pageScope.stackIndex = 0;
+					pageScope.element.removeClass('rb-mobile-page-in');
+					pageScope.element.addClass('rb-mobile-page-out');
+				}
+				
+				$scope.resolveIntent = function(target) {
+					$scope.$broadcast('intent', target);
+				};
+				
+				$scope.action = function(action, param){
+					if(action == 'back') {
+						$scope.popPage($scope);
+					} else {
+						$scope.$parent.action(action, param);
+					}
+				}
+				
+				$scope.$on('objectSelectedEmit', function($event, object){
+					if(!$event.defaultPrevented) {
+						$scope.$broadcast('objectSelected', object);
+						$scope.$broadcast('intent', object.objectname);
+						$event.defaultPrevented = true;
+					}
 				});
 			}
 		};
-
-		
-		$scope.$on('objectSelected', function($event, object){
-			if(object != null  &&  object.objectname == $scope.objectName)
-				$scope.setObject(object);
-		});
-
-
-		$scope.$on('nullObjectSelected', function($event, objectName){
-			if(objectName == $scope.objectName)
-				$scope.setObject(null);
-		});
-
-	 });
+	});	
 	 
-
+	 
 	/***********************************/
-	/** List Controller				  **/
+	/** Mobile Page directive			 **/
 	/***********************************/
 
 	 
-	 
-	module.controller('mobilelist', function listCtl($scope,$attrs,$http,$element) {
-		$scope.objectName = $attrs.rbObject;
-		$scope.list = [];
-		$scope.selectedObject = null;
-		$scope.relatedConfig = null;
-		$scope.relatedObject = null;
-		$scope.searchText = "";
-		$scope.baseFilter = {};
-		$scope.searchText = null;
-		$scope.element = $element;
-		$scope.visible = false;
-		$scope.loading = false;
-
-		if($attrs.rbRelated != null  &&  $attrs.rbRelated.length > 0) {
-			$scope.relatedConfig = JSON.parse($attrs.rbRelated.replace(/'/g, '"'));
-			$scope.relationshipFilter = {uid:-1};
-		}
-			
-		if($attrs.rbBaseFilter != null  &&  $attrs.rbBaseFilter.length > 0)
-			$scope.baseFilter = JSON.parse($attrs.rbBaseFilter.replace(/'/g, '"'));
-
-		$scope.today = function() {
-			return (new Date());			
-		}
-		
-		$scope.search = function(searchText) {
-			$scope.clearList();		
-			$scope.searchText = searchText;
-			$scope.load();
-		}
-		
-		$scope.getBaseAndRelationshipFilter = function() {
-			var filter = {};
-			for (var key in $scope.baseFilter) {
-				var value = $scope.baseFilter[key];
-				if(typeof value == "string"  &&  value.startsWith("{{") &&  value.endsWith("}}")) {
-					var evalExpr = 'value = ' + value.replace('{{', '').replace('}}', '');
-					eval(evalExpr);
-				}
-				filter[key] = value;
-			}
-			if($scope.relatedConfig != null  &&  $scope.relatedObject != null) {
-				for (var key in $scope.relatedConfig.relationship) {
-					var value = $scope.relatedConfig.relationship[key];
-					if(typeof value == "string"  &&  value.startsWith("{{") &&  value.endsWith("}}")) {
-						var evalExpr = 'value = ' + value.replace('{{', '$scope.relatedObject.data.').replace('}}', '').replace('.data.uid', '.uid');
-						eval(evalExpr);
+	module.directive('rbMobilePage', function($compile) {
+		return {
+			restrict:'E',
+			scope:true,
+			controller: function($scope, $attrs, $http, $element, $compile) {
+				$scope.element = $element;
+				$scope.name = $attrs.rbPageName;
+				$scope.stackIndex = 0;
+				$scope.intent = $attrs.rbIntent;
+				
+				$scope.$on('intent', function($event, target){
+					if($scope.intent != null  &&  $scope.intent == target) {
+						$scope.pushPage($scope);
 					}
-					filter[key] = value;
-				}
+				});		
+				
+				$scope.registerPage($scope);
 			}
-			return filter;
-		}
-		
-		$scope.getFullFilter = function() {
-			var filter = $scope.getBaseAndRelationshipFilter();
-			if($scope.searchText != null  &&  $scope.searchText != '') {
-				filter['$multi'] = '*' + $scope.searchText + '*';
-			}
-			return filter;
-		}
-
-		$scope.load = function() {
-			if($scope.visible  &&  $scope.list.length == 0  &&  ($scope.relatedConfig == null ||  ($scope.relatedConfig != null  &&  $scope.relatedObject != null))) {
-				var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:true, addvalidation:true}};
-				$scope.loading = true;
-				$http.post("../../rbos", req)
-				.success(function(response) {
-					var responseList = processResponseJSON(response);
-					$scope.loading = false;
-					if(responseList != null) 
-						$scope.list = responseList;
-				})
-				.error(function(error, status) {
-					$scope.loading = false;
-					alert(error.error);
-				});
-			}
-		}		
-
-		$scope.create = function(){
-			var req = {action:"create", object:$scope.objectName, data:$scope.getBaseAndRelationshipFilter(), options:{addrelated:true, addvalidation:true}};
-			$http.post("../../rbos", req)
-			.success(function(response) {
-				var responseObject = processResponseJSON(response);
-				if(responseObject != null) {
-					$scope.list.push(responseObject);
-					$scope.selectObject(responseObject);
-					$scope.$emit('refreshRelatedEmit', responseObject);
-				}
-			})
-			.error(function(error, status) {
-				alert(error.error);
-			});
-		};		
-		
-		
-		$scope.save = function() {
-			for(var i = 0; i < $scope.list.length; i++) {
-				$scope.list[i].save($http);
-			}		
-		}		
-		
-		$scope.selectObject = function(object) {
-			if(object != null && $scope.list.includes(object)) {
-				$scope.selectedObject = object;
-				$scope.$emit('objectSelectedEmit', object);
-			}
-		}
-
-		$scope.clearList = function() {
-			$scope.list = [];
-			$scope.selectedObject = null;
-			$scope.$emit('nullObjectSelectedEmit', $scope.objectName);
-		}		
-		
-		$scope.$on('objectSelected', function($event, object){
-			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
-				$scope.clearList();
-				$scope.relatedObject = object;
-				$scope.load();
-			}
-		});
-
-		$scope.$on('createObject', function($event, name){
-			if(name == $scope.objectName) {
-				$scope.create();
-			}
-		});
-
-		$scope.$on('saveRelated', function($event, object){
-			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
-				$scope.save();
-			}
-		});
-
-		$scope.$on('refreshRelated', function($event, object){
-			if($scope.relatedConfig != null && object.objectname == $scope.relatedConfig.objectname) {
-				$scope.load();
-			}
-		});
-		
-		$scope.$watch(function() {
-			return $scope.element.prop('offsetParent') != null;
-		}, function(newValue, oldValue) {
-			$scope.visible = newValue;
-			if(newValue == true)
-				$scope.load();
-		});
-		
-		$scope.load();
-	 });	 
-
-	
-	/***********************************/
-	/** Mobile Layout Controller			 **/
-	/***********************************/
-
-	 
-	module.controller('mobilelayout', function layoutCtl($scope,$attrs,$http) {
-		$scope.pages = [];
-		$scope.topPage = $attrs.rbStartPage;
-		$scope.pageOrder = [$scope.topPage];
-		
-		$scope.linkTo = function(page) {
-			$scope.pageOrder.push(page);
-			$scope.topPage = page;
-		}
-	 });	 
-	 
-	/***********************************/
-	/** Mobile Page Controller			 **/
-	/***********************************/
-
-	 
-	module.controller('mobilepage', function layoutCtl($scope,$attrs,$http) {
-
-	});
+		};
+	});	
 
 	/***********************************/
 	/** Workflow Actions Controller	  **/
 	/***********************************/
+	
+	module.directive('rbProcessActionsButton', function($compile) {
+		return {
+			restrict:'C',
+			scope:true,
+			controller: rbProcessActionButtonController
+		};
+	});		
 
-	module.controller('processactions', function processactionCtl($scope,$attrs,$http) {
+	function rbProcessActionButtonController($scope, $attrs, $http, $element, $compile, $mdDialog) {
 		$scope.notification = {};
 		
-		$scope.openMenu = function($mdOpenMenu, ev) {
+		$scope.activate = function(ev) {
 			if($scope.$parent.object != null) {
 				$http.post("../../rbpm", {action:'getnotifications', filter:{'data.objectname':$scope.$parent.objectName, 'data.uid':$scope.$parent.object.uid}})
 				.success(function(response) {
 					if(response.result.length == 0) {
 						$scope.notification = {message:"No actions"};
-						$mdOpenMenu(ev);
+						$scope.openDialog();
 					} else if(response.result.length > 0) {
 						$scope.notification = response.result[0];
-						$mdOpenMenu(ev);
+						$scope.openDialog();
 					}
 				})
 				.error(function(error, status) {
@@ -595,7 +714,23 @@
 			}
 		}
 		
+		$scope.openDialog = function() {
+			var config = {
+				attachTo: angular.element(document.body),
+				template:'<md-list>' +
+						'<md-list-item>{{notification.message}}</md-list-item>' +
+						'<md-divider></md-divider>' +
+						'<md-list-item ng-repeat="item in notification.actions" ng-click="processAction(item.action)">{{item.description}}</md-list-item>' + 
+						'</md-list>',
+				scope:$scope,
+				preserveScope:true,
+				clickOutsideToClose: true
+			};
+			$mdDialog.show(config).then(function(rez) {$scope.timepicker.mdPanelRef = rez;});
+		}
+		
 		$scope.processAction = function(action) {
+			$mdDialog.hide();
 			$http.post("../../rbpm", {action:'processaction', processaction:action, pid:$scope.notification.pid})
 			.success(function(response) {
 				if(response.rbobjectupdate != null) {
@@ -610,7 +745,7 @@
 				alert(error.error);
 			});	
 		}
+	}			
 
-	});
 	
-	
+

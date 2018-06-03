@@ -1,11 +1,7 @@
-<div 
-	class="rb-tabsection"
-	ng-controller="tab"
+<rb-tab-section 
 	style="<%=config.getString('inlineStyle')%>">
-	<div
-		class="rb-tabheadersection">
-		<div
-			class="rb-tabheader"
+	<rb-tab-header-section>
+		<rb-tab-header
 			ng-class="{ 'rb-tabheader-active': tab == selected_tab }"			
 			ng-repeat="tab in tabs">			
 			<md-button 
@@ -13,11 +9,11 @@
 				ng-click="selectTab(tab)">
 				{{tab}}
 			</md-button>
-		</div>
-	</div>
+		</rb-tab-header>
+	</rb-tab-header-section>
 	<md-divider></md-divider>
-	<div
-		class="rb-tabcontentsection">	
+	<rb-tab-content-section
+		class="">	
 		#content#
-	</div>
-</div>
+	</rb-tab-content-section>
+</rb-tab-section>

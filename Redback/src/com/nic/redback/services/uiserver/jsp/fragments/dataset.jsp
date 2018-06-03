@@ -1,6 +1,5 @@
-<div 
-	ng-controller="dataset" 
-	class="rb-controller" <% 
+<rb-dataset 
+	<% 
 if(config.get('object') != null) { %>
 	rb-object="<%=config.getString('object')%>"<% 
 }
@@ -9,7 +8,9 @@ if(config.getObject('master') != null) { %>
 } 
 if(config.get('basefilter') != null) { %>
 	rb-base-filter="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(com.nic.redback.services.UIServer.convertFilter(config.getObject('basefilter')))%>"<% 
-} %>
-	style="<%=config.getString('inlineStyle')%>">
+} 
+if(config.get('inlineStyle') != null) {%>
+	style="<%=config.getString('inlineStyle')%>"<%
+}%>>
 	#content#
-</div>
+</rb-dataset>

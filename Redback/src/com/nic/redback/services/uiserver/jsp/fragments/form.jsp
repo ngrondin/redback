@@ -1,9 +1,10 @@
-<div 
-	ng-controller="form" 
-	class="rb-form" <% 
+<rb-form 
+	<% 
 if(config.get('object') != null) { %>
 	rb-object="<%=config.getString('object')%>"<% 
-} %>
-	style="<%=config.getString('inlineStyle')%>">
+}
+if(config.get('inlineStyle') != null) {%>
+	style="<%=config.getString('inlineStyle')%>"<%
+}%>>
 	#content#
-</div>
+</rb-form>

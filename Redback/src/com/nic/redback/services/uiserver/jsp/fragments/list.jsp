@@ -1,5 +1,4 @@
-<div 
-	class="listscroll" 
+<rb-list-scroll 
 	style="<%=config.getString('inlineStyle')%>">
 	<md-progress-linear 
 		md-mode="indeterminate" 
@@ -20,4 +19,4 @@
 			</div>
 		</md-list-item>
 	</md-list>
-</div>
+</rb-list-scroll>

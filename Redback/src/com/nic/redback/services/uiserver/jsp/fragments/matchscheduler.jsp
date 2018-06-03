@@ -1,39 +1,36 @@
-<div
-	class="rb-sched"
-	ng-controller="matchscheduler"
+<rb-match-scheduler
 <% if(config.getObject('config') != null) { %>
 	rb-config="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(com.nic.redback.services.UIServer.convertFilter(config.getObject('config')))%>"<% 
 } %>>
+	<div
+		class="rb-sched-toolbar">
 		<div
-			class="rb-sched-toolbar">
-			<div
-				class="rb-sched-toolbar-item ">
-				<span>Span</span>
-			</div>
-			<md-select 
-				ng-model="spanDays" 
-				class="rb-sched-toolbar-item"
-				ng-change="spanChanged()"
-				aria-label="Span">
-				<md-option ng-value="1">1 Day</md-option>
-				<md-option ng-value="3">3 Days</md-option>
-				<md-option ng-value="7">1 Week</md-option>
-			</md-select>
-			<div style="width:50px"></div>
-			<div
-				class="rb-sched-toolbar-item ">
-				<span>Zoom</span>
-			</div>
-			<md-select 
-				ng-model="scale" 
-				class="rb-sched-toolbar-item"
-				ng-change="zoomChanged()"
-				aria-label="Zoom">
-				<md-option ng-value="12000">6 Hours</md-option>
-				<md-option ng-value="50000">1 Day</md-option>
-				<md-option ng-value="150000">3 Days</md-option>
-			</md-select>
-			
+			class="rb-sched-toolbar-item ">
+			<span>Span</span>
+		</div>
+		<md-select 
+			ng-model="spanDays" 
+			class="rb-sched-toolbar-item"
+			ng-change="spanChanged()"
+			aria-label="Span">
+			<md-option ng-value="1">1 Day</md-option>
+			<md-option ng-value="3">3 Days</md-option>
+			<md-option ng-value="7">1 Week</md-option>
+		</md-select>
+		<div style="width:50px"></div>
+		<div
+			class="rb-sched-toolbar-item ">
+			<span>Zoom</span>
+		</div>
+		<md-select 
+			ng-model="scale" 
+			class="rb-sched-toolbar-item"
+			ng-change="zoomChanged()"
+			aria-label="Zoom">
+			<md-option ng-value="12000">6 Hours</md-option>
+			<md-option ng-value="50000">1 Day</md-option>
+			<md-option ng-value="150000">3 Days</md-option>
+		</md-select>			
 	</div>
 	<div
 		class="rb-sched-demand">
@@ -122,4 +119,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</rb-match-scheduler>

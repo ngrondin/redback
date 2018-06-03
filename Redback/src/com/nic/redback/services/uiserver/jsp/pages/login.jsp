@@ -10,6 +10,7 @@
 	<link rel="stylesheet" type="text/css" href="../resource/login.css"/>
 	<script src = "../resource/rbcore.js"></script>
 	<script src = "../resource/loginmodule.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
 	<div class="loginbox" ng-app="loginmodule" ng-controller="form">

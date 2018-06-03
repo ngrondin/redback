@@ -59,8 +59,7 @@
 			</md-menu>			
 		</div>
 	</md-toolbar>
-	<div
-		class="rb-hsection"
+	<rb-hsection
 		style="flex:1 1 auto;">
 		<md-sidenav 
 			class="md-sidenav-left rb-sidebar" 
@@ -91,7 +90,7 @@
 		</md-sidenav>		
 		<div  id="mainview" ng-include="page" class="rb-include">
 		</div>
-	</div>
+	</rb-hsection>
 </body>
 </html>
 	
