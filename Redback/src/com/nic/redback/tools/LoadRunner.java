@@ -70,6 +70,7 @@ public class LoadRunner
 	public LoadRunner(String netName, String pass, String filePath, int at, int c)
 	{
 		firebus = new Firebus(netName, pass);
+		/*
 		firebus.registerServiceProvider("stub", new ServiceProvider() {
 			public Payload service(Payload payload)	throws FunctionErrorException
 			{
@@ -79,7 +80,7 @@ public class LoadRunner
 			public ServiceInformation getServiceInformation()
 			{
 				return null;
-			}}, 10);
+			}}, 10);*/
 		calls = new ArrayList<String>();
 		rnd = new Random();
 		activeThreads = at;

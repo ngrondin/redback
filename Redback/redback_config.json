@@ -110,10 +110,16 @@
 			"level":"INFO"
 		},
 		{
+			"name":"com.nic.firebus.adapters",
+			"formatter":"com.nic.firebus.logging.FirebusSimpleFormatter",
+			"filename":"FirebusAdapters.log",
+			"level":"FINEST"
+		},
+		{
 			"name":"com.nic.redback.services.processserver",
 			"formatter":"com.nic.redback.services.processserver.ProcessLogger",
 			"filename":"RedbackProcess.log",
-			"level":"FINE"
+			"level":"INFO"
 		}
 	]
 }
