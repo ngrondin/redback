@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Set;
 
 import jdk.nashorn.api.scripting.AbstractJSObject;
+import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.internal.objects.NativeDate;
 
 import com.nic.firebus.utils.FirebusDataUtil;
@@ -101,9 +102,23 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 	{
 		try
 		{
-			Object val = arg1;
-			if(val instanceof NativeDate)
-				val = new Date((long)NativeDate.getTime(val) + ((long)NativeDate.getTimezoneOffset(val) * 60000));
+			Object val = null;
+			if(arg1 instanceof CharSequence)
+			{
+				val = ((CharSequence)arg1).toString();
+			}
+			else if(arg1 instanceof NativeDate)
+			{
+				val = new Date((long)NativeDate.getTime(arg1) + ((long)NativeDate.getTimezoneOffset(arg1) * 60000));
+			}
+			else if(arg1 instanceof JSObject)
+			{
+				JSObject jso = (JSObject)arg1;
+				if(jso.isArray())
+					val = FirebusDataUtil.convertJSArrayToDataList(jso);
+				else
+					val = FirebusDataUtil.convertJSObjectToDataObject(jso);
+			}
 			rbObject.put(arg0, new Value(val));
 		} 
 		catch (RedbackException e)

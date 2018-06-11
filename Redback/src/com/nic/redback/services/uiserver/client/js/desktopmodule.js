@@ -369,6 +369,9 @@
 			$scope.pageLabel = label;
 		}
 		
+		$scope.today = function() {
+			return (new Date());			
+		}		
 	}).config(function($mdIconProvider) {
 	    $mdIconProvider
 	       .iconSet('wms', '../resource/wms.svg', 24);
@@ -455,7 +458,7 @@
 			controller: function($scope, $attrs, $http, $element, $compile) {
 				$scope.objectName = $attrs.rbObject;
 				$scope.list = [];
-				$scope.selectedObject = null;
+				$scope.selected = null;
 				$scope.relatedConfig = null;
 				$scope.relatedObject = null;
 				$scope.searchText = "";
@@ -539,7 +542,7 @@
 						var responseObject = processResponseJSON(response);
 						if(responseObject != null) {
 							$scope.list.push(responseObject);
-							$scope.selectObject(responseObject);
+							$scope.select(responseObject);
 							$scope.$emit('refreshRelatedEmit', responseObject);
 						}
 					})
@@ -563,16 +566,16 @@
 					} 
 				};
 				
-				$scope.selectObject = function(object) {
+				$scope.select = function(object) {
 					if(object != null && $scope.list.includes(object)) {
-						$scope.selectedObject = object;
+						$scope.selected = object;
 						$scope.$emit('objectSelectedEmit', object);
 					}
 				}
 
 				$scope.clearList = function() {
 					$scope.list = [];
-					$scope.selectedObject = null;
+					$scope.selected = null;
 					$scope.$emit('nullObjectSelectedEmit', $scope.objectName);
 				}		
 				
@@ -615,6 +618,132 @@
 		};
 	});		
 
+	
+	/***********************************/
+	/** Processset Directive		  **/
+	/***********************************/
+
+	module.directive('rbProcessset', function($compile) {
+		return {
+			restrict:'E',
+			scope:true,
+			controller: rbProcessSetController		
+		};
+	});		
+	
+	function rbProcessSetController($scope, $attrs, $http, $element, $compile) {
+		$scope.list = [];
+		$scope.selected = null;
+		$scope.searchText = "";
+		$scope.baseFilter = {};
+		$scope.searchText = null;
+		$scope.element = $element;
+		$scope.visible = false;
+		$scope.loading = false;
+		$scope.viewmap = {};
+			
+		if($attrs.rbBaseFilter != null  &&  $attrs.rbBaseFilter.length > 0)
+			$scope.baseFilter = JSON.parse($attrs.rbBaseFilter.replace(/'/g, '"'));
+
+		if($attrs.rbViewMap != null  &&  $attrs.rbViewMap.length > 0)
+			$scope.viewmap = JSON.parse($attrs.rbViewMap.replace(/'/g, '"'));
+
+		$scope.search = function(searchText) {
+			$scope.clearList();		
+			$scope.searchText = searchText;
+			$scope.load();
+		}
+		
+		$scope.getBaseFilter = function() {
+			var filter = {};
+			for (var key in $scope.baseFilter) {
+				var value = $scope.baseFilter[key];
+				if(typeof value == "string"  &&  value.startsWith("{{") &&  value.endsWith("}}")) {
+					var evalExpr = 'value = ' + value.replace('{{', '').replace('}}', '');
+					eval(evalExpr);
+				}
+				filter[key] = value;
+			}
+			return filter;
+		}
+		
+		$scope.getFullFilter = function() {
+			var filter = $scope.getBaseFilter();
+			if($scope.searchText != null  &&  $scope.searchText != '') {
+				filter['$multi'] = '*' + $scope.searchText + '*';
+			}
+			return filter;
+		}
+
+		$scope.load = function() {
+			if($scope.visible  &&  $scope.list.length == 0) {
+				var req = {action:"getnotifications", filter:$scope.getFullFilter(), viewdata:['objectname', 'uid']};
+				$scope.loading = true;
+				$http.post("../../rbpm", req)
+				.success(function(response) {
+					$scope.loading = false;
+					if(response != null) {
+						$scope.list = response.result;
+						$scope.loadLinkedObjects();
+					}
+				})
+				.error(function(error, status) {
+					$scope.loading = false;
+					alert(error.error);
+				});
+			}
+		}	
+
+		$scope.loadLinkedObjects = function() {
+			if($scope.visible  &&  $scope.list.length != 0) {
+				for(var i = 0; i < $scope.list.length; i++) {
+					var obj = findExistingObject($scope.list[i].data.objectname, $scope.list[i].data.uid);
+					if(obj == null) {
+						var req = {action:"get", object:$scope.list[i].data.objectname, uid:$scope.list[i].data.uid,  options:{addrelated:true, addvalidation:true}};
+						$http.post("../../rbos", req)
+						.success(function(response) {
+							var obj = processResponseJSON(response);
+							for(var j = 0; j < $scope.list.length; j++)
+								if($scope.list[j].data.objectname == obj.objectname  &&  $scope.list[j].data.uid == obj.uid)
+									$scope.list[j].object = obj;
+						})
+						.error(function(error, status) {
+						});
+					} else {
+						$scope.list[i].object = obj;
+					}
+				}
+			}
+		}
+	
+		$scope.select = function(process) {
+			if(process != null && $scope.list.includes(process)) {
+				$scope.selected = process;
+				$scope.$broadcast('loadView', "processobject", $scope.viewmap[process.object.objectname]);
+				$scope.$broadcast('objectSelected', process.object);
+			}
+		}
+
+		$scope.clearList = function() {
+			$scope.list = [];
+			$scope.selected = null;
+		}		
+		
+		$scope.$on('processActionEmit', function($event, process, pid, action){
+			$scope.clearList();
+			$scope.load();
+		});
+				
+		$scope.$watch(function() {
+			return $scope.element.prop('offsetParent') != null;
+		}, function(newValue, oldValue) {
+			$scope.visible = newValue;
+			if(newValue == true)
+				$scope.load();
+		});
+		
+		$scope.load();
+	}	
 	
 	/***********************************/
 	/** Layout Directive			 **/
@@ -666,6 +795,40 @@
 	 
 	 
 	/***********************************/
+	/** View Loader Directive		 **/
+	/***********************************/
+	 
+	module.directive('rbViewLoader', function($compile) {
+		return {
+			restrict:'E',
+			scope:true,
+			controller: rbViewLoaderController		
+		};
+	});	
+	
+	function rbViewLoaderController($scope, $attrs, $http, $element, $compile) {
+		$scope.name = $attrs.rbName;
+		$scope.view = null;
+		$scope.waitingSelectedObject = null;
+
+		$scope.$on('loadView', function($event, loadername, viewname){
+			if(loadername != null  &&  loadername == $scope.name)
+				$scope.view = '../view/' + viewname;
+		});
+		
+		$scope.$on('objectSelected', function($event, object){
+			$scope.waitingSelectedObject = object;
+		});
+
+		$scope.$on("$includeContentLoaded", function(event, templateName){
+			 if($scope.waitingSelectedObject != null) {
+				$scope.$broadcast('objectSelected', $scope.waitingSelectedObject);
+				$scope.waitingSelectedObject = null;
+			 }
+		});
+	}
+	
+	/***********************************/
 	/** Tab Section Directive	 	 **/
 	/***********************************/
 
@@ -707,11 +870,11 @@
 				}
 				
 				$scope.setSelectedObjectPosition = function(position) {
-					$scope.$parent.selectedObject.data.geometry = {
+					$scope.$parent.selected.data.geometry = {
 						type: 'point',
 						coords: position
 					}
-					$scope.$parent.selectedObject.attributeHasChanged('geometry', $http);
+					$scope.$parent.selected.attributeHasChanged('geometry', $http);
 					$scope.hideContextMenu();
 				}
 
@@ -742,7 +905,7 @@
 					var clickedPosition = new google.maps.Point(Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale), Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale));	
 
 					var html = '<div id="contextmenu" class="contextmenu"><md-list>';
-					if($scope.$parent.selectedObject != null)
+					if($scope.$parent.selected != null)
 						html = html + '<md-list-item ng-click="setSelectedObjectPosition({latitude:' + clickLatLng.lat() + ', longitude:' + clickLatLng.lng() + '})"><div style="white-space:nowrap">Set location here</div></md-list-item>';
 					html = html + '<md-list-item ng-click="createObjectAtPosition({latitude:' + clickLatLng.lat() + ', longitude:' + clickLatLng.lng() + '})"><div style="white-space:nowrap">Create new location here</div></md-list-item>';
 					html = html + '</md-list></div>';
@@ -831,6 +994,7 @@
 							obj.refresh($http);
 					}
 				}
+				$scope.$emit('processActionEmit', $scope.notification.process, $scope.notification.pid, action);
 			})
 			.error(function(error, status) {
 				alert(error.error);

@@ -154,6 +154,8 @@ public class ObjectManager
 				error( "Problem initiating object : " + e.getMessage(), e);
 			}		
 		}
+		if(object == null)
+			throw new RedbackException("No " + objectName + " object exists with uid " + id);
 		return object;
 	}
 	

@@ -8,9 +8,9 @@
 		flex="">
 		<md-list-item 
 			class="md-2-line" 
-			ng-class="{ 'list-item-active': item == selectedObject }"
+			ng-class="{ 'list-item-active': item == selected }"
 			ng-repeat="item in list" 
-			ng-click="selectObject(item)">
+			ng-click="select(item)">
 			<div 
 				class="md-list-item-text" 
 				layout="column">

@@ -149,6 +149,18 @@
 					class="rb-hsection"
 					style="flex: 0 0 auto;">
 					<md-input-container>
+						<label>ID Generator</label>
+						<input type="text" ng-model="selectedAttribute.idgenerator">
+					</md-input-container>
+					<md-input-container>
+						<label>Expression</label>
+						<input type="text" ng-model="selectedAttribute.expression">
+					</md-input-container>
+				</div>
+				<div
+					class="rb-hsection"
+					style="flex: 0 0 auto;">
+					<md-input-container>
 						<label>Related Object</label>
 						<input type="text" ng-model="selectedAttribute.relatedobject.name">
 					</md-input-container>
