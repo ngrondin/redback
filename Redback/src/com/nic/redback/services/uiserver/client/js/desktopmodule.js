@@ -883,7 +883,8 @@
 				}
 				
 				$scope.markerSelected = function(marker, eventName, model, args) {
-					model.$parent.$parent.selectObject(model.$parent.object);
+					//$scope.$emit('objectSelectedEmit', model.$parent.object);
+					$scope.select(model.$parent.object);
 				}
 				
 				$scope.mapClicked = function(map, eventName, args) {

@@ -244,17 +244,11 @@ public class UIServer extends RedbackAuthenticatedService
 						if(result != null)
 						{
 							viewConfig = result.getObject("result.0");
-							//if(viewConfig.get("basefilter") != null)
-							//	viewConfig.put("basefilter", convertFilter(viewConfig.getObject("basefilter")));
 							viewConfigs.put(viewName, viewConfig);
 						}
 					}
 					if(viewConfig != null)
 					{
-						//componentJSON = viewConfig;
-						//String objectName = componentJSON.getString("object");
-						//context.put("objectName", objectName);
-						//context.put("viewName", viewName);
 						context.put("canWrite", session.getUserProfile().canWrite("rb.views." + viewName) & (boolean)context.get("canWrite"));
 						context.put("canExecute", session.getUserProfile().canExecute("rb.views." + viewName) & (boolean)context.get("canExecute"));
 						JSONList contentList = viewConfig.getList("content");
@@ -277,7 +271,6 @@ public class UIServer extends RedbackAuthenticatedService
 			{
 				viewHTML = "";
 			}
-			//return generateHTMLFromComponentJSON(new JSONObject("{type:view, name:" + name + "}"), bindings);
 		}
 		else
 		{
@@ -287,9 +280,9 @@ public class UIServer extends RedbackAuthenticatedService
 	}
 	
 	
-	protected String getResource(String name) throws FunctionErrorException, FunctionTimeoutException, JSONException, RedbackException, IOException
+	protected byte[] getResource(String name) throws FunctionErrorException, FunctionTimeoutException, JSONException, RedbackException, IOException
 	{
-		String fileStr = null;
+		byte[] bytes = null;
 		String type = "";
 		if(name.endsWith(".js"))
 			type = "js";
@@ -299,33 +292,44 @@ public class UIServer extends RedbackAuthenticatedService
 			type = "svg";
 		else if(name.endsWith(".ico"))
 			type = "icons";
+		else if(name.endsWith(".png"))
+			type = "png";
 		
 		if(type.equals("svg"))
 		{
 			JSONObject result = request(configService, "{object:rbui_resource,filter:{\"name\":\"" + name + "\"}}");
 			if(result.getList("result").size() > 0)
-				fileStr = StringUtils.unescape(result.getList("result").getObject(0).getString("content"));
+				bytes = StringUtils.unescape(result.getList("result").getObject(0).getString("content")).getBytes();
 		}
-		else if(resourceServiceType.equals("filestorage"))
+		else if(type.equals("png"))
 		{
-			logger.info("Requesting firebus service : " + resourceService);
-			Payload result = firebus.requestService(resourceService, new Payload(name));
-			logger.info("Received firebus service response from : " + resourceService);
-			fileStr = result.getString();
-		}
-		else if(resourceServiceType.equals("db"))
-		{
-			JSONObject result = request(resourceService, "{object:rbui_resource,filter:{name:" + name + "}}");
-			fileStr = result.getList("result").getObject(0).getString("content");
+			InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/client/png/" + name);
+			bytes = new byte[is.available()];
+			is.read(bytes);
 		}
 		else
 		{
-			InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/client/" + type + "/" + name);
-			byte[] bytes = new byte[is.available()];
-			is.read(bytes);
-			fileStr = new String(bytes);
+			if(resourceServiceType.equals("filestorage"))
+			{
+				logger.info("Requesting firebus service : " + resourceService);
+				Payload result = firebus.requestService(resourceService, new Payload(name));
+				logger.info("Received firebus service response from : " + resourceService);
+				bytes = result.getBytes();
+			}
+			else if(resourceServiceType.equals("db"))
+			{
+				JSONObject result = request(resourceService, "{object:rbui_resource,filter:{name:" + name + "}}");
+				bytes = result.getList("result").getObject(0).getString("content").getBytes();
+			}
+			else
+			{
+				InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/client/" + type + "/" + name);
+				bytes = new byte[is.available()];
+				is.read(bytes);
+			}
+			
 		}
-		return fileStr;
+		return bytes;
 	}
 	
 	protected String getResourceMimeType(String name)
@@ -339,6 +343,8 @@ public class UIServer extends RedbackAuthenticatedService
 			mime = "image/svg+xml";
 		else if(name.endsWith(".ico"))
 			mime = "image/x-icon";
+		else if(name.endsWith(".png"))
+			mime = "image/png";
 		return mime;
 	}
 		

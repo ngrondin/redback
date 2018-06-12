@@ -33,7 +33,7 @@ rb-form {
 
 .rb-include {
 	display: flex;
-	#flex: 1 0 auto;
+	flex: 1 1 auto;
 	overflow:hidden;
 }
 
@@ -53,8 +53,8 @@ rb-text {
 rb-map { 
 	display: flex;
 	flex:1;
-	width: 3000px;
-	height: 2000px;
+	#width: 3000px;
+	#height: 2000px;
 }
 
 .rb-dropdown-panel {

@@ -32,7 +32,7 @@
 	data-ng-init="page = '../view/<%=config.getString('defaultview')%>'">
 	<md-toolbar 
 		class="md-hue-2 md-toolbar-tools"
-		style="flex-direction:row">
+		style="flex-direction:row; min-height:52px; height:52px">
 		<div 
 			style="display:flex; flex-direction:row; flex:0 0 auto;">
 			<h3 flex="" md-truncate=""><%=config.getString('label')%></h3>

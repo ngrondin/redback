@@ -17,7 +17,7 @@
 				} else {
 					%>false<%
 				}			
-				%>}"
+				%>,icon:(object == selected ? '../resource/pin11.png' : '../resource/pin10.png')}"
 			events="{dragend:markerHasMoved, click:markerSelected}">
 		</ui-gmap-marker>
 		<ui-gmap-marker 
