@@ -127,7 +127,7 @@ rb-tab-header-section {
 
 rb-tab-content-section {
 	display: flex;
-	flex: 0 0 auto;
+	flex: 1 0 auto;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	border: 0px Solid;
@@ -168,9 +168,31 @@ rb-list-scroll {
 	overflow: auto;
 }
 
+.rb-list-item-circle {
+	margin-right: 10px;
+	width: 40px;
+	height: 40px;
+	background-color: lightgray;
+	text-align: center;
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;	
+}
+
+.rb-list-item-initials {
+	#position: relative;
+	#top: 25px; /* 25% of parent */
+	font-size: 18px; /* 50% of parent */
+	line-height: 40px; /* 50% of parent */
+	color: white;
+	#font-family: "Courier New", monospace;
+	#font-weight: bold;
+}
+
 .list-item-active {
   #background-color: #d5d5ff;
   border-left: 4px Solid red;
+  padding-left: -4px;
 }
 
 .list-item-highlighted {
@@ -362,6 +384,26 @@ rb-match-scheduler {
 
 md-input-container .md-errors-spacer{
 	min-height: 0px !important;
+}
+
+
+rb-file-input {
+	display: flex;
+	flex-direction: column;
+}
+
+rb-file-input input{
+    display: block !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    z-index: 100 !important;
+    margin-top: -20px;
+    padding-top: -20px;
+    top: -20px;
+}
+
+rb-file-input img {
+	max-width: 400px;
 }
 
 ::-webkit-scrollbar-track

@@ -13,6 +13,7 @@ import com.nic.firebus.utils.JSONException;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.services.AccessManager;
 import com.nic.redback.services.ConfigurationServer;
+import com.nic.redback.services.FileServer;
 import com.nic.redback.services.IDGenerator;
 import com.nic.redback.services.ObjectServer;
 import com.nic.redback.services.ProcessServer;
@@ -65,7 +66,7 @@ public abstract class RedbackService implements  ServiceProvider
 			return null;
 		}
 	}
-
+	
 	protected void error(String msg) throws RedbackException
 	{
 		error(msg, null);
@@ -126,6 +127,10 @@ public abstract class RedbackService implements  ServiceProvider
 		else if(type.equalsIgnoreCase("accessmanager"))
 		{
 			return new AccessManager(config);
+		}
+		else if(type.equalsIgnoreCase("fileservice"))
+		{
+			return new FileServer(config);
 		}
 		else if(type.equalsIgnoreCase("configurationserver"))
 		{

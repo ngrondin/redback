@@ -1,7 +1,11 @@
 <md-list-item 
 	class="rb-menu-group md-hue-2"
-	ng-click="menutoggle.group<%=config.getString('_id')%> = !menutoggle.group<%=config.getString('_id')%>">
-	<md-icon md-svg-icon="<%=config.getString('icon')%>"></md-icon>
+	ng-click="menutoggle.group<%=config.getString('_id')%> = !menutoggle.group<%=config.getString('_id')%>"><%
+if(config.getString('icon').indexOf(':') >= 0) {%>
+	<md-icon md-svg-icon="<%=config.getString('icon')%>"></md-icon><%
+} else {%>
+	<md-icon><%=config.getString('icon')%></md-icon><%
+}%>
 	<span 
 		flex 
 		ng-show="largemenu">

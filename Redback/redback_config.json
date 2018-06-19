@@ -59,6 +59,16 @@
 			}
 		},
 		{
+			type:"fileservice",
+			name:"rbfs",
+			config:{
+				metadatadb:"mongo",
+				accessmanagementservice:"rbam",
+				fileadapters:["rbfiles"],
+				defaultadapter:"rbfiles"
+			}
+		},
+		{
 			type:"configurationserver",
 			name:"rbcf",
 			config:{
@@ -75,7 +85,7 @@
 			"type":"httplistener",
 			"config": {
 				"port":"8000",
-				"services": ["rbos", "rbui", "rbpm", "rbcf"]		
+				"services": ["rbos", "rbui", "rbpm", "rbfs", "rbcf"]		
 			}
 		},
 		{

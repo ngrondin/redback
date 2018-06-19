@@ -30,7 +30,7 @@
 				} else {
 					%>false<%
 				}			
-				%>}"
+				%>,icon:'../resource/pin11.png'}"
 			events="{dragend:markerHasMoved, click:markerSelected}">
 		</ui-gmap-marker>
 	</ui-gmap-google-map>

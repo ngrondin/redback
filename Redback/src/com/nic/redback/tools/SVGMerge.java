@@ -71,7 +71,7 @@ public class SVGMerge
 					if(node instanceof Element)
 					{
 						Element localElement = (Element)node;
-						if(hasChildElement(localElement))
+						if(hasChildElement(localElement)  ||  localElement.getNodeName().equalsIgnoreCase("path"))
 						{
 							Element newElement = processElement(localElement, scale);
 							masterDoc.adoptNode(newElement);
@@ -108,16 +108,6 @@ public class SVGMerge
 	public static Element processElement(Element inElement, double scale)
 	{
 		Element outElement = (Element)inElement.cloneNode(false);
-		/*
-		NamedNodeMap attributes = inElement.getAttributes();
-		for(int i = 0; i < attributes.getLength(); i++)
-		{
-			Node attribute = attributes.item(i);
-			//System.out.println(attribute.getNodeName());
-			//if(attribute.getNodeName() == "d")
-			//	outElement.setAttribute(attribute.getNodeName(), processD(inElement.getAttribute(attribute.getNodeName()), scale));
-		}
-		*/
 		NodeList list = inElement.getChildNodes();
 		for(int i = 0; i < list.getLength(); i++)
 		{	
@@ -131,79 +121,5 @@ public class SVGMerge
 		return outElement;
 	}
 
-	/*
-	public static String processD(String in, double scale)
-	{
-		NumberFormat formatter = new DecimalFormat("#0.000");     
-		String out = "";
-		int pos = 0;
-		int state = 0;
-		char command = 0;
-		String numStr = "";
-		int numCount = 0;
-		while(pos < in.length())
-		{
-			char c = in.charAt(pos);
-			if(state == 0)
-			{
-				command = c;
-				System.out.println(command);
-				out += command;
-				state = 1;
-			}
-			else if(state == 1)
-			{
-				if(c == '-'  ||  Character.isDigit(c))
-				{
-					pos--;
-					state = 2;
-				}
-			}
-			else if(state == 2)
-			{
-				if(c == ','  ||  c == ' ' ||  Character.isAlphabetic(c)   ||  (c == '-'  &&  numStr.length() > 0))
-				{
-					Double val = null;
-					try
-					{
-						val = Double.parseDouble(numStr);
-					}
-					catch(Exception e)
-					{
-						System.out.println(numStr);
-					}
-					val *= scale;
-					if(numCount > 0)
-						out += ",";
-					out += formatter.format(val);
-					numStr = "";
-					numCount++;
 
-					if(c == ' ' || c == ',')
-					{
-						state = 1;
-					}
-					else if(c == '-')
-					{
-						pos--;
-						state = 2;
-					}
-					else if(Character.isAlphabetic(c))
-					{
-						numCount = 0;
-						pos--;
-						state = 0;
-					}
-				}
-				else
-				{
-					numStr += c;
-				}
-			}
-			pos++;
-		}
-		return out;
-	}
-	
-	*/
 }

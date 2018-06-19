@@ -15,7 +15,6 @@ import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
-import com.nic.redback.services.processserver.ProcessInstance;
 import com.nic.redback.services.processserver.ProcessManager;
 
 public class ProcessServer extends RedbackAuthenticatedService implements Consumer

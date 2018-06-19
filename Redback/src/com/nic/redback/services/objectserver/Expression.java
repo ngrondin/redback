@@ -10,7 +10,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import com.nic.redback.RedbackException;
-import com.nic.redback.utils.SessionRightsJSFunction;
+import com.nic.redback.security.js.SessionRightsJSFunction;
 
 
 public class Expression

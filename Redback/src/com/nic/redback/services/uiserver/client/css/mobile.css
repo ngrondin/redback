@@ -107,6 +107,25 @@ input {
 	font-size: 115%;
 }
 
+rb-file-input {
+	display: flex;
+	flex-direction: column;
+}
+
+rb-file-input input{
+    display: block !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    z-index: 100 !important;
+    margin-top: -20px;
+    padding-top: -20px;
+    top: -20px;
+}
+
+rb-file-input img {
+	max-width: 100%;
+}
+
 .rb-search-container {
 	margin: 5px 5px;
 }
@@ -216,6 +235,28 @@ rb-list-scroll {
   #background-color: #d5d5ff;
   border-left: 4px Solid red;
 }
+
+.rb-list-item-circle {
+	margin-right: 10px;
+	width: 40px;
+	height: 40px;
+	background-color: lightgray;
+	text-align: center;
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;	
+}
+
+.rb-list-item-initials {
+	#position: relative;
+	#top: 25px; /* 25% of parent */
+	font-size: 18px; /* 50% of parent */
+	line-height: 40px; /* 50% of parent */
+	color: white;
+	#font-family: "Courier New", monospace;
+	#font-weight: bold;
+}
+
 
 .list-item-highlighted {
   background: LightGrey;

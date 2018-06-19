@@ -342,7 +342,86 @@
 			}
 		};
 	});			
+			
+	/***********************************/
+	/** File Input Directive	 	  **/
+	/***********************************/
 	
+	module.directive('rbFileInput', function($compile) {
+		return {
+			restrict:'E',
+			scope:true,
+			controller: function($scope, $attrs, $http, $compile) {
+				$scope.element = null;
+				$scope.inputElement = null;
+				$scope.fileuids = [];
+				$scope.currentFile = null;
+				$scope.touchX = null;
+				$scope.touchFileUID = null;
+				$scope.attributeName = $attrs.rbAttribute;
+				
+				$scope.fileSelected = function() {
+					$scope.currentFile = $scope.inputElement.files[0];
+					var fr = new FileReader();
+					fr.onload = $scope.uploadFile;
+					fr.readAsArrayBuffer($scope.currentFile);
+				}
+				
+				$scope.uploadFile = function(e) {
+					$http({
+						url:'../../rbfs', 
+						method: 'POST',
+						data: new Uint8Array(e.target.result),
+						headers:{'Content-Type': $scope.currentFile.type, 'rb-filename': $scope.currentFile.name},
+						transformRequest: []
+					})
+					.success(function(response) {
+						var currentVal = $scope.object.data[$scope.attributeName];
+						var newUID = response.uid;
+						$scope.object.data[$scope.attributeName] = currentVal + (currentVal.length != 0 ? ',' : '') + newUID;
+						$scope.object.attributeHasChanged($scope.attributeName, $http);
+						$scope.currentFile = null;
+					})
+					.error(function(error, status) {
+						alert(error.error);
+					});
+				}
+				
+				$scope.touchStart = function(e, scp) {
+					$scope.touchX = e.touches[0].clientX;
+					$scope.touchFileUID = scp.fileuid;
+				}
+				
+				$scope.touchMove = function(e, scp) {
+					if($scope.touchFileUID = scp.fileuid) {
+						var pos = e.touches[0].clientX;
+						if(pos > $scope.touchX + 200) {
+							var index = $scope.fileuids.indexOf($scope.touchFileUID);
+							if(index > -1)
+							{
+								$scope.fileuids.splice(index, 1);
+								$scope.object.data[$scope.attributeName] = $scope.fileuids.toString();
+								$scope.object.attributeHasChanged($scope.attributeName, $http);
+							}
+						}
+					}
+				}
+				
+				$scope.$watch('object.data.' + $scope.attributeName, function(newValue, oldValue) {
+					if(newValue != null  &&  newValue.length > 0) {
+						$scope.fileuids = newValue.split(',');
+					} else {
+						$scope.fileuids = [];
+					}
+				});
+			},
+			link: function($scope, $element, $attrs) {
+				$scope.element = $element;
+				$scope.inputElement = $scope.element[0].querySelector('input');
+				$element.bind('change', $scope.fileSelected);
+			}
+		};
+	});	
 	
 	/***********************************/
 	/** Root Controller			 	  **/
@@ -371,7 +450,24 @@
 		
 		$scope.today = function() {
 			return (new Date());			
-		}		
+		}
+
+		$scope.getInitials = function(str)
+		{
+			var initials = '';
+			var isWordStart = true;
+			for(var i = 0; i < str.length; i++) {
+				var c = str.charAt(i);
+				if(isWordStart) {
+					initials = initials + c;
+					isWordStart = false;
+				}
+				if(c == ' ')
+					isWordStart = true;
+			}
+			return initials;
+		}
+		
 	}).config(function($mdIconProvider) {
 	    $mdIconProvider
 	       .iconSet('wms', '../resource/wms.svg', 24);

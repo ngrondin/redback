@@ -16,6 +16,7 @@ import com.nic.firebus.utils.FirebusDataUtil;
 import com.nic.firebus.utils.JSONObject;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
+import com.nic.redback.security.js.UserProfileJSWrapper;
 import com.nic.redback.services.objectserver.js.ObjectManagerJSWrapper;
 import com.nic.redback.services.objectserver.js.RedbackObjectJSWrapper;
 import com.nic.redback.utils.FirebusJSWrapper;
@@ -451,6 +452,7 @@ public class RedbackObject
 		Bindings context = script.getEngine().createBindings();
 		context.put("self", new RedbackObjectJSWrapper(this));
 		context.put("om", new ObjectManagerJSWrapper(objectManager, session));
+		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session.getSessionId().toString()));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(objectManager.getGlobalVariables()));
 		context.put("log", new LoggerJSFunction());
