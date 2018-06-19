@@ -349,6 +349,8 @@
 					.success(function(response) {
 						var currentVal = $scope.object.data[$scope.attributeName];
 						var newUID = response.uid;
+						if(currentVal == null)
+							currentVal = '';
 						$scope.object.data[$scope.attributeName] = currentVal + (currentVal.length != 0 ? ',' : '') + newUID;
 						$scope.object.attributeHasChanged($scope.attributeName, $http);
 						$scope.currentFile = null;
