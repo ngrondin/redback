@@ -4,7 +4,6 @@
 	<link rel="shortcut icon" href="../resource/favicon.ico" />
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css"/>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-	<link rel="stylesheet" href="../resource/desktopicon.css"/>
 	<link rel="stylesheet" href="../resource/desktop.css" type="text/css" />
 	<link rel="stylesheet" href="../resource/mdPickers.css" type="text/css" />
 	<!--  <link rel="stylesheet" href="https://rawgit.com/indrimuska/angular-moment-picker/master/dist/angular-moment-picker.min.css">-->	
@@ -41,19 +40,33 @@
 			style="display:flex; flex-direction:row; flex:0 0 auto; font-size:80%;padding-top:5px;padding-left:10px;">
 			<h3 flex="" md-truncate="">&nbsp;|&nbsp;&nbsp;{{pageLabel}}</h3>
 		</div>
+		<div
+			style="display: flex; flex:1 0 auto;">
+		</div>
 		<div			
-			style="flex:1 0 auto;text-align:right;">
-			<md-menu md-offset="0 60">
+			style="display: flex; flex:0 0 auto;">
+			<md-menu md-offset="0 60"><%
+if(session.getUserProfile().getAttribute("image") != null) {%>
 				<image 
 					ng-click="$mdOpenMenu($event)"
-					src="data:<%=session.getUserProfile().getAttribute("image") %>">
+					style="cursor:pointer;"
+					src="data:<%=session.getUserProfile().getAttribute("image") %>"><%
+} else {%>
+				<div
+					class="rb-list-item-circle"
+					style="cursor:pointer;"
+					ng-click="$mdOpenMenu($event)">
+					<span class="rb-list-item-initials">{{getInitials('<%=session.getUserProfile().getAttribute("fullname")%>')}}</span>
+				</div><%
+}%>
 				<md-menu-content>
 			        		<md-menu-item>
 			        			<span><%=session.getUserProfile().getAttribute("fullname") %></span>        			
 			        		</md-menu-item>
 			        		<md-divider></md-divider>
 			        		<md-menu-item>
-			        			<span>Logout</span>
+			        			<md-button
+			        				ng-click="logout()">Logout</md-button>
 					</md-menu-item>
 				</md-menu-content>	
 			</md-menu>			

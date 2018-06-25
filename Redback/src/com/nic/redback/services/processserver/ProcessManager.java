@@ -3,10 +3,7 @@ package com.nic.redback.services.processserver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.UUID;
 import java.util.logging.Logger;
-
-import javax.script.ScriptException;
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
@@ -123,6 +120,9 @@ public class ProcessManager
 	
 	public Session getSystemUserSession(String domain) throws RedbackException 
 	{
+		if(sysUserSession != null  &&  sysUserSession.expiry < System.currentTimeMillis())
+			sysUserSession = null;
+
 		if(sysUserSession == null)
 		{
 			try
@@ -159,38 +159,56 @@ public class ProcessManager
 	public ArrayList<JSONObject> getAssignments(Session session, String extpid, JSONObject filter, JSONList viewdata) throws RedbackException
 	{
 		ArrayList<JSONObject> retList = new ArrayList<JSONObject>();
-		JSONObject fullFilter = null;
+		JSONObject fullFilter = new JSONObject();
 		if(filter != null)
-			fullFilter = (JSONObject)filter.getCopy();
-		else
-			fullFilter = new JSONObject();
-		if(extpid == null)
-			fullFilter.put("assignees.id", session.getUserProfile().getUsername());
-		else
-			fullFilter.put("assignees.id", extpid);
+			fullFilter.merge(filter);
+		String assigneeId = (extpid != null ? extpid : session.getUserProfile().getUsername());
+		JSONList assigneeOrList = new JSONList();
+		JSONObject assigneeOrTerm1 = new JSONObject();
+		assigneeOrTerm1.put("assignees.id", assigneeId);
+		assigneeOrList.add(assigneeOrTerm1);
+		JSONObject assigneeOrTerm2 = new JSONObject();
+		assigneeOrTerm2.put("lastactioner.id", assigneeId);
+		assigneeOrList.add(assigneeOrTerm2);		
+		fullFilter.put("$or", assigneeOrList);
 		ArrayList<ProcessInstance> instances = findProcesses(session, fullFilter);
 		for(int i = 0; i < instances.size(); i++)
 		{
 			ProcessInstance pi = instances.get(i);
 			Process process = getProcess(pi.getProcessName());
 			ProcessUnit pu = process.getNode(pi.getCurrentNode());
+			JSONObject notification = null;
 			if(pu instanceof InteractionUnit)
 			{
-				JSONObject notification = ((InteractionUnit)pu).getNotification(session, extpid, pi);
-				if(notification != null)
+				notification = ((InteractionUnit)pu).getNotification(session, extpid, pi);
+			}
+			else
+			{
+				notification = new JSONObject();
+				notification.put("process", pi.getProcessName());
+				notification.put("pid", pi.getId());
+				notification.put("interaction", "processexception");
+				notification.put("message", "The process has stopped due to an exception and requires restart");
+				JSONList actionList = new JSONList();
+				JSONObject action = new JSONObject();
+				action.put("action", "restart");
+				action.put("description", "Restart");
+				actionList.add(action);
+				notification.put("actions", actionList);
+			}
+			if(notification != null)
+			{
+				if(viewdata != null  &&  viewdata.size() > 0)
 				{
-					if(viewdata != null  &&  viewdata.size() > 0)
+					JSONObject data = new JSONObject();
+					for(int j = 0; j < viewdata.size(); j++)
 					{
-						JSONObject data = new JSONObject();
-						for(int j = 0; j < viewdata.size(); j++)
-						{
-							String key = viewdata.getString(j); 
-							data.put(key, pi.getData().getString(key));
-						}
-						notification.put("data", data);
+						String key = viewdata.getString(j); 
+						data.put(key, pi.getData().getString(key));
 					}
-					retList.add(notification);
+					notification.put("data", data);
 				}
+				retList.add(notification);
 			}
 		}
 		return retList;
@@ -201,7 +219,16 @@ public class ProcessManager
 		ProcessInstance pi = getProcessInstance(pid);
 		logger.info("Processing action " + event + " on process " + pi.getProcessName() + ":" + pid);
 		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
-		JSONObject result = process.processAction(session, extpid, pi, event, data);
+		ProcessUnit pu = process.getNode(pi.getCurrentNode());
+		JSONObject result = null;
+		if(pu instanceof InteractionUnit)
+		{
+			result = process.processAction(session, extpid, pi, event, data);
+		}
+		else
+		{
+			result = process.continueInstance(pi);
+		}
 		logger.info("Finished processing action");
 		return result;
 	}
@@ -234,22 +261,6 @@ public class ProcessManager
 		return list;
 	}
 	
-	/*
-	public void notifyProcess(Session session, String extpid, String pid, JSONObject notification) throws RedbackException
-	{
-		logger.info("Notifying process " + pid + " with " + notification);
-		//ProcessInstance pi = getProcessInstance(pid);
-		notification.put("_id", UUID.randomUUID().toString());
-		notification.put("pid", pid);
-		notification.put("fromuser", session.getUserProfile().getUsername());
-		if(extpid != null)
-			notification.put("frompid", extpid);
-		//pi.addNotification(notification);
-		firebus.publish(configServiceName, new Payload("{object:rbpm_notification,data:" + notification.toString() + ", operation:replace}"));
-		logger.info("Finished notifying process");
-	}
-	*/
-	
 	protected ProcessInstance getFromCurrentTransaction(String pid)
 	{
 		long txId = Thread.currentThread().getId();
@@ -270,7 +281,7 @@ public class ProcessManager
 		transactions.get(txId).put(pi.getId(), pi);
 	}
 	
-	public void commitCurrentTransaction() throws ScriptException, RedbackException
+	public void commitCurrentTransaction() 
 	{
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))

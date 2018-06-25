@@ -17,6 +17,20 @@ public class Assignee
 		assignee = a;
 	}
 	
+	public Assignee(String username, String pid)
+	{
+		if(pid == null)
+		{
+			assigneeType = USER;
+			assignee = username;
+		}
+		else
+		{
+			assigneeType = PROCESS;
+			assignee = pid;
+		}
+	}
+	
 	public Assignee(JSONObject c)
 	{
 		String atStr = c.getString("type");
@@ -37,6 +51,14 @@ public class Assignee
 	public int getType()
 	{
 		return assigneeType;
+	}
+	
+	public boolean equals(Assignee other)
+	{
+		if(assigneeType == other.getType()  &&  assignee.equals(other.getId()))
+			return true;
+		else
+			return false;
 	}
 	
 	public JSONObject getJSON()

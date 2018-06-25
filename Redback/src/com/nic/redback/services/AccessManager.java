@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
+import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.JSONEntity;
 import com.nic.firebus.utils.JSONList;
 import com.nic.firebus.utils.JSONLiteral;
@@ -23,7 +24,7 @@ import com.nic.redback.security.Session;
 import com.nic.redback.security.UserProfile;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
-public class AccessManager extends RedbackService
+public class AccessManager extends RedbackService implements Consumer
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected HashMap<String, Role> roles;
@@ -138,6 +139,22 @@ public class AccessManager extends RedbackService
 					response.put("result", respList);
 				}
 			}
+			else if(action.equals("logout"))
+			{
+				String sessionidStr = request.getString("sessionid");
+				UUID sessionId = UUID.fromString(sessionidStr);
+				Session session = getSessionById(sessionId);
+				if(session != null)
+				{	
+					logoutSession(session);
+					response.put("result", "ok");
+				}
+				else
+				{
+					response.put("result", "failed");
+					response.put("error", "Session not found");						
+				}
+			}
 		}
 		catch(Exception e)
 		{	
@@ -154,6 +171,30 @@ public class AccessManager extends RedbackService
 	{
 		return null;
 	}
+	
+	public void consume(Payload payload)
+	{
+		logger.info("Access manager consumer start");
+		try
+		{
+			JSONObject request = new JSONObject(payload.getString());
+			String action = request.getString("action");
+			
+			if(action.equals("dropfromcache"))
+			{
+				UUID sessionId = UUID.fromString(request.getString("sessionid"));
+				for(int i = 0; i < cachedSessions.size(); i++)
+					if(cachedSessions.get(i).sessionId.equals(sessionId))
+							cachedSessions.remove(i);
+			}
+		}
+		catch(Exception e)
+		{	
+			logger.severe(e.getMessage());
+		}
+		logger.info("Access manager consumer finish");
+	}
+
 	
 	protected String hashString(String str) throws InvalidKeySpecException
 	{
@@ -192,6 +233,13 @@ public class AccessManager extends RedbackService
 		cachedSessions.add(session);
 		firebus.publish(configService, new Payload("{object:rbam_session, data:{_id:\""+ sessionId.toString()+"\", username:\"" + username + "\", expiry:" + expiry + "}}"));
 		return session;
+	}
+	
+	protected void logoutSession(Session session)
+	{
+		session.expiry = System.currentTimeMillis();
+		firebus.publish(configService, new Payload("{object:rbam_session, data:{_id:\""+ session.getSessionId().toString()+"\", username:\"" + session.getUserProfile().getUsername() + "\", expiry:" + session.expiry + "}}"));
+		firebus.publish(this.serviceName, new Payload("{action:dropfromcache, sessionid:\""+ session.getSessionId().toString()+"\"}"));
 	}
 	
 	protected Session getSessionById(UUID sessionId) throws RedbackException

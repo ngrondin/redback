@@ -111,7 +111,7 @@ public class ObjectManager
 					}
 					JSONObject relatedObjectFilter = new JSONObject();
 					relatedObjectFilter.put("$or", orList);
-					ArrayList<RedbackObject> result = getObjectList(session, relatedObjectConfig.getObjectName(), relatedObjectFilter);
+					ArrayList<RedbackObject> result = getObjectList(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null);
 					for(int k = 0; k < result.size(); k++)
 					{
 						RedbackObject resultObject = result.get(k);
@@ -128,6 +128,63 @@ public class ObjectManager
 			}
 		}
 	}
+	
+	
+	protected JSONObject generateSearchFilter(Session session, String objectName, String searchText) throws RedbackException
+	{
+		JSONObject filter = new JSONObject();
+		JSONList orList = new JSONList();
+		ObjectConfig config = getObjectConfig(objectName);
+		Iterator<String> it = config.getAttributeNames().iterator();
+		while(it.hasNext())
+		{
+			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+			if(attributeConfig.getDBKey() != null)
+			{
+				if(!attributeConfig.hasRelatedObject())
+				{
+					JSONObject orTerm = new JSONObject();
+					orTerm.put(attributeConfig.getName(), "*" + searchText + "*");
+					orList.add(orTerm);
+				}
+				else
+				{
+					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+					String relatedObejctName = roc.getObjectName();
+					ObjectConfig relatedConfig = getObjectConfig(relatedObejctName);
+					if(relatedConfig != null)
+					{
+						JSONObject relatedFilter = new JSONObject();
+						JSONList relatedOrList = new JSONList();
+						Iterator<String> it2 = relatedConfig.getAttributeNames().iterator();
+						while(it2.hasNext())
+						{
+							AttributeConfig relatedAttributeConfig = relatedConfig.getAttributeConfig(it2.next());
+							if(relatedAttributeConfig.getDBKey() != null  &&  !relatedAttributeConfig.hasRelatedObject())
+							{
+								JSONObject orTerm = new JSONObject();
+								orTerm.put(relatedAttributeConfig.getName(), "*" + searchText + "*");
+								relatedOrList.add(orTerm);
+							}
+						}
+						relatedFilter.put("$or", relatedOrList);
+						ArrayList<RedbackObject> result = getObjectList(session, relatedObejctName, relatedFilter, null);
+						for(int k = 0; k < result.size(); k++)
+						{
+							RedbackObject resultObject = result.get(k);
+							Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
+							JSONObject orTerm = new JSONObject();
+							orTerm.put(attributeConfig.getName(), resultObjectLinkValue.getObject());
+							orList.add(orTerm);
+						}
+					}
+				}
+			}
+		}
+		filter.put("$or", orList);
+		return filter;
+	}
+
 
 	
 	public RedbackObject getObject(Session session, String objectName, String id) throws RedbackException
@@ -160,7 +217,7 @@ public class ObjectManager
 	}
 	
 	
-	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, JSONObject filterData) throws RedbackException
+	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, JSONObject filterData, String searchText) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
@@ -168,7 +225,12 @@ public class ObjectManager
 		{
 			try
 			{
-				JSONObject dbFilter = objectConfig.generateDBFilter(filterData);
+				JSONObject objectFilter = new JSONObject();
+				if(filterData != null)
+					objectFilter.merge(filterData);
+				if(searchText != null)
+					objectFilter.merge(generateSearchFilter(session, objectName, searchText));
+				JSONObject dbFilter = objectConfig.generateDBFilter(objectFilter);
 				dbFilter.put("domain", session.getUserProfile().getDBFilterDomainClause());
 				JSONObject dbResult = requestData(objectConfig.getCollection(), dbFilter);
 				JSONList dbResultList = dbResult.getList("result");
@@ -198,11 +260,11 @@ public class ObjectManager
 		return objectList;
 	}
 	
-	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, String uid, String attributeName, JSONObject filterData) throws RedbackException
+	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, String uid, String attributeName, JSONObject filterData, String searchText) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
-			return object.getRelatedList(attributeName, filterData);
+			return object.getRelatedList(attributeName, filterData, searchText);
 		else
 			return new ArrayList<RedbackObject>();
 	}

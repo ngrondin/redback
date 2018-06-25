@@ -40,12 +40,12 @@ public class ObjectManagerJSWrapper
 	
 	public JSObject getObjectList(String objectName, JSObject filterData) throws RedbackException
 	{
-		return convertToJSArray(objectManager.getObjectList(session, objectName, convertToJSONObject(filterData)));
+		return convertToJSArray(objectManager.getObjectList(session, objectName, convertToJSONObject(filterData), null));
 	}
 	
 	public JSObject getObjectList(String objectName, String uid, String attributeName, JSObject filterData) throws RedbackException
 	{
-		return convertToJSArray(objectManager.getObjectList(session, objectName, uid, attributeName, convertToJSONObject(filterData)));
+		return convertToJSArray(objectManager.getObjectList(session, objectName, uid, attributeName, convertToJSONObject(filterData), null));
 	}
 	
 	public JSObject updateObject(UserProfile userProfile, String objectName, String id, JSObject updateData) throws RedbackException, ScriptException

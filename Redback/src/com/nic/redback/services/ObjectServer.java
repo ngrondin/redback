@@ -78,7 +78,6 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 						else
 						{
 							throw new FunctionErrorException("A 'get' action requires a 'uid' attribute");
-							//responseData = new JSONObject("{\"requesterror\":\"A 'get' action requires a 'uid' attribute\"}");
 						}
 					}
 					else if(action.equals("list"))
@@ -87,13 +86,14 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 						JSONObject filter = request.getObject("filter");
 						String attribute = request.getString("attribute");
 						String uid = request.getString("uid");
+						String search = request.getString("search");
 						if(filter == null)
 							filter = new JSONObject();
 						
 						if(uid != null  &&  attribute != null)
-							objects = objectManager.getObjectList(session, objectName, uid, attribute, filter);
+							objects = objectManager.getObjectList(session, objectName, uid, attribute, filter, search);
 						else
-							objects = objectManager.getObjectList(session, objectName, filter);
+							objects = objectManager.getObjectList(session, objectName, filter, search);
 						objectManager.commitCurrentTransaction();
 
 						if(addRelated)
@@ -122,7 +122,6 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 						else
 						{
 							throw new FunctionErrorException("An 'update' action requires a 'uid' and a 'data' attribute");
-							//responseData = new JSONObject("{\"requesterror\":\"An 'update' action requires a 'uid' and a 'data' attribute\"}");
 						}
 					}
 					else if(action.equals("create"))
@@ -146,20 +145,17 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 						else
 						{
 							throw new FunctionErrorException("A 'create' action requires a 'uid' and a 'function' attribute");
-							//responseData = new JSONObject("{\"requesterror\":\"A 'create' action requires a 'uid' and a 'function' attribute\"}");
 						}
 					}
 					else
 					{
 						throw new FunctionErrorException("The '" + action + "' action is not valid as an object request");
-						//responseData = new JSONObject("{\"requesterror\":\"The '" + action + "' action is not valid as an object request\"}");
 					}
 				}
 			}
 			else
 			{
 				throw new FunctionErrorException("Requests must have at least an 'action' attribute");
-				//responseData = new JSONObject("{\"requesterror\":\"Requests must have at least an 'action' attribute\"}");
 			}					
 				
 			response.setData(responseData.toString());
@@ -170,7 +166,6 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 			logger.severe(errorMsg);
 			logger.severe(getStackTrace(e));
 			throw new FunctionErrorException(errorMsg);
-			//response.setData("{\r\n\t\"scripterror\":\"" + errorMsg.replace("\"", "'") + "\"\r\n}");
 		}		
 
 		logger.info("Object service finish");

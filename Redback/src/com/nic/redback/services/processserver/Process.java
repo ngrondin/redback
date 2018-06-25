@@ -78,6 +78,15 @@ public class Process
 		return result;
 	}
 	
+	public JSONObject continueInstance(ProcessInstance pi) throws RedbackException
+	{
+		logger.info("Continuing process '" + name + "' instance");
+		JSONObject result = new JSONObject();
+		execute(pi, result);
+		logger.info("Process '" + name + "' has continued '" + pi.getId() + "'");
+		return result;
+	}
+	
 	public JSONObject processAction(Session session, String extpid, ProcessInstance pi, String action, JSONObject data) throws RedbackException
 	{
 		logger.info("Processing action '" + action + "' of  process " + name + ":" + pi.getId() + "");

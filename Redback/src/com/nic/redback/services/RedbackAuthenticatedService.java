@@ -28,7 +28,6 @@ public abstract class RedbackAuthenticatedService extends RedbackService
 		try
 		{
 			Payload response = null;
-			//JSONObject responseData = null;
 			Session session = null;
 			String sessionId = payload.metadata.get("sessionid");
 			String username = null;//equest.getString("username");
@@ -63,8 +62,6 @@ public abstract class RedbackAuthenticatedService extends RedbackService
 			else
 			{
 				response = unAuthenticatedService(session, payload);
-				//responseData = new JSONObject("{\"authenticationerror\":\"Not logged in or invalid username or password\"}");
-				//response.setData(responseData.toString());
 			}
 			logger.info("Authenticated service finish");
 			return response;
@@ -100,5 +97,12 @@ public abstract class RedbackAuthenticatedService extends RedbackService
 		if(result != null  &&  result.getString("result").equals("ok"))
 			session = new Session(result.getObject("session"));
 		return session;
+	}
+	
+	protected void logout(Session session) throws  JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	{
+		JSONObject result = request(accessManagementService, "{action:logout, sessionid:\"" + session.getSessionId().toString() + "\"}");
+		if(result == null  ||  (result != null  &&  !result.getString("result").equals("ok")))
+			throw new RedbackException("Counld not log out the session");		
 	}
 }

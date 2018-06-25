@@ -196,7 +196,7 @@ public class RedbackObject
 						}
 						else
 						{
-							ArrayList<RedbackObject> resultList = objectManager.getObjectList(session, roc.getObjectName(), getRelatedFindFilter(name));
+							ArrayList<RedbackObject> resultList = objectManager.getObjectList(session, roc.getObjectName(), getRelatedFindFilter(name), null);
 							if(resultList.size() > 0)
 								related.put(name, resultList.get(0));
 						}
@@ -212,7 +212,7 @@ public class RedbackObject
 		 return null;
 	}
 	
-	public ArrayList<RedbackObject> getRelatedList(String attributeName, JSONObject additionalFilter) throws RedbackException
+	public ArrayList<RedbackObject> getRelatedList(String attributeName, JSONObject additionalFilter, String searchText) throws RedbackException
 	{
 		ArrayList<RedbackObject> relatedObjectList = null;
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
@@ -237,29 +237,19 @@ public class RedbackObject
 				JSONObject relatedObjectListFilter = getRelatedListFilter(attributeName);
 				if(relatedObjectListFilter == null)
 					relatedObjectListFilter = new JSONObject();
+				if(additionalFilter != null)
+					relatedObjectListFilter.merge(additionalFilter);
+				/*
 				Iterator<String> it = additionalFilter.keySet().iterator();
 				while(it.hasNext())
 				{
 					String key = it.next();
 					relatedObjectListFilter.put(key, additionalFilter.get(key));
-				}
-				relatedObjectList = objectManager.getObjectList(session, roc.getObjectName(), relatedObjectListFilter);
+				}*/
+				relatedObjectList = objectManager.getObjectList(session, roc.getObjectName(), relatedObjectListFilter, searchText);
 			}
 		}
 		return relatedObjectList;		
-	}
-	
-	protected JSONObject getRelatedListFilter(String attributeName) throws RedbackException
-	{
-		JSONObject filter = null;
-		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
-		if(roc != null)
-		{
-			FilterConfig fc = roc.getListFilterConfig();
-			if(fc != null)
-				filter = fc.generateFilter(this);
-		}
-		return filter;
 	}
 	
 	public JSONObject getRelatedFindFilter(String attributeName) throws RedbackException
@@ -272,6 +262,19 @@ public class RedbackObject
 			if(filter == null)
 				filter = new JSONObject();
 			filter.put(roc.getLinkAttributeName(), get(attributeName).getObject());
+		}
+		return filter;
+	}
+	
+	protected JSONObject getRelatedListFilter(String attributeName) throws RedbackException
+	{
+		JSONObject filter = null;
+		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
+		if(roc != null)
+		{
+			FilterConfig fc = roc.getListFilterConfig();
+			if(fc != null)
+				filter = fc.generateFilter(this);
 		}
 		return filter;
 	}

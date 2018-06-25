@@ -17,7 +17,8 @@ public class ProcessInstance
 	protected String currentNode;
 	protected boolean complete;
 	protected JSONList assignees;
-	protected JSONList receivedNotifications;
+	protected Assignee lastActioner;
+	//protected JSONList receivedNotifications;
 	
 	protected ProcessInstance(String pn, int v, String dom, JSONObject d)
 	{
@@ -28,7 +29,7 @@ public class ProcessInstance
 		data = d;	
 		complete = false;
 		assignees = new JSONList();
-		receivedNotifications = new JSONList();
+		//receivedNotifications = new JSONList();
 	}
 	
 	protected ProcessInstance(JSONObject c)
@@ -45,10 +46,15 @@ public class ProcessInstance
 		else
 			assignees = new JSONList();
 		
+		if(c.containsKey("lastactioner")  &&  c.get("lastactioner") instanceof JSONObject)
+			lastActioner = new Assignee(c.getObject("lastactioner"));
+		
+		/*
 		if(c.containsKey("receivednotifications")  &&  c.get("receivednotifications") instanceof JSONList)
 			receivedNotifications = c.getList("receivednotifications");
 		else
 			receivedNotifications = new JSONList();
+		*/
 	}
 	
 	public String getId()
@@ -111,6 +117,12 @@ public class ProcessInstance
 		return ret;
 	}
 	
+	public void setLastActioner(Assignee la)
+	{
+		lastActioner = la;
+	}
+	
+	/*
 	public void addNotification(JSONObject notification)
 	{
 		for(int i = 0; i < receivedNotifications.size(); i++)
@@ -118,11 +130,13 @@ public class ProcessInstance
 				receivedNotifications.remove(i--);
 		receivedNotifications.add(notification);
 	}
-	
+	*/
+	/*
 	public JSONList getReceivedNotifications()
 	{
 		return receivedNotifications;
 	}
+	*/
 	
 	public boolean isComplete()
 	{
@@ -140,8 +154,10 @@ public class ProcessInstance
 		retVal.put("lastupdate", new Date());
 		if(assignees.size() > 0)
 			retVal.put("assignees", assignees);
-		if(receivedNotifications.size() > 0)
-			retVal.put("receivednotifications", receivedNotifications);
+		if(lastActioner != null)
+			retVal.put("lastactioner", lastActioner.getJSON());
+		//if(receivedNotifications.size() > 0)
+		//	retVal.put("receivednotifications", receivedNotifications);
 		retVal.put("data", data);
 		return retVal;
 	}

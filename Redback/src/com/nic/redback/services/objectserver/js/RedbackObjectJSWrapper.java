@@ -119,6 +119,10 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 				else
 					val = FirebusDataUtil.convertJSObjectToDataObject(jso);
 			}
+			else
+			{
+				val = arg1;
+			}
 			rbObject.put(arg0, new Value(val));
 		} 
 		catch (RedbackException e)

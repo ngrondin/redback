@@ -11,10 +11,10 @@ for(var i = 0; i < list.size(); i++) {
 	var action = actionConfig.get("action") != null ? actionConfig.getString('action') : 'noAction'	
 	if(((action.equals('create')  ||  action.equals('save'))  &&  canWrite) || ((!action.equals('create')  &&  !action.equals('save'))  &&  canExecute)) {
 	%>
-        		<md-menu-item
-        			ng-hide="!(<%=actionConfig.getString('show')%>)">
+        		<md-menu-item>
         			<md-button
-				ng-click="action('<%=action%>', '<%=actionConfig.getString('param')%>');"><%=actionConfig.getString('label') %></md-button>
+				ng-click="action('<%=action%>', '<%=actionConfig.getString('param')%>');"
+				ng-disabled="!(<%=actionConfig.getString('show')%>)"><%=actionConfig.getString('label') %></md-button>
         		</md-menu-item><%
 	}
 }        		

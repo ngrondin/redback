@@ -125,7 +125,7 @@ public class ObjectConfig
 				}
 				dbFilter.put(key, dbList);
 			}
-			else if(key.equals("$multi"))
+/*			else if(key.equals("$multi"))
 			{
 				JSONList dbOrList = new JSONList();
 				Iterator<String> it2 = getAttributeNames().iterator();
@@ -139,8 +139,8 @@ public class ObjectConfig
 						dbOrList.add(generateDBFilter(orTerm));
 					}
 				}
-				dbFilter.put("$or", dbOrList);
-			}			
+				dbFilter.put("$or", generateDBMultiOrList(objectFilter.get(key)));
+			}	*/		
 			else
 			{
 				String attributeDBKey = null; 

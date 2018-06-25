@@ -108,7 +108,8 @@ public class UIServer extends RedbackAuthenticatedService
 				else if(category.equals("app"))
 				{
 					logger.info("Get app " + name);
-					response.setData(getApp(name, session));
+					JSONObject request = new JSONObject(payload.getString());
+					response.setData(getApp(name, session, request));
 					response.metadata.put("mime", "text/html");
 				}
 				else if(category.equals("view"))
@@ -146,7 +147,7 @@ public class UIServer extends RedbackAuthenticatedService
 		return get;
 	}
 	
-	protected String getApp(String name, Session session) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	protected String getApp(String name, Session session, JSONObject request) throws JSONException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		StringBuilder sb = new StringBuilder();
 		Bindings context = jsEngine.createBindings();
@@ -155,21 +156,31 @@ public class UIServer extends RedbackAuthenticatedService
 		{
 			if(session.getUserProfile().canRead("rb.apps." + name))
 			{
-				context.put("session", session);
-				JSONObject result = request(configService, "{object:rbui_app,filter:{name:" + name + "}}");
-				if(result != null)
+				String action = request.getString("action");
+				if(action != null  &&  action.equals("logout"))
 				{
-					JSONObject appConfig = result.getObject("result.0");
-					String page = appConfig.getString("page");
-					context.put("config", appConfig);
-					String html = executeJSP("pages/" + page, context);
-					if(html.contains("#menu#"))
-							html = injectInHTML(html, "menu", getMenu(session));
-					sb.append(html);
+					logout(session);
+					context.put("get", "app/" + name);
+					sb.append(executeJSP(("pages/login"), context));
 				}
 				else
 				{
-					sb.append(executeJSP("pages/error", context).replace("#errormessage#", "Application " + name + " cannot be found"));
+					context.put("session", session);
+					JSONObject result = request(configService, "{object:rbui_app,filter:{name:" + name + "}}");
+					if(result != null)
+					{
+						JSONObject appConfig = result.getObject("result.0");
+						String page = appConfig.getString("page");
+						context.put("config", appConfig);
+						String html = executeJSP("pages/" + page, context);
+						if(html.contains("#menu#"))
+								html = injectInHTML(html, "menu", getMenu(session));
+						sb.append(html);
+					}
+					else
+					{
+						sb.append(executeJSP("pages/error", context).replace("#errormessage#", "Application " + name + " cannot be found"));
+					}
 				}
 			}
 			else
@@ -325,7 +336,9 @@ public class UIServer extends RedbackAuthenticatedService
 			{
 				InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/client/" + type + "/" + name);
 				bytes = new byte[is.available()];
-				is.read(bytes);
+				int bytesRead = 0;
+				while(is.available() > 0)
+					bytesRead += is.read(bytes, bytesRead, (bytes.length - bytesRead));
 			}
 			
 		}

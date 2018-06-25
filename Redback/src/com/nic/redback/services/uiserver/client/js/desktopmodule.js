@@ -100,6 +100,7 @@
 				$scope.displayAttributeName = $attrs.rbDisplayAttribute;
 				$scope.parentAttributeName = $attrs.rbParentAttribute;
 				$scope.childAttributeName = $attrs.rbChildAttribute;
+				$scope.searchKeyCount = 0;
 				$scope.listConfig = {
 					parents:[], 
 					list:[], 
@@ -162,7 +163,6 @@
 						};
 						$scope.listConfig.open = true;
 						$scope.listConfig.parents = [];
-						//$scope.element.val('');
 						$scope.inputValue = '';
 						$scope.mdPanel.open(config).then(function(rez) {$scope.mdPanelRef = rez;});
 						$scope.loadList();
@@ -170,7 +170,7 @@
 				};
 				$scope.loadList = function() {
 					if($scope.listConfig.open == true) {
-						var filter = {$multi:'*' + $scope.inputValue + '*'};
+						var filter = {};
 						if($scope.parentAttributeName != null  &&  $scope.childAttributeName != null) {
 							var lastParentKey = null;
 							if($scope.listConfig.parents.length > 0) {
@@ -179,7 +179,7 @@
 							} 
 							filter[$scope.parentAttributeName] = lastParentKey;
 						}
-						var req = {action:"list", object:$scope.object.objectname, uid:$scope.object.uid, attribute:$scope.attributeName, filter:filter, options:{addrelated:true}};
+						var req = {action:"list", object:$scope.object.objectname, uid:$scope.object.uid, attribute:$scope.attributeName, filter:filter, search:$scope.inputValue, options:{addrelated:true}};
 						$scope.listConfig.loading = true;
 						$http.post("../../rbos", req)
 							.success(function(response) {
@@ -204,7 +204,8 @@
 							$scope.mdPanelRef.close();
 							handled = true;
 					} else {
-						setTimeout(function() {$scope.loadList()}, 100);
+						$scope.searchKeyCount = $scope.searchKeyCount + 1;
+						setTimeout(function() {$scope.search()}, 500);
 					}					
 					if (handled) {
 						$scope.$apply();
@@ -212,6 +213,11 @@
 						event.stopImmediatePropagation();
 						event.Handled = true;
 					}							
+				};
+				$scope.search = function() {
+					if($scope.searchKeyCount == 1)
+						$scope.loadList();
+					$scope.searchKeyCount = $scope.searchKeyCount - 1;
 				};
 				$scope.dropDownClosed = function() {
 					if($scope.listConfig.selected != null) {
@@ -427,7 +433,7 @@
 	/** Root Controller			 	  **/
 	/***********************************/
 	
-	module.controller('desktoproot', function rootCtl($scope,$attrs,$http) {
+	module.controller('desktoproot', function rootCtl($scope,$attrs,$http,$window) {
 		$scope.largemenu = true;
 		$scope.menuwidth = 300;
 		$scope.page = null;
@@ -451,19 +457,25 @@
 		$scope.today = function() {
 			return (new Date());			
 		}
+		
+		$scope.logout = function() {
+			$window.location.href = '/rbui/app/wms?action=logout';
+		}
 
 		$scope.getInitials = function(str)
 		{
 			var initials = '';
-			var isWordStart = true;
-			for(var i = 0; i < str.length; i++) {
-				var c = str.charAt(i);
-				if(isWordStart) {
-					initials = initials + c;
-					isWordStart = false;
+			if(str != null) {
+				var isWordStart = true;
+				for(var i = 0; i < str.length; i++) {
+					var c = str.charAt(i);
+					if(isWordStart) {
+						initials = initials + c;
+						isWordStart = false;
+					}
+					if(c == ' ')
+						isWordStart = true;
 				}
-				if(c == ' ')
-					isWordStart = true;
 			}
 			return initials;
 		}
@@ -551,7 +563,7 @@
 		return {
 			restrict:'E',
 			scope:true,
-			controller: function($scope, $attrs, $http, $element, $compile) {
+			controller: function($scope, $attrs, $http, $element, $compile, $timeout) {
 				$scope.objectName = $attrs.rbObject;
 				$scope.list = [];
 				$scope.selected = null;
@@ -560,6 +572,7 @@
 				$scope.searchText = "";
 				$scope.baseFilter = {};
 				$scope.searchText = null;
+				$scope.searchTypeCount = 0;
 				$scope.element = $element;
 				$scope.visible = false;
 				$scope.loading = false;
@@ -577,9 +590,17 @@
 				}
 				
 				$scope.search = function(searchText) {
-					$scope.clearList();		
 					$scope.searchText = searchText;
-					$scope.load();
+					$scope.searchTypeCount = $scope.searchTypeCount + 1;
+					$timeout($scope.loadSearch, 500);
+				}
+				
+				$scope.loadSearch = function() {
+					if($scope.searchTypeCount == 1) {
+						$scope.clearList();		
+						$scope.load();
+					}
+					$scope.searchTypeCount = $scope.searchTypeCount - 1;
 				}
 				
 				$scope.getBaseAndRelationshipFilter = function() {
@@ -605,6 +626,7 @@
 					return filter;
 				}
 				
+				/*
 				$scope.getFullFilter = function() {
 					var filter = $scope.getBaseAndRelationshipFilter();
 					if($scope.searchText != null  &&  $scope.searchText != '') {
@@ -612,10 +634,13 @@
 					}
 					return filter;
 				}
+				*/
 
 				$scope.load = function() {
 					if($scope.visible  &&  $scope.list.length == 0  &&  ($scope.relatedConfig == null ||  ($scope.relatedConfig != null  &&  $scope.relatedObject != null))) {
-						var req = {action:"list", object:$scope.objectName, filter:$scope.getFullFilter(), options:{addrelated:true, addvalidation:true}};
+						var req = {action:"list", object:$scope.objectName, filter:$scope.getBaseAndRelationshipFilter(), options:{addrelated:true, addvalidation:true}};
+						if($scope.searchText != null)
+							req.search = $scope.searchText;
 						$scope.loading = true;
 						$http.post("../../rbos", req)
 						.success(function(response) {
@@ -773,7 +798,7 @@
 
 		$scope.load = function() {
 			if($scope.visible  &&  $scope.list.length == 0) {
-				var req = {action:"getnotifications", filter:$scope.getFullFilter(), viewdata:['objectname', 'uid']};
+				var req = {action:"getassignments", filter:$scope.getFullFilter(), viewdata:['objectname', 'uid']};
 				$scope.loading = true;
 				$http.post("../../rbpm", req)
 				.success(function(response) {
@@ -1047,7 +1072,7 @@
 		
 		$scope.activate = function(ev) {
 			if($scope.$parent.object != null) {
-				$http.post("../../rbpm", {action:'getnotifications', filter:{'data.objectname':$scope.$parent.objectName, 'data.uid':$scope.$parent.object.uid}})
+				$http.post("../../rbpm", {action:'getassignments', filter:{'data.objectname':$scope.$parent.objectName, 'data.uid':$scope.$parent.object.uid}})
 				.success(function(response) {
 					if(response.result.length == 0) {
 						$scope.notification = {message:"No actions"};

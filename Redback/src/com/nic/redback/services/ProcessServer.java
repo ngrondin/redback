@@ -3,8 +3,6 @@ package com.nic.redback.services;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import javax.script.ScriptException;
-
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
@@ -83,62 +81,18 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 						throw new FunctionErrorException("A 'processaction' request requires 'pid' and 'processaction' attributes");
 					}
 				}
-				else if(action.equals("getnotifications"))
+				else if(action.equals("getassignments"))
 				{
 					String extpid = request.getString("extpid");
 					JSONObject filter = request.getObject("filter");
 					JSONList viewdata = request.getList("viewdata");
-					if(filter != null)
-					{
-						ArrayList<JSONObject> result = processManager.getAssignments(session, extpid, filter, viewdata);
-						JSONList responseList = new JSONList();
-						for(int i = 0; i < result.size(); i++)
-							responseList.add(result.get(i));
-						responseData = new JSONObject();
-						responseData.put("result", responseList);
-					}
-					else
-					{
-						throw new FunctionErrorException("A 'getnotifications' action requires a 'filter' attribute");
-					}
+					ArrayList<JSONObject> result = processManager.getAssignments(session, extpid, filter, viewdata);
+					JSONList responseList = new JSONList();
+					for(int i = 0; i < result.size(); i++)
+						responseList.add(result.get(i));
+					responseData = new JSONObject();
+					responseData.put("result", responseList);
 				}
-				/*
-				else if(action.equals("findprocesses"))
-				{
-					JSONObject filter = request.getObject("filter");
-					if(filter != null)
-					{
-						ArrayList<ProcessInstance> result = processManager.findProcesses(session, filter);
-						JSONList responseList = new JSONList();
-						for(int i = 0; i < result.size(); i++)
-							responseList.add(result.get(i).getId());
-						responseData = new JSONObject();
-						responseData.put("result", responseList);
-					}
-					else
-					{
-						throw new FunctionErrorException("A 'getactions' action requires a 'pid' attribute");
-						//responseData = new JSONObject("{\"requesterror\":\"A 'getactions' action requires a 'pid' attribute\"}");
-					}
-				}
-				else if(action.equals("notifyprocess"))
-				{
-					String extpid = request.getString("extpid");
-					String pid = request.getString("pid");
-					JSONObject notification = request.getObject("notification");
-					if(pid != null)
-					{
-						processManager.notifyProcess(session, extpid, pid, notification);
-						processManager.commitCurrentTransaction();
-						responseData = new JSONObject("{\"result\":\"OK\"}");
-					}
-					else
-					{
-						throw new FunctionErrorException("A 'processAction' request requires 'pid' and 'processaction' attributes");
-						//responseData = new JSONObject("{\"requesterror\":\"A 'processAction' request requires 'pid' and 'processaction' attributes\"}");
-					}
-				}	
-				*/				
 			}
 			else
 			{
@@ -147,11 +101,12 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 
 			response.setData(responseData.toString());
 		}
-		catch(ScriptException | JSONException | RedbackException e)
+		catch(JSONException | RedbackException e)
 		{
 			String errorMsg = buildErrorMessage(e);
 			logger.severe(errorMsg);
 			logger.severe(getStackTrace(e));
+			processManager.commitCurrentTransaction();
 			throw new FunctionErrorException(errorMsg);
 		}
 
