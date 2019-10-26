@@ -1,5 +1,6 @@
 package com.nic.redback;
 
+import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.exceptions.FunctionTimeoutException;
@@ -10,9 +11,9 @@ public abstract class RedbackDataService extends RedbackConfigurableService
 {
 	protected String dataService;
 	
-	public RedbackDataService(DataMap c)
+	public RedbackDataService(Firebus f, DataMap c)
 	{
-		super(c);
+		super(f, c);
 		dataService = config.getString("dataservice");
 	}
 	

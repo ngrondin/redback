@@ -341,8 +341,10 @@ public class RedbackObject
 			if(canWrite)
 			{
 				executeScriptsForEvent("onsave");
+				DataMap key = new DataMap();
+				key.put(config.getUIDDBKey(), getUID().getObject());
+
 				DataMap dbData = new DataMap();
-				dbData.put(config.getUIDDBKey(), getUID().getObject());
 				if(isNewObject)
 					dbData.put(config.getDomainDBKey(), domain.getObject());
 				
@@ -357,7 +359,7 @@ public class RedbackObject
 					}
 				}
 				updatedAttributes.clear();
-				objectManager.publishData(config.getCollection(), dbData);
+				objectManager.publishData(config.getCollection(), key, dbData);
 				executeScriptsForEvent("aftersave");
 				if(isNewObject)
 				{

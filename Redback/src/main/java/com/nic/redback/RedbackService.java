@@ -19,11 +19,13 @@ public abstract class RedbackService implements ServiceProvider
 	protected Firebus firebus;
 	protected DataMap config;
 	
-	public RedbackService(DataMap c)
+	public RedbackService(Firebus f, DataMap c)
 	{
+		firebus = f;
 		config = c;
 	}
 
+	/*
 	public void setName(String n)
 	{
 		serviceName = n;
@@ -33,6 +35,7 @@ public abstract class RedbackService implements ServiceProvider
 	{
 		firebus = fb;
 	}
+	*/
 	
 	protected DataMap request(String service, DataMap request) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{

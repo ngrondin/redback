@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
@@ -26,9 +27,9 @@ public class ConfigServer extends RedbackService
 	private String devpath;
 	private String classpath;
 
-	public ConfigServer(DataMap c) 
+	public ConfigServer(Firebus f, DataMap c) 
 	{
-		super(c);
+		super(f, c);
 		if(config.containsKey("devpath"))
 			devpath = config.getString("devpath");
 		classpath = "/com/nic/redback/config";

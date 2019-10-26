@@ -1,87 +1,108 @@
 package com.nic.redback;
 
 import java.io.FileInputStream;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.nic.firebus.Firebus;
+import com.nic.firebus.interfaces.BusFunction;
 import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.interfaces.ServiceProvider;
-import com.nic.firebus.standalone.StandaloneContainer;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
-import com.nic.redback.services.AccessManager;
-import com.nic.redback.services.ConfigDevelopmentServer;
-import com.nic.redback.services.ConfigServer;
-import com.nic.redback.services.FileServer;
-import com.nic.redback.services.IDGenerator;
-import com.nic.redback.services.ObjectServer;
-import com.nic.redback.services.ProcessServer;
-import com.nic.redback.services.UIServer;
 
-public class RedbackServer extends StandaloneContainer
+public class RedbackServer
 {
-	protected ArrayList<RedbackService> services;
+	private Logger logger = Logger.getLogger("com.nic.redback.RedbackServer");
+	protected ArrayList<BusFunction> services;
 	protected static ArrayList<Logger> loggers;
+	protected Firebus firebus;
 	
 	public RedbackServer(DataMap config)
 	{
-		super(config);
-		try
+		firebus = new Firebus(config.getString("network"), config.getString("password"));
+		DataList knownAddresses = config.getList("knownaddresses");
+		if(knownAddresses != null)
 		{
-			loggers = new ArrayList<Logger>();
-			DataList list = config.getList("loggers");
-			for(int i = 0; i < list.size(); i++)
+			for(int i = 0; i < knownAddresses.size(); i++)
 			{
-				DataMap loggerJSON = list.getObject(i);
-				Logger logger = Logger.getLogger(loggerJSON.getString("name"));
-				Formatter formatter = (Formatter)Class.forName(loggerJSON.getString("formatter")).newInstance();
-				FileHandler fileHandler = new FileHandler(loggerJSON.getString("filename"));
+				String address = knownAddresses.getObject(i).getString("address");
+				int port = Integer.parseInt(knownAddresses.getObject(i).getString("port"));
+				logger.fine("Adding known address " + address + ":" + port);
+				firebus.addKnownNodeAddress(address, port);
+			}
+		}
+		
+		List<Logger> loggers = new ArrayList<Logger>();
+		DataList loggerConfigs = config.getList("loggers");
+		for(int i = 0; i < loggerConfigs.size(); i++)
+		{
+			try
+			{
+				DataMap loggerConfig = loggerConfigs.getObject(i);
+				Logger logger = Logger.getLogger(loggerConfig.getString("name"));
+				Formatter formatter = (Formatter)Class.forName(loggerConfig.getString("formatter")).newInstance();
+				FileHandler fileHandler = new FileHandler(loggerConfig.getString("filename"));
 				fileHandler.setFormatter(formatter);
-				fileHandler.setLevel(Level.parse(loggerJSON.getString("level")));
+				fileHandler.setLevel(Level.parse(loggerConfig.getString("level")));
 				logger.addHandler(fileHandler);
 				logger.setUseParentHandlers(false);
-				logger.setLevel(Level.parse(loggerJSON.getString("level")));
+				logger.setLevel(Level.parse(loggerConfig.getString("level")));
 				loggers.add(logger);
 			}
-
-			services = new ArrayList<RedbackService>();
-			list = config.getList("services");
-			for(int i = 0; i < list.size(); i++)
+			catch(Exception e)
 			{
-				DataMap serviceDeployment = list.getObject(i);
-				String type = serviceDeployment.getString("type");
-				String name = serviceDeployment.getString("name");
-				DataMap serviceDeploymentConfig = serviceDeployment.getObject("config");
-				RedbackService service = instantiateService(type, serviceDeploymentConfig);
-				if(service != null)
+				logger.severe("General error when configuring loggers : " + e.getMessage());
+			}
+		}
+		
+		DataList serviceConfigs = config.getList("services");
+		for(int i = 0; i < serviceConfigs.size(); i++)
+		{
+			try 
+			{
+				logger.fine("Adding services to container");
+				DataMap serviceConfig = serviceConfigs.getObject(i); 
+				String className = serviceConfig.getString("class");
+				String name = serviceConfig.getString("name");
+				DataMap deploymentConfig = serviceConfig.getObject("config");
+				if(className != null && name != null)
 				{
-					service.setName(name);
-					services.add(service);
-					if(firebus != null)
+					try
 					{
-						service.setFirebus(firebus);
+						Class<?> c = Class.forName(className);
+						Constructor<?> cons = c.getConstructor(new Class[]{Firebus.class, DataMap.class});
+						logger.fine("Instantiating service " + name);
+						BusFunction service = (BusFunction)cons.newInstance(new Object[]{firebus, deploymentConfig});
 						if(service instanceof ServiceProvider)
-							firebus.registerServiceProvider(name, service, 10);
+							firebus.registerServiceProvider(name, ((ServiceProvider)service), 10);
 						if(service instanceof Consumer)
-							firebus.registerConsumer(name, (Consumer)service, 10);
+							firebus.registerConsumer(name, ((Consumer)service), 10);
+						services.add(service);
+					}
+					catch(Exception e)
+					{
+						logger.severe("Class " + className + " cannot be found in the classpath");
 					}
 				}
 				else
 				{
-					System.err.println("Did not find a class for service " + name + " of type " + type);
+					logger.severe("No class or name provided for service");
 				}
 			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
+			catch(Exception e)
+			{
+				logger.severe("General error message when instantiating a new adapter: " + e.getMessage());
+			}
 		}
 	}
 
-	
+/*	
 	public RedbackService instantiateService(String type, DataMap config)
 	{
 		if(type.equalsIgnoreCase("objectservice"))
@@ -118,6 +139,7 @@ public class RedbackServer extends StandaloneContainer
 		}
 		return null;
 	}
+	*/
 	
 	public static void main(String[] args)
 	{

@@ -2,6 +2,7 @@ package com.nic.redback;
 
 import java.util.logging.Logger;
 
+import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.exceptions.FunctionTimeoutException;
@@ -14,9 +15,9 @@ public abstract class RedbackAuthenticatedService extends RedbackDataService
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected String accessManagementService;
 
-	public RedbackAuthenticatedService(DataMap c)
+	public RedbackAuthenticatedService(Firebus f, DataMap c)
 	{
-		super(c);
+		super(f, c);
 		accessManagementService = config.getString("accessmanagementservice");
 	}
 	

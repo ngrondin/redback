@@ -2,7 +2,6 @@ package com.nic.redback.services;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -15,6 +14,7 @@ import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.exceptions.FunctionTimeoutException;
@@ -26,7 +26,6 @@ import com.nic.redback.RedbackAuthenticatedService;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
 import com.nic.redback.services.uiserver.HTML;
-import com.nic.redback.utils.RedbackStringBuilder;
 import com.nic.redback.utils.StringUtils;
 
 public class UIServer extends RedbackAuthenticatedService
@@ -38,9 +37,9 @@ public class UIServer extends RedbackAuthenticatedService
 	protected HashMap<String, DataMap> viewConfigs;
 
 
-	public UIServer( DataMap c)
+	public UIServer(Firebus f, DataMap c)
 	{
-		super(c);
+		super(f, c);
 		devpath = config.getString("devpath");
 		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		jspScripts = new HashMap<String, CompiledScript>();

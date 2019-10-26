@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
@@ -24,7 +25,6 @@ import com.nic.redback.security.Session;
 import com.nic.redback.security.UserProfile;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
-@SuppressWarnings("restriction")
 public class AccessManager extends RedbackDataService implements Consumer
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
@@ -37,9 +37,9 @@ public class AccessManager extends RedbackDataService implements Consumer
 	protected String sessionTable = "rbam_session";
 	protected String userTable = "rbam_user";
 	
-	public AccessManager(DataMap c) 
+	public AccessManager(Firebus f, DataMap c) 
 	{
-		super(c);
+		super(f, c);
 		expiryTime = 1800000;
 		cachedSessions = new ArrayList<Session>();
 		cachedUserProfiles = new ArrayList<UserProfile>();
@@ -285,13 +285,12 @@ public class AccessManager extends RedbackDataService implements Consumer
 					session = cachedSessions.get(i);
 				else
 					cachedSessions.remove(i);
-
 		
-		if(session == null)
+		if(session == null  &&  dataService != null)
 		{
 			try
 			{
-				DataMap sessionResult = getData("rbam_session", "{username:\"" + username + "\", expiry:{$gt:" + System.currentTimeMillis() + "}}");
+				DataMap	sessionResult = getData("rbam_session", "{username:\"" + username + "\", expiry:{$gt:" + System.currentTimeMillis() + "}}");
 				if(sessionResult.getList("result").size() > 0)
 				{
 					DataMap sessionJSON = sessionResult.getObject("result.0");
@@ -325,9 +324,7 @@ public class AccessManager extends RedbackDataService implements Consumer
 			{
 				ArrayList<UserProfile> list = listUserProfiles(new DataMap("{username:\"" + username + "\"}"));
 				if(list.size() > 0)
-				{
 					userProfile = list.get(0);
-				}
 			}
 			catch(Exception e)
 			{
@@ -344,17 +341,17 @@ public class AccessManager extends RedbackDataService implements Consumer
 		ArrayList<UserProfile> list = new ArrayList<UserProfile>();
 		try
 		{
-			DataMap userResult = getData("rbam_user", filter.toString());
-			for(int i = 0; i < userResult.getList("result").size(); i++)
+			DataList userConfigs = listUserConfigs(filter);
+			for(int i = 0; i < userConfigs.size(); i++)
 			{
-				DataMap userJSON = userResult.getObject("result." + i);
+				DataMap userConfig = userConfigs.getObject(i);
 				UserProfile userProfile = null;
 				for(int j = 0 ; j < cachedUserProfiles.size(); j++)
-					if(cachedUserProfiles.get(j).getUsername().equals(userJSON.getString("username")))
+					if(cachedUserProfiles.get(j).getUsername().equals(userConfig.getString("username")))
 						userProfile = cachedUserProfiles.get(j);
 				if(userProfile == null)
 				{
-					DataList rolesList = userJSON.getList("roles");
+					DataList rolesList = userConfig.getList("roles");
 					DataMap rights = new DataMap();
 					for(int j = 0; j < rolesList.size(); j++)
 					{
@@ -363,8 +360,8 @@ public class AccessManager extends RedbackDataService implements Consumer
 						DataMap roleRights = role.getAllRights();
 						mergeRights(rights, roleRights);
 					}
-					userJSON.put("rights", rights);
-					userProfile = new UserProfile(userJSON);	
+					userConfig.put("rights", rights);
+					userProfile = new UserProfile(userConfig);	
 					cachedUserProfiles.add(userProfile);
 				}
 				list.add(userProfile);
@@ -377,6 +374,37 @@ public class AccessManager extends RedbackDataService implements Consumer
 		}
 		return list;
 	}
+	
+	protected DataList listUserConfigs(DataMap filter) throws RedbackException
+	{
+		DataList list = new DataList();
+		try
+		{
+			if(dataService != null)
+			{
+				DataMap userResult = getData("rbam_user", filter.toString());
+				for(int i = 0; i < userResult.getList("result").size(); i++)
+				{
+					list.add(userResult.getList("result").get(i));
+				}			
+			}
+			if(config.containsKey("users"))
+			{
+				DataList userResult = config.getList("users");
+				for(int i = 0; i < userResult.size(); i++)
+				{
+					if(userResult.getObject(i).matches(filter))
+						list.add(userResult.get(i));
+				}			
+			}
+		}
+		catch(Exception e)
+		{
+			logger.severe(e.getMessage());
+			throw new RedbackException("Exception listing user profiles : ", e);
+		}
+		return list;
+	}	
 
 	protected void extendSession(Session session)
 	{

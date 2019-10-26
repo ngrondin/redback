@@ -2,6 +2,7 @@ package com.nic.redback.services;
 
 import java.util.logging.Logger;
 
+import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.exceptions.FunctionTimeoutException;
@@ -16,9 +17,9 @@ public class IDGenerator extends RedbackDataService
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	private DataMap configCache;
 
-	public IDGenerator(DataMap c) 
+	public IDGenerator(Firebus f, DataMap c) 
 	{
-		super(c);
+		super(f, c);
 		configCache = new DataMap();
 	}
 

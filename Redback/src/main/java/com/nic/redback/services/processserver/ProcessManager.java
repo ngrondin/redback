@@ -31,8 +31,9 @@ public class ProcessManager
 	protected Session sysUserSession;
 	protected DataMap globalVariables;
 
-	public ProcessManager(DataMap config)
+	public ProcessManager(Firebus fb, DataMap config)
 	{
+		firebus = fb;
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
@@ -42,11 +43,7 @@ public class ProcessManager
 		transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
 		globalVariables = config.getObject("globalvariables");
 	}
-	
-	public void setFirebus(Firebus fb)
-	{
-		firebus = fb;
-	}
+
 	
 	public Firebus getFirebus()
 	{

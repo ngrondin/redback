@@ -33,9 +33,9 @@ public class ConfigDevelopmentServer extends RedbackAuthenticatedService
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected String devPath;
 
-	public ConfigDevelopmentServer(DataMap c)
+	public ConfigDevelopmentServer(Firebus f, DataMap c)
 	{
-		super(c);
+		super(f, c);
 		if(config.containsKey("devpath"))
 			devPath = config.getString("devpath");
 /*		
@@ -88,10 +88,12 @@ public class ConfigDevelopmentServer extends RedbackAuthenticatedService
 		*/
 	}
 
+	/*
 	public void setFirebus(Firebus fb)
 	{
 		super.setFirebus(fb);
 	}
+	*/
 	
 	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
 	{

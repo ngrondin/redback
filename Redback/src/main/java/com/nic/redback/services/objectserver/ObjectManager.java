@@ -30,8 +30,9 @@ public class ObjectManager
 	protected HashMap<Long, HashMap<String, RedbackObject>> transactions;
 
 
-	public ObjectManager(DataMap config)
+	public ObjectManager(Firebus fb, DataMap config)
 	{
+		firebus = fb;
 		cacheConfigs = true;
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
@@ -41,11 +42,6 @@ public class ObjectManager
 			cacheConfigs = false;
 		objectConfigs = new HashMap<String, ObjectConfig>();
 		transactions = new HashMap<Long, HashMap<String, RedbackObject>>();
-	}
-	
-	public void setFirebus(Firebus fb)
-	{
-		firebus = fb;
 	}
 	
 	public Firebus getFirebus()
@@ -192,7 +188,7 @@ public class ObjectManager
 			try
 			{
 				DataMap dbFilter = new DataMap("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
-				dbFilter.put("domain", session.getUserProfile().getDBFilterDomainClause());
+				dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 				DataMap dbResult = requestData(objectConfig.getCollection(), dbFilter);
 				DataList dbResultList = dbResult.getList("result");
 				if(dbResultList.size() > 0)
@@ -400,10 +396,10 @@ public class ObjectManager
 		return request(dataServiceName, request);
 	}
 
-	protected void publishData(String collection, DataMap data)
+	protected void publishData(String collection, DataMap key, DataMap data)
 	{
 		logger.finest("Publishing to firebus service : " + dataServiceName + "  " + data.toString().replace("\r\n", "").replace("\t", ""));
-		firebus.publish(dataServiceName, new Payload("{object:" + collection + ",data:" + data + "}"));
+		firebus.publish(dataServiceName, new Payload("{object:" + collection + ", key: " + key + ", data:" + data + "}"));
 	}
 
 	protected void error(String msg) throws RedbackException

@@ -22,17 +22,19 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 	protected ProcessManager processManager;
 
 
-	public ProcessServer(DataMap c)
+	public ProcessServer(Firebus f, DataMap c)
 	{
-		super(c);
-		processManager = new ProcessManager(config);
+		super(f, c);
+		processManager = new ProcessManager(firebus, config);
 	}
 
+	/*
 	public void setFirebus(Firebus fb)
 	{
 		super.setFirebus(fb);
 		processManager.setFirebus(fb);
 	}
+	*/
 	
 	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
 	{

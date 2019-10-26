@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-
+import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.exceptions.FunctionTimeoutException;
@@ -22,9 +22,9 @@ public class FileServer extends RedbackAuthenticatedService
 	protected ArrayList<String> fileServices = new ArrayList<String>();
 	protected String defaultFileService;
 
-	public FileServer( DataMap c)
+	public FileServer(Firebus f, DataMap c)
 	{
-		super(c);
+		super(f, c);
 		DataList list = c.getList("fileadapters");
 		fileServices = new ArrayList<String>();
 		for(int i = 0; i < list.size(); i++)

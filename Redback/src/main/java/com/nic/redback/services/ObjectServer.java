@@ -28,18 +28,12 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 	protected HashMap<String, ObjectConfig> objectConfigs;
 
 
-	public ObjectServer(DataMap c)
+	public ObjectServer(Firebus f, DataMap c)
 	{
-		super(c);
-		objectManager = new ObjectManager(config);
+		super(f, c);
+		objectManager = new ObjectManager(firebus, config);
 	}
 
-	public void setFirebus(Firebus fb)
-	{
-		super.setFirebus(fb);
-		objectManager.setFirebus(fb);
-	}
-	
 	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
 	{
 		logger.finer("Object service start");
