@@ -1,10 +1,13 @@
 package com.nic.redback.services.processserver;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
@@ -136,7 +139,14 @@ public class ProcessManager
 		{
 			try
 			{
-				DataMap result = request(accessManagerServiceName, new DataMap("{action:authenticate, username:\"" + sysUserName + "\", password:\"" + sysUserPassword + "\"}"));
+				Algorithm algorithm = Algorithm.HMAC256("secret");
+				String token = JWT.create()
+						.withIssuer("rbpm")
+						.withSubject("processuser")
+						.withClaim("email", "processuser")
+						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
+						.sign(algorithm);
+				DataMap result = request(accessManagerServiceName, new DataMap("{action:validate, token:\"" + token + "\"}"));
 				if(result != null  &&  result.getString("result").equals("ok"))
 					sysUserSession = new Session(result.getObject("session"));
 			}
@@ -333,7 +343,7 @@ public class ProcessManager
 	protected void publishInstance(ProcessInstance pi)
 	{
 		logger.finest("Publishing to firebus service : " + dataServiceName + "  ");
-		firebus.publish(dataServiceName, new Payload("{object:rbpm_instance,data:" + pi.getJSON() + ", operation:replace}"));
+		firebus.publish(dataServiceName, new Payload("{object:rbpm_instance, key: {_id:" + pi.getId() + "}, data:" + pi.getJSON() + ", operation:replace}"));
 	}
 
 	

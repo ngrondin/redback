@@ -39,7 +39,7 @@ public class FirebusCallUnit extends ProcessUnit
 		else if(jsData instanceof String)
 			payloadStr = FirebusDataUtil.convertJSObjectToDataObject((JSObject)jsData).toString();
 		Payload payload = new Payload(payloadStr);
-		payload.metadata.put("sessionid", sysUserSession.getSessionId().toString());
+		payload.metadata.put("token", sysUserSession.getToken());
 		try
 		{
 			processManager.getFirebus().requestService(firebusServiceName, payload);

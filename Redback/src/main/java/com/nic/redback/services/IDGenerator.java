@@ -17,9 +17,9 @@ public class IDGenerator extends RedbackDataService
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	private DataMap configCache;
 
-	public IDGenerator(Firebus f, DataMap c) 
+	public IDGenerator(DataMap c, Firebus f) 
 	{
-		super(f, c);
+		super(c, f);
 		configCache = new DataMap();
 	}
 

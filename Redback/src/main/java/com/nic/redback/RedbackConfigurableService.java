@@ -11,9 +11,9 @@ public abstract class RedbackConfigurableService extends RedbackService
 {
 	protected String configService;
 	
-	public RedbackConfigurableService(Firebus f, DataMap c)
+	public RedbackConfigurableService(DataMap c, Firebus f)
 	{
-		super(f, c);
+		super(c, f);
 		configService = config.getString("configservice");
 	}
 	

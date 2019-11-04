@@ -1,7 +1,9 @@
 package com.nic.redback;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -61,43 +63,76 @@ public class RedbackServer
 			}
 		}
 		
+		logger.fine("Adding services to container");
+		services = new ArrayList<BusFunction>();
 		DataList serviceConfigs = config.getList("services");
 		for(int i = 0; i < serviceConfigs.size(); i++)
 		{
-			try 
+			DataMap serviceConfig = serviceConfigs.getObject(i); 
+			String className = serviceConfig.getString("class");
+			String name = serviceConfig.getString("name");
+			DataMap deploymentConfig = serviceConfig.getObject("config");
+			if(className != null && name != null)
 			{
-				logger.fine("Adding services to container");
-				DataMap serviceConfig = serviceConfigs.getObject(i); 
-				String className = serviceConfig.getString("class");
-				String name = serviceConfig.getString("name");
-				DataMap deploymentConfig = serviceConfig.getObject("config");
-				if(className != null && name != null)
+				try
 				{
-					try
+					logger.fine("Instantiating service " + name);
+					Class<?> c = Class.forName(className);
+					Constructor<?> cons = null;
+					BusFunction service = null;
+					try {
+						cons = c.getConstructor(new Class[]{DataMap.class, Firebus.class});
+					} catch (NoSuchMethodException e) {}
+					if(cons != null) 
 					{
-						Class<?> c = Class.forName(className);
-						Constructor<?> cons = c.getConstructor(new Class[]{Firebus.class, DataMap.class});
-						logger.fine("Instantiating service " + name);
-						BusFunction service = (BusFunction)cons.newInstance(new Object[]{firebus, deploymentConfig});
+						service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig, firebus});
+					}
+					else
+					{
+						try {
+							cons = c.getConstructor(new Class[]{DataMap.class});
+						} catch (NoSuchMethodException e) {}
+						if(cons != null)
+						{
+							service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig});
+						}
+						else
+						{
+							try {
+								cons = c.getConstructor();
+							} catch (NoSuchMethodException e) {}
+							if(cons != null)
+							{
+								service = (BusFunction)cons.newInstance();
+							}
+							else
+							{
+								logger.severe("No appropriate constructor can be found for class " + className + " ");
+							}
+						}
+					}
+					
+					if(service != null)
+					{
 						if(service instanceof ServiceProvider)
 							firebus.registerServiceProvider(name, ((ServiceProvider)service), 10);
 						if(service instanceof Consumer)
 							firebus.registerConsumer(name, ((Consumer)service), 10);
 						services.add(service);
 					}
-					catch(Exception e)
-					{
-						logger.severe("Class " + className + " cannot be found in the classpath");
-					}
 				}
-				else
+				catch(ClassNotFoundException e)
 				{
-					logger.severe("No class or name provided for service");
+					logger.severe("Class " + className + " cannot be found in the classpath");
 				}
+				catch(InvocationTargetException | IllegalAccessException | InstantiationException e)
+				{
+					logger.severe("Error invoking the constructor for class " + className + " : " + e.getCause().getMessage());
+				}					
 			}
-			catch(Exception e)
+			else
 			{
-				logger.severe("General error message when instantiating a new adapter: " + e.getMessage());
+				logger.severe("No class or name provided for service");
 			}
 		}
 	}

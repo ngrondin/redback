@@ -223,7 +223,7 @@ public class ObjectManager
 				if(searchText != null)
 					objectFilter.merge(generateSearchFilter(session, objectName, searchText));
 				DataMap dbFilter = objectConfig.generateDBFilter(objectFilter);
-				dbFilter.put("domain", session.getUserProfile().getDBFilterDomainClause());
+				dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 				DataMap dbResult = requestData(objectConfig.getCollection(), dbFilter);
 				DataList dbResultList = dbResult.getList("result");
 				

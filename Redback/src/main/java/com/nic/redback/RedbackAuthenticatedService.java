@@ -15,9 +15,9 @@ public abstract class RedbackAuthenticatedService extends RedbackDataService
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected String accessManagementService;
 
-	public RedbackAuthenticatedService(Firebus f, DataMap c)
+	public RedbackAuthenticatedService(DataMap c, Firebus f)
 	{
-		super(f, c);
+		super(c, f);
 		accessManagementService = config.getString("accessmanagementservice");
 	}
 	
@@ -28,35 +28,17 @@ public abstract class RedbackAuthenticatedService extends RedbackDataService
 		{
 			Payload response = null;
 			Session session = null;
-			String sessionId = payload.metadata.get("sessionid");
-			String username = null;//equest.getString("username");
-			String password = null;//request.getString("password");
+			String token = payload.metadata.get("token");
 			
-			if(payload.getString().length() > 0)
+			if(token != null)
 			{
-				try
-				{
-					DataMap request = new DataMap(payload.getString());
-					username = request.getString("username");
-					password = request.getString("password");
-				}
-				catch(Exception e)	{}
-			}
-
-			
-			if(username != null  &&  password != null)
-			{
-				session = authenticate(username, password);
-			}
-			else if(sessionId != null)
-			{
-				session = validateSession(sessionId);
+				session = validateToken(token);
 			}
 
 			if(session != null)
 			{			
+				payload.metadata.remove("token");
 				response = authenticatedService(session, payload);
-				response.metadata.put("sessionid", session.getSessionId().toString());
 			}
 			else
 			{
@@ -78,29 +60,15 @@ public abstract class RedbackAuthenticatedService extends RedbackDataService
 	public abstract Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException;
 
 	public abstract Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException;
+
 	
-	protected Session authenticate(String username, String password) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	protected Session validateToken(String token) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		Session session = null;
-		DataMap result = request(accessManagementService, "{action:authenticate, username:\"" + username + "\", password:\"" + password + "\"}");
+		DataMap result = request(accessManagementService, "{action:validate, token:\"" + token + "\"}");
 		if(result != null  &&  result.getString("result").equals("ok"))
 			session = new Session(result.getObject("session"));
 		return session;
 	}
 	
-	protected Session validateSession(String sessionid) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
-	{
-		Session session = null;
-		DataMap result = request(accessManagementService, "{action:validate, sessionid:\"" + sessionid + "\"}");
-		if(result != null  &&  result.getString("result").equals("ok"))
-			session = new Session(result.getObject("session"));
-		return session;
-	}
-	
-	protected void logout(Session session) throws  DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
-	{
-		DataMap result = request(accessManagementService, "{action:logout, sessionid:\"" + session.getSessionId().toString() + "\"}");
-		if(result == null  ||  (result != null  &&  !result.getString("result").equals("ok")))
-			throw new RedbackException("Counld not log out the session");		
-	}
 }

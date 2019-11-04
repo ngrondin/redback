@@ -22,9 +22,9 @@ public class FileServer extends RedbackAuthenticatedService
 	protected ArrayList<String> fileServices = new ArrayList<String>();
 	protected String defaultFileService;
 
-	public FileServer(Firebus f, DataMap c)
+	public FileServer(DataMap c, Firebus f)
 	{
-		super(f, c);
+		super(c, f);
 		DataList list = c.getList("fileadapters");
 		fileServices = new ArrayList<String>();
 		for(int i = 0; i < list.size(); i++)

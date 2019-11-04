@@ -458,7 +458,7 @@ public class RedbackObject
 		context.put("self", new RedbackObjectJSWrapper(this));
 		context.put("om", new ObjectManagerJSWrapper(objectManager, session));
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
-		context.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session.getSessionId().toString()));
+		context.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(objectManager.getGlobalVariables()));
 		context.put("log", new LoggerJSFunction());
 		try

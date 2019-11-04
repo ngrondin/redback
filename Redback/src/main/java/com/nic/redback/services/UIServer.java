@@ -37,9 +37,9 @@ public class UIServer extends RedbackAuthenticatedService
 	protected HashMap<String, DataMap> viewConfigs;
 
 
-	public UIServer(Firebus f, DataMap c)
+	public UIServer(DataMap c, Firebus f)
 	{
-		super(f, c);
+		super(c, f);
 		devpath = config.getString("devpath");
 		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		jspScripts = new HashMap<String, CompiledScript>();
@@ -94,11 +94,21 @@ public class UIServer extends RedbackAuthenticatedService
 			Payload response = new Payload();
 			String get = extractGetString(payload);
 
-			if(get != null)
+			if(get != null && !get.equals(""))
 			{
 				String[] parts = get.split("/");
-				String category = parts[0];
-				String name = parts[1];
+				String category = null;
+				String name = null;
+				if(parts.length >= 2)
+				{
+					category = parts[0];
+					name = parts[1];
+				}
+				else if(parts.length == 1)
+				{
+					category = "app";
+					name = parts[0];
+				}
 				
 				if(category.equals("resource"))
 				{
@@ -145,6 +155,8 @@ public class UIServer extends RedbackAuthenticatedService
 			if(get == null) 
 				get = request.getString("get");
 		}
+		if(get.startsWith("/"))
+			get = get.substring(1);
 		return get;
 	}
 	
@@ -160,7 +172,7 @@ public class UIServer extends RedbackAuthenticatedService
 				String action = request.getString("action");
 				if(action != null  &&  action.equals("logout"))
 				{
-					logout(session);
+					//logout(session);
 					context.put("get", "app/" + name);
 					html= executeJSP(("pages/login"), context);
 				}
@@ -272,7 +284,7 @@ public class UIServer extends RedbackAuthenticatedService
 			}
 			else
 			{
-				viewHTML.append("No rights to read view " + viewName);
+				// Intentionnaly leaving the view blank when no right to read it
 			}
 		}
 		else
@@ -319,29 +331,6 @@ public class UIServer extends RedbackAuthenticatedService
 						contentHTML.append(generateHTMLFromComponentConfig(content.getObject(i), context));
 					componentHTML.inject("content", contentHTML);
 				}
-				
-				/*
-				if(componentHTML != null  &&  componentHTML.indexOf("#content#") >= 0)
-				{
-					int posContent = componentHTML.indexOf("#content#");
-					int posNewLine = componentHTML.substring(0, posContent).lastIndexOf("\r\n");
-					String indentStr = componentHTML.substring(posNewLine + 2, posContent);
-					StringBuilder sb = new StringBuilder();
-					DataList content = componentConfig.getList("content");
-					if(content != null)
-					{
-						for(int i = 0; i < content.size(); i++)
-						{
-							if(i > 0)
-								sb.append("\r\n");
-							sb.append(generateHTMLFromComponentConfig(content.getObject(i), context));
-						}
-					}
-					String contentStr = sb.toString();
-					contentStr = contentStr.replace("\r\n", "\r\n" + indentStr);
-					componentHTML = componentHTML.replace("#content#", contentStr);
-				}
-				*/
 			}
 		}
 
@@ -445,6 +434,10 @@ public class UIServer extends RedbackAuthenticatedService
 				{
 					bytesRead += is.read(bytes, bytesRead, (bytes.length - bytesRead));
 				}
+			}
+			else
+			{
+				throw new FunctionErrorException("The resource was not found");
 			}
 		}
 		return bytes;

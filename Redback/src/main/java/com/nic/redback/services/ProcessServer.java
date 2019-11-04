@@ -22,9 +22,9 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 	protected ProcessManager processManager;
 
 
-	public ProcessServer(Firebus f, DataMap c)
+	public ProcessServer(DataMap c, Firebus f)
 	{
-		super(f, c);
+		super(c, f);
 		processManager = new ProcessManager(firebus, config);
 	}
 

@@ -45,7 +45,7 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 		req.put("data", updateData);
 		Payload payload = new Payload();
 		payload.setData(req.toString());
-		payload.metadata.put("sessionid", sysUserSession.getSessionId().toString());
+		payload.metadata.put("token", sysUserSession.getToken());
 		try
 		{
 			logger.info("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());

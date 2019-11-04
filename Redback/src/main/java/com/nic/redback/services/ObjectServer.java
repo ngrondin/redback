@@ -28,9 +28,9 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 	protected HashMap<String, ObjectConfig> objectConfigs;
 
 
-	public ObjectServer(Firebus f, DataMap c)
+	public ObjectServer(DataMap c, Firebus f)
 	{
-		super(f, c);
+		super(c, f);
 		objectManager = new ObjectManager(firebus, config);
 	}
 
@@ -143,6 +143,10 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 					{
 						throw new FunctionErrorException("The '" + action + "' action is not valid as an object request");
 					}
+				}
+				else
+				{
+					throw new FunctionErrorException("No object was provided");
 				}
 			}
 			else

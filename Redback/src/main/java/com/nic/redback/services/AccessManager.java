@@ -1,14 +1,16 @@
 package com.nic.redback.services;
 
 import java.security.MessageDigest;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.UUID;
 import java.util.logging.Logger;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
@@ -23,7 +25,6 @@ import com.nic.redback.RedbackException;
 import com.nic.redback.security.Role;
 import com.nic.redback.security.Session;
 import com.nic.redback.security.UserProfile;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 public class AccessManager extends RedbackDataService implements Consumer
 {
@@ -37,9 +38,9 @@ public class AccessManager extends RedbackDataService implements Consumer
 	protected String sessionTable = "rbam_session";
 	protected String userTable = "rbam_user";
 	
-	public AccessManager(Firebus f, DataMap c) 
+	public AccessManager(DataMap c, Firebus f) 
 	{
-		super(f, c);
+		super(c, f);
 		expiryTime = 1800000;
 		cachedSessions = new ArrayList<Session>();
 		cachedUserProfiles = new ArrayList<UserProfile>();
@@ -64,6 +65,7 @@ public class AccessManager extends RedbackDataService implements Consumer
 			DataMap request = new DataMap(payload.getString());
 			String action = request.getString("action");
 			
+			/*
 			if(action.equals("authenticate"))
 			{
 				String username = request.getString("username");
@@ -104,11 +106,11 @@ public class AccessManager extends RedbackDataService implements Consumer
 					logger.severe(msg);
 				}
 			}
-			else if(action.equals("validate"))
+			else */
+			if(action.equals("validate"))
 			{
-				String sessionidStr = request.getString("sessionid");
-				UUID sessionId = UUID.fromString(sessionidStr);
-				Session session = getSessionById(sessionId);
+				String token = request.getString("token");
+				Session session = validateToken(token);
 				
 				if(session != null)
 				{
@@ -130,19 +132,7 @@ public class AccessManager extends RedbackDataService implements Consumer
 					response.put("error", "Not a valid session");						
 				}
 			}
-			else if(action.equals("listusers"))
-			{
-				DataMap filter = request.getObject("filter");
-				if(filter != null)
-				{
-					DataList respList = new DataList();
-					ArrayList<UserProfile> list = listUserProfiles(filter);
-					for(int i = 0; i < list.size(); i++)
-						respList.add(list.get(i).getSimpleJSON());
-					response.put("result", respList);
-				}
-			}
-			else if(action.equals("logout"))
+			/*else if(action.equals("logout"))
 			{
 				String sessionidStr = request.getString("sessionid");
 				UUID sessionId = UUID.fromString(sessionidStr);
@@ -157,7 +147,7 @@ public class AccessManager extends RedbackDataService implements Consumer
 					response.put("result", "failed");
 					response.put("error", "Session not found");						
 				}
-			}
+			}*/
 		}
 		catch(Exception e)
 		{	
@@ -185,10 +175,9 @@ public class AccessManager extends RedbackDataService implements Consumer
 			
 			if(action.equals("dropfromcache"))
 			{
-				UUID sessionId = UUID.fromString(request.getString("sessionid"));
+				//UUID sessionId = UUID.fromString(request.getString("sessionid"));
 				for(int i = 0; i < cachedSessions.size(); i++)
-					if(cachedSessions.get(i).sessionId.equals(sessionId))
-							cachedSessions.remove(i);
+					cachedSessions.remove(i);
 			}
 		}
 		catch(Exception e)
@@ -198,13 +187,84 @@ public class AccessManager extends RedbackDataService implements Consumer
 		logger.finer("Access manager consumer finish");
 	}
 
-	
+	/*
 	protected String hashString(String str) throws InvalidKeySpecException
 	{
 		digest.update(str.getBytes());
 		byte[] hash = digest.digest();
 		String hashStr = Base64.encode(hash);
 		return hashStr;
+	}
+	*/
+	
+	protected Session validateToken(String token) throws RedbackException
+	{
+		Session session = null;
+		try 
+		{
+			DecodedJWT jwt = JWT.decode(token);
+			Claim usernameClaim = jwt.getClaim("email");
+			String username = usernameClaim.asString();
+			UserProfile profile = getUserProfile(username);
+			session = new Session(token, profile, jwt.getExpiresAt().getTime());
+		} 
+		catch (JWTDecodeException  exception)
+		{
+		    throw new RedbackException("JWT token is invalid");
+		}
+		return session;
+	}
+	
+	protected UserProfile getUserProfile(String username) throws RedbackException
+	{
+		UserProfile userProfile = null;
+		for(int i = 0; i < cachedUserProfiles.size(); i++)
+			if(cachedUserProfiles.get(i).getUsername().equals(username))
+				userProfile = cachedUserProfiles.get(i);
+
+		if(userProfile == null)
+		{
+			try
+			{
+				DataMap userConfig = null;
+				DataList userConfigs = config.getList("users");
+				if(userConfigs != null)
+				{
+					for(int i = 0; i < userConfigs.size(); i++)
+						if(userConfigs.getObject(i).containsKey("username") && userConfigs.getObject(i).getString("username").equals(username))
+							userConfig = userConfigs.getObject(i);
+				}
+				
+				if(userConfig == null && dataService != null)
+				{
+					String collection = config.containsKey("usertable") ? config.getString("usertable") : "rbam_user";
+					DataMap userResult = getData(collection, "{\"username\":\"" + username + "\"}");
+					if(userResult != null && userResult.getList("result") != null && userResult.getList("result").size() > 0)
+						userConfig = userResult.getList("result").getObject(0);
+				}
+	
+				if(userConfig != null)
+				{
+					DataList rolesList = userConfig.getList("roles");
+					DataMap rights = new DataMap();
+					for(int j = 0; j < rolesList.size(); j++)
+					{
+						String roleName = rolesList.getString(j);
+						Role role = getRole(roleName);
+						DataMap roleRights = role.getAllRights();
+						mergeRights(rights, roleRights);
+					}
+					userConfig.put("rights", rights);
+					userProfile = new UserProfile(userConfig);	
+					cachedUserProfiles.add(userProfile);
+				}
+			}
+			catch(Exception e)
+			{
+				error("Error getting user profile for " + username, e);
+			}
+		}
+		return userProfile;
 	}
 	
 	protected Role getRole(String name) throws RedbackException
@@ -224,7 +284,7 @@ public class AccessManager extends RedbackDataService implements Consumer
 		}
 		return role;		
 	}
-	
+	/*
 	protected Session createSession(String username) throws RedbackException
 	{
 		UUID sessionId = UUID.randomUUID();
@@ -234,14 +294,18 @@ public class AccessManager extends RedbackDataService implements Consumer
 		publishData(sessionTable, "{_id:\""+ sessionId.toString()+"\", username:\"" + username + "\", expiry:" + expiry + "}");
 		return session;
 	}
+	*/
 	
+	/*
 	protected void logoutSession(Session session)
 	{
 		session.expiry = System.currentTimeMillis();
 		publishData(sessionTable, "{_id:\""+ session.getSessionId().toString()+"\", username:\"" + session.getUserProfile().getUsername() + "\", expiry:" + session.expiry + "}");
 		firebus.publish(serviceName, new Payload("{action:dropfromcache, sessionid:\""+ session.getSessionId().toString()+"\"}"));
 	}
+	*/
 	
+	/*
 	protected Session getSessionById(UUID sessionId) throws RedbackException
 	{
 		Session session = null;
@@ -252,7 +316,7 @@ public class AccessManager extends RedbackDataService implements Consumer
 				else
 					cachedSessions.remove(i);
 		
-		if(session == null)
+		if(session == null && dataService != null)
 		{
 			try
 			{
@@ -275,7 +339,8 @@ public class AccessManager extends RedbackDataService implements Consumer
 		
 		return session;
 	}
-
+	*/
+	/*
 	protected Session getSessionByUsername(String username) throws RedbackException
 	{
 		Session session = null;
@@ -310,32 +375,9 @@ public class AccessManager extends RedbackDataService implements Consumer
 		
 		return session;
 	}
+	*/
 	
-	protected UserProfile getUserProfile(String username) throws RedbackException
-	{
-		UserProfile userProfile = null;
-		for(int i = 0; i < cachedUserProfiles.size(); i++)
-			if(cachedUserProfiles.get(i).getUsername().equals(username))
-				userProfile = cachedUserProfiles.get(i);
-
-		if(userProfile == null)
-		{
-			try
-			{
-				ArrayList<UserProfile> list = listUserProfiles(new DataMap("{username:\"" + username + "\"}"));
-				if(list.size() > 0)
-					userProfile = list.get(0);
-			}
-			catch(Exception e)
-			{
-				logger.severe(e.getMessage());
-				throw new RedbackException("Exception getting user profile from database : ", e);
-			}
-
-		}
-		return userProfile;
-	}
-	
+	/*
 	protected ArrayList<UserProfile> listUserProfiles(DataMap filter) throws RedbackException
 	{
 		ArrayList<UserProfile> list = new ArrayList<UserProfile>();
@@ -374,7 +416,8 @@ public class AccessManager extends RedbackDataService implements Consumer
 		}
 		return list;
 	}
-	
+	*/
+	/*
 	protected DataList listUserConfigs(DataMap filter) throws RedbackException
 	{
 		DataList list = new DataList();
@@ -405,16 +448,18 @@ public class AccessManager extends RedbackDataService implements Consumer
 		}
 		return list;
 	}	
-
+	*/
+	
 	protected void extendSession(Session session)
 	{
+		/*
 		if(session.expiry < System.currentTimeMillis() + (expiryTime / 2))
 		{
 			long newExpiry = System.currentTimeMillis() + expiryTime;
 			session.expiry = newExpiry;
 			publishData("rbam_session", "{_id:\""+ session.sessionId.toString()+"\", expiry:" + newExpiry + "}");
 		}
-		
+		*/
 	}
 	
 	protected void mergeRights(DataMap to, DataMap from)

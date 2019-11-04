@@ -14,9 +14,21 @@
   		<artifactId>firebus-adapters</artifactId>
   		<version>0.0.1</version>
   	</dependency>
+	<dependency>
+	    <groupId>com.auth0</groupId>
+	    <artifactId>java-jwt</artifactId>
+	    <version>3.8.3</version>
+	</dependency>  	
   </dependencies>
 	<build>
 	  <plugins>
+	    <plugin>    
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <configuration>
+	            <source>1.8</source>
+	            <target>1.8</target>
+	        </configuration>
+	    </plugin>	  
 	    <plugin>
 	      <artifactId>maven-assembly-plugin</artifactId>
 	      <configuration>

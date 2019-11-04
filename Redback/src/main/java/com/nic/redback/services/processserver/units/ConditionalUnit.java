@@ -55,7 +55,7 @@ public class ConditionalUnit extends ProcessUnit
 		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
 		context.put("pm", new ProcessManagerJSWrapper(processManager, sysUserSession));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalVariables()));
-		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), sysUserSession.getSessionId().toString()));
+		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), sysUserSession));
 		try
 		{
 			script.eval(context);

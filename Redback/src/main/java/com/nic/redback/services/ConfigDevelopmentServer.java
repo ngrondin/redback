@@ -33,9 +33,9 @@ public class ConfigDevelopmentServer extends RedbackAuthenticatedService
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected String devPath;
 
-	public ConfigDevelopmentServer(Firebus f, DataMap c)
+	public ConfigDevelopmentServer(DataMap c, Firebus f)
 	{
-		super(f, c);
+		super(c, f);
 		if(config.containsKey("devpath"))
 			devPath = config.getString("devpath");
 /*		

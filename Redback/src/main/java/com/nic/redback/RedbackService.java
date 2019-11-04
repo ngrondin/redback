@@ -19,7 +19,7 @@ public abstract class RedbackService implements ServiceProvider
 	protected Firebus firebus;
 	protected DataMap config;
 	
-	public RedbackService(Firebus f, DataMap c)
+	public RedbackService(DataMap c, Firebus f)
 	{
 		firebus = f;
 		config = c;
