@@ -129,7 +129,7 @@ public class AccessManager extends RedbackDataService implements Consumer
 				else
 				{
 					response.put("result", "failed");
-					response.put("error", "Not a valid session");						
+					response.put("error", "User has no profile");						
 				}
 			}
 			/*else if(action.equals("logout"))
@@ -206,7 +206,8 @@ public class AccessManager extends RedbackDataService implements Consumer
 			Claim usernameClaim = jwt.getClaim("email");
 			String username = usernameClaim.asString();
 			UserProfile profile = getUserProfile(username);
-			session = new Session(token, profile, jwt.getExpiresAt().getTime());
+			if(profile != null)
+				session = new Session(token, profile, jwt.getExpiresAt().getTime());
 		} 
 		catch (JWTDecodeException  exception)
 		{
@@ -237,8 +238,8 @@ public class AccessManager extends RedbackDataService implements Consumer
 				
 				if(userConfig == null && dataService != null)
 				{
-					String collection = config.containsKey("usertable") ? config.getString("usertable") : "rbam_user";
-					DataMap userResult = getData(collection, "{\"username\":\"" + username + "\"}");
+					String userCollection = config.containsKey("usertable") ? config.getString("usertable") : "rbam_user";
+					DataMap userResult = getData(userCollection, new DataMap("username" , username));
 					if(userResult != null && userResult.getList("result") != null && userResult.getList("result").size() > 0)
 						userConfig = userResult.getList("result").getObject(0);
 				}
@@ -251,8 +252,11 @@ public class AccessManager extends RedbackDataService implements Consumer
 					{
 						String roleName = rolesList.getString(j);
 						Role role = getRole(roleName);
-						DataMap roleRights = role.getAllRights();
-						mergeRights(rights, roleRights);
+						if(role != null)
+						{
+							DataMap roleRights = role.getAllRights();
+							mergeRights(rights, roleRights);
+						}
 					}
 					userConfig.put("rights", rights);
 					userProfile = new UserProfile(userConfig);	
@@ -279,7 +283,7 @@ public class AccessManager extends RedbackDataService implements Consumer
 			}
 			catch(Exception e)
 			{
-				error("Exception getting role from database : ", e);
+				role = null;
 			}
 		}
 		return role;		

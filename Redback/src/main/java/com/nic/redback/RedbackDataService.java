@@ -19,23 +19,16 @@ public abstract class RedbackDataService extends RedbackConfigurableService
 	
 	protected DataMap getData(String object, DataMap filter) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
-		return request(dataService, "{object:\"" + object + "\", filter:" + filter.toString() + "}");
+		if(dataService != null)
+			return request(dataService, "{object:\"" + object + "\", filter:" + filter.toString() + "}");
+		else
+			return null;
 	}
 
-	protected DataMap getData(String object, String filter) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	protected void publishData(String object, DataMap key, DataMap data)
 	{
-		return request(dataService, "{object:\"" + object + "\", filter:" + filter + "}");
+		if(dataService != null)
+			firebus.publish(dataService, new Payload("{object:\"" + object + "\", key:" + key.toString() + ", data:" + data.toString() + "}"));
 	}
-
-	protected void publishData(String object, DataMap data)
-	{
-		firebus.publish(dataService, new Payload("{object:\"" + object + "\", data:" + data.toString() + "}"));
-	}
-
-	protected void publishData(String object, String data)
-	{
-		firebus.publish(dataService, new Payload("{object:\"" + object + "\", data:" + data + "}"));
-	}
-
-
+	
 }

@@ -46,7 +46,10 @@ public class UserProfile
 	public DataMap getDBFilterDomainClause()
 	{
 		DataMap inClause = new DataMap();
-		inClause.put("$in", profile.getList("domains"));
+		if(profile.containsKey("domains"))
+			inClause.put("$in", profile.getList("domains"));
+		else
+			inClause.put("$in", new DataList());
 		return inClause;
 	}
 	

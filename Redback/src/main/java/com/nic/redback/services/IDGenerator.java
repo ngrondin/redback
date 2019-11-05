@@ -26,7 +26,6 @@ public class IDGenerator extends RedbackDataService
 	public Payload service(Payload payload) throws FunctionErrorException 
 	{
 		logger.finer("ID generator service start");
-		//TODO: Add handling of next batch
 		Payload response = new Payload();
 		String id = "";
 		try
@@ -47,7 +46,7 @@ public class IDGenerator extends RedbackDataService
 					int reserved = idConfig.containsKey("reserved") ? idConfig.getNumber("reserved").intValue() : 0;
 					if(next >= reserved)
 					{
-						DataMap seq = getData("rbid_sequence", "{_id:\"" + idName + "\"}");
+						DataMap seq = getData("rbid_sequence", new DataMap("_id", idName));
 						if(seq.getList("result").size() > 0)
 						{
 							next = seq.getNumber("result.0.next").intValue();
@@ -59,7 +58,7 @@ public class IDGenerator extends RedbackDataService
 							reserved = 10;
 						}
 						idConfig.put("reserved", reserved);
-						publishData("rbid_sequence", "{_id:\"" + idName + "\", next:" + reserved + "}");
+						publishData("rbid_sequence", new DataMap("_id", idName), new DataMap("next", reserved));
 					}
 					id = "" + next;
 					if(idConfig.containsKey("pad"))

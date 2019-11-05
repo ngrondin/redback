@@ -65,15 +65,11 @@ public class UIServer extends RedbackAuthenticatedService
 					response.setData(getResource(name));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
-				else if(category.equals("app"))
-				{
-					Bindings context = jsEngine.createBindings();
-					context.put("get", "app/" + name);
-					response.setData(executeJSP(("pages/login"), context).toString());
-				}
 				else
 				{
-					throw new FunctionErrorException("This request requires authentication");
+					response.setData("<html><body>Unauthorized</body></html>");
+					response.metadata.put("mime", "text/html");
+					response.metadata.put("httpcode", "401");
 				}
 			}
 			logger.finer("UI unauthenticated service finish");

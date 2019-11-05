@@ -85,7 +85,7 @@ public class FileServer extends RedbackAuthenticatedService
 		Payload response = null;
 		try
 		{
-			DataMap resp1 = getData("rbfs_meta", "{\"_id\":\"" + uid + "\"}");
+			DataMap resp1 = getData("rbfs_meta", new DataMap("_id", uid));
 			if(resp1.getList("result").size() > 0)
 			{
 				String fileAdapter = resp1.getString("result.0.endpoint");
