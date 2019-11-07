@@ -1,6 +1,5 @@
 package com.nic.redback.services;
 
-import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import com.nic.firebus.Firebus;
@@ -11,30 +10,18 @@ import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.DataException;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
-import com.nic.redback.RedbackAuthenticatedService;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.Session;
-import com.nic.redback.services.processserver.ProcessManager;
 
-public class ProcessServer extends RedbackAuthenticatedService implements Consumer
+public abstract class ProcessServer extends AuthenticatedService implements Consumer
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
-	protected ProcessManager processManager;
-
 
 	public ProcessServer(DataMap c, Firebus f)
 	{
 		super(c, f);
-		processManager = new ProcessManager(firebus, config);
 	}
 
-	/*
-	public void setFirebus(Firebus fb)
-	{
-		super.setFirebus(fb);
-		processManager.setFirebus(fb);
-	}
-	*/
 	
 	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
 	{
@@ -60,8 +47,7 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 					DataMap data = request.getObject("data");
 					if(process != null)
 					{
-						responseData = processManager.initiateProcess(session, process, data);
-						processManager.commitCurrentTransaction();
+						responseData = initiate(session, process, data);
 					}
 					else
 					{
@@ -76,8 +62,7 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 					DataMap data = request.getObject("data");
 					if(pid != null &&  processAction != null)
 					{
-						responseData = processManager.processAction(session, extpid, pid, processAction, data);
-						processManager.commitCurrentTransaction();
+						responseData = processAction(session, extpid, pid, processAction, data);
 					}
 					else
 					{
@@ -89,10 +74,7 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 					String extpid = request.getString("extpid");
 					DataMap filter = request.getObject("filter");
 					DataList viewdata = request.getList("viewdata");
-					ArrayList<DataMap> result = processManager.getAssignments(session, extpid, filter, viewdata);
-					DataList responseList = new DataList();
-					for(int i = 0; i < result.size(); i++)
-						responseList.add(result.get(i));
+					DataList responseList = getAssignments(session, extpid, filter, viewdata);
 					responseData = new DataMap();
 					responseData.put("result", responseList);
 				}
@@ -109,7 +91,6 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 			String errorMsg = buildErrorMessage(e);
 			logger.severe(errorMsg);
 			logger.severe(getStackTrace(e));
-			processManager.commitCurrentTransaction();
 			throw new FunctionErrorException(errorMsg);
 		}
 
@@ -129,8 +110,14 @@ public class ProcessServer extends RedbackAuthenticatedService implements Consum
 	{
 		String msg = payload.getString();
 		if(msg.equals("refreshconfig"))
-			processManager.refreshAllConfigs();		
+			refreshConfigs();
 	}
 
+	protected abstract DataMap initiate(Session session, String process, DataMap data) throws RedbackException;
 	
+	protected abstract DataMap processAction(Session session, String extpid, String pid, String processAction, DataMap data) throws RedbackException;
+	
+	protected abstract DataList getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException;
+	
+	protected abstract void refreshConfigs();
 }

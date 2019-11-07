@@ -1,6 +1,6 @@
 <rb-match-scheduler
 <% if(config.getObject('config') != null) { %>
-	rb-config="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(com.nic.redback.services.UIServer.convertFilter(config.getObject('config')))%>"<% 
+	rb-config="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(com.nic.redback.services.impl.RedbackUIServer.convertFilter(config.getObject('config')))%>"<% 
 } %>>
 	<div
 		class="rb-sched-toolbar">

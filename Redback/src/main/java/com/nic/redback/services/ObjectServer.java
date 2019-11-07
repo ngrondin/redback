@@ -1,10 +1,7 @@
 package com.nic.redback.services;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
-
-import javax.script.ScriptException;
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
@@ -14,24 +11,18 @@ import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.DataException;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
-import com.nic.redback.RedbackAuthenticatedService;
 import com.nic.redback.RedbackException;
+import com.nic.redback.managers.objectmanager.RedbackObject;
 import com.nic.redback.security.Session;
-import com.nic.redback.services.objectserver.ObjectConfig;
-import com.nic.redback.services.objectserver.ObjectManager;
-import com.nic.redback.services.objectserver.RedbackObject;
 
-public class ObjectServer extends RedbackAuthenticatedService implements Consumer
+public abstract class ObjectServer extends AuthenticatedService implements Consumer
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
-	protected ObjectManager objectManager;
-	protected HashMap<String, ObjectConfig> objectConfigs;
 
 
 	public ObjectServer(DataMap c, Firebus f)
 	{
 		super(c, f);
-		objectManager = new ObjectManager(firebus, config);
 	}
 
 	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
@@ -63,8 +54,7 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 						String uid = request.getString("uid");
 						if(uid != null)
 						{
-							RedbackObject object = objectManager.getObject(session, objectName, uid);
-							objectManager.commitCurrentTransaction();
+							RedbackObject object = get(session, objectName, uid);
 							responseData = object.getJSON(addValidation, addRelated);
 						}
 						else
@@ -74,29 +64,24 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 					}
 					else if(action.equals("list"))
 					{
-						ArrayList<RedbackObject> objects = null;
 						DataMap filter = request.getObject("filter");
 						String attribute = request.getString("attribute");
 						String uid = request.getString("uid");
 						String search = request.getString("search");
-						if(filter == null)
-							filter = new DataMap();
-						
-						if(uid != null  &&  attribute != null)
-							objects = objectManager.getObjectList(session, objectName, uid, attribute, filter, search);
+						if(filter != null || search != null || (uid != null && attribute != null))
+						{
+							List<RedbackObject> objects = list(session, objectName, filter, search, uid, attribute, addRelated);
+							responseData = new DataMap();
+							DataList list = new DataList();
+							if(objects != null)
+								for(int i = 0; i < objects.size(); i++)
+									list.add(objects.get(i).getJSON(addValidation, addRelated));
+							responseData.put("list", list);
+						}
 						else
-							objects = objectManager.getObjectList(session, objectName, filter, search);
-						objectManager.commitCurrentTransaction();
-
-						if(addRelated)
-							objectManager.addRelatedBulk(session, objects);
-						
-						responseData = new DataMap();
-						DataList list = new DataList();
-						if(objects != null)
-							for(int i = 0; i < objects.size(); i++)
-								list.add(objects.get(i).getJSON(addValidation, addRelated));
-						responseData.put("list", list);
+						{
+							throw new FunctionErrorException("A 'list' action requires either a filter, a search or a uid-attribute pair");
+						}
 					}
 					else if(action.equals("update"))
 					{
@@ -104,12 +89,8 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 						DataMap data = request.getObject("data");
 						if(uid != null  &&  data != null)
 						{
-							RedbackObject object = objectManager.updateObject(session, objectName, uid, data);
-							objectManager.commitCurrentTransaction();
-							if(object != null)
-								responseData = object.getJSON(addValidation, addRelated);
-							else
-								throw new FunctionErrorException("No such object to update");
+							RedbackObject object = update(session, objectName, uid, data);
+							responseData = object.getJSON(addValidation, addRelated);
 						}
 						else
 						{
@@ -119,8 +100,7 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 					else if(action.equals("create"))
 					{
 						DataMap data = request.getObject("data");
-						RedbackObject object = objectManager.createObject(session, objectName, data);
-						objectManager.commitCurrentTransaction();
+						RedbackObject object = create(session, objectName, data);
 						responseData = object.getJSON(addValidation, addRelated);
 					}
 					else if(action.equals("execute"))
@@ -130,8 +110,7 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 						DataMap data = request.getObject("data");
 						if(uid != null)
 						{
-							RedbackObject object = objectManager.executeFunction(session, objectName, uid, function, data);
-							objectManager.commitCurrentTransaction();
+							RedbackObject object = execute(session, objectName, uid, function, data);
 							responseData = object.getJSON(addValidation, addRelated);
 						}
 						else
@@ -156,7 +135,7 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 				
 			response.setData(responseData.toString());
 		}
-		catch(ScriptException | DataException | RedbackException e)
+		catch(DataException | RedbackException e)
 		{
 			String errorMsg = buildErrorMessage(e);
 			logger.severe(errorMsg);
@@ -183,6 +162,19 @@ public class ObjectServer extends RedbackAuthenticatedService implements Consume
 	{
 		String msg = payload.getString();
 		if(msg.equals("refreshconfig"))
-			objectManager.refreshAllConfigs();		
+			refreshConfigs();		
 	}
+	
+	protected abstract RedbackObject get(Session session, String objectName, String uid) throws RedbackException;
+
+	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, String uid, String attribute, boolean addRelated) throws RedbackException;
+
+	protected abstract RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException;
+
+	protected abstract RedbackObject create(Session session, String objectName, DataMap data) throws RedbackException;
+
+	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException;
+	
+	protected abstract void refreshConfigs();
+
 }
