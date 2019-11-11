@@ -175,9 +175,9 @@ public class ProcessManager
 		return result;
 	}
 
-	public ArrayList<DataMap> getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException
+	public ArrayList<Assignment> getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException
 	{
-		ArrayList<DataMap> retList = new ArrayList<DataMap>();
+		ArrayList<Assignment> retList = new ArrayList<Assignment>();
 		DataMap fullFilter = new DataMap();
 		if(filter != null)
 			fullFilter.merge(filter);
@@ -196,38 +196,27 @@ public class ProcessManager
 			ProcessInstance pi = instances.get(i);
 			Process process = getProcess(pi.getProcessName());
 			ProcessUnit pu = process.getNode(pi.getCurrentNode());
-			DataMap notification = null;
+			Assignment assignment = null;
 			if(pu instanceof InteractionUnit)
 			{
-				notification = ((InteractionUnit)pu).getNotification(session, extpid, pi);
+				assignment = ((InteractionUnit)pu).getNotification(session, extpid, pi);
 			}
 			else
 			{
-				notification = new DataMap();
-				notification.put("process", pi.getProcessName());
-				notification.put("pid", pi.getId());
-				notification.put("interaction", "processexception");
-				notification.put("message", "The process has stopped due to an exception and requires restart");
-				DataList actionList = new DataList();
-				DataMap action = new DataMap();
-				action.put("action", "restart");
-				action.put("description", "Restart");
-				actionList.add(action);
-				notification.put("actions", actionList);
+				assignment = new Assignment(pi.getProcessName(), pi.getId(), "processexception", "The process has stopped due to an exception and requires restart");
+				assignment.addAction("restart", "Restart");
 			}
-			if(notification != null)
+			if(assignment != null)
 			{
 				if(viewdata != null  &&  viewdata.size() > 0)
 				{
-					DataMap data = new DataMap();
 					for(int j = 0; j < viewdata.size(); j++)
 					{
 						String key = viewdata.getString(j); 
-						data.put(key, pi.getData().getString(key));
+						assignment.addData(key, pi.getData().getString(key));
 					}
-					notification.put("data", data);
 				}
-				retList.add(notification);
+				retList.add(assignment);
 			}
 		}
 		return retList;

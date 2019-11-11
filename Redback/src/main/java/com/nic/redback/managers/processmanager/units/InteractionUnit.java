@@ -7,6 +7,7 @@ import com.nic.firebus.utils.DataMap;
 import com.nic.redback.RedbackException;
 import com.nic.redback.managers.processmanager.Assignee;
 import com.nic.redback.managers.processmanager.AssigneeConfig;
+import com.nic.redback.managers.processmanager.Assignment;
 import com.nic.redback.managers.processmanager.ProcessInstance;
 import com.nic.redback.managers.processmanager.ProcessManager;
 import com.nic.redback.managers.processmanager.ProcessUnit;
@@ -90,7 +91,7 @@ public class InteractionUnit extends ProcessUnit
 		logger.info("Finished interaction node action");
 	}
 	
-	public DataMap getNotification(Session session, String extpid, ProcessInstance pi)
+	public Assignment getNotification(Session session, String extpid, ProcessInstance pi)
 	{
 		if(isAssignee(session.getUserProfile(), extpid, pi))
 		{
@@ -99,24 +100,12 @@ public class InteractionUnit extends ProcessUnit
 		return null;
 	}
 	
-	protected DataMap getNotification(ProcessInstance pi)
+	protected Assignment getNotification(ProcessInstance pi)
 	{
-		DataMap notificationMsg = new DataMap();
-		notificationMsg.put("process", pi.getProcessName());
-		notificationMsg.put("pid", pi.getId());
-		notificationMsg.put("interaction", notificationConfig.getString("code"));
-		notificationMsg.put("message", notificationConfig.getString("message"));
-		
-		DataList actionList = new DataList();
+		Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), notificationConfig.getString("code"), notificationConfig.getString("message"));
 		for(int i = 0; i < actionsConfig.size(); i++)
-		{
-			DataMap action = new DataMap();
-			action.put("action", actionsConfig.getObject(i).getString("action"));
-			action.put("description", actionsConfig.getObject(i).getString("description"));
-			actionList.add(action);
-		}
-		notificationMsg.put("actions", actionList);
-		return notificationMsg;		
+			assignment.addAction(actionsConfig.getObject(i).getString("action"), actionsConfig.getObject(i).getString("description"));
+		return assignment;		
 	}
 	
 	protected boolean isAssignee(UserProfile up, String extpid, ProcessInstance pi)

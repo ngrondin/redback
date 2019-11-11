@@ -162,12 +162,20 @@ public class ObjectManager
 						}
 						relatedFilter.put("$or", relatedOrList);
 						ArrayList<RedbackObject> result = getObjectList(session, relatedObejctName, relatedFilter, null);
-						for(int k = 0; k < result.size(); k++)
+						if(result.size() > 0)
 						{
-							RedbackObject resultObject = result.get(k);
-							Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
 							DataMap orTerm = new DataMap();
-							orTerm.put(attributeConfig.getName(), resultObjectLinkValue.getObject());
+							DataList inList = new DataList();
+							for(int k = 0; k < result.size(); k++)
+							{
+								RedbackObject resultObject = result.get(k);
+								Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
+								inList.add(resultObjectLinkValue.getObject());
+								//DataMap orTerm = new DataMap();
+								//orTerm.put(attributeConfig.getName(), resultObjectLinkValue.getObject());
+								//orList.add(orTerm);
+							}
+							orTerm.put(attributeConfig.getName(), new DataMap("$in", inList));
 							orList.add(orTerm);
 						}
 					}
@@ -224,7 +232,8 @@ public class ObjectManager
 				if(searchText != null)
 					objectFilter.merge(generateSearchFilter(session, objectName, searchText));
 				DataMap dbFilter = objectConfig.generateDBFilter(objectFilter);
-				dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+				if(objectConfig.getDomainDBKey() != null)
+					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 				DataMap dbResult = requestData(objectConfig.getCollection(), dbFilter);
 				DataList dbResultList = dbResult.getList("result");
 				
@@ -372,7 +381,7 @@ public class ObjectManager
 	{
 		Payload reqPayload = new Payload(request.toString());
 		logger.finest("Requesting firebus service : " + service + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
-		Payload respPayload = firebus.requestService(service, reqPayload);
+		Payload respPayload = firebus.requestService(service, reqPayload, 10000);
 		logger.finest("Receiving firebus service respnse");
 		String respStr = respPayload.getString();
 		DataMap result = new DataMap(respStr);

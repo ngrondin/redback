@@ -1,5 +1,6 @@
 package com.nic.redback.services;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.nic.firebus.Firebus;
@@ -11,6 +12,7 @@ import com.nic.firebus.utils.DataException;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
 import com.nic.redback.RedbackException;
+import com.nic.redback.managers.processmanager.Assignment;
 import com.nic.redback.security.Session;
 
 public abstract class ProcessServer extends AuthenticatedService implements Consumer
@@ -74,7 +76,10 @@ public abstract class ProcessServer extends AuthenticatedService implements Cons
 					String extpid = request.getString("extpid");
 					DataMap filter = request.getObject("filter");
 					DataList viewdata = request.getList("viewdata");
-					DataList responseList = getAssignments(session, extpid, filter, viewdata);
+					List<Assignment> result = getAssignments(session, extpid, filter, viewdata);
+					DataList responseList = new DataList();
+					for(int i = 0; i < result.size(); i++)
+						responseList.add(result.get(i).getDataMap());
 					responseData = new DataMap();
 					responseData.put("result", responseList);
 				}
@@ -117,7 +122,7 @@ public abstract class ProcessServer extends AuthenticatedService implements Cons
 	
 	protected abstract DataMap processAction(Session session, String extpid, String pid, String processAction, DataMap data) throws RedbackException;
 	
-	protected abstract DataList getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException;
+	protected abstract List<Assignment> getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException;
 	
 	protected abstract void refreshConfigs();
 }

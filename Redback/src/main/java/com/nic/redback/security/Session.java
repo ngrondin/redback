@@ -30,7 +30,7 @@ public class Session
 	{
 		//sessionId = UUID.fromString(json.getString("sessionid"));
 		token = json.getString("token");
-		expiry = ((Double)json.getNumber("expiry")).longValue();
+		expiry = json.getNumber("expiry").longValue();
 		userProfile = new UserProfile(json.getObject("userprofile"));
 	}
 	

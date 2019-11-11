@@ -1,13 +1,9 @@
 package com.nic.redback.services;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 import javax.script.Bindings;
-import javax.script.CompiledScript;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
@@ -23,19 +19,10 @@ import com.nic.redback.utils.HTML;
 public abstract class UIServer extends AuthenticatedService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
-	protected String devpath;
-	protected ScriptEngine jsEngine;
-	protected HashMap<String, CompiledScript> jspScripts;
-	protected HashMap<String, DataMap> viewConfigs;
-
 
 	public UIServer(DataMap c, Firebus f)
 	{
 		super(c, f);
-		devpath = config.getString("devpath");
-		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
-		jspScripts = new HashMap<String, CompiledScript>();
-		viewConfigs = new HashMap<String, DataMap>();
 	}
 	
 	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
@@ -50,11 +37,12 @@ public abstract class UIServer extends AuthenticatedService
 				String[] parts = get.split("/");
 				String category = parts[0];
 				String name = parts[1];
+				String version = "default";
 				
 				if(category.equals("resource"))
 				{
 					logger.finer("Get resource " + name);
-					response.setData(getResource(name));
+					response.setData(getResource(name, version));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
 				else
@@ -86,14 +74,23 @@ public abstract class UIServer extends AuthenticatedService
 			{
 				String[] parts = get.split("/");
 				String category = null;
+				String version = null;
 				String name = null;
-				if(parts.length >= 2)
+				if(parts.length >= 3)
 				{
+					version = parts[0];
+					category = parts[1];
+					name = parts[2];
+				}
+				if(parts.length == 2)
+				{
+					version = "default";
 					category = parts[0];
 					name = parts[1];
 				}
 				else if(parts.length == 1)
 				{
+					version = "default";
 					category = "app";
 					name = parts[0];
 				}
@@ -101,20 +98,19 @@ public abstract class UIServer extends AuthenticatedService
 				if(category.equals("resource"))
 				{
 					logger.finer("Get resource " + name);
-					response.setData(getResource(name));
+					response.setData(getResource(name, version));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
 				else if(category.equals("app"))
 				{
 					logger.finer("Get app " + name);
-					DataMap request = new DataMap(payload.getString());
-					response.setData(getApp(name, session, request).toString());
+					response.setData(getApp(session, name, version).toString());
 					response.metadata.put("mime", "text/html");
 				}
 				else if(category.equals("view"))
 				{
 					logger.finer("Get view " + name);
-					response.setData(getView(name, session, null).toString());
+					response.setData(getView(session, name, version, null).toString());
 					response.metadata.put("mime", "text/html");
 				}
 			}
@@ -148,13 +144,13 @@ public abstract class UIServer extends AuthenticatedService
 		return get;
 	}
 	
-	protected abstract HTML getApp(String name, Session session, DataMap request) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException;
+	protected abstract HTML getApp(Session session, String name, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException;
 	
-	protected abstract HTML getMenu(Session session) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException;
+	protected abstract HTML getMenu(Session session, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException;
 	
-	protected abstract HTML getView(String viewName, Session session, Bindings context);
+	protected abstract HTML getView(Session session, String viewName, String version, Bindings context);
 	
-	protected abstract byte[] getResource(String name) throws FunctionErrorException, FunctionTimeoutException, DataException, RedbackException, IOException;
+	protected abstract byte[] getResource(String name, String version) throws FunctionErrorException, FunctionTimeoutException, DataException, RedbackException, IOException;
 
 	protected String getResourceMimeType(String name)
 	{

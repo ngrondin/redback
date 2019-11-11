@@ -6,6 +6,7 @@ import com.nic.firebus.Firebus;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
 import com.nic.redback.RedbackException;
+import com.nic.redback.managers.processmanager.Assignment;
 import com.nic.redback.managers.processmanager.ProcessManager;
 import com.nic.redback.security.Session;
 import com.nic.redback.services.ProcessServer;
@@ -35,13 +36,10 @@ public class RedbackProcessServer extends ProcessServer
 		return responseData;
 	}
 	
-	protected DataList getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException
+	protected List<Assignment> getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException
 	{
-		List<DataMap> result = processManager.getAssignments(session, extpid, filter, viewdata);
-		DataList responseList = new DataList();
-		for(int i = 0; i < result.size(); i++)
-			responseList.add(result.get(i));
-		return responseList;
+		List<Assignment> result = processManager.getAssignments(session, extpid, filter, viewdata);
+		return result;
 	}
 
 	protected void refreshConfigs() 

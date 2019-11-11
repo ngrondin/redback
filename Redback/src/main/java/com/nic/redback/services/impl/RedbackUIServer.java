@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.exceptions.FunctionErrorException;
@@ -26,14 +29,23 @@ import com.nic.redback.utils.StringUtils;
 public class RedbackUIServer extends UIServer
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
+	protected String devpath;
+	protected ScriptEngine jsEngine;
+	protected HashMap<String, CompiledScript> jspScripts;
+	protected HashMap<String, DataMap> viewConfigs;
+
 	
 	public RedbackUIServer(DataMap c, Firebus f) 
 	{
 		super(c, f);
+		devpath = config.getString("devpath");
+		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
+		jspScripts = new HashMap<String, CompiledScript>();
+		viewConfigs = new HashMap<String, DataMap>();
 	}
 
 
-	protected HTML getApp(String name, Session session, DataMap request) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	protected HTML getApp(Session session, String name, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		HTML html = null;
 		Bindings context = jsEngine.createBindings();
@@ -42,45 +54,35 @@ public class RedbackUIServer extends UIServer
 		{
 			if(session.getUserProfile().canRead("rb.apps." + name))
 			{
-				String action = request.getString("action");
-				if(action != null  &&  action.equals("logout"))
+				context.put("session", session);
+				try
 				{
-					//logout(session);
-					context.put("get", "app/" + name);
-					html= executeJSP(("pages/login"), context);
+					DataMap appConfig = getConfig("rbui", "app", name); 
+					String page = appConfig.getString("page");
+					context.put("config", appConfig);
+					html = executeJSP("pages/" + page, version, context);
+					html.inject("menu", getMenu(session, version));
 				}
-				else
+				catch(Exception e)
 				{
-					context.put("session", session);
-					try
-					{
-						DataMap appConfig = getConfig("rbui", "app", name); 
-						String page = appConfig.getString("page");
-						context.put("config", appConfig);
-						html = executeJSP("pages/" + page, context);
-						html.inject("menu", getMenu(session));
-					}
-					catch(Exception e)
-					{
-						html = executeJSP("pages/error", context).inject("errormessage", new HTML("Application " + name + " cannot be found"));
-					}
+					html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("Application " + name + " cannot be found"));
 				}
 			}
 			else
 			{
-				html = executeJSP("pages/error", context).inject("errormessage", new HTML("No access to application " + name + ""));
+				html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("No access to application " + name + ""));
 			}
 		}
 		else
 		{
 			context.put("get", "app/" + name);
-			html = executeJSP(("pages/login"), context);
+			html = executeJSP(("pages/login"), version, context);
 		}
 		return html;
 	}
 	
 	
-	protected HTML getMenu(Session session) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	protected HTML getMenu(Session session, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		DataMap menu = new DataMap("{type:menu, content:[]}");
 		DataMap result = listConfigs("rbui", "menu");
@@ -110,11 +112,11 @@ public class RedbackUIServer extends UIServer
 		}
 		Bindings context = jsEngine.createBindings();
 		context.put("session", session);
-		return generateHTMLFromComponentConfig(menu, context);
+		return generateHTMLFromComponentConfig(menu, version, context);
 	}
 
 	
-	protected HTML getView(String viewName, Session session, Bindings context) 
+	protected HTML getView(Session session, String viewName, String version, Bindings context) 
 	{
 		HTML viewHTML = new HTML();
 		if(session != null)
@@ -143,7 +145,7 @@ public class RedbackUIServer extends UIServer
 						context.put("canExecute", session.getUserProfile().canExecute("rb.views." + viewName) & (boolean)context.get("canExecute"));
 						DataList contentList = viewConfig.getList("content");
 						for(int i = 0; i < contentList.size(); i++)
-							viewHTML.append(generateHTMLFromComponentConfig(contentList.getObject(i), context));
+							viewHTML.append(generateHTMLFromComponentConfig(contentList.getObject(i), version, context));
 					}
 					else
 					{
@@ -167,7 +169,7 @@ public class RedbackUIServer extends UIServer
 		return viewHTML;
 	}
 	
-	protected HTML generateHTMLFromComponentConfig(DataMap componentConfig, Bindings context)
+	protected HTML generateHTMLFromComponentConfig(DataMap componentConfig, String version, Bindings context)
 	{
 		String type = componentConfig.getString("type");
 		HTML componentHTML = new HTML();
@@ -177,7 +179,7 @@ public class RedbackUIServer extends UIServer
 			{
 				String viewName = componentConfig.getString("name");
 				Session session = (Session)context.get("session"); 
-				componentHTML = getView(viewName, session, context);
+				componentHTML = getView(session, viewName, version, context);
 			}
 			else
 			{
@@ -194,14 +196,14 @@ public class RedbackUIServer extends UIServer
 				if(componentConfig.get("show") == null)
 					componentConfig.put("show", "true");
 				context.put("config", componentConfig);
-				componentHTML = executeJSP("fragments/" + type, context);
+				componentHTML = executeJSP("fragments/" + type, version, context);
 
 				if(componentHTML.hasTag("content") && componentConfig.containsKey("content"))
 				{
 					HTML contentHTML = new HTML();
 					DataList content = componentConfig.getList("content");
 					for(int i = 0; i < content.size(); i++)
-						contentHTML.append(generateHTMLFromComponentConfig(content.getObject(i), context));
+						contentHTML.append(generateHTMLFromComponentConfig(content.getObject(i), version, context));
 					componentHTML.inject("content", contentHTML);
 				}
 			}
@@ -211,12 +213,12 @@ public class RedbackUIServer extends UIServer
 	}
 
 	
-	protected HTML executeJSP(String name, Bindings context)
+	protected HTML executeJSP(String name, String version, Bindings context)
 	{
 		context.put("sb", new HTML());
 		try
 		{
-			CompiledScript script = getCompiledJSP(name);
+			CompiledScript script = getCompiledJSP(name, version);
 			script.eval(context);
 			HTML html = ((HTML)context.get("sb"));
 			return html;
@@ -228,31 +230,45 @@ public class RedbackUIServer extends UIServer
 	}	
 	
 	
-	protected CompiledScript getCompiledJSP(String name) throws RedbackException
+	protected CompiledScript getCompiledJSP(String name, String version) throws RedbackException
 	{
 		CompiledScript script = jspScripts.get(name);
 		if(script == null)
 		{
 			try
 			{
-				InputStream is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/jsp/" + name + ".jsp");
-				byte[] bytes = new byte[is.available()];
-				is.read(bytes);
-				is.close();
-				String jsp = new String(bytes);
+				InputStream is = null;
+				if(devpath != null)
+				{
+					File file = new File(devpath + "/" + version + "/jsp/" + name + ".jsp");
+					if(file.exists())
+						is = new FileInputStream(file);
+				}
+				else
+				{
+					is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/" + version + "/jsp/" + name + ".jsp");
+				}
 				
-				jsp = jsp.replace("\r\n", "\\r\\n").replace("'", "\\'");
-				int pos1 = -1;
-				int pos2 = -1;
-				while((pos1 = jsp.indexOf("<%=")) != -1  &&  (pos2 = jsp.indexOf("%>", pos1 + 2)) != -1)
-					jsp = jsp.substring(0, pos1) + "');\r\nsb.append(" + jsp.substring(pos1 + 3, pos2).trim().replace("\\'", "'") + ");\r\nsb.append('" + jsp.substring(pos2 + 2);
-	
-				while((pos1 = jsp.indexOf("<%")) != -1  &&  (pos2 = jsp.indexOf("%>", pos1 + 2)) != -1)
-					jsp = jsp.substring(0, pos1) + "');\r\n" + jsp.substring(pos1 + 2, pos2).trim().replace("\\'",  "'").replace("\\r\\n", "\r\n") + "\r\nsb.append('" + jsp.substring(pos2 + 2);
-				jsp = "sb.append('" + jsp + "');";
-	
-				script = ((Compilable) jsEngine).compile(jsp);
-				jspScripts.put(name,  script);
+				if(is != null)
+				{
+					byte[] bytes = new byte[is.available()];
+					is.read(bytes);
+					is.close();
+					String jsp = new String(bytes);
+					
+					jsp = jsp.replace("\r\n", "\\r\\n").replace("'", "\\'");
+					int pos1 = -1;
+					int pos2 = -1;
+					while((pos1 = jsp.indexOf("<%=")) != -1  &&  (pos2 = jsp.indexOf("%>", pos1 + 2)) != -1)
+						jsp = jsp.substring(0, pos1) + "');\r\nsb.append(" + jsp.substring(pos1 + 3, pos2).trim().replace("\\'", "'") + ");\r\nsb.append('" + jsp.substring(pos2 + 2);
+		
+					while((pos1 = jsp.indexOf("<%")) != -1  &&  (pos2 = jsp.indexOf("%>", pos1 + 2)) != -1)
+						jsp = jsp.substring(0, pos1) + "');\r\n" + jsp.substring(pos1 + 2, pos2).trim().replace("\\'",  "'").replace("\\r\\n", "\r\n") + "\r\nsb.append('" + jsp.substring(pos2 + 2);
+					jsp = "sb.append('" + jsp + "');";
+		
+					script = ((Compilable) jsEngine).compile(jsp);
+					jspScripts.put(name,  script);
+				}
 			}
 			catch(Exception e)
 			{
@@ -265,7 +281,7 @@ public class RedbackUIServer extends UIServer
 	}	
 
 
-	protected byte[] getResource(String name) throws FunctionErrorException, FunctionTimeoutException, DataException, RedbackException, IOException
+	protected byte[] getResource(String name, String version) throws FunctionErrorException, FunctionTimeoutException, DataException, RedbackException, IOException
 	{
 		byte[] bytes = null;
 		String type = "";
@@ -290,13 +306,13 @@ public class RedbackUIServer extends UIServer
 			InputStream is = null;
 			if(devpath != null)
 			{
-				File file = new File(devpath + "/" + type + "/" + name);
+				File file = new File(devpath + "/" + version + "/client/" + type + "/" + name);
 				if(file.exists())
 					is = new FileInputStream(file);
 			}
 			else
 			{
-				is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/client/" + type + "/" + name);
+				is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/" + version + "/client/" + type + "/" + name);
 			}
 			
 			if(is != null)
