@@ -1,0 +1,16 @@
+<mat-toolbar
+    color="primary">
+    <mat-toolbar-row>
+        <span>{{title}}</span>
+    </mat-toolbar-row>
+</mat-toolbar>
+<mat-sidenav-container>
+    <mat-sidenav 
+        mode="side" 
+        opened>Sidenav content</mat-sidenav>
+    <mat-sidenav-content>
+        <rb-view-loader 
+            [src]="viewUrl">
+        </rb-view-loader>
+    </mat-sidenav-content>
+</mat-sidenav-container>

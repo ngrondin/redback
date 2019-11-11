@@ -1,0 +1,50 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html, body { height: 100%; }
+body { 
+    margin: 0; 
+    font-family: Roboto, "Helvetica Neue", sans-serif; 
+    display: flex;
+    flex-direction: column;
+}
+
+rb-view-loader {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+
+rb-layout {
+	display: flex;
+	overflow: hidden;
+}
+
+rb-dataset {
+	display: flex;
+}
+
+rb-hsection {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-shrink: 0;
+	border: 0px Solid;
+	vertical-align:top;
+}
+
+rb-vsection {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	flex-shrink: 0;
+	border: 0px Solid;
+	overflow:hidden;
+}
+
+rb-list-scroll {
+	display: flex;
+	overflow: auto;
+}

@@ -1,0 +1,29 @@
+:host {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+mat-toolbar {
+    min-height:40px
+}
+
+mat-toolbar-row {
+    height: 40px;
+}
+
+mat-sidenav-container {
+    display: flex;
+    flex: 1 1 auto;
+}
+
+mat-sidenav {
+    width: 250px;
+    border-right: Solid 1px gray;
+}
+
+mat-sidenav-content {
+    display: flex;
+    flex: 1 1 auto;
+}
