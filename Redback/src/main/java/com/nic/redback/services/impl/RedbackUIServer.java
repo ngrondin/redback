@@ -169,7 +169,7 @@ public class RedbackUIServer extends UIServer
 		return viewHTML;
 	}
 	
-	protected HTML generateHTMLFromComponentConfig(DataMap componentConfig, String version, Bindings context)
+	protected HTML generateHTMLFromComponentConfig(DataMap componentConfig, String version, Bindings context) throws RedbackException
 	{
 		String type = componentConfig.getString("type");
 		HTML componentHTML = new HTML();
@@ -213,7 +213,7 @@ public class RedbackUIServer extends UIServer
 	}
 
 	
-	protected HTML executeJSP(String name, String version, Bindings context)
+	protected HTML executeJSP(String name, String version, Bindings context) throws RedbackException
 	{
 		context.put("sb", new HTML());
 		try
@@ -225,7 +225,7 @@ public class RedbackUIServer extends UIServer
 		}
 		catch(Exception e)
 		{
-			return formatErrorMessage("Error exeucting jsp '" + name + "'", e);
+			throw new RedbackException("Error exeucting jsp '" + name + "'", e);
 		}
 	}	
 	

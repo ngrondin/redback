@@ -7,9 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import com.nic.firebus.Firebus;
 import com.nic.firebus.utils.DataException;
@@ -28,7 +33,7 @@ public class RedbackConfigServer extends ConfigServer
 		super(c, f);
 		if(config.containsKey("devpath"))
 			devpath = config.getString("devpath");
-		classpath = "/com/nic/redback/config";
+		classpath = "com/nic/redback/config";
 	}
 
 	
@@ -46,7 +51,7 @@ public class RedbackConfigServer extends ConfigServer
 			
 			if(reader == null)
 			{
-	    		InputStream is = getClass().getResourceAsStream(classpath + "/" + service + "/" + category + "/" + name + ".json");
+	    		InputStream is = getClass().getResourceAsStream("/" + classpath + "/" + service + "/" + category + "/" + name + ".json");
 	    		if(is != null)
 	    			reader = new InputStreamReader(is);
 			}
@@ -93,15 +98,31 @@ public class RedbackConfigServer extends ConfigServer
 			else
 			{
 				root = classpath + "/" + service + "/" + category;
-	    		InputStream is = getClass().getResourceAsStream(root);
-	    		if(is != null)
-	    		{
-	    			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-	    			String resource = null;
-	    			while((resource = br.readLine()) != null)
-	    				if(resource.endsWith(".json"))
-	    					names.add(resource.substring(0, resource.length() - 5));
-	    		}
+				URL pathUrl = Thread.currentThread().getContextClassLoader().getResource(root);
+				if(pathUrl.getProtocol().equals("file"))
+				{
+					File[] files = new File(pathUrl.toURI()).listFiles();
+					for(int i = 0; i < files.length; i++)
+	    				if(files[i].getName().endsWith(".json"))
+	    					names.add(files[i].getName().substring(0, files[i].getName().length() - 5));
+				}
+				else if(pathUrl.getProtocol().equals("jar"))
+				{
+					String jarPath = pathUrl.getPath().substring(5, pathUrl.getPath().indexOf("!")); 
+			        JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+			        Enumeration<JarEntry> entries = jar.entries(); 
+			        while(entries.hasMoreElements()) 
+			        {
+			          String name = entries.nextElement().getName();
+			          if (name.startsWith(root)) 
+			          { 
+			            String resource = name.substring(root.length() + 1);
+			            if(resource.endsWith(".json"))
+			            	names.add(resource.substring(0, resource.length() - 5));
+			          }
+			        }
+			        jar.close();
+				}
 			}		
 	
 			for(int i = 0; i < names.size(); i++)
@@ -123,7 +144,7 @@ public class RedbackConfigServer extends ConfigServer
 			}
 			return list;
 		}
-		catch(IOException e)
+		catch(Exception e)
 		{
 			throw new RedbackException("Error getting a config list", e);
 		}
