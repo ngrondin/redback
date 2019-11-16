@@ -1,5 +1,6 @@
 <rb-list-scroll 
 	style="<%=config.getString('inlineStyle')%>">
+	count: {{list}}
 	<!-- <md-progress-linear 
 		md-mode="indeterminate" 
 		ng-show="loading">

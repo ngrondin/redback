@@ -1,7 +1,6 @@
 package com.nic.redback;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -185,6 +184,7 @@ public class RedbackServer
 				Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
 				DataMap config = new DataMap(new FileInputStream(args[0]));
 				new RedbackServer(config);
+				System.out.println("Redback server started");
 			} 
 			catch (Exception e)
 			{

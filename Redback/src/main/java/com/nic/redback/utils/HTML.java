@@ -38,10 +38,10 @@ public class HTML
 		int pos = -1;
 		while((pos = sb.indexOf(tag)) > -1)
 		{
-			//int posNewLine = sb.substring(0, pos).lastIndexOf("\r\n");
-			//String indentStr = sb.substring(posNewLine + 2, pos);
-			//sb.replace(pos, pos + tag.length(), fragment.toString().replace("\r\n", "\r\n" + indentStr));
-			sb.replace(pos, pos + tag.length(), fragment.toString());
+			int posNewLine = sb.substring(0, pos).lastIndexOf("\r\n");
+			String indentStr = sb.substring(posNewLine + 2, pos);
+			sb.replace(pos, pos + tag.length(), fragment.toString().replace("\r\n", "\r\n" + indentStr));
+			//sb.replace(pos, pos + tag.length(), fragment.toString());
 		}
 		return this;
 	}
