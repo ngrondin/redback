@@ -24,13 +24,13 @@ public abstract class AuthenticatedService extends DataService
 	
 	public Payload service(Payload payload) throws FunctionErrorException
 	{
-		logger.finer("Authenticated service start");
+		Payload response = null;
+		Session session = null;
+		String token = payload.metadata.get("token");
+		
+		logger.finer("Authenticated service start (token: " + token + ")");
 		try
 		{
-			Payload response = null;
-			Session session = null;
-			String token = payload.metadata.get("token");
-			
 			if(token != null)
 			{
 				session = validateToken(token);

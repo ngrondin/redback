@@ -216,17 +216,18 @@ public class RedbackUIServer extends UIServer
 	protected HTML executeJSP(String name, String version, Bindings context) throws RedbackException
 	{
 		context.put("sb", new HTML());
+		HTML html = null;
 		try
 		{
 			CompiledScript script = getCompiledJSP(name, version);
 			script.eval(context);
-			HTML html = ((HTML)context.get("sb"));
-			return html;
+			html = ((HTML)context.get("sb"));
 		}
 		catch(Exception e)
 		{
-			throw new RedbackException("Error exeucting jsp '" + name + "'", e);
+			error("Error exeucting jsp '" + name + "'", e);
 		}
+		return html;
 	}	
 	
 	
@@ -274,7 +275,7 @@ public class RedbackUIServer extends UIServer
 			{
 				String error = "Error when trying to retreive " + name + ".jsp";
 				logger.severe(error + " : " + e.getMessage());
-				throw new RedbackException(error, e);
+				error(error, e);
 			}					
 		}
 		return script;
@@ -326,7 +327,7 @@ public class RedbackUIServer extends UIServer
 			}
 			else
 			{
-				throw new FunctionErrorException("The resource was not found");
+				error("The resource was not found");
 			}
 		}
 		return bytes;

@@ -67,12 +67,14 @@ public class RedbackConfigServer extends ConfigServer
 			}
 			else
 			{
-				throw new RedbackException("The requested configuration in not found");
+				error("The requested configuration in not found");
+				return null;
 			}
 		}
 		catch(IOException | DataException e)
 		{
-			throw new RedbackException("Error getting a config", e);
+			error("Error getting a config", e);
+			return null;
 		}
 	}
 	
@@ -146,7 +148,9 @@ public class RedbackConfigServer extends ConfigServer
 		}
 		catch(Exception e)
 		{
-			throw new RedbackException("Error getting a config list", e);
+			error("Error getting a config list", e);
+			return null;
+
 		}
 	}
 

@@ -28,9 +28,12 @@ public abstract class IDGenerator extends DataService
 			String id = getNextId(idName);
 			response.setData(id);
 		}
-		catch(RedbackException e)
+		catch(Exception e)
 		{
-			throw new FunctionErrorException(e.getMessage());
+			String errorMsg = buildErrorMessage(e);
+			logger.severe(errorMsg);
+			logger.severe(getStackTrace(e));
+			throw new FunctionErrorException(errorMsg);
 		}
 		logger.finer("ID generator service finish");
 		return response;

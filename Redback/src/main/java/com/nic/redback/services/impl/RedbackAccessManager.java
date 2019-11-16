@@ -39,7 +39,7 @@ public class RedbackAccessManager extends AccessManager
 		} 
 		catch (JWTDecodeException  exception)
 		{
-		    throw new RedbackException("JWT token is invalid");
+		    error("JWT token is invalid");
 		}
 		return session;
 	}

@@ -50,12 +50,12 @@ public abstract class Service implements ServiceProvider
 		}
 	}
 	
-	protected void error(String msg) throws RedbackException
+	protected Object error(String msg) throws RedbackException
 	{
-		error(msg, null);
+		return error(msg, null);
 	}
 	
-	protected void error(String msg, Exception cause) throws RedbackException
+	protected Object error(String msg, Exception cause) throws RedbackException
 	{
 		logger.severe(msg);
 		if(cause != null)

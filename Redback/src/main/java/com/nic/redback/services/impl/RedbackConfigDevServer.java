@@ -44,13 +44,14 @@ public class RedbackConfigDevServer extends ConfigDevelopmentServer
 			}
 			else
 			{
-				throw new RedbackException("The requested configuration in not found");
+				error("The requested configuration in not found");
 			}
 		}
 		catch(DataException | IOException e)
 		{
-			throw new RedbackException("Error getting the configuration", e);
+			error("Error getting the configuration", e);
 		}
+		return null;
 	}
 	
 	protected DataList getDevConfigList(String service, String category, DataMap filter) throws RedbackException
@@ -105,7 +106,7 @@ public class RedbackConfigDevServer extends ConfigDevelopmentServer
 		}
 		catch(IOException e)
 		{
-			throw new RedbackException("Error putting the configuration", e);
+			error("Error putting the configuration", e);
 		}
 	}
 }

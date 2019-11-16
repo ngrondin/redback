@@ -27,19 +27,21 @@ public class RedbackObjectServer extends ObjectServer
 
 	protected RedbackObject get(Session session, String objectName, String uid) throws RedbackException
 	{
+		RedbackObject object = null;
 		try {
-			RedbackObject object = objectManager.getObject(session, objectName, uid);
+			object = objectManager.getObject(session, objectName, uid);
 			objectManager.commitCurrentTransaction();
-			return object;
 		} catch (ScriptException e) {
-			throw new RedbackException("Error getting object", e);
+			error("Error getting object", e);
 		}
+		return object;
 	}
 
 	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, String uid, String attribute, boolean addRelated) throws RedbackException
 	{
+		List<RedbackObject> objects = null;
 		try {
-			List<RedbackObject> objects = new ArrayList<RedbackObject>();
+			objects = new ArrayList<RedbackObject>();
 			if(filter == null)
 				filter = new DataMap();
 			
@@ -54,46 +56,48 @@ public class RedbackObjectServer extends ObjectServer
 			
 			return objects;
 		} catch(ScriptException e) {
-			throw new RedbackException("Error listing objects", e);
+			error("Error listing objects", e);
 		}
+		return objects;
 	}
 
 	protected RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException
 	{
+		RedbackObject object = null;
 		try {
-			RedbackObject object = objectManager.updateObject(session, objectName, uid, data);
+			object = objectManager.updateObject(session, objectName, uid, data);
 			if(object != null)
 				objectManager.commitCurrentTransaction();
 			else
-				throw new RedbackException("No such object to update");
-			return object;
+				error("No such object to update");
 		} catch(ScriptException e) {
-			throw new RedbackException("Error listing objects", e);
+			error("Error listing objects", e);
 		}
-		
+		return object;
 	}
 
 	protected RedbackObject create(Session session, String objectName, DataMap data) throws RedbackException
 	{
+		RedbackObject object = null;
 		try {
-			RedbackObject object = objectManager.createObject(session, objectName, data);
+			object = objectManager.createObject(session, objectName, data);
 			objectManager.commitCurrentTransaction();
-			return object;
 		} catch(ScriptException e) {
-			throw new RedbackException("Error creating object", e);
+			error("Error creating object", e);
 		}
+		return object;
 	}
 
 	protected RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException
 	{
+		RedbackObject object = null;
 		try {
-			RedbackObject object = objectManager.executeFunction(session, objectName, uid, function, data);
+			object = objectManager.executeFunction(session, objectName, uid, function, data);
 			objectManager.commitCurrentTransaction();
-			return object;
 		} catch(ScriptException e) {
-			throw new RedbackException("Error executing function on object", e);
-			
+			error("Error executing function on object", e);
 		}
+		return object;
 	}
 
 	protected void refreshConfigs() 

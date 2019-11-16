@@ -44,12 +44,12 @@ public class RedbackFileServer extends FileServer
 			}
 			else
 			{
-				throw new RedbackException("File not found");
+				error("File not found " + uid);
 			}
 		}
 		catch(DataException | FunctionTimeoutException | FunctionErrorException e)
 		{
-			throw new RedbackException(e.getMessage());
+			error("General error getting file + uid", e);
 		}
 		return response;
 	}

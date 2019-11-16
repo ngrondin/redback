@@ -84,7 +84,7 @@ public abstract class AccessManager extends DataService implements Consumer
 		}
 		catch(Exception e)
 		{	
-			logger.severe(e.getMessage());
+			logger.severe(buildErrorMessage(e));
 			throw new FunctionErrorException(e.getMessage());
 		}
 		

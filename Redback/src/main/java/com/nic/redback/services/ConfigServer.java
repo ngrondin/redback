@@ -47,8 +47,10 @@ public abstract class ConfigServer extends Service
 		}
 		catch(Exception e)
 		{
-			logger.severe(e.getMessage());
-			throw new FunctionErrorException(e.getMessage());
+			String errorMsg = buildErrorMessage(e);
+			logger.severe(errorMsg);
+			logger.severe(getStackTrace(e));
+			throw new FunctionErrorException(errorMsg);
 		}
 		
 		logger.finer("Config service finish");
