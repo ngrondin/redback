@@ -316,7 +316,7 @@ public class ProcessManager
 		{
 			Payload reqPayload = new Payload(request.toString());
 			logger.finest("Requesting firebus service : " + service + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
-			Payload respPayload = firebus.requestService(service, reqPayload);
+			Payload respPayload = firebus.requestService(service, reqPayload, 10000);
 			logger.finest("Receiving firebus config service respnse");
 			String respStr = respPayload.getString();
 			DataMap result = new DataMap(respStr);

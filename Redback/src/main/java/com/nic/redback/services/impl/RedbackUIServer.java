@@ -293,13 +293,13 @@ public class RedbackUIServer extends UIServer
 		else if(name.endsWith(".svg"))
 			type = "svg";
 		else if(name.endsWith(".ico"))
-			type = "icons";
+			type = "ico";
 		else if(name.endsWith(".png"))
 			type = "png";
 		
 		if(type.equals("svg"))
 		{
-			DataMap result = this.getConfig("rbui", "resource", name); 
+			DataMap result = getConfig("rbui", "resource", name); 
 			bytes = StringUtils.unescape(result.getString("content")).getBytes();
 		}
 		else
@@ -327,7 +327,7 @@ public class RedbackUIServer extends UIServer
 			}
 			else
 			{
-				error("The resource was not found");
+				error("The resource was not found : " + name);
 			}
 		}
 		return bytes;
