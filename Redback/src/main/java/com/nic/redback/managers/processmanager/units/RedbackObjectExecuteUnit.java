@@ -52,7 +52,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 		try
 		{
 			logger.info("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());
-			Payload response = processManager.getFirebus().requestService(processManager.getGlobalVariables().getString("rbobjectservice"), payload);
+			Payload response = processManager.getFirebus().requestService(processManager.getGlobalVariables().getString("rbobjectservice"), payload, 10000);
 			DataMap respJSON = new DataMap(response.getString());
 			//respJSON.remove("data");
 			DataMap respOutput = (DataMap)outputMapExpression.eval("result", respJSON);

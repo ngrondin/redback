@@ -12,6 +12,7 @@ import com.nic.redback.managers.processmanager.ProcessManager;
 import com.nic.redback.managers.processmanager.ProcessUnit;
 import com.nic.redback.security.Session;
 
+@SuppressWarnings("restriction")
 public class FirebusCallUnit extends ProcessUnit 
 {
 	//private Logger logger = Logger.getLogger("com.nic.redback");
@@ -42,7 +43,7 @@ public class FirebusCallUnit extends ProcessUnit
 		payload.metadata.put("token", sysUserSession.getToken());
 		try
 		{
-			processManager.getFirebus().requestService(firebusServiceName, payload);
+			processManager.getFirebus().requestService(firebusServiceName, payload, 10000);
 		} 
 		catch (Exception e)
 		{
