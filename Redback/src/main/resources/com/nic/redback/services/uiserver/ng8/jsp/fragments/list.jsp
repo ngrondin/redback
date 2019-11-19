@@ -1,16 +1,17 @@
 <rb-list-scroll 
 	style="<%=config.getString('inlineStyle')%>">
-	count: {{list}}
 	<!-- <md-progress-linear 
 		md-mode="indeterminate" 
 		ng-show="loading">
 	</md-progress-linear> -->
-	<mat-list>
-		<mat-list-item 
-			*ngFor="let item of list" 
-			(click)="select(item)">
+	<mat-action-list>
+		<button
+			mat-list-item 
+			*ngFor="let item of <%=datasetname%>.list" 
+			[ngClass]="<%=datasetname%>.selectedObject == item ? 'rb-list-item-active' : ''"
+			(click)="<%=datasetname%>.select(item)">
 			<div 
-				class="md-list-item-text" 
+				class="rb-list-item"
 				layout=row><%
 if(config.get('initials') != null) {%>
 				<div
@@ -20,10 +21,16 @@ if(config.get('initials') != null) {%>
 }%>
 				<div
 					layout="column">
-					<h3><%=config.getString('line1')%></h3>
-					<h4><%=config.getString('line2')%></h4>
+					<span
+						class="rb-list-line1">
+						<%=config.getString('line1')%>
+					</span><br/>
+					<span
+						class="rb-list-line2">
+						<%=config.getString('line2')%>
+					</span>
 				</div>
 			</div>
-		</mat-list-item>
-	</mat-list>
+		</button>
+	</mat-action-list>
 </rb-list-scroll>

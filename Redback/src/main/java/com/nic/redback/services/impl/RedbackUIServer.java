@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.script.Bindings;
@@ -196,6 +197,10 @@ public class RedbackUIServer extends UIServer
 				if(componentConfig.get("show") == null)
 					componentConfig.put("show", "true");
 				context.put("config", componentConfig);
+				
+				if(type.equals("dataset"))
+					context.put("datasetname", "ds" + (new Random()).nextInt(10000));
+				
 				componentHTML = executeJSP("fragments/" + type, version, context);
 
 				if(componentHTML.hasTag("content") && componentConfig.containsKey("content"))
