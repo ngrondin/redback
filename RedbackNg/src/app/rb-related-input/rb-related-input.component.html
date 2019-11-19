@@ -1,0 +1,11 @@
+<mat-form-field >
+    <mat-label>{{label}}</mat-label>
+    <input 
+        #input
+        matInput 
+        [(ngModel)]="displayvalue"
+        (change)="commit()"
+        (focus)="focus()"
+        [readonly]="readonly">
+    <mat-icon matPrefix>{{icon}}</mat-icon>
+</mat-form-field>

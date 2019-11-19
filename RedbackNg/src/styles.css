@@ -16,6 +16,11 @@ rb-view-loader {
 	overflow: hidden;
 }
 
+rb-view {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
 
 rb-layout {
 	display: flex;
@@ -47,4 +52,17 @@ rb-vsection {
 rb-list-scroll {
 	display: flex;
 	overflow: auto;
+}
+
+rb-list-scroll > mat-action-list > button {
+	height: auto!important;
+}
+
+.rb-list-item {
+	margin: 8px;
+}
+
+.rb-list-item-active {
+	border-left: 4px Solid red;
+	padding-left: -4px;
 }

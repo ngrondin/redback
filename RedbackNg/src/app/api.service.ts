@@ -23,11 +23,9 @@ export class ApiService {
     private cookieService : CookieService
   ) { 
     this.baseUrl = 'http://localhost';
-    //this.cookieService.set('rbtoken','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJlbWFpbCI6Im5ncm9uZGluNzhAZ21haWwuY29tIiwiZXhwIjoxOTIwNTExOTIyMDAwfQ.zQrN7sheh1PuO4fWru45dTPDtkLAqB9Q0WrwGO6yOeo', 1920511922000, "/", "http://localhost", false, 'Lax');
   }
 
-
-  listObjects(name: string, filter: Object): Observable<any> {
+  listObjects(name: string, filter: any): Observable<any> {
     const req = {
       action: 'list',
       object: name,
@@ -36,6 +34,31 @@ export class ApiService {
         addrelated: true,
         addvalidation: true
       }
+    };
+    return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
+  }
+
+  listRelatedObjects(name: string, uid: string, attribute: string, filter: any): Observable<any> {
+    const req = {
+      action: 'list',
+      object: name,
+      uid: uid,
+      attribute: attribute,
+      filter: filter,
+      options: {
+        addrelated: true,
+        addvalidation: true
+      }
+    };
+    return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
+  }
+
+  updateObject(name: string, uid: string, data: any) {
+    const req = {
+      action: 'update',
+      object: name,
+      uid: uid,
+      data: data
     };
     return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
   }
