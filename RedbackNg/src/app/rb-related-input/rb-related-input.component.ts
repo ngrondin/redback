@@ -4,7 +4,7 @@ import { RbObject } from '../datamodel';
 import { MatDialog } from '@angular/material/dialog';
 import { RbPopupListComponent } from '../rb-popup-list/rb-popup-list.component';
 import { Overlay } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
+import { ComponentPortal, PortalInjector } from '@angular/cdk/portal';
 
 @Component({
   selector: 'rb-related-input',
@@ -59,6 +59,12 @@ export class RbRelatedInputComponent implements OnInit {
       const overlayRef = this.overlay.create({
         positionStrategy: this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
       });
+
+      const injectionTokens = new WeakMap();
+      injectionTokens.set(FilePreviewOverlayRef, overlayRef);
+      injectionTokens.set(FILE_PREVIEW_DIALOG_DATA, {option: "allo"});
+      injector : PortalInjector = new PortalInjector(this.injector, injectionTokens);
+
       const filePreviewPortal = new ComponentPortal(RbPopupListComponent);
       overlayRef.attach(filePreviewPortal);
     }
