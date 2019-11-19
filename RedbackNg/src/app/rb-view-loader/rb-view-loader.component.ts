@@ -21,7 +21,8 @@ export class RbViewLoaderComponent implements OnInit {
   constructor(
     private http: Http,
     private resolver: ComponentFactoryResolver,
-    private compiler: Compiler
+    private compiler: Compiler,
+    private vcRef: ViewContainerRef
   ) { }
 
   ngOnInit() {
@@ -31,10 +32,10 @@ export class RbViewLoaderComponent implements OnInit {
   compileTemplate(body: string) {
 
     @Component({
-      selector: 'dynamic-component',
+      selector: 'rb-view',
       template: body
     })
-    class RuntimeComponent { };
+    class ViewComponent { };
 
     @NgModule({ 
       imports: [
@@ -42,13 +43,13 @@ export class RbViewLoaderComponent implements OnInit {
         RedbackModule
       ], 
       declarations: [
-        RuntimeComponent
+        ViewComponent
       ] 
     })
     class RuntimeComponentModule { }
 
     let module: ModuleWithComponentFactories<any> = this.compiler.compileModuleAndAllComponentsSync(RuntimeComponentModule);
-    let factory = module.componentFactories.find(f => f.componentType === RuntimeComponent);
+    let factory = module.componentFactories.find(f => f.componentType === ViewComponent);
     
     if (this.componentRef) {
       this.componentRef.destroy();
@@ -56,6 +57,7 @@ export class RbViewLoaderComponent implements OnInit {
     }
 
     this.componentRef = this.container.createComponent(factory);
+    //this.componentRef = this.vcRef.createComponent(factory, 0);
   }
 
 

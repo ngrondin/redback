@@ -5,6 +5,9 @@ import { Directive } from '@angular/core';
 })
 export class RbListScrollDirective {
 
-  constructor() { }
+  public list: string = 'allo';
+  constructor() { 
+    this.list = 'all1';
+  }
 
 }

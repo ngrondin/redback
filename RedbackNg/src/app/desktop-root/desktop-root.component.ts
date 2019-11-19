@@ -22,7 +22,7 @@ export class DesktopRootComponent implements OnInit {
   }
 
   get viewUrl() : string {
-    return 'http://localhost/rbui/view/' + this.view;
+    return 'http://localhost/rbui/ng8/view/' + this.view;
   }
 
 }

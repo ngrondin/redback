@@ -1,4 +1,5 @@
-<rb-dataset <% 
+<rb-dataset 
+	#<%=datasetname%>="dataset" <% 
 if(config.get('object') != null) { %>
 	[object]="<%=config.getString('object')%>"<% 
 }
