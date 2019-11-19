@@ -36,6 +36,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
     MatSelectModule,
     MatExpansionModule,
     MatDialogModule,
+    OverlayModule,
     FormsModule,
     BrowserAnimationsModule,
     HttpClientModule,
