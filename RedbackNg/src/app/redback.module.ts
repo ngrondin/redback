@@ -39,6 +39,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
     MatDialogModule,
     MatIconModule,
     MatDividerModule,
+    OverlayModule,
     FormsModule,
     BrowserAnimationsModule,
     HttpClientModule,

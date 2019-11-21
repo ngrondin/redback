@@ -1,10 +1,11 @@
-import { Component, OnInit, Input, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ViewContainerRef, Injector, InjectionToken } from '@angular/core';
+import { OverlayRef, CdkOverlayOrigin, Overlay, OverlayConfig } from  '@angular/cdk/overlay';
 import { RbInputComponent } from '../rb-input/rb-input.component';
 import { RbObject } from '../datamodel';
 import { MatDialog } from '@angular/material/dialog';
 import { RbPopupListComponent } from '../rb-popup-list/rb-popup-list.component';
-import { Overlay } from '@angular/cdk/overlay';
 import { ComponentPortal, PortalInjector } from '@angular/cdk/portal';
+import { CONTAINER_DATA } from '../tokens';
 
 @Component({
   selector: 'rb-related-input',
@@ -28,8 +29,9 @@ export class RbRelatedInputComponent implements OnInit {
   editedValue: string;
 
   constructor(
-    public dialog: MatDialog,
-    private overlay: Overlay
+    public injector: Injector,
+    public overlay: Overlay,
+    public viewContainerRef: ViewContainerRef
   ) {
   }
 
@@ -56,7 +58,7 @@ export class RbRelatedInputComponent implements OnInit {
 
   focus() {
     if(!this.readonly) {
-      const overlayRef = this.overlay.create({
+      const overlayRef: OverlayRef = this.overlay.create({
         positionStrategy: this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
       });
 
@@ -65,7 +67,7 @@ export class RbRelatedInputComponent implements OnInit {
       //injectionTokens.set(FILE_PREVIEW_DIALOG_DATA, {option: "allo"});
       //injector : PortalInjector = new PortalInjector(this.injector, injectionTokens);
 
-      const filePreviewPortal = new ComponentPortal(RbPopupListComponent);
+      const filePreviewPortal = new ComponentPortal(RbPopupListComponent, this.viewContainerRef, inj);
       overlayRef.attach(filePreviewPortal);
     }
   }
