@@ -25,4 +25,8 @@ export class DesktopRootComponent implements OnInit {
     return 'http://localhost/rbui/ng8/view/' + this.view;
   }
 
+  get menuUrl() : string {
+    return 'http://localhost/rbui/ng8/menu/wmsmenu'
+  }
+
 }

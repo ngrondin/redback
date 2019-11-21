@@ -61,9 +61,9 @@ export class RbRelatedInputComponent implements OnInit {
       });
 
       const injectionTokens = new WeakMap();
-      injectionTokens.set(FilePreviewOverlayRef, overlayRef);
-      injectionTokens.set(FILE_PREVIEW_DIALOG_DATA, {option: "allo"});
-      injector : PortalInjector = new PortalInjector(this.injector, injectionTokens);
+      //injectionTokens.set(FilePreviewOverlayRef, overlayRef);
+      //injectionTokens.set(FILE_PREVIEW_DIALOG_DATA, {option: "allo"});
+      //injector : PortalInjector = new PortalInjector(this.injector, injectionTokens);
 
       const filePreviewPortal = new ComponentPortal(RbPopupListComponent);
       overlayRef.attach(filePreviewPortal);

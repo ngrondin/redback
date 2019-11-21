@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 
 import { DesktopRootComponent } from './desktop-root/desktop-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule } from '@angular/material';
+import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule } from '@angular/material';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { RbDatasetDirective } from './rb-dataset/rb-dataset.directive';
+import { RbMenuDirective } from './rb-menu/rb-menu.directive';
 import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
 import { RbVsectionDirective } from './rb-vsection/rb-vsection.directive';
 import { RbLayoutDirective } from './rb-layout/rb-layout.directive';
@@ -36,6 +37,8 @@ import { OverlayModule } from '@angular/cdk/overlay';
     MatSelectModule,
     MatExpansionModule,
     MatDialogModule,
+    MatIconModule,
+    MatDividerModule,
     FormsModule,
     BrowserAnimationsModule,
     HttpClientModule,
@@ -51,12 +54,14 @@ import { OverlayModule } from '@angular/cdk/overlay';
     RbListScrollDirective,
     RbInputComponent,
     RbRelatedInputComponent,
-    RbPopupListComponent
+    RbMenuDirective
   ],
   exports: [
     DesktopRootComponent,
     MatList,
     MatListItem,
+    MatIconModule,
+    MatDividerModule,
     RbDatasetDirective,
     RbViewLoaderComponent,
     RbVsectionDirective,
@@ -65,7 +70,8 @@ import { OverlayModule } from '@angular/cdk/overlay';
     RbListScrollDirective,
     RbInputComponent,
     RbRelatedInputComponent,
-    RbPopupListComponent
+    RbPopupListComponent,
+    RbMenuDirective
   ],
   providers: [
     CookieService,
