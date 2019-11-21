@@ -184,6 +184,7 @@ public class RedbackUIServer extends UIServer
 			}
 			else
 			{
+				String id = type + (new Random()).nextInt(10000);
 				String inlineStyle = "";
 				String grow = componentConfig.getString("grow");
 				String shrink = componentConfig.getString("shrink");
@@ -197,23 +198,23 @@ public class RedbackUIServer extends UIServer
 				if(componentConfig.get("show") == null)
 					componentConfig.put("show", "true");
 				context.put("config", componentConfig);
-				
-				if(type.equals("dataset"))
-					context.put("datasetname", "ds" + (new Random()).nextInt(10000));
+				context.put("id", id);
 				
 				componentHTML = executeJSP("fragments/" + type, version, context);
 
 				if(componentHTML.hasTag("content") && componentConfig.containsKey("content"))
 				{
+					String parentOfSameType = (String)context.get(type);
+					context.put(type, id);
 					HTML contentHTML = new HTML();
 					DataList content = componentConfig.getList("content");
 					for(int i = 0; i < content.size(); i++)
 						contentHTML.append(generateHTMLFromComponentConfig(content.getObject(i), version, context));
 					componentHTML.inject("content", contentHTML);
+					context.put(type, parentOfSameType);
 				}
 			}
 		}
-
 		return componentHTML;
 	}
 
