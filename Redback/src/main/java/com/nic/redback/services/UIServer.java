@@ -109,6 +109,12 @@ public abstract class UIServer extends AuthenticatedService
 					response.setData(getApp(session, name, version).toString());
 					response.metadata.put("mime", "text/html");
 				}
+				else if(category.equals("menu"))
+				{
+					logger.finer("Get menu " + name);
+					response.setData(getMenu(session, version).toString());
+					response.metadata.put("mime", "text/html");
+				}
 				else if(category.equals("view"))
 				{
 					logger.finer("Get view " + name);
