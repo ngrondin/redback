@@ -62,10 +62,10 @@ export class RbRelatedInputComponent implements OnInit {
         positionStrategy: this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
       });
 
-      const injectionTokens = new WeakMap();
-      //injectionTokens.set(FilePreviewOverlayRef, overlayRef);
-      //injectionTokens.set(FILE_PREVIEW_DIALOG_DATA, {option: "allo"});
-      //injector : PortalInjector = new PortalInjector(this.injector, injectionTokens);
+      const injectorTokens = new WeakMap();
+      injectorTokens.set(OverlayRef, overlayRef);
+      injectorTokens.set(CONTAINER_DATA, {rbObject: this.rbObject, attribute: this.attribute});
+      let inj : PortalInjector = new PortalInjector(this.injector, injectorTokens);
 
       const filePreviewPortal = new ComponentPortal(RbPopupListComponent, this.viewContainerRef, inj);
       overlayRef.attach(filePreviewPortal);
