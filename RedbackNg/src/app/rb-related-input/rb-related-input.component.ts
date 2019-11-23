@@ -25,7 +25,7 @@ export class RbRelatedInputComponent implements OnInit {
   @Input('childattribute') childattribute: string;
 
   @ViewChild('input', { read: ViewContainerRef, static: false }) inputContainerRef: ViewContainerRef;
-  
+  overlayRef: OverlayRef;
   editedValue: string;
 
   constructor(
@@ -58,18 +58,25 @@ export class RbRelatedInputComponent implements OnInit {
 
   focus() {
     if(!this.readonly) {
-      const overlayRef: OverlayRef = this.overlay.create({
+      this.overlayRef = this.overlay.create({
         positionStrategy: this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
+      });
+      this.overlayRef.backdropClick().subscribe(() => {
+        this.overlayRef.dispose();
       });
 
       const injectorTokens = new WeakMap();
-      injectorTokens.set(OverlayRef, overlayRef);
+      injectorTokens.set(OverlayRef, this.overlayRef);
       injectorTokens.set(CONTAINER_DATA, {rbObject: this.rbObject, attribute: this.attribute});
       let inj : PortalInjector = new PortalInjector(this.injector, injectorTokens);
 
-      const filePreviewPortal = new ComponentPortal(RbPopupListComponent, this.viewContainerRef, inj);
-      overlayRef.attach(filePreviewPortal);
+      const popupListPortal = new ComponentPortal(RbPopupListComponent, this.viewContainerRef, inj);
+      this.overlayRef.attach(popupListPortal);
     }
+  }
+
+  public clickOutsidePopup() {
+    this.overlayRef.dispose();
   }
 
   commit() {

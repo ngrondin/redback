@@ -55,6 +55,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
     RbListScrollDirective,
     RbInputComponent,
     RbRelatedInputComponent,
+    RbPopupListComponent,
     RbMenuDirective
   ],
   exports: [

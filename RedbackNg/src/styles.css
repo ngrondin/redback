@@ -66,3 +66,26 @@ rb-list-scroll > mat-action-list > button {
 	border-left: 4px Solid red;
 	padding-left: -4px;
 }
+
+
+.rb-menu-group-text {
+	flex-grow: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.rb-menu-link-text {
+	flex-grow: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+rb-input {
+	margin: 6px;
+}
+
+rb-related-input {
+	margin: 6px;
+}

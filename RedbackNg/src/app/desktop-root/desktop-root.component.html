@@ -9,12 +9,14 @@
         mode="side" 
         opened>
         <rb-view-loader 
-            [src]="menuUrl">
+            [src]="menuUrl"
+            (navigate)="navigateTo($event)">
         </rb-view-loader>    
     </mat-sidenav>
     <mat-sidenav-content>
         <rb-view-loader 
-            [src]="viewUrl">
+            [src]="viewUrl"
+            (navigate)="navigateTo($event)">
         </rb-view-loader>
     </mat-sidenav-content>
 </mat-sidenav-container>

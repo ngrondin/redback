@@ -1,4 +1,4 @@
-import { Component, ViewChild, ViewContainerRef, ComponentRef, Compiler, ComponentFactory, NgModule, ModuleWithComponentFactories, ComponentFactoryResolver, OnInit, Input } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef, ComponentRef, Compiler, ComponentFactory, NgModule, ModuleWithComponentFactories, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange } from '@angular/core';
 import { Headers, Http, Response } from '@angular/http';
 import { __asyncDelegator } from 'tslib';
 import { CommonModule } from '@angular/common';
@@ -15,6 +15,7 @@ export class RbViewLoaderComponent implements OnInit {
 
   @Input('src') private templateUrl: string;
   @ViewChild('container', { read: ViewContainerRef, static: false }) container: ViewContainerRef;
+  @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   private componentRef: ComponentRef<{}>;
 
@@ -26,6 +27,9 @@ export class RbViewLoaderComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+  }
+
+  ngOnChanges(changes : SimpleChange) {
     this.http.get(this.templateUrl, { withCredentials: true, responseType: 0 }).subscribe(res => this.compileTemplate(res.text()));
   }
 
@@ -35,7 +39,12 @@ export class RbViewLoaderComponent implements OnInit {
       selector: 'rb-view',
       template: body
     })
-    class ViewComponent { };
+    class ViewComponent {
+      @Output() navigate: EventEmitter<any> = new EventEmitter();
+      navigateTo(view : string, title : string) {
+        this.navigate.emit({view : view, title : title});
+      }
+    };
 
     @NgModule({ 
       imports: [
@@ -56,9 +65,13 @@ export class RbViewLoaderComponent implements OnInit {
       this.componentRef = null;
     }
 
-    this.componentRef = this.container.createComponent(factory);
-    //this.componentRef = this.vcRef.createComponent(factory, 0);
+    let newViewComponentRef : ComponentRef<ViewComponent> = this.container.createComponent(factory);
+    newViewComponentRef.instance.navigate.subscribe(e => this.navigateTo(e));
+    this.componentRef = newViewComponentRef;
   }
 
+  navigateTo($event) {
+    this.navigate.emit($event);
+  }
 
 }
