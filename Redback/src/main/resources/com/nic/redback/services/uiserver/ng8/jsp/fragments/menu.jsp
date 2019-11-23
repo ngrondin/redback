@@ -1,6 +1,6 @@
 <rb-menu
-	#<%=id%>>
-	<mat-list>
+	#<%=id%>="menu">
+	<mat-action-list>
 		#content#
-	</mat-list>
+	</mat-action-list>
 </rb-menu>

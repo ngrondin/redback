@@ -10,7 +10,7 @@ if(config.get('icon') == null) {%>
 	[icon]="'<%=config.getString('icon')%>'"<%
 }%>	
 	[size]="<%=(config.get("size") == null ? 50 : config.getString("size")) %>"
-	[object]="<%=datasetname%>.selectedObject"
+	[object]="<%=dataset%>.selectedObject"
 	[attribute]="'<%=config.getString('attribute')%>'"
 	[displayattribute]="'<%=config.getString('displayattribute')%>'"<%
 if(config.get("parentattribute")) { %>

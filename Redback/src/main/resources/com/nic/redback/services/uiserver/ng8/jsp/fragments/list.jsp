@@ -7,9 +7,9 @@
 	<mat-action-list>
 		<button
 			mat-list-item 
-			*ngFor="let item of <%=datasetname%>.list" 
-			[ngClass]="<%=datasetname%>.selectedObject == item ? 'rb-list-item-active' : ''"
-			(click)="<%=datasetname%>.select(item)">
+			*ngFor="let item of <%=dataset%>.list" 
+			[ngClass]="<%=dataset%>.selectedObject == item ? 'rb-list-item-active' : ''"
+			(click)="<%=dataset%>.select(item)">
 			<div 
 				class="rb-list-item"
 				layout=row><%
