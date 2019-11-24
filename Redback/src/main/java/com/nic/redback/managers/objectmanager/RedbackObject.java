@@ -331,7 +331,10 @@ public class RedbackObject
 	
 	public boolean isEditable(String name) throws RedbackException
 	{
-		return config.getAttributeConfig(name).getEditableExpression().eval(this).getBoolean();
+		if(domain != null && domain.equals("root"))
+			return false;
+		else
+			return config.getAttributeConfig(name).getEditableExpression().eval(this).getBoolean();
 	}
 	
 	public void save() throws ScriptException, RedbackException
