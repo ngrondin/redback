@@ -62,7 +62,7 @@ export class RbRelatedInputComponent implements OnInit {
         positionStrategy: this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
       });
       this.overlayRef.backdropClick().subscribe(() => {
-        this.overlayRef.dispose();
+        alert(this);
       });
 
       const injectorTokens = new WeakMap();
