@@ -217,8 +217,12 @@ public class ObjectManager
 		return object;
 	}
 	
-	
 	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, DataMap filterData, String searchText) throws RedbackException
+	{
+		return getObjectList(session, objectName, filterData, searchText, 0);
+	}
+	
+	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, DataMap filterData, String searchText, int page) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
@@ -234,7 +238,7 @@ public class ObjectManager
 				DataMap dbFilter = objectConfig.generateDBFilter(objectFilter);
 				if(objectConfig.getDomainDBKey() != null)
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-				DataMap dbResult = requestData(objectConfig.getCollection(), dbFilter);
+				DataMap dbResult = requestData(objectConfig.getCollection(), dbFilter, page);
 				DataList dbResultList = dbResult.getList("result");
 				
 				for(int i = 0; i < dbResultList.size(); i++)
@@ -264,9 +268,14 @@ public class ObjectManager
 	
 	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText) throws RedbackException
 	{
+		return getObjectList(session, objectName, uid, attributeName, filterData, searchText, 0);
+	}
+	
+	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, int page) throws RedbackException
+	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
-			return object.getRelatedList(attributeName, filterData, searchText);
+			return object.getRelatedList(attributeName, filterData, searchText, page);
 		else
 			return new ArrayList<RedbackObject>();
 	}
@@ -286,10 +295,10 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject createObject(Session session, String objectName, DataMap initialData) throws RedbackException, ScriptException
+	public RedbackObject createObject(Session session, String objectName, String domain, DataMap initialData) throws RedbackException, ScriptException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
-		RedbackObject object = new RedbackObject(session, this, objectConfig);
+		RedbackObject object = new RedbackObject(session, this, objectConfig, domain);
 		putInCurrentTransaction(object);
 		if(initialData != null)
 		{
@@ -400,9 +409,15 @@ public class ObjectManager
 
 	protected DataMap requestData(String objectName, DataMap filter) throws DataException, FunctionErrorException, FunctionTimeoutException
 	{
+		return requestData(objectName, filter, 0);
+	}
+	
+	protected DataMap requestData(String objectName, DataMap filter, int page) throws DataException, FunctionErrorException, FunctionTimeoutException
+	{
 		DataMap request = new DataMap();
 		request.put("object", objectName);
 		request.put("filter", filter);
+		request.put("page", page);
 		return request(dataServiceName, request);
 	}
 

@@ -67,7 +67,7 @@ public class RedbackConfigServer extends ConfigServer
 			}
 			else
 			{
-				error("The requested configuration in not found");
+				error("The requested configuration '" + service + "/" + category + "/" + name + "' is not found");
 				return null;
 			}
 		}

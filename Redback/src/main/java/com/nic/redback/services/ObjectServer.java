@@ -68,9 +68,18 @@ public abstract class ObjectServer extends AuthenticatedService implements Consu
 						String attribute = request.getString("attribute");
 						String uid = request.getString("uid");
 						String search = request.getString("search");
+						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
 						if(filter != null || search != null || (uid != null && attribute != null))
 						{
-							List<RedbackObject> objects = list(session, objectName, filter, search, uid, attribute, addRelated);
+							List<RedbackObject> objects = null;
+							if(uid != null && attribute != null && filter != null)
+								objects = list(session, objectName, uid, attribute, filter, page, addRelated);
+							else if(uid != null && attribute != null && search != null)
+								objects = list(session, objectName, uid, attribute, search, page, addRelated);
+							else if(filter != null)
+								objects = list(session, objectName, filter, page, addRelated);
+							else if(search != null)
+								objects = list(session, objectName, search, page, addRelated);
 							responseData = new DataMap();
 							DataList list = new DataList();
 							if(objects != null)
@@ -100,7 +109,8 @@ public abstract class ObjectServer extends AuthenticatedService implements Consu
 					else if(action.equals("create"))
 					{
 						DataMap data = request.getObject("data");
-						RedbackObject object = create(session, objectName, data);
+						String domain = request.getString("domain");
+						RedbackObject object = create(session, objectName, domain, data);
 						responseData = object.getJSON(addValidation, addRelated);
 					}
 					else if(action.equals("execute"))
@@ -167,11 +177,17 @@ public abstract class ObjectServer extends AuthenticatedService implements Consu
 	
 	protected abstract RedbackObject get(Session session, String objectName, String uid) throws RedbackException;
 
-	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, String uid, String attribute, boolean addRelated) throws RedbackException;
+	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, int page, boolean addRelated) throws RedbackException;
+
+	protected abstract List<RedbackObject> list(Session session, String objectName, String search, int page, boolean addRelated) throws RedbackException;
+
+	protected abstract List<RedbackObject> list(Session session, String objectName, String uid, String attribute, DataMap filter, int page, boolean addRelated) throws RedbackException;
+
+	protected abstract List<RedbackObject> list(Session session, String objectName, String uid, String attribute, String search, int page, boolean addRelated) throws RedbackException;
 
 	protected abstract RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException;
 
-	protected abstract RedbackObject create(Session session, String objectName, DataMap data) throws RedbackException;
+	protected abstract RedbackObject create(Session session, String objectName, String domain, DataMap data) throws RedbackException;
 
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException;
 	

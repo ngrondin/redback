@@ -40,6 +40,7 @@ public class ExportData
 				result.put(objectname, objectResult);
 				int newUID = 0;
 				boolean hasMore = true;
+				int page = 0;
 				while(hasMore)
 				{
 					DataMap fbReqmap = new DataMap();
@@ -47,6 +48,7 @@ public class ExportData
 					fbReqmap.put("object", objectname);
 					fbReqmap.put("filter", new DataMap());
 					fbReqmap.put("options", new DataMap("addvalidation", true));
+					fbReqmap.put("page", page);
 					Payload fbReq = new Payload(fbReqmap.toString());
 					fbReq.metadata.put("token", token);
 					Payload fbResp = firebus.requestService(objectService, fbReq);
@@ -70,15 +72,18 @@ public class ExportData
 								{
 									String relatedObj = oldObj.getObject("validation").getObject(att).getObject("related").getString("object");
 									String foreignUID = oldObj.getObject("data").getString(att);
-									String newForeignUID = keyMap.get(relatedObj + "." + foreignUID);
-									if(newForeignUID != null)
+									if(foreignUID != null && !foreignUID.equals(""))
 									{
-										String newVal = "#" + newForeignUID + "#";
-										newObj.put(att, newVal);
-									}
-									else
-									{
-										throw new Exception("Broken link in " + oldKey + " for attribute " + att);
+										String newForeignUID = keyMap.get(relatedObj + "." + foreignUID);
+										if(newForeignUID != null)
+										{
+											String newVal = "#" + newForeignUID + "#";
+											newObj.put(att, newVal);
+										}
+										else
+										{
+											//throw new Exception("Broken link in " + oldKey + " for attribute " + att);
+										}
 									}
 								}
 								else if(!att.equals("uid"))
@@ -90,6 +95,8 @@ public class ExportData
 						}
 						if(list.size() < 50)
 							hasMore = false;
+						else
+							page++;
 					}
 					else
 					{

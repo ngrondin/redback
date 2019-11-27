@@ -54,9 +54,8 @@ public class RedbackObject
 		}
 	}
 	
-	
 	// Initiate new object
-	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg) throws RedbackException
+	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, String d) throws RedbackException
 	{
 		init(s, om, cfg);		
 		isNewObject = true;
@@ -67,7 +66,7 @@ public class RedbackObject
 				if(config.getUIDGeneratorName() != null)
 				{
 					uid = objectManager.getNewID(config.getUIDGeneratorName());
-					domain = new Value(session.getUserProfile().getAttribute("rb.defaultdomain"));
+					domain = new Value(d != null ? d : session.getUserProfile().getAttribute("rb.defaultdomain"));
 					Iterator<String> it = config.getAttributeNames().iterator();
 					while(it.hasNext())
 					{
@@ -214,6 +213,11 @@ public class RedbackObject
 	
 	public ArrayList<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText) throws RedbackException
 	{
+		return getRelatedList(attributeName, additionalFilter, searchText, 0);
+	}
+	
+	public ArrayList<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, int page) throws RedbackException
+	{
 		ArrayList<RedbackObject> relatedObjectList = null;
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
 		if(roc != null)
@@ -239,14 +243,7 @@ public class RedbackObject
 					relatedObjectListFilter = new DataMap();
 				if(additionalFilter != null)
 					relatedObjectListFilter.merge(additionalFilter);
-				/*
-				Iterator<String> it = additionalFilter.keySet().iterator();
-				while(it.hasNext())
-				{
-					String key = it.next();
-					relatedObjectListFilter.put(key, additionalFilter.get(key));
-				}*/
-				relatedObjectList = objectManager.getObjectList(session, roc.getObjectName(), relatedObjectListFilter, searchText);
+				relatedObjectList = objectManager.getObjectList(session, roc.getObjectName(), relatedObjectListFilter, searchText, page);
 			}
 		}
 		return relatedObjectList;		
