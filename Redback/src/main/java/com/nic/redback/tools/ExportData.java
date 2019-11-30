@@ -1,10 +1,13 @@
 package com.nic.redback.tools;
 
 import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.utils.DataList;
@@ -30,24 +33,22 @@ public class ExportData
 	public void export()
 	{
 		Map<String, String> keyMap = new HashMap<String, String>();
-		DataMap result = new DataMap();
+		DataList oldObjects = new DataList();
 		try
 		{
 			for(int i = 0; i < objectList.length; i++)
 			{
 				String objectname = objectList[i];
-				DataMap objectResult = new DataMap();
-				result.put(objectname, objectResult);
 				int newUID = 0;
 				boolean hasMore = true;
+				DataMap fbReqmap = new DataMap();
+				fbReqmap.put("action", "list");
+				fbReqmap.put("object", objectname);
+				fbReqmap.put("filter", new DataMap());
+				fbReqmap.put("options", new DataMap("addvalidation", true));
 				int page = 0;
 				while(hasMore)
 				{
-					DataMap fbReqmap = new DataMap();
-					fbReqmap.put("action", "list");
-					fbReqmap.put("object", objectname);
-					fbReqmap.put("filter", new DataMap());
-					fbReqmap.put("options", new DataMap("addvalidation", true));
 					fbReqmap.put("page", page);
 					Payload fbReq = new Payload(fbReqmap.toString());
 					fbReq.metadata.put("token", token);
@@ -59,39 +60,9 @@ public class ExportData
 						for(int j = 0; j < list.size(); j++)
 						{
 							DataMap oldObj = list.getObject(j);
-							DataMap newObj = new DataMap();
+							oldObjects.add(oldObj);
+							keyMap.put(objectname + "." + oldObj.getString("uid"), "" + newUID);
 							newUID++;
-							String oldKey = objectname + "." + oldObj.getString("uid");
-							String newKey = objectname + "." + newUID;
-							keyMap.put(oldKey, newKey);
-							Iterator<String> it = oldObj.getObject("data").keySet().iterator();
-							while(it.hasNext())
-							{
-								String att = it.next();
-								if(oldObj.getObject("validation").getObject(att).containsKey("related")  && oldObj.getObject("validation").getObject(att).getObject("related").getString("link").equals("uid"))
-								{
-									String relatedObj = oldObj.getObject("validation").getObject(att).getObject("related").getString("object");
-									String foreignUID = oldObj.getObject("data").getString(att);
-									if(foreignUID != null && !foreignUID.equals(""))
-									{
-										String newForeignUID = keyMap.get(relatedObj + "." + foreignUID);
-										if(newForeignUID != null)
-										{
-											String newVal = "#" + newForeignUID + "#";
-											newObj.put(att, newVal);
-										}
-										else
-										{
-											//throw new Exception("Broken link in " + oldKey + " for attribute " + att);
-										}
-									}
-								}
-								else if(!att.equals("uid"))
-								{
-									newObj.put(att, oldObj.getObject("data").get(att));
-								}
-							}
-							objectResult.put("" + newUID, newObj);
 						}
 						if(list.size() < 50)
 							hasMore = false;
@@ -103,6 +74,45 @@ public class ExportData
 						hasMore = false;
 					}
 				}
+			}
+			
+			DataMap result = new DataMap();
+			for(int i = 0; i < oldObjects.size(); i++)
+			{
+				DataMap oldObj = oldObjects.getObject(i);
+				String objectname = oldObj.getString("objectname");
+				if(!result.containsKey(objectname))
+					result.put(objectname, new DataMap());
+				DataMap newObj = new DataMap();
+				String oldKey = objectname + "." + oldObj.getString("uid");
+				Iterator<String> it = oldObj.getObject("data").keySet().iterator();
+				while(it.hasNext())
+				{
+					String att = it.next();
+					if(oldObj.getObject("validation").getObject(att).containsKey("related")  && oldObj.getObject("validation").getObject(att).getObject("related").getString("link").equals("uid"))
+					{
+						String relatedObj = oldObj.getObject("validation").getObject(att).getObject("related").getString("object");
+						String oldForeignUID = oldObj.getObject("data").getString(att);
+						if(oldForeignUID != null && !oldForeignUID.equals(""))
+						{
+							String newForeignUID = keyMap.get(relatedObj + "." + oldForeignUID);
+							if(newForeignUID != null)
+							{
+								String newVal = "#" + relatedObj + "." + newForeignUID + "#";
+								newObj.put(att, newVal);
+							}
+							else
+							{
+								throw new Exception("Broken link in " + oldKey + " for attribute " + att);
+							}
+						}
+					}
+					else if(!att.equals("uid"))
+					{
+						newObj.put(att, oldObj.getObject("data").get(att));
+					}
+				}
+				result.getObject(objectname).put(keyMap.get(oldKey), newObj);					
 			}
 			
 			FileOutputStream fos = new FileOutputStream(filepath);
@@ -136,7 +146,8 @@ public class ExportData
 			filepath = args[4];
 		}
 		
-		String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJlbWFpbCI6Im5ncm9uZGluNzhAZ21haWwuY29tIiwiZXhwIjoxOTIwNTExOTIyMDAwfQ.zQrN7sheh1PuO4fWru45dTPDtkLAqB9Q0WrwGO6yOeo";
+	    Algorithm algorithm = Algorithm.HMAC256("secret");
+	    String token = JWT.create().withIssuer("io.firebus").withClaim("email", "ngrondin78@gmail.com").withExpiresAt(new Date((new Date()).getTime() + 3600000)).sign(algorithm);
 		
 		ExportData ed = new ExportData(firebus, token, objectService, objectList.split(","), filepath);
 		ed.export();
