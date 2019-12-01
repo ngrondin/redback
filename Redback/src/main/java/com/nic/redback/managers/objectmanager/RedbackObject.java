@@ -195,7 +195,7 @@ public class RedbackObject
 						}
 						else
 						{
-							ArrayList<RedbackObject> resultList = objectManager.getObjectList(session, roc.getObjectName(), getRelatedFindFilter(name), null);
+							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null);
 							if(resultList.size() > 0)
 								related.put(name, resultList.get(0));
 						}
@@ -243,7 +243,7 @@ public class RedbackObject
 					relatedObjectListFilter = new DataMap();
 				if(additionalFilter != null)
 					relatedObjectListFilter.merge(additionalFilter);
-				relatedObjectList = objectManager.getObjectList(session, roc.getObjectName(), relatedObjectListFilter, searchText, page);
+				relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, page);
 			}
 		}
 		return relatedObjectList;		

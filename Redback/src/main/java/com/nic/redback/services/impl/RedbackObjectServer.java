@@ -46,7 +46,7 @@ public class RedbackObjectServer extends ObjectServer
 			if(filter == null)
 				filter = new DataMap();
 			
-			objects = objectManager.getObjectList(session, objectName, filter, null, page);
+			objects = objectManager.listObjects(session, objectName, filter, null, page);
 			objectManager.commitCurrentTransaction();
 	
 			if(addRelated)
@@ -63,7 +63,7 @@ public class RedbackObjectServer extends ObjectServer
 		List<RedbackObject> objects = null;
 		try {
 			objects = new ArrayList<RedbackObject>();
-			objects = objectManager.getObjectList(session, objectName, null, search, page);
+			objects = objectManager.listObjects(session, objectName, null, search, page);
 			objectManager.commitCurrentTransaction();
 	
 			if(addRelated)
@@ -83,7 +83,7 @@ public class RedbackObjectServer extends ObjectServer
 			if(filter == null)
 				filter = new DataMap();
 			
-			objects = objectManager.getObjectList(session, objectName, uid, attribute, filter, null, page);
+			objects = objectManager.listObjects(session, objectName, uid, attribute, filter, null, page);
 			objectManager.commitCurrentTransaction();
 	
 			if(addRelated)
@@ -100,7 +100,7 @@ public class RedbackObjectServer extends ObjectServer
 		List<RedbackObject> objects = null;
 		try {
 			objects = new ArrayList<RedbackObject>();
-			objects = objectManager.getObjectList(session, objectName, uid, attribute, null, search);
+			objects = objectManager.listObjects(session, objectName, uid, attribute, null, search);
 			objectManager.commitCurrentTransaction();
 	
 			if(addRelated)

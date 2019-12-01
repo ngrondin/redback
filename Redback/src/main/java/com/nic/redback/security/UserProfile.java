@@ -43,6 +43,17 @@ public class UserProfile
 		return domains;
 	}
 	
+	public boolean hasAllDomains()
+	{
+		boolean hasAllDomains = false;
+		
+		DataList list = profile.getList("domains");
+		for(int i = 0; i < list.size(); i++)
+			if(list.getString(i).equals("*"))
+				hasAllDomains = true;
+		return hasAllDomains;
+	}
+	
 	public DataMap getDBFilterDomainClause()
 	{
 		DataMap inClause = new DataMap();

@@ -104,7 +104,7 @@ public class ObjectManager
 					}
 					DataMap relatedObjectFilter = new DataMap();
 					relatedObjectFilter.put("$or", orList);
-					ArrayList<RedbackObject> result = getObjectList(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null);
+					ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null);
 					for(int k = 0; k < result.size(); k++)
 					{
 						RedbackObject resultObject = result.get(k);
@@ -161,7 +161,7 @@ public class ObjectManager
 							}
 						}
 						relatedFilter.put("$or", relatedOrList);
-						ArrayList<RedbackObject> result = getObjectList(session, relatedObejctName, relatedFilter, null);
+						ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null);
 						if(result.size() > 0)
 						{
 							DataMap orTerm = new DataMap();
@@ -197,7 +197,8 @@ public class ObjectManager
 			try
 			{
 				DataMap dbFilter = new DataMap("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
-				dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
+					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 				DataMap dbResult = requestData(objectConfig.getCollection(), dbFilter);
 				DataList dbResultList = dbResult.getList("result");
 				if(dbResultList.size() > 0)
@@ -217,12 +218,12 @@ public class ObjectManager
 		return object;
 	}
 	
-	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, DataMap filterData, String searchText) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filterData, String searchText) throws RedbackException
 	{
-		return getObjectList(session, objectName, filterData, searchText, 0);
+		return listObjects(session, objectName, filterData, searchText, 0);
 	}
 	
-	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, DataMap filterData, String searchText, int page) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filterData, String searchText, int page) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
@@ -236,7 +237,7 @@ public class ObjectManager
 				if(searchText != null)
 					objectFilter.merge(generateSearchFilter(session, objectName, searchText));
 				DataMap dbFilter = objectConfig.generateDBFilter(objectFilter);
-				if(objectConfig.getDomainDBKey() != null)
+				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 				DataMap dbResult = requestData(objectConfig.getCollection(), dbFilter, page);
 				DataList dbResultList = dbResult.getList("result");
@@ -266,12 +267,12 @@ public class ObjectManager
 		return objectList;
 	}
 	
-	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText) throws RedbackException
 	{
-		return getObjectList(session, objectName, uid, attributeName, filterData, searchText, 0);
+		return listObjects(session, objectName, uid, attributeName, filterData, searchText, 0);
 	}
 	
-	public ArrayList<RedbackObject> getObjectList(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, int page) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, int page) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
