@@ -13,7 +13,7 @@ import com.nic.firebus.Payload;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
 
-public class ExportData 
+public class ExportData extends Thread
 {
 	protected Firebus firebus;
 	protected String token;
@@ -30,7 +30,17 @@ public class ExportData
 		filepath = fp;
 	}
 	
-	public void export()
+	public void exportDataAsync()
+	{
+		start();
+	}
+	
+	public void exportData()
+	{
+		run();
+	}
+	
+	public void run()
 	{
 		Map<String, String> keyMap = new HashMap<String, String>();
 		DataList oldObjects = new DataList();
@@ -150,7 +160,7 @@ public class ExportData
 	    String token = JWT.create().withIssuer("io.firebus").withClaim("email", "ngrondin78@gmail.com").withExpiresAt(new Date((new Date()).getTime() + 3600000)).sign(algorithm);
 		
 		ExportData ed = new ExportData(firebus, token, objectService, objectList.split(","), filepath);
-		ed.export();
+		ed.exportData();
 		firebus.close();
 	}
 }
