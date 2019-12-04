@@ -58,6 +58,15 @@ rb-list-scroll > mat-action-list > button {
 	height: auto!important;
 }
 
+.rb-list-line1 {
+	font-size: 16px;
+}
+
+.rb-list-line2 {
+	font-size: 14px;
+	color: #999999;	
+}
+
 .rb-list-item {
 	margin: 8px;
 }

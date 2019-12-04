@@ -14,10 +14,10 @@ if(config.get('icon') == null) {%>
 	[attribute]="'<%=config.getString('attribute')%>'"
 	[displayattribute]="'<%=config.getString('displayattribute')%>'"<%
 if(config.get("parentattribute")) { %>
-	[parentattribute]="<%=config.getString('parentattribute')%>"<% 
+	[parentattribute]="'<%=config.getString('parentattribute')%>'"<% 
 }
 if(config.get("childattribute")) { %>
-	[childattribute]="<%=config.getString('childattribute')%>"<% 
+	[childattribute]="'<%=config.getString('childattribute')%>'"<% 
 } %>
 	[editable]="<%=canWrite%>"
 	>

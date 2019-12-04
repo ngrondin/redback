@@ -38,7 +38,7 @@ public class RedbackObjectServer extends ObjectServer
 	}
 
 	
-	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, int page, boolean addRelated) throws RedbackException 
+	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, int page, boolean addRelated) throws RedbackException 
 	{
 		List<RedbackObject> objects = null;
 		try {
@@ -46,7 +46,7 @@ public class RedbackObjectServer extends ObjectServer
 			if(filter == null)
 				filter = new DataMap();
 			
-			objects = objectManager.listObjects(session, objectName, filter, null, page);
+			objects = objectManager.listObjects(session, objectName, filter, search, page);
 			objectManager.commitCurrentTransaction();
 	
 			if(addRelated)
@@ -56,26 +56,10 @@ public class RedbackObjectServer extends ObjectServer
 		} catch(ScriptException e) {
 			error("Error listing objects", e);
 		}
-		return objects;	}
+		return objects;	
+	}
 
-	protected List<RedbackObject> list(Session session, String objectName, String search, int page, boolean addRelated) throws RedbackException 
-	{
-		List<RedbackObject> objects = null;
-		try {
-			objects = new ArrayList<RedbackObject>();
-			objects = objectManager.listObjects(session, objectName, null, search, page);
-			objectManager.commitCurrentTransaction();
-	
-			if(addRelated)
-				objectManager.addRelatedBulk(session, objects);
-			
-			return objects;
-		} catch(ScriptException e) {
-			error("Error listing objects", e);
-		}
-		return objects;	}
-
-	protected List<RedbackObject> list(Session session, String objectName, String uid, String attribute, DataMap filter, int page, boolean addRelated) throws RedbackException 
+	protected List<RedbackObject> list(Session session, String objectName, String uid, String attribute, DataMap filter, String search, int page, boolean addRelated) throws RedbackException 
 	{
 		List<RedbackObject> objects = null;
 		try {
@@ -83,7 +67,7 @@ public class RedbackObjectServer extends ObjectServer
 			if(filter == null)
 				filter = new DataMap();
 			
-			objects = objectManager.listObjects(session, objectName, uid, attribute, filter, null, page);
+			objects = objectManager.listObjects(session, objectName, uid, attribute, filter, search, page);
 			objectManager.commitCurrentTransaction();
 	
 			if(addRelated)
@@ -93,25 +77,8 @@ public class RedbackObjectServer extends ObjectServer
 		} catch(ScriptException e) {
 			error("Error listing objects", e);
 		}
-		return objects;	}
-
-	protected List<RedbackObject> list(Session session, String objectName, String uid, String attribute, String search, int page, boolean addRelated) throws RedbackException 
-	{
-		List<RedbackObject> objects = null;
-		try {
-			objects = new ArrayList<RedbackObject>();
-			objects = objectManager.listObjects(session, objectName, uid, attribute, null, search);
-			objectManager.commitCurrentTransaction();
-	
-			if(addRelated)
-				objectManager.addRelatedBulk(session, objects);
-			
-			return objects;
-		} catch(ScriptException e) {
-			error("Error listing objects", e);
-		}
-		return objects;	}
-
+		return objects;	
+	}
 
 	protected RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException
 	{

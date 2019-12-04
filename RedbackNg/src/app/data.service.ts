@@ -32,8 +32,8 @@ export class DataService {
     return dataObservable; 
   }
 
-  listRelatedObjects(name: string, uid: string, attribute: string, filter: Object) : Observable<any> {
-    const listObs = this.apiService.listRelatedObjects(name, uid, attribute, filter);
+  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string) : Observable<any> {
+    const listObs = this.apiService.listRelatedObjects(name, uid, attribute, filter, search);
     const dataObservable = new Observable((observer) => {
       listObs.subscribe(resp => {
         const rbObjectArray = Object.values(resp.list).map(json => this.updateObjectFromServer(json));
@@ -55,6 +55,7 @@ export class DataService {
       rbObject.updateFromServer(json);
     } else {
       rbObject = new RbObject(json, this);
+      this.allObjects.push(rbObject);
     }
     return rbObject;
   }
@@ -64,6 +65,6 @@ export class DataService {
     for(const attribute of rbObject.changed) {
         upd[attribute] = rbObject.data[attribute];
     }
-    this.apiService.updateObject(rbObject.objectname, rbObject.uid, upd);
+    this.apiService.updateObject(rbObject.objectname, rbObject.uid, upd).subscribe(resp => this.updateObjectFromServer(resp));
   }
 }

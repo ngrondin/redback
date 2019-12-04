@@ -38,13 +38,14 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
   }
 
-  listRelatedObjects(name: string, uid: string, attribute: string, filter: any): Observable<any> {
+  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string): Observable<any> {
     const req = {
       action: 'list',
       object: name,
       uid: uid,
       attribute: attribute,
       filter: filter,
+      search: search,
       options: {
         addrelated: true,
         addvalidation: true
@@ -58,7 +59,11 @@ export class ApiService {
       action: 'update',
       object: name,
       uid: uid,
-      data: data
+      data: data,
+      options: {
+        addrelated: true,
+        addvalidation: true
+      }
     };
     return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
   }

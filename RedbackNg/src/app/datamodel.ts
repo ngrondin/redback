@@ -27,16 +27,21 @@ export class RbObject {
     }
 
     updateFromServer(json: any) {
-        for(const attribute of json.data) {
-            if(json.data[attribute] != this.data[attribute])
-                this.data[attribute] = json.data[attribute];
+        const inData: any = json.data;
+        for(const attribute in inData) {
+            if(inData[attribute] != this.data[attribute]) {
+                this.data[attribute] = inData[attribute];
+                if(this.related[attribute] != null)
+                    this.related[attribute] = json.related[attribute];
+            }
         }
+        this.changed = [];
     }
 
     setValue(attribute: string, value: any) {
         if(this.validation[attribute].editable == true) {
             this.data[attribute] = value;
-            this.changed[attribute] = true;
+            this.changed.push(attribute);
             if(this.related[attribute] != null) 
                 this.related[attribute] = null;
             if(this.dataService.saveImmediatly)

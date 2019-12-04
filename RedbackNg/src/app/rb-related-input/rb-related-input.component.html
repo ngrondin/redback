@@ -4,8 +4,9 @@
         #input
         matInput 
         [(ngModel)]="displayvalue"
-        (change)="commit()"
         (focus)="focus()"
+        (blur)="blur()"
+        (keydown)="keydown($event)"
         [readonly]="readonly">
     <mat-icon matPrefix>{{icon}}</mat-icon>
 </mat-form-field>

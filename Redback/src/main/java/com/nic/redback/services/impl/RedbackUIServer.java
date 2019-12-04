@@ -239,7 +239,7 @@ public class RedbackUIServer extends UIServer
 	
 	protected CompiledScript getCompiledJSP(String name, String version) throws RedbackException
 	{
-		CompiledScript script = jspScripts.get(name);
+		CompiledScript script = jspScripts.get(version + "/" + name);
 		if(script == null)
 		{
 			try
@@ -274,7 +274,7 @@ public class RedbackUIServer extends UIServer
 					jsp = "sb.append('" + jsp + "');";
 		
 					script = ((Compilable) jsEngine).compile(jsp);
-					jspScripts.put(name,  script);
+					jspScripts.put(version + "/" + name,  script);
 				}
 			}
 			catch(Exception e)

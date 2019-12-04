@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ViewContainerRef, Injector, InjectionToken } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ViewContainerRef, Injector, InjectionToken, ComponentRef } from '@angular/core';
 import { OverlayRef, CdkOverlayOrigin, Overlay, OverlayConfig } from  '@angular/cdk/overlay';
 import { RbInputComponent } from '../rb-input/rb-input.component';
 import { RbObject } from '../datamodel';
@@ -26,7 +26,9 @@ export class RbRelatedInputComponent implements OnInit {
 
   @ViewChild('input', { read: ViewContainerRef, static: false }) inputContainerRef: ViewContainerRef;
   overlayRef: OverlayRef;
-  editedValue: string;
+  popupListComponentRef: ComponentRef<RbPopupListComponent>;
+  searchValue: string; 
+  highlightedObject: RbObject;
 
   constructor(
     public injector: Injector,
@@ -39,14 +41,15 @@ export class RbRelatedInputComponent implements OnInit {
   }
 
   public get displayvalue(): string {
-    if(this.rbObject != null)
+    if(this.rbObject != null && this.rbObject.related[this.attribute] != null )
       return this.rbObject.related[this.attribute].data[this.displayattribute];
     else
       return null;  
   }
 
-  public set displayvalue(val: string) {
-    this.editedValue = val;
+  public set displayvalue(str: string) {
+    this.searchValue = str;
+    this.popupListComponentRef.instance.setSearch(this.searchValue);
   }
 
   public get readonly(): boolean {
@@ -56,30 +59,64 @@ export class RbRelatedInputComponent implements OnInit {
       return true;      
   }
 
-  focus() {
+  public openPopupList() {
     if(!this.readonly) {
       this.overlayRef = this.overlay.create({
-        positionStrategy: this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
+        positionStrategy: this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' }),
+        hasBackdrop: true,
+        backdropClass: 'cdk-overlay-transparent-backdrop'
       });
       this.overlayRef.backdropClick().subscribe(() => {
-        alert(this);
+        this.cancelEditing();
       });
 
       const injectorTokens = new WeakMap();
       injectorTokens.set(OverlayRef, this.overlayRef);
-      injectorTokens.set(CONTAINER_DATA, {rbObject: this.rbObject, attribute: this.attribute});
+      injectorTokens.set(CONTAINER_DATA, {
+        rbObject: this.rbObject, 
+        attribute: this.attribute, 
+        displayattribute: this.displayattribute, 
+        parentattribute: this.parentattribute, 
+        childattribute: this.childattribute
+      });
       let inj : PortalInjector = new PortalInjector(this.injector, injectorTokens);
 
       const popupListPortal = new ComponentPortal(RbPopupListComponent, this.viewContainerRef, inj);
-      this.overlayRef.attach(popupListPortal);
+      this.popupListComponentRef = this.overlayRef.attach(popupListPortal);
+      this.popupListComponentRef.instance.selected.subscribe(object => this.selected(object));
     }
   }
 
-  public clickOutsidePopup() {
-    this.overlayRef.dispose();
+  public focus(event: any) {
+    if(this.overlayRef == null)
+      this.openPopupList();
   }
 
-  commit() {
-    this.rbObject.setValue(this.attribute, this.editedValue);
+  public blur(event: any) {
+    if(this.overlayRef != null) 
+      this.inputContainerRef.element.nativeElement.focus();
   }
+
+  public keydown(event: any) {
+    if(event.keyCode == 13) {
+      this.selected(this.highlightedObject);
+    } else if(event.keyCode == 9 || event.keyCode == 27) {
+      this.cancelEditing();
+    }
+  }
+
+  public cancelEditing() {
+    this.overlayRef.dispose();
+    this.overlayRef = null;
+    this.inputContainerRef.element.nativeElement.blur();
+  }
+
+  public selected(object: RbObject) {
+    let val = object.data[this.rbObject.validation[this.attribute].related.link];
+    this.rbObject.setValue(this.attribute, val);
+    this.overlayRef.dispose();
+    this.overlayRef = null;
+    this.inputContainerRef.element.nativeElement.blur();
+  }
+
 }
