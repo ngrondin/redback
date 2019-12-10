@@ -19,6 +19,7 @@ export class RbPopupListComponent implements OnInit {
   public hierarchy: RbObject[] = [];
   public list: RbObject[] = [];
   public search: string;
+  public isLoading: boolean;
 
   constructor(
     @Inject(CONTAINER_DATA) public config: any, 
@@ -45,11 +46,13 @@ export class RbPopupListComponent implements OnInit {
         filter[this.config.parentattribute] = null;
       }
     }
+    this.isLoading = true;
     this.dataService.listRelatedObjects(this.config.rbObject.objectname, this.config.rbObject.uid, this.config.attribute, filter, this.search).subscribe(data => this.setData(data));
   }
 
   public setData(objects: RbObject[]) {
     this.list = objects;
+    this.isLoading = false;
   }
 
   public setSearch(str: string) {
@@ -62,6 +65,7 @@ export class RbPopupListComponent implements OnInit {
   }
 
   public expand(object: RbObject) {
+    this.list = [];
     this.hierarchy.push(object);
     this.getData();
     this.expanded.emit(object);
@@ -69,6 +73,7 @@ export class RbPopupListComponent implements OnInit {
 
   public colapse(object: RbObject) {
     let i = this.hierarchy.indexOf(object);
+    this.list = [];
     this.hierarchy.splice(i);
     this.getData();
     this.colapsed.emit(object);

@@ -1,0 +1,94 @@
+<div
+    *ngIf="currentPart == 0">
+    <div
+        class="rb-datetime-cal-header">
+        <div
+            class="rb-datetime-cal-monthnav"
+            (click)="previousMonth()">
+            <span>&lt;</span>
+        </div>
+        <div
+            class="rb-datetime-cal-title">
+            <span>{{monthsOfYear[month]}} {{year}}</span>
+        </div>
+        <div
+            class="rb-datetime-cal-monthnav"
+            (click)="nextMonth()">
+            <span>&gt;</span>
+        </div>
+    </div>
+    <div
+        class="rb-datetime-cal-weekline">
+        <div
+            *ngFor="let d of daysOfWeek"
+            class="rb-datetime-cal-dayheader"
+            style="color: #bbbbbb;">
+            <span>{{d}}</span>
+        </div>
+    </div>
+    <div
+        *ngFor="let w of calendar"
+        class="rb-datetime-cal-weekline">
+        <div
+            *ngFor="let d of w">
+            <div
+                *ngIf="d == ''"
+                class="rb-datetime-cal-emptydaybox">
+            </div>
+            <div
+                *ngIf="d != ''"
+                class="rb-datetime-cal-daybox"
+                [style.background-color]="day == d ? 'rgb(255,64,129)' : 'transparent'"
+                [style.color]="day == d ? '#ffffff' : '#666666'"
+                (click)="selectDate(d)">
+                <span>{{d}}</span>
+            </div>            
+        </div>   
+    </div>
+</div>
+<div
+    *ngIf="currentPart == 1">
+    <div 
+        class="rb-datetime-clock-back"
+        (click)="selectHour($event)">
+        <div 
+            class="rb-datetime-clock-dial-container"
+            [style.transform]="'rotate(' + (15 * hour) + 'deg)'">
+            <div 
+                class="rb-datetime-clock-dial-pointer"></div>
+        </div>
+        <div 
+            *ngFor="let t of hoursOfDay; let i = index"
+            class="rb-datetime-clock-dial-container"
+            [style.transform]="'rotate(' + (30 * i) + 'deg)'">
+            <div 
+                class="rb-datetime-clock-dial-number"
+                [style.transform]="'rotate(-' + (30 * i) + 'deg)'">
+            {{t}}
+            </div>
+        </div>  
+    </div>
+</div>
+<div
+    *ngIf="currentPart == 2">
+    <div 
+        class="rb-datetime-clock-back"
+        (click)="selectMinute($event)">
+        <div 
+            class="rb-datetime-clock-dial-container"
+            [style.transform]="'rotate(' + (15 * minute) + 'deg)'">
+            <div 
+                class="rb-datetime-clock-dial-pointer"></div>
+        </div>
+        <div 
+            *ngFor="let t of minutesOfHour; let i = index"
+            class="rb-datetime-clock-dial-container"
+            [style.transform]="'rotate(' + (30 * i) + 'deg)'">
+            <div 
+                class="rb-datetime-clock-dial-number"
+                [style.transform]="'rotate(-' + (30 * i) + 'deg)'">
+            {{t}}
+            </div>
+        </div>  
+    </div>
+</div>

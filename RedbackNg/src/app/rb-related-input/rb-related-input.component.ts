@@ -41,6 +41,8 @@ export class RbRelatedInputComponent implements OnInit {
   }
 
   public get displayvalue(): string {
+    if(this.overlayRef != null)
+      return this.searchValue;
     if(this.rbObject != null && this.rbObject.related[this.attribute] != null )
       return this.rbObject.related[this.attribute].data[this.displayattribute];
     else
@@ -108,6 +110,7 @@ export class RbRelatedInputComponent implements OnInit {
   public cancelEditing() {
     this.overlayRef.dispose();
     this.overlayRef = null;
+    this.searchValue = '';
     this.inputContainerRef.element.nativeElement.blur();
   }
 
@@ -116,6 +119,7 @@ export class RbRelatedInputComponent implements OnInit {
     this.rbObject.setValue(this.attribute, val);
     this.overlayRef.dispose();
     this.overlayRef = null;
+    this.searchValue = '';
     this.inputContainerRef.element.nativeElement.blur();
   }
 

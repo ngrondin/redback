@@ -1,10 +1,12 @@
-<mat-form-field 
-    [style.min-width]="(size * 5) + 'px'" >
+<mat-form-field>
     <mat-label>{{label}}</mat-label>
     <input 
+        #input
         matInput 
-        [(ngModel)]="value"
-        (change)="commit()"
+        [(ngModel)]="displayvalue"
+        (focus)="focus()"
+        (blur)="blur()"
+        (keydown)="keydown($event)"
         [readonly]="readonly">
     <mat-icon matPrefix>{{icon}}</mat-icon>
 </mat-form-field>

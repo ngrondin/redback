@@ -4,7 +4,7 @@ import { DataService } from '../data.service';
 
 @Directive({
   selector: 'rb-dataset',
-  exportAs: 'dataset',
+  exportAs: 'dataset'
 })
 export class RbDatasetDirective implements OnChanges {
 
@@ -12,6 +12,7 @@ export class RbDatasetDirective implements OnChanges {
   @Input('relatedObject') relatedObject: RbObject;
   @Input('relatedFilter') relatedFilter: any;
   @Input('baseFilter') baseFilter: any;
+  @Input('active') active: boolean;
 
   public list: RbObject[] = [];
   public selectedObject: RbObject;
@@ -25,7 +26,10 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.getData();
+    if(this.active)
+      this.getData();
+    else
+      this.list = [];
   }
 
   public getData() {

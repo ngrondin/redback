@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { DesktopRootComponent } from './desktop-root/desktop-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule } from '@angular/material';
+import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule } from '@angular/material';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
@@ -21,6 +21,10 @@ import { FormsModule } from '@angular/forms';
 import { RbRelatedInputComponent } from './rb-related-input/rb-related-input.component';
 import { RbPopupListComponent } from './rb-popup-list/rb-popup-list.component';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { RbTabDirective } from './rb-tab/rb-tab.directive';
+import { RbTabSectionDirective } from './rb-tab-section/rb-tab-section.directive';
+import { RbPopupDatetimeComponent } from './rb-popup-datetime/rb-popup-datetime.component';
+import { RbDatetimeInputComponent } from './rb-datetime-input/rb-datetime-input.component';
 
 @NgModule({
   imports: [
@@ -39,6 +43,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
     MatDialogModule,
     MatIconModule,
     MatDividerModule,
+    MatProgressSpinnerModule,
     OverlayModule,
     FormsModule,
     BrowserAnimationsModule,
@@ -55,8 +60,12 @@ import { OverlayModule } from '@angular/cdk/overlay';
     RbListScrollDirective,
     RbInputComponent,
     RbRelatedInputComponent,
+    RbDatetimeInputComponent,
     RbPopupListComponent,
-    RbMenuDirective
+    RbPopupDatetimeComponent,
+    RbMenuDirective,
+    RbTabDirective,
+    RbTabSectionDirective
   ],
   exports: [
     DesktopRootComponent,
@@ -64,6 +73,8 @@ import { OverlayModule } from '@angular/cdk/overlay';
     MatListItem,
     MatIconModule,
     MatDividerModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
     RbDatasetDirective,
     RbViewLoaderComponent,
     RbVsectionDirective,
@@ -72,8 +83,12 @@ import { OverlayModule } from '@angular/cdk/overlay';
     RbListScrollDirective,
     RbInputComponent,
     RbRelatedInputComponent,
+    RbDatetimeInputComponent,
     RbPopupListComponent,
-    RbMenuDirective
+    RbPopupDatetimeComponent,
+    RbMenuDirective,
+    RbTabDirective,
+    RbTabSectionDirective
   ],
   providers: [
     CookieService,
@@ -81,7 +96,8 @@ import { OverlayModule } from '@angular/cdk/overlay';
     DataService
   ],
   entryComponents: [
-    RbPopupListComponent
+    RbPopupListComponent,
+    RbPopupDatetimeComponent
   ],
   bootstrap: [
   ] 

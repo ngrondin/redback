@@ -10,6 +10,13 @@ body {
     flex-direction: column;
 }
 
+.rb-footer {
+	display: flex;
+	flex: 0 0 auto;
+	height:12px;
+	background: #3f51b5;
+}
+
 rb-view-loader {
 	display: flex;
 	flex-direction: column;
@@ -98,3 +105,92 @@ rb-input {
 rb-related-input {
 	margin: 6px;
 }
+
+rb-datetime-input {
+	margin: 6px;
+}
+
+rb-tab-section {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	border: 0px Solid;
+}
+
+.rb-tab-header-section {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-grow: 0;
+	flex-shrink: 0;
+	border: 0px Solid;
+}
+
+.rb-tab-header {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-grow: 0;
+	flex-shrink: 0;
+	border: 0px Solid;
+	cursor: pointer;
+	padding: 0px;
+}
+
+.rb-tab-button {
+	color: darkblue;
+	font-weight: initial;
+}
+
+.rb-tabheader-active {
+  border-bottom: 2px Solid red;
+}
+
+
+.rb-tab-content-section {
+	display: flex;
+	flex: 1 0 auto;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	border: 0px Solid;
+	margin-top: 25px;
+}
+
+rb-tab {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-grow:1;
+	border: 0px Solid;
+}
+
+::-webkit-scrollbar-track
+{
+	border-radius: 6px;
+	background-color: #FFFFFF;
+}
+
+::-webkit-scrollbar
+{
+	width: 8px;
+	height: 8px;
+	background-color: #FFFFFF;
+}
+
+::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb:hover
+{
+	background-color:#c2c2f0;
+}
+
+::-webkit-scrollbar-thumb:active
+{
+	background-color:#c2c2f0;
+} 
+
+[hidden] { display: none !important;}
