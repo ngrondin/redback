@@ -39,7 +39,11 @@ public class HTML
 		while((pos = sb.indexOf(tag)) > -1)
 		{
 			int posNewLine = sb.substring(0, pos).lastIndexOf("\r\n");
-			String indentStr = sb.substring(posNewLine + 2, pos);
+			if(posNewLine == -1)
+				posNewLine = 0;
+			else
+				posNewLine = posNewLine + 2;
+			String indentStr = sb.substring(posNewLine, pos);
 			sb.replace(pos, pos + tag.length(), fragment.toString().replace("\r\n", "\r\n" + indentStr));
 			//sb.replace(pos, pos + tag.length(), fragment.toString());
 		}

@@ -1,3 +1,3 @@
-<rb-text 
-	class="rb-margin"
-	style="<%=config.getString('inlineStyle')%>"><%=config.getString('expression')%></rb-text>
+<div
+	class="rb-margin rb-text"
+	style="<%=config.getString('inlineStyle')%>"><%=config.getString('expression')%></div>

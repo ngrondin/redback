@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { DesktopRootComponent } from './desktop-root/desktop-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule } from '@angular/material';
+import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule, MatMenuModule } from '@angular/material';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
@@ -25,6 +25,9 @@ import { RbTabDirective } from './rb-tab/rb-tab.directive';
 import { RbTabSectionDirective } from './rb-tab-section/rb-tab-section.directive';
 import { RbPopupDatetimeComponent } from './rb-popup-datetime/rb-popup-datetime.component';
 import { RbDatetimeInputComponent } from './rb-datetime-input/rb-datetime-input.component';
+import { RbTextareaInputComponent } from './rb-textarea-input/rb-textarea-input.component';
+import { RbSearchComponent } from './rb-search/rb-search.component';
+import { RbMapComponent } from './rb-map/rb-map.component';
 
 @NgModule({
   imports: [
@@ -44,6 +47,7 @@ import { RbDatetimeInputComponent } from './rb-datetime-input/rb-datetime-input.
     MatIconModule,
     MatDividerModule,
     MatProgressSpinnerModule,
+    MatMenuModule,
     OverlayModule,
     FormsModule,
     BrowserAnimationsModule,
@@ -59,10 +63,13 @@ import { RbDatetimeInputComponent } from './rb-datetime-input/rb-datetime-input.
     RbLayoutDirective,
     RbListScrollDirective,
     RbInputComponent,
+    RbTextareaInputComponent,
     RbRelatedInputComponent,
     RbDatetimeInputComponent,
     RbPopupListComponent,
     RbPopupDatetimeComponent,
+    RbSearchComponent,
+    RbMapComponent,
     RbMenuDirective,
     RbTabDirective,
     RbTabSectionDirective
@@ -75,6 +82,7 @@ import { RbDatetimeInputComponent } from './rb-datetime-input/rb-datetime-input.
     MatDividerModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatMenuModule,
     RbDatasetDirective,
     RbViewLoaderComponent,
     RbVsectionDirective,
@@ -82,10 +90,13 @@ import { RbDatetimeInputComponent } from './rb-datetime-input/rb-datetime-input.
     RbLayoutDirective,
     RbListScrollDirective,
     RbInputComponent,
+    RbTextareaInputComponent,
     RbRelatedInputComponent,
     RbDatetimeInputComponent,
     RbPopupListComponent,
     RbPopupDatetimeComponent,
+    RbSearchComponent,
+    RbMapComponent,
     RbMenuDirective,
     RbTabDirective,
     RbTabSectionDirective

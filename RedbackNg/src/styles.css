@@ -36,6 +36,7 @@ rb-layout {
 
 rb-dataset {
 	display: flex;
+	overflow: hidden;
 }
 
 rb-hsection {
@@ -45,6 +46,7 @@ rb-hsection {
 	flex-shrink: 0;
 	border: 0px Solid;
 	vertical-align:top;
+	overflow: hidden;
 }
 
 rb-vsection {
@@ -162,6 +164,10 @@ rb-tab {
 	flex-wrap: nowrap;
 	flex-grow:1;
 	border: 0px Solid;
+}
+
+.rb-margin {
+	margin: 10px;
 }
 
 ::-webkit-scrollbar-track

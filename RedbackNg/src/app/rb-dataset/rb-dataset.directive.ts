@@ -16,12 +16,15 @@ export class RbDatasetDirective implements OnChanges {
 
   public list: RbObject[] = [];
   public selectedObject: RbObject;
+  //public nullSelectedObject: RbObject;
 
   constructor(
     private dataService: DataService
   ) {   }
 
   ngOnInit() {
+    //this.nullSelectedObject = new RbObject({uid:-1, objectname:null, domain:null, data:{}, related:{}, validation:{}}, null);
+    //this.selectedObject = this.nullSelectedObject;
     this.getData();
   }
 

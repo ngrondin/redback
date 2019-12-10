@@ -1,26 +1,17 @@
-<md-input-container 
-	class="md-block rb-input-container"
+<rb-textarea-input
 	style="<%=config.getString('inlineStyle')%>"
-	ng-hide="!(<%=config.getString('show')%>)">
-	<label><%=config.getString('label')%></label><%
+	*ngIf="(<%=config.getString('show')%>)"
+	[label]="'<%=config.getString("label")%>'"<%
 if(config.get('icon') == null) {%>
-	<md-icon class="md-hue-3" >description</md-icon><%	
+	[icon]="'description'"<%	
 } else if(config.getString('icon').indexOf(':') >= 0) {%>
-	<md-icon class="md-hue-3" md-svg-icon="<%=config.getString('icon')%>"></md-icon><%
+	[icon]="'<%=config.getString('icon')%>'"<%
 } else {%>
-	<md-icon class="md-hue-3"><%=config.getString('icon')%></md-icon><%
+	[icon]="'<%=config.getString('icon')%>'"<%
 }%>	
-	<textarea 
-		rows="3"
-		rb-input
-		ng-model="inputValue"
-		rb-attribute="<%=config.getString('attribute')%>" 
-		ng-disabled="<%
-				if(canWrite) {		
-					%>!object.validation.<%=config.getString('attribute')%>.editable<%
-				} else {
-					%>true<%
-				}			
-				%>">
-	</textarea>
-</md-input-container>
+	[size]="<%=(config.get("size") == null ? 50 : config.getString("size")) %>"
+	[object]="<%=dataset%>.selectedObject"
+	[attribute]="'<%=config.getString('attribute')%>'"
+	[editable]="<%=canWrite%>"
+	>
+</rb-textarea-input>

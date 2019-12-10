@@ -1,0 +1,13 @@
+<mat-form-field >
+        <mat-label>{{label}}</mat-label>
+        <textarea 
+            #input
+            matInput 
+            [(ngModel)]="displayvalue"
+            (focus)="focus()"
+            (blur)="blur()"
+            (keydown)="keydown($event)"
+            [readonly]="readonly">
+        </textarea>
+        <mat-icon matPrefix>{{icon}}</mat-icon>
+</mat-form-field>
