@@ -2,7 +2,7 @@
 var showExpr = (config.get("show") != null ? config.getString('show') : 'true').replaceAll('object', dataset + '.selectedObject').replaceAll('relatedObject', dataset + '.relatedObject');
 if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
 if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
-%><rb-related-input
+%><rb-duration-input
 	style="<%=config.getString('inlineStyle')%>"
 	*ngIf="<%=showExpr%>"
 	[label]="'<%=config.getString("label")%>'"<%
@@ -16,12 +16,5 @@ if(config.get('icon') == null) {%>
 	[size]="<%=(config.get("size") == null ? 50 : config.getString("size")) %>"
 	[object]="<%=dataset%>.selectedObject"
 	[attribute]="'<%=config.getString('attribute')%>'"
-	[displayattribute]="'<%=config.getString('displayattribute')%>'"<%
-if(config.get("parentattribute")) { %>
-	[parentattribute]="'<%=config.getString('parentattribute')%>'"<% 
-}
-if(config.get("childattribute")) { %>
-	[childattribute]="'<%=config.getString('childattribute')%>'"<% 
-} %>
 	[editable]="<%=canWrite%>">
-</rb-related-input>
+</rb-duration-input>

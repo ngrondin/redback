@@ -12,4 +12,4 @@ if(config.get("label") != null) {%>
 	<%=config.getString('label')%><%
 }%>
 </button><%
-} %> 	
+} %>

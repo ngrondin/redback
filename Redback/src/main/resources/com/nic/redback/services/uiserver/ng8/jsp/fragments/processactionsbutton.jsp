@@ -1,7 +1,7 @@
 <button
 	mat-button 
 	aria-label="Process Actions" 
-	class="md-fab md-mini md-primary rb-button rb-process-actions-button" 
+	class="mat-mini-fab mat-primary rb-button rb-process-actions-button" 
 	(click)="activate()">
-	<mat-icon md-svg-icon="wms:network"></mat-icon>
+	<mat-icon>linear_scale</mat-icon>
 </button>

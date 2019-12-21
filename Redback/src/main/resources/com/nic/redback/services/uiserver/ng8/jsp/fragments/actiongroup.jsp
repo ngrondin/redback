@@ -1,23 +1,38 @@
 <mat-menu
 	#<%=id%>="matMenu">
-<% var list = config.getList('actions'); 
+<% 
+var list = config.getList('actions'); 
+var noShow = "";
 for(var i = 0; i < list.size(); i++) { 
 	var actionConfig = list.getObject(i);
+	var showExpr = (actionConfig.get("show") != null ? actionConfig.getString('show') : 'true').replaceAll('object', dataset + '.selectedObject').replaceAll('relatedObject', dataset + '.relatedObject');
+	if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
+	if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
+	if(i > 0)
+		noShow = noShow + " && ";
+	noShow = noShow + "!(" + showExpr + ")"
 	var action = actionConfig.get("action") != null ? actionConfig.getString('action') : 'noAction'	
 	if(((action.equals('create')  ||  action.equals('save'))  &&  canWrite) || ((!action.equals('create')  &&  !action.equals('save'))  &&  canExecute)) {
 	%>
-		<button
-			mat-menu-item
-			(click)="<%=dataset%>.action('<%=action%>', '<%=actionConfig.getString('param')%>');"
-			*ngIf="<%=dataset%>.selectedObject != null ? (<%=actionConfig.getString('show').replace('object.', dataset + '.selectedObject.')%>) : false"><%=actionConfig.getString('label') %>
-		</button><%
+	<button
+		mat-menu-item
+		(click)="<%=dataset%>.action('<%=action%>', '<%=actionConfig.getString('param')%>');"
+		*ngIf="<%=showExpr%>">
+		<%=actionConfig.getString('label') %>
+	</button><%
 	}
 }        		
-%>	
+%>
+	<button
+		mat-menu-item
+		*ngIf="<%=noShow%>"
+		[disabled]="true">
+		No actions available
+	</button>
 </mat-menu>
 <button
 	mat-icon-button 
-	class="md-fab md-mini md-primary rb-form-button"
+	class="mat-mini-fab mat-primary rb-button"
 	[matMenuTriggerFor]="<%=id%>">
 	<mat-icon>reorder</mat-icon>
 </button>
