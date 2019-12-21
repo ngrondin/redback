@@ -10,9 +10,6 @@ import { CookieService } from 'ngx-cookie-service';
 import { RbDatasetDirective } from './rb-dataset/rb-dataset.directive';
 import { RbMenuDirective } from './rb-menu/rb-menu.directive';
 import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
-import { RbVsectionDirective } from './rb-vsection/rb-vsection.directive';
-import { RbLayoutDirective } from './rb-layout/rb-layout.directive';
-import { RbHsectionDirective } from './rb-hsection/rb-hsection.directive';
 import { RbListScrollDirective } from './rb-list-scroll/rb-list-scroll.directive';
 import { ApiService } from './api.service';
 import { DataService } from './data.service';
@@ -28,6 +25,7 @@ import { RbDatetimeInputComponent } from './rb-datetime-input/rb-datetime-input.
 import { RbTextareaInputComponent } from './rb-textarea-input/rb-textarea-input.component';
 import { RbSearchComponent } from './rb-search/rb-search.component';
 import { RbMapComponent } from './rb-map/rb-map.component';
+import { RbDurationInputComponent } from './rb-duration-input/rb-duration-input.component';
 
 @NgModule({
   imports: [
@@ -58,14 +56,12 @@ import { RbMapComponent } from './rb-map/rb-map.component';
     DesktopRootComponent,
     RbDatasetDirective,
     RbViewLoaderComponent,
-    RbVsectionDirective,
-    RbHsectionDirective,
-    RbLayoutDirective,
     RbListScrollDirective,
     RbInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,
     RbDatetimeInputComponent,
+    RbDurationInputComponent,
     RbPopupListComponent,
     RbPopupDatetimeComponent,
     RbSearchComponent,
@@ -85,14 +81,12 @@ import { RbMapComponent } from './rb-map/rb-map.component';
     MatMenuModule,
     RbDatasetDirective,
     RbViewLoaderComponent,
-    RbVsectionDirective,
-    RbHsectionDirective,
-    RbLayoutDirective,
     RbListScrollDirective,
     RbInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,
     RbDatetimeInputComponent,
+    RbDurationInputComponent,
     RbPopupListComponent,
     RbPopupDatetimeComponent,
     RbSearchComponent,

@@ -32,7 +32,10 @@
             </button>
     </mat-list-item>
 </mat-list>
-<mat-spinner
-    *ngIf="isLoading"
-    diameter="20">
-</mat-spinner>
+<div
+    class="rb-spinner-container"
+    *ngIf="isLoading">
+    <mat-spinner
+        diameter="20">
+    </mat-spinner>
+</div>

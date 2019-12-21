@@ -55,7 +55,7 @@ export class RbRelatedInputComponent implements OnInit {
   }
 
   public get readonly(): boolean {
-    if(this.rbObject != null)
+    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
       return !(this.editable && this.rbObject.validation[this.attribute].editable);
     else
       return true;      
@@ -115,8 +115,9 @@ export class RbRelatedInputComponent implements OnInit {
   }
 
   public selected(object: RbObject) {
-    let val = object.data[this.rbObject.validation[this.attribute].related.link];
-    this.rbObject.setValue(this.attribute, val);
+    let link = this.rbObject.validation[this.attribute].related.link;
+    let val = (link == 'uid') ? object.uid : object.data[link];
+    this.rbObject.setValueAndRelated(this.attribute, val, object);
     this.overlayRef.dispose();
     this.overlayRef = null;
     this.searchValue = '';

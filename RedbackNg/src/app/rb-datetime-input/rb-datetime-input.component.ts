@@ -39,15 +39,19 @@ export class RbDatetimeInputComponent implements OnInit {
   public get displayvalue(): string {
     if(this.rbObject != null) {
       let iso : string = this.rbObject.data[this.attribute];
-      let dt: Date = new Date(iso);
-      let val = this.format;
-      val = val.replace('YYYY', dt.getFullYear().toString());
-      val = val.replace('YY', (dt.getFullYear() % 100).toString());
-      val = val.replace('MM', this.convertToStringAndPad(dt.getMonth() + 1, 2));
-      val = val.replace('DD', this.convertToStringAndPad(dt.getDate(), 2));
-      val = val.replace('HH', this.convertToStringAndPad(dt.getHours(), 2));
-      val = val.replace('mm', this.convertToStringAndPad(dt.getMinutes(), 2));
-      return val;
+      if(iso != null) {
+        let dt: Date = new Date(iso);
+        let val = this.format;
+        val = val.replace('YYYY', dt.getFullYear().toString());
+        val = val.replace('YY', (dt.getFullYear() % 100).toString());
+        val = val.replace('MM', this.convertToStringAndPad(dt.getMonth() + 1, 2));
+        val = val.replace('DD', this.convertToStringAndPad(dt.getDate(), 2));
+        val = val.replace('HH', this.convertToStringAndPad(dt.getHours(), 2));
+        val = val.replace('mm', this.convertToStringAndPad(dt.getMinutes(), 2));
+        return val;
+      } else {
+        return null;
+      }
     } else
       return null;  
   }
@@ -60,7 +64,7 @@ export class RbDatetimeInputComponent implements OnInit {
   }
 
   public get readonly(): boolean {
-    if(this.rbObject != null)
+    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
       return !(this.editable && this.rbObject.validation[this.attribute].editable);
     else
       return true;      

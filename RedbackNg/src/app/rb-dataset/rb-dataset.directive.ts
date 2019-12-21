@@ -36,6 +36,8 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   public getData() {
+    this.list = [];
+    this.selectedObject = null;
     let filter = null;
     if(this.baseFilter != null)
       filter = this.baseFilter;

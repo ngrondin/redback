@@ -34,7 +34,7 @@ export class RbTextareaInputComponent implements OnInit {
   }
 
   public get readonly(): boolean {
-    if(this.rbObject != null)
+    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
       return !(this.editable && this.rbObject.validation[this.attribute].editable);
     else
       return true;      

@@ -1,5 +1,5 @@
 <mat-form-field 
-    [style.min-width]="(size * 8) + 'px'" >
+    [style.min-width]="(size * 6) + 'px'" >
     <mat-label>{{label}}</mat-label>
     <input 
         #input
@@ -9,5 +9,7 @@
         (blur)="blur()"
         (keydown)="keydown($event)"
         [readonly]="readonly">
-    <mat-icon matPrefix>{{icon}}</mat-icon>
+    <mat-icon 
+        matPrefix
+        class="rb-grey-icon">{{icon}}</mat-icon>
 </mat-form-field>

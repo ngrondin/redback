@@ -39,7 +39,7 @@ rb-dataset {
 	overflow: hidden;
 }
 
-rb-hsection {
+.rb-hsection {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
@@ -49,7 +49,7 @@ rb-hsection {
 	overflow: hidden;
 }
 
-rb-vsection {
+.rb-vsection {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
@@ -58,9 +58,17 @@ rb-vsection {
 	overflow:hidden;
 }
 
+.rb-button {
+	margin: 8px !important;
+}
+
 rb-list-scroll {
 	display: flex;
 	overflow: auto;
+}
+
+rb-list-scroll > mat-action-list {
+	width: 270px !important;
 }
 
 rb-list-scroll > mat-action-list > button {
@@ -91,6 +99,7 @@ rb-list-scroll > mat-action-list > button {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	font-weight: 500;
 }
 
 .rb-menu-link-text {
@@ -98,6 +107,7 @@ rb-list-scroll > mat-action-list > button {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	font-weight: 300;
 }
 
 rb-input {
@@ -142,6 +152,7 @@ rb-tab-section {
 .rb-tab-button {
 	color: darkblue;
 	font-weight: initial;
+	margin: 0px 10px 3px 10px !important;
 }
 
 .rb-tabheader-active {
@@ -168,6 +179,22 @@ rb-tab {
 
 .rb-margin {
 	margin: 10px;
+}
+
+
+.mat-form-field-underline {
+	left: 30px;
+	right: 0px;
+	width: auto !important;
+	background-color: lightgray !important;
+}
+
+.mat-form-field-prefix {
+	margin-right: 10px;
+}
+
+.rb-grey-icon {
+	color: grey;
 }
 
 ::-webkit-scrollbar-track

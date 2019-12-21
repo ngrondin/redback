@@ -19,6 +19,15 @@ export class DataService {
     this.saveImmediatly = true;
   }
 
+  getLocalObject(objectname: string, uid: string) : RbObject {
+    let rbObject: RbObject = null;
+    for(const o of this.allObjects) {
+      if(o.objectname == objectname && o.uid == uid) {
+        rbObject = o;
+      }
+    }
+    return rbObject;
+  }
 
   listObjects(name: string, filter: Object) : Observable<any> {
     const listObs = this.apiService.listObjects(name, filter);
@@ -45,12 +54,14 @@ export class DataService {
   }
 
   updateObjectFromServer(json: any) : RbObject {
-    let rbObject: RbObject = null;
-    for(const o of this.allObjects) {
-      if(o.objectname == json.objectname && o.uid == json.uid) {
-        rbObject = o;
+    if(json.related != null) {
+      for(const a in json.related) {
+        const relatedJson = json.related[a];
+        this.updateObjectFromServer(relatedJson);
       }
     }
+
+    let rbObject : RbObject = this.getLocalObject(json.objectname, json.uid);
     if(rbObject != null) {
       rbObject.updateFromServer(json);
     } else {
