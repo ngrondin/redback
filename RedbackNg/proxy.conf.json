@@ -1,0 +1,22 @@
+{
+  "/rbui/view/*": {
+    "target": "http://localhost",
+    "secure": false
+  },
+  "/rbui/resource/*": {
+    "target": "http://localhost",
+    "secure": false
+  },
+  "/rbui/menu/*": {
+    "target": "http://localhost",
+    "secure": false
+  },
+  "/rbos": {
+    "target": "http://localhost/rbos",
+    "secure": false
+  },
+  "/rbpm": {
+    "target": "http://localhost/rbpm",
+    "secure": false
+  }    
+}

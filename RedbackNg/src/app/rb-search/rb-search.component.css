@@ -1,0 +1,9 @@
+.rb-filter-button {
+    padding: 0px;
+    min-width: 32px;
+}
+
+.rb-filter-dialog {
+    min-width: 500px;
+    min-height: 250px;
+}

@@ -29,8 +29,8 @@ export class DataService {
     return rbObject;
   }
 
-  listObjects(name: string, filter: Object) : Observable<any> {
-    const listObs = this.apiService.listObjects(name, filter);
+  listObjects(name: string, filter: any, search: string) : Observable<any> {
+    const listObs = this.apiService.listObjects(name, filter, search);
     const dataObservable = new Observable((observer) => {
       listObs.subscribe(resp => {
         const rbObjectArray = Object.values(resp.list).map(json => this.updateObjectFromServer(json));

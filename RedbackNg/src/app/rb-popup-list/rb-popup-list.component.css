@@ -38,10 +38,3 @@
 .rb-list-expand-button {
 
 }
-
-.rb-spinner-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-}

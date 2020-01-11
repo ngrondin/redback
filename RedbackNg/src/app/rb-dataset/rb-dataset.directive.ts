@@ -16,26 +16,26 @@ export class RbDatasetDirective implements OnChanges {
 
   public list: RbObject[] = [];
   public selectedObject: RbObject;
-  //public nullSelectedObject: RbObject;
+  public searchString: string;
+  public searchFilter: any;
+  public isLoading: boolean;
 
   constructor(
     private dataService: DataService
   ) {   }
 
   ngOnInit() {
-    //this.nullSelectedObject = new RbObject({uid:-1, objectname:null, domain:null, data:{}, related:{}, validation:{}}, null);
-    //this.selectedObject = this.nullSelectedObject;
-    this.getData();
+    this.refreshData();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if(this.active)
-      this.getData();
+      this.refreshData();
     else
       this.list = [];
   }
 
-  public getData() {
+  public refreshData() {
     this.list = [];
     this.selectedObject = null;
     let filter = null;
@@ -60,11 +60,36 @@ export class RbDatasetDirective implements OnChanges {
         filter = null;
       }
     } 
-    if(filter != null)
-      this.dataService.listObjects(this.objectname, filter).subscribe(data => this.list = data);
+
+    if(this.searchFilter != null) {
+      for (const key in this.searchFilter) {
+        let value = this.searchFilter[key];
+        filter[key] = value;
+      }
+    }
+
+    if(filter != null) {
+      this.dataService.listObjects(this.objectname, filter, this.searchString).subscribe(data => this.setData(data));
+      this.isLoading = true;
+    }
+  }
+
+  private setData(data: RbObject[]) {
+    this.list = data;
+    this.isLoading = false;
   }
 
   public select(item: RbObject) {
     this.selectedObject = item;
   }
+
+  public search(str: string) {
+    this.searchString = str;
+    this.refreshData();
+  }
+
+  public filter(flt: any) {
+    this.searchFilter = flt;
+    this.refreshData();
+  } 
 }

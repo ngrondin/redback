@@ -1,0 +1,45 @@
+<div
+    class="rb-filter-dialog">
+    <div>
+        <span>Add to filter&nbsp;&nbsp;</span>
+        <mat-form-field>
+            <mat-label>Attributes</mat-label>
+            <mat-icon
+                matPrefix>search</mat-icon>
+            <mat-select
+                [(value)]="selectedAttribute"
+                (selectionChange)="addSelectedAttribute()">
+                <mat-option 
+                    *ngFor="let attribute of config.filterConfig.attributes" 
+                    [value]="attribute">
+                    {{attribute.label}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div>
+        <div
+            *ngFor="let filternode of filter | keyvalue">
+            <span>
+                {{getAttributeLabel(filternode.key)}} : &nbsp;&nbsp;
+            </span>
+            <mat-form-field>
+                <mat-label>Value</mat-label>
+                <mat-icon
+                    matPrefix>search</mat-icon>
+                <input
+                    matInput
+                    [(ngModel)]="filternode.value">
+            </mat-form-field>   
+        </div>
+    </div>
+    <div>
+        <button
+            mat-button
+            class="mat-mini-fab mat-primary rb-button" 
+            (click)="clickOk()">
+            <mat-icon class="md-hue-3" >check</mat-icon>
+        </button
+        >
+    </div>
+</div>

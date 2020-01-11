@@ -26,6 +26,7 @@ import { RbTextareaInputComponent } from './rb-textarea-input/rb-textarea-input.
 import { RbSearchComponent } from './rb-search/rb-search.component';
 import { RbMapComponent } from './rb-map/rb-map.component';
 import { RbDurationInputComponent } from './rb-duration-input/rb-duration-input.component';
+import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.component';
 
 @NgModule({
   imports: [
@@ -68,7 +69,8 @@ import { RbDurationInputComponent } from './rb-duration-input/rb-duration-input.
     RbMapComponent,
     RbMenuDirective,
     RbTabDirective,
-    RbTabSectionDirective
+    RbTabSectionDirective,
+    RbFilterBuilderComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -93,7 +95,8 @@ import { RbDurationInputComponent } from './rb-duration-input/rb-duration-input.
     RbMapComponent,
     RbMenuDirective,
     RbTabDirective,
-    RbTabSectionDirective
+    RbTabSectionDirective,
+    RbFilterBuilderComponent
   ],
   providers: [
     CookieService,
@@ -102,7 +105,8 @@ import { RbDurationInputComponent } from './rb-duration-input/rb-duration-input.
   ],
   entryComponents: [
     RbPopupListComponent,
-    RbPopupDatetimeComponent
+    RbPopupDatetimeComponent,
+    RbFilterBuilderComponent
   ],
   bootstrap: [
   ] 

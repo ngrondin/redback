@@ -3,15 +3,19 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { RedbackModule } from './redback.module';
-import { ViewLoaderModule } from './loader.module';
-import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
-import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material';
+import { HttpClientModule } from '@angular/common/http';
 
 
 @NgModule({
   imports: [
     BrowserModule,
-    RedbackModule
+    MatIconModule,
+    RedbackModule,
+    HttpClientModule
+  ],
+  exports: [
+    MatIconModule
   ],
   declarations: [
     AppComponent

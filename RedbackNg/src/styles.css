@@ -65,6 +65,7 @@ rb-dataset {
 rb-list-scroll {
 	display: flex;
 	overflow: auto;
+	flex-direction: column;
 }
 
 rb-list-scroll > mat-action-list {
@@ -93,13 +94,17 @@ rb-list-scroll > mat-action-list > button {
 	padding-left: -4px;
 }
 
-
 .rb-menu-group-text {
 	flex-grow: 1;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	font-weight: 500;
+	padding-left: 12px;
+}
+
+.rb-menu-group-icon {
+	color:dimgray;
 }
 
 .rb-menu-link-text {
@@ -108,18 +113,18 @@ rb-list-scroll > mat-action-list > button {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	font-weight: 300;
+	padding-left: 12px;
 }
 
-rb-input {
-	margin: 6px;
+.rb-menu-link-icon {
+	color:#888888;
 }
 
-rb-related-input {
-	margin: 6px;
-}
-
-rb-datetime-input {
-	margin: 6px;
+.rb-input-margin {
+	margin-left: 6px;
+	margin-right: 6px;
+	margin-top: 6px;
+	margin-bottom: -5px;
 }
 
 rb-tab-section {
@@ -195,6 +200,14 @@ rb-tab {
 
 .rb-grey-icon {
 	color: grey;
+}
+
+
+.rb-spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
 }
 
 ::-webkit-scrollbar-track

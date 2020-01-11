@@ -16,16 +16,19 @@ const httpOptions = {
 })
 export class ApiService {
 
-  baseUrl: string;
+  public baseUrl: string;
+  public uiService: string;
+  public objectService: string;
+  public processService: string;
 
   constructor(
     private http: HttpClient,
     private cookieService : CookieService
   ) { 
-    this.baseUrl = 'http://localhost';
+    //this.baseUrl = 'http://localhost';
   }
 
-  listObjects(name: string, filter: any): Observable<any> {
+  listObjects(name: string, filter: any, search: string): Observable<any> {
     const req = {
       action: 'list',
       object: name,
@@ -35,6 +38,8 @@ export class ApiService {
         addvalidation: true
       }
     };
+    if(search != null)
+      req['search'] = search;
     return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
   }
 
@@ -45,12 +50,13 @@ export class ApiService {
       uid: uid,
       attribute: attribute,
       filter: filter,
-      search: search,
       options: {
         addrelated: true,
         addvalidation: true
       }
     };
+    if(search != null)
+      req['search'] = search;
     return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
   }
 

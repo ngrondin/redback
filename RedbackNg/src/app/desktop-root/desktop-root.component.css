@@ -5,6 +5,11 @@
     max-height: 100%;
 }
 
+.rb-pagetitle {
+    font-size: smaller;
+    color: #eeeeee;
+}
+
 mat-toolbar {
     min-height:40px
 }
@@ -19,7 +24,7 @@ mat-sidenav-container {
 }
 
 mat-sidenav {
-    width: 250px;
+    width: 260px;
     border-right: Solid 1px gray;
 }
 
@@ -27,3 +32,4 @@ mat-sidenav-content {
     display: flex;
     flex: 1 1 auto;
 }
+

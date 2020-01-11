@@ -1,4 +1,5 @@
-<mat-form-field>
+<mat-form-field
+    [style.width]="(size * 15) + 'px'" >
     <mat-label>{{label}}</mat-label>
     <input 
         #input
@@ -12,4 +13,5 @@
     <mat-icon 
         matPrefix
         class="rb-grey-icon">{{icon}}</mat-icon>
-</mat-form-field>
+</mat-form-field
+>

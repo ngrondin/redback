@@ -1,1 +1,17 @@
-<p>rb-search works!</p>
+<mat-form-field>
+    <mat-label>Search</mat-label>
+    <input 
+        matInput 
+        [(ngModel)]="value"
+        (keyup)="keyup($event)">
+    <mat-icon 
+        matPrefix
+        class="rb-grey-icon">search</mat-icon>
+</mat-form-field>
+<button 
+    mat-button
+    *ngIf="filterConfig != null"
+    class="rb-grey-icon rb-filter-button"
+    (click)="openFilterBuilder()">
+    <mat-icon>filter_list</mat-icon>
+</button>
