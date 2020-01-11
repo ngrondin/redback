@@ -36,9 +36,9 @@ public class RedbackUIServer extends UIServer
 	protected HashMap<String, DataMap> viewConfigs;
 
 	
-	public RedbackUIServer(DataMap c, Firebus f) 
+	public RedbackUIServer(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 		devpath = config.getString("devpath");
 		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		jspScripts = new HashMap<String, CompiledScript>();
@@ -51,6 +51,10 @@ public class RedbackUIServer extends UIServer
 		HTML html = null;
 		Bindings context = jsEngine.createBindings();
 		context.put("global", config.getObject("globalvariables"));
+		context.put("version", version);
+		context.put("uiservice", this.serviceName);
+		context.put("objectservice", config.getString("objectservice"));
+		context.put("processservice", config.getString("processservice"));
 		if(session != null)
 		{
 			if(session.getUserProfile().canRead("rb.apps." + name))
@@ -128,6 +132,7 @@ public class RedbackUIServer extends UIServer
 				context.put("session", session);
 				context.put("canWrite", true);
 				context.put("canExecute", true);
+				context.put("dataset", "none");
 			}
 
 			if(session.getUserProfile().canRead("rb.views." + viewName))
@@ -169,6 +174,7 @@ public class RedbackUIServer extends UIServer
 		}
 		return viewHTML;
 	}
+	
 	
 	protected HTML generateHTMLFromComponentConfig(DataMap componentConfig, String version, Bindings context) throws RedbackException
 	{
@@ -239,6 +245,8 @@ public class RedbackUIServer extends UIServer
 	
 	protected CompiledScript getCompiledJSP(String name, String version) throws RedbackException
 	{
+		if(version == null)
+			version = "default";
 		CompiledScript script = jspScripts.get(version + "/" + name);
 		if(script == null)
 		{
@@ -291,6 +299,8 @@ public class RedbackUIServer extends UIServer
 	protected byte[] getResource(String name, String version) throws FunctionErrorException, FunctionTimeoutException, DataException, RedbackException, IOException
 	{
 		byte[] bytes = null;
+		if(version == null)
+			version = "default";
 		String type = "";
 		if(name.endsWith(".js"))
 			type = "js";

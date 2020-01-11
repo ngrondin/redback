@@ -28,9 +28,9 @@ public class RedbackConfigServer extends ConfigServer
 	private String devpath;
 	private String classpath;
 
-	public RedbackConfigServer(DataMap c, Firebus f) 
+	public RedbackConfigServer(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 		if(config.containsKey("devpath"))
 			devpath = config.getString("devpath");
 		classpath = "com/nic/redback/config";

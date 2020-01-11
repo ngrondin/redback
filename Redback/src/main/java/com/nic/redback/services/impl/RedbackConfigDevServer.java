@@ -20,9 +20,9 @@ public class RedbackConfigDevServer extends ConfigDevelopmentServer
 {
 	protected String devPath;
 
-	public RedbackConfigDevServer(DataMap c, Firebus f) 
+	public RedbackConfigDevServer(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 		if(config.containsKey("devpath"))
 			devPath = config.getString("devpath");
 	}

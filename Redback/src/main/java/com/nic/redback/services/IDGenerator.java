@@ -13,9 +13,9 @@ public abstract class IDGenerator extends DataService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
-	public IDGenerator(DataMap c, Firebus f) 
+	public IDGenerator(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 	}
 
 	public Payload service(Payload payload) throws FunctionErrorException 

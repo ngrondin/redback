@@ -12,9 +12,9 @@ public abstract class DataService extends ConfigurableService
 {
 	protected String dataService;
 	
-	public DataService(DataMap c, Firebus f)
+	public DataService(String n, DataMap c, Firebus f)
 	{
-		super(c, f);
+		super(n, c, f);
 		dataService = config.getString("dataservice");
 	}
 	

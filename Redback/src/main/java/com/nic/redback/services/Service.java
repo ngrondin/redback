@@ -20,10 +20,11 @@ public abstract class Service implements ServiceProvider
 	protected Firebus firebus;
 	protected DataMap config;
 	
-	public Service(DataMap c, Firebus f)
+	public Service(String n, DataMap c, Firebus f)
 	{
-		firebus = f;
+		serviceName = n;
 		config = c;
+		firebus = f;
 	}
 
 	protected DataMap request(String service, DataMap request) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException

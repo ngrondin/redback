@@ -3,9 +3,15 @@
 	class="rb-menu-group md-hue-2"
 	(click)="<%=menu%>.toggleGroup('<%=config.getString('_id')%>')"><%
 if(config.getString('icon').indexOf(':') >= 0) {%>
-	<mat-icon md-svg-icon="<%=config.getString('icon')%>"></mat-icon><%
+	<mat-icon
+		class="rb-menu-group-icon" 
+		svgIcon="<%=config.getString('icon')%>">
+	</mat-icon><%
 } else {%>
-	<mat-icon><%=config.getString('icon')%></mat-icon><%
+	<mat-icon
+		class="rb-menu-group-icon">
+		<%=config.getString('icon')%>
+	</mat-icon><%
 }%>
 	<span 
 		flex 

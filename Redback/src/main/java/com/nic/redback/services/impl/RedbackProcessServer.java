@@ -16,9 +16,9 @@ public class RedbackProcessServer extends ProcessServer
 	protected ProcessManager processManager;
 
 
-	public RedbackProcessServer(DataMap c, Firebus f) 
+	public RedbackProcessServer(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 		processManager = new ProcessManager(firebus, config);
 	}
 	

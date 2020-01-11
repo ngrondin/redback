@@ -20,8 +20,8 @@ public class RedbackObjectServer extends ObjectServer
 	protected ObjectManager objectManager;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 
-	public RedbackObjectServer(DataMap c, Firebus f) {
-		super(c, f);
+	public RedbackObjectServer(String n, DataMap c, Firebus f) {
+		super(n, c, f);
 		objectManager = new ObjectManager(firebus, config);
 	}
 

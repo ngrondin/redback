@@ -15,9 +15,9 @@ public abstract class FileServer extends AuthenticatedService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
-	public FileServer(DataMap c, Firebus f)
+	public FileServer(String n, DataMap c, Firebus f)
 	{
-		super(c, f);
+		super(n, c, f);
 	}
 	
 	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException

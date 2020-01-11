@@ -1,4 +1,5 @@
 <rb-input
+	class="rb-input-margin"
 	style="<%=config.getString('inlineStyle')%>"
 	*ngIf="(<%=config.getString('show')%>)"
 	[label]="'<%=config.getString("label")%>'"<%
@@ -9,9 +10,8 @@ if(config.get('icon') == null) {%>
 } else {%>
 	[icon]="'<%=config.getString('icon')%>'"<%
 }%>	
-	[size]="<%=(config.get("size") == null ? 50 : config.getString("size")) %>"
+	[size]="<%=(config.get("size") == null ? 20 : config.getString("size")) %>"
 	[object]="<%=dataset%>.selectedObject"
 	[attribute]="'<%=config.getString('attribute')%>'"
-	[editable]="<%=canWrite%>"
-	>
+	[editable]="<%=canWrite%>" >
 </rb-input>

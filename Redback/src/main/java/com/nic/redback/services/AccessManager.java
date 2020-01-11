@@ -29,9 +29,9 @@ public abstract class AccessManager extends DataService implements Consumer
 	protected String sessionTable = "rbam_session";
 	protected String userTable = "rbam_user";
 	
-	public AccessManager(DataMap c, Firebus f) 
+	public AccessManager(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 		expiryTime = 1800000;
 		cachedSessions = new ArrayList<Session>();
 		cachedUserProfiles = new ArrayList<UserProfile>();

@@ -9,9 +9,9 @@ public class RedbackIDGenerator extends IDGenerator
 {
 	private DataMap configCache;
 
-	public RedbackIDGenerator(DataMap c, Firebus f) 
+	public RedbackIDGenerator(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 		configCache = new DataMap();
 	}
 	

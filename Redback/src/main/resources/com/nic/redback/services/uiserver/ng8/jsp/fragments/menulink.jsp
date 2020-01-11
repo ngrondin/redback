@@ -4,9 +4,15 @@
 	*ngIf="<%=menu%>.isGroupOpen(<%=config.getString('group')%>)"
 	(click)="navigateTo('<%=config.getString('view')%>', '<%=config.getString('label')%>')"><%
 if(config.getString('icon').indexOf(':') >= 0) {%>
-	<mat-icon mat-svg-icon="<%=config.getString('icon')%>"></mat-icon><%
+	<mat-icon 
+		svgIcon="<%=config.getString('icon')%>"
+		class="rb-menu-link-icon">
+	</mat-icon><%
 } else {%>
-	<mat-icon><%=config.getString('icon')%></mat-icon><%
+	<mat-icon
+		class="rb-menu-link-icon">
+		<%=config.getString('icon')%>
+	</mat-icon><%
 }%>
 	<span 
 		flex

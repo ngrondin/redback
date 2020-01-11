@@ -16,9 +16,9 @@ public abstract class ConfigDevelopmentServer extends AuthenticatedService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
-	public ConfigDevelopmentServer(DataMap c, Firebus f)
+	public ConfigDevelopmentServer(String n, DataMap c, Firebus f)
 	{
-		super(c, f);
+		super(n, c, f);
 	}
 
 	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException

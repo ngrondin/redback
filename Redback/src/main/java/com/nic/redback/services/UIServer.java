@@ -20,9 +20,9 @@ public abstract class UIServer extends AuthenticatedService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
-	public UIServer(DataMap c, Firebus f)
+	public UIServer(String n, DataMap c, Firebus f)
 	{
-		super(c, f);
+		super(n, c, f);
 	}
 	
 	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
@@ -37,7 +37,7 @@ public abstract class UIServer extends AuthenticatedService
 				String[] parts = get.split("/");
 				String category = parts[0];
 				String name = parts[1];
-				String version = "default";
+				String version = null;
 				
 				if(category.equals("resource"))
 				{
@@ -76,24 +76,24 @@ public abstract class UIServer extends AuthenticatedService
 			{
 				String[] parts = get.split("/");
 				String category = null;
-				String version = null;
 				String name = null;
+				String version = null;
 				if(parts.length >= 3)
 				{
-					version = parts[0];
-					category = parts[1];
+					category = parts[0];
+					version = parts[1];
 					name = parts[2];
 				}
 				if(parts.length == 2)
 				{
-					version = "default";
 					category = parts[0];
+					//version = "default";
 					name = parts[1];
 				}
 				else if(parts.length == 1)
 				{
-					version = "default";
 					category = "app";
+					//version = "default";
 					name = parts[0];
 				}
 				

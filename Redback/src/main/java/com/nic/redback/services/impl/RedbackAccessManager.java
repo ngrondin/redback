@@ -20,9 +20,9 @@ import com.nic.redback.services.AccessManager;
 public class RedbackAccessManager extends AccessManager
 {
 
-	public RedbackAccessManager(DataMap c, Firebus f) 
+	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 	}
 
 	protected Session validateToken(String token) throws RedbackException

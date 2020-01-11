@@ -19,9 +19,9 @@ public class RedbackFileServer extends FileServer
 	protected String defaultFileService;
 
 	
-	public RedbackFileServer(DataMap c, Firebus f) 
+	public RedbackFileServer(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 		DataList list = c.getList("fileadapters");
 		fileServices = new ArrayList<String>();
 		for(int i = 0; i < list.size(); i++)

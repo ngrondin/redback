@@ -19,9 +19,9 @@ public abstract class ProcessServer extends AuthenticatedService implements Cons
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
-	public ProcessServer(DataMap c, Firebus f)
+	public ProcessServer(String n, DataMap c, Firebus f)
 	{
-		super(c, f);
+		super(n, c, f);
 	}
 
 	

@@ -80,33 +80,54 @@ public class RedbackServer
 					Constructor<?> cons = null;
 					BusFunction service = null;
 					try {
-						cons = c.getConstructor(new Class[]{DataMap.class, Firebus.class});
+						cons = c.getConstructor(new Class[]{String.class, DataMap.class, Firebus.class});
 					} catch (NoSuchMethodException e) {}
 					if(cons != null) 
 					{
-						service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig, firebus});
+						service = (BusFunction)cons.newInstance(new Object[]{name, deploymentConfig, firebus});
 					}
 					else
 					{
 						try {
-							cons = c.getConstructor(new Class[]{DataMap.class});
+							cons = c.getConstructor(new Class[]{DataMap.class, Firebus.class});
 						} catch (NoSuchMethodException e) {}
-						if(cons != null)
+						if(cons != null) 
 						{
-							service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig});
+							service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig, firebus});
 						}
 						else
 						{
 							try {
-								cons = c.getConstructor();
+								cons = c.getConstructor(new Class[]{String.class, DataMap.class});
+								
 							} catch (NoSuchMethodException e) {}
 							if(cons != null)
 							{
-								service = (BusFunction)cons.newInstance();
+								service = (BusFunction)cons.newInstance(new Object[]{name, deploymentConfig});
 							}
 							else
 							{
-								logger.severe("No appropriate constructor can be found for class " + className + " ");
+								try {
+									cons = c.getConstructor(new Class[]{DataMap.class});
+								} catch (NoSuchMethodException e) {}
+								if(cons != null)
+								{
+									service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig});
+								}
+								else
+								{
+									try {
+										cons = c.getConstructor();
+									} catch (NoSuchMethodException e) {}
+									if(cons != null)
+									{
+										service = (BusFunction)cons.newInstance();
+									}
+									else
+									{
+										logger.severe("No appropriate constructor can be found for class " + className + " ");
+									}
+								}
 							}
 						}
 					}

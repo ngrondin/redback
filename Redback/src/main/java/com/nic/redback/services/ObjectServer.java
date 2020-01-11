@@ -20,9 +20,9 @@ public abstract class ObjectServer extends AuthenticatedService implements Consu
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
 
-	public ObjectServer(DataMap c, Firebus f)
+	public ObjectServer(String n, DataMap c, Firebus f)
 	{
-		super(c, f);
+		super(n, c, f);
 	}
 
 	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException

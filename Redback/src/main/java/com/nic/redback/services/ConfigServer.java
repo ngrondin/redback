@@ -14,9 +14,9 @@ public abstract class ConfigServer extends Service
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
-	public ConfigServer(DataMap c, Firebus f) 
+	public ConfigServer(String n, DataMap c, Firebus f) 
 	{
-		super(c, f);
+		super(n, c, f);
 	}
 
 	public Payload service(Payload payload) throws FunctionErrorException 

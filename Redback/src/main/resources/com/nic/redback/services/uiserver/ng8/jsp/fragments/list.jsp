@@ -1,9 +1,5 @@
 <rb-list-scroll 
 	style="<%=config.getString('inlineStyle')%>">
-	<!-- <md-progress-linear 
-		md-mode="indeterminate" 
-		ng-show="loading">
-	</md-progress-linear> -->
 	<mat-action-list>
 		<button
 			mat-list-item 
@@ -33,4 +29,11 @@ if(config.get('initials') != null) {%>
 			</div>
 		</button>
 	</mat-action-list>
+	<div
+	    class="rb-spinner-container"
+	    *ngIf="<%=dataset%>.isLoading">
+	    <mat-spinner
+	        diameter="20">
+	    </mat-spinner>
+	</div>	
 </rb-list-scroll>

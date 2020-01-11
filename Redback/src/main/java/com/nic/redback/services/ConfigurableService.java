@@ -12,9 +12,9 @@ public abstract class ConfigurableService extends Service
 {
 	protected String configService;
 	
-	public ConfigurableService(DataMap c, Firebus f)
+	public ConfigurableService(String n, DataMap c, Firebus f)
 	{
-		super(c, f);
+		super(n, c, f);
 		configService = config.getString("configservice");
 	}
 	
