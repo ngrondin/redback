@@ -17,7 +17,7 @@ export class RbDatasetDirective implements OnChanges {
   public list: RbObject[] = [];
   public selectedObject: RbObject;
   public searchString: string;
-  public searchFilter: any;
+  public userFilter: any;
   public isLoading: boolean;
 
   constructor(
@@ -35,14 +35,15 @@ export class RbDatasetDirective implements OnChanges {
       this.list = [];
   }
 
-  public refreshData() {
-    this.list = [];
-    this.selectedObject = null;
-    let filter = null;
-    if(this.baseFilter != null)
-      filter = this.baseFilter;
-    else
-      filter = {};
+  private mergeFilters() : any {
+    let filter = {};
+    if(this.baseFilter != null) {
+      for (const key in this.baseFilter) {
+        let value = this.baseFilter[key];
+        filter[key] = value;
+      }
+    }
+
     if(this.relatedFilter != null) {
       if(this.relatedObject != null) {
         for (const key in this.relatedFilter) {
@@ -56,19 +57,24 @@ export class RbDatasetDirective implements OnChanges {
           }
           filter[key] = value;
         }
-      } else {
-        filter = null;
       }
     } 
 
-    if(this.searchFilter != null) {
-      for (const key in this.searchFilter) {
-        let value = this.searchFilter[key];
+    if(this.userFilter != null) {
+      for (const key in this.userFilter) {
+        let value = this.userFilter[key];
         filter[key] = value;
       }
     }
+    
+    return filter;
+  }
 
-    if(filter != null) {
+  public refreshData() {
+    this.list = [];
+    this.selectedObject = null;
+    if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
+      const filter = this.mergeFilters();
       this.dataService.listObjects(this.objectname, filter, this.searchString).subscribe(data => this.setData(data));
       this.isLoading = true;
     }
@@ -89,7 +95,24 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   public filter(flt: any) {
-    this.searchFilter = flt;
+    this.userFilter = flt;
     this.refreshData();
   } 
+
+  public action(name: string, param: string) {
+    if(name == 'create') {
+      this.dataService.createObject(this.objectname, this.mergeFilters()).subscribe(newObject => this.addObjectAndSelect(newObject));
+    } else if(name == 'save') {
+      
+    } else if(this.selectedObject != null) {
+      this.dataService.executeObObject(this.selectedObject, name, param);
+    }
+  }
+
+  public addObjectAndSelect(obj: RbObject) {
+    if(this.list.indexOf(obj) == -1) {
+      this.list.push(obj);
+      this.selectedObject = obj;
+    }
+  }
 }

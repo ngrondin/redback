@@ -78,4 +78,20 @@ export class DataService {
     }
     this.apiService.updateObject(rbObject.objectname, rbObject.uid, upd).subscribe(resp => this.updateObjectFromServer(resp));
   }
+
+  createObject(name: string, data: any) : Observable<RbObject> {
+    const apiObservable = this.apiService.createObject(name, data);
+    const dataObservable = new Observable<RbObject>((observer) => {
+      apiObservable.subscribe(resp => {
+        const newObj: RbObject = this.updateObjectFromServer(resp);
+        observer.next(newObj);
+        observer.complete();
+      });
+    })
+    return dataObservable;     
+  }
+
+  executeObObject(rbObject: RbObject, func: string, param: string) {
+    this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(resp => this.updateObjectFromServer(resp));
+  }
 }

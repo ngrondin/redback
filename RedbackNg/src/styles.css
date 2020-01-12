@@ -20,6 +20,7 @@ body {
 rb-view-loader {
 	display: flex;
 	flex-direction: column;
+	flex-grow: 1;
 	overflow: hidden;
 }
 
@@ -171,7 +172,7 @@ rb-tab-section {
 	flex-direction: row;
 	flex-wrap: nowrap;
 	border: 0px Solid;
-	margin-top: 25px;
+	margin-top: 12px;
 }
 
 rb-tab {
@@ -208,6 +209,11 @@ rb-tab {
     flex-direction: column;
     align-items: center;
     padding: 10px;
+}
+
+
+.agm-map-container-inner {
+    height: 100% !important;
 }
 
 ::-webkit-scrollbar-track

@@ -1,11 +1,12 @@
 <div
-    class="rb-filter-dialog">
+    class="rb-filter-builder-container">
     <div>
-        <span>Add to filter&nbsp;&nbsp;</span>
+        <span>Add filter for&nbsp;&nbsp;</span>
         <mat-form-field>
             <mat-label>Attributes</mat-label>
             <mat-icon
-                matPrefix>search</mat-icon>
+                matPrefix
+                class="rb-grey-icon">search</mat-icon>
             <mat-select
                 [(value)]="selectedAttribute"
                 (selectionChange)="addSelectedAttribute()">
@@ -17,29 +18,39 @@
             </mat-select>
         </mat-form-field>
     </div>
-    <div>
+    <div
+        class="rb-filter-builder-canvas">
         <div
             *ngFor="let filternode of filter | keyvalue">
             <span>
                 {{getAttributeLabel(filternode.key)}} : &nbsp;&nbsp;
             </span>
-            <mat-form-field>
+            <mat-form-field
+                *ngIf="getAttributeType(filternode.key) == 'string'">
                 <mat-label>Value</mat-label>
                 <mat-icon
-                    matPrefix>search</mat-icon>
+                    matPrefix
+                    class="rb-grey-icon">description</mat-icon>
                 <input
                     matInput
-                    [(ngModel)]="filternode.value">
+                    [ngModel]="getFilterValue(filternode.key)"
+                    (change)="setFilterValue(filternode.key, $event.target.value)">
             </mat-form-field>   
+            <button
+                mat-button
+                class="mat-mini mat-primary rb-button" 
+                (click)="removeAttribute(filternode.key)">
+                <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
+            </button>
         </div>
-    </div>
+    </div
+    >
     <div>
         <button
             mat-button
             class="mat-mini-fab mat-primary rb-button" 
             (click)="clickOk()">
             <mat-icon class="md-hue-3" >check</mat-icon>
-        </button
-        >
+        </button>
     </div>
 </div>

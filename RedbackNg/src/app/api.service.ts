@@ -40,7 +40,7 @@ export class ApiService {
     };
     if(search != null)
       req['search'] = search;
-    return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string): Observable<any> {
@@ -57,7 +57,7 @@ export class ApiService {
     };
     if(search != null)
       req['search'] = search;
-    return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   updateObject(name: string, uid: string, data: any) {
@@ -71,6 +71,33 @@ export class ApiService {
         addvalidation: true
       }
     };
-    return this.http.post<any>(this.baseUrl + '/rbos', req, httpOptions);
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
+  createObject(name: string, data: any) {
+    const req = {
+      action: 'create',
+      object: name,
+      data: data,
+      options: {
+        addrelated: true,
+        addvalidation: true
+      }
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
+  executeObject(name: string, uid: string, func: string) {
+    const req = {
+      action: 'execute',
+      object: name,
+      uid: uid,
+      function: func,
+      options: {
+        addrelated: true,
+        addvalidation: true
+      }
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 }

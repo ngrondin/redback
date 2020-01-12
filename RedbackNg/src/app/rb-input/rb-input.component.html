@@ -5,7 +5,8 @@
         matInput 
         [(ngModel)]="value"
         (change)="commit()"
-        [readonly]="readonly">
+        [readonly]="readonly"
+        autocomplete="off">
     <mat-icon 
         matPrefix
         class="rb-grey-icon">{{icon}}</mat-icon>

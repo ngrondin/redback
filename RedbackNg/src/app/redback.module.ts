@@ -27,6 +27,7 @@ import { RbSearchComponent } from './rb-search/rb-search.component';
 import { RbMapComponent } from './rb-map/rb-map.component';
 import { RbDurationInputComponent } from './rb-duration-input/rb-duration-input.component';
 import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.component';
+import { AgmCoreModule } from '@agm/core';
 
 @NgModule({
   imports: [
@@ -51,7 +52,10 @@ import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.
     FormsModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    HttpModule    
+    HttpModule,
+    AgmCoreModule.forRoot({
+      apiKey: 'AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'
+    })    
   ],
   declarations: [
     DesktopRootComponent,

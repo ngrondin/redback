@@ -35,6 +35,10 @@ export class RbFilterBuilderComponent implements OnInit {
     this.selectedAttribute = null;
   }
 
+  removeAttribute(att: string) {
+    delete this.filter[att];
+  }
+
   getAttributeLabel(att: string) : string {
     if(this.config.filterConfig != null) {
       for(let a of this.config.filterConfig.attributes) {
@@ -55,6 +59,26 @@ export class RbFilterBuilderComponent implements OnInit {
       }
     }
     return "string";
+  }
+
+  getFilterValue(att: string) : string {
+    let type = this.getAttributeType(att);
+    if(type == 'string') {
+      let val : string = this.filter[att];
+      if(val != null && val.startsWith('*') && val.endsWith('*')) {
+        return val.substring(1, val.length - 1);
+      } else {
+        return val;
+      }
+    }
+    return this.filter[att];
+  }
+
+  setFilterValue(att: string, val: string) {
+    let type = this.getAttributeType(att);
+    if(type == 'string') {
+      this.filter[att] = '*' + val + '*'; 
+    }
   }
 
   clickOk() {
