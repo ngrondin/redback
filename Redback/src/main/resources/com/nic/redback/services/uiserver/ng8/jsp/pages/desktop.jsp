@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body>
+<body oncontextmenu="return false;">
   <app-root 
     type="<%=config.getString('page')%>"
     title="<%=config.getString('label')%>"

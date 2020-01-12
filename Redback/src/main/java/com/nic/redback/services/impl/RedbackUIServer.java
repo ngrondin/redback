@@ -340,6 +340,7 @@ public class RedbackUIServer extends UIServer
 				{
 					bytesRead += is.read(bytes, bytesRead, (bytes.length - bytesRead));
 				}
+				is.close();
 			}
 			else
 			{
