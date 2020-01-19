@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            id="io.redback.eclipse.editors.MultiPageEditor"
+            name="Sample Multi-page Editor"
+            icon="icons/sample.png"
+            extensions="mpe"
+            class="io.redback.eclipse.editors.MultiPageEditor"
+            contributorClass="io.redback.eclipse.editors.MultiPageEditorContributor">
+      </editor>
+      <editor
+            id="io.redback.eclipse.editors.RedbackConfigEditor"
+            name="Redback Configuration Editor"
+            icon="icons/sample.png"
+            extensions="json"
+            class="io.redback.eclipse.editors.RedbackConfigEditor"
+            contributorClass="io.redback.eclipse.editors.RedbackConfigEditorContributor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Sample Wizards"
+            id="RedbackEclipse">
+      </category>
+      <wizard
+            id="redbackeclipse.wizards.SampleNewWizard"
+            name="Multi-page Editor file"
+            icon="icons/sample.png"
+            class="redbackeclipse.wizards.SampleNewWizard"
+            category="RedbackEclipse">
+      </wizard>
+   </extension>
+
+</plugin>
