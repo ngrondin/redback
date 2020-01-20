@@ -149,7 +149,7 @@ public class TestIFile implements IFile {
 	@Override
 	public String getFileExtension() {
 		// TODO Auto-generated method stub
-		return null;
+		return "json";
 	}
 
 	@Override

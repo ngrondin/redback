@@ -7,23 +7,30 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.nic.firebus.utils.DataMap;
 
+import io.redback.eclipse.editors.RedbackConfigEditor;
+
 
 public abstract class Manager extends Composite  {
 
-	protected DataMap data; 
+	protected DataMap data;
+	protected RedbackConfigEditor editorPart;
 	protected SashForm sashForm;
 	protected Navigator navigator;
 	protected Form form;
+	protected boolean changed;
 
-	public Manager(DataMap d, Composite parent, int style) {
+	public Manager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
 		super(parent, style);
 		data = d;
+		editorPart = e;
+		changed = false;
+	}
+	
+	protected void createUI() {
 		setLayout(new FillLayout());
 		getHorizontalBar().setVisible(false);
-
 		sashForm = new SashForm(this, SWT.HORIZONTAL);
 	    navigator = getNavigator();
-	    navigator.createUI();
 	    form = new EmptyForm(sashForm, SWT.PUSH);
 	}
 	
@@ -31,7 +38,7 @@ public abstract class Manager extends Composite  {
 	
 	protected abstract Form getForm(String type, String name);
 
-	public abstract void createNode(String type, String name);
+	public abstract String createNode(String type, String name);
 	
 	public abstract void deleteNode(String type, String name);
 
@@ -54,6 +61,15 @@ public abstract class Manager extends Composite  {
 
 		sashForm.setWeights(weights);
 		layout(true, true);		
+	}
+	
+	public void setDataChanged(boolean c) {
+		changed = c;
+		editorPart.setDirty();
+	}
+	
+	public boolean isDataChanged() {
+		return changed;
 	}
 	
 }

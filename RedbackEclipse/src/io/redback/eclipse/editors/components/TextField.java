@@ -46,6 +46,7 @@ public class TextField extends Composite implements ModifyListener {
 				map.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
+		form.setDataChanged(true);
 		oldValue = newValue;
 	}
 

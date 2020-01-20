@@ -1,6 +1,8 @@
 package io.redback.eclipse.editors.components;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
@@ -17,28 +19,45 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
 
-public class KeyValueForm extends Form implements SelectionListener, ModifyListener, FocusListener, MouseListener {
+public class TableField extends Composite implements SelectionListener, ModifyListener, FocusListener, MouseListener {
 
+	protected DataMap data;
+	protected String attribute;
+	protected String label;
+	protected String[][] columns;
+	protected Map<String, Integer> colMap;
+	protected Form form;
 	protected Table table;
-	protected TableColumn keyCol;
-	protected TableColumn valueCol;
 	protected Button addBut;
 	protected Button delBut;
 	protected TableEditor editor;
 	
-	public KeyValueForm(DataMap d, Manager m, Composite p, int s) {
-		super(d, m, p, s);
+	public TableField(DataMap d, String a, String l, String[][] c, Form f, int s) {
+		super(f, s);
+		data = d;
+		attribute = a;
+		label = l;
+		form = f;
+		columns = c;
+		colMap = new HashMap<String, Integer>();
+		for(int i = 0; i < columns.length; i++)
+			colMap.put(columns[i][0], i);
 		createUI();
 	}
 	
 	public void createUI() {
+		setLayout(new RowLayout(SWT.VERTICAL));
+		Label lbl = new Label(this, SWT.NONE);
+		lbl.setText(label);
 		Composite tools = new Composite(this, SWT.NONE);
 		tools.setLayout(new RowLayout(SWT.HORIZONTAL));
 		addBut = new Button(tools, SWT.NONE);
@@ -51,15 +70,16 @@ public class KeyValueForm extends Form implements SelectionListener, ModifyListe
 		table = new Table(this, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLayoutData(new RowData(500, 150));
 		table.setHeaderVisible(true);
-		keyCol = new TableColumn(table, SWT.NULL);
-		keyCol.setText("Keys");
-		keyCol.pack();
-		keyCol.setWidth(200);
-		valueCol = new TableColumn(table, SWT.NULL);
-		valueCol.setText("Values");
-		valueCol.pack();
-		valueCol.setWidth(300);
 		
+		for(int i = 0; i < columns.length; i++) {
+			TableColumn col = new TableColumn(table, SWT.NULL);
+			col.setText(columns[i][1]);
+			col.setData(columns[i][0]);
+			col.pack();
+			col.setWidth(200);
+			
+		}
+
 		editor = new TableEditor(table);
 		editor.horizontalAlignment = SWT.LEFT;
 		editor.grabHorizontal = true;
@@ -67,15 +87,18 @@ public class KeyValueForm extends Form implements SelectionListener, ModifyListe
 	    
 		table.addMouseListener(this);
 		
-		Iterator<String> it = data.keySet().iterator();
-		while(it.hasNext()) {
-			String key = it.next();
+		refreshTableRows();
+	}
+	
+	public void refreshTableRows() {
+		DataList list = data.getList(attribute);
+		for(int i = 0; i < list.size(); i++) {
 			TableItem item = new TableItem(table, SWT.NULL);
-			item.setText(0, key);
-			item.setText(1, data.getString(key));
-			item.setData("key", key);
-			//item.addListener(SWT.MouseDoubleClick, this);
-		}	
+			for(int j = 0; j < columns.length; j++) {
+				item.setText(j, list.getObject(i).getString(columns[j][0]));
+			}
+			item.setData(i);
+		}			
 	}
 
 	
@@ -108,14 +131,15 @@ public class KeyValueForm extends Form implements SelectionListener, ModifyListe
 	public void widgetSelected(SelectionEvent event) {
 		if(event.getSource() instanceof Button) {
 			if(event.getSource() == addBut) {
-				TableItem item = new TableItem(table, SWT.NULL);
-				startEditing(item);
+				DataMap newData = new DataMap();
+				data.getList(attribute).add(newData);
+				refreshTableRows();
+				//startEditing(item);
 			} else if(event.getSource() == delBut) {
 				TableItem[] items = table.getSelection();
 				for(int i = 0; i < items.length; i++) {
-					String key = (String)items[i].getData("key");
-					if(key != null)
-						data.remove(key);
+					int index = (Integer)items[i].getData();
+					data.getList(attribute).remove(index);
 					items[i].dispose();
 				}
 				layout(true, true);
@@ -124,7 +148,8 @@ public class KeyValueForm extends Form implements SelectionListener, ModifyListe
 	}
 
 	public void modifyText(ModifyEvent event) {
-		manager.setDataChanged(true);
+		form.onFieldUpdate(attribute, null, null);
+		form.setDataChanged(true);
 	}
 
 	public void focusGained(FocusEvent wvent) {
@@ -134,8 +159,8 @@ public class KeyValueForm extends Form implements SelectionListener, ModifyListe
 	public void focusLost(FocusEvent event) {
         Text text = (Text)editor.getEditor();
         TableItem item = (TableItem)editor.getItem();
-        String key = (String)item.getData("key");
-        if(key == null) {
+        int index = (Integer)item.getData();
+        /*if(key == null) {
         	String newKey = text.getText();
             item.setText(0, newKey);
             item.setData("key", newKey);
@@ -145,7 +170,7 @@ public class KeyValueForm extends Form implements SelectionListener, ModifyListe
             item.setText(1, text.getText());
             data.put(key, text.getText());
             closeEditor();
-        }
+        }*/
 	}
 
 	public void mouseDoubleClick(MouseEvent event) {

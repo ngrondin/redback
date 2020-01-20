@@ -4,6 +4,7 @@ package io.redback.eclipse.editors.components;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -27,8 +28,8 @@ public class CheckboxField extends Composite implements SelectionListener {
 		setLayout(new RowLayout(SWT.HORIZONTAL));
 		Label label = new Label(this, SWT.NONE);
 		label.setText(l);
-		label.setSize(200, 32);
-		checkbox = new Button(f, SWT.CHECK);
+		label.setLayoutData(new RowData(170, 24));
+		checkbox = new Button(this, SWT.CHECK);
 		if(map != null && map.get(attribute) != null) {
 			checkbox.setEnabled(map.getBoolean(attribute));
 			oldValue = map.getBoolean(attribute);
@@ -54,6 +55,7 @@ public class CheckboxField extends Composite implements SelectionListener {
 				map.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
+		form.setDataChanged(true);
 		oldValue = newValue;
 	}
 

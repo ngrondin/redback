@@ -28,6 +28,10 @@ public abstract class Form extends Composite {
 		layout(true, true);
 	}
 	
+	public void setDataChanged(boolean c) {
+		manager.setDataChanged(c);
+	}
+	
 	public abstract void createUI();
 
 	public abstract void onFieldUpdate(String attribute, Object oldValue, Object newValue);

@@ -1,6 +1,5 @@
 package io.redback.eclipse.editors.components;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,12 +57,13 @@ public class ScriptField extends Composite implements ModifyListener {
 				map.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
+		form.setDataChanged(true);
 		processStyle();
 		oldValue = newValue;
 	}
 	
 	protected void processStyle() {
-		List<Character> limits = Arrays.asList(new Character[] {' ', ';', '(', ')', '{', '}', '\r', '\n', '\t', ',', '.', '!', '=', '\'', '"', '[', ']'});
+		List<Character> limits = Arrays.asList(new Character[] {' ', ';', ':', '(', ')', '{', '}', '\r', '\n', '\t', ',', '.', '!', '=', '\'', '"', '[', ']'});
 		String txt = text.getText();
 		int mark = 0;
 		boolean inQuote = false;
@@ -101,10 +101,20 @@ public class ScriptField extends Composite implements ModifyListener {
 				} else if(token.equals("self") || token.equals("om") || token.equals("log")) {
 					fontStyle = SWT.BOLD;
 					fontColor = getDisplay().getSystemColor(SWT.COLOR_RED);
-				} else if(beforeDot != null && beforeDot.contentEquals("om") && token.equals("getRelated") || token.equals("getObjectList") || token.equals("createObject")) {
-					fontStyle = SWT.NONE;
-					fontColor = getDisplay().getSystemColor(SWT.COLOR_DARK_MAGENTA);
-				}
+				} else if(beforeDot != null && beforeDot.contentEquals("om")) {
+					if(token.equals("getObjectList") || token.equals("createObject")) {
+						fontStyle = SWT.NONE;
+						fontColor = getDisplay().getSystemColor(SWT.COLOR_DARK_MAGENTA);
+					}
+				} else if(beforeDot != null && beforeDot.contentEquals("self")) {
+					if(token.equals("getRelated")) {
+						fontStyle = SWT.NONE;
+						fontColor = getDisplay().getSystemColor(SWT.COLOR_DARK_MAGENTA);
+					} else {
+						fontStyle = SWT.NONE;
+						fontColor = getDisplay().getSystemColor(SWT.COLOR_DARK_YELLOW);
+					}
+				} 
 				
 				if(fontColor != null) {
 					StyleRange style = new StyleRange();
@@ -117,6 +127,8 @@ public class ScriptField extends Composite implements ModifyListener {
 				
 				if(c == '.') {
 					beforeDot = token;
+				} else {
+					beforeDot = null;
 				}
 				
 				if(c == '.' || c == '(' || c == ')' ||c == '{' || c == '}') {

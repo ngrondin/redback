@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Composite;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
 
+import io.redback.eclipse.editors.RedbackConfigEditor;
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.GetDataDialog;
@@ -15,13 +16,18 @@ import io.redback.eclipse.editors.components.ScriptForm;
 
 public class ObjectManager extends Manager {
 	
-	public ObjectManager(DataMap d, Composite parent, int style) {
-		super(d, parent, style);
-		sashForm.setWeights(new int[] {1, 2});
+	public ObjectManager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
+		super(d, e, parent, style);
 		if(!data.containsKey("attributes"))
 			data.put("attributes", new DataList());
 		if(!data.containsKey("scripts"))
 			data.put("scripts", new DataMap());
+		createUI();
+	}
+	
+	public void createUI() {
+		super.createUI();
+		sashForm.setWeights(new int[] {1, 2});
 	}
 	
 	protected Navigator getNavigator() {
@@ -29,7 +35,7 @@ public class ObjectManager extends Manager {
 	}
 
 	protected Form getForm(String type, String name) {
-		if(type.equals("general")) {
+		if(type.equals("root")) {
 			return new ObjectHeaderForm(data, this, sashForm, SWT.PUSH);
 		} else if(type.equals("attribute")) {
 			DataList attributes = data.getList("attributes");
@@ -44,22 +50,22 @@ public class ObjectManager extends Manager {
 		}
 	}
 
-	public void createNode(String type, String name) {
+	public String createNode(String type, String name) {
 		if(type.equals("attribute")) {
 			if(name == null) {
 				GetDataDialog dialog = new GetDataDialog("Name of the new attribute", getShell());
 				name = dialog.openReturnString();
 			} 
 			data.getList("attributes").add(new DataMap("name", name));
-			navigator.refresh();
 		} else if(type.equals("script")) {
 			if(name == null) {
 				GetDataDialog dialog = new GetDataDialog("Name of the new method", getShell());
 				name = dialog.openReturnString();	
 			} 
 			data.getObject("scripts").put(name, "");
-			navigator.refresh();
 		}
+		setDataChanged(true);
+		return name;
 	}
 
 	public void deleteNode(String type, String name) {

@@ -20,6 +20,8 @@ public abstract class Navigator extends Composite implements MenuDetectListener,
 
 	protected DataMap data;
 	protected Manager manager;
+	protected String selectedType;
+	protected String selectedName;
 
 	public Navigator(DataMap d, Manager m, Composite p, int s) {
 		super(p, s);
@@ -36,6 +38,13 @@ public abstract class Navigator extends Composite implements MenuDetectListener,
 		else
 			item = source;
 		return item;		
+	}
+	
+	public boolean isSelected(String type, String name) {
+		if(selectedType != null && selectedType.equals(type) && selectedName != null && selectedName.equals(name))
+			return true;
+		else
+			return false;
 	}
 	
 	public void refresh() {
@@ -58,9 +67,9 @@ public abstract class Navigator extends Composite implements MenuDetectListener,
 	public void menuDetected(MenuDetectEvent event) {
 		Control source = (Control)event.getSource();
 		Widget item = getEndWidget(source);
-		ItemData data = (ItemData)item.getData();
+		NavigatorAction navAction = (NavigatorAction)item.getData();
 		Menu menu = new Menu(source);
-		createContextMenu(menu, data.type, data.name);
+		createContextMenu(menu, navAction.type, navAction.name);
 		for(int i = 0; i < menu.getItemCount(); i++) {
 			MenuItem menuItem = menu.getItem(i);
 			if(menuItem.getData() != null) {
@@ -85,15 +94,23 @@ public abstract class Navigator extends Composite implements MenuDetectListener,
 	public void widgetSelected(SelectionEvent event) {
 		Widget source = (Widget)event.getSource();
 		Widget item = getEndWidget(source);
-		ItemData data = (ItemData)item.getData();
-		if(data.action.equals("select")) {
-			manager.nodeSelected(data.type, data.name);
-		} else if(data.action.equals("create")) {
-			manager.createNode(data.type, data.name);
-		} else if(data.action.equals("delete")) {
-			manager.deleteNode(data.type, data.name);
+		NavigatorAction navAction = (NavigatorAction)item.getData();
+		if(navAction.action.equals("select")) {
+			manager.nodeSelected(navAction.type, navAction.name);
+			selectedType = navAction.type;
+			selectedName = navAction.name;
+		} else if(navAction.action.equals("create")) {
+			String newName = manager.createNode(navAction.type, navAction.name);
+			selectedType = navAction.type;
+			selectedName = newName;
+			refresh();
+			manager.nodeSelected(navAction.type, newName);
+		} else if(navAction.action.equals("delete")) {
+			manager.deleteNode(navAction.type, navAction.name);
+			selectedType = null;
+			selectedName = null;
+			refresh();
 		}
-
 	}
 	
 }
