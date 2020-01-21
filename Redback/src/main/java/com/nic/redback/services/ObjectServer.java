@@ -7,7 +7,6 @@ import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
-import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.DataException;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
@@ -15,7 +14,7 @@ import com.nic.redback.RedbackException;
 import com.nic.redback.managers.objectmanager.RedbackObject;
 import com.nic.redback.security.Session;
 
-public abstract class ObjectServer extends AuthenticatedService implements Consumer
+public abstract class ObjectServer extends AuthenticatedService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
@@ -163,13 +162,6 @@ public abstract class ObjectServer extends AuthenticatedService implements Consu
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	public void consume(Payload payload)
-	{
-		String msg = payload.getString();
-		if(msg.equals("refreshconfig"))
-			refreshConfigs();		
-	}
 	
 	protected abstract RedbackObject get(Session session, String objectName, String uid) throws RedbackException;
 
@@ -183,6 +175,4 @@ public abstract class ObjectServer extends AuthenticatedService implements Consu
 
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException;
 	
-	protected abstract void refreshConfigs();
-
 }

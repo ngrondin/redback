@@ -7,7 +7,6 @@ import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
-import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.DataException;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
@@ -15,7 +14,7 @@ import com.nic.redback.RedbackException;
 import com.nic.redback.managers.processmanager.Assignment;
 import com.nic.redback.security.Session;
 
-public abstract class ProcessServer extends AuthenticatedService implements Consumer
+public abstract class ProcessServer extends AuthenticatedService
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 
@@ -111,12 +110,6 @@ public abstract class ProcessServer extends AuthenticatedService implements Cons
 		return null;
 	}
 
-	public void consume(Payload payload)
-	{
-		String msg = payload.getString();
-		if(msg.equals("refreshconfig"))
-			refreshConfigs();
-	}
 
 	protected abstract DataMap initiate(Session session, String process, DataMap data) throws RedbackException;
 	
@@ -124,5 +117,4 @@ public abstract class ProcessServer extends AuthenticatedService implements Cons
 	
 	protected abstract List<Assignment> getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException;
 	
-	protected abstract void refreshConfigs();
 }

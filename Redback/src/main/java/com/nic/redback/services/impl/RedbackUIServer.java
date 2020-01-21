@@ -369,4 +369,10 @@ public class RedbackUIServer extends UIServer
 		return out;
 	}
 
+	
+	public void clearCaches()
+	{
+		viewConfigs.clear();
+	}
+
 }

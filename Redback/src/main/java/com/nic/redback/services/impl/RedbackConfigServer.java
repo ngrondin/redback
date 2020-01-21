@@ -15,25 +15,40 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
 
 import com.nic.firebus.Firebus;
+import com.nic.firebus.Payload;
 import com.nic.firebus.utils.DataException;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
 import com.nic.redback.RedbackException;
 import com.nic.redback.services.ConfigServer;
+import com.nic.redback.utils.FileWatcher;
+import com.nic.redback.utils.FileWatcher.FileWatcherListener;
 
-public class RedbackConfigServer extends ConfigServer
+public class RedbackConfigServer extends ConfigServer implements FileWatcherListener
 {
+	private Logger logger = Logger.getLogger("com.nic.redback");
 	private String devpath;
 	private String classpath;
-
+	
 	public RedbackConfigServer(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
-		if(config.containsKey("devpath"))
+		if(config.containsKey("devpath")) 
+		{
 			devpath = config.getString("devpath");
-		classpath = "com/nic/redback/config";
+			try 
+			{
+				new FileWatcher(devpath, this);
+			} 
+			catch (IOException e) 
+			{
+				logger.severe("Exception trying to watch the filesystem: " + e.getMessage());
+			}
+		}
+		classpath = "com/nic/redback/config";		
 	}
 
 	
@@ -152,6 +167,12 @@ public class RedbackConfigServer extends ConfigServer
 			return null;
 
 		}
+	}
+
+
+	public void fileModified(File file, int o) 
+	{
+		firebus.publish("_rb_config_cache_clear", new Payload());
 	}
 
 	

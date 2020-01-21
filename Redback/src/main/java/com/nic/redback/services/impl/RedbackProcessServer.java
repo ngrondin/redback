@@ -41,9 +41,10 @@ public class RedbackProcessServer extends ProcessServer
 		List<Assignment> result = processManager.getAssignments(session, extpid, filter, viewdata);
 		return result;
 	}
-
-	protected void refreshConfigs() 
+	
+	public void clearCaches()
 	{
 		processManager.refreshAllConfigs();			
 	}
+
 }

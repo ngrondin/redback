@@ -118,8 +118,8 @@ public class RedbackObjectServer extends ObjectServer
 		}
 		return object;
 	}
-
-	protected void refreshConfigs() 
+	
+	public void clearCaches()
 	{
 		objectManager.refreshAllConfigs();
 	}

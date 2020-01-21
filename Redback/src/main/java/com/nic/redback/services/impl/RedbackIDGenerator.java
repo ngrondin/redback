@@ -71,5 +71,12 @@ public class RedbackIDGenerator extends IDGenerator
 			return null;
 		}
 	}
+	
+	
+	public void clearCaches()
+	{
+		configCache.clear();
+	}
+
 
 }
