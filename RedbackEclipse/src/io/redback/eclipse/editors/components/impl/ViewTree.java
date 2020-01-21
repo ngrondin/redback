@@ -74,13 +74,13 @@ public class ViewTree extends Navigator {
 		    item.setData(new NavigatorAction("create", "vsection", name));
 
 			item = new MenuItem(menu, SWT.PUSH);
-		    item.setText("Create Tab");
-		    item.setData(new NavigatorAction("create", "tab", name));
-
-			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create Tab Section");
 		    item.setData(new NavigatorAction("create", "tabsection", name));
 		    
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create Tab");
+		    item.setData(new NavigatorAction("create", "tab", name));
+
 		    new MenuItem(menu, SWT.SEPARATOR);
 		    
 			item = new MenuItem(menu, SWT.PUSH);

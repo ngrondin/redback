@@ -7,7 +7,7 @@ import com.nic.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.CheckboxField;
 import io.redback.eclipse.editors.components.Form;
-import io.redback.eclipse.editors.components.KeyValueForm;
+import io.redback.eclipse.editors.components.MapField;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.TextField;
 
@@ -24,7 +24,7 @@ public class ViewDataSetForm extends Form
 		CheckboxField cb1 = new CheckboxField(null, "isbasefilter", "Base Filter", this, SWT.NONE);
 		if(data.get("basefilter") != null) {
 			cb1.setChecked(true);
-			new KeyValueForm(data.getObject("basefilter"), manager, this, SWT.NONE);
+			new MapField(data, "basefilter", "Base Filter", this, SWT.NONE);
 		} else {
 			cb1.setChecked(false);
 		}
@@ -32,7 +32,7 @@ public class ViewDataSetForm extends Form
 		if(data.get("master") != null) {
 			cb2.setChecked(true);
 			new TextField(data, "master.objectname", "Related Object", this, SWT.NONE);
-			new KeyValueForm(data.getObject("master.relationship"), manager, this, SWT.NONE);
+			new MapField(data, "master.relationship", "Relationship", this, SWT.NONE);
 
 		} else {
 			cb2.setChecked(false);

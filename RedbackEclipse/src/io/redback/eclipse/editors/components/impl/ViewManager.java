@@ -50,12 +50,24 @@ public class ViewManager extends Manager {
 			return new ViewDateInputForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("textarea")) {
 			return new ViewInputForm(data.getObject(name), this, sashForm, SWT.PUSH);
-		} else if(type.equals("duration")) {
+		} else if(type.equals("durationinput")) {
 			return new ViewInputForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("switch")) {
 			return new ViewInputForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("actiongroup")) {
 			return new ViewActionGroupForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("list")) {
+			return new ViewListForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("search")) {
+			return new ViewSearchForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("map")) {
+			return new ViewMapForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("button")) {
+			return new ViewButtonForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("roundbutton")) {
+			return new ViewButtonForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("tab")) {
+			return new ViewTabForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}
