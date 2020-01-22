@@ -24,7 +24,7 @@ import io.redback.eclipse.editors.RedbackConfigEditor;
 public class RedbackEditorTest {
 	public static void main(String[] args) {
 		try {
-			IFileEditorInput fei = new TestFileEditorInput("C:\\tmp\\io\\redback\\config\\rbui\\view\\woheaderform.json");
+			IFileEditorInput fei = new TestFileEditorInput("C:\\tmp\\io\\redback\\config\\rbid\\key\\wocode.json");
 			IEditorSite es = new TestEditorSite();
 			RedbackConfigEditor rce = new RedbackConfigEditor();
 			rce.init(es, fei);

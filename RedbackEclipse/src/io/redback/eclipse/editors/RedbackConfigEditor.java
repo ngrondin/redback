@@ -24,8 +24,13 @@ import com.nic.firebus.utils.DataException;
 import com.nic.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.Manager;
+import io.redback.eclipse.editors.components.impl.AppManager;
+import io.redback.eclipse.editors.components.impl.KeyManager;
+import io.redback.eclipse.editors.components.impl.MenuManager;
 import io.redback.eclipse.editors.components.impl.ObjectManager;
 import io.redback.eclipse.editors.components.impl.ObjectTree;
+import io.redback.eclipse.editors.components.impl.ResourceManager;
+import io.redback.eclipse.editors.components.impl.RoleManager;
 import io.redback.eclipse.editors.components.impl.ViewManager;
 
 public class RedbackConfigEditor extends EditorPart implements IResourceChangeListener 
@@ -109,7 +114,21 @@ public class RedbackConfigEditor extends EditorPart implements IResourceChangeLi
 				} else if(rbService.equals("rbui")) {
 					if(rbConfigType.equals("view")) {
 						manager = new ViewManager(data, this, composite, SWT.HORIZONTAL);
+					} else if(rbConfigType.equals("resource")) {
+						manager = new ResourceManager(data, this, composite, SWT.HORIZONTAL);
+					} else if(rbConfigType.equals("menu")) {
+						manager = new MenuManager(data, this, composite, SWT.HORIZONTAL);
+					} else if(rbConfigType.equals("app")) {
+						manager = new AppManager(data, this, composite, SWT.HORIZONTAL);
 					}
+				} else if(rbService.equals("rbid")) {
+					if(rbConfigType.equals("key")) {
+						manager = new KeyManager(data, this, composite, SWT.HORIZONTAL);
+					} 
+				} else if(rbService.equals("rbam")) {
+					if(rbConfigType.equals("role")) {
+						manager = new RoleManager(data, this, composite, SWT.HORIZONTAL);
+					} 
 				}
 			}
 		}
