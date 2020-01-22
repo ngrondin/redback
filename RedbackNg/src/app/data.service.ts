@@ -29,6 +29,19 @@ export class DataService {
     return rbObject;
   }
 
+  
+  getServerObject(objectname: string, uid: string) : Observable<RbObject> {
+    const getObs =  this.apiService.getObject(objectname, uid);
+    const dataObservable = new Observable<RbObject>((observer) => {
+      getObs.subscribe(resp => {
+        const rbObject = this.updateObjectFromServer(resp);
+        observer.next(rbObject);
+        observer.complete();
+      });
+    })
+    return dataObservable; 
+  }
+
   listObjects(name: string, filter: any, search: string) : Observable<any> {
     const listObs = this.apiService.listObjects(name, filter, search);
     const dataObservable = new Observable((observer) => {
@@ -52,6 +65,7 @@ export class DataService {
     })
     return dataObservable; 
   }
+
 
   updateObjectFromServer(json: any) : RbObject {
     if(json.related != null) {

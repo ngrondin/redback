@@ -28,6 +28,7 @@ import { RbMapComponent } from './rb-map/rb-map.component';
 import { RbDurationInputComponent } from './rb-duration-input/rb-duration-input.component';
 import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.component';
 import { AgmCoreModule } from '@agm/core';
+import { RbProcessactionsComponent } from './rb-processactions/rb-processactions.component';
 
 @NgModule({
   imports: [
@@ -74,7 +75,8 @@ import { AgmCoreModule } from '@agm/core';
     RbMenuDirective,
     RbTabDirective,
     RbTabSectionDirective,
-    RbFilterBuilderComponent
+    RbFilterBuilderComponent,
+    RbProcessactionsComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -100,7 +102,8 @@ import { AgmCoreModule } from '@agm/core';
     RbMenuDirective,
     RbTabDirective,
     RbTabSectionDirective,
-    RbFilterBuilderComponent
+    RbFilterBuilderComponent,
+    RbProcessactionsComponent
   ],
   providers: [
     CookieService,

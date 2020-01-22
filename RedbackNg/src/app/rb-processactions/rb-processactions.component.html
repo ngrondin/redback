@@ -1,0 +1,29 @@
+<button
+	mat-button 
+	aria-label="Process Actions" 
+	class="mat-mini-fab mat-primary rb-button rb-process-actions-button" 
+    (click)="activate()"
+    [matMenuTriggerFor]="processactionmenu">
+	<mat-icon>linear_scale</mat-icon>
+</button>
+<mat-menu
+    #processactionmenu="matMenu">
+    <div
+        class="rb-processaction-message"
+        [style.color]="pid == null ? 'grey' : 'black'">
+        {{message}}
+</div>
+    <button
+        mat-menu-item
+        *ngFor="let action of actions"
+        (click)="clickAction(action.action)">
+        {{action.description}}
+    </button>
+    <div
+        class="rb-spinner-container"
+        *ngIf="loading">
+        <mat-spinner
+            diameter="20">
+        </mat-spinner>
+    </div>    
+</mat-menu>

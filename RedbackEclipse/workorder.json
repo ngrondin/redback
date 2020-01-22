@@ -1,0 +1,157 @@
+{
+	"name":"workorder",
+	"domaindbkey":"domain",
+	"uiddbkey":"_id",
+	"attributes":[
+		{
+			"idgenerator":"wocode",
+			"editable":false,
+			"name":"code",
+			"dbkey":"code"
+		},
+		{
+			"editable":true,
+			"name":"description",
+			"dbkey":"description"
+		},
+		{
+			"editable":true,
+			"name":"longdesc",
+			"dbkey":"longdesc"
+		},
+		{
+			"editable":"status.equals('created')",
+			"name":"customer",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"org"
+			},
+			"dbkey":"customer"
+		},
+		{
+			"default":"created",
+			"editable":"canWrite('rb.field.status')",
+			"name":"status",
+			"relatedobject":{
+				"linkattribute":"value",
+				"listfilter":{
+					"object":"'workorder'"
+				},
+				"name":"statusmaster"
+			},
+			"dbkey":"status"
+		},
+		{
+			"editable":"status.equals('created')",
+			"name":"type",
+			"scripts":{
+				"onupdate":"//type.onupdate\r\nvar attributeMasterList = om.getObjectList('attributemaster', {object:'workorder', type:self.type});\r\nfor(var i = 0; i <attributeMasterList.length; i++)\r\n{\r\n\tvar attributeMaster = attributeMasterList[i];\r\n\tvar data = {\r\n\t\tobject:'workorder',\r\n\t\tobjectuid:self.uid,\r\n\t\tcode:attributeMaster.code,\r\n\t\tname:attributeMaster.name,\r\n\t\tdatatype:attributeMaster.datatype\r\n\t}\r\n\tom.createObject('attribute', data);\r\n}"
+			},
+			"relatedobject":{
+				"linkattribute":"value",
+				"listfilter":{
+					"object":"'workorder'"
+				},
+				"name":"typemaster"
+			},
+			"dbkey":"type"
+		},
+		{
+			"editable":"status == 'created'  ||  status == 'plan'",
+			"name":"location",
+			"scripts":{
+				"onupdate":"//location.onupdate\nif(self.location == null) \n{\n\tself.address = null;\n\tself.geometry = null;\n} \nelse \n{\n\tvar loc = self.getRelated('location');\n\tself.address = loc.address;\n\tself.geometry = loc.geometry;\n}"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"location"
+			},
+			"dbkey":"location"
+		},
+		{
+			"editable":"status == 'created'  ||  status == 'plan'",
+			"name":"address",
+			"scripts":{
+				"onupdate":"//geocode "
+			},
+			"dbkey":"address"
+		},
+		{
+			"editable":"status == 'created'  ||  status == 'plan'",
+			"name":"geometry",
+			"dbkey":"geometry"
+		},
+		{
+			"editable":"status.equals('created')",
+			"name":"mustnotstartbefore",
+			"dbkey":"mustnotstartbefore"
+		},
+		{
+			"editable":"status.equals('created')",
+			"name":"mustfinishby",
+			"dbkey":"mustfinishby"
+		},
+		{
+			"editable":"status.equals('plan')",
+			"name":"planstart",
+			"dbkey":"planstartdate"
+		},
+		{
+			"editable":"status.equals('plan')",
+			"name":"planfinish",
+			"dbkey":"planfinishdate"
+		},
+		{
+			"editable":"status.equals('sched')",
+			"name":"schedstart",
+			"dbkey":"schedulestartdate"
+		},
+		{
+			"editable":"status.equals('sched')",
+			"name":"schedfinish",
+			"dbkey":"schedulefinishdate"
+		},
+		{
+			"editable":"status.equals('plan')",
+			"name":"planduration",
+			"dbkey":"planduration"
+		},
+		{
+			"editable":"status=='created'",
+			"name":"contract",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"org":"customer"
+				},
+				"name":"contract"
+			},
+			"dbkey":"contract"
+		},
+		{
+			"expression":"code + ' - ' + description",
+			"name":"label"
+		}
+	],
+	"_id":"17",
+	"collection":"workorder",
+	"uidgenerator":"guid",
+	"scripts":{
+		"wappr":"self.status = 'wappr';\nom.createObject('statushistory', {object:'workorder', objectuid:self.uid, status:'wappr', date:(new Date())});\n\nvar labreqs = om.getObjectList('labreq', {workorder: self.uid, status: 'plan'});\nfor(var i = 0; i < labreqs.length; i++)\n\tlabreqs[i].status = 'wappr';\n\nvar matreqs = om.getObjectList('matreq', {workorder: self.uid, status: 'plan'});\nfor(var i = 0; i < matreqs.length; i++)\n\tmatreqs[i].status = 'wappr';\n    \nvar eqreqs = om.getObjectList('eqreq', {workorder: self.uid, status: 'plan'});\nfor(var i = 0; i < eqreqs.length; i++)\n\teqreqs[i].status = 'wappr';    \n    \nvar servreqs = om.getObjectList('servreq', {workorder: self.uid, status: 'plan'});\nfor(var i = 0; i < servreqs.length; i++)\n\tservreqs[i].status = 'wappr';        \n    \nvar delplans = om.getObjectList('delplan', {workorder: self.uid, status: 'plan'});\nfor(var i = 0; i < delplans.length; i++)\n\tdelplans[i].status = 'wappr';  ",
+		"applyplan":"log('info', 'Starting applyplan on workorder');\n\nvar locs = [];\nvar loc = self.getRelated('location');\nwhile(loc != null) {\n\tlocs.push(loc.uid);\n\tloc = loc.getRelated('parent');\n}\n\nvar types = [];\nvar type = self.getRelated('type');\nwhile(type != null) {\n\ttypes.push(type.value);\n\ttype = type.getRelated('parent');\n}\n\nvar rulesquery = {\n\t$and: [\n\t\t{\n\t\t\tstatus:'active'\n\t\t},\n\t\t{\n\t\t\t$or:[\n\t\t\t\t{iflocation:null},\n\t\t\t\t{iflocation:''},\n\t\t\t\t{iflocation:{$in:locs}}\t\t\t\t\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t$or:[\n\t\t\t\t{iftype:null},\n\t\t\t\t{iftype:''},\n\t\t\t\t{iftype:{$in:types}\t}\t\t\n\t\t\t]\n\t\t}\t\n\t]\n};\n\nvar rules = om.getObjectList('wprule', rulesquery);\n\nif(rules.length > 0) {\n\tvar wp = rules[0].getRelated('wp');\n\tself.description = wp.description;\n\tvar wptasks = om.getObjectList('wptask', {wp:wp.uid});\n\tfor(var i = 0; i < wptasks.length; i++) {\n\t\tvar wptask = wptasks[i];\n        var data = {workorder:self.uid, type:wptasks[i].type};\n        var tasks = om.getObjectList('task', data);\n        var task = null;\n        if(tasks.length == 0)\n        \ttask = om.createObject('task', data);\n        else\n        \ttask = tasks[0];\n        task.applyplan();\n\t}\n}",
+		"ready":"self.status = 'ready';\nom.createObject('statushistory', {object:'workorder', objectuid:self.uid, status:'ready', date:(new Date())});\n",
+		"approve":"self.status = 'sched';\nom.createObject('statushistory', {object:'workorder', objectuid:self.uid, status:'sched', date:(new Date())});\n\nvar labreqs = om.getObjectList('labreq', {workorder: self.uid, status: 'wappr'});\nfor(var i = 0; i < labreqs.length; i++)\n\tlabreqs[i].status = 'appr';\n\nvar matreqs = om.getObjectList('matreq', {workorder: self.uid, status: 'wappr'});\nfor(var i = 0; i < matreqs.length; i++)\n\tmatreqs[i].status = 'appr';\n    \nvar eqreqs = om.getObjectList('eqreq', {workorder: self.uid, status: 'wappr'});\nfor(var i = 0; i < eqreqs.length; i++)\n\teqreqs[i].status = 'appr';    \n    \nvar servreqs = om.getObjectList('servreq', {workorder: self.uid, status: 'wappr'});\nfor(var i = 0; i < servreqs.length; i++)\n\tservreqs[i].status = 'appr';        \n    \nvar delplans = om.getObjectList('delplan', {workorder: self.uid, status: 'wappr'});\nfor(var i = 0; i < delplans.length; i++)\n\tdelplans[i].status = 'appr';  ",
+		"calcSchedDates":"var tasklist = om.getObjectList('task', {workorder : self.uid});\nfor(var i = 0; i < tasklist.length; i++) {\n\tif(self.schedstart == null)\n\t\tself.schedstart = tasklist[i].schedstart;\n\telse if(tasklist[i].schedstart != null  &&  tasklist[i].schedstart.getTime() < self.schedstart.getTime())\n\t\tself.schedstart = tasklist[i].schedstart;\n\n\tif(self.schedfinish == null)\n\t\tself.schedfinish = tasklist[i].schedfinish;\n\telse if(tasklist[i].schedfinish != null  &&  tasklist[i].schedfinish.getTime() > self.schedfinish.getTime())\n\t\tself.schedfinish = tasklist[i].schedfinish;\n}",
+		"aftercreate":"firebus.request(global.processservicename, {action:'initiate', process:'workorder', data:{objectname:'workorder', uid:self.uid}});",
+		"started":"self.status = 'started';\nom.createObject('statushistory', {object:'workorder', objectuid:self.uid, status:'started', date:(new Date())});\n",
+		"calcPlanDates":"var tasklist = om.getObjectList('task', {workorder : self.uid});\nfor(var i = 0; i < tasklist.length; i++) {\n\tif(self.planstart == null)\n\t\tself.planstart = tasklist[i].planstart;\n\telse if(tasklist[i].planstart != null  &&  tasklist[i].planstart.getTime() < self.planstart.getTime())\n\t\tself.planstart = tasklist[i].planstart;\n\n\tif(self.planfinish == null)\n\t\tself.planfinish = tasklist[i].planfinish;\n\telse if(tasklist[i].planfinish != null  &&  tasklist[i].planfinish.getTime() > self.planfinish.getTime())\n\t\tself.planfinish = tasklist[i].planfinish;\n}\n\nif(self.planstart != null  &&  self.planfinish != null)\n\tself.planduration = ((self.planfinish.getTime() - self.planstart.getTime()) / 3600000); ",
+		"complete":"self.status = 'comp';\nom.createObject('statushistory', {object:'workorder', objectuid:self.uid, status:'comp', date:(new Date())});\n",
+		"close":"self.status = 'closed';\nom.createObject('statushistory', {object:'workorder', objectuid:self.uid, status:'closed', date:(new Date())});\n",
+		"genctl":"var labreqs = om.getObjectList('labreq', {workorder: self.uid, status: 'appr'});\nfor(var i = 0; i < labreqs.length; i++)\n\tlabreqs[i].genctl();\n\nvar matreqs = om.getObjectList('matreq', {workorder: self.uid, status: 'appr'});\nfor(var i = 0; i < matreqs.length; i++)\n\tmatreqs[i].genctl();\n    \nvar eqreqs = om.getObjectList('eqreq', {workorder: self.uid, status: 'appr'});\nfor(var i = 0; i < eqreqs.length; i++)\n\teqreqs[i].genctl();    \n    \nvar servreqs = om.getObjectList('servreq', {workorder: self.uid, status: 'appr'});\nfor(var i = 0; i < servreqs.length; i++)\n\tservreqs[i].genctl();     "
+	},
+	"group":"workorder"
+}

@@ -28,6 +28,19 @@ export class ApiService {
     //this.baseUrl = 'http://localhost';
   }
 
+  getObject(name: string, uid: string): Observable<any> {
+    const req = {
+      action: 'get',
+      object: name,
+      uid: uid,
+      options: {
+        addrelated: true,
+        addvalidation: true
+      }
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
   listObjects(name: string, filter: any, search: string): Observable<any> {
     const req = {
       action: 'list',
@@ -99,5 +112,23 @@ export class ApiService {
       }
     };
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
+  listAssignments(filter: any): Observable<any> {
+    const req = {
+      action: 'getassignments',
+      filter: filter,
+      viewdata:['objectname', 'uid']
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
+  }
+
+  actionAssignment(pid: string, action: string): Observable<any> {
+    const req = {
+      action: 'processaction',
+      pid: pid,
+      processaction: action
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }
 }
