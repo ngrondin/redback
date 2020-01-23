@@ -9,7 +9,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { RbDatasetDirective } from './rb-dataset/rb-dataset.directive';
 import { RbMenuDirective } from './rb-menu/rb-menu.directive';
-import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
 import { RbListScrollDirective } from './rb-list-scroll/rb-list-scroll.directive';
 import { ApiService } from './api.service';
 import { DataService } from './data.service';
@@ -29,6 +28,7 @@ import { RbDurationInputComponent } from './rb-duration-input/rb-duration-input.
 import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.component';
 import { AgmCoreModule } from '@agm/core';
 import { RbProcessactionsComponent } from './rb-processactions/rb-processactions.component';
+import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
 
 @NgModule({
   imports: [
@@ -60,8 +60,8 @@ import { RbProcessactionsComponent } from './rb-processactions/rb-processactions
   ],
   declarations: [
     DesktopRootComponent,
-    RbDatasetDirective,
     RbViewLoaderComponent,
+    RbDatasetDirective,
     RbListScrollDirective,
     RbInputComponent,
     RbTextareaInputComponent,
@@ -87,8 +87,8 @@ import { RbProcessactionsComponent } from './rb-processactions/rb-processactions
     MatButtonModule,
     MatProgressSpinnerModule,
     MatMenuModule,
-    RbDatasetDirective,
     RbViewLoaderComponent,
+    RbDatasetDirective,
     RbListScrollDirective,
     RbInputComponent,
     RbTextareaInputComponent,

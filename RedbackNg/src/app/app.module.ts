@@ -18,9 +18,11 @@ import { HttpClientModule } from '@angular/common/http';
     MatIconModule
   ],
   declarations: [
-    AppComponent
+    AppComponent   
   ],
   providers: [
+  ],
+  entryComponents :[
   ],
   bootstrap: [
     AppComponent

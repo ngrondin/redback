@@ -16,7 +16,7 @@ export class RbRelatedInputComponent implements OnInit {
 
   @Input('label') label: string;
   @Input('icon') icon: string;
-  @Input('size') size: Number;
+  @Input('size') size: number;
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;

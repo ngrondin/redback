@@ -14,7 +14,7 @@ import { DateTimePopupConfig, RbPopupDatetimeComponent } from 'app/rb-popup-date
 export class RbDatetimeInputComponent implements OnInit {
   @Input('label') label: string;
   @Input('icon') icon: string;
-  @Input('size') size: Number;
+  @Input('size') size: number;
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
@@ -54,6 +54,10 @@ export class RbDatetimeInputComponent implements OnInit {
       }
     } else
       return null;  
+  }
+
+  public set displayvalue(val: string) {
+    
   }
 
   private convertToStringAndPad(num: number, n: number) : string {

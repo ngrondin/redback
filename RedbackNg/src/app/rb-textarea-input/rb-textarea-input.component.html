@@ -3,11 +3,10 @@
         <textarea 
             #input
             matInput 
-            [(ngModel)]="displayvalue"
-            (focus)="focus()"
-            (blur)="blur()"
-            (keydown)="keydown($event)"
-            [readonly]="readonly">
+            [(ngModel)]="value"
+            (change)="commit()"
+            [readonly]="readonly"
+            autocomplete="off">
         </textarea>
         <mat-icon 
             matPrefix

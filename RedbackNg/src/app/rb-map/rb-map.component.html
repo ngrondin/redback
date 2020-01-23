@@ -9,8 +9,8 @@
     <agm-marker
         *ngFor="let object of list"
         [markerClickable]="true"
-        [latitude]="latitudeOf(object)"
-        [longitude]="longitudeOf(object)"
+        [latitude]="latitudeOf(object, 0)"
+        [longitude]="longitudeOf(object, 0)"
         [iconUrl]="iconUrlOf(object)"
         [zIndex]="zIndexOf(object)"
         (markerClick)="objectClick(object)"

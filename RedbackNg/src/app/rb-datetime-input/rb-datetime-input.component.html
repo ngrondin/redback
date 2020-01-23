@@ -5,13 +5,12 @@
         #input
         matInput 
         [(ngModel)]="displayvalue"
-        (focus)="focus()"
-        (blur)="blur()"
+        (focus)="focus($event)"
+        (blur)="blur($event)"
         (keydown)="keydown($event)"
         [readonly]="readonly"
         autocomplete="off">
     <mat-icon 
         matPrefix
         class="rb-grey-icon">{{icon}}</mat-icon>
-</mat-form-field
->
+</mat-form-field>

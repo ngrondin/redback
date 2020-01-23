@@ -1,9 +1,8 @@
 import { Component, ViewChild, ViewContainerRef, ComponentRef, Compiler, ComponentFactory, NgModule, ModuleWithComponentFactories, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange } from '@angular/core';
-import { Headers, Http, Response } from '@angular/http';
+import { Http } from '@angular/http';
 import { __asyncDelegator } from 'tslib';
 import { CommonModule } from '@angular/common';
 import { RedbackModule } from '../redback.module';
-import { MatListModule } from '@angular/material';
 
 
 @Component({
@@ -62,7 +61,7 @@ export class RbViewLoaderComponent implements OnInit {
     
     if (this.componentRef) {
       this.componentRef.destroy();
-      this.componentRef = null;
+      this.componentRef = null; 
     }
 
     let newViewComponentRef : ComponentRef<ViewComponent> = this.container.createComponent(factory);

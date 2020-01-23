@@ -5,8 +5,8 @@
         #input
         matInput 
         [(ngModel)]="displayvalue"
-        (focus)="focus()"
-        (blur)="blur()"
+        (focus)="focus($event)"
+        (blur)="blur($event)"
         (keydown)="keydown($event)"
         [readonly]="readonly"
         autocomplete="off">
