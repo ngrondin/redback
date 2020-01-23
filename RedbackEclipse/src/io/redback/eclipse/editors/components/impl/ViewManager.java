@@ -83,6 +83,7 @@ public class ViewManager extends Manager {
 			DataList list = parentData.getList("content");
 			newName = name + ".content." + list.size();
 			list.add(newNode);
+			setDataChanged(true);
 		}
 		return newName;
 	}
@@ -96,6 +97,19 @@ public class ViewManager extends Manager {
 			((DataMap)entity).remove(child);
 		else if(entity instanceof DataList)
 			((DataList)entity).remove(Integer.parseInt(child));
+		setDataChanged(true);
+	}
+	
+	public void moveNode(String name, String target) {
+		DataMap targetNode = data.getObject(target);
+		if(targetNode.containsKey("content")) {
+			String sourceContentNodeName = name.substring(0, name.lastIndexOf("."));
+			int sourceContentIndex = Integer.parseInt(name.substring(name.lastIndexOf(".") + 1));
+			DataMap map = data.getObject(name);
+			data.getList(sourceContentNodeName).remove(sourceContentIndex);
+			data.getList(target + ".content").add(map);
+			setDataChanged(true);
+		}
 	}
 
 }

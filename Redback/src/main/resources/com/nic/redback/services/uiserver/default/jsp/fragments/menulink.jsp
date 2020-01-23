@@ -1,15 +1,23 @@
-<md-list-item 
+<button
+	mat-list-item 
 	class="rb-menu-link"
-	ng-show="menutoggle.group<%=config.getString('group')%>"
-	ng-click="navigate('<%=config.getString('view')%>', '<%=config.getString('label')%>')"><%
+	*ngIf="<%=menu%>.isGroupOpen(<%=config.getString('group')%>)"
+	(click)="navigateTo('<%=config.getString('view')%>', '<%=config.getString('label')%>')"><%
 if(config.getString('icon').indexOf(':') >= 0) {%>
-	<md-icon md-svg-icon="<%=config.getString('icon')%>"></md-icon><%
+	<mat-icon 
+		svgIcon="<%=config.getString('icon')%>"
+		class="rb-menu-link-icon">
+	</mat-icon><%
 } else {%>
-	<md-icon><%=config.getString('icon')%></md-icon><%
+	<mat-icon
+		class="rb-menu-link-icon">
+		<%=config.getString('icon')%>
+	</mat-icon><%
 }%>
 	<span 
-		ng-show="largemenu" 
-		flex>
+		flex
+		class="rb-menu-link-text"
+		*ngIf="<%=menu%>.isLarge">
 		<%=config.getString('label')%>
 	</span>
-</md-list-item>				
+</button>

@@ -1,18 +1,13 @@
 <rb-list-scroll 
 	style="<%=config.getString('inlineStyle')%>">
-	<md-progress-linear 
-		md-mode="indeterminate" 
-		ng-show="loading">
-	</md-progress-linear>
-	<md-list 
-		flex="">
-		<md-list-item 
-			class="md-2-line" 
-			ng-class="{ 'list-item-active': item == selected }"
-			ng-repeat="item in list" 
-			ng-click="select(item)">
+	<mat-action-list>
+		<button
+			mat-list-item 
+			*ngFor="let item of <%=dataset%>.list" 
+			[ngClass]="<%=dataset%>.selectedObject == item ? 'rb-list-item-active' : ''"
+			(click)="<%=dataset%>.select(item)">
 			<div 
-				class="md-list-item-text" 
+				class="rb-list-item"
 				layout=row><%
 if(config.get('initials') != null) {%>
 				<div
@@ -22,10 +17,23 @@ if(config.get('initials') != null) {%>
 }%>
 				<div
 					layout="column">
-					<h3><%=config.getString('line1')%></h3>
-					<h4><%=config.getString('line2')%></h4>
+					<span
+						class="rb-list-line1">
+						<%=config.getString('line1')%>
+					</span><br/>
+					<span
+						class="rb-list-line2">
+						<%=config.getString('line2')%>
+					</span>
 				</div>
 			</div>
-		</md-list-item>
-	</md-list>
+		</button>
+	</mat-action-list>
+	<div
+	    class="rb-spinner-container"
+	    *ngIf="<%=dataset%>.isLoading">
+	    <mat-spinner
+	        diameter="20">
+	    </mat-spinner>
+	</div>	
 </rb-list-scroll>

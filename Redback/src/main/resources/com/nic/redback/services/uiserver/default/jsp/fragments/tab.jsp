@@ -1,7 +1,10 @@
-<rb-tab-content
-	label="<%=config.getString('label')%>"
+<rb-tab
+	#<%=id%>="tab"
+	[id]="'<%=id%>'"
+	[label]="'<%=config.getString('label')%>'"
 	style="<%=config.getString('inlineStyle')%>"
-	ng-init="tabs.push('<%=config.getString('label')%>')"
-	ng-show="selected_tab == '<%=config.getString('label')%>'">
+	[active]="<%=tabsection%>.isTabVisible(<%=id%>)"
+	[hidden]="!<%=id%>.active"
+	(register)="<%=tabsection%>.register(<%=id%>)">
 	#content#
-</rb-tab-content>
+</rb-tab>

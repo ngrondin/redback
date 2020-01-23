@@ -1,23 +1,38 @@
-<md-menu md-offset="0 60">
-	<md-button 
-		class="md-fab md-mini md-primary rb-form-button"
-		ng-click="$mdOpenMenu($event)">
-		<md-icon>reorder</md-icon>
-	</md-button>
-	<md-menu-content>
-<% var list = config.getList('actions'); 
+<mat-menu
+	#<%=id%>="matMenu">
+<% 
+var list = config.getList('actions'); 
+var noShow = "";
 for(var i = 0; i < list.size(); i++) { 
 	var actionConfig = list.getObject(i);
+	var showExpr = (actionConfig.get("show") != null ? actionConfig.getString('show') : 'true').replaceAll('object', dataset + '.selectedObject').replaceAll('relatedObject', dataset + '.relatedObject');
+	if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
+	if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
+	if(i > 0)
+		noShow = noShow + " && ";
+	noShow = noShow + "!(" + showExpr + ")"
 	var action = actionConfig.get("action") != null ? actionConfig.getString('action') : 'noAction'	
 	if(((action.equals('create')  ||  action.equals('save'))  &&  canWrite) || ((!action.equals('create')  &&  !action.equals('save'))  &&  canExecute)) {
 	%>
-        		<md-menu-item>
-        			<md-button
-				ng-click="action('<%=action%>', '<%=actionConfig.getString('param')%>');"
-				ng-disabled="!(<%=actionConfig.getString('show')%>)"><%=actionConfig.getString('label') %></md-button>
-        		</md-menu-item><%
+	<button
+		mat-menu-item
+		(click)="<%=dataset%>.action('<%=action%>', '<%=actionConfig.getString('param')%>');"
+		*ngIf="<%=showExpr%>">
+		<%=actionConfig.getString('label') %>
+	</button><%
 	}
 }        		
 %>
-	</md-menu-content>	
-</md-menu>
+	<button
+		mat-menu-item
+		*ngIf="<%=noShow%>"
+		[disabled]="true">
+		No actions available
+	</button>
+</mat-menu>
+<button
+	mat-icon-button 
+	class="mat-mini-fab mat-primary rb-button"
+	[matMenuTriggerFor]="<%=id%>">
+	<mat-icon>reorder</mat-icon>
+</button>

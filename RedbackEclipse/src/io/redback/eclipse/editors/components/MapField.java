@@ -85,9 +85,10 @@ public class MapField extends Composite implements SelectionListener, ModifyList
 		Iterator<String> it = data.getObject(attribute).keySet().iterator();
 		while(it.hasNext()) {
 			String key = it.next();
+			String val = data.getObject(attribute).getString(key);		
 			TableItem item = new TableItem(table, SWT.NULL);
 			item.setText(0, key);
-			item.setText(1, data.getObject(attribute).getString(key));
+			item.setText(1, val == null ? "" : val);
 			item.setData("key", key);
 		}	
 	}

@@ -1,19 +1,24 @@
 <rb-tab-section 
-	style="<%=config.getString('inlineStyle')%>">
-	<rb-tab-header-section>
-		<rb-tab-header
-			ng-class="{ 'rb-tabheader-active': tab == selected_tab }"			
-			ng-repeat="tab in tabs">			
-			<md-button 
-				class="md-primary"
-				ng-click="selectTab(tab)">
-				{{tab}}
-			</md-button>
-		</rb-tab-header>
-	</rb-tab-header-section>
-	<md-divider></md-divider>
-	<rb-tab-content-section
-		class="">	
+	#<%=id%>="tabsection"
+	style="<%=config.getString('inlineStyle')%>"
+	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
+	<div
+		class="rb-tab-header-section">
+		<div
+			class="rb-tab-header"
+			*ngFor="let tab of <%=id%>.tabs"
+			[ngClass]="<%=id%>.isTabVisible(tab) ? 'rb-tabheader-active' : ''">			
+			<button
+				mat-button
+				class="rb-tab-button" 
+				(click)="<%=id%>.select(tab)">
+				{{tab.label}}
+			</button>
+		</div>
+	</div>
+	<mat-divider></mat-divider>
+	<div
+		class="rb-tab-content-section">	
 		#content#
-	</rb-tab-content-section>
+	</div>
 </rb-tab-section>

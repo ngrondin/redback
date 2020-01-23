@@ -1,6 +1,15 @@
 package io.redback.eclipse.editors.components.impl;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.DropTargetListener;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -15,8 +24,10 @@ import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.Navigator;
 import io.redback.eclipse.editors.components.NavigatorAction;
 
-public class ViewTree extends Navigator {
+public class ViewTree extends Navigator implements DragSourceListener, DropTargetListener {
 
+	protected String dragNodeName;
+	
 	public ViewTree(DataMap d, Manager m, Composite p, int s) {
 		super(d, m, p, s);
 		createUI();
@@ -28,13 +39,24 @@ public class ViewTree extends Navigator {
 		final Tree tree = new Tree (this, SWT.PUSH);
 		tree.addSelectionListener(this);
 		tree.addMenuDetectListener(this);
+		
+		Transfer[] types = new Transfer[] { TextTransfer.getInstance() };
+	    int operations = DND.DROP_MOVE;
+
+	    final DragSource source = new DragSource(tree, operations);
+	    source.setTransfer(types);
+	    //final TreeItem[] dragSourceItem = new TreeItem[1];
+	    source.addDragListener(this);
+
+	    DropTarget target = new DropTarget(tree, operations);
+	    target.setTransfer(types);
+	    target.addDropListener(this);
 
 		TreeItem rootNode = new TreeItem (tree, 0);
 		rootNode.setText (data.getString("name"));
 		rootNode.setData(new NavigatorAction("select", "root", null));
 		
 		createRecursiveUI(data, "", tree, rootNode);
-		
 	}
 	
 	protected void createRecursiveUI(DataMap parentData, String hierarchy, Tree tree, TreeItem parentItem) {
@@ -148,12 +170,56 @@ public class ViewTree extends Navigator {
 		    item.setData(new NavigatorAction("create", "switch", name));
 
 		    new MenuItem(menu, SWT.SEPARATOR);
-		    
-			item = new MenuItem(menu, SWT.PUSH);
-		    item.setText("Delete");
-		    item.setData(new NavigatorAction("delete", type, name));
-
 		}
+
+		item = new MenuItem(menu, SWT.PUSH);
+	    item.setText("Delete");
+	    item.setData(new NavigatorAction("delete", type, name));
+
+	}
+
+	public void dragFinished(DragSourceEvent event) {
+		refresh();			
+		
+	}
+
+	public void dragSetData(DragSourceEvent event) {
+		event.data = "a";
+	}
+
+	public void dragStart(DragSourceEvent event) {
+		DragSource source = (DragSource)event.getSource();
+		Tree tree = (Tree)source.getControl();
+		TreeItem treeItem = tree.getSelection()[0];
+		NavigatorAction action = (NavigatorAction)treeItem.getData();
+		dragNodeName = action.name;
+	}
+
+	public void dragEnter(DropTargetEvent event) {
+		
+	}
+
+	public void dragLeave(DropTargetEvent event) {
+		
+	}
+
+	public void dragOperationChanged(DropTargetEvent event) {
+		
+	}
+
+	public void dragOver(DropTargetEvent event) {
+		
+	}
+
+	public void drop(DropTargetEvent event) {
+		
+	}
+
+	public void dropAccept(DropTargetEvent event) {
+		TreeItem treeItem = (TreeItem)event.item;
+		NavigatorAction action = (NavigatorAction)treeItem.getData();
+		String targetNodeName = action.name;
+		((ViewManager)manager).moveNode(dragNodeName, targetNodeName);
 	}
 
 }

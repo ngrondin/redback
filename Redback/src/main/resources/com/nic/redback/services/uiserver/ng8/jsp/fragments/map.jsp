@@ -1,9 +1,0 @@
-<rb-map
-	#<%=id%>="rbMap"
-	[list]="<%=dataset%>.list"	
-	[selectedObject]="<%=dataset%>.selectedObject"
-	[geoattribute]="'<%=config.getString('geoattribute')%>'"
-	[labelattribute]="'<%=config.getString('labelattribute')%>'"
-	[descriptionattribute]="'<%=config.getString('descriptionattribute')%>'"
-	(selectObject)="<%=dataset%>.select($event)">
-</rb-map>
