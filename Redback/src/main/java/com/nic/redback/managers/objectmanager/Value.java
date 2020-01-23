@@ -190,6 +190,16 @@ public class Value
 					if(getNumber().equals(v.getNumber()))
 							return true;
 			}
+			else if(valueClass == String.class && v.getValueClass() == Number.class)
+			{
+				if(getString().equals(v.getString()))
+					return true;
+			}
+			else if(valueClass == Number.class && v.getValueClass() == String.class)
+			{
+				if(v.getString().equals(getString()))
+					return true;
+			}
 		}
 		return false;
 	}
