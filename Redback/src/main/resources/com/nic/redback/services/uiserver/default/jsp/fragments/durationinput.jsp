@@ -13,9 +13,15 @@ if(config.get('icon') == null) {%>
 	[icon]="'<%=config.getString('icon')%>'"<%
 } else {%>
 	[icon]="'<%=config.getString('icon')%>'"<%
+}
+if(config.get('size') != null) { %>	
+	[size]="<%=(config.get("size") == null ? 20 : config.getString("size")) %>" <%
+} 
+if(dataset != null) { %>	
+	[object]="<%=dataset%>.selectedObject" <%
+} 
+if(config.get('attribute') != null) { %>	
+	[attribute]="'<%=(config.get("attribute") == null ? 20 : config.getString("attribute")) %>'" <%
 }%>	
-	[size]="<%=(config.get("size") == null ? 14 : config.getString("size")) %>"
-	[object]="<%=dataset%>.selectedObject"
-	[attribute]="'<%=config.getString('attribute')%>'"
 	[editable]="<%=canWrite%>">
 </rb-duration-input>

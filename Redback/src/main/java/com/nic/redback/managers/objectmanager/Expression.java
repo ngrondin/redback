@@ -13,6 +13,7 @@ import com.nic.redback.RedbackException;
 import com.nic.redback.security.js.SessionRightsJSFunction;
 
 
+
 public class Expression
 {
 	protected String expressionString;
@@ -62,6 +63,7 @@ public class Expression
 				if(obj.getObjectConfig().getAttributeConfig(key).getExpression() == null)
 					executionContext.put(key, obj.get(key).getString());
 			}
+			Object returnValue = null;
 			try
 			{
 				script.eval(executionContext);

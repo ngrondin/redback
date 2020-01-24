@@ -10,14 +10,13 @@ import com.nic.firebus.Firebus;
 import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.information.ServiceInformation;
-import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.DataMap;
 import com.nic.redback.RedbackException;
 import com.nic.redback.security.Role;
 import com.nic.redback.security.Session;
 import com.nic.redback.security.UserProfile;
 
-public abstract class AccessManager extends DataService implements Consumer
+public abstract class AccessManager extends DataService 
 {
 	private Logger logger = Logger.getLogger("com.nic.redback");
 	protected HashMap<String, Role> roles;
@@ -98,28 +97,13 @@ public abstract class AccessManager extends DataService implements Consumer
 		return null;
 	}
 	
-	public void consume(Payload payload)
+	
+	public void clearCaches()
 	{
-		logger.finer("Access manager consumer start");
-		try
-		{
-			DataMap request = new DataMap(payload.getString());
-			String action = request.getString("action");
-			
-			if(action.equals("dropfromcache"))
-			{
-				//UUID sessionId = UUID.fromString(request.getString("sessionid"));
-				for(int i = 0; i < cachedSessions.size(); i++)
-					cachedSessions.remove(i);
-			}
-		}
-		catch(Exception e)
-		{	
-			logger.severe(e.getMessage());
-		}
-		logger.finer("Access manager consumer finish");
+		this.cachedSessions.clear();
+		this.cachedUserProfiles.clear();
+		this.roles.clear();
 	}
-
 	
 	protected abstract Session validateToken(String token) throws RedbackException;
 }

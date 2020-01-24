@@ -6,8 +6,9 @@ var versionOrDefault = version != null ? version : 'default';
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Redback</title>
+  <title><%=config.getString('label')%></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="<%=config.getString('logo')%>">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -16,6 +17,7 @@ var versionOrDefault = version != null ? version : 'default';
   <app-root 
     type="<%=config.getString('page')%>"
     title="<%=config.getString('label')%>"
+    logo="<%=config.getString('logo')%>"
     version="<%=versionOrDefault%>"
     initialview="<%=config.getString('defaultview')%>"
     initialviewtitle="<%=config.getString('initialviewtitle')%>"

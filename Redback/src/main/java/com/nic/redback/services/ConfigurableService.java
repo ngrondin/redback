@@ -2,10 +2,8 @@ package com.nic.redback.services;
 
 
 import com.nic.firebus.Firebus;
-import com.nic.firebus.Payload;
 import com.nic.firebus.exceptions.FunctionErrorException;
 import com.nic.firebus.exceptions.FunctionTimeoutException;
-import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.utils.DataException;
 import com.nic.firebus.utils.DataMap;
 import com.nic.redback.RedbackException;
@@ -18,10 +16,6 @@ public abstract class ConfigurableService extends Service
 	{
 		super(n, c, f);
 		configService = config.getString("configservice");
-		firebus.registerConsumer("_rb_config_cache_clear", new Consumer() {
-			public void consume(Payload payload) {
-				clearCaches();
-			}}, 1);
 	}
 	
 	public void clearCaches() 

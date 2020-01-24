@@ -1,7 +1,11 @@
-<rb-input
+<% 
+var showExpr = (config.get("show") != null ? config.getString('show') : 'true').replaceAll('object', dataset + '.selectedObject').replaceAll('relatedObject', dataset + '.relatedObject');
+if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
+if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
+%><rb-input
 	class="rb-input-margin"
 	style="<%=config.getString('inlineStyle')%>"
-	*ngIf="(<%=config.getString('show')%>)"
+	*ngIf="<%=showExpr%>"
 	[label]="'<%=config.getString("label")%>'"<%
 if(config.get('icon') == null) {%>
 	[icon]="'description'"<%	
@@ -9,9 +13,15 @@ if(config.get('icon') == null) {%>
 	[icon]="'<%=config.getString('icon')%>'"<%
 } else {%>
 	[icon]="'<%=config.getString('icon')%>'"<%
-}%>	
-	[size]="<%=(config.get("size") == null ? 20 : config.getString("size")) %>"
-	[object]="<%=dataset%>.selectedObject"
-	[attribute]="'<%=config.getString('attribute')%>'"
+}
+if(config.get('size') != null) { %>	
+	[size]="<%=(config.get("size") == null ? 20 : config.getString("size")) %>" <%
+} 
+if(dataset != null) { %>	
+	[object]="<%=dataset%>.selectedObject" <%
+} 
+if(config.get('attribute') != null) { %>	
+	[attribute]="'<%=(config.get("attribute") == null ? 20 : config.getString("attribute")) %>'" <%
+} %>
 	[editable]="<%=canWrite%>" >
 </rb-input>

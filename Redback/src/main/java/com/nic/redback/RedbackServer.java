@@ -11,13 +11,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.nic.firebus.Firebus;
+import com.nic.firebus.Payload;
 import com.nic.firebus.interfaces.BusFunction;
 import com.nic.firebus.interfaces.Consumer;
 import com.nic.firebus.interfaces.ServiceProvider;
 import com.nic.firebus.utils.DataList;
 import com.nic.firebus.utils.DataMap;
+import com.nic.redback.services.ConfigurableService;
 
-public class RedbackServer
+public class RedbackServer implements Consumer
 {
 	private Logger logger = Logger.getLogger("com.nic.redback.RedbackServer");
 	protected ArrayList<BusFunction> services;
@@ -27,6 +29,8 @@ public class RedbackServer
 	public RedbackServer(DataMap config)
 	{
 		firebus = new Firebus(config.getString("network"), config.getString("password"));
+		firebus.registerConsumer("_rb_config_cache_clear", this, 1);
+		
 		DataList knownAddresses = config.getList("knownaddresses");
 		if(knownAddresses != null)
 		{
@@ -157,44 +161,14 @@ public class RedbackServer
 		}
 	}
 
-/*	
-	public RedbackService instantiateService(String type, DataMap config)
-	{
-		if(type.equalsIgnoreCase("objectservice"))
-		{
-			return new ObjectServer(config);
-		}
-		else if(type.equalsIgnoreCase("uiservice"))
-		{
-			return new UIServer(config);
-		}
-		else if(type.equalsIgnoreCase("processservice"))
-		{
-			return new ProcessServer(config);
-		}
-		else if(type.equalsIgnoreCase("idgeneratorservice"))
-		{
-			return new IDGenerator(config);
-		}
-		else if(type.equalsIgnoreCase("accessmanagementservice"))
-		{
-			return new AccessManager(config);
-		}
-		else if(type.equalsIgnoreCase("fileservice"))
-		{
-			return new FileServer(config);
-		}
-		else if(type.equalsIgnoreCase("configservice"))
-		{
-			return new ConfigServer(config);
-		}
-		else if(type.equalsIgnoreCase("configdevelopmentservice"))
-		{
-			return new ConfigDevelopmentServer(config);
-		}
-		return null;
+	public void consume(Payload payload) {
+		for(int i = 0; i < services.size(); i++) {
+			BusFunction service = services.get(i);
+			if(service instanceof ConfigurableService)
+				((ConfigurableService)service).clearCaches();
+		}		
 	}
-	*/
+
 	
 	public static void main(String[] args)
 	{
@@ -214,4 +188,5 @@ public class RedbackServer
 		}
 
 	}
+
 }

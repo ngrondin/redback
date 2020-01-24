@@ -132,7 +132,6 @@ public class RedbackUIServer extends UIServer
 				context.put("session", session);
 				context.put("canWrite", true);
 				context.put("canExecute", true);
-				context.put("dataset", "none");
 			}
 
 			if(session.getUserProfile().canRead("rb.views." + viewName))

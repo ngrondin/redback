@@ -4,6 +4,11 @@ import java.util.Date;
 
 import com.nic.firebus.utils.DataLiteral;
 import com.nic.firebus.utils.DataMap;
+import com.nic.firebus.utils.FirebusDataUtil;
+
+import jdk.nashorn.api.scripting.JSObject;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
+
 
 public class Value
 {
@@ -65,6 +70,12 @@ public class Value
 		{
 			valueClass = DataMap.class;
 			jsonObjectValue = (DataMap)v;
+		}
+		else if(v instanceof JSObject)
+		{
+			DataMap map = FirebusDataUtil.convertJSObjectToDataObject((JSObject)v);
+			valueClass = DataMap.class;
+			jsonObjectValue = map;
 		}
 	}
 	
