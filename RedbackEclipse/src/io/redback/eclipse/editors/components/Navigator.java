@@ -107,8 +107,8 @@ public abstract class Navigator extends Composite implements MenuDetectListener,
 			manager.nodeSelected(navAction.type, newName);
 		} else if(navAction.action.equals("delete")) {
 			manager.deleteNode(navAction.type, navAction.name);
-			selectedType = null;
-			selectedName = null;
+			selectedType = navAction.nextSelectType;
+			selectedName = navAction.nextSelectName;
 			refresh();
 		}
 	}

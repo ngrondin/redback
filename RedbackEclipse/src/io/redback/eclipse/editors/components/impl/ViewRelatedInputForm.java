@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.nic.firebus.utils.DataMap;
 
+import io.redback.eclipse.editors.components.CheckboxField;
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.TextField;
@@ -23,6 +24,7 @@ public class ViewRelatedInputForm extends Form
 		new TextField(data, "icon", "Icon", this, SWT.NONE);
 		new TextField(data, "size", "Size", this, SWT.NONE);
 		new TextField(data, "show", "Show (!)", this, SWT.NONE);
+		new CheckboxField(data, "grow", "Grow", this, SWT.NONE).setAsOneAndZero(true);
 		new TextField(data, "displayattribute", "Display Attribute", this, SWT.NONE);
 		new TextField(data, "parentattribute", "Parent Attribute", this, SWT.NONE);
 		new TextField(data, "childattribute", "Child Attribute", this, SWT.NONE);

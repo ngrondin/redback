@@ -10,9 +10,9 @@ import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.TextField;
 
-public class ViewInputForm extends Form
+public class ViewTextAreaForm extends Form
 {
-	public ViewInputForm(DataMap d, Manager m, Composite p, int s) 
+	public ViewTextAreaForm(DataMap d, Manager m, Composite p, int s) 
 	{
 		super(d, m, p, s);
 		createUI();
@@ -24,6 +24,7 @@ public class ViewInputForm extends Form
 		new TextField(data, "icon", "Icon", this, SWT.NONE);
 		new TextField(data, "size", "Size", this, SWT.NONE);
 		new CheckboxField(data, "grow", "Grow", this, SWT.NONE).setAsOneAndZero(true);
+		new TextField(data, "row", "Row", this, SWT.NONE);
 		new TextField(data, "show", "Show (!)", this, SWT.NONE);
 	}
 

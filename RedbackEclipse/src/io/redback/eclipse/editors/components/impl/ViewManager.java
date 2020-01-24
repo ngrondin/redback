@@ -38,6 +38,10 @@ public class ViewManager extends Manager {
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
 			return null;
+		} else if(type.equals("vsection")) {
+			return new ViewSectionForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("hsection")) {
+			return new ViewSectionForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("view")) {
 			return new ViewViewForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("dataset")) {
@@ -49,7 +53,7 @@ public class ViewManager extends Manager {
 		} else if(type.equals("datepicker")) {
 			return new ViewDateInputForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("textarea")) {
-			return new ViewInputForm(data.getObject(name), this, sashForm, SWT.PUSH);
+			return new ViewTextAreaForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("durationinput")) {
 			return new ViewInputForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("switch")) {

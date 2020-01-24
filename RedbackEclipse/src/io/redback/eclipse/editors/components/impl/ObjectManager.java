@@ -69,7 +69,7 @@ public class ObjectManager extends Manager {
 	}
 
 	public void deleteNode(String type, String name) {
-		if(type.equals("attributes")) {
+		if(type.equals("attribute")) {
 			DataList attributes = data.getList("attributes");
 			for(int i = 0; i < attributes.size(); i++) {
 				if(attributes.getObject(i).getString("name").equals(name))

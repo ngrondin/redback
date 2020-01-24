@@ -39,6 +39,8 @@ public class TextAreaField extends Composite implements ModifyListener {
 
 	public void modifyText(ModifyEvent event) {
 		String newValue = text.getText();
+		if(newValue != null && newValue.equals(""))
+			newValue = null;
 		if(map != null) {
 			if(newValue == null && map.get(attribute) != null)
 				map.remove(attribute);

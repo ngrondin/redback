@@ -17,7 +17,7 @@ public class TextField extends Composite implements ModifyListener {
 	protected String attribute;
 	protected Form form;
 	protected Text text;
-	protected String oldValue;
+	protected Object oldValue;
 	
 	public TextField(DataMap m, String a, String l, Form f, int s) {
 		super(f, s);
@@ -38,7 +38,21 @@ public class TextField extends Composite implements ModifyListener {
 	}
 
 	public void modifyText(ModifyEvent event) {
-		String newValue = text.getText();
+		Object newValue = null;
+		String newString = text.getText();
+		if(newString != null && newString.equals("")) {
+			newValue = null;
+		} else {
+			try {
+				newValue = Integer.parseInt(newString);
+			} catch(Exception e1) {
+				try {
+					newValue = Double.parseDouble(newString);
+				} catch(Exception e2) {
+					newValue = newString;
+				}
+			}
+		}
 		if(map != null) {
 			if(newValue == null && map.get(attribute) != null)
 				map.remove(attribute);

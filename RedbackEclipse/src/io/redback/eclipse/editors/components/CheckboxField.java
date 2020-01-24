@@ -18,7 +18,8 @@ public class CheckboxField extends Composite implements SelectionListener {
 	protected String attribute;
 	protected Form form;
 	protected Button checkbox;
-	protected Boolean oldValue;
+	protected Object oldValue;
+	protected boolean asOneAndZero;
 	
 	public CheckboxField(DataMap m, String a, String l, Form f, int s) {
 		super(f, s);
@@ -41,18 +42,25 @@ public class CheckboxField extends Composite implements SelectionListener {
 	public void setChecked(boolean checked) {
 		checkbox.setSelection(checked);
 	}
+	
+	public void setAsOneAndZero(boolean b) {
+		asOneAndZero = b;
+	}
 
 	public void widgetDefaultSelected(SelectionEvent event) {
 		
 	}
 
 	public void widgetSelected(SelectionEvent event) {
-		Boolean newValue = checkbox.getSelection();
-		if(map != null) {
-			if(newValue == null && map.get(attribute) != null)
-				map.remove(attribute);
+		Object newValue = checkbox.getSelection();
+		if(asOneAndZero) {
+			if((Boolean)newValue == true)
+				newValue = 1;
 			else
-				map.put(attribute, newValue);
+				newValue = 0;
+		}
+		if(map != null) {
+			map.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);
