@@ -29,6 +29,7 @@ import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.
 import { AgmCoreModule } from '@agm/core';
 import { RbProcessactionsComponent } from './rb-processactions/rb-processactions.component';
 import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   imports: [
@@ -56,7 +57,7 @@ import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component
     HttpModule,
     AgmCoreModule.forRoot({
       apiKey: 'AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'
-    })    
+    })
   ],
   declarations: [
     DesktopRootComponent,

@@ -41,6 +41,13 @@ export class RbInputComponent implements OnInit {
       return true;      
   }
 
+  public get widthString() : string {
+    if(this.size != null)
+      return (15*this.size) + 'px';
+    else
+      return '100%';
+  }
+
   commit() {
     this.rbObject.setValue(this.attribute, this.editedValue);
   }

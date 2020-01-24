@@ -4,6 +4,7 @@ import { RbPopupDatetimeComponent, DateTimePopupConfig } from 'app/rb-popup-date
 import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { RbFilterBuilderComponent, FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'rb-search',
@@ -40,7 +41,7 @@ export class RbSearchComponent implements OnInit {
       setTimeout(()=> {
         if(this.value == currentValue)
           this.search.emit(this.value);
-      }, 1000);
+      }, 500);
       this.previousValue = this.value;
     }
   }

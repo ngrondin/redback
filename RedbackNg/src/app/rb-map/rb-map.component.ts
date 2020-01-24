@@ -111,8 +111,10 @@ export class RbMapComponent implements OnInit {
   latLonOf(object: RbObject) : any {
     let geometry = this.geometryOf(object);
     if(geometry != null) {
-      if(geometry.type == 'point') {
-        return geometry.coords;
+      if(geometry.type == 'point' && geometry.coords != null) {
+        if(!isNaN(geometry.coords.latitude) && !isNaN(geometry.coords.longitude)) {
+          return geometry.coords;
+        }
       }
     }
     return null;

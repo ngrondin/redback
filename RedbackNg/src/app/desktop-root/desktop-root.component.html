@@ -1,11 +1,34 @@
 <mat-toolbar
     color="primary">
     <mat-toolbar-row>
+        <div>
+            <img [src]="logoUrl" height="25" style="vertical-align: middle;"/>
+        </div>
+        &nbsp;&nbsp;
         <span>{{title}}</span>
         <span
             class="rb-pagetitle">
             &nbsp;&nbsp;|&nbsp;&nbsp;{{viewTitle}}
-            </span>
+        </span>
+        <div
+            class="rb-toolbar-spacer">
+        </div>
+        <mat-icon>search</mat-icon>
+        <input
+            class="rb-toolbar-search">
+        <button
+            mat-button
+            [matMenuTriggerFor]="usermenu">
+            {{userdisplay}}
+        </button>
+        <mat-menu
+            #usermenu="matMenu">
+            <button
+                mat-menu-item
+                (click)="logout()">
+                Logout
+            </button>
+        </mat-menu>        
     </mat-toolbar-row>
 </mat-toolbar>
 <mat-sidenav-container>

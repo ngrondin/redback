@@ -22,11 +22,13 @@ rb-view-loader {
 	flex-direction: column;
 	flex-grow: 1;
 	overflow: hidden;
+	padding-top: 5px;
 }
 
 rb-view {
 	display: flex;
 	flex-direction: column;
+	flex-grow: 1;
 	overflow: hidden;
 }
 
@@ -38,13 +40,15 @@ rb-layout {
 rb-dataset {
 	display: flex;
 	overflow: hidden;
+	flex-grow: 1;
+	flex-direction: column;
 }
 
 .rb-hsection {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
-	flex-shrink: 0;
+	flex-shrink: 1;
 	border: 0px Solid;
 	vertical-align:top;
 	overflow: hidden;
@@ -54,7 +58,7 @@ rb-dataset {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
-	flex-shrink: 0;
+	flex-shrink: 1;
 	border: 0px Solid;
 	overflow:hidden;
 }
@@ -219,7 +223,7 @@ rb-tab {
 ::-webkit-scrollbar-track
 {
 	border-radius: 6px;
-	background-color: #FFFFFF;
+	background-color: #eeeeee;
 }
 
 ::-webkit-scrollbar
@@ -232,7 +236,7 @@ rb-tab {
 ::-webkit-scrollbar-thumb
 {
 	border-radius: 10px;
-	background-color: #F5F5F5;
+	background-color: #d5d5f1;
 }
 
 ::-webkit-scrollbar-thumb:hover

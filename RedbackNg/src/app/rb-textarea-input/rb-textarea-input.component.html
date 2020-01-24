@@ -1,14 +1,16 @@
-<mat-form-field >
-        <mat-label>{{label}}</mat-label>
-        <textarea 
-            #input
-            matInput 
-            [(ngModel)]="value"
-            (change)="commit()"
-            [readonly]="readonly"
-            autocomplete="off">
-        </textarea>
-        <mat-icon 
-            matPrefix
-            class="rb-grey-icon">{{icon}}</mat-icon>
+<mat-form-field 
+    [style.width]="(size * 15) + 'px'" >
+    <mat-label>{{label}}</mat-label>
+    <textarea 
+        #input
+        matInput 
+        [(ngModel)]="value"
+        (change)="commit()"
+        [readonly]="readonly"
+        autocomplete="off"
+        [rows]="rows">
+    </textarea>
+    <mat-icon 
+        matPrefix
+        class="rb-grey-icon">{{icon}}</mat-icon>
 </mat-form-field>

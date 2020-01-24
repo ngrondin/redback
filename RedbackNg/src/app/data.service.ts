@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable, of } from 'rxjs';
 import { ObjectResp, RbObject } from './datamodel';
+import { ToastrService } from 'ngx-toastr';
 
 
 
@@ -13,7 +14,8 @@ export class DataService {
   saveImmediatly: boolean;
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private toastr: ToastrService
   ) {
     this.allObjects = [];
     this.saveImmediatly = true;
@@ -33,11 +35,16 @@ export class DataService {
   getServerObject(objectname: string, uid: string) : Observable<RbObject> {
     const getObs =  this.apiService.getObject(objectname, uid);
     const dataObservable = new Observable<RbObject>((observer) => {
-      getObs.subscribe(resp => {
-        const rbObject = this.updateObjectFromServer(resp);
-        observer.next(rbObject);
-        observer.complete();
-      });
+      getObs.subscribe(
+        resp => {
+          const rbObject = this.updateObjectFromServer(resp);
+          observer.next(rbObject);
+          observer.complete();
+        },
+        error => {
+          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+        }
+      );
     })
     return dataObservable; 
   }
@@ -45,11 +52,16 @@ export class DataService {
   listObjects(name: string, filter: any, search: string) : Observable<any> {
     const listObs = this.apiService.listObjects(name, filter, search);
     const dataObservable = new Observable((observer) => {
-      listObs.subscribe(resp => {
-        const rbObjectArray = Object.values(resp.list).map(json => this.updateObjectFromServer(json));
-        observer.next(rbObjectArray);
-        observer.complete();
-      });
+      listObs.subscribe(
+        resp => {
+          const rbObjectArray = Object.values(resp.list).map(json => this.updateObjectFromServer(json));
+          observer.next(rbObjectArray);
+          observer.complete();
+        }, 
+        error => {
+          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+        }
+      )
     })
     return dataObservable; 
   }
@@ -57,11 +69,16 @@ export class DataService {
   listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string) : Observable<any> {
     const listObs = this.apiService.listRelatedObjects(name, uid, attribute, filter, search);
     const dataObservable = new Observable((observer) => {
-      listObs.subscribe(resp => {
-        const rbObjectArray = Object.values(resp.list).map(json => this.updateObjectFromServer(json));
-        observer.next(rbObjectArray);
-        observer.complete();
-      });
+      listObs.subscribe(
+        resp => {
+          const rbObjectArray = Object.values(resp.list).map(json => this.updateObjectFromServer(json));
+          observer.next(rbObjectArray);
+          observer.complete();
+        },
+        error => {
+          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+        }
+      );
     })
     return dataObservable; 
   }
@@ -90,17 +107,28 @@ export class DataService {
     for(const attribute of rbObject.changed) {
         upd[attribute] = rbObject.data[attribute];
     }
-    this.apiService.updateObject(rbObject.objectname, rbObject.uid, upd).subscribe(resp => this.updateObjectFromServer(resp));
+    this.apiService.updateObject(rbObject.objectname, rbObject.uid, upd).subscribe(
+      resp => {
+        this.updateObjectFromServer(resp)
+      },
+      error => {
+        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+      });
   }
 
   createObject(name: string, data: any) : Observable<RbObject> {
     const apiObservable = this.apiService.createObject(name, data);
     const dataObservable = new Observable<RbObject>((observer) => {
-      apiObservable.subscribe(resp => {
-        const newObj: RbObject = this.updateObjectFromServer(resp);
-        observer.next(newObj);
-        observer.complete();
-      });
+      apiObservable.subscribe(
+        resp => {
+          const newObj: RbObject = this.updateObjectFromServer(resp);
+          observer.next(newObj);
+          observer.complete();
+        },
+        error => {
+          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+        }
+      );
     })
     return dataObservable;     
   }

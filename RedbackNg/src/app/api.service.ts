@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ObjectResp, RbObject } from './datamodel';
 import { RequestOptionsArgs, RequestOptions } from '@angular/http';
 import { CookieService } from 'ngx-cookie-service';
+import { ToastrService } from 'ngx-toastr';
 
 const httpOptions = {
   headers: new HttpHeaders().set("Content-Type", "application/json"),
@@ -23,9 +24,10 @@ export class ApiService {
 
   constructor(
     private http: HttpClient,
-    private cookieService : CookieService
+    private cookieService : CookieService,
+    private toastr: ToastrService
   ) { 
-    //this.baseUrl = 'http://localhost';
+
   }
 
   getObject(name: string, uid: string): Observable<any> {

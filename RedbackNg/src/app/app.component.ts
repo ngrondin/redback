@@ -12,8 +12,11 @@ import { ApiService } from './api.service';
 })
 export class AppComponent {
   title: string; 
+  logo: string;
   type: string;
   version: string;
+  username: string;
+  userdisplay: string;
   initialView: string;
   initialViewTitle: string;
   menuView: string;
@@ -27,7 +30,10 @@ export class AppComponent {
     var native = this.elementRef.nativeElement;
     this.type = native.getAttribute("type");
     this.title = native.getAttribute("title");
+    this.logo = native.getAttribute("logo");
     this.version = native.getAttribute("version");
+    this.username = native.getAttribute("username");
+    this.userdisplay = native.getAttribute("userdisplay");
     this.initialView = native.getAttribute("initialview");
     this.initialViewTitle = native.getAttribute("initialviewtitle");
     this.menuView = native.getAttribute("menuview");

@@ -11,6 +11,7 @@ export class RbTextareaInputComponent implements OnInit {
   @Input('label') label: string;
   @Input('icon') icon: string;
   @Input('size') size: Number;
+  @Input('rows') rows: Number = 3;
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
@@ -39,6 +40,7 @@ export class RbTextareaInputComponent implements OnInit {
     else
       return true;      
   }
+
 
   commit() {
     this.rbObject.setValue(this.attribute, this.editedValue);

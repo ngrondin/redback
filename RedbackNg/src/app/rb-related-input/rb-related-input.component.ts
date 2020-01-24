@@ -51,7 +51,13 @@ export class RbRelatedInputComponent implements OnInit {
 
   public set displayvalue(str: string) {
     this.searchValue = str;
-    this.popupListComponentRef.instance.setSearch(this.searchValue);
+    if(this.popupListComponentRef != null) {
+      let currentValue = this.searchValue;
+      setTimeout(()=> {
+        if(this.searchValue == currentValue)
+        this.popupListComponentRef.instance.setSearch(this.searchValue);
+      }, 500);     
+    }
   }
 
   public get readonly(): boolean {
@@ -110,6 +116,7 @@ export class RbRelatedInputComponent implements OnInit {
   public cancelEditing() {
     this.overlayRef.dispose();
     this.overlayRef = null;
+    this.popupListComponentRef = null;
     this.searchValue = '';
     this.inputContainerRef.element.nativeElement.blur();
   }
@@ -120,6 +127,7 @@ export class RbRelatedInputComponent implements OnInit {
     this.rbObject.setValueAndRelated(this.attribute, val, object);
     this.overlayRef.dispose();
     this.overlayRef = null;
+    this.popupListComponentRef = null;
     this.searchValue = '';
     this.inputContainerRef.element.nativeElement.blur();
   }
