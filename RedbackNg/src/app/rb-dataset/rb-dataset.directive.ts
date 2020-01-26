@@ -25,7 +25,6 @@ export class RbDatasetDirective implements OnChanges {
   ) {   }
 
   ngOnInit() {
-    this.refreshData();
   }
 
   ngOnChanges(changes: SimpleChanges) {

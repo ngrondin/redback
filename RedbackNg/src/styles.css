@@ -25,6 +25,13 @@ rb-view-loader {
 	padding-top: 5px;
 }
 
+rb-view-container {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	overflow: hidden;
+}
+
 rb-view {
 	display: flex;
 	flex-direction: column;
