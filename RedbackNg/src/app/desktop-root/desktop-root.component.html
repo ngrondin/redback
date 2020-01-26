@@ -43,7 +43,8 @@
     <mat-sidenav-content>
         <rb-view-loader 
             [src]="viewUrl"
-            (navigate)="navigateTo($event)">
+            (navigate)="navigateTo($event)"
+            (titlechange)="setTitle($event)">
         </rb-view-loader>
     </mat-sidenav-content>
 </mat-sidenav-container>

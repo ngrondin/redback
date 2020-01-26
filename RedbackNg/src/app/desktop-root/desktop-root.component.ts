@@ -49,7 +49,10 @@ export class DesktopRootComponent implements OnInit {
 
   navigateTo($event) {
     this.view = $event.view;
-    this.viewTitle = $event.title;
+  }
+
+  setTitle(title: string) {
+    this.viewTitle = title;
   }
 
 }

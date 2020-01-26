@@ -30,6 +30,7 @@ import { AgmCoreModule } from '@agm/core';
 import { RbProcessactionsComponent } from './rb-processactions/rb-processactions.component';
 import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
 import { ToastrModule } from 'ngx-toastr';
+import { RbViewDirective } from './rb-view/rb-view.directive';
 
 @NgModule({
   imports: [
@@ -62,6 +63,7 @@ import { ToastrModule } from 'ngx-toastr';
   declarations: [
     DesktopRootComponent,
     RbViewLoaderComponent,
+    RbViewDirective,
     RbDatasetDirective,
     RbListScrollDirective,
     RbInputComponent,
@@ -89,6 +91,7 @@ import { ToastrModule } from 'ngx-toastr';
     MatProgressSpinnerModule,
     MatMenuModule,
     RbViewLoaderComponent,
+    RbViewDirective,
     RbDatasetDirective,
     RbListScrollDirective,
     RbInputComponent,

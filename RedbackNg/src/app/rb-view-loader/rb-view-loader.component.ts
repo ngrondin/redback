@@ -15,6 +15,7 @@ export class RbViewLoaderComponent implements OnInit {
   @Input('src') private templateUrl: string;
   @ViewChild('container', { read: ViewContainerRef, static: false }) container: ViewContainerRef;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
+  @Output() titlechange: EventEmitter<any> = new EventEmitter();
 
   private componentRef: ComponentRef<{}>;
 
@@ -35,13 +36,17 @@ export class RbViewLoaderComponent implements OnInit {
   compileTemplate(body: string) {
 
     @Component({
-      selector: 'rb-view',
+      selector: 'rb-view-container',
       template: body
     })
-    class ViewComponent {
+    class ViewContainerComponent {
       @Output() navigate: EventEmitter<any> = new EventEmitter();
+      @Output() titlechange: EventEmitter<any> = new EventEmitter();
       navigateTo(view : string, title : string) {
         this.navigate.emit({view : view, title : title});
+      }
+      setTitle(title: string) {
+        this.titlechange.emit(title);
       }
     };
 
@@ -51,26 +56,31 @@ export class RbViewLoaderComponent implements OnInit {
         RedbackModule
       ], 
       declarations: [
-        ViewComponent
+        ViewContainerComponent
       ] 
     })
     class RuntimeComponentModule { }
 
     let module: ModuleWithComponentFactories<any> = this.compiler.compileModuleAndAllComponentsSync(RuntimeComponentModule);
-    let factory = module.componentFactories.find(f => f.componentType === ViewComponent);
+    let factory = module.componentFactories.find(f => f.componentType === ViewContainerComponent);
     
     if (this.componentRef) {
       this.componentRef.destroy();
       this.componentRef = null; 
     }
 
-    let newViewComponentRef : ComponentRef<ViewComponent> = this.container.createComponent(factory);
+    let newViewComponentRef : ComponentRef<ViewContainerComponent> = this.container.createComponent(factory);
     newViewComponentRef.instance.navigate.subscribe(e => this.navigateTo(e));
+    newViewComponentRef.instance.titlechange.subscribe(e => this.setTitle(e));
     this.componentRef = newViewComponentRef;
   }
 
   navigateTo($event) {
     this.navigate.emit($event);
+  }
+
+  setTitle(title: string) {
+    this.titlechange.emit(title);
   }
 
 }
