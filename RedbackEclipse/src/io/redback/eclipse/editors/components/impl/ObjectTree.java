@@ -42,12 +42,25 @@ public class ObjectTree extends Navigator
 
 		DataList list = data.getList("attributes");
 		for(int i = 0; i < list.size(); i++) {
-			DataMap	attCfg = list.getObject(i);
+			DataMap	attribute = list.getObject(i);
 			TreeItem attNode = new TreeItem(attributeNode, 0);
-			attNode.setData(new NavigatorAction("select", "attribute", attCfg.getString("name")));
-			attNode.setText(attCfg.getString("name"));	
-			if(isSelected("attribute", attCfg.getString("name")))
+			String atttributeName = attribute.getString("name");
+			attNode.setData(new NavigatorAction("select", "attribute", atttributeName));
+			attNode.setText(attribute.getString("name"));	
+			if(isSelected("attribute", attribute.getString("name")))
 				tree.setSelection(attNode);
+			if(attribute.containsKey("scripts")) {
+				Iterator<String> it = attribute.getObject("scripts").keySet().iterator();
+				while(it.hasNext()) {
+					String key = it.next();
+					String scriptName = atttributeName + "." + key;
+					TreeItem scriptNode = new TreeItem(attNode, 0);
+					scriptNode.setData(new NavigatorAction("select", "attributescript", scriptName));
+					scriptNode.setText(key);	
+					if(isSelected("attributescript", scriptName))
+						tree.setSelection(scriptNode);
+				}
+			}		
 		}
 		
 		TreeItem methodNode = new TreeItem (rootNode, 2);
@@ -74,12 +87,25 @@ public class ObjectTree extends Navigator
 		    item.setData(new NavigatorAction("create", "attribute", null));
 		} else if(type.equals("attribute")) {
 			MenuItem item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create onupdate");
+		    item.setData(new NavigatorAction("create", "attributescript", name + ".onupdate"));
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create afterupdate");
+		    item.setData(new NavigatorAction("create", "attributescript", name + ".afterupdate"));
+			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Delete " + name);
 		    item.setData(new NavigatorAction("delete", "attribute", name));
+		} else if(type.equals("attributescript")) {
+			MenuItem item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Delete " + name);
+		    item.setData(new NavigatorAction("delete", "attributescript", name));
 		} else if(type.equals("scriptgroup")) {
 			MenuItem item = new MenuItem(menu, SWT.PUSH);
-		    item.setText("Create onSave");
-		    item.setData(new NavigatorAction("create", "script", "onSave"));
+		    item.setText("Create onsave");
+		    item.setData(new NavigatorAction("create", "script", "onsave"));
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create aftersave");
+		    item.setData(new NavigatorAction("create", "script", "aftersave"));
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create...");
 		    item.setData(new NavigatorAction("create", "script", null));

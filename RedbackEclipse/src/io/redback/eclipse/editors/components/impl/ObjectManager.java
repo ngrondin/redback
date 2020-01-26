@@ -34,17 +34,25 @@ public class ObjectManager extends Manager {
 		return new ObjectTree(data, this, sashForm, SWT.PUSH);
 	}
 
+	private DataMap getAttribute(String name) {
+		DataList attributes = data.getList("attributes");
+		for(int i = 0; i < attributes.size(); i++)
+			if(attributes.getObject(i).getString("name").equals(name))
+				return attributes.getObject(i);
+		return null;
+	}
+	
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
 			return new ObjectHeaderForm(data, this, sashForm, SWT.PUSH);
 		} else if(type.equals("attribute")) {
-			DataList attributes = data.getList("attributes");
-			for(int i = 0; i < attributes.size(); i++)
-				if(attributes.getObject(i).getString("name").equals(name))
-					return new ObjectAttributeForm(attributes.getObject(i), this, sashForm, SWT.PUSH);	
-			return null;
+			return new ObjectAttributeForm(getAttribute(name), this, sashForm, SWT.PUSH);	
 		} else if(type.equals("script")) {
 			return new ScriptForm(data.getObject("scripts"), name, this, sashForm, SWT.PUSH);
+		} else if(type.equals("attributescript")) {
+			String attributeName = name.substring(0, name.indexOf("."));
+			String scriptName = name.substring(name.indexOf(".") + 1);
+			return new ScriptForm(getAttribute(attributeName).getObject("scripts"), scriptName, this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}
@@ -63,6 +71,15 @@ public class ObjectManager extends Manager {
 				name = dialog.openReturnString();	
 			} 
 			data.getObject("scripts").put(name, "");
+		} else if(type.equals("attributescript")) {
+			String attributeName = name.substring(0, name.indexOf("."));
+			String scriptName = name.substring(name.indexOf(".") + 1);
+			DataMap attribute = getAttribute(attributeName);
+			if(attribute != null) {
+				if(!attribute.containsKey("scripts"))
+					attribute.put("scripts", new DataMap());
+				attribute.getObject("scripts").put(scriptName, "");
+			}			
 		}
 		setDataChanged(true);
 		return name;
@@ -77,6 +94,13 @@ public class ObjectManager extends Manager {
 			}
 		} else if(type.equals("scripts")) {
 			data.getObject("scripts").remove(name);
+		} else if(type.equals("attributescript")) {
+			String attributeName = name.substring(0, name.indexOf("."));
+			String scriptName = name.substring(name.indexOf(".") + 1);
+			DataMap attribute = getAttribute(attributeName);
+			attribute.getObject("scripts").remove(scriptName);
+			if(attribute.getObject("scripts").keySet().size() == 0)
+				attribute.remove("scripts");
 		}
 	}
 

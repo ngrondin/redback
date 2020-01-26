@@ -22,21 +22,23 @@ public class ScriptField extends Composite implements ModifyListener {
 
 	protected DataMap map;
 	protected String attribute;
+	protected String label;
 	protected Form form;
 	protected StyledText text;
 	protected String oldValue;
 
-	public ScriptField(DataMap m, String a, Form f, int s) {
+	public ScriptField(DataMap m, String a, String l, Form f, int s) {
 		super(f, s);
 		map = m;
 		attribute = a;
+		label = l;
 		form = f;
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
 		setLayout(layout);
-		Label label = new Label(this, SWT.NONE);		
-		label.setText(attribute);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		Label lbl = new Label(this, SWT.NONE);		
+		lbl.setText(label);
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		text = new StyledText(this, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
 		text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		text.setFont(new Font( getDisplay(), new FontData( "Fira Code", 10, SWT.NONE)));

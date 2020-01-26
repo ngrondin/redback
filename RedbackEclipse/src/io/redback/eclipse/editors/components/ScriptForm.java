@@ -18,7 +18,7 @@ public class ScriptForm extends Form {
 
 	public void createUI() {
 		setLayout(new FillLayout());
-		new ScriptField(data, attribute, this, SWT.NONE);
+		new ScriptField(data, attribute, attribute, this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {
