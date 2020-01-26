@@ -14,7 +14,7 @@ import io.redback.security.Session;
 
 public class RedbackObjectUpdateUnit extends ProcessUnit 
 {
-	private Logger logger = Logger.getLogger("com.nic.redback.managers.processmanager");
+	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected String objectName;
 	protected Expression objectUIDExpression;
 	protected Expression dataExpression;

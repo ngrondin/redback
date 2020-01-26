@@ -11,7 +11,7 @@ import io.redback.RedbackException;
 
 public abstract class IDGenerator extends DataService
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 
 	public IDGenerator(String n, DataMap c, Firebus f) 
 	{

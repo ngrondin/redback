@@ -5,10 +5,10 @@
 	rb-object="<%=config.getString('object')%>"
 <% } %>
 <% if(config.getObject('master') != null) { %>
-	rb-related="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(config.getObject('master'))%>"
+	rb-related="<%=utils.convertDataMapToAttributeString(config.getObject('master'))%>"
 <% } %>
 <% if(config.get('basefilter') != null) { %>
-	rb-base-filter="<%=com.nic.redback.utils.StringUtils.convertJSONToAttributeString(config.getObject('basefilter'))%>"
+	rb-base-filter="<%=utils.convertDataMapToAttributeString(config.getObject('basefilter'))%>"
 <% } %>
 	style="<%=config.getString('inlineStyle')%>">
 	#content#

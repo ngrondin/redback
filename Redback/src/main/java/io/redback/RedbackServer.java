@@ -21,7 +21,7 @@ import io.redback.services.ConfigurableService;
 
 public class RedbackServer implements Consumer
 {
-	private Logger logger = Logger.getLogger("com.nic.redback.RedbackServer");
+	private Logger logger = Logger.getLogger("io.redback.RedbackServer");
 	protected ArrayList<BusFunction> services;
 	protected static ArrayList<Logger> loggers;
 	protected Firebus firebus;

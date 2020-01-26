@@ -24,7 +24,7 @@ import io.redback.utils.LoggerJSFunction;
 
 public class RedbackObject 
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected Session session;
 	protected ObjectManager objectManager;
 	protected ObjectConfig config;

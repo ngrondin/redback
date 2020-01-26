@@ -14,7 +14,7 @@ import io.redback.security.Session;
 
 public abstract class ConfigDevelopmentServer extends AuthenticatedService
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 
 	public ConfigDevelopmentServer(String n, DataMap c, Firebus f)
 	{

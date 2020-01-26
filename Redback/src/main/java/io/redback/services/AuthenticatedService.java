@@ -13,7 +13,7 @@ import io.redback.security.Session;
 
 public abstract class AuthenticatedService extends DataService
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected String accessManagementService;
 
 	public AuthenticatedService(String n, DataMap c, Firebus f)

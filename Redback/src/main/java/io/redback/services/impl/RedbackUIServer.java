@@ -25,11 +25,12 @@ import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.UIServer;
 import io.redback.utils.HTML;
+import io.redback.utils.RedbackUtilsJSWrapper;
 import io.redback.utils.StringUtils;
 
 public class RedbackUIServer extends UIServer
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected String devpath;
 	protected ScriptEngine jsEngine;
 	protected HashMap<String, CompiledScript> jspScripts;
@@ -134,6 +135,7 @@ public class RedbackUIServer extends UIServer
 			{
 				context = jsEngine.createBindings();
 				context.put("session", session);
+				context.put("utils", new RedbackUtilsJSWrapper());
 				context.put("canWrite", true);
 				context.put("canExecute", true);
 			}
@@ -267,7 +269,7 @@ public class RedbackUIServer extends UIServer
 				}
 				else
 				{
-					is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/" + version + "/jsp/" + name + ".jsp");
+					is = this.getClass().getResourceAsStream("/io/redback/services/uiserver/" + version + "/jsp/" + name + ".jsp");
 				}
 				
 				if(is != null)
@@ -335,7 +337,7 @@ public class RedbackUIServer extends UIServer
 			}
 			else
 			{
-				is = this.getClass().getResourceAsStream("/com/nic/redback/services/uiserver/" + version + "/client/" + type + "/" + name);
+				is = this.getClass().getResourceAsStream("/io/redback/services/uiserver/" + version + "/client/" + type + "/" + name);
 			}
 			
 			if(is != null)

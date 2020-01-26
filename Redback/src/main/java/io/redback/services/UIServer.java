@@ -18,7 +18,7 @@ import io.redback.utils.HTML;
 
 public abstract class UIServer extends AuthenticatedService
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 
 	public UIServer(String n, DataMap c, Firebus f)
 	{

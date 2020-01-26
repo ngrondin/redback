@@ -14,7 +14,7 @@ import io.redback.security.Session;
 @SuppressWarnings("restriction")
 public class FirebusCallUnit extends ProcessUnit 
 {
-	//private Logger logger = Logger.getLogger("com.nic.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected String firebusServiceName;
 	protected Expression payloadExpression;
 	protected String nextNode;

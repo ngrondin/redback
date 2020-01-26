@@ -12,7 +12,7 @@ import jdk.nashorn.api.scripting.JSObject;
 
 public class FirebusJSWrapper 
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
 	protected Session session;
 	

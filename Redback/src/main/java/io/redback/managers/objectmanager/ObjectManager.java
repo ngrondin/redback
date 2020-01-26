@@ -20,7 +20,7 @@ import io.redback.security.Session;
 
 public class ObjectManager
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
 	protected boolean cacheConfigs;
 	protected String configServiceName;

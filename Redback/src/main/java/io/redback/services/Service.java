@@ -15,7 +15,7 @@ import io.redback.RedbackException;
 
 public abstract class Service implements ServiceProvider
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected String serviceName;
 	protected Firebus firebus;
 	protected DataMap config;

@@ -23,7 +23,7 @@ import io.redback.security.Session;
 
 public class ProcessManager
 {
-	private Logger logger = Logger.getLogger("com.nic.redback.managers.processmanager");
+	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected Firebus firebus;
 	protected String configServiceName;
 	protected String dataServiceName;

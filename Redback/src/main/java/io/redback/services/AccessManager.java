@@ -18,7 +18,7 @@ import io.redback.security.UserProfile;
 
 public abstract class AccessManager extends DataService 
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected HashMap<String, Role> roles;
 	protected ArrayList<Session> cachedSessions;
 	protected ArrayList<UserProfile> cachedUserProfiles;

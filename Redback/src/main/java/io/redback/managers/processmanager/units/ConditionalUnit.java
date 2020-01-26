@@ -22,7 +22,7 @@ import io.redback.utils.StringUtils;
 
 public class ConditionalUnit extends ProcessUnit 
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected CompiledScript script;
 	protected String trueNode;
 	protected String falseNode;

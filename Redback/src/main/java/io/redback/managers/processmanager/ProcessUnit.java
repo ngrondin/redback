@@ -7,7 +7,7 @@ import io.redback.RedbackException;
 
 public abstract class ProcessUnit 
 {
-	protected Logger logger = Logger.getLogger("com.nic.redback.managers.processmanager");
+	protected Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected String nodeId;
 	protected ProcessManager processManager;
 	

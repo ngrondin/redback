@@ -179,7 +179,7 @@ public class LoadRunner
 		{
 			Thread.currentThread().setName("rbLoadRunner");
 			Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
-			Logger logger = Logger.getLogger("com.nic.firebus");
+			Logger logger = Logger.getLogger("io.firebus");
 			FileHandler fh = new FileHandler("LoadRunner.log");
 			fh.setFormatter(new FirebusSimpleFormatter());
 			fh.setLevel(Level.FINEST);

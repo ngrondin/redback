@@ -18,7 +18,7 @@ import io.firebus.utils.DataMap;
 
 public class ImportData extends Thread
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	
 	protected Firebus firebus;
 	protected String token;

@@ -12,7 +12,7 @@ import io.redback.RedbackException;
 
 public abstract class ConfigServer extends Service
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 
 	public ConfigServer(String n, DataMap c, Firebus f) 
 	{

@@ -8,7 +8,7 @@ import jdk.nashorn.api.scripting.AbstractJSObject;
 
 public class LoggerJSFunction extends AbstractJSObject
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected Session session;
 	protected String right;
 	

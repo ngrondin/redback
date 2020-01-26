@@ -29,7 +29,7 @@ import io.redback.utils.FileWatcher.FileWatcherListener;
 
 public class RedbackConfigServer extends ConfigServer implements FileWatcherListener
 {
-	private Logger logger = Logger.getLogger("com.nic.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	private String devpath;
 	private String classpath;
 	
@@ -48,7 +48,7 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 				logger.severe("Exception trying to watch the filesystem: " + e.getMessage());
 			}
 		}
-		classpath = "com/nic/redback/config";		
+		classpath = "io/redback/config";		
 	}
 
 	
