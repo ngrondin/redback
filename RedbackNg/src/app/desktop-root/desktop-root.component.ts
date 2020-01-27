@@ -39,19 +39,18 @@ export class DesktopRootComponent implements OnInit {
       this.objectViewMap = {};
   }
 
-  get viewUrl() : string {
-    return this.apiService.baseUrl + '/' + this.apiService.uiService + '/view/' + this.version + '/' + this.view;
+  get viewTarget() : any {
+    return {
+      url: this.apiService.baseUrl + '/' + this.apiService.uiService + '/view/' + this.version + '/' + this.view,
+      userfilter: this.viewUserFilter
+    }
   }
 
-  get viewInitialUserFilter() : any {
-    if(this.viewUserFilter != null)
-      return this.viewUserFilter;
-    else
-      return {};
-  }
-
-  get menuUrl() : string {
-    return this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/' + this.version + '/' + this.menuView;
+  get menuTarget() : any {
+    return {
+      url: this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/' + this.version + '/' + this.menuView,
+      userfilter: null
+    };
   }
 
   get logoUrl() : any {
@@ -59,8 +58,8 @@ export class DesktopRootComponent implements OnInit {
   }
 
   navigateTo($event) {
-    this.viewUserFilter = $event.filter;
     this.view = $event.view;
+    this.viewUserFilter = $event.filter;
   }
 
   setTitle(title: string) {

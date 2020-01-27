@@ -27,14 +27,15 @@ export class RbDatasetDirective implements OnChanges {
   ) {   }
 
   ngOnInit() {
-    if(this.initialUserFilter != null) {
-      this.userFilter = this.initialUserFilter;
-    }
     this.refreshData();
     this.initiated = true;
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    if("initialUserFilter" in changes) {
+      this.userFilter = this.initialUserFilter;
+    }
+
     if(this.initiated) {
       if(this.active)
         this.refreshData();

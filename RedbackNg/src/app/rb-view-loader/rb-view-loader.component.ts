@@ -3,6 +3,7 @@ import { Http } from '@angular/http';
 import { __asyncDelegator } from 'tslib';
 import { CommonModule } from '@angular/common';
 import { RedbackModule } from '../redback.module';
+import { ApiService } from 'app/api.service';
 
 
 @Component({
@@ -12,30 +13,38 @@ import { RedbackModule } from '../redback.module';
 })
 export class RbViewLoaderComponent implements OnInit {
 
-  @Input('src') private templateUrl: string;
-  @Input('initialUserFilter') private initialUserFilter: any;
+  @Input('target') private target: any;
   @ViewChild('container', { read: ViewContainerRef, static: false }) container: ViewContainerRef;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() titlechange: EventEmitter<any> = new EventEmitter();
 
-  private componentRef: ComponentRef<{}>;
+  private currentUrl: string;
+  private currentFilter: string;
+  private componentRef: ComponentRef<{setInitialUserFilter(filter:any);}>;
 
   constructor(
     private http: Http,
     private resolver: ComponentFactoryResolver,
     private compiler: Compiler,
-    private vcRef: ViewContainerRef
+    private vcRef: ViewContainerRef,
+    private apiService: ApiService
   ) { }
 
   ngOnInit() {
   }
 
   ngOnChanges(changes : SimpleChange) {
-    if("templateUrl" in changes) {
-      this.http.get(this.templateUrl, { withCredentials: true, responseType: 0 }).subscribe(
-        res => this.compileTemplate(res.text())
-      );
-    }
+    if("target" in changes) {
+      if(this.target.url != this.currentUrl) {
+        this.http.get(this.target.url, { withCredentials: true, responseType: 0 }).subscribe(
+          res => this.compileTemplate(res.text())
+        );
+        this.currentUrl = this.target.url;
+      } else if(this.target.userfilter != this.currentFilter) {
+        this.componentRef.instance.setInitialUserFilter(this.target.userfilter);
+        this.currentFilter = this.target.userfilter;
+      }
+    } 
   }
 
   compileTemplate(body: string) {
@@ -79,7 +88,7 @@ export class RbViewLoaderComponent implements OnInit {
     }
 
     let newViewComponentRef : ComponentRef<ViewContainerComponent> = this.container.createComponent(factory);
-    newViewComponentRef.instance.setInitialUserFilter(this.initialUserFilter);
+    newViewComponentRef.instance.setInitialUserFilter(this.target.userfilter);
     newViewComponentRef.instance.navigate.subscribe(e => this.navigateTo(e));
     newViewComponentRef.instance.titlechange.subscribe(e => this.setTitle(e));
     this.componentRef = newViewComponentRef;

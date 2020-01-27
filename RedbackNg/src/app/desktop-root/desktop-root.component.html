@@ -37,14 +37,13 @@
         mode="side" 
         opened>
         <rb-view-loader 
-            [src]="menuUrl"
+            [target]="menuTarget"
             (navigate)="navigateTo($event)">
         </rb-view-loader>    
     </mat-sidenav>
     <mat-sidenav-content>
         <rb-view-loader 
-            [src]="viewUrl"
-            [initialUserFilter]="viewInitialUserFilter"
+            [target]="viewTarget"
             (navigate)="navigateTo($event)"
             (titlechange)="setTitle($event)">
         </rb-view-loader>
