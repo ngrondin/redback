@@ -56,6 +56,7 @@ public class RedbackUIServer extends UIServer
 		context.put("uiservice", this.serviceName);
 		context.put("objectservice", config.getString("objectservice"));
 		context.put("processservice", config.getString("processservice"));
+		context.put("utils", new RedbackUtilsJSWrapper());
 		if(session != null)
 		{
 			if(session.getUserProfile().canRead("rb.apps." + name))
@@ -122,6 +123,7 @@ public class RedbackUIServer extends UIServer
 		menu.getList("content").sort("order");
 		Bindings context = jsEngine.createBindings();
 		context.put("session", session);
+		context.put("utils", new RedbackUtilsJSWrapper());
 		return generateHTMLFromComponentConfig(menu, version, context);
 	}
 

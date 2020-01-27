@@ -41,12 +41,12 @@ public class RelatedObjectConfig
 				ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 				try
 				{
-					String scriptSrc = StringUtils.unescape((String)f);
+					String scriptSrc = ((DataLiteral)f).getString();
 					listFilterScript = ((Compilable)jsEngine).compile(scriptSrc);
 				} 
 				catch (ScriptException e)
 				{
-					throw new RedbackException("Problem compiling the list script for related object '" + getObjectName() + "'", e);
+					throw new RedbackException("Problem compiling the list filter script for related object '" + getObjectName() + "'", e);
 				}
 			}
 		}
@@ -89,7 +89,7 @@ public class RelatedObjectConfig
 			DataMap filter = new DataMap();
 			Bindings context = listFilterScript.getEngine().createBindings();
 			context.put("self", obj);
-			context.put("om", obj.getObjectManager());
+			context.put("om", new ObjectManagerJSWrapper(obj.getObjectManager(), obj.getUserSession()));
 			context.put("userprofile", obj.getUserSession().getUserProfile());
 			context.put("firebus", new FirebusJSWrapper(obj.getObjectManager().getFirebus(), obj.getUserSession()));
 			context.put("global", FirebusDataUtil.convertDataObjectToJSObject(obj.getObjectManager().getGlobalVariables()));
@@ -97,7 +97,7 @@ public class RelatedObjectConfig
 			try
 			{
 				listFilterScript.eval(context);
-				filter = FirebusDataUtil.convertJSObjectToDataObject((JSObject)context.get(filter));
+				filter = FirebusDataUtil.convertJSObjectToDataObject((JSObject)context.get("filter"));
 			} 
 			catch (ScriptException e)
 			{
