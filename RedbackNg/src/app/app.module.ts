@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.component';
 
 
 @NgModule({
@@ -22,7 +23,7 @@ import { ToastrModule } from 'ngx-toastr';
     MatIconModule
   ],
   declarations: [
-    AppComponent   
+    AppComponent 
   ],
   providers: [
   ],

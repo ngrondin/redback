@@ -13,6 +13,7 @@ import { RedbackModule } from '../redback.module';
 export class RbViewLoaderComponent implements OnInit {
 
   @Input('src') private templateUrl: string;
+  @Input('initialUserFilter') private initialUserFilter: any;
   @ViewChild('container', { read: ViewContainerRef, static: false }) container: ViewContainerRef;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() titlechange: EventEmitter<any> = new EventEmitter();
@@ -30,7 +31,11 @@ export class RbViewLoaderComponent implements OnInit {
   }
 
   ngOnChanges(changes : SimpleChange) {
-    this.http.get(this.templateUrl, { withCredentials: true, responseType: 0 }).subscribe(res => this.compileTemplate(res.text()));
+    if("templateUrl" in changes) {
+      this.http.get(this.templateUrl, { withCredentials: true, responseType: 0 }).subscribe(
+        res => this.compileTemplate(res.text())
+      );
+    }
   }
 
   compileTemplate(body: string) {
@@ -42,11 +47,15 @@ export class RbViewLoaderComponent implements OnInit {
     class ViewContainerComponent {
       @Output() navigate: EventEmitter<any> = new EventEmitter();
       @Output() titlechange: EventEmitter<any> = new EventEmitter();
-      navigateTo(view : string, title : string) {
-        this.navigate.emit({view : view, title : title});
+      initialUserFilter: any;
+      navigateTo(view : string) {
+        this.navigate.emit({view : view});
       }
       setTitle(title: string) {
         this.titlechange.emit(title);
+      }
+      setInitialUserFilter(filter: any) {
+        this.initialUserFilter = filter;
       }
     };
 
@@ -70,6 +79,7 @@ export class RbViewLoaderComponent implements OnInit {
     }
 
     let newViewComponentRef : ComponentRef<ViewContainerComponent> = this.container.createComponent(factory);
+    newViewComponentRef.instance.setInitialUserFilter(this.initialUserFilter);
     newViewComponentRef.instance.navigate.subscribe(e => this.navigateTo(e));
     newViewComponentRef.instance.titlechange.subscribe(e => this.setTitle(e));
     this.componentRef = newViewComponentRef;

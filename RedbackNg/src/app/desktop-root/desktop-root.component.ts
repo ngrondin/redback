@@ -2,6 +2,8 @@ import { Component, OnInit, Input } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { ApiService } from 'app/api.service';
 import { DomSanitizer } from '@angular/platform-browser';
+import { DataService } from 'app/data.service';
+import { RbObject } from 'app/datamodel';
 
 @Component({
   selector: 'desktop-root',
@@ -15,10 +17,11 @@ export class DesktopRootComponent implements OnInit {
   @Input() username : string;
   @Input() userdisplay : string;
   @Input() initialView : string;
-  @Input() initialViewTitle : string;
   @Input() menuView : string;
   @Input() version : string;
+  @Input() objectViewMap : any;
   view: string;
+  viewUserFilter: string;
   viewTitle: string;
  
   constructor(
@@ -32,11 +35,19 @@ export class DesktopRootComponent implements OnInit {
     if(this.version == null)
       this.version = 'default';
     this.view = this.initialView;
-    this.viewTitle = this.initialViewTitle;
+    if(this.objectViewMap == null)
+      this.objectViewMap = {};
   }
 
   get viewUrl() : string {
     return this.apiService.baseUrl + '/' + this.apiService.uiService + '/view/' + this.version + '/' + this.view;
+  }
+
+  get viewInitialUserFilter() : any {
+    if(this.viewUserFilter != null)
+      return this.viewUserFilter;
+    else
+      return {};
   }
 
   get menuUrl() : string {
@@ -48,11 +59,14 @@ export class DesktopRootComponent implements OnInit {
   }
 
   navigateTo($event) {
+    this.viewUserFilter = $event.filter;
     this.view = $event.view;
   }
 
   setTitle(title: string) {
     this.viewTitle = title;
   }
+
+
 
 }

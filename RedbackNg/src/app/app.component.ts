@@ -21,6 +21,7 @@ export class AppComponent {
   initialViewTitle: string;
   menuView: string;
   iconsets: string[];
+  objectViewMap: any;
 
   constructor(
       private elementRef: ElementRef,
@@ -40,6 +41,8 @@ export class AppComponent {
     this.apiService.uiService = native.getAttribute("uiservice");
     this.apiService.objectService = native.getAttribute("objectservice");
     this.apiService.processService = native.getAttribute("processservice");
+    let objectViewMapString: string = native.getAttribute("objectviewmap");
+    this.objectViewMap = JSON.parse(objectViewMapString.replace(/'/g, '"'));
 
     let currentUrl = window.location.href;
     let pos = currentUrl.indexOf(this.apiService.uiService);

@@ -13,9 +13,10 @@
         <div
             class="rb-toolbar-spacer">
         </div>
-        <mat-icon>search</mat-icon>
-        <input
-            class="rb-toolbar-search">
+        <rb-global-search
+            [objectViewMap]="objectViewMap"
+            (navigate)="navigateTo($event)">
+        </rb-global-search>
         <button
             mat-button
             [matMenuTriggerFor]="usermenu">
@@ -43,6 +44,7 @@
     <mat-sidenav-content>
         <rb-view-loader 
             [src]="viewUrl"
+            [initialUserFilter]="viewInitialUserFilter"
             (navigate)="navigateTo($event)"
             (titlechange)="setTitle($event)">
         </rb-view-loader>

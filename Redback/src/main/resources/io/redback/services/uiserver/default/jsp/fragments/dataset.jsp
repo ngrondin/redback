@@ -12,6 +12,9 @@ if(config.getObject('master') != null) { %>
 } 
 if(config.get('basefilter') != null) { %>
 	[baseFilter]="<%=utils.convertDataMapToAttributeString(utils.convertFilterForClient(config.getObject('basefilter')))%>"<% 
+} 
+if(typeof dataset == 'undefined') { %>
+	[initialUserFilter]="initialUserFilter" <%
 } %>
 	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
 	#content#

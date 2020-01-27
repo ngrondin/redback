@@ -29,8 +29,8 @@ import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.
 import { AgmCoreModule } from '@agm/core';
 import { RbProcessactionsComponent } from './rb-processactions/rb-processactions.component';
 import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
-import { ToastrModule } from 'ngx-toastr';
 import { RbViewDirective } from './rb-view/rb-view.directive';
+import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.component';
 
 @NgModule({
   imports: [
@@ -79,7 +79,8 @@ import { RbViewDirective } from './rb-view/rb-view.directive';
     RbTabDirective,
     RbTabSectionDirective,
     RbFilterBuilderComponent,
-    RbProcessactionsComponent
+    RbProcessactionsComponent,
+    RbGlobalSeachComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -107,7 +108,8 @@ import { RbViewDirective } from './rb-view/rb-view.directive';
     RbTabDirective,
     RbTabSectionDirective,
     RbFilterBuilderComponent,
-    RbProcessactionsComponent
+    RbProcessactionsComponent,
+    RbGlobalSeachComponent
   ],
   providers: [
     CookieService,

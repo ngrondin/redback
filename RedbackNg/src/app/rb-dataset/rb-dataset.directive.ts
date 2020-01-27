@@ -12,6 +12,7 @@ export class RbDatasetDirective implements OnChanges {
   @Input('relatedObject') relatedObject: RbObject;
   @Input('relatedFilter') relatedFilter: any;
   @Input('baseFilter') baseFilter: any;
+  @Input('initialUserFilter') initialUserFilter: any;
   @Input('active') active: boolean;
 
   public list: RbObject[] = [];
@@ -19,19 +20,27 @@ export class RbDatasetDirective implements OnChanges {
   public searchString: string;
   public userFilter: any;
   public isLoading: boolean;
+  public initiated: boolean = false;
 
   constructor(
     private dataService: DataService
   ) {   }
 
   ngOnInit() {
+    if(this.initialUserFilter != null) {
+      this.userFilter = this.initialUserFilter;
+    }
+    this.refreshData();
+    this.initiated = true;
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if(this.active)
-      this.refreshData();
+    if(this.initiated) {
+      if(this.active)
+        this.refreshData();
     else
       this.list = [];
+    }
   }
 
   private mergeFilters() : any {
@@ -74,7 +83,9 @@ export class RbDatasetDirective implements OnChanges {
     this.selectedObject = null;
     if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
       const filter = this.mergeFilters();
-      this.dataService.listObjects(this.objectname, filter, this.searchString).subscribe(data => this.setData(data));
+      this.dataService.listObjects(this.objectname, filter, this.searchString).subscribe(
+        data => this.setData(data)
+      );
       this.isLoading = true;
     }
   }
@@ -82,6 +93,9 @@ export class RbDatasetDirective implements OnChanges {
   private setData(data: RbObject[]) {
     this.list = data;
     this.isLoading = false;
+    if(this.list.length == 1) {
+      this.selectedObject = this.list[0];
+    }
   }
 
   public select(item: RbObject) {
