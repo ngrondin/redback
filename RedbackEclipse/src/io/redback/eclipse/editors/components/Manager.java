@@ -5,7 +5,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.RedbackConfigEditor;
 

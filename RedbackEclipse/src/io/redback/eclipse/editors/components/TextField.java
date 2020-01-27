@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataMap;
 
 public class TextField extends Composite implements ModifyListener {
 	

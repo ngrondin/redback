@@ -10,22 +10,16 @@ import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.TextField;
 
-public class ViewDateInputForm extends Form
+public class ViewSpacerForm extends Form
 {
-	public ViewDateInputForm(DataMap d, Manager m, Composite p, int s) 
+	public ViewSpacerForm(DataMap d, Manager m, Composite p, int s) 
 	{
 		super(d, m, p, s);
 		createUI();
 	}
 	
 	public void createUI() {
-		new TextField(data, "label", "Label", this, SWT.NONE);
-		new TextField(data, "attribute", "Attribute", this, SWT.NONE);
-		new TextField(data, "icon", "Icon", this, SWT.NONE);
 		new TextField(data, "size", "Size", this, SWT.NONE);
-		new CheckboxField(data, "grow", "Grow", this, SWT.NONE).setAsOneAndZero(true);
-		new TextField(data, "show", "Show (!)", this, SWT.NONE);
-		new TextField(data, "format", "Format", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

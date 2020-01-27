@@ -6,9 +6,9 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
-import com.nic.firebus.utils.DataEntity;
-import com.nic.firebus.utils.DataList;
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataEntity;
+import io.firebus.utils.DataList;
+import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.RedbackConfigEditor;
 import io.redback.eclipse.editors.components.Form;
@@ -72,6 +72,8 @@ public class ViewManager extends Manager {
 			return new ViewButtonForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("tab")) {
 			return new ViewTabForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("spacer")) {
+			return new ViewSpacerForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

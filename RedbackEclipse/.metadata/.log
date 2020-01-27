@@ -3113,7 +3113,7 @@ Caused by: java.lang.NoClassDefFoundError: com/nic/firebus/utils/DataException
 	at java.lang.Class.getDeclaredConstructor(Class.java:2178)
 	at org.eclipse.core.internal.registry.osgi.RegistryStrategyOSGI.createExecutableExtension(RegistryStrategyOSGI.java:204)
 	... 92 more
-Caused by: java.lang.ClassNotFoundException: com.nic.firebus.utils.DataException cannot be found by RedbackEclipse_1.0.0.qualifier
+Caused by: java.lang.ClassNotFoundException: io.firebus.utils.DataException cannot be found by RedbackEclipse_1.0.0.qualifier
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClassInternal(BundleLoader.java:512)
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:423)
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:415)
@@ -3221,7 +3221,7 @@ java.lang.NoClassDefFoundError: com/nic/firebus/utils/DataException
 	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:597)
 	at org.eclipse.equinox.launcher.Main.run(Main.java:1468)
 	at org.eclipse.equinox.launcher.Main.main(Main.java:1441)
-Caused by: java.lang.ClassNotFoundException: com.nic.firebus.utils.DataException cannot be found by RedbackEclipse_1.0.0.qualifier
+Caused by: java.lang.ClassNotFoundException: io.firebus.utils.DataException cannot be found by RedbackEclipse_1.0.0.qualifier
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClassInternal(BundleLoader.java:512)
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:423)
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:415)
@@ -3438,7 +3438,7 @@ Caused by: java.lang.NoClassDefFoundError: com/nic/firebus/utils/DataException
 	at java.lang.Class.getDeclaredConstructor(Class.java:2178)
 	at org.eclipse.core.internal.registry.osgi.RegistryStrategyOSGI.createExecutableExtension(RegistryStrategyOSGI.java:204)
 	... 90 more
-Caused by: java.lang.ClassNotFoundException: com.nic.firebus.utils.DataException cannot be found by RedbackEclipse_1.0.0.qualifier
+Caused by: java.lang.ClassNotFoundException: io.firebus.utils.DataException cannot be found by RedbackEclipse_1.0.0.qualifier
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClassInternal(BundleLoader.java:512)
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:423)
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:415)
@@ -3544,7 +3544,7 @@ java.lang.NoClassDefFoundError: com/nic/firebus/utils/DataException
 	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:597)
 	at org.eclipse.equinox.launcher.Main.run(Main.java:1468)
 	at org.eclipse.equinox.launcher.Main.main(Main.java:1441)
-Caused by: java.lang.ClassNotFoundException: com.nic.firebus.utils.DataException cannot be found by RedbackEclipse_1.0.0.qualifier
+Caused by: java.lang.ClassNotFoundException: io.firebus.utils.DataException cannot be found by RedbackEclipse_1.0.0.qualifier
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClassInternal(BundleLoader.java:512)
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:423)
 	at org.eclipse.osgi.internal.loader.BundleLoader.findClass(BundleLoader.java:415)
@@ -6131,9 +6131,9 @@ java.lang.ClassNotFoundException: io.redback.eclipse.editors.RedbackConfigEditor
 !SUBENTRY 1 org.eclipse.ui 4 0 2020-01-19 20:24:29.071
 !MESSAGE Error initialising the editor
 !STACK 0
-com.nic.firebus.utils.DataException: Missing '}' as line 1 column 2
-	at com.nic.firebus.utils.DataMap.initialise(DataMap.java:169)
-	at com.nic.firebus.utils.DataMap.<init>(DataMap.java:43)
+io.firebus.utils.DataException: Missing '}' as line 1 column 2
+	at io.firebus.utils.DataMap.initialise(DataMap.java:169)
+	at io.firebus.utils.DataMap.<init>(DataMap.java:43)
 	at io.redback.eclipse.editors.RedbackConfigEditor.init(RedbackConfigEditor.java:43)
 	at org.eclipse.ui.internal.EditorReference.initialize(EditorReference.java:354)
 	at org.eclipse.ui.internal.e4.compatibility.CompatibilityPart.create(CompatibilityPart.java:340)

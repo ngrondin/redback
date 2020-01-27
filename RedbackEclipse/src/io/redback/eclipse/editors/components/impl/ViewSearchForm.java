@@ -3,8 +3,8 @@ package io.redback.eclipse.editors.components.impl;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
-import com.nic.firebus.utils.DataList;
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataList;
+import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.CheckboxField;
 import io.redback.eclipse.editors.components.Form;

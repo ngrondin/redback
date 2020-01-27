@@ -4,7 +4,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Composite;
 
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.CheckboxField;
 import io.redback.eclipse.editors.components.Form;

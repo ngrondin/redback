@@ -10,8 +10,8 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-import com.nic.firebus.utils.DataList;
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataList;
+import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.NavigatorAction;
 import io.redback.eclipse.editors.components.Manager;

@@ -20,8 +20,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.EditorPart;
 
-import com.nic.firebus.utils.DataException;
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataException;
+import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.impl.AppManager;

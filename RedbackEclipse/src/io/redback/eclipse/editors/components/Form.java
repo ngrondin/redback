@@ -5,7 +5,7 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataMap;
 
 public abstract class Form extends Composite {
 	

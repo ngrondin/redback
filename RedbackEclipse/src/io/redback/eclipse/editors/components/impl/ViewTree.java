@@ -17,8 +17,8 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-import com.nic.firebus.utils.DataList;
-import com.nic.firebus.utils.DataMap;
+import io.firebus.utils.DataList;
+import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.Navigator;
@@ -84,7 +84,7 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 
 	protected void createContextMenu(Menu menu, String type, String name) {
 		MenuItem item = null;
-		DataMap menuData = data.getObject(name);
+ 		DataMap menuData = name != null ? data.getObject(name) : data;
 		if(menuData.containsKey("content")) {
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create HSection");
@@ -101,6 +101,10 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create Tab");
 		    item.setData(new NavigatorAction("create", "tab", name));
+
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create Spacer");
+		    item.setData(new NavigatorAction("create", "spacer", name));
 
 		    new MenuItem(menu, SWT.SEPARATOR);
 		    
@@ -171,11 +175,13 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 		    new MenuItem(menu, SWT.SEPARATOR);
 		}
 		
-		String nextSelectName = name.substring(0, name.lastIndexOf(".", name.lastIndexOf(".") - 1));
-		String nextSelectType = data.getObject(nextSelectName).getString("type");
-		item = new MenuItem(menu, SWT.PUSH);
-	    item.setText("Delete");
-	    item.setData(new NavigatorAction("delete", type, name, nextSelectType, nextSelectName));
+		if(name != null) {
+			String nextSelectName = name.substring(0, name.lastIndexOf(".", name.lastIndexOf(".") - 1));
+			String nextSelectType = data.getObject(nextSelectName).getString("type");
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Delete");
+		    item.setData(new NavigatorAction("delete", type, name, nextSelectType, nextSelectName));
+		}
 
 	}
 
