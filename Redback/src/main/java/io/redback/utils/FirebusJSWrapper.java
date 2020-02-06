@@ -1,5 +1,6 @@
 package io.redback.utils;
 
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import io.firebus.Firebus;
@@ -24,6 +25,11 @@ public class FirebusJSWrapper
 	
 	public JSObject request(String serviceName, JSObject jsRequest) throws RedbackException 
 	{
+		return request(serviceName, null, jsRequest);
+	}
+	
+	public JSObject request(String serviceName, JSObject metadata, JSObject jsRequest) throws RedbackException 
+	{
 		if(serviceName != null)
 		{
 			try
@@ -31,6 +37,14 @@ public class FirebusJSWrapper
 				DataMap requestObject = FirebusDataUtil.convertJSObjectToDataObject(jsRequest);
 				Payload request = new Payload(requestObject.toString());
 				request.metadata.put("token", session.getToken());
+				if(metadata != null) 
+				{
+					Iterator<String> it = metadata.keySet().iterator();
+					while(it.hasNext()) {
+						String key = it.next();
+						request.metadata.put(key, metadata.getMember(key).toString());
+					}
+				}
 				logger.finest("Requesting firebus service : " + serviceName + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
 				Payload response = firebus.requestService(serviceName, request);
 				logger.finest("Receiving firebus service respnse");

@@ -133,15 +133,6 @@ public class RedbackUIServer extends UIServer
 		HTML viewHTML = new HTML();
 		if(session != null)
 		{
-			if(context == null)
-			{
-				context = jsEngine.createBindings();
-				context.put("session", session);
-				context.put("utils", new RedbackUtilsJSWrapper());
-				context.put("canWrite", true);
-				context.put("canExecute", true);
-			}
-
 			if(session.getUserProfile().canRead("rb.views." + viewName))
 			{
 				try
@@ -154,14 +145,26 @@ public class RedbackUIServer extends UIServer
 					}
 					if(viewConfig != null)
 					{
+						if(context == null)
+						{
+							context = jsEngine.createBindings();
+							context.put("session", session);
+							context.put("utils", new RedbackUtilsJSWrapper());
+							context.put("canWrite", true);
+							context.put("canExecute", true);
+							viewHTML.append("<rb-view\r\n\t(afterload)=\"setTitle('" + viewConfig.getString("label") + "')\">\r\n\t#content#\r\n</rb-view>");
+						}
+
 						context.put("canWrite", session.getUserProfile().canWrite("rb.views." + viewName) & (boolean)context.get("canWrite"));
 						context.put("canExecute", session.getUserProfile().canExecute("rb.views." + viewName) & (boolean)context.get("canExecute"));
 						DataList contentList = viewConfig.getList("content");
-						viewHTML.append("<rb-view\r\n\t(afterload)=\"setTitle('" + viewConfig.getString("label") + "')\">\r\n\t#content#\r\n</rb-view>");
 						HTML contentHTML = new HTML();
 						for(int i = 0; i < contentList.size(); i++)
 							contentHTML.append(generateHTMLFromComponentConfig(contentList.getObject(i), version, context));
-						viewHTML.inject("content", contentHTML);
+						if(viewHTML.hasTag("content"))
+							viewHTML.inject("content", contentHTML);
+						else
+							viewHTML = contentHTML;
 					}
 					else
 					{

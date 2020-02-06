@@ -84,6 +84,15 @@ public class ObjectConfig
 	{
 		return config.getString("domaindbkey");
 	}
+	
+	public boolean isDomainManaged()
+	{
+		String domainDBKey = config.getString("domaindbkey");
+		if(domainDBKey != null && domainDBKey.length() > 0)
+			return true;
+		else
+			return false;
+	}
 
 	public Set<String> getAttributeNames()
 	{
@@ -100,78 +109,5 @@ public class ObjectConfig
 		return scripts.get(event);
 	}
 	
-	public DataMap generateDBFilter(DataMap objectFilter) throws DataException, FunctionErrorException
-	{
-		DataMap dbFilter = new DataMap();
-		Iterator<String> it = objectFilter.keySet().iterator();
-		while(it.hasNext())
-		{
-			String key = it.next();
-			if(key.equals("$eq")  ||  key.equals("$gt")  ||  key.equals("$gte")  ||  key.equals("$lt")  ||  key.equals("$lte")  ||  key.equals("$ne"))
-			{
-				dbFilter.put(key, objectFilter.getString(key));
-			}
-			else if(key.equals("$in")  ||  key.equals("$nin"))
-			{
-				dbFilter.put(key, objectFilter.getList(key));
-			}
-			else if(key.equals("$or") || key.equals("$and"))
-			{
-				DataList objectList = objectFilter.getList(key);
-				DataList dbList = new DataList();
-				for(int i = 0; i < objectList.size(); i++)
-				{
-					dbList.add(generateDBFilter(objectList.getObject(i)));
-				}
-				dbFilter.put(key, dbList);
-			}
-/*			else if(key.equals("$multi"))
-			{
-				JSONList dbOrList = new JSONList();
-				Iterator<String> it2 = getAttributeNames().iterator();
-				while(it2.hasNext())
-				{
-					AttributeConfig attributeConfig = getAttributeConfig(it2.next());
-					if(attributeConfig.getDBKey() != null)
-					{
-						JSONObject orTerm = new JSONObject();
-						orTerm.put(attributeConfig.getName(), objectFilter.get(key));
-						dbOrList.add(generateDBFilter(orTerm));
-					}
-				}
-				dbFilter.put("$or", generateDBMultiOrList(objectFilter.get(key)));
-			}	*/		
-			else
-			{
-				String attributeDBKey = null; 
-				AttributeConfig attributeConfig = getAttributeConfig(key);
-				if(key.equals("uid"))
-					attributeDBKey = getUIDDBKey();
-				else if(attributeConfig != null)
-					attributeDBKey = attributeConfig.getDBKey();
-				
-				if(attributeDBKey != null)
-				{
-					DataEntity objectFilterValue = objectFilter.get(key);
-					DataEntity dbFilterValue = null;
-					if(objectFilterValue instanceof DataMap)
-					{
-						dbFilterValue = generateDBFilter((DataMap)objectFilterValue);
-					}
-					else if(objectFilterValue instanceof DataLiteral)
-					{
-						String objectFilterValueString = ((DataLiteral)objectFilterValue).getString();
-						if(objectFilterValueString != null  &&  objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
-							dbFilterValue =  new DataMap("{$regex:\"" + objectFilterValueString.substring(1, objectFilterValueString.length() - 1) + "\"}");
-						else
-							dbFilterValue = ((DataLiteral)objectFilterValue).getCopy();
-					}
-					dbFilter.put(attributeDBKey, dbFilterValue);
-				}
-			}
-		}
 
-		return dbFilter;
-	}
-	
 }

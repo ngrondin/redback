@@ -12,8 +12,10 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
+import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
@@ -123,70 +125,6 @@ public class ObjectManager
 	}
 	
 	
-	protected DataMap generateSearchFilter(Session session, String objectName, String searchText) throws RedbackException
-	{
-		DataMap filter = new DataMap();
-		DataList orList = new DataList();
-		ObjectConfig config = getObjectConfig(objectName);
-		Iterator<String> it = config.getAttributeNames().iterator();
-		while(it.hasNext())
-		{
-			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-			if(attributeConfig.getDBKey() != null)
-			{
-				if(!attributeConfig.hasRelatedObject())
-				{
-					DataMap orTerm = new DataMap();
-					orTerm.put(attributeConfig.getName(), "*" + searchText + "*");
-					orList.add(orTerm);
-				}
-				else
-				{
-					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-					String relatedObejctName = roc.getObjectName();
-					ObjectConfig relatedConfig = getObjectConfig(relatedObejctName);
-					if(relatedConfig != null)
-					{
-						DataMap relatedFilter = new DataMap();
-						DataList relatedOrList = new DataList();
-						Iterator<String> it2 = relatedConfig.getAttributeNames().iterator();
-						while(it2.hasNext())
-						{
-							AttributeConfig relatedAttributeConfig = relatedConfig.getAttributeConfig(it2.next());
-							if(relatedAttributeConfig.getDBKey() != null  &&  !relatedAttributeConfig.hasRelatedObject())
-							{
-								DataMap orTerm = new DataMap();
-								orTerm.put(relatedAttributeConfig.getName(), "*" + searchText + "*");
-								relatedOrList.add(orTerm);
-							}
-						}
-						relatedFilter.put("$or", relatedOrList);
-						ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null);
-						if(result.size() > 0)
-						{
-							DataMap orTerm = new DataMap();
-							DataList inList = new DataList();
-							for(int k = 0; k < result.size(); k++)
-							{
-								RedbackObject resultObject = result.get(k);
-								Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
-								inList.add(resultObjectLinkValue.getObject());
-								//DataMap orTerm = new DataMap();
-								//orTerm.put(attributeConfig.getName(), resultObjectLinkValue.getObject());
-								//orList.add(orTerm);
-							}
-							orTerm.put(attributeConfig.getName(), new DataMap("$in", inList));
-							orList.add(orTerm);
-						}
-					}
-				}
-			}
-		}
-		filter.put("$or", orList);
-		return filter;
-	}
-
-
 	
 	public RedbackObject getObject(Session session, String objectName, String id) throws RedbackException
 	{
@@ -236,7 +174,7 @@ public class ObjectManager
 					objectFilter.merge(filterData);
 				if(searchText != null)
 					objectFilter.merge(generateSearchFilter(session, objectName, searchText));
-				DataMap dbFilter = objectConfig.generateDBFilter(objectFilter);
+				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 				DataMap dbResult = requestData(objectConfig.getCollection(), dbFilter, page);
@@ -386,6 +324,150 @@ public class ObjectManager
 			}
 		}		
 	}
+	
+	
+	public DataMap generateDBFilter(Session session, ObjectConfig objectConfig, DataMap objectFilter) throws DataException, FunctionErrorException, RedbackException
+	{
+		DataMap dbFilter = new DataMap();
+		Iterator<String> it = objectFilter.keySet().iterator();
+		while(it.hasNext())
+		{
+			String key = it.next();
+			if(key.equals("$eq")  ||  key.equals("$gt")  ||  key.equals("$gte")  ||  key.equals("$lt")  ||  key.equals("$lte")  ||  key.equals("$ne"))
+			{
+				dbFilter.put(key, objectFilter.getString(key));
+			}
+			else if(key.equals("$in")  ||  key.equals("$nin"))
+			{
+				dbFilter.put(key, objectFilter.getList(key));
+			}
+			else if(key.equals("$or") || key.equals("$and"))
+			{
+				DataList list = objectFilter.getList(key);
+				DataList dbList = new DataList();
+				for(int i = 0; i < list.size(); i++)
+				{
+					dbList.add(generateDBFilter(session, objectConfig, list.getObject(i)));
+				}
+				dbFilter.put(key, dbList);
+			}
+			else if(key.contains(".")) 
+			{
+				String rootAttribute = key.substring(0, key.indexOf("."));
+				String remainder = key.substring(key.indexOf(".") + 1);
+				AttributeConfig attributeConfig = objectConfig.getAttributeConfig(rootAttribute);
+				if(attributeConfig.hasRelatedObject())
+				{
+					DataList dbList = new DataList();
+					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+					ObjectConfig nextObjectConfig = getObjectConfig(roc.getObjectName());
+					ArrayList<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null);
+					if(list.size() > 0) {
+						for(int k = 0; k < list.size(); k++)
+						{
+							RedbackObject resultObject = list.get(k);
+							Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
+							dbList.add(resultObjectLinkValue.getObject());
+						}
+						dbFilter.put(rootAttribute, new DataMap("$in", dbList));
+					} else {
+						dbFilter.put(rootAttribute, "");
+					}
+				}
+			}
+			else
+			{
+				String attributeDBKey = null; 
+				AttributeConfig attributeConfig = objectConfig.getAttributeConfig(key);
+				if(key.equals("uid"))
+					attributeDBKey = objectConfig.getUIDDBKey();
+				else if(attributeConfig != null)
+					attributeDBKey = attributeConfig.getDBKey();
+				
+				if(attributeDBKey != null)
+				{
+					DataEntity objectFilterValue = objectFilter.get(key);
+					DataEntity dbFilterValue = null;
+					if(objectFilterValue instanceof DataMap)
+					{
+						dbFilterValue = generateDBFilter(session, objectConfig, (DataMap)objectFilterValue);
+					}
+					else if(objectFilterValue instanceof DataLiteral)
+					{
+						String objectFilterValueString = ((DataLiteral)objectFilterValue).getString();
+						if(objectFilterValueString != null  &&  objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
+							dbFilterValue =  new DataMap("{$regex:\"" + objectFilterValueString.substring(1, objectFilterValueString.length() - 1) + "\"}");
+						else
+							dbFilterValue = ((DataLiteral)objectFilterValue).getCopy();
+					}
+					dbFilter.put(attributeDBKey, dbFilterValue);
+				}
+			}
+		}
+
+		return dbFilter;
+	}
+	
+	protected DataMap generateSearchFilter(Session session, String objectName, String searchText) throws RedbackException
+	{
+		DataMap filter = new DataMap();
+		DataList orList = new DataList();
+		ObjectConfig config = getObjectConfig(objectName);
+		Iterator<String> it = config.getAttributeNames().iterator();
+		while(it.hasNext())
+		{
+			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+			if(attributeConfig.getDBKey() != null)
+			{
+				if(!attributeConfig.hasRelatedObject())
+				{
+					DataMap orTerm = new DataMap();
+					orTerm.put(attributeConfig.getName(), "*" + searchText + "*");
+					orList.add(orTerm);
+				}
+				else
+				{
+					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+					String relatedObejctName = roc.getObjectName();
+					ObjectConfig relatedConfig = getObjectConfig(relatedObejctName);
+					if(relatedConfig != null)
+					{
+						DataMap relatedFilter = new DataMap();
+						DataList relatedOrList = new DataList();
+						Iterator<String> it2 = relatedConfig.getAttributeNames().iterator();
+						while(it2.hasNext())
+						{
+							AttributeConfig relatedAttributeConfig = relatedConfig.getAttributeConfig(it2.next());
+							if(relatedAttributeConfig.getDBKey() != null  &&  !relatedAttributeConfig.hasRelatedObject())
+							{
+								DataMap orTerm = new DataMap();
+								orTerm.put(relatedAttributeConfig.getName(), "*" + searchText + "*");
+								relatedOrList.add(orTerm);
+							}
+						}
+						relatedFilter.put("$or", relatedOrList);
+						ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null);
+						if(result.size() > 0)
+						{
+							DataMap orTerm = new DataMap();
+							DataList inList = new DataList();
+							for(int k = 0; k < result.size(); k++)
+							{
+								RedbackObject resultObject = result.get(k);
+								Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
+								inList.add(resultObjectLinkValue.getObject());
+							}
+							orTerm.put(attributeConfig.getName(), new DataMap("$in", inList));
+							orList.add(orTerm);
+						}
+					}
+				}
+			}
+		}
+		filter.put("$or", orList);
+		return filter;
+	}
+	
 	
 	protected DataMap request(String service, DataMap request) throws DataException, FunctionErrorException, FunctionTimeoutException
 	{

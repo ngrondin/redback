@@ -36,7 +36,7 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 	public RedbackConfigServer(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
-		if(config.containsKey("devpath")) 
+		if(config.containsKey("devpath") && config.getString("devpath").length() > 0) 
 		{
 			devpath = config.getString("devpath");
 			try 

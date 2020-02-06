@@ -3,8 +3,12 @@ package io.redback;
 import java.io.FileInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
@@ -177,9 +181,40 @@ public class RedbackServer implements Consumer
 			try
 			{
 				Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
-				DataMap config = new DataMap(new FileInputStream(args[0]));
-				new RedbackServer(config);
-				System.out.println("Redback server started");
+				DataMap config = null;
+				String configString = null;
+				Properties props = null;
+				for(int i = 0; i < args.length; i++) 
+				{
+					if(args[i].endsWith(".json"))
+					{
+						configString = new String(Files.readAllBytes(Paths.get(args[i])));
+					}
+					else if(args[i].endsWith("properties"))
+					{
+						props = new Properties();
+						props.load(new FileInputStream(args[i]));
+					}
+				}
+				
+				if(configString != null) 
+				{
+					int pos1 = -1;
+					while((pos1 = configString.indexOf("{{")) != -1)
+					{
+						int pos2 = configString.indexOf("}}", pos1);
+						String key = configString.substring(pos1 + 2, pos2);
+						String val = props != null ? props.getProperty(key) : "";
+						configString = configString.substring(0, pos1) + val + configString.substring(pos2 + 2);
+					}
+					config = new DataMap(configString);
+					new RedbackServer(config);
+					System.out.println("Redback server started");
+				}
+				else
+				{
+					System.out.println("No config file provided");
+				}
 			} 
 			catch (Exception e)
 			{

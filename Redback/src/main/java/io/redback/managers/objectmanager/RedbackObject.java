@@ -66,7 +66,7 @@ public class RedbackObject
 				if(config.getUIDGeneratorName() != null)
 				{
 					uid = objectManager.getNewID(config.getUIDGeneratorName());
-					domain = new Value(d != null ? d : session.getUserProfile().getAttribute("rb.defaultdomain"));
+					domain = new Value(config.isDomainManaged() ? (d != null ? d : session.getUserProfile().getAttribute("rb.defaultdomain")) : "root");
 					Iterator<String> it = config.getAttributeNames().iterator();
 					while(it.hasNext())
 					{
@@ -113,7 +113,7 @@ public class RedbackObject
 	protected void setDataFromDBData(DataMap dbData)
 	{
 		uid = new Value(dbData.getString(config.getUIDDBKey()));
-		domain = new Value(dbData.getString(config.getDomainDBKey()));
+		domain = new Value(config.isDomainManaged() ? dbData.getString(config.getDomainDBKey()) : "root");
 		Iterator<String> it = config.getAttributeNames().iterator();
 		while(it.hasNext())
 		{
@@ -334,7 +334,7 @@ public class RedbackObject
 				key.put(config.getUIDDBKey(), getUID().getObject());
 
 				DataMap dbData = new DataMap();
-				if(isNewObject)
+				if(isNewObject && config.isDomainManaged())
 					dbData.put(config.getDomainDBKey(), domain.getObject());
 				
 				for(int i = 0; i < updatedAttributes.size(); i++)
@@ -347,9 +347,9 @@ public class RedbackObject
 						dbData.put(attributeDBKey, get(attributeName).getObject());
 					}
 				}
-				updatedAttributes.clear();
 				objectManager.publishData(config.getCollection(), key, dbData);
 				executeScriptsForEvent("aftersave");
+				updatedAttributes.clear();
 				if(isNewObject)
 				{
 					executeScriptsForEvent("aftercreate");
