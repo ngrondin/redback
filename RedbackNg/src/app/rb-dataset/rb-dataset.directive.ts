@@ -47,33 +47,17 @@ export class RbDatasetDirective implements OnChanges {
   private mergeFilters() : any {
     let filter = {};
     if(this.baseFilter != null) {
-      for (const key in this.baseFilter) {
-        let value = this.baseFilter[key];
-        filter[key] = value;
-      }
+      filter = this.mergeMaps(filter, this.baseFilter);
     }
 
     if(this.relatedFilter != null) {
       if(this.relatedObject != null) {
-        for (const key in this.relatedFilter) {
-          let value = this.relatedFilter[key];
-          if(typeof value == "string"  &&  value.startsWith("[") &&  value.endsWith("]")) {
-            let attr = value.substring(1, value.length - 1);
-            if(attr == 'uid')
-              value = this.relatedObject.uid;
-            else
-              value = this.relatedObject.data[attr];
-          }
-          filter[key] = value;
-        }
+        filter = this.mergeMaps(filter, this.resolveMap(this.relatedFilter, this.relatedObject));
       }
     } 
 
     if(this.userFilter != null) {
-      for (const key in this.userFilter) {
-        let value = this.userFilter[key];
-        filter[key] = value;
-      }
+      filter = this.mergeMaps(filter, this.userFilter);
     }
     
     return filter;
@@ -115,7 +99,11 @@ export class RbDatasetDirective implements OnChanges {
 
   public action(name: string, param: string) {
     if(name == 'create') {
-      this.dataService.createObject(this.objectname, this.mergeFilters()).subscribe(newObject => this.addObjectAndSelect(newObject));
+      let data = this.mergeFilters();
+      if(param != null) {
+        data = this.mergeMaps(data, this.resolveMap(param, this.selectedObject))
+      }
+      this.dataService.createObject(this.objectname, data).subscribe(newObject => this.addObjectAndSelect(newObject));
     } else if(name == 'save') {
       
     } else if(this.selectedObject != null) {
@@ -128,5 +116,35 @@ export class RbDatasetDirective implements OnChanges {
       this.list.push(obj);
       this.selectedObject = obj;
     }
+  }
+
+
+  private mergeMaps(map1: any, map2: any) : any {
+    let map: any = {};
+    for (const key in map1) {
+      let value = map1[key];
+      map[key] = value;
+    }
+    for (const key in map2) {
+      let value = map2[key];
+      map[key] = value;
+    }
+    return map;
+  }
+
+  private resolveMap(inMap: any, obj: RbObject) : any {
+    let outMap: any = {};
+    for (const key in inMap) {
+      let value = inMap[key];
+      if(typeof value == "string"  &&  value.startsWith("[") &&  value.endsWith("]")) {
+        let attr = value.substring(1, value.length - 1);
+        if(attr == 'uid')
+          value = obj.uid;
+        else
+          value = obj.data[attr];
+      }
+      outMap[key] = value;
+    }
+    return outMap;
   }
 }

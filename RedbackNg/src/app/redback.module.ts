@@ -31,6 +31,7 @@ import { RbProcessactionsComponent } from './rb-processactions/rb-processactions
 import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
 import { RbViewDirective } from './rb-view/rb-view.directive';
 import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.component';
+import { RbLogComponent } from './rb-log/rb-log.component';
 
 @NgModule({
   imports: [
@@ -80,7 +81,8 @@ import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.compon
     RbTabSectionDirective,
     RbFilterBuilderComponent,
     RbProcessactionsComponent,
-    RbGlobalSeachComponent
+    RbGlobalSeachComponent,
+    RbLogComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -109,7 +111,8 @@ import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.compon
     RbTabSectionDirective,
     RbFilterBuilderComponent,
     RbProcessactionsComponent,
-    RbGlobalSeachComponent
+    RbGlobalSeachComponent,
+    RbLogComponent
   ],
   providers: [
     CookieService,

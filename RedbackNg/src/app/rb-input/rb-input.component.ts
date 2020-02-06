@@ -24,10 +24,15 @@ export class RbInputComponent implements OnInit {
   }
 
   public get value(): string {
-    if(this.rbObject != null)
-      return this.rbObject.data[this.attribute];
-    else
+    if(this.rbObject != null) {
+      if(this.attribute == 'uid') {
+        return this.rbObject.uid;
+      } else {
+        return this.rbObject.data[this.attribute];
+      }
+    } else {
       return null;  
+    }
   }
 
   public set value(val: string) {
@@ -49,7 +54,9 @@ export class RbInputComponent implements OnInit {
   }
 
   commit() {
-    this.rbObject.setValue(this.attribute, this.editedValue);
+    if(this.attribute != 'uid') {
+      this.rbObject.setValue(this.attribute, this.editedValue);
+    }
   }
 
 }

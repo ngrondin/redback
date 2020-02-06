@@ -1,0 +1,56 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    width: 800px;
+    overflow: hidden;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.rb-log-post {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.rb-log-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.rb-log-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 3px;
+    margin: 5px;
+    margin-bottom: 35px;
+}
+
+.rb-log-header {
+    display: flex;
+    flex-direction: row;
+    height: 24px;
+}
+
+.rb-log-name {
+    display: flex;
+    width: 50%;
+    height:24px;
+    color: #3f51b5;
+    font-size: smaller;
+}
+
+.rb-log-date {
+    display: flex;
+    width: 50%;
+    height:24px;
+    color: #3f51b5;
+    font-size: smaller;
+}
+
+.rb-log-entry {
+    display: flex;
+}

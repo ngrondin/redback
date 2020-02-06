@@ -42,7 +42,11 @@ export class AppComponent {
     this.apiService.objectService = native.getAttribute("objectservice");
     this.apiService.processService = native.getAttribute("processservice");
     let objectViewMapString: string = native.getAttribute("objectviewmap");
-    this.objectViewMap = JSON.parse(objectViewMapString.replace(/'/g, '"'));
+    if(objectViewMapString.length > 0) {
+      this.objectViewMap = JSON.parse(objectViewMapString.replace(/'/g, '"'));
+    } else {
+      this.objectViewMap = {};
+    }
 
     let currentUrl = window.location.href;
     let pos = currentUrl.indexOf(this.apiService.uiService);

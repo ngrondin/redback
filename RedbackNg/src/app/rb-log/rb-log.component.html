@@ -1,0 +1,44 @@
+<div
+    class="rb-log-post">
+    <mat-form-field
+        style="flex-grow:1;">
+        <mat-label>New Note</mat-label>
+        <input 
+            matInput 
+            [(ngModel)]="value"
+            autocomplete="off">
+        <mat-icon 
+            matPrefix
+            class="rb-grey-icon">note</mat-icon>
+        
+    </mat-form-field >
+    <button
+        mat-raised-button
+        color="primary"
+        (click)="post()">
+        Post
+    </button>
+</div>
+<div
+    class="rb-log-container">
+    <div
+        class="rb-log-card"
+        *ngFor="let item of list">
+        <div
+            class="rb-log-header">
+            <div
+                class="rb-log-name">
+                {{getUserForItem(item)}}
+            </div>
+            <div
+                class="rb-log-date">
+                {{getDateForItem(item)}}
+            </div>
+        </div>
+        <div
+            class="rb-log-entry">
+            {{item.data[this.entryattribute]}}
+        </div>
+    </div >
+
+</div>

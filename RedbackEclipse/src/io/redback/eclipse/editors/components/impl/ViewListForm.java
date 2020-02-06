@@ -20,6 +20,8 @@ public class ViewListForm extends Form
 	public void createUI() {
 		new TextField(data, "line1", "Line 1", this, SWT.NONE);
 		new TextField(data, "line2", "Line 2", this, SWT.NONE);
+		new TextField(data, "grow", "Grow", this, SWT.NONE);
+		new TextField(data, "shrink", "Shrink", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

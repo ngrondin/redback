@@ -81,7 +81,7 @@ public class ViewManager extends Manager {
 
 	public String createNode(String type, String name) {
 		String newName = null;
-		DataMap parentData = data.getObject(name);
+		DataMap parentData = name != null ? data.getObject(name) : data;
 		if(parentData.containsKey("content")) {
 			DataMap newNode = new DataMap("type", type);
 			if(typesWithContent.contains(type))
@@ -111,9 +111,11 @@ public class ViewManager extends Manager {
 		if(targetNode.containsKey("content")) {
 			String sourceContentNodeName = name.substring(0, name.lastIndexOf("."));
 			int sourceContentIndex = Integer.parseInt(name.substring(name.lastIndexOf(".") + 1));
-			DataMap map = data.getObject(name);
-			data.getList(sourceContentNodeName).remove(sourceContentIndex);
-			data.getList(target + ".content").add(map);
+			DataMap mapToMove = data.getObject(name);
+			DataList sourceList = data.getList(sourceContentNodeName); 
+			DataList targetList = data.getList(target + ".content");
+			sourceList.remove(sourceContentIndex);
+			targetList.add(mapToMove);
 			setDataChanged(true);
 		}
 	}

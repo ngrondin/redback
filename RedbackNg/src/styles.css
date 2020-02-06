@@ -55,7 +55,7 @@ rb-dataset {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
-	flex-shrink: 1;
+	flex: 1 1 auto;
 	border: 0px Solid;
 	vertical-align:top;
 	overflow: hidden;
@@ -65,7 +65,7 @@ rb-dataset {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
-	flex-shrink: 1;
+	flex: 1 1 auto;
 	border: 0px Solid;
 	overflow:hidden;
 }
@@ -78,6 +78,7 @@ rb-list-scroll {
 	display: flex;
 	overflow: auto;
 	flex-direction: column;
+	flex: 1 1 auto;
 }
 
 rb-list-scroll > mat-action-list {
@@ -143,7 +144,9 @@ rb-tab-section {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
+	flex: 1 1 auto;
 	border: 0px Solid;
+	overflow: hidden;
 }
 
 .rb-tab-header-section {
@@ -179,18 +182,19 @@ rb-tab-section {
 
 .rb-tab-content-section {
 	display: flex;
-	flex: 1 0 auto;
+	flex: 1 1 auto;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	border: 0px Solid;
 	margin-top: 12px;
+	overflow: hidden;
 }
 
 rb-tab {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
-	flex-grow:1;
+	flex: 1 1 auto;
 	border: 0px Solid;
 }
 

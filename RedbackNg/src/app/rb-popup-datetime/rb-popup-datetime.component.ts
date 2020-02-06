@@ -107,13 +107,13 @@ export class RbPopupDatetimeComponent implements OnInit {
 
   public selectHour(event: any)
   {
-    this.hour = Math.round((this.getAngleFromClick(event) + 7.5) / 15);
+    this.hour = Math.floor(((this.getAngleFromClick(event) + 7.5) % 360) / 15);
     this.nextPart();
   }
 
   public selectMinute(event: any)
   {
-    this.minute = Math.round((this.getAngleFromClick(event) + 3) / 6);
+    this.minute = Math.floor(((this.getAngleFromClick(event) + 3) % 360) / 6);
     this.nextPart();
   }
 
@@ -132,7 +132,7 @@ export class RbPopupDatetimeComponent implements OnInit {
     let y = event.layerY - (event.target.clientHeight / 2);
     let angle = 0;
     if(x == 0){
-      if(y <= 0)
+      if(y >= 0)
         angle = 180;
       else
         angle = 0;

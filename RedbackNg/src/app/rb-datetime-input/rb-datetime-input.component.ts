@@ -74,10 +74,16 @@ export class RbDatetimeInputComponent implements OnInit {
       return true;      
   }
 
-  public openPopupList() {
+  public openPopupList(direction) {
     if(!this.readonly) {
+      let positionStrategy: any = null;
+      if(direction == 'up') {
+        positionStrategy = this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'bottom' })
+      } else {
+        positionStrategy = this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
+      }
       this.overlayRef = this.overlay.create({
-        positionStrategy: this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' }),
+        positionStrategy: positionStrategy,
         hasBackdrop: true,
         backdropClass: 'cdk-overlay-transparent-backdrop'
       });
@@ -102,8 +108,14 @@ export class RbDatetimeInputComponent implements OnInit {
   }
 
   public focus(event: any) {
-    if(this.overlayRef == null)
-      this.openPopupList();
+    if(this.overlayRef == null) {
+      let position: any = this.getPositionOf(event.target);
+      if(position.top > (window.innerHeight / 2)) {
+        this.openPopupList('up');
+      } else {
+        this.openPopupList('down');
+      }
+    }
   }
 
   public blur(event: any) {
@@ -135,4 +147,15 @@ export class RbDatetimeInputComponent implements OnInit {
     this.inputContainerRef.element.nativeElement.blur();
   }
 
+
+  public getPositionOf(element: any) : any {
+    if(element.offsetParent != null) {
+      let position: any = this.getPositionOf(element.offsetParent);
+      position.top = position.top + element.offsetTop;
+      position.left = position.left + element.offsetLeft;
+      return position;
+    } else {
+      return { top : 0, left: 0};
+    }
+  }
 }

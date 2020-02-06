@@ -5,7 +5,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import io.firebus.utils.DataMap;
 
-import io.redback.eclipse.editors.components.CheckboxField;
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.TextField;
@@ -23,8 +22,9 @@ public class ViewInputForm extends Form
 		new TextField(data, "attribute", "Attribute", this, SWT.NONE);
 		new TextField(data, "icon", "Icon", this, SWT.NONE);
 		new TextField(data, "size", "Size", this, SWT.NONE);
-		new CheckboxField(data, "grow", "Grow", this, SWT.NONE).setAsOneAndZero(true);
 		new TextField(data, "show", "Show (!)", this, SWT.NONE);
+		new TextField(data, "grow", "Grow", this, SWT.NONE);
+		new TextField(data, "shrink", "Shrink", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {
