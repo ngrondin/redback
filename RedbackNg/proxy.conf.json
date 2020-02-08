@@ -18,5 +18,9 @@
   "/rbpm": {
     "target": "http://localhost/rbpm",
     "secure": false
+  },
+  "/rbfs": {
+    "target": "http://localhost/rbfs",
+    "secure": false
   }    
 }

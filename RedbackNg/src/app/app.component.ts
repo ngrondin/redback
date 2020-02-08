@@ -40,6 +40,7 @@ export class AppComponent {
     this.menuView = native.getAttribute("menuview");
     this.apiService.uiService = native.getAttribute("uiservice");
     this.apiService.objectService = native.getAttribute("objectservice");
+    this.apiService.fileService = native.getAttribute("fileservice");
     this.apiService.processService = native.getAttribute("processservice");
     let objectViewMapString: string = native.getAttribute("objectviewmap");
     if(objectViewMapString.length > 0) {

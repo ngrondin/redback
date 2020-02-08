@@ -26,6 +26,7 @@ var versionOrDefault = version != null ? version : 'default';
     iconsets="<%=(JSON.parse(config.getList('iconsets').toString())).join(',')%>"
     uiservice="<%=uiservice%>"
     objectservice="<%=objectservice%>"
+    fileservice="<%=fileservice%>"
     processservice="<%=processservice%>">
   </app-root>
 

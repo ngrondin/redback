@@ -1,0 +1,17 @@
+.rb-file-drop {
+    padding: 20px;
+    padding-left: 40px;
+    color: lightgrey;
+    font-style: italic;
+    cursor: default;
+}
+
+.rb-file-drop-active {
+    background: repeating-linear-gradient(
+        45deg,
+        #606dbc,
+        #606dbc 10px,
+        #9da6db 10px,
+        #9da6db 20px
+        );
+}

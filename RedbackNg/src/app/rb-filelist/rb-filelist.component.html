@@ -1,0 +1,36 @@
+<div
+    class="rb-file-container">
+    <mat-action-list>
+        <button
+            mat-list-item 
+            *ngFor="let file of list" 
+            [ngClass]="selectedFile == file ? 'rb-files-item-active' : ''"
+            (click)="select(file)">
+            <div
+                class="rb-files-item">
+                <div
+                    class="rb-file-icon">
+                    <mat-icon>attach_file</mat-icon>
+                </div>
+                <div
+                    class="rb-files-details">
+                    <div
+                        class="rb-files-name">
+                        {{file.fileName}}
+                    </div>
+                    <div
+                        class="rb-files-date">
+                        {{file.date.toLocaleString()}}
+                    </div>
+                </div>
+            </div>
+        </button>
+    </mat-action-list>
+    <div
+        class="rb-spinner-container"
+        *ngIf="isLoading">
+        <mat-spinner
+            diameter="20">
+        </mat-spinner>
+    </div>    
+</div>

@@ -1,0 +1,9 @@
+<div
+    ng2FileDrop
+    class="rb-file-drop"    
+    [ngClass]="hasFileOver ? 'rb-file-drop-active' : ''"
+    (fileOver)="fileOver($event)"
+    (onFileDrop)="fileDropped($event)"
+    [uploader]="uploader">
+    Drop new files here.
+</div>

@@ -5,6 +5,7 @@ export class ObjectResp {
     objects: object;
 }
 
+
 export class RbObject {
     objectname: string;
     uid: string;
@@ -66,4 +67,27 @@ export class RbObject {
         this.dataService.updateObjectToServer(this);
     }
 
+}
+
+
+
+
+export class RbFile {
+    fileUid: string;
+    relatedObject: string;
+    relatedUid: string;
+    fileName: string;
+    mime: string;
+    username: string;
+    date: Date;
+
+    constructor(json: any, ds: DataService) {
+        this.fileUid = json.fileuid;
+        this.relatedObject = json.relatedobject;
+        this.relatedUid = json.relateduid;
+        this.fileName = json.filename;
+        this.mime = json.mime;
+        this.username = json.username;
+        this.date = new Date(json.date);
+    }
 }

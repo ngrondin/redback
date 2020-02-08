@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable, of } from 'rxjs';
-import { ObjectResp, RbObject } from './datamodel';
+import { ObjectResp, RbObject, RbFile } from './datamodel';
 import { ToastrService } from 'ngx-toastr';
 
 
@@ -135,5 +135,24 @@ export class DataService {
 
   executeObObject(rbObject: RbObject, func: string, param: string) {
     this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(resp => this.updateObjectFromServer(resp));
+  }
+
+
+
+  listFiles(object: string, uid: any) : Observable<RbFile[]> {
+    const listObs = this.apiService.listFiles(object, uid);
+    const fileObservable = new Observable<RbFile[]>((observer) => {
+      listObs.subscribe(
+        resp => {
+          const rbFileArray = Object.values(resp.list).map(json => new RbFile(json, this));
+          observer.next(rbFileArray);
+          observer.complete();
+        }, 
+        error => {
+          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+        }
+      )
+    })
+    return fileObservable; 
   }
 }

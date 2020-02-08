@@ -1,0 +1,39 @@
+.rb-file-container {
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+}
+
+.rb-files-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 60px!important;
+    cursor: pointer;
+}
+
+.rb-files-item-active {
+    border-left: 1px solid red;
+}
+
+.rb-file-icon {
+    display: flex;
+    flex: 0 0 auto;
+    padding: 8px;
+}
+
+.rb-files-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-files-name {
+    display: flex;
+}
+
+.rb-files-date {
+    display: flex;
+    font-size: smaller;
+    color: lightgray;
+}
+

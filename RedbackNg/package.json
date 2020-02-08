@@ -25,6 +25,7 @@
     "@angular/router": "~8.2.0",
     "angular-toastr": "^2.1.1",
     "hammerjs": "^2.0.8",
+    "ng2-file-upload": "^1.4.0",
     "ngx-cookie-service": "^2.2.0",
     "ngx-toastr": "^11.3.2",
     "rxjs": "~6.5.3",

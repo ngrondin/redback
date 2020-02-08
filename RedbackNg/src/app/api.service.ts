@@ -20,6 +20,7 @@ export class ApiService {
   public baseUrl: string;
   public uiService: string;
   public objectService: string;
+  public fileService: string;
   public processService: string;
 
   constructor(
@@ -132,5 +133,12 @@ export class ApiService {
       processaction: action
     };
     return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
+  }
+
+
+
+  
+  listFiles(object: string, uid: string): Observable<any> {
+    return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?object=' + object + '&uid=' + uid, httpOptions);
   }
 }

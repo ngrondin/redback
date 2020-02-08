@@ -55,6 +55,7 @@ public class RedbackUIServer extends UIServer
 		context.put("version", version);
 		context.put("uiservice", this.serviceName);
 		context.put("objectservice", config.getString("objectservice"));
+		context.put("fileservice", config.getString("filesservice"));
 		context.put("processservice", config.getString("processservice"));
 		context.put("utils", new RedbackUtilsJSWrapper());
 		if(session != null)

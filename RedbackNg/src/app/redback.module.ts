@@ -32,6 +32,11 @@ import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component
 import { RbViewDirective } from './rb-view/rb-view.directive';
 import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.component';
 import { RbLogComponent } from './rb-log/rb-log.component';
+import { RbFilesetDirective } from './rb-fileset/rb-fileset.directive';
+import { RbFilesComponent } from './rb-files/rb-files.component';
+import { FileUploadModule } from 'ng2-file-upload';
+import { RbFilelistComponent } from './rb-filelist/rb-filelist.component';
+import { RbFiledropComponent } from './rb-filedrop/rb-filedrop.component';
 
 @NgModule({
   imports: [
@@ -52,6 +57,7 @@ import { RbLogComponent } from './rb-log/rb-log.component';
     MatDividerModule,
     MatProgressSpinnerModule,
     MatMenuModule,
+    FileUploadModule,
     OverlayModule,
     FormsModule,
     BrowserAnimationsModule,
@@ -82,7 +88,10 @@ import { RbLogComponent } from './rb-log/rb-log.component';
     RbFilterBuilderComponent,
     RbProcessactionsComponent,
     RbGlobalSeachComponent,
-    RbLogComponent
+    RbLogComponent,
+    RbFilesetDirective,
+    RbFilelistComponent,
+    RbFiledropComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -112,7 +121,10 @@ import { RbLogComponent } from './rb-log/rb-log.component';
     RbFilterBuilderComponent,
     RbProcessactionsComponent,
     RbGlobalSeachComponent,
-    RbLogComponent
+    RbLogComponent,
+    RbFilesetDirective,
+    RbFilelistComponent,
+    RbFiledropComponent
   ],
   providers: [
     CookieService,
