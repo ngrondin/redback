@@ -223,6 +223,12 @@ public class ProcessManager
 		return retList;
 	}
 	
+	public int getAssignmentCount(Session session, String extpid)
+	{
+		//TODO still need to implememt this;
+		return 0;
+	}
+	
 	public DataMap processAction(Session session, String extpid, String pid, String event, DataMap data) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);

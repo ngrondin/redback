@@ -42,9 +42,14 @@ public class RedbackProcessServer extends ProcessServer
 		return result;
 	}
 	
+	protected int getAssignmentCount(Session session, String extpid) throws RedbackException {
+		return processManager.getAssignmentCount(session, extpid);
+	}
+
 	public void clearCaches()
 	{
 		processManager.refreshAllConfigs();			
 	}
+
 
 }
