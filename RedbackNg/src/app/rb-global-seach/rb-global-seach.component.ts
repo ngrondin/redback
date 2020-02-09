@@ -51,7 +51,6 @@ export class RbGlobalSeachComponent implements OnInit {
 
   navigateToObject(object: string, uid: string) {
     this.navigate.emit({
-      view : this.objectViewMap[object],
       object : object,
       filter : {
         uid : uid

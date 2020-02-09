@@ -17,9 +17,9 @@
             [objectViewMap]="objectViewMap"
             (navigate)="navigateTo($event)">
         </rb-global-search>
-        <mat-icon>
-            notifications
-        </mat-icon>
+        <rb-notification
+            (navigate)="navigateTo($event)">
+        </rb-notification>
         <button
             mat-button
             [matMenuTriggerFor]="usermenu">

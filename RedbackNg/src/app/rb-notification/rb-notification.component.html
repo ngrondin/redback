@@ -1,0 +1,28 @@
+<button
+    mat-flat-button
+    class="mat-primary rb-button"
+    (click)="getList()"
+    [matMenuTriggerFor]="assignmentlistmenu">
+    <mat-icon>notifications</mat-icon>
+</button>
+<div
+    *ngIf="count > 0"
+    class="rb-notification-badge">
+    <span>{{count}}</span>
+</div>
+<mat-menu
+    #assignmentlistmenu="matMenu">
+    <button
+        mat-menu-item
+        *ngFor="let notification of list"
+        (click)="selectNotification(notification)">
+        {{notification.message}}
+    </button>
+    <div
+        class="rb-spinner-container"
+        *ngIf="loading">
+        <mat-spinner
+            diameter="20">
+        </mat-spinner>
+    </div>    
+</mat-menu>

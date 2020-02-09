@@ -58,7 +58,11 @@ export class DesktopRootComponent implements OnInit {
   }
 
   navigateTo($event) {
-    this.view = $event.view;
+    if($event.view != null) {
+      this.view = $event.view;
+    } else {
+      this.view = this.objectViewMap[$event.object];
+    }
     this.viewUserFilter = $event.filter;
   }
 

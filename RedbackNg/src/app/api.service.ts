@@ -126,6 +126,13 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }
 
+  getAssignmentCount(): Observable<any> {
+    const req = {
+      action: 'getassignmentcount'
+    };    
+    return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
+  }
+
   actionAssignment(pid: string, action: string): Observable<any> {
     const req = {
       action: 'processaction',

@@ -57,8 +57,8 @@ export class RbViewLoaderComponent implements OnInit {
       @Output() navigate: EventEmitter<any> = new EventEmitter();
       @Output() titlechange: EventEmitter<any> = new EventEmitter();
       initialUserFilter: any;
-      navigateTo(view : string) {
-        this.navigate.emit({view : view});
+      navigateTo(target: any) {
+        this.navigate.emit(target);
       }
       setTitle(title: string) {
         this.titlechange.emit(title);

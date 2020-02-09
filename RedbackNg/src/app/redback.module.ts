@@ -36,6 +36,8 @@ import { RbFilesetDirective } from './rb-fileset/rb-fileset.directive';
 import { FileUploadModule } from 'ng2-file-upload';
 import { RbFilelistComponent } from './rb-filelist/rb-filelist.component';
 import { RbFiledropComponent } from './rb-filedrop/rb-filedrop.component';
+import { RbNotificationComponent } from './rb-notification/rb-notification.component';
+import { RbLinkComponent } from './rb-link/rb-link.component';
 
 @NgModule({
   imports: [
@@ -90,7 +92,9 @@ import { RbFiledropComponent } from './rb-filedrop/rb-filedrop.component';
     RbLogComponent,
     RbFilesetDirective,
     RbFilelistComponent,
-    RbFiledropComponent
+    RbFiledropComponent,
+    RbNotificationComponent,
+    RbLinkComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -123,7 +127,9 @@ import { RbFiledropComponent } from './rb-filedrop/rb-filedrop.component';
     RbLogComponent,
     RbFilesetDirective,
     RbFilelistComponent,
-    RbFiledropComponent
+    RbFiledropComponent,
+    RbNotificationComponent,
+    RbLinkComponent
   ],
   providers: [
     CookieService,
