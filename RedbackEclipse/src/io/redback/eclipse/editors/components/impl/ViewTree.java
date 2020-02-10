@@ -113,9 +113,11 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 		    item.setData(new NavigatorAction("create", "dataset", name));
 
 			item = new MenuItem(menu, SWT.PUSH);
-		    item.setText("Create Process Set");
-		    item.setData(new NavigatorAction("create", "processset", name));
+		    item.setText("Create File Set");
+		    item.setData(new NavigatorAction("create", "fileset", name));
 
+		    new MenuItem(menu, SWT.SEPARATOR);
+		    
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create List");
 		    item.setData(new NavigatorAction("create", "list", name));
@@ -127,6 +129,18 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create Map");
 		    item.setData(new NavigatorAction("create", "map", name));
+
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create Log");
+		    item.setData(new NavigatorAction("create", "log", name));
+
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create File List");
+		    item.setData(new NavigatorAction("create", "filelist", name));
+
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create Dynamic Form");
+		    item.setData(new NavigatorAction("create", "dynamicform", name));
 
 		    new MenuItem(menu, SWT.SEPARATOR);
 		    
@@ -145,6 +159,10 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create Process Action Button");
 		    item.setData(new NavigatorAction("create", "processactionsbutton", name));
+
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create Link");
+		    item.setData(new NavigatorAction("create", "link", name));
 
 		    new MenuItem(menu, SWT.SEPARATOR);
 		    
@@ -171,6 +189,10 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create Switch");
 		    item.setData(new NavigatorAction("create", "switch", name));
+
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Create File Drop");
+		    item.setData(new NavigatorAction("create", "filedrop", name));
 
 		    new MenuItem(menu, SWT.SEPARATOR);
 		}

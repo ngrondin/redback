@@ -17,7 +17,7 @@ import io.redback.eclipse.editors.components.Navigator;
 
 public class ViewManager extends Manager {
 	
-	protected List<String> typesWithContent = Arrays.asList(new String[] {"hsection", "vsection", "dataset", "tab", "tabsection", "form", "layout"});
+	protected List<String> typesWithContent = Arrays.asList(new String[] {"hsection", "vsection", "dataset", "tab", "tabsection", "form", "layout", "fileset"});
 
 	public ViewManager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
 		super(d, e, parent, style);
@@ -74,6 +74,18 @@ public class ViewManager extends Manager {
 			return new ViewTabForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("spacer")) {
 			return new ViewSpacerForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("fileset")) {
+			return new ViewFilesetForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("filelist")) {
+			return new ViewFilelistForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("filedrop")) {
+			return new ViewFiledropForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("log")) {
+			return new ViewLogForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("link")) {
+			return new ViewLinkForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("dynamicform")) {
+			return new ViewDynamicformForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}
