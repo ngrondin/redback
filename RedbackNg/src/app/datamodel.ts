@@ -28,6 +28,26 @@ export class RbObject {
         this.resolveRelatedObjects();
     }
 
+    get(attr: string) : any {
+        if(attr != null) {
+            if(attr == 'uid') {
+                return this.uid;
+            } else if(attr.indexOf('.') == -1) {
+                return this.data[attr];
+            } else {
+                let relationship = attr.substring(0, attr.indexOf('.'));
+                let finalattr = attr.substring(attr.indexOf('.') + 1);
+                if(this.related[relationship] != null) {
+                    return this.related[relationship].data[finalattr];
+                } else {
+                    return null;
+                }
+            }
+        } else {
+            return null;
+        }
+    }
+
     updateFromServer(json: any) {
         const inData: any = json.data;
         for(const attribute in json.data) 

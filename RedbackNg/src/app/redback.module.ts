@@ -38,6 +38,8 @@ import { RbFilelistComponent } from './rb-filelist/rb-filelist.component';
 import { RbFiledropComponent } from './rb-filedrop/rb-filedrop.component';
 import { RbNotificationComponent } from './rb-notification/rb-notification.component';
 import { RbLinkComponent } from './rb-link/rb-link.component';
+import { RbDynamicformComponent } from './rb-dynamicform/rb-dynamicform.component';
+import { RbChoiceInputComponent } from './rb-choice-input/rb-choice-input.component';
 
 @NgModule({
   imports: [
@@ -94,7 +96,9 @@ import { RbLinkComponent } from './rb-link/rb-link.component';
     RbFilelistComponent,
     RbFiledropComponent,
     RbNotificationComponent,
-    RbLinkComponent
+    RbLinkComponent,
+    RbDynamicformComponent,
+    RbChoiceInputComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -129,7 +133,9 @@ import { RbLinkComponent } from './rb-link/rb-link.component';
     RbFilelistComponent,
     RbFiledropComponent,
     RbNotificationComponent,
-    RbLinkComponent
+    RbLinkComponent,
+    RbDynamicformComponent,
+    RbChoiceInputComponent
   ],
   providers: [
     CookieService,

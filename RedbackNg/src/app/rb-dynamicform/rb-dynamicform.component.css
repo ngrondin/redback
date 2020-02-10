@@ -1,0 +1,10 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+
+.rb-df-container {
+    display: flex;
+    flex-direction: column;
+}

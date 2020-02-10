@@ -1,0 +1,92 @@
+<div
+    class="rb-df-container">
+
+    <div
+        *ngFor="let object of getOrderedList()"
+        class="rb-df-line">
+        <div
+            class="rb-df-linetitle">
+            {{object.get(titleattribute)}}
+        </div>
+        <div
+            class="rb-df-linedetail">
+            {{object.get(detailattribute)}}
+        </div>
+        <div
+            class="rb-df-lineinput"
+            *ngIf="getTypeOf(object) == 'string'">
+            <rb-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [size]="20"
+                [icon]="'description'"
+                [label]="object.get(labelattribute)"
+                [editable]="editable">
+            </rb-input>
+        </div>
+        <div
+            class="rb-df-lineinput"
+            *ngIf="getTypeOf(object) == 'textarea'">
+            <rb-textarea-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [size]="20"
+                [rows]="3"
+                [icon]="'description'"
+                [label]="object.get(labelattribute)"
+                [editable]="editable">
+            </rb-textarea-input>
+        </div>        
+        <div
+            class="rb-df-lineinput"
+            *ngIf="getTypeOf(object) == 'choice'">
+            <rb-choice-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [choicelist]="object.get(optionsattribute)"
+                [size]="20"
+                [icon]="'description'"
+                [label]="object.get(labelattribute)"
+                [editable]="editable">
+            </rb-choice-input>
+        </div>        
+        <div
+            class="rb-df-lineinput"
+            *ngIf="getTypeOf(object) == 'files'">
+            <rb-fileset
+                #fileset="fileset"
+                [object]="object.objectname"
+                [relatedObject]="object"
+                [active]="true">
+                    <rb-filelist
+                        [list]="fileset.list"
+                        [downloadOnSelect]="true">
+                    </rb-filelist>
+                    <rb-filedrop
+                        [uploader]="fileset.uploader"
+                        (dropped)="fileset.upload($event)">
+                    </rb-filedrop>
+            </rb-fileset>
+        </div>        
+        <div
+            class="rb-df-lineinput"
+            *ngIf="getTypeOf(object) == 'checkbox'">
+            Checkbox<br><br>
+        </div>        
+        <div
+            class="rb-df-lineinput"
+            *ngIf="getTypeOf(object) == 'signature'">
+            Signature<br><br>
+        </div>        
+        <div
+            class="rb-df-lineinput"
+            *ngIf="getTypeOf(object) == 'number'">
+            Number<br><br>
+        </div>        
+        <div
+            class="rb-df-lineinput"
+            *ngIf="getTypeOf(object) == 'unknown'">
+            Unknown type<br><br>
+        </div>        
+    </div>
+</div>
