@@ -204,7 +204,7 @@ public class RedbackServer implements Consumer
 					{
 						int pos2 = configString.indexOf("}}", pos1);
 						String key = configString.substring(pos1 + 2, pos2);
-						String val = props != null ? props.getProperty(key) : "";
+						String val = props.getProperty(key) != null ? props.getProperty(key) : "";
 						configString = configString.substring(0, pos1) + val + configString.substring(pos2 + 2);
 					}
 					config = new DataMap(configString);

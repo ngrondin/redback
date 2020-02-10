@@ -2,6 +2,7 @@ package io.redback.managers.objectmanager;
 
 import java.util.Date;
 
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.firebus.utils.FirebusDataUtil;
@@ -15,7 +16,8 @@ public class Value
 	protected Number numberValue;
 	protected Boolean boolValue;
 	protected Date dateValue;
-	protected DataMap jsonObjectValue;
+	protected DataMap mapValue;
+	protected DataList listValue;
 	protected Class<?> valueClass;
 
 	
@@ -68,13 +70,18 @@ public class Value
 		else if(v instanceof DataMap)
 		{
 			valueClass = DataMap.class;
-			jsonObjectValue = (DataMap)v;
+			mapValue = (DataMap)v;
+		}
+		else if(v instanceof DataList)
+		{
+			valueClass = DataList.class;
+			listValue = (DataList)v;
 		}
 		else if(v instanceof JSObject)
 		{
 			DataMap map = FirebusDataUtil.convertJSObjectToDataObject((JSObject)v);
 			valueClass = DataMap.class;
-			jsonObjectValue = map;
+			mapValue = map;
 		}
 	}
 	
@@ -89,7 +96,9 @@ public class Value
 		else if(valueClass == Date.class)
 			return dateValue;
 		else if(valueClass == DataMap.class)
-			return jsonObjectValue;
+			return mapValue;
+		else if(valueClass == DataList.class)
+			return listValue;
 		return null;		
 	}
 	
@@ -104,7 +113,9 @@ public class Value
 		else if(valueClass == Date.class)
 			return dateValue.toString();
 		else if(valueClass == DataMap.class)
-			return jsonObjectValue.toString();
+			return mapValue.toString();
+		else if(valueClass == DataList.class)
+			return listValue.toString();
 		return "";
 	}
 
