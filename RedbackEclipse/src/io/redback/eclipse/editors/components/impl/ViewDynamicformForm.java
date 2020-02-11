@@ -24,6 +24,10 @@ public class ViewDynamicformForm extends Form
 		new TextField(data, "detailattribute", "Detail Attribute", this, SWT.NONE);
 		new TextField(data, "labelattribute", "Label Attribute", this, SWT.NONE);
 		new TextField(data, "orderattribute", "Order Attribute", this, SWT.NONE);
+		new TextField(data, "categoryattribute", "Category Attribute", this, SWT.NONE);
+		new TextField(data, "categoryorderattribute", "Category Order Attribute", this, SWT.NONE);
+		new TextField(data, "dependencyattribute", "Dependency Attribute", this, SWT.NONE);
+		new TextField(data, "dependencyvalueattribute", "Dependency Value Attribute", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {
