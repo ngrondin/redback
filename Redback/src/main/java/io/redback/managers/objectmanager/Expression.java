@@ -11,6 +11,7 @@ import javax.script.ScriptException;
 
 import io.redback.RedbackException;
 import io.redback.security.js.SessionRightsJSFunction;
+import io.redback.security.js.UserProfileJSWrapper;
 
 
 
@@ -55,13 +56,14 @@ public class Expression
 			executionContext.put("canRead", new SessionRightsJSFunction(obj.getUserSession(), "read"));
 			executionContext.put("canWrite", new SessionRightsJSFunction(obj.getUserSession(), "write"));
 			executionContext.put("canExecute", new SessionRightsJSFunction(obj.getUserSession(), "execute"));
+			executionContext.put("userProfile", new UserProfileJSWrapper(obj.getUserSession().getUserProfile()));
 			executionContext.put("uid", obj.getUID().getString());
 			Iterator<String> it = obj.getObjectConfig().getAttributeNames().iterator();
 			while(it.hasNext())
 			{	
 				String key = it.next();
 				if(obj.getObjectConfig().getAttributeConfig(key).getExpression() == null)
-					executionContext.put(key, obj.get(key).getString());
+					executionContext.put(key, obj.get(key).getObject());
 			}
 			Object returnValue = null;
 			try

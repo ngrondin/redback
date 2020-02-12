@@ -73,11 +73,15 @@ public class RedbackObject
 						AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
 						String attributeName = attributeConfig.getName();
 						String idGeneratorName = attributeConfig.getIdGeneratorName();
-						String defaultValue = attributeConfig.getDefaultValue();
+						Expression defaultValue = attributeConfig.getDefaultValue();
 						if(idGeneratorName != null)
+						{
 							put(attributeName, objectManager.getNewID(idGeneratorName));
+						}
 						else if(defaultValue != null)
-							put(attributeName, defaultValue);
+						{
+							put(attributeName, defaultValue.eval(this));
+						}
 					}
 					executeScriptsForEvent("oncreate");
 				}
@@ -167,11 +171,11 @@ public class RedbackObject
 		else if(attributeConfig != null)
 		{
 			Expression expression = attributeConfig.getExpression();
-			if(expression != null)
-				return expression.eval(this);
-			else if(data.containsKey(name))
+			if(data.containsKey(name))
 				return data.get(name);
-			else
+			else if(expression != null)
+				return expression.eval(this);
+			else 
 				return new Value(null);
 		}		
 		return null;
@@ -200,7 +204,7 @@ public class RedbackObject
 						}
 						else
 						{
-							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null);
+							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, false);
 							if(resultList.size() > 0)
 								related.put(name, resultList.get(0));
 						}
@@ -230,7 +234,7 @@ public class RedbackObject
 			DataMap relatedObjectListFilter = getRelatedListFilter(attributeName);
 			if(additionalFilter != null)
 				relatedObjectListFilter.merge(additionalFilter);
-			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, page);
+			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, false, page);
 		}
 		return relatedObjectList;		
 	}
@@ -241,10 +245,18 @@ public class RedbackObject
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
 		if(roc != null)
 		{
-			filter = getRelatedListFilter(attributeName);
-			if(filter == null)
-				filter = new DataMap();
-			filter.put(roc.getLinkAttributeName(), get(attributeName).getObject());
+			String linkAttribute = roc.getLinkAttributeName();
+			if(linkAttribute.equals("uid")) 
+			{
+				filter = new DataMap("uid", get(attributeName).getObject());
+			}
+			else
+			{
+				filter = getRelatedListFilter(attributeName);
+				if(filter == null)
+					filter = new DataMap();
+				filter.put(roc.getLinkAttributeName(), get(attributeName).getObject());
+			}
 		}
 		return filter;
 	}

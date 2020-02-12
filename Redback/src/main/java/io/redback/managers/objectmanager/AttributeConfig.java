@@ -21,6 +21,7 @@ public class AttributeConfig
 	protected RelatedObjectConfig relatedObjectConfig;
 	protected Expression editable;
 	protected Expression expression;
+	protected Expression defaultValue;
 	
 	public AttributeConfig(DataMap cfg, String on) throws RedbackException
 	{
@@ -30,14 +31,17 @@ public class AttributeConfig
 		if(config.get("relatedobject") != null)
 			relatedObjectConfig = new RelatedObjectConfig(config.getObject("relatedobject"));
 		
-		if(config.get("editable") != null)
+		if(config.get("editable") != null && config.getString("editable").length() > 0)
 			editable = new Expression(config.getString("editable"));
 		else 
 			editable = new Expression("true");
 		
-		if(config.get("expression") != null)
+		if(config.get("expression") != null && config.getString("expression").length() > 0)
 			expression = new Expression(config.getString("expression"));
-		
+
+		if(config.get("default") != null && config.getString("default").length() > 0)
+			defaultValue = new Expression(config.getString("default"));
+
 		DataMap scriptsCfg = config.getObject("scripts");
 		if(scriptsCfg != null)
 		{
@@ -87,9 +91,9 @@ public class AttributeConfig
 		return config.getString("idgenerator");
 	}
 	
-	public String getDefaultValue()
+	public Expression getDefaultValue()
 	{
-		return config.getString("default");
+		return defaultValue;
 	}
 
 	public boolean hasRelatedObject()

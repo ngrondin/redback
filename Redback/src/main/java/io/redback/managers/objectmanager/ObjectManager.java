@@ -102,11 +102,15 @@ public class ObjectManager
 					{
 						RedbackObject object = objects.get(j);
 						if(object.getString(attributeName) != null)
-							orList.add(object.getRelatedFindFilter(attributeName));
+						{
+							DataMap findFilter = object.getRelatedFindFilter(attributeName);
+							if(!orList.contains(findFilter))
+								orList.add(findFilter);
+						}
 					}
 					DataMap relatedObjectFilter = new DataMap();
 					relatedObjectFilter.put("$or", orList);
-					ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null);
+					ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null, false);
 					for(int k = 0; k < result.size(); k++)
 					{
 						RedbackObject resultObject = result.get(k);
@@ -156,12 +160,12 @@ public class ObjectManager
 		return object;
 	}
 	
-	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filterData, String searchText) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filterData, String searchText, boolean addRelated) throws RedbackException
 	{
-		return listObjects(session, objectName, filterData, searchText, 0);
+		return listObjects(session, objectName, filterData, searchText, addRelated, 0);
 	}
 	
-	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filterData, String searchText, int page) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filterData, String searchText, boolean addRelated, int page) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
@@ -191,6 +195,9 @@ public class ObjectManager
 					}
 					objectList.add(object);
 				}
+				
+				if(addRelated)
+					addRelatedBulk(session, objectList);
 			}
 			catch(Exception e)
 			{
@@ -205,12 +212,12 @@ public class ObjectManager
 		return objectList;
 	}
 	
-	public ArrayList<RedbackObject> listObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated) throws RedbackException
 	{
-		return listObjects(session, objectName, uid, attributeName, filterData, searchText, 0);
+		return listObjects(session, objectName, uid, attributeName, filterData, searchText, addRelated, 0);
 	}
 	
-	public ArrayList<RedbackObject> listObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, int page) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated, int page) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
@@ -361,7 +368,7 @@ public class ObjectManager
 					DataList dbList = new DataList();
 					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
 					ObjectConfig nextObjectConfig = getObjectConfig(roc.getObjectName());
-					ArrayList<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null);
+					ArrayList<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, false);
 					if(list.size() > 0) {
 						for(int k = 0; k < list.size(); k++)
 						{
@@ -446,7 +453,7 @@ public class ObjectManager
 							}
 						}
 						relatedFilter.put("$or", relatedOrList);
-						ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null);
+						ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null, false);
 						if(result.size() > 0)
 						{
 							DataMap orTerm = new DataMap();
@@ -480,34 +487,60 @@ public class ObjectManager
 		return result;
 	}
 	
-	protected DataMap requestConfig(String service, String category, String name) throws DataException, FunctionErrorException, FunctionTimeoutException
+	protected DataMap requestConfig(String service, String category, String name) throws RedbackException
 	{
 		DataMap request = new DataMap();
-		request.put("action", "get");
-		request.put("service", service);
-		request.put("category", category);
-		request.put("name", name);
-		return request(configServiceName, request);
+		try
+		{
+			request.put("action", "get");
+			request.put("service", service);
+			request.put("category", category);
+			request.put("name", name);
+			return request(configServiceName, request);
+		}
+		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
+		{
+			throw new RedbackException("Error requesting configuration", e);
+		}
+		
 	}
 
-	protected DataMap requestData(String objectName, DataMap filter) throws DataException, FunctionErrorException, FunctionTimeoutException
+	protected DataMap requestData(String objectName, DataMap filter) throws RedbackException
 	{
 		return requestData(objectName, filter, 0);
 	}
 	
-	protected DataMap requestData(String objectName, DataMap filter, int page) throws DataException, FunctionErrorException, FunctionTimeoutException
+	protected DataMap requestData(String objectName, DataMap filter, int page) throws RedbackException
 	{
-		DataMap request = new DataMap();
-		request.put("object", objectName);
-		request.put("filter", filter);
-		request.put("page", page);
-		return request(dataServiceName, request);
+		try
+		{
+			DataMap request = new DataMap();
+			request.put("object", objectName);
+			request.put("filter", filter);
+			request.put("page", page);
+			return request(dataServiceName, request);
+		}
+		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
+		{
+			throw new RedbackException("Error requesting data", e);
+		}
 	}
 
-	protected void publishData(String collection, DataMap key, DataMap data)
+	protected void publishData(String collection, DataMap key, DataMap data) throws RedbackException
 	{
 		logger.finest("Publishing to firebus service : " + dataServiceName + "  " + data.toString().replace("\r\n", "").replace("\t", ""));
-		firebus.publish(dataServiceName, new Payload("{object:" + collection + ", key: " + key + ", data:" + data + "}"));
+		try
+		{
+			DataMap request = new DataMap();
+			request.put("object", collection);
+			request.put("key", key);
+			request.put("data", data);
+			request(dataServiceName, request);
+		}
+		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
+		{
+			throw new RedbackException("Error publishing data", e);
+		}
 	}
 
 	protected void error(String msg) throws RedbackException

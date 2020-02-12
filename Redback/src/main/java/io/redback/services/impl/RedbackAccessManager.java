@@ -49,7 +49,7 @@ public class RedbackAccessManager extends AccessManager
 	{
 		UserProfile userProfile = null;
 		for(int i = 0; i < cachedUserProfiles.size(); i++)
-			if(cachedUserProfiles.get(i).getUsername().equals(username))
+			if(cachedUserProfiles.get(i).getUsername().equalsIgnoreCase(username))
 				userProfile = cachedUserProfiles.get(i);
 
 		if(userProfile == null)

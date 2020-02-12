@@ -46,11 +46,8 @@ public class RedbackObjectServer extends ObjectServer
 			if(filter == null)
 				filter = new DataMap();
 			
-			objects = objectManager.listObjects(session, objectName, filter, search, page);
+			objects = objectManager.listObjects(session, objectName, filter, search, addRelated, page);
 			objectManager.commitCurrentTransaction();
-	
-			if(addRelated)
-				objectManager.addRelatedBulk(session, objects);
 			
 			return objects;
 		} catch(ScriptException e) {
@@ -67,12 +64,9 @@ public class RedbackObjectServer extends ObjectServer
 			if(filter == null)
 				filter = new DataMap();
 			
-			objects = objectManager.listObjects(session, objectName, uid, attribute, filter, search, page);
+			objects = objectManager.listObjects(session, objectName, uid, attribute, filter, search, addRelated, page);
 			objectManager.commitCurrentTransaction();
 	
-			if(addRelated)
-				objectManager.addRelatedBulk(session, objects);
-			
 			return objects;
 		} catch(ScriptException e) {
 			error("Error listing objects", e);

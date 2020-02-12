@@ -28,6 +28,18 @@ if(config.getString('labelattribute') != null) { %>
 }
 if(config.getString('orderattribute') != null) { %>	
 	[orderattribute]="'<%=config.getString("orderattribute")%>'" <%
+}
+if(config.getString('categoryattribute') != null) { %>	
+	[categoryattribute]="'<%=config.getString("categoryattribute")%>'" <%
+}
+if(config.getString('categoryorderattribute') != null) { %>	
+	[categoryorderattribute]="'<%=config.getString("categoryorderattribute")%>'" <%
+}
+if(config.getString('dependencyattribute') != null) { %>	
+	[dependencyattribute]="'<%=config.getString("dependencyattribute")%>'" <%
+}
+if(config.getString('dependencyvalueattribute') != null) { %>	
+	[dependencyvalueattribute]="'<%=config.getString("dependencyvalueattribute")%>'" <%
 } %>
 	[editable]="<%=canWrite%>" >
 </rb-dynamicform>
