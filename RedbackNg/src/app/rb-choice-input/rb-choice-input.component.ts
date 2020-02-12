@@ -15,9 +15,28 @@ export class RbChoiceInputComponent implements OnInit {
   @Input('attribute') attribute: string;
   @Input('choicelist') choicelist: any;
 
+  public editedValue: string; 
+
   constructor() { }
 
   ngOnInit() {
+  }
+
+  public get value(): any {
+    if(this.rbObject != null) {
+      let v = this.rbObject.get(this.attribute);
+      for(let opt of this.choicelist) {
+        if(opt['value'] == v)
+          return opt['value'];
+      }
+      return null;
+    } else {
+      return null;  
+    }
+  }
+
+  public set value(val: any) {
+    this.editedValue = val;
   }
 
   public get widthString() : string {
@@ -25,5 +44,11 @@ export class RbChoiceInputComponent implements OnInit {
       return (15*this.size) + 'px';
     else
       return '100%';
+  }
+
+  commit() {
+    if(this.attribute != 'uid') {
+      this.rbObject.setValue(this.attribute, this.editedValue);
+    }
   }
 }

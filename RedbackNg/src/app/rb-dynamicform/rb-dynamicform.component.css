@@ -7,4 +7,22 @@
 .rb-df-container {
     display: flex;
     flex-direction: column;
+    padding: 10px;
+}
+
+.rb-df-category {
+    color: darkblue;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    font-weight: 500;
+}
+
+.rb-df-linetitle {
+    font-size: smaller;
+
+}
+
+.rb-df-linedetail {
+    font-size: smaller;
+    color: grey;
 }

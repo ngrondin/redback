@@ -1,9 +1,13 @@
 <div
     class="rb-df-container">
-
     <div
-        *ngFor="let object of getOrderedList()"
+        *ngFor="let object of getOrderedList();"
         class="rb-df-line">
+        <div
+            class="rb-df-category"
+            *ngIf="isFirstInCategory(object)">
+            {{object.get(categoryattribute)}}
+        </div>
         <div
             class="rb-df-linetitle">
             {{object.get(titleattribute)}}
@@ -67,12 +71,18 @@
                         (dropped)="fileset.upload($event)">
                     </rb-filedrop>
             </rb-fileset>
-        </div>        
+        </div>
         <div
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'checkbox'">
-            Checkbox<br><br>
-        </div>        
+            <rb-switch-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [icon]="'description'"
+                [label]="object.get(labelattribute)"
+                [editable]="editable">
+            </rb-switch-input>
+        </div>           
         <div
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'signature'">

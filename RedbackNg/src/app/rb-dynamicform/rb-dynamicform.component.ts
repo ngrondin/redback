@@ -16,6 +16,10 @@ export class RbDynamicformComponent implements OnInit {
   @Input() detailattribute : string;
   @Input() labelattribute : string;
   @Input() orderattribute : string;
+  @Input() categoryattribute : string;
+  @Input() categoryorderattribute : string;
+  @Input() dependencyattribute : string;
+  @Input() dependencyvalueattribute : string;
   @Input() editable : boolean;
 
   constructor() { }
@@ -36,10 +40,30 @@ export class RbDynamicformComponent implements OnInit {
     }
   }
 
+  isFirstInCategory(object: RbObject) : boolean {
+    let index = this.list.indexOf(object);
+    if(index == 0) {
+      return true;
+    } else {
+      if(this.list[index - 1].get(this.categoryattribute) != object.get(this.categoryattribute)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
   getOrderedList() {
     if(this.list != null) {
       if(this.orderattribute != null) {
-        return this.list.sort((a, b) => a.get(this.orderattribute) - b.get(this.orderattribute));
+        return this.list.sort((a, b) => {
+          let c = a.get(this.categoryorderattribute) - b.get(this.categoryorderattribute);
+          if(c != 0) {
+            return c;
+          } else {
+            a.get(this.orderattribute) - b.get(this.orderattribute)
+          }
+        });
       } else {
         return this.list;
       }

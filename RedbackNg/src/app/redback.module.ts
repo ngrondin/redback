@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { DesktopRootComponent } from './desktop-root/desktop-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule, MatMenuModule } from '@angular/material';
+import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule, MatMenuModule, MatSlideToggleModule } from '@angular/material';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
@@ -40,6 +40,7 @@ import { RbNotificationComponent } from './rb-notification/rb-notification.compo
 import { RbLinkComponent } from './rb-link/rb-link.component';
 import { RbDynamicformComponent } from './rb-dynamicform/rb-dynamicform.component';
 import { RbChoiceInputComponent } from './rb-choice-input/rb-choice-input.component';
+import { RbSwitchInputComponent } from './rb-switch-input/rb-switch-input.component';
 
 @NgModule({
   imports: [
@@ -60,6 +61,7 @@ import { RbChoiceInputComponent } from './rb-choice-input/rb-choice-input.compon
     MatDividerModule,
     MatProgressSpinnerModule,
     MatMenuModule,
+    MatSlideToggleModule,
     FileUploadModule,
     OverlayModule,
     FormsModule,
@@ -98,7 +100,8 @@ import { RbChoiceInputComponent } from './rb-choice-input/rb-choice-input.compon
     RbNotificationComponent,
     RbLinkComponent,
     RbDynamicformComponent,
-    RbChoiceInputComponent
+    RbChoiceInputComponent,
+    RbSwitchInputComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -135,7 +138,8 @@ import { RbChoiceInputComponent } from './rb-choice-input/rb-choice-input.compon
     RbNotificationComponent,
     RbLinkComponent,
     RbDynamicformComponent,
-    RbChoiceInputComponent
+    RbChoiceInputComponent,
+    RbSwitchInputComponent
   ],
   providers: [
     CookieService,

@@ -2,9 +2,9 @@
     [style.width]="widthString" >
     <mat-label>{{label}}</mat-label>
     <mat-select
-        (change)="commit()"
+        (selectionChange)="commit()"
         [disabled]="readonly"
-        [(ngModel)]="value">
+        [(value)]="value">
         <mat-option
             *ngFor="let choice of choicelist"
             [value]="choice.value">
