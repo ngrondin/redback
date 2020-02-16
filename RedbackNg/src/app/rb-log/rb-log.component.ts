@@ -45,7 +45,7 @@ export class RbLogComponent implements OnInit {
 
   post() {
     let msg: any = {};
-    msg[this.entryattribute] = this.value;
+    msg[this.entryattribute] = "'" + this.value.replace("'", "\\'") + "'";
     this.posted.emit(msg);
     this.value = "";
   }

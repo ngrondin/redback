@@ -25,12 +25,12 @@ export class RbLinkComponent implements OnInit {
       let target = {};
       if(this.attribute == 'uid') {
         target['object'] = this.rbObject.objectname;
-        target['filter'] = {uid: this.rbObject.uid};
+        target['filter'] = {uid: "'" + this.rbObject.uid + "'"};
       } else {
         let related = this.rbObject.related[this.attribute];
         if(related != null) {
           target['object'] = related.objectname;
-          target['filter'] = {uid: related.uid};
+          target['filter'] = {uid: "'" + related.uid + "'"};
         }
       }
       if(this.view != null) {

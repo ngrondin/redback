@@ -53,7 +53,7 @@ export class RbGlobalSeachComponent implements OnInit {
     this.navigate.emit({
       object : object,
       filter : {
-        uid : uid
+        uid : "'" + uid + "'"
       }
     });
   }

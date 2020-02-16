@@ -5,7 +5,7 @@
         class="rb-df-line">
         <div
             class="rb-df-category"
-            *ngIf="isFirstInCategory(object)">
+            *ngIf="isFirstInCategory(object) && categoryattribute != null">
             {{object.get(categoryattribute)}}
         </div>
         <div

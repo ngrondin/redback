@@ -50,16 +50,16 @@ export class RbDatasetDirective implements OnChanges {
       filter = this.mergeMaps(filter, this.baseFilter);
     }
 
-    if(this.relatedFilter != null) {
-      if(this.relatedObject != null) {
-        filter = this.mergeMaps(filter, this.resolveMap(this.relatedFilter, this.relatedObject));
-      }
+    if(this.relatedFilter != null && this.relatedObject != null) {
+      filter = this.mergeMaps(filter, this.relatedFilter);
     } 
 
     if(this.userFilter != null) {
       filter = this.mergeMaps(filter, this.userFilter);
     }
     
+    filter = this.resolveMap(filter, this.relatedObject);
+
     return filter;
   }
 
@@ -134,14 +134,33 @@ export class RbDatasetDirective implements OnChanges {
 
   private resolveMap(inMap: any, obj: RbObject) : any {
     let outMap: any = {};
+    let relatedObject = this.relatedObject;
+    let selectedObject = this.selectedObject;
+    let uid = null;
+    let varString = "";
+    if(obj != null && typeof obj != 'undefined') {
+      uid = obj.uid;
+      for(const attr in obj.data) {
+        let val = obj.data[attr];
+        if(typeof val == 'object') {
+          val = JSON.stringify(val);
+        } 
+        if(typeof val == 'string') {
+          val = "'" + val.replace(/\'/g, "\\'").replace(/\"/g, "\\\"") + "'";
+        } 
+        varString = varString + "var " + attr + " = " + val + ";"
+      }
+    } 
+    try {
+      eval(varString);
+    } catch(e) {}
+
     for (const key in inMap) {
       let value = inMap[key];
-      if(typeof value == "string"  &&  value.startsWith("[") &&  value.endsWith("]")) {
-        let attr = value.substring(1, value.length - 1);
-        if(attr == 'uid')
-          value = obj.uid;
-        else
-          value = obj.data[attr];
+      if(typeof value == "string") {
+        value = eval(value);
+      } else if(typeof value == "object") {
+        value = this.resolveMap(value, obj);
       }
       outMap[key] = value;
     }

@@ -19,6 +19,13 @@
 }
 
 .rb-filter-builder-canvas {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
 }
 
+.rb-filter-builder-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}

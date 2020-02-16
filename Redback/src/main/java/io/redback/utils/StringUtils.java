@@ -88,7 +88,8 @@ public class StringUtils
 			ret = ret.replaceAll("\r", "");
 			ret = ret.replaceAll("\n", "");
 			ret = ret.replaceAll("\t", "");
-			ret = ret.replaceAll("\"", "'");
+			ret = ret.replaceAll("\"", "&#34;");
+			ret = ret.replaceAll("\'", "&#39;");
 			return ret;
 		}
 		else

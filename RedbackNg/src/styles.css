@@ -140,6 +140,15 @@ rb-list-scroll > mat-action-list > button {
 	margin-bottom: -5px;
 }
 
+
+rb-textarea-input .mat-form-field-flex {
+    align-items: start!important;
+}
+
+rb-textarea-input .mat-form-field-prefix {
+    margin-top: 10px!important;
+}
+
 rb-tab-section {
 	display: flex;
 	flex-direction: column;

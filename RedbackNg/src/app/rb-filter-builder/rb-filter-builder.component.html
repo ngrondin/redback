@@ -21,21 +21,39 @@
     <div
         class="rb-filter-builder-canvas">
         <div
-            *ngFor="let filternode of filter | keyvalue">
+            *ngFor="let filternode of filter | keyvalue"
+            class="rb-filter-builder-line">
             <span>
                 {{getAttributeLabel(filternode.key)}} : &nbsp;&nbsp;
             </span>
             <mat-form-field
                 *ngIf="getAttributeType(filternode.key) == 'string'">
                 <mat-label>Value</mat-label>
-                <mat-icon
-                    matPrefix
-                    class="rb-grey-icon">description</mat-icon>
                 <input
                     matInput
                     [ngModel]="getFilterValue(filternode.key)"
-                    (change)="setFilterValue(filternode.key, $event.target.value)">
-            </mat-form-field>   
+                    (change)="setFilterValue(filternode.key, $event.target.value)"
+                    autocomplete="off">
+                    <mat-icon 
+                        matPrefix
+                        class="rb-grey-icon">create</mat-icon>
+            </mat-form-field>
+            <mat-form-field 
+                *ngIf="getAttributeType(filternode.key) == 'date'">
+                <mat-select
+                    (selectionChange)="setFilterValue(filternode.key, $event.value)"
+                    [value]="getFilterValue(filternode.key)"
+                    [compareWith]="dateOptionComparison">
+                    <mat-option
+                        *ngFor="let choice of datechoice"
+                        [value]="choice.value">
+                        {{choice.display}}
+                    </mat-option>
+                </mat-select>
+                <mat-icon 
+                    matPrefix
+                    class="rb-grey-icon">date_range</mat-icon>
+            </mat-form-field>            
             <button
                 mat-button
                 class="mat-mini mat-primary rb-button" 
@@ -43,8 +61,7 @@
                 <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
             </button>
         </div>
-    </div
-    >
+    </div>
     <div>
         <button
             mat-button
