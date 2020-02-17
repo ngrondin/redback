@@ -88,7 +88,7 @@ public class RelatedObjectConfig
 		{
 			DataMap filter = new DataMap();
 			Bindings context = listFilterScript.getEngine().createBindings();
-			context.put("self", obj);
+			context.put("self", new RedbackObjectJSWrapper(obj));
 			context.put("om", new ObjectManagerJSWrapper(obj.getObjectManager(), obj.getUserSession()));
 			context.put("userprofile", obj.getUserSession().getUserProfile());
 			context.put("firebus", new FirebusJSWrapper(obj.getObjectManager().getFirebus(), obj.getUserSession()));

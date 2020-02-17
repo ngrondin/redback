@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.redback</groupId>
 	<artifactId>redback-core</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 
 	<name>Redback</name>
 	<description>Business application development platform</description>
