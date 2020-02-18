@@ -25,6 +25,7 @@ import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.impl.AppManager;
+import io.redback.eclipse.editors.components.impl.IncludeManager;
 import io.redback.eclipse.editors.components.impl.KeyManager;
 import io.redback.eclipse.editors.components.impl.MenuManager;
 import io.redback.eclipse.editors.components.impl.ObjectManager;
@@ -110,6 +111,8 @@ public class RedbackConfigEditor extends EditorPart implements IResourceChangeLi
 				if(rbService.equals("rbo")) {
 					if(rbConfigType.equals("object")) {
 						manager = new ObjectManager(data, this, composite, SWT.HORIZONTAL);
+					} else if(rbConfigType.equals("include")) {
+						manager = new IncludeManager(data, this, composite, SWT.HORIZONTAL);
 					}
 				} else if(rbService.equals("rbui")) {
 					if(rbConfigType.equals("view")) {
