@@ -2,6 +2,7 @@ package io.redback.managers.objectmanager;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.script.Compilable;
@@ -24,7 +25,7 @@ public class ObjectConfig
 	protected HashMap<String, AttributeConfig> attributes;
 	protected HashMap<String, CompiledScript> scripts;
 	
-	public ObjectConfig(DataMap cfg) throws RedbackException
+	public ObjectConfig(DataMap cfg, List<IncludeScript> includes) throws RedbackException
 	{
 		config = cfg;
 		attributes = new HashMap<String, AttributeConfig>();
@@ -34,6 +35,16 @@ public class ObjectConfig
 		{
 			DataMap attrCfg = list.getObject(i);
 			attributes.put(attrCfg.getString("name"), new AttributeConfig(attrCfg, getName()));
+		}
+		
+		StringBuilder allIncludes = new StringBuilder();
+		if(includes != null)
+		{
+			for(int i = 0; i < includes.size(); i++)
+			{
+				allIncludes.append(includes.get(i).getSource());
+				allIncludes.append("\r\n\r\n");
+			}
 		}
 		
 		DataMap scriptsCfg = config.getObject("scripts");
@@ -49,6 +60,7 @@ public class ObjectConfig
 					ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 					jsEngine.put(ScriptEngine.FILENAME, scriptName);
 					String source = StringUtils.unescape(scriptsCfg.getString(event));
+					source = allIncludes.toString() + source;
 					CompiledScript script = ((Compilable)jsEngine).compile(source);
 					scripts.put(event, script);
 				} 

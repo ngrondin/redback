@@ -1,5 +1,6 @@
 package io.redback.utils;
 
+import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataMap;
 
 public class StringUtils
@@ -80,7 +81,7 @@ public class StringUtils
 	
 	
 	
-	public static String convertJSONToAttributeString(DataMap obj)
+	public static String convertDataEntityToAttributeString(DataEntity obj)
 	{
 		if(obj != null)
 		{

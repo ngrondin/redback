@@ -30,6 +30,7 @@ public class ObjectManager
 	protected String idGeneratorServiceName;
 	protected DataMap globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
+	protected List<IncludeScript> includeScripts;
 	protected HashMap<Long, HashMap<String, RedbackObject>> transactions;
 
 
@@ -60,6 +61,22 @@ public class ObjectManager
 	public void refreshAllConfigs()
 	{
 		objectConfigs.clear();
+		includeScripts = null;
+	}
+	
+	protected void getIncludeScripts() throws RedbackException
+	{
+		if(includeScripts == null)
+		{
+			includeScripts = new ArrayList<IncludeScript>();
+			DataMap result = listConfigs("rbo", "include");
+			DataList resultList = result.getList("result");
+			for(int i = 0; i < resultList.size(); i++)
+			{
+				IncludeScript is = new IncludeScript(resultList.getObject(i));
+				includeScripts.add(is);
+			}
+		}
 	}
 	
 	protected ObjectConfig getObjectConfig(String object) throws RedbackException
@@ -69,7 +86,9 @@ public class ObjectManager
 		{
 			try
 			{
-				objectConfig = new ObjectConfig(requestConfig("rbo", "object", object));
+				if(includeScripts == null)
+					getIncludeScripts();
+				objectConfig = new ObjectConfig(requestConfig("rbo", "object", object), includeScripts);
 				if(cacheConfigs)
 					objectConfigs.put(object, objectConfig);
 			}
@@ -502,9 +521,24 @@ public class ObjectManager
 		{
 			throw new RedbackException("Error requesting configuration", e);
 		}
-		
 	}
 
+	protected DataMap listConfigs(String service, String category) throws RedbackException
+	{
+		DataMap request = new DataMap();
+		try
+		{
+			request.put("action", "list");
+			request.put("service", service);
+			request.put("category", category);
+			return request(configServiceName, request);
+		}
+		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
+		{
+			throw new RedbackException("Error requesting configuration", e);
+		}
+	}
+	
 	protected DataMap requestData(String objectName, DataMap filter) throws RedbackException
 	{
 		return requestData(objectName, filter, 0);
