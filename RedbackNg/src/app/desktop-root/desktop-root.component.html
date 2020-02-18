@@ -45,11 +45,19 @@
         </rb-view-loader>    
     </mat-sidenav>
     <mat-sidenav-content>
-        <rb-view-loader 
-            [target]="viewTarget"
-            (navigate)="navigateTo($event)"
-            (titlechange)="setTitle($event)">
-        </rb-view-loader>
+        <div
+            class="rb-vsection">
+            <rb-breadcrumb
+                *ngIf="viewTargetStack.length > 1"
+                [targetStack]="viewTargetStack"
+                (backTo)="backTo($event)">
+            </rb-breadcrumb>
+            <rb-view-loader 
+                [target]="viewTarget"
+                (navigate)="navigateTo($event)"
+                (titlechange)="setTitle($event)">
+            </rb-view-loader>
+        </div>
     </mat-sidenav-content>
 </mat-sidenav-container>
 <div

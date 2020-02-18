@@ -41,6 +41,7 @@ import { RbLinkComponent } from './rb-link/rb-link.component';
 import { RbDynamicformComponent } from './rb-dynamicform/rb-dynamicform.component';
 import { RbChoiceInputComponent } from './rb-choice-input/rb-choice-input.component';
 import { RbSwitchInputComponent } from './rb-switch-input/rb-switch-input.component';
+import { RbBreadcrumbComponent } from './rb-breadcrumb/rb-breadcrumb.component';
 
 @NgModule({
   imports: [
@@ -101,7 +102,8 @@ import { RbSwitchInputComponent } from './rb-switch-input/rb-switch-input.compon
     RbLinkComponent,
     RbDynamicformComponent,
     RbChoiceInputComponent,
-    RbSwitchInputComponent
+    RbSwitchInputComponent,
+    RbBreadcrumbComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -139,7 +141,8 @@ import { RbSwitchInputComponent } from './rb-switch-input/rb-switch-input.compon
     RbLinkComponent,
     RbDynamicformComponent,
     RbChoiceInputComponent,
-    RbSwitchInputComponent
+    RbSwitchInputComponent,
+    RbBreadcrumbComponent
   ],
   providers: [
     CookieService,

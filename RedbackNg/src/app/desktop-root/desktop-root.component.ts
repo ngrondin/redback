@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { ApiService } from 'app/api.service';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -11,7 +11,6 @@ import { RbObject } from 'app/datamodel';
   styleUrls: ['./desktop-root.component.css']
 })
 export class DesktopRootComponent implements OnInit {
-
   @Input() title : string;
   @Input() logo : string;
   @Input() username : string;
@@ -20,9 +19,10 @@ export class DesktopRootComponent implements OnInit {
   @Input() menuView : string;
   @Input() version : string;
   @Input() objectViewMap : any;
-  view: string;
-  viewUserFilter: string;
   viewTitle: string;
+  viewTarget: any;
+  menuTarget: any;
+  viewTargetStack: any[];
  
   constructor(
     private cookieService : CookieService,
@@ -31,26 +31,24 @@ export class DesktopRootComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    //this.cookieService.set('rbtoken','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJlbWFpbCI6Im5ncm9uZGluNzhAZ21haWwuY29tIiwiZXhwIjoxOTIwNTExOTIyMDAwfQ.zQrN7sheh1PuO4fWru45dTPDtkLAqB9Q0WrwGO6yOeo', 1920511922000, "/", "http://localhost", false, 'Lax');
     if(this.version == null)
       this.version = 'default';
-    this.view = this.initialView;
     if(this.objectViewMap == null)
       this.objectViewMap = {};
+    if(this.viewTargetStack == null)
+      this.viewTargetStack = [];
   }
 
-  get viewTarget() : any {
-    return {
-      url: this.apiService.baseUrl + '/' + this.apiService.uiService + '/view/' + this.version + '/' + this.view,
-      userfilter: this.viewUserFilter
+  ngOnChanges(changes: SimpleChanges) {
+    if("menuView" in changes) {
+      this.menuTarget = {
+        url: this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/' + this.version + '/' + this.menuView,
+        userfilter: null
+      };
     }
-  }
-
-  get menuTarget() : any {
-    return {
-      url: this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/' + this.version + '/' + this.menuView,
-      userfilter: null
-    };
+    if("initialView" in changes) {
+      this.setViewTarget(this.initialView, null, true);
+    }
   }
 
   get logoUrl() : any {
@@ -59,17 +57,37 @@ export class DesktopRootComponent implements OnInit {
 
   navigateTo($event) {
     if($event.view != null) {
-      this.view = $event.view;
-    } else {
-      this.view = this.objectViewMap[$event.object];
+      this.setViewTarget($event.view, $event.filter, $event.reset);
+    } else if($event.object != null) {
+      this.setViewTarget(this.objectViewMap[$event.object], $event.filter, $event.reset);
     }
-    this.viewUserFilter = $event.filter;
+  }
+
+  backTo($event) {
+    let i = this.viewTargetStack.indexOf($event);
+    this.viewTargetStack.splice(i + 1);
+    this.viewTarget = $event;
   }
 
   setTitle(title: string) {
     this.viewTitle = title;
   }
 
+  setViewTarget(view: string, filter: any, resetStack: boolean) {
+    this.viewTarget = {
+      url: this.apiService.baseUrl + '/' + this.apiService.uiService + '/view/' + this.version + '/' + view,
+      userfilter: filter
+    };
+    if(filter != null && filter.uid != null) {
+      this.viewTarget.label = eval(filter.uid);
+    } else {
+      this.viewTarget.label = view;
+    }
+    if(resetStack) {
+      this.viewTargetStack = [];
+    }
+    this.viewTargetStack.push(this.viewTarget);
+  }
 
 
 }

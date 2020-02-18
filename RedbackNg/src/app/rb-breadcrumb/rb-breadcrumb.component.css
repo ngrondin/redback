@@ -1,0 +1,12 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    max-height: 20px;
+    color: grey;
+    padding-left: 15px;
+    padding-top: 4px;
+}
+
+.rb-breadcrumb-link {
+    cursor: pointer;
+}

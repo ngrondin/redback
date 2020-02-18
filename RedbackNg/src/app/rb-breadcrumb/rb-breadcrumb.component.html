@@ -1,0 +1,17 @@
+<div
+    *ngFor="let target of targetStack; let i = index">
+    <span
+        *ngIf="i > 0">
+        &nbsp;&nbsp;&gt;&nbsp;&nbsp;
+    </span>
+    <span
+        class="rb-breadcrumb-link"
+        *ngIf="i < targetStack.length - 1"
+        (click)="backTo(target)">
+        {{target.label}}
+    </span>
+    <span
+        *ngIf="i == targetStack.length - 1">
+        {{target.label}}
+    </span>    
+</div>
