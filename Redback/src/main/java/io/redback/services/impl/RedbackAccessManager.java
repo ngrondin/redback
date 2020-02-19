@@ -3,7 +3,8 @@ package io.redback.services.impl;
 import java.util.Iterator;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
@@ -20,10 +21,14 @@ import io.redback.services.AccessManager;
 
 public class RedbackAccessManager extends AccessManager
 {
+	protected String secret;
+	protected String issuer;
 
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
+		secret = config.getString("secret");
+		issuer = config.getString("issuer");
 	}
 
 	protected Session validateToken(String token) throws RedbackException
@@ -31,6 +36,12 @@ public class RedbackAccessManager extends AccessManager
 		Session session = null;
 		try 
 		{
+		    Algorithm algorithm = Algorithm.HMAC256(secret);
+			JWTVerifier verifier = JWT.require(algorithm)
+	                .withIssuer(issuer)
+	                .build();
+			verifier.verify(token);
+			
 			DecodedJWT jwt = JWT.decode(token);
 			Claim usernameClaim = jwt.getClaim("email");
 			String username = usernameClaim.asString();
@@ -38,7 +49,7 @@ public class RedbackAccessManager extends AccessManager
 			if(profile != null)
 				session = new Session(token, profile, jwt.getExpiresAt().getTime());
 		} 
-		catch (JWTDecodeException  exception)
+		catch (Exception exception)
 		{
 		    error("JWT token is invalid");
 		}

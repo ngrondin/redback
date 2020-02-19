@@ -101,6 +101,11 @@ public class AttributeConfig
 		return config.getObject("relatedobject") != null;
 	}
 	
+	public boolean canBeSearched()
+	{
+		return config.getBoolean("search");
+	}
+	
 	public RelatedObjectConfig getRelatedObjectConfig()
 	{
 		return relatedObjectConfig;

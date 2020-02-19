@@ -130,16 +130,29 @@ public class ObjectManager
 					DataMap relatedObjectFilter = new DataMap();
 					relatedObjectFilter.put("$or", orList);
 					ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null, false);
-					for(int k = 0; k < result.size(); k++)
+					
+					String relatedObjectLinkAttributeName = relatedObjectConfig.getLinkAttributeName();
+					for(int j = 0; j < objects.size(); j++)
 					{
-						RedbackObject resultObject = result.get(k);
-						Value resultObjectLinkValue = resultObject.get(relatedObjectConfig.getLinkAttributeName());
-						for(int j = 0; j < objects.size(); j++)
+						RedbackObject object = objects.get(j);
+						Value linkValue = object.get(attributeName);
+						if(!linkValue.isNull())
 						{
-							RedbackObject object = objects.get(j);
-							Value linkValue = object.get(attributeName);
-							if(linkValue != null  &&  linkValue.equals(resultObjectLinkValue))
-								object.put(attributeName, resultObject);
+							RedbackObject relatedObject = null;
+							for(int k = 0; k < result.size(); k++)
+							{
+								RedbackObject resultObject = result.get(k);
+								Value resultObjectLinkValue = resultObject.get(relatedObjectLinkAttributeName);
+								if(linkValue != null  &&  linkValue.equals(resultObjectLinkValue))
+									relatedObject = resultObject;
+							}
+							if(relatedObject == null) // Because of a broken link in the DB
+							{
+								ObjectConfig zombieObjectConfig = getObjectConfig(relatedObjectConfig.getObjectName());
+								String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
+								relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));
+							}
+							object.put(attributeName, relatedObject);							
 						}
 					}
 				}
@@ -439,58 +452,64 @@ public class ObjectManager
 		DataMap filter = new DataMap();
 		DataList orList = new DataList();
 		ObjectConfig config = getObjectConfig(objectName);
+		orList.add(new DataMap("uid", "*" + searchText + "*"));
 		Iterator<String> it = config.getAttributeNames().iterator();
 		while(it.hasNext())
 		{
 			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
 			if(attributeConfig.getDBKey() != null)
 			{
-				if(!attributeConfig.hasRelatedObject())
+				if(attributeConfig.canBeSearched())
 				{
 					DataMap orTerm = new DataMap();
 					orTerm.put(attributeConfig.getName(), "*" + searchText + "*");
 					orList.add(orTerm);
 				}
-				else
+				if(attributeConfig.hasRelatedObject())
 				{
 					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
 					String relatedObejctName = roc.getObjectName();
 					ObjectConfig relatedConfig = getObjectConfig(relatedObejctName);
 					if(relatedConfig != null)
 					{
-						DataMap relatedFilter = new DataMap();
 						DataList relatedOrList = new DataList();
 						Iterator<String> it2 = relatedConfig.getAttributeNames().iterator();
 						while(it2.hasNext())
 						{
 							AttributeConfig relatedAttributeConfig = relatedConfig.getAttributeConfig(it2.next());
-							if(relatedAttributeConfig.getDBKey() != null  &&  !relatedAttributeConfig.hasRelatedObject())
+							if(relatedAttributeConfig.getDBKey() != null  &&  !relatedAttributeConfig.hasRelatedObject() && relatedAttributeConfig.canBeSearched())
 							{
 								DataMap orTerm = new DataMap();
 								orTerm.put(relatedAttributeConfig.getName(), "*" + searchText + "*");
 								relatedOrList.add(orTerm);
 							}
 						}
-						relatedFilter.put("$or", relatedOrList);
-						ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null, false);
-						if(result.size() > 0)
+						if(relatedOrList.size() > 0)
 						{
-							DataMap orTerm = new DataMap();
-							DataList inList = new DataList();
-							for(int k = 0; k < result.size(); k++)
+							DataMap relatedFilter = new DataMap("$or", relatedOrList);
+							ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null, false);
+							if(result.size() > 0)
 							{
-								RedbackObject resultObject = result.get(k);
-								Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
-								inList.add(resultObjectLinkValue.getObject());
+								DataMap orTerm = new DataMap();
+								DataList inList = new DataList();
+								for(int k = 0; k < result.size(); k++)
+								{
+									RedbackObject resultObject = result.get(k);
+									Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
+									inList.add(resultObjectLinkValue.getObject());
+								}
+								orTerm.put(attributeConfig.getName(), new DataMap("$in", inList));
+								orList.add(orTerm);
 							}
-							orTerm.put(attributeConfig.getName(), new DataMap("$in", inList));
-							orList.add(orTerm);
 						}
 					}
 				}
 			}
 		}
-		filter.put("$or", orList);
+		if(orList.size() == 1)
+			filter = orList.getObject(0);
+		if(orList.size() > 1)
+			filter.put("$or", orList);
 		return filter;
 	}
 	
