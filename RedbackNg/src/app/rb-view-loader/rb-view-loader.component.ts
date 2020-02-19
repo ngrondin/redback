@@ -4,6 +4,8 @@ import { __asyncDelegator } from 'tslib';
 import { CommonModule } from '@angular/common';
 import { RedbackModule } from '../redback.module';
 import { ApiService } from 'app/api.service';
+import { Target } from 'app/desktop-root/desktop-root.component';
+import { RbObject } from 'app/datamodel';
 
 
 @Component({
@@ -13,14 +15,15 @@ import { ApiService } from 'app/api.service';
 })
 export class RbViewLoaderComponent implements OnInit {
 
-  @Input('target') private target: any;
+  @Input('target') private target: Target;
   @ViewChild('container', { read: ViewContainerRef, static: false }) container: ViewContainerRef;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() titlechange: EventEmitter<any> = new EventEmitter();
 
-  private currentUrl: string;
-  private currentFilter: string;
-  private componentRef: ComponentRef<{setInitialUserFilter(filter:any);}>;
+  //private currentUrl: string;
+  private currentView: string;
+  //private currentFilter: string;
+  private componentRef: ComponentRef<any>;
 
   constructor(
     private http: Http,
@@ -35,15 +38,13 @@ export class RbViewLoaderComponent implements OnInit {
 
   ngOnChanges(changes : SimpleChange) {
     if("target" in changes) {
-      if(this.target.url != this.currentUrl) {
-        this.http.get(this.target.url, { withCredentials: true, responseType: 0 }).subscribe(
+      if(this.target.view != this.currentView) {
+        let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/' + this.target.type + '/' + this.target.version + '/' + this.target.view;
+        this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
           res => this.compileTemplate(res.text())
         );
-        this.currentUrl = this.target.url;
-      } else if(this.target.userfilter != this.currentFilter) {
-        this.componentRef.instance.setInitialUserFilter(this.target.userfilter);
-        this.currentFilter = this.target.userfilter;
-      }
+        this.currentView = this.target.view;
+      } 
     } 
   }
 
@@ -56,15 +57,15 @@ export class RbViewLoaderComponent implements OnInit {
     class ViewContainerComponent {
       @Output() navigate: EventEmitter<any> = new EventEmitter();
       @Output() titlechange: EventEmitter<any> = new EventEmitter();
-      initialUserFilter: any;
+      currentTarget: Target;
       navigateTo(target: any) {
         this.navigate.emit(target);
       }
       setTitle(title: string) {
         this.titlechange.emit(title);
       }
-      setInitialUserFilter(filter: any) {
-        this.initialUserFilter = filter;
+      rememberFilter(filter: any) {
+        this.currentTarget.filter = filter;
       }
     };
 
@@ -88,7 +89,10 @@ export class RbViewLoaderComponent implements OnInit {
     }
 
     let newViewComponentRef : ComponentRef<ViewContainerComponent> = this.container.createComponent(factory);
-    newViewComponentRef.instance.setInitialUserFilter(this.target.userfilter);
+    newViewComponentRef.instance.currentTarget = this.target;
+    //newViewComponentRef.instance.initialUserFilter = this.target.filter;
+    //newViewComponentRef.instance.initialSearch = this.target.search;
+    //newViewComponentRef.instance.initialSelectedObject = this.target.selectedObject;
     newViewComponentRef.instance.navigate.subscribe(e => this.navigateTo(e));
     newViewComponentRef.instance.titlechange.subscribe(e => this.setTitle(e));
     this.componentRef = newViewComponentRef;
