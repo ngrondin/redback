@@ -27,6 +27,7 @@ public class ObjectAttributeForm extends Form
 		new TextField(data, "editable", "Editable (!)", this, SWT.NONE);
 		new TextField(data, "default", "Default (!)", this, SWT.NONE);
 		new TextField(data, "expression", "Expression (!)", this, SWT.NONE);
+		new CheckboxField(data, "search", "Can be Searched", this, SWT.NONE);
 		CheckboxField cb = new CheckboxField(null, "islink", "Is Relationship", this, SWT.NONE);
 		if(data.get("relatedobject") != null)
 			cb.setChecked(true);

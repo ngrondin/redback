@@ -32,7 +32,7 @@ public class CheckboxField extends Composite implements SelectionListener {
 		label.setLayoutData(new RowData(170, 24));
 		checkbox = new Button(this, SWT.CHECK);
 		if(map != null && map.get(attribute) != null) {
-			checkbox.setEnabled(map.getBoolean(attribute));
+			checkbox.setSelection(map.getBoolean(attribute));
 			oldValue = map.getBoolean(attribute);
 		}
 		checkbox.addSelectionListener(this);
