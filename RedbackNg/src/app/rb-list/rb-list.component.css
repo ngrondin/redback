@@ -1,0 +1,36 @@
+:host {
+	display: flex;
+	overflow: auto;
+	flex-direction: column;
+    flex: 1 1 auto;
+    max-width: 300px;
+}
+
+:host > mat-action-list > button {
+	height: auto!important;
+}
+
+.rb-list-item-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: 5px;
+}
+
+.rb-list-item-datablock {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-list-item-header {
+}
+
+.rb-list-item-subhead {
+    font-size: smaller;
+    font-weight: 500;
+}
+
+.rb-list-item-supptext {
+    color: #aaaaaa;
+    font-size: small;
+}

@@ -1,6 +1,8 @@
 <button
-	mat-button 
-	aria-label="Process Actions" 
+    mat-button 
+    matTooltip="Process actions for this record"
+    [matTooltipShowDelay]="1000"
+    aria-label="Process Actions" 
 	class="mat-mini-fab mat-primary rb-button rb-process-actions-button" 
     (click)="activate()"
     [matMenuTriggerFor]="processactionmenu">

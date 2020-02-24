@@ -11,7 +11,7 @@ import { ApiService } from './api.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title: string; 
+  apptitle: string; 
   logo: string;
   type: string;
   version: string;
@@ -30,7 +30,7 @@ export class AppComponent {
       private apiService: ApiService ) {
     var native = this.elementRef.nativeElement;
     this.type = native.getAttribute("type");
-    this.title = native.getAttribute("title");
+    this.apptitle = native.getAttribute("apptitle");
     this.logo = native.getAttribute("logo");
     this.version = native.getAttribute("version");
     this.username = native.getAttribute("username");

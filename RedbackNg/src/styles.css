@@ -99,6 +99,8 @@ rb-list-scroll > mat-action-list > button {
 }
 
 .rb-list-item {
+	display: flex;
+	flex-direction: row;
 	margin: 8px;
 }
 

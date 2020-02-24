@@ -15,7 +15,7 @@ var versionOrDefault = version != null ? version : 'default';
 <body oncontextmenu="return false;">
   <app-root 
     type="<%=config.getString('page')%>"
-    title="<%=config.getString('label')%>"
+    apptitle="<%=config.getString('label')%>"
     logo="<%=config.getString('logo')%>"
     version="<%=versionOrDefault%>"
     username="<%=session.getUserProfile().getUsername()%>"

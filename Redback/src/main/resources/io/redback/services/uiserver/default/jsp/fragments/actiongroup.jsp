@@ -32,6 +32,8 @@ for(var i = 0; i < list.size(); i++) {
 </mat-menu>
 <button
 	mat-icon-button 
+	matTooltip="Geenral actions for this record"
+    [matTooltipShowDelay]="1000"
 	class="mat-mini-fab mat-primary rb-button"
 	[matMenuTriggerFor]="<%=id%>">
 	<mat-icon>reorder</mat-icon>

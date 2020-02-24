@@ -36,7 +36,7 @@ export class Target {
   styleUrls: ['./desktop-root.component.css']
 })
 export class DesktopRootComponent implements OnInit {
-  @Input() title : string;
+  @Input() apptitle : string;
   @Input() logo : string;
   @Input() username : string;
   @Input() userdisplay : string;

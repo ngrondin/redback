@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { DesktopRootComponent } from './desktop-root/desktop-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule, MatMenuModule, MatSlideToggleModule } from '@angular/material';
+import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule, MatMenuModule, MatSlideToggleModule, MatTooltipModule, MatTooltip } from '@angular/material';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
@@ -42,6 +42,7 @@ import { RbDynamicformComponent } from './rb-dynamicform/rb-dynamicform.componen
 import { RbChoiceInputComponent } from './rb-choice-input/rb-choice-input.component';
 import { RbSwitchInputComponent } from './rb-switch-input/rb-switch-input.component';
 import { RbBreadcrumbComponent } from './rb-breadcrumb/rb-breadcrumb.component';
+import { RbListComponent } from './rb-list/rb-list.component';
 
 @NgModule({
   imports: [
@@ -63,6 +64,7 @@ import { RbBreadcrumbComponent } from './rb-breadcrumb/rb-breadcrumb.component';
     MatProgressSpinnerModule,
     MatMenuModule,
     MatSlideToggleModule,
+    MatTooltipModule,
     FileUploadModule,
     OverlayModule,
     FormsModule,
@@ -79,6 +81,7 @@ import { RbBreadcrumbComponent } from './rb-breadcrumb/rb-breadcrumb.component';
     RbViewDirective,
     RbDatasetDirective,
     RbListScrollDirective,
+    RbListComponent,
     RbInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,
@@ -114,10 +117,12 @@ import { RbBreadcrumbComponent } from './rb-breadcrumb/rb-breadcrumb.component';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatMenuModule,
+    MatTooltipModule,
     RbViewLoaderComponent,
     RbViewDirective,
     RbDatasetDirective,
     RbListScrollDirective,
+    RbListComponent,
     RbInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,
