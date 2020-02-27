@@ -62,6 +62,8 @@ public class ViewManager extends Manager {
 			return new ViewActionGroupForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("list")) {
 			return new ViewListForm(data.getObject(name), this, sashForm, SWT.PUSH);
+		} else if(type.equals("list3")) {
+			return new ViewList3Form(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("search")) {
 			return new ViewSearchForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("map")) {

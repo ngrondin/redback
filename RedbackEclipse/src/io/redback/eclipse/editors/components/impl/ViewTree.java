@@ -119,8 +119,8 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 		    new MenuItem(menu, SWT.SEPARATOR);
 		    
 			item = new MenuItem(menu, SWT.PUSH);
-		    item.setText("Create List");
-		    item.setData(new NavigatorAction("create", "list", name));
+		    item.setText("Create List3");
+		    item.setData(new NavigatorAction("create", "list3", name));
 
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create Search");
