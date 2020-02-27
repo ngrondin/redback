@@ -35,14 +35,40 @@
         </mat-menu>        
     </mat-toolbar-row>
 </mat-toolbar>
-<mat-sidenav-container>
+<mat-sidenav-container
+    autosize>
     <mat-sidenav 
         mode="side" 
-        opened>
-        <rb-view-loader 
-            [target]="menuTarget"
-            (navigate)="navigateTo($event)">
-        </rb-view-loader>    
+        opened
+        [style.width.px]="menuWidth">
+        <div
+            class="rb-menu-nav">
+            <div
+                class="rb-menu-container">
+                <div
+                    class="rb-menu">
+                    <rb-view-loader 
+                        [target]="menuTarget"
+                        (navigate)="navigateTo($event)">
+                    </rb-view-loader>
+                </div>
+            </div>
+            <div
+                class="rb-menu-control">
+                <button
+                    mat-icon-button
+                    (click)="toggleMenuMode()">
+                    <mat-icon
+                        *ngIf="menuMode == 'small'">
+                        navigate_next
+                    </mat-icon>
+                    <mat-icon
+                        *ngIf="menuMode == 'large'">
+                        navigate_before
+                    </mat-icon>
+                </button>                
+            </div>
+        </div>
     </mat-sidenav>
     <mat-sidenav-content>
         <div

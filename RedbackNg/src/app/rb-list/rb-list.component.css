@@ -3,7 +3,7 @@
 	overflow: auto;
 	flex-direction: column;
     flex: 1 1 auto;
-    max-width: 300px;
+    width: 300px;
 }
 
 :host > mat-action-list > button {

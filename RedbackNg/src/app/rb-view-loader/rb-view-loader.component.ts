@@ -6,6 +6,7 @@ import { RedbackModule } from '../redback.module';
 import { ApiService } from 'app/api.service';
 import { Target } from 'app/desktop-root/desktop-root.component';
 import { RbObject } from 'app/datamodel';
+import { ViewContainerComponent } from './rb-view-container.component';
 
 
 @Component({
@@ -20,10 +21,8 @@ export class RbViewLoaderComponent implements OnInit {
   @Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() titlechange: EventEmitter<any> = new EventEmitter();
 
-  //private currentUrl: string;
   private currentView: string;
-  //private currentFilter: string;
-  private componentRef: ComponentRef<any>;
+  private componentRef: ComponentRef<ViewContainerComponent>;
 
   constructor(
     private http: Http,
@@ -54,45 +53,30 @@ export class RbViewLoaderComponent implements OnInit {
       selector: 'rb-view-container',
       template: body
     })
-    class ViewContainerComponent {
-      @Output() navigate: EventEmitter<any> = new EventEmitter();
-      @Output() titlechange: EventEmitter<any> = new EventEmitter();
-      currentTarget: Target;
-      navigateTo(target: any) {
-        this.navigate.emit(target);
-      }
-      setTitle(title: string) {
-        this.titlechange.emit(title);
-      }
-      rememberFilter(filter: any) {
-        this.currentTarget.filter = filter;
-      }
-    };
+    class NewViewContainerComponent extends ViewContainerComponent {};
 
+    
     @NgModule({ 
       imports: [
         CommonModule,
         RedbackModule
       ], 
       declarations: [
-        ViewContainerComponent
+        NewViewContainerComponent
       ] 
     })
     class RuntimeComponentModule { }
 
     let module: ModuleWithComponentFactories<any> = this.compiler.compileModuleAndAllComponentsSync(RuntimeComponentModule);
-    let factory = module.componentFactories.find(f => f.componentType === ViewContainerComponent);
+    let factory = module.componentFactories.find(f => f.componentType === NewViewContainerComponent);
     
     if (this.componentRef) {
       this.componentRef.destroy();
       this.componentRef = null; 
     }
 
-    let newViewComponentRef : ComponentRef<ViewContainerComponent> = this.container.createComponent(factory);
+    let newViewComponentRef : ComponentRef<NewViewContainerComponent> = this.container.createComponent(factory);
     newViewComponentRef.instance.currentTarget = this.target;
-    //newViewComponentRef.instance.initialUserFilter = this.target.filter;
-    //newViewComponentRef.instance.initialSearch = this.target.search;
-    //newViewComponentRef.instance.initialSelectedObject = this.target.selectedObject;
     newViewComponentRef.instance.navigate.subscribe(e => this.navigateTo(e));
     newViewComponentRef.instance.titlechange.subscribe(e => this.setTitle(e));
     this.componentRef = newViewComponentRef;

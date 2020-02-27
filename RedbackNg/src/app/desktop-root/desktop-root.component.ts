@@ -47,6 +47,8 @@ export class DesktopRootComponent implements OnInit {
   viewTitle: string;
   viewTarget: Target;
   menuTarget: Target;
+  menuMode: string;
+  menuWidth: number;
   viewTargetStack: Target[];
  
   constructor(
@@ -56,6 +58,8 @@ export class DesktopRootComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.menuMode = 'large';
+    this.menuWidth = 251;
     if(this.version == null)
       this.version = 'default';
     if(this.objectViewMap == null)
@@ -93,7 +97,17 @@ export class DesktopRootComponent implements OnInit {
     this.viewTitle = title;
   }
 
-  pushViewTarget(target: Target, resetStack: boolean) {
+  toggleMenuMode() {
+    if(this.menuMode == 'large') {
+      this.menuMode = 'small';
+      this.menuWidth = 53;
+    } else {
+      this.menuMode = 'large';
+      this.menuWidth = 251;
+    }
+  }
+
+  private pushViewTarget(target: Target, resetStack: boolean) {
     this.viewTarget = target;
     if(resetStack) {
       this.viewTargetStack = [];

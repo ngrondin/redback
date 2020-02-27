@@ -50,7 +50,7 @@ export class RbNotificationComponent implements OnInit {
     this.navigate.emit({
       object : notification.data.object,
       filter : {
-        uid : notification.data.uid
+        uid : "'" + notification.data.uid + "'"
       }
     })
   }
