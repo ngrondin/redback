@@ -1,7 +1,7 @@
 <div
     class="rb-df-container">
     <div
-        *ngFor="let object of getOrderedList();"
+        *ngFor="let object of sortedVisibleList"
         class="rb-df-line">
         <div
             class="rb-df-category"
@@ -51,7 +51,8 @@
                 [size]="20"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
-                [editable]="editable">
+                [editable]="editable"
+                (change)="calcSortedVisibleList()">
             </rb-choice-input>
         </div>        
         <div
@@ -80,14 +81,10 @@
                 [attribute]="valueattribute"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
-                [editable]="editable">
+                [editable]="editable"
+                (change)="calcSortedVisibleList()">
             </rb-switch-input>
-        </div>           
-        <div
-            class="rb-df-lineinput"
-            *ngIf="getTypeOf(object) == 'signature'">
-            Signature<br><br>
-        </div>        
+        </div>                
         <div
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'number'">

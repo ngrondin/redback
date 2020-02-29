@@ -8,22 +8,23 @@ import { DataService } from '../data.service';
 })
 export class RbDatasetDirective implements OnChanges {
 
+  @Input('active') active: boolean;
   @Input('object') objectname: string;
   @Input('relatedObject') relatedObject: RbObject;
   @Input('relatedFilter') relatedFilter: any;
   @Input('baseFilter') baseFilter: any;
-  @Input('initialUserFilter') initialUserFilter: any;
-  @Input('initialSearchString') initialSearchString: any;
-  @Input('initialSelectedObject') initialSelectedObject: any;
-  @Input('active') active: boolean;
 
-  @Output('userFilterChanged') userFilterChanged: EventEmitter<any> = new EventEmitter();
-  @Output('searchStringChanged') searchStringChanged: EventEmitter<any> = new EventEmitter();
-  @Output('selectedObjectChanged') selectedObjectChanged: EventEmitter<any> = new EventEmitter();
+  @Input('userFilter') inputUserFilter: any;
+  @Input('searchString') inputSearchString: any;
+  @Input('selectedObject') inputSelectedObject: any;
+
+  @Output('userFilterChange') userFilterChange: EventEmitter<any> = new EventEmitter();
+  @Output('searchStringChange') searchStringChange: EventEmitter<any> = new EventEmitter();
+  @Output('selectedObjectChange') selectedObjectChange: EventEmitter<any> = new EventEmitter();
 
   
   public list: RbObject[] = [];
-  public selectedObject: RbObject;
+  public _selectedObject: RbObject;
   public searchString: string;
   public userFilter: any;
   public isLoading: boolean;
@@ -34,21 +35,46 @@ export class RbDatasetDirective implements OnChanges {
     private dataService: DataService
   ) {   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    let doRefresh: boolean = false;
+    if("relatedObject" in changes || "active" in changes) {
+      if(this.initiated) {
+        if(this.active)
+          doRefresh = true;
+      else
+        this.list = [];
+      }
+    }
+    if("inputUserFilter" in changes && this.userFilter != this.inputUserFilter) {
+      this.userFilter = this.inputUserFilter;
+      doRefresh = true;
+    }
+    if("inputSearchString" in changes && this.searchString != this.inputSearchString) {
+      this.searchString = this.inputSearchString;
+      doRefresh = true;
+    }
+    if("inputSelectedObject" in changes && this.selectedObject != this.inputSelectedObject) {
+      this._selectedObject = this.inputSelectedObject;
+      doRefresh = true;
+    }
+    if(doRefresh) {
+      this.refreshData();
+    }
+  }
+
   ngOnInit() {
-    this.userFilter = this.initialUserFilter;
-    this.searchString = this.initialSearchString;
     this.initiated = true;
     this.refreshData();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if("relatedObject" in changes || "active" in changes) {
-      if(this.initiated) {
-        if(this.active)
-          this.refreshData();
-      else
-        this.list = [];
-      }
+  public refreshData() {
+    this.list = [];
+    if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
+      const filter = this.mergeFilters();
+      this.dataService.listObjects(this.objectname, filter, this.searchString).subscribe(
+        data => this.setData(data)
+      );
+      this.isLoading = true;
     }
   }
 
@@ -71,45 +97,44 @@ export class RbDatasetDirective implements OnChanges {
     return filter;
   }
 
-  public refreshData() {
-    this.list = [];
-    this.selectedObject = null;
-    if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
-      const filter = this.mergeFilters();
-      this.dataService.listObjects(this.objectname, filter, this.searchString).subscribe(
-        data => this.setData(data)
-      );
-      this.isLoading = true;
-    }
-  }
-
   private setData(data: RbObject[]) {
     this.list = data;
     this.isLoading = false;
-    if(this.firstLoad && this.initialSelectedObject != null) {
-      this.selectedObject = this.initialSelectedObject;
-    }
     this.firstLoad = false;
-    if(this.list.length == 1) {
-      this.selectedObject = this.list[0];
+    if(this.list.length == 0) {
+      this._selectedObject = null;
+    } else if(this.list.length == 1) {
+      this._selectedObject = this.list[0];
+    } else if(this.list.length > 1) {
+      if(this.selectedObject != null && !this.list.includes(this.selectedObject)) {
+        this._selectedObject = null;
+      }
     }
   }
 
+  public get selectedObject(): RbObject {
+    return this._selectedObject;
+  }
+
+  public set selectedObject(obj: RbObject) {
+    this.select(obj);
+  }
+
   public select(item: RbObject) {
-    this.selectedObject = item;
-    this.selectedObjectChanged.emit(item);
+    this._selectedObject = item;
+    this.selectedObjectChange.emit(item);
   }
 
   public search(str: string) {
     this.searchString = str;
     this.refreshData();
-    this.searchStringChanged.emit(str);
+    this.searchStringChange.emit(str);
   }
 
   public filter(flt: any) {
     this.userFilter = flt;
     this.refreshData();
-    this.userFilterChanged.emit(flt);
+    this.userFilterChange.emit(flt);
   } 
 
   public action(name: string, param: string) {
@@ -129,7 +154,7 @@ export class RbDatasetDirective implements OnChanges {
   public addObjectAndSelect(obj: RbObject) {
     if(this.list.indexOf(obj) == -1) {
       this.list.push(obj);
-      this.selectedObject = obj;
+      this.select(obj);
     }
   }
 

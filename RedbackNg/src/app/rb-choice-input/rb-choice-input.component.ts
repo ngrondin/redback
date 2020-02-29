@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 
 @Component({
@@ -14,6 +14,7 @@ export class RbChoiceInputComponent implements OnInit {
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
   @Input('choicelist') choicelist: any;
+  @Output('change') change = new EventEmitter();
 
   public editedValue: string; 
 
@@ -39,6 +40,14 @@ export class RbChoiceInputComponent implements OnInit {
     this.editedValue = val;
   }
 
+  
+  public get readonly(): boolean {
+    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
+      return !(this.editable && this.rbObject.validation[this.attribute].editable);
+    else
+      return true;      
+  }
+  
   public get widthString() : string {
     if(this.size != null)
       return (15*this.size) + 'px';
@@ -50,5 +59,6 @@ export class RbChoiceInputComponent implements OnInit {
     if(this.attribute != 'uid') {
       this.rbObject.setValue(this.attribute, this.editedValue);
     }
+    this.change.emit(this.editedValue);
   }
 }

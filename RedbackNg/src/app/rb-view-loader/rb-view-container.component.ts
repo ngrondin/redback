@@ -6,16 +6,19 @@ import { Target } from 'app/desktop-root/desktop-root.component';
     template: '<div>View Container</div>'
   })
   export class ViewContainerComponent {
+    @Input('target') currentTarget: Target;
     @Output() navigate: EventEmitter<any> = new EventEmitter();
     @Output() titlechange: EventEmitter<any> = new EventEmitter();
-    currentTarget: Target;
+    //currentTarget: Target;
     navigateTo(target: any) {
       this.navigate.emit(target);
     }
     setTitle(title: string) {
       this.titlechange.emit(title);
     }
+    /*
     rememberFilter(filter: any) {
       this.currentTarget.filter = filter;
     }
+    */
   };

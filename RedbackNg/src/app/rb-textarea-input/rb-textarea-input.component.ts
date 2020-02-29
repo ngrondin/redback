@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 
 @Component({
@@ -15,6 +15,7 @@ export class RbTextareaInputComponent implements OnInit {
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
+  @Output('change') change = new EventEmitter();
 
   editedValue: string;
 
@@ -44,6 +45,7 @@ export class RbTextareaInputComponent implements OnInit {
 
   commit() {
     this.rbObject.setValue(this.attribute, this.editedValue);
+    this.change.emit(this.editedValue);
   }
 
 

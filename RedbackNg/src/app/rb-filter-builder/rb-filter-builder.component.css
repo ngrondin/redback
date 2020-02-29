@@ -6,8 +6,6 @@
         0 5px 24px 4px rgba(0, 0, 0, 0.12);
     min-height: 200px;
     min-width: 500px;
-    max-height: 70%;
-    max-width: 70%;
     padding: 10px;
     display: flex;
 }

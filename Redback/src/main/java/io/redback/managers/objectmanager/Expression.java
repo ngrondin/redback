@@ -10,6 +10,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import io.redback.RedbackException;
+import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
 
@@ -57,6 +58,7 @@ public class Expression
 			executionContext.put("canWrite", new SessionRightsJSFunction(obj.getUserSession(), "write"));
 			executionContext.put("canExecute", new SessionRightsJSFunction(obj.getUserSession(), "execute"));
 			executionContext.put("userProfile", new UserProfileJSWrapper(obj.getUserSession().getUserProfile()));
+			executionContext.put("self", new RedbackObjectJSWrapper(obj));
 			executionContext.put("uid", obj.getUID().getString());
 			Iterator<String> it = obj.getObjectConfig().getAttributeNames().iterator();
 			while(it.hasNext())

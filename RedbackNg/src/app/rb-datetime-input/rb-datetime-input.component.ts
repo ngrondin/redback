@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ComponentRef, Injector, ViewContainerRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ComponentRef, Injector, ViewContainerRef, ViewChild, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { OverlayRef, Overlay } from '@angular/cdk/overlay';
 import { RbPopupListComponent } from 'app/rb-popup-list/rb-popup-list.component';
@@ -19,6 +19,8 @@ export class RbDatetimeInputComponent implements OnInit {
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
   @Input('format') format: string;
+  @Input('value') value: string;
+  @Output() valueChange = new EventEmitter();
 
   @ViewChild('input', { read: ViewContainerRef, static: false }) inputContainerRef: ViewContainerRef;
 
@@ -37,27 +39,39 @@ export class RbDatetimeInputComponent implements OnInit {
   }
 
   public get displayvalue(): string {
-    if(this.rbObject != null) {
-      let iso : string = this.rbObject.data[this.attribute];
-      if(iso != null) {
-        let dt: Date = new Date(iso);
-        let val = this.format;
-        val = val.replace('YYYY', dt.getFullYear().toString());
-        val = val.replace('YY', (dt.getFullYear() % 100).toString());
-        val = val.replace('MM', this.convertToStringAndPad(dt.getMonth() + 1, 2));
-        val = val.replace('DD', this.convertToStringAndPad(dt.getDate(), 2));
-        val = val.replace('HH', this.convertToStringAndPad(dt.getHours(), 2));
-        val = val.replace('mm', this.convertToStringAndPad(dt.getMinutes(), 2));
-        return val;
+    if(this.attribute != null) {
+      if(this.rbObject != null) {
+        let iso : string = this.rbObject.data[this.attribute];
+        if(iso != null) {
+          return this.formatDate(new Date(iso));
+        } else {
+          return null;
+        }
+      } else {
+        return null;  
+      }
+    } else {
+      if(this.value != null) {
+        return this.formatDate(new Date(this.value));
       } else {
         return null;
       }
-    } else
-      return null;  
+    }
   }
 
   public set displayvalue(val: string) {
     
+  }
+
+  private formatDate(dt: Date) : string {
+    let val = this.format;
+    val = val.replace('YYYY', dt.getFullYear().toString());
+    val = val.replace('YY', (dt.getFullYear() % 100).toString());
+    val = val.replace('MM', this.convertToStringAndPad(dt.getMonth() + 1, 2));
+    val = val.replace('DD', this.convertToStringAndPad(dt.getDate(), 2));
+    val = val.replace('HH', this.convertToStringAndPad(dt.getHours(), 2));
+    val = val.replace('mm', this.convertToStringAndPad(dt.getMinutes(), 2));
+    return val;
   }
 
   private convertToStringAndPad(num: number, n: number) : string {
@@ -68,10 +82,15 @@ export class RbDatetimeInputComponent implements OnInit {
   }
 
   public get readonly(): boolean {
-    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
-      return !(this.editable && this.rbObject.validation[this.attribute].editable);
-    else
-      return true;      
+    if(this.attribute != null) {
+      if(this.rbObject != null && this.rbObject.validation[this.attribute] != null) {
+        return !(this.editable && this.rbObject.validation[this.attribute].editable);
+      } else {
+        return true;      
+      }
+    } else {
+      return !this.editable;
+    }
   }
 
   public openPopupList(direction) {
@@ -138,10 +157,16 @@ export class RbDatetimeInputComponent implements OnInit {
   }
 
   public selected(dt: Date) {
-    if(dt != null)
-      this.rbObject.setValue(this.attribute, dt.toISOString());
-    else
-      this.rbObject.setValue(this.attribute, null);
+    if(this.attribute != null) {
+      if(this.rbObject != null) {
+        if(dt != null)
+          this.rbObject.setValue(this.attribute, dt.toISOString());
+        else
+          this.rbObject.setValue(this.attribute, null);
+      }
+    } else {
+      this.valueChange.emit(dt.toISOString());
+    }
     this.overlayRef.dispose();
     this.overlayRef = null;
     this.inputContainerRef.element.nativeElement.blur();

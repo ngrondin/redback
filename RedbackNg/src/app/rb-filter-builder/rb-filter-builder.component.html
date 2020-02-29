@@ -21,29 +21,29 @@
     <div
         class="rb-filter-builder-canvas">
         <div
-            *ngFor="let filternode of filter | keyvalue"
+            *ngFor="let filterConstruct of filterConstructs"
             class="rb-filter-builder-line">
             <span>
-                {{getAttributeLabel(filternode.key)}} : &nbsp;&nbsp;
+                {{filterConstruct.config.label}} : &nbsp;&nbsp;
             </span>
+
             <mat-form-field
-                *ngIf="getAttributeType(filternode.key) == 'string'">
+                *ngIf="filterConstruct.config.type == 'string'">
                 <mat-label>Value</mat-label>
                 <input
                     matInput
-                    [ngModel]="getFilterValue(filternode.key)"
-                    (change)="setFilterValue(filternode.key, $event.target.value)"
+                    [(ngModel)]="filterConstruct.val1"
                     autocomplete="off">
                     <mat-icon 
                         matPrefix
                         class="rb-grey-icon">create</mat-icon>
             </mat-form-field>
+            
             <mat-form-field 
-                *ngIf="getAttributeType(filternode.key) == 'date'">
+                *ngIf="filterConstruct.config.type == 'date'">
                 <mat-select
-                    (selectionChange)="setFilterValue(filternode.key, $event.value)"
-                    [value]="getFilterValue(filternode.key)"
-                    [compareWith]="dateOptionComparison">
+                    (selectionChange)="filterConstruct.val1 = $event.value"
+                    [value]="filterConstruct.val1">
                     <mat-option
                         *ngFor="let choice of datechoice"
                         [value]="choice.value">
@@ -53,13 +53,24 @@
                 <mat-icon 
                     matPrefix
                     class="rb-grey-icon">date_range</mat-icon>
-            </mat-form-field>            
+            </mat-form-field>  
+            <rb-datetime-input
+                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'since' || filterConstruct.val1 == 'between')"
+                [editable]="true"
+                [(value)]=filterConstruct.val2>
+            </rb-datetime-input>          
+            <rb-datetime-input
+                *ngIf="filterConstruct.config.type == 'date' &&  filterConstruct.val1 == 'between'"
+                [editable]="true"
+                [(value)]=filterConstruct.val3>
+            </rb-datetime-input>          
             <button
                 mat-button
                 class="mat-mini mat-primary rb-button" 
-                (click)="removeAttribute(filternode.key)">
+                (click)="removeFilterItem(filterConstruct)">
                 <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
             </button>
+
         </div>
     </div>
     <div>

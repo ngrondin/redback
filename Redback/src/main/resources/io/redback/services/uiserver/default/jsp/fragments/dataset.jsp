@@ -10,12 +10,9 @@ if(config.get('basefilter') != null) { %>
 	[baseFilter]="<%=utils.convertDataMapToAttributeString(config.getObject('basefilter'))%>"<% 
 } 
 if(typeof dataset == 'undefined') { %>
-	[initialUserFilter]="currentTarget.filter" 
-	(userFilterChanged)="currentTarget.filter = $event"
-	[initialSearchString]="currentTarget.search" 
-	(searchStringChanged)="currentTarget.search = $event"
-	[initialSelectedObject]="currentTarget.selectedObject" 
-	(selectedObjectChanged)="currentTarget.selectedObject = $event"<%
+	[(userFilter)]="currentTarget.filter" 
+	[(searchString)]="currentTarget.search" 
+	[(selectedObject)]="currentTarget.selectedObject" <%
 } else if(config.getObject('master') != null) { %>
 	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.getObject('master').getObject('relationship'))%>" 
 	[relatedObject]="<%=dataset%>.selectedObject"<% 

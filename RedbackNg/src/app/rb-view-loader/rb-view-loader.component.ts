@@ -26,9 +26,7 @@ export class RbViewLoaderComponent implements OnInit {
 
   constructor(
     private http: Http,
-    private resolver: ComponentFactoryResolver,
     private compiler: Compiler,
-    private vcRef: ViewContainerRef,
     private apiService: ApiService
   ) { }
 
@@ -43,6 +41,8 @@ export class RbViewLoaderComponent implements OnInit {
           res => this.compileTemplate(res.text())
         );
         this.currentView = this.target.view;
+      } else if(this.componentRef != null) {
+        this.componentRef.instance.currentTarget = this.target;
       } 
     } 
   }

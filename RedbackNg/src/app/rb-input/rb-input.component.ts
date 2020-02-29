@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from '../datamodel';
 import {FormControl, FormGroupDirective, NgForm, Validators} from '@angular/forms';
 
@@ -15,6 +15,7 @@ export class RbInputComponent implements OnInit {
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
+  @Output('change') change = new EventEmitter();
 
   editedValue: string;
 
@@ -57,6 +58,7 @@ export class RbInputComponent implements OnInit {
     if(this.attribute != 'uid') {
       this.rbObject.setValue(this.attribute, this.editedValue);
     }
+    this.change.emit(this.editedValue);
   }
 
 }
