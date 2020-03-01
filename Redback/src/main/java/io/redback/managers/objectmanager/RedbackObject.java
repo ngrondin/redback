@@ -39,13 +39,25 @@ public class RedbackObject
 	protected boolean isNewObject;
 
 	// Initiate existing object from pre-loaded data
-	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, DataMap d) throws RedbackException, ScriptException
+	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, DataMap dbData) throws RedbackException, ScriptException
 	{
 		init(s, om, cfg);		
 		isNewObject = false;
 		if(canRead)
 		{
-			setDataFromDBData(d);
+			uid = new Value(dbData.getString(config.getUIDDBKey()));
+			domain = new Value(config.isDomainManaged() ? dbData.getString(config.getDomainDBKey()) : "root");
+			Iterator<String> it = config.getAttributeNames().iterator();
+			while(it.hasNext())
+			{
+				AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+				String dbKey = attributeConfig.getDBKey();
+				if(dbKey != null)
+				{
+					Value val = new Value(dbData.get(dbKey));
+					data.put(attributeConfig.getName(), val);
+				}
+			}
 			executeScriptsForEvent("onload");
 		}
 		else
@@ -55,7 +67,7 @@ public class RedbackObject
 	}
 	
 	// Initiate new object
-	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, String d) throws RedbackException
+	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, String u, String d) throws RedbackException
 	{
 		init(s, om, cfg);		
 		isNewObject = true;
@@ -63,32 +75,45 @@ public class RedbackObject
 		{
 			try
 			{
-				if(config.getUIDGeneratorName() != null)
+				if(u != null) 
+				{
+					List<RedbackObject> others = om.listObjects(s, config.getName(), new DataMap("uid", u), null, false);
+					if(others.size() == 0)
+					{
+						uid = new Value(u);
+					}
+					else
+					{
+						error("Another object " + config.getName() + " already exists with uid " + u, null);
+					}
+				}
+				else if(config.getUIDGeneratorName() != null)
 				{
 					uid = objectManager.getNewID(config.getUIDGeneratorName());
-					domain = new Value(config.isDomainManaged() ? (d != null ? d : session.getUserProfile().getAttribute("rb.defaultdomain")) : "root");
-					Iterator<String> it = config.getAttributeNames().iterator();
-					while(it.hasNext())
-					{
-						AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-						String attributeName = attributeConfig.getName();
-						String idGeneratorName = attributeConfig.getIdGeneratorName();
-						Expression defaultValue = attributeConfig.getDefaultValue();
-						if(idGeneratorName != null)
-						{
-							put(attributeName, objectManager.getNewID(idGeneratorName));
-						}
-						else if(defaultValue != null)
-						{
-							put(attributeName, defaultValue.eval(this));
-						}
-					}
-					executeScriptsForEvent("oncreate");
 				}
 				else
 				{
-					error("No UID Generator has been configured for object " + config.getName() , null);
+					error("No UID has been provided or no UID Generator has been configured for object " + config.getName() , null);
 				}
+				
+				domain = new Value(config.isDomainManaged() ? (d != null ? d : session.getUserProfile().getAttribute("rb.defaultdomain")) : "root");
+				Iterator<String> it = config.getAttributeNames().iterator();
+				while(it.hasNext())
+				{
+					AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+					String attributeName = attributeConfig.getName();
+					String idGeneratorName = attributeConfig.getIdGeneratorName();
+					Expression defaultValue = attributeConfig.getDefaultValue();
+					if(idGeneratorName != null)
+					{
+						put(attributeName, objectManager.getNewID(idGeneratorName));
+					}
+					else if(defaultValue != null)
+					{
+						put(attributeName, defaultValue.eval(this));
+					}
+				}
+				executeScriptsForEvent("oncreate");
 			}
 			catch(Exception e)
 			{
@@ -112,23 +137,6 @@ public class RedbackObject
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
-	}
-	
-	protected void setDataFromDBData(DataMap dbData)
-	{
-		uid = new Value(dbData.getString(config.getUIDDBKey()));
-		domain = new Value(config.isDomainManaged() ? dbData.getString(config.getDomainDBKey()) : "root");
-		Iterator<String> it = config.getAttributeNames().iterator();
-		while(it.hasNext())
-		{
-			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-			String dbKey = attributeConfig.getDBKey();
-			if(dbKey != null)
-			{
-				Value val = new Value(dbData.get(dbKey));
-				data.put(attributeConfig.getName(), val);
-			}
-		}
 	}
 	
 

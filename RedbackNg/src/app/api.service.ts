@@ -90,7 +90,7 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  createObject(name: string, data: any) {
+  createObject(name: string, uid: string, data: any) {
     const req = {
       action: 'create',
       object: name,
@@ -100,6 +100,9 @@ export class ApiService {
         addvalidation: true
       }
     };
+    if(uid != null) {
+      req['uid'] = uid;
+    }
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 

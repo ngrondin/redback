@@ -73,20 +73,29 @@ export class RbObject {
     }
 
     setValueAndRelated(attribute: string, value: any, related: RbObject) {
-        if(this.validation[attribute].editable == true) {
+        if(attribute == 'uid') {
+            if(this.uid == null) {
+                this.uid = value;
+                this.dataService.createObject(this.objectname, this.uid, this.data).subscribe(val => {});
+            }
+        } else if(this.validation[attribute].editable == true) {
             this.data[attribute] = value;
             this.changed.push(attribute);
-            if(this.related[attribute] != null) 
+            if(this.related[attribute] != null) {
                 this.related[attribute] = related;
-            if(this.dataService.saveImmediatly)
-                this.saveToServer();
+            }
+            if(this.dataService.saveImmediatly) {
+                //this.saveToServer();
+                this.dataService.updateObjectToServer(this);
+            }
         }
     }
 
+    /*
     saveToServer() {
         this.dataService.updateObjectToServer(this);
     }
-
+    */
 }
 
 

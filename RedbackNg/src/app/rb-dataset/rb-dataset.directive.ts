@@ -138,12 +138,16 @@ export class RbDatasetDirective implements OnChanges {
   } 
 
   public action(name: string, param: string) {
-    if(name == 'create') {
+    if(name == 'create' || name == 'createInMemory') {
       let data = this.mergeFilters();
       if(param != null) {
         data = this.mergeMaps(data, this.resolveMap(param, this.selectedObject))
       }
-      this.dataService.createObject(this.objectname, data).subscribe(newObject => this.addObjectAndSelect(newObject));
+      if(name == 'create') {
+        this.dataService.createObject(this.objectname, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
+      } else if(name == 'createInMemory') {
+        this.dataService.createObjectInMemory(this.objectname, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
+      }
     } else if(name == 'save') {
       
     } else if(this.selectedObject != null) {

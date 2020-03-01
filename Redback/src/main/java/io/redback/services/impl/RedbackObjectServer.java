@@ -89,11 +89,11 @@ public class RedbackObjectServer extends ObjectServer
 		return object;
 	}
 
-	protected RedbackObject create(Session session, String objectName, String domain, DataMap data) throws RedbackException
+	protected RedbackObject create(Session session, String objectName, String uid, String domain, DataMap data) throws RedbackException
 	{
 		RedbackObject object = null;
 		try {
-			object = objectManager.createObject(session, objectName, domain, data);
+			object = objectManager.createObject(session, objectName, uid, domain, data);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			error("Error creating object", e);

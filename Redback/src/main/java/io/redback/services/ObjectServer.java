@@ -103,9 +103,10 @@ public abstract class ObjectServer extends AuthenticatedService
 					}
 					else if(action.equals("create"))
 					{
-						DataMap data = request.getObject("data");
+						String uid = request.getString("uid");
 						String domain = request.getString("domain");
-						RedbackObject object = create(session, objectName, domain, data);
+						DataMap data = request.getObject("data");
+						RedbackObject object = create(session, objectName, uid, domain, data);
 						responseData = object.getJSON(addValidation, addRelated);
 					}
 					else if(action.equals("execute"))
@@ -171,7 +172,7 @@ public abstract class ObjectServer extends AuthenticatedService
 
 	protected abstract RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException;
 
-	protected abstract RedbackObject create(Session session, String objectName, String domain, DataMap data) throws RedbackException;
+	protected abstract RedbackObject create(Session session, String objectName, String uid, String domain, DataMap data) throws RedbackException;
 
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException;
 	

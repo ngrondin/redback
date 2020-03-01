@@ -116,8 +116,8 @@ export class DataService {
       });
   }
 
-  createObject(name: string, data: any) : Observable<RbObject> {
-    const apiObservable = this.apiService.createObject(name, data);
+  createObject(name: string, uid: string, data: any) : Observable<RbObject> {
+    const apiObservable = this.apiService.createObject(name, uid, data);
     const dataObservable = new Observable<RbObject>((observer) => {
       apiObservable.subscribe(
         resp => {
@@ -131,6 +131,16 @@ export class DataService {
       );
     })
     return dataObservable;     
+  }
+
+  createObjectInMemory(name: string, uid: string, data: any) : Observable<RbObject> {
+    const dataObservable = new Observable<RbObject>((observer) => {
+      let newObj: RbObject = new RbObject({objectname: name, uid: uid, data: data}, this);
+      this.allObjects.push(newObj);
+      observer.next(newObj);
+      observer.complete();
+    });
+    return dataObservable;  
   }
 
   executeObObject(rbObject: RbObject, func: string, param: string) {

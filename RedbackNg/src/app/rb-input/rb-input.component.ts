@@ -1,14 +1,15 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from '../datamodel';
 import {FormControl, FormGroupDirective, NgForm, Validators} from '@angular/forms';
+import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.component';
 
 @Component({
   selector: 'rb-input',
   templateUrl: './rb-input.component.html',
   styleUrls: ['./rb-input.component.css']
 })
-export class RbInputComponent implements OnInit {
-
+export class RbInputComponent extends RbInputCommonComponent implements OnInit {
+/*
   @Input('label') label: string;
   @Input('icon') icon: string;
   @Input('size') size: number;
@@ -18,8 +19,11 @@ export class RbInputComponent implements OnInit {
   @Output('change') change = new EventEmitter();
 
   editedValue: string;
+*/
 
-  constructor() { }
+  constructor() {
+    super();
+   }
 
   ngOnInit() {
   }
@@ -40,12 +44,14 @@ export class RbInputComponent implements OnInit {
     this.editedValue = val;
   }
 
+  /*
   public get readonly(): boolean {
     if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
       return !(this.editable && this.rbObject.validation[this.attribute].editable);
     else
       return true;      
   }
+  */
 
   public get widthString() : string {
     if(this.size != null)
@@ -55,9 +61,7 @@ export class RbInputComponent implements OnInit {
   }
 
   commit() {
-    if(this.attribute != 'uid') {
-      this.rbObject.setValue(this.attribute, this.editedValue);
-    }
+    this.rbObject.setValue(this.attribute, this.editedValue);
     this.change.emit(this.editedValue);
   }
 

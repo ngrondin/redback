@@ -58,7 +58,7 @@ public class ObjectManagerJSWrapper
 	
 	public JSObject createObject(String objectName, JSObject initialData) throws RedbackException, ScriptException
 	{
-		RedbackObject rbo = objectManager.createObject(session, objectName, null, convertToJSONObject(initialData));
+		RedbackObject rbo = objectManager.createObject(session, objectName, null, null, convertToJSONObject(initialData));
 		if(rbo != null)
 			return new RedbackObjectJSWrapper(rbo);
 		else

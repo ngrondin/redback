@@ -273,10 +273,10 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject createObject(Session session, String objectName, String domain, DataMap initialData) throws RedbackException, ScriptException
+	public RedbackObject createObject(Session session, String objectName, String uid, String domain, DataMap initialData) throws RedbackException, ScriptException
 	{
 		ObjectConfig objectConfig = getObjectConfig(objectName);
-		RedbackObject object = new RedbackObject(session, this, objectConfig, domain);
+		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
 		putInCurrentTransaction(object);
 		if(initialData != null)
 		{
