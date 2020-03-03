@@ -26,6 +26,9 @@ export class RbInputComponent extends RbInputCommonComponent implements OnInit {
    }
 
   ngOnInit() {
+    if(this.icon == null) {
+      this.icon = 'description';
+    }
   }
 
   public get value(): string {
@@ -33,7 +36,7 @@ export class RbInputComponent extends RbInputCommonComponent implements OnInit {
       if(this.attribute == 'uid') {
         return this.rbObject.uid;
       } else {
-        return this.rbObject.data[this.attribute];
+        return this.rbObject.get(this.attribute);
       }
     } else {
       return null;  

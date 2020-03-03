@@ -122,7 +122,7 @@ export class RbMapComponent implements OnInit {
 
   geometryOf(object: RbObject) : any {
     if(object != null && this.geoattribute != null ) {
-      return object.data[this.geoattribute];
+      return object.get(this.geoattribute);
     } else {
       return null;
     }

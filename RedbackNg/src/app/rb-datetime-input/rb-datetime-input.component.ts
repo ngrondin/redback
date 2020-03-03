@@ -5,22 +5,23 @@ import { RbPopupListComponent } from 'app/rb-popup-list/rb-popup-list.component'
 import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { DateTimePopupConfig, RbPopupDatetimeComponent } from 'app/rb-popup-datetime/rb-popup-datetime.component';
+import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.component';
 
 @Component({
   selector: 'rb-datetime-input',
   templateUrl: './rb-datetime-input.component.html',
   styleUrls: ['./rb-datetime-input.component.css']
 })
-export class RbDatetimeInputComponent implements OnInit {
-  @Input('label') label: string;
+export class RbDatetimeInputComponent extends RbInputCommonComponent implements OnInit {
+  /*@Input('label') label: string;
   @Input('icon') icon: string;
   @Input('size') size: number;
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
-  @Input('format') format: string;
   @Input('value') value: string;
-  @Output() valueChange = new EventEmitter();
+  @Output() valueChange = new EventEmitter();*/
+  @Input('format') format: string;
 
   @ViewChild('input', { read: ViewContainerRef, static: false }) inputContainerRef: ViewContainerRef;
 
@@ -31,7 +32,9 @@ export class RbDatetimeInputComponent implements OnInit {
     public injector: Injector,
     public overlay: Overlay,
     public viewContainerRef: ViewContainerRef
-  ) { }
+  ) {
+    super();
+   }
 
   ngOnInit() {
     if(this.format == null)
@@ -41,7 +44,7 @@ export class RbDatetimeInputComponent implements OnInit {
   public get displayvalue(): string {
     if(this.attribute != null) {
       if(this.rbObject != null) {
-        let iso : string = this.rbObject.data[this.attribute];
+        let iso : string = this.rbObject.get(this.attribute);
         if(iso != null) {
           return this.formatDate(new Date(iso));
         } else {
@@ -81,6 +84,7 @@ export class RbDatetimeInputComponent implements OnInit {
     return ret;
   }
 
+  /*
   public get readonly(): boolean {
     if(this.attribute != null) {
       if(this.rbObject != null && this.rbObject.validation[this.attribute] != null) {
@@ -92,6 +96,7 @@ export class RbDatetimeInputComponent implements OnInit {
       return !this.editable;
     }
   }
+  */
 
   public openPopupList(direction) {
     if(!this.readonly) {

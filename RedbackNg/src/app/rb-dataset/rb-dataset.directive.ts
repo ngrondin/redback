@@ -38,12 +38,7 @@ export class RbDatasetDirective implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     let doRefresh: boolean = false;
     if("relatedObject" in changes || "active" in changes) {
-      if(this.initiated) {
-        if(this.active)
-          doRefresh = true;
-      else
-        this.list = [];
-      }
+      doRefresh = true;
     }
     if("inputUserFilter" in changes && this.userFilter != this.inputUserFilter) {
       this.userFilter = this.inputUserFilter;
@@ -57,7 +52,7 @@ export class RbDatasetDirective implements OnChanges {
       this._selectedObject = this.inputSelectedObject;
       doRefresh = true;
     }
-    if(doRefresh) {
+    if(doRefresh && this.initiated && this.active) {
       this.refreshData();
     }
   }
