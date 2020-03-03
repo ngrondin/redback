@@ -7,11 +7,9 @@ if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObjec
 	style="<%=config.getString('inlineStyle')%>"
 	*ngIf="<%=showExpr%>"
 	[label]="'<%=config.getString("label")%>'"<%
-if(config.get('icon') == null) {%>
-	[icon]="'description'"<%	
-} else if(config.getString('icon').indexOf(':') >= 0) {%>
+if(config.get('icon') != null && config.getString('icon').indexOf(':') >= 0) {%>
 	[icon]="'<%=config.getString('icon')%>'"<%
-} else {%>
+} else if(config.get('icon') != null) {%>
 	[icon]="'<%=config.getString('icon')%>'"<%
 }
 if(config.get('size') != null) { %>	
