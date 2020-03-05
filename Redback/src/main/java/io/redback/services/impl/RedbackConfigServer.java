@@ -59,7 +59,7 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 			Reader reader = null;
 			if(devpath != null)
 			{
-				File file = new File(devpath + "\\" + service + "\\" + category + "\\" + name + ".json");
+				File file = new File(devpath + File.separator + service + File.separator + category + File.separator + name + ".json");
 				if(file.exists())
 					reader = new FileReader(file);
 			}
@@ -102,7 +102,7 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 			String root = null;
 			if(devpath != null)
 			{
-				root = devpath + "\\" + service + "\\" + category;
+				root = devpath + File.separator + service + File.separator + category;
 				File file = new File(root);
 				if(file.isDirectory())
 				{

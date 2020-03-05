@@ -49,9 +49,13 @@ public class RedbackAccessManager extends AccessManager
 			if(profile != null)
 				session = new Session(token, profile, jwt.getExpiresAt().getTime());
 		} 
+		catch (RedbackException exception)
+		{
+			error("Cannot retrieve the user profile", exception);
+		}
 		catch (Exception exception)
 		{
-		    error("JWT token is invalid");
+		    error("JWT token is invalid", exception);
 		}
 		return session;
 	}

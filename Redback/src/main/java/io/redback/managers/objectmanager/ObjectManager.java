@@ -209,7 +209,7 @@ public class ObjectManager
 				if(filterData != null)
 					objectFilter.merge(filterData);
 				if(searchText != null)
-					objectFilter.merge(generateSearchFilter(session, objectName, searchText));
+					objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
 				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
