@@ -101,7 +101,7 @@ public class ViewManager extends Manager {
 			if(typesWithContent.contains(type))
 				newNode.put("content", new DataList());
 			DataList list = parentData.getList("content");
-			newName = name + ".content." + list.size();
+			newName = (name != null ? name + "." : "") + "content." + list.size();
 			list.add(newNode);
 			setDataChanged(true);
 		}

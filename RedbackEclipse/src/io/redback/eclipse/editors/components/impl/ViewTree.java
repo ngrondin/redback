@@ -198,8 +198,14 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 		}
 		
 		if(name != null) {
-			String nextSelectName = name.substring(0, name.lastIndexOf(".", name.lastIndexOf(".") - 1));
-			String nextSelectType = data.getObject(nextSelectName).getString("type");
+			String parentContent = name.substring(0, name.lastIndexOf("."));
+			String nextSelectName = null;
+			String nextSelectType = null;
+			if(parentContent.indexOf(".") > -1) {
+				nextSelectName = parentContent.substring(0, parentContent.lastIndexOf("."));
+				nextSelectType = data.getObject(nextSelectName).getString("type");
+			}
+			
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Delete");
 		    item.setData(new NavigatorAction("delete", type, name, nextSelectType, nextSelectName));
