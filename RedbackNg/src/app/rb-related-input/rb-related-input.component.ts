@@ -44,7 +44,7 @@ export class RbRelatedInputComponent implements OnInit {
     if(this.overlayRef != null)
       return this.searchValue;
     if(this.rbObject != null && this.rbObject.related[this.attribute] != null )
-      return this.rbObject.related[this.attribute].data[this.displayattribute];
+      return this.rbObject.related[this.attribute].get(this.displayattribute);
     else
       return null;  
   }

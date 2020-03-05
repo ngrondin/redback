@@ -5,7 +5,7 @@
             mat-button 
             class="rb-list-select-button"
             (click)="select(item)">
-            {{item.data[config.displayattribute]}}
+            {{item.get(config.displayattribute)}}
         </button>
         <button 
             mat-button 
