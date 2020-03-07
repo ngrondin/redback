@@ -6,6 +6,7 @@ import { ObjectResp, RbObject } from './datamodel';
 import { RequestOptionsArgs, RequestOptions } from '@angular/http';
 import { CookieService } from 'ngx-cookie-service';
 import { ToastrService } from 'ngx-toastr';
+import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 const httpOptions = {
   headers: new HttpHeaders().set("Content-Type", "application/json"),
@@ -22,11 +23,11 @@ export class ApiService {
   public objectService: string;
   public fileService: string;
   public processService: string;
+  public signalService: string;
+  public signalWebsocket: WebSocketSubject<any>;
 
   constructor(
-    private http: HttpClient,
-    private cookieService : CookieService,
-    private toastr: ToastrService
+    private http: HttpClient
   ) { 
 
   }
@@ -118,6 +119,39 @@ export class ApiService {
       }
     };
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
+  private initSignalWebsocket() {
+    if(this.signalService != null && this.signalWebsocket == null) {
+      this.signalWebsocket = webSocket(this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.signalService);
+      //this.signalWebsocket = webSocket('ws://localhost/rbws');
+    }
+  }
+
+  getSignalObservable() : Observable<any>  {
+    if(this.signalService != null) {
+      if(this.signalWebsocket == null) {
+        this.initSignalWebsocket();
+      }
+      if(this.signalWebsocket != null) {
+        return this.signalWebsocket.asObservable();
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  subscribeToSignal(signal: string) {
+    if(this.signalService != null) {
+      if(this.signalWebsocket == null) {
+        this.initSignalWebsocket();
+      }
+      if(this.signalWebsocket != null) {
+        this.signalWebsocket.next({subscribe:signal});
+      } 
+    } 
   }
 
   listAssignments(filter: any): Observable<any> {

@@ -22,5 +22,10 @@
   "/rbfs": {
     "target": "http://localhost/rbfs",
     "secure": false
+  },
+  "/rbws": {
+    "target": "ws://localhost/rbws",
+    "secure": false,
+    "ws":true
   }    
 }

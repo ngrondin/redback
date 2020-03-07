@@ -19,6 +19,13 @@ export class DataService {
   ) {
     this.allObjects = [];
     this.saveImmediatly = true;
+    let obs = this.apiService.getSignalObservable();
+    if(obs != null) {
+      obs.subscribe(json => {
+        let parts = json.signal.split(':');
+        this.getServerObject(parts[0], parts[1]).subscribe(object => {});
+      });
+    }
   }
 
   getLocalObject(objectname: string, uid: string) : RbObject {
@@ -98,6 +105,7 @@ export class DataService {
     } else {
       rbObject = new RbObject(json, this);
       this.allObjects.push(rbObject);
+      this.apiService.subscribeToSignal(rbObject.objectname + ':' + rbObject.uid);
     }
     return rbObject;
   }

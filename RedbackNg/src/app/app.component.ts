@@ -42,6 +42,7 @@ export class AppComponent {
     this.apiService.objectService = native.getAttribute("objectservice");
     this.apiService.fileService = native.getAttribute("fileservice");
     this.apiService.processService = native.getAttribute("processservice");
+    this.apiService.signalService = native.getAttribute("signalservice");
     let objectViewMapString: string = native.getAttribute("objectviewmap");
     if(objectViewMapString.length > 0) {
       this.objectViewMap = JSON.parse(objectViewMapString.replace(/'/g, '"'));
