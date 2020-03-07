@@ -53,10 +53,11 @@ public class RedbackUIServer extends UIServer
 		Bindings context = jsEngine.createBindings();
 		context.put("global", config.getObject("globalvariables"));
 		context.put("version", version);
-		context.put("uiservice", this.serviceName);
-		context.put("objectservice", config.getString("objectservice"));
-		context.put("fileservice", config.getString("fileservice"));
-		context.put("processservice", config.getString("processservice"));
+		context.put("uiservicepath",  config.getString("uiservicepath"));
+		context.put("objectservicepath", config.getString("objectservicepath"));
+		context.put("fileservicepath", config.getString("fileservicepath"));
+		context.put("processservicepath", config.getString("processservicepath"));
+		context.put("signalservicepath", config.getString("signalservicepath"));
 		context.put("utils", new RedbackUtilsJSWrapper());
 		if(session != null)
 		{

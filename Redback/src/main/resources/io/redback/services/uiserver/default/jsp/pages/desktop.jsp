@@ -24,10 +24,11 @@ var versionOrDefault = version != null ? version : 'default';
     initialview="<%=config.getString('defaultview')%>"
     menuview="<%=config.getString('name')%>"
     iconsets="<%=(JSON.parse(config.getList('iconsets').toString())).join(',')%>"
-    uiservice="<%=uiservice%>"
-    objectservice="<%=objectservice%>"
-    fileservice="<%=fileservice%>"
-    processservice="<%=processservice%>">
+    uiservice="<%=uiservicepath%>"
+    objectservice="<%=objectservicepath%>"
+    fileservice="<%=fileservicepath%>"
+    processservice="<%=processservicepath%>"
+    signalservice="<%=signalservicepath%>">
   </app-root>
 
   <script src="<%=resourcePrefix%>/runtime-es2015.js" type="module"></script>
