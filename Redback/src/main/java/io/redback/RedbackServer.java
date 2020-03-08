@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.FileHandler;
@@ -33,6 +32,8 @@ public class RedbackServer implements Consumer
 	public RedbackServer(DataMap config)
 	{
 		firebus = new Firebus(config.getString("network"), config.getString("password"));
+		if(config.containsKey("threads"))
+			firebus.setThreadCount(config.getNumber("threads").intValue());
 		firebus.registerConsumer("_rb_config_cache_clear", this, 1);
 		
 		DataList knownAddresses = config.getList("knownaddresses");
