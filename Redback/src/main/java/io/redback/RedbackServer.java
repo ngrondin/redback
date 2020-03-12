@@ -13,6 +13,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.firebus.DiscoveryAgent;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.interfaces.BusFunction;
@@ -31,23 +32,6 @@ public class RedbackServer implements Consumer
 	
 	public RedbackServer(DataMap config)
 	{
-		firebus = new Firebus(config.getString("network"), config.getString("password"));
-		if(config.containsKey("threads"))
-			firebus.setThreadCount(config.getNumber("threads").intValue());
-		firebus.registerConsumer("_rb_config_cache_clear", this, 1);
-		
-		DataList knownAddresses = config.getList("knownaddresses");
-		if(knownAddresses != null)
-		{
-			for(int i = 0; i < knownAddresses.size(); i++)
-			{
-				String address = knownAddresses.getObject(i).getString("address");
-				int port = Integer.parseInt(knownAddresses.getObject(i).getString("port"));
-				logger.fine("Adding known address " + address + ":" + port);
-				firebus.addKnownNodeAddress(address, port);
-			}
-		}
-		
 		List<Logger> loggers = new ArrayList<Logger>();
 		DataList loggerConfigs = config.getList("loggers");
 		for(int i = 0; i < loggerConfigs.size(); i++)
@@ -71,6 +55,46 @@ public class RedbackServer implements Consumer
 			}
 		}
 		
+		firebus = new Firebus(config.getString("network"), config.getString("password"));
+		if(config.containsKey("threads"))
+			firebus.setThreadCount(config.getNumber("threads").intValue());
+		firebus.registerConsumer("_rb_config_cache_clear", this, 1);
+		
+		DataList knownAddresses = config.getList("knownaddresses");
+		if(knownAddresses != null)
+		{
+			logger.fine("Adding known addresses to firebus");
+			for(int i = 0; i < knownAddresses.size(); i++)
+			{
+				String address = knownAddresses.getObject(i).getString("address");
+				int port = Integer.parseInt(knownAddresses.getObject(i).getString("port"));
+				logger.fine("Adding known address " + address + ":" + port);
+				firebus.addKnownNodeAddress(address, port);
+			}
+		}
+		
+		DataList discoveryAgents = config.getList("discoveryagents");
+		if(discoveryAgents != null)
+		{
+			logger.fine("Adding discovery agents to firebus");
+			for(int i = 0; i < discoveryAgents.size(); i++)
+			{
+				DataMap discoveryAgent = discoveryAgents.getObject(i);  
+				String className = discoveryAgent.getString("class");
+				try
+				{
+					logger.fine("Instantiating discovery agent " + className);
+					Class<?> c = Class.forName(className);
+					DiscoveryAgent agent = (DiscoveryAgent)c.newInstance();
+					firebus.addDiscoveryAgent(agent);
+				} 
+				catch (Exception e) 
+				{
+					logger.severe("Error instantiating discoveryAgent " + className + " : " + e.getMessage());
+				}
+			}
+		}		
+
 		logger.fine("Adding services to container");
 		services = new ArrayList<BusFunction>();
 		DataList serviceConfigs = config.getList("services");
