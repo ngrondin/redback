@@ -20,7 +20,7 @@ var versionOrDefault = version != null ? version : 'default';
     version="<%=versionOrDefault%>"
     username="<%=session.getUserProfile().getUsername()%>"
     userdisplay="<%=session.getUserProfile().getAttribute('fullname')%>"
-    objectviewmap="<%=utils.convertDataMapToAttributeString(config.getObject('objectviewmap'))%>"
+    objects="<%=utils.convertDataMapToAttributeString(config.getObject('objects'))%>"
     initialview="<%=config.getString('defaultview')%>"
     menuview="<%=config.getString('name')%>"
     iconsets="<%=(JSON.parse(config.getList('iconsets').toString())).join(',')%>"

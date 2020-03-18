@@ -12,6 +12,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import jdk.nashorn.api.scripting.JSObject;
+import io.firebus.exceptions.FunctionErrorException;
+import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataMap;
 import io.firebus.utils.FirebusDataUtil;
 import io.redback.RedbackException;
@@ -96,7 +98,27 @@ public class RedbackObject
 					error("No UID has been provided or no UID Generator has been configured for object " + config.getName() , null);
 				}
 				
-				domain = new Value(config.isDomainManaged() ? (d != null ? d : session.getUserProfile().getAttribute("rb.defaultdomain")) : "root");
+				if(!config.isDomainManaged()) 
+				{
+					domain = new Value("root");
+				}
+				else if(d != null)
+				{
+					domain = new Value(d);
+				} 
+				else if(session.getUserProfile().getAttribute("rb.defaultdomain") != null)
+				{
+					domain = new Value(session.getUserProfile().getAttribute("rb.defaultdomain"));
+				}
+				else if(session.getUserProfile().getDomains().size() > 0)
+				{
+					domain = new Value(session.getUserProfile().getDomains().get(0));
+				}
+				else
+				{
+					error("No domain has been provided and no default domain has been configure for the user");
+				}
+				
 				Iterator<String> it = config.getAttributeNames().iterator();
 				while(it.hasNext())
 				{
@@ -115,7 +137,7 @@ public class RedbackObject
 				}
 				executeScriptsForEvent("oncreate");
 			}
-			catch(Exception e)
+			catch(FunctionTimeoutException | FunctionErrorException e)
 			{
 				error("Problem initiating object " + config.getName(), e);
 			}
