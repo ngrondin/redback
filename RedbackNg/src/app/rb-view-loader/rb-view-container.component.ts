@@ -8,17 +8,14 @@ import { Target } from 'app/desktop-root/desktop-root.component';
   export class ViewContainerComponent {
     @Input('target') currentTarget: Target;
     @Output() navigate: EventEmitter<any> = new EventEmitter();
-    @Output() titlechange: EventEmitter<any> = new EventEmitter();
-    //currentTarget: Target;
+    //@Output() titlechange: EventEmitter<any> = new EventEmitter();
+
     navigateTo(target: any) {
       this.navigate.emit(target);
     }
     setTitle(title: string) {
-      this.titlechange.emit(title);
+      this.currentTarget.title = title;
+      //this.titlechange.emit(title);
     }
-    /*
-    rememberFilter(filter: any) {
-      this.currentTarget.filter = filter;
-    }
-    */
+
   };

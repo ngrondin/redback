@@ -8,13 +8,12 @@
         <span>{{apptitle}}</span>
         <span
             class="rb-pagetitle">
-            &nbsp;&nbsp;|&nbsp;&nbsp;{{viewTitle}}
+            &nbsp;&nbsp;|&nbsp;&nbsp;{{currentViewTarget.title}}
         </span>
         <div
             class="rb-toolbar-spacer">
         </div>
         <rb-global-search
-            [objectViewMap]="objectViewMap"
             (navigate)="navigateTo($event)">
         </rb-global-search>
         <rb-notification
@@ -79,9 +78,8 @@
                 (backTo)="backTo($event)">
             </rb-breadcrumb>
             <rb-view-loader 
-                [target]="viewTarget"
-                (navigate)="navigateTo($event)"
-                (titlechange)="setTitle($event)">
+                [target]="currentViewTarget"
+                (navigate)="navigateTo($event)">
             </rb-view-loader>
         </div>
     </mat-sidenav-content>

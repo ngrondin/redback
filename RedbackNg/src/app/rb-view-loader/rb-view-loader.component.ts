@@ -34,7 +34,7 @@ export class RbViewLoaderComponent implements OnInit {
   }
 
   ngOnChanges(changes : SimpleChange) {
-    if("target" in changes) {
+    if("target" in changes && this.target != null) {
       if(this.target.view != this.currentView) {
         let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/' + this.target.type + '/' + this.target.version + '/' + this.target.view;
         this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
@@ -78,7 +78,7 @@ export class RbViewLoaderComponent implements OnInit {
     let newViewComponentRef : ComponentRef<NewViewContainerComponent> = this.container.createComponent(factory);
     newViewComponentRef.instance.currentTarget = this.target;
     newViewComponentRef.instance.navigate.subscribe(e => this.navigateTo(e));
-    newViewComponentRef.instance.titlechange.subscribe(e => this.setTitle(e));
+    //newViewComponentRef.instance.titlechange.subscribe(e => this.setTitle(e));
     this.componentRef = newViewComponentRef;
   }
 
@@ -86,8 +86,9 @@ export class RbViewLoaderComponent implements OnInit {
     this.navigate.emit($event);
   }
 
+  /*
   setTitle(title: string) {
     this.titlechange.emit(title);
   }
-
+  */
 }

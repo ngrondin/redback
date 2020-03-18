@@ -5,23 +5,35 @@
     (keydown)="keyDown($event)"
     (blur)="blur($event)">
 <div
-    class="rb-globalsearch-resultcontainer"
+    class="rb-globalsearch-resultwindow"
     *ngIf="showResults">
-    <mat-list>
-        <mat-list-item
-            *ngFor="let item of searchResult">
-            <button 
-                mat-button 
-                (click)="navigateToObject(item.objectname, item.uid)">
-                {{item.objectname}} {{item.uid}}
-            </button>
-        </mat-list-item>
-    </mat-list>  
     <div
-        class="rb-spinner-container"
-        *ngIf="isLoading > 0">
-        <mat-spinner
-            diameter="20">
-        </mat-spinner>
+        class="rb-globalsearch-resultcontainer">
+        <mat-action-list>
+            <button 
+                mat-list-item 
+                *ngFor="let item of searchResult"
+                (click)="navigateToObject(item)">
+                <div
+                    class="rb-globalsearch-listcontainer">
+                    <div
+                        class="rb-globalsearch-listheader">
+                        {{getObjectHeaderText(item)}}
+                    </div>
+                    <div
+                        class="rb-globalsearch-listsub">
+                        {{getObjectSubText(item)}}
+                    </div>
+                </div>
+            </button>
+        </mat-action-list>  
+        <div
+            class="rb-spinner-container"
+            *ngIf="isLoading > 0">
+            <mat-spinner
+                diameter="20">
+            </mat-spinner>
+        </div>
     </div>
 </div>
+

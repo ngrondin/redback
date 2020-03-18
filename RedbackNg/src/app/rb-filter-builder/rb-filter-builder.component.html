@@ -1,78 +1,184 @@
 <div
     class="rb-filter-builder-container">
-    <div>
-        <span>Add filter for&nbsp;&nbsp;</span>
-        <mat-form-field>
-            <mat-label>Attributes</mat-label>
-            <mat-icon
-                matPrefix
-                class="rb-grey-icon">search</mat-icon>
-            <mat-select
-                [(value)]="selectedAttribute"
-                (selectionChange)="addSelectedAttribute()">
-                <mat-option 
-                    *ngFor="let attribute of config.filterConfig.attributes" 
-                    [value]="attribute">
-                    {{attribute.label}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
-    </div>
-    <div
-        class="rb-filter-builder-canvas">
+    <rb-tab-section
+        #filterbuilderts="tabsection"
+        [active]="true"
+        [initiallyactive]="'filtertab'">
         <div
-            *ngFor="let filterConstruct of filterConstructs"
-            class="rb-filter-builder-line">
-            <span>
-                {{filterConstruct.config.label}} : &nbsp;&nbsp;
-            </span>
-
-            <mat-form-field
-                *ngIf="filterConstruct.config.type == 'string'">
-                <mat-label>Value</mat-label>
-                <input
-                    matInput
-                    [(ngModel)]="filterConstruct.val1"
-                    autocomplete="off">
-                    <mat-icon 
-                        matPrefix
-                        class="rb-grey-icon">create</mat-icon>
-            </mat-form-field>
-            
-            <mat-form-field 
-                *ngIf="filterConstruct.config.type == 'date'">
-                <mat-select
-                    (selectionChange)="filterConstruct.val1 = $event.value"
-                    [value]="filterConstruct.val1">
-                    <mat-option
-                        *ngFor="let choice of datechoice"
-                        [value]="choice.value">
-                        {{choice.display}}
-                    </mat-option>
-                </mat-select>
-                <mat-icon 
-                    matPrefix
-                    class="rb-grey-icon">date_range</mat-icon>
-            </mat-form-field>  
-            <rb-datetime-input
-                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'since' || filterConstruct.val1 == 'between')"
-                [editable]="true"
-                [(value)]=filterConstruct.val2>
-            </rb-datetime-input>          
-            <rb-datetime-input
-                *ngIf="filterConstruct.config.type == 'date' &&  filterConstruct.val1 == 'between'"
-                [editable]="true"
-                [(value)]=filterConstruct.val3>
-            </rb-datetime-input>          
-            <button
-                mat-button
-                class="mat-mini mat-primary rb-button" 
-                (click)="removeFilterItem(filterConstruct)">
-                <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
-            </button>
-
+            class="rb-tab-header-section">
+            <div
+                class="rb-tab-header"
+                *ngFor="let tab of filterbuilderts.tabs"
+                [ngClass]="filterbuilderts.isTabVisible(tab) ? 'rb-tabheader-active' : ''">			
+                <button
+                    mat-button
+                    class="rb-tab-button" 
+                    (click)="filterbuilderts.select(tab)">
+                    {{tab.label}}
+                </button>
+            </div>
         </div>
-    </div>
+        <mat-divider></mat-divider>
+        <div
+            class="rb-tab-content-section">	
+            <rb-tab
+                #filtertab="tab"
+                *ngIf="filterConfig != null"
+                [id]="'filtertab'"
+                [label]="'Filter'"
+                [active]="filterbuilderts.isTabVisible(filtertab)"
+                [hidden]="!filtertab.active"
+                (register)="filterbuilderts.register(filtertab)">
+
+                <div
+                    class="rb-vsection">
+                    <div>
+                        <span>Add filter for&nbsp;&nbsp;</span>
+                        <mat-form-field>
+                            <mat-label>Attributes</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="rb-grey-icon">search</mat-icon>
+                            <mat-select
+                                (selectionChange)="addAttributeToFilter($event)">
+                                <mat-option 
+                                    *ngFor="let attribute of filterConfig.attributes" 
+                                    [value]="attribute">
+                                    {{attribute.label}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div
+                        class="rb-filter-builder-canvas">
+                        <div
+                            *ngFor="let filterConstruct of filterConstructs"
+                            class="rb-filter-builder-line">
+                            <span>
+                                {{filterConstruct.config.label}} : &nbsp;&nbsp;
+                            </span>
+                
+                            <mat-form-field
+                                *ngIf="filterConstruct.config.type == 'string'">
+                                <mat-label>Value</mat-label>
+                                <input
+                                    matInput
+                                    [(ngModel)]="filterConstruct.val1"
+                                    autocomplete="off">
+                                    <mat-icon 
+                                        matPrefix
+                                        class="rb-grey-icon">create</mat-icon>
+                            </mat-form-field>
+                            
+                            <mat-form-field 
+                                *ngIf="filterConstruct.config.type == 'date'">
+                                <mat-select
+                                    (selectionChange)="filterConstruct.val1 = $event.value"
+                                    [value]="filterConstruct.val1">
+                                    <mat-option
+                                        *ngFor="let choice of datechoice"
+                                        [value]="choice.value">
+                                        {{choice.display}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-icon 
+                                    matPrefix
+                                    class="rb-grey-icon">date_range</mat-icon>
+                            </mat-form-field>  
+                            <rb-datetime-input
+                                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'since' || filterConstruct.val1 == 'between')"
+                                [editable]="true"
+                                [(value)]=filterConstruct.val2>
+                            </rb-datetime-input>          
+                            <rb-datetime-input
+                                *ngIf="filterConstruct.config.type == 'date' &&  filterConstruct.val1 == 'between'"
+                                [editable]="true"
+                                [(value)]=filterConstruct.val3>
+                            </rb-datetime-input>    
+                            <div
+                                style="flex: 1 1 auto;">
+                            </div>      
+                            <button
+                                mat-button
+                                class="mat-mini mat-primary rb-button" 
+                                (click)="removeFilterItem(filterConstruct)">
+                                <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
+                            </button>
+                
+                        </div>
+                    </div>
+                </div>
+
+            </rb-tab>
+
+            <rb-tab
+                #sorttab="tab"
+                *ngIf="sortConfig != null"
+                [id]="'sorttab'"
+                [label]="'Sort'"
+                [active]="filterbuilderts.isTabVisible(sorttab)"
+                [hidden]="!sorttab.active"
+                (register)="filterbuilderts.register(sorttab)">
+
+                <div
+                    class="rb-vsection">
+                    <div>
+                        <span>Sort on&nbsp;&nbsp;</span>
+                        <mat-form-field>
+                            <mat-label>Attributes</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="rb-grey-icon">sort</mat-icon>
+                            <mat-select
+                                (selectionChange)="addAttributeToSort($event)">
+                                <mat-option 
+                                    *ngFor="let attribute of sortConfig.attributes" 
+                                    [value]="attribute">
+                                    {{attribute.label}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div
+                        class="rb-filter-builder-canvas">
+                        <div
+                            *ngFor="let sortConstruct of sortConstructs"
+                            class="rb-filter-builder-line">
+                            <span>
+                                {{sortConstruct.config.label}} &nbsp;&nbsp;
+                            </span>
+                            <button
+                                mat-button
+                                class="mat-mini mat-primary rb-button" 
+                                (click)="toggleDir(sortConstruct)">
+                                <mat-icon 
+                                    *ngIf="sortConstruct.direction == 1"
+                                    class="md-hue-3" >
+                                    keyboard_arrow_up
+                                </mat-icon>
+                                <mat-icon 
+                                    *ngIf="sortConstruct.direction == -1"
+                                    class="md-hue-3" >
+                                    keyboard_arrow_down
+                                </mat-icon>
+                            </button>                           
+                            <div
+                                style="flex: 1 1 auto;">
+                            </div>      
+                            <button
+                                mat-button
+                                class="mat-mini mat-primary rb-button" 
+                                (click)="removeSortItem(sortConstruct)">
+                                <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </rb-tab>
+        </div>
+    </rb-tab-section>
     <div>
         <button
             mat-button
@@ -81,4 +187,5 @@
             <mat-icon class="md-hue-3" >check</mat-icon>
         </button>
     </div>
+
 </div>

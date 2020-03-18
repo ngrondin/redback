@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ApiService } from './api.service';
+import { ConfigService } from './config.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -21,13 +22,14 @@ export class AppComponent {
   initialViewTitle: string;
   menuView: string;
   iconsets: string[];
-  objectViewMap: any;
+  
 
   constructor(
       private elementRef: ElementRef,
       private matIconRegistry: MatIconRegistry,
       private domSanitizer: DomSanitizer,
-      private apiService: ApiService ) {
+      private apiService: ApiService,
+      private configService: ConfigService ) {
     var native = this.elementRef.nativeElement;
     this.type = native.getAttribute("type");
     this.apptitle = native.getAttribute("apptitle");
@@ -43,12 +45,10 @@ export class AppComponent {
     this.apiService.fileService = native.getAttribute("fileservice");
     this.apiService.processService = native.getAttribute("processservice");
     this.apiService.signalService = native.getAttribute("signalservice");
-    let objectViewMapString: string = native.getAttribute("objectviewmap");
-    if(objectViewMapString.length > 0) {
-      this.objectViewMap = JSON.parse(objectViewMapString.replace(/'/g, '"'));
-    } else {
-      this.objectViewMap = {};
-    }
+    let objectsString: string = native.getAttribute("objects");
+    if(objectsString.length > 0) {
+      this.configService.setObjectsConfig(JSON.parse(objectsString.replace(/'/g, '"')));
+    } 
 
     let currentUrl = window.location.href;
     let pos = currentUrl.indexOf(this.apiService.uiService);

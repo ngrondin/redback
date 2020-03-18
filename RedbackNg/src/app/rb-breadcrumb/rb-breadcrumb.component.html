@@ -8,10 +8,10 @@
         class="rb-breadcrumb-link"
         *ngIf="i < targetStack.length - 1"
         (click)="backTo(target)">
-        {{target.label}}
+        {{target.breadcrumbLabel}}
     </span>
     <span
         *ngIf="i == targetStack.length - 1">
-        {{target.label}}
+        {{target.breadcrumbLabel}}
     </span>    
 </div>

@@ -19,7 +19,11 @@
     padding-bottom: 0px;
 }
 
-.rb-globalsearch-resultcontainer {
+:host > mat-action-list > button {
+	height: auto!important;
+}
+
+.rb-globalsearch-resultwindow {
     display:block;
     position: absolute;
     top: 40px;
@@ -28,12 +32,36 @@
     box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
         0 13px 19px 2px rgba(0, 0, 0, 0.14),
         0 5px 24px 4px rgba(0, 0, 0, 0.12);
-    flex-direction: column;
-    align-items: stretch;
     z-index: 1000;
     max-height: 500px;
     min-width: 150px;
     overflow: auto;
+}
+
+.rb-globalsearch-resultcontainer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.rb-globalsearch-listcontainer {
+    display: flex;
+    flex-direction: column;
+    padding-left: 12px;
+}
+
+.rb-globalsearch-listheader {
+    margin: 0px 0px 0px 0px;
+}
+
+.rb-globalsearch-listsub {
+    color: #aaaaaa;
+    font-size: small;
+    margin: -12px 0px 0px 0px;
+    max-width: 330px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 :host /deep/ .mat-list-item-content {

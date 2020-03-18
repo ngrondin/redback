@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { DataService } from 'app/data.service';
+import { ConfigService } from 'app/config.service';
 
 @Component({
   selector: 'rb-global-search',
@@ -8,7 +9,6 @@ import { DataService } from 'app/data.service';
   styleUrls: ['./rb-global-seach.component.css']
 })
 export class RbGlobalSeachComponent implements OnInit {
-  @Input() objectViewMap : any;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   searchString: string;
@@ -17,7 +17,8 @@ export class RbGlobalSeachComponent implements OnInit {
   isLoading: number = 0;
 
   constructor(
-    private dataService: DataService
+    private dataService: DataService,
+    private configService: ConfigService
   ) { }
 
   ngOnInit() {
@@ -26,7 +27,7 @@ export class RbGlobalSeachComponent implements OnInit {
   globalSearch() {
     this.searchResult = [];
     this.showResults = true;
-    for(let o in this.objectViewMap) {
+    for(let o in this.configService.objectsConfig) {
       this.isLoading = this.isLoading + 1;
       this.dataService.listObjects(o, null, this.searchString).subscribe(
         data => {
@@ -34,6 +35,24 @@ export class RbGlobalSeachComponent implements OnInit {
           this.isLoading = this.isLoading - 1;
         }
       );
+    }
+  }
+
+  getObjectHeaderText(obj: RbObject): string {
+    let objectConfig = this.configService.objectsConfig[obj.objectname];
+    if(objectConfig != null) {
+      return (objectConfig.labelprefix != null ? objectConfig.labelprefix + ' ' : '') + obj.get(objectConfig.labelattribute);
+    } else {
+      return obj.uid;
+    }
+  }
+
+  getObjectSubText(obj: RbObject): string {
+    let objectConfig = this.configService.objectsConfig[obj.objectname];
+    if(objectConfig != null) {
+      return obj.get(objectConfig.descriptionattribute);
+    } else {
+      return null;
     }
   }
 
@@ -49,11 +68,11 @@ export class RbGlobalSeachComponent implements OnInit {
     }, 100);
   }
 
-  navigateToObject(object: string, uid: string) {
+  navigateToObject(object: RbObject) {
     this.navigate.emit({
-      object : object,
+      object : object.objectname,
       filter : {
-        uid : "'" + uid + "'"
+        uid : "'" + object.uid + "'"
       }
     });
   }

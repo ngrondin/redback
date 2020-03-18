@@ -43,6 +43,7 @@ import { RbChoiceInputComponent } from './rb-choice-input/rb-choice-input.compon
 import { RbSwitchInputComponent } from './rb-switch-input/rb-switch-input.component';
 import { RbBreadcrumbComponent } from './rb-breadcrumb/rb-breadcrumb.component';
 import { RbListComponent } from './rb-list/rb-list.component';
+import { ConfigService } from './config.service';
 
 @NgModule({
   imports: [
@@ -152,7 +153,8 @@ import { RbListComponent } from './rb-list/rb-list.component';
   providers: [
     CookieService,
     ApiService,
-    DataService
+    DataService,
+    ConfigService
   ],
   entryComponents: [
     RbPopupListComponent,

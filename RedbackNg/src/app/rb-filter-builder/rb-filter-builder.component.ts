@@ -2,10 +2,13 @@ import { Component, OnInit, Output, EventEmitter, Inject } from '@angular/core';
 import { CONTAINER_DATA } from 'app/tokens';
 import { DateTimePopupConfig } from 'app/rb-popup-datetime/rb-popup-datetime.component';
 import { OverlayRef, validateHorizontalPosition } from '@angular/cdk/overlay';
+import { MatSelect } from '@angular/material/select';
 
 export class FilterBuilderConfig {
   filterConfig: any;
   initialFilter: any;
+  sortConfig: any;
+  initialSort: any;
 }
 
 
@@ -14,8 +17,10 @@ export class FilterConfig {
 
   constructor(json: any) {
     this.attributes = [];
-    for(let ac of json.attributes) {
-      this.attributes.push(new FilterAttributeConfig(ac));
+    if(typeof json.attributes != 'undefined') {
+      for(let ac of json.attributes) {
+        this.attributes.push(new FilterAttributeConfig(ac));
+      }
     }
   }
   
@@ -106,6 +111,62 @@ export class FilterItemConstruct {
 
 
 
+export class SortConfig {
+  public attributes: SortAttributeConfig[];
+
+  constructor(json: any) {
+    this.attributes = [];
+    if(typeof json.attributes != 'undefined') {
+      for(let ac of json.attributes) {
+        this.attributes.push(new SortAttributeConfig(ac));
+      }
+    }
+  }
+  
+  getAttributeConfig(name: string) : SortAttributeConfig {
+    for(let a of this.attributes) {
+      if(a.attribute == name) {
+        return a;
+      }
+    }
+    return null;
+  }
+}
+
+
+export class SortAttributeConfig {
+  public attribute: string;
+  public label: string;
+  public type: string;
+
+  constructor(json: any) {
+    this.attribute = json.attribute;
+    this.label = json.label;
+    this.type = json.type;
+  }
+}
+
+
+export class SortItemConstruct {
+  public config: SortAttributeConfig;
+  public direction: number;
+  public order: number;
+
+  constructor(c: SortAttributeConfig, v: any) {
+    this.config = c;
+    if(v != null) {
+      this.direction = v.dir;
+      this.order = v.order;
+    } 
+  }
+
+  public getSortValue() : any {
+    return {dir: this.direction, order: this.order};
+  }
+}
+
+
+
 @Component({
   selector: 'rb-filter-builder',
   templateUrl: './rb-filter-builder.component.html',
@@ -114,10 +175,12 @@ export class FilterItemConstruct {
 export class RbFilterBuilderComponent implements OnInit {
 
   @Output() done: EventEmitter<any> = new EventEmitter();
-  selectedAttribute: any;
   filterConfig: FilterConfig;
   filter: any;
   filterConstructs: FilterItemConstruct[];
+  sortConfig: SortConfig;
+  sort: any;
+  sortConstructs: SortItemConstruct[];
 
   datechoice: any = [
     { value: "last15", display: "Last 15 Minutes"},
@@ -132,11 +195,17 @@ export class RbFilterBuilderComponent implements OnInit {
     public overlayRef: OverlayRef,
   ) { 
     this.filter = this.config.initialFilter;
-    this.filterConfig = new FilterConfig(this.config.filterConfig);
+    if(this.config.filterConfig != null) {
+      this.filterConfig = new FilterConfig(this.config.filterConfig);
+    }
+    if(this.config.sortConfig != null) {
+      this.sortConfig = new SortConfig(this.config.sortConfig);
+    }
   }
 
   ngOnInit() {
     this.filterConstructs = [];
+    this.sortConstructs = [];
     if(this.filter == null) {
       this.filter = {};
     } else {
@@ -145,16 +214,44 @@ export class RbFilterBuilderComponent implements OnInit {
         this.filterConstructs.push(fic);
       }
     }
+
+    if(this.sort == null) {
+      this.sort = {};
+    } else {
+      for(let key in this.sort) {
+        let sic = new SortItemConstruct(this.sortConfig.getAttributeConfig(key), this.sort[key]);
+        this.sortConstructs.push(sic);
+      }
+    }
+
   }
 
-  addSelectedAttribute() {
-    let fic = new FilterItemConstruct(this.filterConfig.getAttributeConfig(this.selectedAttribute.attribute), null);
+  addAttributeToFilter(event: any) {
+    let fac: FilterAttributeConfig = event.value;
+    let src: MatSelect = event.source;
+    let fic = new FilterItemConstruct(fac, null);
     this.filterConstructs.push(fic);
-    this.selectedAttribute = null;
-}
+    src.value = null;
+  }
+
+  addAttributeToSort(event: any) {
+    let sac: SortAttributeConfig = event.value;
+    let src: MatSelect = event.source;
+    let sic = new SortItemConstruct(sac, {order:this.sortConstructs.length, dir:1});
+    this.sortConstructs.push(sic);
+    src.value = null;
+  }
 
   removeFilterItem(fic: FilterItemConstruct) {
     this.filterConstructs.splice(this.filterConstructs.indexOf(fic), 1);
+  }
+
+  removeSortItem(sic: SortItemConstruct) {
+    this.sortConstructs.splice(this.sortConstructs.indexOf(sic), 1);
+  }
+
+  toggleDir(sic: SortItemConstruct) {
+    sic.direction = (-1 * sic.direction );
   }
 
   clickOk() {
@@ -162,7 +259,11 @@ export class RbFilterBuilderComponent implements OnInit {
     for(let fic of this.filterConstructs) {
       this.filter[fic.config.attribute] = fic.getFilterValue();
     }
-    this.done.emit(this.filter);
+    this.sort = {};
+    for(let sic of this.sortConstructs) {
+      this.sort[sic.config.attribute] = sic.getSortValue();
+    }
+    this.done.emit({filter: this.filter, sort: this.sort});
   }
 
   dateOptionComparison(option: any, value: any) : boolean  {

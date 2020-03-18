@@ -16,8 +16,10 @@ export class RbSearchComponent implements OnInit {
   @Input('icon') icon: string;
   @Input('size') size: Number;
   @Input('filterconfig') filterConfig: any;
+  @Input('sortconfig') sortConfig: any;
   @Output() search: EventEmitter<any> = new EventEmitter();
   @Output() filter: EventEmitter<any> = new EventEmitter();
+  @Output() sort: EventEmitter<any> = new EventEmitter();
 
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;
@@ -25,6 +27,7 @@ export class RbSearchComponent implements OnInit {
   public value;
   private previousValue;
   public filterValue: any;
+  public sortValue: any;
 
   constructor(    
     public injector: Injector,
@@ -55,6 +58,10 @@ export class RbSearchComponent implements OnInit {
     this.filter.emit(filter);
   }
 
+  setSort(sort: any) {
+
+  }
+
   openFilterBuilder() {
     this.overlayRef = this.overlay.create({
       positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
@@ -68,6 +75,8 @@ export class RbSearchComponent implements OnInit {
     let config: FilterBuilderConfig = new FilterBuilderConfig();
     config.filterConfig = this.filterConfig;
     config.initialFilter = this.filterValue;
+    config.sortConfig = this.sortConfig;
+    config.initialSort = this.sortValue;
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);
@@ -75,7 +84,7 @@ export class RbSearchComponent implements OnInit {
 
     const popupPortal = new ComponentPortal(RbFilterBuilderComponent, this.viewContainerRef, inj);
     this.filterBuilderComponentRef = this.overlayRef.attach(popupPortal);
-    this.filterBuilderComponentRef.instance.done.subscribe(filter => this.setFilter(filter));
+    this.filterBuilderComponentRef.instance.done.subscribe(event => {this.setFilter(event.filter); this.setSort(event.sort);});
   }
 
   cancelFilterBuilder() {

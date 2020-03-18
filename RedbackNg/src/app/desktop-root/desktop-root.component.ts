@@ -4,6 +4,7 @@ import { ApiService } from 'app/api.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DataService } from 'app/data.service';
 import { RbObject } from 'app/datamodel';
+import { ConfigService } from 'app/config.service';
 
 export class Target {
   view: string;
@@ -12,21 +13,29 @@ export class Target {
   filter: any;
   search: string;
   selectedObject: RbObject;
-  label: string;
+  title: string;
+  _breadcrumbLabel: string;
 
-  constructor(v: string, vs: string, t: string, f: any) {
+  constructor(t: string, vs: string, v: string, f: any) {
     this.view = v;
     this.version = vs;
     this.type = t;
     this.filter = f;
     this.search = null;
     this.selectedObject = null;
+    this.title = null;
+  }
 
-    if(this.filter != null && this.filter.uid != null) {
-      this.label = eval(this.filter.uid);
+  get breadcrumbLabel(): string {
+    if(this._breadcrumbLabel != null) {
+      return this._breadcrumbLabel;
     } else {
-      this.label = this.view;
+      return this.title; 
     }
+  }
+
+  set breadcrumbLabel(v: string) {
+    this._breadcrumbLabel = v;
   }
 }
 
@@ -43,17 +52,13 @@ export class DesktopRootComponent implements OnInit {
   @Input() initialView : string;
   @Input() menuView : string;
   @Input() version : string;
-  @Input() objectViewMap : any;
-  viewTitle: string;
-  viewTarget: Target;
   menuTarget: Target;
   menuMode: string;
   menuWidth: number;
   viewTargetStack: Target[];
  
   constructor(
-    private cookieService : CookieService,
-    private apiService : ApiService,
+    private configService : ConfigService,
     private domSanitizer: DomSanitizer
   ) { }
 
@@ -62,19 +67,17 @@ export class DesktopRootComponent implements OnInit {
     this.menuWidth = 251;
     if(this.version == null)
       this.version = 'default';
-    if(this.objectViewMap == null)
-      this.objectViewMap = {};
     if(this.viewTargetStack == null)
       this.viewTargetStack = [];
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if("menuView" in changes) {
-      this.menuTarget = new Target(this.menuView, this.version, 'menu', null);
+      this.menuTarget = new Target('menu', this.version, this.menuView, null);
         //url: this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/' + this.version + '/' + this.menuView,
     }
     if("initialView" in changes) {
-      this.pushViewTarget(new Target(this.initialView, this.version, 'view', null), true);
+      this.pushViewTarget(new Target('view', this.version, this.initialView, null), true);
     }
   }
 
@@ -83,18 +86,20 @@ export class DesktopRootComponent implements OnInit {
   }
 
   navigateTo($event) {
-    let view = ($event.view != null ? $event.view : this.objectViewMap[$event.object]);
-    this.pushViewTarget(new Target(view, this.version, 'view', $event.filter), $event.reset);
+    let objectConfig: any = this.configService.objectsConfig[$event.object];
+    let view: string = ($event.view != null ? $event.view : (objectConfig != null ? objectConfig.view : null));
+    if(view != null) {
+      let target = new Target('view', this.version, view, $event.filter); 
+      if(objectConfig != null && $event.filter != null && $event.filter[objectConfig.labelattribute] != null) {
+        target.breadcrumbLabel = eval($event.filter[objectConfig.labelattribute]);
+      }
+      this.pushViewTarget(target, $event.reset);
+    }
   }
 
   backTo($event) {
     let i = this.viewTargetStack.indexOf($event);
     this.viewTargetStack.splice(i + 1);
-    this.viewTarget = $event;
-  }
-
-  setTitle(title: string) {
-    this.viewTitle = title;
   }
 
   toggleMenuMode() {
@@ -107,12 +112,19 @@ export class DesktopRootComponent implements OnInit {
     }
   }
 
-  private pushViewTarget(target: Target, resetStack: boolean) {
-    this.viewTarget = target;
+  pushViewTarget(target: Target, resetStack: boolean) {
     if(resetStack) {
       this.viewTargetStack = [];
     }
-    this.viewTargetStack.push(this.viewTarget);
+    this.viewTargetStack.push(target);
+  }
+
+  get currentViewTarget(): Target {
+    if(this.viewTargetStack.length > 0) {
+      return this.viewTargetStack[this.viewTargetStack.length - 1];
+    } else {
+      return null;
+    }
   }
 
 

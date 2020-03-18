@@ -12,12 +12,25 @@
 </div>
 <mat-menu
     #assignmentlistmenu="matMenu">
-    <button
-        mat-menu-item
-        *ngFor="let notification of list"
-        (click)="selectNotification(notification)">
-        {{notification.message}}
-    </button>
+    <mat-action-list>
+        <button 
+            mat-menu-item
+            style="height: auto"
+            *ngFor="let notification of list"
+            (click)="selectNotification(notification)">
+            <div
+                class="rb-notification-listcontainer">
+                <div
+                    class="rb-notification-listheader">
+                    {{notification.data.uid}}
+                </div>
+                <div
+                    class="rb-notification-listsub">
+                    {{notification.message}}
+                </div>
+            </div>        
+        </button>
+    </mat-action-list>          
     <div
         class="rb-spinner-container"
         *ngIf="loading">

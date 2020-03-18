@@ -7,7 +7,8 @@ import { RbTabDirective } from 'app/rb-tab/rb-tab.directive';
 })
 export class RbTabSectionDirective {
   @Input('active') active : boolean;
-  
+  @Input('initiallyactive') initiallyActiveTabId: string;
+
   tabs: RbTabDirective[] = [];
   visibleTab: RbTabDirective;
 
@@ -15,6 +16,9 @@ export class RbTabSectionDirective {
 
   public register(tab : RbTabDirective) {
     this.tabs.push(tab);
+    if(this.initiallyActiveTabId != null && this.initiallyActiveTabId == tab.id) {
+      this.visibleTab = tab;
+    }
   }
 
   public select(tab: RbTabDirective) {

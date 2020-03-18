@@ -6,7 +6,7 @@
 
 .rb-notification-badge {
     position: absolute;
-    top: 1px;
+    top: 5px;
     left: 6px;
     height: 24px;
     min-width: 18px;
@@ -20,6 +20,28 @@
     pointer-events: none;
 }
 
-button {
+
+:host > mat-action-list > button.mat-menu-item {
+	height: auto!important;
     margin: 0px!important;
+}
+
+.rb-notification-listcontainer {
+    display: flex;
+    flex-direction: column;
+    padding-left: 12px;
+}
+
+.rb-notification-listheader {
+    margin: -10px 0px -10px 0px;
+}
+
+.rb-notification-listsub {
+    color: #aaaaaa;
+    font-size: small;
+    margin: -20px 0px -10px 0px;
+    max-width: 330px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
