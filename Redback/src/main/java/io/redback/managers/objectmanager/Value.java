@@ -175,15 +175,23 @@ public class Value
 		return valueClass == null;
 	}
 	
+	public boolean equalsIgnoreCase(Object o)
+	{
+		if(o instanceof Value)
+			return _equals((Value)o, true);
+		else
+			return _equals(new Value(o), true);
+	}
+
 	public boolean equals(Object o)
 	{
 		if(o instanceof Value)
-			return _equals((Value)o);
+			return _equals((Value)o, false);
 		else
-			return _equals(new Value(o));
+			return _equals(new Value(o), false);
 	}
 	
-	protected boolean _equals(Value v)
+	protected boolean _equals(Value v, boolean ignoreCase)
 	{
 		if(v == null)
 		{
@@ -199,8 +207,13 @@ public class Value
 			else if(valueClass == v.getValueClass())
 			{
 				if(valueClass == String.class)
-					if(getString().equals(v.getString()))
+					if(ignoreCase == false) {
+						if(getString().equals(v.getString()))
 							return true;
+					} else {
+						if(getString().equalsIgnoreCase(v.getString()))
+							return true;
+					}
 				if(valueClass == Boolean.class)
 					if(getBoolean() == v.getBoolean())
 							return true;

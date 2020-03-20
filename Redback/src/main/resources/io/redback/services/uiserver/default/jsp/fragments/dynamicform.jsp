@@ -6,7 +6,8 @@ if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObjec
 	style="<%=config.getString('inlineStyle')%>"
 	*ngIf="<%=showExpr%>"<%
 if(typeof dataset != 'undefined') { %>	
-	[list]="<%=dataset%>.list" <%
+	[list]="<%=dataset%>.list"
+	[isLoading]="<%=dataset%>.isLoading" <%
 } 
 if(config.getString('valueattribute') != null) { %>	
 	[valueattribute]="'<%=config.getString("valueattribute")%>'" <%

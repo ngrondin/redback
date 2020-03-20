@@ -143,7 +143,7 @@ public class ObjectManager
 							{
 								RedbackObject resultObject = result.get(k);
 								Value resultObjectLinkValue = resultObject.get(relatedObjectLinkAttributeName);
-								if(linkValue != null  &&  linkValue.equals(resultObjectLinkValue))
+								if(linkValue != null  &&  linkValue.equalsIgnoreCase(resultObjectLinkValue))
 									relatedObject = resultObject;
 							}
 							if(relatedObject == null) // Because of a broken link in the DB
