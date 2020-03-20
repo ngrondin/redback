@@ -9,6 +9,7 @@ import { stringify } from 'querystring';
 })
 export class RbDynamicformComponent implements OnInit {
   @Input() list : RbObject[];
+  @Input('isLoading') isLoading: any;
   @Input() valueattribute : string;
   @Input() typeattribute : string;
   @Input() optionsattribute : string;
