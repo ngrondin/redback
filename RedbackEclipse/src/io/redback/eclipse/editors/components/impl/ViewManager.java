@@ -37,7 +37,7 @@ public class ViewManager extends Manager {
 
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
-			return null;
+			return new ViewHeaderForm(data, this, sashForm, SWT.PUSH);
 		} else if(type.equals("vsection")) {
 			return new ViewSectionForm(data.getObject(name), this, sashForm, SWT.PUSH);
 		} else if(type.equals("hsection")) {
