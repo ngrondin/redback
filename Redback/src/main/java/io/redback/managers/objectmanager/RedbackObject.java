@@ -389,7 +389,7 @@ public class RedbackObject
 						dbData.put(attributeDBKey, get(attributeName).getObject());
 					}
 				}
-				objectManager.publishData(config.getCollection(), key, dbData);
+				objectManager.commitData(config.getCollection(), key, dbData);
 				executeScriptsForEvent("aftersave");
 				updatedAttributes.clear();
 				if(isNewObject)

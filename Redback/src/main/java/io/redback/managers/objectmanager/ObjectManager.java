@@ -579,7 +579,7 @@ public class ObjectManager
 		}
 	}
 
-	protected void publishData(String collection, DataMap key, DataMap data) throws RedbackException
+	protected void commitData(String collection, DataMap key, DataMap data) throws RedbackException
 	{
 		logger.finest("Publishing to firebus service : " + dataServiceName + "  " + data.toString().replace("\r\n", "").replace("\t", ""));
 		try
