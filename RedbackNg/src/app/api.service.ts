@@ -122,7 +122,7 @@ export class ApiService {
   }
 
   private initSignalWebsocket() {
-    if(this.signalService != null && this.signalWebsocket == null) {
+    if(this.signalService != null && this.signalService != "" && this.signalWebsocket == null) {
       this.signalWebsocket = webSocket(this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.signalService);
       //this.signalWebsocket = webSocket('ws://localhost/rbws');
     }

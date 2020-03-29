@@ -171,38 +171,47 @@ export class RbDatasetDirective implements OnChanges {
     return map;
   }
 
-  private resolveMap(inMap: any, obj: RbObject) : any {
-    let outMap: any = {};
-    let relatedObject = this.relatedObject;
-    let selectedObject = this.selectedObject;
-    let uid = null;
-    let varString = "";
-    if(obj != null && typeof obj != 'undefined') {
-      uid = obj.uid;
-      for(const attr in obj.data) {
-        let val = obj.data[attr];
-        if(typeof val == 'object') {
-          val = JSON.stringify(val);
-        } 
-        if(typeof val == 'string') {
-          val = "'" + val.replace(/\'/g, "\\'").replace(/\"/g, "\\\"") + "'";
-        } 
-        varString = varString + "var " + attr + " = " + val + ";"
-      }
-    } 
+  private resolveMap(__inMap: any, obj: RbObject) : any {
     try {
-      eval(varString);
-    } catch(e) {}
+      let __outMap: any = {};
+      let relatedObject = this.relatedObject;
+      let selectedObject = this.selectedObject;
+      let uid = null;
+      let __varString = "";
+      if(obj != null && typeof obj != 'undefined') {
+        uid = obj.uid;
+        for(const attr in obj.data) {
+          let val = obj.data[attr];
+          if(typeof val == 'object') {
+            val = JSON.stringify(val);
+          } 
+          if(typeof val == 'string') {
+            val = "'" + val.replace(/\'/g, "\\'").replace(/\"/g, "\\\"") + "'";
+          } 
+          __varString = __varString + "var " + attr + " = " + val + ";"
+        }
+      } 
 
-    for (const key in inMap) {
-      let value = inMap[key];
-      if(typeof value == "string") {
-        value = eval(value);
-      } else if(typeof value == "object") {
-        value = this.resolveMap(value, obj);
+      for (const __key in __inMap) {
+        let __value = __inMap[__key];
+        if(typeof __value == "string") {
+          __value = eval(__varString + __value);
+        } else if(typeof __value == "object") {
+          if(Array.isArray(__value)) {
+            let outArray = [];
+            for(const valueItem of __value) {
+              outArray.push(eval(__varString + valueItem));
+            }
+            __value = outArray;
+          } else {
+            __value = this.resolveMap(__value, obj);
+          }
+        }
+        __outMap[__key] = __value;
       }
-      outMap[key] = value;
+      return __outMap;
+    } catch(e) {
+      return __inMap;
     }
-    return outMap;
   }
 }
