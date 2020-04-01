@@ -29,6 +29,7 @@ public class RedbackObjectServer extends ObjectServer
 	{
 		RedbackObject object = null;
 		try {
+			objectManager.initiateCurrentTransaction();
 			object = objectManager.getObject(session, objectName, uid);
 			objectManager.commitCurrentTransaction();
 		} catch (ScriptException e) {
@@ -46,6 +47,7 @@ public class RedbackObjectServer extends ObjectServer
 			if(filter == null)
 				filter = new DataMap();
 			
+			objectManager.initiateCurrentTransaction();
 			objects = objectManager.listObjects(session, objectName, filter, search, addRelated, page);
 			objectManager.commitCurrentTransaction();
 			
@@ -63,7 +65,8 @@ public class RedbackObjectServer extends ObjectServer
 			objects = new ArrayList<RedbackObject>();
 			if(filter == null)
 				filter = new DataMap();
-			
+
+			objectManager.initiateCurrentTransaction();
 			objects = objectManager.listObjects(session, objectName, uid, attribute, filter, search, addRelated, page);
 			objectManager.commitCurrentTransaction();
 	
@@ -78,11 +81,13 @@ public class RedbackObjectServer extends ObjectServer
 	{
 		RedbackObject object = null;
 		try {
+			objectManager.initiateCurrentTransaction();
 			object = objectManager.updateObject(session, objectName, uid, data);
-			if(object != null)
+			if(object != null) {
 				objectManager.commitCurrentTransaction();
-			else
+			} else {
 				error("No such object to update");
+			}
 		} catch(ScriptException e) {
 			error("Error listing objects", e);
 		}
@@ -93,6 +98,7 @@ public class RedbackObjectServer extends ObjectServer
 	{
 		RedbackObject object = null;
 		try {
+			objectManager.initiateCurrentTransaction();
 			object = objectManager.createObject(session, objectName, uid, domain, data);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
@@ -105,6 +111,7 @@ public class RedbackObjectServer extends ObjectServer
 	{
 		RedbackObject object = null;
 		try {
+			objectManager.initiateCurrentTransaction();
 			object = objectManager.executeFunction(session, objectName, uid, function, data);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {

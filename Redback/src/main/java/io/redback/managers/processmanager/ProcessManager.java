@@ -31,7 +31,7 @@ public class ProcessManager
 	protected HashMap<String, HashMap<Integer, Process>> processes;
 	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
 	protected String sysUserName;
-	protected String sysUserPassword;
+	protected String jwtSecret;
 	protected Session sysUserSession;
 	protected DataMap globalVariables;
 
@@ -42,7 +42,7 @@ public class ProcessManager
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
 		sysUserName = config.getString("sysusername");
-		sysUserPassword = config.getString("sysuserpassword");
+		jwtSecret = config.getString("jwtsecret");
 		processes = new HashMap<String, HashMap<Integer, Process>>();
 		transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
 		globalVariables = config.getObject("globalvariables");
@@ -140,10 +140,9 @@ public class ProcessManager
 		{
 			try
 			{
-				Algorithm algorithm = Algorithm.HMAC256("secret");
+				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
 				String token = JWT.create()
-						.withIssuer("rbpm")
-						.withSubject("processuser")
+						.withIssuer("io.firebus.http")
 						.withClaim("email", "processuser")
 						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
 						.sign(algorithm);

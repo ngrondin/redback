@@ -28,6 +28,8 @@ public class ObjectManager
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String idGeneratorServiceName;
+	protected String processServiceName;
+	protected String signalConsumerName;
 	protected DataMap globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 	protected List<IncludeScript> includeScripts;
@@ -41,6 +43,8 @@ public class ObjectManager
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");
+		processServiceName = config.getString("processservice");
+		signalConsumerName = config.getString("signalconsumer");
 		globalVariables = config.getObject("globalvariables");
 		if(config.containsKey("cacheconfigs") &&  config.getString("cacheconfigs").equalsIgnoreCase("false"))
 			cacheConfigs = false;
@@ -320,6 +324,15 @@ public class ObjectManager
 	}
 
 	
+	public void initiateCurrentTransaction() 
+	{
+		long txId = Thread.currentThread().getId();
+		synchronized(transactions)
+		{
+			transactions.put(txId, new HashMap<String, RedbackObject>());
+		}
+	}
+	
 	protected RedbackObject getFromCurrentTransaction(String objectName, String uid)
 	{
 		long txId = Thread.currentThread().getId();
@@ -593,6 +606,17 @@ public class ObjectManager
 		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
 		{
 			throw new RedbackException("Error publishing data", e);
+		}
+	}
+	
+	protected void signal(String signal)
+	{
+		if(signalConsumerName != null) 
+		{
+			Payload payload = new Payload(signal);
+			logger.finest("Publishing signal : " + signal);
+			firebus.publish(signalConsumerName, payload);
+			logger.finest("Published signal : " + signal);
 		}
 	}
 

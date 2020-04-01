@@ -1,15 +1,16 @@
-<% var action = config.get("action") != null ? config.getString('action') : 'noAction';
-if(((action.equals('create')  ||  action.equals('save'))  &&  canWrite) || ((!action.equals('create')  &&  !action.equals('save'))  &&  canExecute)) {	
-%><button
- 	mat-button
-	class="rb-button md-button md-primary md-raised" 
-	(click)="<%=dataset%>.action('<%=action%>', '<%=config.getString('param')%>');"
-	*ngIf="<%=config.getString('show')%>"><%
-if(config.get("icon") != null) {	%>
-	<mat-icon><%=config.getString("icon") %></mat-icon><%
-}
-if(config.get("label") != null) {%>
-	<%=config.getString('label')%><%
-}%>
-</button><%
+<% 
+var showExpr = (config.get("show") != null ? config.getString('show') : 'true').replaceAll('object', dataset + '.selectedObject').replaceAll('relatedObject', dataset + '.relatedObject');
+if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
+if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
+var action = config.get("action") != null ? config.getString('action') : 'noAction';
+if(((action.equals('create')  ||  action.equals('save'))  &&  canWrite) || ((!action.equals('create')  &&  !action.equals('save'))  &&  canExecute)) {
+%><div>
+	<button 
+		mat-stroked-button
+		class="mat-primary rb-button" 
+		(click)="<%=dataset%>.action('<%=action%>', '<%=config.getString('param')%>');"
+		*ngIf="<%=showExpr%>">
+		<%=config.getString('label')%>
+	</button>
+</div><%
 } %>

@@ -18,6 +18,7 @@ import io.firebus.utils.DataMap;
 import io.firebus.utils.FirebusDataUtil;
 import io.redback.RedbackException;
 import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
+import io.redback.managers.objectmanagers.js.ProcessManagerProxyJSWrapper;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.UserProfileJSWrapper;
@@ -317,7 +318,10 @@ public class RedbackObject
 				}
 				else
 				{
-					error("User does not have the right to update object " + config.getName() + " or the attribute " + name);
+					if(canWrite)
+						error("User '" + session.getUserProfile().getUsername() + "' does not have the right to update attribute '" + name + "' on object '" + config.getName() + "'");
+					else
+						error("User '" + session.getUserProfile().getUsername() + "' does not have the right to update object '" + config.getName() + "'");
 				}
 			}
 		}
@@ -390,6 +394,7 @@ public class RedbackObject
 					}
 				}
 				objectManager.commitData(config.getCollection(), key, dbData);
+				objectManager.signal(config.getName() + ":" + getUID().getString());
 				executeScriptsForEvent("aftersave");
 				updatedAttributes.clear();
 				if(isNewObject)
@@ -488,6 +493,7 @@ public class RedbackObject
 		Bindings context = script.getEngine().createBindings();
 		context.put("self", new RedbackObjectJSWrapper(this));
 		context.put("om", new ObjectManagerJSWrapper(objectManager, session));
+		context.put("pm", new ProcessManagerProxyJSWrapper(objectManager.getFirebus(), objectManager.processServiceName, session));
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(objectManager.getGlobalVariables()));
