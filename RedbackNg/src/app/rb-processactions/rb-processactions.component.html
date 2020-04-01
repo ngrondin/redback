@@ -1,4 +1,5 @@
 <button
+    *ngIf="round"
     mat-button 
     matTooltip="Process actions for this record"
     [matTooltipShowDelay]="1000"
@@ -8,11 +9,25 @@
     [matMenuTriggerFor]="processactionmenu">
 	<mat-icon>linear_scale</mat-icon>
 </button>
+<div>
+    <button
+        *ngIf="!round"
+        mat-stroked-button 
+        matTooltip="Process actions for this record"
+        [matTooltipShowDelay]="1000"
+        aria-label="Process Actions" 
+        class="mat-primary rb-button rb-process-actions-button" 
+        (click)="activate()"
+        [matMenuTriggerFor]="processactionmenu">
+        Process
+    </button>
+
+</div>
 <mat-menu
     #processactionmenu="matMenu">
     <div
         class="rb-processaction-message"
-        [style.color]="pid == null ? 'grey' : 'black'">
+        [style.color]="pid == null ? 'lightgrey' : 'black'">
         {{message}}
     </div>
     <button

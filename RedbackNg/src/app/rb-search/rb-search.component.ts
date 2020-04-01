@@ -14,7 +14,7 @@ import { ToastrService } from 'ngx-toastr';
 export class RbSearchComponent implements OnInit {
 
   @Input('icon') icon: string;
-  @Input('size') size: Number;
+  @Input('size') size: number;
   @Input('filterconfig') filterConfig: any;
   @Input('sortconfig') sortConfig: any;
   @Output() search: EventEmitter<any> = new EventEmitter();
@@ -90,5 +90,13 @@ export class RbSearchComponent implements OnInit {
   cancelFilterBuilder() {
     this.overlayRef.dispose();
     this.overlayRef = null;
+  }
+
+
+  public get widthString() : string {
+    if(this.size != null)
+      return '' + (15 * this.size) + 'px';
+    else
+      return '100%';
   }
 }

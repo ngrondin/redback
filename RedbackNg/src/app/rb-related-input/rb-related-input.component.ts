@@ -123,6 +123,8 @@ export class RbRelatedInputComponent implements OnInit {
       this.selected(this.highlightedObject);
     } else if(event.keyCode == 9 || event.keyCode == 27) {
       this.cancelEditing();
+    } else if(event.keyCode == 8 || event.keyCode == 127) {
+      this.erase();
     }
   }
 
@@ -138,11 +140,12 @@ export class RbRelatedInputComponent implements OnInit {
     let link = this.rbObject.validation[this.attribute].related.link;
     let val = (link == 'uid') ? object.uid : object.data[link];
     this.rbObject.setValueAndRelated(this.attribute, val, object);
-    this.overlayRef.dispose();
-    this.overlayRef = null;
-    this.popupListComponentRef = null;
-    this.searchValue = '';
-    this.inputContainerRef.element.nativeElement.blur();
+    this.cancelEditing();
+  }
+
+  public erase() {
+    this.rbObject.setValueAndRelated(this.attribute, null, null);
+    this.cancelEditing();
   }
 
   public getPositionOf(element: any) : any {

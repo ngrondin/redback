@@ -198,11 +198,11 @@ export class RbDatasetDirective implements OnChanges {
           __value = eval(__varString + __value);
         } else if(typeof __value == "object") {
           if(Array.isArray(__value)) {
-            let outArray = [];
-            for(const valueItem of __value) {
-              outArray.push(eval(__varString + valueItem));
+            let __outArray = [];
+            for(const __valueItem of __value) {
+              __outArray.push(eval(__varString + __valueItem));
             }
-            __value = outArray;
+            __value = __outArray;
           } else {
             __value = this.resolveMap(__value, obj);
           }

@@ -11,6 +11,7 @@ import { DataService } from 'app/data.service';
 export class RbProcessactionsComponent implements OnInit {
 
   @Input('object') rbObject: RbObject;
+  @Input('round') round: boolean = false;
 
   pid: string;
   actions: any;

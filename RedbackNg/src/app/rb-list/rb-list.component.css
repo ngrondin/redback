@@ -10,6 +10,10 @@
 	height: auto!important;
 }
 
+.rb-list-item {
+    min-height: 40px;
+}
+
 .rb-list-item-icon {
     display: flex;
     flex-direction: column;

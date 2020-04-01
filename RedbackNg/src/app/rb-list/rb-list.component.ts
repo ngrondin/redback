@@ -40,7 +40,15 @@ export class RbListComponent implements OnInit {
 
   getHeaderFor(item: RbObject) : string {
     if(this.headerattribute != null) {
-      return item.get(this.headerattribute)
+      let val = item.get(this.headerattribute);
+      if((val == null || val.trim() == "")) {
+        let val2 = item.get(this.subheadattribute);
+        let val3 = item.get(this.supptextattribute);
+        if((val2 == null || val2.trim() == "") && (val3 == null || val3.trim() == "")) {
+          val = "No Label";
+        }
+      }
+      return val;
     } else {
       return "";
     }
@@ -48,7 +56,7 @@ export class RbListComponent implements OnInit {
 
   getSubheadFor(item: RbObject) : string {
     if(this.subheadattribute != null) {
-      return item.get(this.subheadattribute)
+      return item.get(this.subheadattribute);
     } else {
       return "";
     }
@@ -56,7 +64,7 @@ export class RbListComponent implements OnInit {
 
   getSuppTextFor(item: RbObject) : string {
     if(this.supptextattribute != null) {
-      return item.get(this.supptextattribute)
+      return item.get(this.supptextattribute);
     } else {
       return "";
     }
