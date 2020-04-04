@@ -94,7 +94,8 @@ public class ProcessManager extends Manager {
 		newNode.getObject("position").put("y", Integer.parseInt(parts[1]));
 		if(newType.equals("interaction")) {
 			newNode.put("actions", new DataList());
-			newNode.put("notidication", new DataList());
+			newNode.put("assignees", new DataList());
+			newNode.put("notidication", new DataMap());
 		}
 		data.getList("nodes").add(newNode);
 		return "" + id;

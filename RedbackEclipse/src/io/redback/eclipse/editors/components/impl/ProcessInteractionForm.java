@@ -24,6 +24,12 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 	public ProcessInteractionForm(DataMap d, DataList n, Manager m, Composite p, int s) 
 	{
 		super(d, n, m, p, s);
+		if(data.getList("assignees") == null)
+			data.put("assignees", new DataList());
+		if(data.getList("actions") == null)
+			data.put("actions", new DataList());
+		if(data.getObject("notification") == null)
+			data.put("notification", new DataMap());
 		createUI();
 	}
 	

@@ -1,13 +1,13 @@
 package io.redback.eclipse.editors.components.impl;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Composite;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 
 import io.redback.eclipse.editors.components.Manager;
-import io.redback.eclipse.editors.components.MapField;
 import io.redback.eclipse.editors.components.ScriptField;
 import io.redback.eclipse.editors.components.SelectField;
 import io.redback.eclipse.editors.components.TextField;
@@ -23,7 +23,8 @@ public class ProcessScriptForm extends ProcessForm
 	public void createUI() {
 		
 		new TextField(data, "name", "Name", this, SWT.NONE);
-		new ScriptField(data, "source", "Script", this, SWT.NONE);
+		ScriptField sf = new ScriptField(data, "source", "Script", this, SWT.NONE);
+		sf.setLayoutData(new RowData(600, 200));
 		new SelectField(data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
 	}
 
