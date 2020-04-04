@@ -9,28 +9,26 @@ import org.eclipse.swt.widgets.Text;
 
 import io.firebus.utils.DataMap;
 
-public class ReadOnlyField extends Composite  {
+public class ReadOnlyField extends Field  {
 	
-	protected DataMap map;
-	protected String attribute;
-	protected Form form;
 	protected Text text;
 	protected String oldValue;
 	
-	public ReadOnlyField(DataMap m, String a, String l, Form f, int s) {
-		super(f, s);
-		map = m;
-		attribute = a;
-		form = f;
+	public ReadOnlyField(DataMap d, String a, String l, Composite p, int s) {
+		super(d, a, l, p, s);
+		createUI();
+	}
+
+	public void createUI() {
 		setLayout(new RowLayout(SWT.HORIZONTAL));
-		Label label = new Label(this, SWT.NONE);
-		label.setText(l);
-		label.setLayoutData(new RowData(170, 24));
+		Label lbl = new Label(this, SWT.NONE);
+		lbl.setText(label);
+		lbl.setLayoutData(new RowData(170, 24));
 		text = new Text(this, SWT.BORDER);
 		text.setLayoutData(new RowData(300, 24));
-		if(map != null && map.getString(attribute) != null) {
-			text.setText(map.getString(attribute));
-			oldValue = map.getString(attribute);
+		if(data != null && data.getString(attribute) != null) {
+			text.setText(data.getString(attribute));
+			oldValue = data.getString(attribute);
 		}
 		text.setEditable(false);
 	}

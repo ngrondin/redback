@@ -1,7 +1,6 @@
 package io.redback.eclipse.editors.components;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -30,7 +29,7 @@ import org.eclipse.swt.widgets.Text;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 
-public class TableField extends Composite implements SelectionListener, ModifyListener, FocusListener, MouseListener {
+public class TableField extends Field implements SelectionListener, ModifyListener, FocusListener, MouseListener {
 
 	protected DataMap data;
 	protected String attribute;
@@ -43,12 +42,8 @@ public class TableField extends Composite implements SelectionListener, ModifyLi
 	protected Button delBut;
 	protected TableEditor editor;
 	
-	public TableField(DataMap d, String a, String l, String[][] c, Form f, int s) {
-		super(f, s);
-		data = d;
-		attribute = a;
-		label = l;
-		form = f;
+	public TableField(DataMap d, String a, String l, String[][] c, Composite p, int s) {
+		super(d, a, l, p, s);
 		columns = c;
 		colMap = new HashMap<String, Integer>();
 		for(int i = 0; i < columns.length; i++)

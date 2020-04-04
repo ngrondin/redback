@@ -25,23 +25,15 @@ import org.eclipse.swt.widgets.Text;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 
-public class ListField extends Composite implements SelectionListener, ModifyListener, FocusListener, MouseListener {
+public class ListField extends Field implements SelectionListener, ModifyListener, FocusListener, MouseListener {
 
-	protected DataMap data;
-	protected String attribute;
-	protected String label;
-	protected Form form;
 	protected Table table;
 	protected Button addBut;
 	protected Button delBut;
 	protected TableEditor editor;
 	
-	public ListField(DataMap d, String a, String l, Form f, int s) {
-		super(f, s);
-		data = d;
-		attribute = a;
-		label = l;
-		form = f;
+	public ListField(DataMap d, String a, String l, Composite p, int s) {
+		super(d, a, l, p, s);
 		createUI();
 	}
 	

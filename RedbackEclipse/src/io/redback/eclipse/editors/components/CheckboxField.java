@@ -12,31 +12,28 @@ import org.eclipse.swt.widgets.Label;
 
 import io.firebus.utils.DataMap;
 
-public class CheckboxField extends Composite implements SelectionListener {
+public class CheckboxField extends Field implements SelectionListener {
 	
-	protected DataMap map;
-	protected String attribute;
-	protected Form form;
 	protected Button checkbox;
 	protected Object oldValue;
 	protected boolean asOneAndZero;
 	
-	public CheckboxField(DataMap m, String a, String l, Form f, int s) {
-		super(f, s);
-		map = m;
-		attribute = a;
-		form = f;
+	public CheckboxField(DataMap d, String a, String l, Composite p, int s) {
+		super(d, a, l, p, s);
+		createUI();
+	}
+
+	public void createUI() {
 		setLayout(new RowLayout(SWT.HORIZONTAL));
-		Label label = new Label(this, SWT.NONE);
-		label.setText(l);
-		label.setLayoutData(new RowData(170, 24));
+		Label lbl = new Label(this, SWT.NONE);
+		lbl.setText(label);
+		lbl.setLayoutData(new RowData(170, 24));
 		checkbox = new Button(this, SWT.CHECK);
-		if(map != null && map.get(attribute) != null) {
-			checkbox.setSelection(map.getBoolean(attribute));
-			oldValue = map.getBoolean(attribute);
+		if(data != null && data.get(attribute) != null) {
+			checkbox.setSelection(data.getBoolean(attribute));
+			oldValue = data.getBoolean(attribute);
 		}
 		checkbox.addSelectionListener(this);
-
 	}
 	
 	public void setChecked(boolean checked) {
@@ -59,13 +56,14 @@ public class CheckboxField extends Composite implements SelectionListener {
 			else
 				newValue = 0;
 		}
-		if(map != null) {
-			map.put(attribute, newValue);
+		if(data != null) {
+			data.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);
 		oldValue = newValue;
 	}
+
 
 
 }

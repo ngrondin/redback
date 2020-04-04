@@ -18,21 +18,17 @@ import org.eclipse.swt.widgets.Label;
 
 import io.firebus.utils.DataMap;
 
-public class ScriptField extends Composite implements ModifyListener {
+public class ScriptField extends Field implements ModifyListener {
 
-	protected DataMap map;
-	protected String attribute;
-	protected String label;
-	protected Form form;
 	protected StyledText text;
 	protected String oldValue;
 
-	public ScriptField(DataMap m, String a, String l, Form f, int s) {
-		super(f, s);
-		map = m;
-		attribute = a;
-		label = l;
-		form = f;
+	public ScriptField(DataMap m, String a, String l, Composite p, int s) {
+		super(m, a, l, p, s);
+		createUI();
+	}
+	
+	public void createUI() {
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
 		setLayout(layout);
@@ -43,20 +39,20 @@ public class ScriptField extends Composite implements ModifyListener {
 		text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		text.setFont(new Font( getDisplay(), new FontData( "Fira Code", 10, SWT.NONE)));
 		text.addModifyListener(this);
-		if(map != null && map.get(attribute) != null) {
-			text.setText(map.getString(attribute));
+		if(data != null && data.get(attribute) != null) {
+			text.setText(data.getString(attribute));
 			processStyle();
 		}
-		
 	}
+
 
 	public void modifyText(ModifyEvent event) {
 		String newValue = text.getText();
-		if(map != null) {
-			if(newValue == null && map.get(attribute) != null)
-				map.remove(attribute);
+		if(data != null) {
+			if(newValue == null && data.get(attribute) != null)
+				data.remove(attribute);
 			else
-				map.put(attribute, newValue);
+				data.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);
@@ -150,4 +146,5 @@ public class ScriptField extends Composite implements ModifyListener {
 		}
 		layout(true, true);
 	}
+
 }

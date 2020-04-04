@@ -30,6 +30,7 @@ import io.redback.eclipse.editors.components.impl.KeyManager;
 import io.redback.eclipse.editors.components.impl.MenuManager;
 import io.redback.eclipse.editors.components.impl.ObjectManager;
 import io.redback.eclipse.editors.components.impl.ObjectTree;
+import io.redback.eclipse.editors.components.impl.ProcessManager;
 import io.redback.eclipse.editors.components.impl.ResourceManager;
 import io.redback.eclipse.editors.components.impl.RoleManager;
 import io.redback.eclipse.editors.components.impl.ViewManager;
@@ -131,6 +132,10 @@ public class RedbackConfigEditor extends EditorPart implements IResourceChangeLi
 				} else if(rbService.equals("rbam")) {
 					if(rbConfigType.equals("role")) {
 						manager = new RoleManager(data, this, composite, SWT.HORIZONTAL);
+					} 
+				} else if(rbService.equals("rbpm")) {
+					if(rbConfigType.equals("process")) {
+						manager = new ProcessManager(data, this, composite, SWT.HORIZONTAL);
 					} 
 				}
 			}

@@ -11,28 +11,26 @@ import org.eclipse.swt.widgets.Text;
 
 import io.firebus.utils.DataMap;
 
-public class TextAreaField extends Composite implements ModifyListener {
+public class TextAreaField extends Field implements ModifyListener {
 	
-	protected DataMap map;
-	protected String attribute;
-	protected Form form;
 	protected Text text;
 	protected String oldValue;
 	
-	public TextAreaField(DataMap m, String a, String l, Form f, int s) {
-		super(f, s);
-		map = m;
-		attribute = a;
-		form = f;
+	public TextAreaField(DataMap d, String a, String l, Composite p, int s) {
+		super(d, a, l, p, s);
+		createUI();
+	}
+	
+	public void createUI() {
 		setLayout(new RowLayout(SWT.VERTICAL));
-		Label label = new Label(this, SWT.NONE);
-		label.setText(l);
-		label.setLayoutData(new RowData(170, 24));
+		Label lbl = new Label(this, SWT.NONE);
+		lbl.setText(label);
+		lbl.setLayoutData(new RowData(170, 24));
 		text = new Text(this, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		text.setLayoutData(new RowData(500, 300));
-		if(map != null && map.getString(attribute) != null) {
-			text.setText(map.getString(attribute));
-			oldValue = map.getString(attribute);
+		if(data != null && data.getString(attribute) != null) {
+			text.setText(data.getString(attribute));
+			oldValue = data.getString(attribute);
 		}
 		text.addModifyListener(this);
 	}
@@ -41,11 +39,11 @@ public class TextAreaField extends Composite implements ModifyListener {
 		String newValue = text.getText();
 		if(newValue != null && newValue.equals(""))
 			newValue = null;
-		if(map != null) {
-			if(newValue == null && map.get(attribute) != null)
-				map.remove(attribute);
+		if(data != null) {
+			if(newValue == null && data.get(attribute) != null)
+				data.remove(attribute);
 			else
-				map.put(attribute, newValue);
+				data.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);

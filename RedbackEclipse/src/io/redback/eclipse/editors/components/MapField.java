@@ -1,7 +1,6 @@
 package io.redback.eclipse.editors.components;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
@@ -28,12 +27,8 @@ import org.eclipse.swt.widgets.Text;
 
 import io.firebus.utils.DataMap;
 
-public class MapField extends Composite implements SelectionListener, ModifyListener, FocusListener, MouseListener {
+public class MapField extends Field implements SelectionListener, ModifyListener, FocusListener, MouseListener {
 
-	protected DataMap data;
-	protected String attribute;
-	protected String label;
-	protected Form form;
 	protected Table table;
 	protected TableColumn keyCol;
 	protected TableColumn valueCol;
@@ -41,12 +36,8 @@ public class MapField extends Composite implements SelectionListener, ModifyList
 	protected Button delBut;
 	protected TableEditor editor;
 	
-	public MapField(DataMap d, String a, String l, Form f, int s) {
-		super(f, s);
-		data = d;
-		attribute = a;
-		label = l;
-		form = f;
+	public MapField(DataMap d, String a, String l, Composite p, int s) {
+		super(d, a, l, p, s);
 		createUI();
 	}
 	
@@ -82,15 +73,17 @@ public class MapField extends Composite implements SelectionListener, ModifyList
 	    
 		table.addMouseListener(this);
 		
-		Iterator<String> it = data.getObject(attribute).keySet().iterator();
-		while(it.hasNext()) {
-			String key = it.next();
-			String val = data.getObject(attribute).getString(key);		
-			TableItem item = new TableItem(table, SWT.NULL);
-			item.setText(0, key);
-			item.setText(1, val == null ? "" : val);
-			item.setData("key", key);
-		}	
+		if(data.getObject(attribute) != null) {
+			Iterator<String> it = data.getObject(attribute).keySet().iterator();
+			while(it.hasNext()) {
+				String key = it.next();
+				String val = data.getObject(attribute).getString(key);		
+				TableItem item = new TableItem(table, SWT.NULL);
+				item.setText(0, key);
+				item.setText(1, val == null ? "" : val);
+				item.setData("key", key);
+			}	
+		}
 	}
 
 	
@@ -156,6 +149,8 @@ public class MapField extends Composite implements SelectionListener, ModifyList
         	String newKey = text.getText();
             item.setText(0, newKey);
             item.setData("key", newKey);
+            if(data.getObject(attribute) == null)
+            	data.put(attribute, new DataMap());
             data.getObject(attribute).put(newKey, null);
             closeEditor();
         } else {

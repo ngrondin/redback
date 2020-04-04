@@ -11,11 +11,13 @@ public abstract class Form extends Composite {
 	
 	protected DataMap data;
 	protected Manager manager;	
+	protected Composite parent;
 	
 	public Form(DataMap d, Manager m, Composite p, int s) {
 		super(p, s);
 		data = d;
 		manager = m;
+		parent = p;
 		setLayout(new RowLayout(SWT.VERTICAL));
 	}
 	

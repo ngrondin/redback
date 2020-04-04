@@ -34,6 +34,11 @@ public abstract class Manager extends Composite  {
 	    form = new EmptyForm(sashForm, SWT.PUSH);
 	}
 	
+	public void refresh() {
+		if(navigator != null)
+			navigator.refresh();
+	}
+	
 	protected abstract Navigator getNavigator();
 	
 	protected abstract Form getForm(String type, String name);

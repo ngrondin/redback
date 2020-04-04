@@ -24,7 +24,7 @@ import io.redback.eclipse.editors.RedbackConfigEditor;
 public class RedbackEditorTest {
 	public static void main(String[] args) {
 		try {
-			IFileEditorInput fei = new TestFileEditorInput("C:\\src\\pulse\\Office\\office\\src\\main\\resources\\io\\redback\\config\\rbui\\view\\asset.json");
+			IFileEditorInput fei = new TestFileEditorInput("C:\\Users\\ngron\\git\\redbackwms\\src\\main\\resources\\io\\redback\\config\\rbpm\\process\\workorder.json");
 			IEditorSite es = new TestEditorSite();
 			RedbackConfigEditor rce = new RedbackConfigEditor();
 			rce.init(es, fei);
