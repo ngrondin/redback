@@ -29,7 +29,7 @@ public abstract class Navigator extends Composite implements MenuDetectListener,
 		manager = m;
 	}
 
-	private Widget getEndWidget(Widget source) {
+	protected Widget getEndWidget(Widget source) {
 		Widget item = null;
 		if(source instanceof Tree) 
 			item = ((Tree)source).getSelection()[0];

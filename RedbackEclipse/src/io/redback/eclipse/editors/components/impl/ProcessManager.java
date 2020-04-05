@@ -23,6 +23,7 @@ public class ProcessManager extends Manager {
 		{"rbobjectexecute", "RbObject Execute"},
 		{"rbobjectupdate", "RbObject Update"}, 
 		{"script", "Script"},
+		{"firebusrequest", "Firebus Request"},
 		{"domainservice", "Domain Service"}
 	};
 	
@@ -60,6 +61,8 @@ public class ProcessManager extends Manager {
 			return new ProcessRbObjectUpdateForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("rbobjectexecute")) {
 			return new ProcessRbObjectExecuteForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+		} else if(type.equals("firebusrequest")) {
+			return new ProcessFirebusRequestForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("domainservice")) {
 			return new ProcessDomainServiceForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else {

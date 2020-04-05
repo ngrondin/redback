@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ScrollBar;
-
+import org.eclipse.swt.widgets.Widget;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
@@ -65,6 +65,7 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 		typeLabels.put("rbobjectexecute", "Rbo Execute");
 		typeLabels.put("rbobjectupdate", "Rbo Update");
 		typeLabels.put("script", "Script");
+		typeLabels.put("firebusrequest", "Firebus Req.");
 		typeLabels.put("domainservice", "Domain Serv.");
 		FontData fd = new FontData();
 		fd.setHeight(7);
@@ -85,6 +86,11 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 		canvas.addPaintListener(this);
 		canvas.addMouseListener(this);
 		canvas.addMouseMoveListener(this);
+		canvas.addListener (SWT.Resize,  new Listener () {
+		    public void handleEvent (Event e) {
+		    	calcCanvasSize();
+		    }
+		});
 		canvas.getVerticalBar().addListener(SWT.Selection, new Listener() {
 	        public void handleEvent(Event e) {
 	            int scrollDiff = -((ScrollBar)e.widget).getSelection() - scrollVPos;
@@ -109,6 +115,11 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create node");
 		    item.setData(new NavigatorAction("create", type, name));
+
+			item = new MenuItem(menu, SWT.PUSH);
+		    item.setText("Make space");
+		    item.setData(new NavigatorAction("space", type, name));
+
 		} else {
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Delete node");
@@ -117,6 +128,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 	}
 	
 	protected void calcCanvasSize() {
+		canvasWidth = 0;
+		canvasHeight = 0;
 		for(int i = 0; i < data.getList("nodes").size(); i++) {
 			DataMap node = data.getList("nodes").getObject(i);
 			int x = node.getNumber("position.x").intValue();
@@ -126,11 +139,12 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 			if(y > canvasHeight)
 				canvasHeight = y;
 		}
-		canvasHeight += 100;
-		canvasWidth += 300;
-		canvas.setSize(canvasWidth, canvasHeight);
+		canvasHeight += (2 * boxWidth);
+		canvasWidth += (2 * boxHeight);
 		canvas.getHorizontalBar().setMaximum(canvasWidth);
+		canvas.getHorizontalBar().setThumb(canvas.getSize().x);
 		canvas.getVerticalBar().setMaximum(canvasHeight);
+		canvas.getVerticalBar().setThumb(canvas.getSize().y);
 	}
 
 	public void paintControl(PaintEvent event) {
@@ -239,30 +253,53 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 			gc.drawLine(endX - 6, endY - 3, endX, endY);
 		}
 	}
+	
+	
+	
+	public void widgetSelected(SelectionEvent event) {
+		Widget source = (Widget)event.getSource();
+		Widget item = getEndWidget(source);
+		NavigatorAction navAction = (NavigatorAction)item.getData();
+		if(navAction.action.equals("space")) {
+			String[] parts = navAction.name.split("-");
+			int x = Integer.parseInt(parts[0]);
+			for(int i = 0; i < data.getList("nodes").size(); i++) {
+				DataMap node = data.getList("nodes").getObject(i);
+				int nodeX = node.getNumber("position.x").intValue();
+				if(nodeX > x)
+					node.getObject("position").put("x", nodeX + (boxWidth * 2));
+			}
+			calcCanvasSize();
+			canvas.redraw();
+		}
+		super.widgetSelected(event);
+	}
 
 	public void mouseDoubleClick(MouseEvent event) {
 		
 	}
 
 	public void mouseDown(MouseEvent event) {
-		DataMap node = getNode(event.x, event.y);
+		int x = event.x - scrollHPos;
+		int y = event.y - scrollVPos;
+		DataMap node = getNode(x, y);
 		if(event.button == 1) {
 			if(node != null) {
 				selectedNode = node;
 				draggingNode = node;
-				dragOffsetX = event.x - node.getNumber("position.x").intValue() - scrollHPos;
-				dragOffsetY = event.y - node.getNumber("position.y").intValue() - scrollVPos;
+				dragOffsetX = x - node.getNumber("position.x").intValue();
+				dragOffsetY = y - node.getNumber("position.y").intValue();
 				sendSelectionEvent(new NavigatorAction("select", node.getString("type"), node.getString("id")));
 			} else {
 				selectedNode = null;
-				sendSelectionEvent(new NavigatorAction("select", "header", event.x + "-" + event.y));
+				sendSelectionEvent(new NavigatorAction("select", "header", x + "-" + y));
 			}
 			canvas.redraw();
 		} else if(event.button == 3) {
 			if(node != null)
 				sendMenuEvent(new NavigatorAction("select", node.getString("type"), node.getString("id")));
 			else
-				sendMenuEvent(new NavigatorAction("select", "header", event.x + "-" + event.y));
+				sendMenuEvent(new NavigatorAction("select", "header", x + "-" + y));
 		}
 	}
 
@@ -306,8 +343,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 	protected DataMap getNode(int mx, int my) {
 		for(int i = 0; i < data.getList("nodes").size(); i++) {
 			DataMap node = data.getList("nodes").getObject(i);
-			int x = node.getNumber("position.x").intValue() + scrollHPos;
-			int y = node.getNumber("position.y").intValue() + scrollVPos;
+			int x = node.getNumber("position.x").intValue();
+			int y = node.getNumber("position.y").intValue();
 			if(mx >= x && mx <= x + boxWidth && my >= y - 15 && my <= y + boxHeight)
 				return node;
 		}
