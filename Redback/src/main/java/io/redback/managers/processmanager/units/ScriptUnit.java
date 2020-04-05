@@ -30,7 +30,6 @@ public class ScriptUnit extends ProcessUnit
 		processManager = pm;
 		nextNode = config.getString("nextnode");
 		ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
-		//jsEngine.put(ScriptEngine.FILENAME, scriptName);
 		String source = StringUtils.unescape(config.getString("source"));
 		try
 		{
@@ -42,24 +41,22 @@ public class ScriptUnit extends ProcessUnit
 		}
 	}
 
-	public void execute(ProcessInstance pi, DataMap result) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
 		logger.info("Start executing script");
 		Bindings context = script.getEngine().createBindings();
 		context.put("pid", pi.getId());
 		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
-		context.put("pm", new ProcessManagerJSWrapper(processManager, sysUserSession));
+		context.put("pm", new ProcessManagerJSWrapper(processManager, pi));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalVariables()));
 		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), sysUserSession));
-		context.put("result", FirebusDataUtil.convertDataObjectToJSObject(result));
 		try
 		{
 			script.eval(context);
 			pi.setCurrentNode(nextNode);
 			JSObject piDataJS = (JSObject)context.get("data");
 			pi.setData(FirebusDataUtil.convertJSObjectToDataObject(piDataJS));
-			result = FirebusDataUtil.convertJSObjectToDataObject((JSObject)context.get("result"));
 		} 
 		catch (ScriptException e)
 		{

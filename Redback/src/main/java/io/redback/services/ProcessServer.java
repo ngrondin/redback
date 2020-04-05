@@ -12,6 +12,7 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.processmanager.Assignment;
+import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.security.Session;
 
 public abstract class ProcessServer extends AuthenticatedService
@@ -48,7 +49,8 @@ public abstract class ProcessServer extends AuthenticatedService
 					DataMap data = request.getObject("data");
 					if(process != null)
 					{
-						responseData = initiate(session, process, data);
+						ProcessInstance pi = initiate(session, process, data);
+						responseData = new DataMap("instance", pi.getId());
 					}
 					else
 					{
@@ -57,13 +59,13 @@ public abstract class ProcessServer extends AuthenticatedService
 				}
 				else if(action.equals("processaction"))
 				{
-					String extpid = request.getString("extpid");
 					String pid = request.getString("pid");
 					String processAction = request.getString("processaction");
 					DataMap data = request.getObject("data");
 					if(pid != null &&  processAction != null)
 					{
-						responseData = processAction(session, extpid, pid, processAction, data);
+						processAction(session, pid, processAction, data);
+						responseData = new DataMap("result", "ok");
 					}
 					else
 					{
@@ -72,10 +74,9 @@ public abstract class ProcessServer extends AuthenticatedService
 				}
 				else if(action.equals("getassignments"))
 				{
-					String extpid = request.getString("extpid");
 					DataMap filter = request.getObject("filter");
 					DataList viewdata = request.getList("viewdata");
-					List<Assignment> result = getAssignments(session, extpid, filter, viewdata);
+					List<Assignment> result = getAssignments(session, filter, viewdata);
 					DataList responseList = new DataList();
 					for(int i = 0; i < result.size(); i++)
 						responseList.add(result.get(i).getDataMap());
@@ -84,8 +85,7 @@ public abstract class ProcessServer extends AuthenticatedService
 				}
 				else if(action.equals("getassignmentcount"))
 				{
-					String extpid = request.getString("extpid");
-					int count = getAssignmentCount(session, extpid);
+					int count = getAssignmentCount(session);
 					responseData = new DataMap();
 					responseData.put("count", count);
 				}
@@ -113,17 +113,16 @@ public abstract class ProcessServer extends AuthenticatedService
 
 	public ServiceInformation getServiceInformation()
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	protected abstract DataMap initiate(Session session, String process, DataMap data) throws RedbackException;
+	protected abstract ProcessInstance initiate(Session session, String process, DataMap data) throws RedbackException;
 	
-	protected abstract DataMap processAction(Session session, String extpid, String pid, String processAction, DataMap data) throws RedbackException;
+	protected abstract void processAction(Session session, String pid, String processAction, DataMap data) throws RedbackException;
 	
-	protected abstract List<Assignment> getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException;
+	protected abstract List<Assignment> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException;
 	
-	protected abstract int getAssignmentCount(Session session, String extpid) throws RedbackException;
+	protected abstract int getAssignmentCount(Session session) throws RedbackException;
 	
 }

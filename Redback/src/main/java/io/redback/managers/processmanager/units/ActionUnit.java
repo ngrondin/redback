@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.security.Session;
 
 public class ActionUnit extends ProcessUnit 
 {
@@ -24,11 +24,11 @@ public class ActionUnit extends ProcessUnit
 		nextNode = config.getString("nextnode");
 	}
 	
-	public void execute(ProcessInstance pi, DataMap result) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.info("Starting Action node");
-		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-		ArrayList<Assignment> assignments = processManager.getAssignments(sysUserSession, pi.getId(), null, null);
+		Actionner actionner = new Actionner(pi);
+		ArrayList<Assignment> assignments = processManager.getAssignments(actionner, null, null);
 		for(int i = 0; i < assignments.size(); i++)
 		{
 			Assignment assignment = assignments.get(i);
@@ -41,8 +41,7 @@ public class ActionUnit extends ProcessUnit
 				if(actionExists)
 				{
 					logger.fine("Actionning interaction '" + interactionCode + "' with action '" + action +"' in instance '" + assignment.pid +"'");
-					DataMap actionResult = processManager.processAction(sysUserSession, pi.getId(), assignment.pid, action, null);
-					result.merge(actionResult);
+					processManager.processAction(actionner, assignment.pid, action, null);
 				}
 				else
 				{

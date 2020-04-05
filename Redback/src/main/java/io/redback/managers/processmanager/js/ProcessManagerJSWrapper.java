@@ -7,6 +7,7 @@ import io.firebus.utils.DataMap;
 import io.firebus.utils.FirebusDataUtil;
 import io.firebus.utils.FirebusJSArray;
 import io.redback.RedbackException;
+import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
@@ -15,22 +16,28 @@ import io.redback.security.Session;
 public class ProcessManagerJSWrapper
 {
 	protected ProcessManager processManager;
-	protected Session session;
+	protected ProcessInstance processInstance;
+	protected Actionner actionner;
+	//protected Session session;
 	
-	public ProcessManagerJSWrapper(ProcessManager pm, Session s)
+	public ProcessManagerJSWrapper(ProcessManager pm, ProcessInstance pi)
 	{
 		processManager = pm;
-		session = s;
+		processInstance = pi;
+		actionner = new Actionner(pi);
+		//session = s;
 	}
 	
-	public JSObject initiateProcess(String name, String domain, DataMap data) throws RedbackException
+	public ProcessInstanceJSWrapper initiateProcess(String name, JSObject data) throws RedbackException
 	{
-		return FirebusDataUtil.convertDataObjectToJSObject(processManager.initiateProcess(session, name, data));
+		DataMap dataMap = FirebusDataUtil.convertJSObjectToDataObject(data);
+		ProcessInstance pi = processManager.initiateProcess(actionner, name, dataMap);
+		return new ProcessInstanceJSWrapper(pi);
 	}
 
-	public JSObject getNotifications(String extpid, JSObject filter, JSObject viewdata) throws RedbackException
+	public JSObject getNotifications(JSObject filter, JSObject viewdata) throws RedbackException
 	{
-		ArrayList<Assignment> list = processManager.getAssignments(session, extpid, FirebusDataUtil.convertJSObjectToDataObject(filter), FirebusDataUtil.convertJSArrayToDataList(viewdata));
+		ArrayList<Assignment> list = processManager.getAssignments(actionner, FirebusDataUtil.convertJSObjectToDataObject(filter), FirebusDataUtil.convertJSArrayToDataList(viewdata));
 		FirebusJSArray array = new FirebusJSArray();
 		for(int i = 0; i < list.size(); i++)
 			array.setSlot(i,  FirebusDataUtil.convertDataObjectToJSObject(list.get(i).getDataMap()));
@@ -38,14 +45,14 @@ public class ProcessManagerJSWrapper
 		
 	}
 	
-	public JSObject processAction(String extpid, String pid, String event, JSObject data) throws RedbackException
+	public void processAction(String extpid, String pid, String event, JSObject data) throws RedbackException
 	{
-		return FirebusDataUtil.convertDataObjectToJSObject(processManager.processAction(session, extpid, pid, event, FirebusDataUtil.convertJSObjectToDataObject(data)));
+		processManager.processAction(actionner, pid, event, FirebusDataUtil.convertJSObjectToDataObject(data));
 	}
 	
 	public JSObject findProcesses(JSObject filter) throws RedbackException
 	{
-		ArrayList<ProcessInstance> list = processManager.findProcesses(session, FirebusDataUtil.convertJSObjectToDataObject(filter));
+		ArrayList<ProcessInstance> list = processManager.findProcesses(actionner, FirebusDataUtil.convertJSObjectToDataObject(filter));
 		FirebusJSArray array = new FirebusJSArray();
 		for(int i = 0; i < list.size(); i++)
 			array.setSlot(i,  new ProcessInstanceJSWrapper(list.get(i)));

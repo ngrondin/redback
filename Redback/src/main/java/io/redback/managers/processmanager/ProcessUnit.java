@@ -22,7 +22,7 @@ public abstract class ProcessUnit
 		return nodeId;
 	}
 	
-	public void execute(ProcessInstance pi, DataMap result) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		pi.setCurrentNode(null);
 	}

@@ -3,10 +3,10 @@ package io.redback.managers.processmanager.units;
 import java.util.logging.Logger;
 
 import io.firebus.Payload;
-import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.processmanager.Expression;
+import io.redback.managers.processmanager.ExpressionMap;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
@@ -18,8 +18,8 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 	protected String objectName;
 	protected Expression objectUIDExpression;
 	protected String objectFunctionName;
-	protected Expression functionParamsExpression;
-	protected Expression outputMapExpression;
+	protected ExpressionMap inputExpressionMap;
+	protected ExpressionMap outputExpressionMap;
 	protected String nextNode;
 	
 	public RedbackObjectExecuteUnit(ProcessManager pm, DataMap config) throws RedbackException 
@@ -29,16 +29,16 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 		objectName = config.getString("object");
 		objectUIDExpression = new Expression(config.getString("uid"));
 		objectFunctionName = config.getString("function");
-		functionParamsExpression = new Expression(config.get("data") != null ? config.getString("data") : "{}");
-		outputMapExpression = new Expression(config.get("outmap") != null ? config.getString("outmap") : "{}");
+		inputExpressionMap = new ExpressionMap(config.get("data") != null ? config.getObject("data") : new DataMap());
+		outputExpressionMap = new ExpressionMap(config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
 		nextNode = config.getString("nextnode");
 	}
 
-	public void execute(ProcessInstance pi, DataMap result) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.info("Starting redback object execute node");
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-		DataMap functionParams = (DataMap)functionParamsExpression.eval("data", pi.getData());
+		DataMap functionParams = inputExpressionMap.eval("data", pi.getData());
 		String objectUID = (String)objectUIDExpression.eval("data", pi.getData());
 		DataMap req = new DataMap();
 		req.put("action", "execute");
@@ -53,14 +53,10 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 		{
 			logger.info("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());
 			Payload response = processManager.getFirebus().requestService(processManager.getGlobalVariables().getString("rbobjectservice"), payload, 10000);
-			DataMap respJSON = new DataMap(response.getString());
-			//respJSON.remove("data");
-			DataMap respOutput = (DataMap)outputMapExpression.eval("result", respJSON);
+			DataMap respData = new DataMap(response.getString());
+			DataMap respOutput = outputExpressionMap.eval("result", respData);
 			logger.fine("Output data was: " + respOutput);
 			pi.getData().merge(respOutput);
-			if(result.get("rbobjectupdate") == null)
-				result.put("rbobjectupdate", new DataList());
-			result.getList("rbobjectupdate").add(new DataMap("{objectname:" + respJSON.getString("objectname") + ", uid:" + respJSON.getString("uid") + "}"));
 		} 
 		catch (Exception e)
 		{

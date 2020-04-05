@@ -12,7 +12,6 @@ import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.managers.processmanager.units.RedbackObjectExecuteUnit;
 import io.redback.managers.processmanager.units.RedbackObjectUpdateUnit;
 import io.redback.managers.processmanager.units.ScriptUnit;
-import io.redback.security.Session;
 
 public class Process 
 {
@@ -61,44 +60,45 @@ public class Process
 		return nodes.get(n);
 	}
 
-	public ProcessInstance createInstance(Session session, DataMap data)
+	public ProcessInstance createInstance(Actionner actionner, DataMap data) throws RedbackException
 	{
-		ProcessInstance pi = new ProcessInstance(name, version, session.getUserProfile().getAttribute("rb.defaultdomain"), data);
+		String domain = null;
+		if(actionner.isUser())
+			domain = actionner.getUserProfile().getAttribute("rb.defaultdomain");
+		else
+			domain = processManager.getProcessInstance(actionner.getId()).getDomain();
+		ProcessInstance pi = new ProcessInstance(name, version, domain, data);
 		return pi;
 	}
 	
-	public DataMap startInstance(Session session, ProcessInstance pi) throws RedbackException
+	public void startInstance(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
 		logger.info("Starting process '" + name + "' instance");
-		DataMap result = new DataMap();
 		pi.setCurrentNode(startNode);
-		pi.getData().put("originator", session.getUserProfile().getUsername());
-		execute(pi, result);
+		pi.getData().put("originator", actionner.getId());
+		execute(pi);
 		logger.info("Process '" + name + "' started instance '" + pi.getId() + "'");
-		return result;
 	}
 	
-	public DataMap continueInstance(ProcessInstance pi) throws RedbackException
+	public void continueInstance(ProcessInstance pi) throws RedbackException
 	{
 		logger.info("Continuing process '" + name + "' instance");
-		DataMap result = new DataMap();
-		execute(pi, result);
+		execute(pi);
 		logger.info("Process '" + name + "' has continued '" + pi.getId() + "'");
-		return result;
 	}
 	
-	public DataMap processAction(Session session, String extpid, ProcessInstance pi, String action, DataMap data) throws RedbackException
+	public void processAction(Actionner actionner, ProcessInstance pi, String action, DataMap data) throws RedbackException
 	{
 		logger.info("Processing action '" + action + "' of  process " + name + ":" + pi.getId() + "");
-		DataMap result = new DataMap();
 		String currentNodeId = pi.getCurrentNode();
 		if(currentNodeId != null)
 		{
 			ProcessUnit currentNode = nodes.get(currentNodeId);
 			if(currentNode instanceof InteractionUnit)
 			{
-				((InteractionUnit)currentNode).processAction(session, extpid,  pi, action, data);
-				execute(pi, result);
+				((InteractionUnit)currentNode).processAction(actionner,  pi, action, data);
+				if(pi.getCurrentNode() != null)
+					execute(pi);
 			}
 			else
 			{
@@ -113,48 +113,43 @@ public class Process
 				error("Process instance " + pi.getId() + " has not been start yet");
 		}	
 		logger.info("Finished processing action '" + action + "' of  " + name + ":" + pi.getId() + "");
-		return result;
 	}
 	
-	protected void execute(ProcessInstance pi, DataMap result) throws RedbackException
+	protected void execute(ProcessInstance pi) throws RedbackException
 	{
-		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-		if(sysUserSession != null  &&  sysUserSession.getUserProfile().getAttribute("rb.process.sysuser").equals("true"))
+		String currentNodeId = pi.getCurrentNode();
+		if(currentNodeId != null)
 		{
-			String currentNodeId = pi.getCurrentNode();
-			if(currentNodeId != null)
+			while(currentNodeId != null  &&  nodes.get(currentNodeId) != null  &&   !pi.isComplete()  &&  !(nodes.get(currentNodeId) instanceof InteractionUnit))
 			{
-				while(currentNodeId != null  &&  nodes.get(currentNodeId) != null  &&   !pi.isComplete()  &&  !(nodes.get(currentNodeId) instanceof InteractionUnit))
+				logger.info("Executing node '" + currentNodeId + "'");
+				nodes.get(currentNodeId).execute(pi);
+				currentNodeId = pi.getCurrentNode();
+			}
+			
+			if(currentNodeId != null  &&  !pi.isComplete())
+			{
+				if(nodes.get(currentNodeId) != null)
 				{
-					logger.info("Executing node '" + currentNodeId + "'");
-					nodes.get(currentNodeId).execute(pi, result);
-					currentNodeId = pi.getCurrentNode();
+					if(nodes.get(currentNodeId) instanceof InteractionUnit)
+					{
+						logger.info("Executing node '" + currentNodeId + "'");
+						((InteractionUnit)nodes.get(currentNodeId)).execute(pi);			
+					}
 				}
-				
-				if(currentNodeId != null  &&  !pi.isComplete())
+				else
 				{
-					if(nodes.get(currentNodeId) != null)
-					{
-						if(nodes.get(currentNodeId) instanceof InteractionUnit)
-						{
-							logger.info("Executing node '" + currentNodeId + "'");
-							((InteractionUnit)nodes.get(currentNodeId)).execute(pi, result);			
-						}
-					}
-					else
-					{
-						throw new RedbackException("Current node '" + currentNodeId + " is unknown in process '" + name + "' version " + version);
-					}
+					throw new RedbackException("Current node '" + currentNodeId + " is unknown in process '" + name + "' version " + version);
 				}
 			}
-			else
-			{
-				if(pi.isComplete())
-					error("Process instance " + pi.getId() + " is complete");
-				else
-					error("Process instance " + pi.getId() + " has not been start yet");
-			}	
 		}
+		else
+		{
+			if(pi.isComplete())
+				error("Process instance " + pi.getId() + " is complete");
+			else
+				error("Process instance " + pi.getId() + " has not been start yet");
+		}	
 	}
 	
 	protected void error(String msg) throws RedbackException

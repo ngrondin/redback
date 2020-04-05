@@ -17,7 +17,7 @@ public class ProcessInstance
 	protected String currentNode;
 	protected boolean complete;
 	protected DataList assignees;
-	protected Assignee lastActioner;
+	protected Actionner lastActioner;
 	//protected JSONList receivedNotifications;
 	
 	protected ProcessInstance(String pn, int v, String dom, DataMap d)
@@ -47,14 +47,7 @@ public class ProcessInstance
 			assignees = new DataList();
 		
 		if(c.containsKey("lastactioner")  &&  c.get("lastactioner") instanceof DataMap)
-			lastActioner = new Assignee(c.getObject("lastactioner"));
-		
-		/*
-		if(c.containsKey("receivednotifications")  &&  c.get("receivednotifications") instanceof JSONList)
-			receivedNotifications = c.getList("receivednotifications");
-		else
-			receivedNotifications = new JSONList();
-		*/
+			lastActioner = new Actionner(c.getObject("lastactioner"));
 	}
 	
 	public String getId()
@@ -117,7 +110,7 @@ public class ProcessInstance
 		return ret;
 	}
 	
-	public void setLastActioner(Assignee la)
+	public void setLastActioner(Actionner la)
 	{
 		lastActioner = la;
 	}

@@ -28,7 +28,7 @@ public class FirebusCallUnit extends ProcessUnit
 		nextNode = config.getString("nextnode");
 	}
 
-	public void execute(ProcessInstance pi, DataMap result) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.info("Starting firebus call node");
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());

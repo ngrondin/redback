@@ -5,14 +5,13 @@ import java.util.ArrayList;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignee;
 import io.redback.managers.processmanager.AssigneeConfig;
 import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.security.Session;
-import io.redback.security.UserProfile;
 
 public class InteractionUnit extends ProcessUnit 
 {
@@ -35,7 +34,7 @@ public class InteractionUnit extends ProcessUnit
 		notificationConfig = config.getObject("notification");
 	}
 
-	public void execute(ProcessInstance pi, DataMap result) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.info("Starting interaction node execution");
 		for(int i = 0; i < assigneeConfigs.size(); i++)
@@ -45,7 +44,7 @@ public class InteractionUnit extends ProcessUnit
 			if(assigneeObject instanceof String)
 			{
 				logger.fine("Adding assignee " + (String)assigneeObject);
-				pi.addAssignee(new Assignee(assigneeConfigs.get(i).getType(), (String)assigneeObject));
+				pi.addAssignee(new Assignee(assigneeConfig.getType(), (String)assigneeObject));
 			}
 			else if(assigneeObject instanceof DataList)
 			{
@@ -56,15 +55,16 @@ public class InteractionUnit extends ProcessUnit
 					pi.addAssignee(new Assignee(assigneeConfigs.get(i).getType(), assigneeList.getString(j)));
 				}
 			}
+			//TODO: handle active notifications (email)
 		}
 		logger.info("Finished interaction node execution");
 	}
 
-	public void processAction(Session session, String extpid, ProcessInstance pi, String action, DataMap data) throws RedbackException
+	public void processAction(Actionner actionner, ProcessInstance pi, String action, DataMap data) throws RedbackException
 	{
 		logger.info("Starting interaction node action");
 		boolean foundAction = false;
-		if(isAssignee(session.getUserProfile(), extpid, pi))
+		if(isAssignee(actionner, pi))
 		{
 			for(int i = 0; i < actionsConfig.size(); i++)
 			{
@@ -74,7 +74,7 @@ public class InteractionUnit extends ProcessUnit
 					foundAction = true;
 					String nextNode = actionsConfig.getObject(i).getString("nextnode");
 					pi.clearAssignees();
-					pi.setLastActioner(new Assignee(session.getUserProfile().getUsername(), extpid));
+					pi.setLastActioner(actionner);
 					pi.setCurrentNode(nextNode);
 				}
 			}
@@ -91,9 +91,9 @@ public class InteractionUnit extends ProcessUnit
 		logger.info("Finished interaction node action");
 	}
 	
-	public Assignment getNotification(Session session, String extpid, ProcessInstance pi)
+	public Assignment getNotification(Actionner actionner, ProcessInstance pi)
 	{
-		if(isAssignee(session.getUserProfile(), extpid, pi))
+		if(isAssignee(actionner, pi))
 		{
 			return getNotification(pi);
 		}
@@ -108,7 +108,7 @@ public class InteractionUnit extends ProcessUnit
 		return assignment;		
 	}
 	
-	protected boolean isAssignee(UserProfile up, String extpid, ProcessInstance pi)
+	protected boolean isAssignee(Actionner actionner, ProcessInstance pi)
 	{
 		boolean isAssignee = false;
 
@@ -116,11 +116,8 @@ public class InteractionUnit extends ProcessUnit
 		for(int i = 0; i < assignees.size(); i++)
 		{
 			Assignee assignee = assignees.get(i);
-			if(assignee.getType() == Assignee.PROCESS  &&  assignee.getId().equals(extpid)  &&  up.getAttribute("rb.process.sysuser").equals("true"))
+			if(assignee.getType() == actionner.getType() && assignee.getId().equals(actionner.getId()))
 				isAssignee = true;
-			if(assignee.getType() == Assignee.USER  && assignee.getId().equals(up.getUsername()))
-				isAssignee = true;
-			//TODO: Need to add groups
 		}
 		return isAssignee;
 	}

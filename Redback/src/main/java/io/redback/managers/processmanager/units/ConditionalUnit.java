@@ -45,7 +45,7 @@ public class ConditionalUnit extends ProcessUnit
 		}
 	}
 
-	public void execute(ProcessInstance pi, DataMap result) throws RedbackException
+	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
 		String fileName = (String)script.getEngine().get(ScriptEngine.FILENAME);
@@ -53,7 +53,7 @@ public class ConditionalUnit extends ProcessUnit
 		Bindings context = script.getEngine().createBindings();
 		context.put("pid", pi.getId());
 		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
-		context.put("pm", new ProcessManagerJSWrapper(processManager, sysUserSession));
+		context.put("pm", new ProcessManagerJSWrapper(processManager, pi));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalVariables()));
 		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), sysUserSession));
 		try

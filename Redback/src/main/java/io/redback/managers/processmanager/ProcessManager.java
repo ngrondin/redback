@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
@@ -163,34 +164,40 @@ public class ProcessManager
 		return globalVariables;
 	}
 	
-	public DataMap initiateProcess(Session session, String processName, DataMap data) throws RedbackException
+	public ProcessInstance initiateProcess(Actionner actionner, String processName, DataMap data) throws RedbackException
 	{
 		logger.finer("Initiating process '" + processName + "'");
+		ProcessInstance pi = null;
 		Process process = getProcess(processName);
-		ProcessInstance pi = process.createInstance(session, data);
-		putInCurrentTransaction(pi);
-		DataMap result = process.startInstance(session, pi);
-		result.put("pid", pi.getId());
-		logger.finer("Initiated instance '" + pi.getId() + "' for process '" + processName + "'");
-		return result;
+		if(process != null)
+		{
+			pi = process.createInstance(actionner, data);
+			putInCurrentTransaction(pi);
+			process.startInstance(actionner, pi);
+			logger.finer("Initiated instance '" + pi.getId() + "' for process '" + processName + "'");
+		}
+		else
+		{
+			throw new RedbackException("No process found for name '" + processName + "'");
+		}
+		return pi;
 	}
 
-	public ArrayList<Assignment> getAssignments(Session session, String extpid, DataMap filter, DataList viewdata) throws RedbackException
+	public ArrayList<Assignment> getAssignments(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
 	{
 		ArrayList<Assignment> retList = new ArrayList<Assignment>();
 		DataMap fullFilter = new DataMap();
 		if(filter != null)
 			fullFilter.merge(filter);
-		String assigneeId = (extpid != null ? extpid : session.getUserProfile().getUsername());
 		DataList assigneeOrList = new DataList();
 		DataMap assigneeOrTerm1 = new DataMap();
-		assigneeOrTerm1.put("assignees.id", assigneeId);
+		assigneeOrTerm1.put("assignees.id", actionner.getId());
 		assigneeOrList.add(assigneeOrTerm1);
 		DataMap assigneeOrTerm2 = new DataMap();
-		assigneeOrTerm2.put("lastactioner.id", assigneeId);
+		assigneeOrTerm2.put("lastactioner.id", actionner.getId());
 		assigneeOrList.add(assigneeOrTerm2);		
 		fullFilter.put("$or", assigneeOrList);
-		ArrayList<ProcessInstance> instances = findProcesses(session, fullFilter);
+		ArrayList<ProcessInstance> instances = findProcesses(actionner, fullFilter);
 		for(int i = 0; i < instances.size(); i++)
 		{
 			ProcessInstance pi = instances.get(i);
@@ -199,7 +206,7 @@ public class ProcessManager
 			Assignment assignment = null;
 			if(pu instanceof InteractionUnit)
 			{
-				assignment = ((InteractionUnit)pu).getNotification(session, extpid, pi);
+				assignment = ((InteractionUnit)pu).getNotification(actionner, pi);
 			}
 			else
 			{
@@ -222,38 +229,40 @@ public class ProcessManager
 		return retList;
 	}
 	
-	public int getAssignmentCount(Session session, String extpid)
+	public int getAssignmentCount(Actionner actionner) throws RedbackException
 	{
-		//TODO still need to implememt this;
-		return 0;
+		List<Assignment> assignments = getAssignments(actionner, null, null);
+		int count = assignments.size();
+		return count;
 	}
 	
-	public DataMap processAction(Session session, String extpid, String pid, String event, DataMap data) throws RedbackException
+	public void processAction(Actionner actionner, String pid, String action, DataMap data) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);
-		logger.finer("Processing action " + event + " on process " + pi.getProcessName() + ":" + pid);
+		logger.finer("Processing action " + action + " on process " + pi.getProcessName() + ":" + pid);
 		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
 		ProcessUnit pu = process.getNode(pi.getCurrentNode());
-		DataMap result = null;
 		if(pu instanceof InteractionUnit)
 		{
-			result = process.processAction(session, extpid, pi, event, data);
+			process.processAction(actionner, pi, action, data);
 		}
 		else
 		{
-			result = process.continueInstance(pi);
+			process.continueInstance(pi);
 		}
 		logger.finer("Finished processing action");
-		return result;
 	}
 	
-	public ArrayList<ProcessInstance> findProcesses(Session session, DataMap filter) throws RedbackException
+	public ArrayList<ProcessInstance> findProcesses(Actionner actionner, DataMap filter) throws RedbackException
 	{
 		logger.finer("Finding processes for " + filter.toString());
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
 		try 
 		{
-			DataMap result = request(dataServiceName, new DataMap("{object:rbpm_instance,filter:" + filter + "}"));
+			DataMap fullFilter = new DataMap();
+			fullFilter.merge(filter);
+			fullFilter.put("domain", actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
+			DataMap result = request(dataServiceName, new DataMap("{object:rbpm_instance, filter:" + filter + "}"));
 			DataList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 			{
@@ -273,6 +282,15 @@ public class ProcessManager
 		} 	
 		logger.finer("Finished finding processes");
 		return list;
+	}
+	
+	public void initiateCurrentTransaction() 
+	{
+		long txId = Thread.currentThread().getId();
+		synchronized(transactions)
+		{
+			transactions.put(txId, new HashMap<String, ProcessInstance>());
+		}
 	}
 	
 	protected ProcessInstance getFromCurrentTransaction(String pid)
