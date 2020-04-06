@@ -12,42 +12,35 @@ import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.security.Session;
 
-public class RedbackObjectExecuteUnit extends ProcessUnit 
+public class RedbackObjectGetUnit extends ProcessUnit 
 {
 	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected String objectName;
 	protected Expression objectUIDExpression;
-	protected String objectFunctionName;
-	protected ExpressionMap inputExpressionMap;
 	protected ExpressionMap outputExpressionMap;
 	protected String nextNode;
 	
-	public RedbackObjectExecuteUnit(ProcessManager pm, DataMap config) throws RedbackException 
+	public RedbackObjectGetUnit(ProcessManager pm, DataMap config) throws RedbackException 
 	{
 		super(pm, config);
 		processManager = pm;
 		objectName = config.getString("object");
 		objectUIDExpression = new Expression(config.getString("uid"));
-		objectFunctionName = config.getString("function");
-		inputExpressionMap = new ExpressionMap(config.get("data") != null ? config.getObject("data") : new DataMap());
 		outputExpressionMap = new ExpressionMap(config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
 		nextNode = config.getString("nextnode");
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Starting redback object execute node");
+		logger.info("Starting redback object get node");
 		if(processManager.getObjectServiceName() != null)
 		{
 			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-			DataMap functionParams = inputExpressionMap.eval("data", pi.getData());
 			String objectUID = (String)objectUIDExpression.eval("data", pi.getData());
 			DataMap req = new DataMap();
-			req.put("action", "execute");
+			req.put("action", "get");
 			req.put("object", objectName);
 			req.put("uid", objectUID);
-			req.put("function", objectFunctionName);
-			req.put("data", functionParams);
 			Payload payload = new Payload();
 			payload.setData(req.toString());
 			payload.metadata.put("token", sysUserSession.getToken());
@@ -62,9 +55,9 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 			} 
 			catch (Exception e)
 			{
-				error("Error executing function '" + objectFunctionName + "' on Redback object '" + objectName + "'",  e);
+				error("Error getting Redback object '" + objectName + "'",  e);
 			}
-			logger.info("Finished redback object execute node");
+			logger.info("Finished redback object get node");
 		}
 		else
 		{
@@ -72,5 +65,4 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 		}
 		pi.setCurrentNode(nextNode);
 	}
-
 }

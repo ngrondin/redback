@@ -8,8 +8,11 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.processmanager.units.ActionUnit;
 import io.redback.managers.processmanager.units.ConditionalUnit;
+import io.redback.managers.processmanager.units.DomainServiceUnit;
+import io.redback.managers.processmanager.units.FirebusRequestUnit;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.managers.processmanager.units.RedbackObjectExecuteUnit;
+import io.redback.managers.processmanager.units.RedbackObjectGetUnit;
 import io.redback.managers.processmanager.units.RedbackObjectUpdateUnit;
 import io.redback.managers.processmanager.units.ScriptUnit;
 
@@ -45,10 +48,16 @@ public class Process
 				unit = new ActionUnit(processManager, nodeConfig);
 			else if(unitType.equals("interaction"))
 				unit = new InteractionUnit(processManager, nodeConfig);
+			else if(unitType.equals("rbobjectget"))
+				unit = new RedbackObjectGetUnit(processManager, nodeConfig);
 			else if(unitType.equals("rbobjectupdate"))
 				unit = new RedbackObjectUpdateUnit(processManager, nodeConfig);
 			else if(unitType.equals("rbobjectexecute"))
 				unit = new RedbackObjectExecuteUnit(processManager, nodeConfig);
+			else if(unitType.equals("firebusrequest"))
+				unit = new FirebusRequestUnit(processManager, nodeConfig);
+			else if(unitType.equals("domainservice"))
+				unit = new DomainServiceUnit(processManager, nodeConfig);
 			else
 				error("Unit type '" + unitType + "' is not recognised");
 			nodes.put(unit.getId(), unit);

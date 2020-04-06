@@ -35,32 +35,40 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.info("Starting redback object update node");
-		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-		DataMap updateData = inputExpressionMap.eval("data", pi.getData());
-		String objectUID = (String)objectUIDExpression.eval("data", pi.getData());
-		DataMap req = new DataMap();
-		req.put("action", "update");
-		req.put("object", objectName);
-		req.put("uid", objectUID);
-		req.put("data", updateData);
-		Payload payload = new Payload();
-		payload.setData(req.toString());
-		payload.metadata.put("token", sysUserSession.getToken());
-		try
+		if(processManager.getObjectServiceName() != null)
 		{
-			logger.info("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());
-			Payload response = processManager.getFirebus().requestService(processManager.getGlobalVariables().getString("rbobjectservice"), payload, 10000);
-			DataMap respData = new DataMap(response.getString());
-			DataMap respOutput = outputExpressionMap.eval("result", respData);
-			logger.fine("Output data was: " + respOutput);
-			pi.getData().merge(respOutput);
-		} 
-		catch (Exception e)
+			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
+			DataMap updateData = inputExpressionMap.eval("data", pi.getData());
+			String objectUID = (String)objectUIDExpression.eval("data", pi.getData());
+			DataMap req = new DataMap();
+			req.put("action", "update");
+			req.put("object", objectName);
+			req.put("uid", objectUID);
+			req.put("data", updateData);
+			Payload payload = new Payload();
+			payload.setData(req.toString());
+			payload.metadata.put("token", sysUserSession.getToken());
+			try
+			{
+				logger.info("Calling redback object service " + processManager.getObjectServiceName() + " " + payload.getString());
+				Payload response = processManager.getFirebus().requestService(processManager.getObjectServiceName(), payload, 10000);
+				DataMap respData = new DataMap(response.getString());
+				DataMap respOutput = outputExpressionMap.eval("result", respData);
+				logger.fine("Output data was: " + respOutput);
+				pi.getData().merge(respOutput);
+			} 
+			catch (Exception e)
+			{
+				error("Error updating Redback object '" + objectName + "'",  e);
+			}
+			logger.info("Finished redback object update node");
+		}
+		else
 		{
-			error("Error updating Redback object '" + objectName + "'",  e);
+			logger.info("No object service defined");
 		}
 		pi.setCurrentNode(nextNode);
-		logger.info("Finished redback object update node");
+		
 	}
 
 }

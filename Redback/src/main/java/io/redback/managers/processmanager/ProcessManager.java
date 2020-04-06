@@ -29,6 +29,8 @@ public class ProcessManager
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String accessManagerServiceName;
+	protected String objectServiceName;
+	protected String domainServiceName;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
 	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
 	protected String sysUserName;
@@ -42,6 +44,8 @@ public class ProcessManager
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
+		objectServiceName = config.getString("objectservice");
+		domainServiceName = config.getString("domainservice");
 		sysUserName = config.getString("sysusername");
 		jwtSecret = config.getString("jwtsecret");
 		processes = new HashMap<String, HashMap<Integer, Process>>();
@@ -162,6 +166,16 @@ public class ProcessManager
 	public DataMap getGlobalVariables()
 	{
 		return globalVariables;
+	}
+	
+	public String getObjectServiceName()
+	{
+		return objectServiceName;
+	}
+	
+	public String getDomainServiceName()
+	{
+		return domainServiceName;
 	}
 	
 	public ProcessInstance initiateProcess(Actionner actionner, String processName, DataMap data) throws RedbackException
@@ -313,7 +327,7 @@ public class ProcessManager
 		transactions.get(txId).put(pi.getId(), pi);
 	}
 	
-	public void commitCurrentTransaction() 
+	public void commitCurrentTransaction() throws RedbackException 
 	{
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))
@@ -324,7 +338,7 @@ public class ProcessManager
 			{
 				String key = it.next();
 				ProcessInstance pi = objects.get(key);
-				publishInstance(pi);
+				commitInstance(pi);
 			}
 			synchronized(transactions)
 			{
@@ -353,10 +367,17 @@ public class ProcessManager
 		return null;
 	}
 	
-	protected void publishInstance(ProcessInstance pi)
+	protected void commitInstance(ProcessInstance pi) throws RedbackException
 	{
-		logger.finest("Publishing to firebus service : " + dataServiceName + "  ");
-		firebus.publish(dataServiceName, new Payload("{object:rbpm_instance, key: {_id:" + pi.getId() + "}, data:" + pi.getJSON() + ", operation:replace}"));
+		try
+		{
+			logger.finest("Publishing to firebus service : " + dataServiceName + "  ");
+			firebus.requestService(dataServiceName, new Payload("{object:rbpm_instance, key: {_id:" + pi.getId() + "}, data:" + pi.getJSON() + ", operation:replace}"));
+		}
+		catch(FunctionErrorException | FunctionTimeoutException e)
+		{
+			throw new RedbackException("Error publishing data", e);
+		}		
 	}
 
 	
