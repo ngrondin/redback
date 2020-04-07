@@ -7,6 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -17,30 +21,38 @@ import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
+import io.firebus.utils.FirebusDataUtil;
 import io.redback.RedbackException;
+import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
+import io.redback.utils.CollectionConfig;
+import io.redback.utils.FirebusJSWrapper;
 
 
 public class ProcessManager
 {
 	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected Firebus firebus;
+	protected ScriptEngine jsEngine;
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String accessManagerServiceName;
 	protected String objectServiceName;
 	protected String domainServiceName;
+	protected CollectionConfig piCollectionConfig;
+	protected CollectionConfig gmCollectionConfig;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
 	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
 	protected String sysUserName;
 	protected String jwtSecret;
 	protected Session sysUserSession;
 	protected DataMap globalVariables;
-
+	
 	public ProcessManager(Firebus fb, DataMap config)
 	{
 		firebus = fb;
+		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
@@ -51,12 +63,19 @@ public class ProcessManager
 		processes = new HashMap<String, HashMap<Integer, Process>>();
 		transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
 		globalVariables = config.getObject("globalvariables");
+		piCollectionConfig = config.containsKey("processinstancecollection") ? new CollectionConfig(config.getObject("processinstancecollection")) : new CollectionConfig("rbpm_instance");
+		gmCollectionConfig = config.containsKey("groupmembercollection") ? new CollectionConfig(config.getObject("groupmembercollection")) : new CollectionConfig("rbam_groupmember");
 	}
 
 	
 	public Firebus getFirebus()
 	{
 		return firebus;
+	}
+	
+	public ScriptEngine getScriptEngine()
+	{
+		return jsEngine;
 	}
 	
 	public void refreshAllConfigs()
@@ -69,20 +88,28 @@ public class ProcessManager
 	{
 		try
 		{
-			DataMap configList = request(configServiceName, new DataMap("{action:list, service:rbpm, category:process, filter:{name:" + name + "}}"));
+			DataMap request = new DataMap();
+			request.put("action", "list");
+			request.put("service", "rbpm");
+			request.put("category", "process");
+			request.put("filter", new DataMap("name", name));
+			DataMap configList = request(configServiceName, request);
 			DataList list = configList.getList("result");
 			if(list.size() > 0)
 			{
 				HashMap<Integer, Process> versions = new HashMap<Integer, Process>();
 				for(int i = 0; i < list.size(); i++)
-					versions.put(list.getObject(i).getNumber("version").intValue(), new Process(this, list.getObject(i)));
+				{
+					Process process = new Process(this, list.getObject(i));
+					versions.put(list.getObject(i).getNumber("version").intValue(), process);
+				}
 				processes.put(name, versions);				
 			}
 		}
 		catch(Exception e)
 		{
 			logger.severe(e.getMessage());
-			throw new RedbackException("Exception getting process config", e);
+			throw new RedbackException("Exception getting process config '" + name + "'", e);
 		}
 	
 	}
@@ -124,8 +151,11 @@ public class ProcessManager
 		{
 			try 
 			{
-				DataMap piJSON = request(dataServiceName, new DataMap("{object:rbpm_instance,filter:{_id:\"" + pid + "\"}}"));
-				pi = new ProcessInstance(piJSON.getObject("result.0"));
+				DataMap request = new DataMap();
+				request.put("object", piCollectionConfig.getName());
+				request.put("filter", new DataMap(piCollectionConfig.getField("_id"), pid));
+				DataMap response = request(dataServiceName, request);
+				pi = new ProcessInstance(piCollectionConfig.convertObjectToCanonical(response.getObject("result.0")));
 				putInCurrentTransaction(pi);
 			} 
 			catch (Exception e) 
@@ -197,21 +227,20 @@ public class ProcessManager
 		return pi;
 	}
 
-	public ArrayList<Assignment> getAssignments(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
+	public List<Assignment> getAssignments(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
 	{
-		ArrayList<Assignment> retList = new ArrayList<Assignment>();
+		List<Assignment> list = new ArrayList<Assignment>();
+		loadGroupsOf(actionner);
 		DataMap fullFilter = new DataMap();
 		if(filter != null)
 			fullFilter.merge(filter);
-		DataList assigneeOrList = new DataList();
-		DataMap assigneeOrTerm1 = new DataMap();
-		assigneeOrTerm1.put("assignees.id", actionner.getId());
-		assigneeOrList.add(assigneeOrTerm1);
-		DataMap assigneeOrTerm2 = new DataMap();
-		assigneeOrTerm2.put("lastactioner.id", actionner.getId());
-		assigneeOrList.add(assigneeOrTerm2);		
-		fullFilter.put("$or", assigneeOrList);
-		ArrayList<ProcessInstance> instances = findProcesses(actionner, fullFilter);
+		DataList assigneeInList = new DataList();
+		assigneeInList.add(actionner.getId());
+		List<String> groups = actionner.getGroups();
+		for(int i = 0; i < groups.size(); i++)
+			assigneeInList.add(groups.get(i));
+		fullFilter.put("assignees.id", new DataMap("$in", assigneeInList));
+		List<ProcessInstance> instances = findProcesses(actionner, fullFilter);
 		for(int i = 0; i < instances.size(); i++)
 		{
 			ProcessInstance pi = instances.get(i);
@@ -237,10 +266,10 @@ public class ProcessManager
 						assignment.addData(key, pi.getData().getString(key));
 					}
 				}
-				retList.add(assignment);
+				list.add(assignment);
 			}
 		}
-		return retList;
+		return list;
 	}
 	
 	public int getAssignmentCount(Actionner actionner) throws RedbackException
@@ -258,11 +287,12 @@ public class ProcessManager
 		ProcessUnit pu = process.getNode(pi.getCurrentNode());
 		if(pu instanceof InteractionUnit)
 		{
+			loadGroupsOf(actionner);
 			process.processAction(actionner, pi, action, data);
 		}
 		else
 		{
-			process.continueInstance(pi);
+			throw new RedbackException("The process in not on an interaction node");
 		}
 		logger.finer("Finished processing action");
 	}
@@ -296,6 +326,29 @@ public class ProcessManager
 		} 	
 		logger.finer("Finished finding processes");
 		return list;
+	}
+	
+	protected void loadGroupsOf(Actionner actionner) throws RedbackException
+	{
+		logger.finer("Finding groups for " + actionner.getId());
+		try 
+		{
+			DataMap request = new DataMap();
+			request.put("object", gmCollectionConfig.getName());
+			DataMap filter = new DataMap();
+			filter.put(gmCollectionConfig.getField("domain"), actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
+			filter.put(gmCollectionConfig.getField("username"), actionner.getId());
+			request.put("filter", filter);
+			DataMap result = request(dataServiceName, request);		
+			DataList resultList = result.getList("result");
+			for(int i = 0; i < resultList.size(); i++)
+				actionner.addGroup(resultList.getObject(i).getString(gmCollectionConfig.getField("group")));
+		} 
+		catch (Exception e) 
+		{
+			throw new RedbackException("Error retreiving groups", e);
+		} 	
+		logger.finer("Finished finding groups");
 	}
 	
 	public void initiateCurrentTransaction() 
@@ -345,6 +398,17 @@ public class ProcessManager
 				transactions.remove(txId);
 			}
 		}		
+	}
+	
+	public Bindings createScriptContext(ProcessInstance pi)
+	{
+		Bindings context = jsEngine.createBindings();
+		context.put("pid", pi.getId());
+		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
+		context.put("pm", new ProcessManagerJSWrapper(this, pi));
+		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(getGlobalVariables()));
+		context.put("firebus", new FirebusJSWrapper(getFirebus(), sysUserSession));
+		return context;
 	}
 	
 	

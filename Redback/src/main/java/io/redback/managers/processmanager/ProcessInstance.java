@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.script.Bindings;
+
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 
@@ -115,22 +117,6 @@ public class ProcessInstance
 		lastActioner = la;
 	}
 	
-	/*
-	public void addNotification(JSONObject notification)
-	{
-		for(int i = 0; i < receivedNotifications.size(); i++)
-			if(receivedNotifications.getObject(i).getString("pid").equals(notification.getString("pid"))  &&  receivedNotifications.getObject(i).getString("interaction").equals(notification.getString("interaction")))
-				receivedNotifications.remove(i--);
-		receivedNotifications.add(notification);
-	}
-	*/
-	/*
-	public JSONList getReceivedNotifications()
-	{
-		return receivedNotifications;
-	}
-	*/
-	
 	public boolean isComplete()
 	{
 		return complete;
@@ -154,4 +140,5 @@ public class ProcessInstance
 		retVal.put("data", data);
 		return retVal;
 	}
+	
 }

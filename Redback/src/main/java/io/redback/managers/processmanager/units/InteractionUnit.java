@@ -29,7 +29,7 @@ public class InteractionUnit extends ProcessUnit
 		{
 			DataList list = config.getList("assignees");
 			for(int i = 0; i < list.size(); i++)
-				assigneeConfigs.add(new AssigneeConfig(list.getObject(i)));
+				assigneeConfigs.add(new AssigneeConfig(processManager, list.getObject(i)));
 		}
 		notificationConfig = config.getObject("notification");
 	}
@@ -116,7 +116,9 @@ public class InteractionUnit extends ProcessUnit
 		for(int i = 0; i < assignees.size(); i++)
 		{
 			Assignee assignee = assignees.get(i);
-			if(assignee.getType() == actionner.getType() && assignee.getId().equals(actionner.getId()))
+			if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId()))
+				isAssignee = true;
+			else if(assignee.getType() == actionner.getType() && assignee.getId().equals(actionner.getId()))
 				isAssignee = true;
 		}
 		return isAssignee;

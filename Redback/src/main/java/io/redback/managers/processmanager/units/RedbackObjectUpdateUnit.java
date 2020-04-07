@@ -2,15 +2,17 @@ package io.redback.managers.processmanager.units;
 
 import java.util.logging.Logger;
 
+import javax.script.Bindings;
+
 import io.firebus.Payload;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.managers.processmanager.Expression;
-import io.redback.managers.processmanager.ExpressionMap;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.security.Session;
+import io.redback.utils.Expression;
+import io.redback.utils.ExpressionMap;
 
 public class RedbackObjectUpdateUnit extends ProcessUnit 
 {
@@ -26,9 +28,9 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 		super(pm, config);
 		processManager = pm;
 		objectName = config.getString("object");
-		objectUIDExpression = new Expression(config.getString("uid"));
-		inputExpressionMap = new ExpressionMap(config.get("data") != null ? config.getObject("data") : new DataMap());
-		outputExpressionMap = new ExpressionMap(config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
+		objectUIDExpression = new Expression(processManager.getScriptEngine(), config.getString("uid"));
+		inputExpressionMap = new ExpressionMap(processManager.getScriptEngine(), config.get("data") != null ? config.getObject("data") : new DataMap());
+		outputExpressionMap = new ExpressionMap(processManager.getScriptEngine(), config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
 		nextNode = config.getString("nextnode");
 	}
 
@@ -38,8 +40,9 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 		if(processManager.getObjectServiceName() != null)
 		{
 			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-			DataMap updateData = inputExpressionMap.eval("data", pi.getData());
-			String objectUID = (String)objectUIDExpression.eval("data", pi.getData());
+			Bindings context = processManager.createScriptContext(pi);
+			DataMap updateData = inputExpressionMap.eval(context);
+			String objectUID = (String)objectUIDExpression.eval(context);
 			DataMap req = new DataMap();
 			req.put("action", "update");
 			req.put("object", objectName);
@@ -53,7 +56,8 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 				logger.info("Calling redback object service " + processManager.getObjectServiceName() + " " + payload.getString());
 				Payload response = processManager.getFirebus().requestService(processManager.getObjectServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
-				DataMap respOutput = outputExpressionMap.eval("result", respData);
+				context.put("result", respData);
+				DataMap respOutput = outputExpressionMap.eval(context);
 				logger.fine("Output data was: " + respOutput);
 				pi.getData().merge(respOutput);
 			} 

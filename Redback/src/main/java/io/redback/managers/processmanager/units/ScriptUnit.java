@@ -29,11 +29,10 @@ public class ScriptUnit extends ProcessUnit
 		super(pm, config);
 		processManager = pm;
 		nextNode = config.getString("nextnode");
-		ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		String source = StringUtils.unescape(config.getString("source"));
 		try
 		{
-			script = ((Compilable)jsEngine).compile(source);
+			script = ((Compilable)pm.getScriptEngine()).compile(source);
 		}
 		catch(ScriptException e)
 		{
@@ -60,15 +59,15 @@ public class ScriptUnit extends ProcessUnit
 		} 
 		catch (ScriptException e)
 		{
-			error("Problem occurred executing script of node " + nodeId, e);
+			error("Problem occurred executing script of node '" + name + "'", e);
 		}		
 		catch(NullPointerException e)
 		{
-			error("Null pointer exception in script of node " + nodeId, e);
+			error("Null pointer exception in script of node '" + name + "'", e);
 		}
 		catch(RuntimeException e)
 		{
-			error("Problem occurred executing script of node " + nodeId, e);
+			error("Problem occurred executing script of node '" + name + "'", e);
 		}		
 		logger.info("Finish executing script ");		
 	}

@@ -1,13 +1,15 @@
 package io.redback.managers.processmanager.units;
 
+import javax.script.Bindings;
+
 import io.firebus.Payload;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.managers.processmanager.ExpressionMap;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.security.Session;
+import io.redback.utils.ExpressionMap;
 
 public class DomainServiceUnit extends ProcessUnit 
 {
@@ -22,8 +24,8 @@ public class DomainServiceUnit extends ProcessUnit
 		super(pm, config);
 		processManager = pm;
 		domainServiceName = config.getString("service");
-		inputExpressionMap = new ExpressionMap(config.get("data") != null ? config.getObject("data") : new DataMap());
-		outputExpressionMap = new ExpressionMap(config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
+		inputExpressionMap = new ExpressionMap(processManager.getScriptEngine(), config.get("data") != null ? config.getObject("data") : new DataMap());
+		outputExpressionMap = new ExpressionMap(processManager.getScriptEngine(), config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
 		nextNode = config.getString("nextnode");
 	}
 
@@ -33,7 +35,8 @@ public class DomainServiceUnit extends ProcessUnit
 		if(processManager.getDomainServiceName() != null)
 		{
 			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-			DataMap data = inputExpressionMap.eval("data", pi.getData());
+			Bindings context = processManager.createScriptContext(pi);
+			DataMap data = inputExpressionMap.eval(context);
 			DataMap req = new DataMap();
 			req.put("service", domainServiceName);
 			req.put("domain", pi.getDomain());
@@ -46,7 +49,8 @@ public class DomainServiceUnit extends ProcessUnit
 				logger.info("Calling " + processManager.getDomainServiceName() + " " + payload.getString());
 				Payload response = processManager.getFirebus().requestService(processManager.getDomainServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
-				DataMap respOutput = outputExpressionMap.eval("result", respData);
+				context.put("result", respData);
+				DataMap respOutput = outputExpressionMap.eval(context);
 				logger.fine("Output data was: " + respOutput);
 				pi.getData().merge(respOutput);
 			} 

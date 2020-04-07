@@ -1,6 +1,8 @@
 package io.redback.managers.processmanager.units;
 
-import java.util.ArrayList;
+import java.util.List;
+
+import javax.script.ScriptEngine;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -28,7 +30,7 @@ public class ActionUnit extends ProcessUnit
 	{
 		logger.info("Starting Action node");
 		Actionner actionner = new Actionner(pi);
-		ArrayList<Assignment> assignments = processManager.getAssignments(actionner, null, null);
+		List<Assignment> assignments = processManager.getAssignments(actionner, null, null);
 		for(int i = 0; i < assignments.size(); i++)
 		{
 			Assignment assignment = assignments.get(i);

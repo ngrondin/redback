@@ -2,6 +2,8 @@ package io.redback.managers.processmanager;
 
 import java.util.logging.Logger;
 
+import javax.script.ScriptEngine;
+
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 
@@ -9,11 +11,13 @@ public abstract class ProcessUnit
 {
 	protected Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected String nodeId;
+	protected String name;
 	protected ProcessManager processManager;
 	
 	public ProcessUnit(ProcessManager pm, DataMap config)
 	{
 		nodeId = config.getString("id");
+		name = config.getString("name");
 		processManager = pm;
 	}
 	

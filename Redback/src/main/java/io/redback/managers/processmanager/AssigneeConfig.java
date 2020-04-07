@@ -2,9 +2,11 @@ package io.redback.managers.processmanager;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.utils.Expression;
 
 public class AssigneeConfig
 {
+	protected ProcessManager processManager;
 	protected int assigneeType;
 	protected String assigneeStr;
 	protected Expression assigneeExpr;
@@ -13,15 +15,17 @@ public class AssigneeConfig
 	public static int GROUP = 2;
 	public static int PROCESS = 3;
 	
-	public AssigneeConfig(int at, String a) throws RedbackException
+	public AssigneeConfig(ProcessManager pm, int at, String a) throws RedbackException
 	{
+		processManager = pm;
 		assigneeType = at;
 		assigneeStr = a;
-		assigneeExpr = new Expression(a);
+		assigneeExpr = new Expression(processManager.getScriptEngine(), a);
 	}
 	
-	public AssigneeConfig(DataMap c) throws RedbackException
+	public AssigneeConfig(ProcessManager pm, DataMap c) throws RedbackException
 	{
+		processManager = pm;
 		String atStr = c.getString("type");
 		if(atStr.equals("user"))
 			assigneeType = USER;
@@ -30,12 +34,12 @@ public class AssigneeConfig
 		else if(atStr.equals("process"))
 			assigneeType = PROCESS;
 		assigneeStr = c.getString("id");
-		assigneeExpr = new Expression(assigneeStr);
+		assigneeExpr = new Expression(processManager.getScriptEngine(), assigneeStr);
 	}
 	
 	public Object evaluateId(ProcessInstance pi) throws RedbackException
 	{
-		return assigneeExpr.eval("data", pi.getData());
+		return assigneeExpr.eval(processManager.createScriptContext(pi));
 	}
 	
 	public int getType()

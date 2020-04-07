@@ -17,13 +17,15 @@ import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.security.Session;
+import io.redback.utils.Expression;
 import io.redback.utils.FirebusJSWrapper;
 import io.redback.utils.StringUtils;
 
 public class ConditionalUnit extends ProcessUnit 
 {
 	private Logger logger = Logger.getLogger("io.redback");
-	protected CompiledScript script;
+	protected String expressionStr;
+	protected Expression expression;
 	protected String trueNode;
 	protected String falseNode;
 	
@@ -33,43 +35,27 @@ public class ConditionalUnit extends ProcessUnit
 		processManager = pm;
 		trueNode = config.getString("truenode");
 		falseNode = config.getString("falsenode");
-		ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
-		String source = "var result = (" + StringUtils.unescape(config.getString("condition")) + ");";
-		try
-		{
-			script = ((Compilable)jsEngine).compile(source);
-		}
-		catch(ScriptException e)
-		{
-			error("Error creating script unit", e);
-		}
+		expressionStr = config.getString("condition");
+		expression = new Expression(pm.getScriptEngine(), expressionStr);
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-		String fileName = (String)script.getEngine().get(ScriptEngine.FILENAME);
-		logger.info("Start executing condition : " + fileName);
-		Bindings context = script.getEngine().createBindings();
-		context.put("pid", pi.getId());
-		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
-		context.put("pm", new ProcessManagerJSWrapper(processManager, pi));
-		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(processManager.getGlobalVariables()));
-		context.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), sysUserSession));
+		Bindings context = processManager.createScriptContext(pi);
+		logger.info("Start executing condition");
 		try
 		{
-			script.eval(context);
-			boolean bool = (Boolean)context.get("result");
+			boolean bool = (Boolean)expression.eval(context);
 			if(bool == true)
 				pi.setCurrentNode(trueNode);
 			else
 				pi.setCurrentNode(falseNode);
 		} 
-		catch (ScriptException e)
+		catch (RedbackException e)
 		{
 			error("Problem occurred executing a condition", e);
 		}		
-		logger.info("Finish executing condition : " + fileName);		
+		logger.info("Finish executing condition");		
 	}
 
 }

@@ -1,6 +1,8 @@
 package io.redback.managers.processmanager;
 
-import io.firebus.utils.DataList;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.firebus.utils.DataMap;
 import io.redback.security.UserProfile;
 
@@ -10,6 +12,7 @@ public class Actionner
 	protected UserProfile userProfile;
 	protected ProcessInstance processInstance;
 	protected int type;
+	protected List<String> groups;
 	public static int USER = 1;
 	public static int PROCESS = 3;
 
@@ -19,6 +22,7 @@ public class Actionner
 		userProfile = up;
 		id = userProfile.getUsername();
 		type = USER;
+		groups = new ArrayList<String>();
 	}
 	
 	public Actionner(ProcessInstance pi)
@@ -26,6 +30,7 @@ public class Actionner
 		processInstance = pi;
 		id = processInstance.getId();
 		type = PROCESS;
+		groups = new ArrayList<String>();
 	}
 	
 	public Actionner(DataMap c)
@@ -36,8 +41,13 @@ public class Actionner
 		else if(atStr.equals("process"))
 			type = PROCESS;
 		id = c.getString("id");
+		groups = new ArrayList<String>();
 	}
 
+	public void addGroup(String group)
+	{
+		groups.add(group);
+	}
 	
 	public int getType() 
 	{
@@ -54,6 +64,11 @@ public class Actionner
 		return type == PROCESS;
 	}
 	
+	public boolean isInGroup(String g)
+	{
+		return groups.contains(g);
+	}
+	
 	public String getId()
 	{
 		return id;
@@ -67,6 +82,11 @@ public class Actionner
 	public ProcessInstance getProcessInstance()
 	{
 		return processInstance;
+	}
+	
+	public List<String> getGroups()
+	{
+		return groups;
 	}
 	
 	public DataMap getJSON()

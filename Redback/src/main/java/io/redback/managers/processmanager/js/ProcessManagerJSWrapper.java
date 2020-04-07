@@ -1,6 +1,7 @@
 package io.redback.managers.processmanager.js;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import jdk.nashorn.api.scripting.JSObject;
 import io.firebus.utils.DataMap;
@@ -37,7 +38,7 @@ public class ProcessManagerJSWrapper
 
 	public JSObject getNotifications(JSObject filter, JSObject viewdata) throws RedbackException
 	{
-		ArrayList<Assignment> list = processManager.getAssignments(actionner, FirebusDataUtil.convertJSObjectToDataObject(filter), FirebusDataUtil.convertJSArrayToDataList(viewdata));
+		List<Assignment> list = processManager.getAssignments(actionner, FirebusDataUtil.convertJSObjectToDataObject(filter), FirebusDataUtil.convertJSArrayToDataList(viewdata));
 		FirebusJSArray array = new FirebusJSArray();
 		for(int i = 0; i < list.size(); i++)
 			array.setSlot(i,  FirebusDataUtil.convertDataObjectToJSObject(list.get(i).getDataMap()));
