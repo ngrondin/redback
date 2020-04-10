@@ -19,6 +19,7 @@ public class ViewDynamicformForm extends Form
 	
 	public void createUI() {
 		new TextField(data, "valueattribute", "Value Attribute", this, SWT.NONE);
+		new TextField(data, "optionsattribute", "Options Attribute", this, SWT.NONE);
 		new TextField(data, "typeattribute", "Type Attribute", this, SWT.NONE);
 		new TextField(data, "titleattribute", "Title Attribute", this, SWT.NONE);
 		new TextField(data, "detailattribute", "Detail Attribute", this, SWT.NONE);
