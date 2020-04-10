@@ -1,34 +1,27 @@
-<html>
+<%
+var resourcePrefix = version != null ? ('../../resource/' + version) : '../resource'; 
+var versionOrDefault = version != null ? version : 'default';
+%>  
+<!doctype html>
+<html lang="en">
 <head>
-	<title><%=config.getString('label')%></title>
-	<link rel="shortcut icon" href="../resource/favicon.ico" />
-	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css"/>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-	<link rel="stylesheet" href="../resource/mdPickers.css" type="text/css" />
-	<link rel="stylesheet" href="../resource/mobile.css" type="text/css" />
-	<script src = "../resource/lodash.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.js"></script>
-	<script src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'></script>
-	<script src = "http://cdn.rawgit.com/nmccready/angular-simple-logger/master/dist/angular-simple-logger.js"></script>	
-	<script src = "../resource/angular-google-maps.js"></script>
-	<script src = "../resource/moment.js"></script>
-	<script src = "../resource/mdPickers.js"></script>
-	<script src = "../resource/rbobject.js"></script>
-	<script src = "../resource/rbcore.js"></script>
-	<script src = "../resource/mobilemodule.js"></script>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name=”apple-mobile-web-app-capable” content=”yes”>
+  <meta charset="utf-8">
+  <title><%=config.getString('label')%></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="0; url = 'redbackwmsmob://login?token=<%=session.getToken()%>&expiry=<%=session.expiry%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>'" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />  
+  <link rel="icon" type="image/x-icon" href="<%=config.getString('logo')%>">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script>
+    window.onload = function() {
+        window.location = 'redbackwmsmob://login?token=<%=session.getToken()%>&expiry=<%=session.expiry%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>';
+    }
+  </script>  
 </head>
-<body
-	ng-app="mobilemodule" 
-	ng-controller="mobileroot"
-	data-ng-init="page = '../view/<%=config.getString('defaultview')%>'">
-	<div  id="mainview" ng-include="page" class="rb-include">
-	</div>
+<body oncontextmenu="return false;">
+	<a href="redbackwmsmob://login?token=<%=session.getToken()%>&expiry=<%=session.expiry%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>">Manual Redirect</a>
 </body>
 </html>
-	
