@@ -42,7 +42,7 @@ public abstract class FileServer extends AuthenticatedService
 				String fileName = payload.metadata.get("filename");
 				String mime = payload.metadata.get("mime");
 				String fileUid = putFile(object, uid, fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
-				response = new Payload((new DataMap("uid", fileUid)).toString());
+				response = new Payload((new DataMap("fileuid", fileUid)).toString());
 			}
 			else
 			{

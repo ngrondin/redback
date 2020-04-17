@@ -13,6 +13,7 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.services.FileServer;
+import io.redback.utils.CollectionConfig;
 import io.redback.utils.RedbackFile;
 
 public class RedbackFileServer extends FileServer
@@ -21,7 +22,7 @@ public class RedbackFileServer extends FileServer
 	protected String defaultFileService;
 	protected String idGeneratorService; 
 	protected String idName; 
-	protected DataMap collection;
+	protected CollectionConfig collectionConfig;
 	
 	public RedbackFileServer(String n, DataMap c, Firebus f) 
 	{
@@ -33,20 +34,21 @@ public class RedbackFileServer extends FileServer
 		for(int i = 0; i < list.size(); i++)
 			fileServices.add(list.getString(i));
 		defaultFileService = config.getString("defaultadapter");
-		collection = c.getObject("collection");
+		collectionConfig = new CollectionConfig(c.getObject("collection"));
 	}
 
 	public RedbackFile getFile(String fileUid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException
 	{
 		RedbackFile file = null;
-		DataMap resp = getData(collection.getString("name"), new DataMap(collection.getString("map.uid"), fileUid));
+		DataMap resp = getData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid));
 		if(resp.getList("result").size() > 0)
 		{
-			String fileName = resp.getString("result.0." + collection.getString("map.filename"));
-			String mime = resp.getString("result.0." + collection.getString("map.mime"));
-			String username = resp.getString("result.0." + collection.getString("map.user"));
-			Date date = resp.getDate("result.0." + collection.getString("map.date"));
-			String fileAdapter = resp.getString("result.0." + collection.getString("map.endpoint"));
+			DataMap fileInfo = collectionConfig.convertObjectToCanonical(resp.getList("result").getObject(0));
+			String fileName = fileInfo.getString("filename");
+			String mime = fileInfo.getString("mime");
+			String username = fileInfo.getString("user");
+			Date date = fileInfo.getDate("date");
+			String fileAdapter = fileInfo.getString("endpoint");
 			if(fileAdapter == null)
 				fileAdapter = defaultFileService;
 			Payload filePayload = firebus.requestService(fileAdapter, new Payload(fileUid), 10000);
@@ -62,18 +64,18 @@ public class RedbackFileServer extends FileServer
 	public List<RedbackFile> listFilesFor(String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException
 	{
 		DataMap filter = new DataMap();
-		filter.put(collection.getString("map.relatedobject"), object);
-		filter.put(collection.getString("map.relateduid"), uid);
-		DataMap resp = getData(collection.getString("name"), filter);
+		filter.put(collectionConfig.getField("relatedobject"), object);
+		filter.put(collectionConfig.getField("relateduid"), uid);
+		DataMap resp = getData(collectionConfig.getName(), filter);
 		List<RedbackFile> list = new ArrayList<RedbackFile>();
 		for(int i = 0; i < resp.getList("result").size(); i++) 
 		{
-			DataMap fileInfo = resp.getList("result").getObject(i);
-			String fileUid = fileInfo.getString(collection.getString("map.uid"));
-			String fileName = fileInfo.getString(collection.getString("map.filename"));
-			String mime = fileInfo.getString(collection.getString("map.mime"));
-			String username = fileInfo.getString(collection.getString("map.user"));
-			Date date = fileInfo.getDate(collection.getString("map.date"));
+			DataMap fileInfo = collectionConfig.convertObjectToCanonical(resp.getList("result").getObject(i));
+			String fileUid = fileInfo.getString("fileuid");
+			String fileName = fileInfo.getString("filename");
+			String mime = fileInfo.getString("mime");
+			String username = fileInfo.getString("user");
+			Date date = fileInfo.getDate("date");
 			RedbackFile file = new RedbackFile(fileUid, fileName, mime, username, date, null);
 			list.add(file);
 		}
@@ -84,13 +86,13 @@ public class RedbackFileServer extends FileServer
 	{
 		String fileUid = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
 		DataMap data = new DataMap();
-		data.put(collection.getString("map.filename"), fileName);
-		data.put(collection.getString("map.relatedobject"), object);
-		data.put(collection.getString("map.relateduid"), uid);
-		data.put(collection.getString("map.mime"), mime);
-		data.put(collection.getString("map.user"), username);
-		data.put(collection.getString("map.date"), new Date());
-		publishData(collection.getString("name"), new DataMap(collection.getString("map.uid"), fileUid), data);
+		data.put(collectionConfig.getField("filename"), fileName);
+		data.put(collectionConfig.getField("relatedobject"), object);
+		data.put(collectionConfig.getField("relateduid"), uid);
+		data.put(collectionConfig.getField("mime"), mime);
+		data.put(collectionConfig.getField("user"), username);
+		data.put(collectionConfig.getField("date"), new Date());
+		publishData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid), data);
 
 		Payload filePayload = new Payload(bytes);
 		filePayload.metadata.put("filename", fileUid);
