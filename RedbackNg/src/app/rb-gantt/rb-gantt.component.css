@@ -1,0 +1,98 @@
+:host {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-gantt-header {
+    display: flex;
+    flex-direction: row;
+    height: 42px;
+}
+
+.rb-gantt-corner {
+    display: flex;
+}
+
+.rb-gantt-headertrack {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-gantt-body {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-gantt-groupheads {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: 250px;
+}
+
+.rb-gantt-grouphead {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.rb-gantt-grouplanes {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+
+.rb-gantt-grouplane {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    background-color: grey;
+}
+
+
+.rb-gantt-spread {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: absolute;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.rb-gantt-spreadbox {
+    border: 1px solid darkblue;
+    height: 28px;
+    top: 7px;
+    background-color: white;
+}
+
+.rb-gantt-spreadbackground {
+    height: 42px;
+}
+
+.rb-gantt-mainlabel {
+    display: inline-block;
+    padding: 5px;
+}
+
+
+
+.rb-gantt-laneheight {
+    height: 42px;
+}
+
+.rb-gantt-lanecolor1 {
+    background-color: #e4e4e4;
+}
+
+.rb-gantt-lanecolor2 {
+    background-color: #e0e0e0;
+}
+
+.rb-gantt-backgroundcolor1 {
+    background-color: #fafafa;
+}
+
+.rb-gantt-backgroundcolor2 {
+    background-color: #f4f4f4;
+}

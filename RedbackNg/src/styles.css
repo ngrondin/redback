@@ -72,6 +72,7 @@ rb-dataset {
 
 .rb-button {
 	margin: 8px !important;
+	border: solid 1px #3f51b5!important;
 }
 
 rb-list-scroll {

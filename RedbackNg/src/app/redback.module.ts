@@ -44,6 +44,7 @@ import { RbSwitchInputComponent } from './rb-switch-input/rb-switch-input.compon
 import { RbBreadcrumbComponent } from './rb-breadcrumb/rb-breadcrumb.component';
 import { RbListComponent } from './rb-list/rb-list.component';
 import { ConfigService } from './config.service';
+import { RbGanttComponent } from './rb-gantt/rb-gantt.component';
 
 @NgModule({
   imports: [
@@ -107,7 +108,8 @@ import { ConfigService } from './config.service';
     RbDynamicformComponent,
     RbChoiceInputComponent,
     RbSwitchInputComponent,
-    RbBreadcrumbComponent
+    RbBreadcrumbComponent,
+    RbGanttComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -148,7 +150,8 @@ import { ConfigService } from './config.service';
     RbDynamicformComponent,
     RbChoiceInputComponent,
     RbSwitchInputComponent,
-    RbBreadcrumbComponent
+    RbBreadcrumbComponent,
+    RbGanttComponent
   ],
   providers: [
     CookieService,

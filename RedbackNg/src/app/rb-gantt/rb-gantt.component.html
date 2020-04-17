@@ -1,0 +1,45 @@
+<div
+    class="rb-gantt-header">
+    <div
+        class="rb-gantt-corner">
+    </div>
+    <div
+        class="rb-gantt-headertrack">
+    </div>
+</div>
+<div
+    class="rb-gantt-body">
+    <div
+        class="rb-gantt-groupheads">
+        <div
+            *ngFor="let group of getGroups(0); let i = index"
+            [class]="'rb-gantt-grouphead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')">
+            <div
+                class="rb-gantt-mainlabel">
+                {{group.label}}
+            </div>
+        </div>
+    </div>
+    <div
+        class="rb-gantt-grouplanes">
+        <div
+            *ngFor="let group of getGroups(0); let i = index"
+            class=""
+            [class]="'rb-gantt-grouplane rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
+            [style.width.px]="width">
+            <div
+                class=" rb-gantt-spreadheight"
+                *ngFor="let spread of getSpreads(0, group.id)"
+                [class]="'rb-gantt-spread ' + (spread.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
+                [style.width.px]="spread.width"
+                [style.left.px]="spread.start">
+                <div
+                    class="rb-gantt-mainlabel">
+                    {{spread.label}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

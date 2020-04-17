@@ -152,7 +152,8 @@ export class RbDatasetDirective implements OnChanges {
 
   public addObjectAndSelect(obj: RbObject) {
     if(this.list.indexOf(obj) == -1) {
-      this.list.push(obj);
+      this.list.unshift(obj);
+      //this.list.push(obj);
       this.select(obj);
     }
   }
