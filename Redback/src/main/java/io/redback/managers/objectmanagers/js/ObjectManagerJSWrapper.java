@@ -56,15 +56,20 @@ public class ObjectManagerJSWrapper
 			return null;
 	}
 	
-	public JSObject createObject(String objectName, JSObject initialData) throws RedbackException, ScriptException
+	public JSObject createObject(String objectName, String domain, JSObject initialData) throws RedbackException, ScriptException
 	{
-		RedbackObject rbo = objectManager.createObject(session, objectName, null, null, convertToJSONObject(initialData));
+		RedbackObject rbo = objectManager.createObject(session, objectName, null, domain, convertToJSONObject(initialData));
 		if(rbo != null)
 			return new RedbackObjectJSWrapper(rbo);
 		else
 			return null;
 	}
-	
+
+	public JSObject createObject(String objectName, JSObject initialData) throws RedbackException, ScriptException
+	{
+		return createObject(objectName, null, initialData);
+	}
+
 	protected DataMap convertToJSONObject(JSObject jso)
 	{
 		DataMap retObj = new DataMap();
