@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.redback</groupId>
 	<artifactId>redback-core</artifactId>
-	<version>1.0.18</version>
+	<version>1.0.19</version>
 
 	<name>Redback</name>
 	<description>Business application development platform</description>
@@ -31,7 +31,7 @@
 	</developers>
 	
 	<properties>
-		<io.firebus.version>1.0.12</io.firebus.version>
+		<io.firebus.version>1.0.13</io.firebus.version>
 	</properties>	
 
 	<dependencies>
