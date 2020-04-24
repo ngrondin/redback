@@ -2,6 +2,8 @@ package io.redback.managers.processmanager.units;
 
 import java.util.ArrayList;
 
+import javax.script.Bindings;
+
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -12,6 +14,7 @@ import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.utils.Expression;
 
 public class InteractionUnit extends ProcessUnit 
 {
@@ -19,6 +22,9 @@ public class InteractionUnit extends ProcessUnit
 	protected String assigneeType;
 	protected ArrayList<AssigneeConfig> assigneeConfigs;
 	protected DataMap notificationConfig;
+	protected String interactionCode;
+	protected Expression labelExpression;
+	protected Expression messageExpression;
 
 	public InteractionUnit(ProcessManager pm, DataMap config) throws RedbackException 
 	{
@@ -32,6 +38,9 @@ public class InteractionUnit extends ProcessUnit
 				assigneeConfigs.add(new AssigneeConfig(processManager, list.getObject(i)));
 		}
 		notificationConfig = config.getObject("notification");
+		interactionCode = notificationConfig.getString("code");
+		labelExpression = new Expression(pm.getScriptEngine(), notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
+		messageExpression = new Expression(pm.getScriptEngine(), notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException
@@ -91,7 +100,7 @@ public class InteractionUnit extends ProcessUnit
 		logger.info("Finished interaction node action");
 	}
 	
-	public Assignment getNotification(Actionner actionner, ProcessInstance pi)
+	public Assignment getNotification(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
 		if(isAssignee(actionner, pi))
 		{
@@ -100,9 +109,13 @@ public class InteractionUnit extends ProcessUnit
 		return null;
 	}
 	
-	protected Assignment getNotification(ProcessInstance pi)
+	protected Assignment getNotification(ProcessInstance pi) throws RedbackException
 	{
-		Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), notificationConfig.getString("code"), notificationConfig.getString("message"));
+		Bindings context = processManager.createScriptContext(pi);
+		String code = notificationConfig.getString("code");
+		String label = (String)labelExpression.eval(context);
+		String message = (String)messageExpression.eval(context);
+		Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), code, label, message);
 		for(int i = 0; i < actionsConfig.size(); i++)
 			assignment.addAction(actionsConfig.getObject(i).getString("action"), actionsConfig.getObject(i).getString("description"));
 		return assignment;		

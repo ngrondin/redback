@@ -1,4 +1,4 @@
 <rb-gantt
-	[list]="<%=dataset%>.list"
+	[lists]="<%=datasetgroup%>.lists"
 	[series]="<%=utils.convertDataEntityToAttributeString(config.getList('series'))%>">
 </rb-gantt>

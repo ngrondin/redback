@@ -16,7 +16,10 @@ if(typeof dataset == 'undefined') { %>
 } else if(config.getObject('master') != null) { %>
 	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.getObject('master').getObject('relationship'))%>" 
 	[relatedObject]="<%=dataset%>.selectedObject"<% 
-}  %>
+}  
+if(typeof datasetgroup != 'undefined' && config.getString('name') != null) { %>
+	(initiated)="<%=datasetgroup%>.register('<%=config.getString('name')%>', <%=id%>)" <%
+} %>
 	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
 	#content#
 </rb-dataset>
