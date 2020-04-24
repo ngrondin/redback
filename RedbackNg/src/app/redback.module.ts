@@ -45,6 +45,10 @@ import { RbBreadcrumbComponent } from './rb-breadcrumb/rb-breadcrumb.component';
 import { RbListComponent } from './rb-list/rb-list.component';
 import { ConfigService } from './config.service';
 import { RbGanttComponent } from './rb-gantt/rb-gantt.component';
+import { RbDatasetGroupDirective } from './rb-datasetgroup/rb-datasetgroup.directive';
+import { RbDragObjectDirective } from './rb-drag/rb-drag-object.directive';
+import { RbDragDropzoneDirective } from './rb-drag/rb-drag-dropzone.directive';
+import { DragService } from './rb-drag/drag.service';
 
 @NgModule({
   imports: [
@@ -82,6 +86,7 @@ import { RbGanttComponent } from './rb-gantt/rb-gantt.component';
     RbViewLoaderComponent,
     RbViewDirective,
     RbDatasetDirective,
+    RbDatasetGroupDirective,
     RbListScrollDirective,
     RbListComponent,
     RbInputComponent,
@@ -109,7 +114,9 @@ import { RbGanttComponent } from './rb-gantt/rb-gantt.component';
     RbChoiceInputComponent,
     RbSwitchInputComponent,
     RbBreadcrumbComponent,
-    RbGanttComponent
+    RbGanttComponent,
+    RbDragObjectDirective,
+    RbDragDropzoneDirective
   ],
   exports: [
     DesktopRootComponent,
@@ -124,6 +131,7 @@ import { RbGanttComponent } from './rb-gantt/rb-gantt.component';
     RbViewLoaderComponent,
     RbViewDirective,
     RbDatasetDirective,
+    RbDatasetGroupDirective,
     RbListScrollDirective,
     RbListComponent,
     RbInputComponent,
@@ -151,13 +159,16 @@ import { RbGanttComponent } from './rb-gantt/rb-gantt.component';
     RbChoiceInputComponent,
     RbSwitchInputComponent,
     RbBreadcrumbComponent,
-    RbGanttComponent
+    RbGanttComponent,
+    RbDragObjectDirective,
+    RbDragDropzoneDirective
   ],
   providers: [
     CookieService,
     ApiService,
     DataService,
-    ConfigService
+    ConfigService,
+    DragService
   ],
   entryComponents: [
     RbPopupListComponent,

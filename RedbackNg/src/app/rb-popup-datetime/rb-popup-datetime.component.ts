@@ -19,7 +19,7 @@ export class RbPopupDatetimeComponent implements OnInit {
 
   @Output() selected: EventEmitter<any> = new EventEmitter();
 
-  currentPart: number = 0;
+  currentPart: number;
   year: number;
   month: number;
   day: number;
@@ -45,6 +45,7 @@ export class RbPopupDatetimeComponent implements OnInit {
     this.day = this.config.initialDate.getDate();
     this.hour = this.config.initialDate.getHours();
     this.minute = this.config.initialDate.getMinutes();
+    this.currentPart = (this.config.datePart ? 0 : (this.config.hourPart ? 1 : 2));
     this.calcCalendarSettings();
   }
 

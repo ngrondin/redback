@@ -13,14 +13,6 @@ import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.comp
   styleUrls: ['./rb-datetime-input.component.css']
 })
 export class RbDatetimeInputComponent extends RbInputCommonComponent implements OnInit {
-  /*@Input('label') label: string;
-  @Input('icon') icon: string;
-  @Input('size') size: number;
-  @Input('editable') editable: boolean;
-  @Input('object') rbObject: RbObject;
-  @Input('attribute') attribute: string;
-  @Input('value') value: string;
-  @Output() valueChange = new EventEmitter();*/
   @Input('format') format: string;
 
   @ViewChild('input', { read: ViewContainerRef, static: false }) inputContainerRef: ViewContainerRef;
@@ -84,19 +76,7 @@ export class RbDatetimeInputComponent extends RbInputCommonComponent implements 
     return ret;
   }
 
-  /*
-  public get readonly(): boolean {
-    if(this.attribute != null) {
-      if(this.rbObject != null && this.rbObject.validation[this.attribute] != null) {
-        return !(this.editable && this.rbObject.validation[this.attribute].editable);
-      } else {
-        return true;      
-      }
-    } else {
-      return !this.editable;
-    }
-  }
-  */
+
 
   public openPopupList(direction) {
     if(!this.readonly) {
@@ -117,9 +97,9 @@ export class RbDatetimeInputComponent extends RbInputCommonComponent implements 
 
       let config: DateTimePopupConfig = new DateTimePopupConfig();
       config.initialDate = this.rbObject != null && this.rbObject.data[this.attribute] != null ? new Date(this.rbObject.data[this.attribute]) : new Date();
-      config.datePart = true;
-      config.hourPart = true;
-      config.minutePart = true;
+      config.datePart = this.format.indexOf('YY') > -1 || this.format.indexOf('MM') > -1 || this.format.indexOf('DD') > -1 ? true : false;
+      config.hourPart = this.format.indexOf('HH') > -1 ? true : false;
+      config.minutePart = this.format.indexOf('mm') > -1 ? true : false;
       const injectorTokens = new WeakMap();
       injectorTokens.set(OverlayRef, this.overlayRef);
       injectorTokens.set(CONTAINER_DATA, config);

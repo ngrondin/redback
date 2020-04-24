@@ -1,33 +1,40 @@
 import { Component, OnInit, Input, SimpleChange } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { ObserveOnMessage } from 'rxjs/internal/operators/observeOn';
+import { RbSearchComponent } from 'app/rb-search/rb-search.component';
+import { trigger } from '@angular/animations';
+import { MATERIAL_SANITY_CHECKS } from '@angular/material';
 
 
 class GanttSeriesConfig {
-  object: string;
+  dataset: string;
   startAttribute: string;
+  durationAttribute: string;
   endAttribute: string;
   labelAttribute: string;
-  groupAttribute: string;
-  groupLabelAttribute: string;
+  laneAttribute: string;
+  laneLabelAttribute: string;
   colorAttribute: string;
   colorMap: any;
   isBackground: boolean;
+  canEdit: boolean;
 
   constructor(json: any) {
-    this.object = json.dataset;
+    this.dataset = json.dataset;
     this.startAttribute = json.startattribute;
+    this.durationAttribute = json.durationattribute;
     this.endAttribute = json.endattribute;
     this.labelAttribute = json.labelattribute;
-    this.groupAttribute = json.groupattribute;
-    this.groupLabelAttribute = json.grouplabelattribute;
+    this.laneAttribute = json.laneattribute;
+    this.laneLabelAttribute = json.lanelabelattribute;
     this.isBackground = json.isbackground;
+    this.canEdit = json.canedit;
     this.colorAttribute = json.colorattribute;
     this.colorMap = json.colormap;
   }
 }
 
-class GanttGroup {
+class GanttLane {
   id: string;
   label: string;
 
@@ -42,20 +49,33 @@ class GanttSpread {
   label: string;
   start: number;
   width: number;
-  group: string;
+  lane: string;
   color: string;
-  isBackground: boolean;
+  object: RbObject;
+  config: GanttSeriesConfig;
 
-  constructor(i: string, l: string, s: number, w: number, g: string, c: string, bg: boolean) {
+  constructor(i: string, l: string, s: number, w: number, ln: string, c: string, o: RbObject, cfg: GanttSeriesConfig) {
     this.id = i;
     this.label = l;
     this.start = s;
     this.width = w;
-    this.group = g;
+    this.lane = ln;
     this.color = c;
-    this.isBackground = bg;
+    this.object = o;
+    this.config = cfg;
   }
 }
+
+class GanttMark {
+  px: number;
+  label: string;
+
+  constructor(p: number, l: string) {
+    this.px = p;
+    this.label = l;
+  }
+}
+
 
 @Component({
   selector: 'rb-gantt',
@@ -63,16 +83,19 @@ class GanttSpread {
   styleUrls: ['./rb-gantt.component.css']
 })
 export class RbGanttComponent implements OnInit {
-  @Input() list : RbObject[];
+  @Input() lists : any;
   @Input() series: any[];
 
   seriesConfigs: GanttSeriesConfig[];
-  span: number;
-  zoom: number;
-  start: number;
-  end: number;
+  spanMS: number;
+  zoomMS: number;
+  markIntervalMS: number;
+  startMS: number;
+  endMS: number;
   multiplier: number;
-  width: number;
+  widthPX: number;
+  scrollLeft: number;
+  monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   constructor() { }
 
@@ -84,71 +107,201 @@ export class RbGanttComponent implements OnInit {
         this.seriesConfigs.push(new GanttSeriesConfig(item));
       }
     }
-    if('list' in changes && this.list != null) {
+    if('lists' in changes && this.lists != null) {
       this.calcParams();
     }
   }
 
   ngOnInit() {
-    this.span = 259200000;
-    this.zoom = 259200000;
+    this.spanMS = 259200000;
+    this.zoomMS = 259200000;
+  }
+
+  setZoom(ms: number) {
+    this.zoomMS = ms;
+    this.calcParams();
+  }
+
+  setSpan(ms: number) {
+    this.spanMS = ms;
+    this.calcParams();
   }
 
   calcParams() {
-    let now = new Date();
-    this.start = now.getTime();
-    this.end = this.start + this.span;
-    this.multiplier = window.innerWidth / this.zoom;
-    this.width = this.span * this.multiplier;
-  }
-
-  public getGroups(series: number) : GanttGroup[] {
-    let cfg = this.seriesConfigs[series];
-    let groups : GanttGroup[] = [];
-    for(var i in this.list) {
-      let obj = this.list[i];
-      let objGroup: GanttGroup = null;
-      for(var g of groups) {
-        if(obj.get(cfg.groupAttribute) == g.id) {
-          objGroup = g;
-        }
-      }
-      if(objGroup == null) {
-        objGroup = new GanttGroup(obj.get(cfg.groupAttribute), obj.get(cfg.groupLabelAttribute));
-        groups.push(objGroup);
-      }
+    if(this.spanMS < this.zoomMS) {
+      this.spanMS = this.zoomMS;
     }
-    return groups;
+    let now = new Date();
+    this.startMS = now.getTime();
+    this.endMS = this.startMS + this.spanMS;
+    this.multiplier = window.innerWidth / this.zoomMS;
+    this.widthPX = this.spanMS * this.multiplier;
+    this.markIntervalMS = 3600000;
+    while(this.markIntervalMS * this.multiplier < 40) {
+      this.markIntervalMS *= 2;
+    }
   }
 
-  public getSpreads(series: number, groupId: string) : GanttSpread[] {
-    let cfg = this.seriesConfigs[series];
-    let spreads : GanttSpread[] = [];
-    for(var i in this.list) {
-      let obj = this.list[i];
-      if(obj.get(cfg.groupAttribute) == groupId) {
-        let start: number = Math.round(((new Date(obj.get(cfg.startAttribute))).getTime() - this.start) * this.multiplier);
-        if(start < this.width) {
-          if(start < 0) {
-            start = 0;
-          }
-          let end: number = Math.round(((new Date(obj.get(cfg.endAttribute))).getTime() - this.start) * this.multiplier);
-          if(end > this.width) end = this.width;
-          let duration = end - start;
-          let label = cfg.isBackground ? "" : obj.get(cfg.labelAttribute);
-          let color = 'white';
-          if(cfg.colorAttribute != null) {
-            if(cfg.colorMap != null) {
-              color = cfg.colorMap[obj.get(cfg.colorAttribute)];
-            } else {
-              color = obj.get(cfg.colorAttribute);
+  public canEditSpread(spread: GanttSpread) : Boolean {
+    return spread.object.canEdit(spread.config.startAttribute) || spread.object.canEdit(spread.config.laneAttribute);
+  }
+
+  public getLanes() : GanttLane[] {
+    let lanes : GanttLane[] = [];
+    for(let cfg of this.seriesConfigs) {
+      let list: RbObject[] = this.lists[cfg.dataset];
+      for(var i in list) {
+        let obj = list[i];
+        let objLaneId = obj.get(cfg.laneAttribute);
+        if(objLaneId != null) {
+          let objLane: GanttLane = null;
+          for(var g of lanes) {
+            if(objLaneId == g.id) {
+              objLane = g;
             }
           }
-          spreads.push(new GanttSpread(obj.uid, label, start, duration, groupId, color, cfg.isBackground));
+          if(objLane == null) {
+            objLane = new GanttLane(obj.get(cfg.laneAttribute), obj.get(cfg.laneLabelAttribute));
+            lanes.push(objLane);
+          }
+        }
+      }
+    }
+    return lanes;
+  }
+
+  public getSpreads(laneId: string) : GanttSpread[] {
+    let spreads : GanttSpread[] = [];
+    for(let cfg of this.seriesConfigs) {
+      let list: RbObject[] = this.lists[cfg.dataset];
+      for(var i in list) {
+        let obj = list[i];
+        if(obj.get(cfg.laneAttribute) == laneId) {
+          let startMS = (new Date(obj.get(cfg.startAttribute))).getTime();
+          let startPX: number = Math.round((startMS - this.startMS) * this.multiplier);
+          if(startPX < this.widthPX) {
+            let durationMS;
+            if(cfg.durationAttribute != null) {
+              durationMS = parseInt(obj.get(cfg.durationAttribute));
+            } else if(cfg.endAttribute != null) {
+              durationMS = (new Date(obj.get(cfg.endAttribute))).getTime() - startMS;
+            } else {
+              durationMS = 3600000;
+            }
+            if(startMS + durationMS > this.endMS) {
+              durationMS = this.spanMS - durationMS;
+            }
+            let widthPX = Math.round(durationMS * this.multiplier);
+            if(startPX < 0) {
+              widthPX = widthPX + startPX;
+              startPX = 0;
+            }
+            let label = cfg.isBackground ? "" : obj.get(cfg.labelAttribute);
+            let color = 'white';
+            if(cfg.colorAttribute != null) {
+              if(cfg.colorMap != null) {
+                color = cfg.colorMap[obj.get(cfg.colorAttribute)];
+              } else {
+                color = obj.get(cfg.colorAttribute);
+              }
+            }
+            spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, obj, cfg));
+          }
         }
       }
     }
     return spreads;
   }
 
+  public getHourMarks() : GanttMark[] {
+    let marks: GanttMark[] = [];
+    let lastMidnight = (new Date(this.startMS));
+    lastMidnight.setHours(0);
+    lastMidnight.setMinutes(0);
+    lastMidnight.setSeconds(0);
+    lastMidnight.setMilliseconds(0);
+    let cur = lastMidnight.getTime();
+    while(cur < this.endMS) {
+      let curDate: Date = new Date(cur);
+      let pos = Math.round((cur - this.startMS) * this.multiplier);
+      if(pos > 0) {
+        let mark = new GanttMark(pos, curDate.getHours() + ":00");
+        marks.push(mark);
+      }
+      cur = cur + this.markIntervalMS;
+    }
+    return marks;
+  }
+
+  public getDayMarks() : GanttMark[] {
+    let marks: GanttMark[] = [];
+    let lastMidnight = (new Date(this.startMS));
+    lastMidnight.setHours(0);
+    lastMidnight.setMinutes(0);
+    lastMidnight.setSeconds(0);
+    lastMidnight.setMilliseconds(0);
+    let cur = lastMidnight.getTime();
+    while(cur < this.endMS) {
+      let curDate: Date = new Date(cur);
+      let pos = Math.round((cur - this.startMS) * this.multiplier);
+      let mark = new GanttMark(pos, curDate.getDate() + " " + this.monthNames[curDate.getMonth()] + " " + curDate.getFullYear());
+      marks.push(mark);
+      cur = cur + 86400000;
+    }
+    return marks;
+  }
+
+  public getSeriesConfigForObject(object: RbObject) : GanttSeriesConfig {
+    for(let key in this.lists) {
+      for(let obj of this.lists[key]) {
+        if(obj == object) {
+          for(let sc of this.seriesConfigs) {
+            if(sc.dataset == key) {
+              return sc;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+
+  public dropped(event, lane: GanttLane) {
+    let update: any = {};
+    let object: RbObject = event.object;
+    let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
+    let previousStart = object.get(config.startAttribute);
+    let tgt = event.mouseEvent.target;
+    let left = event.mouseEvent.offsetX - event.offset.x;
+    while(tgt.className.indexOf("rb-gantt-lane") == -1) {
+      left = left + tgt.offsetLeft;
+      tgt = tgt.offsetParent;
+    }
+    let newStartMS = this.startMS + (left / this.multiplier);
+    let newStart = (new Date(newStartMS)).toISOString();
+    if(previousStart != newStart) {
+      update[config.startAttribute] = newStart;
+      if(config.durationAttribute == null && config.endAttribute != null) {
+        let previousStartMS = (new Date(previousStart)).getTime();
+        let previousEndMS = (new Date(event.object.get(config.endAttribute))).getTime();
+        let durationMS = previousEndMS - previousStartMS;
+        let newEnd = (new Date(newStartMS + durationMS)).toISOString();
+        update[config.endAttribute] = newEnd;
+      } 
+    }
+
+    let previousLane = object.get(config.laneAttribute);
+    let newLane = lane.id;
+    if(previousLane != newLane) {
+      update[config.laneAttribute] = newLane;
+    }
+    if(Object.keys(update).length > 0) {
+      event.object.setValues(update);
+    }
+  }
+
+  public scroll(event) {
+    this.scrollLeft = event.target.scrollLeft;
+  }
 }

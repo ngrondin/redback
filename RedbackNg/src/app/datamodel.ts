@@ -28,26 +28,6 @@ export class RbObject {
         this.resolveRelatedObjects();
     }
 
-    get(attr: string) : any {
-        if(attr != null) {
-            if(attr == 'uid') {
-                return this.uid;
-            } else if(attr.indexOf('.') == -1) {
-                return this.data[attr];
-            } else {
-                let relationship = attr.substring(0, attr.indexOf('.'));
-                let finalattr = attr.substring(attr.indexOf('.') + 1);
-                if(this.related[relationship] != null) {
-                    return this.related[relationship].data[finalattr];
-                } else {
-                    return null;
-                }
-            }
-        } else {
-            return null;
-        }
-    }
-
     updateFromServer(json: any) {
         const inData: any = json.data;
         for(const attribute in json.data) 
@@ -68,11 +48,55 @@ export class RbObject {
         }
     }
 
+    get(attr: string) : any {
+        if(attr != null) {
+            if(attr == 'uid') {
+                return this.uid;
+            } else if(attr.indexOf('.') == -1) {
+                return this.data[attr];
+            } else {
+                let relationship = attr.substring(0, attr.indexOf('.'));
+                let finalattr = attr.substring(attr.indexOf('.') + 1);
+                if(this.related[relationship] != null) {
+                    return this.related[relationship].data[finalattr];
+                } else {
+                    return null;
+                }
+            }
+        } else {
+            return null;
+        }
+    }
+    
+    canEdit(attribute: string) : boolean {
+        return (this.validation != null && this.validation[attribute] != null && this.validation[attribute].editable == true);
+    }
+
     setValue(attribute: string, value: any) {
-        this.setValueAndRelated(attribute, value, null);
+        let ret = this._setValueAndRelated(attribute, value, null);
+        if(ret == true && this.dataService.saveImmediatly) {
+            this.dataService.updateObjectToServer(this);
+        }
+    }
+
+    setValues(map: any) {
+        let ret: boolean = false;
+        for(let key of Object.keys(map)) {
+            ret = this._setValueAndRelated(key, map[key], null) || ret;
+        }
+        if(ret == true && this.dataService.saveImmediatly) {
+            this.dataService.updateObjectToServer(this);
+        }
     }
 
     setValueAndRelated(attribute: string, value: any, related: RbObject) {
+        let ret = this._setValueAndRelated(attribute, value, related);
+        if(ret == true && this.dataService.saveImmediatly) {
+            this.dataService.updateObjectToServer(this);
+        }
+    }
+
+    _setValueAndRelated(attribute: string, value: any, related: RbObject) : boolean {
         if(attribute == 'uid') {
             if(this.uid == null) {
                 this.uid = value;
@@ -80,22 +104,15 @@ export class RbObject {
             }
         } else if(this.validation[attribute].editable == true) {
             this.data[attribute] = value;
-            this.changed.push(attribute);
             if(this.related[attribute] != null) {
                 this.related[attribute] = related;
             }
-            if(this.dataService.saveImmediatly) {
-                //this.saveToServer();
-                this.dataService.updateObjectToServer(this);
-            }
+            this.changed.push(attribute);
+            return true;
         }
+        return false;
     }
 
-    /*
-    saveToServer() {
-        this.dataService.updateObjectToServer(this);
-    }
-    */
 }
 
 
@@ -118,5 +135,16 @@ export class RbFile {
         this.mime = json.mime;
         this.username = json.username;
         this.date = new Date(json.date);
+    }
+}
+
+
+export class XY {
+    x: number;
+    y: number;
+
+    constructor(a: number, b: number) {
+        this.x = a;
+        this.y = b;
     }
 }

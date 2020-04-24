@@ -3,50 +3,99 @@
     flex-direction: column;
 }
 
+.rb-gantt-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    height: 30px;
+    padding: 12px;
+}
+
 .rb-gantt-header {
     display: flex;
     flex-direction: row;
-    height: 42px;
+    height: 64px;
 }
 
 .rb-gantt-corner {
     display: flex;
+    width: 250px;
+}
+
+.rb-gantt-headertrackcontainer {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    position: relative;
+    overflow: hidden;
+    border-top: solid 1px lightgray;
+    border-right: solid 1px lightgray;
+    border-left: solid 1px lightgray;
 }
 
 .rb-gantt-headertrack {
     display: flex;
-    flex-direction: row;
+    position: absolute;
+    flex-direction: column;
+}
+
+.rb-gantt-daytrack {
+    display:flex;
+    position: relative;
+    height: 32px;
+}
+
+.rb-gantt-hourtrack {
+    display: flex;
+    position: relative;
+    height: 32px;
+    border-top: 1px solid lightgray;
+}
+
+.rb-gantt-mark {
+    display: block;
+    position: absolute;
+    font-size: smaller;
+    border-left: solid 1px lightgray;
+    height: 100%;
+    z-index: 100;
+    padding-top: 6px;
+    margin-bottom: -6px;
 }
 
 .rb-gantt-body {
     display: flex;
     flex-direction: row;
+    border-bottom: 1px solid lightgray;
+
 }
 
-.rb-gantt-groupheads {
+.rb-gantt-laneheads {
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
     width: 250px;
 }
 
-.rb-gantt-grouphead {
+.rb-gantt-lanehead {
     display: flex;
     flex-direction: row;
     align-items: center;
+    border-top: 1px solid lightgray;
 }
 
-.rb-gantt-grouplanes {
+.rb-gantt-lanes {
     display: flex;
     flex-direction: column;
     overflow: auto;
+    position: relative;
 }
 
-.rb-gantt-grouplane {
+.rb-gantt-lane {
     display: flex;
     flex-direction: row;
     position: relative;
     background-color: grey;
+    border-top: 1px solid lightgray;
 }
 
 
@@ -64,10 +113,17 @@
     height: 28px;
     top: 7px;
     background-color: white;
+    border-radius: 3px;
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+    user-select: none; 
+    cursor: pointer;
+    z-index: 150;
 }
 
 .rb-gantt-spreadbackground {
     height: 42px;
+    z-index: 50;
 }
 
 .rb-gantt-mainlabel {
@@ -75,6 +131,11 @@
     padding: 5px;
 }
 
+.rb-gantt-smalllabel {
+    display: inline-block;
+    padding: 5px;
+    font-size: smaller;
+}
 
 
 .rb-gantt-laneheight {

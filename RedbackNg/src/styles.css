@@ -51,6 +51,13 @@ rb-dataset {
 	flex-direction: column;
 }
 
+rb-datasetgroup {
+	display: flex;
+	overflow: hidden;
+	flex-grow: 1;
+	flex-direction: column;
+}
+
 .rb-hsection {
 	display: flex;
 	flex-direction: row;

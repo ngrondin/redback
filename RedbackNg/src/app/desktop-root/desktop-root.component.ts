@@ -1,10 +1,11 @@
-import { Component, OnInit, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, HostListener } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { ApiService } from 'app/api.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DataService } from 'app/data.service';
 import { RbObject } from 'app/datamodel';
 import { ConfigService } from 'app/config.service';
+import { DragService } from 'app/rb-drag/drag.service';
 
 export class Target {
   view: string;
@@ -59,6 +60,7 @@ export class DesktopRootComponent implements OnInit {
  
   constructor(
     private configService : ConfigService,
+    private dragService: DragService,
     private domSanitizer: DomSanitizer
   ) { }
 
@@ -127,5 +129,16 @@ export class DesktopRootComponent implements OnInit {
     }
   }
 
+  @HostListener('mouseup', ['$event']) onMouseUp($event) {
+    this.dragService.endDrag();
+  }
 
+  @HostListener('mousemove', ['$event']) onMouseMove($event) {
+    this.dragService.move($event);
+  }
+/*
+  @HostListener('mouseout', ['$event']) onMouseOut($event) {
+    this.dragService.endDrag();
+  }
+*/
 }

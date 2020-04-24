@@ -47,11 +47,13 @@ export class RbNotificationComponent implements OnInit {
   }
 
   public selectNotification(notification: any) {
-    this.navigate.emit({
-      object : notification.data.object,
+    let evt = {
+      object : (notification.data.object != null ? notification.data.object : (notification.data.objectname != null ? notification.data.objectname : null)),
       filter : {
         uid : "'" + notification.data.uid + "'"
-      }
-    })
+      },
+      reset : true
+    }
+    this.navigate.emit(evt);
   }
 }

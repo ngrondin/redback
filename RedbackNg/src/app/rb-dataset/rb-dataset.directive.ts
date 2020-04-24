@@ -18,6 +18,7 @@ export class RbDatasetDirective implements OnChanges {
   @Input('searchString') inputSearchString: any;
   @Input('selectedObject') inputSelectedObject: any;
 
+  @Output('initiated') initated: EventEmitter<any> = new EventEmitter();
   @Output('userFilterChange') userFilterChange: EventEmitter<any> = new EventEmitter();
   @Output('searchStringChange') searchStringChange: EventEmitter<any> = new EventEmitter();
   @Output('selectedObjectChange') selectedObjectChange: EventEmitter<any> = new EventEmitter();
@@ -60,6 +61,7 @@ export class RbDatasetDirective implements OnChanges {
   ngOnInit() {
     this.initiated = true;
     this.refreshData();
+    this.initated.emit(this);
   }
 
   public refreshData() {
@@ -145,6 +147,10 @@ export class RbDatasetDirective implements OnChanges {
       }
     } else if(name == 'save') {
       
+    } else if(name == 'executeAll') {
+      this.list.forEach((object) => {
+        this.dataService.executeObObject(object, param, null);
+      });
     } else if(this.selectedObject != null) {
       this.dataService.executeObObject(this.selectedObject, name, param);
     }

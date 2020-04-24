@@ -39,7 +39,8 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 		col1.setLayout(new RowLayout(SWT.VERTICAL));
 		new TextField(data, "name", "Name", col1, SWT.NONE);
 		new TextField(data, "notification.code", "Interaction Code", col1, SWT.NONE);
-		new TextField(data, "notification.message", "Message", col1, SWT.NONE);
+		new TextField(data, "notification.label", "Label (!)", col1, SWT.NONE);
+		new TextField(data, "notification.message", "Message (!)", col1, SWT.NONE);
 
 		Composite col2 = new Composite(this, SWT.NONE);
 		col2.setLayout(new RowLayout(SWT.VERTICAL));

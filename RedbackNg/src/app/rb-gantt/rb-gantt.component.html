@@ -1,40 +1,93 @@
 <div
+    class="rb-gantt-toolbar">
+    <button
+        [matMenuTriggerFor]="zoomMenu"
+        mat-outlined-button>
+        <mat-icon>zoom_in</mat-icon>
+    </button>
+    <mat-menu #zoomMenu="matMenu">
+        <button mat-menu-item (click)="setZoom(86400000)">1 day</button>
+        <button mat-menu-item (click)="setZoom(259200000)">3 Days</button>
+        <button mat-menu-item (click)="setZoom(604800000)">7 Days</button>
+    </mat-menu>    
+    &nbsp;
+    <button
+        mat-outlined-button
+        [matMenuTriggerFor]="spanMenu">
+        <mat-icon>swap_horiz</mat-icon>
+    </button>
+    <mat-menu #spanMenu="matMenu">
+        <button mat-menu-item (click)="setSpan(259200000)">3 day</button>
+        <button mat-menu-item (click)="setSpan(604800000)">7 Days</button>
+        <button mat-menu-item (click)="setSpan(1209600000)">14 Days</button>
+    </mat-menu>    
+</div>
+<div
     class="rb-gantt-header">
     <div
         class="rb-gantt-corner">
     </div>
     <div
-        class="rb-gantt-headertrack">
+        class="rb-gantt-headertrackcontainer">
+        <div
+            class="rb-gantt-headertrack"
+            [style.width.px]="widthPX"
+            [style.left.px]="-scrollLeft">
+            <div
+                class="rb-gantt-daytrack">
+                <div
+                    *ngFor="let mark of getDayMarks()"
+                    [style.left.px]="mark.px"
+                    class="rb-gantt-mark">
+                    &nbsp;{{mark.label}}
+                </div>
+            </div>
+            <div
+                class="rb-gantt-hourtrack">
+                <div
+                    *ngFor="let mark of getHourMarks()"
+                    [style.left.px]="mark.px"
+                    class="rb-gantt-mark">
+                    &nbsp;{{mark.label}}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <div
     class="rb-gantt-body">
     <div
-        class="rb-gantt-groupheads">
+        class="rb-gantt-laneheads">
         <div
-            *ngFor="let group of getGroups(0); let i = index"
-            [class]="'rb-gantt-grouphead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')">
+            *ngFor="let lane of getLanes(); let i = index"
+            [class]="'rb-gantt-lanehead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')">
             <div
                 class="rb-gantt-mainlabel">
-                {{group.label}}
+                {{lane.label}}
             </div>
         </div>
     </div>
     <div
-        class="rb-gantt-grouplanes">
+        class="rb-gantt-lanes"
+        (scroll)="scroll($event)">
         <div
-            *ngFor="let group of getGroups(0); let i = index"
-            class=""
-            [class]="'rb-gantt-grouplane rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
-            [style.width.px]="width">
+            *ngFor="let mark of getHourMarks()"
+            [style.left.px]="mark.px"
+            class="rb-gantt-mark">
+        </div>
+        <div
+            *ngFor="let lane of getLanes(); let i = index"
+            [class]="'rb-gantt-lane rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
+            [style.width.px]="widthPX"
+            (rb-drag-dropzone)="dropped($event, lane)">
             <div
-                class=" rb-gantt-spreadheight"
-                *ngFor="let spread of getSpreads(0, group.id)"
-                [class]="'rb-gantt-spread ' + (spread.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
+                *ngFor="let spread of getSpreads(lane.id)"
+                [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
+                [rb-drag-object]="canEditSpread(spread) ? spread.object : null"
                 [style.width.px]="spread.width"
                 [style.left.px]="spread.start">
                 <div
-                    class="rb-gantt-mainlabel">
+                    class="rb-gantt-smalllabel">
                     {{spread.label}}
                 </div>
             </div>

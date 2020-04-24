@@ -35,6 +35,15 @@
     display: flex;
 }
 
+.rb-drag-box {
+    display: block;
+    position: absolute;
+    background: rgb(232, 235, 240);
+    z-index: 1000;
+    border: solid 1px rgb(67, 86, 110);
+    border-radius: 3px;
+    pointer-events: none;
+}
 
 mat-toolbar {
     min-height:40px
