@@ -120,6 +120,22 @@ export class ApiService {
     };
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
+  
+  aggregateObjects(name: string, filter: any, tuple: any, metrics: any): Observable<any> {
+    const req = {
+      action: 'aggregate',
+      object: name,
+      filter: filter,
+      tuple: tuple,
+      metrics: metrics,
+      options: {
+        addrelated: true
+      }
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
+
 
   private initSignalWebsocket() {
     if(this.signalService != null && this.signalService != "" && this.signalWebsocket == null) {
@@ -185,4 +201,5 @@ export class ApiService {
   listFiles(object: string, uid: string): Observable<any> {
     return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?object=' + object + '&uid=' + uid, httpOptions);
   }
+
 }

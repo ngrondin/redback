@@ -1,6 +1,7 @@
 import { Directive, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { ObjectResp, RbObject } from '../datamodel';
 import { DataService } from '../data.service';
+import { MapService } from 'app/map.service';
 
 @Directive({
   selector: 'rb-dataset',
@@ -33,7 +34,8 @@ export class RbDatasetDirective implements OnChanges {
   public firstLoad: boolean = true;
 
   constructor(
-    private dataService: DataService
+    private dataService: DataService,
+    private mapService: MapService
   ) {   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -78,18 +80,18 @@ export class RbDatasetDirective implements OnChanges {
   private mergeFilters() : any {
     let filter = {};
     if(this.baseFilter != null) {
-      filter = this.mergeMaps(filter, this.baseFilter);
+      filter = this.mapService.mergeMaps(filter, this.baseFilter);
     }
 
     if(this.relatedFilter != null && this.relatedObject != null) {
-      filter = this.mergeMaps(filter, this.relatedFilter);
+      filter = this.mapService.mergeMaps(filter, this.relatedFilter);
     } 
 
     if(this.userFilter != null) {
-      filter = this.mergeMaps(filter, this.userFilter);
+      filter = this.mapService.mergeMaps(filter, this.userFilter);
     }
     
-    filter = this.resolveMap(filter, this.relatedObject);
+    filter = this.mapService.resolveMap(filter, this.relatedObject, this.selectedObject, this.relatedObject);
 
     return filter;
   }
@@ -138,7 +140,7 @@ export class RbDatasetDirective implements OnChanges {
     if(name == 'create' || name == 'createInMemory') {
       let data = this.mergeFilters();
       if(param != null) {
-        data = this.mergeMaps(data, this.resolveMap(param, this.selectedObject))
+        data = this.mapService.mergeMaps(data, this.mapService.resolveMap(param, this.selectedObject, this.selectedObject, this.relatedObject))
       }
       if(name == 'create') {
         this.dataService.createObject(this.objectname, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
@@ -159,66 +161,10 @@ export class RbDatasetDirective implements OnChanges {
   public addObjectAndSelect(obj: RbObject) {
     if(this.list.indexOf(obj) == -1) {
       this.list.unshift(obj);
-      //this.list.push(obj);
       this.select(obj);
     }
   }
 
 
-  private mergeMaps(map1: any, map2: any) : any {
-    let map: any = {};
-    for (const key in map1) {
-      let value = map1[key];
-      map[key] = value;
-    }
-    for (const key in map2) {
-      let value = map2[key];
-      map[key] = value;
-    }
-    return map;
-  }
 
-  private resolveMap(__inMap: any, obj: RbObject) : any {
-    try {
-      let __outMap: any = {};
-      let relatedObject = this.relatedObject;
-      let selectedObject = this.selectedObject;
-      let uid = null;
-      let __varString = "";
-      if(obj != null && typeof obj != 'undefined') {
-        uid = obj.uid;
-        for(const attr in obj.data) {
-          let val = obj.data[attr];
-          if(typeof val == 'object') {
-            val = JSON.stringify(val);
-          } 
-          if(typeof val == 'string') {
-            val = "'" + val.replace(/\'/g, "\\'").replace(/\"/g, "\\\"") + "'";
-          } 
-          __varString = __varString + "var " + attr + " = " + val + ";"
-        }
-      } 
-
-      for (const __key in __inMap) {
-        let __value = __inMap[__key];
-        if(typeof __value == "string") {
-          __value = eval(__varString + __value);
-        } else if(typeof __value == "object") {
-          if(Array.isArray(__value)) {
-            let __outArray = [];
-            for(const __valueItem of __value) {
-              __outArray.push(eval(__varString + __valueItem));
-            }
-            __value = __outArray;
-          } else {
-            __value = this.resolveMap(__value, obj);
-          }
-        }
-        __outMap[__key] = __value;
-      }
-      return __outMap;
-    } catch(e) {
-      return __inMap;
-    }
-  }
 }

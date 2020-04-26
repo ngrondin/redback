@@ -49,6 +49,10 @@ import { RbDatasetGroupDirective } from './rb-datasetgroup/rb-datasetgroup.direc
 import { RbDragObjectDirective } from './rb-drag/rb-drag-object.directive';
 import { RbDragDropzoneDirective } from './rb-drag/rb-drag-dropzone.directive';
 import { DragService } from './rb-drag/drag.service';
+import { MapService } from './map.service';
+import { RbAggregatesetDirective } from './rb-aggregateset/rb-aggregateset.directive';
+import { RbGraphComponent } from './rb-graph/rb-graph.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
   imports: [
@@ -77,6 +81,7 @@ import { DragService } from './rb-drag/drag.service';
     BrowserAnimationsModule,
     HttpClientModule,
     HttpModule,
+    NgxChartsModule,
     AgmCoreModule.forRoot({
       apiKey: 'AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'
     })
@@ -116,7 +121,9 @@ import { DragService } from './rb-drag/drag.service';
     RbBreadcrumbComponent,
     RbGanttComponent,
     RbDragObjectDirective,
-    RbDragDropzoneDirective
+    RbDragDropzoneDirective,
+    RbAggregatesetDirective,
+    RbGraphComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -161,14 +168,17 @@ import { DragService } from './rb-drag/drag.service';
     RbBreadcrumbComponent,
     RbGanttComponent,
     RbDragObjectDirective,
-    RbDragDropzoneDirective
+    RbDragDropzoneDirective,
+    RbAggregatesetDirective,
+    RbGraphComponent
   ],
   providers: [
     CookieService,
     ApiService,
     DataService,
     ConfigService,
-    DragService
+    DragService,
+    MapService
   ],
   entryComponents: [
     RbPopupListComponent,

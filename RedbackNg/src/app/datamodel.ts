@@ -139,6 +139,58 @@ export class RbFile {
 }
 
 
+
+export class RbAggregate {
+    objectname: string;
+    dimensions: any;
+    metrics: any;
+    related: any;
+    dataService: DataService;
+
+    constructor(json: any, ds: DataService) {
+        this.objectname = json.objectname;
+        this.dimensions = json.dimensions;
+        this.metrics = json.metrics;
+        this.related = json.related != null ? json.related : {};
+        this.dataService = ds;
+        if(json.related != null) {
+            for(const attribute in json.related) {
+                this.related[attribute] = this.dataService.updateObjectFromServer(json.related[attribute]);
+            }
+        }
+    }
+
+    getDimension(attr: string) : any {
+        if(attr != null) {
+            if(attr.indexOf('.') == -1) {
+                return this.dimensions[attr];
+            } else {
+                let relationship = attr.substring(0, attr.indexOf('.'));
+                let finalattr = attr.substring(attr.indexOf('.') + 1);
+                if(this.related[relationship] != null) {
+                    return this.related[relationship].data[finalattr];
+                } else {
+                    return null;
+                }
+            }
+        } else {
+            return null;
+        }
+    }
+
+    getMetric(metric: string) : any {
+        if(metric != null) {
+            return this.metrics[metric];
+        } else {
+            return null;
+        }        
+    }
+
+}
+
+
+
+
 export class XY {
     x: number;
     y: number;

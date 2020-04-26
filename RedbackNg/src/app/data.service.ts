@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable, of } from 'rxjs';
-import { ObjectResp, RbObject, RbFile } from './datamodel';
+import { ObjectResp, RbObject, RbFile, RbAggregate } from './datamodel';
 import { ToastrService } from 'ngx-toastr';
 
 
@@ -57,9 +57,9 @@ export class DataService {
   }
 
   listObjects(name: string, filter: any, search: string) : Observable<any> {
-    const listObs = this.apiService.listObjects(name, filter, search);
+    const apiObservable = this.apiService.listObjects(name, filter, search);
     const dataObservable = new Observable((observer) => {
-      listObs.subscribe(
+      apiObservable.subscribe(
         resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.updateObjectFromServer(json));
           observer.next(rbObjectArray);
@@ -74,9 +74,9 @@ export class DataService {
   }
 
   listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string) : Observable<any> {
-    const listObs = this.apiService.listRelatedObjects(name, uid, attribute, filter, search);
+    const apiObservable = this.apiService.listRelatedObjects(name, uid, attribute, filter, search);
     const dataObservable = new Observable((observer) => {
-      listObs.subscribe(
+      apiObservable.subscribe(
         resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.updateObjectFromServer(json));
           observer.next(rbObjectArray);
@@ -155,12 +155,29 @@ export class DataService {
     this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(resp => this.updateObjectFromServer(resp));
   }
 
+  aggregateObjects(name: string, filter: any, tuple: any, metrics: any) : Observable<any> {
+    const apiObservable = this.apiService.aggregateObjects(name, filter, tuple, metrics);
+    const dataObservable = new Observable((observer) => {
+      apiObservable.subscribe(
+        resp => {
+          const rbAggregateArray = Object.values(resp.list).map(json => new RbAggregate(json, this));
+          observer.next(rbAggregateArray);
+          observer.complete();
+        }, 
+        error => {
+          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+        }
+      )
+    })
+    return dataObservable; 
+  }
+
 
 
   listFiles(object: string, uid: any) : Observable<RbFile[]> {
-    const listObs = this.apiService.listFiles(object, uid);
+    const apiObservable = this.apiService.listFiles(object, uid);
     const fileObservable = new Observable<RbFile[]>((observer) => {
-      listObs.subscribe(
+      apiObservable.subscribe(
         resp => {
           const rbFileArray = Object.values(resp.list).map(json => new RbFile(json, this));
           observer.next(rbFileArray);
