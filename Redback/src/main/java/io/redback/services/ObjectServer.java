@@ -11,6 +11,7 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 
@@ -72,7 +73,7 @@ public abstract class ObjectServer extends AuthenticatedService
 						{
 							List<RedbackObject> objects = null;
 							if(uid != null && attribute != null)
-								objects = list(session, objectName, uid, attribute, filter, search, page, addRelated);
+								objects = listRelated(session, objectName, uid, attribute, filter, search, page, addRelated);
 							else
 								objects = list(session, objectName, filter, search, page, addRelated);
 							responseData = new DataMap();
@@ -87,6 +88,29 @@ public abstract class ObjectServer extends AuthenticatedService
 							throw new FunctionErrorException("A 'list' action requires either a filter, a search or a uid-attribute pair");
 						}
 					}
+					else if(action.equals("listrelated"))
+					{
+						DataMap filter = request.getObject("filter");
+						String attribute = request.getString("attribute");
+						String uid = request.getString("uid");
+						String search = request.getString("search");
+						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
+						if(uid != null && attribute != null)
+						{
+							List<RedbackObject> objects = null;
+							objects = listRelated(session, objectName, uid, attribute, filter, search, page, addRelated);
+							responseData = new DataMap();
+							DataList list = new DataList();
+							if(objects != null)
+								for(int i = 0; i < objects.size(); i++)
+									list.add(objects.get(i).getJSON(addValidation, addRelated));
+							responseData.put("list", list);
+						}
+						else
+						{
+							throw new FunctionErrorException("A 'listrelated' action requires either a uid-attribute pair");
+						}
+					}					
 					else if(action.equals("update"))
 					{
 						String uid = request.getString("uid");
@@ -124,6 +148,26 @@ public abstract class ObjectServer extends AuthenticatedService
 							throw new FunctionErrorException("A 'create' action requires a 'uid' and a 'function' attribute");
 						}
 					}
+					else if(action.equals("aggregate"))
+					{
+						DataMap filter = request.getObject("filter");
+						DataList tuple = request.getList("tuple");
+						DataList metrics = request.getList("metrics");
+						if(tuple != null && metrics != null)
+						{
+							List<RedbackAggregate> aggregates = aggregate(session, objectName, filter, tuple, metrics, addRelated);
+							responseData = new DataMap();
+							DataList list = new DataList();
+							if(aggregates != null)
+								for(int i = 0; i < aggregates.size(); i++)
+									list.add(aggregates.get(i).getJSON(addRelated));
+							responseData.put("list", list);
+						}
+						else
+						{
+							throw new FunctionErrorException("A 'aggregate' action requires a filter, a tuple and a metric");
+						}
+					}					
 					else
 					{
 						throw new FunctionErrorException("The '" + action + "' action is not valid as an object request");
@@ -168,12 +212,14 @@ public abstract class ObjectServer extends AuthenticatedService
 
 	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, int page, boolean addRelated) throws RedbackException;
 
-	protected abstract List<RedbackObject> list(Session session, String objectName, String uid, String attribute, DataMap filter, String search, int page, boolean addRelated) throws RedbackException;
+	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, int page, boolean addRelated) throws RedbackException;
 
 	protected abstract RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException;
 
 	protected abstract RedbackObject create(Session session, String objectName, String uid, String domain, DataMap data) throws RedbackException;
 
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException;
-	
+
+	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, boolean addRelated) throws RedbackException;
+
 }

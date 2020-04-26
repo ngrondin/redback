@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.script.Bindings;
@@ -22,15 +23,13 @@ import io.redback.managers.objectmanagers.js.ProcessManagerProxyJSWrapper;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.UserProfileJSWrapper;
+import io.redback.utils.Expression;
 import io.redback.utils.FirebusJSWrapper;
 import io.redback.utils.LoggerJSFunction;
 
-public class RedbackObject 
+public class RedbackObject extends RedbackElement
 {
 	private Logger logger = Logger.getLogger("io.redback");
-	protected Session session;
-	protected ObjectManager objectManager;
-	protected ObjectConfig config;
 	protected Value uid;
 	protected Value domain;
 	protected boolean canRead;
@@ -133,7 +132,7 @@ public class RedbackObject
 					}
 					else if(defaultValue != null)
 					{
-						put(attributeName, defaultValue.eval(this));
+						put(attributeName, new Value(defaultValue.eval(objectManager.createScriptContext(this))));
 					}
 				}
 				executeScriptsForEvent("oncreate");
@@ -163,21 +162,6 @@ public class RedbackObject
 	}
 	
 
-	public ObjectConfig getObjectConfig()
-	{
-		return config;
-	}
-	
-	public ObjectManager getObjectManager()
-	{
-		return objectManager;
-	}
-	
-	public Session getUserSession()
-	{
-		return session;
-	}
-
 	public Value getUID()
 	{
 		return  uid;
@@ -186,6 +170,11 @@ public class RedbackObject
 	public Value getDomain()
 	{
 		return domain;
+	}
+	
+	public Set<String> getAttributeNames()
+	{
+		return config.getAttributeNames();
 	}
 	
 	public Value get(String name) throws RedbackException
@@ -205,7 +194,7 @@ public class RedbackObject
 			if(data.containsKey(name))
 				return data.get(name);
 			else if(expression != null)
-				return expression.eval(this);
+				return new Value(expression.eval(objectManager.createScriptContext(this)));
 			else 
 				return new Value(null);
 		}		
@@ -361,7 +350,9 @@ public class RedbackObject
 		if(domain != null && domain.equals("root"))
 			return false;
 		else
-			return config.getAttributeConfig(name).getEditableExpression().eval(this).getBoolean();
+		{
+			return (Boolean)config.getAttributeConfig(name).getEditableExpression().eval(objectManager.createScriptContext(this));
+		}
 	}
 	
 	public List<String> getUpdatedAttributes() 

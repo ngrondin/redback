@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import io.firebus.Firebus;
@@ -17,13 +20,21 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
+import io.firebus.utils.FirebusDataUtil;
 import io.redback.RedbackException;
+import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
+import io.redback.managers.objectmanagers.js.RedbackAggregateJSWrapper;
+import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
+import io.redback.security.js.SessionRightsJSFunction;
+import io.redback.utils.FirebusJSWrapper;
+import io.redback.utils.LoggerJSFunction;
 
 public class ObjectManager
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
+	protected ScriptEngine jsEngine;
 	protected boolean cacheConfigs;
 	protected String configServiceName;
 	protected String dataServiceName;
@@ -40,6 +51,7 @@ public class ObjectManager
 	{
 		firebus = fb;
 		cacheConfigs = true;
+		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");
@@ -57,6 +69,11 @@ public class ObjectManager
 		return firebus;
 	}
 	
+	public ScriptEngine getScriptEngine()
+	{
+		return jsEngine;
+	}
+	
 	public DataMap getGlobalVariables()
 	{
 		return globalVariables;
@@ -68,7 +85,39 @@ public class ObjectManager
 		includeScripts = null;
 	}
 	
-	protected void getIncludeScripts() throws RedbackException
+	public Bindings createScriptContext(RedbackElement element) throws RedbackException
+	{
+		Bindings context = jsEngine.createBindings();
+		if(element instanceof RedbackObject)
+		{
+			RedbackObject rbObject = (RedbackObject)element;
+			context.put("uid", rbObject.getUID().getString());
+			context.put("self", new RedbackObjectJSWrapper(rbObject));
+		}
+		else
+		{
+			RedbackAggregate rbAggregate = (RedbackAggregate)element;
+			context.put("self", new RedbackAggregateJSWrapper(rbAggregate));
+		}
+		Iterator<String> it = element.getAttributeNames().iterator();
+		while(it.hasNext())
+		{	
+			String key = it.next();
+			if(element.getObjectConfig().getAttributeConfig(key).getExpression() == null)
+				context.put(key, element.get(key).getObject());
+		}
+		context.put("canRead", new SessionRightsJSFunction(element.getUserSession(), "read"));
+		context.put("canWrite", new SessionRightsJSFunction(element.getUserSession(), "write"));
+		context.put("canExecute", new SessionRightsJSFunction(element.getUserSession(), "execute"));
+		context.put("om", new ObjectManagerJSWrapper(this, element.getUserSession()));
+		context.put("userprofile", element.getUserSession().getUserProfile());
+		context.put("firebus", new FirebusJSWrapper(firebus, element.getUserSession()));
+		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(getGlobalVariables()));
+		context.put("log", new LoggerJSFunction());
+		return context;
+	}
+	
+	protected List<IncludeScript> getIncludeScripts() throws RedbackException
 	{
 		if(includeScripts == null)
 		{
@@ -81,6 +130,7 @@ public class ObjectManager
 				includeScripts.add(is);
 			}
 		}
+		return includeScripts;
 	}
 	
 	protected ObjectConfig getObjectConfig(String object) throws RedbackException
@@ -92,7 +142,7 @@ public class ObjectManager
 			{
 				if(includeScripts == null)
 					getIncludeScripts();
-				objectConfig = new ObjectConfig(requestConfig("rbo", "object", object), includeScripts);
+				objectConfig = new ObjectConfig(this, requestConfig("rbo", "object", object));
 				if(cacheConfigs)
 					objectConfigs.put(object, objectConfig);
 			}
@@ -107,11 +157,11 @@ public class ObjectManager
 
 
 	
-	public void addRelatedBulk(Session session, List<RedbackObject> objects) throws RedbackException, ScriptException
+	public void addRelatedBulk(Session session, List<RedbackElement> elements) throws RedbackException, ScriptException
 	{
-		if(objects != null  && objects.size() > 0)
+		if(elements != null  && elements.size() > 0)
 		{
-			ObjectConfig objectConfig = objects.get(0).getObjectConfig();
+			ObjectConfig objectConfig = elements.get(0).getObjectConfig();
 			Iterator<String> it = objectConfig.getAttributeNames().iterator();
 			while(it.hasNext())
 			{
@@ -121,42 +171,46 @@ public class ObjectManager
 				{
 					RelatedObjectConfig relatedObjectConfig = attributeConfig.getRelatedObjectConfig();
 					DataList orList = new DataList();
-					for(int j = 0; j < objects.size(); j++)
+					for(int j = 0; j < elements.size(); j++)
 					{
-						RedbackObject object = objects.get(j);
-						if(object.getString(attributeName) != null)
+						RedbackElement element = elements.get(j);
+						Value linkValue = element.get(attributeName);
+						if(linkValue != null && !linkValue.isNull())
 						{
-							DataMap findFilter = object.getRelatedFindFilter(attributeName);
+							DataMap findFilter = element.getRelatedFindFilter(attributeName);
 							if(!orList.contains(findFilter))
 								orList.add(findFilter);
 						}
 					}
-					DataMap relatedObjectFilter = new DataMap();
-					relatedObjectFilter.put("$or", orList);
-					ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null, false);
-					
-					String relatedObjectLinkAttributeName = relatedObjectConfig.getLinkAttributeName();
-					for(int j = 0; j < objects.size(); j++)
+					if(orList.size() > 0)
 					{
-						RedbackObject object = objects.get(j);
-						Value linkValue = object.get(attributeName);
-						if(!linkValue.isNull())
+						DataMap relatedObjectFilter = new DataMap();
+						relatedObjectFilter.put("$or", orList);
+						ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null, false);
+						
+						String relatedObjectLinkAttributeName = relatedObjectConfig.getLinkAttributeName();
+						for(int j = 0; j < elements.size(); j++)
 						{
-							RedbackObject relatedObject = null;
-							for(int k = 0; k < result.size(); k++)
+							RedbackElement element = elements.get(j);
+							Value linkValue = element.get(attributeName);
+							if(linkValue != null && !linkValue.isNull())
 							{
-								RedbackObject resultObject = result.get(k);
-								Value resultObjectLinkValue = resultObject.get(relatedObjectLinkAttributeName);
-								if(linkValue != null  &&  linkValue.equalsIgnoreCase(resultObjectLinkValue))
-									relatedObject = resultObject;
+								RedbackObject relatedObject = null;
+								for(int k = 0; k < result.size(); k++)
+								{
+									RedbackObject resultObject = result.get(k);
+									Value resultObjectLinkValue = resultObject.get(relatedObjectLinkAttributeName);
+									if(linkValue != null  &&  linkValue.equalsIgnoreCase(resultObjectLinkValue))
+										relatedObject = resultObject;
+								}
+								if(relatedObject == null) // Because of a broken link in the DB
+								{
+									ObjectConfig zombieObjectConfig = getObjectConfig(relatedObjectConfig.getObjectName());
+									String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
+									relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));
+								}
+								element.put(attributeName, relatedObject);							
 							}
-							if(relatedObject == null) // Because of a broken link in the DB
-							{
-								ObjectConfig zombieObjectConfig = getObjectConfig(relatedObjectConfig.getObjectName());
-								String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
-								relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));
-							}
-							object.put(attributeName, relatedObject);							
 						}
 					}
 				}
@@ -233,7 +287,7 @@ public class ObjectManager
 				}
 				
 				if(addRelated)
-					addRelatedBulk(session, objectList);
+					addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 			}
 			catch(Exception e)
 			{
@@ -248,12 +302,12 @@ public class ObjectManager
 		return objectList;
 	}
 	
-	public ArrayList<RedbackObject> listObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated) throws RedbackException
+	public ArrayList<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated) throws RedbackException
 	{
-		return listObjects(session, objectName, uid, attributeName, filterData, searchText, addRelated, 0);
+		return listRelatedObjects(session, objectName, uid, attributeName, filterData, searchText, addRelated, 0);
 	}
 	
-	public ArrayList<RedbackObject> listObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated, int page) throws RedbackException
+	public ArrayList<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated, int page) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
@@ -314,6 +368,69 @@ public class ObjectManager
 			object.save();
 		}
 		return object;
+	}
+	
+	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, boolean addRelated) throws RedbackException
+	{
+		List<RedbackAggregate> list = new ArrayList<RedbackAggregate>();
+		ObjectConfig objectConfig = getObjectConfig(objectName);
+		if(objectConfig != null)
+		{
+			try
+			{
+				DataMap objectFilter = new DataMap();
+				if(filter != null)
+					objectFilter.merge(filter);
+				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
+				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
+					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+				DataList dbTuple = new DataList();
+				for(int i = 0; i < tuple.size(); i++)
+					dbTuple.add(objectConfig.getAttributeConfig(tuple.getString(i)).getDBKey());
+				DataList dbMetrics = new DataList();
+				for(int i = 0; i < metrics.size(); i++)
+				{
+					DataMap metric = metrics.getObject(i);
+					String function = metric.getString("function");
+					if(function.equals("count") || function.equals("sum") || function.equals("max") || function.equals("min"))
+					{
+						DataMap dbMetric = new DataMap();
+						dbMetric.put("function", function);
+						if(!function.equals("count"))
+						{
+							String attribute = metric.getString("attribute");
+							if(attribute != null)
+								dbMetric.put("field", objectConfig.getAttributeConfig(attribute).getDBKey());
+						}
+						dbMetric.put("name", metric.getString("name"));
+						dbMetrics.add(metric);
+					}
+				}
+				
+				DataMap dbResult = aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics);
+				DataList dbResultList = dbResult.getList("result");
+				
+				for(int i = 0; i < dbResultList.size(); i++)
+				{
+					DataMap dbData = dbResultList.getObject(i);
+					RedbackAggregate aggregate = new RedbackAggregate(session, this, objectConfig, dbData);
+					list.add(aggregate);
+				}
+				
+				if(addRelated)
+					addRelatedBulk(session, (List<RedbackElement>)(List<?>)list);
+			}
+			catch(Exception e)
+			{
+				logger.severe(e.getMessage());
+				throw new RedbackException("Error aggregating objects", e);
+			}
+		}
+		else
+		{
+			error("No object config is available for '" + objectName + "'");	
+		}
+		return list;		
 	}
 	
 	public Value getNewID(String name) throws FunctionErrorException, FunctionTimeoutException
@@ -606,6 +723,23 @@ public class ObjectManager
 		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
 		{
 			throw new RedbackException("Error publishing data", e);
+		}
+	}
+	
+	protected DataMap aggregateData(String objectName, DataMap filter, DataList tuple, DataList metrics) throws RedbackException
+	{
+		try
+		{
+			DataMap request = new DataMap();
+			request.put("object", objectName);
+			request.put("filter", filter);
+			request.put("tuple", tuple);
+			request.put("metrics", metrics);
+			return request(dataServiceName, request);
+		}
+		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
+		{
+			throw new RedbackException("Error requesting data", e);
 		}
 	}
 	

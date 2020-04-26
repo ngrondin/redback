@@ -42,11 +42,17 @@ public class ObjectManagerJSWrapper
 		return convertToJSArray(objectManager.listObjects(session, objectName, convertToJSONObject(filterData), null, false));
 	}
 	
+	@Deprecated
 	public JSObject getObjectList(String objectName, String uid, String attributeName, JSObject filterData) throws RedbackException
 	{
-		return convertToJSArray(objectManager.listObjects(session, objectName, uid, attributeName, convertToJSONObject(filterData), null, false));
+		return convertToJSArray(objectManager.listRelatedObjects(session, objectName, uid, attributeName, convertToJSONObject(filterData), null, false));
 	}
-	
+
+	public JSObject getRelatedObjectList(String objectName, String uid, String attributeName, JSObject filterData) throws RedbackException
+	{
+		return convertToJSArray(objectManager.listRelatedObjects(session, objectName, uid, attributeName, convertToJSONObject(filterData), null, false));
+	}
+
 	public JSObject updateObject(UserProfile userProfile, String objectName, String id, JSObject updateData) throws RedbackException, ScriptException
 	{
 		RedbackObject rbo = objectManager.updateObject(session, objectName, id, convertToJSONObject(updateData));

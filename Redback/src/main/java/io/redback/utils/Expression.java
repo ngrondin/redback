@@ -15,16 +15,16 @@ import jdk.nashorn.api.scripting.JSObject;
 public class Expression
 {
 	protected String expressionString;
-	protected Value fixedValue;
+	protected Object fixedValue;
 	protected CompiledScript script;
 	
 	public Expression(ScriptEngine jsEngine, String exp) throws RedbackException
 	{
 		expressionString = exp != null ? exp : "null";
 		if(expressionString.matches("[-+]?\\d*\\.?\\d+"))
-			fixedValue = new Value(Double.parseDouble(expressionString));
+			fixedValue = Double.parseDouble(expressionString);
 		else if(expressionString.equalsIgnoreCase("true") ||  expressionString.equalsIgnoreCase("false"))
-			fixedValue = new Value(expressionString.equalsIgnoreCase("true") ? true : false);
+			fixedValue = expressionString.equalsIgnoreCase("true") ? true : false;
 		else
 		{
 			try

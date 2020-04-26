@@ -11,10 +11,12 @@ import javax.script.ScriptException;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.utils.Expression;
 import io.redback.utils.StringUtils;
 
 public class AttributeConfig 
 {
+	protected ObjectManager objectManager;
 	protected DataMap config;	
 	protected String objectName;
 	protected HashMap<String, CompiledScript> scripts;
@@ -23,24 +25,25 @@ public class AttributeConfig
 	protected Expression expression;
 	protected Expression defaultValue;
 	
-	public AttributeConfig(DataMap cfg, String on) throws RedbackException
+	public AttributeConfig(ObjectManager om, String on, DataMap cfg) throws RedbackException
 	{
-		config = cfg;
+		objectManager = om;
 		objectName = on;
+		config = cfg;
 		scripts = new HashMap<String, CompiledScript>();
 		if(config.get("relatedobject") != null)
-			relatedObjectConfig = new RelatedObjectConfig(config.getObject("relatedobject"));
+			relatedObjectConfig = new RelatedObjectConfig(objectManager, config.getObject("relatedobject"));
 		
 		if(config.get("editable") != null && config.getString("editable").length() > 0)
-			editable = new Expression(config.getString("editable"));
+			editable = new Expression(objectManager.getScriptEngine(), config.getString("editable"));
 		else 
-			editable = new Expression("true");
+			editable = new Expression(objectManager.getScriptEngine(), "true");
 		
 		if(config.get("expression") != null && config.getString("expression").length() > 0)
-			expression = new Expression(config.getString("expression"));
+			expression = new Expression(objectManager.getScriptEngine(), config.getString("expression"));
 
 		if(config.get("default") != null && config.getString("default").length() > 0)
-			defaultValue = new Expression(config.getString("default"));
+			defaultValue = new Expression(objectManager.getScriptEngine(), config.getString("default"));
 
 		DataMap scriptsCfg = config.getObject("scripts");
 		if(scriptsCfg != null)

@@ -7,10 +7,12 @@ import java.util.List;
 import javax.script.ScriptException;
 
 import io.firebus.Firebus;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.objectmanager.ObjectConfig;
 import io.redback.managers.objectmanager.ObjectManager;
+import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 import io.redback.services.ObjectServer;
@@ -43,34 +45,28 @@ public class RedbackObjectServer extends ObjectServer
 	{
 		List<RedbackObject> objects = null;
 		try {
-			objects = new ArrayList<RedbackObject>();
 			if(filter == null)
 				filter = new DataMap();
 			
 			objectManager.initiateCurrentTransaction();
 			objects = objectManager.listObjects(session, objectName, filter, search, addRelated, page);
 			objectManager.commitCurrentTransaction();
-			
-			return objects;
 		} catch(ScriptException e) {
 			error("Error listing objects", e);
 		}
 		return objects;	
 	}
 
-	protected List<RedbackObject> list(Session session, String objectName, String uid, String attribute, DataMap filter, String search, int page, boolean addRelated) throws RedbackException 
+	protected List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, int page, boolean addRelated) throws RedbackException 
 	{
 		List<RedbackObject> objects = null;
 		try {
-			objects = new ArrayList<RedbackObject>();
 			if(filter == null)
 				filter = new DataMap();
 
 			objectManager.initiateCurrentTransaction();
-			objects = objectManager.listObjects(session, objectName, uid, attribute, filter, search, addRelated, page);
+			objects = objectManager.listRelatedObjects(session, objectName, uid, attribute, filter, search, addRelated, page);
 			objectManager.commitCurrentTransaction();
-	
-			return objects;
 		} catch(ScriptException e) {
 			error("Error listing objects", e);
 		}
@@ -123,6 +119,18 @@ public class RedbackObjectServer extends ObjectServer
 	public void clearCaches()
 	{
 		objectManager.refreshAllConfigs();
+	}
+
+	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, boolean addRelated) throws RedbackException {
+		List<RedbackAggregate> aggregates = null;
+		try {
+			objectManager.initiateCurrentTransaction();
+			aggregates = objectManager.aggregateObjects(session, objectName, filter, tuple, metrics, addRelated);
+			objectManager.commitCurrentTransaction();
+		} catch(ScriptException e) {
+			error("Error listing objects", e);
+		}
+		return aggregates;	
 	}
 
 }

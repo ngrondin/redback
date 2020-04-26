@@ -10,23 +10,21 @@ import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.utils.DataEntity;
-import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
-import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.utils.StringUtils;
 
 public class ObjectConfig
 {
+	protected ObjectManager objectManager;
 	protected DataMap config;
 	protected HashMap<String, AttributeConfig> attributes;
 	protected HashMap<String, CompiledScript> scripts;
 	
-	public ObjectConfig(DataMap cfg, List<IncludeScript> includes) throws RedbackException
+	public ObjectConfig(ObjectManager om, DataMap cfg) throws RedbackException
 	{
+		objectManager = om;
 		config = cfg;
 		attributes = new HashMap<String, AttributeConfig>();
 		scripts = new HashMap<String, CompiledScript>();
@@ -34,9 +32,10 @@ public class ObjectConfig
 		for(int i = 0; i < list.size(); i++)
 		{
 			DataMap attrCfg = list.getObject(i);
-			attributes.put(attrCfg.getString("name"), new AttributeConfig(attrCfg, getName()));
+			attributes.put(attrCfg.getString("name"), new AttributeConfig(objectManager, getName(), attrCfg));
 		}
 		
+		List<IncludeScript> includes = objectManager.getIncludeScripts();
 		StringBuilder allIncludes = new StringBuilder();
 		if(includes != null)
 		{
@@ -60,7 +59,7 @@ public class ObjectConfig
 					ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 					jsEngine.put(ScriptEngine.FILENAME, scriptName);
 					String source = StringUtils.unescape(scriptsCfg.getString(event));
-					source = allIncludes.toString() + source;
+					source = source + allIncludes.toString();
 					CompiledScript script = ((Compilable)jsEngine).compile(source);
 					scripts.put(event, script);
 				} 
