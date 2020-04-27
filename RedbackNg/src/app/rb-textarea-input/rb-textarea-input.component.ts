@@ -10,8 +10,8 @@ export class RbTextareaInputComponent implements OnInit {
 
   @Input('label') label: string;
   @Input('icon') icon: string;
-  @Input('size') size: Number;
-  @Input('rows') rows: Number = 3;
+  @Input('size') size: number;
+  @Input('rows') rows: number = 3;
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
@@ -42,6 +42,12 @@ export class RbTextareaInputComponent implements OnInit {
       return true;      
   }
 
+  public get widthString() : string {
+    if(this.size != null)
+      return (15*this.size) + 'px';
+    else
+      return '100%';
+  }
 
   commit() {
     this.rbObject.setValue(this.attribute, this.editedValue);

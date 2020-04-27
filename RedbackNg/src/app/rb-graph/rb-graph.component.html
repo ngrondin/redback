@@ -8,7 +8,6 @@
     [style.height.px]="height">
     <ngx-charts-bar-vertical
         *ngIf="type == 'vbar' && !is2d"
-        [view]="view"
         [scheme]="colorScheme"
         [results]="graphData"
         [xAxis]="true"
@@ -21,7 +20,6 @@
     </ngx-charts-bar-vertical>    
     <ngx-charts-bar-vertical-2d
         *ngIf="type == 'vbar' && is2d"
-        [view]="view"
         [scheme]="colorScheme"
         [results]="graphData"
         [xAxis]="true"
@@ -34,7 +32,6 @@
     </ngx-charts-bar-vertical-2d>
     <ngx-charts-bar-horizontal
         *ngIf="type == 'hbar' && !is2d"
-        [view]="view"
         [scheme]="colorScheme"
         [results]="graphData"
         [xAxis]="true"
@@ -47,7 +44,6 @@
     </ngx-charts-bar-horizontal>    
     <ngx-charts-bar-horizontal-2d
         *ngIf="type == 'hbar' && is2d"
-        [view]="view"
         [scheme]="colorScheme"
         [results]="graphData"
         [xAxis]="true"
@@ -60,7 +56,6 @@
     </ngx-charts-bar-horizontal-2d>
     <ngx-charts-pie-chart
         *ngIf="type == 'pie' && !is2d"
-        [view]="view"
         [scheme]="colorScheme"
         [results]="graphData"
         [doughnut]="true"
@@ -69,9 +64,9 @@
     </ngx-charts-pie-chart>
     <ngx-charts-gauge
         *ngIf="type == 'gauge'"
-        [view]="view"
         [scheme]="colorScheme"
         [results]="graphData"
+        [showText]="false"
         [legend]="true"
         [legendPosition]="'below'"
         [legendTitle]="null"
@@ -80,7 +75,6 @@
     </ngx-charts-gauge>    
     <ngx-charts-number-card
         *ngIf="type == 'number'"
-        [view]="view"
         [scheme]="colorScheme"
         [results]="graphData"
         [cardColor]="'#232837'">

@@ -15,6 +15,7 @@ export class RbObject {
     validation: any;
     changed: any;
     dataService: DataService;
+    lastUpdated: number;
 
     constructor(json: any, ds: DataService) {
         this.uid = json.uid;
@@ -26,6 +27,7 @@ export class RbObject {
         this.changed = [];
         this.dataService = ds;
         this.resolveRelatedObjects();
+        this.lastUpdated = (new Date()).getTime();
     }
 
     updateFromServer(json: any) {
@@ -40,6 +42,7 @@ export class RbObject {
                 this.related[attribute] = json.related[attribute];
         this.changed = [];
         this.resolveRelatedObjects();
+        this.lastUpdated = (new Date()).getTime();
     }
 
     resolveRelatedObjects() {
@@ -108,6 +111,7 @@ export class RbObject {
                 this.related[attribute] = related;
             }
             this.changed.push(attribute);
+            this.lastUpdated = (new Date()).getTime();
             return true;
         }
         return false;

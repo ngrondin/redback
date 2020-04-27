@@ -37,10 +37,12 @@ class GanttSeriesConfig {
 class GanttLane {
   id: string;
   label: string;
+  spreads: GanttSpread[];
 
-  constructor(i: string, l: string) {
+  constructor(i: string, l: string, s: GanttSpread[]) {
     this.id = i;
     this.label = l;
+    this.spreads = s;
   }
 }
 
@@ -51,16 +53,18 @@ class GanttSpread {
   width: number;
   lane: string;
   color: string;
+  canEdit: Boolean;
   object: RbObject;
   config: GanttSeriesConfig;
 
-  constructor(i: string, l: string, s: number, w: number, ln: string, c: string, o: RbObject, cfg: GanttSeriesConfig) {
+  constructor(i: string, l: string, s: number, w: number, ln: string, c: string, ce: Boolean, o: RbObject, cfg: GanttSeriesConfig) {
     this.id = i;
     this.label = l;
     this.start = s;
     this.width = w;
     this.lane = ln;
     this.color = c;
+    this.canEdit = ce;
     this.object = o;
     this.config = cfg;
   }
@@ -96,7 +100,16 @@ export class RbGanttComponent implements OnInit {
   widthPX: number;
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  ganttData: any[];
+  dayMarks: GanttMark[];
+  hourMarks: GanttMark[];
 
+  lastObjectCount: number = 0;
+  lastObjectUpdate: number = 0;
+
+  recalc: number = 0;
+  public getSizeForObjectCallback: Function;
+  
   constructor() { }
 
 
@@ -108,26 +121,57 @@ export class RbGanttComponent implements OnInit {
       }
     }
     if('lists' in changes && this.lists != null) {
-      this.calcParams();
+      if(this.haveListsChanged()) {
+        this.calcAll();
+      }
     }
   }
 
   ngOnInit() {
+    this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
     this.spanMS = 259200000;
     this.zoomMS = 259200000;
+    this.calcAll();
+  }
+
+  haveListsChanged(): Boolean {
+    let changed: Boolean = false;
+    let count: number = 0;
+    for(let ser in this.lists) {
+      for(let obj of this.lists[ser]) {
+        count += 1;
+        if(obj['lastUpdated'] > this.lastObjectUpdate) {
+          changed = true;
+          this.lastObjectUpdate = obj['lastUpdated'];
+        }
+      }
+    }
+    if(count != this.lastObjectCount) {
+      changed = true;
+      this.lastObjectCount = count;
+    }
+    return changed;
   }
 
   setZoom(ms: number) {
     this.zoomMS = ms;
-    this.calcParams();
+    this.calcAll();
   }
 
   setSpan(ms: number) {
     this.spanMS = ms;
-    this.calcParams();
+    this.calcAll();
   }
 
-  calcParams() {
+  calcAll() {
+    this.calcParams();
+    this.ganttData = this.getLanes();
+    this.dayMarks = this.getDayMarks();
+    this.hourMarks = this.getHourMarks();
+    this.recalc += 1;
+  }
+
+  private calcParams() {
     if(this.spanMS < this.zoomMS) {
       this.spanMS = this.zoomMS;
     }
@@ -142,11 +186,7 @@ export class RbGanttComponent implements OnInit {
     }
   }
 
-  public canEditSpread(spread: GanttSpread) : Boolean {
-    return spread.object.canEdit(spread.config.startAttribute) || spread.object.canEdit(spread.config.laneAttribute);
-  }
-
-  public getLanes() : GanttLane[] {
+  private getLanes() {
     let lanes : GanttLane[] = [];
     for(let cfg of this.seriesConfigs) {
       let list: RbObject[] = this.lists[cfg.dataset];
@@ -154,23 +194,25 @@ export class RbGanttComponent implements OnInit {
         let obj = list[i];
         let objLaneId = obj.get(cfg.laneAttribute);
         if(objLaneId != null) {
-          let objLane: GanttLane = null;
-          for(var g of lanes) {
-            if(objLaneId == g.id) {
-              objLane = g;
+          let lane: GanttLane = null;
+          for(var l of lanes) {
+            if(objLaneId == l.id) {
+              lane = l;
             }
           }
-          if(objLane == null) {
-            objLane = new GanttLane(obj.get(cfg.laneAttribute), obj.get(cfg.laneLabelAttribute));
-            lanes.push(objLane);
+          if(lane == null) {
+            lane = new GanttLane(objLaneId, obj.get(cfg.laneLabelAttribute), this.getSpreads(objLaneId));
+            lanes.push(lane);
           }
+          
         }
       }
     }
+    lanes.sort((a, b) => (a != null && b != null ? a.label.localeCompare(b.label) : 0));
     return lanes;
   }
 
-  public getSpreads(laneId: string) : GanttSpread[] {
+  private getSpreads(laneId: string) : GanttSpread[] {
     let spreads : GanttSpread[] = [];
     for(let cfg of this.seriesConfigs) {
       let list: RbObject[] = this.lists[cfg.dataset];
@@ -205,7 +247,8 @@ export class RbGanttComponent implements OnInit {
                 color = obj.get(cfg.colorAttribute);
               }
             }
-            spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, obj, cfg));
+            let canEdit: Boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
+            spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, canEdit, obj, cfg));
           }
         }
       }
@@ -213,7 +256,7 @@ export class RbGanttComponent implements OnInit {
     return spreads;
   }
 
-  public getHourMarks() : GanttMark[] {
+  private getHourMarks() : GanttMark[] {
     let marks: GanttMark[] = [];
     let lastMidnight = (new Date(this.startMS));
     lastMidnight.setHours(0);
@@ -233,7 +276,7 @@ export class RbGanttComponent implements OnInit {
     return marks;
   }
 
-  public getDayMarks() : GanttMark[] {
+  private getDayMarks() : GanttMark[] {
     let marks: GanttMark[] = [];
     let lastMidnight = (new Date(this.startMS));
     lastMidnight.setHours(0);
@@ -303,5 +346,13 @@ export class RbGanttComponent implements OnInit {
 
   public scroll(event) {
     this.scrollLeft = event.target.scrollLeft;
+  }
+
+  public getSizeForObject(object: RbObject) : any {
+    let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(object);
+    return {
+      x: Math.round(object.get(cfg.durationAttribute) * this.multiplier),
+      y: 28
+    };
   }
 }

@@ -57,10 +57,11 @@ export class DesktopRootComponent implements OnInit {
   menuMode: string;
   menuWidth: number;
   viewTargetStack: Target[];
+  title: string = "Welcome";
  
   constructor(
     private configService : ConfigService,
-    private dragService: DragService,
+    public dragService: DragService,
     private domSanitizer: DomSanitizer
   ) { }
 
@@ -85,6 +86,10 @@ export class DesktopRootComponent implements OnInit {
 
   get logoUrl() : any {
     return this.domSanitizer.bypassSecurityTrustResourceUrl(this.logo);
+  }
+
+  setTitle($event) {
+    this.title = $event;
   }
 
   navigateTo($event) {
@@ -127,6 +132,10 @@ export class DesktopRootComponent implements OnInit {
     } else {
       return null;
     }
+  }
+
+  logout() {
+
   }
 
   @HostListener('mouseup', ['$event']) onMouseUp($event) {

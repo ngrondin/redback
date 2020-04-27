@@ -150,8 +150,12 @@ export class RbDatasetDirective implements OnChanges {
     } else if(name == 'save') {
       
     } else if(name == 'executeAll') {
+      let delay: number = 0;
       this.list.forEach((object) => {
-        this.dataService.executeObObject(object, param, null);
+        setTimeout(() => {
+          this.dataService.executeObObject(object, param, null)
+        }, delay);
+        delay += 200;
       });
     } else if(this.selectedObject != null) {
       this.dataService.executeObObject(this.selectedObject, name, param);

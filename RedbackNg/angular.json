@@ -44,15 +44,14 @@
               "sourceMap": false,
               "extractCss": false,
               "namedChunks": false,
-              "aot": false,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": false,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
+                  "maximumWarning": "5mb",
+                  "maximumError": "15mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -127,5 +126,8 @@
       }
     }
   },
-  "defaultProject": "RedbackNg"
+  "defaultProject": "RedbackNg",
+  "cli": {
+    "analytics": false
+  }
 }

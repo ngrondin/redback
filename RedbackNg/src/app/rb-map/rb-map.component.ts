@@ -19,7 +19,7 @@ export class RbMapComponent implements OnInit {
   @Input('labelattribute') labelattribute: string;
   @Input('descriptionattribute') descriptionattribute: string;
   @Output() selectObject: EventEmitter<any> = new EventEmitter();
-  @ViewChild('map', { read: AgmMap, static: false }) map: AgmMap;
+  @ViewChild('map', { read: AgmMap }) map: AgmMap;
 
   zoomOfMap: number;
   showContextMenu: boolean = false;

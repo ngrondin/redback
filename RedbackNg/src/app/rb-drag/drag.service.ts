@@ -29,6 +29,7 @@ export class DragService {
       this.position = new XY(event.clientX - this.offset.x, event.clientY - this.offset.y);
       if(this.isDragging == false && this.object != null && (Math.abs(event.clientX - this.mouseOrigin.x) > 5 || Math.abs(event.clientY - this.mouseOrigin.y) > 5)) {
         this.isDragging = true;
+        this.sourceElement.nativeElement.style.visibility = "hidden";
       }
     }
   }
@@ -38,6 +39,10 @@ export class DragService {
   }
 
   public endDrag() {
+    if(this.sourceElement != null && this.sourceElement.nativeElement != null) {
+      this.sourceElement.nativeElement.style.visibility = "";
+    }
+    this.sourceElement = null;
     this.isDragging = false;
     this.object = null;
     this.mouseOrigin = null;

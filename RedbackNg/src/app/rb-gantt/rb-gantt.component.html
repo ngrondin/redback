@@ -36,7 +36,7 @@
             <div
                 class="rb-gantt-daytrack">
                 <div
-                    *ngFor="let mark of getDayMarks()"
+                    *ngFor="let mark of dayMarks"
                     [style.left.px]="mark.px"
                     class="rb-gantt-mark">
                     &nbsp;{{mark.label}}
@@ -45,7 +45,7 @@
             <div
                 class="rb-gantt-hourtrack">
                 <div
-                    *ngFor="let mark of getHourMarks()"
+                    *ngFor="let mark of hourMarks"
                     [style.left.px]="mark.px"
                     class="rb-gantt-mark">
                     &nbsp;{{mark.label}}
@@ -59,7 +59,7 @@
     <div
         class="rb-gantt-laneheads">
         <div
-            *ngFor="let lane of getLanes(); let i = index"
+            *ngFor="let lane of ganttData; let i = index"
             [class]="'rb-gantt-lanehead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')">
             <div
                 class="rb-gantt-mainlabel">
@@ -71,19 +71,20 @@
         class="rb-gantt-lanes"
         (scroll)="scroll($event)">
         <div
-            *ngFor="let mark of getHourMarks()"
+            *ngFor="let mark of hourMarks"
             [style.left.px]="mark.px"
             class="rb-gantt-mark">
         </div>
         <div
-            *ngFor="let lane of getLanes(); let i = index"
+            *ngFor="let lane of ganttData; let i = index"
             [class]="'rb-gantt-lane rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
             [style.width.px]="widthPX"
-            (rb-drag-dropzone)="dropped($event, lane)">
+            (rb-drag-dropzone)="dropped($event, lane)"
+            [rb-drag-changeform]="getSizeForObjectCallback">
             <div
-                *ngFor="let spread of getSpreads(lane.id)"
+                *ngFor="let spread of lane.spreads"
                 [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
-                [rb-drag-object]="canEditSpread(spread) ? spread.object : null"
+                [rb-drag-object]="spread.canEdit ? spread.object : null"
                 [style.width.px]="spread.width"
                 [style.left.px]="spread.start">
                 <div

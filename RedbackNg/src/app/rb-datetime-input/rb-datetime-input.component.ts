@@ -15,7 +15,7 @@ import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.comp
 export class RbDatetimeInputComponent extends RbInputCommonComponent implements OnInit {
   @Input('format') format: string;
 
-  @ViewChild('input', { read: ViewContainerRef, static: false }) inputContainerRef: ViewContainerRef;
+  @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
 
   overlayRef: OverlayRef;
   popupDatetimeComponentRef: ComponentRef<RbPopupDatetimeComponent>;

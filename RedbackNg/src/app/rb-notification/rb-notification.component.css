@@ -34,6 +34,9 @@
 
 .rb-notification-listheader {
     margin: -10px 0px -10px 0px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .rb-notification-listsub {
@@ -44,4 +47,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+:host > .mat-menu-panel {
+    max-width: 350px!important;
 }

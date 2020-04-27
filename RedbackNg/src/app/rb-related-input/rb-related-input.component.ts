@@ -24,7 +24,7 @@ export class RbRelatedInputComponent implements OnInit {
   @Input('parentattribute') parentattribute: string;
   @Input('childattribute') childattribute: string;
 
-  @ViewChild('input', { read: ViewContainerRef, static: false }) inputContainerRef: ViewContainerRef;
+  @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
   overlayRef: OverlayRef;
   popupListComponentRef: ComponentRef<RbPopupListComponent>;
   searchValue: string; 

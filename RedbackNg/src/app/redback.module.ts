@@ -53,6 +53,7 @@ import { MapService } from './map.service';
 import { RbAggregatesetDirective } from './rb-aggregateset/rb-aggregateset.directive';
 import { RbGraphComponent } from './rb-graph/rb-graph.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { RbDragChangeformDirective } from './rb-drag/rb-drag-changeform.directive';
 
 @NgModule({
   imports: [
@@ -122,6 +123,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     RbGanttComponent,
     RbDragObjectDirective,
     RbDragDropzoneDirective,
+    RbDragChangeformDirective,
     RbAggregatesetDirective,
     RbGraphComponent
   ],
@@ -169,6 +171,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     RbGanttComponent,
     RbDragObjectDirective,
     RbDragDropzoneDirective,
+    RbDragChangeformDirective,
     RbAggregatesetDirective,
     RbGraphComponent
   ],

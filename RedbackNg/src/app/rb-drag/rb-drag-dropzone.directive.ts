@@ -11,7 +11,6 @@ export class RbDragDropzoneDirective {
     private dragService: DragService    
   ) { }
 
-  //@Input('rb-drag-dropzone') inp: any;
   @Output('rb-drag-dropzone') dropped: EventEmitter<any> = new EventEmitter();
 
   @HostListener('mouseup', ['$event']) onMouseUp($event) {

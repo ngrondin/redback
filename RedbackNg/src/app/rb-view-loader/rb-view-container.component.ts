@@ -14,7 +14,7 @@ import { Target } from 'app/desktop-root/desktop-root.component';
       this.navigate.emit(target);
     }
     setTitle(title: string) {
-      this.currentTarget.title = title;
+      setTimeout(() => this.currentTarget.title = title);
       //this.titlechange.emit(title);
     }
 
