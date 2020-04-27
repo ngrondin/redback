@@ -70,7 +70,7 @@ public class RedbackUIServer extends UIServer
 					String page = appConfig.getString("page");
 					context.put("config", appConfig);
 					html = executeJSP("pages/" + page, version, context);
-					html.inject("menu", getMenu(session, version));
+					//html.inject("menu", getMenu(session, version));
 				}
 				catch(Exception e)
 				{
@@ -105,7 +105,7 @@ public class RedbackUIServer extends UIServer
 				menuGroup.put("content", new DataList());
 				for(int j = 0; j < resultList.size(); j++)
 				{
-					if(resultList.getObject(j).getString("type").equals("menulink")  &&  resultList.getObject(j).getString("group").equals(menuGroup.getString("name")))
+					if(resultList.getObject(j).getString("type").equals("menulink") && menuGroup.getString("name").equals(resultList.getObject(j).getString("group")))
 					{
 						DataMap menuLink = resultList.getObject(j);
 						if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
@@ -120,6 +120,12 @@ public class RedbackUIServer extends UIServer
 					menuGroup.getList("content").sort("order");
 					menu.getList("content").add(menuGroup);
 				}
+			} 
+			else if(resultList.getObject(i).getString("type").equals("menulink") && resultList.getObject(i).getString("group") == null)
+			{
+				DataMap menuLink = resultList.getObject(i);
+				if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
+					menu.getList("content").add(menuLink);
 			}
 		}
 		menu.getList("content").sort("order");

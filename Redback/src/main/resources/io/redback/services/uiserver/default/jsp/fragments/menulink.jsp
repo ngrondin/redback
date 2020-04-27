@@ -1,7 +1,9 @@
 <button
 	mat-list-item 
-	class="rb-menu-link"
-	*ngIf="<%=menu%>.isGroupOpen('<%=config.getString('group')%>')"
+	class="rb-menu-link" <%
+if(typeof menugroup != 'undefined') { %>
+	*ngIf="<%=menu%>.isGroupOpen('<%=config.getString('group')%>')" <%
+} %>	
 	(click)="navigateTo({view:'<%=config.getString('view')%>', filter:{}, reset:true})"><%
 if(config.getString('icon').indexOf(':') >= 0) {%>
 	<mat-icon 

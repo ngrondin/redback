@@ -351,7 +351,11 @@ public class RedbackObject extends RedbackElement
 			return false;
 		else
 		{
-			return (Boolean)config.getAttributeConfig(name).getEditableExpression().eval(objectManager.createScriptContext(this));
+			Object o = config.getAttributeConfig(name).getEditableExpression().eval(objectManager.createScriptContext(this));
+			if(o instanceof Boolean)
+				return (Boolean)o;
+			else
+				return false;
 		}
 	}
 	
