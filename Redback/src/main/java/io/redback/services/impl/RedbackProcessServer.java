@@ -24,11 +24,11 @@ public class RedbackProcessServer extends ProcessServer
 		processManager = new ProcessManager(firebus, config);
 	}
 	
-	protected ProcessInstance initiate(Session session, String process, DataMap data) throws RedbackException
+	protected ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session.getUserProfile());
 		processManager.initiateCurrentTransaction();
-		ProcessInstance pi = processManager.initiateProcess(actionner, process, data);
+		ProcessInstance pi = processManager.initiateProcess(actionner, process, domain, data);
 		processManager.commitCurrentTransaction();
 		return pi;
 	}

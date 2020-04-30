@@ -22,4 +22,7 @@ if(config.getString('icon').indexOf(':') >= 0) {%>
 		*ngIf="<%=menu%>.isLarge">
 		<%=config.getString('label')%>
 	</span>
-</button>
+</button> <%
+if(config.get("group") == null) { %>
+<mat-divider></mat-divider> <%
+} %>

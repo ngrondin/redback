@@ -22,6 +22,7 @@ import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
 import io.redback.managers.objectmanagers.js.ProcessManagerProxyJSWrapper;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
+import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.Expression;
 import io.redback.utils.FirebusJSWrapper;
@@ -126,13 +127,15 @@ public class RedbackObject extends RedbackElement
 					String attributeName = attributeConfig.getName();
 					String idGeneratorName = attributeConfig.getIdGeneratorName();
 					Expression defaultValue = attributeConfig.getDefaultValue();
+					Value value = null;
 					if(idGeneratorName != null)
-					{
-						put(attributeName, objectManager.getNewID(idGeneratorName));
-					}
+						value = objectManager.getNewID(idGeneratorName);
 					else if(defaultValue != null)
-					{
-						put(attributeName, new Value(defaultValue.eval(objectManager.createScriptContext(this))));
+						value = new Value(defaultValue.eval(objectManager.createScriptContext(this)));
+					if(value != null) {
+						data.put(attributeName, value);
+						updatedAttributes.add(attributeName);	
+						executeAttributeScriptsForEvent(attributeName, "onupdate");
 					}
 				}
 				executeScriptsForEvent("oncreate");
@@ -490,6 +493,9 @@ public class RedbackObject extends RedbackElement
 		context.put("om", new ObjectManagerJSWrapper(objectManager, session));
 		context.put("pm", new ProcessManagerProxyJSWrapper(objectManager.getFirebus(), objectManager.processServiceName, session));
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
+		context.put("canRead", new SessionRightsJSFunction(session, "read"));
+		context.put("canWrite", new SessionRightsJSFunction(session, "write"));
+		context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
 		context.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(objectManager.getGlobalVariables()));
 		context.put("log", new LoggerJSFunction());

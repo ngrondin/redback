@@ -47,9 +47,10 @@ public abstract class ProcessServer extends AuthenticatedService
 				{
 					String process = request.getString("process");
 					DataMap data = request.getObject("data");
+					String domain = request.getString("domain");
 					if(process != null)
 					{
-						ProcessInstance pi = initiate(session, process, data);
+						ProcessInstance pi = initiate(session, process, domain, data);
 						responseData = new DataMap("instance", pi.getId());
 					}
 					else
@@ -117,7 +118,7 @@ public abstract class ProcessServer extends AuthenticatedService
 	}
 
 
-	protected abstract ProcessInstance initiate(Session session, String process, DataMap data) throws RedbackException;
+	protected abstract ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException;
 	
 	protected abstract void processAction(Session session, String pid, String processAction, DataMap data) throws RedbackException;
 	

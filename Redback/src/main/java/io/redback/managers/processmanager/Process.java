@@ -69,13 +69,8 @@ public class Process
 		return nodes.get(n);
 	}
 
-	public ProcessInstance createInstance(Actionner actionner, DataMap data) throws RedbackException
+	public ProcessInstance createInstance(Actionner actionner, String domain, DataMap data) throws RedbackException
 	{
-		String domain = null;
-		if(actionner.isUser())
-			domain = actionner.getUserProfile().getAttribute("rb.defaultdomain");
-		else
-			domain = processManager.getProcessInstance(actionner.getId()).getDomain();
 		ProcessInstance pi = new ProcessInstance(name, version, domain, data);
 		return pi;
 	}

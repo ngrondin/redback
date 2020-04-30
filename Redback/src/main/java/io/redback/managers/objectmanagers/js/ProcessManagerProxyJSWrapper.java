@@ -36,6 +36,7 @@ public class ProcessManagerProxyJSWrapper
 		request.put("process", process);
 		request.put("objectname", object.getMember("objectname"));
 		request.put("uid", object.getMember("uid"));
+		request.put("domain", object.getMember("domain"));
 		request.put("data", data);
 		try
 		{

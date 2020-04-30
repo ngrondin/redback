@@ -29,10 +29,10 @@ public class ProcessManagerJSWrapper
 		//session = s;
 	}
 	
-	public ProcessInstanceJSWrapper initiateProcess(String name, JSObject data) throws RedbackException
+	public ProcessInstanceJSWrapper initiateProcess(String name, String domain, JSObject data) throws RedbackException
 	{
 		DataMap dataMap = FirebusDataUtil.convertJSObjectToDataObject(data);
-		ProcessInstance pi = processManager.initiateProcess(actionner, name, dataMap);
+		ProcessInstance pi = processManager.initiateProcess(actionner, name, domain, dataMap);
 		return new ProcessInstanceJSWrapper(pi);
 	}
 

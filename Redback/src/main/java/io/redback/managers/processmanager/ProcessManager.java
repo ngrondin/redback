@@ -208,14 +208,17 @@ public class ProcessManager
 		return domainServiceName;
 	}
 	
-	public ProcessInstance initiateProcess(Actionner actionner, String processName, DataMap data) throws RedbackException
+	public ProcessInstance initiateProcess(Actionner actionner, String processName, String domain, DataMap data) throws RedbackException
 	{
 		logger.finer("Initiating process '" + processName + "'");
 		ProcessInstance pi = null;
 		Process process = getProcess(processName);
 		if(process != null)
 		{
-			pi = process.createInstance(actionner, data);
+			
+			if(domain == null && actionner.isUser())
+				domain = actionner.getUserProfile().getAttribute("rb.defaultdomain");
+			pi = process.createInstance(actionner, domain, data);
 			putInCurrentTransaction(pi);
 			process.startInstance(actionner, pi);
 			logger.finer("Initiated instance '" + pi.getId() + "' for process '" + processName + "'");
