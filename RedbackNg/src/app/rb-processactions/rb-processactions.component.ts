@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { ApiService } from 'app/api.service';
 import { RbObject } from 'app/datamodel';
 import { DataService } from 'app/data.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'rb-processactions',
@@ -20,7 +21,8 @@ export class RbProcessactionsComponent implements OnInit {
   
   constructor(
     private apiService: ApiService,
-    private dataService: DataService
+    private dataService: DataService,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit() {
@@ -54,7 +56,14 @@ export class RbProcessactionsComponent implements OnInit {
   }
 
   clickAction(action: string) {
-    this.apiService.actionAssignment(this.pid, action).subscribe(resp => this.receiveActionResponse(resp));
+    this.apiService.actionAssignment(this.pid, action).subscribe(
+      resp => {
+        this.receiveActionResponse(resp)
+      },
+      error => {
+        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+      }
+    );
   }
 
   receiveActionResponse(resp: any) {

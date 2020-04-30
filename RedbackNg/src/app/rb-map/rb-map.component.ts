@@ -156,8 +156,12 @@ export class RbMapComponent implements OnInit {
 
   mapRightClick(event: any) {
     this.clickCoords = event.coords;
-    this.showContextMenu = true;
-    this.contextMenuPosition = {x: this.mousePosition.x, y: this.mousePosition.y};
+    if(this.selectedObject != null && this.geoattribute != null) {
+      if(this.selectedObject.validation[this.geoattribute].editable == true) {
+        this.showContextMenu = true;
+        this.contextMenuPosition = {x: this.mousePosition.x, y: this.mousePosition.y};
+      }
+    }
   }
 
   mouseMove(event: any) {

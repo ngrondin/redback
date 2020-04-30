@@ -17,7 +17,9 @@ export class RbGraphComponent implements OnInit {
   @Input('aggregates') aggregates: RbAggregate[];
 
   colorScheme = {
-    domain: ['#9370DB', '#87CEFA', '#FA8072', '#FF7F50', '#90EE90', '#9370DB']
+    //domain: ['#9370DB', '#87CEFA', '#FA8072', '#FF7F50', '#90EE90', '#9370DB']
+    //domain: ['#01579B', '#0277BD', '#0288D1', '#039BE5', '#29B6F6', '#81D4F4']
+    domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
   };
   graphData: any[];
 
@@ -98,7 +100,7 @@ export class RbGraphComponent implements OnInit {
     } else if(this.type == 'gauge') {
       return {x: 350, y: 250};
     } else if(this.type == 'number') {
-      return {x: 300, y: 300}
+      return {x: 170 * (this.graphData.length), y: 170}
     } else {
       return {x: 400, y: 300};
     }

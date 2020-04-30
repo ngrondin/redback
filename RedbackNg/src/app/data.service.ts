@@ -152,7 +152,14 @@ export class DataService {
   }
 
   executeObObject(rbObject: RbObject, func: string, param: string) {
-    this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(resp => this.updateObjectFromServer(resp));
+    this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(
+      resp => {
+        !this.apiService.SignalWebsocketConnected() ? this.updateObjectFromServer(resp) : null
+      },
+      error => {
+        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+      }      
+    );
   }
 
   aggregateObjects(name: string, filter: any, tuple: any, metrics: any) : Observable<any> {

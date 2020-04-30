@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Observer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ObjectResp, RbObject } from './datamodel';
@@ -25,11 +25,11 @@ export class ApiService {
   public processService: string;
   public signalService: string;
   public signalWebsocket: WebSocketSubject<any>;
+  public signalObservers: Observer<String>[] = [];
 
   constructor(
     private http: HttpClient
   ) { 
-
   }
 
   getObject(name: string, uid: string): Observable<any> {
@@ -135,28 +135,38 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-
-
-  private initSignalWebsocket() {
+  initSignalWebsocket() {
     if(this.signalService != null && this.signalService != "" && this.signalWebsocket == null) {
       this.signalWebsocket = webSocket(this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.signalService);
-      //this.signalWebsocket = webSocket('ws://localhost/rbws');
+      this.initSignalWebsocketSubscribe();
     }
   }
 
+  initSignalWebsocketSubscribe() {
+    this.signalWebsocket.asObservable().subscribe(
+      (msg) => this.receiveSignal(msg),
+      (err) => this.signalError(err)
+    );
+}
+
+  receiveSignal(signal: String) {
+    this.signalObservers.forEach((observer) => {
+      observer.next(signal);
+    });
+  }
+
+  signalError(error: String) {
+    setTimeout(() => {this.initSignalWebsocketSubscribe()}, 1000);
+  }
+
   getSignalObservable() : Observable<any>  {
-    if(this.signalService != null) {
-      if(this.signalWebsocket == null) {
-        this.initSignalWebsocket();
-      }
-      if(this.signalWebsocket != null) {
-        return this.signalWebsocket.asObservable();
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
+    return new Observable<any>((observer) => {
+      this.signalObservers.push(observer);
+    });
+  }
+
+  SignalWebsocketConnected() : Boolean {
+    return this.signalWebsocket != null;
   }
 
   subscribeToSignal(signal: string) {
