@@ -16,8 +16,8 @@ public class IncludeManager extends Manager {
 	
 	public IncludeManager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
 		super(d, e, parent, style);
-		if(!data.containsKey("script"))
-			data.put("script", "");
+		if(!_data.containsKey("script"))
+			_data.put("script", "");
 
 		createUI();
 	}
@@ -28,12 +28,12 @@ public class IncludeManager extends Manager {
 	}
 	
 	protected Navigator getNavigator() {
-		return new IncludeTree(data, this, sashForm, SWT.PUSH);
+		return new IncludeTree(_data, this, sashForm, SWT.PUSH);
 	}
 
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
-			return new ScriptForm(data, "script", this, sashForm, SWT.PUSH);
+			return new ScriptForm(_data, "script", this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

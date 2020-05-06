@@ -29,8 +29,8 @@ public class ProcessManager extends Manager {
 	
 	public ProcessManager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
 		super(d, e, parent, style);
-		if(!data.containsKey("nodes"))
-			data.put("nodes", new DataList());
+		if(!_data.containsKey("nodes"))
+			_data.put("nodes", new DataList());
 		createUI();
 	}
 	
@@ -41,38 +41,38 @@ public class ProcessManager extends Manager {
 	}
 
 	protected Navigator getNavigator() {
-		return new ProcessNavigator(data, this, sashForm, SWT.PUSH);
+		return new ProcessNavigator(_data, this, sashForm, SWT.PUSH);
 	}
 
 	protected Form getForm(String type, String name) {
 		if(type.equals("header")) {
-			return new ProcessHeaderForm(data, data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessHeaderForm(_data, _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("interaction")) {
-			return new ProcessInteractionForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessInteractionForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("action")) {
-			return new ProcessActionForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessActionForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("condition")) {
-			return new ProcessConditionForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessConditionForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("script")) {
-			return new ProcessScriptForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessScriptForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("rbobjectget")) {
-			return new ProcessRbObjectGetForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessRbObjectGetForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("rbobjectupdate")) {
-			return new ProcessRbObjectUpdateForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessRbObjectUpdateForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("rbobjectexecute")) {
-			return new ProcessRbObjectExecuteForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessRbObjectExecuteForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("firebusrequest")) {
-			return new ProcessFirebusRequestForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessFirebusRequestForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("domainservice")) {
-			return new ProcessDomainServiceForm(getNodeById(name), data.getList("nodes"), this, sashForm, SWT.PUSH);
+			return new ProcessDomainServiceForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}
 	}
 	
 	private DataMap getNodeById(String id) {
-		for(int i = 0; i < data.getList("nodes").size(); i++) {
-			DataMap node = data.getList("nodes").getObject(i);
+		for(int i = 0; i < _data.getList("nodes").size(); i++) {
+			DataMap node = _data.getList("nodes").getObject(i);
 			if(node.getString("id").equals(id))
 				return node;
 		}
@@ -83,8 +83,8 @@ public class ProcessManager extends Manager {
 		GetDataDialog dialog = new GetDataDialog("Type of node", options, getShell());
 		String newType = dialog.openReturnString();
 		int id = -1;
-		for(int i = 0; i < data.getList("nodes").size(); i++) {
-			int nodeId = Integer.parseInt(data.getList("nodes").getObject(i).getString("id"));
+		for(int i = 0; i < _data.getList("nodes").size(); i++) {
+			int nodeId = Integer.parseInt(_data.getList("nodes").getObject(i).getString("id"));
 			if(id <= nodeId)
 				id = nodeId + 1;
 		}
@@ -100,12 +100,12 @@ public class ProcessManager extends Manager {
 			newNode.put("assignees", new DataList());
 			newNode.put("notidication", new DataMap());
 		}
-		data.getList("nodes").add(newNode);
+		_data.getList("nodes").add(newNode);
 		return "" + id;
 	}
 
 	public void deleteNode(String type, String name) {
-		DataList nodes = data.getList("nodes");
+		DataList nodes = _data.getList("nodes");
 		for(int i = 0; i < nodes.size(); i++) {
 			if(nodes.getObject(i).getString("id").equals(name)) {
 				nodes.remove(i);

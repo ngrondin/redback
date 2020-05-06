@@ -24,12 +24,12 @@ public class RoleManager extends Manager {
 	}
 	
 	protected Navigator getNavigator() {
-		return new RoleTree(data, this, sashForm, SWT.PUSH);
+		return new RoleTree(_data, this, sashForm, SWT.PUSH);
 	}
 
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
-			return new RoleHeaderForm(data, this, sashForm, SWT.PUSH);
+			return new RoleHeaderForm(_data, this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

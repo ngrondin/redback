@@ -24,12 +24,12 @@ public class KeyManager extends Manager {
 	}
 	
 	protected Navigator getNavigator() {
-		return new KeyTree(data, this, sashForm, SWT.PUSH);
+		return new KeyTree(_data, this, sashForm, SWT.PUSH);
 	}
 
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
-			return new KeyHeaderForm(data, this, sashForm, SWT.PUSH);
+			return new KeyHeaderForm(_data, this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

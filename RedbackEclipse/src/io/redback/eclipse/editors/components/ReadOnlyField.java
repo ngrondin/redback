@@ -26,9 +26,9 @@ public class ReadOnlyField extends Field  {
 		lbl.setLayoutData(new RowData(170, 24));
 		text = new Text(this, SWT.BORDER);
 		text.setLayoutData(new RowData(300, 24));
-		if(data != null && data.getString(attribute) != null) {
-			text.setText(data.getString(attribute));
-			oldValue = data.getString(attribute);
+		if(_data != null && _data.getString(attribute) != null) {
+			text.setText(_data.getString(attribute));
+			oldValue = _data.getString(attribute);
 		}
 		text.setEditable(false);
 	}

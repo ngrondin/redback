@@ -22,10 +22,10 @@ public class ProcessScriptForm extends ProcessForm
 	
 	public void createUI() {
 		
-		new TextField(data, "name", "Name", this, SWT.NONE);
-		ScriptField sf = new ScriptField(data, "source", "Script", this, SWT.NONE);
+		new TextField(_data, "name", "Name", this, SWT.NONE);
+		ScriptField sf = new ScriptField(_data, "source", "Script", this, SWT.NONE);
 		sf.setLayoutData(new RowData(600, 200));
-		new SelectField(data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
+		new SelectField(_data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
 	}
 
 

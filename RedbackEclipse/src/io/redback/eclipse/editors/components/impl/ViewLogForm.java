@@ -18,10 +18,10 @@ public class ViewLogForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "entryattribute", "Entry Attribute", this, SWT.NONE);
-		new TextField(data, "userattribute", "User Attribute", this, SWT.NONE);
-		new TextField(data, "dateattribute", "Date Attribute", this, SWT.NONE);
-		new TextField(data, "categoryattribute", "Category Attribute", this, SWT.NONE);
+		new TextField(_data, "entryattribute", "Entry Attribute", this, SWT.NONE);
+		new TextField(_data, "userattribute", "User Attribute", this, SWT.NONE);
+		new TextField(_data, "dateattribute", "Date Attribute", this, SWT.NONE);
+		new TextField(_data, "categoryattribute", "Category Attribute", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

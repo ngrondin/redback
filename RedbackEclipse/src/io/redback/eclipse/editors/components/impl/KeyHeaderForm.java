@@ -20,9 +20,9 @@ public class KeyHeaderForm extends Form
 	}
 
 	public void createUI() {
-		new ReadOnlyField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "type", "Type", this, SWT.NONE);
-		new TextField(data, "pad", "Pad", this, SWT.NONE);
+		new ReadOnlyField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "type", "Type", this, SWT.NONE);
+		new TextField(_data, "pad", "Pad", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

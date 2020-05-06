@@ -18,9 +18,9 @@ public class ViewMapForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "geoattribute", "Geometry Attribute", this, SWT.NONE);
-		new TextField(data, "labelattribute", "Label Attribute", this, SWT.NONE);
-		new TextField(data, "descriptionattribute", "Description Attribute", this, SWT.NONE);
+		new TextField(_data, "geoattribute", "Geometry Attribute", this, SWT.NONE);
+		new TextField(_data, "labelattribute", "Label Attribute", this, SWT.NONE);
+		new TextField(_data, "descriptionattribute", "Description Attribute", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

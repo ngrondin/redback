@@ -24,12 +24,12 @@ public class AppManager extends Manager {
 	}
 	
 	protected Navigator getNavigator() {
-		return new AppTree(data, this, sashForm, SWT.PUSH);
+		return new AppTree(_data, this, sashForm, SWT.PUSH);
 	}
 
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
-			return new AppHeaderForm(data, this, sashForm, SWT.PUSH);
+			return new AppHeaderForm(_data, this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

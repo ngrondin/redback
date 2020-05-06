@@ -20,10 +20,10 @@ public class ProcessActionForm extends ProcessForm
 	
 	public void createUI() {
 		
-		new TextField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "interaction", "Interaction Code", this, SWT.NONE);
-		new TextField(data, "action", "Action", this, SWT.NONE);
-		new SelectField(data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
+		new TextField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "interaction", "Interaction Code", this, SWT.NONE);
+		new TextField(_data, "action", "Action", this, SWT.NONE);
+		new SelectField(_data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
 	}
 
 

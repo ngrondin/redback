@@ -130,8 +130,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 	protected void calcCanvasSize() {
 		canvasWidth = 0;
 		canvasHeight = 0;
-		for(int i = 0; i < data.getList("nodes").size(); i++) {
-			DataMap node = data.getList("nodes").getObject(i);
+		for(int i = 0; i < _data.getList("nodes").size(); i++) {
+			DataMap node = _data.getList("nodes").getObject(i);
 			int x = node.getNumber("position.x").intValue();
 			int y = node.getNumber("position.y").intValue();
 			if(x > canvasWidth)
@@ -150,8 +150,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 	public void paintControl(PaintEvent event) {
 		GC gc = event.gc;
 		Display display = Display.getCurrent();
-		for(int i = 0; i < data.getList("nodes").size(); i++) {
-			DataMap node = data.getList("nodes").getObject(i);
+		for(int i = 0; i < _data.getList("nodes").size(); i++) {
+			DataMap node = _data.getList("nodes").getObject(i);
 			int x = node.getNumber("position.x").intValue() + scrollHPos;
 			int y = node.getNumber("position.y").intValue() + scrollVPos;
 			String type = node.getString("type");
@@ -263,8 +263,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 		if(navAction.action.equals("space")) {
 			String[] parts = navAction.name.split("-");
 			int x = Integer.parseInt(parts[0]);
-			for(int i = 0; i < data.getList("nodes").size(); i++) {
-				DataMap node = data.getList("nodes").getObject(i);
+			for(int i = 0; i < _data.getList("nodes").size(); i++) {
+				DataMap node = _data.getList("nodes").getObject(i);
 				int nodeX = node.getNumber("position.x").intValue();
 				if(nodeX > x)
 					node.getObject("position").put("x", nodeX + (boxWidth * 2));
@@ -341,8 +341,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 
 	
 	protected DataMap getNode(int mx, int my) {
-		for(int i = 0; i < data.getList("nodes").size(); i++) {
-			DataMap node = data.getList("nodes").getObject(i);
+		for(int i = 0; i < _data.getList("nodes").size(); i++) {
+			DataMap node = _data.getList("nodes").getObject(i);
 			int x = node.getNumber("position.x").intValue();
 			int y = node.getNumber("position.y").intValue();
 			if(mx >= x && mx <= x + boxWidth && my >= y - 15 && my <= y + boxHeight)
@@ -353,8 +353,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 	
 	protected DataMap getNode(String id)
 	{
-		for(int i = 0; i < data.getList("nodes").size(); i++) {
-			DataMap node = data.getList("nodes").getObject(i);
+		for(int i = 0; i < _data.getList("nodes").size(); i++) {
+			DataMap node = _data.getList("nodes").getObject(i);
 			if(node.getString("id").equals(id))
 				return node;
 		}
@@ -363,8 +363,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 
 	protected DataMap getPrecedingNode(String id)
 	{
-		for(int i = 0; i < data.getList("nodes").size(); i++) {
-			DataMap node = data.getList("nodes").getObject(i);
+		for(int i = 0; i < _data.getList("nodes").size(); i++) {
+			DataMap node = _data.getList("nodes").getObject(i);
 			if(node.getString("nextnode") != null) {
 				if(node.getString("nextnode").equals(id))
 					return node;

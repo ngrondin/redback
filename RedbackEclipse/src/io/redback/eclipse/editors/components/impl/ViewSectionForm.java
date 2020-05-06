@@ -18,9 +18,9 @@ public class ViewSectionForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "grow", "Grow", this, SWT.NONE);
-		new TextField(data, "shrink", "Shrink", this, SWT.NONE);
-		new TextField(data, "show", "Show (!)", this, SWT.NONE);
+		new TextField(_data, "grow", "Grow", this, SWT.NONE);
+		new TextField(_data, "shrink", "Shrink", this, SWT.NONE);
+		new TextField(_data, "show", "Show (!)", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

@@ -21,9 +21,9 @@ public class ViewSearchForm extends Form
 	
 	public void createUI() {
 		CheckboxField cb1 = new CheckboxField(null, "hasfilter", "Has Filter?", this, SWT.NONE);
-		if(data.get("filter") != null) {
+		if(_data.get("filter") != null) {
 			cb1.setChecked(true);
-			new TableField(data, "filter.attributes", "Filter Fields", new String[][] {{"attribute", "Attribute"}, {"label", "Label"}, {"type", "Type"}}, this, SWT.NONE);
+			new TableField(_data, "filter.attributes", "Filter Fields", new String[][] {{"attribute", "Attribute"}, {"label", "Label"}, {"type", "Type"}}, this, SWT.NONE);
 
 		} else {
 			cb1.setChecked(false);
@@ -33,9 +33,9 @@ public class ViewSearchForm extends Form
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {
 		if(attribute.equals("hasfilter")) {
 			if(((Boolean)newValue).equals(true)) {
-				data.put("filter", new DataMap("attributes", new DataList()));
+				_data.put("filter", new DataMap("attributes", new DataList()));
 			} else {
-				data.remove("filter");
+				_data.remove("filter");
 			}
 			refresh();
 		} 

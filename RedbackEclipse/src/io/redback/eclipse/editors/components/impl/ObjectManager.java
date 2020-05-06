@@ -18,10 +18,10 @@ public class ObjectManager extends Manager {
 	
 	public ObjectManager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
 		super(d, e, parent, style);
-		if(!data.containsKey("attributes"))
-			data.put("attributes", new DataList());
-		if(!data.containsKey("scripts"))
-			data.put("scripts", new DataMap());
+		if(!_data.containsKey("attributes"))
+			_data.put("attributes", new DataList());
+		if(!_data.containsKey("scripts"))
+			_data.put("scripts", new DataMap());
 		createUI();
 	}
 	
@@ -31,11 +31,11 @@ public class ObjectManager extends Manager {
 	}
 	
 	protected Navigator getNavigator() {
-		return new ObjectTree(data, this, sashForm, SWT.PUSH);
+		return new ObjectTree(_data, this, sashForm, SWT.PUSH);
 	}
 
 	private DataMap getAttribute(String name) {
-		DataList attributes = data.getList("attributes");
+		DataList attributes = _data.getList("attributes");
 		for(int i = 0; i < attributes.size(); i++)
 			if(attributes.getObject(i).getString("name").equals(name))
 				return attributes.getObject(i);
@@ -44,11 +44,11 @@ public class ObjectManager extends Manager {
 	
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
-			return new ObjectHeaderForm(data, this, sashForm, SWT.PUSH);
+			return new ObjectHeaderForm(_data, this, sashForm, SWT.PUSH);
 		} else if(type.equals("attribute")) {
 			return new ObjectAttributeForm(getAttribute(name), this, sashForm, SWT.PUSH);	
 		} else if(type.equals("script")) {
-			return new ScriptForm(data.getObject("scripts"), name, this, sashForm, SWT.PUSH);
+			return new ScriptForm(_data.getObject("scripts"), name, this, sashForm, SWT.PUSH);
 		} else if(type.equals("attributescript")) {
 			String attributeName = name.substring(0, name.indexOf("."));
 			String scriptName = name.substring(name.indexOf(".") + 1);
@@ -64,13 +64,13 @@ public class ObjectManager extends Manager {
 				GetDataDialog dialog = new GetDataDialog("Name of the new attribute", getShell());
 				name = dialog.openReturnString();
 			} 
-			data.getList("attributes").add(new DataMap("name", name));
+			_data.getList("attributes").add(new DataMap("name", name));
 		} else if(type.equals("script")) {
 			if(name == null) {
 				GetDataDialog dialog = new GetDataDialog("Name of the new method", getShell());
 				name = dialog.openReturnString();	
 			} 
-			data.getObject("scripts").put(name, "");
+			_data.getObject("scripts").put(name, "");
 		} else if(type.equals("attributescript")) {
 			String attributeName = name.substring(0, name.indexOf("."));
 			String scriptName = name.substring(name.indexOf(".") + 1);
@@ -87,13 +87,13 @@ public class ObjectManager extends Manager {
 
 	public void deleteNode(String type, String name) {
 		if(type.equals("attribute")) {
-			DataList attributes = data.getList("attributes");
+			DataList attributes = _data.getList("attributes");
 			for(int i = 0; i < attributes.size(); i++) {
 				if(attributes.getObject(i).getString("name").equals(name))
 					attributes.remove(i);
 			}
 		} else if(type.equals("scripts")) {
-			data.getObject("scripts").remove(name);
+			_data.getObject("scripts").remove(name);
 		} else if(type.equals("attributescript")) {
 			String attributeName = name.substring(0, name.indexOf("."));
 			String scriptName = name.substring(name.indexOf(".") + 1);

@@ -24,12 +24,12 @@ public class MenuManager extends Manager {
 	}
 	
 	protected Navigator getNavigator() {
-		return new MenuTree(data, this, sashForm, SWT.PUSH);
+		return new MenuTree(_data, this, sashForm, SWT.PUSH);
 	}
 
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
-			return new MenuHeaderForm(data, this, sashForm, SWT.PUSH);
+			return new MenuHeaderForm(_data, this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

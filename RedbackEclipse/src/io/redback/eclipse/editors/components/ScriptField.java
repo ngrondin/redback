@@ -39,8 +39,8 @@ public class ScriptField extends Field implements ModifyListener {
 		text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		text.setFont(new Font( getDisplay(), new FontData( "Fira Code", 10, SWT.NONE)));
 		text.addModifyListener(this);
-		if(data != null && data.get(attribute) != null) {
-			text.setText(data.getString(attribute));
+		if(_data != null && _data.get(attribute) != null) {
+			text.setText(_data.getString(attribute));
 			processStyle();
 		}
 	}
@@ -48,11 +48,11 @@ public class ScriptField extends Field implements ModifyListener {
 
 	public void modifyText(ModifyEvent event) {
 		String newValue = text.getText();
-		if(data != null) {
-			if(newValue == null && data.get(attribute) != null)
-				data.remove(attribute);
+		if(_data != null) {
+			if(newValue == null && _data.get(attribute) != null)
+				_data.remove(attribute);
 			else
-				data.put(attribute, newValue);
+				_data.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);

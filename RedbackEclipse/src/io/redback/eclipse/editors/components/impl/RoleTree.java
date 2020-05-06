@@ -28,7 +28,7 @@ public class RoleTree extends Navigator {
 		tree.addMenuDetectListener(this);
 
 		TreeItem rootNode = new TreeItem (tree, 0);
-		rootNode.setText (data.getString("name"));
+		rootNode.setText (_data.getString("name"));
 		rootNode.setData(new NavigatorAction("select", "root", null));
 	}
 	

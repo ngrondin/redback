@@ -19,9 +19,9 @@ public class ProcessHeaderForm extends ProcessForm
 	}
 	
 	public void createUI() {
-		new TextField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "version", "Version", this, SWT.NONE);
-		new SelectField(data, "startnode", "Start Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
+		new TextField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "version", "Version", this, SWT.NONE);
+		new SelectField(_data, "startnode", "Start Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
 	}
 
 

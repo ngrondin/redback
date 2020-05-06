@@ -11,12 +11,12 @@ import org.eclipse.swt.widgets.Text;
 
 import io.firebus.utils.DataMap;
 
-public class TextAreaField extends Field implements ModifyListener {
+public class JSONField extends Field implements ModifyListener {
 	
 	protected Text text;
 	protected String oldValue;
 	
-	public TextAreaField(DataMap d, String a, String l, Composite p, int s) {
+	public JSONField(DataMap d, String a, String l, Composite p, int s) {
 		super(d, a, l, p, s);
 		createUI();
 	}
@@ -27,10 +27,10 @@ public class TextAreaField extends Field implements ModifyListener {
 		lbl.setText(label);
 		lbl.setLayoutData(new RowData(170, 24));
 		text = new Text(this, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		text.setLayoutData(new RowData(500, 300));
-		if(_data != null && _data.getString(attribute) != null) {
-			text.setText(_data.getString(attribute));
-			oldValue = _data.getString(attribute);
+		text.setLayoutData(new RowData(500, 200));
+		if(_data != null && _data.getObject(attribute) != null) {
+			oldValue = _data.getObject(attribute).toString();
+			text.setText(oldValue);
 		}
 		text.addModifyListener(this);
 	}
@@ -40,10 +40,17 @@ public class TextAreaField extends Field implements ModifyListener {
 		if(newValue != null && newValue.equals(""))
 			newValue = null;
 		if(_data != null) {
-			if(newValue == null && _data.get(attribute) != null)
+			if(newValue == null && _data.get(attribute) != null) {
 				_data.remove(attribute);
-			else
-				_data.put(attribute, newValue);
+			} else {
+				try {
+					_data.put(attribute, new DataMap(newValue));
+				} catch(Exception e) {
+					try {
+						_data.put(attribute, new DataMap(oldValue));
+					} catch(Exception e2) { }
+				}
+			}
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);

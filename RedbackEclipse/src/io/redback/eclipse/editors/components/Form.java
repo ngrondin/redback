@@ -9,13 +9,13 @@ import io.firebus.utils.DataMap;
 
 public abstract class Form extends Composite {
 	
-	protected DataMap data;
+	protected DataMap _data;
 	protected Manager manager;	
 	protected Composite parent;
 	
 	public Form(DataMap d, Manager m, Composite p, int s) {
 		super(p, s);
-		data = d;
+		_data = d;
 		manager = m;
 		parent = p;
 		setLayout(new RowLayout(SWT.VERTICAL));

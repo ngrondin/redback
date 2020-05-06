@@ -21,11 +21,11 @@ public class ProcessFirebusRequestForm extends ProcessForm
 	
 	public void createUI() {
 		
-		new TextField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "service", "Service", this, SWT.NONE);
-		new MapField(data, "data", "Data", this, SWT.NONE);
-		new MapField(data, "outmap", "Result Map", this, SWT.NONE);
-		new SelectField(data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
+		new TextField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "service", "Service", this, SWT.NONE);
+		new MapField(_data, "data", "Data", this, SWT.NONE);
+		new MapField(_data, "outmap", "Result Map", this, SWT.NONE);
+		new SelectField(_data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
 	}
 
 

@@ -18,8 +18,8 @@ public class ViewLinkForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "view", "View", this, SWT.NONE);
-		new TextField(data, "attribute", "Related Attribute", this, SWT.NONE);
+		new TextField(_data, "view", "View", this, SWT.NONE);
+		new TextField(_data, "attribute", "Related Attribute", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

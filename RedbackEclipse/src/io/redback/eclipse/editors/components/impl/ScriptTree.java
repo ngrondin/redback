@@ -13,9 +13,9 @@ import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.Navigator;
 import io.redback.eclipse.editors.components.NavigatorAction;
 
-public class KeyTree extends Navigator {
+public class ScriptTree extends Navigator {
 
-	public KeyTree(DataMap d, Manager m, Composite p, int s) {
+	public ScriptTree(DataMap d, Manager m, Composite p, int s) {
 		super(d, m, p, s);
 		createUI();
 	}

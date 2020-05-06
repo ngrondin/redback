@@ -20,7 +20,7 @@ public class ViewViewForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "name", "Name", this, SWT.NONE);
 	}
 
 

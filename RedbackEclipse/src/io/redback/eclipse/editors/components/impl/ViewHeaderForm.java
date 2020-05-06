@@ -18,7 +18,7 @@ public class ViewHeaderForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "label", "Label", this, SWT.NONE);
+		new TextField(_data, "label", "Label", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

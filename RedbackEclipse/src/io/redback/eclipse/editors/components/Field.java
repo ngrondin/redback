@@ -6,7 +6,7 @@ import io.firebus.utils.DataMap;
 
 public abstract class Field extends Composite {
 
-	protected DataMap data;
+	protected DataMap _data;
 	protected String attribute;
 	protected String label;
 	protected Composite parent;
@@ -15,7 +15,7 @@ public abstract class Field extends Composite {
 	
 	Field(DataMap d, String a, String l, Composite p, int s) {
 		super(p, s);
-		data = d;
+		_data = d;
 		attribute = a;
 		label = l;
 		parent = p;

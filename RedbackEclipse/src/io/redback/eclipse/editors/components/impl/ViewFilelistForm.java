@@ -18,7 +18,7 @@ public class ViewFilelistForm extends Form
 	}
 	
 	public void createUI() {
-		new CheckboxField(data, "downloadonselect", "Download on Select", this, SWT.NONE);
+		new CheckboxField(_data, "downloadonselect", "Download on Select", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

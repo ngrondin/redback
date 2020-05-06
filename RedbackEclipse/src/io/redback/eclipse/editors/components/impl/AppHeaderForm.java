@@ -20,12 +20,12 @@ public class AppHeaderForm extends Form
 	}
 
 	public void createUI() {
-		new ReadOnlyField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "label", "Label", this, SWT.NONE);
-		new TextField(data, "page", "Page", this, SWT.NONE);
-		new TextField(data, "initialviewtitle", "Initial Title", this, SWT.NONE);
-		new TextField(data, "defaultview", "Default View", this, SWT.NONE);
-		new ListField(data, "iconsets", "Icon Sets", this, SWT.NONE);
+		new ReadOnlyField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "label", "Label", this, SWT.NONE);
+		new TextField(_data, "page", "Page", this, SWT.NONE);
+		new TextField(_data, "initialviewtitle", "Initial Title", this, SWT.NONE);
+		new TextField(_data, "defaultview", "Default View", this, SWT.NONE);
+		new ListField(_data, "iconsets", "Icon Sets", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

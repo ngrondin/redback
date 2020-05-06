@@ -76,7 +76,7 @@ public class ListField extends Field implements SelectionListener, ModifyListene
 	
 	public void refreshTableRows() {
 		table.removeAll();
-		DataList list = data.getList(attribute);
+		DataList list = _data.getList(attribute);
 		if(list != null) {
 			for(int i = 0; i < list.size(); i++) {
 				TableItem item = new TableItem(table, SWT.NULL);
@@ -120,15 +120,15 @@ public class ListField extends Field implements SelectionListener, ModifyListene
 		if(event.getSource() instanceof Button) {
 			if(event.getSource() == addBut) {
 				DataMap newData = new DataMap();
-				if(data.getList(attribute) == null)
-					data.put(attribute, new DataList());
-				data.getList(attribute).add(newData);
+				if(_data.getList(attribute) == null)
+					_data.put(attribute, new DataList());
+				_data.getList(attribute).add(newData);
 				refreshTableRows();
 			} else if(event.getSource() == delBut) {
 				TableItem[] items = table.getSelection();
 				for(int i = 0; i < items.length; i++) {
 					int index = (Integer)items[i].getData();
-					data.getList(attribute).remove(index);
+					_data.getList(attribute).remove(index);
 					items[i].dispose();
 				}
 				layout(true, true);
@@ -148,7 +148,7 @@ public class ListField extends Field implements SelectionListener, ModifyListene
         TableItem item = (TableItem)editor.getItem();
         int rowIndex = (Integer)item.getData();
         String value = text.getText();
-        DataList oldList = data.getList(attribute);
+        DataList oldList = _data.getList(attribute);
         DataList newList = new DataList();
         for(int i = 0; i < oldList.size(); i++) {
         	if(i == rowIndex) {
@@ -157,7 +157,7 @@ public class ListField extends Field implements SelectionListener, ModifyListene
         		newList.add(oldList.get(i));
         	}
         }
-        data.put(attribute, newList);
+        _data.put(attribute, newList);
         item.setText(0, value);
         closeEditor();
 	}

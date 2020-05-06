@@ -19,13 +19,13 @@ public class MenuHeaderForm extends Form
 	}
 
 	public void createUI() {
-		new ReadOnlyField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "type", "Type", this, SWT.NONE);
-		new TextField(data, "label", "Label", this, SWT.NONE);
-		new TextField(data, "icon", "Icon", this, SWT.NONE);
-		new TextField(data, "group", "Group", this, SWT.NONE);
-		new TextField(data, "order", "Order", this, SWT.NONE);
-		new TextField(data, "view", "View", this, SWT.NONE);
+		new ReadOnlyField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "type", "Type", this, SWT.NONE);
+		new TextField(_data, "label", "Label", this, SWT.NONE);
+		new TextField(_data, "icon", "Icon", this, SWT.NONE);
+		new TextField(_data, "group", "Group", this, SWT.NONE);
+		new TextField(_data, "order", "Order", this, SWT.NONE);
+		new TextField(_data, "view", "View", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

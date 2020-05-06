@@ -29,9 +29,9 @@ public class CheckboxField extends Field implements SelectionListener {
 		lbl.setText(label);
 		lbl.setLayoutData(new RowData(170, 24));
 		checkbox = new Button(this, SWT.CHECK);
-		if(data != null && data.get(attribute) != null) {
-			checkbox.setSelection(data.getBoolean(attribute));
-			oldValue = data.getBoolean(attribute);
+		if(_data != null && _data.get(attribute) != null) {
+			checkbox.setSelection(_data.getBoolean(attribute));
+			oldValue = _data.getBoolean(attribute);
 		}
 		checkbox.addSelectionListener(this);
 	}
@@ -56,8 +56,8 @@ public class CheckboxField extends Field implements SelectionListener {
 			else
 				newValue = 0;
 		}
-		if(data != null) {
-			data.put(attribute, newValue);
+		if(_data != null) {
+			_data.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);

@@ -52,10 +52,10 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 	    target.addDropListener(this);
 
 		TreeItem rootNode = new TreeItem (tree, 0);
-		rootNode.setText (data.getString("name"));
+		rootNode.setText (_data.getString("name"));
 		rootNode.setData(new NavigatorAction("select", "root", null));
 		
-		createRecursiveUI(data, "", tree, rootNode);
+		createRecursiveUI(_data, "", tree, rootNode);
 	}
 	
 	protected void createRecursiveUI(DataMap parentData, String hierarchy, Tree tree, TreeItem parentItem) {
@@ -84,7 +84,7 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 
 	protected void createContextMenu(Menu menu, String type, String name) {
 		MenuItem item = null;
- 		DataMap menuData = name != null ? data.getObject(name) : data;
+ 		DataMap menuData = name != null ? _data.getObject(name) : _data;
 		if(menuData.containsKey("content")) {
 			item = new MenuItem(menu, SWT.PUSH);
 		    item.setText("Create HSection");
@@ -207,7 +207,7 @@ public class ViewTree extends Navigator implements DragSourceListener, DropTarge
 			String nextSelectType = null;
 			if(parentContent.indexOf(".") > -1) {
 				nextSelectName = parentContent.substring(0, parentContent.lastIndexOf("."));
-				nextSelectType = data.getObject(nextSelectName).getString("type");
+				nextSelectType = _data.getObject(nextSelectName).getString("type");
 			}
 			
 			item = new MenuItem(menu, SWT.PUSH);

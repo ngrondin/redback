@@ -34,9 +34,9 @@ public class SelectField extends Field implements SelectionListener {
 		combo.setLayoutData(new RowData(170, 24));
 		combo.setItems(optionLabels);
 		combo.addSelectionListener(this);
-		if(data != null && data.getString(attribute) != null) {
-			setValue(data.getString(attribute));
-			oldValue = data.getString(attribute);
+		if(_data != null && _data.getString(attribute) != null) {
+			setValue(_data.getString(attribute));
+			oldValue = _data.getString(attribute);
 		}
 	}
 
@@ -75,11 +75,11 @@ public class SelectField extends Field implements SelectionListener {
 				}
 			}
 		}
-		if(data != null) {
-			if(newValue == null && data.get(attribute) != null)
-				data.remove(attribute);
+		if(_data != null) {
+			if(newValue == null && _data.get(attribute) != null)
+				_data.remove(attribute);
 			else
-				data.put(attribute, newValue);
+				_data.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);

@@ -18,17 +18,17 @@ public class ViewDynamicformForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "valueattribute", "Value Attribute", this, SWT.NONE);
-		new TextField(data, "optionsattribute", "Options Attribute", this, SWT.NONE);
-		new TextField(data, "typeattribute", "Type Attribute", this, SWT.NONE);
-		new TextField(data, "titleattribute", "Title Attribute", this, SWT.NONE);
-		new TextField(data, "detailattribute", "Detail Attribute", this, SWT.NONE);
-		new TextField(data, "labelattribute", "Label Attribute", this, SWT.NONE);
-		new TextField(data, "orderattribute", "Order Attribute", this, SWT.NONE);
-		new TextField(data, "categoryattribute", "Category Attribute", this, SWT.NONE);
-		new TextField(data, "categoryorderattribute", "Category Order Attribute", this, SWT.NONE);
-		new TextField(data, "dependencyattribute", "Dependency Attribute", this, SWT.NONE);
-		new TextField(data, "dependencyvalueattribute", "Dependency Value Attribute", this, SWT.NONE);
+		new TextField(_data, "valueattribute", "Value Attribute", this, SWT.NONE);
+		new TextField(_data, "optionsattribute", "Options Attribute", this, SWT.NONE);
+		new TextField(_data, "typeattribute", "Type Attribute", this, SWT.NONE);
+		new TextField(_data, "titleattribute", "Title Attribute", this, SWT.NONE);
+		new TextField(_data, "detailattribute", "Detail Attribute", this, SWT.NONE);
+		new TextField(_data, "labelattribute", "Label Attribute", this, SWT.NONE);
+		new TextField(_data, "orderattribute", "Order Attribute", this, SWT.NONE);
+		new TextField(_data, "categoryattribute", "Category Attribute", this, SWT.NONE);
+		new TextField(_data, "categoryorderattribute", "Category Order Attribute", this, SWT.NONE);
+		new TextField(_data, "dependencyattribute", "Dependency Attribute", this, SWT.NONE);
+		new TextField(_data, "dependencyvalueattribute", "Dependency Value Attribute", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

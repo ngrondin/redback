@@ -18,21 +18,21 @@ public class ObjectAttributeRelatedForm extends Form
 	public ObjectAttributeRelatedForm(DataMap d, Manager m, Composite p, int s) 
 	{
 		super(d, m, p, s);
-		if(!data.containsKey("listfilter"))
-			data.put("listfilter", new DataMap());
+		if(!_data.containsKey("listfilter"))
+			_data.put("listfilter", new DataMap());
 		createUI();
 	}
 
 	public void createUI() {
-		new TextField(data, "name", "Object", this, SWT.NONE);
-		new TextField(data, "linkattribute", "Object Link", this, SWT.NONE);
+		new TextField(_data, "name", "Object", this, SWT.NONE);
+		new TextField(_data, "linkattribute", "Object Link", this, SWT.NONE);
 		CheckboxField cb = new CheckboxField(null, "isscript", "Is Script", this, SWT.NONE);
-		if(data.get("listfilter") instanceof DataMap) {
+		if(_data.get("listfilter") instanceof DataMap) {
 			cb.setChecked(false);
-			new MapField(data, "listfilter", "List Filter Map", this, SWT.NONE);
+			new MapField(_data, "listfilter", "List Filter Map", this, SWT.NONE);
 		} else {
 			cb.setChecked(true);
-			ScriptField sf = new ScriptField(data, "listfilter", "List Filter Script", this, SWT.NONE);
+			ScriptField sf = new ScriptField(_data, "listfilter", "List Filter Script", this, SWT.NONE);
 			sf.setLayoutData(new RowData(500, 200));
 		}
 	}
@@ -40,9 +40,9 @@ public class ObjectAttributeRelatedForm extends Form
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {
 		if(attribute.equals("isscript")) {
 			if((boolean)newValue == true) {
-				data.put("listfilter", "");
+				_data.put("listfilter", "");
 			} else {
-				data.put("listfilter", new DataMap());
+				_data.put("listfilter", new DataMap());
 			}
 			refresh();
 		}

@@ -28,9 +28,9 @@ public class TextField extends Field implements ModifyListener {
 		lbl.setLayoutData(new RowData(170, 24));
 		text = new Text(this, SWT.BORDER);
 		text.setLayoutData(new RowData(300, 24));
-		if(data != null && data.getString(attribute) != null) {
-			text.setText(data.getString(attribute));
-			oldValue = data.getString(attribute);
+		if(_data != null && _data.getString(attribute) != null) {
+			text.setText(_data.getString(attribute));
+			oldValue = _data.getString(attribute);
 		}
 		text.addModifyListener(this);	
 	}
@@ -51,11 +51,11 @@ public class TextField extends Field implements ModifyListener {
 				}
 			}
 		}
-		if(data != null) {
-			if(newValue == null && data.get(attribute) != null)
-				data.remove(attribute);
+		if(_data != null) {
+			if(newValue == null && _data.get(attribute) != null)
+				_data.remove(attribute);
 			else
-				data.put(attribute, newValue);
+				_data.put(attribute, newValue);
 		}
 		form.onFieldUpdate(attribute, oldValue, newValue);
 		form.setDataChanged(true);

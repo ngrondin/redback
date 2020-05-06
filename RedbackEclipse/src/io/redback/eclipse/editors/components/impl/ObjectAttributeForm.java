@@ -21,15 +21,15 @@ public class ObjectAttributeForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "dbkey", "DB Key", this, SWT.NONE);
-		new TextField(data, "idgenerator", "ID Generator", this, SWT.NONE);
-		new TextField(data, "editable", "Editable (!)", this, SWT.NONE);
-		new TextField(data, "default", "Default (!)", this, SWT.NONE);
-		new TextField(data, "expression", "Expression (!)", this, SWT.NONE);
-		new CheckboxField(data, "search", "Can be Searched", this, SWT.NONE);
+		new TextField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "dbkey", "DB Key", this, SWT.NONE);
+		new TextField(_data, "idgenerator", "ID Generator", this, SWT.NONE);
+		new TextField(_data, "editable", "Editable (!)", this, SWT.NONE);
+		new TextField(_data, "default", "Default (!)", this, SWT.NONE);
+		new TextField(_data, "expression", "Expression (!)", this, SWT.NONE);
+		new CheckboxField(_data, "search", "Can be Searched", this, SWT.NONE);
 		CheckboxField cb = new CheckboxField(null, "islink", "Is Relationship", this, SWT.NONE);
-		if(data.get("relatedobject") != null)
+		if(_data.get("relatedobject") != null)
 			cb.setChecked(true);
 		else
 			cb.setChecked(false);
@@ -40,10 +40,10 @@ public class ObjectAttributeForm extends Form
 
 	
 	protected void refreshRelatedForm() {
-		if(data.get("relatedobject") != null && relatedForm == null) {
-			relatedForm = new ObjectAttributeRelatedForm(data.getObject("relatedobject"), manager, this, SWT.NONE);
+		if(_data.get("relatedobject") != null && relatedForm == null) {
+			relatedForm = new ObjectAttributeRelatedForm(_data.getObject("relatedobject"), manager, this, SWT.NONE);
 			layout(true, true);
-		} else if(data.get("relatedobject") == null && relatedForm != null) {
+		} else if(_data.get("relatedobject") == null && relatedForm != null) {
 			relatedForm.dispose();
 			layout(true, true);
 		}
@@ -52,9 +52,9 @@ public class ObjectAttributeForm extends Form
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {
 		if(attribute.equals("islink")) {
 			if(((Boolean)newValue).equals(true)) {
-				data.put("relatedobject", new DataMap());
+				_data.put("relatedobject", new DataMap());
 			} else {
-				data.remove("relatedobject");
+				_data.remove("relatedobject");
 			}
 			refreshRelatedForm();
 		}

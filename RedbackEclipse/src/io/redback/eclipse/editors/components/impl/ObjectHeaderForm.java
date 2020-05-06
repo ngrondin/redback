@@ -19,12 +19,12 @@ public class ObjectHeaderForm extends Form
 	}
 
 	public void createUI() {
-		new ReadOnlyField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "collection", "DB Collection", this, SWT.NONE);
-		new TextField(data, "uiddbkey", "UID DB Key", this, SWT.NONE);
-		new TextField(data, "domaindbkey", "Domain DB Key", this, SWT.NONE);
-		new TextField(data, "uidgenerator", "UID Generator", this, SWT.NONE);
-		new TextField(data, "group", "Group", this, SWT.NONE);
+		new ReadOnlyField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "collection", "DB Collection", this, SWT.NONE);
+		new TextField(_data, "uiddbkey", "UID DB Key", this, SWT.NONE);
+		new TextField(_data, "domaindbkey", "Domain DB Key", this, SWT.NONE);
+		new TextField(_data, "uidgenerator", "UID Generator", this, SWT.NONE);
+		new TextField(_data, "group", "Group", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

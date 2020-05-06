@@ -33,14 +33,14 @@ public class ObjectTree extends Navigator
 		tree.addMenuDetectListener(this);
 
 		TreeItem rootNode = new TreeItem (tree, 0);
-		rootNode.setText (data.getString("name"));
+		rootNode.setText (_data.getString("name"));
 		rootNode.setData(new NavigatorAction("select", "root", null));
 
 		TreeItem attributeNode = new TreeItem (rootNode, 1);
 		attributeNode.setText ("Attributes");
 		attributeNode.setData(new NavigatorAction("select", "attributegroup", null));
 
-		DataList list = data.getList("attributes");
+		DataList list = _data.getList("attributes");
 		for(int i = 0; i < list.size(); i++) {
 			DataMap	attribute = list.getObject(i);
 			TreeItem attNode = new TreeItem(attributeNode, 0);
@@ -67,8 +67,8 @@ public class ObjectTree extends Navigator
 		methodNode.setText ("Methods");
 		methodNode.setData(new NavigatorAction("select", "scriptgroup", null));
 
-		if(data.containsKey("scripts")) {
-			Iterator<String> it = data.getObject("scripts").keySet().iterator();
+		if(_data.containsKey("scripts")) {
+			Iterator<String> it = _data.getObject("scripts").keySet().iterator();
 			while(it.hasNext()) {
 				String key = it.next();
 				TreeItem scriptNode = new TreeItem(methodNode, 0);

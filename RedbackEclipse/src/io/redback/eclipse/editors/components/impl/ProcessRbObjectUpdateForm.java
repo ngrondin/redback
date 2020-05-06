@@ -21,12 +21,12 @@ public class ProcessRbObjectUpdateForm extends ProcessForm
 	
 	public void createUI() {
 		
-		new TextField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "object", "Object", this, SWT.NONE);
-		new TextField(data, "uid", "Uid (!)", this, SWT.NONE);
-		new MapField(data, "data", "Data", this, SWT.NONE);
-		new MapField(data, "outmap", "Result Map", this, SWT.NONE);
-		new SelectField(data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
+		new TextField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "object", "Object", this, SWT.NONE);
+		new TextField(_data, "uid", "Uid (!)", this, SWT.NONE);
+		new MapField(_data, "data", "Data", this, SWT.NONE);
+		new MapField(_data, "outmap", "Result Map", this, SWT.NONE);
+		new SelectField(_data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);
 	}
 
 

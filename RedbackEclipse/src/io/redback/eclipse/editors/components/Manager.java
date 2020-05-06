@@ -12,7 +12,7 @@ import io.redback.eclipse.editors.RedbackConfigEditor;
 
 public abstract class Manager extends Composite  {
 
-	protected DataMap data;
+	protected DataMap _data;
 	protected RedbackConfigEditor editorPart;
 	protected SashForm sashForm;
 	protected Navigator navigator;
@@ -21,7 +21,7 @@ public abstract class Manager extends Composite  {
 
 	public Manager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
 		super(parent, style);
-		data = d;
+		_data = d;
 		editorPart = e;
 		changed = false;
 	}

@@ -10,11 +10,15 @@ import io.redback.eclipse.editors.RedbackConfigEditor;
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.Navigator;
+import io.redback.eclipse.editors.components.ScriptForm;
 
-public class ResourceManager extends Manager {
+public class ScriptManager extends Manager {
 	
-	public ResourceManager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
+	public ScriptManager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
 		super(d, e, parent, style);
+		if(!_data.containsKey("script"))
+			_data.put("script", "");
+
 		createUI();
 	}
 	
@@ -24,12 +28,12 @@ public class ResourceManager extends Manager {
 	}
 	
 	protected Navigator getNavigator() {
-		return new ResourceTree(_data, this, sashForm, SWT.PUSH);
+		return new IncludeTree(_data, this, sashForm, SWT.PUSH);
 	}
 
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
-			return new ResourceHeaderForm(_data, this, sashForm, SWT.PUSH);
+			return new ScriptForm(_data, "script", this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

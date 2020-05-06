@@ -18,14 +18,14 @@ import io.firebus.utils.DataMap;
 
 public abstract class Navigator extends Composite implements MenuDetectListener, SelectionListener, MenuListener {
 
-	protected DataMap data;
+	protected DataMap _data;
 	protected Manager manager;
 	protected String selectedType;
 	protected String selectedName;
 
 	public Navigator(DataMap d, Manager m, Composite p, int s) {
 		super(p, s);
-		data = d;
+		_data = d;
 		manager = m;
 	}
 

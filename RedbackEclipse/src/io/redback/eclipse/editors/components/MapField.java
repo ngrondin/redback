@@ -73,11 +73,11 @@ public class MapField extends Field implements SelectionListener, ModifyListener
 	    
 		table.addMouseListener(this);
 		
-		if(data.getObject(attribute) != null) {
-			Iterator<String> it = data.getObject(attribute).keySet().iterator();
+		if(_data.getObject(attribute) != null) {
+			Iterator<String> it = _data.getObject(attribute).keySet().iterator();
 			while(it.hasNext()) {
 				String key = it.next();
-				String val = data.getObject(attribute).getString(key);		
+				String val = _data.getObject(attribute).getString(key);		
 				TableItem item = new TableItem(table, SWT.NULL);
 				item.setText(0, key);
 				item.setText(1, val == null ? "" : val);
@@ -125,7 +125,7 @@ public class MapField extends Field implements SelectionListener, ModifyListener
 				for(int i = 0; i < items.length; i++) {
 					String key = (String)items[i].getData("key");
 					if(key != null)
-						data.getObject(attribute).remove(key);
+						_data.getObject(attribute).remove(key);
 					items[i].dispose();
 				}
 				layout(true, true);
@@ -149,13 +149,13 @@ public class MapField extends Field implements SelectionListener, ModifyListener
         	String newKey = text.getText();
             item.setText(0, newKey);
             item.setData("key", newKey);
-            if(data.getObject(attribute) == null)
-            	data.put(attribute, new DataMap());
-            data.getObject(attribute).put(newKey, null);
+            if(_data.getObject(attribute) == null)
+            	_data.put(attribute, new DataMap());
+            _data.getObject(attribute).put(newKey, null);
             closeEditor();
         } else {
             item.setText(1, text.getText());
-            data.getObject(attribute).put(key, text.getText());
+            _data.getObject(attribute).put(key, text.getText());
             closeEditor();
         }
 	}

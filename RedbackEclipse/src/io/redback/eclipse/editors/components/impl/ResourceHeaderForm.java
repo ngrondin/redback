@@ -20,9 +20,9 @@ public class ResourceHeaderForm extends Form
 	}
 
 	public void createUI() {
-		new ReadOnlyField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "type", "type", this, SWT.NONE);
-		new TextAreaField(data, "content", "Content", this, SWT.NONE);
+		new ReadOnlyField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "type", "type", this, SWT.NONE);
+		new TextAreaField(_data, "content", "Content", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

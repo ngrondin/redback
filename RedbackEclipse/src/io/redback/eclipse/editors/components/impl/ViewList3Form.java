@@ -18,11 +18,11 @@ public class ViewList3Form extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "headerattribute", "Header Attribute", this, SWT.NONE);
-		new TextField(data, "subheadattribute", "Subhead Attribute", this, SWT.NONE);
-		new TextField(data, "supptextattribute", "Support Text Attribute", this, SWT.NONE);
-		new TextField(data, "grow", "Grow", this, SWT.NONE);
-		new TextField(data, "shrink", "Shrink", this, SWT.NONE);
+		new TextField(_data, "headerattribute", "Header Attribute", this, SWT.NONE);
+		new TextField(_data, "subheadattribute", "Subhead Attribute", this, SWT.NONE);
+		new TextField(_data, "supptextattribute", "Support Text Attribute", this, SWT.NONE);
+		new TextField(_data, "grow", "Grow", this, SWT.NONE);
+		new TextField(_data, "shrink", "Shrink", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

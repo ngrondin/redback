@@ -24,12 +24,12 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 	public ProcessInteractionForm(DataMap d, DataList n, Manager m, Composite p, int s) 
 	{
 		super(d, n, m, p, s);
-		if(data.getList("assignees") == null)
-			data.put("assignees", new DataList());
-		if(data.getList("actions") == null)
-			data.put("actions", new DataList());
-		if(data.getObject("notification") == null)
-			data.put("notification", new DataMap());
+		if(_data.getList("assignees") == null)
+			_data.put("assignees", new DataList());
+		if(_data.getList("actions") == null)
+			_data.put("actions", new DataList());
+		if(_data.getObject("notification") == null)
+			_data.put("notification", new DataMap());
 		createUI();
 	}
 	
@@ -37,14 +37,14 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 		setLayout(new RowLayout(SWT.HORIZONTAL));
 		Composite col1 = new Composite(this, SWT.NONE);
 		col1.setLayout(new RowLayout(SWT.VERTICAL));
-		new TextField(data, "name", "Name", col1, SWT.NONE);
-		new TextField(data, "notification.code", "Interaction Code", col1, SWT.NONE);
-		new TextField(data, "notification.label", "Label (!)", col1, SWT.NONE);
-		new TextField(data, "notification.message", "Message (!)", col1, SWT.NONE);
+		new TextField(_data, "name", "Name", col1, SWT.NONE);
+		new TextField(_data, "notification.code", "Interaction Code", col1, SWT.NONE);
+		new TextField(_data, "notification.label", "Label (!)", col1, SWT.NONE);
+		new TextField(_data, "notification.message", "Message (!)", col1, SWT.NONE);
 
 		Composite col2 = new Composite(this, SWT.NONE);
 		col2.setLayout(new RowLayout(SWT.VERTICAL));
-		DataList list = data.getList("assignees");
+		DataList list = _data.getList("assignees");
 		for(int i = 0; i < list.size(); i++) {
 			DataMap assignee = list.getObject(i);
 			Group group = new Group(col2, SWT.NONE);
@@ -64,7 +64,7 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 
 		Composite col3 = new Composite(this, SWT.NONE);
 		col3.setLayout(new RowLayout(SWT.VERTICAL));
-		list = data.getList("actions");
+		list = _data.getList("actions");
 		for(int i = 0; i < list.size(); i++) {
 			DataMap action = list.getObject(i);
 			Group group = new Group(col3, SWT.NONE);
@@ -91,15 +91,15 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 		NavigatorAction action = (NavigatorAction)event.widget.getData();
 		if(action.action.equals("create")) {
 			if(action.type.equals("assignee")) {
-				data.getList("assignees").add(new DataMap());
+				_data.getList("assignees").add(new DataMap());
 			} else if(action.type.equals("action")) {
-				data.getList("actions").add(new DataMap());
+				_data.getList("actions").add(new DataMap());
 			}
 		} if(action.action.equals("delete")) {
 			if(action.type.equals("assignee")) {
-				data.getList("assignees").remove(Integer.parseInt(action.name));
+				_data.getList("assignees").remove(Integer.parseInt(action.name));
 			} else if(action.type.equals("action")) {
-				data.getList("actions").remove(Integer.parseInt(action.name));
+				_data.getList("actions").remove(Integer.parseInt(action.name));
 			}
 			
 		}

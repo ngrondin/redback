@@ -31,12 +31,8 @@ import io.firebus.utils.DataMap;
 
 public class TableField extends Field implements SelectionListener, ModifyListener, FocusListener, MouseListener {
 
-	protected DataMap data;
-	protected String attribute;
-	protected String label;
 	protected String[][] columns;
 	protected Map<String, Integer> colMap;
-	protected Form form;
 	protected Table table;
 	protected Button addBut;
 	protected Button delBut;
@@ -88,7 +84,7 @@ public class TableField extends Field implements SelectionListener, ModifyListen
 	
 	public void refreshTableRows() {
 		table.removeAll();
-		DataList list = data.getList(attribute);
+		DataList list = _data.getList(attribute);
 		if(list != null) {
 			for(int i = 0; i < list.size(); i++) {
 				TableItem item = new TableItem(table, SWT.NULL);
@@ -135,15 +131,15 @@ public class TableField extends Field implements SelectionListener, ModifyListen
 		if(event.getSource() instanceof Button) {
 			if(event.getSource() == addBut) {
 				DataMap newData = new DataMap();
-				if(data.getList(attribute) == null)
-					data.put(attribute, new DataList());
-				data.getList(attribute).add(newData);
+				if(_data.getList(attribute) == null)
+					_data.put(attribute, new DataList());
+				_data.getList(attribute).add(newData);
 				refreshTableRows();
 			} else if(event.getSource() == delBut) {
 				TableItem[] items = table.getSelection();
 				for(int i = 0; i < items.length; i++) {
 					int index = (Integer)items[i].getData();
-					data.getList(attribute).remove(index);
+					_data.getList(attribute).remove(index);
 					items[i].dispose();
 				}
 				layout(true, true);
@@ -165,7 +161,7 @@ public class TableField extends Field implements SelectionListener, ModifyListen
         int colIndex = (Integer)text.getData();
         String key = columns[colIndex][0];
         String value = text.getText();
-        data.getList(attribute).getObject(rowIndex).put(key, value);
+        _data.getList(attribute).getObject(rowIndex).put(key, value);
         item.setText(colIndex, value);
         closeEditor();
 	}

@@ -33,6 +33,7 @@ import io.redback.eclipse.editors.components.impl.ObjectTree;
 import io.redback.eclipse.editors.components.impl.ProcessManager;
 import io.redback.eclipse.editors.components.impl.ResourceManager;
 import io.redback.eclipse.editors.components.impl.RoleManager;
+import io.redback.eclipse.editors.components.impl.ScriptManager;
 import io.redback.eclipse.editors.components.impl.ViewManager;
 
 public class RedbackConfigEditor extends EditorPart implements IResourceChangeListener 
@@ -114,6 +115,8 @@ public class RedbackConfigEditor extends EditorPart implements IResourceChangeLi
 						manager = new ObjectManager(data, this, composite, SWT.HORIZONTAL);
 					} else if(rbConfigType.equals("include")) {
 						manager = new IncludeManager(data, this, composite, SWT.HORIZONTAL);
+					} else if(rbConfigType.equals("script")) {
+						manager = new ScriptManager(data, this, composite, SWT.HORIZONTAL);
 					}
 				} else if(rbService.equals("rbui")) {
 					if(rbConfigType.equals("view")) {

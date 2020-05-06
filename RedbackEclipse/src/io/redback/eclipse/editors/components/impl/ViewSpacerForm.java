@@ -19,7 +19,7 @@ public class ViewSpacerForm extends Form
 	}
 	
 	public void createUI() {
-		new TextField(data, "size", "Size", this, SWT.NONE);
+		new TextField(_data, "size", "Size", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

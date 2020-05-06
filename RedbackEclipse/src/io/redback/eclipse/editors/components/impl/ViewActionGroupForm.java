@@ -19,7 +19,7 @@ public class ViewActionGroupForm extends Form
 	}
 	
 	public void createUI() {
-		new TableField(data, "actions", "Actions",  new String[][] {{"action", "Action"}, {"label", "Label"}, {"show", "Show"}}, this, SWT.NONE);
+		new TableField(_data, "actions", "Actions",  new String[][] {{"action", "Action"}, {"label", "Label"}, {"show", "Show"}}, this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

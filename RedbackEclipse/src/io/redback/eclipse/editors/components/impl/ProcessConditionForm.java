@@ -20,10 +20,10 @@ public class ProcessConditionForm extends ProcessForm
 	
 	public void createUI() {
 		
-		new TextField(data, "name", "Name", this, SWT.NONE);
-		new TextField(data, "condition", "Condition (!)", this, SWT.NONE);
-		new SelectField(data, "truenode", "True", nodeOptions, nodeOptionLabels, this, SWT.NONE);
-		new SelectField(data, "falsenode", "False", nodeOptions, nodeOptionLabels, this, SWT.NONE);
+		new TextField(_data, "name", "Name", this, SWT.NONE);
+		new TextField(_data, "condition", "Condition (!)", this, SWT.NONE);
+		new SelectField(_data, "truenode", "True", nodeOptions, nodeOptionLabels, this, SWT.NONE);
+		new SelectField(_data, "falsenode", "False", nodeOptions, nodeOptionLabels, this, SWT.NONE);
 	}
 
 
