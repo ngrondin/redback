@@ -29,7 +29,7 @@ export class RbGlobalSeachComponent implements OnInit {
     this.showResults = true;
     for(let o in this.configService.objectsConfig) {
       this.isLoading = this.isLoading + 1;
-      this.dataService.listObjects(o, null, this.searchString).subscribe(
+      this.dataService.listObjects(o, null, this.searchString, 0).subscribe(
         data => {
           this.searchResult = this.searchResult.concat(data);
           this.isLoading = this.isLoading - 1;

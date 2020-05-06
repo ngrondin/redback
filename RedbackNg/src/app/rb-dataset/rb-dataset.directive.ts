@@ -14,6 +14,7 @@ export class RbDatasetDirective implements OnChanges {
   @Input('relatedObject') relatedObject: RbObject;
   @Input('relatedFilter') relatedFilter: any;
   @Input('baseFilter') baseFilter: any;
+  @Input('fetchAll') fetchAll: boolean = false;
 
   @Input('userFilter') inputUserFilter: any;
   @Input('searchString') inputSearchString: any;
@@ -32,6 +33,7 @@ export class RbDatasetDirective implements OnChanges {
   public isLoading: boolean;
   public initiated: boolean = false;
   public firstLoad: boolean = true;
+  public page: number;
 
   constructor(
     private dataService: DataService,
@@ -67,10 +69,15 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   public refreshData() {
+    this.page = 0;
     this.list = [];
+    this.fetchPage(this.page);
+  }
+
+  public fetchPage(page: number) {
     if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
       const filter = this.mergeFilters();
-      this.dataService.listObjects(this.objectname, filter, this.searchString).subscribe(
+      this.dataService.listObjects(this.objectname, filter, this.searchString, this.page).subscribe(
         data => this.setData(data)
       );
       this.isLoading = true;
@@ -97,16 +104,21 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   private setData(data: RbObject[]) {
-    this.list = data;
-    this.isLoading = false;
-    this.firstLoad = false;
-    if(this.list.length == 0) {
-      this._selectedObject = null;
-    } else if(this.list.length == 1) {
-      this._selectedObject = this.list[0];
-    } else if(this.list.length > 1) {
-      if(this.selectedObject != null && !this.list.includes(this.selectedObject)) {
+    this.list = this.list.concat(data);
+    if(this.fetchAll && data.length == 50) {
+      this.page = this.page + 1;
+      this.fetchPage(this.page);
+    } else {
+      this.isLoading = false;
+      this.firstLoad = false;
+      if(this.list.length == 0) {
         this._selectedObject = null;
+      } else if(this.list.length == 1) {
+        this._selectedObject = this.list[0];
+      } else if(this.list.length > 1) {
+        if(this.selectedObject != null && !this.list.includes(this.selectedObject)) {
+          this._selectedObject = null;
+        }
       }
     }
   }

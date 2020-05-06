@@ -4,7 +4,8 @@ if(config.get('inlineStyle') != null) {%>
 	style="<%=config.getString('inlineStyle')%>"<%
 }
 if(config.get('object') != null) { %>
-	[object]="'<%=config.getString('object')%>'"<% 
+	[object]="'<%=config.getString('object')%>'"
+	[fetchAll]="<%=config.getBoolean('fetchall')%>"<% 
 }
 if(config.get('basefilter') != null) { %>
 	[baseFilter]="<%=utils.convertDataMapToAttributeString(config.getObject('basefilter'))%>"<% 

@@ -45,11 +45,12 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  listObjects(name: string, filter: any, search: string): Observable<any> {
+  listObjects(name: string, filter: any, search: string, page: number): Observable<any> {
     const req = {
       action: 'list',
       object: name,
       filter: filter,
+      page: page,
       options: {
         addrelated: true,
         addvalidation: true
