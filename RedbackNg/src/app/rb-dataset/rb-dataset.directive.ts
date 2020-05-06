@@ -137,28 +137,31 @@ export class RbDatasetDirective implements OnChanges {
   } 
 
   public action(name: string, param: string) {
-    if(name == 'create' || name == 'createInMemory') {
+    let _name: string = name.toLowerCase();
+    if(_name == 'create' || _name == 'createinmemory') {
       let data = this.mergeFilters();
       if(param != null) {
         data = this.mapService.mergeMaps(data, this.mapService.resolveMap(param, this.selectedObject, this.selectedObject, this.relatedObject))
       }
-      if(name == 'create') {
+      if(_name == 'create') {
         this.dataService.createObject(this.objectname, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
-      } else if(name == 'createInMemory') {
+      } else if(_name == 'createinmemory') {
         this.dataService.createObjectInMemory(this.objectname, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
       }
-    } else if(name == 'save') {
+    } else if(_name == 'save') {
       
-    } else if(name == 'executeAll') {
+    } else if(_name == 'executeall') {
       let delay: number = 0;
       this.list.forEach((object) => {
         setTimeout(() => {
-          this.dataService.executeObObject(object, param, null)
+          this.dataService.executeObject(object, param, null)
         }, delay);
         delay += 200;
       });
+    } else if(_name == 'executeglobal') {
+      this.dataService.executeGlobal(param, null);
     } else if(this.selectedObject != null) {
-      this.dataService.executeObObject(this.selectedObject, name, param);
+      this.dataService.executeObject(this.selectedObject, name, param);
     }
   }
 

@@ -39,11 +39,11 @@ export class RbGraphComponent implements OnInit {
       this.graphData = [];
       let cats: String[] = [];
       for(let agg of this.aggregates) {
-        let cat = agg.getDimension(this.categories.dimension);
+        let cat = this.nullToEmptyString(agg.getDimension(this.categories.dimension));
         if(cats.indexOf(cat) == -1) {
           cats.push(cat);
           let category: any = {
-            name: agg.getDimension(this.categories.labelattribute),
+            name: this.nullToEmptyString(agg.getDimension(this.categories.labelattribute)),
             series: this.getSeriesDataForCategory(cat)
           }
           this.graphData.push(category);
@@ -54,13 +54,13 @@ export class RbGraphComponent implements OnInit {
     } 
   }
 
-  getSeriesDataForCategory(cat: string) : any[] {
+  getSeriesDataForCategory(cat: String) : any[] {
     let series: any[] = [];
     for(let agg of this.aggregates) {
       let thisCat: String = this.categories != null ? agg.getDimension(this.categories.dimension) : null;
       if(cat == null || cat == thisCat) {
         let data: any = {
-          name: agg.getDimension(this.series.labelattribute),
+          name: this.nullToEmptyString(agg.getDimension(this.series.labelattribute)),
           value: agg.getMetric(this.value.name)
         }
         series.push(data);
@@ -107,4 +107,11 @@ export class RbGraphComponent implements OnInit {
 
   }
 
+  private nullToEmptyString(str: String): String {
+    if(str == null) {
+      return "";
+    } else {
+      return str;
+    }
+  }
 }

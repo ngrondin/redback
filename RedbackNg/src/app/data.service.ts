@@ -151,10 +151,22 @@ export class DataService {
     return dataObservable;  
   }
 
-  executeObObject(rbObject: RbObject, func: string, param: string) {
+  executeObject(rbObject: RbObject, func: string, param: string) {
     this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(
       resp => {
         !this.apiService.SignalWebsocketConnected() ? this.updateObjectFromServer(resp) : null
+      },
+      error => {
+        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+      }      
+    );
+  }
+
+  
+  executeGlobal(func: string, param: string) {
+    this.apiService.executeGlobal(func).subscribe(
+      resp => {
+        null
       },
       error => {
         this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});

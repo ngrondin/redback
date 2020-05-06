@@ -41,7 +41,7 @@ class GanttLane {
 
   constructor(i: string, l: string, s: GanttSpread[]) {
     this.id = i;
-    this.label = l;
+    this.label = l != null ? l : "";
     this.spreads = s;
   }
 }
@@ -204,11 +204,12 @@ export class RbGanttComponent implements OnInit {
             lane = new GanttLane(objLaneId, obj.get(cfg.laneLabelAttribute), this.getSpreads(objLaneId));
             lanes.push(lane);
           }
-          
         }
       }
     }
-    lanes.sort((a, b) => (a != null && b != null ? a.label.localeCompare(b.label) : 0));
+    if(lanes.length > 0) {
+      lanes.sort((a, b) => (a != null && b != null ? a.label.localeCompare(b.label) : 0));
+    }
     return lanes;
   }
 
@@ -231,24 +232,26 @@ export class RbGanttComponent implements OnInit {
               durationMS = 3600000;
             }
             if(startMS + durationMS > this.endMS) {
-              durationMS = this.spanMS - durationMS;
+              durationMS = this.endMS - startMS;
             }
             let widthPX = Math.round(durationMS * this.multiplier);
-            if(startPX < 0) {
-              widthPX = widthPX + startPX;
-              startPX = 0;
-            }
-            let label = cfg.isBackground ? "" : obj.get(cfg.labelAttribute);
-            let color = 'white';
-            if(cfg.colorAttribute != null) {
-              if(cfg.colorMap != null) {
-                color = cfg.colorMap[obj.get(cfg.colorAttribute)];
-              } else {
-                color = obj.get(cfg.colorAttribute);
+            if(startPX > -widthPX) {
+              if(startPX < 0) {
+                widthPX = widthPX + startPX;
+                startPX = 0;
               }
+              let label = cfg.isBackground ? "" : obj.get(cfg.labelAttribute);
+              let color = 'white';
+              if(cfg.colorAttribute != null) {
+                if(cfg.colorMap != null) {
+                  color = cfg.colorMap[obj.get(cfg.colorAttribute)];
+                } else {
+                  color = obj.get(cfg.colorAttribute);
+                }
+              }
+              let canEdit: Boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
+              spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, canEdit, obj, cfg));
             }
-            let canEdit: Boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
-            spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, canEdit, obj, cfg));
           }
         }
       }

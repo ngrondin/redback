@@ -121,6 +121,14 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
   
+  executeGlobal(func: string) {
+    const req = {
+      action: 'execute',
+      function: func,
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
   aggregateObjects(name: string, filter: any, tuple: any, metrics: any): Observable<any> {
     const req = {
       action: 'aggregate',
