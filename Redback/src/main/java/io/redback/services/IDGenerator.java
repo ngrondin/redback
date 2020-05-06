@@ -9,7 +9,7 @@ import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 
-public abstract class IDGenerator extends DataService
+public abstract class IDGenerator extends Service
 {
 	private Logger logger = Logger.getLogger("io.redback");
 

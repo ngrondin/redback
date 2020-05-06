@@ -14,6 +14,8 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.ConfigurationClient;
+import io.redback.client.DataClient;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
@@ -23,12 +25,16 @@ public class RedbackAccessManager extends AccessManager
 {
 	protected String secret;
 	protected String issuer;
+	protected DataClient dataClient;
+	protected ConfigurationClient configClient;
 
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
 		secret = config.getString("secret");
 		issuer = config.getString("issuer");
+		dataClient = new DataClient(firebus, config.getString("dataservice"));
+		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
 	}
 
 	protected Session validateToken(String token) throws RedbackException
@@ -80,10 +86,10 @@ public class RedbackAccessManager extends AccessManager
 							userConfig = userConfigs.getObject(i);
 				}
 				
-				if(userConfig == null && dataService != null)
+				if(userConfig == null && dataClient != null)
 				{
 					String userCollection = config.containsKey("usertable") ? config.getString("usertable") : "rbam_user";
-					DataMap userResult = getData(userCollection, new DataMap("username" , username));
+					DataMap userResult = dataClient.getData(userCollection, new DataMap("username" , username));
 					if(userResult != null && userResult.getList("result") != null && userResult.getList("result").size() > 0)
 						userConfig = userResult.getList("result").getObject(0);
 				}
@@ -122,7 +128,7 @@ public class RedbackAccessManager extends AccessManager
 		{
 			try
 			{
-				role =  new Role(getConfig("rbam", "role", name));
+				role =  new Role(configClient.getConfig("rbam", "role", name));
 				roles.put(name, role);
 			}
 			catch(Exception e)

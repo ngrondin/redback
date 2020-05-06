@@ -31,7 +31,7 @@ public class FirebusRequestUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Starting firebus call node");
+		logger.finer("Starting firebus call node");
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
 		Bindings context = processManager.createScriptContext(pi);
 		DataMap data = inputExpressionMap.eval(context);
@@ -39,12 +39,12 @@ public class FirebusRequestUnit extends ProcessUnit
 		payload.metadata.put("token", sysUserSession.getToken());
 		try
 		{
-			logger.info("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());
+			logger.finest("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());
 			Payload response = processManager.getFirebus().requestService(firebusServiceName, payload, 10000);
 			DataMap respData = new DataMap(response.getString());
 			context.put("result", respData);
 			DataMap respOutput = outputExpressionMap.eval(context);
-			logger.fine("Output data was: " + respOutput);
+			logger.finest("Output data was: " + respOutput);
 			pi.getData().merge(respOutput);
 		} 
 		catch (Exception e)
@@ -52,7 +52,7 @@ public class FirebusRequestUnit extends ProcessUnit
 			error("Error executing firebus service '" + firebusServiceName + "' ",  e);
 		}
 		pi.setCurrentNode(nextNode);
-		logger.info("Finished firebus call node");
+		logger.finer("Finished firebus call node");
 	}
 
 }

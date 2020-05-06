@@ -45,14 +45,14 @@ public class InteractionUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Starting interaction node execution");
+		logger.finer("Starting interaction node execution");
 		for(int i = 0; i < assigneeConfigs.size(); i++)
 		{
 			AssigneeConfig assigneeConfig = assigneeConfigs.get(i);
 			Object assigneeObject = assigneeConfig.evaluateId(pi);
 			if(assigneeObject instanceof String)
 			{
-				logger.fine("Adding assignee " + (String)assigneeObject);
+				logger.finer("Adding assignee " + (String)assigneeObject);
 				pi.addAssignee(new Assignee(assigneeConfig.getType(), (String)assigneeObject));
 			}
 			else if(assigneeObject instanceof DataList)
@@ -60,18 +60,18 @@ public class InteractionUnit extends ProcessUnit
 				DataList assigneeList = (DataList)assigneeObject;
 				for(int j = 0; j < assigneeList.size(); j++)
 				{
-					logger.fine("Adding assignee " + assigneeList.getString(j));
+					logger.finer("Adding assignee " + assigneeList.getString(j));
 					pi.addAssignee(new Assignee(assigneeConfigs.get(i).getType(), assigneeList.getString(j)));
 				}
 			}
 			//TODO: handle active notifications (email)
 		}
-		logger.info("Finished interaction node execution");
+		logger.finer("Finished interaction node execution");
 	}
 
 	public void processAction(Actionner actionner, ProcessInstance pi, String action, DataMap data) throws RedbackException
 	{
-		logger.info("Starting interaction node action");
+		logger.finer("Starting interaction node action");
 		boolean foundAction = false;
 		if(isAssignee(actionner, pi))
 		{
@@ -97,7 +97,7 @@ public class InteractionUnit extends ProcessUnit
 		{
 			error("Actionning user or process is not a current assignee");
 		}		
-		logger.info("Finished interaction node action");
+		logger.finer("Finished interaction node action");
 	}
 	
 	public Assignment getNotification(Actionner actionner, ProcessInstance pi) throws RedbackException

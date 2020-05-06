@@ -38,7 +38,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Starting redback object execute node");
+		logger.finer("Starting redback object execute node");
 		if(processManager.getObjectServiceName() != null)
 		{
 			Bindings context = processManager.createScriptContext(pi);
@@ -56,19 +56,19 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 			payload.metadata.put("token", sysUserSession.getToken());
 			try
 			{
-				logger.info("Calling redback object service " + processManager.getObjectServiceName() + " " + payload.getString());
+				logger.finest("Calling redback object service " + processManager.getObjectServiceName() + " " + payload.getString());
 				Payload response = processManager.getFirebus().requestService(processManager.getObjectServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
 				context.put("result", respData);
 				DataMap respOutput = outputExpressionMap.eval(context);
-				logger.fine("Output data was: " + respOutput);
+				logger.finest("Output data was: " + respOutput);
 				pi.getData().merge(respOutput);
 			} 
 			catch (Exception e)
 			{
 				error("Error executing function '" + objectFunctionName + "' on Redback object '" + objectName + "'",  e);
 			}
-			logger.info("Finished redback object execute node");
+			logger.finer("Finished redback object execute node");
 		}
 		else
 		{

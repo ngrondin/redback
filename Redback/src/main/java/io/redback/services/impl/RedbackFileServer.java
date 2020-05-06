@@ -12,6 +12,8 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.ConfigurationClient;
+import io.redback.client.DataClient;
 import io.redback.services.FileServer;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.RedbackFile;
@@ -23,6 +25,7 @@ public class RedbackFileServer extends FileServer
 	protected String idGeneratorService; 
 	protected String idName; 
 	protected CollectionConfig collectionConfig;
+	protected DataClient dataClient;
 	
 	public RedbackFileServer(String n, DataMap c, Firebus f) 
 	{
@@ -35,12 +38,13 @@ public class RedbackFileServer extends FileServer
 			fileServices.add(list.getString(i));
 		defaultFileService = config.getString("defaultadapter");
 		collectionConfig = new CollectionConfig(c.getObject("collection"));
+		dataClient = new DataClient(firebus, config.getString("dataservice"));
 	}
 
 	public RedbackFile getFile(String fileUid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException
 	{
 		RedbackFile file = null;
-		DataMap resp = getData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid));
+		DataMap resp = dataClient.getData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid));
 		if(resp.getList("result").size() > 0)
 		{
 			DataMap fileInfo = collectionConfig.convertObjectToCanonical(resp.getList("result").getObject(0));
@@ -66,7 +70,7 @@ public class RedbackFileServer extends FileServer
 		DataMap filter = new DataMap();
 		filter.put(collectionConfig.getField("relatedobject"), object);
 		filter.put(collectionConfig.getField("relateduid"), uid);
-		DataMap resp = getData(collectionConfig.getName(), filter);
+		DataMap resp = dataClient.getData(collectionConfig.getName(), filter);
 		List<RedbackFile> list = new ArrayList<RedbackFile>();
 		for(int i = 0; i < resp.getList("result").size(); i++) 
 		{
@@ -92,7 +96,7 @@ public class RedbackFileServer extends FileServer
 		data.put(collectionConfig.getField("mime"), mime);
 		data.put(collectionConfig.getField("user"), username);
 		data.put(collectionConfig.getField("date"), new Date());
-		publishData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid), data);
+		dataClient.putData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid), data);
 
 		Payload filePayload = new Payload(bytes);
 		filePayload.metadata.put("filename", fileUid);

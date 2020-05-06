@@ -35,7 +35,7 @@ public class ObjectConfig
 			attributes.put(attrCfg.getString("name"), new AttributeConfig(objectManager, getName(), attrCfg));
 		}
 		
-		List<IncludeScript> includes = objectManager.getIncludeScripts();
+		List<ScriptConfig> includes = objectManager.getIncludeScripts();
 		StringBuilder allIncludes = new StringBuilder();
 		if(includes != null)
 		{

@@ -36,7 +36,7 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Starting redback object update node");
+		logger.finer("Starting redback object update node");
 		if(processManager.getObjectServiceName() != null)
 		{
 			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
@@ -53,19 +53,19 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 			payload.metadata.put("token", sysUserSession.getToken());
 			try
 			{
-				logger.info("Calling redback object service " + processManager.getObjectServiceName() + " " + payload.getString());
+				logger.finest("Calling redback object service " + processManager.getObjectServiceName() + " " + payload.getString());
 				Payload response = processManager.getFirebus().requestService(processManager.getObjectServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
 				context.put("result", respData);
 				DataMap respOutput = outputExpressionMap.eval(context);
-				logger.fine("Output data was: " + respOutput);
+				logger.finest("Output data was: " + respOutput);
 				pi.getData().merge(respOutput);
 			} 
 			catch (Exception e)
 			{
 				error("Error updating Redback object '" + objectName + "'",  e);
 			}
-			logger.info("Finished redback object update node");
+			logger.finer("Finished redback object update node");
 		}
 		else
 		{

@@ -23,7 +23,6 @@ import io.redback.utils.StringUtils;
 
 public class ConditionalUnit extends ProcessUnit 
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected String expressionStr;
 	protected Expression expression;
 	protected String trueNode;
@@ -42,7 +41,7 @@ public class ConditionalUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		Bindings context = processManager.createScriptContext(pi);
-		logger.info("Start executing condition");
+		logger.finer("Start executing condition");
 		try
 		{
 			boolean bool = (Boolean)expression.eval(context);
@@ -55,7 +54,7 @@ public class ConditionalUnit extends ProcessUnit
 		{
 			error("Problem occurred executing a condition", e);
 		}		
-		logger.info("Finish executing condition");		
+		logger.finer("Finish executing condition");		
 	}
 
 }

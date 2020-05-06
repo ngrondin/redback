@@ -11,7 +11,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 
-public abstract class AuthenticatedService extends DataService
+public abstract class AuthenticatedService extends Service
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String accessManagementService;

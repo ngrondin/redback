@@ -2,6 +2,7 @@ package io.redback.managers.objectmanager;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -44,6 +45,17 @@ public class AttributeConfig
 
 		if(config.get("default") != null && config.getString("default").length() > 0)
 			defaultValue = new Expression(objectManager.getScriptEngine(), config.getString("default"));
+		
+		List<ScriptConfig> includes = objectManager.getIncludeScripts();
+		StringBuilder allIncludes = new StringBuilder();
+		if(includes != null)
+		{
+			for(int i = 0; i < includes.size(); i++)
+			{
+				allIncludes.append(includes.get(i).getSource());
+				allIncludes.append("\r\n\r\n");
+			}
+		}
 
 		DataMap scriptsCfg = config.getObject("scripts");
 		if(scriptsCfg != null)
@@ -58,6 +70,7 @@ public class AttributeConfig
 					ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 					jsEngine.put(ScriptEngine.FILENAME, scriptName);
 					String source = StringUtils.unescape(scriptsCfg.getString(event));
+					source = source + allIncludes.toString();
 					CompiledScript script = ((Compilable)jsEngine).compile(source);
 					scripts.put(event, script);
 				} 

@@ -175,7 +175,22 @@ public abstract class ObjectServer extends AuthenticatedService
 				}
 				else
 				{
-					throw new FunctionErrorException("No object was provided");
+					if(action.equals("execute"))
+					{
+						String function = request.getString("function");
+						if(function != null)
+						{
+							execute(session, function);
+						}
+						else
+						{
+							throw new FunctionErrorException("A global 'execute' action requires a 'function' attribute");
+						}
+					}
+					else
+					{
+						throw new FunctionErrorException("No object was provided");
+					}
 				}
 			}
 			else
@@ -219,6 +234,8 @@ public abstract class ObjectServer extends AuthenticatedService
 	protected abstract RedbackObject create(Session session, String objectName, String uid, String domain, DataMap data) throws RedbackException;
 
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException;
+
+	protected abstract RedbackObject execute(Session session, String function) throws RedbackException;
 
 	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, boolean addRelated) throws RedbackException;
 

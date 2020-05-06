@@ -28,7 +28,7 @@ public class ActionUnit extends ProcessUnit
 	
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Starting Action node");
+		logger.finer("Starting Action node");
 		Actionner actionner = new Actionner(pi);
 		List<Assignment> assignments = processManager.getAssignments(actionner, null, null);
 		for(int i = 0; i < assignments.size(); i++)
@@ -53,7 +53,7 @@ public class ActionUnit extends ProcessUnit
 		}	
 
 		pi.setCurrentNode(nextNode);
-		logger.info("Finished Action node");
+		logger.finer("Finished Action node");
 	}
 
 }

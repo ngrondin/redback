@@ -43,7 +43,7 @@ public class ScriptUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-		logger.info("Start executing script");
+		logger.finer("Start executing script");
 		Bindings context = script.getEngine().createBindings();
 		context.put("pid", pi.getId());
 		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
@@ -69,7 +69,7 @@ public class ScriptUnit extends ProcessUnit
 		{
 			error("Problem occurred executing script of node '" + name + "'", e);
 		}		
-		logger.info("Finish executing script ");		
+		logger.finer("Finish executing script ");		
 	}
 
 }

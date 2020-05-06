@@ -31,7 +31,7 @@ public class DomainServiceUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Starting domain service call node");
+		logger.finer("Starting domain service call node");
 		if(processManager.getDomainServiceName() != null)
 		{
 			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
@@ -46,23 +46,23 @@ public class DomainServiceUnit extends ProcessUnit
 			payload.metadata.put("token", sysUserSession.getToken());
 			try
 			{
-				logger.info("Calling " + processManager.getDomainServiceName() + " " + payload.getString());
+				logger.finest("Calling " + processManager.getDomainServiceName() + " " + payload.getString());
 				Payload response = processManager.getFirebus().requestService(processManager.getDomainServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
 				context.put("result", respData);
 				DataMap respOutput = outputExpressionMap.eval(context);
-				logger.fine("Output data was: " + respOutput);
+				logger.finest("Output data was: " + respOutput);
 				pi.getData().merge(respOutput);
 			} 
 			catch (Exception e)
 			{
 				error("Error executing domain service call ",  e);
 			}
-			logger.info("Finished domain service call node");
+			logger.finer("Finished domain service call node");
 		}
 		else
 		{
-			logger.info("No domain service defined");
+			logger.fine("No domain service defined");
 		}
 		pi.setCurrentNode(nextNode);
 	}

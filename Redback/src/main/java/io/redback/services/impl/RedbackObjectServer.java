@@ -1,6 +1,5 @@
 package io.redback.services.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -116,6 +115,18 @@ public class RedbackObjectServer extends ObjectServer
 		return object;
 	}
 	
+	protected RedbackObject execute(Session session, String function) throws RedbackException {
+		try {
+			objectManager.initiateCurrentTransaction();
+			objectManager.executeFunction(session, function);
+			objectManager.commitCurrentTransaction();
+		} catch(ScriptException e) {
+			error("Error executing function on object", e);
+		}
+
+		return null;
+	}
+
 	public void clearCaches()
 	{
 		objectManager.refreshAllConfigs();

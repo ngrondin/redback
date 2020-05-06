@@ -22,6 +22,7 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.ConfigurationClient;
 import io.redback.security.Session;
 import io.redback.services.UIServer;
 import io.redback.utils.HTML;
@@ -35,6 +36,7 @@ public class RedbackUIServer extends UIServer
 	protected ScriptEngine jsEngine;
 	protected HashMap<String, CompiledScript> jspScripts;
 	protected HashMap<String, DataMap> viewConfigs;
+	protected ConfigurationClient configClient;
 
 	
 	public RedbackUIServer(String n, DataMap c, Firebus f) 
@@ -44,6 +46,7 @@ public class RedbackUIServer extends UIServer
 		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
 		jspScripts = new HashMap<String, CompiledScript>();
 		viewConfigs = new HashMap<String, DataMap>();
+		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
 	}
 
 
@@ -66,7 +69,7 @@ public class RedbackUIServer extends UIServer
 				context.put("session", session);
 				try
 				{
-					DataMap appConfig = getConfig("rbui", "app", name); 
+					DataMap appConfig = configClient.getConfig("rbui", "app", name); 
 					String page = appConfig.getString("page");
 					context.put("config", appConfig);
 					html = executeJSP("pages/" + page, version, context);
@@ -94,7 +97,7 @@ public class RedbackUIServer extends UIServer
 	protected HTML getMenu(Session session, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		DataMap menu = new DataMap("{type:menu, content:[]}");
-		DataMap result = listConfigs("rbui", "menu");
+		DataMap result = configClient.listConfigs("rbui", "menu");
 		DataList resultList = result.getList("result");
 		for(int i = 0; i < resultList.size(); i++)
 		{
@@ -148,7 +151,7 @@ public class RedbackUIServer extends UIServer
 					DataMap viewConfig = viewConfigs.get(viewName);
 					if(viewConfig == null)
 					{
-						viewConfig = getConfig("rbui", "view", viewName);
+						viewConfig = configClient.getConfig("rbui", "view", viewName);
 						viewConfigs.put(viewName, viewConfig);
 					}
 					if(viewConfig != null)
@@ -336,7 +339,7 @@ public class RedbackUIServer extends UIServer
 		
 		if(type.equals("svg"))
 		{
-			DataMap result = getConfig("rbui", "resource", name); 
+			DataMap result = configClient.getConfig("rbui", "resource", name); 
 			bytes = StringUtils.unescape(result.getString("content")).getBytes();
 		}
 		else
