@@ -2,14 +2,10 @@ package io.redback.tools;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -93,39 +89,46 @@ public class ImportData extends Thread
 							}
 							if(!skip)
 							{
-								DataMap fbReqmap = new DataMap();
-								fbReqmap.put("action", "list");
-								fbReqmap.put("object", objectname);
-								fbReqmap.put("filter", data);
-								Payload request = new Payload(fbReqmap.toString());
-								request.metadata.put("token", token);
-								Payload response = firebus.requestService(objectService, request);
-								DataMap fbRespmap = new DataMap(response.getString());
-								DataList list = fbRespmap.getList("list");
-								String newUid = null;
-								if(list.size() > 0)
+								try
 								{
-									DataMap existing = list.getObject(0);
-									newUid = existing.getString("uid");
-									logger.fine("Found existing object " + objectname + "." + newUid);
-								}
-								else
-								{
-									fbReqmap = new DataMap();
-									fbReqmap.put("action", "create");
+									DataMap fbReqmap = new DataMap();
+									fbReqmap.put("action", "list");
 									fbReqmap.put("object", objectname);
-									fbReqmap.put("data", data);
-									fbReqmap.put("domain", domain);
-									request = new Payload(fbReqmap.toString());
+									fbReqmap.put("filter", data);
+									Payload request = new Payload(fbReqmap.toString());
 									request.metadata.put("token", token);
-									response = firebus.requestService(objectService, request);
-									fbRespmap = new DataMap(response.getString());
-									newUid = fbRespmap.getString("uid");
-									logger.fine("Created object " + objectname + "." + newUid);
+									Payload response = firebus.requestService(objectService, request);
+									DataMap fbRespmap = new DataMap(response.getString());
+									DataList list = fbRespmap.getList("list");
+									String newUid = null;
+									if(list.size() > 0)
+									{
+										DataMap existing = list.getObject(0);
+										newUid = existing.getString("uid");
+										logger.fine("Found existing object " + objectname + "." + newUid);
+									}
+									else
+									{
+										fbReqmap = new DataMap();
+										fbReqmap.put("action", "create");
+										fbReqmap.put("object", objectname);
+										fbReqmap.put("data", data);
+										fbReqmap.put("domain", domain);
+										request = new Payload(fbReqmap.toString());
+										request.metadata.put("token", token);
+										response = firebus.requestService(objectService, request);
+										fbRespmap = new DataMap(response.getString());
+										newUid = fbRespmap.getString("uid");
+										logger.fine("Created object " + objectname + "." + newUid);
+									}
+									String oldKey = objectname + "." + oldUid;
+									keyMap.put(oldKey, newUid);
+									objects.remove(oldUid);
 								}
-								String oldKey = objectname + "." + oldUid;
-								keyMap.put(oldKey, newUid);
-								objects.remove(oldUid);
+								catch(Exception e)
+								{
+									logger.info("Error creating object : " + e.getMessage());
+								}
 							}
 							else
 							{

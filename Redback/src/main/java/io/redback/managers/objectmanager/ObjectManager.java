@@ -377,12 +377,14 @@ public class ObjectManager
 		putInCurrentTransaction(object);
 		if(initialData != null)
 		{
-			Iterator<String> it = initialData.keySet().iterator();
-			while(it.hasNext())
+			for(String attributeName: initialData.keySet())
 			{
-				String attributeName = it.next();
-				if(!(initialData.get(attributeName) instanceof DataMap))  //THis is to avoid complex base filters setting initial data
-					object.put(attributeName, new Value(initialData.get(attributeName)));
+				Object value = initialData.get(attributeName);
+				if(value instanceof DataMap) //THis is to avoid complex base filters setting initial data
+					for(String key: ((DataMap)value).keySet())
+						if(key.startsWith("$"))
+							value = null;
+				object.put(attributeName, new Value(value));
 			}
 			logger.fine("Created object " + object.getObjectConfig().getName() + ":" + object.getUID().getString());
 		}
