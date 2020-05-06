@@ -84,9 +84,9 @@ export class RbMapComponent implements OnInit {
     let geometry = this.geometryOf(object);
     if(geometry != null) {
       if(object == this.selectedObject) {
-        url = this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/pin10.png';
-      } else {
         url = this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/pin11.png';
+      } else {
+        url = this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/pin10.png';
       }
     } 
     return url;
