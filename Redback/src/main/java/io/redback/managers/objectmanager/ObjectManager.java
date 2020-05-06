@@ -89,12 +89,13 @@ public class ObjectManager
 	public void refreshAllConfigs()
 	{
 		objectConfigs.clear();
-		includeScripts = null;
+		globalScripts.clear();
+		includeScripts.clear();
 	}
 	
 	public Bindings createScriptContext(RedbackElement element) throws RedbackException
 	{
-		Bindings context = jsEngine.createBindings();
+		Bindings context = createScriptContext(element.getUserSession());
 		if(element != null)
 		{
 			if(element instanceof RedbackObject)
@@ -115,13 +116,19 @@ public class ObjectManager
 				if(element.getObjectConfig().getAttributeConfig(key).getExpression() == null)
 					context.put(key, element.get(key).getObject());
 			}
-		}
-		context.put("canRead", new SessionRightsJSFunction(element.getUserSession(), "read"));
-		context.put("canWrite", new SessionRightsJSFunction(element.getUserSession(), "write"));
-		context.put("canExecute", new SessionRightsJSFunction(element.getUserSession(), "execute"));
-		context.put("om", new ObjectManagerJSWrapper(this, element.getUserSession()));
-		context.put("userprofile", element.getUserSession().getUserProfile());
-		context.put("firebus", new FirebusJSWrapper(firebus, element.getUserSession()));
+		}		
+		return context;
+	}
+	
+	public Bindings createScriptContext(Session session) throws RedbackException
+	{
+		Bindings context = jsEngine.createBindings();
+		context.put("canRead", new SessionRightsJSFunction(session, "read"));
+		context.put("canWrite", new SessionRightsJSFunction(session, "write"));
+		context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
+		context.put("om", new ObjectManagerJSWrapper(this, session));
+		context.put("userprofile", session.getUserProfile());
+		context.put("firebus", new FirebusJSWrapper(firebus, session));
 		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(getGlobalVariables()));
 		context.put("log", new LoggerJSFunction());
 		return context;
@@ -407,8 +414,10 @@ public class ObjectManager
 		ScriptConfig scriptCfg = this.getGlobalScript(function);
 		if(scriptCfg != null)
 		{
-			if(session.getUserProfile().canExecute("rb.script." + function))
-				scriptCfg.execute(this.createScriptContext(null));
+			if(session.getUserProfile().canExecute("rb.scripts." + function))
+				scriptCfg.execute(this.createScriptContext(session));
+			else
+				throw new RedbackException("No rights to execute global function " + function);
 		}
 	}	
 	

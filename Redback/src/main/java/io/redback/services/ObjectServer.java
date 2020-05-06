@@ -181,6 +181,8 @@ public abstract class ObjectServer extends AuthenticatedService
 						if(function != null)
 						{
 							execute(session, function);
+							responseData = new DataMap();
+							responseData.put("result", "ok");
 						}
 						else
 						{
