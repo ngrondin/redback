@@ -379,12 +379,14 @@ public class ObjectManager
 		{
 			for(String attributeName: initialData.keySet())
 			{
+				boolean isFilter = false;
 				Object value = initialData.get(attributeName);
-				if(value instanceof DataMap) //THis is to avoid complex base filters setting initial data
+				if(value instanceof DataMap)
 					for(String key: ((DataMap)value).keySet())
 						if(key.startsWith("$"))
-							value = null;
-				object.put(attributeName, new Value(value));
+							isFilter = true;
+				if(!isFilter)
+					object.put(attributeName, new Value(value));
 			}
 			logger.fine("Created object " + object.getObjectConfig().getName() + ":" + object.getUID().getString());
 		}
