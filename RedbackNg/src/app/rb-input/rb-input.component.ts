@@ -9,17 +9,6 @@ import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.comp
   styleUrls: ['./rb-input.component.css']
 })
 export class RbInputComponent extends RbInputCommonComponent implements OnInit {
-/*
-  @Input('label') label: string;
-  @Input('icon') icon: string;
-  @Input('size') size: number;
-  @Input('editable') editable: boolean;
-  @Input('object') rbObject: RbObject;
-  @Input('attribute') attribute: string;
-  @Output('change') change = new EventEmitter();
-
-  editedValue: string;
-*/
 
   constructor() {
     super();
@@ -32,29 +21,23 @@ export class RbInputComponent extends RbInputCommonComponent implements OnInit {
   }
 
   public get value(): string {
+    let val: string = null;
     if(this.rbObject != null) {
       if(this.attribute == 'uid') {
-        return this.rbObject.uid;
+        val = this.rbObject.uid;
       } else {
-        return this.rbObject.get(this.attribute);
+        val = this.rbObject.get(this.attribute);
       }
     } else {
-      return null;  
+      val = null;
     }
+    this.checkValueChange(val);
+    return val;
   }
 
   public set value(val: string) {
     this.editedValue = val;
   }
-
-  /*
-  public get readonly(): boolean {
-    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
-      return !(this.editable && this.rbObject.validation[this.attribute].editable);
-    else
-      return true;      
-  }
-  */
 
   public get widthString() : string {
     if(this.size != null)
@@ -64,6 +47,7 @@ export class RbInputComponent extends RbInputCommonComponent implements OnInit {
   }
 
   commit() {
+    this.previousValue = this.editedValue;
     this.rbObject.setValue(this.attribute, this.editedValue);
     this.change.emit(this.editedValue);
   }

@@ -1,31 +1,36 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { RbObject } from 'app/datamodel';
+import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.component';
 
 @Component({
   selector: 'rb-duration-input',
   templateUrl: './rb-duration-input.component.html',
   styleUrls: ['./rb-duration-input.component.css']
 })
-export class RbDurationInputComponent implements OnInit {
+export class RbDurationInputComponent extends RbInputCommonComponent implements OnInit {
+  /*
   @Input('label') label: string;
   @Input('icon') icon: string;
   @Input('size') size: number;
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
-
+*/
   editing: boolean;
   editingValue: string;
 
-  constructor() { }
+  constructor() {
+    super();
+   }
 
   ngOnInit() {
     this.editing = false;
   }
 
   get displayvalue() : string {
+    let ret: string = null;
     if(this.editing) {
-      return this.editingValue;
+      ret = this.editingValue;
     } else {
       if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
         let ms = this.rbObject.data[this.attribute];
@@ -51,24 +56,27 @@ export class RbDurationInputComponent implements OnInit {
           val = val + " " + seconds + "s";
         if(milli != 0)
           val = val + " " + milli + "ms";
-        return val.substr(1);
+          ret = val.substr(1);
       } else {
-        return null;
+        ret = null;
       }
+      this.checkValueChange(ret);
     }
+    return ret;
   }
 
   set displayvalue(val: string) {
     this.editingValue = val;
   }
 
-  
+  /*
   public get readonly(): boolean {
     if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
       return !(this.editable && this.rbObject.validation[this.attribute].editable);
     else
       return true;      
   }
+*/
 
   public keydown(event: any) {
 

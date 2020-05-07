@@ -158,6 +158,20 @@ rb-menu > .mat-list-base {
 	margin-bottom: -5px;
 }
 
+.rb-input-flasher {
+    background-color: transparent;
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+	z-index: -1;
+	transition: background-color 0.2s ease-out;
+}
+
+.rb-input-flasher-on {
+	background-color: lightsteelblue;
+	transition: background-color 0.1s step-start;
+}
 
 rb-textarea-input .mat-form-field-flex {
     align-items: start!important;

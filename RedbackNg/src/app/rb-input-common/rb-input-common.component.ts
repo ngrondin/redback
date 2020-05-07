@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 
 @Component({
@@ -17,11 +17,28 @@ export class RbInputCommonComponent implements OnInit {
   @Output('valueChange') valueChange = new EventEmitter();
   @Output('change') change = new EventEmitter();
 
-  editedValue: string;
+  previousObject: RbObject;
+  previousValue: any;
+  editedValue: any;
+  flasherOn: boolean = false;
 
   constructor() { }
 
   ngOnInit() {
+  }
+
+
+  public checkValueChange(value: any) {
+    if(this.previousValue != value && this.previousObject == this.rbObject) {
+      this.flash();
+    }
+    this.previousValue = value;
+    this.previousObject = this.rbObject;
+  }
+
+  public flash() {
+    this.flasherOn = true;
+    setTimeout(() => {this.flasherOn = false}, 100);
   }
 
 

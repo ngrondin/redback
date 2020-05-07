@@ -6,20 +6,22 @@ import { MatDialog } from '@angular/material/dialog';
 import { RbPopupListComponent } from '../rb-popup-list/rb-popup-list.component';
 import { ComponentPortal, PortalInjector } from '@angular/cdk/portal';
 import { CONTAINER_DATA } from '../tokens';
+import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.component';
 
 @Component({
   selector: 'rb-related-input',
   templateUrl: './rb-related-input.component.html',
   styleUrls: ['./rb-related-input.component.css']
 })
-export class RbRelatedInputComponent implements OnInit {
-
+export class RbRelatedInputComponent extends RbInputCommonComponent implements OnInit {
+  /*
   @Input('label') label: string;
   @Input('icon') icon: string;
   @Input('size') size: number;
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
+  */
   @Input('displayattribute') displayattribute: string;
   @Input('parentattribute') parentattribute: string;
   @Input('childattribute') childattribute: string;
@@ -35,18 +37,21 @@ export class RbRelatedInputComponent implements OnInit {
     public overlay: Overlay,
     public viewContainerRef: ViewContainerRef
   ) {
+    super();
   }
 
   ngOnInit() {
   }
 
   public get displayvalue(): string {
-    if(this.overlayRef != null)
-      return this.searchValue;
-    if(this.rbObject != null && this.rbObject.related[this.attribute] != null )
-      return this.rbObject.related[this.attribute].get(this.displayattribute);
-    else
-      return null;  
+    let val: string = null;
+    if(this.overlayRef != null) {
+      val = this.searchValue;
+    } else if(this.rbObject != null && this.rbObject.related[this.attribute] != null ) {
+      val = this.rbObject.related[this.attribute].get(this.displayattribute);
+      this.checkValueChange(val);
+    }
+    return val;
   }
 
   public set displayvalue(str: string) {
@@ -60,12 +65,14 @@ export class RbRelatedInputComponent implements OnInit {
     }
   }
 
+  /*
   public get readonly(): boolean {
     if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
       return !(this.editable && this.rbObject.validation[this.attribute].editable);
     else
       return true;      
   }
+*/
 
   public openPopupList(direction) {
     if(!this.readonly) {

@@ -34,24 +34,27 @@ export class RbDatetimeInputComponent extends RbInputCommonComponent implements 
   }
 
   public get displayvalue(): string {
+    let val: string = null;
     if(this.attribute != null) {
       if(this.rbObject != null) {
         let iso : string = this.rbObject.get(this.attribute);
         if(iso != null) {
-          return this.formatDate(new Date(iso));
+          val = this.formatDate(new Date(iso));
         } else {
-          return null;
+          val = null;
         }
       } else {
-        return null;  
+        val = null;  
       }
     } else {
       if(this.value != null) {
-        return this.formatDate(new Date(this.value));
+        val = this.formatDate(new Date(this.value));
       } else {
-        return null;
+        val = null;
       }
     }
+    this.checkValueChange(val);
+    return val;
   }
 
   public set displayvalue(val: string) {
@@ -144,10 +147,9 @@ export class RbDatetimeInputComponent extends RbInputCommonComponent implements 
   public selected(dt: Date) {
     if(this.attribute != null) {
       if(this.rbObject != null) {
-        if(dt != null)
-          this.rbObject.setValue(this.attribute, dt.toISOString());
-        else
-          this.rbObject.setValue(this.attribute, null);
+        let val: string = (dt != null ? dt.toISOString() : null);
+        this.previousValue = (dt != null ? this.formatDate(dt) : null);
+        this.rbObject.setValue(this.attribute, val);
       }
     } else {
       this.valueChange.emit(dt.toISOString());

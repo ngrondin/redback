@@ -12,5 +12,9 @@
         autocomplete="off">
     <mat-icon 
         matPrefix
-        class="rb-grey-icon">{{icon}}</mat-icon>
+        class="rb-grey-icon">{{icon}}
+    </mat-icon>
+    <div
+        [class]="'rb-input-flasher' + (flasherOn ? ' rb-input-flasher-on' : '')">        
+    </div>
 </mat-form-field>

@@ -605,6 +605,8 @@ public class ObjectManager
 				AttributeConfig attributeConfig = objectConfig.getAttributeConfig(key);
 				if(key.equals("uid"))
 					attributeDBKey = objectConfig.getUIDDBKey();
+				else if(key.equals("domain"))
+					attributeDBKey = objectConfig.getDomainDBKey();
 				else if(attributeConfig != null)
 					attributeDBKey = attributeConfig.getDBKey();
 				
@@ -698,113 +700,10 @@ public class ObjectManager
 		return filter;
 	}
 	
-	/*
-	protected DataMap request(String service, DataMap request) throws DataException, FunctionErrorException, FunctionTimeoutException
-	{
-		Payload reqPayload = new Payload(request.toString());
-		logger.finest("Requesting firebus service : " + service + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
-		Payload respPayload = firebus.requestService(service, reqPayload, 10000);
-		logger.finest("Receiving firebus service respnse");
-		String respStr = respPayload.getString();
-		DataMap result = new DataMap(respStr);
-		return result;
-	}
-	*/
-	/*
-	protected DataMap requestConfig(String service, String category, String name) throws RedbackException
-	{
-		DataMap request = new DataMap();
-		try
-		{
-			request.put("action", "get");
-			request.put("service", service);
-			request.put("category", category);
-			request.put("name", name);
-			return request(configServiceName, request);
-		}
-		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
-		{
-			throw new RedbackException("Error requesting configuration", e);
-		}
-	}
-
-	protected DataMap listConfigs(String service, String category) throws RedbackException
-	{
-		DataMap request = new DataMap();
-		try
-		{
-			request.put("action", "list");
-			request.put("service", service);
-			request.put("category", category);
-			return request(configServiceName, request);
-		}
-		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
-		{
-			throw new RedbackException("Error requesting configuration", e);
-		}
-	}
-	*/
-	
 	protected void commitData(String collection, DataMap key, DataMap data) throws RedbackException
 	{
 		dataClient.putData(collection, key, data);
 	}
-	
-	/*
-	protected DataMap requestData(String objectName, DataMap filter) throws RedbackException
-	{
-		return requestData(objectName, filter, 0);
-	}
-	
-	protected DataMap requestData(String objectName, DataMap filter, int page) throws RedbackException
-	{
-		try
-		{
-			DataMap request = new DataMap();
-			request.put("object", objectName);
-			request.put("filter", filter);
-			request.put("page", page);
-			return request(dataServiceName, request);
-		}
-		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
-		{
-			throw new RedbackException("Error requesting data", e);
-		}
-	}
-
-	protected void commitData(String collection, DataMap key, DataMap data) throws RedbackException
-	{
-		logger.finest("Publishing to firebus service : " + dataServiceName + "  " + data.toString().replace("\r\n", "").replace("\t", ""));
-		try
-		{
-			DataMap request = new DataMap();
-			request.put("object", collection);
-			request.put("key", key);
-			request.put("data", data);
-			request(dataServiceName, request);
-		}
-		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
-		{
-			throw new RedbackException("Error publishing data", e);
-		}
-	}
-	
-	protected DataMap aggregateData(String objectName, DataMap filter, DataList tuple, DataList metrics) throws RedbackException
-	{
-		try
-		{
-			DataMap request = new DataMap();
-			request.put("object", objectName);
-			request.put("filter", filter);
-			request.put("tuple", tuple);
-			request.put("metrics", metrics);
-			return request(dataServiceName, request);
-		}
-		catch(DataException | FunctionErrorException | FunctionTimeoutException e)
-		{
-			throw new RedbackException("Error requesting data", e);
-		}
-	}*/
 	
 	protected void signal(String signal)
 	{
