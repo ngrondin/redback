@@ -1,5 +1,6 @@
 package io.redback.services.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -336,6 +337,10 @@ public class RedbackUIServer extends UIServer
 			type = "ico";
 		else if(name.endsWith(".png"))
 			type = "png";
+		else if(name.endsWith(".apk"))
+			type = "apk";
+		else if(name.endsWith(".ipa"))
+			type = "ipa";
 		
 		if(type.equals("svg"))
 		{
@@ -358,13 +363,13 @@ public class RedbackUIServer extends UIServer
 			
 			if(is != null)
 			{
-				bytes = new byte[is.available()];
-				int bytesRead = 0;
-				while(is.available() > 0)
-				{
-					bytesRead += is.read(bytes, bytesRead, (bytes.length - bytesRead));
-				}
+				ByteArrayOutputStream result = new ByteArrayOutputStream();
+				byte[] buffer = new byte[1024];
+				int length;
+				while ((length = is.read(buffer)) != -1)
+				    result.write(buffer, 0, length);
 				is.close();
+				bytes = result.toByteArray();
 			}
 			else
 			{

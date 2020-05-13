@@ -19,9 +19,33 @@ var versionOrDefault = version != null ? version : 'default';
     window.onload = function() {
         window.location = '<%=config.getString('mobileapp')%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>';
     }
+    
+    var os = getMobileOperatingSystem();
+    if(os != 'Android')
+    	document.getElementById('androiddl').style.visibility = 'hidden';
+    if(os != 'iOS')
+    	document.getElementById('iosdl').style.visibility = 'hidden';
+    
+    function getMobileOperatingSystem() {
+		var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+   	    if (/windows phone/i.test(userAgent)) 
+   	        return "Windows Phone";
+   	    if (/android/i.test(userAgent))
+   	        return "Android";
+   	    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream)
+   	        return "iOS";
+   	    return "unknown";
+    }    
   </script>  
 </head>
 <body oncontextmenu="return false;">
-	<a href="<%=config.getString('mobileapp')%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>">Manual Redirect</a>
+	<a href="<%=config.getString('mobileapp')%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>">Manual Redirect</a><br><br> <%
+	
+if(config.get('android') != null) { %>	
+	<a id="androiddl" href="../resource/<%=config.getString("android")%>">Download Android App</a> <%
+}
+if(config.get('ios') != null) { %>	
+	<a id="iosdl" href="../resource/<%=config.getString("ios")%>">Download iOS App</a> <%
+}%>
 </body>
 </html>

@@ -175,6 +175,10 @@ public abstract class UIServer extends AuthenticatedService
 			mime = "image/x-icon";
 		else if(name.endsWith(".png"))
 			mime = "image/png";
+		else if(name.endsWith(".apk"))
+			mime = "application/vnd.android.package-archive";
+		else
+			mime = "application/octet-stream";
 		return mime;
 	}
 	
