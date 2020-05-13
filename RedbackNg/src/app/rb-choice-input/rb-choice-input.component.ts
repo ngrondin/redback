@@ -36,7 +36,6 @@ export class RbChoiceInputComponent extends RbInputCommonComponent implements On
         if(opt['value'] == v)
           val = opt['value'];
       }
-      val = null;
     } else {
       val = null;  
     }
