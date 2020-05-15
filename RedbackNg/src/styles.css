@@ -158,6 +158,16 @@ rb-menu > .mat-list-base {
 	margin-bottom: -5px;
 }
 
+.rb-input-text-color {
+	color: currentColor!important;
+	transition: color 0.6s ease-out!important;
+}
+
+.rb-input-text-flash {
+	color: red!important;
+	transition: color 0.1s step-start!important;
+}
+
 .rb-input-flasher {
     background-color: transparent;
     position: absolute;

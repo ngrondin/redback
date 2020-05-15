@@ -4,6 +4,7 @@
     <input 
         #input
         matInput 
+        [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         [(ngModel)]="displayvalue"
         (focus)="focus($event)"
         (blur)="blur($event)"
@@ -14,7 +15,4 @@
         matPrefix
         class="rb-grey-icon">{{icon}}
     </mat-icon>
-    <div
-        [class]="'rb-input-flasher' + (flasherOn ? ' rb-input-flasher-on' : '')">        
-    </div>
 </mat-form-field>

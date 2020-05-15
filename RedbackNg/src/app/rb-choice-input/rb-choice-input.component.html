@@ -2,6 +2,7 @@
     [style.width]="widthString" >
     <mat-label>{{label}}</mat-label>
     <mat-select
+        [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         (selectionChange)="commit()"
         [disabled]="readonly"
         [(value)]="value">
@@ -15,7 +16,4 @@
         matPrefix
         class="rb-grey-icon">{{icon}}
     </mat-icon>
-    <div
-        [class]="'rb-input-flasher' + (flasherOn ? ' rb-input-flasher-on' : '')">        
-    </div>    
 </mat-form-field>

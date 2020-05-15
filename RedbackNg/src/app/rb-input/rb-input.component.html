@@ -3,6 +3,7 @@
     <mat-label>{{label}}</mat-label>
     <input 
         matInput 
+        [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         [(ngModel)]="value"
         (change)="commit()"
         [readonly]="readonly"
@@ -10,7 +11,4 @@
     <mat-icon 
         matPrefix
         class="rb-grey-icon">{{icon}}</mat-icon>
-    <div
-        [class]="'rb-input-flasher' + (flasherOn ? ' rb-input-flasher-on' : '')">        
-    </div>
 </mat-form-field>
