@@ -90,7 +90,9 @@ public class ObjectManager
 	{
 		objectConfigs.clear();
 		globalScripts.clear();
-		includeScripts.clear();
+		if(includeScripts != null)
+			includeScripts.clear();
+		includeScripts = null;
 	}
 	
 	public Bindings createScriptContext(RedbackElement element) throws RedbackException

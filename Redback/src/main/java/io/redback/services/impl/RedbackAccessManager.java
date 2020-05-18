@@ -20,8 +20,9 @@ import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 import io.redback.services.AccessManager;
+import io.redback.services.ConfigurableService;
 
-public class RedbackAccessManager extends AccessManager
+public class RedbackAccessManager extends AccessManager implements ConfigurableService
 {
 	protected String secret;
 	protected String issuer;
@@ -183,4 +184,12 @@ public class RedbackAccessManager extends AccessManager
 			}
 		}
 	}
+	
+	
+	public void clearCaches()
+	{
+		this.cachedSessions.clear();
+		this.cachedUserProfiles.clear();
+		this.roles.clear();
+	}	
 }

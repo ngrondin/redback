@@ -9,8 +9,9 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 
-public abstract class DataService extends ConfigurableService
+public abstract class DataService// extends ConfigurableService
 {
+	/*
 	protected String dataService;
 	
 	public DataService(String n, DataMap c, Firebus f)
@@ -40,5 +41,5 @@ public abstract class DataService extends ConfigurableService
 		if(dataService != null)
 			firebus.publish(dataService, new Payload("{object:\"" + object + "\", key:" + key.toString() + ", data:" + data.toString() + "}"));
 	}
-	
+	*/
 }

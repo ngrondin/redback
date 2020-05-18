@@ -14,11 +14,13 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
+import io.redback.services.AuthenticatedService;
+import io.redback.services.ConfigurableService;
 import io.redback.services.FileServer;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.RedbackFile;
 
-public class RedbackFileServer extends FileServer
+public class RedbackFileServer extends FileServer implements ConfigurableService
 {
 	protected ArrayList<String> fileServices = new ArrayList<String>();
 	protected String defaultFileService;
@@ -112,6 +114,11 @@ public class RedbackFileServer extends FileServer
 		if(filename.toLowerCase().endsWith(".jpg"))
 			type = "image/jpg";
 		return type;
+	}
+
+	public void clearCaches() 
+	{
+		
 	}
 
 

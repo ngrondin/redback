@@ -25,12 +25,13 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.security.Session;
+import io.redback.services.ConfigurableService;
 import io.redback.services.UIServer;
 import io.redback.utils.HTML;
 import io.redback.utils.RedbackUtilsJSWrapper;
 import io.redback.utils.StringUtils;
 
-public class RedbackUIServer extends UIServer
+public class RedbackUIServer extends UIServer  implements ConfigurableService
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String devpath;

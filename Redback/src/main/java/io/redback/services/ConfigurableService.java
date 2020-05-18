@@ -8,21 +8,19 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 
-public abstract class ConfigurableService extends Service 
+public interface ConfigurableService //extends Service 
 {
-	protected String configService;
-	
+	//protected String configService;
+	/*
 	public ConfigurableService(String n, DataMap c, Firebus f)
 	{
 		super(n, c, f);
 		configService = config.getString("configservice");
 	}
-	
-	public void clearCaches() 
-	{
-		
-	}
-	
+	*/
+	public void clearCaches(); 
+
+	/*
 	protected DataMap getConfig(String service, String category, String name) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		return request(configService, "{action:\"get\", service:\"" + service + "\", category:\"" + category + "\", name:\"" + name + "\"}");
@@ -37,4 +35,5 @@ public abstract class ConfigurableService extends Service
 	{
 		return request(configService, "{action:\"list\", service:\"" + service + "\", category:\"" + category + "\"}");
 	}
+	*/
 }

@@ -97,13 +97,7 @@ public abstract class AccessManager extends Service
 		return null;
 	}
 	
-	
-	public void clearCaches()
-	{
-		this.cachedSessions.clear();
-		this.cachedUserProfiles.clear();
-		this.roles.clear();
-	}
+
 	
 	protected abstract Session validateToken(String token) throws RedbackException;
 }

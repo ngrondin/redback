@@ -11,9 +11,10 @@ import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.security.Session;
+import io.redback.services.ConfigurableService;
 import io.redback.services.ProcessServer;
 
-public class RedbackProcessServer extends ProcessServer 
+public class RedbackProcessServer extends ProcessServer implements ConfigurableService
 {
 	protected ProcessManager processManager;
 
