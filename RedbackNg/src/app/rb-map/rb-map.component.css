@@ -20,3 +20,112 @@ agm-map {
     flex-direction: column;
     align-items: stretch;
 }
+
+.rb-map-label-panel {
+    position: absolute;
+    left: 25px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
+        0 13px 19px 2px rgba(0, 0, 0, 0.14),
+        0 5px 24px 4px rgba(0, 0, 0, 0.12);
+    white-space: nowrap;
+    font-size: 18px;
+    cursor: default;
+}
+
+.rb-map-label-button {
+    font-size: initial;
+    padding: 6px 12px 6px 12px;
+}
+
+.rb-map-label-text {
+    padding: 12px;
+}
+
+.rb-mapicon-pin {
+	position: absolute;
+	border-radius: 50%;
+	border-width: 8px;
+	border-style: solid;
+	width: 8px;
+	height: 8px;
+    top: -13px;
+    cursor: pointer;
+}
+
+.rb-mapicon-pin::after {
+	position: absolute;
+	content: '';
+	width: 0px;
+	height: 0px;
+	bottom: -30px;
+	left: -6px;
+	border: 10px solid transparent;
+	border-top-width: 17px;
+	border-top-style: solid;
+	border-top-color: inherit;
+}
+
+.rb-mapicon-pin-animate-pulse::before {
+	position: absolute;
+	content: '';
+	width: 32px;
+	height: 28px;
+	left: -19px;
+	top: 6px;
+	border: 7px solid;
+	border-radius: 50%;
+	border-color: inherit;
+	animation: rb-map-animation-pulse 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+	z-index: 1;
+}
+
+.rb-mapicon-circle {
+	position: absolute;
+	border-radius: 50%;
+	border-width: 13px;
+    border-style: solid;
+    background-color: white;
+	width: 0px;
+	height: 0px;
+    top: 6px;
+    left: 1px;
+    cursor: pointer;
+}
+
+
+.rb-mapicon-circle-animate-pulse::before {
+	position: absolute;
+	content: '';
+	width: 36px;
+	height: 36px;
+	top: -25px;
+	left: -25px;
+	border: 7px solid;
+	border-radius: 50%;
+	border-color: inherit;
+	animation: rb-map-animation-pulse 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+	z-index: -1;
+}
+
+
+@keyframes rb-map-animation-pulse {
+	0% {
+	  transform: scale(.5);
+	}
+	80%, 100% {
+	  opacity: 0;
+	}
+  }
+
+.rb-map-initial {
+    position: absolute;
+    width: 26px;
+    line-height: 16px;
+    top: -7px;
+    left: -13px;
+    color:white;
+    font-weight: 700;
+    text-align: center;
+}

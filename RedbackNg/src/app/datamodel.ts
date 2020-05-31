@@ -117,6 +117,19 @@ export class RbObject {
         return false;
     }
 
+    simplify() : string {
+        let str: string = "";
+        let o: any = {
+            "objectname": this.objectname,
+            "uid": this.uid,
+            "data": this.data,
+            "related":{}
+        };
+        for(let a of Object.keys(this.related)) {
+            o.related[a] = this.related[a].simplify();
+        }
+        return o;
+    }
 }
 
 

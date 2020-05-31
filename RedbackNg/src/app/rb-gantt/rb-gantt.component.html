@@ -65,6 +65,7 @@
                 class="rb-gantt-mainlabel">
                 {{lane.label}}
             </div>
+            <mat-icon>{{lane.icon}}</mat-icon>
         </div>
     </div>
     <div
@@ -86,7 +87,8 @@
                 [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
                 [rb-drag-object]="spread.canEdit ? spread.object : null"
                 [style.width.px]="spread.width"
-                [style.left.px]="spread.start">
+                [style.left.px]="spread.start"
+                [style.background-color]="spread.color">
                 <div
                     class="rb-gantt-smalllabel">
                     {{spread.label}}

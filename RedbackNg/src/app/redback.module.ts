@@ -54,6 +54,7 @@ import { RbAggregatesetDirective } from './rb-aggregateset/rb-aggregateset.direc
 import { RbGraphComponent } from './rb-graph/rb-graph.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { RbDragChangeformDirective } from './rb-drag/rb-drag-changeform.directive';
+import { AgmOverlays } from "agm-overlays"
 
 @NgModule({
   imports: [
@@ -83,6 +84,7 @@ import { RbDragChangeformDirective } from './rb-drag/rb-drag-changeform.directiv
     HttpClientModule,
     HttpModule,
     NgxChartsModule,
+    AgmOverlays,
     AgmCoreModule.forRoot({
       apiKey: 'AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'
     })

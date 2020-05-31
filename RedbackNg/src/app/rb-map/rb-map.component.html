@@ -1,21 +1,48 @@
 <agm-map 
     #map
-    [latitude]="latLonOfMap.latitude" 
-    [longitude]="latLonOfMap.longitude"
+    [latitude]="mapLatitude" 
+    [longitude]="mapLongitude"
     [zoom]="zoomOfMap"
     (mapRightClick)="mapRightClick($event)"
     (mapClick)="mapClick($event)"
     (mousemove)="mouseMove($event)">
-    <agm-marker
-        *ngFor="let object of list"
-        [markerClickable]="true"
-        [latitude]="latitudeOf(object, 0)"
-        [longitude]="longitudeOf(object, 0)"
-        [iconUrl]="iconUrlOf(object)"
-        [zIndex]="zIndexOf(object)"
-        (markerClick)="objectClick(object)"
-        (markerRightClick)="objectRightClick(object)">
-    </agm-marker>    
+    <agm-overlay
+        *ngFor="let mapObject of mapObjects"
+        [latitude]="mapObject.latitude"
+        [longitude]="mapObject.longitude"
+        [zIndex]="mapObject.zindex"
+        (markerClick)="objectClick(mapObject)"
+        (markerRightClick)="objectRightClick(mapObject)">
+        <div
+            [class]="'rb-mapicon-' + mapObject.icon + (mapObject.animate != null ? ' rb-mapicon-' + mapObject.icon + '-animate-' + mapObject.animate : '')"
+            [style.border-color]="mapObject.color">
+            <span
+                class="rb-map-initial"
+                *ngIf="mapObject.initials != null">
+                {{mapObject.initials}}
+            </span>
+        </div>
+    </agm-overlay> 
+    <agm-overlay
+        *ngIf="showLabel"
+        [latitude]="labellatLon.latitude"
+        [longitude]="labellatLon.longitude">
+        <div
+            class="rb-map-label-panel">
+            <button
+                mat-button
+                *ngIf="labelLink != null"
+                class="rb-map-label-button"
+                (click)="labelClick()">
+                {{labelText}}
+            </button>
+            <div
+                *ngIf="labelLink == null"
+                class="rb-map-label-text">
+                {{labelText}}
+        </div>
+        </div>
+    </agm-overlay>   
 </agm-map>
 <div 
     class="rb-map-menu-panel"
@@ -32,3 +59,4 @@
         </mat-list-item>
     </mat-list>    
 </div>
+

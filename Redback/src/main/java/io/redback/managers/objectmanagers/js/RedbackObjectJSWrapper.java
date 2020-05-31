@@ -93,7 +93,7 @@ public class RedbackObjectJSWrapper extends AbstractJSObject
 			}
 			else if(in instanceof NativeDate)
 			{
-				val = new Date((long)NativeDate.getTime(in) + ((long)NativeDate.getTimezoneOffset(in) * 60000));
+				val = new Date((long)NativeDate.getTime(in)); //new Date((long)NativeDate.getTime(in) + ((long)NativeDate.getTimezoneOffset(in) * 60000));
 			}
 			else if(in instanceof JSObject)
 			{

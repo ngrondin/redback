@@ -4,7 +4,7 @@ import { ObserveOnMessage } from 'rxjs/internal/operators/observeOn';
 import { RbSearchComponent } from 'app/rb-search/rb-search.component';
 import { trigger } from '@angular/animations';
 import { MATERIAL_SANITY_CHECKS } from '@angular/material';
-
+import { Md5 } from 'ts-md5/dist/md5';
 
 class GanttSeriesConfig {
   dataset: string;
@@ -14,6 +14,8 @@ class GanttSeriesConfig {
   labelAttribute: string;
   laneAttribute: string;
   laneLabelAttribute: string;
+  laneIconAttribute: string;
+  laneIconMap: any;
   colorAttribute: string;
   colorMap: any;
   isBackground: boolean;
@@ -27,6 +29,8 @@ class GanttSeriesConfig {
     this.labelAttribute = json.labelattribute;
     this.laneAttribute = json.laneattribute;
     this.laneLabelAttribute = json.lanelabelattribute;
+    this.laneIconAttribute = json.laneliconattribute;
+    this.laneIconMap = json.laneiconmap;
     this.isBackground = json.isbackground;
     this.canEdit = json.canedit;
     this.colorAttribute = json.colorattribute;
@@ -37,11 +41,13 @@ class GanttSeriesConfig {
 class GanttLane {
   id: string;
   label: string;
+  icon: string;
   spreads: GanttSpread[];
 
-  constructor(i: string, l: string, s: GanttSpread[]) {
+  constructor(i: string, l: string, ic: string, s: GanttSpread[]) {
     this.id = i;
     this.label = l != null ? l : "";
+    this.icon = ic;
     this.spreads = s;
   }
 }
@@ -106,6 +112,7 @@ export class RbGanttComponent implements OnInit {
 
   lastObjectCount: number = 0;
   lastObjectUpdate: number = 0;
+  lastHash: string | Int32Array;
 
   recalc: number = 0;
   public getSizeForObjectCallback: Function;
@@ -135,22 +142,19 @@ export class RbGanttComponent implements OnInit {
   }
 
   haveListsChanged(): Boolean {
-    let changed: Boolean = false;
-    let count: number = 0;
+    let str: string = "";
     for(let ser in this.lists) {
       for(let obj of this.lists[ser]) {
-        count += 1;
-        if(obj['lastUpdated'] > this.lastObjectUpdate) {
-          changed = true;
-          this.lastObjectUpdate = obj['lastUpdated'];
-        }
+        str = str + JSON.stringify(obj.simplify());
       }
     }
-    if(count != this.lastObjectCount) {
-      changed = true;
-      this.lastObjectCount = count;
+    let hash: string | Int32Array = Md5.hashStr(str);
+    if(hash != this.lastHash) {
+      this.lastHash = hash;
+      return true;
+    } else {
+      return false;
     }
-    return changed;
   }
 
   setZoom(ms: number) {
@@ -201,7 +205,14 @@ export class RbGanttComponent implements OnInit {
             }
           }
           if(lane == null) {
-            lane = new GanttLane(objLaneId, obj.get(cfg.laneLabelAttribute), this.getSpreads(objLaneId));
+            let icon = null;
+            if(cfg.laneIconAttribute != null) {
+              icon = obj.get(cfg.laneIconAttribute);
+              if(cfg.laneIconMap != null) {
+                icon = cfg.laneIconMap[icon];
+              } 
+            }
+            lane = new GanttLane(objLaneId, obj.get(cfg.laneLabelAttribute), icon, this.getSpreads(objLaneId));
             lanes.push(lane);
           }
         }

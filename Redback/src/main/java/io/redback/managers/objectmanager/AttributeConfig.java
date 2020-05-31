@@ -32,6 +32,18 @@ public class AttributeConfig
 		objectName = on;
 		config = cfg;
 		scripts = new HashMap<String, CompiledScript>();
+		List<ScriptConfig> includes = objectManager.getIncludeScripts();
+		StringBuilder allIncludes = new StringBuilder();
+		allIncludes.append("\r\n\r\n");
+		if(includes != null)
+		{
+			for(int i = 0; i < includes.size(); i++)
+			{
+				allIncludes.append(includes.get(i).getSource());
+				allIncludes.append("\r\n\r\n");
+			}
+		}
+
 		if(config.get("relatedobject") != null)
 			relatedObjectConfig = new RelatedObjectConfig(objectManager, config.getObject("relatedobject"));
 		
@@ -46,17 +58,6 @@ public class AttributeConfig
 		if(config.get("default") != null && config.getString("default").length() > 0)
 			defaultValue = new Expression(objectManager.getScriptEngine(), config.getString("default"));
 		
-		List<ScriptConfig> includes = objectManager.getIncludeScripts();
-		StringBuilder allIncludes = new StringBuilder();
-		if(includes != null)
-		{
-			for(int i = 0; i < includes.size(); i++)
-			{
-				allIncludes.append(includes.get(i).getSource());
-				allIncludes.append("\r\n\r\n");
-			}
-		}
-
 		DataMap scriptsCfg = config.getObject("scripts");
 		if(scriptsCfg != null)
 		{
