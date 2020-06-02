@@ -110,6 +110,16 @@ export class RbMapComponent implements OnInit {
   lastObjectCount: number = 0;
   lastObjectUpdate: number = 0;
 
+  defaultStyles = [
+    {
+      featureType: "poi",
+      elementType: "labels",
+      stylers: [
+        { visibility: "off" }
+      ]
+    }
+  ];
+
   constructor(
     private apiService: ApiService
   ) { }
