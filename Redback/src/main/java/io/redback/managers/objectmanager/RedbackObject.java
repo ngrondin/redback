@@ -488,17 +488,8 @@ public class RedbackObject extends RedbackElement
 	{
 		String fileName = (String)script.getEngine().get(ScriptEngine.FILENAME);
 		logger.finer("Start executing script : " + fileName);
-		Bindings context = script.getEngine().createBindings();
-		context.put("self", new RedbackObjectJSWrapper(this));
-		context.put("om", new ObjectManagerJSWrapper(objectManager, session));
+		Bindings context = objectManager.createScriptContext(this); //script.getEngine().createBindings();
 		context.put("pm", new ProcessManagerProxyJSWrapper(objectManager.getFirebus(), objectManager.processServiceName, session));
-		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
-		context.put("canRead", new SessionRightsJSFunction(session, "read"));
-		context.put("canWrite", new SessionRightsJSFunction(session, "write"));
-		context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
-		context.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
-		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(objectManager.getGlobalVariables()));
-		context.put("log", new LoggerJSFunction());
 		try
 		{
 			script.eval(context);

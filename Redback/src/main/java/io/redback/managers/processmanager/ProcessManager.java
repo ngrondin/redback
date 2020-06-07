@@ -28,6 +28,7 @@ import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.FirebusJSWrapper;
+import io.redback.utils.LoggerJSFunction;
 
 
 public class ProcessManager
@@ -77,7 +78,20 @@ public class ProcessManager
 	{
 		return jsEngine;
 	}
+
 	
+	public Bindings createScriptContext(ProcessInstance pi) throws RedbackException
+	{
+		Bindings context = jsEngine.createBindings();
+		context.put("pid", pi.getId());
+		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
+		context.put("pm", new ProcessManagerJSWrapper(this, pi));
+		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(getGlobalVariables()));
+		context.put("firebus", new FirebusJSWrapper(getFirebus(), getSystemUserSession(pi.getDomain())));
+		context.put("log", new LoggerJSFunction());
+		return context;
+	}
+		
 	public void refreshAllConfigs()
 	{
 		processes.clear();
@@ -401,17 +415,6 @@ public class ProcessManager
 				transactions.remove(txId);
 			}
 		}		
-	}
-	
-	public Bindings createScriptContext(ProcessInstance pi)
-	{
-		Bindings context = jsEngine.createBindings();
-		context.put("pid", pi.getId());
-		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
-		context.put("pm", new ProcessManagerJSWrapper(this, pi));
-		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(getGlobalVariables()));
-		context.put("firebus", new FirebusJSWrapper(getFirebus(), sysUserSession));
-		return context;
 	}
 	
 	

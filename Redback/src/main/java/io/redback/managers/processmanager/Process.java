@@ -126,8 +126,9 @@ public class Process
 		{
 			while(currentNodeId != null  &&  nodes.get(currentNodeId) != null  &&   !pi.isComplete()  &&  !(nodes.get(currentNodeId) instanceof InteractionUnit))
 			{
-				logger.info("Executing node '" + currentNodeId + "'");
-				nodes.get(currentNodeId).execute(pi);
+				ProcessUnit node = nodes.get(currentNodeId);
+				logger.info("Executing node '" + node.getName() + "'");
+				node.execute(pi);
 				currentNodeId = pi.getCurrentNode();
 			}
 			

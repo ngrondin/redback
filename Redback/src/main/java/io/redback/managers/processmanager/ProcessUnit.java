@@ -26,6 +26,11 @@ public abstract class ProcessUnit
 		return nodeId;
 	}
 	
+	public String getName()
+	{
+		return name;
+	}
+	
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		pi.setCurrentNode(null);
