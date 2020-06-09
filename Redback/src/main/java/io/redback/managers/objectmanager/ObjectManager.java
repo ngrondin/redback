@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
@@ -56,6 +57,10 @@ public class ObjectManager
 		firebus = fb;
 		cacheConfigs = true;
 		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
+		List<ScriptEngineFactory> list = new ScriptEngineManager().getEngineFactories();
+		for(int i = 0; i < list.size(); i++) {
+			System.out.println(list.get(i).getEngineName() + " " + list.get(i).getLanguageName());
+		}
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");

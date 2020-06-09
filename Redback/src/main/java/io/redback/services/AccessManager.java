@@ -10,13 +10,14 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
+import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 
-public abstract class AccessManager extends Service 
+public abstract class AccessManager extends Service implements ServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected HashMap<String, Role> roles;

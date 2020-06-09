@@ -6,11 +6,12 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
+import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 
-public abstract class ConfigServer extends Service
+public abstract class ConfigServer extends Service implements ServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 

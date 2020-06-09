@@ -6,17 +6,18 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 
-public abstract class AuthenticatedService extends Service
+public abstract class AuthenticatedServiceProvider extends Service implements ServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String accessManagementService;
 
-	public AuthenticatedService(String n, DataMap c, Firebus f)
+	public AuthenticatedServiceProvider(String n, DataMap c, Firebus f)
 	{
 		super(n, c, f);
 		accessManagementService = config.getString("accessmanagementservice");

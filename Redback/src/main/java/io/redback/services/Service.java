@@ -8,12 +8,11 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
-import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 
-public abstract class Service implements ServiceProvider
+public abstract class Service 
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String serviceName;
@@ -87,5 +86,7 @@ public abstract class Service implements ServiceProvider
 		String sStackTrace = sw.toString(); 
 		return sStackTrace;
 	}
+	
+	public abstract void clearCaches();
 
 }

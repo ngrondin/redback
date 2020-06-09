@@ -5,10 +5,9 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
-import io.redback.services.ConfigurableService;
 import io.redback.services.IDGenerator;
 
-public class RedbackIDGenerator extends IDGenerator implements ConfigurableService
+public class RedbackIDGenerator extends IDGenerator
 {
 	private DataMap configCache;
 	protected DataClient dataClient;

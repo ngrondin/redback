@@ -15,7 +15,7 @@ import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 
-public abstract class ObjectServer extends AuthenticatedService 
+public abstract class ObjectServer extends AuthenticatedServiceProvider 
 {
 	private Logger logger = Logger.getLogger("io.redback");
 

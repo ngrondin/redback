@@ -175,5 +175,10 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 		firebus.publish("_rb_config_cache_clear", new Payload());
 	}
 
+
+	public void clearCaches() {
+		
+	}
+
 	
 }

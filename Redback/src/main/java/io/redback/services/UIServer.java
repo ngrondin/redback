@@ -16,7 +16,7 @@ import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.HTML;
 
-public abstract class UIServer extends AuthenticatedService
+public abstract class UIServer extends AuthenticatedServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 

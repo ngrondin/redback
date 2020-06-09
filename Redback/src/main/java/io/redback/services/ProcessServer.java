@@ -15,7 +15,7 @@ import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.security.Session;
 
-public abstract class ProcessServer extends AuthenticatedService
+public abstract class ProcessServer extends AuthenticatedServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 

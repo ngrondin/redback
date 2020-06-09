@@ -15,7 +15,7 @@ import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.RedbackFile;
 
-public abstract class FileServer extends AuthenticatedService
+public abstract class FileServer extends AuthenticatedServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 

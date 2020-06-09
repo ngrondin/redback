@@ -14,10 +14,9 @@ import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
-import io.redback.services.ConfigurableService;
 import io.redback.services.ObjectServer;
 
-public class RedbackObjectServer extends ObjectServer implements ConfigurableService
+public class RedbackObjectServer extends ObjectServer
 {
 	protected ObjectManager objectManager;
 	protected HashMap<String, ObjectConfig> objectConfigs;

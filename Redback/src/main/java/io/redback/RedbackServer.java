@@ -21,7 +21,7 @@ import io.firebus.interfaces.Consumer;
 import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.services.ConfigurableService;
+import io.redback.services.Service;
 
 public class RedbackServer implements Consumer
 {
@@ -193,8 +193,8 @@ public class RedbackServer implements Consumer
 	public void consume(Payload payload) {
 		for(int i = 0; i < services.size(); i++) {
 			BusFunction service = services.get(i);
-			if(service instanceof ConfigurableService)
-				((ConfigurableService)service).clearCaches();
+			if(service instanceof Service)
+				((Service)service).clearCaches();
 		}		
 	}
 
