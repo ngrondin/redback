@@ -55,6 +55,7 @@ import { RbGraphComponent } from './rb-graph/rb-graph.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { RbDragChangeformDirective } from './rb-drag/rb-drag-changeform.directive';
 import { AgmOverlays } from "agm-overlays"
+import { RbChatComponent } from './rb-chat/rb-chat.component';
 
 @NgModule({
   imports: [
@@ -127,7 +128,8 @@ import { AgmOverlays } from "agm-overlays"
     RbDragDropzoneDirective,
     RbDragChangeformDirective,
     RbAggregatesetDirective,
-    RbGraphComponent
+    RbGraphComponent,
+    RbChatComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -175,7 +177,8 @@ import { AgmOverlays } from "agm-overlays"
     RbDragDropzoneDirective,
     RbDragChangeformDirective,
     RbAggregatesetDirective,
-    RbGraphComponent
+    RbGraphComponent,
+    RbChatComponent
   ],
   providers: [
     CookieService,

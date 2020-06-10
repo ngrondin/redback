@@ -23,8 +23,13 @@
     "target": "http://localhost/rbfs",
     "secure": false
   },
-  "/rbws": {
-    "target": "ws://localhost/rbws",
+  "/rbsi": {
+    "target": "ws://localhost/rbsi",
+    "secure": false,
+    "ws":true
+  },
+  "/rbch": {
+    "target": "ws://localhost/rbch",
     "secure": false,
     "ws":true
   }    

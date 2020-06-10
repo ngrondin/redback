@@ -1,0 +1,85 @@
+:host {
+    padding-left: 3px;
+    padding-right: 3px;
+    position: relative;
+}
+
+.rb-chat-badge {
+    position: absolute;
+    top: 0px;
+    right: 45%;
+    height: 24px;
+    min-width: 18px;
+    border-radius: 12px;
+    background-color: red;
+    font-size: small;
+    text-align: center;
+    line-height: 200%;
+    padding-left: 3px;
+    padding-right: 3px;
+    pointer-events: none;
+}
+
+
+:host > mat-action-list > button.mat-menu-item {
+	height: auto!important;
+    margin: 0px!important;
+}
+
+.mat-menu-panel.rb-chat-menupanel {
+    width: 500px!important;
+    max-width: 500px!important;
+}
+
+.rb-chat-container {
+    margin-top: -8px;
+    margin-bottom: -8px;
+}
+
+.rb-chat-conversation-container {
+
+}
+
+.rb-chat-conversation-header {
+    background-color: #3f51b5;
+    color: white;
+    padding: 8px 15px 8px 15px;
+    cursor: pointer;
+}
+
+.rb-chat-conversation {
+    padding: 2px;
+    max-height: 300px;
+    overflow-y: scroll;
+}
+
+.rb-chat-message {
+    padding: 8px;
+    border-radius: 3px;
+}
+
+.rb-chat-message-fromme {
+    text-align: right;
+}
+
+.rb-chat-date {
+    font-size: x-small;
+    color: grey;
+
+}
+
+.rb-chat-body {
+
+}
+
+.rb-chat-textarea {
+    width: 92%;
+    margin-left: 2%;
+    margin-right: 2%;
+}
+
+.rb-chat-add-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
+}

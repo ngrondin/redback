@@ -45,6 +45,7 @@ export class AppComponent {
     this.apiService.fileService = native.getAttribute("fileservice");
     this.apiService.processService = native.getAttribute("processservice");
     this.apiService.signalService = native.getAttribute("signalservice");
+    this.apiService.chatService = native.getAttribute("chatservice");
     let objectsString: string = native.getAttribute("objects");
     if(objectsString.length > 0) {
       this.configService.setObjectsConfig(JSON.parse(objectsString.replace(/'/g, '"')));

@@ -1,11 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, Observer } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ObjectResp, RbObject } from './datamodel';
-import { RequestOptionsArgs, RequestOptions } from '@angular/http';
-import { CookieService } from 'ngx-cookie-service';
-import { ToastrService } from 'ngx-toastr';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 const httpOptions = {
@@ -26,6 +21,9 @@ export class ApiService {
   public signalService: string;
   public signalWebsocket: WebSocketSubject<any>;
   public signalObservers: Observer<String>[] = [];
+  public chatService: string;
+  public chatWebsocket: WebSocketSubject<any>;
+  public chatObservers: Observer<String>[] = [];
 
   constructor(
     private http: HttpClient
@@ -144,6 +142,8 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
+  /******* Signals *********/
+
   initSignalWebsocket() {
     if(this.signalService != null && this.signalService != "" && this.signalWebsocket == null) {
       this.signalWebsocket = webSocket(this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.signalService);
@@ -188,6 +188,60 @@ export class ApiService {
       } 
     } 
   }
+
+  /********** chat ********/
+
+  initChatWebsocket() {
+    if(this.chatService != null && this.chatService != "" && this.chatWebsocket == null) {
+      this.chatWebsocket = webSocket(this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.chatService);
+      this.initChatWebsocketSubscribe();
+    }
+  }
+
+  initChatWebsocketSubscribe() {
+    this.chatWebsocket.asObservable().subscribe(
+      (msg) => this.receiveChat(msg),
+      (err) => this.chatError(err)
+    );
+  }
+
+  receiveChat(msg: any) {
+    this.chatObservers.forEach((observer) => {
+      observer.next(msg);
+    });
+  }
+
+  sendChat(to: String[], body: String) {
+    let json: any = {
+      action: "sendtext",
+      to: to,
+      body: body
+    }
+    this.chatWebsocket.next(json);
+  }
+
+  getChatUsers() {
+    let json: any = {
+      action: "listusers"
+    };
+    this.chatWebsocket.next(json);
+  }
+
+  chatError(error: String) {
+    setTimeout(() => {this.initChatWebsocketSubscribe()}, 1000);
+  }
+
+  getChatObservable() : Observable<any>  {
+    return new Observable<any>((observer) => {
+      this.chatObservers.push(observer);
+    });
+  }
+
+  chatWebsocketConnected() : Boolean {
+    return this.chatWebsocket != null;
+  }
+
+  /********* Process **********/
 
   listAssignments(filter: any): Observable<any> {
     const req = {
