@@ -19,6 +19,7 @@ import io.firebus.Payload;
 import io.firebus.interfaces.BusFunction;
 import io.firebus.interfaces.Consumer;
 import io.firebus.interfaces.ServiceProvider;
+import io.firebus.interfaces.StreamProvider;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.services.Service;
@@ -169,6 +170,8 @@ public class RedbackServer implements Consumer
 					{
 						if(service instanceof ServiceProvider)
 							firebus.registerServiceProvider(name, ((ServiceProvider)service), 10);
+						if(service instanceof StreamProvider)
+							firebus.registerStreamProvider(name, ((StreamProvider)service), 10);
 						if(service instanceof Consumer)
 							firebus.registerConsumer(name, ((Consumer)service), 10);
 						services.add(service);

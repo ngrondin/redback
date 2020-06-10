@@ -28,7 +28,8 @@ var versionOrDefault = version != null ? version : 'default';
     objectservice="<%=objectservicepath%>"
     fileservice="<%=fileservicepath%>"
     processservice="<%=processservicepath%>"
-    signalservice="<%=signalservicepath%>">
+    signalservice="<%=signalservicepath%>"
+    chatservice="<%=chatservicepath%>">
   </app-root>
 
   <script src="<%=resourcePrefix%>/runtime-es2015.js" type="module"></script>

@@ -62,6 +62,7 @@ public class RedbackUIServer extends UIServer
 		context.put("fileservicepath", config.getString("fileservicepath"));
 		context.put("processservicepath", config.getString("processservicepath"));
 		context.put("signalservicepath", config.getString("signalservicepath"));
+		context.put("chatservicepath", config.getString("chatservicepath"));
 		context.put("utils", new RedbackUtilsJSWrapper());
 		if(session != null)
 		{

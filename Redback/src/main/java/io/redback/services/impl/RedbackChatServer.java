@@ -20,13 +20,19 @@ public class RedbackChatServer extends ChatServer {
 
 	protected void userConnected(Session session) throws RedbackException {
 		sessions.add(session);
+		System.out.println("User connected " + session.getUserProfile().getUsername());
 	}
 
 	protected void receiveTextMessage(Session session, List<String> to, String message) throws RedbackException {
+		System.out.println("Chat: received text from " + session.getUserProfile().getUsername() + " for " + to + " : " + message.trim());
 		if(to != null) {
 			for(int i = 0; i < to.size(); i++) {
-				Session dest = getSessionByUsername(to.get(i));
-				sendTextMessage(dest, session.getUserProfile().getUsername(), message);
+				for(int j = 0; j < sessions.size(); j++) {
+					if(sessions.get(j).getUserProfile().getUsername().equals(to.get(i))) {
+						System.out.println("Chat: sending text to " + to.get(i));
+						sendTextMessage(sessions.get(j), session.getUserProfile().getUsername(), message);
+					}
+				}
 			}
 		}
 	}
@@ -37,6 +43,7 @@ public class RedbackChatServer extends ChatServer {
 
 	protected void userDisconnected(Session session) throws RedbackException {
 		sessions.remove(session);
+		System.out.println("User disconnected " + session.getUserProfile().getUsername());
 	}
 
 	
@@ -48,10 +55,15 @@ public class RedbackChatServer extends ChatServer {
 		return null;
 	}
 
-	protected List<String> getConnectedUsers() throws RedbackException {
+	protected List<String> getConnectedUsers(Session session) throws RedbackException {
+		System.out.println("Chat: listing users");
 		List<String> resp = new ArrayList<String>();
 		for(int i = 0; i < sessions.size(); i++) {
-			resp.add(sessions.get(i).getUserProfile().getUsername());
+			String username = sessions.get(i).getUserProfile().getUsername(); 
+			if(!resp.contains(username) && !session.getUserProfile().getUsername().equals(username)) {
+				System.out.println("Chat: " + sessions.get(i).getUserProfile().getUsername());
+				resp.add(username);
+			}
 		}
 		return resp;
 	}

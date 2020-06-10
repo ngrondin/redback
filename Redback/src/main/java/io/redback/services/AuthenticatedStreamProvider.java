@@ -67,9 +67,6 @@ public abstract class AuthenticatedStreamProvider extends Service implements Str
 		}
 	}
 
-	public void streamTimeout(StreamEndpoint streamEndpoint) {
-	}
-
 	public int getStreamIdleTimeout() {
 		return 3600000;
 	}

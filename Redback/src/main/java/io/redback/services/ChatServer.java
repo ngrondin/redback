@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.StreamInformation;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
@@ -31,12 +32,20 @@ public abstract class ChatServer extends AuthenticatedStreamProvider {
 			String mime = payload.metadata.get("mime");
 			if(mime == null || (mime != null && mime.equals("application/json"))) {
 				DataMap msg = new DataMap(payload.getString());
-				String type = msg.getString("type"); 
-				if(type.equals("text")) {
+				String action = msg.getString("action"); 
+				if(action.equals("sendtext")) {
 					List<String> to = new ArrayList<String>();
 					for(int i = 0; i < msg.getList("to").size(); i++)
 						to.add(msg.getList("to").getString(i));
 					receiveTextMessage(session, to, msg.getString("body"));			
+				} else if(action.equals("listusers")) {
+					List<String> list = getConnectedUsers(session);
+					DataMap resp = new DataMap();
+					resp.put("type", "users");
+					resp.put("users", new DataList());
+					for(int i = 0; i < list.size(); i++)
+						resp.getList("users").add(list.get(i));
+					sendStreamData(session, new Payload(resp.toString()));
 				}
 			}
 		} catch(Exception e) {
@@ -64,6 +73,6 @@ public abstract class ChatServer extends AuthenticatedStreamProvider {
 
 	protected abstract void userDisconnected(Session session) throws RedbackException;
 	
-	protected abstract List<String> getConnectedUsers() throws RedbackException;
+	protected abstract List<String> getConnectedUsers(Session session) throws RedbackException;
 
 }
