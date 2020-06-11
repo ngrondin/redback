@@ -211,10 +211,13 @@ export class ApiService {
     });
   }
 
-  sendChat(to: String[], body: String) {
+  sendChat(to: String[], id: String, object: String, uid: String, body: String) {
     let json: any = {
       action: "sendtext",
       to: to,
+      chatid: id,
+      object: object,
+      uid: uid,
       body: body
     }
     this.chatWebsocket.next(json);

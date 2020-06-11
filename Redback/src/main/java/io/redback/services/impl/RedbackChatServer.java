@@ -23,21 +23,21 @@ public class RedbackChatServer extends ChatServer {
 		System.out.println("User connected " + session.getUserProfile().getUsername());
 	}
 
-	protected void receiveTextMessage(Session session, List<String> to, String message) throws RedbackException {
+	protected void receiveTextMessage(Session session, List<String> to, String chatId, String objectname, String uid, String message) throws RedbackException {
 		System.out.println("Chat: received text from " + session.getUserProfile().getUsername() + " for " + to + " : " + message.trim());
 		if(to != null) {
 			for(int i = 0; i < to.size(); i++) {
 				for(int j = 0; j < sessions.size(); j++) {
 					if(sessions.get(j).getUserProfile().getUsername().equals(to.get(i))) {
 						System.out.println("Chat: sending text to " + to.get(i));
-						sendTextMessage(sessions.get(j), session.getUserProfile().getUsername(), message);
+						sendTextMessage(sessions.get(j), session.getUserProfile().getUsername(), chatId, objectname, uid, message);
 					}
 				}
 			}
 		}
 	}
 
-	protected void receiveSoundPacket(Session session, List<String> to, byte[] bytes) throws RedbackException {
+	protected void receiveSoundPacket(Session session, List<String> to, String chatId, String objectname, String uid, byte[] bytes) throws RedbackException {
 		
 	}
 

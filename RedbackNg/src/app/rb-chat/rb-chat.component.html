@@ -21,11 +21,17 @@
             class="rb-chat-conversation-container">
             <div
                 class="rb-chat-conversation-header"
-                (click)="openChat(chat.id)">
-                {{chat.id}}
+                (click)="openChat(chat)">
+                {{chat.label}}
             </div>
             <div
-                *ngIf="chat.id == openId"
+                *ngIf="chat.linkLabel != null"
+                class="rb-chat-conversation-link"
+                (click)="clickLink(chat)">
+                {{chat.linkLabel}}
+            </div>
+            <div
+                *ngIf="chat == focusChat"
                 class="rb-chat-conversation"
                 [(scrollTop)]="chat.scrollpos">
                 <div
@@ -42,7 +48,7 @@
                 </div>
             </div>
             <textarea
-                *ngIf="chat.id == openId"
+                *ngIf="chat == focusChat"
                 class="rb-chat-textarea"
                 (keyup)="keyUp($event)" 
                 [(ngModel)]="chat.newmessage">

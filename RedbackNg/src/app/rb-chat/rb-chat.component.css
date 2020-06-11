@@ -47,6 +47,14 @@
     cursor: pointer;
 }
 
+.rb-chat-conversation-link {
+    color: darkblue;
+    cursor: pointer;
+    background-color: #9798c9;
+    padding: 5px 15px;
+    font-size: smaller;
+}
+
 .rb-chat-conversation {
     padding: 2px;
     max-height: 300px;

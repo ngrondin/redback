@@ -1,12 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { ApiService } from 'app/api.service';
+import { ConfigService } from 'app/config.service';
+import { DataService } from 'app/data.service';
 
 export class Chat {
   id: String;
+  object: string;
+  uid: string;
+  participants: String[];
   messages: ChatMessage[];
   newmessage: String;
   scrollpos: number;
   unread: number;
+  linkLabel: String;
+
+  get label() : String {
+    return this.id != null ? this.id : this.participants.join(',');
+  }
+
 }
 
 export class ChatMessage {
@@ -21,15 +32,20 @@ export class ChatMessage {
   styleUrls: ['./rb-chat.component.css']
 })
 export class RbChatComponent implements OnInit {
+  
+  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  
   opened: boolean;
   dest: String;
   body: String;
   chats: Chat[] = [];
-  openId: String;
+  focusChat: Chat;
   users: String[] = [];
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private dataService: DataService,
+    private configService: ConfigService
   ) { 
     this.apiService.initChatWebsocket();
     let obs = this.apiService.getChatObservable();
@@ -52,8 +68,8 @@ export class RbChatComponent implements OnInit {
 
   menuOpened() {
     this.opened = true;
-    if(this.openId != null) {
-      this.getChat(this.openId).unread = 0;
+    if(this.focusChat != null) {
+      this.focusChat.unread = 0;
     }
   }
 
@@ -61,9 +77,9 @@ export class RbChatComponent implements OnInit {
     this.opened = false;
   }
 
-  openChat(id: String) {
-    this.openId = id;
-    this.getChat(this.openId).unread = 0;
+  openChat(chat: Chat) {
+    this.focusChat = chat;
+    chat.unread = 0;
   }
 
   keyUp(event: any) {
@@ -72,7 +88,7 @@ export class RbChatComponent implements OnInit {
     textArea.style.height = '0px';
     textArea.style.height = textArea.scrollHeight + 'px';
     if(event.key == "Enter") {
-      this.send(this.openId);
+      this.send(this.focusChat);
     }
   }
 
@@ -81,19 +97,27 @@ export class RbChatComponent implements OnInit {
       let thisChat: Chat = null;
       let from = json.from;
       for(let chat of this.chats) {
-        if(chat.id == from) {
+        if((json.chatid != null && json.chatid == chat.id) || (json.chatid == null && chat.id == null && chat.participants.indexOf(json.from) > -1)) {
           thisChat = chat;
         }
       }
       if(thisChat == null) {
         thisChat = this.newChatWith(from);
+        thisChat.id = json.chatid;
+      }
+      if(json.object != null && json.uid != null && (json.object != thisChat.object || json.uid != thisChat.uid)) {
+        thisChat.object = json.object;
+        thisChat.uid = json.uid;
+        this.dataService.getServerObject(thisChat.object, thisChat.uid).subscribe((object) => {
+          thisChat.linkLabel = this.configService.getLabel(object)
+        });
       }
       let msg = new ChatMessage();
       msg.body = json.body;
       msg.date = new Date();
       thisChat.messages.push(msg);
       thisChat.scrollpos = thisChat.scrollpos + 50;
-      if(this.openId != thisChat.id || this.opened == false) {
+      if(this.focusChat != thisChat || this.opened == false) {
         thisChat.unread = thisChat.unread + 1;
       }
 
@@ -114,38 +138,46 @@ export class RbChatComponent implements OnInit {
 
   }
 
-  send(id: String) {
-    for(let chat of this.chats) {
-      if(id == chat.id) {
-        let to: String[] = [];
-        to.push(chat.id);
-        this.apiService.sendChat(to, chat.newmessage);
-        let newMsg = new ChatMessage();
-        newMsg.body = chat.newmessage;
-        newMsg.date = new Date();
-        newMsg.fromMe = true;
-        chat.messages.push(newMsg);
-        chat.newmessage = null;
-        chat.scrollpos = chat.scrollpos + 50;
-      }
-    }
+  send(chat: Chat) {
+    let to: String[] = chat.participants;
+    this.apiService.sendChat(to, chat.id, chat.object, chat.uid, chat.newmessage);
+    let newMsg = new ChatMessage();
+    newMsg.body = chat.newmessage;
+    newMsg.date = new Date();
+    newMsg.fromMe = true;
+    chat.messages.push(newMsg);
+    chat.newmessage = null;
+    chat.scrollpos = chat.scrollpos + 50;
   }
 
   newChat() {
-    this.openId = null;
+    this.focusChat = null;
     this.apiService.getChatUsers();
   }
 
   newChatWith(user: String) : Chat {
     this.users = [];
     let chat = new Chat();
-    chat.id = user;
+    chat.id = null;
+    chat.participants = [];
+    chat.participants.push(user)
     chat.messages = [];
     chat.scrollpos = 400;
     chat.unread = 0;
     this.chats.push(chat);
-    this.openId = chat.id;
+    this.focusChat = chat;
     return chat;
+  }
+
+  public clickLink(chat: Chat) {
+    let evt = {
+      object : (chat.object != null ? chat.object : null),
+      filter : {
+        uid : "'" + chat.uid + "'"
+      },
+      reset : true
+    }
+    this.navigate.emit(evt);
   }
 
   getChat(id: String) : Chat {

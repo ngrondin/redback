@@ -37,7 +37,11 @@ public abstract class ChatServer extends AuthenticatedStreamProvider {
 					List<String> to = new ArrayList<String>();
 					for(int i = 0; i < msg.getList("to").size(); i++)
 						to.add(msg.getList("to").getString(i));
-					receiveTextMessage(session, to, msg.getString("body"));			
+					String chatId = msg.getString("chatid");
+					String objectname = msg.getString("object");
+					String uid = msg.getString("uid");
+					String body = msg.getString("body");
+					receiveTextMessage(session, to, chatId, objectname, uid, body);			
 				} else if(action.equals("listusers")) {
 					List<String> list = getConnectedUsers(session);
 					DataMap resp = new DataMap();
@@ -57,19 +61,22 @@ public abstract class ChatServer extends AuthenticatedStreamProvider {
 		userDisconnected(session);
 	}
 	
-	protected void sendTextMessage(Session session, String from, String message) {
+	protected void sendTextMessage(Session session, String from, String chatId, String object, String uid, String body) {
 		DataMap msg = new DataMap();
 		msg.put("type", "text");
 		msg.put("from", from);
-		msg.put("body", message);
+		msg.put("chatid", chatId);
+		msg.put("object", object);
+		msg.put("uid", uid);
+		msg.put("body", body);
 		sendStreamData(session, new Payload(msg.toString()));
 	}
 
 	protected abstract void userConnected(Session session) throws RedbackException;
 
-	protected abstract void receiveTextMessage(Session session, List<String> to, String message) throws RedbackException;
+	protected abstract void receiveTextMessage(Session session, List<String> to, String chatId, String object, String uid, String message) throws RedbackException;
 
-	protected abstract void receiveSoundPacket(Session session, List<String> to, byte[] bytes) throws RedbackException;
+	protected abstract void receiveSoundPacket(Session session, List<String> to, String chatId, String object, String uid, byte[] bytes) throws RedbackException;
 
 	protected abstract void userDisconnected(Session session) throws RedbackException;
 	
