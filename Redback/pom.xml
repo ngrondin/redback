@@ -32,6 +32,7 @@
 	
 	<properties>
 		<io.firebus.version>1.1.0</io.firebus.version>
+		<graalvm.version>20.1.0</graalvm.version>
 	</properties>	
 
 	<dependencies>
@@ -55,6 +56,37 @@
 			<artifactId>java-jwt</artifactId>
 			<version>3.8.3</version>
 		</dependency>
+		<!-- 
+                <dependency>
+                    <groupId>org.graalvm.sdk</groupId>
+                    <artifactId>graal-sdk</artifactId>
+                    <version>${graalvm.version}</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js</artifactId>
+                    <version>${graalvm.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js-scriptengine</artifactId>
+                    <version>${graalvm.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>profiler</artifactId>
+                    <version>${graalvm.version}</version>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>chromeinspector</artifactId>
+                    <version>${graalvm.version}</version>
+                    <scope>runtime</scope>
+                </dependency>		 -->
 	</dependencies>
 
 
