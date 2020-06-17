@@ -1,23 +1,20 @@
 package io.redback.managers.objectmanagers.js;
 
-import java.util.Date;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.HashSet;
 
-import jdk.nashorn.api.scripting.AbstractJSObject;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.internal.objects.NativeDate;
-import jdk.nashorn.api.scripting.ScriptUtils;
-import io.firebus.utils.DataMap;
-import io.firebus.utils.FirebusDataUtil;
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyObject;
+
 import io.redback.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
-import io.redback.managers.objectmanager.RedbackElement;
-import io.redback.managers.objectmanager.RedbackObject;
-import io.redback.managers.objectmanager.Value;
+import io.redback.utils.js.JSConverter;
 
-public class RedbackAggregateJSWrapper extends AbstractJSObject
+public class RedbackAggregateJSWrapper implements ProxyObject
 {
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected RedbackAggregate rbAggregate;
+	protected String[] members = {"objectname"};
 	
 	public RedbackAggregateJSWrapper(RedbackAggregate o)
 	{
@@ -28,11 +25,7 @@ public class RedbackAggregateJSWrapper extends AbstractJSObject
 	{
 		return null;
 	}
-	
-	public String getClassName()
-	{
-		return "RedbackObject";
-	}
+
 
 	public Object getMember(String name)
 	{
@@ -44,23 +37,12 @@ public class RedbackAggregateJSWrapper extends AbstractJSObject
 			}
 			else
 			{
-				Object obj = null;
-				Value val = rbAggregate.get(name);
-				if(val != null)
+				Object obj = rbAggregate.get(name).getObject();
+				if(obj == null)
 				{
-					obj = val.getObject();
+					obj = rbAggregate.getMetric(name).getObject();
 				}
-				else
-				{
-					val = rbAggregate.getMetric(name);
-					if(val != null)
-						obj = val.getObject();
-				}
-				
-				if(obj instanceof DataMap)
-					return FirebusDataUtil.convertDataObjectToJSObject((DataMap)obj);
-				else
-					return obj;
+				return JSConverter.toJS(obj);
 			}
 		} 
 		catch (RedbackException e)
@@ -69,27 +51,23 @@ public class RedbackAggregateJSWrapper extends AbstractJSObject
 		}
 	}
 
-	public boolean hasMember(String name)
-	{
-		try
-		{
-			return rbAggregate.get(name) != null || rbAggregate.getMetric(name) != null;
-		} 
-		catch (RedbackException e)
-		{
-			throw new RuntimeException("Error getting the Redback Object attribute '" + name + "'", e);
+	public Object getMemberKeys() {
+		return new HashSet<>(Arrays.asList(members));
+	}
+
+	public boolean hasMember(String key) {
+		if(Arrays.asList(members).contains(key)) {
+			return true;
+		} else if(rbAggregate.getAttributeNames().contains(key)) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
-
-	public Set<String> keySet()
-	{
-		return rbAggregate.getObjectConfig().getAttributeNames();
-	}
-
-	public void setMember(String arg0, Object arg1)
-	{
-
+	@Override
+	public void putMember(String key, Value value) {
+		
 	}
 
 }

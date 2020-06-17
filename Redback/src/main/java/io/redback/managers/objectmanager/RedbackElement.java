@@ -4,6 +4,8 @@ package io.redback.managers.objectmanager;
 
 import java.util.Set;
 
+import javax.script.Bindings;
+
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
@@ -13,6 +15,7 @@ public abstract class RedbackElement
 	protected Session session;
 	protected ObjectManager objectManager;
 	protected ObjectConfig config;
+	protected Bindings scriptContext;
 
 	public ObjectConfig getObjectConfig()
 	{
@@ -27,6 +30,11 @@ public abstract class RedbackElement
 	public Session getUserSession()
 	{
 		return session;
+	}
+	
+	public Bindings getScriptContext()
+	{
+		return scriptContext;
 	}
 
 	public abstract Set<String> getAttributeNames(); 

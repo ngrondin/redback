@@ -18,8 +18,8 @@ import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.security.Session;
 import io.redback.utils.Expression;
-import io.redback.utils.FirebusJSWrapper;
 import io.redback.utils.StringUtils;
+import io.redback.utils.js.FirebusJSWrapper;
 
 public class ConditionalUnit extends ProcessUnit 
 {

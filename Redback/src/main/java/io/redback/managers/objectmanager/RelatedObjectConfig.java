@@ -51,7 +51,7 @@ public class RelatedObjectConfig
 
 	public DataMap generateFilter(RedbackElement elem) throws RedbackException
 	{
-		Bindings context = objectManager.createScriptContext(elem);
+		Bindings context = elem.getScriptContext();
 		if(listFilterExpressionMap != null)
 		{
 			return listFilterExpressionMap.eval(context);

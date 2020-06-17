@@ -44,7 +44,7 @@ public class RedbackUIServer extends UIServer
 	{
 		super(n, c, f);
 		devpath = config.getString("devpath");
-		jsEngine = new ScriptEngineManager().getEngineByName("javascript");
+		jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
 		jspScripts = new HashMap<String, CompiledScript>();
 		viewConfigs = new HashMap<String, DataMap>();
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));

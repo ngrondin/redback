@@ -24,7 +24,10 @@ public class ScriptConfig
 		source = StringUtils.unescape(config.getString("script"));
 		try
 		{
-			script = ((Compilable)jsEngine).compile(source);
+			synchronized(jsEngine) 
+			{
+				script = ((Compilable)jsEngine).compile(source);
+			}
 		} 
 		catch (ScriptException e)
 		{

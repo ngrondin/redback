@@ -76,6 +76,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 								objects = listRelated(session, objectName, uid, attribute, filter, search, page, addRelated);
 							else
 								objects = list(session, objectName, filter, search, page, addRelated);
+
 							responseData = new DataMap();
 							DataList list = new DataList();
 							if(objects != null)

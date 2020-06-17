@@ -1,10 +1,12 @@
 package io.redback.security.js;
 
 
-import io.redback.security.Session;
-import jdk.nashorn.api.scripting.AbstractJSObject;
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyExecutable;
 
-public class SessionRightsJSFunction extends AbstractJSObject
+import io.redback.security.Session;
+
+public class SessionRightsJSFunction implements ProxyExecutable
 {
 	protected Session session;
 	protected String right;
@@ -15,10 +17,9 @@ public class SessionRightsJSFunction extends AbstractJSObject
 		right = r;
 	}
 
-	public Object call(Object arg0, Object... args)
-	{
+	public Object execute(Value... arguments) {
 		boolean val = false;
-		String name = (String)args[0];
+		String name = arguments[0].asString();
 		if(right.equals("read"))
 			val = session.getUserProfile().canRead(name);
 		else if(right.equals("write"))
@@ -26,15 +27,5 @@ public class SessionRightsJSFunction extends AbstractJSObject
 		else if(right.equals("execute"))
 			val = session.getUserProfile().canExecute(name);
 		return val;
-	}
-
-	public boolean isFunction()
-	{
-		return true;
-	}
-
-	public boolean isStrictFunction()
-	{
-		return true;
 	}
 }

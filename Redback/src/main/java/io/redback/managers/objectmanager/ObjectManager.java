@@ -21,7 +21,6 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
-import io.firebus.utils.FirebusDataUtil;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
@@ -30,8 +29,10 @@ import io.redback.managers.objectmanagers.js.RedbackAggregateJSWrapper;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
-import io.redback.utils.FirebusJSWrapper;
-import io.redback.utils.LoggerJSFunction;
+import io.redback.security.js.UserProfileJSWrapper;
+import io.redback.utils.js.FirebusJSWrapper;
+import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.LoggerJSFunction;
 
 public class ObjectManager
 {
@@ -60,7 +61,7 @@ public class ObjectManager
 		for(int i = 0; i < list.size(); i++) {
 			System.out.println(list.get(i).getEngineName() + " " + list.get(i).getLanguageName());
 		}
-		jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
+		jsEngine = new ScriptEngineManager().getEngineByName("graal.js");
 		System.out.println("jsEngine is " + (jsEngine.getClass()));
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
@@ -122,7 +123,7 @@ public class ObjectManager
 			{	
 				String key = it.next();
 				if(element.getObjectConfig().getAttributeConfig(key).getExpression() == null)
-					context.put(key, element.get(key).getObject());
+					context.put(key, JSConverter.toJS(element.get(key).getObject()));
 			}
 		}		
 		return context;
@@ -131,14 +132,14 @@ public class ObjectManager
 	public Bindings createScriptContext(Session session) throws RedbackException
 	{
 		Bindings context = jsEngine.createBindings();
+		context.put("om", new ObjectManagerJSWrapper(this, session));
+		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
+		context.put("firebus", new FirebusJSWrapper(firebus, session));
+		context.put("global", JSConverter.toJS(getGlobalVariables()));
+		context.put("log", new LoggerJSFunction());
 		context.put("canRead", new SessionRightsJSFunction(session, "read"));
 		context.put("canWrite", new SessionRightsJSFunction(session, "write"));
 		context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
-		context.put("om", new ObjectManagerJSWrapper(this, session));
-		context.put("userprofile", session.getUserProfile());
-		context.put("firebus", new FirebusJSWrapper(firebus, session));
-		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(getGlobalVariables()));
-		context.put("log", new LoggerJSFunction());
 		return context;
 	}
 	

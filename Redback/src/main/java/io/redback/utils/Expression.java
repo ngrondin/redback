@@ -1,19 +1,21 @@
 package io.redback.utils;
 
+import java.util.logging.Logger;
+
 import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import io.firebus.utils.FirebusDataUtil;
+import org.graalvm.polyglot.Value;
+
 import io.redback.RedbackException;
-import io.redback.managers.objectmanager.Value;
-import jdk.nashorn.api.scripting.JSObject;
+import io.redback.utils.js.JSConverter;
 
 public class Expression
 {
+	private Logger logger = Logger.getLogger("io.redback");
 	protected String expressionString;
 	protected Object fixedValue;
 	protected CompiledScript script;
@@ -29,7 +31,10 @@ public class Expression
 		{
 			try
 			{
-				script = ((Compilable)jsEngine).compile("var returnValue = (" + expressionString  + ");");
+				synchronized(jsEngine) 
+				{
+					script = ((Compilable)jsEngine).compile("var returnValue = (" + expressionString  + ");");
+				}
 			} 
 			catch (ScriptException e)
 			{
@@ -67,15 +72,7 @@ public class Expression
 			{
 				throw new RedbackException("Runtime error executing a expression  '" + expressionString + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
 			}
-			Object obj = context.get("returnValue");
-			if(obj instanceof JSObject)
-			{
-				JSObject jso = (JSObject)obj;
-				if(jso.isArray())
-					obj = FirebusDataUtil.convertJSArrayToDataList(jso);
-				else
-					obj = FirebusDataUtil.convertJSObjectToDataObject(jso);
-			}
+			Object obj = JSConverter.toJava(Value.asValue(context.get("returnValue")));
 			return obj;
 		}
 	}

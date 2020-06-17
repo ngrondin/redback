@@ -1,19 +1,27 @@
 package io.redback.managers.objectmanagers.js;
 
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.logging.Logger;
+
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyExecutable;
+import org.graalvm.polyglot.proxy.ProxyObject;
+
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.utils.DataMap;
-import io.firebus.utils.FirebusDataUtil;
-import io.redback.RedbackException;
 import io.redback.security.Session;
-import jdk.nashorn.api.scripting.JSObject;
+import io.redback.utils.js.JSConverter;
 
-public class ProcessManagerProxyJSWrapper
+public class ProcessManagerProxyJSWrapper implements ProxyObject
 {
+	private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
 	protected String processServiceName;
 	protected Session session;
+	protected String[] members = {"initiate", "getAssignment", "action"};
 	
 	public ProcessManagerProxyJSWrapper(Firebus f, String ps, Session s)
 	{
@@ -21,78 +29,106 @@ public class ProcessManagerProxyJSWrapper
 		processServiceName = ps;
 		session = s;
 	}
-	
-	public void initiate(String process, RedbackObjectJSWrapper object, JSObject jsData) throws RedbackException
-	{
-		DataMap data = null;
-		if(jsData == null)
-			data = new DataMap();
-		else
-			data = FirebusDataUtil.convertJSObjectToDataObject(jsData);
-		data.put("objectname", object.getMember("objectname"));
-		data.put("uid", object.getMember("uid"));
-		DataMap request = new DataMap();
-		request.put("action", "initiate");
-		request.put("process", process);
-		request.put("objectname", object.getMember("objectname"));
-		request.put("uid", object.getMember("uid"));
-		request.put("domain", object.getMember("domain"));
-		request.put("data", data);
-		try
-		{
-			Payload requestPayload = new Payload(request.toString());
-			requestPayload.metadata.put("token", session.getToken());
-			firebus.requestService(processServiceName, requestPayload);
-		}
-		catch(Exception e) 
-		{
-			throw new RedbackException("Error initiating process", e);
+
+
+	public Object getMember(String key) {
+		if(key.equals("initiate")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String process = arguments[0].asString();
+					RedbackObjectJSWrapper object = arguments[1].asProxyObject();
+					DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
+					data.put("objectname", object.getMember("objectname"));
+					data.put("uid", object.getMember("uid"));
+					DataMap request = new DataMap();
+					request.put("action", "initiate");
+					request.put("process", process);
+					request.put("objectname", object.getMember("objectname"));
+					request.put("uid", object.getMember("uid"));
+					request.put("domain", object.getMember("domain"));
+					request.put("data", data);
+					try
+					{
+						Payload requestPayload = new Payload(request.toString());
+						requestPayload.metadata.put("token", session.getToken());
+						firebus.requestService(processServiceName, requestPayload);
+					}
+					catch(Exception e) 
+					{
+						logger.severe("Error initiating process: " + e);
+						throw new RuntimeException("Error initiating process", e);						
+					}
+					return null;
+				}
+			};			
+		} else if(key.equals("getAssignment")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					RedbackObjectJSWrapper object = arguments[0].asProxyObject();
+					DataMap request = new DataMap();
+					request.put("action", "getassignments");
+					DataMap filter = new DataMap();
+					filter.put("data.objectname", object.getMember("objectname"));
+					filter.put("data.uid", object.getMember("uid"));
+					request.put("filter", filter);
+					try
+					{
+						Payload requestPayload = new Payload(request.toString());
+						requestPayload.metadata.put("token", session.getToken());
+						Payload resp = firebus.requestService(processServiceName, requestPayload);
+						DataMap response = new DataMap(resp.getString());
+						if(response != null && response.getList("result").size() > 0) 
+						{
+							return JSConverter.toJS(response.getList("result").getObject(0));	
+						}
+					}
+					catch(Exception e) 
+					{
+						logger.severe("Error getting process assignment: " + e);
+						throw new RuntimeException("Error getting process assignment", e);						
+					}
+					return null;				}
+			};				
+		} else if(key.equals("action")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String pid = arguments[0].asString();
+					String action = arguments[1].asString();
+					DataMap request = new DataMap();
+					request.put("action", "processaction");
+					request.put("pid", pid);
+					request.put("processaction", action);
+					try
+					{
+						Payload requestPayload = new Payload(request.toString());
+						requestPayload.metadata.put("token", session.getToken());
+						firebus.requestService(processServiceName, requestPayload);
+					}
+					catch(Exception e) 
+					{
+						logger.severe("Error actionning process : " + e);
+						throw new RuntimeException("Error actionning process", e);						
+					}	
+					return null;
+				}
+			};				
+		} else {
+			return null;
 		}
 	}
-	
-	public JSObject getAssignment(RedbackObjectJSWrapper object) throws RedbackException
-	{
-		JSObject assignmentJSO = null;
-		DataMap request = new DataMap();
-		request.put("action", "getassignments");
-		DataMap filter = new DataMap();
-		filter.put("data.objectname", object.getMember("objectname"));
-		filter.put("data.uid", object.getMember("uid"));
-		request.put("filter", filter);
-		try
-		{
-			Payload requestPayload = new Payload(request.toString());
-			requestPayload.metadata.put("token", session.getToken());
-			Payload resp = firebus.requestService(processServiceName, requestPayload);
-			DataMap response = new DataMap(resp.getString());
-			if(response != null && response.getList("result").size() > 0) 
-			{
-				assignmentJSO = FirebusDataUtil.convertDataObjectToJSObject(response.getList("result").getObject(0));	
-			}
-		}
-		catch(Exception e) 
-		{
-			throw new RedbackException("Error getting process assignment", e);
-		}
-		return assignmentJSO;
+
+	public Object getMemberKeys() {
+		return new HashSet<>(Arrays.asList(members));
 	}
-	
-	public void action(String pid, String action) throws RedbackException
-	{
-		DataMap request = new DataMap();
-		request.put("action", "processaction");
-		request.put("pid", pid);
-		request.put("processaction", action);
-		try
-		{
-			Payload requestPayload = new Payload(request.toString());
-			requestPayload.metadata.put("token", session.getToken());
-			firebus.requestService(processServiceName, requestPayload);
-		}
-		catch(Exception e) 
-		{
-			throw new RedbackException("Error actionning process", e);
-		}		
+
+	public boolean hasMember(String key) {
+		
+		return Arrays.asList(members).contains(key);
+	}
+
+	public void putMember(String key, Value value) {
+		
+		
 	}
 	
 

@@ -1,57 +1,42 @@
 package io.redback.security.js;
 
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
+
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.redback.security.Session;
-import jdk.nashorn.api.scripting.AbstractJSObject;
 
-public class SessionJSWrapper extends AbstractJSObject
+public class SessionJSWrapper implements ProxyObject
 {
 	protected Session session;
+	protected String[] members = {"userProfile"};
 	
 	public SessionJSWrapper(Session s)
 	{
 		session = s;
 	}
 
-
-	public Object call(Object arg0, Object... args)
-	{
-		return null;
-	}
-	
-	public String getClassName()
-	{
-		return "Session";
-	}
-
-	public Object getMember(String name)
-	{
-		if(name.equals("userProfile"))
-		{
-			return session.getUserProfile();
-		}
-		else
-		{
+	public Object getMember(String key) {
+		if(key.equals("userProfile")) {
+			return new UserProfileJSWrapper(session.getUserProfile());
+		} else {
 			return null;
 		}
 	}
 
-	public boolean hasMember(String arg0)
-	{
-		if(arg0.equals("userProfile"))
-			return true;
-		else
-			return false;
+	public Object getMemberKeys() {
+		return new HashSet<>(Arrays.asList(members));
 	}
 
+	public boolean hasMember(String key) {
+		
+		return Arrays.asList(members).contains(key);
+	}
 
-	public Set<String> keySet()
-	{
-		HashSet<String> set = new HashSet<String>();
-		set.add("userProfile");
-		return set;
+	public void putMember(String key, Value value) {
+	
 	}
 
 }

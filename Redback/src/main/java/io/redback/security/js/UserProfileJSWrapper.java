@@ -1,84 +1,78 @@
 package io.redback.security.js;
 
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
+
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyExecutable;
+import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.redback.security.UserProfile;
-import jdk.nashorn.api.scripting.AbstractJSObject;
 
-public class UserProfileJSWrapper extends AbstractJSObject
+public class UserProfileJSWrapper implements ProxyObject
 {
 	protected UserProfile userProfile;
-	protected String functionName;
+	protected String[] members = {"username", "getAttributes", "getRights", "canRead", "canWrite", "canExecute"};
+	
 	
 	public UserProfileJSWrapper(UserProfile up)
 	{
 		userProfile = up;
 	}
 
-	public UserProfileJSWrapper(UserProfile up, String fn)
-	{
-		userProfile = up;
-		functionName = fn;
-	}
-
-	public String getClassName()
-	{
-		return "Session";
-	}
-
-	public Object getMember(String name)
-	{
-		if(name.equals("username"))
-		{
-			return userProfile.getUsername();
-		}
-		else if(name.equals("getAttribute") || name.equals("getRights") || name.equals("canRead")  ||  name.equals("canWrite")  ||  name.equals("canExecute"))
-		{
-			return new UserProfileJSWrapper(userProfile, name);
-		}
-		else
-		{
+	public Object getMember(String key) {
+		if(key.equals("username")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return userProfile.getUsername();
+				}
+			};
+		} else if(key.equals("getAttribute")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return userProfile.getAttribute(arguments[0].asString());
+				}
+			};
+		} else if(key.equals("getRights")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return userProfile.getRights(arguments[0].asString());
+				}
+			};
+		} else if(key.equals("canRead")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return userProfile.canRead(arguments[0].asString());
+				}
+			};
+		} else if(key.equals("canWrite")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return userProfile.canWrite(arguments[0].asString());
+				}
+			};
+		} else if(key.equals("canExecute")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return userProfile.canExecute(arguments[0].asString());
+				}
+			};
+		} else {
 			return null;
 		}
 	}
+
+	public Object getMemberKeys() {
+		return new HashSet<>(Arrays.asList(members));
+	}
+
+	public boolean hasMember(String key) {
+		
+		return Arrays.asList(members).contains(key);
+	}
+
+	public void putMember(String key, Value value) {
 	
-	public Object call(Object jsObj, Object... args)
-	{
-		String param = (String)args[0];
-		Object val = null;
-		if(functionName.equals("getAttribute"))
-			val = userProfile.getAttribute(param);
-		else if(functionName.equals("getRights"))
-			val = userProfile.getRights(param);
-		else if(functionName.equals("canRead"))
-			val = userProfile.canRead(param);
-		else if(functionName.equals("canWrite"))
-			val = userProfile.canWrite(param);
-		else if(functionName.equals("canExecute"))
-			val = userProfile.canExecute(param);
-		return val;
-	}
-
-	public boolean hasMember(String name)
-	{
-		if(name.equals("username") || name.equals("getAttributes") || name.equals("getRights") || name.equals("canRead")  ||  name.equals("canWrite")  ||  name.equals("canExecute"))
-			return true;
-		else
-			return false;
-	}
-
-
-	public Set<String> keySet()
-	{
-		HashSet<String> set = new HashSet<String>();
-		set.add("username");
-		set.add("getAttributes");
-		set.add("getRights");
-		set.add("canRead");
-		set.add("canWrite");
-		set.add("canExecute");
-		return set;
 	}
 
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
@@ -51,15 +52,16 @@ public class ObjectConfig
 			while(events.hasNext())
 			{
 				String event = events.next();
-				//String scriptName = getName() + "." + event;
 				try
 				{
-					//ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("javascript");
-					//jsEngine.put(ScriptEngine.FILENAME, scriptName);
 					String source = StringUtils.unescape(scriptsCfg.getString(event));
 					source = source + allIncludes.toString();
-					CompiledScript script = ((Compilable)objectManager.getScriptEngine()).compile(source);
-					scripts.put(event, script);
+					ScriptEngine jsEngine = objectManager.getScriptEngine();
+					synchronized(jsEngine)
+					{
+						CompiledScript script = ((Compilable)objectManager.getScriptEngine()).compile(source);
+						scripts.put(event, script);
+					}
 				} 
 				catch(Exception e)
 				{

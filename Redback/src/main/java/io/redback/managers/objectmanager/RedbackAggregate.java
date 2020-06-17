@@ -4,29 +4,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.script.Bindings;
-import javax.script.CompiledScript;
-import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-import jdk.nashorn.api.scripting.JSObject;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataMap;
-import io.firebus.utils.FirebusDataUtil;
 import io.redback.RedbackException;
 import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
-import io.redback.managers.objectmanagers.js.ProcessManagerProxyJSWrapper;
-import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
+import io.redback.managers.objectmanagers.js.RedbackAggregateJSWrapper;
 import io.redback.security.Session;
+import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
-import io.redback.utils.Expression;
-import io.redback.utils.FirebusJSWrapper;
-import io.redback.utils.LoggerJSFunction;
+import io.redback.utils.js.FirebusJSWrapper;
+import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.LoggerJSFunction;
 
 public class RedbackAggregate extends RedbackElement
 {
@@ -64,7 +56,8 @@ public class RedbackAggregate extends RedbackElement
 				String dbKey = it.next();
 				Value val = new Value(data.get(dbKey));
 				metrics.put(dbKey, val);
-			}		
+			}	
+			updateScriptContext();
 		}
 		else
 		{
@@ -82,7 +75,28 @@ public class RedbackAggregate extends RedbackElement
 		metrics = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
+		scriptContext = objectManager.getScriptEngine().createBindings();
+		scriptContext.put("self", new RedbackAggregateJSWrapper(this));
+		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
+		scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
+		scriptContext.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
+		scriptContext.put("global", JSConverter.toJS(objectManager.getGlobalVariables()));
+		scriptContext.put("log", new LoggerJSFunction());
+		scriptContext.put("canRead", new SessionRightsJSFunction(session, "read"));
+		scriptContext.put("canWrite", new SessionRightsJSFunction(session, "write"));
+		scriptContext.put("canExecute", new SessionRightsJSFunction(session, "execute"));		
 	}
+	
+	protected void updateScriptContext() throws RedbackException 
+	{
+		Iterator<String> it = getAttributeNames().iterator();
+		while(it.hasNext())
+		{	
+			String key = it.next();
+			if(getObjectConfig().getAttributeConfig(key).getExpression() == null)
+				scriptContext.put(key, JSConverter.toJS(get(key).getObject()));
+		}
+	}	
 	
 	public Set<String> getAttributeNames() 
 	{
