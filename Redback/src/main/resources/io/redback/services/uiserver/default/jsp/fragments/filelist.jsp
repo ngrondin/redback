@@ -1,9 +1,9 @@
 <rb-filelist <% 
-if(config.get('inlineStyle') != null) {%>
-	style="<%=config.getString('inlineStyle')%>"<%
+if(config.inlineStyle != null) {%>
+	style="<%=config.inlineStyle%>"<%
 }
-if(config.get('downloadonselect') != null) { %>
-	[downloadOnSelect]="<%=config.getBoolean('downloadonselect')%>" <%
+if(config.downloadonselect != null) { %>
+	[downloadOnSelect]="<%=config.downloadonselect%>" <%
 }
 if(typeof fileset != 'undefined') { %>
 	[list]="<%=fileset%>.list"

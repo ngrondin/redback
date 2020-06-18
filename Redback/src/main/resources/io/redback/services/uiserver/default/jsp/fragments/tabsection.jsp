@@ -1,6 +1,6 @@
 <rb-tab-section 
 	#<%=id%>="tabsection"
-	style="<%=config.getString('inlineStyle')%>"
+	style="<%=config.inlineStyle%>"
 	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
 	<div
 		class="rb-tab-header-section">

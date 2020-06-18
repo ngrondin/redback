@@ -1,4 +1,4 @@
 <rb-vscroll 
-	style="<%=config.getString('inlineStyle')%>">
+	style="<%=config.inlineStyle%>">
 	#content#
 </rb-vscroll>

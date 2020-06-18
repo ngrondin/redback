@@ -1,27 +1,27 @@
 <% 
-var showExpr = (config.get("show") != null ? config.getString('show') : 'true').replace(/object/g, dataset + '.selectedObject').replace(/relatedObject/g, dataset + '.relatedObject');
+var showExpr = (config.show != null ? config.show : 'true').replace(/object/g, dataset + '.selectedObject').replace(/relatedObject/g, dataset + '.relatedObject');
 if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
 if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
 %><rb-log
-	style="<%=config.getString('inlineStyle')%>"
+	style="<%=config.inlineStyle%>"
 	*ngIf="<%=showExpr%>"<%
-if(config.get('size') != null) { %>	
-	[size]="<%=(config.get("size") == null ? 20 : config.getString("size")) %>" <%
+if(config.size != null) { %>	
+	[size]="<%=(config.size == null ? 20 : config.size) %>" <%
 } 
 if(typeof dataset != 'undefined') { %>	
 	[list]="<%=dataset%>.list" <%
 } 
-if(config.get('userattribute') != null) { %>	
-	[userattribute]="'<%=config.getString("userattribute")%>'" <%
+if(config.userattribute != null) { %>	
+	[userattribute]="'<%=config.userattribute%>'" <%
 } 
-if(config.get('dateattribute') != null) { %>	
-	[dateattribute]="'<%=config.getString("dateattribute")%>'" <%
+if(config.dateattribute != null) { %>	
+	[dateattribute]="'<%=config.dateattribute%>'" <%
 } 
-if(config.get('entryattribute') != null) { %>	
-	[entryattribute]="'<%=config.getString("entryattribute")%>'" <%
+if(config.entryattribute != null) { %>	
+	[entryattribute]="'<%=config.entryattribute%>'" <%
 } 
-if(config.get('categoryattribute') != null) { %>	
-	[categoryattribute]="'<%=config.getString("categoryattribute")%>'" <%
+if(config.categoryattribute != null) { %>	
+	[categoryattribute]="'<%=config.categoryattribute%>'" <%
 } %>
 	[editable]="<%=canWrite%>" <%
 if(typeof dataset != 'undefined') { %>

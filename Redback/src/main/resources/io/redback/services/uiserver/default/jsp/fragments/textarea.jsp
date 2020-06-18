@@ -1,30 +1,30 @@
 <% 
-var showExpr = (config.get("show") != null ? config.getString('show') : 'true').replace(/object/g, dataset + '.selectedObject').replace(/relatedObject/g, dataset + '.relatedObject');
+var showExpr = (config.show != null ? config.show : 'true').replace(/object/g, dataset + '.selectedObject').replace(/relatedObject/g, dataset + '.relatedObject');
 if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
 if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
 %><rb-textarea-input
 	class="rb-input-margin"
-	style="<%=config.getString('inlineStyle')%>"
+	style="<%=config.inlineStyle%>"
 	*ngIf="<%=showExpr%>"
-	[label]="'<%=config.getString("label")%>'"<%
-if(config.get('icon') == null) {%>
+	[label]="'<%=config.label%>'"<%
+if(config.icon == null) {%>
 	[icon]="'description'"<%	
-} else if(config.getString('icon').indexOf(':') >= 0) {%>
-	[icon]="'<%=config.getString('icon')%>'"<%
+} else if(config.icon.indexOf(':') >= 0) {%>
+	[icon]="'<%=config.icon%>'"<%
 } else {%>
-	[icon]="'<%=config.getString('icon')%>'"<%
+	[icon]="'<%=config.icon%>'"<%
 }
-if(config.get('size') != null) { %>	
-	[size]="<%=(config.get("size") == null ? 20 : config.getString("size")) %>" <%
+if(config.size != null) { %>	
+	[size]="<%=(config.size == null ? 20 : config.size) %>" <%
 } 
 if(dataset != null) { %>	
 	[object]="<%=dataset%>.selectedObject" <%
 } 
-if(config.get('attribute') != null) { %>	
-	[attribute]="'<%=(config.get("attribute") == null ? 20 : config.getString("attribute")) %>'" <%
+if(config.attribute != null) { %>	
+	[attribute]="'<%=(config.attribute == null ? 20 : config.attribute) %>'" <%
 }
-if(config.get('rows') != null) { %>	
-	[rows]="<%=(config.get("rows") == null ? 20 : config.getString("rows")) %>" <%
+if(config.rows != null) { %>	
+	[rows]="<%=(config.rows == null ? 20 : config.rows) %>" <%
 } %>	
 	[editable]="<%=canWrite%>"
 	>

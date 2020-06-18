@@ -1,7 +1,7 @@
 <rb-datasetgroup 
 	#<%=id%>="datasetgroup" <% 
-if(config.get('inlineStyle') != null) {%>
-	style="<%=config.getString('inlineStyle')%>"<%
+if(config.inlineStyle != null) {%>
+	style="<%=config.inlineStyle%>"<%
 } %>
 	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
 	#content#

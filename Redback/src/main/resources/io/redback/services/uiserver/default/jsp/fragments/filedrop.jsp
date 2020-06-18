@@ -1,6 +1,6 @@
 <rb-filedrop <% 
-if(config.get('inlineStyle') != null) {%>
-	style="<%=config.getString('inlineStyle')%>"<%
+if(config.inlineStyle != null) {%>
+	style="<%=config.inlineStyle%>"<%
 }
 if(typeof fileset != 'undefined') { %>
 	[uploader]="<%=fileset%>.uploader"

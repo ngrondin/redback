@@ -1,8 +1,8 @@
 <rb-tab
 	#<%=id%>="tab"
 	[id]="'<%=id%>'"
-	[label]="'<%=config.getString('label')%>'"
-	style="<%=config.getString('inlineStyle')%>"
+	[label]="'<%=config.label%>'"
+	style="<%=config.inlineStyle%>"
 	[active]="<%=tabsection%>.isTabVisible(<%=id%>)"
 	[hidden]="!<%=id%>.active"
 	(register)="<%=tabsection%>.register(<%=id%>)">

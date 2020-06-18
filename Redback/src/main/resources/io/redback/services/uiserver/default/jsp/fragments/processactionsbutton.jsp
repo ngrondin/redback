@@ -1,4 +1,4 @@
 <rb-processactions
 	[object]="<%=dataset%>.selectedObject"
-	[round]="<%=config.getBoolean("round")%>">
+	[round]="<%=config.round%>">
 </rb-processactions>

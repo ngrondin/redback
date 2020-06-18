@@ -1,10 +1,10 @@
 <rb-link <%
-if(config.get('view') != null) { %>
-	[view]="'<%=config.getString('view')%>'" <%
+if(config.view != null) { %>
+	[view]="'<%=config.view%>'" <%
 }
 if(typeof dataset != 'undefined') { %>
 	[object]="<%=dataset%>.selectedObject"
-	[attribute]="'<%=config.getString('attribute')%>'" <%
+	[attribute]="'<%=config.attribute%>'" <%
 } %>
 	(navigate)="navigateTo($event)" >
 </rb-link>

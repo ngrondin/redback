@@ -1,6 +1,6 @@
 <rb-file-input
-	rb-attribute="<%=config.getString('attribute')%>"
-	ng-show="<%=config.getString('show')%>">
+	rb-attribute="<%=config.attribute%>"
+	ng-show="<%=config.show%>">
 	<md-button
 		class="rb-button md-button md-primary md-raised" 
 		style="width:80px">
