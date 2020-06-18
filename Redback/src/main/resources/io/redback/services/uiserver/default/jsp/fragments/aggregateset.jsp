@@ -1,26 +1,26 @@
 <rb-aggregateset 
 	#<%=id%>="aggregateset" <% 
-if(config.get('inlineStyle') != null) {%>
-	style="<%=config.getString('inlineStyle')%>"<%
+if(config.inlineStyle != null) {%>
+	style="<%=config.inlineStyle%>"<%
 }
-if(config.get('object') != null) { %>
-	[object]="'<%=config.getString('object')%>'"<% 
+if(config.object != null) { %>
+	[object]="'<%=config.object%>'"<% 
 }
-if(config.get('basefilter') != null) { %>
-	[baseFilter]="<%=utils.convertDataMapToAttributeString(config.getObject('basefilter'))%>"<% 
+if(config.basefilter != null) { %>
+	[baseFilter]="<%=utils.convertDataMapToAttributeString(config.basefilter)%>"<% 
 }
-if(config.get('tuple') != null) { %>
-	[tuple]="<%=utils.convertDataEntityToAttributeString(config.getList('tuple'))%>"<% 
+if(config.tuple != null) { %>
+	[tuple]="<%=utils.convertDataEntityToAttributeString(config.tuple)%>"<% 
 } 
-if(config.get('metrics') != null) { %>
-	[metrics]="<%=utils.convertDataEntityToAttributeString(config.getList('metrics'))%>"<% 
+if(config.metrics != null) { %>
+	[metrics]="<%=utils.convertDataEntityToAttributeString(config.metrics)%>"<% 
 } 
 if(typeof dataset == 'undefined') { %>
 	[(userFilter)]="currentTarget.filter" 
 	[(searchString)]="currentTarget.search" 
 	[(selectedObject)]="currentTarget.selectedObject" <%
-} else if(config.getObject('master') != null) { %>
-	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.getObject('master').getObject('relationship'))%>" 
+} else if(config.master != null) { %>
+	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.master.relationship)%>" 
 	[relatedObject]="<%=dataset%>.selectedObject"<% 
 } %>
 	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">

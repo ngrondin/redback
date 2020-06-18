@@ -1,13 +1,13 @@
 <% 
 var showExpr = true;
 if(typeof dataset != 'undefined') {
-	showExpr = (config.get("show") != null ? config.getString('show') : 'true').replaceAll('object', dataset + '.selectedObject').replaceAll('relatedObject', dataset + '.relatedObject');
+	showExpr = (config.show != null ? config.show : 'true').replace(/object/g, dataset + '.selectedObject').replace(/relatedObject/g, dataset + '.relatedObject');
 	if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
 	if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
 }
 %><div
 	class="rb-hsection" 
-	style="<%=config.getString('inlineStyle')%>"
+	style="<%=config.inlineStyle%>"
 	*ngIf="<%=showExpr%>">
 	#content#
 </div>

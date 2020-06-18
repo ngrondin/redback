@@ -2,27 +2,27 @@
 	mat-list-item 
 	class="rb-menu-link" <%
 if(typeof menugroup != 'undefined') { %>
-	*ngIf="<%=menu%>.isGroupOpen('<%=config.getString('group')%>')" <%
+	*ngIf="<%=menu%>.isGroupOpen('<%=config.group%>')" <%
 } %>	
-	(click)="navigateTo({view:'<%=config.getString('view')%>', filter:{}, reset:true})"><%
-if(config.getString('icon').indexOf(':') >= 0) {%>
+	(click)="navigateTo({view:'<%=config.view%>', filter:{}, reset:true})"><%
+if(config.icon.indexOf(':') >= 0) {%>
 	<mat-icon 
-		svgIcon="<%=config.getString('icon')%>"
+		svgIcon="<%=config.icon%>"
 		class="rb-menu-link-icon">
 	</mat-icon><%
 } else {%>
 	<mat-icon
 		class="rb-menu-link-icon">
-		<%=config.getString('icon')%>
+		<%=config.icon%>
 	</mat-icon><%
 }%>
 	<span 
 		flex
 		class="rb-menu-link-text"
 		*ngIf="<%=menu%>.isLarge">
-		<%=config.getString('label')%>
+		<%=config.label%>
 	</span>
 </button> <%
-if(config.get("group") == null) { %>
+if(config.group == null) { %>
 <mat-divider></mat-divider> <%
 } %>

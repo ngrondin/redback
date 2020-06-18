@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
@@ -12,7 +13,7 @@ import io.redback.security.UserProfile;
 public class UserProfileJSWrapper implements ProxyObject
 {
 	protected UserProfile userProfile;
-	protected String[] members = {"username", "getAttributes", "getRights", "canRead", "canWrite", "canExecute"};
+	protected String[] members = {"username", "getAttribute", "getRights", "canRead", "canWrite", "canExecute", "getUsername"};
 	
 	
 	public UserProfileJSWrapper(UserProfile up)
@@ -21,7 +22,7 @@ public class UserProfileJSWrapper implements ProxyObject
 	}
 
 	public Object getMember(String key) {
-		if(key.equals("username")) {
+		if(key.equals("getUsername")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					return userProfile.getUsername();
@@ -57,13 +58,15 @@ public class UserProfileJSWrapper implements ProxyObject
 					return userProfile.canExecute(arguments[0].asString());
 				}
 			};
+		} else if(key.equals("username")) {
+			return userProfile.getUsername();
 		} else {
 			return null;
 		}
 	}
 
 	public Object getMemberKeys() {
-		return new HashSet<>(Arrays.asList(members));
+		return ProxyArray.fromArray(((Object[])members));		
 	}
 
 	public boolean hasMember(String key) {

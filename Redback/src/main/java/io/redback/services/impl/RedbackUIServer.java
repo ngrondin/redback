@@ -25,10 +25,13 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.security.Session;
+import io.redback.security.js.SessionJSWrapper;
 import io.redback.services.UIServer;
 import io.redback.utils.HTML;
-import io.redback.utils.RedbackUtilsJSWrapper;
 import io.redback.utils.StringUtils;
+import io.redback.utils.js.HTMLJSWrapper;
+import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class RedbackUIServer extends UIServer 
 {
@@ -44,7 +47,7 @@ public class RedbackUIServer extends UIServer
 	{
 		super(n, c, f);
 		devpath = config.getString("devpath");
-		jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
+		jsEngine = new ScriptEngineManager().getEngineByName("graal.js");
 		jspScripts = new HashMap<String, CompiledScript>();
 		viewConfigs = new HashMap<String, DataMap>();
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
@@ -55,7 +58,7 @@ public class RedbackUIServer extends UIServer
 	{
 		HTML html = null;
 		Bindings context = jsEngine.createBindings();
-		context.put("global", config.getObject("globalvariables"));
+		context.put("global", JSConverter.toJS(config.getObject("globalvariables")));
 		context.put("version", version);
 		context.put("uiservicepath",  config.getString("uiservicepath"));
 		context.put("objectservicepath", config.getString("objectservicepath"));
@@ -68,12 +71,12 @@ public class RedbackUIServer extends UIServer
 		{
 			if(session.getUserProfile().canRead("rb.apps." + name))
 			{
-				context.put("session", session);
+				context.put("session", new SessionJSWrapper(session));
 				try
 				{
 					DataMap appConfig = configClient.getConfig("rbui", "app", name); 
 					String page = appConfig.getString("page");
-					context.put("config", appConfig);
+					context.put("config", JSConverter.toJS(appConfig));
 					html = executeJSP("pages/" + page, version, context);
 					//html.inject("menu", getMenu(session, version));
 				}
@@ -135,9 +138,9 @@ public class RedbackUIServer extends UIServer
 		}
 		menu.getList("content").sort("order");
 		Bindings context = jsEngine.createBindings();
-		context.put("session", session);
+		context.put("session", new SessionJSWrapper(session));
 		context.put("utils", new RedbackUtilsJSWrapper());
-		return generateHTMLFromComponentConfig(menu, version, context);
+		return generateHTMLFromComponentConfig(session, menu, version, context);
 	}
 
 	
@@ -161,7 +164,7 @@ public class RedbackUIServer extends UIServer
 						if(context == null)
 						{
 							context = jsEngine.createBindings();
-							context.put("session", session);
+							context.put("session", new SessionJSWrapper(session));
 							context.put("utils", new RedbackUtilsJSWrapper());
 							context.put("canWrite", true);
 							context.put("canExecute", true);
@@ -173,7 +176,7 @@ public class RedbackUIServer extends UIServer
 						DataList contentList = viewConfig.getList("content");
 						HTML contentHTML = new HTML();
 						for(int i = 0; i < contentList.size(); i++)
-							contentHTML.append(generateHTMLFromComponentConfig(contentList.getObject(i), version, context));
+							contentHTML.append(generateHTMLFromComponentConfig(session, contentList.getObject(i), version, context));
 						if(viewHTML.hasTag("content"))
 							viewHTML.inject("content", contentHTML);
 						else
@@ -186,6 +189,7 @@ public class RedbackUIServer extends UIServer
 				}
 				catch(Exception e)
 				{
+					e.printStackTrace();
 					viewHTML = formatErrorMessage("Error retrieving view " + viewName, e);
 				}
 			}
@@ -202,7 +206,7 @@ public class RedbackUIServer extends UIServer
 	}
 	
 	
-	protected HTML generateHTMLFromComponentConfig(DataMap componentConfig, String version, Bindings context) throws RedbackException
+	protected HTML generateHTMLFromComponentConfig(Session session, DataMap componentConfig, String version, Bindings context) throws RedbackException
 	{
 		String type = componentConfig.getString("type");
 		HTML componentHTML = new HTML();
@@ -211,7 +215,7 @@ public class RedbackUIServer extends UIServer
 			if(type.equals("view"))
 			{
 				String viewName = componentConfig.getString("name");
-				Session session = (Session)context.get("session"); 
+				//Session session = (Session)context.get("session"); 
 				componentHTML = getView(session, viewName, version, context);
 			}
 			else
@@ -229,7 +233,7 @@ public class RedbackUIServer extends UIServer
 					componentConfig.put("inlineStyle", inlineStyle);
 				if(componentConfig.get("show") == null)
 					componentConfig.put("show", "true");
-				context.put("config", componentConfig);
+				context.put("config", JSConverter.toJS(componentConfig));
 				context.put("id", id);
 				
 				componentHTML = executeJSP("fragments/" + type, version, context);
@@ -241,7 +245,7 @@ public class RedbackUIServer extends UIServer
 					HTML contentHTML = new HTML();
 					DataList content = componentConfig.getList("content");
 					for(int i = 0; i < content.size(); i++)
-						contentHTML.append(generateHTMLFromComponentConfig(content.getObject(i), version, context));
+						contentHTML.append(generateHTMLFromComponentConfig(session, content.getObject(i), version, context));
 					componentHTML.inject("content", contentHTML);
 					context.put(type, parentOfSameType);
 				}
@@ -253,16 +257,16 @@ public class RedbackUIServer extends UIServer
 	
 	protected HTML executeJSP(String name, String version, Bindings context) throws RedbackException
 	{
-		context.put("sb", new HTML());
-		HTML html = null;
+		HTML html = new HTML();
+		context.put("sb", new HTMLJSWrapper(html));
 		try
 		{
 			CompiledScript script = getCompiledJSP(name, version);
 			script.eval(context);
-			html = ((HTML)context.get("sb"));
 		}
 		catch(Exception e)
 		{
+			System.out.println("Error executing JSP " + name + " : " + e.getMessage());
 			error("Error exeucting jsp '" + name + "'", e);
 		}
 		return html;
@@ -306,8 +310,10 @@ public class RedbackUIServer extends UIServer
 					while((pos1 = jsp.indexOf("<%")) != -1  &&  (pos2 = jsp.indexOf("%>", pos1 + 2)) != -1)
 						jsp = jsp.substring(0, pos1) + "');\r\n" + jsp.substring(pos1 + 2, pos2).trim().replace("\\'",  "'").replace("\\r\\n", "\r\n") + "\r\nsb.append('" + jsp.substring(pos2 + 2);
 					jsp = "sb.append('" + jsp + "');";
-		
-					script = ((Compilable) jsEngine).compile(jsp);
+					
+					synchronized(jsEngine) {
+						script = ((Compilable) jsEngine).compile(jsp);
+					}
 					jspScripts.put(version + "/" + name,  script);
 				}
 			}

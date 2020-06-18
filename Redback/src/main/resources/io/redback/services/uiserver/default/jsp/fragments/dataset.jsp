@@ -1,25 +1,25 @@
 <rb-dataset 
 	#<%=id%>="dataset" <% 
-if(config.get('inlineStyle') != null) {%>
-	style="<%=config.getString('inlineStyle')%>"<%
+if(config.inlineStyle != null) {%>
+	style="<%=config.inlineStyle%>"<%
 }
-if(config.get('object') != null) { %>
-	[object]="'<%=config.getString('object')%>'"
-	[fetchAll]="<%=config.getBoolean('fetchall')%>"<% 
+if(config.object != null) { %>
+	[object]="'<%=config.object%>'"
+	[fetchAll]="<%=config.fetchall%>"<% 
 }
-if(config.get('basefilter') != null) { %>
-	[baseFilter]="<%=utils.convertDataMapToAttributeString(config.getObject('basefilter'))%>"<% 
+if(config.basefilter != null) { %>
+	[baseFilter]="<%=utils.convertDataMapToAttributeString(config.basefilter)%>"<% 
 } 
 if(typeof dataset == 'undefined') { %>
 	[(userFilter)]="currentTarget.filter" 
 	[(searchString)]="currentTarget.search" 
 	[(selectedObject)]="currentTarget.selectedObject" <%
-} else if(config.getObject('master') != null) { %>
-	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.getObject('master').getObject('relationship'))%>" 
+} else if(config.master != null) { %>
+	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.master.relationship)%>" 
 	[relatedObject]="<%=dataset%>.selectedObject"<% 
 }  
-if(typeof datasetgroup != 'undefined' && config.getString('name') != null) { %>
-	(initiated)="<%=datasetgroup%>.register('<%=config.getString('name')%>', <%=id%>)" <%
+if(typeof datasetgroup != 'undefined' && config.name != null) { %>
+	(initiated)="<%=datasetgroup%>.register('<%=config.name%>', <%=id%>)" <%
 } %>
 	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
 	#content#

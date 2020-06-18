@@ -1,7 +1,7 @@
 <div
 	style="<%
-if(config.containsKey('size') && config.getString('size').length > 0) {
-	%>width:<%=config.getString('size')%>px;height:<%=config.getString('size')%>px;<%
+if(config.size!= null && config.size.length > 0) {
+	%>width:<%=config.size%>px;height:<%=config.size%>px;<%
 } else {
 	%>flex-grow:1<%
 }

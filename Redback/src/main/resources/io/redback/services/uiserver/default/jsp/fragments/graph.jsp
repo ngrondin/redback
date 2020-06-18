@@ -1,13 +1,13 @@
 <rb-graph
 	class="rb-input-margin"
-	style="<%=config.getString('inlineStyle')%>"
-	[type]="'<%=config.getString("graphtype")%>'"
-	[label]="'<%=config.getString("label")%>'"
-	[series]="<%=utils.convertDataEntityToAttributeString(config.getObject('series'))%>"
-	[categories]="<%=utils.convertDataEntityToAttributeString(config.getObject('categories'))%>"
-	[value]="<%=utils.convertDataEntityToAttributeString(config.getObject('value'))%>"
-	[min]="'<%=config.getNumber("min")%>'"
-	[max]="'<%=config.getNumber("max")%>'" <%
+	style="<%=config.inlineStyle%>"
+	[type]="'<%=config.graphtype%>'"
+	[label]="'<%=config.label%>'"
+	[series]="<%=utils.convertDataEntityToAttributeString(config.series)%>"
+	[categories]="<%=utils.convertDataEntityToAttributeString(config.categories)%>"
+	[value]="<%=utils.convertDataEntityToAttributeString(config.value)%>"
+	[min]="'<%=config.min%>'"
+	[max]="'<%=config.max%>'" <%
 if(aggregateset != null) { %>	
 	[aggregates]="<%=aggregateset%>.aggregates" <%
 } %> >

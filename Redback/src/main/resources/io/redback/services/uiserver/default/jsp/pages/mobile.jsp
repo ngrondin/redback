@@ -6,9 +6,9 @@ var versionOrDefault = version != null ? version : 'default';
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title><%=config.getString('label')%></title>
+  <title><%=config.label%></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url = '<%=config.getString('mobileapp')%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>&chatservice=<%=chatservicepath%>'" />
+  <meta http-equiv="refresh" content="0; url = '<%=config.mobileapp%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>&chatservice=<%=chatservicepath%>'" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />  
@@ -17,7 +17,7 @@ var versionOrDefault = version != null ? version : 'default';
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script>
     window.onload = function() {
-        window.location = '<%=config.getString('mobileapp')%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>&chatservice=<%=chatservicepath%>';
+        window.location = '<%=config.mobileapp%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>&chatservice=<%=chatservicepath%>';
     }
     
     var os = getMobileOperatingSystem();
@@ -39,13 +39,13 @@ var versionOrDefault = version != null ? version : 'default';
   </script>  
 </head>
 <body oncontextmenu="return false;">
-	<a href="<%=config.getString('mobileapp')%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>&chatservice=<%=chatservicepath%>">Manual Redirect</a><br><br> <%
+	<a href="<%=config.mobileapp%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=objectservicepath%>&processservice=<%=processservicepath%>&fileservice=<%=fileservicepath%>&chatservice=<%=chatservicepath%>">Manual Redirect</a><br><br> <%
 	
-if(config.get('android') != null) { %>	
-	<a id="androiddl" href="../resource/<%=config.getString("android")%>">Download Android App</a> <%
+if(config.android != null) { %>	
+	<a id="androiddl" href="../resource/<%=config.android%>">Download Android App</a> <%
 }
-if(config.get('ios') != null) { %>	
-	<a id="iosdl" href="../resource/<%=config.getString("ios")%>">Download iOS App</a> <%
+if(config.ios != null) { %>	
+	<a id="iosdl" href="../resource/<%=config.ios%>">Download iOS App</a> <%
 }%>
 </body>
 </html>

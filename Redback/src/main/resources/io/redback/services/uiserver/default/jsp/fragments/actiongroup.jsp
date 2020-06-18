@@ -1,24 +1,23 @@
 <mat-menu
 	#<%=id%>="matMenu">
 <% 
-var list = config.getList('actions'); 
+var list = config.actions; 
 var noShow = "";
-for(var i = 0; i < list.size(); i++) { 
-	var actionConfig = list.getObject(i);
-	var showExpr = (actionConfig.get("show") != null ? actionConfig.getString('show') : 'true').replaceAll('object', dataset + '.selectedObject').replaceAll('relatedObject', dataset + '.relatedObject');
+for(var i = 0; i < list.length; i++) { 
+	var actionConfig = list[i];
 	if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
 	if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
 	if(i > 0)
 		noShow = noShow + " && ";
 	noShow = noShow + "!(" + showExpr + ")"
-	var action = actionConfig.get("action") != null ? actionConfig.getString('action') : 'noAction'	
-	if(((action.equals('create')  ||  action.equals('save'))  &&  canWrite) || ((!action.equals('create')  &&  !action.equals('save'))  &&  canExecute)) {
+	var action = actionConfig.action != null ? actionConfig.action : 'noAction'	
+	if(((action == 'create'  ||  action == 'save')  &&  canWrite) || ((!(action == 'create')  &&  !(action == 'save'))  &&  canExecute)) {
 	%>
 	<button
 		mat-menu-item
-		(click)="<%=dataset%>.action('<%=action%>', '<%=actionConfig.getString('param')%>');"
+		(click)="<%=dataset%>.action('<%=action%>', '<%=actionConfig.param%>');"
 		*ngIf="<%=showExpr%>">
-		<%=actionConfig.getString('label') %>
+		<%=actionConfig.label %>
 	</button><%
 	}
 }        		
@@ -30,7 +29,7 @@ for(var i = 0; i < list.size(); i++) {
 		No actions available
 	</button>
 </mat-menu> <%
-if(config.getBoolean("round") == true) { %>
+if(config.round == true) { %>
 <button
 	mat-icon-button 
 	matTooltip="Geenral actions for this record"

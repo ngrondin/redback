@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.redback.RedbackException;
@@ -52,7 +53,7 @@ public class RedbackAggregateJSWrapper implements ProxyObject
 	}
 
 	public Object getMemberKeys() {
-		return new HashSet<>(Arrays.asList(members));
+		return ProxyArray.fromArray(((Object[])members));
 	}
 
 	public boolean hasMember(String key) {

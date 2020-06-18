@@ -6,24 +6,24 @@ var versionOrDefault = version != null ? version : 'default';
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title><%=config.getString('label')%></title>
+  <title><%=config.label%></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="<%=config.getString('logo')%>">
+  <link rel="icon" type="image/x-icon" href="<%=config.logo%>">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body oncontextmenu="return false;">
   <app-root 
-    type="<%=config.getString('page')%>"
-    apptitle="<%=config.getString('label')%>"
-    logo="<%=config.getString('logo')%>"
+    type="<%=config.page%>"
+    apptitle="<%=config.label%>"
+    logo="<%=config.logo%>"
     version="<%=versionOrDefault%>"
     username="<%=session.getUserProfile().getUsername()%>"
     userdisplay="<%=session.getUserProfile().getAttribute('fullname')%>"
-    objects="<%=utils.convertDataMapToAttributeString(config.getObject('objects'))%>"
-    initialview="<%=config.getString('defaultview')%>"
-    menuview="<%=config.getString('name')%>"
-    iconsets="<%=(JSON.parse(config.getList('iconsets').toString())).join(',')%>"
+    objects="<%=utils.convertDataMapToAttributeString(config.objects)%>"
+    initialview="<%=config.defaultview%>"
+    menuview="<%=config.name%>"
+    iconsets="<%=utils.convertDataEntityToAttributeString(config.iconsets)%>"
     uiservice="<%=uiservicepath%>"
     objectservice="<%=objectservicepath%>"
     fileservice="<%=fileservicepath%>"

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
@@ -118,7 +119,7 @@ public class ProcessManagerProxyJSWrapper implements ProxyObject
 	}
 
 	public Object getMemberKeys() {
-		return new HashSet<>(Arrays.asList(members));
+		return ProxyArray.fromArray(((Object[])members));
 	}
 
 	public boolean hasMember(String key) {
