@@ -148,6 +148,7 @@ export class ApiService {
     if(this.signalService != null && this.signalService != "" && this.signalWebsocket == null) {
       this.signalWebsocket = webSocket(this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.signalService);
       this.initSignalWebsocketSubscribe();
+      this.signalHeartbeat();
     }
   }
 
@@ -166,6 +167,12 @@ export class ApiService {
 
   signalError(error: String) {
     setTimeout(() => {this.initSignalWebsocketSubscribe()}, 1000);
+  }
+
+  
+  signalHeartbeat() {
+    this.signalWebsocket.next({action:"heartbeat"});
+    setTimeout(() => {this.signalHeartbeat()}, 60000);
   }
 
   getSignalObservable() : Observable<any>  {
@@ -195,6 +202,7 @@ export class ApiService {
     if(this.chatService != null && this.chatService != "" && this.chatWebsocket == null) {
       this.chatWebsocket = webSocket(this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.chatService);
       this.initChatWebsocketSubscribe();
+      this.chatHeartbeat();
     }
   }
 
@@ -232,6 +240,11 @@ export class ApiService {
 
   chatError(error: String) {
     setTimeout(() => {this.initChatWebsocketSubscribe()}, 1000);
+  }
+
+  chatHeartbeat() {
+    this.chatWebsocket.next({action:"heartbeat"});
+    setTimeout(() => {this.chatHeartbeat()}, 60000);
   }
 
   getChatObservable() : Observable<any>  {

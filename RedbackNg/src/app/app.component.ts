@@ -55,7 +55,7 @@ export class AppComponent {
     let pos = currentUrl.indexOf(this.apiService.uiService);
     this.apiService.baseUrl = currentUrl.substring(0, pos - 1);
 
-    this.iconsets = native.getAttribute("iconsets").split(",");
+    this.iconsets = JSON.parse(native.getAttribute("iconsets").replace(/'/g, '"'))
     for(const set of this.iconsets) {
       this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'));
     }
