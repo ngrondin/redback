@@ -25,7 +25,7 @@
                 {{chat.label}}
             </div>
             <div
-                *ngIf="chat.linkLabel != null"
+                *ngIf="chat.linkLabel != null && chat == focusChat"
                 class="rb-chat-conversation-link"
                 (click)="clickLink(chat)">
                 {{chat.linkLabel}}

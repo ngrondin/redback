@@ -57,12 +57,7 @@ public class ObjectManager
 	{
 		firebus = fb;
 		cacheConfigs = true;
-		List<ScriptEngineFactory> list = new ScriptEngineManager().getEngineFactories();
-		for(int i = 0; i < list.size(); i++) {
-			System.out.println(list.get(i).getEngineName() + " " + list.get(i).getLanguageName());
-		}
 		jsEngine = new ScriptEngineManager().getEngineByName("graal.js");
-		System.out.println("jsEngine is " + (jsEngine.getClass()));
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");

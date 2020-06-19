@@ -5,14 +5,15 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
 
-import jdk.nashorn.api.scripting.JSObject;
+import org.graalvm.polyglot.Value;
+
 import io.firebus.utils.DataMap;
-import io.firebus.utils.FirebusDataUtil;
 import io.redback.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.utils.StringUtils;
+import io.redback.utils.js.JSConverter;
 
 public class ScriptUnit extends ProcessUnit 
 {
@@ -38,13 +39,13 @@ public class ScriptUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.finer("Start executing script");
-		Bindings context = processManager.createScriptContext(pi);
+		Bindings context = pi.getScriptContext();
 		try
 		{
 			script.eval(context);
 			pi.setCurrentNode(nextNode);
-			JSObject piDataJS = (JSObject)context.get("data");
-			pi.setData(FirebusDataUtil.convertJSObjectToDataObject(piDataJS));
+			DataMap piData = (DataMap)JSConverter.toJava(Value.asValue(context.get("data")));
+			pi.setData(piData);
 		} 
 		catch (ScriptException e)
 		{

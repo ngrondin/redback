@@ -13,6 +13,7 @@ import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.security.Session;
 import io.redback.utils.Expression;
 import io.redback.utils.ExpressionMap;
+import io.redback.utils.js.JSConverter;
 
 public class RedbackObjectUpdateUnit extends ProcessUnit 
 {
@@ -40,7 +41,7 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 		if(processManager.getObjectServiceName() != null)
 		{
 			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-			Bindings context = processManager.createScriptContext(pi);
+			Bindings context = pi.getScriptContext();
 			DataMap updateData = inputExpressionMap.eval(context);
 			String objectUID = (String)objectUIDExpression.eval(context);
 			DataMap req = new DataMap();
@@ -56,10 +57,10 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 				logger.finest("Calling redback object service " + processManager.getObjectServiceName() + " " + payload.getString());
 				Payload response = processManager.getFirebus().requestService(processManager.getObjectServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
-				context.put("result", respData);
+				context.put("result", JSConverter.toJS(respData));
 				DataMap respOutput = outputExpressionMap.eval(context);
 				logger.finest("Output data was: " + respOutput);
-				pi.getData().merge(respOutput);
+				pi.setData(respOutput);
 			} 
 			catch (Exception e)
 			{

@@ -111,7 +111,7 @@ public class InteractionUnit extends ProcessUnit
 	
 	protected Assignment getNotification(ProcessInstance pi) throws RedbackException
 	{
-		Bindings context = processManager.createScriptContext(pi);
+		Bindings context = pi.getScriptContext();
 		String code = notificationConfig.getString("code");
 		String label = (String)labelExpression.eval(context);
 		String message = (String)messageExpression.eval(context);

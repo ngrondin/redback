@@ -10,6 +10,7 @@ import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.security.Session;
 import io.redback.utils.ExpressionMap;
+import io.redback.utils.js.JSConverter;
 
 public class FirebusRequestUnit extends ProcessUnit 
 {
@@ -33,7 +34,7 @@ public class FirebusRequestUnit extends ProcessUnit
 	{
 		logger.finer("Starting firebus call node");
 		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-		Bindings context = processManager.createScriptContext(pi);
+		Bindings context = pi.getScriptContext();
 		DataMap data = inputExpressionMap.eval(context);
 		Payload payload = new Payload(data.toString());
 		payload.metadata.put("token", sysUserSession.getToken());
@@ -42,10 +43,10 @@ public class FirebusRequestUnit extends ProcessUnit
 			logger.finest("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());
 			Payload response = processManager.getFirebus().requestService(firebusServiceName, payload, 10000);
 			DataMap respData = new DataMap(response.getString());
-			context.put("result", respData);
+			context.put("result", JSConverter.toJS(respData));
 			DataMap respOutput = outputExpressionMap.eval(context);
 			logger.finest("Output data was: " + respOutput);
-			pi.getData().merge(respOutput);
+			pi.setData(respOutput);
 		} 
 		catch (Exception e)
 		{

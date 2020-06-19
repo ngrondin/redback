@@ -2,15 +2,21 @@ package io.redback.managers.processmanager;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.UUID;
 
 import javax.script.Bindings;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
+import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
+import io.redback.utils.js.FirebusJSWrapper;
+import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.LoggerJSFunction;
 
 public class ProcessInstance 
 {
+	protected ProcessManager processManager;
 	protected String processName;
 	protected int processVersion;
 	protected String domain;
@@ -20,10 +26,12 @@ public class ProcessInstance
 	protected boolean complete;
 	protected DataList assignees;
 	protected Actionner lastActioner;
+	protected Bindings scriptContext;
 	//protected JSONList receivedNotifications;
 	
-	protected ProcessInstance(String pn, int v, String dom, DataMap d)
+	protected ProcessInstance(ProcessManager pm, String pn, int v, String dom, DataMap d)
 	{
+		processManager = pm;
 		processName = pn;
 		processVersion = v;
 		domain = dom;
@@ -31,11 +39,13 @@ public class ProcessInstance
 		data = d;	
 		complete = false;
 		assignees = new DataList();
+		createScriptBindings();
 		//receivedNotifications = new JSONList();
 	}
 	
-	protected ProcessInstance(DataMap c)
+	protected ProcessInstance(ProcessManager pm, DataMap c)
 	{
+		processManager = pm;
 		processName = c.getString("process");
 		processVersion = c.getNumber("version").intValue();
 		domain = c.getString("domain");
@@ -50,6 +60,26 @@ public class ProcessInstance
 		
 		if(c.containsKey("lastactioner")  &&  c.get("lastactioner") instanceof DataMap)
 			lastActioner = new Actionner(c.getObject("lastactioner"));
+		createScriptBindings();
+	}
+	
+	protected void createScriptBindings()
+	{
+		scriptContext = processManager.getScriptEngine().createBindings();
+		try {
+			scriptContext.put("pid", getId());
+			scriptContext.put("pm", new ProcessManagerJSWrapper(processManager, this));
+			scriptContext.put("global", JSConverter.toJS(processManager.getGlobalVariables()));
+			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getSystemUserSession(domain)));
+			scriptContext.put("log", new LoggerJSFunction());
+			updateScriptBindings();
+		} catch(Exception e) {
+		}
+	}
+	
+	public void updateScriptBindings()
+	{
+		scriptContext.put("data", JSConverter.toJS(data));
 	}
 	
 	public String getId()
@@ -77,9 +107,26 @@ public class ProcessInstance
 		return data;
 	}
 	
+	public Bindings getScriptContext()
+	{
+		return scriptContext;
+	}
+	
 	public void setData(DataMap d)
 	{
-		data = d;
+		Iterator<String> it = d.keySet().iterator();
+		while(it.hasNext())
+		{
+			String key = it.next();
+			data.put(key, d.get(key));
+		}
+		updateScriptBindings();
+	}
+	
+	public void setOriginator(String id)
+	{
+		data.put("originator", id);
+		updateScriptBindings();
 	}
 	
 	public void setCurrentNode(String cn)

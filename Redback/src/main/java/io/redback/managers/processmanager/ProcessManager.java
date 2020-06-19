@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -21,14 +20,10 @@ import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.firebus.utils.FirebusDataUtil;
 import io.redback.RedbackException;
-import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
-import io.redback.utils.js.FirebusJSWrapper;
-import io.redback.utils.js.LoggerJSFunction;
 
 
 public class ProcessManager
@@ -53,7 +48,7 @@ public class ProcessManager
 	public ProcessManager(Firebus fb, DataMap config)
 	{
 		firebus = fb;
-		jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
+		jsEngine = new ScriptEngineManager().getEngineByName("graal.js");
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
@@ -79,7 +74,7 @@ public class ProcessManager
 		return jsEngine;
 	}
 
-	
+	/*
 	public Bindings createScriptContext(ProcessInstance pi) throws RedbackException
 	{
 		Bindings context = jsEngine.createBindings();
@@ -90,7 +85,7 @@ public class ProcessManager
 		context.put("firebus", new FirebusJSWrapper(getFirebus(), getSystemUserSession(pi.getDomain())));
 		context.put("log", new LoggerJSFunction());
 		return context;
-	}
+	}*/
 		
 	public void refreshAllConfigs()
 	{
@@ -169,7 +164,7 @@ public class ProcessManager
 				request.put("object", piCollectionConfig.getName());
 				request.put("filter", new DataMap(piCollectionConfig.getField("_id"), pid));
 				DataMap response = request(dataServiceName, request);
-				pi = new ProcessInstance(piCollectionConfig.convertObjectToCanonical(response.getObject("result.0")));
+				pi = new ProcessInstance(this, piCollectionConfig.convertObjectToCanonical(response.getObject("result.0")));
 				putInCurrentTransaction(pi);
 			} 
 			catch (Exception e) 
@@ -327,14 +322,19 @@ public class ProcessManager
 			DataList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 			{
-				ProcessInstance pi = getFromCurrentTransaction(resultList.getObject(i).getString("_id"));
+				String pid = resultList.getObject(i).getString("_id");
+				ProcessInstance pi = getFromCurrentTransaction(pid);
 				if(pi == null)
 				{
-					pi = new ProcessInstance(resultList.getObject(i));
+					pi = new ProcessInstance(this, resultList.getObject(i));
 					putInCurrentTransaction(pi);
+					logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId() + " in database with data " + pi.getData());
+				} 
+				else 
+				{
+					logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId() + " in transaction with data " + pi.getData());
 				}
 				list.add(pi);
-				logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId());
 			}
 		} 
 		catch (Exception e) 

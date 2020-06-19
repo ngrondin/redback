@@ -71,7 +71,7 @@ public class Process
 
 	public ProcessInstance createInstance(Actionner actionner, String domain, DataMap data) throws RedbackException
 	{
-		ProcessInstance pi = new ProcessInstance(name, version, domain, data);
+		ProcessInstance pi = new ProcessInstance(processManager, name, version, domain, data);
 		return pi;
 	}
 	
@@ -79,7 +79,7 @@ public class Process
 	{
 		logger.info("Starting process '" + name + "' instance");
 		pi.setCurrentNode(startNode);
-		pi.getData().put("originator", actionner.getId());
+		pi.setOriginator(actionner.getId());
 		execute(pi);
 		logger.info("Process '" + name + "' started instance '" + pi.getId() + "'");
 	}
@@ -138,7 +138,7 @@ public class Process
 				{
 					if(nodes.get(currentNodeId) instanceof InteractionUnit)
 					{
-						logger.info("Executing node '" + currentNodeId + "'");
+						logger.info("Executing node '" + nodes.get(currentNodeId).getName() + "'");
 						((InteractionUnit)nodes.get(currentNodeId)).execute(pi);			
 					}
 				}

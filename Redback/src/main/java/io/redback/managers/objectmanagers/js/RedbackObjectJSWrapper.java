@@ -104,7 +104,9 @@ public class RedbackObjectJSWrapper implements ProxyObject
 	}
 
 	public Object getMemberKeys() {
-		List<Object> list = Arrays.asList(((Object[])members));
+		List<Object> list = new ArrayList<Object>();
+		for(int i = 0; i < members.length; i++)
+			list.add(members[i]);
 		list.add("objectname");
 		list.add("uid");
 		list.add("domain");

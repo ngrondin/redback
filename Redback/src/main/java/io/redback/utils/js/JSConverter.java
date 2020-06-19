@@ -18,11 +18,15 @@ import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
+import io.redback.managers.processmanager.ProcessInstance;
+import io.redback.managers.processmanager.js.ProcessInstanceJSWrapper;
 
 public class JSConverter {
 
 	public static Object toJS(Object object) {
-		if(object instanceof DataMap) {
+		if(object == null) {
+			return null;
+		} else if(object instanceof DataMap) {
 			DataMap map = (DataMap)object;
 			Map<String, Object> out = new HashMap<String, Object>();
 			Iterator<String> it = map.keySet().iterator();
@@ -56,13 +60,17 @@ public class JSConverter {
 			return new JSDate((Date)object);
 		} else if(object instanceof RedbackObject) {
 			return new RedbackObjectJSWrapper((RedbackObject)object);
+		} else if(object instanceof ProcessInstance) {
+			return new ProcessInstanceJSWrapper((ProcessInstance)object);
 		} else {
 			return object;
 		}
 	}
 	
 	public static Object toJava(Value value) {
-		if(value.isInstant()) {
+		if(value == null) {
+			return null;
+		} else if(value.isInstant()) {
 			Instant ins = value.asInstant();
 			Date dt = Date.from(ins);
 			return dt;

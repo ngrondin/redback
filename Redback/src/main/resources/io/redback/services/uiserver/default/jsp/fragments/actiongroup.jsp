@@ -5,13 +5,14 @@ var list = config.actions;
 var noShow = "";
 for(var i = 0; i < list.length; i++) { 
 	var actionConfig = list[i];
+	var showExpr = (actionConfig.show != null ? actionConfig.show : 'true').split('object').join(dataset + '.selectedObject').split('relatedObject').join(dataset + '.relatedObject');
 	if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
 	if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
 	if(i > 0)
 		noShow = noShow + " && ";
 	noShow = noShow + "!(" + showExpr + ")"
 	var action = actionConfig.action != null ? actionConfig.action : 'noAction'	
-	if(((action == 'create'  ||  action == 'save')  &&  canWrite) || ((!(action == 'create')  &&  !(action == 'save'))  &&  canExecute)) {
+	if(((action == 'create'  ||  action == 'save')  &&  canWrite) || ((action != 'create'  &&  action != 'save')  &&  canExecute)) {
 	%>
 	<button
 		mat-menu-item

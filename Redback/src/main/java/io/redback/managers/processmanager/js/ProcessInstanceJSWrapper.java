@@ -1,31 +1,26 @@
 package io.redback.managers.processmanager.js;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
 
-import jdk.nashorn.api.scripting.AbstractJSObject;
-import io.firebus.utils.FirebusDataUtil;
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyArray;
+import org.graalvm.polyglot.proxy.ProxyObject;
+
 import io.redback.managers.processmanager.ProcessInstance;
+import io.redback.utils.js.JSConverter;
 
 
-public class ProcessInstanceJSWrapper extends AbstractJSObject
+public class ProcessInstanceJSWrapper implements ProxyObject
 {
 	protected ProcessInstance processInstance;
+	protected String[] members = {"pid", "data"};
 	
 	public ProcessInstanceJSWrapper(ProcessInstance pi)
 	{
 		processInstance = pi;
 	}
 	
-	public Object call(Object arg0, Object... args)
-	{
-		return null;
-	}
-	
-	public String getClassName()
-	{
-		return "RedbackProcessInstance";
-	}
+
 
 	public Object getMember(String name)
 	{
@@ -35,7 +30,7 @@ public class ProcessInstanceJSWrapper extends AbstractJSObject
 		}
 		else if(name.equals("data"))
 		{
-			return FirebusDataUtil.convertDataObjectToJSObject(processInstance.getData());
+			return JSConverter.toJS(processInstance.getData());
 		}
 		else
 		{
@@ -43,24 +38,17 @@ public class ProcessInstanceJSWrapper extends AbstractJSObject
 		}
 	}
 
-	public boolean hasMember(String name)
-	{
-		if(name.equals("pid")  ||  name.equals("data"))
-			return true;
-		else
-			return false;
+
+	public Object getMemberKeys() {
+		return ProxyArray.fromArray(((Object[])members));
 	}
 
-
-	public Set<String> keySet()
-	{
-		HashSet<String> keys = new HashSet<String>();
-		keys.add("pid");
-		keys.add("data");
-		return keys;
+	public boolean hasMember(String key) {
+		return Arrays.asList(members).contains(key);
 	}
 
-	public void setMember(String name, Object value)
-	{
-	}	
+	public void putMember(String key, Value value) {
+		
+	}
+
 }
