@@ -78,5 +78,20 @@
         [scheme]="colorScheme"
         [results]="graphData"
         [cardColor]="'#232837'">
-    </ngx-charts-number-card>    
+    </ngx-charts-number-card>
+    <ngx-charts-line-chart
+        *ngIf="type == 'line'"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [legend]="true"
+        [legendPosition]="'below'"
+        [legendTitle]="null"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [xAxis]="true"
+        [yAxis]="true"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+        [timeline]="false">
+    </ngx-charts-line-chart>    
 </div>

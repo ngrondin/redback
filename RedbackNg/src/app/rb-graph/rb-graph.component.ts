@@ -59,11 +59,12 @@ export class RbGraphComponent implements OnInit {
     for(let agg of this.aggregates) {
       let thisCat: String = this.categories != null ? agg.getDimension(this.categories.dimension) : null;
       if(cat == null || cat == thisCat) {
-        let data: any = {
-          name: this.nullToEmptyString(agg.getDimension(this.series.labelattribute)),
-          value: agg.getMetric(this.value.name)
+        let name: any = this.nullToEmptyString(agg.getDimension(this.series.labelattribute));
+        let value = agg.getMetric(this.value.name);
+        if(!isNaN(Date.parse(name))) {
+          name = new Date(Date.parse(name.toString()));
         }
-        series.push(data);
+        series.push({name: name, value: value});
       }
     }
     return series;
@@ -101,6 +102,8 @@ export class RbGraphComponent implements OnInit {
       return {x: 350, y: 250};
     } else if(this.type == 'number') {
       return {x: 170 * (this.graphData.length), y: 170}
+    } else if(this.type == 'line') {
+      return {x: 800, y: 250};
     } else {
       return {x: 400, y: 300};
     }
