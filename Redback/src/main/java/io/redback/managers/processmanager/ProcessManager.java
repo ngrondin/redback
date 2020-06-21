@@ -42,6 +42,7 @@ public class ProcessManager
 	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
 	protected String sysUserName;
 	protected String jwtSecret;
+	protected String jwtIssuer;
 	protected Session sysUserSession;
 	protected DataMap globalVariables;
 	
@@ -56,6 +57,7 @@ public class ProcessManager
 		domainServiceName = config.getString("domainservice");
 		sysUserName = config.getString("sysusername");
 		jwtSecret = config.getString("jwtsecret");
+		jwtIssuer = config.getString("jwtissuer");
 		processes = new HashMap<String, HashMap<Integer, Process>>();
 		transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
 		globalVariables = config.getObject("globalvariables");
@@ -74,19 +76,6 @@ public class ProcessManager
 		return jsEngine;
 	}
 
-	/*
-	public Bindings createScriptContext(ProcessInstance pi) throws RedbackException
-	{
-		Bindings context = jsEngine.createBindings();
-		context.put("pid", pi.getId());
-		context.put("data", FirebusDataUtil.convertDataObjectToJSObject(pi.getData()));
-		context.put("pm", new ProcessManagerJSWrapper(this, pi));
-		context.put("global", FirebusDataUtil.convertDataObjectToJSObject(getGlobalVariables()));
-		context.put("firebus", new FirebusJSWrapper(getFirebus(), getSystemUserSession(pi.getDomain())));
-		context.put("log", new LoggerJSFunction());
-		return context;
-	}*/
-		
 	public void refreshAllConfigs()
 	{
 		processes.clear();
@@ -186,7 +175,7 @@ public class ProcessManager
 			{
 				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
 				String token = JWT.create()
-						.withIssuer("io.firebus.http")
+						.withIssuer(jwtIssuer)
 						.withClaim("email", "processuser")
 						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
 						.sign(algorithm);

@@ -31,8 +31,8 @@ public class RedbackAccessManager extends AccessManager
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
-		secret = config.getString("secret");
-		issuer = config.getString("issuer");
+		secret = config.getString("jwtsecret");
+		issuer = config.getString("jwtissuer");
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
 	}

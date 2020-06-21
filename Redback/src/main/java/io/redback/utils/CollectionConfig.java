@@ -14,9 +14,19 @@ public class CollectionConfig {
 	}
 	
 	public CollectionConfig(DataMap cfg) {
+		init(cfg, null);
+	}
+	
+	public CollectionConfig(DataMap cfg, String defaultName) {
+		init(cfg, defaultName);
+	}
+		
+	protected void init(DataMap cfg, String defaultName) {
 		config = cfg;
 		if(config == null)
 			config = new DataMap();
+		if(config.get("name") == null) 
+			config.put("name", defaultName);
 	}
 	
 	public String getName() {
@@ -34,7 +44,7 @@ public class CollectionConfig {
 	}
 
 	public DataMap convertObjectToCanonical(DataMap in) {
-		DataMap out = (DataMap)in.getCopy(); //new DataMap();
+		DataMap out = (DataMap)in.getCopy(); 
 		if(config != null && config.getObject("map") != null) {
 			Iterator<String> it = config.getObject("map").keySet().iterator();
 			while(it.hasNext()) {
@@ -43,6 +53,22 @@ public class CollectionConfig {
 				if(inKey != null && out.containsKey(inKey) && !inKey.equals(canonicalkey)) {
 					out.put(canonicalkey, out.get(inKey));
 					out.remove(inKey);
+				}
+			}
+		}
+		return out;
+	}
+	
+	public DataMap convertObjectToSpecific(DataMap in) {
+		DataMap out = (DataMap)in.getCopy(); 
+		if(config != null && config.getObject("map") != null) {
+			Iterator<String> it = config.getObject("map").keySet().iterator();
+			while(it.hasNext()) {
+				String canonicalkey = it.next();
+				String inKey = getField(canonicalkey);
+				if(inKey != null && out.containsKey(canonicalkey) && !inKey.equals(canonicalkey)) {
+					out.put(inKey, out.get(canonicalkey));
+					out.remove(canonicalkey);
 				}
 			}
 		}
