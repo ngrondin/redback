@@ -443,8 +443,15 @@ public class ObjectManager
 				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 				DataList dbTuple = new DataList();
-				for(int i = 0; i < tuple.size(); i++)
-					dbTuple.add(objectConfig.getAttributeConfig(tuple.getString(i)).getDBKey());
+				for(int i = 0; i < tuple.size(); i++) {
+					if(tuple.get(i) instanceof DataMap) {
+						DataMap tupleItem = (DataMap)tuple.getObject(i).getCopy();
+						tupleItem.put("attribute", objectConfig.getAttributeConfig(tupleItem.getString("attribute")).getDBKey());
+						dbTuple.add(tupleItem);
+					} else {
+						dbTuple.add(objectConfig.getAttributeConfig(tuple.getString(i)).getDBKey());
+					}
+				}
 				DataList dbMetrics = new DataList();
 				for(int i = 0; i < metrics.size(); i++)
 				{
