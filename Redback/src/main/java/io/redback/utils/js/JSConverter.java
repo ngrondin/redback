@@ -55,7 +55,8 @@ public class JSConverter {
 			}
 			return ProxyArray.fromList(out);
 		} else if(object instanceof DataLiteral) {
-			return ((DataLiteral)object).getObject();
+			Object obj = ((DataLiteral)object).getObject(); 
+			return JSConverter.toJS(obj);
 		} else if(object instanceof Date) {
 			return new JSDate((Date)object);
 		} else if(object instanceof RedbackObject) {
