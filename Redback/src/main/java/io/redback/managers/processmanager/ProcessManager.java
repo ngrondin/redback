@@ -218,6 +218,7 @@ public class ProcessManager
 				domain = actionner.getUserProfile().getAttribute("rb.defaultdomain");
 			pi = process.createInstance(actionner, domain, data);
 			putInCurrentTransaction(pi);
+			commitInstance(pi);
 			process.startInstance(actionner, pi);
 			logger.finer("Initiated instance '" + pi.getId() + "' for process '" + processName + "'");
 		}

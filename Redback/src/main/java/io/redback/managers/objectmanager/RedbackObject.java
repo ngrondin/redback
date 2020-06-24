@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import javax.script.Bindings;
 import javax.script.CompiledScript;
-import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import io.firebus.exceptions.FunctionErrorException;
@@ -198,6 +197,11 @@ public class RedbackObject extends RedbackElement
 		return domain;
 	}
 	
+	public boolean isNew()
+	{
+		return isNewObject;
+	}
+	
 	public Set<String> getAttributeNames()
 	{
 		return config.getAttributeNames();
@@ -322,12 +326,22 @@ public class RedbackObject extends RedbackElement
 	{
 		if(config.getAttributeConfig(name) != null)
 		{
+			Value actualValue = value;
+			if(value.getObject() instanceof DataMap && getObjectConfig().getAttributeConfig(name).getRelatedObjectConfig() != null) 
+			{
+				DataMap filter = (DataMap)value.getObject();
+				ArrayList<RedbackObject> list = objectManager.listRelatedObjects(session, getObjectConfig().getName(), uid.getString(), name, filter, null, false);
+				if(list.size() > 0) 
+					actualValue = new Value(list.get(0).get(getObjectConfig().getAttributeConfig(name).getRelatedObjectConfig().getLinkAttributeName()).getString());
+				else
+					actualValue = new Value(null);
+			}
 			Value currentValue = get(name);
-			if(!currentValue.equals(value))
+			if(!currentValue.equals(actualValue))
 			{
 				if(canWrite  &&  (isEditable(name) || isNewObject))
 				{
-					data.put(name, value);
+					data.put(name, actualValue);
 					updatedAttributes.add(name);	
 					updateScriptContext();
 					executeAttributeScriptsForEvent(name, "onupdate");

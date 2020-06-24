@@ -1,7 +1,6 @@
 package io.redback.security.js;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -9,11 +8,12 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.redback.security.Session;
+import io.redback.utils.js.JSConverter;
 
 public class SessionJSWrapper implements ProxyObject
 {
 	protected Session session;
-	protected String[] members = {"userProfile", "getUserProfile"};
+	protected String[] members = {"userProfile", "getToken", "expiry", "getUserProfile"};
 	
 	public SessionJSWrapper(Session s)
 	{
@@ -27,8 +27,16 @@ public class SessionJSWrapper implements ProxyObject
 					return new UserProfileJSWrapper(session.getUserProfile());
 				}
 			};
+		} else if(key.equals("getToken")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return session.getToken();
+				}
+			};
 		} else if(key.equals("userProfile")) {
 			return new UserProfileJSWrapper(session.getUserProfile());
+		} else if(key.equals("expiry")) {
+			return JSConverter.toJS(session.expiry);
 		} else {
 			return null;
 		}

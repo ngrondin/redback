@@ -12,7 +12,7 @@ var versionOrDefault = version != null ? version : 'default';
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />  
-  <link rel="icon" type="image/x-icon" href="<%=config.getString('logo')%>">
+  <link rel="icon" type="image/x-icon" href="<%=config.logo%>">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script>

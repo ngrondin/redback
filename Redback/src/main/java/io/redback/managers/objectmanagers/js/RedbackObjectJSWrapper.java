@@ -2,7 +2,6 @@ package io.redback.managers.objectmanagers.js;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -20,7 +19,7 @@ public class RedbackObjectJSWrapper implements ProxyObject
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected RedbackObject rbObject;
-	protected String[] members = {"getRelated", "save", "getUpdatedAttributes"};
+	protected String[] members = {"getRelated", "save", "getUpdatedAttributes", "isNew"};
 	
 	public RedbackObjectJSWrapper(RedbackObject o)
 	{
@@ -90,6 +89,10 @@ public class RedbackObjectJSWrapper implements ProxyObject
 			else if(name.equals("domain"))
 			{
 				return rbObject.getDomain().getObject();
+			}
+			else if(name.equals("isNew"))
+			{
+				return rbObject.isNew();
 			}
 			else
 			{
