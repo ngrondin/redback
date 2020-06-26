@@ -33,6 +33,7 @@ public class CronTaskManager extends Thread {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String uuid;
 	protected Firebus firebus;
+	protected DataMap config;
 	protected ScriptEngine jsEngine;
 	protected String configServiceName;
 	protected String dataServiceName;
@@ -49,10 +50,11 @@ public class CronTaskManager extends Thread {
 	protected boolean quit = false;
 
 
-	public CronTaskManager(Firebus fb, DataMap config)
+	public CronTaskManager(Firebus fb, DataMap c)
 	{
 		uuid = UUID.randomUUID().toString();
 		firebus = fb;
+		config = c;
 		jsEngine = new ScriptEngineManager().getEngineByName("graal.js");
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
@@ -221,7 +223,7 @@ public class CronTaskManager extends Thread {
 				ctc.getScript().eval(scriptContext);
 			} else if(ctc.getFirebusCall() != null) {
 				DataMap call = ctc.getFirebusCall();
-				String serviceName = call.getString("service");
+				String serviceName = config.getString(call.getString("service"));
 				Payload req = new Payload(call.getObject("payload").toString());
 				req.metadata.put("token", session.getToken());
 				firebus.requestService(serviceName, req);

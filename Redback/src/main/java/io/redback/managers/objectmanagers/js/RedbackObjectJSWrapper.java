@@ -48,8 +48,9 @@ public class RedbackObjectJSWrapper implements ProxyObject
 						try {
 							rbObject.save();
 						} catch(Exception e) {
-							logger.severe("Error saving objects : " + e.getMessage());
-							throw new RuntimeException("Errror saving objects", e);
+							String errMsg = "Error saving objects : " + constructErrorString(e);
+							logger.severe(errMsg);
+							throw new RuntimeException(errMsg);
 						}
 						return null;
 					}
@@ -71,8 +72,9 @@ public class RedbackObjectJSWrapper implements ProxyObject
 						try {
 							rbObject.execute(name);
 						} catch(Exception e) {
-							logger.severe("Error executing object script : " + e.getMessage());
-							throw new RuntimeException("Errror executing object script", e);
+							String errMsg = "Error executing object script : " + constructErrorString(e);
+							logger.severe(errMsg);
+							throw new RuntimeException(errMsg);
 						}
 						return null;
 					}
@@ -138,9 +140,24 @@ public class RedbackObjectJSWrapper implements ProxyObject
 		} 
 		catch (RedbackException e)
 		{
-			throw new RuntimeException("Error setting the Redback Object attribute '" + key + "' ", e);
+			String errMsg = "Error setting the Redback Object attribute '" + key + "' : " + constructErrorString(e);
+			logger.severe(errMsg);
+			throw new RuntimeException(errMsg);		
 		}		
 	}
 
+	
+	protected String constructErrorString(Throwable e) 
+	{
+		String ret = "";
+		Throwable t = e;
+		while(t != null) {
+			if(ret.length() > 0)
+				ret = ret + " : ";
+			ret = ret + t.getMessage();
+			t = t.getCause();
+		}
+		return ret;
+	}
 
 }
