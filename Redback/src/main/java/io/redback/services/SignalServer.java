@@ -24,13 +24,13 @@ public abstract class SignalServer extends AuthenticatedStreamProvider implement
 
 	public void consume(Payload payload) {
 		try {
-			onSignal(payload.getString());
+			onSignal(new DataMap(payload.getString()));
 		} catch(Exception e) {
 			logger.severe(e.getMessage());
 		}
 	}
 
 
-	protected abstract void onSignal(String signal) throws RedbackException;
+	protected abstract void onSignal(DataMap signal) throws RedbackException;
 
 }

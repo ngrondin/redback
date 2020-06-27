@@ -544,18 +544,23 @@ public class ObjectManager
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))
 		{
-			HashMap<String, RedbackObject> objects = transactions.get(txId);
-			Iterator<String> it = objects.keySet().iterator();
-			while(it.hasNext())
-			{
-				String key = it.next();
-				RedbackObject object = objects.get(key);
-				object.save();
-			}
+			RedbackObject[] arr = null; 
 			synchronized(transactions)
 			{
+				HashMap<String, RedbackObject> objects = transactions.get(txId);
+				arr = new RedbackObject[objects.size()];
+				int i = 0;
+				Iterator<String> it = objects.keySet().iterator();
+				while(it.hasNext())
+				{
+					String key = it.next();
+					RedbackObject object = objects.get(key);
+					arr[i++] = object;
+				}
 				transactions.remove(txId);
 			}
+			for(int i = 0; i < arr.length; i++)
+				arr[i].save();
 		}		
 	}
 	
@@ -715,14 +720,24 @@ public class ObjectManager
 		dataClient.putData(collection, key, data);
 	}
 	
-	protected void signal(String signal)
+	protected void signal(RedbackObject object)
 	{
 		if(signalConsumerName != null) 
 		{
-			Payload payload = new Payload(signal);
-			logger.finest("Publishing signal : " + signal);
-			firebus.publish(signalConsumerName, payload);
-			logger.finest("Published signal : " + signal);
+			try 
+			{
+				DataMap signal = new DataMap();
+				signal.put("type", "objectchange");
+				signal.put("object", object.getJSON(true, true));
+				Payload payload = new Payload(signal.toString());
+				logger.finest("Publishing signal : " + signal);
+				firebus.publish(signalConsumerName, payload);
+				logger.finest("Published signal : " + signal);
+			}
+			catch(Exception e) 
+			{
+				logger.severe("Cannot send out signal : " + e.getMessage());
+			}
 		}
 	}
 

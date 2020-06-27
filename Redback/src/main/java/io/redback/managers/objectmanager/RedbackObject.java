@@ -432,7 +432,7 @@ public class RedbackObject extends RedbackElement
 					}
 				}
 				objectManager.commitData(config.getCollection(), key, dbData);
-				objectManager.signal(config.getName() + ":" + getUID().getString());
+				objectManager.signal(this);
 				executeScriptsForEvent("aftersave");
 				updatedAttributes.clear();
 				if(isNewObject)
