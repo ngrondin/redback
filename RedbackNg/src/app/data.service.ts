@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Observer } from 'rxjs';
 import { ObjectResp, RbObject, RbFile, RbAggregate } from './datamodel';
 import { ToastrService } from 'ngx-toastr';
 
@@ -12,6 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 export class DataService {
   allObjects: RbObject[];
   saveImmediatly: boolean;
+  dataObservers: Observer<RbObject>[] = [];
 
   constructor(
     private apiService: ApiService,
@@ -19,13 +20,28 @@ export class DataService {
   ) {
     this.allObjects = [];
     this.saveImmediatly = true;
-    let obs = this.apiService.getSignalObservable();
-    if(obs != null) {
-      obs.subscribe(json => {
-        let parts = json.signal.split(':');
-        this.getServerObject(parts[0], parts[1]).subscribe(object => {});
-      });
-    }
+    this.apiService.getSignalObservable().subscribe(
+      json => {
+        if(json.type == 'objectchange') {
+          let rbObject: RbObject = this.updateObjectFromServer(json.object);
+          this.dataObservers.forEach((observer) => {
+            observer.next(rbObject);
+          });      
+        }
+      }
+    );
+  }
+
+  getDataObservable() : Observable<any>  {
+    return new Observable<any>((observer) => {
+      this.dataObservers.push(observer);
+    });
+  }
+
+  clearAllLocalObject() {
+    this.allObjects = [];
+    this.apiService.clearSubscriptions();
+    this.dataObservers = []; 
   }
 
   getLocalObject(objectname: string, uid: string) : RbObject {
@@ -105,7 +121,11 @@ export class DataService {
     } else {
       rbObject = new RbObject(json, this);
       this.allObjects.push(rbObject);
-      this.apiService.subscribeToSignal(rbObject.objectname + ':' + rbObject.uid);
+      this.apiService.subscribeToSignal({
+        "type":"objectchange",
+        "objectname": rbObject.objectname,
+        "uid": rbObject.uid
+      });
     }
     return rbObject;
   }
@@ -208,5 +228,14 @@ export class DataService {
       )
     })
     return fileObservable; 
+  }
+
+  subscribeToFilter(id: String, object: String, filter: any) {
+    this.apiService.subscribeToSignal({
+      "type":"objectfilter",
+      "id": id,
+      "objectname": object,
+      "filter": filter
+    });
   }
 }

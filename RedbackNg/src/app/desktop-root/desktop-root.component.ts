@@ -145,9 +145,5 @@ export class DesktopRootComponent implements OnInit {
   @HostListener('mousemove', ['$event']) onMouseMove($event) {
     this.dragService.move($event);
   }
-/*
-  @HostListener('mouseout', ['$event']) onMouseOut($event) {
-    this.dragService.endDrag();
-  }
-*/
+
 }

@@ -143,16 +143,31 @@ export class RbGanttComponent implements OnInit {
 
   haveListsChanged(): Boolean {
     let str: string = "";
+    let cnt = 0;
+    let lu = 0;
     for(let ser in this.lists) {
       for(let obj of this.lists[ser]) {
-        str = str + JSON.stringify(obj.simplify());
+        //str = str + JSON.stringify(obj.simplify());
+        cnt = cnt + 1;
+        let u = obj.lastUpdated;
+        if(u > lu) {
+          lu = u;
+        }
       }
     }
+    /*
     let hash: string | Int32Array = Md5.hashStr(str);
     if(hash != this.lastHash) {
       this.lastHash = hash;
       return true;
     } else {
+      return false;
+    }*/
+    if(cnt != this.lastObjectCount || lu > this.lastObjectUpdate) {
+      this.lastObjectCount = cnt;
+      this.lastObjectUpdate = lu;
+      return true;
+    } else { 
       return false;
     }
   }

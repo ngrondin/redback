@@ -185,13 +185,25 @@ export class ApiService {
     return this.signalWebsocket != null;
   }
 
-  subscribeToSignal(signal: string) {
+  subscribeToSignal(req: any) {
     if(this.signalService != null) {
       if(this.signalWebsocket == null) {
         this.initSignalWebsocket();
       }
       if(this.signalWebsocket != null) {
-        this.signalWebsocket.next({subscribe:signal});
+        req["action"] = "subscribe";
+        this.signalWebsocket.next(req);
+      } 
+    } 
+  }
+
+  clearSubscriptions() {
+    if(this.signalService != null) {
+      if(this.signalWebsocket == null) {
+        this.initSignalWebsocket();
+      }
+      if(this.signalWebsocket != null) {
+        this.signalWebsocket.next({"action":"unsubscribe"});
       } 
     } 
   }

@@ -6,6 +6,7 @@ import { RedbackModule } from '../redback.module';
 import { ApiService } from 'app/api.service';
 import { Target } from 'app/desktop-root/desktop-root.component';
 import { ViewContainerComponent } from './rb-view-container.component';
+import { DataService } from 'app/data.service';
 
 
 @Component({
@@ -26,7 +27,8 @@ export class RbViewLoaderComponent implements OnInit {
   constructor(
     private http: Http,
     private compiler: Compiler,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private dataService: DataService
   ) { }
 
   ngOnInit() {
@@ -35,6 +37,7 @@ export class RbViewLoaderComponent implements OnInit {
   ngOnChanges(changes : SimpleChange) {
     if("target" in changes && this.target != null) {
       if(this.target.view != this.currentView) {
+        this.dataService.clearAllLocalObject();
         let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/' + this.target.type + '/' + this.target.version + '/' + this.target.view;
         this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
           res => this.compileTemplate(res.text())
@@ -63,13 +66,7 @@ export class RbViewLoaderComponent implements OnInit {
     let newViewComponentRef : ComponentRef<ViewContainerComponent> = this.container.createComponent(factory);
     newViewComponentRef.instance.currentTarget = this.target;
     newViewComponentRef.instance.navigate.subscribe(e => this.navigate.emit(e));
-    //newViewComponentRef.instance.titlechange.subscribe(e => this.titlechange.emit(e))
     this.componentRef = newViewComponentRef;
   }
 
-  /*
-  navigateTo($event) {
-    this.navigate.emit($event);
-  }
-  */
 }

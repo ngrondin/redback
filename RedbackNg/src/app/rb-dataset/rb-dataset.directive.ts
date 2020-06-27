@@ -2,6 +2,7 @@ import { Directive, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitte
 import { ObjectResp, RbObject } from '../datamodel';
 import { DataService } from '../data.service';
 import { MapService } from 'app/map.service';
+import { Observable, Subscription } from 'rxjs';
 
 @Directive({
   selector: 'rb-dataset',
@@ -25,7 +26,8 @@ export class RbDatasetDirective implements OnChanges {
   @Output('searchStringChange') searchStringChange: EventEmitter<any> = new EventEmitter();
   @Output('selectedObjectChange') selectedObjectChange: EventEmitter<any> = new EventEmitter();
 
-  
+  public id: String;
+  public dataSubscription: Subscription;
   public list: RbObject[] = [];
   public _selectedObject: RbObject;
   public searchString: string;
@@ -63,9 +65,15 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   ngOnInit() {
+    this.id = "" + Math.floor(Math.random() * 10000);
+    this.dataSubscription = this.dataService.getDataObservable().subscribe(object => this.receiveData(object));
     this.initiated = true;
     this.refreshData();
     this.initated.emit(this);
+  }
+
+  ngOnDestroy() {
+    this.dataSubscription.unsubscribe();
   }
 
   public refreshData() {
@@ -80,6 +88,7 @@ export class RbDatasetDirective implements OnChanges {
       this.dataService.listObjects(this.objectname, filter, this.searchString, this.page).subscribe(
         data => this.setData(data)
       );
+      this.dataService.subscribeToFilter(this.id, this.objectname, filter);
       this.isLoading = true;
     }
   }
@@ -103,6 +112,13 @@ export class RbDatasetDirective implements OnChanges {
     return filter;
   }
 
+  private receiveData(object: RbObject) {
+    if(object.objectname == this.objectname && this.list.includes(object) == false && (this.searchString == null || this.searchString == '') && this.list.length < 50) {
+      this.list.push(object);
+    }
+  }
+
+  
   private setData(data: RbObject[]) {
     this.list = this.list.concat(data);
     if(this.fetchAll && data.length == 50) {
@@ -122,6 +138,7 @@ export class RbDatasetDirective implements OnChanges {
       }
     }
   }
+  
 
   public get selectedObject(): RbObject {
     return this._selectedObject;

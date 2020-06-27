@@ -10,45 +10,39 @@ export class RbObject {
     objectname: string;
     uid: string;
     domain: string;
-    data: any;
-    related: any;
-    validation: any;
+    data: any = {};
+    related: any = {};
+    validation: any = {};
     changed: any;
     dataService: DataService;
     lastUpdated: number;
 
     constructor(json: any, ds: DataService) {
+        this.dataService = ds;
         this.uid = json.uid;
         this.objectname = json.objectname;
         this.domain = json.domain;
-        this.data = json.data;
-        this.related = json.related != null ? json.related : {};
-        this.validation = json.validation != null ? json.validation : {};
-        this.changed = [];
-        this.dataService = ds;
-        this.resolveRelatedObjects();
-        this.lastUpdated = (new Date()).getTime();
+        this.updateFromServer(json);
     }
 
     updateFromServer(json: any) {
         const inData: any = json.data;
-        for(const attribute in json.data) 
-            this.data[attribute] = json.data[attribute];
-        if(json.validation != null) 
-            for(const attribute in json.validation) 
+        for(const attribute in json.data) {
+            if(this.data[attribute] != json.data[attribute]) {
+                this.data[attribute] = json.data[attribute];
+                if(json.related != null && json.related[attribute] != null) {
+                    this.related[attribute] = this.dataService.getLocalObject(json.related[attribute].objectname, json.related[attribute].uid);
+                } else {
+                    this.related[attribute] = null;
+                }
+            }
+            if(json.validation != null && json.validation[attribute] != null) {
                 this.validation[attribute] = json.validation[attribute];
-        if(json.related != null)
-            for(const attribute in json.related) 
-                this.related[attribute] = json.related[attribute];
-        this.changed = [];
-        this.resolveRelatedObjects();
-        this.lastUpdated = (new Date()).getTime();
+            }
     }
 
-    resolveRelatedObjects() {
-        for(const attribute in this.related) {
-            this.related[attribute] = this.dataService.getLocalObject(this.related[attribute].objectname, this.related[attribute].uid);
-        }
+        this.changed = [];
+        this.lastUpdated = (new Date()).getTime();
     }
 
     get(attr: string) : any {
@@ -107,9 +101,7 @@ export class RbObject {
             }
         } else if(this.validation[attribute].editable == true) {
             this.data[attribute] = value;
-            if(this.related[attribute] != null) {
-                this.related[attribute] = related;
-            }
+            this.related[attribute] = related;
             this.changed.push(attribute);
             this.lastUpdated = (new Date()).getTime();
             return true;
