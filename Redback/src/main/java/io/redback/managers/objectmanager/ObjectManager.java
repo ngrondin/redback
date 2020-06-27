@@ -727,7 +727,10 @@ public class ObjectManager
 			try 
 			{
 				DataMap signal = new DataMap();
-				signal.put("type", "objectchange");
+				if(object.isNew())
+					signal.put("type", "objectcreate");
+				else
+					signal.put("type", "objectupdate");
 				signal.put("object", object.getJSON(true, true));
 				Payload payload = new Payload(signal.toString());
 				logger.finest("Publishing signal : " + signal);

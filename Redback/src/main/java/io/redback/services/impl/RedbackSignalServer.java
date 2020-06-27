@@ -2,7 +2,6 @@ package io.redback.services.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,92 +21,115 @@ public class RedbackSignalServer extends SignalServer {
 		public abstract boolean matches(DataMap signal);
 	};
 	
-	protected class ObjectSubscription extends Subscription {
-		public String object;
-		public String uid;
-		
-		public ObjectSubscription(String o, String u) {
-			object = o;
-			uid = u;
-		}
-		
-		public boolean matches(DataMap signal) {
-			if(signal.getString("type").equals("objectchange") && signal.getString("object.objectname").equals(object) && signal.getString("object.uid").equals(uid))
-				return true;
-			else
-				return false;
-		}
-	}
-	
+
 	protected class FilterSubscription extends Subscription {
 		public String id;
 		public DataMap filter;
-		public String object;
+		public Session session;
 		
-		public FilterSubscription(String i, String o, DataMap f) {
+		public FilterSubscription(String i, Session s, DataMap f) {
 			id = i;
-			object = o;
+			session = s;
 			filter = f;
 		}
 
-		public boolean matches(DataMap signal) {
-			if(signal.getString("type").equals("objectchange") && signal.getString("object.objectname").equals(object))
-				return FilterProcessor.apply(signal.getObject("object.data"), filter);
-			else
-				return false;
+		public boolean matches(DataMap data) {
+			return FilterProcessor.apply(data, filter);
 		}
 	}
 	
-	protected Map<Session, List<Subscription>> subscriptions;
+	protected Map<String, Map<String, List<Session>>> objectUpdate;
+	protected Map<String, Map<String, List<FilterSubscription>>> objectCreate;
+	protected Map<Session, List<String[]>> sessionToObjectUpdate;
+	protected Map<Session, List<String[]>> sessionToObjectCreate;
 	
 	public RedbackSignalServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
-		subscriptions = new HashMap<Session, List<Subscription>>();
+		objectUpdate = new HashMap<String, Map<String, List<Session>>>();
+		objectCreate = new HashMap<String, Map<String, List<FilterSubscription>>>();
+		sessionToObjectUpdate = new HashMap<Session, List<String[]>>();
+		sessionToObjectCreate = new HashMap<Session, List<String[]>>();
 	}
 
 	protected void onNewStream(Session session, StreamEndpoint streamEndpoint) throws RedbackException {
 	}
 
 	protected void onSignal(DataMap signal) throws RedbackException {
-		Iterator<Session> it = subscriptions.keySet().iterator();
-		while(it.hasNext()) {
-			Session session = it.next();
-			List<Subscription> list = subscriptions.get(session);
-			for(Subscription subscription : list) {
-				if(subscription.matches(signal)) {
-					sendStreamData(session, new Payload(signal.toString()));
-					break;
-				}
-			}
+		String type = signal.getString("type");
+		if(type.equals("objectupdate")) {
+			List<Session> list = objectUpdate.get(signal.getString("object.objectname")).get(signal.getString("object.uid"));
+			for(Session session : list) 
+				sendStreamData(session, new Payload(signal.toString()));
+		} else if(type.equals("objectcreate")) {
+			List<FilterSubscription> list = objectCreate.get(signal.getString("object.objectname")).get(signal.getString("object.domain"));
+			for(FilterSubscription subs : list) 
+				if(subs.matches(signal.getObject("object.data")))
+					sendStreamData(subs.session, new Payload(signal.toString()));
 		}
 	}
 
 	protected void onNewStream(Session session) throws RedbackException {
-		List<Subscription> list = new ArrayList<Subscription>();
-		subscriptions.put(session, list);
+
 	}
 
 	protected void onStreamData(Session session, Payload payload) throws RedbackException {
 		try {
-			DataMap req = new DataMap(payload.getString());
-			if(req.getString("action").equals("subscribe")) {
-				Subscription subscription = null;
-				if(req.getString("type").equals("objectchange")) {
-					subscription = new ObjectSubscription(req.getString("objectname"), req.getString("uid"));
-				} if(req.getString("type").equals("objectfilter")) {
-					List<Subscription> list = subscriptions.get(session);
-					for(Subscription subs: list) 
-						if(subs instanceof FilterSubscription && ((FilterSubscription)subs).id.equals(req.getString("id")))
-							subscription = subs;
-					if(subscription != null) {
-						((FilterSubscription)subscription).filter = req.getObject("filter");
-					} else {
-						subscription = new FilterSubscription(req.getString("id"), req.getString("objectname"), req.getObject("filter"));
-						subscriptions.get(session).add(subscription);
+			synchronized(this) {
+				DataMap req = new DataMap(payload.getString());
+				if(req.getString("action").equals("subscribe")) {
+					String type = req.getString("type");
+					String object = req.getString("objectname");
+					if(type.equals("objectupdate")) {
+						String uid = req.getString("uid");
+						Map<String, List<Session>> objMap = objectUpdate.get(object);
+						if(objMap == null) {
+							objMap = new HashMap<String, List<Session>>();
+							objectUpdate.put(object, objMap);
+						}
+						List<Session> list = objMap.get(uid);
+						if(list == null) {
+							list = new ArrayList<Session>();
+							objMap.put(uid, list);
+						}
+						list.add(session);
+						List<String[]> pointers = sessionToObjectUpdate.get(session);
+						if(pointers == null) {
+							pointers = new ArrayList<String[]>();
+							sessionToObjectUpdate.put(session, pointers);
+						}
+						pointers.add(new String[] {object, uid});
+					} else if(type.equals("objectcreate")) {
+						Map<String, List<FilterSubscription>> objMap = objectCreate.get(object);
+						if(objMap == null) {
+							objMap = new HashMap<String, List<FilterSubscription>>();
+							objectCreate.put(object, objMap);
+						}
+						for(String domain: session.getUserProfile().getDomains()) {
+							List<FilterSubscription> list = objMap.get(domain);
+							if(list == null) {
+								list = new ArrayList<FilterSubscription>();
+								objMap.put(domain, list);
+							}
+							FilterSubscription filterSubscription = null;
+							for(FilterSubscription fs: list) 
+								if(fs.id.equals(req.getString("id"))) 
+									filterSubscription = fs;
+							if(filterSubscription != null) {
+								filterSubscription.filter = req.getObject("filter");
+							} else {
+								list.add(new FilterSubscription(req.getString("id"), session, req.getObject("filter")));
+							}
+							List<String[]> pointers = sessionToObjectCreate.get(session);
+							if(pointers == null) {
+								pointers = new ArrayList<String[]>();
+								sessionToObjectCreate.put(session, pointers);
+							}
+							pointers.add(new String[] {object, domain});						
+						}
 					}
+				} else if(req.getString("action").equals("unsubscribe")) {
+					unsubscribe(session);
 				}
-			} else if(req.getString("action").equals("unsubscribe")) {
-				subscriptions.get(session).clear();
 			}
 		} catch(DataException e) {
 			//TODO: Handle this
@@ -116,9 +138,43 @@ public class RedbackSignalServer extends SignalServer {
 	}
 
 	protected void onStreamClose(Session session) throws RedbackException {
-		subscriptions.remove(session);		
+		unsubscribe(session);
 	}
 
+	protected synchronized void unsubscribe(Session session) {
+		List<String[]> pointers = sessionToObjectUpdate.get(session);
+		if(pointers != null) {
+			for(String[] pointer: pointers) {
+				objectUpdate.get(pointer[0]).get(pointer[1]).remove(session);
+				if(objectUpdate.get(pointer[0]).get(pointer[1]).size() == 0) {
+					objectUpdate.get(pointer[0]).remove(pointer[1]);
+					if(objectUpdate.get(pointer[0]).size() == 0)
+						objectUpdate.remove(pointer[0]);
+				}
+			}
+			sessionToObjectUpdate.remove(session);
+		}
+		
+		pointers = sessionToObjectCreate.get(session);
+		if(pointers != null) {
+			for(String[] pointer: pointers) {
+				List<FilterSubscription> list = objectCreate.get(pointer[0]).get(pointer[1]);
+				if(list != null) {
+					for(FilterSubscription fs : list) 
+						if(fs.session == session)
+							list.remove(fs);
+					if(objectCreate.get(pointer[0]).get(pointer[1]).size() == 0) {
+						objectCreate.get(pointer[0]).remove(pointer[1]);
+						if(objectCreate.get(pointer[0]).size() == 0)
+							objectCreate.remove(pointer[0]);
+					}
+				}
+			}
+			sessionToObjectCreate.remove(session);
+		}
+	}
+	
+	
 	public void clearCaches() {
 		
 	}
