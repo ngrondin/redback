@@ -12,7 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 export class DataService {
   allObjects: RbObject[];
   saveImmediatly: boolean;
-  dataObservers: Observer<RbObject>[] = [];
+  objectCreateObservers: Observer<RbObject>[] = [];
 
   constructor(
     private apiService: ApiService,
@@ -22,26 +22,28 @@ export class DataService {
     this.saveImmediatly = true;
     this.apiService.getSignalObservable().subscribe(
       json => {
-        if(json.type == 'objectchange') {
+        if(json.type == 'objectcreate') {
           let rbObject: RbObject = this.updateObjectFromServer(json.object);
-          this.dataObservers.forEach((observer) => {
+          this.objectCreateObservers.forEach((observer) => {
             observer.next(rbObject);
           });      
+        } else if(json.type == 'objectupdate') {
+          this.updateObjectFromServer(json.object);
         }
       }
     );
   }
 
-  getDataObservable() : Observable<any>  {
+  getObjectCreateObservable() : Observable<any>  {
     return new Observable<any>((observer) => {
-      this.dataObservers.push(observer);
+      this.objectCreateObservers.push(observer);
     });
   }
 
   clearAllLocalObject() {
     this.allObjects = [];
     this.apiService.clearSubscriptions();
-    this.dataObservers = []; 
+    this.objectCreateObservers = []; 
   }
 
   getLocalObject(objectname: string, uid: string) : RbObject {
@@ -122,7 +124,7 @@ export class DataService {
       rbObject = new RbObject(json, this);
       this.allObjects.push(rbObject);
       this.apiService.subscribeToSignal({
-        "type":"objectchange",
+        "type":"objectupdate",
         "objectname": rbObject.objectname,
         "uid": rbObject.uid
       });
@@ -230,9 +232,9 @@ export class DataService {
     return fileObservable; 
   }
 
-  subscribeToFilter(id: String, object: String, filter: any) {
+  subscribeObjectCreation(id: String, object: String, filter: any) {
     this.apiService.subscribeToSignal({
-      "type":"objectfilter",
+      "type":"objectcreate",
       "id": id,
       "objectname": object,
       "filter": filter

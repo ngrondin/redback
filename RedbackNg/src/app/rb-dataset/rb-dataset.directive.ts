@@ -66,7 +66,7 @@ export class RbDatasetDirective implements OnChanges {
 
   ngOnInit() {
     this.id = "" + Math.floor(Math.random() * 10000);
-    this.dataSubscription = this.dataService.getDataObservable().subscribe(object => this.receiveData(object));
+    this.dataSubscription = this.dataService.getObjectCreateObservable().subscribe(object => this.receiveNewlyCreatedData(object));
     this.initiated = true;
     this.refreshData();
     this.initated.emit(this);
@@ -88,7 +88,7 @@ export class RbDatasetDirective implements OnChanges {
       this.dataService.listObjects(this.objectname, filter, this.searchString, this.page).subscribe(
         data => this.setData(data)
       );
-      this.dataService.subscribeToFilter(this.id, this.objectname, filter);
+      this.dataService.subscribeObjectCreation(this.id, this.objectname, filter);
       this.isLoading = true;
     }
   }
@@ -112,13 +112,6 @@ export class RbDatasetDirective implements OnChanges {
     return filter;
   }
 
-  private receiveData(object: RbObject) {
-    if(object.objectname == this.objectname && this.list.includes(object) == false && (this.searchString == null || this.searchString == '') && this.list.length < 50) {
-      this.list.push(object);
-    }
-  }
-
-  
   private setData(data: RbObject[]) {
     this.list = this.list.concat(data);
     if(this.fetchAll && data.length == 50) {
@@ -139,6 +132,11 @@ export class RbDatasetDirective implements OnChanges {
     }
   }
   
+  private receiveNewlyCreatedData(object: RbObject) {
+    if(object.objectname == this.objectname && this.list.includes(object) == false && (this.searchString == null || this.searchString == '') && this.list.length < 50) {
+      this.list.push(object);
+    }
+  }
 
   public get selectedObject(): RbObject {
     return this._selectedObject;
