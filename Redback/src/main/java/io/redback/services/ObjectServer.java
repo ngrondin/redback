@@ -68,14 +68,15 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						String attribute = request.getString("attribute");
 						String uid = request.getString("uid");
 						String search = request.getString("search");
+						DataMap sort = request.getObject("sort");
 						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
 						if(filter != null || search != null || (uid != null && attribute != null))
 						{
 							List<RedbackObject> objects = null;
 							if(uid != null && attribute != null)
-								objects = listRelated(session, objectName, uid, attribute, filter, search, page, addRelated);
+								objects = listRelated(session, objectName, uid, attribute, filter, search, sort, page, addRelated);
 							else
-								objects = list(session, objectName, filter, search, page, addRelated);
+								objects = list(session, objectName, filter, search, sort, page, addRelated);
 
 							responseData = new DataMap();
 							DataList list = new DataList();
@@ -95,11 +96,12 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						String attribute = request.getString("attribute");
 						String uid = request.getString("uid");
 						String search = request.getString("search");
+						DataMap sort = request.getObject("sort");
 						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
 						if(uid != null && attribute != null)
 						{
 							List<RedbackObject> objects = null;
-							objects = listRelated(session, objectName, uid, attribute, filter, search, page, addRelated);
+							objects = listRelated(session, objectName, uid, attribute, filter, search, sort, page, addRelated);
 							responseData = new DataMap();
 							DataList list = new DataList();
 							if(objects != null)
@@ -154,9 +156,10 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						DataMap filter = request.getObject("filter");
 						DataList tuple = request.getList("tuple");
 						DataList metrics = request.getList("metrics");
+						DataMap sort = request.getObject("sort");
 						if(tuple != null && metrics != null)
 						{
-							List<RedbackAggregate> aggregates = aggregate(session, objectName, filter, tuple, metrics, addRelated);
+							List<RedbackAggregate> aggregates = aggregate(session, objectName, filter, tuple, metrics, sort, addRelated);
 							responseData = new DataMap();
 							DataList list = new DataList();
 							if(aggregates != null)
@@ -228,9 +231,9 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	
 	protected abstract RedbackObject get(Session session, String objectName, String uid) throws RedbackException;
 
-	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, int page, boolean addRelated) throws RedbackException;
+	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, int page, boolean addRelated) throws RedbackException;
 
-	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, int page, boolean addRelated) throws RedbackException;
+	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, int page, boolean addRelated) throws RedbackException;
 
 	protected abstract RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException;
 
@@ -240,6 +243,6 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 
 	protected abstract RedbackObject execute(Session session, String function) throws RedbackException;
 
-	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, boolean addRelated) throws RedbackException;
+	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException;
 
 }

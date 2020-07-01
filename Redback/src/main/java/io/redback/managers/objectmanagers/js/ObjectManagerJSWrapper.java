@@ -47,7 +47,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					try {
-						return JSConverter.toJS(objectManager.listObjects(session, arguments[0].asString(), (DataMap)JSConverter.toJava(arguments[1]), null, false));
+						return JSConverter.toJS(objectManager.listObjects(session, arguments[0].asString(), (DataMap)JSConverter.toJava(arguments[1]), null, (DataMap)JSConverter.toJava(arguments[2]), false, 0));
 					} catch (Exception e) {
 						logger.severe("Errror in getObjectList : " + e.getMessage());
 						throw new RuntimeException("Errror in getObjectList", e);

@@ -89,7 +89,7 @@ public class RedbackAccessManager extends AccessManager
 				if(userConfig == null && dataClient != null)
 				{
 					String userCollection = config.containsKey("usertable") ? config.getString("usertable") : "rbam_user";
-					DataMap userResult = dataClient.getData(userCollection, new DataMap("username" , username));
+					DataMap userResult = dataClient.getData(userCollection, new DataMap("username" , username), null);
 					if(userResult != null && userResult.getList("result") != null && userResult.getList("result").size() > 0)
 						userConfig = userResult.getList("result").getObject(0);
 				}

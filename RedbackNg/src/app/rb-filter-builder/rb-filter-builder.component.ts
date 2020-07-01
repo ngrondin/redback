@@ -3,12 +3,15 @@ import { CONTAINER_DATA } from 'app/tokens';
 import { DateTimePopupConfig } from 'app/rb-popup-datetime/rb-popup-datetime.component';
 import { OverlayRef, validateHorizontalPosition } from '@angular/cdk/overlay';
 import { MatSelect } from '@angular/material/select';
+import { DataService } from 'app/data.service';
+import { RbAggregate } from 'app/datamodel';
 
 export class FilterBuilderConfig {
   filterConfig: any;
   initialFilter: any;
   sortConfig: any;
   initialSort: any;
+  objectname: string;
 }
 
 
@@ -39,52 +42,61 @@ export class FilterAttributeConfig {
   public attribute: string;
   public label: string;
   public type: string;
+  public displayAttribute: string;
+  public options: any[] = [];
 
   constructor(json: any) {
     this.attribute = json.attribute;
     this.label = json.label;
     this.type = json.type;
+    this.displayAttribute = json.displayattribute;
   }
 }
 
 
 export class FilterItemConstruct {
   public config: FilterAttributeConfig;
-  public val1: string;
+  public val1: any;
   public val2: string;
   public val3: string;
 
   constructor(c: FilterAttributeConfig, v: any) {
     this.config = c;
-    if(v != null) {
-      if(this.config.type == 'string') {
+    if(this.config.type == 'string') {
+      if(v != null) {
         if(v != null && v.startsWith("'*") && v.endsWith("*'")) {
           this.val1 = v.substring(2, v.length - 2);; 
         } else {
           this.val1 = v;
         }
-      } else if(this.config.type == 'date') {
-        if(typeof v == 'object') {
-          if(v.hasOwnProperty('$gt') && v.hasOwnProperty('$lt')) {
-            this.val1 = 'between';
-            let s2 = v['$gt'];
-            let s3 = v['$gt'];
-            this.val2 = s2.substring(1, s2.length - 1);
-            this.val3 = s3.substring(1, s3.length - 1);
-          } else if(v.hasOwnProperty('$gt')) {
-            let s = v['$gt'];
-            if(s == "(new Date((new Date()).getTime() - 900000)).toISOString()") {
-              this.val1 = 'last15';
-            } else if(s == "(new Date((new Date()).getTime() - 3600000)).toISOString()") {
-              this.val1 = 'lasthour';
-            } else if(s == "(new Date((new Date()).getTime() - 86400000)).toISOString()") {
-              this.val1 = 'lastday';
-            } else {
-              this.val1 = 'since';
-              this.val2 = s.substring(1, s.length - 1);
-            }
+      }
+    } else if(this.config.type == 'date') {
+      if(v != null && typeof v == 'object') {
+        if(v.hasOwnProperty('$gt') && v.hasOwnProperty('$lt')) {
+          this.val1 = 'between';
+          let s2 = v['$gt'];
+          let s3 = v['$gt'];
+          this.val2 = s2.substring(1, s2.length - 1);
+          this.val3 = s3.substring(1, s3.length - 1);
+        } else if(v.hasOwnProperty('$gt')) {
+          let s = v['$gt'];
+          if(s == "(new Date((new Date()).getTime() - 900000)).toISOString()") {
+            this.val1 = 'last15';
+          } else if(s == "(new Date((new Date()).getTime() - 3600000)).toISOString()") {
+            this.val1 = 'lasthour';
+          } else if(s == "(new Date((new Date()).getTime() - 86400000)).toISOString()") {
+            this.val1 = 'lastday';
+          } else {
+            this.val1 = 'since';
+            this.val2 = s.substring(1, s.length - 1);
           }
         }
+      }
+    } else if(this.config.type == 'multiselect') {
+      if(v != null && typeof v == 'object' && v.hasOwnProperty("$in")) {
+        this.val1 = v["$in"];
+      } else {
+        this.val1 = [];
       }
     }
   }
@@ -104,6 +116,8 @@ export class FilterItemConstruct {
       } else if(this.val1 == 'between') {
         return {"$gt":"'" + this.val2 + "'", "$lt":"'" + this.val3 + "'"};
       }
+    } else if(this.config.type == 'multiselect') {
+      return {"$in": this.val1};
     }
   }
 }
@@ -137,12 +151,10 @@ export class SortConfig {
 export class SortAttributeConfig {
   public attribute: string;
   public label: string;
-  public type: string;
 
   constructor(json: any) {
     this.attribute = json.attribute;
     this.label = json.label;
-    this.type = json.type;
   }
 }
 
@@ -152,16 +164,16 @@ export class SortItemConstruct {
   public direction: number;
   public order: number;
 
-  constructor(c: SortAttributeConfig, v: any) {
+  constructor(c: SortAttributeConfig, o: number, v: any) {
     this.config = c;
+    this.order = o;
     if(v != null) {
       this.direction = v.dir;
-      this.order = v.order;
     } 
   }
 
   public getSortValue() : any {
-    return {dir: this.direction, order: this.order};
+    return {attribute: this.config.attribute, dir: this.direction};
   }
 }
 
@@ -193,11 +205,13 @@ export class RbFilterBuilderComponent implements OnInit {
   constructor(
     @Inject(CONTAINER_DATA) public config: FilterBuilderConfig, 
     public overlayRef: OverlayRef,
+    public dataService: DataService
   ) { 
     this.filter = this.config.initialFilter;
     if(this.config.filterConfig != null) {
       this.filterConfig = new FilterConfig(this.config.filterConfig);
     }
+    this.sort = this.config.initialSort;
     if(this.config.sortConfig != null) {
       this.sortConfig = new SortConfig(this.config.sortConfig);
     }
@@ -210,8 +224,10 @@ export class RbFilterBuilderComponent implements OnInit {
       this.filter = {};
     } else {
       for(let key in this.filter) {
-        let fic = new FilterItemConstruct(this.filterConfig.getAttributeConfig(key), this.filter[key]);
+        let fac: FilterAttributeConfig = this.filterConfig.getAttributeConfig(key);
+        let fic = new FilterItemConstruct(fac, this.filter[key]);
         this.filterConstructs.push(fic);
+        this.getAggregatesFor(fac);
       }
     }
 
@@ -219,7 +235,9 @@ export class RbFilterBuilderComponent implements OnInit {
       this.sort = {};
     } else {
       for(let key in this.sort) {
-        let sic = new SortItemConstruct(this.sortConfig.getAttributeConfig(key), this.sort[key]);
+        let order: number = parseInt(key);
+        let sortItem: any = this.sort[key];
+        let sic = new SortItemConstruct(this.sortConfig.getAttributeConfig(sortItem.attribute), order, sortItem);
         this.sortConstructs.push(sic);
       }
     }
@@ -232,12 +250,13 @@ export class RbFilterBuilderComponent implements OnInit {
     let fic = new FilterItemConstruct(fac, null);
     this.filterConstructs.push(fic);
     src.value = null;
+    this.getAggregatesFor(fac);
   }
 
   addAttributeToSort(event: any) {
     let sac: SortAttributeConfig = event.value;
     let src: MatSelect = event.source;
-    let sic = new SortItemConstruct(sac, {order:this.sortConstructs.length, dir:1});
+    let sic = new SortItemConstruct(sac, this.sortConstructs.length, {dir:1});
     this.sortConstructs.push(sic);
     src.value = null;
   }
@@ -254,6 +273,24 @@ export class RbFilterBuilderComponent implements OnInit {
     sic.direction = (-1 * sic.direction );
   }
 
+  getAggregatesFor(fac: FilterAttributeConfig) {
+    if(fac.type == 'multiselect') {
+      let fltr = {};
+      for (const key in this.filter) {
+        if(key != fac.attribute) {
+          fltr[key] = this.filter[key];
+        }
+      }
+      this.dataService.aggregateObjects(this.config.objectname, fltr, [fac.attribute], [{function:"count", name:"count"}]).subscribe(list => {
+        fac.options = list.map(agg => {return {
+          name: agg.getDimension(fac.attribute + "." + fac.displayAttribute), 
+          value: agg.getDimension(fac.attribute),
+          count:agg.getMetric("count")
+        }});
+      });
+    }    
+  }
+
   clickOk() {
     this.filter = {};
     for(let fic of this.filterConstructs) {
@@ -261,7 +298,7 @@ export class RbFilterBuilderComponent implements OnInit {
     }
     this.sort = {};
     for(let sic of this.sortConstructs) {
-      this.sort[sic.config.attribute] = sic.getSortValue();
+      this.sort[sic.order] = sic.getSortValue();
     }
     this.done.emit({filter: this.filter, sort: this.sort});
   }
@@ -269,4 +306,6 @@ export class RbFilterBuilderComponent implements OnInit {
   dateOptionComparison(option: any, value: any) : boolean  {
     return JSON.stringify(option) == JSON.stringify(value);
   }
+
+
 }

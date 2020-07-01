@@ -40,7 +40,7 @@ public class RedbackObjectServer extends ObjectServer
 	}
 
 	
-	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, int page, boolean addRelated) throws RedbackException 
+	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, int page, boolean addRelated) throws RedbackException 
 	{
 		List<RedbackObject> objects = null;
 		try {
@@ -48,7 +48,7 @@ public class RedbackObjectServer extends ObjectServer
 				filter = new DataMap();
 			
 			objectManager.initiateCurrentTransaction();
-			objects = objectManager.listObjects(session, objectName, filter, search, addRelated, page);
+			objects = objectManager.listObjects(session, objectName, filter, search, sort, addRelated, page);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			error("Error listing objects", e);
@@ -56,7 +56,7 @@ public class RedbackObjectServer extends ObjectServer
 		return objects;	
 	}
 
-	protected List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, int page, boolean addRelated) throws RedbackException 
+	protected List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, int page, boolean addRelated) throws RedbackException 
 	{
 		List<RedbackObject> objects = null;
 		try {
@@ -132,11 +132,11 @@ public class RedbackObjectServer extends ObjectServer
 		objectManager.refreshAllConfigs();
 	}
 
-	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, boolean addRelated) throws RedbackException {
+	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException {
 		List<RedbackAggregate> aggregates = null;
 		try {
 			objectManager.initiateCurrentTransaction();
-			aggregates = objectManager.aggregateObjects(session, objectName, filter, tuple, metrics, addRelated);
+			aggregates = objectManager.aggregateObjects(session, objectName, filter, tuple, metrics, sort, addRelated);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			error("Error listing objects", e);

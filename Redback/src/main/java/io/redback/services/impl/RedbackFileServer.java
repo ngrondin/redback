@@ -43,7 +43,7 @@ public class RedbackFileServer extends FileServer
 	public RedbackFile getFile(String fileUid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException
 	{
 		RedbackFile file = null;
-		DataMap resp = dataClient.getData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid));
+		DataMap resp = dataClient.getData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid), null);
 		if(resp.getList("result").size() > 0)
 		{
 			DataMap fileInfo = collectionConfig.convertObjectToCanonical(resp.getList("result").getObject(0));
@@ -69,7 +69,7 @@ public class RedbackFileServer extends FileServer
 		DataMap filter = new DataMap();
 		filter.put(collectionConfig.getField("relatedobject"), object);
 		filter.put(collectionConfig.getField("relateduid"), uid);
-		DataMap resp = dataClient.getData(collectionConfig.getName(), filter);
+		DataMap resp = dataClient.getData(collectionConfig.getName(), filter, null);
 		List<RedbackFile> list = new ArrayList<RedbackFile>();
 		for(int i = 0; i < resp.getList("result").size(); i++) 
 		{

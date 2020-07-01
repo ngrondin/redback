@@ -79,7 +79,7 @@ public class RedbackObject extends RedbackElement
 			{
 				if(u != null) 
 				{
-					List<RedbackObject> others = om.listObjects(s, config.getName(), new DataMap("uid", u), null, false);
+					List<RedbackObject> others = om.listObjects(s, config.getName(), new DataMap("uid", u), null, null, false, 0);
 					if(others.size() == 0)
 					{
 						uid = new Value(u);
@@ -254,7 +254,7 @@ public class RedbackObject extends RedbackElement
 						}
 						else
 						{
-							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, false);
+							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0);
 							if(resultList.size() > 0)
 								related.put(name, resultList.get(0));
 						}
@@ -284,7 +284,7 @@ public class RedbackObject extends RedbackElement
 			DataMap relatedObjectListFilter = getRelatedListFilter(attributeName);
 			if(additionalFilter != null)
 				relatedObjectListFilter.merge(additionalFilter);
-			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, false, page);
+			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, null, false, page);
 		}
 		return relatedObjectList;		
 	}

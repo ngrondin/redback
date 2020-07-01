@@ -161,7 +161,7 @@ public class CronTaskManager extends Thread {
 	
 	protected void refreshTaskStates() throws RedbackException {
 		try {
-			DataMap resp = dataClient.getData(collectionConfig.getName(), new DataMap("nextrun", new DataMap("$ne", null)));
+			DataMap resp = dataClient.getData(collectionConfig.getName(), new DataMap("nextrun", new DataMap("$ne", null)), null);
 			DataList list = resp.getList("result");
 			for(int i = 0; i < list.size(); i++) {
 				DataMap taskState = collectionConfig.convertObjectToCanonical(list.getObject(i));
@@ -185,7 +185,7 @@ public class CronTaskManager extends Thread {
 	protected boolean lockTask(CronTaskConfig ctc) throws RedbackException {
 		try {
 			DataMap key = new DataMap("name", ctc.getName());
-			DataMap resp = dataClient.getData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key));
+			DataMap resp = dataClient.getData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), null);
 			DataList list = resp.getList("result");
 			if(list.size() == 0) {
 				DataMap data = new DataMap();

@@ -228,7 +228,7 @@ public class ObjectManager
 					{
 						DataMap relatedObjectFilter = new DataMap();
 						relatedObjectFilter.put("$or", orList);
-						ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null, false);
+						ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null, null, false, 0);
 						
 						String relatedObjectLinkAttributeName = relatedObjectConfig.getLinkAttributeName();
 						for(int j = 0; j < elements.size(); j++)
@@ -273,7 +273,7 @@ public class ObjectManager
 				DataMap dbFilter = new DataMap("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
 				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter);
+				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, null);
 				DataList dbResultList = dbResult.getList("result");
 				if(dbResultList.size() > 0)
 				{
@@ -292,12 +292,15 @@ public class ObjectManager
 		return object;
 	}
 	
+	/*
 	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filterData, String searchText, boolean addRelated) throws RedbackException
 	{
 		return listObjects(session, objectName, filterData, searchText, addRelated, 0);
 	}
+	*/
 	
-	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filterData, String searchText, boolean addRelated, int page) throws RedbackException
+	@SuppressWarnings("unchecked")
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page) throws RedbackException
 	{
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
@@ -306,14 +309,15 @@ public class ObjectManager
 			try
 			{
 				DataMap objectFilter = new DataMap();
-				if(filterData != null)
-					objectFilter.merge(filterData);
+				if(filter != null)
+					objectFilter.merge(filter);
 				if(searchText != null)
 					objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
 				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, page);
+				DataMap dbSort = generateDBSort(session, objectConfig, sort); 
+				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page);
 				DataList dbResultList = dbResult.getList("result");
 				
 				for(int i = 0; i < dbResultList.size(); i++)
@@ -428,7 +432,8 @@ public class ObjectManager
 		}
 	}	
 	
-	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, boolean addRelated) throws RedbackException
+	@SuppressWarnings("unchecked")
+	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException
 	{
 		List<RedbackAggregate> list = new ArrayList<RedbackAggregate>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
@@ -471,8 +476,8 @@ public class ObjectManager
 						dbMetrics.add(metric);
 					}
 				}
-				
-				DataMap dbResult = dataClient.aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics);
+				DataMap dbSort = generateDBSort(session, objectConfig, sort);
+				DataMap dbResult = dataClient.aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics, dbSort);
 				DataList dbResultList = dbResult.getList("result");
 				
 				for(int i = 0; i < dbResultList.size(); i++)
@@ -600,7 +605,7 @@ public class ObjectManager
 					DataList dbList = new DataList();
 					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
 					ObjectConfig nextObjectConfig = getObjectConfig(roc.getObjectName());
-					ArrayList<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, false);
+					ArrayList<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, null, false, 0);
 					if(list.size() > 0) {
 						for(int k = 0; k < list.size(); k++)
 						{
@@ -649,6 +654,24 @@ public class ObjectManager
 		return dbFilter;
 	}
 	
+	public DataMap generateDBSort(Session session, ObjectConfig objectConfig, DataMap objectSort) throws DataException, FunctionErrorException, RedbackException
+	{
+		DataMap dbSort = null;
+		if(objectSort != null) {
+			dbSort = new DataMap();
+			for(int i = 0; objectSort.containsKey("" + i); i++) {
+				DataMap sortItem = new DataMap();
+				String attribute = objectSort.getObject("" + i).getString("attribute");
+				if(objectConfig.getAttributeConfig(attribute).getDBKey() != null) {
+					sortItem.put("attribute", objectConfig.getAttributeConfig(attribute).getDBKey());
+					sortItem.put("dir", objectSort.getObject("" + i).getString("dir"));
+					dbSort.put("" + i, sortItem);
+				}
+			}
+		}
+		return dbSort;
+	}
+	
 	protected DataMap generateSearchFilter(Session session, String objectName, String searchText) throws RedbackException
 	{
 		DataMap filter = new DataMap();
@@ -689,7 +712,7 @@ public class ObjectManager
 						if(relatedOrList.size() > 0)
 						{
 							DataMap relatedFilter = new DataMap("$or", relatedOrList);
-							ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null, false);
+							ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null, null, false, 0);
 							if(result.size() > 0)
 							{
 								DataMap orTerm = new DataMap();

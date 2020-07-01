@@ -43,11 +43,12 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  listObjects(name: string, filter: any, search: string, page: number): Observable<any> {
+  listObjects(name: string, filter: any, search: string, sort: any, page: number): Observable<any> {
     const req = {
       action: 'list',
       object: name,
       filter: filter,
+      sort: sort,
       page: page,
       options: {
         addrelated: true,

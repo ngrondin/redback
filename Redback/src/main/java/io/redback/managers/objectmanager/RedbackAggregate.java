@@ -160,7 +160,7 @@ public class RedbackAggregate extends RedbackElement
 						}
 						else
 						{
-							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, false);
+							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0);
 							if(resultList.size() > 0)
 								related.put(name, resultList.get(0));
 						}

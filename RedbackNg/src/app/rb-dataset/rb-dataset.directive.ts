@@ -17,13 +17,15 @@ export class RbDatasetDirective implements OnChanges {
   @Input('baseFilter') baseFilter: any;
   @Input('fetchAll') fetchAll: boolean = false;
 
-  @Input('userFilter') inputUserFilter: any;
   @Input('searchString') inputSearchString: any;
+  @Input('userFilter') inputUserFilter: any;
+  @Input('userSort') inputUserSort: any;
   @Input('selectedObject') inputSelectedObject: any;
 
   @Output('initiated') initated: EventEmitter<any> = new EventEmitter();
-  @Output('userFilterChange') userFilterChange: EventEmitter<any> = new EventEmitter();
   @Output('searchStringChange') searchStringChange: EventEmitter<any> = new EventEmitter();
+  @Output('userFilterChange') userFilterChange: EventEmitter<any> = new EventEmitter();
+  @Output('userSortChange') userSortChange: EventEmitter<any> = new EventEmitter();
   @Output('selectedObjectChange') selectedObjectChange: EventEmitter<any> = new EventEmitter();
 
   public id: String;
@@ -32,6 +34,7 @@ export class RbDatasetDirective implements OnChanges {
   public _selectedObject: RbObject;
   public searchString: string;
   public userFilter: any;
+  public userSort: any;
   public isLoading: boolean;
   public initiated: boolean = false;
   public firstLoad: boolean = true;
@@ -47,12 +50,16 @@ export class RbDatasetDirective implements OnChanges {
     if("relatedObject" in changes || "active" in changes) {
       doRefresh = true;
     }
+    if("inputSearchString" in changes && this.searchString != this.inputSearchString) {
+      this.searchString = this.inputSearchString;
+      doRefresh = true;
+    }
     if("inputUserFilter" in changes && this.userFilter != this.inputUserFilter) {
       this.userFilter = this.inputUserFilter;
       doRefresh = true;
     }
-    if("inputSearchString" in changes && this.searchString != this.inputSearchString) {
-      this.searchString = this.inputSearchString;
+    if("inputUserSort" in changes && this.userSort != this.inputUserSort) {
+      this.userSort = this.inputUserSort;
       doRefresh = true;
     }
     if("inputSelectedObject" in changes && this.selectedObject != this.inputSelectedObject) {
@@ -85,7 +92,7 @@ export class RbDatasetDirective implements OnChanges {
   public fetchPage(page: number) {
     if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
       const filter = this.mergeFilters();
-      this.dataService.listObjects(this.objectname, filter, this.searchString, this.page).subscribe(
+      this.dataService.listObjects(this.objectname, filter, this.searchString, this.userSort, this.page).subscribe(
         data => this.setData(data)
       );
       this.dataService.subscribeObjectCreation(this.id, this.objectname, filter);
@@ -98,17 +105,13 @@ export class RbDatasetDirective implements OnChanges {
     if(this.baseFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.baseFilter);
     }
-
     if(this.relatedFilter != null && this.relatedObject != null) {
       filter = this.mapService.mergeMaps(filter, this.relatedFilter);
     } 
-
     if(this.userFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.userFilter);
     }
-    
     filter = this.mapService.resolveMap(filter, this.relatedObject, this.selectedObject, this.relatedObject);
-
     return filter;
   }
 
@@ -133,7 +136,7 @@ export class RbDatasetDirective implements OnChanges {
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
-    if(object.objectname == this.objectname && this.list.includes(object) == false && (this.searchString == null || this.searchString == '') && this.list.length < 50) {
+    if(object.objectname == this.objectname && this.isLoading == false && this.list.includes(object) == false && (this.searchString == null || this.searchString == '') && this.list.length < 50) {
       this.list.push(object);
     }
   }
@@ -157,10 +160,12 @@ export class RbDatasetDirective implements OnChanges {
     this.searchStringChange.emit(str);
   }
 
-  public filter(flt: any) {
-    this.userFilter = flt;
+  public filterSort(event: any) {
+    this.userFilter = event.filter;
+    this.userSort = event.sort;
     this.refreshData();
-    this.userFilterChange.emit(flt);
+    this.userFilterChange.emit(event.filter);
+    this.userSortChange.emit(event.sort);
   } 
 
   public action(name: string, param: string) {

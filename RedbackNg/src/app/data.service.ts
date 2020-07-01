@@ -74,8 +74,8 @@ export class DataService {
     return dataObservable; 
   }
 
-  listObjects(name: string, filter: any, search: string, page: number) : Observable<any> {
-    const apiObservable = this.apiService.listObjects(name, filter, search, page);
+  listObjects(name: string, filter: any, search: string, sort: any, page: number) : Observable<any> {
+    const apiObservable = this.apiService.listObjects(name, filter, search, sort, page);
     const dataObservable = new Observable((observer) => {
       apiObservable.subscribe(
         resp => {
@@ -196,9 +196,9 @@ export class DataService {
     );
   }
 
-  aggregateObjects(name: string, filter: any, tuple: any, metrics: any) : Observable<any> {
+  aggregateObjects(name: string, filter: any, tuple: any, metrics: any) : Observable<RbAggregate[]> {
     const apiObservable = this.apiService.aggregateObjects(name, filter, tuple, metrics);
-    const dataObservable = new Observable((observer) => {
+    const dataObservable = new Observable<RbAggregate[]>((observer) => {
       apiObservable.subscribe(
         resp => {
           const rbAggregateArray = Object.values(resp.list).map(json => new RbAggregate(json, this));

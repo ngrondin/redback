@@ -45,7 +45,7 @@ public class RedbackIDGenerator extends IDGenerator
 						int reserved = idConfig.containsKey("reserved") ? idConfig.getNumber("reserved").intValue() : 0;
 						if(next >= reserved)
 						{
-							DataMap seq = dataClient.getData("rbid_sequence", new DataMap("_id", name));
+							DataMap seq = dataClient.getData("rbid_sequence", new DataMap("_id", name), null);
 							if(seq.getList("result").size() > 0)
 							{
 								next = seq.getNumber("result.0.next").intValue();

@@ -79,6 +79,9 @@ rb-datasetgroup {
 
 .rb-button {
 	margin: 8px !important;
+}
+
+.mat-stroked-button {
 	border: solid 1px #3f51b5!important;
 }
 

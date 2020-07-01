@@ -25,5 +25,17 @@
 .rb-filter-builder-line {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: start;
+}
+
+.rb-filter-builder-label {
+    padding-top: 15px;
+}
+
+.rb-filter-builder-multiselect-table {
+    padding: 10px;
+}
+
+.rb-filter-builder-multiselect-tablecell {
+    padding: 0px 10px 0px 10px;
 }

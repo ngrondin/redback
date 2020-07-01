@@ -54,7 +54,8 @@
                         <div
                             *ngFor="let filterConstruct of filterConstructs"
                             class="rb-filter-builder-line">
-                            <span>
+                            <span
+                                class="rb-filter-builder-label">
                                 {{filterConstruct.config.label}} : &nbsp;&nbsp;
                             </span>
                 
@@ -94,7 +95,32 @@
                                 *ngIf="filterConstruct.config.type == 'date' &&  filterConstruct.val1 == 'between'"
                                 [editable]="true"
                                 [(value)]=filterConstruct.val3>
-                            </rb-datetime-input>    
+                            </rb-datetime-input>  
+                            <table
+                                *ngIf="filterConstruct.config.type == 'multiselect'"
+                                class="rb-filter-builder-multiselect-table">
+                                <tr
+                                    *ngFor="let option of filterConstruct.config.options">
+                                    <td
+                                        class="rb-filter-builder-multiselect-tablecell">
+                                        {{option.name}}
+                                    </td>
+                                    <td
+                                        class="rb-filter-builder-multiselect-tablecell"
+                                        style="font-size: smaller;">
+                                        {{option.count}}
+                                    </td>
+                                    <td
+                                        class="rb-filter-builder-multiselect-tablecell">    
+                                        <mat-checkbox
+                                            matInput 
+                                            [checked]="filterConstruct.val1.includes(option.value)"
+                                            (change)="$event.checked ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexof(option.value)) "
+                                            color="primary">
+                                        </mat-checkbox>
+                                    </td>
+                                </tr>
+                            </table>
                             <div
                                 style="flex: 1 1 auto;">
                             </div>      
@@ -145,7 +171,8 @@
                         <div
                             *ngFor="let sortConstruct of sortConstructs"
                             class="rb-filter-builder-line">
-                            <span>
+                            <span
+                                class="rb-filter-builder-label">
                                 {{sortConstruct.config.label}} &nbsp;&nbsp;
                             </span>
                             <button

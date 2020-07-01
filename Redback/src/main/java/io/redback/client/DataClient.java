@@ -16,18 +16,20 @@ public class DataClient extends Client
 		super(fb, sn);
 	}
 
-	public DataMap getData(String object, DataMap filter, int page) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	public DataMap getData(String object, DataMap filter, DataMap sort, int page) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		DataMap req = new DataMap();
 		req.put("object", object);
 		req.put("filter", filter);
+		if(sort != null)
+			req.put("sort", sort);
 		req.put("page", page);
 		return request(req);
 	}
 
-	public DataMap getData(String object, DataMap filter) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	public DataMap getData(String object, DataMap filter, DataMap sort) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
-		return getData(object, filter, 0);
+		return getData(object, filter, sort, 0);
 	}	
 
 	public DataMap putData(String object, DataMap key, DataMap data) throws RedbackException
@@ -39,13 +41,15 @@ public class DataClient extends Client
 		return request(req);
 	}
 
-	public DataMap aggregateData(String object, DataMap filter, DataList tuple, DataList metrics) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	public DataMap aggregateData(String object, DataMap filter, DataList tuple, DataList metrics, DataMap sort) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		DataMap req = new DataMap();
 		req.put("object", object);
 		req.put("filter", filter);
 		req.put("tuple", tuple);
 		req.put("metrics", metrics);
+		if(sort != null)
+			req.put("sort", sort);
 		return request(req);
 	}
 

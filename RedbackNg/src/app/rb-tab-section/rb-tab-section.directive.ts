@@ -15,10 +15,12 @@ export class RbTabSectionDirective {
   constructor() { }
 
   public register(tab : RbTabDirective) {
-    this.tabs.push(tab);
-    if(this.initiallyActiveTabId != null && this.initiallyActiveTabId == tab.id) {
-      this.visibleTab = tab;
-    }
+    setTimeout(() => {
+      this.tabs.push(tab);
+      if(this.initiallyActiveTabId != null && this.initiallyActiveTabId == tab.id) {
+        this.visibleTab = tab;
+      }
+    }, 1);
   }
 
   public select(tab: RbTabDirective) {
