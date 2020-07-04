@@ -33,7 +33,8 @@ public class Expression
 			{
 				synchronized(jsEngine) 
 				{
-					script = ((Compilable)jsEngine).compile("var returnValue = (" + expressionString  + ");");
+					//script = ((Compilable)jsEngine).compile("var returnValue = (" + expressionString  + ");");
+					script = ((Compilable)jsEngine).compile(expressionString);
 				}
 			} 
 			catch (ScriptException e)
@@ -58,7 +59,9 @@ public class Expression
 		{
 			try
 			{
-				script.eval(context);
+				Object obj = script.eval(context);
+				obj = JSConverter.toJava(Value.asValue(obj));
+				return obj;
 			} 
 			catch (ScriptException e)
 			{
@@ -72,8 +75,8 @@ public class Expression
 			{
 				throw new RedbackException("Runtime error executing a expression  '" + expressionString + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
 			}
-			Object obj = JSConverter.toJava(Value.asValue(context.get("returnValue")));
-			return obj;
+			//Object obj = JSConverter.toJava(Value.asValue(context.get("returnValue")));
+			//return obj;
 		}
 	}
 }

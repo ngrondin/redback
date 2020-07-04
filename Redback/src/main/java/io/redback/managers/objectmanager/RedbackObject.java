@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import javax.script.Bindings;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
+import javax.script.SimpleBindings;
 
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
@@ -22,6 +23,7 @@ import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.Expression;
+import io.redback.utils.Timer;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.LoggerJSFunction;
@@ -42,7 +44,7 @@ public class RedbackObject extends RedbackElement
 	// Initiate existing object from pre-loaded data
 	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, DataMap dbData) throws RedbackException, ScriptException
 	{
-		init(s, om, cfg);		
+		init(s, om, cfg);	
 		isNewObject = false;
 		if(canRead)
 		{
@@ -79,7 +81,7 @@ public class RedbackObject extends RedbackElement
 			{
 				if(u != null) 
 				{
-					List<RedbackObject> others = om.listObjects(s, config.getName(), new DataMap("uid", u), null, null, false, 0);
+					List<RedbackObject> others = om.listObjects(s, config.getName(), new DataMap("uid", u), null, null, false, 0, 1);
 					if(others.size() == 0)
 					{
 						uid = new Value(u);
@@ -162,6 +164,7 @@ public class RedbackObject extends RedbackElement
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
+		//scriptContext = new SimpleBindings(); //objectManager.getScriptEngine().createBindings();
 		scriptContext = objectManager.getScriptEngine().createBindings();
 		scriptContext.put("self", new RedbackObjectJSWrapper(this));
 		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
@@ -223,9 +226,13 @@ public class RedbackObject extends RedbackElement
 			Expression expression = attributeConfig.getExpression();
 			if(data.containsKey(name))
 				return data.get(name);
-			else if(expression != null)
-				return new Value(expression.eval(scriptContext));
-			else 
+			else if(expression != null) {
+				//Timer t = new Timer("expr");
+				Object o = expression.eval(scriptContext);
+				//t.mark();
+				Value val = new Value(o);
+				return val;
+			} else 
 				return new Value(null);
 		}		
 		return null;
@@ -254,7 +261,7 @@ public class RedbackObject extends RedbackElement
 						}
 						else
 						{
-							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0);
+							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0, 1);
 							if(resultList.size() > 0)
 								related.put(name, resultList.get(0));
 						}
@@ -272,10 +279,10 @@ public class RedbackObject extends RedbackElement
 	
 	public ArrayList<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText) throws RedbackException
 	{
-		return getRelatedList(attributeName, additionalFilter, searchText, 0);
+		return getRelatedList(attributeName, additionalFilter, searchText, 0, 50);
 	}
 	
-	public ArrayList<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, int page) throws RedbackException
+	public ArrayList<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, int page, int pageSize) throws RedbackException
 	{
 		ArrayList<RedbackObject> relatedObjectList = null;
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
@@ -284,7 +291,7 @@ public class RedbackObject extends RedbackElement
 			DataMap relatedObjectListFilter = getRelatedListFilter(attributeName);
 			if(additionalFilter != null)
 				relatedObjectListFilter.merge(additionalFilter);
-			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, null, false, page);
+			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, null, false, page, pageSize);
 		}
 		return relatedObjectList;		
 	}
@@ -463,10 +470,11 @@ public class RedbackObject extends RedbackElement
 	public DataMap getJSON(boolean addValidation, boolean addRelated) throws RedbackException
 	{
 		DataMap object = new DataMap();
+		
 		object.put("objectname", config.getName());
 		object.put("uid", uid.getObject());
 		object.put("domain", domain.getObject());
-		
+
 		DataMap dataNode = new DataMap();
 		DataMap validatonNode = new DataMap();
 		DataMap relatedNode = new DataMap();
@@ -476,10 +484,12 @@ public class RedbackObject extends RedbackElement
 		{
 			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
 			String attrName = attributeConfig.getName();
+			//Value attrValue = new Value("allo");
 			Value attrValue = get(attrName);
 
-			DataMap attributeValidation = new DataMap();			
-			attributeValidation.put("editable", isEditable(attrName));
+			DataMap attributeValidation = new DataMap();
+			
+			//attributeValidation.put("editable", isEditable(attrName));
 			attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
 			if(attributeConfig.hasRelatedObject())
 			{
@@ -488,6 +498,7 @@ public class RedbackObject extends RedbackElement
 				relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
 				attributeValidation.put("related", relatedObjectValidation);
 			}
+			
 			validatonNode.put(attrName, attributeValidation);
 			
 			if(addRelated  &&  attributeConfig.hasRelatedObject())
@@ -496,8 +507,9 @@ public class RedbackObject extends RedbackElement
 				if(relatedObject != null)
 					relatedNode.put(attrName, relatedObject.getJSON(false, false));
 			}
-			
+
 			dataNode.put(attrName, attrValue.getObject());
+			
 		}
 		object.put("data", dataNode);
 		
@@ -505,7 +517,7 @@ public class RedbackObject extends RedbackElement
 			object.put("validation", validatonNode);
 		if(addRelated)
 			object.put("related", relatedNode);
-		
+			
 		return object;
 	}
 	

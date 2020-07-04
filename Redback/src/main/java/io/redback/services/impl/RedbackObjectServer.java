@@ -40,7 +40,7 @@ public class RedbackObjectServer extends ObjectServer
 	}
 
 	
-	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, int page, boolean addRelated) throws RedbackException 
+	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException 
 	{
 		List<RedbackObject> objects = null;
 		try {
@@ -48,7 +48,7 @@ public class RedbackObjectServer extends ObjectServer
 				filter = new DataMap();
 			
 			objectManager.initiateCurrentTransaction();
-			objects = objectManager.listObjects(session, objectName, filter, search, sort, addRelated, page);
+			objects = objectManager.listObjects(session, objectName, filter, search, sort, addRelated, page, pageSize);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			error("Error listing objects", e);
@@ -56,7 +56,7 @@ public class RedbackObjectServer extends ObjectServer
 		return objects;	
 	}
 
-	protected List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, int page, boolean addRelated) throws RedbackException 
+	protected List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException 
 	{
 		List<RedbackObject> objects = null;
 		try {
@@ -64,7 +64,7 @@ public class RedbackObjectServer extends ObjectServer
 				filter = new DataMap();
 
 			objectManager.initiateCurrentTransaction();
-			objects = objectManager.listRelatedObjects(session, objectName, uid, attribute, filter, search, addRelated, page);
+			objects = objectManager.listRelatedObjects(session, objectName, uid, attribute, filter, search, addRelated, page, pageSize);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			error("Error listing objects", e);

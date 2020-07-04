@@ -29,6 +29,7 @@ import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
+import io.redback.utils.Timer;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.LoggerJSFunction;
@@ -228,7 +229,7 @@ public class ObjectManager
 					{
 						DataMap relatedObjectFilter = new DataMap();
 						relatedObjectFilter.put("$or", orList);
-						ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null, null, false, 0);
+						ArrayList<RedbackObject> result = listObjects(session, relatedObjectConfig.getObjectName(), relatedObjectFilter, null, null, false, 0, 1000);
 						
 						String relatedObjectLinkAttributeName = relatedObjectConfig.getLinkAttributeName();
 						for(int j = 0; j < elements.size(); j++)
@@ -300,8 +301,9 @@ public class ObjectManager
 	*/
 	
 	@SuppressWarnings("unchecked")
-	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page) throws RedbackException
+	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
+		Timer t = new Timer("list." + objectName);
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		if(objectConfig != null)
@@ -316,8 +318,10 @@ public class ObjectManager
 				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-				DataMap dbSort = generateDBSort(session, objectConfig, sort); 
-				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page);
+				DataMap dbSort = generateDBSort(session, objectConfig, sort);
+				t.mark("beforedata");
+				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
+				t.mark("afterdata");
 				DataList dbResultList = dbResult.getList("result");
 				
 				for(int i = 0; i < dbResultList.size(); i++)
@@ -331,7 +335,6 @@ public class ObjectManager
 					}
 					objectList.add(object);
 				}
-				
 				if(addRelated)
 					addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 			}
@@ -345,19 +348,20 @@ public class ObjectManager
 		{
 			error("No object config is available for '" + objectName + "'");	
 		}
+		t.mark("end");
 		return objectList;
 	}
 	
 	public ArrayList<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated) throws RedbackException
 	{
-		return listRelatedObjects(session, objectName, uid, attributeName, filterData, searchText, addRelated, 0);
+		return listRelatedObjects(session, objectName, uid, attributeName, filterData, searchText, addRelated, 0, 50);
 	}
 	
-	public ArrayList<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated, int page) throws RedbackException
+	public ArrayList<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
-			return object.getRelatedList(attributeName, filterData, searchText, page);
+			return object.getRelatedList(attributeName, filterData, searchText, page, pageSize);
 		else
 			return new ArrayList<RedbackObject>();
 	}
@@ -605,7 +609,7 @@ public class ObjectManager
 					DataList dbList = new DataList();
 					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
 					ObjectConfig nextObjectConfig = getObjectConfig(roc.getObjectName());
-					ArrayList<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, null, false, 0);
+					ArrayList<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, null, false, 0, 1000);
 					if(list.size() > 0) {
 						for(int k = 0; k < list.size(); k++)
 						{
@@ -712,7 +716,7 @@ public class ObjectManager
 						if(relatedOrList.size() > 0)
 						{
 							DataMap relatedFilter = new DataMap("$or", relatedOrList);
-							ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null, null, false, 0);
+							ArrayList<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null, null, false, 0, 1000);
 							if(result.size() > 0)
 							{
 								DataMap orTerm = new DataMap();

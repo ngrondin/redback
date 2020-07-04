@@ -14,6 +14,7 @@ import io.redback.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
+import io.redback.utils.Timer;
 
 public abstract class ObjectServer extends AuthenticatedServiceProvider 
 {
@@ -64,20 +65,22 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					}
 					else if(action.equals("list"))
 					{
+						Timer t = new Timer("server");
 						DataMap filter = request.getObject("filter");
 						String attribute = request.getString("attribute");
 						String uid = request.getString("uid");
 						String search = request.getString("search");
 						DataMap sort = request.getObject("sort");
 						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
+						int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
 						if(filter != null || search != null || (uid != null && attribute != null))
 						{
 							List<RedbackObject> objects = null;
 							if(uid != null && attribute != null)
-								objects = listRelated(session, objectName, uid, attribute, filter, search, sort, page, addRelated);
+								objects = listRelated(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
 							else
-								objects = list(session, objectName, filter, search, sort, page, addRelated);
-
+								objects = list(session, objectName, filter, search, sort, addRelated, page, pageSize);
+							t.mark("afterlist");
 							responseData = new DataMap();
 							DataList list = new DataList();
 							if(objects != null)
@@ -89,6 +92,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						{
 							throw new FunctionErrorException("A 'list' action requires either a filter, a search or a uid-attribute pair");
 						}
+						t.mark();
 					}
 					else if(action.equals("listrelated"))
 					{
@@ -98,10 +102,11 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						String search = request.getString("search");
 						DataMap sort = request.getObject("sort");
 						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
+						int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
 						if(uid != null && attribute != null)
 						{
 							List<RedbackObject> objects = null;
-							objects = listRelated(session, objectName, uid, attribute, filter, search, sort, page, addRelated);
+							objects = listRelated(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
 							responseData = new DataMap();
 							DataList list = new DataList();
 							if(objects != null)
@@ -205,6 +210,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 			}					
 				
 			response.setData(responseData.toString());
+			response.metadata.put("mime", "application/json");
 		}
 		catch(DataException | RedbackException e)
 		{
@@ -231,9 +237,9 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	
 	protected abstract RedbackObject get(Session session, String objectName, String uid) throws RedbackException;
 
-	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, int page, boolean addRelated) throws RedbackException;
+	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 
-	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, int page, boolean addRelated) throws RedbackException;
+	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 
 	protected abstract RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException;
 
