@@ -2,7 +2,8 @@ package io.redback.managers.processmanager;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.utils.Expression;
+import io.redback.managers.jsmanager.Expression;
+import io.redback.utils.StringUtils;
 
 public class AssigneeConfig
 {
@@ -20,7 +21,7 @@ public class AssigneeConfig
 		processManager = pm;
 		assigneeType = at;
 		assigneeStr = a;
-		assigneeExpr = new Expression(processManager.getScriptEngine(), a);
+		assigneeExpr = new Expression(processManager.getJSManager(), "pm_assignee_" + StringUtils.base16(a.hashCode()), pm.getScriptVariableNames(), a);
 	}
 	
 	public AssigneeConfig(ProcessManager pm, DataMap c) throws RedbackException
@@ -34,7 +35,7 @@ public class AssigneeConfig
 		else if(atStr.equals("process"))
 			assigneeType = PROCESS;
 		assigneeStr = c.getString("id");
-		assigneeExpr = new Expression(processManager.getScriptEngine(), assigneeStr);
+		assigneeExpr = new Expression(processManager.getJSManager(), "pm_assignee_" + StringUtils.base16(assigneeStr.hashCode()), pm.getScriptVariableNames(), assigneeStr);
 	}
 	
 	public Object evaluateId(ProcessInstance pi) throws RedbackException

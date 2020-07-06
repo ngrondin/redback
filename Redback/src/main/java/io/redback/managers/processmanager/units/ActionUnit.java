@@ -2,15 +2,15 @@ package io.redback.managers.processmanager.units;
 
 import java.util.List;
 
-import javax.script.ScriptEngine;
-
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignment;
+import io.redback.managers.processmanager.Process;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.managers.processmanager.Process;
 
 public class ActionUnit extends ProcessUnit 
 {
@@ -18,9 +18,9 @@ public class ActionUnit extends ProcessUnit
 	protected String action;
 	protected String nextNode;
 
-	public ActionUnit(ProcessManager pm, DataMap config) 
+	public ActionUnit(ProcessManager pm, Process p, DataMap config) 
 	{
-		super(pm, config);
+		super(pm, p, config);
 		interactionCode = config.getString("interaction");
 		action = config.getString("action");
 		nextNode = config.getString("nextnode");

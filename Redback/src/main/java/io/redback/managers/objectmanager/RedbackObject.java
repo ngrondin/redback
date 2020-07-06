@@ -7,22 +7,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.script.Bindings;
-import javax.script.CompiledScript;
 import javax.script.ScriptException;
-import javax.script.SimpleBindings;
 
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.jsmanager.Expression;
+import io.redback.managers.jsmanager.Function;
 import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
 import io.redback.managers.objectmanagers.js.ProcessManagerProxyJSWrapper;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
-import io.redback.utils.Expression;
 import io.redback.utils.Timer;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
@@ -164,8 +162,7 @@ public class RedbackObject extends RedbackElement
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
-		//scriptContext = new SimpleBindings(); //objectManager.getScriptEngine().createBindings();
-		scriptContext = objectManager.getScriptEngine().createBindings();
+		scriptContext = new HashMap<String, Object>();
 		scriptContext.put("self", new RedbackObjectJSWrapper(this));
 		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
 		scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
@@ -489,7 +486,7 @@ public class RedbackObject extends RedbackElement
 
 			DataMap attributeValidation = new DataMap();
 			
-			//attributeValidation.put("editable", isEditable(attrName));
+			attributeValidation.put("editable", isEditable(attrName));
 			attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
 			if(attributeConfig.hasRelatedObject())
 			{
@@ -524,40 +521,30 @@ public class RedbackObject extends RedbackElement
 
 	protected void executeScriptsForEvent(String event) throws RedbackException
 	{
-		CompiledScript script  = config.getScriptForEvent(event);
+		Function script  = config.getScriptForEvent(event);
 		if(script != null)
 				executeScript(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + event);
 	}
 
 	protected void executeAttributeScriptsForEvent(String attributeName, String event) throws RedbackException
 	{
-		CompiledScript script  = config.getAttributeConfig(attributeName).getScriptForEvent(event);
+		Function script  = config.getAttributeConfig(attributeName).getScriptForEvent(event);
 		if(script != null)
 				executeScript(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + attributeName + "." + event);
 	}
 	
-	protected Bindings executeScript(CompiledScript script, String name) throws RedbackException
+	protected void executeScript(Function script, String name) throws RedbackException
 	{
 		logger.finer("Start executing script : " + name);
-		//Bindings context = objectManager.createScriptContext(this); 
 		try
 		{
-			script.eval(scriptContext);
+			script.execute(scriptContext);
 		} 
-		catch (ScriptException e)
+		catch (RedbackException e)
 		{
 			error("Problem occurred executing a script", e);
 		}		
-		catch(NullPointerException e)
-		{
-			error("Null pointer exception in script " + name, e);
-		}
-		catch(RuntimeException e)
-		{
-			error("Problem occurred executing a script", e);
-		}
 		logger.finer("Finish executing script : " + name);
-		return scriptContext;
 	}
 	
 	protected void error(String msg) throws RedbackException

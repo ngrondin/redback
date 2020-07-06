@@ -1,12 +1,12 @@
 package io.redback.managers.processmanager.units;
 
 import java.util.ArrayList;
-
-import javax.script.Bindings;
+import java.util.Map;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignee;
 import io.redback.managers.processmanager.AssigneeConfig;
@@ -14,7 +14,7 @@ import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.utils.Expression;
+import io.redback.managers.processmanager.Process;
 
 public class InteractionUnit extends ProcessUnit 
 {
@@ -26,9 +26,9 @@ public class InteractionUnit extends ProcessUnit
 	protected Expression labelExpression;
 	protected Expression messageExpression;
 
-	public InteractionUnit(ProcessManager pm, DataMap config) throws RedbackException 
+	public InteractionUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
-		super(pm, config);
+		super(pm, p, config);
 		actionsConfig = config.getList("actions");
 		assigneeConfigs = new ArrayList<AssigneeConfig>();
 		if(config.containsKey("assignees")  &&  config.get("assignees") instanceof DataList)
@@ -39,8 +39,8 @@ public class InteractionUnit extends ProcessUnit
 		}
 		notificationConfig = config.getObject("notification");
 		interactionCode = notificationConfig.getString("code");
-		labelExpression = new Expression(pm.getScriptEngine(), notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
-		messageExpression = new Expression(pm.getScriptEngine(), notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
+		labelExpression = new Expression(pm.getJSManager(), jsFunctionNameRoot + "_labelexpr", pm.getScriptVariableNames(), notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
+		messageExpression = new Expression(pm.getJSManager(), jsFunctionNameRoot + "_msgexpr", pm.getScriptVariableNames(), notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException
@@ -111,7 +111,7 @@ public class InteractionUnit extends ProcessUnit
 	
 	protected Assignment getNotification(ProcessInstance pi) throws RedbackException
 	{
-		Bindings context = pi.getScriptContext();
+		Map<String, Object> context = pi.getScriptContext();
 		String code = notificationConfig.getString("code");
 		String label = (String)labelExpression.eval(context);
 		String message = (String)messageExpression.eval(context);

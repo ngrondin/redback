@@ -7,9 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -21,16 +18,18 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
+
 
 
 public class ProcessManager
 {
 	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected Firebus firebus;
-	protected ScriptEngine jsEngine;
+	protected JSManager jsManager;
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String accessManagerServiceName;
@@ -45,11 +44,12 @@ public class ProcessManager
 	protected String jwtIssuer;
 	protected Session sysUserSession;
 	protected DataMap globalVariables;
+	protected List<String> scriptVars;
 	
 	public ProcessManager(Firebus fb, DataMap config)
 	{
 		firebus = fb;
-		jsEngine = new ScriptEngineManager().getEngineByName("graal.js");
+		jsManager = new JSManager();
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
@@ -63,6 +63,12 @@ public class ProcessManager
 		globalVariables = config.getObject("globalvariables");
 		piCollectionConfig = config.containsKey("processinstancecollection") ? new CollectionConfig(config.getObject("processinstancecollection")) : new CollectionConfig("rbpm_instance");
 		gmCollectionConfig = config.containsKey("groupmembercollection") ? new CollectionConfig(config.getObject("groupmembercollection")) : new CollectionConfig("rbam_groupmember");
+		jsManager.setGlobalVariables(globalVariables);
+		scriptVars = new ArrayList<String>();
+		scriptVars.add("pid");
+		scriptVars.add("pm");
+		scriptVars.add("firebus");
+		scriptVars.add("data");	
 	}
 
 	
@@ -71,11 +77,16 @@ public class ProcessManager
 		return firebus;
 	}
 	
-	public ScriptEngine getScriptEngine()
+	public JSManager getJSManager()
 	{
-		return jsEngine;
+		return jsManager;
 	}
 
+	public List<String> getScriptVariableNames()
+	{
+		return scriptVars;
+	}
+	
 	public void refreshAllConfigs()
 	{
 		processes.clear();

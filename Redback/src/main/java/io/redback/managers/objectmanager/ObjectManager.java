@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import io.firebus.Firebus;
@@ -23,9 +21,8 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
+import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
-import io.redback.managers.objectmanagers.js.RedbackAggregateJSWrapper;
-import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
@@ -38,8 +35,8 @@ public class ObjectManager
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
-	protected ScriptEngine jsEngine;
-	protected boolean cacheConfigs;
+	protected JSManager jsManager;
+	protected boolean includeLoaded;
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String idGeneratorServiceName;
@@ -56,8 +53,8 @@ public class ObjectManager
 	public ObjectManager(Firebus fb, DataMap config)
 	{
 		firebus = fb;
-		cacheConfigs = true;
-		jsEngine = new ScriptEngineManager().getEngineByName("graal.js");
+		includeLoaded = false;
+		jsManager = new JSManager();
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");
@@ -66,11 +63,10 @@ public class ObjectManager
 		globalVariables = config.getObject("globalvariables");
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
-		if(config.containsKey("cacheconfigs") &&  config.getString("cacheconfigs").equalsIgnoreCase("false"))
-			cacheConfigs = false;
 		objectConfigs = new HashMap<String, ObjectConfig>();
 		globalScripts = new HashMap<String, ScriptConfig>();
 		transactions = new HashMap<Long, HashMap<String, RedbackObject>>();
+		jsManager.setGlobalVariables(globalVariables);
 	}
 	
 	public Firebus getFirebus()
@@ -78,9 +74,9 @@ public class ObjectManager
 		return firebus;
 	}
 	
-	public ScriptEngine getScriptEngine()
+	public JSManager getJSManager()
 	{
-		return jsEngine;
+		return jsManager;
 	}
 	
 	public DataMap getGlobalVariables()
@@ -92,41 +88,11 @@ public class ObjectManager
 	{
 		objectConfigs.clear();
 		globalScripts.clear();
-		if(includeScripts != null)
-			includeScripts.clear();
-		includeScripts = null;
 	}
 	
-	public Bindings createScriptContext(RedbackElement element) throws RedbackException
+	public Map<String, Object> createScriptContext(Session session) throws RedbackException
 	{
-		Bindings context = createScriptContext(element.getUserSession());
-		if(element != null)
-		{
-			if(element instanceof RedbackObject)
-			{
-				RedbackObject rbObject = (RedbackObject)element;
-				context.put("uid", rbObject.getUID().getString());
-				context.put("self", new RedbackObjectJSWrapper(rbObject));
-			}
-			else if(element instanceof RedbackAggregate)
-			{
-				RedbackAggregate rbAggregate = (RedbackAggregate)element;
-				context.put("self", new RedbackAggregateJSWrapper(rbAggregate));
-			}
-			Iterator<String> it = element.getAttributeNames().iterator();
-			while(it.hasNext())
-			{	
-				String key = it.next();
-				if(element.getObjectConfig().getAttributeConfig(key).getExpression() == null)
-					context.put(key, JSConverter.toJS(element.get(key).getObject()));
-			}
-		}		
-		return context;
-	}
-	
-	public Bindings createScriptContext(Session session) throws RedbackException
-	{
-		Bindings context = jsEngine.createBindings();
+		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("om", new ObjectManagerJSWrapper(this, session));
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("firebus", new FirebusJSWrapper(firebus, session));
@@ -138,20 +104,21 @@ public class ObjectManager
 		return context;
 	}
 	
-	protected List<ScriptConfig> getIncludeScripts() throws RedbackException
+	protected void loadIncludeScripts() throws RedbackException
 	{
-		if(includeScripts == null)
+		DataMap result = configClient.listConfigs("rbo", "include");
+		DataList resultList = result.getList("result");
+		for(int i = 0; i < resultList.size(); i++)
 		{
-			includeScripts = new ArrayList<ScriptConfig>();
-			DataMap result = configClient.listConfigs("rbo", "include");
-			DataList resultList = result.getList("result");
-			for(int i = 0; i < resultList.size(); i++)
+			try 
 			{
-				ScriptConfig is = new ScriptConfig(getScriptEngine(), resultList.getObject(i));
-				includeScripts.add(is);
+				jsManager.addFunction("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
+			}
+			catch(Exception e) 
+			{
+				throw new RedbackException("Problem compiling include scripts", e);
 			}
 		}
-		return includeScripts;
 	}
 
 	protected ScriptConfig getGlobalScript(String name) throws RedbackException
@@ -161,11 +128,10 @@ public class ObjectManager
 		{
 			try
 			{
-				if(includeScripts == null)
-					getIncludeScripts();
-				scriptConfig = new ScriptConfig(getScriptEngine(), configClient.getConfig("rbo", "script", name));
-				if(cacheConfigs)
-					globalScripts.put(name, scriptConfig);
+				if(!includeLoaded)
+					loadIncludeScripts();
+				scriptConfig = new ScriptConfig(jsManager, configClient.getConfig("rbo", "script", name));
+				globalScripts.put(name, scriptConfig);
 			}
 			catch(Exception e)
 			{
@@ -183,11 +149,10 @@ public class ObjectManager
 		{
 			try
 			{
-				if(includeScripts == null)
-					getIncludeScripts();
+				if(!includeLoaded)
+					loadIncludeScripts();
 				objectConfig = new ObjectConfig(this, configClient.getConfig("rbo", "object", object));
-				if(cacheConfigs)
-					objectConfigs.put(object, objectConfig);
+				objectConfigs.put(object, objectConfig);
 			}
 			catch(Exception e)
 			{
@@ -303,7 +268,7 @@ public class ObjectManager
 	@SuppressWarnings("unchecked")
 	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
-		Timer t = new Timer("list." + objectName);
+		//Timer t = new Timer("list." + objectName);
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		if(objectConfig != null)
@@ -319,9 +284,9 @@ public class ObjectManager
 				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 				DataMap dbSort = generateDBSort(session, objectConfig, sort);
-				t.mark("beforedata");
+				//t.mark("beforedata");
 				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
-				t.mark("afterdata");
+				//t.mark("afterdata");
 				DataList dbResultList = dbResult.getList("result");
 				
 				for(int i = 0; i < dbResultList.size(); i++)
@@ -348,7 +313,7 @@ public class ObjectManager
 		{
 			error("No object config is available for '" + objectName + "'");	
 		}
-		t.mark("end");
+		//t.mark("end");
 		return objectList;
 	}
 	

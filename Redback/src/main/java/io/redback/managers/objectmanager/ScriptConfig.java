@@ -1,13 +1,13 @@
 package io.redback.managers.objectmanager;
 
-import javax.script.Bindings;
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.jsmanager.Function;
+import io.redback.managers.jsmanager.JSManager;
 import io.redback.utils.StringUtils;
 
 public class ScriptConfig 
@@ -15,25 +15,19 @@ public class ScriptConfig
 	protected DataMap config;
 	protected String name;
 	protected String source;
-	protected CompiledScript script;
+	protected Function function;
 
-	public ScriptConfig(ScriptEngine jsEngine, DataMap cfg) throws RedbackException
+	public ScriptConfig(JSManager jsm, DataMap cfg) throws RedbackException
 	{
 		config = cfg;
 		name = config.getString("name");
 		source = StringUtils.unescape(config.getString("script"));
-		try
-		{
-			synchronized(jsEngine) 
-			{
-				script = ((Compilable)jsEngine).compile(source);
-			}
-		} 
-		catch (ScriptException e)
-		{
-			throw new RedbackException("Problem compiling the script '" + name + "'", e);
-		}
-		
+		List<String> scriptVars = new ArrayList<String>();
+		scriptVars.add("om");
+		scriptVars.add("pm");
+		scriptVars.add("firebus");
+		scriptVars.add("userprofile");
+		function = new Function(jsm, name, scriptVars, source);
 	}
 	
 	public String getName()
@@ -46,15 +40,8 @@ public class ScriptConfig
 		return source;
 	}
 	
-	public void execute(Bindings context) throws RedbackException
+	public void execute(Map<String, Object> context) throws RedbackException
 	{
-		try
-		{
-			script.eval(context);
-		} 
-		catch (ScriptException e)
-		{
-			throw new RedbackException("Script error executing the script  '" + name + "'", e);
-		}
+		function.execute(context);
 	}	
 }

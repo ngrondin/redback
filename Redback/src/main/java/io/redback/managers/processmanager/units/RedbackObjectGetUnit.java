@@ -1,8 +1,9 @@
 package io.redback.managers.processmanager.units;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.script.Bindings;
 
 import io.firebus.Payload;
 import io.firebus.utils.DataMap;
@@ -10,9 +11,10 @@ import io.redback.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.managers.jsmanager.Expression;
+import io.redback.managers.jsmanager.ExpressionMap;
+import io.redback.managers.processmanager.Process;
 import io.redback.security.Session;
-import io.redback.utils.Expression;
-import io.redback.utils.ExpressionMap;
 import io.redback.utils.js.JSConverter;
 
 public class RedbackObjectGetUnit extends ProcessUnit 
@@ -23,13 +25,15 @@ public class RedbackObjectGetUnit extends ProcessUnit
 	protected ExpressionMap outputExpressionMap;
 	protected String nextNode;
 	
-	public RedbackObjectGetUnit(ProcessManager pm, DataMap config) throws RedbackException 
+	public RedbackObjectGetUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
-		super(pm, config);
+		super(pm, p, config);
 		processManager = pm;
 		objectName = config.getString("object");
-		objectUIDExpression = new Expression(processManager.getScriptEngine(), config.getString("uid"));
-		outputExpressionMap = new ExpressionMap(processManager.getScriptEngine(), config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
+		objectUIDExpression = new Expression(processManager.getJSManager(), jsFunctionNameRoot + "_uidexpr", pm.getScriptVariableNames(), config.getString("uid"));
+		List<String> outVars = new ArrayList<String>(pm.getScriptVariableNames());
+		outVars.add("result");
+		outputExpressionMap = new ExpressionMap(processManager.getJSManager(), jsFunctionNameRoot + "_outexpr", outVars, config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
 		nextNode = config.getString("nextnode");
 	}
 
@@ -39,7 +43,7 @@ public class RedbackObjectGetUnit extends ProcessUnit
 		if(processManager.getObjectServiceName() != null)
 		{
 			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-			Bindings context = pi.getScriptContext();
+			Map<String, Object> context = pi.getScriptContext();
 			String objectUID = (String)objectUIDExpression.eval(context);
 			DataMap req = new DataMap();
 			req.put("action", "get");

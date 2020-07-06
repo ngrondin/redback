@@ -5,7 +5,8 @@ import io.redback.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.utils.Expression;
+import io.redback.managers.jsmanager.Expression;
+import io.redback.managers.processmanager.Process;
 
 public class ConditionalUnit extends ProcessUnit 
 {
@@ -14,14 +15,14 @@ public class ConditionalUnit extends ProcessUnit
 	protected String trueNode;
 	protected String falseNode;
 	
-	public ConditionalUnit(ProcessManager pm, DataMap config) throws RedbackException 
+	public ConditionalUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
-		super(pm, config);
+		super(pm, p, config);
 		processManager = pm;
 		trueNode = config.getString("truenode");
 		falseNode = config.getString("falsenode");
 		expressionStr = config.getString("condition");
-		expression = new Expression(pm.getScriptEngine(), expressionStr);
+		expression = new Expression(pm.getJSManager(), jsFunctionNameRoot, pm.getScriptVariableNames(), expressionStr);
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException

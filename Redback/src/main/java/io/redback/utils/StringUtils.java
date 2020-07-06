@@ -98,4 +98,14 @@ public class StringUtils
 			return "";
 		}
 	}
+	
+	public static String base16(int n) 
+	{
+		String s = "";
+		for(int i = 0; i < 8; i++)
+		{
+			s = s + (char)(((n >> (i * 4)) & 0x0f) + 97);
+		}
+		return s;
+	}
 }

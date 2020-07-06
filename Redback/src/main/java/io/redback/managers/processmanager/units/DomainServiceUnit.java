@@ -1,6 +1,8 @@
 package io.redback.managers.processmanager.units;
 
-import javax.script.Bindings;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import io.firebus.Payload;
 import io.firebus.utils.DataMap;
@@ -8,8 +10,9 @@ import io.redback.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.managers.jsmanager.ExpressionMap;
+import io.redback.managers.processmanager.Process;
 import io.redback.security.Session;
-import io.redback.utils.ExpressionMap;
 import io.redback.utils.js.JSConverter;
 
 public class DomainServiceUnit extends ProcessUnit 
@@ -20,13 +23,15 @@ public class DomainServiceUnit extends ProcessUnit
 	protected ExpressionMap outputExpressionMap;
 	protected String nextNode;
 	
-	public DomainServiceUnit(ProcessManager pm, DataMap config) throws RedbackException 
+	public DomainServiceUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
-		super(pm, config);
+		super(pm, p, config);
 		processManager = pm;
 		domainServiceName = config.getString("service");
-		inputExpressionMap = new ExpressionMap(processManager.getScriptEngine(), config.get("data") != null ? config.getObject("data") : new DataMap());
-		outputExpressionMap = new ExpressionMap(processManager.getScriptEngine(), config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
+		inputExpressionMap = new ExpressionMap(processManager.getJSManager(), jsFunctionNameRoot + "_inexpr", pm.getScriptVariableNames(), config.get("data") != null ? config.getObject("data") : new DataMap());
+		List<String> outVars = new ArrayList<String>(pm.getScriptVariableNames());
+		outVars.add("result");
+		outputExpressionMap = new ExpressionMap(processManager.getJSManager(), jsFunctionNameRoot + "_outexpr", outVars, config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
 		nextNode = config.getString("nextnode");
 	}
 
@@ -36,7 +41,7 @@ public class DomainServiceUnit extends ProcessUnit
 		if(processManager.getDomainServiceName() != null)
 		{
 			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
-			Bindings context = pi.getScriptContext();
+			Map<String, Object> context = pi.getScriptContext();
 			DataMap data = inputExpressionMap.eval(context);
 			DataMap req = new DataMap();
 			req.put("service", domainServiceName);

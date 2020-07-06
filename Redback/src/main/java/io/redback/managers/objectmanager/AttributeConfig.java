@@ -2,60 +2,44 @@ package io.redback.managers.objectmanager;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.utils.Expression;
-import io.redback.utils.StringUtils;
+import io.redback.managers.jsmanager.Expression;
+import io.redback.managers.jsmanager.Function;
 
 public class AttributeConfig 
 {
 	protected ObjectManager objectManager;
+	protected ObjectConfig objectConfig;
 	protected DataMap config;	
-	protected String objectName;
-	protected HashMap<String, CompiledScript> scripts;
+	protected HashMap<String, Function> scripts;
 	protected RelatedObjectConfig relatedObjectConfig;
 	protected Expression editable;
 	protected Expression expression;
 	protected Expression defaultValue;
 	
-	public AttributeConfig(ObjectManager om, String on, DataMap cfg) throws RedbackException
+	public AttributeConfig(ObjectManager om, ObjectConfig oc, DataMap cfg) throws RedbackException
 	{
 		objectManager = om;
-		objectName = on;
+		objectConfig = oc;
 		config = cfg;
-		scripts = new HashMap<String, CompiledScript>();
-		List<ScriptConfig> includes = objectManager.getIncludeScripts();
-		StringBuilder allIncludes = new StringBuilder();
-		allIncludes.append("\r\n\r\n");
-		if(includes != null)
-		{
-			for(int i = 0; i < includes.size(); i++)
-			{
-				allIncludes.append(includes.get(i).getSource());
-				allIncludes.append("\r\n\r\n");
-			}
-		}
+		scripts = new HashMap<String, Function>();
 
 		if(config.get("relatedobject") != null)
-			relatedObjectConfig = new RelatedObjectConfig(objectManager, config.getObject("relatedobject"));
+			relatedObjectConfig = new RelatedObjectConfig(objectManager, objectConfig, this, config.getObject("relatedobject"));
 		
 		if(config.get("editable") != null && config.getString("editable").length() > 0)
-			editable = new Expression(objectManager.getScriptEngine(), config.getString("editable"));
+			editable = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_editable", objectConfig.getScriptVariables(), config.getString("editable"));
 		else 
-			editable = new Expression(objectManager.getScriptEngine(), "true");
+			editable = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_editable", objectConfig.getScriptVariables(), "true");
 		
 		if(config.get("expression") != null && config.getString("expression").length() > 0)
-			expression = new Expression(objectManager.getScriptEngine(), config.getString("expression"));
+			expression = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_expression", objectConfig.getScriptVariables(), config.getString("expression"));
 
 		if(config.get("default") != null && config.getString("default").length() > 0)
-			defaultValue = new Expression(objectManager.getScriptEngine(), config.getString("default"));
+			defaultValue = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_default", objectConfig.getScriptVariables(), config.getString("default"));
 		
 		DataMap scriptsCfg = config.getObject("scripts");
 		if(scriptsCfg != null)
@@ -66,16 +50,10 @@ public class AttributeConfig
 				String event = events.next();
 				try
 				{
-					String source = StringUtils.unescape(scriptsCfg.getString(event));
-					source = source + allIncludes.toString();
-					ScriptEngine jsEngine = objectManager.getScriptEngine();
-					synchronized(jsEngine) 
-					{
-						CompiledScript script = ((Compilable)jsEngine).compile(source);
-						scripts.put(event, script);
-					}
+					Function function = new Function(objectManager.getJSManager(), oc.getName() + "_" + getName() + "_event_" + event, objectConfig.getScriptVariables(), scriptsCfg.getString(event));
+					scripts.put(event, function);
 				} 
-				catch(ScriptException e)
+				catch(RedbackException e)
 				{
 					throw new RedbackException("Problem compiling script", e);
 				}
@@ -128,7 +106,7 @@ public class AttributeConfig
 		return relatedObjectConfig;
 	}
 	
-	public CompiledScript getScriptForEvent(String event)
+	public Function getScriptForEvent(String event)
 	{
 		return scripts.get(event);
 	}

@@ -1,12 +1,10 @@
 package io.redback.managers.objectmanager;
 
-import javax.script.Bindings;
-
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.utils.Expression;
-import io.redback.utils.ExpressionMap;
+import io.redback.managers.jsmanager.Expression;
+import io.redback.managers.jsmanager.ExpressionMap;
 
 public class RelatedObjectConfig
 {
@@ -16,26 +14,27 @@ public class RelatedObjectConfig
 	protected Expression listFilterExpression;
 
 	
-	public RelatedObjectConfig(ObjectManager om, DataMap cfg) throws RedbackException
+	public RelatedObjectConfig(ObjectManager om, ObjectConfig oc, AttributeConfig ac, DataMap cfg) throws RedbackException
 	{
 		objectManager = om;
 		config = cfg;
+		String fn = oc.getName() + "_" + ac.getName() + "_relatedlistfilter";
 		if(config.containsKey("listfilter"))
 		{
 			Object f = config.get("listfilter");
 			if(f instanceof DataMap)
 			{
-				listFilterExpressionMap = new ExpressionMap(objectManager.getScriptEngine(), (DataMap)f);
+				listFilterExpressionMap = new ExpressionMap(objectManager.getJSManager(), fn, oc.getScriptVariables(), (DataMap)f);
 			}
 			else if(f instanceof DataLiteral)
 			{
 				String scriptSrc = ((DataLiteral)f).getString();
-				listFilterExpression = new Expression(objectManager.getScriptEngine(), scriptSrc); // ((Compilable)jsEngine).compile(scriptSrc);
+				listFilterExpression = new Expression(objectManager.getJSManager(), fn, oc.getScriptVariables(), scriptSrc); 
 			}
 		}
 		else
 		{
-			listFilterExpressionMap = new ExpressionMap(objectManager.getScriptEngine(), new DataMap());
+			listFilterExpressionMap = new ExpressionMap(objectManager.getJSManager(), fn, oc.getScriptVariables(), new DataMap());
 		}
 	}
 	
@@ -51,16 +50,15 @@ public class RelatedObjectConfig
 
 	public DataMap generateFilter(RedbackElement elem) throws RedbackException
 	{
-		Bindings context = elem.getScriptContext();
 		if(listFilterExpressionMap != null)
 		{
-			return listFilterExpressionMap.eval(context);
+			return listFilterExpressionMap.eval(elem.getScriptContext());
 		}
 		else if(listFilterExpression != null)
 		{
 			try
 			{
-				Object o = listFilterExpression.eval(context);
+				Object o = listFilterExpression.eval(elem.getScriptContext());
 				if(o instanceof DataMap)
 					return (DataMap)o;
 				else

@@ -2,17 +2,17 @@ package io.redback.managers.processmanager;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 
-import javax.script.Bindings;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
-import io.redback.utils.js.LoggerJSFunction;
 
 public class ProcessInstance 
 {
@@ -26,7 +26,7 @@ public class ProcessInstance
 	protected boolean complete;
 	protected DataList assignees;
 	protected Actionner lastActioner;
-	protected Bindings scriptContext;
+	protected Map<String, Object> scriptContext;
 	//protected JSONList receivedNotifications;
 	
 	protected ProcessInstance(ProcessManager pm, String pn, int v, String dom, DataMap d)
@@ -65,13 +65,11 @@ public class ProcessInstance
 	
 	protected void createScriptBindings()
 	{
-		scriptContext = processManager.getScriptEngine().createBindings();
+		scriptContext = new HashMap<String, Object>();
 		try {
 			scriptContext.put("pid", getId());
 			scriptContext.put("pm", new ProcessManagerJSWrapper(processManager, this));
-			scriptContext.put("global", JSConverter.toJS(processManager.getGlobalVariables()));
 			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getSystemUserSession(domain)));
-			scriptContext.put("log", new LoggerJSFunction());
 			updateScriptBindings();
 		} catch(Exception e) {
 		}
@@ -107,7 +105,7 @@ public class ProcessInstance
 		return data;
 	}
 	
-	public Bindings getScriptContext()
+	public Map<String, Object> getScriptContext()
 	{
 		return scriptContext;
 	}

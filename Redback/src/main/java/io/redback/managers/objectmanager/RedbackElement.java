@@ -1,10 +1,7 @@
 package io.redback.managers.objectmanager;
 
-
-
+import java.util.Map;
 import java.util.Set;
-
-import javax.script.Bindings;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -15,7 +12,7 @@ public abstract class RedbackElement
 	protected Session session;
 	protected ObjectManager objectManager;
 	protected ObjectConfig config;
-	protected Bindings scriptContext;
+	protected Map<String, Object> scriptContext;
 
 	public ObjectConfig getObjectConfig()
 	{
@@ -32,7 +29,7 @@ public abstract class RedbackElement
 		return session;
 	}
 	
-	public Bindings getScriptContext()
+	public Map<String, Object> getScriptContext()
 	{
 		return scriptContext;
 	}

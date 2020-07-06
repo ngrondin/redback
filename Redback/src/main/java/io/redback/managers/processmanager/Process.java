@@ -41,23 +41,23 @@ public class Process
 			String unitType = nodeConfig.getString("type");
 			ProcessUnit unit = null;
 			if(unitType.equals("script"))
-				unit = new ScriptUnit(processManager, nodeConfig);
+				unit = new ScriptUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("condition"))
-				unit = new ConditionalUnit(processManager, nodeConfig);
+				unit = new ConditionalUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("action"))
-				unit = new ActionUnit(processManager, nodeConfig);
+				unit = new ActionUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("interaction"))
-				unit = new InteractionUnit(processManager, nodeConfig);
+				unit = new InteractionUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("rbobjectget"))
-				unit = new RedbackObjectGetUnit(processManager, nodeConfig);
+				unit = new RedbackObjectGetUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("rbobjectupdate"))
-				unit = new RedbackObjectUpdateUnit(processManager, nodeConfig);
+				unit = new RedbackObjectUpdateUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("rbobjectexecute"))
-				unit = new RedbackObjectExecuteUnit(processManager, nodeConfig);
+				unit = new RedbackObjectExecuteUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("firebusrequest"))
-				unit = new FirebusRequestUnit(processManager, nodeConfig);
+				unit = new FirebusRequestUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("domainservice"))
-				unit = new DomainServiceUnit(processManager, nodeConfig);
+				unit = new DomainServiceUnit(processManager, this, nodeConfig);
 			else
 				error("Unit type '" + unitType + "' is not recognised");
 			nodes.put(unit.getId(), unit);
@@ -67,6 +67,11 @@ public class Process
 	public ProcessUnit getNode(String n)
 	{
 		return nodes.get(n);
+	}
+	
+	public String getName()
+	{
+		return name;
 	}
 
 	public ProcessInstance createInstance(Actionner actionner, String domain, DataMap data) throws RedbackException

@@ -75,7 +75,7 @@ public class RedbackAggregate extends RedbackElement
 		metrics = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
-		scriptContext = objectManager.getScriptEngine().createBindings();
+		scriptContext = new HashMap<String, Object>();
 		scriptContext.put("self", new RedbackAggregateJSWrapper(this));
 		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
 		scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));

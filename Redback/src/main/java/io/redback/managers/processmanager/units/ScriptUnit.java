@@ -1,36 +1,33 @@
 package io.redback.managers.processmanager.units;
 
-import javax.script.Bindings;
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptException;
+import java.util.Map;
 
-import org.graalvm.polyglot.Value;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.managers.jsmanager.Function;
+import io.redback.managers.processmanager.Process;
 import io.redback.utils.StringUtils;
-import io.redback.utils.js.JSConverter;
 
 public class ScriptUnit extends ProcessUnit 
 {
-	protected CompiledScript script;
+	protected Function script;
 	protected String nextNode;
 	
-	public ScriptUnit(ProcessManager pm, DataMap config) throws RedbackException 
+	public ScriptUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
-		super(pm, config);
+		super(pm, p, config);
 		processManager = pm;
 		nextNode = config.getString("nextnode");
-		String source = StringUtils.unescape(config.getString("source"));
+		String source = StringUtils.unescape(config.getString("source")) + "\r\nreturn data;";
 		try
 		{
-			script = ((Compilable)pm.getScriptEngine()).compile(source);
+			script = new Function(pm.getJSManager(), jsFunctionNameRoot + "_script", pm.getScriptVariableNames(), source);
 		}
-		catch(ScriptException e)
+		catch(RedbackException e)
 		{
 			error("Error creating script unit id '" + getId() + "'", e);
 		}
@@ -39,23 +36,14 @@ public class ScriptUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.finer("Start executing script");
-		Bindings context = pi.getScriptContext();
+		Map<String, Object> context = pi.getScriptContext();
 		try
 		{
-			script.eval(context);
-			pi.setCurrentNode(nextNode);
-			DataMap piData = (DataMap)JSConverter.toJava(Value.asValue(context.get("data")));
+			DataMap piData = (DataMap)script.execute(context);
 			pi.setData(piData);
+			pi.setCurrentNode(nextNode);
 		} 
-		catch (ScriptException e)
-		{
-			error("Problem occurred executing script of node '" + name + "'", e);
-		}		
-		catch(NullPointerException e)
-		{
-			error("Null pointer exception in script of node '" + name + "'", e);
-		}
-		catch(RuntimeException e)
+		catch (RedbackException e)
 		{
 			error("Problem occurred executing script of node '" + name + "'", e);
 		}		
