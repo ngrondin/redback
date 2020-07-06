@@ -74,8 +74,8 @@ export class DataService {
     return dataObservable; 
   }
 
-  listObjects(name: string, filter: any, search: string, sort: any, page: number) : Observable<any> {
-    const apiObservable = this.apiService.listObjects(name, filter, search, sort, page);
+  listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number) : Observable<any> {
+    const apiObservable = this.apiService.listObjects(name, filter, search, sort, page, pageSize);
     const dataObservable = new Observable((observer) => {
       apiObservable.subscribe(
         resp => {

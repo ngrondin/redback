@@ -38,7 +38,9 @@ export class RbDatasetDirective implements OnChanges {
   public isLoading: boolean;
   public initiated: boolean = false;
   public firstLoad: boolean = true;
-  public page: number;
+  public nextPage: number;
+  public pageSize: number;
+  public fetchThreads: number;
 
   constructor(
     private dataService: DataService,
@@ -75,6 +77,8 @@ export class RbDatasetDirective implements OnChanges {
     this.id = "" + Math.floor(Math.random() * 10000);
     this.dataSubscription = this.dataService.getObjectCreateObservable().subscribe(object => this.receiveNewlyCreatedData(object));
     this.initiated = true;
+    this.pageSize = this.fetchAll == true ? 250 : 50;
+    this.fetchThreads = 0;
     this.refreshData();
     this.initated.emit(this);
   }
@@ -84,17 +88,22 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   public refreshData() {
-    this.page = 0;
+    this.nextPage = 0;
     this.list = [];
-    this.fetchPage(this.page);
+    if(this.fetchAll) {
+      setTimeout(() => this.fetchNextPage(), 1);
+      setTimeout(() => this.fetchNextPage(), 500);
+    } else {
+      this.fetchNextPage();
+    }
   }
 
-  public fetchPage(page: number) {
+  public fetchNextPage() {
     if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
       const filter = this.mergeFilters();
-      this.dataService.listObjects(this.objectname, filter, this.searchString, this.userSort, this.page).subscribe(
-        data => this.setData(data)
-      );
+      this.dataService.listObjects(this.objectname, filter, this.searchString, this.userSort, this.nextPage, this.pageSize).subscribe(data => this.setData(data));
+      this.nextPage = this.nextPage + 1;
+      this.fetchThreads = this.fetchThreads + 1;
       this.dataService.subscribeObjectCreation(this.id, this.objectname, filter);
       this.isLoading = true;
     }
@@ -117,10 +126,10 @@ export class RbDatasetDirective implements OnChanges {
 
   private setData(data: RbObject[]) {
     this.list = this.list.concat(data);
-    if(this.fetchAll && data.length == 50) {
-      this.page = this.page + 1;
-      this.fetchPage(this.page);
-    } else {
+    this.fetchThreads = this.fetchThreads - 1;
+    if(this.fetchAll && data.length > 0) {
+      this.fetchNextPage();
+    } else if(this.fetchThreads == 0) {
       this.isLoading = false;
       this.firstLoad = false;
       if(this.list.length == 0) {

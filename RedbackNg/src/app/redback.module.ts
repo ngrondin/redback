@@ -56,6 +56,9 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { RbDragChangeformDirective } from './rb-drag/rb-drag-changeform.directive';
 import { AgmOverlays } from "agm-overlays"
 import { RbChatComponent } from './rb-chat/rb-chat.component';
+import { RbAddressInputComponent } from './rb-address-input/rb-address-input.component';
+import { RbPopupInputComponent } from './rb-popup-input/rb-popup-input.component';
+import { RbPopupAddressesComponent } from './rb-popup-addresses/rb-popup-addresses.component';
 
 @NgModule({
   imports: [
@@ -105,6 +108,7 @@ import { RbChatComponent } from './rb-chat/rb-chat.component';
     RbDurationInputComponent,
     RbPopupListComponent,
     RbPopupDatetimeComponent,
+    RbPopupAddressesComponent,
     RbSearchComponent,
     RbMapComponent,
     RbMenuDirective,
@@ -122,6 +126,7 @@ import { RbChatComponent } from './rb-chat/rb-chat.component';
     RbDynamicformComponent,
     RbChoiceInputComponent,
     RbSwitchInputComponent,
+    RbAddressInputComponent,
     RbBreadcrumbComponent,
     RbGanttComponent,
     RbDragObjectDirective,
@@ -129,7 +134,7 @@ import { RbChatComponent } from './rb-chat/rb-chat.component';
     RbDragChangeformDirective,
     RbAggregatesetDirective,
     RbGraphComponent,
-    RbChatComponent
+    RbChatComponent,
   ],
   exports: [
     DesktopRootComponent,
@@ -154,6 +159,7 @@ import { RbChatComponent } from './rb-chat/rb-chat.component';
     RbDurationInputComponent,
     RbPopupListComponent,
     RbPopupDatetimeComponent,
+    RbPopupAddressesComponent,
     RbSearchComponent,
     RbMapComponent,
     RbMenuDirective,
@@ -171,6 +177,7 @@ import { RbChatComponent } from './rb-chat/rb-chat.component';
     RbDynamicformComponent,
     RbChoiceInputComponent,
     RbSwitchInputComponent,
+    RbAddressInputComponent,
     RbBreadcrumbComponent,
     RbGanttComponent,
     RbDragObjectDirective,
@@ -191,7 +198,8 @@ import { RbChatComponent } from './rb-chat/rb-chat.component';
   entryComponents: [
     RbPopupListComponent,
     RbPopupDatetimeComponent,
-    RbFilterBuilderComponent
+    RbFilterBuilderComponent,
+    RbPopupAddressesComponent
   ],
   bootstrap: [
   ] 

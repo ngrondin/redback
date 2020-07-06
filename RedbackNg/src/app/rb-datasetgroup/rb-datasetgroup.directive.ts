@@ -29,6 +29,16 @@ export class RbDatasetGroupDirective {
   public get selectedObject(): RbObject {
     return this._selectedObject;
   }
+
+  public get isLoading(): boolean {
+    let l: boolean = false;
+    for(let key of Object.keys(this.datasets)) {
+      if(this.datasets[key].isLoading) {
+        l = true;
+      }
+    }
+    return l;
+  }
   
   public select(item: RbObject) {
     this._selectedObject = item;

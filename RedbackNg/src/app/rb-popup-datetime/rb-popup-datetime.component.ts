@@ -2,6 +2,7 @@ import { Component, OnInit, Output, EventEmitter, Inject } from '@angular/core';
 import { CONTAINER_DATA } from 'app/tokens';
 import { OverlayRef } from '@angular/cdk/overlay';
 import { DataService } from 'app/data.service';
+import { RbPopupComponent } from 'app/rb-popup/rb-popup.component';
 
 export class DateTimePopupConfig {
   initialDate: Date;
@@ -15,7 +16,7 @@ export class DateTimePopupConfig {
   templateUrl: './rb-popup-datetime.component.html',
   styleUrls: ['./rb-popup-datetime.component.css']
 })
-export class RbPopupDatetimeComponent implements OnInit {
+export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit {
 
   @Output() selected: EventEmitter<any> = new EventEmitter();
 
@@ -37,7 +38,9 @@ export class RbPopupDatetimeComponent implements OnInit {
     @Inject(CONTAINER_DATA) public config: DateTimePopupConfig, 
     public overlayRef: OverlayRef,
     private dataService: DataService
-  ) { }
+  ) {
+    super();
+  }
 
   ngOnInit() {
     this.year = this.config.initialDate.getFullYear();
@@ -147,4 +150,10 @@ export class RbPopupDatetimeComponent implements OnInit {
     return angle;
   }
 
+  public getHighlighted() {
+    
+  }
+  public setSearch(val: String) {
+    
+  }
 }

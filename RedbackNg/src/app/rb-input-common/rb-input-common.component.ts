@@ -6,7 +6,7 @@ import { RbObject } from 'app/datamodel';
   templateUrl: './rb-input-common.component.html',
   styleUrls: ['./rb-input-common.component.css']
 })
-export class RbInputCommonComponent implements OnInit {
+export abstract class RbInputCommonComponent implements OnInit {
   @Input('label') label: string;
   @Input('icon') icon: string;
   @Input('size') size: number;
@@ -37,7 +37,7 @@ export class RbInputCommonComponent implements OnInit {
   }
 
   public flash() {
-    this.flasherOn = true;
+    setTimeout(() => {this.flasherOn = true}, 1);
     setTimeout(() => {this.flasherOn = false}, 100);
   }
 

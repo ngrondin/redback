@@ -4,17 +4,14 @@ import { RbObject } from '../datamodel';
 import { OverlayRef } from '@angular/cdk/overlay';
 import { CONTAINER_DATA } from '../tokens';
 import { DataService } from 'app/data.service';
+import { RbPopupComponent } from 'app/rb-popup/rb-popup.component';
 
 @Component({
   selector: 'rb-popup-list',
   templateUrl: './rb-popup-list.component.html',
   styleUrls: ['./rb-popup-list.component.css']
 })
-export class RbPopupListComponent implements OnInit {
-
-  @Output() selected: EventEmitter<any> = new EventEmitter();
-  @Output() expanded: EventEmitter<any> = new EventEmitter();
-  @Output() colapsed: EventEmitter<any> = new EventEmitter();
+export class RbPopupListComponent extends RbPopupComponent implements OnInit {
 
   public hierarchy: RbObject[] = [];
   public list: RbObject[] = [];
@@ -25,7 +22,9 @@ export class RbPopupListComponent implements OnInit {
     @Inject(CONTAINER_DATA) public config: any, 
     public overlayRef: OverlayRef,
     private dataService: DataService
-  ) { }
+  ) {
+    super();
+  }
 
   ngOnInit() {
     this.search = "";
@@ -68,7 +67,6 @@ export class RbPopupListComponent implements OnInit {
     this.list = [];
     this.hierarchy.push(object);
     this.getData();
-    this.expanded.emit(object);
   }
 
   public colapse(object: RbObject) {
@@ -76,6 +74,9 @@ export class RbPopupListComponent implements OnInit {
     this.list = [];
     this.hierarchy.splice(i);
     this.getData();
-    this.colapsed.emit(object);
   }
+
+  public getHighlighted() {
+    throw new Error("Method not implemented.");
+  }  
 }

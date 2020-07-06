@@ -1,7 +1,10 @@
+declare const google: any
+
 import { Injectable } from '@angular/core';
 import { Observable, of, Observer } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+
 
 const httpOptions = {
   headers: new HttpHeaders().set("Content-Type", "application/json"),
@@ -24,10 +27,12 @@ export class ApiService {
   public chatService: string;
   public chatWebsocket: WebSocketSubject<any>;
   public chatObservers: Observer<String>[] = [];
+  public placesAutocompleteService: any;
 
   constructor(
     private http: HttpClient
   ) { 
+    this.placesAutocompleteService = new google.maps.places.AutocompleteService();
   }
 
   getObject(name: string, uid: string): Observable<any> {
@@ -43,13 +48,14 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  listObjects(name: string, filter: any, search: string, sort: any, page: number): Observable<any> {
+  listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number): Observable<any> {
     const req = {
       action: 'list',
       object: name,
       filter: filter,
       sort: sort,
       page: page,
+      pagesize: pageSize,
       options: {
         addrelated: true,
         addvalidation: true
@@ -141,6 +147,12 @@ export class ApiService {
       }
     };
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
+  /******* Files *********/
+
+  listFiles(object: string, uid: string): Observable<any> {
+    return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?object=' + object + '&uid=' + uid, httpOptions);
   }
 
   /******* Signals *********/
@@ -297,11 +309,17 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }
 
-
+  /********* Google Location **********/  
 
   
-  listFiles(object: string, uid: string): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?object=' + object + '&uid=' + uid, httpOptions);
+  predictAddresses(search: String): Observable<any> {
+    return new Observable<any>((observer) => {
+      setTimeout(() => {
+        this.placesAutocompleteService.getQueryPredictions({input: search.toString()}, (predictions, status) => {
+          observer.next(predictions);
+          observer.complete();
+        });
+        }, 1);
+    })    
   }
-
 }
