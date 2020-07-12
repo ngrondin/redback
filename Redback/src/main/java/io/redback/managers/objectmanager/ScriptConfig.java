@@ -27,6 +27,7 @@ public class ScriptConfig
 		scriptVars.add("pm");
 		scriptVars.add("firebus");
 		scriptVars.add("userprofile");
+		scriptVars.add("geo");
 		function = new Function(jsm, name, scriptVars, source);
 	}
 	

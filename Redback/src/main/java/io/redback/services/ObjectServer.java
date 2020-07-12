@@ -65,7 +65,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					}
 					else if(action.equals("list"))
 					{
-						Timer t = new Timer("server");
+						//Timer t = new Timer("server");
 						DataMap filter = request.getObject("filter");
 						String attribute = request.getString("attribute");
 						String uid = request.getString("uid");
@@ -80,7 +80,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 								objects = listRelated(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
 							else
 								objects = list(session, objectName, filter, search, sort, addRelated, page, pageSize);
-							t.mark("afterlist");
+							//t.mark("afterlist");
 							responseData = new DataMap();
 							DataList list = new DataList();
 							if(objects != null)
@@ -92,7 +92,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						{
 							throw new FunctionErrorException("A 'list' action requires either a filter, a search or a uid-attribute pair");
 						}
-						t.mark();
+						//t.mark();
 					}
 					else if(action.equals("listrelated"))
 					{
@@ -221,7 +221,8 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 		}		
 
 		logger.finer("Object service finish");
-		return response;	}
+		return response;	
+	}
 
 	public Payload unAuthenticatedService(Session session, Payload payload)	throws FunctionErrorException
 	{

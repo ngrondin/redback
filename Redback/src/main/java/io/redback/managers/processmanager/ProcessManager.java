@@ -68,7 +68,8 @@ public class ProcessManager
 		scriptVars.add("pid");
 		scriptVars.add("pm");
 		scriptVars.add("firebus");
-		scriptVars.add("data");	
+		scriptVars.add("data");
+		scriptVars.add("processuser");
 	}
 
 	

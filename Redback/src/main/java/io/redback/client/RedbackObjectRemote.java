@@ -59,12 +59,16 @@ public class RedbackObjectRemote {
 	}
 	
 	public void set(String attribute, Object value) throws RedbackException {
+		set(new DataMap(attribute, value));
+	}
+	
+	public void set(DataMap map) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "update");
 			req.put("object", data.getString("objectname"));
 			req.put("uid", getUid());
-			req.put("data", new DataMap(attribute, value));
+			req.put("data", map);
 			Payload reqP = new Payload(req.toString());
 			reqP.metadata.put("token", token);
 			Payload respP = firebus.requestService(objectService, reqP);
@@ -73,6 +77,6 @@ public class RedbackObjectRemote {
 		} catch(Exception e) {
 			throw new RedbackException("Error updating object", e);
 		}
-	}
+	}	
 	
 }

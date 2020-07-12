@@ -13,6 +13,7 @@ import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
@@ -21,7 +22,6 @@ import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
-import io.redback.utils.Timer;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.LoggerJSFunction;
@@ -167,6 +167,7 @@ public class RedbackObject extends RedbackElement
 		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
 		scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		scriptContext.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
+		scriptContext.put("geo", new GeoClientJSWrapper(objectManager.getGeoClient()));
 		scriptContext.put("global", JSConverter.toJS(objectManager.getGlobalVariables()));
 		scriptContext.put("log", new LoggerJSFunction());
 		scriptContext.put("canRead", new SessionRightsJSFunction(session, "read"));
@@ -438,12 +439,12 @@ public class RedbackObject extends RedbackElement
 				objectManager.commitData(config.getCollection(), key, dbData);
 				objectManager.signal(this);
 				executeScriptsForEvent("aftersave");
-				updatedAttributes.clear();
 				if(isNewObject)
 				{
 					executeScriptsForEvent("aftercreate");
 					isNewObject = false;
 				}
+				updatedAttributes.clear();
 			}
 			else
 			{

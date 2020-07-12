@@ -19,7 +19,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 	private Logger logger = Logger.getLogger("io.redback");
 	protected ObjectManager objectManager;
 	protected Session session;
-	protected String[] members = {"getObject", "getObjectList", "getRelatedObjectList", "updateObject", "createObject"};
+	protected String[] members = {"getObject", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "execute"};
 	
 	public ObjectManagerJSWrapper(ObjectManager om, Session s)
 	{
@@ -98,6 +98,19 @@ public class ObjectManagerJSWrapper implements ProxyObject
 					} catch (Exception e) {
 						logger.severe("Errror in createObject : " + e.getMessage());
 						throw new RuntimeException("Errror in createObject", e);
+					}
+				}
+			};
+		} else if(key.equals("execute")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String functionName = arguments[0].asString(); 
+					try {
+						objectManager.executeFunction(session, functionName);
+						return null;
+					} catch (Exception e) {
+						logger.severe("Error in execute : " + e.getMessage());
+						throw new RuntimeException("Error in execute", e);
 					}
 				}
 			};

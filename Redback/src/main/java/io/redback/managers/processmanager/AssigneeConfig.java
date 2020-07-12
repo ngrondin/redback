@@ -16,6 +16,7 @@ public class AssigneeConfig
 	public static int GROUP = 2;
 	public static int PROCESS = 3;
 	
+	/*
 	public AssigneeConfig(ProcessManager pm, int at, String a) throws RedbackException
 	{
 		processManager = pm;
@@ -23,6 +24,7 @@ public class AssigneeConfig
 		assigneeStr = a;
 		assigneeExpr = new Expression(processManager.getJSManager(), "pm_assignee_" + StringUtils.base16(a.hashCode()), pm.getScriptVariableNames(), a);
 	}
+	*/
 	
 	public AssigneeConfig(ProcessManager pm, DataMap c) throws RedbackException
 	{

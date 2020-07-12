@@ -19,7 +19,7 @@ public class RedbackObjectJSWrapper implements ProxyObject
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected RedbackObject rbObject;
-	protected String[] members = {"getRelated", "save", "getUpdatedAttributes", "isNew"};
+	protected String[] members = {"getRelated", "save", "getUpdatedAttributes", "isNew", "isAttributeUpdated"};
 	
 	public RedbackObjectJSWrapper(RedbackObject o)
 	{
@@ -61,10 +61,23 @@ public class RedbackObjectJSWrapper implements ProxyObject
 				return new ProxyExecutable() {
 					public Object execute(Value... arguments) {
 						List<Object> list = new ArrayList<Object>(rbObject.getUpdatedAttributes());
-						return ProxyArray.fromList(list);
+						ProxyArray pa = ProxyArray.fromList(list); 
+						return pa;
 					}
 				};				
 			}
+			else if(name.equals("isAttributeUpdated"))
+			{
+				return new ProxyExecutable() {
+					public Object execute(Value... arguments) {
+						String attribute = arguments[0].asString();
+						Boolean ret = false;
+						if(rbObject.getUpdatedAttributes().contains(attribute))
+							ret = true;
+						return JSConverter.toJS(ret);
+					}
+				};				
+			}			
 			else if(rbObject.getObjectConfig().getScriptForEvent(name) != null)
 			{
 				return new ProxyExecutable() {

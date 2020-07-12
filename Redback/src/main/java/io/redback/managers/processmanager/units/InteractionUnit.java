@@ -7,6 +7,7 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.jsmanager.Expression;
+import io.redback.managers.processmanager.ActionConfig;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignee;
 import io.redback.managers.processmanager.AssigneeConfig;
@@ -18,9 +19,10 @@ import io.redback.managers.processmanager.Process;
 
 public class InteractionUnit extends ProcessUnit 
 {
-	protected DataList actionsConfig;
+	//protected DataList actionsConfig;
 	protected String assigneeType;
 	protected ArrayList<AssigneeConfig> assigneeConfigs;
+	protected ArrayList<ActionConfig> actionConfigs;
 	protected DataMap notificationConfig;
 	protected String interactionCode;
 	protected Expression labelExpression;
@@ -29,13 +31,19 @@ public class InteractionUnit extends ProcessUnit
 	public InteractionUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
 		super(pm, p, config);
-		actionsConfig = config.getList("actions");
 		assigneeConfigs = new ArrayList<AssigneeConfig>();
 		if(config.containsKey("assignees")  &&  config.get("assignees") instanceof DataList)
 		{
 			DataList list = config.getList("assignees");
 			for(int i = 0; i < list.size(); i++)
 				assigneeConfigs.add(new AssigneeConfig(processManager, list.getObject(i)));
+		}
+		actionConfigs = new ArrayList<ActionConfig>();
+		if(config.containsKey("actions")  &&  config.get("actions") instanceof DataList)
+		{
+			DataList list = config.getList("actions");
+			for(int i = 0; i < list.size(); i++)
+				actionConfigs.add(new ActionConfig(processManager, p, this, list.getObject(i)));
 		}
 		notificationConfig = config.getObject("notification");
 		interactionCode = notificationConfig.getString("code");
@@ -75,16 +83,16 @@ public class InteractionUnit extends ProcessUnit
 		boolean foundAction = false;
 		if(isAssignee(actionner, pi))
 		{
-			for(int i = 0; i < actionsConfig.size(); i++)
+			for(int i = 0; i < actionConfigs.size(); i++)
 			{
-				if(actionsConfig.getObject(i).getString("action").equals(action))
+				ActionConfig actionConfig = actionConfigs.get(i);
+				if(actionConfig.getActionName().equals(action))
 				{
 					logger.fine("Actionning interaction with '" + action + "'");
 					foundAction = true;
-					String nextNode = actionsConfig.getObject(i).getString("nextnode");
 					pi.clearAssignees();
 					pi.setLastActioner(actionner);
-					pi.setCurrentNode(nextNode);
+					pi.setCurrentNode(actionConfig.getNextNode());
 				}
 			}
 
@@ -104,36 +112,36 @@ public class InteractionUnit extends ProcessUnit
 	{
 		if(isAssignee(actionner, pi))
 		{
-			return getNotification(pi);
+			Map<String, Object> context = pi.getScriptContext();
+			String code = notificationConfig.getString("code");
+			String label = (String)labelExpression.eval(context);
+			String message = (String)messageExpression.eval(context);
+			Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), code, label, message);
+			for(ActionConfig actionConfig: actionConfigs)
+			{
+				if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeMatch(actionner, pi.getAssigneeById((String)actionConfig.evaluateExclusiveId(pi)))))
+					assignment.addAction(actionConfig.getActionName(), actionConfig.getActionDescription());
+			}
+			return assignment;		
 		}
 		return null;
 	}
-	
-	protected Assignment getNotification(ProcessInstance pi) throws RedbackException
-	{
-		Map<String, Object> context = pi.getScriptContext();
-		String code = notificationConfig.getString("code");
-		String label = (String)labelExpression.eval(context);
-		String message = (String)messageExpression.eval(context);
-		Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), code, label, message);
-		for(int i = 0; i < actionsConfig.size(); i++)
-			assignment.addAction(actionsConfig.getObject(i).getString("action"), actionsConfig.getObject(i).getString("description"));
-		return assignment;		
-	}
-	
+		
 	protected boolean isAssignee(Actionner actionner, ProcessInstance pi)
 	{
-		boolean isAssignee = false;
-
-		ArrayList<Assignee> assignees = pi.getAssignees();
-		for(int i = 0; i < assignees.size(); i++)
-		{
-			Assignee assignee = assignees.get(i);
-			if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId()))
-				isAssignee = true;
-			else if(assignee.getType() == actionner.getType() && assignee.getId().equals(actionner.getId()))
-				isAssignee = true;
-		}
-		return isAssignee;
+		for(Assignee assignee: pi.getAssignees())
+			if(assigneeMatch(actionner, assignee))
+				return true;
+		return false;
+	}
+	
+	protected boolean assigneeMatch(Actionner actionner, Assignee assignee)
+	{
+		if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId()))
+			return true;
+		else if(assignee.getType() == actionner.getType() && assignee.getId().equals(actionner.getId()))
+			return true;
+		else 
+			return false;
 	}
 }

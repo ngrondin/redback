@@ -70,6 +70,7 @@ public class ProcessInstance
 			scriptContext.put("pid", getId());
 			scriptContext.put("pm", new ProcessManagerJSWrapper(processManager, this));
 			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getSystemUserSession(domain)));
+			scriptContext.put("processuser", processManager.getSystemUserSession(domain).getUserProfile().getUsername());
 			updateScriptBindings();
 		} catch(Exception e) {
 		}
@@ -155,6 +156,14 @@ public class ProcessInstance
 		for(int i = 0; i < assignees.size(); i++)
 			ret.add(new Assignee(assignees.getObject(i)));
 		return ret;
+	}
+	
+	public Assignee getAssigneeById(String id) 
+	{
+		for(int i = 0; i < assignees.size(); i++)
+			if(assignees.getObject(i).getString("id").equals(id))
+				return new Assignee(assignees.getObject(i));
+		return null;
 	}
 	
 	public void setLastActioner(Actionner la)

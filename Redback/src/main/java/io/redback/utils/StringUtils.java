@@ -79,8 +79,6 @@ public class StringUtils
 	}
 	
 	
-	
-	
 	public static String convertDataEntityToAttributeString(DataEntity obj)
 	{
 		if(obj != null)

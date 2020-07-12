@@ -21,6 +21,8 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
+import io.redback.client.GeoClient;
+import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
 import io.redback.security.Session;
@@ -42,6 +44,7 @@ public class ObjectManager
 	protected String idGeneratorServiceName;
 	protected String processServiceName;
 	protected String signalConsumerName;
+	protected String geoServiceName;
 	protected DataMap globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 	protected HashMap<String, ScriptConfig> globalScripts;
@@ -49,6 +52,7 @@ public class ObjectManager
 	protected HashMap<Long, HashMap<String, RedbackObject>> transactions;
 	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
+	protected GeoClient geoClient;
 
 	public ObjectManager(Firebus fb, DataMap config)
 	{
@@ -60,9 +64,11 @@ public class ObjectManager
 		idGeneratorServiceName = config.getString("idgeneratorservice");
 		processServiceName = config.getString("processservice");
 		signalConsumerName = config.getString("signalconsumer");
+		geoServiceName = config.getString("geoservice");
 		globalVariables = config.getObject("globalvariables");
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
+		geoClient = new GeoClient(firebus, geoServiceName);
 		objectConfigs = new HashMap<String, ObjectConfig>();
 		globalScripts = new HashMap<String, ScriptConfig>();
 		transactions = new HashMap<Long, HashMap<String, RedbackObject>>();
@@ -77,6 +83,11 @@ public class ObjectManager
 	public JSManager getJSManager()
 	{
 		return jsManager;
+	}
+	
+	public GeoClient getGeoClient()
+	{
+		return geoClient;
 	}
 	
 	public DataMap getGlobalVariables()
@@ -96,6 +107,7 @@ public class ObjectManager
 		context.put("om", new ObjectManagerJSWrapper(this, session));
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("firebus", new FirebusJSWrapper(firebus, session));
+		context.put("geo", new GeoClientJSWrapper(geoClient));
 		context.put("global", JSConverter.toJS(getGlobalVariables()));
 		context.put("log", new LoggerJSFunction());
 		context.put("canRead", new SessionRightsJSFunction(session, "read"));

@@ -2,7 +2,6 @@ package io.redback.managers.objectmanagers.js;
 
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
@@ -88,7 +87,8 @@ public class ProcessManagerProxyJSWrapper implements ProxyObject
 						logger.severe("Error getting process assignment: " + e);
 						throw new RuntimeException("Error getting process assignment", e);						
 					}
-					return null;				}
+					return null;				
+				}
 			};				
 		} else if(key.equals("action")) {
 			return new ProxyExecutable() {

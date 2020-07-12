@@ -1,7 +1,6 @@
 package io.redback.utils.js;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
@@ -78,7 +77,6 @@ public class FirebusJSWrapper implements ProxyObject
 	}
 
 	public boolean hasMember(String key) {
-		
 		return Arrays.asList(members).contains(key);
 	}
 
