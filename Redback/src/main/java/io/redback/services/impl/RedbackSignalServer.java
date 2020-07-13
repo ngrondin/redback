@@ -8,7 +8,6 @@ import java.util.Map;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
-import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
@@ -57,14 +56,26 @@ public class RedbackSignalServer extends SignalServer {
 	protected void onSignal(DataMap signal) throws RedbackException {
 		String type = signal.getString("type");
 		if(type.equals("objectupdate")) {
-			List<Session> list = objectUpdate.get(signal.getString("object.objectname")).get(signal.getString("object.uid"));
-			for(Session session : list) 
-				sendStreamData(session, new Payload(signal.toString()));
+			String objectName = signal.getString("object.objectname");
+			String uid = signal.getString("object.uid");
+			Map<String, List<Session>> map = objectUpdate.get(objectName);
+			if(map != null) {
+				List<Session> list = map.get(uid);
+				if(list != null)
+					for(Session session : list) 
+						sendStreamData(session, new Payload(signal.toString()));
+			}
 		} else if(type.equals("objectcreate")) {
-			List<FilterSubscription> list = objectCreate.get(signal.getString("object.objectname")).get(signal.getString("object.domain"));
-			for(FilterSubscription subs : list) 
-				if(subs.matches(signal.getObject("object.data")))
-					sendStreamData(subs.session, new Payload(signal.toString()));
+			String objectName = signal.getString("object.objectname");
+			String uid = signal.getString("object.uid");
+			Map<String, List<FilterSubscription>> map = objectCreate.get(objectName);
+			if(map != null) {
+				List<FilterSubscription> list = map.get(uid);
+				if(list != null)
+					for(FilterSubscription subs : list) 
+						if(subs.matches(signal.getObject("object.data")))
+							sendStreamData(subs.session, new Payload(signal.toString()));
+			}
 		}
 	}
 
@@ -131,8 +142,8 @@ public class RedbackSignalServer extends SignalServer {
 					unsubscribe(session);
 				}
 			}
-		} catch(DataException e) {
-			//TODO: Handle this
+		} catch(Exception e) {
+			throw new RedbackException("Error process signal subscriptions", e);
 		}
 		
 	}

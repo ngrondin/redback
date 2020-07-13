@@ -26,6 +26,7 @@ public abstract class SignalServer extends AuthenticatedStreamProvider implement
 		try {
 			onSignal(new DataMap(payload.getString()));
 		} catch(Exception e) {
+			e.printStackTrace();
 			logger.severe(e.getMessage());
 		}
 	}
