@@ -104,6 +104,7 @@ export class RbGanttComponent implements OnInit {
   endMS: number;
   multiplier: number;
   widthPX: number;
+  scrollTop: number;
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   ganttData: any[];
@@ -147,7 +148,6 @@ export class RbGanttComponent implements OnInit {
     let lu = 0;
     for(let ser in this.lists) {
       for(let obj of this.lists[ser]) {
-        //str = str + JSON.stringify(obj.simplify());
         cnt = cnt + 1;
         let u = obj.lastUpdated;
         if(u > lu) {
@@ -155,14 +155,6 @@ export class RbGanttComponent implements OnInit {
         }
       }
     }
-    /*
-    let hash: string | Int32Array = Md5.hashStr(str);
-    if(hash != this.lastHash) {
-      this.lastHash = hash;
-      return true;
-    } else {
-      return false;
-    }*/
     if(cnt != this.lastObjectCount || lu > this.lastObjectUpdate) {
       this.lastObjectCount = cnt;
       this.lastObjectUpdate = lu;
@@ -375,6 +367,7 @@ export class RbGanttComponent implements OnInit {
 
   public scroll(event) {
     this.scrollLeft = event.target.scrollLeft;
+    this.scrollTop = event.target.scrollTop;
   }
 
   public getSizeForObject(object: RbObject) : any {

@@ -1,10 +1,13 @@
 :host {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
+    overflow: hidden;
 }
 
 .rb-gantt-toolbar {
     display: flex;
+    flex: 0 0 auto;
     justify-content: flex-end;
     height: 30px;
     padding: 12px;
@@ -13,6 +16,7 @@
 .rb-gantt-header {
     display: flex;
     flex-direction: row;
+    flex: 0 0 auto;
     height: 64px;
 }
 
@@ -65,8 +69,9 @@
 .rb-gantt-body {
     display: flex;
     flex-direction: row;
+    flex: 0 1 auto;
+    overflow: hidden;
     border-bottom: 1px solid lightgray;
-
 }
 
 .rb-gantt-laneheads {
@@ -74,6 +79,13 @@
     flex-direction: column;
     flex: 0 0 auto;
     width: 250px;
+}
+
+.rb-gantt-laneheadscontainer {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    position: relative;
 }
 
 .rb-gantt-lanehead {
@@ -87,6 +99,13 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
+    position: relative;
+}
+
+.rb-gantt-lanecontainer {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
     position: relative;
 }
 
@@ -141,6 +160,7 @@
 
 .rb-gantt-laneheight {
     height: 42px;
+    flex: 0 0 auto;
 }
 
 .rb-gantt-lanecolor1 {

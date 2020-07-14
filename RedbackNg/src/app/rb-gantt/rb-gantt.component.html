@@ -59,39 +59,46 @@
     <div
         class="rb-gantt-laneheads">
         <div
-            *ngFor="let lane of ganttData; let i = index"
-            [class]="'rb-gantt-lanehead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')">
+            class="rb-gantt-laneheadscontainer"
+            [style.top.px]="-scrollTop">
             <div
-                class="rb-gantt-mainlabel">
-                {{lane.label}}
+                *ngFor="let lane of ganttData; let i = index"
+                [class]="'rb-gantt-lanehead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')">
+                <div
+                    class="rb-gantt-mainlabel">
+                    {{lane.label}}
+                </div>
+                <mat-icon>{{lane.icon}}</mat-icon>
             </div>
-            <mat-icon>{{lane.icon}}</mat-icon>
         </div>
     </div>
     <div
         class="rb-gantt-lanes"
         (scroll)="scroll($event)">
         <div
-            *ngFor="let mark of hourMarks"
-            [style.left.px]="mark.px"
-            class="rb-gantt-mark">
-        </div>
-        <div
-            *ngFor="let lane of ganttData; let i = index"
-            [class]="'rb-gantt-lane rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
-            [style.width.px]="widthPX"
-            (rb-drag-dropzone)="dropped($event, lane)"
-            [rb-drag-changeform]="getSizeForObjectCallback">
+            class="rb-gantt-lanecontainer">
             <div
-                *ngFor="let spread of lane.spreads"
-                [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
-                [rb-drag-object]="spread.canEdit ? spread.object : null"
-                [style.width.px]="spread.width"
-                [style.left.px]="spread.start"
-                [style.background-color]="spread.color">
+                *ngFor="let mark of hourMarks"
+                [style.left.px]="mark.px"
+                class="rb-gantt-mark">
+            </div>
+            <div
+                *ngFor="let lane of ganttData; let i = index"
+                [class]="'rb-gantt-lane rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
+                [style.width.px]="widthPX"
+                (rb-drag-dropzone)="dropped($event, lane)"
+                [rb-drag-changeform]="getSizeForObjectCallback">
                 <div
-                    class="rb-gantt-smalllabel">
-                    {{spread.label}}
+                    *ngFor="let spread of lane.spreads"
+                    [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
+                    [rb-drag-object]="spread.canEdit ? spread.object : null"
+                    [style.width.px]="spread.width"
+                    [style.left.px]="spread.start"
+                    [style.background-color]="spread.color">
+                    <div
+                        class="rb-gantt-smalllabel">
+                        {{spread.label}}
+                    </div>
                 </div>
             </div>
         </div>

@@ -125,7 +125,7 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   private setData(data: RbObject[]) {
-    this.list = this.list.concat(data);
+    this.list = [...this.list.concat(data)];
     this.fetchThreads = this.fetchThreads - 1;
     if(this.fetchAll && data.length > 0) {
       this.fetchNextPage();
@@ -147,6 +147,7 @@ export class RbDatasetDirective implements OnChanges {
   private receiveNewlyCreatedData(object: RbObject) {
     if(object.objectname == this.objectname && this.isLoading == false && this.list.includes(object) == false && (this.searchString == null || this.searchString == '') && this.list.length < 50) {
       this.list.push(object);
+      //this.list = [...this.list];
     }
   }
 
@@ -207,10 +208,12 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   public addObjectAndSelect(obj: RbObject) {
-    if(this.list.indexOf(obj) == -1) {
-      this.list.unshift(obj);
-      this.select(obj);
+    if(this.list.indexOf(obj) > -1) {
+      this.list.splice(this.list.indexOf(obj));
     }
+    this.list.unshift(obj);
+    this.select(obj);
+    //this.list = [...this.list];
   }
 
 

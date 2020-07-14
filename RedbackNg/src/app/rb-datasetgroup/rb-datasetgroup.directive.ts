@@ -1,4 +1,4 @@
-import { Directive, Input } from '@angular/core';
+import { Directive, Input, SimpleChanges } from '@angular/core';
 import { RbDatasetDirective } from 'app/rb-dataset/rb-dataset.directive';
 import { RbObject } from 'app/datamodel';
 
@@ -9,11 +9,11 @@ import { RbObject } from 'app/datamodel';
 export class RbDatasetGroupDirective {
   @Input('active') active: boolean;
 
-  datasets: RbDatasetDirective[] = [];
+  datasets: any = {};
   _selectedObject: RbObject;
 
   constructor() { }
-
+  
   public register(name: string, dataset: RbDatasetDirective) {
     this.datasets[name] = dataset;
   }
