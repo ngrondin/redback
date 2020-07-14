@@ -49,19 +49,19 @@ public abstract class Executor {
 		} 
 		catch (ScriptException e)
 		{
-			throw new RedbackException("Script error executing '" + sourceString + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
+			throw new RedbackException("Script error executing '" + functionName + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
 		}
 		catch(NullPointerException e)
 		{
-			throw new RedbackException("Null pointer exception in '" + sourceString + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
+			throw new RedbackException("Null pointer exception in '" + functionName + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
 		}
 		catch(RuntimeException e)
 		{
-			throw new RedbackException("Runtime error executing in '" + sourceString + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
+			throw new RedbackException("Runtime error executing in '" + functionName + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
 		}
 		catch (NoSuchMethodException e) 
 		{
-			throw new RedbackException("No such method error executing '" + sourceString + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
+			throw new RedbackException("No such method error executing '" + functionName + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
 		}
 	}
 	

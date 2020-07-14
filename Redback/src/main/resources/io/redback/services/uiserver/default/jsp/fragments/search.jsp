@@ -8,7 +8,7 @@ if(config.filter != null) { %>
 if(config.sort != null) { %>
 	[sortconfig]="<%=utils.convertDataMapToAttributeString(config.sort)%>"<%
 } %>
-	[object]="<%=dataset%>.objectname"
-	(search)="<%=dataset%>.search($event)"
-	(filterSort)="<%=dataset%>.filterSort($event)">
+	[object]="<%=parents.dataset%>.objectname"
+	(search)="<%=parents.dataset%>.search($event)"
+	(filterSort)="<%=parents.dataset%>.filterSort($event)">
 </rb-search>

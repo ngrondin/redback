@@ -5,9 +5,9 @@ var list = config.actions;
 var noShow = "";
 for(var i = 0; i < list.length; i++) { 
 	var actionConfig = list[i];
-	var showExpr = (actionConfig.show != null ? actionConfig.show : 'true').split('object').join(dataset + '.selectedObject').split('relatedObject').join(dataset + '.relatedObject');
-	if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
-	if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
+	var showExpr = (actionConfig.show != null ? actionConfig.show : 'true').split('object').join(parents.dataset + '.selectedObject').split('relatedObject').join(parents.dataset + '.relatedObject');
+	if(showExpr.indexOf('.selectedObject.') > -1) showExpr = parents.dataset + '.selectedObject != null && (' + showExpr + ')';
+	if(showExpr.indexOf('.relatedObject.') > -1) showExpr = parents.dataset + '.relatedObject != null && (' + showExpr + ')';
 	if(i > 0)
 		noShow = noShow + " && ";
 	noShow = noShow + "!(" + showExpr + ")"
@@ -16,7 +16,7 @@ for(var i = 0; i < list.length; i++) {
 	%>
 	<button
 		mat-menu-item
-		(click)="<%=dataset%>.action('<%=action%>', '<%=actionConfig.param%>');"
+		(click)="<%=parents.dataset%>.action('<%=action%>', '<%=actionConfig.param%>');"
 		*ngIf="<%=showExpr%>">
 		<%=actionConfig.label %>
 	</button><%

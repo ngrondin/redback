@@ -2,8 +2,8 @@
 if(config.inlineStyle != null) {%>
 	style="<%=config.inlineStyle%>"<%
 }
-if(typeof fileset != 'undefined') { %>
-	[uploader]="<%=fileset%>.uploader"
-	(dropped)="<%=fileset%>.upload($event)" <%
+if(typeof parents.fileset != 'undefined') { %>
+	[uploader]="<%=parents.fileset%>.uploader"
+	(dropped)="<%=parents.fileset%>.upload($event)" <%
 } %> >
 </rb-filedrop>

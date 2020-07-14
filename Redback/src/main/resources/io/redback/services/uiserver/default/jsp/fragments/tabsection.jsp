@@ -1,7 +1,7 @@
 <rb-tab-section 
 	#<%=id%>="tabsection"
 	style="<%=config.inlineStyle%>"
-	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
+	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
 	<div
 		class="rb-tab-header-section">
 		<div

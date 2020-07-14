@@ -3,8 +3,8 @@
 	[id]="'<%=id%>'"
 	[label]="'<%=config.label%>'"
 	style="<%=config.inlineStyle%>"
-	[active]="<%=tabsection%>.isTabVisible(<%=id%>)"
+	[active]="<%=parents.tabsection%>.isTabVisible(<%=id%>)"
 	[hidden]="!<%=id%>.active"
-	(register)="<%=tabsection%>.register(<%=id%>)">
+	(register)="<%=parents.tabsection%>.register(<%=id%>)">
 	#content#
 </rb-tab>

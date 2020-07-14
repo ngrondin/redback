@@ -25,12 +25,12 @@ var versionOrDefault = version != null ? version : 'default';
     initialview="<%=config.defaultview%>"
     menuview="<%=config.name%>"
     iconsets="<%=utils.convertDataEntityToAttributeString(config.iconsets)%>"
-    uiservice="<%=uiservicepath%>"
-    objectservice="<%=objectservicepath%>"
-    fileservice="<%=fileservicepath%>"
-    processservice="<%=processservicepath%>"
-    signalservice="<%=signalservicepath%>"
-    chatservice="<%=chatservicepath%>">
+    uiservice="<%=deployment.uiservicepath%>"
+    objectservice="<%=deployment.objectservicepath%>"
+    fileservice="<%=deployment.fileservicepath%>"
+    processservice="<%=deployment.processservicepath%>"
+    signalservice="<%=deployment.signalservicepath%>"
+    chatservice="<%=deployment.chatservicepath%>">
   </app-root>
 
   <script src="<%=resourcePrefix%>/runtime-es2015.js" type="module"></script>

@@ -5,9 +5,9 @@ if(config.inlineStyle != null) {%>
 if(config.downloadonselect != null) { %>
 	[downloadOnSelect]="<%=config.downloadonselect%>" <%
 }
-if(typeof fileset != 'undefined') { %>
-	[list]="<%=fileset%>.list"
-	[selectedFile]="<%=fileset%>.selectedFile"
-	(selected)="<%=fileset%>.select($event)" <%
+if(typeof parents.fileset != 'undefined') { %>
+	[list]="<%=parents.fileset%>.list"
+	[selectedFile]="<%=parents.fileset%>.selectedFile"
+	(selected)="<%=parents.fileset%>.select($event)" <%
 } %> >
 </rb-filelist>

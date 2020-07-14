@@ -1,13 +1,13 @@
 <% 
-var showExpr = (config.show != null ? config.show : 'true').split('object').join(dataset + '.selectedObject').split('relatedObject').join(dataset + '.relatedObject');
-if(showExpr.indexOf('.selectedObject.') > -1) showExpr = dataset + '.selectedObject != null && (' + showExpr + ')';
-if(showExpr.indexOf('.relatedObject.') > -1) showExpr = dataset + '.relatedObject != null && (' + showExpr + ')';
+var showExpr = (config.show != null ? config.show : 'true').split('object').join(parents.dataset + '.selectedObject').split('relatedObject').join(parents.dataset + '.relatedObject');
+if(showExpr.indexOf('.selectedObject.') > -1) showExpr = parents.dataset + '.selectedObject != null && (' + showExpr + ')';
+if(showExpr.indexOf('.relatedObject.') > -1) showExpr = parents.dataset + '.relatedObject != null && (' + showExpr + ')';
 %><rb-dynamicform
 	style="<%=config.inlineStyle%>"
 	*ngIf="<%=showExpr%>"<%
-if(typeof dataset != 'undefined') { %>	
-	[list]="<%=dataset%>.list"
-	[isLoading]="<%=dataset%>.isLoading" <%
+if(typeof parents.dataset != 'undefined') { %>	
+	[list]="<%=parents.dataset%>.list"
+	[isLoading]="<%=parents.dataset%>.isLoading" <%
 } 
 if(config.valueattribute != null) { %>	
 	[valueattribute]="'<%=config.valueattribute%>'" <%

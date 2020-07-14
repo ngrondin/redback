@@ -3,9 +3,9 @@
 	<mat-action-list>
 		<button
 			mat-list-item 
-			*ngFor="let item of <%=dataset%>.list" 
-			[ngClass]="<%=dataset%>.selectedObject == item ? 'rb-list-item-active' : ''"
-			(click)="<%=dataset%>.select(item)">
+			*ngFor="let item of <%=parents.dataset%>.list" 
+			[ngClass]="<%=parents.dataset%>.selectedObject == item ? 'rb-list-item-active' : ''"
+			(click)="<%=parents.dataset%>.select(item)">
 			<div 
 				class="rb-list-item"
 				layout=row><%
@@ -31,7 +31,7 @@ if(config.initials != null) {%>
 	</mat-action-list>
 	<div
 	    class="rb-spinner-container"
-	    *ngIf="<%=dataset%>.isLoading">
+	    *ngIf="<%=parents.dataset%>.isLoading">
 	    <mat-spinner
 	        diameter="20">
 	    </mat-spinner>

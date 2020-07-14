@@ -2,10 +2,10 @@
 if(config.view != null) { %>
 	[view]="'<%=config.view%>'" <%
 }
-if(typeof dataset != 'undefined') { %>
-	[list]="<%=dataset%>.list"
-	[(selectedObject)]="<%=dataset%>.selectedObject"
-	[isLoading]="<%=dataset%>.isLoading" <%
+if(typeof parents.dataset != 'undefined') { %>
+	[list]="<%=parents.dataset%>.list"
+	[(selectedObject)]="<%=parents.dataset%>.selectedObject"
+	[isLoading]="<%=parents.dataset%>.isLoading" <%
 }
 if(config.headerattribute != null) { %>
 	[headerattribute]="'<%=config.headerattribute%>'" <%

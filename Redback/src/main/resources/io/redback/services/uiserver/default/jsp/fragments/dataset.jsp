@@ -10,17 +10,17 @@ if(config.object != null) { %>
 if(config.basefilter != null) { %>
 	[baseFilter]="<%=utils.convertDataMapToAttributeString(config.basefilter)%>"<% 
 } 
-if(typeof dataset == 'undefined') { %>
+if(typeof parents.dataset == 'undefined' && typeof parents.datasetgroup == 'undefined') { %>
 	[(userFilter)]="currentTarget.filter" 
 	[(searchString)]="currentTarget.search" 
 	[(selectedObject)]="currentTarget.selectedObject" <%
 } else if(config.master != null) { %>
 	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.master.relationship)%>" 
-	[relatedObject]="<%=dataset%>.selectedObject"<% 
+	[relatedObject]="<%=parents.dataset%>.selectedObject"<% 
 }  
-if(typeof datasetgroup != 'undefined' && config.name != null) { %>
-	(initiated)="<%=datasetgroup%>.register('<%=config.name%>', <%=id%>)" <%
+if(typeof parents.datasetgroup != 'undefined' && config.name != null) { %>
+	(initiated)="<%=parents.datasetgroup%>.register('<%=config.name%>', <%=id%>)" <%
 } %>
-	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
+	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
 	#content#
 </rb-dataset>

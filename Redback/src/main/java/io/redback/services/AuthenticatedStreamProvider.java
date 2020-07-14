@@ -56,6 +56,7 @@ public abstract class AuthenticatedStreamProvider extends Service implements Str
 		try {
 			onStreamData(session, payload);
 		} catch(Exception e) {
+			e.printStackTrace();
 			logger.severe("Error receiving stream data : " + e.getMessage());
 		}
 	}

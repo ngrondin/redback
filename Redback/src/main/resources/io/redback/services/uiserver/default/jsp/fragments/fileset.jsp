@@ -3,9 +3,9 @@
 if(config.inlineStyle != null) {%>
 	style="<%=config.inlineStyle%>"<%
 }
-if(typeof dataset != 'undefined') { %>
-	[relatedObject]="<%=dataset%>.selectedObject" <%
+if(typeof parents.dataset != 'undefined') { %>
+	[relatedObject]="<%=parents.dataset%>.selectedObject" <%
 } %>
-	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
+	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
 	#content#
 </rb-fileset>

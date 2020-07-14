@@ -67,10 +67,10 @@ public class RedbackSignalServer extends SignalServer {
 			}
 		} else if(type.equals("objectcreate")) {
 			String objectName = signal.getString("object.objectname");
-			String uid = signal.getString("object.uid");
+			String domain = signal.getString("object.domain");
 			Map<String, List<FilterSubscription>> map = objectCreate.get(objectName);
 			if(map != null) {
-				List<FilterSubscription> list = map.get(uid);
+				List<FilterSubscription> list = map.get(domain);
 				if(list != null)
 					for(FilterSubscription subs : list) 
 						if(subs.matches(signal.getObject("object.data")))
@@ -152,36 +152,53 @@ public class RedbackSignalServer extends SignalServer {
 		unsubscribe(session);
 	}
 
-	protected synchronized void unsubscribe(Session session) {
-		List<String[]> pointers = sessionToObjectUpdate.get(session);
-		if(pointers != null) {
-			for(String[] pointer: pointers) {
-				objectUpdate.get(pointer[0]).get(pointer[1]).remove(session);
-				if(objectUpdate.get(pointer[0]).get(pointer[1]).size() == 0) {
-					objectUpdate.get(pointer[0]).remove(pointer[1]);
-					if(objectUpdate.get(pointer[0]).size() == 0)
-						objectUpdate.remove(pointer[0]);
-				}
-			}
-			sessionToObjectUpdate.remove(session);
-		}
+	protected void unsubscribe(Session session) {
+		try {
+			synchronized(this) {
 		
-		pointers = sessionToObjectCreate.get(session);
-		if(pointers != null) {
-			for(String[] pointer: pointers) {
-				List<FilterSubscription> list = objectCreate.get(pointer[0]).get(pointer[1]);
-				if(list != null) {
-					for(FilterSubscription fs : list) 
-						if(fs.session == session)
-							list.remove(fs);
-					if(objectCreate.get(pointer[0]).get(pointer[1]).size() == 0) {
-						objectCreate.get(pointer[0]).remove(pointer[1]);
-						if(objectCreate.get(pointer[0]).size() == 0)
-							objectCreate.remove(pointer[0]);
+				List<String[]> pointers = sessionToObjectUpdate.get(session);
+				if(pointers != null) {
+					for(String[] pointer: pointers) {
+						Map<String, List<Session>> map = objectUpdate.get(pointer[0]);
+						if(map != null) {
+							List<Session> list = map.get(pointer[1]);
+							if(list != null) {
+								list.remove(session);
+								if(objectUpdate.get(pointer[0]).get(pointer[1]).size() == 0) {
+									objectUpdate.get(pointer[0]).remove(pointer[1]);
+									if(objectUpdate.get(pointer[0]).size() == 0)
+										objectUpdate.remove(pointer[0]);
+								}
+							}
+						}
 					}
+					sessionToObjectUpdate.remove(session);
+				}
+				
+				pointers = sessionToObjectCreate.get(session);
+				if(pointers != null) {
+					for(String[] pointer: pointers) {
+						Map<String, List<FilterSubscription>> map = objectCreate.get(pointer[0]);
+						if(map != null) 
+						{
+							List<FilterSubscription> list = map.get(pointer[1]);
+							if(list != null) {
+								for(int i = 0; i < list.size(); i++)
+									if(list.get(i).session == session)
+										list.remove(i--);
+								if(objectCreate.get(pointer[0]).get(pointer[1]).size() == 0) {
+									objectCreate.get(pointer[0]).remove(pointer[1]);
+									if(objectCreate.get(pointer[0]).size() == 0)
+										objectCreate.remove(pointer[0]);
+								}
+							}
+						}
+					}
+					sessionToObjectCreate.remove(session);
 				}
 			}
-			sessionToObjectCreate.remove(session);
+		} catch(Exception e) {
+			
 		}
 	}
 	

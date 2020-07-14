@@ -3,8 +3,6 @@ package io.redback.services;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import javax.script.Bindings;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
@@ -118,7 +116,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				else if(category.equals("view"))
 				{
 					logger.finer("Get view " + name);
-					response.setData(getView(session, name, version, null).toString());
+					response.setData(getView(session, name, version).toString());
 					response.metadata.put("mime", "text/html");
 				}
 			}
@@ -158,7 +156,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	
 	protected abstract HTML getMenu(Session session, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException;
 	
-	protected abstract HTML getView(Session session, String viewName, String version, Bindings context);
+	protected abstract HTML getView(Session session, String viewName, String version);
 	
 	protected abstract byte[] getResource(String name, String version) throws FunctionErrorException, FunctionTimeoutException, DataException, RedbackException, IOException;
 

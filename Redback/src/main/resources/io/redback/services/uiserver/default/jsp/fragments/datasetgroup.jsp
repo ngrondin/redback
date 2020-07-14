@@ -3,6 +3,6 @@
 if(config.inlineStyle != null) {%>
 	style="<%=config.inlineStyle%>"<%
 } %>
-	[active]="<%=(typeof tab !== 'undefined' ? tab + ".active" : "true")%>">
+	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
 	#content#
 </rb-datasetgroup>

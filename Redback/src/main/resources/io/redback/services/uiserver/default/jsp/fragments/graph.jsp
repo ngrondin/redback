@@ -8,7 +8,7 @@
 	[value]="<%=utils.convertDataEntityToAttributeString(config.value)%>"
 	[min]="'<%=config.min%>'"
 	[max]="'<%=config.max%>'" <%
-if(aggregateset != null) { %>	
-	[aggregates]="<%=aggregateset%>.aggregates" <%
+if(parents.aggregateset != null) { %>	
+	[aggregates]="<%=parents.aggregateset%>.aggregates" <%
 } %> >
 </rb-graph>

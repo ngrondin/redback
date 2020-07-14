@@ -1,4 +1,4 @@
 <rb-processactions
-	[object]="<%=dataset%>.selectedObject"
+	[object]="<%=parents.dataset%>.selectedObject"
 	[round]="<%=config.round%>">
 </rb-processactions>

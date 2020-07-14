@@ -1,8 +1,8 @@
 <button
 	mat-list-item 
 	class="rb-menu-link" <%
-if(typeof menugroup != 'undefined') { %>
-	*ngIf="<%=menu%>.isGroupOpen('<%=config.group%>')" <%
+if(typeof parents.menugroup != 'undefined') { %>
+	*ngIf="<%=parents.menu%>.isGroupOpen('<%=config.group%>')" <%
 } %>	
 	(click)="navigateTo({view:'<%=config.view%>', filter:{}, reset:true})"><%
 if(config.icon.indexOf(':') >= 0) {%>
@@ -19,7 +19,7 @@ if(config.icon.indexOf(':') >= 0) {%>
 	<span 
 		flex
 		class="rb-menu-link-text"
-		*ngIf="<%=menu%>.isLarge">
+		*ngIf="<%=parents.menu%>.isLarge">
 		<%=config.label%>
 	</span>
 </button> <%
