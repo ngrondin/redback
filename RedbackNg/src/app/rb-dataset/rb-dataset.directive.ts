@@ -147,7 +147,9 @@ export class RbDatasetDirective implements OnChanges {
   private receiveNewlyCreatedData(object: RbObject) {
     if(object.objectname == this.objectname && this.isLoading == false && this.list.includes(object) == false && (this.searchString == null || this.searchString == '') && this.list.length < 50) {
       this.list.push(object);
-      //this.list = [...this.list];
+      if(this.list.length == 1) {
+        this._selectedObject = this.list[0];
+      }
     }
   }
 
@@ -213,7 +215,6 @@ export class RbDatasetDirective implements OnChanges {
     }
     this.list.unshift(obj);
     this.select(obj);
-    //this.list = [...this.list];
   }
 
 

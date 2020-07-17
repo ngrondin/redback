@@ -115,7 +115,8 @@ export class RbGanttComponent implements OnInit {
   lastObjectUpdate: number = 0;
   lastHash: string | Int32Array;
 
-  recalc: number = 0;
+  recalcPlanned: boolean = false;
+  lastRecalc: number = 0;
   public getSizeForObjectCallback: Function;
   
   constructor() { }
@@ -130,7 +131,7 @@ export class RbGanttComponent implements OnInit {
     }
     if('lists' in changes && this.lists != null) {
       if(this.haveListsChanged()) {
-        this.calcAll();
+        this.redraw();
       }
     }
   }
@@ -139,7 +140,7 @@ export class RbGanttComponent implements OnInit {
     this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
     this.spanMS = 259200000;
     this.zoomMS = 259200000;
-    this.calcAll();
+    this.redraw();
   }
 
   haveListsChanged(): Boolean {
@@ -166,12 +167,25 @@ export class RbGanttComponent implements OnInit {
 
   setZoom(ms: number) {
     this.zoomMS = ms;
-    this.calcAll();
+    this.redraw();
   }
 
   setSpan(ms: number) {
     this.spanMS = ms;
-    this.calcAll();
+    this.redraw();
+  }
+
+  redraw() {
+    if(this.recalcPlanned == false) {
+      let now = (new Date()).getTime();
+      let timeSinceLastRecalc = now - this.lastRecalc;
+      if(timeSinceLastRecalc > 250) {
+        this.calcAll();
+      } else {
+        this.recalcPlanned = true;
+        setTimeout(() => this.calcAll(), (250 - timeSinceLastRecalc));
+      }
+    } 
   }
 
   calcAll() {
@@ -179,7 +193,8 @@ export class RbGanttComponent implements OnInit {
     this.ganttData = this.getLanes();
     this.dayMarks = this.getDayMarks();
     this.hourMarks = this.getHourMarks();
-    this.recalc += 1;
+    this.lastRecalc = (new Date()).getTime();
+    this.recalcPlanned = false;
   }
 
   private calcParams() {
@@ -268,7 +283,9 @@ export class RbGanttComponent implements OnInit {
                 }
               }
               let canEdit: Boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
-              spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, canEdit, obj, cfg));
+              if(color != null) {
+                spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, canEdit, obj, cfg));
+              }
             }
           }
         }
