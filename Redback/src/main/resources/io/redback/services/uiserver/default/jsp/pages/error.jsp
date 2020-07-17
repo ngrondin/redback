@@ -1,15 +1,17 @@
-<html>
+<%
+var resourcePrefix = version != null ? ('../../resource/' + version) : '../resource'; 
+var versionOrDefault = version != null ? version : 'default';
+%>  
+<!doctype html>
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css"/>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
-	<script src = "https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="../resource/login.css"/>
-	<script src = "../resource/rbcore.js"></script>
-	<script src = "../resource/loginmodule.js"></script>
+  <meta charset="utf-8">
+  <title><%=config.label%></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="<%=config.logo%>">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC78ZWKE3Shecj9QgDf84TW9kk7r5NrVPE&libraries=places"></script>
 </head>
 <body>
 	<div class="loginbox" ng-app="loginmodule" ng-controller="form">

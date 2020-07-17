@@ -88,7 +88,7 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 		}
 		catch(IOException | DataException e)
 		{
-			error("Error getting a config", e);
+			error("Error getting config " + service + "/" + category + "/" + name, e);
 			return null;
 		}
 	}

@@ -115,7 +115,7 @@ public abstract class RedbackTestUnit extends Thread {
 			}
 			return list;
 		} catch(Exception e) {
-			throw new RedbackException("Error listins objects", e);
+			throw new RedbackException("Error listing objects", e);
 		}
 	}
 	
