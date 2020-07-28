@@ -354,9 +354,9 @@ public class RedbackObject extends RedbackElement
 				else
 				{
 					if(canWrite)
-						error("User '" + session.getUserProfile().getUsername() + "' does not have the right to update attribute '" + name + "' on object '" + config.getName() + "'");
+						error("User '" + session.getUserProfile().getUsername() + "' does not have the right to update attribute '" + name + "' on object '" + config.getName() + ":" + getUID().getString() + "'");
 					else
-						error("User '" + session.getUserProfile().getUsername() + "' does not have the right to update object '" + config.getName() + "'");
+						error("User '" + session.getUserProfile().getUsername() + "' does not have the right to update object '" + config.getName() + ":" + getUID().getString() + "'");
 				}
 			}
 		}
