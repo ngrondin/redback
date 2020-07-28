@@ -226,7 +226,8 @@ rb-tab-section {
 .rb-tab-button {
 	color: darkblue;
 	font-weight: initial;
-	margin: 0px 10px 3px 10px !important;
+	font-size: 1.0rem;
+	margin: 0px 5px 0px 5px !important;
 }
 
 .rb-tabheader-active {

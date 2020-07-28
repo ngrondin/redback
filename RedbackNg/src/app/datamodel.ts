@@ -30,16 +30,24 @@ export class RbObject {
         for(const attribute in json.data) {
             if(this.data[attribute] != json.data[attribute]) {
                 this.data[attribute] = json.data[attribute];
-                if(json.related != null && json.related[attribute] != null) {
-                    this.related[attribute] = this.dataService.getLocalObject(json.related[attribute].objectname, json.related[attribute].uid);
+            }
+
+            if(json.related != null) {
+                if(json.related[attribute] != null) {
+                    let related = this.dataService.getLocalObject(json.related[attribute].objectname, json.related[attribute].uid);
+                    if(this.related[attribute] != related) {
+                        this.related[attribute] = related;
+                    }
                 } else {
                     this.related[attribute] = null;
                 }
             }
+
             if(json.validation != null && json.validation[attribute] != null) {
                 this.validation[attribute] = json.validation[attribute];
             }
-    }
+        
+        }
 
         this.changed = [];
         this.lastUpdated = (new Date()).getTime();
