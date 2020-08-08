@@ -70,7 +70,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 			Payload response = new Payload();
 			String get = extractGetString(payload);
 
-			if(get != null && !get.equals(""))
+			if(get != null)
 			{
 				String[] parts = get.split("/");
 				String category = null;
@@ -91,8 +91,8 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				else if(parts.length == 1)
 				{
 					category = "app";
-					//version = "default";
-					name = parts[0];
+					if(!parts[0].equals(""))
+						name = parts[0];
 				}
 				
 				if(category.equals("resource"))
@@ -103,7 +103,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				}
 				else if(category.equals("app"))
 				{
-					logger.finer("Get app " + name);
+					logger.finer("Get app " + (name != null ? name : "?"));
 					response.setData(getApp(session, name, version).toString());
 					response.metadata.put("mime", "text/html");
 				}

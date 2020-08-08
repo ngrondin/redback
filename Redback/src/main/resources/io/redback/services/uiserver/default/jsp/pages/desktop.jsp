@@ -1,5 +1,5 @@
 <%
-var resourcePrefix = version != null ? ('../../resource/' + version) : '../resource'; 
+//var resourcePrefix = version != null ? ('../../resource/' + version) : '../resource'; 
 var versionOrDefault = version != null ? version : 'default';
 %>  
 <!doctype html>
@@ -33,14 +33,14 @@ var versionOrDefault = version != null ? version : 'default';
     chatservice="<%=deployment.chatservicepath%>">
   </app-root>
 
-  <script src="<%=resourcePrefix%>/runtime-es2015.js" type="module"></script>
-  <script src="<%=resourcePrefix%>/runtime-es5.js" nomodule defer></script>
-  <script src="<%=resourcePrefix%>/polyfills-es5.js" nomodule defer></script>
-  <script src="<%=resourcePrefix%>/polyfills-es2015.js" type="module"></script>
-  <script src="<%=resourcePrefix%>/styles-es2015.js" type="module"></script>
-  <script src="<%=resourcePrefix%>/styles-es5.js" nomodule defer></script>
-  <script src="<%=resourcePrefix%>/main-es2015.js" type="module"></script>
-  <script src="<%=resourcePrefix%>/main-es5.js" nomodule defer></script></body>
+  <script src="/<%=deployment.uiservicepath%>/resource/runtime-es2015.js" type="module"></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/runtime-es5.js" nomodule defer></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/polyfills-es5.js" nomodule defer></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/polyfills-es2015.js" type="module"></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/styles-es2015.js" type="module"></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/styles-es5.js" nomodule defer></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/main-es2015.js" type="module"></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/main-es5.js" nomodule defer></script></body>
 
 </body>
 </html>

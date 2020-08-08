@@ -66,24 +66,40 @@ public class RedbackUIServer extends UIServer
 		context.put("utils", new RedbackUtilsJSWrapper());
 		if(session != null)
 		{
-			if(session.getUserProfile().canRead("rb.apps." + name))
-			{
-				context.put("session", new SessionJSWrapper(session));
-				try
-				{
-					DataMap appConfig = configClient.getConfig("rbui", "app", name); 
-					String page = appConfig.getString("page");
-					context.put("config", JSConverter.toJS(appConfig));
-					html = executeJSP("pages/" + page, version, context);
-				}
-				catch(Exception e)
-				{
-					html = executeJSP("pages/error", version, context).inject("errormessage", formatErrorMessage("Error retrieving application " + name, e));
+			DataMap appConfig = null;
+			if(name != null) {
+				appConfig = configClient.getConfig("rbui", "app", name); 
+			} else {
+				DataMap result = configClient.listConfigs("rbui", "app", new DataMap("isdefault", true));
+				if(result.getList("result").size() > 0) {
+					appConfig = result.getList("result").getObject(0);
 				}
 			}
-			else
+			if(appConfig != null) 
 			{
-				html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("No access to application " + name + ""));
+				String appName = appConfig.getString("name");
+				if(session.getUserProfile().canRead("rb.apps." + appName))
+				{
+					context.put("session", new SessionJSWrapper(session));
+					try
+					{
+						String page = appConfig.getString("page");
+						context.put("config", JSConverter.toJS(appConfig));
+						html = executeJSP("pages/" + page, version, context);
+					}
+					catch(Exception e)
+					{
+						html = executeJSP("pages/error", version, context).inject("errormessage", formatErrorMessage("Error retrieving application " + appName, e));
+					}
+				}
+				else
+				{
+					html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("No access to application " + appName + ""));
+				}
+			}
+			else 
+			{
+				html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("No application name provided and no default configured"));
 			}
 		}
 		else
