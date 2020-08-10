@@ -72,6 +72,7 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 			group.setText("Action " + (i + 1));
 			new TextField(action, "action", "Action", group, SWT.NONE);
 			new TextField(action, "description", "Description", group, SWT.NONE);
+			new TextField(action, "exclusive", "Exclusive (!)", group, SWT.NONE);
 			new SelectField(action, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, group, SWT.NONE);
 			Button del = new Button(group, SWT.NONE);
 			del.setText("Remove");
