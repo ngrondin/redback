@@ -28,7 +28,6 @@ import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
-import io.redback.utils.Timer;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.LoggerJSFunction;
@@ -85,6 +84,11 @@ public class ObjectManager
 		return jsManager;
 	}
 	
+	public DataClient getDataClient()
+	{
+		return dataClient;
+	}
+
 	public GeoClient getGeoClient()
 	{
 		return geoClient;
@@ -380,6 +384,13 @@ public class ObjectManager
 		}
 		return object;
 	}
+	
+	public void deleteObject(Session session, String objectName, String uid) throws RedbackException, ScriptException
+	{
+		RedbackObject object = getObject(session, objectName, uid);
+		if(object != null)
+			object.delete();
+	}	
 	
 	public RedbackObject executeFunction(Session session, String objectName, String id, String function, DataMap updateData) throws RedbackException, ScriptException
 	{
@@ -719,10 +730,12 @@ public class ObjectManager
 		return filter;
 	}
 	
+	/*
 	protected void commitData(String collection, DataMap key, DataMap data) throws RedbackException
 	{
 		dataClient.putData(collection, key, data);
 	}
+	*/
 	
 	protected void signal(RedbackObject object)
 	{

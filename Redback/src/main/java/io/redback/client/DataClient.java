@@ -62,4 +62,13 @@ public class DataClient extends Client
 		req.put("data", data);
 		publish(req);
 	}
+	
+	public DataMap deleteData(String object, DataMap key) throws RedbackException
+	{
+		DataMap req = new DataMap();
+		req.put("object", object);
+		req.put("key", key);
+		req.put("operation", "delete");
+		return request(req);
+	}	
 }

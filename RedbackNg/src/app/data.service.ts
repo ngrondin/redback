@@ -163,6 +163,22 @@ export class DataService {
     return dataObservable;     
   }
 
+  deleteObject(rbObject: RbObject) : Observable<any> {
+    const apiObservable = this.apiService.deleteObject(rbObject.objectname, rbObject.uid);
+    const dataObservable = new Observable<RbObject>((observer) => {
+      apiObservable.subscribe(
+        resp => {
+          observer.next(resp);
+          observer.complete();
+        },
+        error => {
+          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+        }
+      );
+    })
+    return dataObservable;     
+  }
+
   createObjectInMemory(name: string, uid: string, data: any) : Observable<RbObject> {
     const dataObservable = new Observable<RbObject>((observer) => {
       let newObj: RbObject = new RbObject({objectname: name, uid: uid, data: data}, this);

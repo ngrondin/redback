@@ -14,7 +14,6 @@ import io.redback.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
-import io.redback.utils.Timer;
 
 public abstract class ObjectServer extends AuthenticatedServiceProvider 
 {
@@ -141,6 +140,12 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						RedbackObject object = create(session, objectName, uid, domain, data);
 						responseData = object.getJSON(addValidation, addRelated);
 					}
+					else if(action.equals("delete"))
+					{
+						String uid = request.getString("uid");
+						delete(session, objectName, uid);
+						responseData = new DataMap("result", "ok");
+					}					
 					else if(action.equals("execute"))
 					{
 						String uid = request.getString("uid");
@@ -245,6 +250,8 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	protected abstract RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException;
 
 	protected abstract RedbackObject create(Session session, String objectName, String uid, String domain, DataMap data) throws RedbackException;
+
+	protected abstract void delete(Session session, String objectName, String uid) throws RedbackException;
 
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException;
 

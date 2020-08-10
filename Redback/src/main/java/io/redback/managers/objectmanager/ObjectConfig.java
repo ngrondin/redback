@@ -10,6 +10,7 @@ import java.util.Set;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.Function;
 
 public class ObjectConfig
@@ -18,6 +19,7 @@ public class ObjectConfig
 	protected DataMap config;
 	protected HashMap<String, AttributeConfig> attributes;
 	protected HashMap<String, Function> scripts;
+	protected Expression canDeleteExpr;
 	protected List<String> scriptVars;
 	
 	public ObjectConfig(ObjectManager om, DataMap cfg) throws RedbackException
@@ -67,6 +69,8 @@ public class ObjectConfig
 				}
 			}			
 		}
+		
+		canDeleteExpr = new Expression(objectManager.getJSManager(), getName() + "_candelete", scriptVars, (config.getString("candelete") != null ? config.getString("candelete") : "false"));
 	}
 
 	public String getName()
@@ -116,6 +120,11 @@ public class ObjectConfig
 	public Function getScriptForEvent(String event)
 	{
 		return scripts.get(event);
+	}
+	
+	public Expression getCanDeleteExpression()
+	{
+		return canDeleteExpr;
 	}
 	
 	public List<String> getScriptVariables()

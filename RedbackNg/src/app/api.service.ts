@@ -113,6 +113,15 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
+  deleteObject(name: string, uid: string) {
+    const req = {
+      action: 'delete',
+      object: name,
+      uid: uid
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
   executeObject(name: string, uid: string, func: string) {
     const req = {
       action: 'execute',

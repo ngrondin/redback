@@ -38,6 +38,7 @@ public class RedbackObject extends RedbackElement
 	protected HashMap<String, RedbackObject> related;
 	protected ArrayList<String> updatedAttributes;
 	protected boolean isNewObject;
+	protected boolean isDeleted;
 
 	// Initiate existing object from pre-loaded data
 	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, DataMap dbData) throws RedbackException, ScriptException
@@ -397,7 +398,6 @@ public class RedbackObject extends RedbackElement
 			return false;
 		else
 		{
-			//Bindings context = objectManager.createScriptContext(this);
 			Expression expression = config.getAttributeConfig(name).getEditableExpression(); 
 			Object o = expression.eval(scriptContext);
 			if(o instanceof Boolean)
@@ -407,6 +407,24 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 	
+	public boolean canDelete() throws RedbackException
+	{
+		Expression expression = config.getCanDeleteExpression();
+		Object o = expression.eval(scriptContext);
+		if(o instanceof Boolean)
+			return (Boolean)o;
+		else
+			return false;
+	}
+	
+	public void delete() throws RedbackException
+	{
+		if(canDelete())
+			isDeleted = true;
+		else
+			throw new RedbackException("The object '" + config.getName() + ":" + getUID().getString() + "' cannot be deleted");
+	}
+	
 	public List<String> getUpdatedAttributes() 
 	{
 		return updatedAttributes;
@@ -414,7 +432,13 @@ public class RedbackObject extends RedbackElement
 	
 	public void save() throws ScriptException, RedbackException
 	{
-		if(updatedAttributes.size() > 0  ||  isNewObject == true)
+		if(isDeleted)
+		{
+			DataMap key = new DataMap();
+			key.put(config.getUIDDBKey(), getUID().getObject());
+			objectManager.getDataClient().deleteData(config.getName(), key);
+		}
+		else if(updatedAttributes.size() > 0  ||  isNewObject == true)
 		{
 			if(canWrite)
 			{
@@ -436,7 +460,7 @@ public class RedbackObject extends RedbackElement
 						dbData.put(attributeDBKey, get(attributeName).getObject());
 					}
 				}
-				objectManager.commitData(config.getCollection(), key, dbData);
+				objectManager.getDataClient().putData(config.getCollection(), key, dbData);
 				objectManager.signal(this);
 				executeScriptsForEvent("aftersave");
 				if(isNewObject)

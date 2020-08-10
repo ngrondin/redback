@@ -102,6 +102,16 @@ public class RedbackObjectServer extends ObjectServer
 		return object;
 	}
 
+	protected void delete(Session session, String objectName, String uid) throws RedbackException {
+		try {
+			objectManager.initiateCurrentTransaction();
+			objectManager.deleteObject(session, objectName, uid);
+			objectManager.commitCurrentTransaction();
+		} catch(ScriptException e) {
+			error("Error creating object", e);
+		}
+	}
+
 	protected RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException
 	{
 		RedbackObject object = null;

@@ -192,6 +192,10 @@ export class RbDatasetDirective implements OnChanges {
       } else if(_name == 'createinmemory') {
         this.dataService.createObjectInMemory(this.objectname, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
       }
+    } else if(_name == 'delete') {
+      if(this.selectedObject != null) {
+        this.dataService.deleteObject(this.selectedObject).subscribe(result => this.removeSelected());
+      }
     } else if(_name == 'save') {
       
     } else if(_name == 'executeall') {
@@ -215,6 +219,13 @@ export class RbDatasetDirective implements OnChanges {
     }
     this.list.unshift(obj);
     this.select(obj);
+  }
+
+  public removeSelected() {
+    if(this.list.indexOf(this.selectedObject) > -1) {
+      this.list.splice(this.list.indexOf(this.selectedObject), 1);
+    }
+    this.selectedObject = null;
   }
 
 
