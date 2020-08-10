@@ -1,31 +1,39 @@
 <div
     class="rb-file-container">
-    <mat-action-list>
-        <button
-            mat-list-item 
-            *ngFor="let file of list" 
-            [ngClass]="selectedFile == file ? 'rb-files-item-active' : ''"
-            (click)="select(file)">
+    <div
+        *ngFor="let file of list" 
+        [ngClass]="selectedFile == file ? 'rb-files-item-active' : ''"
+        (click)="select(file)">
+        <div
+            class="rb-files-item">
             <div
-                class="rb-files-item">
-                <div
-                    class="rb-file-icon">
-                    <mat-icon>attach_file</mat-icon>
-                </div>
-                <div
-                    class="rb-files-details">
-                    <div
-                        class="rb-files-name">
-                        {{file.fileName}}
-                    </div>
-                    <div
-                        class="rb-files-date">
-                        {{file.date.toLocaleString()}}
-                    </div>
-                </div>
+                class="rb-files-imgbox">
+                <mat-icon
+                    *ngIf="file.thumbnail == null">
+                    attach_file
+                </mat-icon>
+                <img
+                    class="rb-files-img"
+                    [src]="getBase64Thumbnail(file)"
+                    *ngIf="file.thumbnail != null">
             </div>
-        </button>
-    </mat-action-list>
+            <div
+                class="rb-files-details">
+                <div
+                    class="rb-files-name">
+                    {{getDisplayFileName(file)}}
+                </div>
+                <div
+                    class="rb-files-date">
+                    {{file.date.toLocaleString()}}
+                </div>
+                <div
+                    class="rb-files-date">
+                    {{file.username}}
+                </div>
+            </div>         
+        </div>
+    </div>
     <div
         class="rb-spinner-container"
         *ngIf="isLoading">

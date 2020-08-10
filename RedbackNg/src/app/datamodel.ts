@@ -141,6 +141,7 @@ export class RbFile {
     relatedUid: string;
     fileName: string;
     mime: string;
+    thumbnail: string;
     username: string;
     date: Date;
 
@@ -150,6 +151,7 @@ export class RbFile {
         this.relatedUid = json.relateduid;
         this.fileName = json.filename;
         this.mime = json.mime;
+        this.thumbnail = json.thumbnail;
         this.username = json.username;
         this.date = new Date(json.date);
     }

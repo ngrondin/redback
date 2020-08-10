@@ -8,7 +8,6 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 60px!important;
     cursor: pointer;
 }
 
@@ -16,15 +15,31 @@
     border-left: 1px solid red;
 }
 
-.rb-file-icon {
+.rb-files-imgbox {
     display: flex;
     flex: 0 0 auto;
     padding: 8px;
+    width: 80px;
+    height: 80px;
+    justify-content: center;
+    align-items: center;
+}
+
+.rb-files-img {
+    display: block;
+    max-width:100%;
+    max-height:100%;
+    width: auto;
+    height: auto;
 }
 
 .rb-files-details {
     display: flex;
     flex-direction: column;
+}
+
+.rb-files-thumb {
+    display: flex;
 }
 
 .rb-files-name {

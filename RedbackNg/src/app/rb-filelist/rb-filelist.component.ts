@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { RbFile } from 'app/datamodel';
 import { ApiService } from 'app/api.service';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'rb-filelist',
@@ -18,7 +19,8 @@ export class RbFilelistComponent implements OnInit {
   hasFileOver: boolean = false;
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private domSanitizer: DomSanitizer    
   ) { 
 
   }
@@ -35,5 +37,17 @@ export class RbFilelistComponent implements OnInit {
     if(this.downloadOnSelect) {
       window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + file.fileUid);
     }
+  }
+
+  getDisplayFileName(file: RbFile) {
+    if(file.fileName.length > 40) {
+      return file.fileName.substr(0, 40) + "...";
+    } else {
+      return file.fileName;
+    }
+  }
+
+  getBase64Thumbnail(file: RbFile) {
+    return this.domSanitizer.bypassSecurityTrustResourceUrl(file.thumbnail);
   }
 }
