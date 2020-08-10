@@ -25,6 +25,7 @@ public class ObjectHeaderForm extends Form
 		new TextField(_data, "domaindbkey", "Domain DB Key", this, SWT.NONE);
 		new TextField(_data, "uidgenerator", "UID Generator", this, SWT.NONE);
 		new TextField(_data, "group", "Group", this, SWT.NONE);
+		new TextField(_data, "candelete", "Can Delete (!)", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

@@ -41,7 +41,7 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 	protected ScrolledComposite scrollable;
 	protected Canvas canvas;
 	protected int boxWidth = 85;
-	protected int boxHeight = 62;
+	protected int boxHeight = 78;
 	protected int canvasWidth = 500;
 	protected int canvasHeight = 200;
 	protected int scrollHPos = 0;
@@ -160,41 +160,58 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 			
 			//Box
 			if(node == selectedNode)
-				gc.setForeground(new Color(display, 255, 0, 0));
+				gc.setForeground(new Color(display, 200, 0, 0));
 			else
 				gc.setForeground(new Color(display, 0, 0, 0));
-			gc.drawRectangle(x, y - 16, boxWidth, 16);
 			gc.drawRectangle(x, y, boxWidth, boxHeight);
 			
 			//Header
+			if(node == selectedNode) {
+				gc.setBackground(new Color(display, 200, 0, 0));
+				gc.setForeground(new Color(display, 255, 255, 255));
+			} else {
+				gc.setBackground(new Color(display, 128, 128, 128));
+				gc.setForeground(new Color(display, 255, 255, 255));
+			}
+			gc.fillRectangle(x, y, boxWidth, 16);
 			gc.setFont(headerFont);
-			gc.drawString(typeLabels.get(type), x + 2, y - 15);
+			gc.drawString(typeLabels.get(type), x + 2, y + 1);
 		
 			//Label
 			gc.setFont(labelFont);
+			gc.setBackground(new Color(display, 255, 255, 255));
 			gc.setForeground(new Color(display, 0, 0, 0));
-			int cc = boxWidth / gc.getFontMetrics().getAverageCharWidth();
+
 			String remName = name + " ";
-			int line = 0;
+			int maxLineWidth = boxWidth - 2;
+			int line = 16;
 			while(remName.length() > 0 && line < boxHeight - 10) {
 				String thisLine = null;
-				if(remName.length() < cc) {
+				if(getWidth(gc, remName) < maxLineWidth) {
 					thisLine = remName;
 					remName = "";
 				} else {
-					int cutAt = remName.substring(0, cc).lastIndexOf(" ");
-					if(cutAt > -1) {
+					int cutAt = 0;
+					int nextSpace = 0;
+					do {
+						cutAt = nextSpace;
+						nextSpace = remName.indexOf(" ", cutAt + 1);
+					} while(getWidth(gc, remName.substring(0, nextSpace)) < maxLineWidth);
+					if(cutAt > 0) {
 						thisLine = remName.substring(0, cutAt);
 						remName = remName.substring(cutAt + 1);
 					} else {
-						thisLine = remName.substring(0, cc);
-						remName = remName.substring(remName.indexOf(" ", cc));
+						thisLine = remName;
+						while(getWidth(gc, thisLine) > maxLineWidth)
+							thisLine = thisLine.substring(0, thisLine.length() - 1);
+						remName = "";
 					}
 				}
 				if(thisLine.length() > 0)
 					gc.drawString(thisLine, x + 3, y + 2 + line);
 				line += gc.getFontMetrics().getHeight();
 			}
+			
 			//Connectors
 			if(type.equals("interaction")) {
 				DataList actions = node.getList("actions");
@@ -235,10 +252,10 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 				int midX1 = startX + 10;
 				int midX2 = endX - 10;
 				int midY = 0;
-				if(Math.abs(startY - endY) > boxHeight + 20) {
-					midY = (startY + endY) / 2;
+				if(endY > startY) {
+					midY = startY - ((boxHeight / 2) + 20);
 				} else {
-					midY = (startY < endY ? startY : endY) - boxHeight;
+					midY = startY + ((boxHeight / 2) + 20);
 				}
 				gc.drawLine(startX, startY, midX1, startY);
 				gc.drawLine(midX1, startY, midX1, midY);
@@ -384,6 +401,13 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 			}
 		}
 		return null;
+	}
+	
+	protected long getWidth(GC gc, String s) {
+		int len = 0;
+		for(int i = 0; i < s.length(); i++)
+			len += gc.getAdvanceWidth(s.charAt(i));
+		return len;
 	}
 	
 }
