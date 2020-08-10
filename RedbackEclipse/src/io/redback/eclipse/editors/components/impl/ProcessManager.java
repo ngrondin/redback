@@ -24,7 +24,8 @@ public class ProcessManager extends Manager {
 		{"rbobjectupdate", "RbObject Update"}, 
 		{"script", "Script"},
 		{"firebusrequest", "Firebus Request"},
-		{"domainservice", "Domain Service"}
+		{"domainservice", "Domain Service"},
+		{"join", "Join"}
 	};
 	
 	public ProcessManager(DataMap d, RedbackConfigEditor e, Composite parent, int style) {
@@ -65,6 +66,8 @@ public class ProcessManager extends Manager {
 			return new ProcessFirebusRequestForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else if(type.equals("domainservice")) {
 			return new ProcessDomainServiceForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
+		} else if(type.equals("join")) {
+			return new ProcessJoinForm(getNodeById(name), _data.getList("nodes"), this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

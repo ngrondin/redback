@@ -1,8 +1,6 @@
 package io.redback.managers.objectmanagers.js;
 
 import java.util.Arrays;
-import java.util.HashSet;
-
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyObject;

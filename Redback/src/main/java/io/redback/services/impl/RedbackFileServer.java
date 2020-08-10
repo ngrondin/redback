@@ -1,8 +1,17 @@
 package io.redback.services.impl;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -49,13 +58,14 @@ public class RedbackFileServer extends FileServer
 			DataMap fileInfo = collectionConfig.convertObjectToCanonical(resp.getList("result").getObject(0));
 			String fileName = fileInfo.getString("filename");
 			String mime = fileInfo.getString("mime");
+			String thumbnail = fileInfo.getString("thumbnail");
 			String username = fileInfo.getString("user");
 			Date date = fileInfo.getDate("date");
 			String fileAdapter = fileInfo.getString("endpoint");
 			if(fileAdapter == null)
 				fileAdapter = defaultFileService;
 			Payload filePayload = firebus.requestService(fileAdapter, new Payload(fileUid), 10000);
-			file = new RedbackFile(fileUid, fileName, mime, username, date, filePayload.getBytes());
+			file = new RedbackFile(fileUid, fileName, mime, thumbnail, username, date, filePayload.getBytes());
 		}
 		else
 		{
@@ -77,9 +87,10 @@ public class RedbackFileServer extends FileServer
 			String fileUid = fileInfo.getString("fileuid");
 			String fileName = fileInfo.getString("filename");
 			String mime = fileInfo.getString("mime");
+			String thumbnail = fileInfo.getString("thumbnail");
 			String username = fileInfo.getString("user");
 			Date date = fileInfo.getDate("date");
-			RedbackFile file = new RedbackFile(fileUid, fileName, mime, username, date, null);
+			RedbackFile file = new RedbackFile(fileUid, fileName, mime, thumbnail, username, date, null);
 			list.add(file);
 		}
 		return list;
@@ -95,6 +106,8 @@ public class RedbackFileServer extends FileServer
 		data.put(collectionConfig.getField("mime"), mime);
 		data.put(collectionConfig.getField("user"), username);
 		data.put(collectionConfig.getField("date"), new Date());
+		if(mime.startsWith("image"))
+			data.put(collectionConfig.getField("thumbnail"), getBase64Thumbnail(bytes));
 		dataClient.putData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid), data);
 
 		Payload filePayload = new Payload(bytes);
@@ -110,7 +123,32 @@ public class RedbackFileServer extends FileServer
 		String type = "";
 		if(filename.toLowerCase().endsWith(".jpg"))
 			type = "image/jpg";
+		else if(filename.toLowerCase().endsWith(".png"))
+			type = "image/png";
 		return type;
+	}
+	
+	public String getBase64Thumbnail(byte[] bytes) throws RedbackException 
+	{
+		String b64img = null;
+		try
+		{
+			BufferedImage orig = ImageIO.read(new ByteArrayInputStream(bytes));
+			int newHeight = 80;
+			int newWidth = orig.getWidth() / (orig.getHeight() / newHeight);
+			BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+			Graphics2D gc = img.createGraphics();
+			gc.setColor(Color.WHITE);
+			gc.fillRect(0, 0, newWidth, newHeight);
+			gc.drawImage(orig.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH),0,0,null);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ImageIO.write(img, "png", baos);
+			b64img = "data:image/png;base64, " + (new String(Base64.getEncoder().encode(baos.toByteArray()), "UTF-8"));
+		}
+		catch(Exception e) 
+		{
+		}
+		return b64img;
 	}
 
 	public void clearCaches() 

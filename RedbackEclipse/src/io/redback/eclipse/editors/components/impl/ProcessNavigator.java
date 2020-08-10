@@ -67,6 +67,7 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 		typeLabels.put("script", "Script");
 		typeLabels.put("firebusrequest", "Firebus Req.");
 		typeLabels.put("domainservice", "Domain Serv.");
+		typeLabels.put("join", "Join");
 		FontData fd = new FontData();
 		fd.setHeight(7);
 		headerFont = new Font(Display.getCurrent(), fd);
@@ -155,61 +156,69 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 			int x = node.getNumber("position.x").intValue() + scrollHPos;
 			int y = node.getNumber("position.y").intValue() + scrollVPos;
 			String type = node.getString("type");
-			String name = node.getString("name") != null ? node.getString("name") : "No label";
-			String id = node.getString("id");
-			
-			//Box
-			if(node == selectedNode)
-				gc.setForeground(new Color(display, 200, 0, 0));
-			else
-				gc.setForeground(new Color(display, 0, 0, 0));
-			gc.drawRectangle(x, y, boxWidth, boxHeight);
-			
-			//Header
-			if(node == selectedNode) {
-				gc.setBackground(new Color(display, 200, 0, 0));
-				gc.setForeground(new Color(display, 255, 255, 255));
+			if(type.equals("join")) {
+				if(node == selectedNode)
+					gc.setBackground(new Color(display, 200, 0, 0));
+				else
+					gc.setBackground(new Color(display, 128, 128, 128));
+				gc.fillArc(x, y, 20, 20, 0, 360);
 			} else {
-				gc.setBackground(new Color(display, 128, 128, 128));
-				gc.setForeground(new Color(display, 255, 255, 255));
-			}
-			gc.fillRectangle(x, y, boxWidth, 16);
-			gc.setFont(headerFont);
-			gc.drawString(typeLabels.get(type), x + 2, y + 1);
-		
-			//Label
-			gc.setFont(labelFont);
-			gc.setBackground(new Color(display, 255, 255, 255));
-			gc.setForeground(new Color(display, 0, 0, 0));
-
-			String remName = name + " ";
-			int maxLineWidth = boxWidth - 2;
-			int line = 16;
-			while(remName.length() > 0 && line < boxHeight - 10) {
-				String thisLine = null;
-				if(getWidth(gc, remName) < maxLineWidth) {
-					thisLine = remName;
-					remName = "";
+				String name = node.getString("name") != null ? node.getString("name") : "No label";
+				String id = node.getString("id");
+				
+				//Box
+				if(node == selectedNode)
+					gc.setForeground(new Color(display, 200, 0, 0));
+				else
+					gc.setForeground(new Color(display, 0, 0, 0));
+				gc.drawRectangle(x, y, boxWidth, boxHeight);
+				
+				//Header
+				if(node == selectedNode) {
+					gc.setBackground(new Color(display, 200, 0, 0));
+					gc.setForeground(new Color(display, 255, 255, 255));
 				} else {
-					int cutAt = 0;
-					int nextSpace = 0;
-					do {
-						cutAt = nextSpace;
-						nextSpace = remName.indexOf(" ", cutAt + 1);
-					} while(getWidth(gc, remName.substring(0, nextSpace)) < maxLineWidth);
-					if(cutAt > 0) {
-						thisLine = remName.substring(0, cutAt);
-						remName = remName.substring(cutAt + 1);
-					} else {
-						thisLine = remName;
-						while(getWidth(gc, thisLine) > maxLineWidth)
-							thisLine = thisLine.substring(0, thisLine.length() - 1);
-						remName = "";
-					}
+					gc.setBackground(new Color(display, 128, 128, 128));
+					gc.setForeground(new Color(display, 255, 255, 255));
 				}
-				if(thisLine.length() > 0)
-					gc.drawString(thisLine, x + 3, y + 2 + line);
-				line += gc.getFontMetrics().getHeight();
+				gc.fillRectangle(x, y, boxWidth, 16);
+				gc.setFont(headerFont);
+				gc.drawString(typeLabels.get(type), x + 2, y + 1);
+			
+				//Label
+				gc.setFont(labelFont);
+				gc.setBackground(new Color(display, 255, 255, 255));
+				gc.setForeground(new Color(display, 0, 0, 0));
+
+				String remName = name + " ";
+				int maxLineWidth = boxWidth - 3;
+				int line = 16;
+				while(remName.length() > 0 && line < boxHeight - 10) {
+					String thisLine = null;
+					if(getWidth(gc, remName) < maxLineWidth) {
+						thisLine = remName;
+						remName = "";
+					} else {
+						int cutAt = 0;
+						int nextSpace = 0;
+						do {
+							cutAt = nextSpace;
+							nextSpace = remName.indexOf(" ", cutAt + 1);
+						} while(nextSpace > -1 && getWidth(gc, remName.substring(0, nextSpace)) < maxLineWidth);
+						if(cutAt > 0) {
+							thisLine = remName.substring(0, cutAt);
+							remName = remName.substring(cutAt + 1);
+						} else {
+							thisLine = remName;
+							while(getWidth(gc, thisLine) > maxLineWidth)
+								thisLine = thisLine.substring(0, thisLine.length() - 1);
+							remName = "";
+						}
+					}
+					if(thisLine.length() > 0)
+						gc.drawString(thisLine, x + 3, y + 2 + line);
+					line += gc.getFontMetrics().getHeight();
+				}				
 			}
 			
 			//Connectors
@@ -237,10 +246,12 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 	protected void paintConnector(GC gc, DataMap start, DataMap end, String n)
 	{
 		if(start != null && end != null) {
-			int startX = start.getNumber("position.x").intValue() + boxWidth + scrollHPos;
-			int startY = start.getNumber("position.y").intValue() + (boxHeight / 2) + scrollVPos;
+			String startType = start.getString("type");
+			String endType = end.getString("type");
+			int startX = start.getNumber("position.x").intValue() + (startType.equals("join") ? 20 : boxWidth) + scrollHPos;
+			int startY = start.getNumber("position.y").intValue() + (startType.equals("join") ? 10 : (boxHeight / 2)) + scrollVPos;
 			int endX = end.getNumber("position.x").intValue() + scrollHPos;
-			int endY = end.getNumber("position.y").intValue() + (boxHeight / 2) + scrollVPos;
+			int endY = end.getNumber("position.y").intValue() + (endType.equals("join") ? 10 : (boxHeight / 2)) + scrollVPos;
 			if(endX > startX + 10) {
 				int midX = startX + 10;
 				gc.drawLine(startX, startY, midX, startY);
@@ -339,6 +350,7 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 			draggingNode.getObject("position").put("x", event.x - dragOffsetX - scrollHPos);
 			draggingNode.getObject("position").put("y", event.y - dragOffsetY - scrollVPos);
 			canvas.redraw();
+			manager.setDataChanged(true);
 		}
 	}
 

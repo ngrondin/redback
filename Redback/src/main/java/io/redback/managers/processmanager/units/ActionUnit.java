@@ -10,7 +10,6 @@ import io.redback.managers.processmanager.Process;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.managers.processmanager.Process;
 
 public class ActionUnit extends ProcessUnit 
 {

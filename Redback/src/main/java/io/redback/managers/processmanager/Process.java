@@ -11,6 +11,7 @@ import io.redback.managers.processmanager.units.ConditionalUnit;
 import io.redback.managers.processmanager.units.DomainServiceUnit;
 import io.redback.managers.processmanager.units.FirebusRequestUnit;
 import io.redback.managers.processmanager.units.InteractionUnit;
+import io.redback.managers.processmanager.units.JoinUnit;
 import io.redback.managers.processmanager.units.RedbackObjectExecuteUnit;
 import io.redback.managers.processmanager.units.RedbackObjectGetUnit;
 import io.redback.managers.processmanager.units.RedbackObjectUpdateUnit;
@@ -58,6 +59,8 @@ public class Process
 				unit = new FirebusRequestUnit(processManager, this, nodeConfig);
 			else if(unitType.equals("domainservice"))
 				unit = new DomainServiceUnit(processManager, this, nodeConfig);
+			else if(unitType.equals("join"))
+				unit = new JoinUnit(processManager, this, nodeConfig);
 			else
 				error("Unit type '" + unitType + "' is not recognised");
 			nodes.put(unit.getId(), unit);
