@@ -30,6 +30,22 @@ export class RbDatasetGroupDirective {
     return this._selectedObject;
   }
 
+  public set selectedObject(obj: RbObject) {
+    this.select(obj);
+  }
+    
+  public select(obj: RbObject) {
+    this._selectedObject = obj;
+    for(let name of Object.keys(this.datasets)) {
+      let ds: RbDatasetDirective = this.datasets[name];
+      if(ds.objectname == obj.objectname) {
+        ds.select(obj);
+      } else {
+        ds.select(null);
+      }
+    }
+  }
+
   public get isLoading(): boolean {
     let l: boolean = false;
     for(let key of Object.keys(this.datasets)) {
@@ -39,8 +55,5 @@ export class RbDatasetGroupDirective {
     }
     return l;
   }
-  
-  public select(item: RbObject) {
-    this._selectedObject = item;
-  }
+
 }

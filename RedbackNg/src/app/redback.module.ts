@@ -59,6 +59,7 @@ import { RbChatComponent } from './rb-chat/rb-chat.component';
 import { RbAddressInputComponent } from './rb-address-input/rb-address-input.component';
 import { RbPopupInputComponent } from './rb-popup-input/rb-popup-input.component';
 import { RbPopupAddressesComponent } from './rb-popup-addresses/rb-popup-addresses.component';
+import { RbModalComponent } from './rb-modal/rb-modal.component';
 
 @NgModule({
   imports: [
@@ -123,6 +124,7 @@ import { RbPopupAddressesComponent } from './rb-popup-addresses/rb-popup-address
     RbFiledropComponent,
     RbNotificationComponent,
     RbLinkComponent,
+    RbModalComponent,
     RbDynamicformComponent,
     RbChoiceInputComponent,
     RbSwitchInputComponent,
@@ -174,6 +176,7 @@ import { RbPopupAddressesComponent } from './rb-popup-addresses/rb-popup-address
     RbFiledropComponent,
     RbNotificationComponent,
     RbLinkComponent,
+    RbModalComponent,
     RbDynamicformComponent,
     RbChoiceInputComponent,
     RbSwitchInputComponent,

@@ -63,7 +63,9 @@
             [style.top.px]="-scrollTop">
             <div
                 *ngFor="let lane of ganttData; let i = index"
-                [class]="'rb-gantt-lanehead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')">
+                [class]="'rb-gantt-lanehead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
+                [style.cursor]="lanesConfig.modal != null ? 'pointer' : ''"
+                (click)="clickLane(lane)">
                 <div
                     class="rb-gantt-mainlabel">
                     {{lane.label}}
@@ -92,6 +94,7 @@
                     *ngFor="let spread of lane.spreads"
                     [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
                     [rb-drag-object]="spread.canEdit ? spread.object : null"
+                    (click)="clickSpread(spread)"
                     [style.width.px]="spread.width"
                     [style.left.px]="spread.start"
                     [style.background-color]="spread.color">

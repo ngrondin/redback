@@ -1,10 +1,26 @@
-import { Component, OnInit, Input, SimpleChange } from '@angular/core';
+import { Component, OnInit, Input, SimpleChange, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { ObserveOnMessage } from 'rxjs/internal/operators/observeOn';
 import { RbSearchComponent } from 'app/rb-search/rb-search.component';
 import { trigger } from '@angular/animations';
 import { MATERIAL_SANITY_CHECKS } from '@angular/material';
 import { Md5 } from 'ts-md5/dist/md5';
+
+class GanttLaneConfig {
+  dataset: string;
+  labelAttribute: string;
+  iconAttribute: string;
+  iconMap: any;
+  modal: string;
+
+  constructor(json: any) {
+    this.dataset = json.dataset;
+    this.labelAttribute = json.labelattribute;
+    this.iconAttribute = json.iconattribute;
+    this.iconMap = json.iconmap;
+    this.modal = json.modal;
+  }
+}
 
 class GanttSeriesConfig {
   dataset: string;
@@ -19,6 +35,7 @@ class GanttSeriesConfig {
   colorAttribute: string;
   colorMap: any;
   isBackground: boolean;
+  modal: string;
   canEdit: boolean;
 
   constructor(json: any) {
@@ -35,6 +52,7 @@ class GanttSeriesConfig {
     this.canEdit = json.canedit;
     this.colorAttribute = json.colorattribute;
     this.colorMap = json.colormap;
+    this.modal = json.modal;
   }
 }
 
@@ -43,12 +61,14 @@ class GanttLane {
   label: string;
   icon: string;
   spreads: GanttSpread[];
+  object: RbObject;
 
-  constructor(i: string, l: string, ic: string, s: GanttSpread[]) {
+  constructor(i: string, l: string, ic: string, o: RbObject, s: GanttSpread[]) {
     this.id = i;
     this.label = l != null ? l : "";
     this.icon = ic;
     this.spreads = s;
+    this.object = o;
   }
 }
 
@@ -93,9 +113,14 @@ class GanttMark {
   styleUrls: ['./rb-gantt.component.css']
 })
 export class RbGanttComponent implements OnInit {
-  @Input() lists : any;
-  @Input() series: any[];
+  @Input('lists') lists : any;
+  @Input('lanes') lanes : any;
+  @Input('series') series: any[];
+  @Input('selectedObject') selectedObject: RbObject;
+  @Output() selectedObjectChange: EventEmitter<any> = new EventEmitter();
+  @Output('openModal') openModal: EventEmitter<any> = new EventEmitter();
 
+  lanesConfig: GanttLaneConfig;
   seriesConfigs: GanttSeriesConfig[];
   spanMS: number;
   zoomMS: number;
@@ -123,6 +148,9 @@ export class RbGanttComponent implements OnInit {
 
 
   ngOnChanges(changes : SimpleChange) {
+    if('lanes' in changes && this.lanes != null) {
+      this.lanesConfig = new GanttLaneConfig(this.lanes);
+    }
     if('series' in changes && this.series != null) {
       this.seriesConfigs = [];
       for(let item of this.series) {
@@ -214,31 +242,15 @@ export class RbGanttComponent implements OnInit {
 
   private getLanes() {
     let lanes : GanttLane[] = [];
-    for(let cfg of this.seriesConfigs) {
-      let list: RbObject[] = this.lists[cfg.dataset];
-      for(var i in list) {
-        let obj = list[i];
-        let objLaneId = obj.get(cfg.laneAttribute);
-        if(objLaneId != null) {
-          let lane: GanttLane = null;
-          for(var l of lanes) {
-            if(objLaneId == l.id) {
-              lane = l;
-            }
-          }
-          if(lane == null) {
-            let icon = null;
-            if(cfg.laneIconAttribute != null) {
-              icon = obj.get(cfg.laneIconAttribute);
-              if(cfg.laneIconMap != null) {
-                icon = cfg.laneIconMap[icon];
-              } 
-            }
-            lane = new GanttLane(objLaneId, obj.get(cfg.laneLabelAttribute), icon, this.getSpreads(objLaneId));
-            lanes.push(lane);
-          }
-        }
+    let list: RbObject[] = this.lists[this.lanesConfig.dataset];
+    for(let obj of list) {
+      let label = obj.get(this.lanesConfig.labelAttribute);
+      let icon = obj.get(this.lanesConfig.iconAttribute);
+      if(this.lanesConfig.iconMap != null) {
+        icon = this.lanesConfig.iconMap[icon];
       }
+      let lane = new GanttLane(obj.uid, label, icon, obj, this.getSpreads(obj.uid))
+      lanes.push(lane);
     }
     if(lanes.length > 0) {
       lanes.sort((a, b) => (a != null && b != null ? a.label.localeCompare(b.label) : 0));
@@ -347,6 +359,19 @@ export class RbGanttComponent implements OnInit {
     return null;
   }
 
+  public clickSpread(spread: GanttSpread) {
+    this.selectedObjectChange.emit(spread.object);
+    if(spread.config.modal != null) {
+      this.openModal.emit(spread.config.modal);
+    }
+  }
+
+  public clickLane(lane: GanttLane) {
+    this.selectedObjectChange.emit(lane.object);
+    if(this.lanesConfig.modal != null) {
+      this.openModal.emit(this.lanesConfig.modal);
+    }
+  }
 
   public dropped(event, lane: GanttLane) {
     let update: any = {};

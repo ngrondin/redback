@@ -8,14 +8,23 @@ import { Target } from 'app/desktop-root/desktop-root.component';
   export class ViewContainerComponent {
     @Input('target') currentTarget: Target;
     @Output() navigate: EventEmitter<any> = new EventEmitter();
-    //@Output() titlechange: EventEmitter<any> = new EventEmitter();
+    
+    activeModal: string;
 
     navigateTo(target: any) {
       this.navigate.emit(target);
     }
+
+    openModal(name: string) {
+      this.activeModal = name;
+    }
+
+    closeModal() {
+      this.activeModal = null;
+    }
+
     setTitle(title: string) {
       setTimeout(() => this.currentTarget.title = title);
-      //this.titlechange.emit(title);
     }
 
   };
