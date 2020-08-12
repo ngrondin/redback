@@ -109,16 +109,6 @@ rb-list-scroll > mat-action-list > button {
 	color: #999999;	
 }
 
-.rb-list-item {
-	display: flex;
-	flex-direction: row;
-	margin: 8px;
-}
-
-.rb-list-item-active {
-	border-left: 4px Solid red;
-	padding-left: -4px;
-}
 
 rb-menu > .mat-list-base {
 	padding-top: 0px;

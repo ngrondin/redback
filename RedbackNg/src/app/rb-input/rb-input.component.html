@@ -7,7 +7,8 @@
         [(ngModel)]="value"
         (change)="commit()"
         [readonly]="readonly"
-        autocomplete="off">
+        autocomplete="off"
+        [type]="type != null ? type : 'text'">
     <mat-icon 
         matPrefix
         class="rb-grey-icon">{{icon}}</mat-icon>

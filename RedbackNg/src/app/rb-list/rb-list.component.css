@@ -11,14 +11,28 @@
 }
 
 .rb-list-item {
+	display: flex;
+	flex-direction: row;
+	margin: 12px 4px 12px 4px;
     min-height: 40px;
+}
+
+.rb-list-item-active {
+	border-left: 4px Solid red;
+	padding-left: -4px;
 }
 
 .rb-list-item-icon {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-right: 5px;
+    color: grey;
+    margin-left: -5px;
+    padding-right: 10px;
+}
+
+.mat-icon{
+    font-size: 1.7rem;
 }
 
 .rb-list-item-datablock {

@@ -9,6 +9,7 @@ import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.comp
   styleUrls: ['./rb-input.component.css']
 })
 export class RbInputComponent extends RbInputCommonComponent implements OnInit {
+  @Input('type') type: string;
 
   constructor() {
     super();

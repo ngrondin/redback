@@ -88,8 +88,16 @@
         <div
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'number'">
-            Number<br><br>
-        </div>        
+            <rb-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [size]="20"
+                [icon]="'description'"
+                [label]="object.get(labelattribute)"
+                [type]="'number'"
+                [editable]="editable">
+            </rb-input>
+        </div>
         <div
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'unknown'">
