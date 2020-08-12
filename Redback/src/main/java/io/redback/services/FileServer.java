@@ -35,51 +35,74 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 		{
 			logger.info("Authenticated file service start");
 			Payload response = null;
-			if(payload.metadata.containsKey("object") && payload.metadata.containsKey("uid") && payload.metadata.containsKey("filename") && payload.metadata.containsKey("mime"))
+			if(payload.metadata.containsKey("filename") && payload.metadata.containsKey("mime"))
 			{
-				String object = payload.metadata.get("object");
-				String uid = payload.metadata.get("uid");
 				String fileName = payload.metadata.get("filename");
 				String mime = payload.metadata.get("mime");
-				String fileUid = putFile(object, uid, fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
+				String fileUid = putFile(fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
+				if(payload.metadata.containsKey("object") && payload.metadata.containsKey("uid"))
+				{
+					String object = payload.metadata.get("object");
+					String uid = payload.metadata.get("uid");
+					linkFileTo(fileUid, object, uid);
+				}			
 				response = new Payload((new DataMap("fileuid", fileUid)).toString());
 			}
 			else
 			{
 				DataMap request = new DataMap(payload.getString());
-				if(request.containsKey("fileuid"))
-				{
-					RedbackFile file = getFile(request.getString("fileuid"));
-					response = new Payload(file.bytes);
-					response.metadata.put("mime", file.mime);
-					response.metadata.put("filename", file.fileName);
-					response.metadata.put("uid", file.uid);
-					response.metadata.put("username", file.username);
-					response.metadata.put("date", file.date.toString());
+				String action = request.getString("action");
+				if(action == null) {
+					if(request.containsKey("fileuid") && request.containsKey("object") && request.containsKey("uid"))
+						action = "link";
+					else if(request.containsKey("fileuid"))
+						action = "get";
+					else if(request.containsKey("object") && request.containsKey("uid"))
+						action = "list";
 				}
-				else if(request.containsKey("object") && request.containsKey("uid"))
+				if(action != null) 
 				{
-					String object = request.getString("object");
-					String uid = request.getString("uid");
-					List<RedbackFile> files = listFilesFor(object, uid);
-					DataMap resp = new DataMap();
-					DataList list = new DataList();
-					for(int i = 0; i < files.size(); i++) 
+					if(action.equals("get"))
 					{
-						RedbackFile file = files.get(i);
-						DataMap fileInfo = new DataMap();
-						fileInfo.put("fileuid", file.uid);
-						fileInfo.put("filename", file.fileName);
-						fileInfo.put("mime", file.mime);
-						fileInfo.put("thumbnail", file.thumbnail);
-						fileInfo.put("username", file.username);
-						fileInfo.put("date", file.date);
-						fileInfo.put("relatedobject", object);
-						fileInfo.put("relateduid", uid);
-						list.add(fileInfo);
+						RedbackFile file = getFile(request.getString("fileuid"));
+						response = new Payload(file.bytes);
+						response.metadata.put("mime", file.mime);
+						response.metadata.put("filename", file.fileName);
+						response.metadata.put("uid", file.uid);
+						response.metadata.put("username", file.username);
+						response.metadata.put("date", file.date.toString());
+					} 
+					else if(action.equals("link")) 
+					{
+						String object = request.getString("object");
+						String uid = request.getString("uid");
+						String fileUid = request.getString("fileUid");
+						linkFileTo(fileUid, object, uid);
 					}
-					resp.put("list", list);
-					response = new Payload(resp.toString());
+					else if(action.equals("list"))
+					{
+						String object = request.getString("object");
+						String uid = request.getString("uid");
+						List<RedbackFile> files = listFilesFor(object, uid);
+						DataMap resp = new DataMap();
+						DataList list = new DataList();
+						for(int i = 0; i < files.size(); i++) 
+						{
+							RedbackFile file = files.get(i);
+							DataMap fileInfo = new DataMap();
+							fileInfo.put("fileuid", file.uid);
+							fileInfo.put("filename", file.fileName);
+							fileInfo.put("mime", file.mime);
+							fileInfo.put("thumbnail", file.thumbnail);
+							fileInfo.put("username", file.username);
+							fileInfo.put("date", file.date);
+							fileInfo.put("relatedobject", object);
+							fileInfo.put("relateduid", uid);
+							list.add(fileInfo);
+						}
+						resp.put("list", list);
+						response = new Payload(resp.toString());
+					}
 				}
 			}
 			if(response == null)
@@ -106,7 +129,9 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 	public abstract RedbackFile getFile(String fileUid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
 
 	public abstract List<RedbackFile> listFilesFor(String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
-	
-	public abstract String putFile(String object, String uid, String fileName, String mime, String username, byte[] bytes) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
+
+	public abstract void linkFileTo(String fileUid, String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
+
+	public abstract String putFile(String fileName, String mime, String username, byte[] bytes) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
 	
 }

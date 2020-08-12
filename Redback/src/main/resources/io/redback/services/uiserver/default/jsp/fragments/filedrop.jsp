@@ -6,4 +6,5 @@ if(typeof parents.fileset != 'undefined') { %>
 	[uploader]="<%=parents.fileset%>.uploader"
 	(dropped)="<%=parents.fileset%>.upload($event)" <%
 } %> >
+	#content#
 </rb-filedrop>

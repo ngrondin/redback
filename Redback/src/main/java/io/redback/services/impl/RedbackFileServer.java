@@ -32,7 +32,8 @@ public class RedbackFileServer extends FileServer
 	protected String defaultFileService;
 	protected String idGeneratorService; 
 	protected String idName; 
-	protected CollectionConfig collectionConfig;
+	protected CollectionConfig fileCollection;
+	protected CollectionConfig linkCollection;
 	protected DataClient dataClient;
 	
 	public RedbackFileServer(String n, DataMap c, Firebus f) 
@@ -45,17 +46,18 @@ public class RedbackFileServer extends FileServer
 		for(int i = 0; i < list.size(); i++)
 			fileServices.add(list.getString(i));
 		defaultFileService = config.getString("defaultadapter");
-		collectionConfig = new CollectionConfig(c.getObject("collection"));
+		fileCollection = new CollectionConfig(c.getObject("filecollection"));
+		linkCollection = new CollectionConfig(c.getObject("linkcollection"));
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
 	}
 
 	public RedbackFile getFile(String fileUid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException
 	{
 		RedbackFile file = null;
-		DataMap resp = dataClient.getData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid), null);
+		DataMap resp = dataClient.getData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), fileUid), null);
 		if(resp.getList("result").size() > 0)
 		{
-			DataMap fileInfo = collectionConfig.convertObjectToCanonical(resp.getList("result").getObject(0));
+			DataMap fileInfo = fileCollection.convertObjectToCanonical(resp.getList("result").getObject(0));
 			String fileName = fileInfo.getString("filename");
 			String mime = fileInfo.getString("mime");
 			String thumbnail = fileInfo.getString("thumbnail");
@@ -76,14 +78,19 @@ public class RedbackFileServer extends FileServer
 	
 	public List<RedbackFile> listFilesFor(String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException
 	{
-		DataMap filter = new DataMap();
-		filter.put(collectionConfig.getField("relatedobject"), object);
-		filter.put(collectionConfig.getField("relateduid"), uid);
-		DataMap resp = dataClient.getData(collectionConfig.getName(), filter, null);
+		DataMap filter1 = new DataMap();
+		filter1.put(linkCollection.getField("object"), object);
+		filter1.put(linkCollection.getField("objectuid"), uid);
+		DataMap resp1 = dataClient.getData(linkCollection.getName(), filter1, null);
+		DataList filter2List = new DataList();
+		for(int i = 0; i < resp1.getList("result").size(); i++) 
+			filter2List.add(resp1.getList("result").getObject(i).getString("fileuid"));
+		DataMap filter2 = new DataMap(fileCollection.getField("fileuid"), new DataMap("$in", filter2List));
+		DataMap resp2 = dataClient.getData(fileCollection.getName(), filter2, null);
 		List<RedbackFile> list = new ArrayList<RedbackFile>();
-		for(int i = 0; i < resp.getList("result").size(); i++) 
+		for(int i = 0; i < resp2.getList("result").size(); i++) 
 		{
-			DataMap fileInfo = collectionConfig.convertObjectToCanonical(resp.getList("result").getObject(i));
+			DataMap fileInfo = fileCollection.convertObjectToCanonical(resp2.getList("result").getObject(i));
 			String fileUid = fileInfo.getString("fileuid");
 			String fileName = fileInfo.getString("filename");
 			String mime = fileInfo.getString("mime");
@@ -96,19 +103,17 @@ public class RedbackFileServer extends FileServer
 		return list;
 	}
 
-	public String putFile(String object, String uid, String fileName, String mime, String username, byte[] bytes) throws RedbackException, FunctionErrorException, FunctionTimeoutException
+	public String putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException, FunctionErrorException, FunctionTimeoutException
 	{
 		String fileUid = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
 		DataMap data = new DataMap();
-		data.put(collectionConfig.getField("filename"), fileName);
-		data.put(collectionConfig.getField("relatedobject"), object);
-		data.put(collectionConfig.getField("relateduid"), uid);
-		data.put(collectionConfig.getField("mime"), mime);
-		data.put(collectionConfig.getField("user"), username);
-		data.put(collectionConfig.getField("date"), new Date());
+		data.put(fileCollection.getField("filename"), fileName);
+		data.put(fileCollection.getField("mime"), mime);
+		data.put(fileCollection.getField("user"), username);
+		data.put(fileCollection.getField("date"), new Date());
 		if(mime.startsWith("image"))
-			data.put(collectionConfig.getField("thumbnail"), getBase64Thumbnail(bytes));
-		dataClient.putData(collectionConfig.getName(), new DataMap(collectionConfig.getField("fileuid"), fileUid), data);
+			data.put(fileCollection.getField("thumbnail"), getBase64Thumbnail(bytes));
+		dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), fileUid), data);
 
 		Payload filePayload = new Payload(bytes);
 		filePayload.metadata.put("filename", fileUid);
@@ -117,6 +122,14 @@ public class RedbackFileServer extends FileServer
 		return fileUid;
 	}
 
+	public void linkFileTo(String fileUid, String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException {
+		DataMap data = new DataMap();
+		String linkId = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
+		data.put(linkCollection.getField("fileuid"), fileUid);
+		data.put(linkCollection.getField("object"), object);
+		data.put(linkCollection.getField("objectuid"), uid);
+		dataClient.putData(linkCollection.getName(), new DataMap(linkCollection.getField("linkid"), linkId), data);
+	}
 
 	public String getMimeType(String filename)
 	{
