@@ -24,16 +24,29 @@ public class Client {
 	
 	protected DataMap request(Session session, DataMap req) throws RedbackException
 	{
+		try
+		{
+			Payload reqP = new Payload(req.toString());
+			Payload respP = requestPayload(session, reqP);
+			DataMap resp = new DataMap(respP.getString());
+			return resp;
+		}
+		catch(Exception e)
+		{
+			throw new RedbackException("Error requesting " + serviceName, e);
+		}
+	}
+	
+	protected Payload requestPayload(Session session, Payload reqP) throws RedbackException 
+	{
 		if(serviceName != null)
 		{
 			try
 			{
-				Payload reqP = new Payload(req.toString());
 				if(session != null)
 					reqP.metadata.put("token", session.getToken());
 				Payload respP = firebus.requestService(serviceName, reqP);
-				DataMap resp = new DataMap(respP.getString());
-				return resp;
+				return respP;
 			}
 			catch(Exception e)
 			{

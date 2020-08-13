@@ -5,6 +5,6 @@
 	style="<%=config.inlineStyle%>"
 	[active]="<%=parents.tabsection%>.isTabVisible(<%=id%>)"
 	[hidden]="!<%=id%>.active"
-	(register)="<%=parents.tabsection%>.register(<%=id%>)">
+	(initialised)="<%=parents.tabsection%>.register(<%=id%>, <%=config.isdefault != null ? config.isdefault : false%>)">
 	#content#
 </rb-tab>

@@ -44,6 +44,7 @@
 
 .rb-files-name {
     display: flex;
+    color:#202020;
 }
 
 .rb-files-date {

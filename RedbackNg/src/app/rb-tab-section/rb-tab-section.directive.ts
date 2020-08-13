@@ -14,13 +14,11 @@ export class RbTabSectionDirective {
 
   constructor() { }
 
-  public register(tab : RbTabDirective) {
-    setTimeout(() => {
-      this.tabs.push(tab);
-      if(this.initiallyActiveTabId != null && this.initiallyActiveTabId == tab.id) {
-        this.visibleTab = tab;
-      }
-    }, 1);
+  public register(tab: RbTabDirective, isdefault: Boolean) {
+    this.tabs.push(tab);
+    if((this.initiallyActiveTabId != null && this.initiallyActiveTabId == tab.id) || (isdefault != null && isdefault == true)) {
+      this.visibleTab = tab;
+    }
   }
 
   public select(tab: RbTabDirective) {

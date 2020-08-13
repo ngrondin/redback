@@ -95,14 +95,16 @@
     border-top: 1px solid lightgray;
 }
 
-.rb-gantt-lanes {
+.rb-gantt-lanescontainer {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
     overflow: auto;
     position: relative;
+    width: 100px;
 }
 
-.rb-gantt-lanecontainer {
+.rb-gantt-lanes {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;

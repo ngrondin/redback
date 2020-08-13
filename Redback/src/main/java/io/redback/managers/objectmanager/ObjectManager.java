@@ -21,6 +21,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
+import io.redback.client.FileClient;
 import io.redback.client.GeoClient;
 import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.managers.jsmanager.JSManager;
@@ -44,6 +45,7 @@ public class ObjectManager
 	protected String processServiceName;
 	protected String signalConsumerName;
 	protected String geoServiceName;
+	protected String fileServiceName;
 	protected DataMap globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 	protected HashMap<String, ScriptConfig> globalScripts;
@@ -52,6 +54,7 @@ public class ObjectManager
 	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
 	protected GeoClient geoClient;
+	protected FileClient fileClient;
 
 	public ObjectManager(Firebus fb, DataMap config)
 	{
@@ -64,10 +67,12 @@ public class ObjectManager
 		processServiceName = config.getString("processservice");
 		signalConsumerName = config.getString("signalconsumer");
 		geoServiceName = config.getString("geoservice");
+		fileServiceName = config.getString("fileservice");
 		globalVariables = config.getObject("globalvariables");
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		geoClient = new GeoClient(firebus, geoServiceName);
+		fileClient = new FileClient(firebus, fileServiceName);
 		objectConfigs = new HashMap<String, ObjectConfig>();
 		globalScripts = new HashMap<String, ScriptConfig>();
 		transactions = new HashMap<Long, HashMap<String, RedbackObject>>();
@@ -92,6 +97,11 @@ public class ObjectManager
 	public GeoClient getGeoClient()
 	{
 		return geoClient;
+	}
+	
+	public FileClient getFileClient()
+	{
+		return fileClient;
 	}
 	
 	public DataMap getGlobalVariables()

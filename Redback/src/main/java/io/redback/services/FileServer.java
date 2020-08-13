@@ -80,7 +80,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 					{
 						String object = request.getString("object");
 						String uid = request.getString("uid");
-						String fileUid = request.getString("fileUid");
+						String fileUid = request.getString("fileuid");
 						linkFileTo(fileUid, object, uid);
 					}
 					else if(action.equals("list"))

@@ -9,12 +9,14 @@ export class RbTabDirective {
   @Input('label') label: string;
   @Input('active') active : boolean;
   
-  @Output() register: EventEmitter<any> = new EventEmitter();
+  @Output() initialised: EventEmitter<any> = new EventEmitter();
   
   constructor() { }
 
   ngOnInit() {
-    this.register.emit(this);
+    setTimeout(() => {
+      this.initialised.emit(this);
+    }, 1);      
   }
 
 }

@@ -113,6 +113,7 @@ class GanttMark {
   styleUrls: ['./rb-gantt.component.css']
 })
 export class RbGanttComponent implements OnInit {
+  @Input('list') list: RbObject[];
   @Input('lists') lists : any;
   @Input('lanes') lanes : any;
   @Input('series') series: any[];
@@ -157,7 +158,7 @@ export class RbGanttComponent implements OnInit {
         this.seriesConfigs.push(new GanttSeriesConfig(item));
       }
     }
-    if('lists' in changes && this.lists != null) {
+    if('lists' in changes || 'list' in changes) {
       if(this.haveListsChanged()) {
         this.redraw();
       }
@@ -175,12 +176,23 @@ export class RbGanttComponent implements OnInit {
     let str: string = "";
     let cnt = 0;
     let lu = 0;
-    for(let ser in this.lists) {
-      for(let obj of this.lists[ser]) {
+    if(this.list != null) {
+      for(let obj of this.list) {
         cnt = cnt + 1;
         let u = obj.lastUpdated;
         if(u > lu) {
           lu = u;
+        }
+      }
+    }
+    if(this.lists != null) {
+      for(let ser in this.lists) {
+        for(let obj of this.lists[ser]) {
+          cnt = cnt + 1;
+          let u = obj.lastUpdated;
+          if(u > lu) {
+            lu = u;
+          }
         }
       }
     }
@@ -242,7 +254,7 @@ export class RbGanttComponent implements OnInit {
 
   private getLanes() {
     let lanes : GanttLane[] = [];
-    let list: RbObject[] = this.lists[this.lanesConfig.dataset];
+    let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
     for(let obj of list) {
       let label = obj.get(this.lanesConfig.labelAttribute);
       let icon = obj.get(this.lanesConfig.iconAttribute);
@@ -261,7 +273,7 @@ export class RbGanttComponent implements OnInit {
   private getSpreads(laneId: string) : GanttSpread[] {
     let spreads : GanttSpread[] = [];
     for(let cfg of this.seriesConfigs) {
-      let list: RbObject[] = this.lists[cfg.dataset];
+      let list: RbObject[] = this.lists != null ? this.lists[cfg.dataset] : this.list;
       for(var i in list) {
         let obj = list[i];
         if(obj.get(cfg.laneAttribute) == laneId) {
@@ -345,16 +357,20 @@ export class RbGanttComponent implements OnInit {
   }
 
   public getSeriesConfigForObject(object: RbObject) : GanttSeriesConfig {
-    for(let key in this.lists) {
-      for(let obj of this.lists[key]) {
-        if(obj == object) {
-          for(let sc of this.seriesConfigs) {
-            if(sc.dataset == key) {
-              return sc;
+    if(this.lists != null) {
+      for(let key in this.lists) {
+        for(let obj of this.lists[key]) {
+          if(obj == object) {
+            for(let sc of this.seriesConfigs) {
+              if(sc.dataset == key) {
+                return sc;
+              }
             }
           }
         }
       }
+    } else if(this.list != null) {
+      return this.seriesConfigs[0];
     }
     return null;
   }

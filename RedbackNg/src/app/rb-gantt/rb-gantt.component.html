@@ -75,10 +75,10 @@
         </div>
     </div>
     <div
-        class="rb-gantt-lanes"
+        class="rb-gantt-lanescontainer"
         (scroll)="scroll($event)">
         <div
-            class="rb-gantt-lanecontainer">
+            class="rb-gantt-lanes">
             <div
                 *ngFor="let mark of hourMarks"
                 [style.left.px]="mark.px"
