@@ -1,0 +1,32 @@
+:host {
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.rb-file-input-box {
+    display: flex;
+    flex: 0 0 auto;
+    min-width: 100px;
+    min-height: 100px;
+    border: 1px solid grey;
+    justify-content: center;
+    align-items: center;
+}
+
+.rb-file-input-active {
+    background: repeating-linear-gradient(
+        45deg,
+        RGB(96, 109, 188, 0.2),
+        RGB(96, 109, 188, 0.2) 10px,
+        RGB(157, 166, 219, 0.2) 10px,
+        RGB(157, 166, 219, 0.2) 20px
+        );
+}
+
+.rb-file-input-img {
+    cursor: pointer;
+}
+
+.rb-file-input-icon {
+    cursor: pointer;
+}

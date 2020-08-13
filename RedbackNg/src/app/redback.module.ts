@@ -60,6 +60,7 @@ import { RbAddressInputComponent } from './rb-address-input/rb-address-input.com
 import { RbPopupInputComponent } from './rb-popup-input/rb-popup-input.component';
 import { RbPopupAddressesComponent } from './rb-popup-addresses/rb-popup-addresses.component';
 import { RbModalComponent } from './rb-modal/rb-modal.component';
+import { RbFileInputComponent } from './rb-file-input/rb-file-input.component';
 
 @NgModule({
   imports: [
@@ -122,6 +123,7 @@ import { RbModalComponent } from './rb-modal/rb-modal.component';
     RbFilesetDirective,
     RbFilelistComponent,
     RbFiledropComponent,
+    RbFileInputComponent,
     RbNotificationComponent,
     RbLinkComponent,
     RbModalComponent,
@@ -174,6 +176,7 @@ import { RbModalComponent } from './rb-modal/rb-modal.component';
     RbFilesetDirective,
     RbFilelistComponent,
     RbFiledropComponent,
+    RbFileInputComponent,
     RbNotificationComponent,
     RbLinkComponent,
     RbModalComponent,

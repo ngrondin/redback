@@ -39,14 +39,18 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 			{
 				String fileName = payload.metadata.get("filename");
 				String mime = payload.metadata.get("mime");
-				String fileUid = putFile(fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
+				RedbackFile newFile = putFile(fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
 				if(payload.metadata.containsKey("object") && payload.metadata.containsKey("uid"))
 				{
 					String object = payload.metadata.get("object");
 					String uid = payload.metadata.get("uid");
-					linkFileTo(fileUid, object, uid);
-				}			
-				response = new Payload((new DataMap("fileuid", fileUid)).toString());
+					linkFileTo(newFile.uid, object, uid);
+				}
+				DataMap resp = new DataMap();
+				resp.put("fileuid", newFile.uid);
+				resp.put("thumbnail", newFile.thumbnail);
+				response = new Payload(resp.toString());
+				response.metadata.put("mime", "application/json");
 			}
 			else
 			{
@@ -132,6 +136,6 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 
 	public abstract void linkFileTo(String fileUid, String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
 
-	public abstract String putFile(String fileName, String mime, String username, byte[] bytes) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
+	public abstract RedbackFile putFile(String fileName, String mime, String username, byte[] bytes) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
 	
 }

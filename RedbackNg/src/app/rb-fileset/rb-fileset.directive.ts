@@ -43,8 +43,6 @@ export class RbFilesetDirective {
 
   
   public refreshData() {
-    //this.list = [];
-    //this.selectedFile = null;
     if(this.relatedObject != null) {
       this.dataService.listFiles(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
         data => this.setData(data)

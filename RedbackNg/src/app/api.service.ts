@@ -161,7 +161,7 @@ export class ApiService {
   /******* Files *********/
 
   listFiles(object: string, uid: string): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?object=' + object + '&uid=' + uid, httpOptions);
+    return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?action=list&object=' + object + '&uid=' + uid, httpOptions);
   }
 
   /******* Signals *********/

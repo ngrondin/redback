@@ -1,6 +1,11 @@
+:host {
+    display: flex;
+    flex: 1 1 auto;
+}
+
 .rb-file-drop {
-    padding: 20px;
-    padding-left: 40px;
+    display: flex;
+    flex: 1 1 auto;
     color: lightgrey;
     font-style: italic;
     cursor: default;
@@ -9,9 +14,9 @@
 .rb-file-drop-active {
     background: repeating-linear-gradient(
         45deg,
-        #606dbc,
-        #606dbc 10px,
-        #9da6db 10px,
-        #9da6db 20px
+        RGB(96, 109, 188, 0.2),
+        RGB(96, 109, 188, 0.2) 10px,
+        RGB(157, 166, 219, 0.2) 10px,
+        RGB(157, 166, 219, 0.2) 20px
         );
 }

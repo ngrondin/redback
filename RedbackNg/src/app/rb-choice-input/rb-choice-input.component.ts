@@ -8,14 +8,6 @@ import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.comp
   styleUrls: ['./rb-choice-input.component.css']
 })
 export class RbChoiceInputComponent extends RbInputCommonComponent implements OnInit {
-  /*
-  @Input('label') label: string;
-  @Input('icon') icon: string;
-  @Input('size') size: number;
-  @Input('editable') editable: boolean;
-  @Input('object') rbObject: RbObject;
-  @Input('attribute') attribute: string;
-  */
   @Input('choicelist') choicelist: any;
   @Output('change') change = new EventEmitter();
 
@@ -46,15 +38,6 @@ export class RbChoiceInputComponent extends RbInputCommonComponent implements On
   public set value(val: any) {
     this.editedValue = val;
   }
-
-  /*
-  public get readonly(): boolean {
-    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
-      return !(this.editable && this.rbObject.validation[this.attribute].editable);
-    else
-      return true;      
-  }
-  */
   
   public get widthString() : string {
     if(this.size != null)

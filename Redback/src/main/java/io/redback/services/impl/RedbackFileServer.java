@@ -6,9 +6,11 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -35,6 +37,7 @@ public class RedbackFileServer extends FileServer
 	protected CollectionConfig fileCollection;
 	protected CollectionConfig linkCollection;
 	protected DataClient dataClient;
+	protected MessageDigest messageDigest;
 	
 	public RedbackFileServer(String n, DataMap c, Firebus f) 
 	{
@@ -49,6 +52,10 @@ public class RedbackFileServer extends FileServer
 		fileCollection = new CollectionConfig(c.getObject("filecollection"));
 		linkCollection = new CollectionConfig(c.getObject("linkcollection"));
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
+		try {
+			messageDigest = MessageDigest.getInstance("SHA-1");
+		} catch(Exception e) {
+		}
 	}
 
 	public RedbackFile getFile(String fileUid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException
@@ -103,23 +110,46 @@ public class RedbackFileServer extends FileServer
 		return list;
 	}
 
-	public String putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException, FunctionErrorException, FunctionTimeoutException
+	public RedbackFile putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException, FunctionErrorException, FunctionTimeoutException, DataException
 	{
-		String fileUid = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
-		DataMap data = new DataMap();
-		data.put(fileCollection.getField("filename"), fileName);
-		data.put(fileCollection.getField("mime"), mime);
-		data.put(fileCollection.getField("user"), username);
-		data.put(fileCollection.getField("date"), new Date());
-		if(mime.startsWith("image"))
-			data.put(fileCollection.getField("thumbnail"), getBase64Thumbnail(bytes));
-		dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), fileUid), data);
+		byte[] hash = messageDigest.digest(bytes);
+		Formatter formatter = new Formatter();
+	    for (byte b : hash) 
+	        formatter.format("%02x", b);
+	    String hashStr = formatter.toString();
+	    formatter.close();
+	    DataMap resp = dataClient.getData(fileCollection.getName(), new DataMap(fileCollection.getField("hash"), hashStr), null);
+	    if(resp.getList("result").size() == 0) 
+	    {
+			String fileUid = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
+			Date date = new Date();
+			String thumbnail = null;
+			DataMap data = new DataMap();
+			data.put(fileCollection.getField("filename"), fileName);
+			data.put(fileCollection.getField("mime"), mime);
+			data.put(fileCollection.getField("user"), username);
+			data.put(fileCollection.getField("date"), new Date());
+			data.put(fileCollection.getField("hash"), hashStr);
+			if(mime.startsWith("image")) {
+				thumbnail = getBase64Thumbnail(bytes);
+				data.put(fileCollection.getField("thumbnail"), thumbnail);
+			}
+			dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), fileUid), data);
 
-		Payload filePayload = new Payload(bytes);
-		filePayload.metadata.put("filename", fileUid);
-		firebus.publish(defaultFileService, filePayload);
-		
-		return fileUid;
+			Payload filePayload = new Payload(bytes);
+			filePayload.metadata.put("filename", fileUid);
+			firebus.publish(defaultFileService, filePayload);
+			return new RedbackFile(fileUid, fileName, mime, thumbnail, username, date, null);
+	    }
+	    else
+	    {
+			DataMap fileInfo = fileCollection.convertObjectToCanonical(resp.getList("result").getObject(0));
+			String fileUid = fileInfo.getString("fileuid");
+			String thumbnail = fileInfo.getString("thumbnail");
+			Date date = fileInfo.getDate("date");
+			RedbackFile file = new RedbackFile(fileUid, fileName, mime, thumbnail, username, date, null);
+			return file;
+	    }
 	}
 
 	public void linkFileTo(String fileUid, String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException {
