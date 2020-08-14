@@ -30,7 +30,7 @@ export class RbDatasetDirective implements OnChanges {
 
   public id: String;
   public dataSubscription: Subscription;
-  public list: RbObject[] = [];
+  public _list: RbObject[] = [];
   public _selectedObject: RbObject;
   public searchString: string;
   public userFilter: any;
@@ -87,9 +87,13 @@ export class RbDatasetDirective implements OnChanges {
     this.dataSubscription.unsubscribe();
   }
 
+  public get list() : RbObject[] {
+    return [...this._list];
+  }
+
   public refreshData() {
     this.nextPage = 0;
-    this.list = [];
+    this._list = [];
     if(this.fetchAll) {
       setTimeout(() => this.fetchNextPage(), 1);
       setTimeout(() => this.fetchNextPage(), 500);
@@ -125,19 +129,19 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   private setData(data: RbObject[]) {
-    this.list = [...this.list.concat(data)];
+    this._list = [...this._list.concat(data)];
     this.fetchThreads = this.fetchThreads - 1;
     if(this.fetchAll && data.length > 0) {
       this.fetchNextPage();
     } else if(this.fetchThreads == 0) {
       this.isLoading = false;
       this.firstLoad = false;
-      if(this.list.length == 0) {
+      if(this._list.length == 0) {
         this._selectedObject = null;
-      } else if(this.list.length == 1) {
-        this._selectedObject = this.list[0];
-      } else if(this.list.length > 1) {
-        if(this.selectedObject != null && !this.list.includes(this.selectedObject)) {
+      } else if(this._list.length == 1) {
+        this._selectedObject = this._list[0];
+      } else if(this._list.length > 1) {
+        if(this.selectedObject != null && !this._list.includes(this.selectedObject)) {
           this._selectedObject = null;
         }
       }
@@ -145,10 +149,10 @@ export class RbDatasetDirective implements OnChanges {
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
-    if(object.objectname == this.objectname && this.isLoading == false && this.list.includes(object) == false && (this.searchString == null || this.searchString == '') && this.list.length < 50) {
-      this.list.push(object);
-      if(this.list.length == 1) {
-        this._selectedObject = this.list[0];
+    if(object.objectname == this.objectname && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && this._list.length < 50) {
+      this._list.push(object);
+      if(this._list.length == 1) {
+        this._selectedObject = this._list[0];
       }
     }
   }
@@ -200,7 +204,7 @@ export class RbDatasetDirective implements OnChanges {
       
     } else if(_name == 'executeall') {
       let delay: number = 0;
-      this.list.forEach((object) => {
+      this._list.forEach((object) => {
         setTimeout(() => {
           this.dataService.executeObject(object, param, null)
         }, delay);
@@ -214,16 +218,16 @@ export class RbDatasetDirective implements OnChanges {
   }
 
   public addObjectAndSelect(obj: RbObject) {
-    if(this.list.indexOf(obj) > -1) {
-      this.list.splice(this.list.indexOf(obj));
+    if(this._list.indexOf(obj) > -1) {
+      this._list.splice(this._list.indexOf(obj));
     }
-    this.list.unshift(obj);
+    this._list.unshift(obj);
     this.select(obj);
   }
 
   public removeSelected() {
-    if(this.list.indexOf(this.selectedObject) > -1) {
-      this.list.splice(this.list.indexOf(this.selectedObject), 1);
+    if(this._list.indexOf(this.selectedObject) > -1) {
+      this._list.splice(this._list.indexOf(this.selectedObject), 1);
     }
     this.selectedObject = null;
   }

@@ -35,10 +35,10 @@ export class RbFileInputComponent extends RbInputCommonComponent implements OnIn
   get fileUid() : String{
     if(this.rbObject != null) {
       let val = this.rbObject.get(this.attribute);
-      return val.fileuid;
-    } else {
-      return null;
-    }
+      if(val != null)
+        return val.fileuid;
+    } 
+    return null;
   } 
 
   get thumbnail() {

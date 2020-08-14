@@ -8,7 +8,7 @@
     flex: 0 0 auto;
     min-width: 100px;
     min-height: 100px;
-    border: 1px solid grey;
+    border: 1px solid rgb(172, 171, 171);
     justify-content: center;
     align-items: center;
 }
@@ -29,4 +29,5 @@
 
 .rb-file-input-icon {
     cursor: pointer;
+    font-size: 2.0rem;
 }
