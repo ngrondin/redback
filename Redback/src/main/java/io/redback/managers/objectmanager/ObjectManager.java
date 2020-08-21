@@ -138,7 +138,7 @@ public class ObjectManager
 		{
 			try 
 			{
-				jsManager.addFunction("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
+				jsManager.addSource("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
 			}
 			catch(Exception e) 
 			{

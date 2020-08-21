@@ -12,17 +12,13 @@ public class Expression extends Executor
 	
 	public Expression(JSManager jsm, String fn, List<String> p, String exp) throws RedbackException
 	{
-		super(jsm, fn, p, exp);
+		super(jsm, fn, p, "function " + fn + "(" + (p != null ? String.join(",", p) : "") + ") { return (" + exp + ");}");
 		if(sourceString == null)
 			fixedValueNull = true;
 		else if(sourceString.matches("[-+]?\\d*\\.?\\d+"))
 			fixedValue = Double.parseDouble(sourceString);
 		else if(sourceString.equalsIgnoreCase("true") ||  sourceString.equalsIgnoreCase("false"))
 			fixedValue = sourceString.equalsIgnoreCase("true") ? true : false;
-		else
-		{
-			setSource("function " + functionName + "(" + (paramNames != null ? String.join(",", paramNames) : "") + ") { return (" + sourceString + ");}");
-		}
 	}
 	
 	public Object eval(Map<String, Object> context) throws RedbackException

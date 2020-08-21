@@ -17,10 +17,10 @@ import io.redback.utils.js.LoggerJSFunction;
 
 public class JSManager {
 	
-	protected class FunctionEntry {
+	protected class SourceEntry {
 		public String src;
 		public long lastUpdated;
-		public FunctionEntry(String s, long lu) {
+		public SourceEntry(String s, long lu) {
 			src = s;
 			lastUpdated = lu;
 		}
@@ -36,13 +36,13 @@ public class JSManager {
 	}
 	
 	protected ScriptEngineManager engineManager;
-	protected Map<String, FunctionEntry> functions;
+	protected Map<String, SourceEntry> sourceEntries;
 	protected Map<Long, EngineEntry> engines;
 	protected long lastUpdated;
 	protected DataMap globalVariables;
 	
 	public JSManager() {
-		functions = new HashMap<String, FunctionEntry>();
+		sourceEntries = new HashMap<String, SourceEntry>();
 		engines = new HashMap<Long, EngineEntry>();
 		engineManager = new ScriptEngineManager();
 	}
@@ -51,16 +51,17 @@ public class JSManager {
 		globalVariables = gv;
 	}
 	
-	public void addFunction(String id, String src) {
-		synchronized(functions) {
-			lastUpdated = System.currentTimeMillis();
-			FunctionEntry fe = functions.get(id);
+	public void addSource(String id, String src) {
+		synchronized(sourceEntries) {
+			long now = System.currentTimeMillis();
+			SourceEntry fe = sourceEntries.get(id);
 			if(fe != null) {
 				fe.src = src;
 				fe.lastUpdated = lastUpdated;
 			} else {
-				functions.put(id, new FunctionEntry(src, lastUpdated));	
-			}				
+				sourceEntries.put(id, new SourceEntry(src, now));	
+			}	
+			lastUpdated = now;
 		}
 	}
 	
@@ -86,13 +87,13 @@ public class JSManager {
 
 	protected void compileEngine(EngineEntry engineEntry) throws RedbackException {
 		try {
-			synchronized(functions) {
-				Iterator<String> it = functions.keySet().iterator();
+			synchronized(sourceEntries) {
+				Iterator<String> it = sourceEntries.keySet().iterator();
 				while(it.hasNext()) {
 					String functionId = it.next();
-					FunctionEntry functionEntry = functions.get(functionId);
-					if(functionEntry.lastUpdated >= engineEntry.lastCompiled)
-						engineEntry.engine.eval(functionEntry.src);
+					SourceEntry sourceEntry = sourceEntries.get(functionId);
+					if(sourceEntry.lastUpdated >= engineEntry.lastCompiled)
+						engineEntry.engine.eval(sourceEntry.src);
 				}
 				engineEntry.lastCompiled = System.currentTimeMillis();
 			}

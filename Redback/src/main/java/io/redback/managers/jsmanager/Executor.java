@@ -24,11 +24,7 @@ public abstract class Executor {
 		paramNames = p;
 		if(paramNames == null)
 			paramNames = new ArrayList<String>();
-	}
-	
-	protected void setSource(String src) throws RedbackException
-	{
-		jsManager.addFunction(functionName, src);
+		jsManager.addSource(functionName, sourceString);
 	}
 	
 	public Object execute(Map<String, Object> context) throws RedbackException
@@ -61,6 +57,7 @@ public abstract class Executor {
 		}
 		catch (NoSuchMethodException e) 
 		{
+			jsManager.addSource(functionName, sourceString);
 			throw new RedbackException("No such method error executing '" + functionName + "'" + (contextDescriptor != null ? " in '" + contextDescriptor + "'" : ""), e);
 		}
 	}
