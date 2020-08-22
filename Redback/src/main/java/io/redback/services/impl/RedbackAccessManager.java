@@ -95,7 +95,19 @@ public class RedbackAccessManager extends AccessManager
 			try
 			{
 				DataMap userConfig = null;
-				if(type.equals("hardusers"))
+				if(username.equals("sysuser")) 
+				{
+					userConfig = new DataMap();
+					userConfig.put("username", "processuser");
+					DataList doms = new DataList();
+					doms.add("*");
+					userConfig.put("domains", doms);
+					DataList roles = new DataList();
+					roles.add("admin");
+					roles.add("process");
+					userConfig.put("roles", roles);
+				}
+				else if(type.equals("hardusers"))
 				{
 					for(int i = 0; i < hardUsers.size(); i++)
 						if(hardUsers.getObject(i).containsKey("username") && hardUsers.getObject(i).getString("username").equals(username))
