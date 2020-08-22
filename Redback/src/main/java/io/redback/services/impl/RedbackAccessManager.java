@@ -9,6 +9,7 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import io.firebus.Firebus;
+import io.firebus.Payload;
 import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
@@ -25,7 +26,12 @@ public class RedbackAccessManager extends AccessManager
 {
 	protected String secret;
 	protected String issuer;
+	protected String type;
+	protected String outboundService;
+	protected String idmUrl;
+	protected String idmKey;
 	protected DataClient dataClient;
+	protected DataList hardUsers;
 	protected ConfigurationClient configClient;
 
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
@@ -33,7 +39,18 @@ public class RedbackAccessManager extends AccessManager
 		super(n, c, f);
 		secret = config.getString("jwtsecret");
 		issuer = config.getString("jwtissuer");
-		dataClient = new DataClient(firebus, config.getString("dataservice"));
+		if(config.containsKey("users")) {
+			type = "hardusers";
+			hardUsers = config.getList("users");
+		} else if(config.containsKey("dataservice")) {
+			type = "data";
+			dataClient = new DataClient(firebus, config.getString("dataservice"));
+		} else if(config.containsKey("idmurl") && config.containsKey("outboundservice")) {
+			type = "idm";
+			idmUrl = config.getString("idmurl");
+			idmKey = config.getString("idmkey");
+			outboundService = config.getString("outboundservice");
+		}
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
 	}
 
@@ -78,20 +95,26 @@ public class RedbackAccessManager extends AccessManager
 			try
 			{
 				DataMap userConfig = null;
-				DataList userConfigs = config.getList("users");
-				if(userConfigs != null)
+				if(type.equals("hardusers"))
 				{
-					for(int i = 0; i < userConfigs.size(); i++)
-						if(userConfigs.getObject(i).containsKey("username") && userConfigs.getObject(i).getString("username").equals(username))
-							userConfig = userConfigs.getObject(i);
+					for(int i = 0; i < hardUsers.size(); i++)
+						if(hardUsers.getObject(i).containsKey("username") && hardUsers.getObject(i).getString("username").equals(username))
+							userConfig = hardUsers.getObject(i);
 				}
-				
-				if(userConfig == null && dataClient != null)
+				else if(type.equals("data"))
 				{
 					String userCollection = config.containsKey("usertable") ? config.getString("usertable") : "rbam_user";
 					DataMap userResult = dataClient.getData(userCollection, new DataMap("username" , username), null);
 					if(userResult != null && userResult.getList("result") != null && userResult.getList("result").size() > 0)
 						userConfig = userResult.getList("result").getObject(0);
+				}
+				else if(type.equals("idm")) {
+					DataMap req = new DataMap();
+					req.put("method", "get");
+					req.put("url", idmUrl + "?user=" + username);
+					req.put("authorization", idmKey);
+				    Payload respP = firebus.requestService(outboundService, new Payload(req.toString()));
+					userConfig = new DataMap(respP.getString());
 				}
 	
 				if(userConfig != null)
