@@ -137,11 +137,15 @@ public class InteractionUnit extends ProcessUnit
 	
 	protected boolean assigneeMatch(Actionner actionner, Assignee assignee)
 	{
-		if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId()))
-			return true;
-		else if(assignee.getType() == actionner.getType() && assignee.getId().equals(actionner.getId()))
-			return true;
-		else 
+		if(assignee != null && actionner != null) {
+			if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId()))
+				return true;
+			else if(assignee.getType() == actionner.getType() && assignee.getId().equals(actionner.getId()))
+				return true;
+			else 
+				return false;
+		} else {
 			return false;
+		}
 	}
 }

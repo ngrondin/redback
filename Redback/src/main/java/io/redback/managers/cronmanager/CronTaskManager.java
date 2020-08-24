@@ -38,10 +38,10 @@ public class CronTaskManager extends Thread {
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String accessManagerServiceName;
-	protected String sysUserName;
+	protected String cronUserName;
 	protected String jwtSecret;
 	protected String jwtIssuer;
-	protected Session sysUserSession;
+	protected Session cronUserSession;
 	protected CollectionConfig collectionConfig;
 	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
@@ -59,7 +59,7 @@ public class CronTaskManager extends Thread {
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
-		sysUserName = config.getString("sysusername");
+		cronUserName = config.getString("cronuser");
 		jwtSecret = config.getString("jwtsecret");
 		jwtIssuer = config.getString("jwtissuer");
 		dataClient = new DataClient(firebus, dataServiceName);
@@ -93,27 +93,27 @@ public class CronTaskManager extends Thread {
 	
 	public Session getSystemUserSession(String domain) throws RedbackException 
 	{
-		if(sysUserSession != null  &&  sysUserSession.expiry < System.currentTimeMillis())
-			sysUserSession = null;
+		if(cronUserSession != null  &&  cronUserSession.expiry < System.currentTimeMillis())
+			cronUserSession = null;
 
-		if(sysUserSession == null)
+		if(cronUserSession == null)
 		{
 			try
 			{
 				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
 				String token = JWT.create()
 						.withIssuer(jwtIssuer)
-						.withClaim("email", "processuser")
+						.withClaim("email", cronUserName)
 						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
 						.sign(algorithm);
-				sysUserSession = accessManagementClient.validate(token);
+				cronUserSession = accessManagementClient.validate(token);
 			}
 			catch(Exception e)
 			{
 				throw new RedbackException("Error authenticating sys user", e);
 			}
 		}
-		return sysUserSession;
+		return cronUserSession;
 	}
 
 	public void run() {

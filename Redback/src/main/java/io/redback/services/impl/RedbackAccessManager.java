@@ -95,16 +95,16 @@ public class RedbackAccessManager extends AccessManager
 			try
 			{
 				DataMap userConfig = null;
-				if(username.equals("sysuser")) 
+				if(username.equals("sysuser@redbackwms.com")) 
 				{
 					userConfig = new DataMap();
-					userConfig.put("username", "processuser");
+					userConfig.put("username", "sysuser@redbackwms.com");
 					DataList doms = new DataList();
 					doms.add("*");
 					userConfig.put("domains", doms);
 					DataList roles = new DataList();
 					roles.add("admin");
-					roles.add("process");
+					roles.add("system");
 					userConfig.put("roles", roles);
 				}
 				else if(type.equals("hardusers"))

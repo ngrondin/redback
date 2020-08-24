@@ -44,7 +44,7 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 		logger.finer("Starting redback object update node");
 		if(processManager.getObjectServiceName() != null)
 		{
-			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
+			Session sysUserSession = processManager.getProcessUserSession(pi.getDomain());
 			Map<String, Object> context = pi.getScriptContext();
 			DataMap updateData = inputExpressionMap.eval(context);
 			String objectUID = (String)objectUIDExpression.eval(context);

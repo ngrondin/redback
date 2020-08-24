@@ -69,8 +69,8 @@ public class ProcessInstance
 		try {
 			scriptContext.put("pid", getId());
 			scriptContext.put("pm", new ProcessManagerJSWrapper(processManager, this));
-			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getSystemUserSession(domain)));
-			scriptContext.put("processuser", processManager.getSystemUserSession(domain).getUserProfile().getUsername());
+			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getProcessUserSession(domain)));
+			scriptContext.put("processuser", processManager.getProcessUserSession(domain).getUserProfile().getUsername());
 			updateScriptBindings();
 		} catch(Exception e) {
 		}

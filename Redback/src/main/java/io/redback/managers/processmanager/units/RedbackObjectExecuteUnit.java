@@ -47,7 +47,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 		if(processManager.getObjectServiceName() != null)
 		{
 			Map<String, Object> context = pi.getScriptContext();
-			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
+			Session sysUserSession = processManager.getProcessUserSession(pi.getDomain());
 			DataMap functionParams = inputExpressionMap.eval(context);
 			String objectUID = (String)objectUIDExpression.eval(context);
 			DataMap req = new DataMap();

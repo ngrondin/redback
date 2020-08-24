@@ -38,7 +38,7 @@ public class FirebusRequestUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.finer("Starting firebus call node");
-		Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
+		Session sysUserSession = processManager.getProcessUserSession(pi.getDomain());
 		Map<String, Object> context = pi.getScriptContext();
 		DataMap data = inputExpressionMap.eval(context);
 		Payload payload = new Payload(data.toString());

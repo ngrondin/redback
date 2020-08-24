@@ -42,7 +42,7 @@ public class RedbackObjectGetUnit extends ProcessUnit
 		logger.finer("Starting redback object get node");
 		if(processManager.getObjectServiceName() != null)
 		{
-			Session sysUserSession = processManager.getSystemUserSession(pi.getDomain());
+			Session sysUserSession = processManager.getProcessUserSession(pi.getDomain());
 			Map<String, Object> context = pi.getScriptContext();
 			String objectUID = (String)objectUIDExpression.eval(context);
 			DataMap req = new DataMap();

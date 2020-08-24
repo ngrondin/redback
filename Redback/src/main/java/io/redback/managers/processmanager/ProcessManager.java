@@ -39,7 +39,7 @@ public class ProcessManager
 	protected CollectionConfig gmCollectionConfig;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
 	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
-	protected String sysUserName;
+	protected String processUserName;
 	protected String jwtSecret;
 	protected String jwtIssuer;
 	protected Session sysUserSession;
@@ -55,7 +55,7 @@ public class ProcessManager
 		accessManagerServiceName = config.getString("accessmanagementservice");
 		objectServiceName = config.getString("objectservice");
 		domainServiceName = config.getString("domainservice");
-		sysUserName = config.getString("sysusername");
+		processUserName = config.getString("processuser");
 		jwtSecret = config.getString("jwtsecret");
 		jwtIssuer = config.getString("jwtissuer");
 		processes = new HashMap<String, HashMap<Integer, Process>>();
@@ -176,7 +176,7 @@ public class ProcessManager
 		return pi;
 	}
 	
-	public Session getSystemUserSession(String domain) throws RedbackException 
+	public Session getProcessUserSession(String domain) throws RedbackException 
 	{
 		if(sysUserSession != null  &&  sysUserSession.expiry < System.currentTimeMillis())
 			sysUserSession = null;
@@ -188,7 +188,7 @@ public class ProcessManager
 				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
 				String token = JWT.create()
 						.withIssuer(jwtIssuer)
-						.withClaim("email", "processuser")
+						.withClaim("email", processUserName)
 						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
 						.sign(algorithm);
 				DataMap result = request(accessManagerServiceName, new DataMap("{action:validate, token:\"" + token + "\"}"));
