@@ -1,0 +1,26 @@
+<div
+    class="rb-vcollapse-header">
+    <div
+        class="rb-vcollapse-preline">
+    </div>
+    <div
+        class="rb-vcollapse-switch">
+        <mat-icon
+            *ngIf="isOpen"
+            (click)="toggle()">
+            keyboard_arrow_up
+        </mat-icon>
+        <mat-icon
+            *ngIf="!isOpen"
+            (click)="toggle()">
+            keyboard_arrow_down
+        </mat-icon>
+    </div>
+    <div
+        class="rb-vcollapse-postline">
+    </div>
+</div>
+<div
+    *ngIf="isOpen">
+    <ng-content></ng-content>
+</div>

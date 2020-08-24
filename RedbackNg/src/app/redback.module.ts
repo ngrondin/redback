@@ -61,6 +61,7 @@ import { RbPopupInputComponent } from './rb-popup-input/rb-popup-input.component
 import { RbPopupAddressesComponent } from './rb-popup-addresses/rb-popup-addresses.component';
 import { RbModalComponent } from './rb-modal/rb-modal.component';
 import { RbFileInputComponent } from './rb-file-input/rb-file-input.component';
+import { RbVcollapseComponent } from './rb-vcollapse/rb-vcollapse.component';
 
 @NgModule({
   imports: [
@@ -139,6 +140,7 @@ import { RbFileInputComponent } from './rb-file-input/rb-file-input.component';
     RbAggregatesetDirective,
     RbGraphComponent,
     RbChatComponent,
+    RbVcollapseComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -191,7 +193,8 @@ import { RbFileInputComponent } from './rb-file-input/rb-file-input.component';
     RbDragChangeformDirective,
     RbAggregatesetDirective,
     RbGraphComponent,
-    RbChatComponent
+    RbChatComponent,
+    RbVcollapseComponent
   ],
   providers: [
     CookieService,

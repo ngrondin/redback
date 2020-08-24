@@ -1,0 +1,32 @@
+:host {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-vcollapse-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px 30px 10px 30px;
+}
+
+.rb-vcollapse-preline {
+    display: flex;
+    flex: 0 0 auto;
+    width: 20px;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.rb-vcollapse-postline {
+    display: flex;
+    flex: 1 1 auto;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.rb-vcollapse-switch {
+    display: flex;
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+    color: lightgray;
+    cursor: pointer;
+}
