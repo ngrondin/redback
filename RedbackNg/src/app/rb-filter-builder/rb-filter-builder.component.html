@@ -28,7 +28,7 @@
                 [label]="'Filter'"
                 [active]="filterbuilderts.isTabVisible(filtertab)"
                 [hidden]="!filtertab.active"
-                (register)="filterbuilderts.register(filtertab)">
+                (initialised)="filterbuilderts.register(filtertab, true)">
 
                 <div
                     class="rb-vsection">
@@ -144,7 +144,7 @@
                 [label]="'Sort'"
                 [active]="filterbuilderts.isTabVisible(sorttab)"
                 [hidden]="!sorttab.active"
-                (register)="filterbuilderts.register(sorttab)">
+                (initialised)="filterbuilderts.register(sorttab, false)">
 
                 <div
                     class="rb-vsection">
