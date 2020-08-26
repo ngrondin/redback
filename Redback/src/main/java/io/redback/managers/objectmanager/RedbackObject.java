@@ -479,15 +479,16 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 	
-	public void execute(String eventName) throws ScriptException, RedbackException
+	public Object execute(String eventName) throws ScriptException, RedbackException
 	{
 		if(canExecute)
 		{
-			executeScriptsForEvent(eventName);
+			return executeScriptsForEvent(eventName);
 		}
 		else
 		{
 			error("User does not have the right to execute functions in object " + config.getName());
+			return null;
 		}
 	}
 	
@@ -546,11 +547,13 @@ public class RedbackObject extends RedbackElement
 	}
 	
 
-	protected void executeScriptsForEvent(String event) throws RedbackException
+	protected Object executeScriptsForEvent(String event) throws RedbackException
 	{
 		Function script  = config.getScriptForEvent(event);
 		if(script != null)
-				executeScript(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + event);
+			return executeScript(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + event);
+		else
+			return null;
 	}
 
 	protected void executeAttributeScriptsForEvent(String attributeName, String event) throws RedbackException
@@ -560,18 +563,20 @@ public class RedbackObject extends RedbackElement
 				executeScript(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + attributeName + "." + event);
 	}
 	
-	protected void executeScript(Function script, String name) throws RedbackException
+	protected Object executeScript(Function script, String name) throws RedbackException
 	{
+		Object retVal = null;
 		logger.finer("Start executing script : " + name);
 		try
 		{
-			script.execute(scriptContext);
+			retVal = script.execute(scriptContext);
 		} 
 		catch (RedbackException e)
 		{
 			error("Problem occurred executing a script", e);
 		}		
 		logger.finer("Finish executing script : " + name);
+		return retVal;
 	}
 	
 	protected void error(String msg) throws RedbackException

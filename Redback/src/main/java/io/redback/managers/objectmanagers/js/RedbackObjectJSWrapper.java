@@ -83,13 +83,12 @@ public class RedbackObjectJSWrapper implements ProxyObject
 				return new ProxyExecutable() {
 					public Object execute(Value... arguments) {
 						try {
-							rbObject.execute(name);
+							return JSConverter.toJS(rbObject.execute(name));
 						} catch(Exception e) {
 							String errMsg = "Error executing object script : " + constructErrorString(e);
 							logger.severe(errMsg);
 							throw new RuntimeException(errMsg);
 						}
-						return null;
 					}
 				};				
 			}
