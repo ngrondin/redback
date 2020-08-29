@@ -15,6 +15,7 @@ import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataException;
+import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -317,10 +318,21 @@ public class ProcessManager
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
 		try 
 		{
-			DataMap fullFilter = new DataMap();
-			fullFilter.merge(filter);
-			fullFilter.put("domain", actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
-			DataMap result = request(dataServiceName, new DataMap("{object:rbpm_instance, filter:" + filter + "}"));
+			DataMap fullFilterMap = new DataMap();
+			fullFilterMap.merge(filter);
+			fullFilterMap.put("domain", actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
+			DataFilter fullFilter = new DataFilter(fullFilterMap);
+			long txId = Thread.currentThread().getId();
+			HashMap<String, ProcessInstance> txProcesses = transactions.get(txId);
+			Iterator<String> it = txProcesses.keySet().iterator();
+			while(it.hasNext()) {
+				ProcessInstance pi = txProcesses.get(it.next());
+				if(fullFilter.apply(pi.getJSON())) {
+					logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId() + " in transaction with data " + pi.getData());
+					list.add(pi);
+				}
+			}
+			DataMap result = request(dataServiceName, new DataMap("{object:rbpm_instance, filter:" + fullFilterMap + "}"));
 			DataList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 			{
@@ -331,12 +343,8 @@ public class ProcessManager
 					pi = new ProcessInstance(this, resultList.getObject(i));
 					putInCurrentTransaction(pi);
 					logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId() + " in database with data " + pi.getData());
+					list.add(pi);
 				} 
-				else 
-				{
-					logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId() + " in transaction with data " + pi.getData());
-				}
-				list.add(pi);
 			}
 		} 
 		catch (Exception e) 

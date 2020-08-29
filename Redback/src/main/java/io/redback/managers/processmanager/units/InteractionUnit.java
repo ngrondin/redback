@@ -140,7 +140,7 @@ public class InteractionUnit extends ProcessUnit
 		if(assignee != null && actionner != null) {
 			if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId()))
 				return true;
-			else if(assignee.getType() == actionner.getType() && assignee.getId().equals(actionner.getId()))
+			else if(assignee.getType() == actionner.getType() && (assignee.getId().equals(actionner.getId()) || assignee.getId().equals("*")))
 				return true;
 			else 
 				return false;

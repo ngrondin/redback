@@ -69,10 +69,9 @@ public class ProcessManagerJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					try {
-						//String extpid = arguments[0].asString();
-						String pid = arguments[1].asString();
-						String event = arguments[2].asString();
-						DataMap data = (DataMap)JSConverter.toJava(arguments[3]);
+						String pid = arguments[0].asString();
+						String event = arguments[1].asString();
+						DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
 						processManager.processAction(actionner, pid, event, data);
 						return null;
 					} catch (Exception e) {
