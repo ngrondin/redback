@@ -21,6 +21,8 @@ export class RbListComponent implements OnInit {
 
   @Output() selectedObjectChange: EventEmitter<any> = new EventEmitter();
 
+  isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/;
+
   constructor() { }
 
   ngOnInit() {
@@ -48,7 +50,7 @@ export class RbListComponent implements OnInit {
           val = "No Label";
         }
       }
-      return val;
+      return this.formatText(val);
     } else {
       return "";
     }
@@ -56,7 +58,7 @@ export class RbListComponent implements OnInit {
 
   getSubheadFor(item: RbObject) : string {
     if(this.subheadattribute != null) {
-      return item.get(this.subheadattribute);
+      return this.formatText(item.get(this.subheadattribute));
     } else {
       return "";
     }
@@ -64,10 +66,18 @@ export class RbListComponent implements OnInit {
 
   getSuppTextFor(item: RbObject) : string {
     if(this.supptextattribute != null) {
-      return item.get(this.supptextattribute);
+      return this.formatText(item.get(this.supptextattribute));
     } else {
       return "";
     }
   }
 
+  private formatText(txt: string) : string {
+    
+    if(this.isoDateRegExp.test(txt)) {
+      return (new Date(txt)).toLocaleString();
+    } else {
+      return txt;
+    }
+  }
 }

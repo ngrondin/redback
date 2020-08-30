@@ -8,14 +8,6 @@ import { RbInputCommonComponent } from 'app/rb-input-common/rb-input-common.comp
   styleUrls: ['./rb-duration-input.component.css']
 })
 export class RbDurationInputComponent extends RbInputCommonComponent implements OnInit {
-  /*
-  @Input('label') label: string;
-  @Input('icon') icon: string;
-  @Input('size') size: number;
-  @Input('editable') editable: boolean;
-  @Input('object') rbObject: RbObject;
-  @Input('attribute') attribute: string;
-*/
   editing: boolean;
   editingValue: string;
 
@@ -41,6 +33,8 @@ export class RbDurationInputComponent extends RbInputCommonComponent implements 
         let minutes = Math.floor((ms % 3600000) / 60000);
         let seconds = Math.floor((ms % 60000) / 1000);
         let milli = Math.floor((ms % 1000));
+        let greaterThanMinute = ms > 60000;
+        let greaterThanHour = ms > 3600000;
         let val = "";
         if(years != 0)
           val = val + " " + years + "y";
@@ -52,9 +46,9 @@ export class RbDurationInputComponent extends RbInputCommonComponent implements 
           val = val + " " + hours + "h";
         if(minutes != 0)
           val = val + " " + minutes + "m";
-        if(seconds != 0)
+        if(seconds != 0 && !greaterThanHour)
           val = val + " " + seconds + "s";
-        if(milli != 0)
+        if(milli != 0 && !greaterThanMinute)
           val = val + " " + milli + "ms";
           ret = val.substr(1);
       } else {
@@ -68,15 +62,6 @@ export class RbDurationInputComponent extends RbInputCommonComponent implements 
   set displayvalue(val: string) {
     this.editingValue = val;
   }
-
-  /*
-  public get readonly(): boolean {
-    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
-      return !(this.editable && this.rbObject.validation[this.attribute].editable);
-    else
-      return true;      
-  }
-*/
 
   public keydown(event: any) {
 
