@@ -15,12 +15,14 @@ public class ActionUnit extends ProcessUnit
 {
 	protected String interactionCode;
 	protected String action;
+	protected String process;
 	protected String nextNode;
 
 	public ActionUnit(ProcessManager pm, Process p, DataMap config) 
 	{
 		super(pm, p, config);
 		interactionCode = config.getString("interaction");
+		process = config.getString("process");
 		action = config.getString("action");
 		nextNode = config.getString("nextnode");
 	}
@@ -29,11 +31,14 @@ public class ActionUnit extends ProcessUnit
 	{
 		logger.finer("Starting Action node");
 		Actionner actionner = new Actionner(pi);
-		List<Assignment> assignments = processManager.getAssignments(actionner, null, null);
+		DataMap filter = new DataMap();
+		if(process != null) 
+			filter.put("process", process);
+		List<Assignment> assignments = processManager.getAssignments(actionner, filter, null);
 		for(int i = 0; i < assignments.size(); i++)
 		{
 			Assignment assignment = assignments.get(i);
-			if(interactionCode.equals(assignment.interaction))
+			if(interactionCode == null || (interactionCode != null && interactionCode.equals(assignment.interaction)))
 			{
 				boolean actionExists = false;
 				for(int j = 0; j < assignment.actions.size(); j++)
@@ -41,7 +46,7 @@ public class ActionUnit extends ProcessUnit
 						actionExists = true;
 				if(actionExists)
 				{
-					logger.fine("Actionning interaction '" + interactionCode + "' with action '" + action +"' in instance '" + assignment.pid +"'");
+					logger.fine("Actionning interaction '" + assignment.interaction + "' with action '" + action +"' in process '" + assignment.processName + "' instance '" + assignment.pid +"'");
 					processManager.processAction(actionner, assignment.pid, action, null);
 				}
 				else
