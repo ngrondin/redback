@@ -42,10 +42,10 @@ var versionOrDefault = version != null ? version : 'default';
 	<a href="<%=config.mobileapp%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=deployment.objectservicepath%>&processservice=<%=deployment.processservicepath%>&fileservice=<%=deployment.fileservicepath%>&chatservice=<%=deployment.chatservicepath%>">Manual Redirect</a><br><br> <%
 	
 if(config.android != null) { %>	
-	<a id="androiddl" href="../resource/<%=config.android%>">Download Android App</a> <%
+	<a id="androiddl" href="../resource/<%=config.android%>">Download Android App</a><br><br> <%
 }
 if(config.ios != null) { %>	
-	<a id="iosdl" href="../resource/<%=config.ios%>">Download iOS App</a> <%
+	<a id="iosdl" href="../resource/<%=config.ios%>">Download iOS App</a><br><br> <%
 }%>
 </body>
 </html>
