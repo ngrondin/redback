@@ -229,6 +229,23 @@ export class DataService {
     return dataObservable; 
   }
 
+  exportObjects(name: string, filter: any, search: string) {
+    const apiObservable = this.apiService.exportObjects(name, filter, search);
+    apiObservable.subscribe(
+      resp => {
+        const url = window.URL.createObjectURL(new Blob([...resp]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'export.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      },
+      error => {
+        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
+      }
+    );
+  }
 
 
   listFiles(object: string, uid: any) : Observable<RbFile[]> {

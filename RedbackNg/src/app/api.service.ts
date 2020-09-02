@@ -2,8 +2,9 @@ declare const google: any
 
 import { Injectable } from '@angular/core';
 import { Observable, of, Observer } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { ResponseContentType, RequestOptions } from '@angular/http';
 
 
 const httpOptions = {
@@ -156,6 +157,26 @@ export class ApiService {
       }
     };
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+  }
+
+  exportObjects(name: string, filter: any, search: string): Observable<any> {
+    const req = {
+      action: 'list',
+      object: name,
+      filter: filter,
+      page: 0,
+      pagesize: 5000,
+      options: {
+        addrelated: true,
+        addvalidation: false,
+        format: "csv"
+      }
+    };
+    if(search != null)
+      req['search'] = search;
+    const headers = new HttpHeaders().set('Content-Type', 'text/plain; charset=utf-8');
+    
+    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, { headers, withCredentials: true, responseType: 'text' as 'json'});
   }
 
   /******* Files *********/

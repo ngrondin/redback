@@ -202,6 +202,9 @@ export class RbDatasetDirective implements OnChanges {
       }
     } else if(_name == 'save') {
       
+    } else if(_name == 'exportall') {
+      const filter = this.mergeFilters();
+      this.dataService.exportObjects(this.objectname, filter, this.searchString);
     } else if(_name == 'executeall') {
       let delay: number = 0;
       this._list.forEach((object) => {
