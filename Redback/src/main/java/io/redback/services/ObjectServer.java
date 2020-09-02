@@ -1,6 +1,7 @@
 package io.redback.services;
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import io.firebus.Firebus;
@@ -28,16 +29,19 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
 	{
 		logger.finer("Object service start");
-		Payload response = new Payload();
+		Payload response = null;
 		try
 		{
 			DataMap request = new DataMap(payload.getString());
 			String action = request.getString("action");
 			String objectName = request.getString("object");
 			DataMap options = request.getObject("options");
-			DataMap responseData = null;
+			//DataMap responseData = null;
+			//byte[] responseBytes = null;
+			//String responseMime = "application/json";
 			boolean addValidation = false;
 			boolean addRelated = false;
+			String format = "json";
 			
 			if(action != null)
 			{
@@ -47,6 +51,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					{
 						addValidation = options.getBoolean("addvalidation");
 						addRelated = options.getBoolean("addrelated");
+						format = options.containsKey("format") ? options.getString("format") : "json";
 					}
 					
 					if(action.equals("get"))
@@ -55,7 +60,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						if(uid != null)
 						{
 							RedbackObject object = get(session, objectName, uid);
-							responseData = object.getJSON(addValidation, addRelated);
+							response = formatResponse(object, format, addValidation, addRelated);
 						}
 						else
 						{
@@ -64,7 +69,6 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					}
 					else if(action.equals("list"))
 					{
-						//Timer t = new Timer("server");
 						DataMap filter = request.getObject("filter");
 						String attribute = request.getString("attribute");
 						String uid = request.getString("uid");
@@ -79,19 +83,12 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 								objects = listRelated(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
 							else
 								objects = list(session, objectName, filter, search, sort, addRelated, page, pageSize);
-							//t.mark("afterlist");
-							responseData = new DataMap();
-							DataList list = new DataList();
-							if(objects != null)
-								for(int i = 0; i < objects.size(); i++)
-									list.add(objects.get(i).getJSON(addValidation, addRelated));
-							responseData.put("list", list);
+							response = formatResponse(objects, format, addValidation, addRelated);
 						}
 						else
 						{
 							throw new FunctionErrorException("A 'list' action requires either a filter, a search or a uid-attribute pair");
 						}
-						//t.mark();
 					}
 					else if(action.equals("listrelated"))
 					{
@@ -106,12 +103,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						{
 							List<RedbackObject> objects = null;
 							objects = listRelated(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
-							responseData = new DataMap();
-							DataList list = new DataList();
-							if(objects != null)
-								for(int i = 0; i < objects.size(); i++)
-									list.add(objects.get(i).getJSON(addValidation, addRelated));
-							responseData.put("list", list);
+							response = formatResponse(objects, format, addValidation, addRelated);
 						}
 						else
 						{
@@ -125,7 +117,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						if(uid != null  &&  data != null)
 						{
 							RedbackObject object = update(session, objectName, uid, data);
-							responseData = object.getJSON(addValidation, addRelated);
+							response = formatResponse(object, format, addValidation, addRelated);
 						}
 						else
 						{
@@ -138,13 +130,13 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						String domain = request.getString("domain");
 						DataMap data = request.getObject("data");
 						RedbackObject object = create(session, objectName, uid, domain, data);
-						responseData = object.getJSON(addValidation, addRelated);
+						response = formatResponse(object, format, addValidation, addRelated);
 					}
 					else if(action.equals("delete"))
 					{
 						String uid = request.getString("uid");
 						delete(session, objectName, uid);
-						responseData = new DataMap("result", "ok");
+						response = formatResponse(new DataMap("result", "ok"), format, addValidation, addRelated);
 					}					
 					else if(action.equals("execute"))
 					{
@@ -154,7 +146,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						if(uid != null)
 						{
 							RedbackObject object = execute(session, objectName, uid, function, data);
-							responseData = object.getJSON(addValidation, addRelated);
+							response = formatResponse(object, format, addValidation, addRelated);
 						}
 						else
 						{
@@ -170,12 +162,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						if(tuple != null && metrics != null)
 						{
 							List<RedbackAggregate> aggregates = aggregate(session, objectName, filter, tuple, metrics, sort, addRelated);
-							responseData = new DataMap();
-							DataList list = new DataList();
-							if(aggregates != null)
-								for(int i = 0; i < aggregates.size(); i++)
-									list.add(aggregates.get(i).getJSON(addRelated));
-							responseData.put("list", list);
+							response = formatResponse(aggregates, format, addValidation, addRelated);							
 						}
 						else
 						{
@@ -195,8 +182,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						if(function != null)
 						{
 							execute(session, function);
-							responseData = new DataMap();
-							responseData.put("result", "ok");
+							response = formatResponse(new DataMap("result", "ok"), format, addValidation, addRelated);
 						}
 						else
 						{
@@ -213,9 +199,6 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 			{
 				throw new FunctionErrorException("Requests must have at least an 'action' attribute");
 			}					
-				
-			response.setData(responseData.toString());
-			response.metadata.put("mime", "application/json");
 		}
 		catch(DataException | RedbackException e)
 		{
@@ -239,6 +222,85 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	protected Payload formatResponse(Object data, String format, boolean addValidation, boolean addRelated) throws RedbackException 
+	{
+		Payload response = null;
+		if(data != null) {
+			if(data instanceof List<?>) {
+				List<?> list = (List<?>)data;
+				if(list.size() > 0) {
+					if(list.get(0) instanceof RedbackObject) {
+						if(format.equals("csv")) {
+							StringBuilder sb = new StringBuilder();
+							if(list.size() > 0) {
+								RedbackObject o = (RedbackObject)list.get(0);
+								Set<String> cols = o.getObjectConfig().getAttributeNames();
+								for(String col : cols) 
+									sb.append(col + ",");
+								for(int i = 0; i < list.size(); i++) {
+									for(String col : cols) 
+										sb.append(((RedbackObject)list.get(i)).getString(col) + ",");
+								}
+							}
+							response = new Payload(sb.toString().getBytes());
+							response.metadata.put("mime", "text/csv");
+						} else {
+							DataMap responseData = new DataMap();
+							DataList respList = new DataList();
+							for(int i = 0; i < list.size(); i++)
+								respList.add(((RedbackObject)list.get(i)).getJSON(addValidation, addRelated));
+							responseData.put("list", respList);
+							response = new Payload(responseData.toString());
+							response.metadata.put("mime", "application/json");
+						}				
+					} else if(list.get(0) instanceof RedbackAggregate) {
+						if(format.equals("csv")) {
+							StringBuilder sb = new StringBuilder();
+							if(list.size() > 0) {
+								RedbackAggregate a = (RedbackAggregate)list.get(0);
+								Set<String> cols = a.getObjectConfig().getAttributeNames();
+								for(String col : cols) 
+									sb.append(col + ",");
+								for(int i = 0; i < list.size(); i++) {
+									for(String col : cols) 
+										sb.append(((RedbackAggregate)list.get(i)).getString(col) + ",");
+								}
+							} else {
+								
+							}
+							response = new Payload(sb.toString().getBytes());
+							response.metadata.put("mime", "text/csv");
+						} else {
+							DataMap responseData = new DataMap();
+							DataList respList = new DataList();
+							for(int i = 0; i < list.size(); i++)
+								respList.add(((RedbackAggregate)list.get(i)).getJSON(addRelated));
+							responseData.put("list", respList);
+							response = new Payload(responseData.toString());
+							response.metadata.put("mime", "application/json");
+						}							
+					}
+				} else {
+					response = new Payload("");
+					response.metadata.put("mime", format);
+				}
+			} else if(data instanceof RedbackObject) {
+				RedbackObject object = (RedbackObject)data;
+				response = new Payload(object.getJSON(addValidation, addRelated).toString());
+				response.metadata.put("mime", "application/json");
+			} else if(data instanceof RedbackAggregate) {
+				RedbackAggregate agg = (RedbackAggregate)data;
+				response = new Payload(agg.getJSON(addRelated).toString());
+				response.metadata.put("mime", "application/json");
+			} else if(data instanceof DataMap) {
+				response = new Payload(((DataMap)data).toString());
+				response.metadata.put("mime", "application/json");
+			}
+		}
+
+		return response;
 	}
 	
 	protected abstract RedbackObject get(Session session, String objectName, String uid) throws RedbackException;
