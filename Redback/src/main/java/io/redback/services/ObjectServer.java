@@ -1,5 +1,6 @@
 package io.redback.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -15,6 +16,7 @@ import io.redback.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
+import io.redback.utils.StringUtils;
 
 public abstract class ObjectServer extends AuthenticatedServiceProvider 
 {
@@ -36,9 +38,6 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 			String action = request.getString("action");
 			String objectName = request.getString("object");
 			DataMap options = request.getObject("options");
-			//DataMap responseData = null;
-			//byte[] responseBytes = null;
-			//String responseMime = "application/json";
 			boolean addValidation = false;
 			boolean addRelated = false;
 			String format = "json";
@@ -234,14 +233,39 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					if(list.get(0) instanceof RedbackObject) {
 						if(format.equals("csv")) {
 							StringBuilder sb = new StringBuilder();
-							if(list.size() > 0) {
-								RedbackObject o = (RedbackObject)list.get(0);
-								Set<String> cols = o.getObjectConfig().getAttributeNames();
-								for(String col : cols) 
-									sb.append(col + ",");
-								for(int i = 0; i < list.size(); i++) {
-									for(String col : cols) 
-										sb.append(((RedbackObject)list.get(i)).getString(col) + ",");
+							boolean newLine = true;
+							List<String> allCols = new ArrayList<String>();
+							RedbackObject o = (RedbackObject)list.get(0);
+							Set<String> cols = o.getObjectConfig().getAttributeNames();
+							for(String col : cols) {
+								allCols.add(col);
+								sb.append((!newLine ? "," : "") + col);
+								if(addRelated) {
+									RedbackObject ro = o.getRelated(col);
+									if(ro != null) {
+										Set<String> subcols = ro.getObjectConfig().getAttributeNames();
+										for(String subcol : subcols) {
+											allCols.add(col + "." + subcol);
+											sb.append((!newLine ? "," : "") + col + "." + subcol);
+										}
+									}
+								}
+								newLine = false;
+							}
+							for(int i = 0; i < list.size(); i++) {
+								sb.append("\r\n");
+								newLine = true;
+								for(String col : allCols) {
+									Object val = null;
+									if(col.indexOf(".") == -1) {
+										val = ((RedbackObject)list.get(i)).get(col).getObject();
+									} else {
+										RedbackObject ro = ((RedbackObject)list.get(i)).getRelated(col.substring(0, col.indexOf(".")));
+										if(ro != null)
+											val = ro.get(col.substring(col.indexOf(".") + 1)).getObject();
+									}
+									sb.append((!newLine ? "," : "") + StringUtils.convertObjectToCSVField(val));
+									newLine = false;
 								}
 							}
 							response = new Payload(sb.toString().getBytes());
@@ -283,8 +307,13 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						}							
 					}
 				} else {
-					response = new Payload("");
-					response.metadata.put("mime", format);
+					if(format.equals("csv")) {
+						response = new Payload("");
+						response.metadata.put("mime", "text/csv");
+					} else {
+						response = new Payload(new DataMap("list", new DataList()).toString());
+						response.metadata.put("mime", "application/json");
+					}
 				}
 			} else if(data instanceof RedbackObject) {
 				RedbackObject object = (RedbackObject)data;
@@ -298,6 +327,8 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 				response = new Payload(((DataMap)data).toString());
 				response.metadata.put("mime", "application/json");
 			}
+		} else {
+			response = new Payload();
 		}
 
 		return response;

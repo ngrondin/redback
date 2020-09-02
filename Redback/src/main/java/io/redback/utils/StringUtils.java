@@ -1,6 +1,9 @@
 package io.redback.utils;
 
+import java.util.Date;
+
 import io.firebus.utils.DataEntity;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 
 public class StringUtils
@@ -105,5 +108,34 @@ public class StringUtils
 			s = s + (char)(((n >> (i * 4)) & 0x0f) + 97);
 		}
 		return s;
+	}
+	
+	
+	public static String convertObjectToCSVField(Object obj) {
+		String ret = "";
+		if(obj instanceof String) {
+			ret = (String)obj;
+			ret = ret.replaceAll("\r", "");
+			ret = ret.replaceAll("\n", "");
+			ret = ret.replaceAll("\t", "");
+			ret = ret.replaceAll("\"", "\\\"");
+			ret = "\"" + ret + "\"";
+		} else if(obj instanceof Date) {
+			ret = "\"" + ((Date)obj).toInstant().toString() + "\""; 
+		} else if(obj instanceof Number) {
+			ret = ((Number)obj).toString();
+		} else if(obj instanceof Boolean) {
+			if(((Boolean)obj) == true) 
+				ret = "true";
+			else
+				ret = "false";
+		} else if(obj instanceof DataMap) {
+			ret = ((DataMap)obj).toString(0, true);
+			ret = "\"" + ret.replaceAll("\"", "\"\"") + "\"";
+		} else if(obj instanceof DataList) {
+			ret = ((DataList)obj).toString(0, true);
+			ret = "\"" + ret.replaceAll("\"", "\"\"") + "\"";
+		}
+		return ret;
 	}
 }
