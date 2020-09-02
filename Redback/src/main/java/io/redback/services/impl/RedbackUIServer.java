@@ -369,6 +369,8 @@ public class RedbackUIServer extends UIServer
 			type = "apk";
 		else if(name.endsWith(".ipa"))
 			type = "ipa";
+		else if(name.endsWith(".plist"))
+			type = "plist";
 		
 		if(type.equals("svg"))
 		{

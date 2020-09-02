@@ -175,6 +175,8 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 			mime = "image/png";
 		else if(name.endsWith(".apk"))
 			mime = "application/vnd.android.package-archive";
+		else if(name.endsWith(".plist"))
+			mime = "application/xml";
 		else
 			mime = "application/octet-stream";
 		return mime;
