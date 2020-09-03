@@ -2,7 +2,6 @@ package io.redback.services;
 
 import java.security.MessageDigest;
 import java.security.spec.KeySpec;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -15,14 +14,11 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Role;
 import io.redback.security.Session;
-import io.redback.security.UserProfile;
 
 public abstract class AccessManager extends Service implements ServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected HashMap<String, Role> roles;
-	protected ArrayList<Session> cachedSessions;
-	protected ArrayList<UserProfile> cachedUserProfiles;
 	protected KeySpec keySpec;
 	protected MessageDigest digest;
 	protected long expiryTime;
@@ -33,8 +29,6 @@ public abstract class AccessManager extends Service implements ServiceProvider
 	{
 		super(n, c, f);
 		expiryTime = 1800000;
-		cachedSessions = new ArrayList<Session>();
-		cachedUserProfiles = new ArrayList<UserProfile>();
 		roles = new HashMap<String, Role>();
 		try
 		{

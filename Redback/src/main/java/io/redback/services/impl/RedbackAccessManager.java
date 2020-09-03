@@ -1,5 +1,6 @@
 package io.redback.services.impl;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.auth0.jwt.JWT;
@@ -17,6 +18,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
+import io.redback.security.CachedUserProfile;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
@@ -33,6 +35,9 @@ public class RedbackAccessManager extends AccessManager
 	protected DataClient dataClient;
 	protected DataList hardUsers;
 	protected ConfigurationClient configClient;
+	//protected ArrayList<Session> cachedSessions;
+	protected ArrayList<CachedUserProfile> cachedUserProfiles;
+
 
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
@@ -52,6 +57,8 @@ public class RedbackAccessManager extends AccessManager
 			outboundService = config.getString("outboundservice");
 		}
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
+		//cachedSessions = new ArrayList<Session>();
+		cachedUserProfiles = new ArrayList<CachedUserProfile>();
 	}
 
 	protected Session validateToken(String token) throws RedbackException
@@ -85,10 +92,17 @@ public class RedbackAccessManager extends AccessManager
 	
 	protected UserProfile getUserProfile(String username) throws RedbackException
 	{
-		UserProfile userProfile = null;
+		long now = System.currentTimeMillis();
+		CachedUserProfile userProfile = null;
 		for(int i = 0; i < cachedUserProfiles.size(); i++)
 			if(cachedUserProfiles.get(i).getUsername().equalsIgnoreCase(username))
 				userProfile = cachedUserProfiles.get(i);
+		
+		if(userProfile != null && userProfile.expiry > now)
+		{
+			cachedUserProfiles.remove(userProfile);
+			userProfile = null;
+		}
 
 		if(userProfile == null)
 		{
@@ -144,7 +158,7 @@ public class RedbackAccessManager extends AccessManager
 						}
 					}
 					userConfig.put("rights", rights);
-					userProfile = new UserProfile(userConfig);	
+					userProfile = new CachedUserProfile(userConfig, now + 300000);	
 					cachedUserProfiles.add(userProfile);
 				}
 			}
@@ -222,7 +236,7 @@ public class RedbackAccessManager extends AccessManager
 	
 	public void clearCaches()
 	{
-		this.cachedSessions.clear();
+		//this.cachedSessions.clear();
 		this.cachedUserProfiles.clear();
 		this.roles.clear();
 	}	
