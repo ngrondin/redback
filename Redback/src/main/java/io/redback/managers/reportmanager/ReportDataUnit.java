@@ -38,7 +38,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 		RedbackObjectRemote object = (RedbackObjectRemote)context.get("object");
 		jsContext.put("object", new RedbackObjectRemoteJSWrapper(object));
 		Object value = valueExpr.eval(jsContext);
-		String valueStr = value.toString();
+		String valueStr = value != null ? value.toString() : "";
 		return valueStr;
 	}
 	

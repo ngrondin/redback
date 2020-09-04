@@ -1,10 +1,13 @@
 package io.redback.client;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
@@ -29,15 +32,32 @@ public class FileClient extends Client {
 			String dateStr = resp.metadata.get("date");
 			String thumbnail = resp.metadata.get("thumbnail");
 			byte[] bytes = resp.getBytes();
-			return new RedbackFile(fileUid, filename, mime, thumbnail, username, new Date(dateStr), bytes);
+			return new RedbackFile(fileUid, filename, mime, thumbnail, username, Date.from(ZonedDateTime.parse(dateStr).toInstant()), bytes);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
 		}
 	}
 
 	public List<RedbackFile> listFilesFor(Session session, String object, String uid)  throws RedbackException {
-		//TODO complete this
-		return null;
+		List<RedbackFile> files = new ArrayList<RedbackFile>();
+		try {
+			DataMap req = new DataMap();
+			req.put("object", object);
+			req.put("uid", uid);
+			Payload resp = requestPayload(session, new Payload(req.toString()));
+			DataMap respMap = new DataMap(resp.getString());
+			DataList list = respMap.getList("list");
+			for(int i = 0; i < list.size(); i++) {
+				DataMap map = list.getObject(i);
+				String fileUid = map.getString("fileuid");
+				RedbackFile file = getFile(session, fileUid);
+				files.add(file);
+			}
+			
+		} catch(Exception e) {
+			throw new RedbackException("Error getting file", e);
+		}
+		return files;
 	}
 
 	public void linkFileTo(Session session, String fileUid, String object, String uid)  throws RedbackException {

@@ -17,14 +17,14 @@ public class Field extends ReportDataUnit {
 	public Field(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
 		label = config.containsKey("label") ? config.getString("label") : "";
-		labelFontSize = 8f;
+		labelFontSize = 9f;
 		height = 35f;
 	}
 
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
 		String valueStr = getSringValue(context);
 		ReportBox rb1 = ReportBox.Text(label, font, labelFontSize);
-		rb1.height += 3;
+		rb1.height += 5;
 		ReportBox rb2 = ReportBox.Text(valueStr, font, fontSize);
 		rb2.height += 5;
 		if(width > -1)

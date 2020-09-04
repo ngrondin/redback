@@ -62,8 +62,12 @@ public class RedbackObjectRemote {
 	}
 	
 	public RedbackObjectRemote getRelated(String attribute) {
-		if(data.containsKey("related")) {				
-			return new RedbackObjectRemote(firebus, objectService, token, data.getObject("related." + attribute));
+		if(data.containsKey("related")) {
+			DataMap d = data.getObject("related." + attribute);
+			if(d != null)
+				return new RedbackObjectRemote(firebus, objectService, token, d);
+			else
+				return null;
 		} else {
 			return null;
 		}

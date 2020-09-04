@@ -28,6 +28,7 @@ var versionOrDefault = version != null ? version : 'default';
     uiservice="<%=deployment.uiservicepath%>"
     objectservice="<%=deployment.objectservicepath%>"
     fileservice="<%=deployment.fileservicepath%>"
+    reportservice="<%=deployment.reportservicepath%>"
     processservice="<%=deployment.processservicepath%>"
     signalservice="<%=deployment.signalservicepath%>"
     chatservice="<%=deployment.chatservicepath%>">

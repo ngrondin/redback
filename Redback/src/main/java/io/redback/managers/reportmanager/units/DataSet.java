@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+import io.firebus.utils.DataEntity;
+import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ObjectClient;
@@ -30,19 +31,22 @@ public class DataSet extends ReportContainerUnit {
 	
 	public DataSet(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		jsParams = Arrays.asList(new String[] {"params", "object"});
+		jsParams = Arrays.asList(new String[] {"filter", "object"});
 		object = c.getString("object");
-		if(c.containsKey("filterexpr"))
-			filterExp = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_filter", jsParams, c.getString("filterexpr"));
-		else if(c.containsKey("filter"))
-			filterExpMap = new ExpressionMap(reportManager.getJSManager(), jsFunctionNameRoot + "_filter", jsParams, c.getObject("filter"));
+		if(c.containsKey("filter")) {
+			DataEntity filter = c.get("filter");
+			if(filter instanceof DataMap)
+				filterExpMap = new ExpressionMap(reportManager.getJSManager(), jsFunctionNameRoot + "_filter", jsParams, ((DataMap)filter));
+			else if(filter instanceof DataLiteral)
+				filterExp = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_filter", jsParams, ((DataLiteral)filter).getString());	
+		}
 	}
 
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
 		RedbackObjectRemote currentObject = (RedbackObjectRemote)context.get("object");
 		List<?> currentDataSet = (List<?>)context.get("dataset");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		jsContext.put("params", JSConverter.toJS(context.get("params")));
+		jsContext.put("filter", JSConverter.toJS(context.get("filter")));
 		jsContext.put("object", new RedbackObjectRemoteJSWrapper(currentObject));
 		ObjectClient oc = reportManager.getObjectClient();
 		DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));

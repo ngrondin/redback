@@ -74,7 +74,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 						response.metadata.put("filename", file.fileName);
 						response.metadata.put("uid", file.uid);
 						response.metadata.put("username", file.username);
-						response.metadata.put("date", file.date.toString());
+						response.metadata.put("date", file.date.toInstant().toString());
 					} 
 					else if(action.equals("link")) 
 					{
@@ -99,7 +99,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 							fileInfo.put("mime", file.mime);
 							fileInfo.put("thumbnail", file.thumbnail);
 							fileInfo.put("username", file.username);
-							fileInfo.put("date", file.date);
+							fileInfo.put("date", file.date.toInstant().toString());
 							fileInfo.put("relatedobject", object);
 							fileInfo.put("relateduid", uid);
 							list.add(fileInfo);

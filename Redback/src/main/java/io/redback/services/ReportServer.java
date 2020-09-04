@@ -30,12 +30,12 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 			String action = request.getString("action");
 			String reportName = get != null && get.length() > 1 ? get.substring(1) : request.getString("report");
 			String format = request.getString("format");
-			DataMap params = request.get("params") instanceof DataMap ? request.getObject("params") : new DataMap(request.getString("params"));
+			DataMap filter = request.get("filter") instanceof DataMap ? request.getObject("filter") : new DataMap(request.getString("filter"));
 			if(action == null) 
 				action = "produce";
 			
 			if(action.equals("produce")) {
-				Report report = produce(session, reportName, params);
+				Report report = produce(session, reportName, filter);
 				if(format != null && format.equals("json")) {
 					//TODO Add json format
 				} else {
@@ -67,5 +67,5 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 	
-	protected abstract Report produce(Session session, String name, DataMap params) throws RedbackException;
+	protected abstract Report produce(Session session, String name, DataMap filter) throws RedbackException;
 }

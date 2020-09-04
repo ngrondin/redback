@@ -11,6 +11,7 @@ public class ReportBox {
 	public PDFont font;
 	public float fontSize;
 	public float lineWidth;
+	public byte[] bytes;
 	public boolean checked;
 	public boolean canBreak;
 	public boolean breakBefore;
@@ -84,6 +85,16 @@ public class ReportBox {
 		ReportBox rb = new ReportBox();
 		rb.type = "checkbox";
 		rb.checked = checked;
+		rb.canBreak = false;
+		rb.width = w;
+		rb.height = h;
+		return rb;
+	}
+	
+	public static ReportBox Image(byte[] bytes, float w, float h) {
+		ReportBox rb = new ReportBox();
+		rb.type = "image";
+		rb.bytes = bytes;
 		rb.canBreak = false;
 		rb.width = w;
 		rb.height = h;

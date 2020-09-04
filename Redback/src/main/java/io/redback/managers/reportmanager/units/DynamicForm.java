@@ -1,5 +1,11 @@
 package io.redback.managers.reportmanager.units;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -7,17 +13,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.FileClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.managers.reportmanager.ReportBox;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.managers.reportmanager.ReportUnit;
+import io.redback.security.Session;
+import io.redback.utils.RedbackFile;
 
 public class DynamicForm extends ReportUnit {
 	protected PDFont font;
@@ -48,6 +59,8 @@ public class DynamicForm extends ReportUnit {
 	}
 
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
+		Session session = (Session)context.get("session");
+
 		List<RedbackObjectRemote> rors = ((List<?>)context.get("dataset"))
 				.stream()
 				.map(o -> (RedbackObjectRemote)o)
@@ -142,6 +155,28 @@ public class DynamicForm extends ReportUnit {
 				labelAnswer.addChild(rb);
 
 			} else if(type.equals("files")) {
+				FileClient fc = reportManager.getFileClient();
+				List<RedbackFile> files = fc.listFilesFor(session, "formitem", ror.getUid());
+				for(RedbackFile file: files) {
+					BufferedImage orig = ImageIO.read(new ByteArrayInputStream(file.bytes));
+					if(orig.getHeight() > 0) {
+						int newHeight = 300;
+						int newWidth = (int)((float)orig.getWidth() / ((float)orig.getHeight() / (float)newHeight));
+						BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+						Graphics2D gc = img.createGraphics();
+						gc.setColor(Color.WHITE);
+						gc.fillRect(0, 0, newWidth, newHeight);
+						gc.drawImage(orig.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH),0,0,null);
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						ImageIO.write(img, "png", baos);
+						ReportBox rb = ReportBox.Image(baos.toByteArray(), 400, 300);
+						item.addChild(rb);
+					}					
+					//ReportBox rb = ReportBox.Image(new byte[] {}, 400, 300);
+					//System.out.println("Added picture");
+					//item.addChild(rb);
+					item.canBreak = true;
+				}
 				
 			} else if(type.equals("signature")) {
 				
