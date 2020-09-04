@@ -21,6 +21,7 @@ export class ApiService {
   public uiService: string;
   public objectService: string;
   public fileService: string;
+  public reportService: string;
   public processService: string;
   public signalService: string;
   public signalWebsocket: WebSocketSubject<any>;
@@ -352,4 +353,13 @@ export class ApiService {
         }, 1);
     })    
   }
+
+  /********* Launch Report **********/  
+
+  launchReport(report: String, filter: any) {
+    window.open(this.baseUrl + '/' + this.reportService + '?report=' + report + '&filter=' + JSON.stringify(filter));
+  }
+
 }
+
+ 

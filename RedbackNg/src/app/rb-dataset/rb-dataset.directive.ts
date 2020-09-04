@@ -3,6 +3,7 @@ import { ObjectResp, RbObject } from '../datamodel';
 import { DataService } from '../data.service';
 import { MapService } from 'app/map.service';
 import { Observable, Subscription } from 'rxjs';
+import { ApiService } from 'app/api.service';
 
 @Directive({
   selector: 'rb-dataset',
@@ -44,6 +45,7 @@ export class RbDatasetDirective implements OnChanges {
 
   constructor(
     private dataService: DataService,
+    private apiService: ApiService,
     private mapService: MapService
   ) {   }
 
@@ -205,13 +207,20 @@ export class RbDatasetDirective implements OnChanges {
     } else if(_name == 'exportall') {
       const filter = this.mergeFilters();
       this.dataService.exportObjects(this.objectname, filter, this.searchString);
+    } else if(_name == 'report') {
+      if(this.selectedObject != null) {
+        this.apiService.launchReport(param, {"uid": this.selectedObject.uid})
+      }
+    } else if(_name == 'reportall') {
+      const filter = this.mergeFilters();
+      this.apiService.launchReport(param, filter)
     } else if(_name == 'executeall') {
       let delay: number = 0;
       this._list.forEach((object) => {
         setTimeout(() => {
           this.dataService.executeObject(object, param, null)
         }, delay);
-        delay += 200;
+        delay += 50;
       });
     } else if(_name == 'executeglobal') {
       this.dataService.executeGlobal(param, null);

@@ -35,6 +35,11 @@
         </div>
     </div>
     <div
+        class="rb-files-item"
+        *ngIf="list.length == 0">
+        No Files
+    </div>  
+    <div
         class="rb-spinner-container"
         *ngIf="isLoading">
         <mat-spinner
