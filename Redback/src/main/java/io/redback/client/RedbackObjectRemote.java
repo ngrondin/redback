@@ -1,6 +1,9 @@
 package io.redback.client;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -58,6 +61,14 @@ public class RedbackObjectRemote {
 		}
 	}
 	
+	public RedbackObjectRemote getRelated(String attribute) {
+		if(data.containsKey("related")) {				
+			return new RedbackObjectRemote(firebus, objectService, token, data.getObject("related." + attribute));
+		} else {
+			return null;
+		}
+	}
+	
 	public void set(String attribute, Object value) throws RedbackException {
 		set(new DataMap(attribute, value));
 	}
@@ -77,6 +88,15 @@ public class RedbackObjectRemote {
 		} catch(Exception e) {
 			throw new RedbackException("Error updating object", e);
 		}
-	}	
+	}
+	
+	public List<String> getAttributeNames() {
+		List<String> ret = new ArrayList<String>();
+		Iterator<String> it = data.getObject("data").keySet().iterator();
+		while(it.hasNext()) {
+			ret.add(it.next());
+		}
+		return ret;
+	}
 	
 }
