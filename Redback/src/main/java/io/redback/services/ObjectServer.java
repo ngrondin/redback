@@ -240,6 +240,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 							for(String col : cols) {
 								allCols.add(col);
 								sb.append((!newLine ? "," : "") + col);
+								newLine = false;
 								if(addRelated) {
 									RedbackObject ro = o.getRelated(col);
 									if(ro != null) {
@@ -250,7 +251,6 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 										}
 									}
 								}
-								newLine = false;
 							}
 							for(int i = 0; i < list.size(); i++) {
 								sb.append("\r\n");
