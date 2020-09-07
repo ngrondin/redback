@@ -54,7 +54,9 @@ public class ObjectConfig
 		}
 		
 		if(config.containsKey("datagen")) {
-			generationScript = new Function(objectManager.getJSManager(), getName() + "_datagen", scriptVars, config.getString("datagen"));
+			List<String> scriptVars2 = new ArrayList<String>(scriptVars);
+			scriptVars2.add("filter");
+			generationScript = new Function(objectManager.getJSManager(), getName() + "_datagen", scriptVars2, config.getString("datagen"));
 		}
 				
 		DataMap scriptsCfg = config.getObject("scripts");

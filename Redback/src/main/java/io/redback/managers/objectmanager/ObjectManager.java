@@ -323,7 +323,9 @@ public class ObjectManager
 				} else {
 					Function gs = objectConfig.getGenerationScript();
 					if(gs != null) {
-						Object o = gs.execute(createScriptContext(session));
+						Map<String, Object> context = createScriptContext(session);
+						context.put("filter", JSConverter.toJS(filter));
+						Object o = gs.execute(context);
 						if(o instanceof DataList)
 							resultList = (DataList)o;
 					}
