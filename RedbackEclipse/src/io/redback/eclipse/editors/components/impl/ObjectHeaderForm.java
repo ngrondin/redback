@@ -1,6 +1,7 @@
 package io.redback.eclipse.editors.components.impl;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Composite;
 
 import io.firebus.utils.DataMap;
@@ -8,6 +9,7 @@ import io.firebus.utils.DataMap;
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.ReadOnlyField;
+import io.redback.eclipse.editors.components.ScriptField;
 import io.redback.eclipse.editors.components.TextField;
 
 public class ObjectHeaderForm extends Form
@@ -26,6 +28,11 @@ public class ObjectHeaderForm extends Form
 		new TextField(_data, "uidgenerator", "UID Generator", this, SWT.NONE);
 		new TextField(_data, "group", "Group", this, SWT.NONE);
 		new TextField(_data, "candelete", "Can Delete (!)", this, SWT.NONE);
+		ScriptField sf = new ScriptField(_data, "datagen", "Data Generation (!)", this, SWT.NONE);
+	    RowData rowData = new RowData();
+	    rowData.width = 500;
+	    rowData.height = 300;
+		sf.setLayoutData(rowData);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {
