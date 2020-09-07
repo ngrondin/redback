@@ -11,15 +11,17 @@ import io.redback.managers.reportmanager.ReportManager;
 import io.redback.managers.reportmanager.ReportUnit;
 
 public class Space extends ReportUnit {
-	protected float size;
+	protected float width;
+	protected float height;
 	
 	public Space(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		size = config.containsKey("size") ? config.getNumber("size").floatValue() : 10;
+		width = config.containsKey("width") ? config.getNumber("width").floatValue() : 10;
+		height = config.containsKey("height") ? config.getNumber("height").floatValue() : 10;
 	}
 
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
-		return ReportBox.Empty(size, size);
+		return ReportBox.Empty(width, height);
 	}
 
 }

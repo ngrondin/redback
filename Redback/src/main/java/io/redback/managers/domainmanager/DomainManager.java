@@ -17,8 +17,10 @@ import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
+import io.redback.client.NotificationClient;
 import io.redback.client.ObjectClient;
 import io.redback.client.js.FileClientJSWrapper;
+import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
@@ -32,10 +34,12 @@ public class DomainManager implements Consumer {
 	protected String objectServiceName;
 	protected String dataServiceName;
 	protected String fileServiceName;
+	protected String notificationServiceName;
 	protected ConfigurationClient configClient;
 	protected ObjectClient objectClient;
 	protected DataClient dataClient;
 	protected FileClient fileClient;
+	protected NotificationClient notificationClient;
 	protected CollectionConfig collection;
 	protected Map<String, DomainEntry> entries;
 
@@ -46,10 +50,12 @@ public class DomainManager implements Consumer {
 		objectServiceName = config.getString("objectservice");
 		dataServiceName = config.getString("dataservice");
 		fileServiceName = config.getString("fileservice");
+		notificationServiceName = config.getString("notificationservice");
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		objectClient = new ObjectClient(firebus, objectServiceName);
 		dataClient = new DataClient(firebus, dataServiceName);
 		fileClient = new FileClient(firebus, fileServiceName);
+		notificationClient = new NotificationClient(firebus, notificationServiceName);
 		collection = new CollectionConfig(config.getObject("collection"));
 		entries = new HashMap<String, DomainEntry>();	
 		firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
@@ -63,7 +69,7 @@ public class DomainManager implements Consumer {
 			{
 				DataMap filter = new DataMap();
 				filter.put(collection.getField("domain"), domain);
-				filter.put(collection.getField("_id"), name);
+				filter.put(collection.getField("name"), name);
 				DataMap resp = dataClient.getData(collection.getName(), filter, null);
 				DataList result = resp.getList("result");
 				if(result.size() > 0) {
@@ -124,8 +130,7 @@ public class DomainManager implements Consumer {
 	
 	protected void putEntry(String domain, String name, DomainEntry entry) throws RedbackException {
 		DataMap key = new DataMap();
-		key.put(collection.getField("domain"), domain);
-		key.put(collection.getField("_id"), name);
+		key.put(collection.getField("_id"), domain + "_" + entry.getType() + "_" + name);
 		dataClient.putData(collection.getName(), key, collection.convertObjectToSpecific(entry.getConfig()));
 		if(entry.canCache()) {
 			entries.put(domain + "." + name, entry);
@@ -207,6 +212,7 @@ public class DomainManager implements Consumer {
 		//context.put("dm", new SessionJSWrapper(session));
 		//context.put("oc", new FileClientJSWrapper(fileClient, session));
 		context.put("fc", new FileClientJSWrapper(fileClient, session));
+		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
 		df.execute(context);
 	}
 }

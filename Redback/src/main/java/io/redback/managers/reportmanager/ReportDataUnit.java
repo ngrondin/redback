@@ -1,7 +1,9 @@
 package io.redback.managers.reportmanager;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,15 +22,17 @@ public abstract class ReportDataUnit extends ReportUnit {
 	protected float fontSize;
 	protected float height;
 	protected float width;
+	protected String format;
 
 	public ReportDataUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
 		jsParams = Arrays.asList(new String[] {"params", "object"});
 		valueExpr = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_text_value", jsParams, c.getString("value"));
 		width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
-		font = PDType1Font.TIMES_ROMAN;
+		font = PDType1Font.HELVETICA;
 		fontSize = 12f;
 		height = 20f;
+		format = config.getString("format");
 	}
 
 	public abstract ReportBox produce(Map<String, Object> context) throws IOException, RedbackException;
@@ -39,9 +43,15 @@ public abstract class ReportDataUnit extends ReportUnit {
 		jsContext.put("object", new RedbackObjectRemoteJSWrapper(object));
 		Object value = valueExpr.eval(jsContext);
 		String valueStr = value != null ? value.toString() : "";
+		if(format != null) {
+			if(format.equals("currency")) {
+				NumberFormat formatter = NumberFormat.getCurrencyInstance();
+				valueStr = formatter.format(Float.parseFloat(valueStr));
+			}	
+		}
 		return valueStr;
 	}
 	
-	
+
 
 }

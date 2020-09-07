@@ -13,19 +13,11 @@ import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.client.js.FileClientJSWrapper;
-import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.Function;
-import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
-import io.redback.managers.objectmanagers.js.ProcessManagerProxyJSWrapper;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
-import io.redback.security.js.SessionRightsJSFunction;
-import io.redback.security.js.UserProfileJSWrapper;
-import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
-import io.redback.utils.js.LoggerJSFunction;
 
 public class RedbackObject extends RedbackElement
 {
@@ -153,7 +145,7 @@ public class RedbackObject extends RedbackElement
 		}		
 	}
 	
-	protected void init(Session s, ObjectManager om, ObjectConfig cfg)
+	protected void init(Session s, ObjectManager om, ObjectConfig cfg) throws RedbackException
 	{
 		session = s;
 		objectManager = om;
@@ -164,9 +156,9 @@ public class RedbackObject extends RedbackElement
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
-		scriptContext = new HashMap<String, Object>();
+		scriptContext = objectManager.createScriptContext(session);
 		scriptContext.put("self", new RedbackObjectJSWrapper(this));
-		scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
+		/*scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		scriptContext.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
 		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
 		scriptContext.put("pm", new ProcessManagerProxyJSWrapper(objectManager.getFirebus(), objectManager.processServiceName, session));
@@ -176,7 +168,7 @@ public class RedbackObject extends RedbackElement
 		scriptContext.put("log", new LoggerJSFunction());
 		scriptContext.put("canRead", new SessionRightsJSFunction(session, "read"));
 		scriptContext.put("canWrite", new SessionRightsJSFunction(session, "write"));
-		scriptContext.put("canExecute", new SessionRightsJSFunction(session, "execute"));
+		scriptContext.put("canExecute", new SessionRightsJSFunction(session, "execute"));*/
 	}
 	
 	protected void updateScriptContext() throws RedbackException 
@@ -421,10 +413,12 @@ public class RedbackObject extends RedbackElement
 	
 	public void delete() throws RedbackException
 	{
-		if(canDelete())
+		if(canDelete()) {
 			isDeleted = true;
-		else
+			executeScriptsForEvent("ondelete");
+		} else {
 			throw new RedbackException("The object '" + config.getName() + ":" + getUID().getString() + "' cannot be deleted");
+		}
 	}
 	
 	public List<String> getUpdatedAttributes() 

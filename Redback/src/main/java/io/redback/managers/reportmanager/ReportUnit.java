@@ -12,7 +12,9 @@ import io.redback.RedbackException;
 import io.redback.managers.reportmanager.units.DataSet;
 import io.redback.managers.reportmanager.units.DynamicForm;
 import io.redback.managers.reportmanager.units.Field;
+import io.redback.managers.reportmanager.units.HLine;
 import io.redback.managers.reportmanager.units.HSection;
+import io.redback.managers.reportmanager.units.MultilineText;
 import io.redback.managers.reportmanager.units.Space;
 import io.redback.managers.reportmanager.units.Text;
 import io.redback.managers.reportmanager.units.VList;
@@ -42,6 +44,8 @@ public abstract class ReportUnit {
 			newUnit = new DataSet(rm, rc, c);
 		else if(type.equals("text"))
 			newUnit = new Text(rm, rc, c);
+		else if(type.equals("multilinetext"))
+			newUnit = new MultilineText(rm, rc, c);
 		else if(type.equals("field"))
 			newUnit = new Field(rm, rc, c);
 		else if(type.equals("vlist"))
@@ -54,6 +58,8 @@ public abstract class ReportUnit {
 			newUnit = new DynamicForm(rm, rc, c);
 		else if(type.equals("space"))
 			newUnit = new Space(rm, rc, c);
+		else if(type.equals("hline"))
+			newUnit = new HLine(rm, rc, c);
 		return newUnit;
 	}
 	

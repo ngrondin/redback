@@ -5,10 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -42,15 +38,4 @@ public class ReportConfig {
 		return root;
 	}
 
-	public void pageBreak(Map<String, Object> context) throws IOException, RedbackException {
-		PDDocument document = (PDDocument)context.get("document");
-		PDPageContentStream contentStream = (PDPageContentStream)context.get("contentStream");
-		contentStream.close();
-		PDPage newPage = new PDPage();
-		document.addPage(newPage);
-		context.put("x", 30f);
-		context.put("y", 760f);
-		contentStream = new PDPageContentStream(document, newPage);
-		context.put("contentStream", contentStream);
-	}
 }

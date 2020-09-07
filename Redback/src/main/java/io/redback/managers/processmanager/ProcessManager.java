@@ -19,6 +19,7 @@ import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.ObjectClient;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
@@ -36,6 +37,7 @@ public class ProcessManager
 	protected String accessManagerServiceName;
 	protected String objectServiceName;
 	protected String domainServiceName;
+	protected ObjectClient objectClient;
 	protected CollectionConfig piCollectionConfig;
 	protected CollectionConfig gmCollectionConfig;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
@@ -55,6 +57,7 @@ public class ProcessManager
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
 		objectServiceName = config.getString("objectservice");
+		objectClient = new ObjectClient(firebus, objectServiceName);
 		domainServiceName = config.getString("domainservice");
 		processUserName = config.getString("processuser");
 		jwtSecret = config.getString("jwtsecret");
@@ -69,6 +72,7 @@ public class ProcessManager
 		scriptVars.add("pid");
 		scriptVars.add("pm");
 		scriptVars.add("firebus");
+		scriptVars.add("oc");
 		scriptVars.add("data");
 		scriptVars.add("processuser");
 	}
@@ -82,6 +86,11 @@ public class ProcessManager
 	public JSManager getJSManager()
 	{
 		return jsManager;
+	}
+	
+	public ObjectClient getObjectClient()
+	{
+		return objectClient;
 	}
 
 	public List<String> getScriptVariableNames()

@@ -23,9 +23,12 @@ import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.GeoClient;
+import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.GeoClientJSWrapper;
+import io.redback.managers.jsmanager.Function;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
+import io.redback.managers.objectmanagers.js.ProcessManagerProxyJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
@@ -121,6 +124,9 @@ public class ObjectManager
 		context.put("om", new ObjectManagerJSWrapper(this, session));
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("firebus", new FirebusJSWrapper(firebus, session));
+		context.put("om", new ObjectManagerJSWrapper(this, session));
+		context.put("pm", new ProcessManagerProxyJSWrapper(getFirebus(), processServiceName, session));
+		context.put("fm", new FileClientJSWrapper(getFileClient(), session));
 		context.put("geo", new GeoClientJSWrapper(geoClient));
 		context.put("global", JSConverter.toJS(getGlobalVariables()));
 		context.put("log", new LoggerJSFunction());
@@ -294,7 +300,6 @@ public class ObjectManager
 	@SuppressWarnings("unchecked")
 	public ArrayList<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
-		//Timer t = new Timer("list." + objectName);
 		ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
 		ObjectConfig objectConfig = getObjectConfig(objectName);
 		if(objectConfig != null)
@@ -306,28 +311,40 @@ public class ObjectManager
 					objectFilter.merge(filter);
 				if(searchText != null)
 					objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
-				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
-				if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
-					dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-				DataMap dbSort = generateDBSort(session, objectConfig, sort);
-				//t.mark("beforedata");
-				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
-				//t.mark("afterdata");
-				DataList dbResultList = dbResult.getList("result");
-				
-				for(int i = 0; i < dbResultList.size(); i++)
+				DataList resultList = null;
+				if(objectConfig.isPersistent()) 
 				{
-					DataMap dbData = dbResultList.getObject(i);
-					RedbackObject object = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
-					if(object == null)
-					{
-						object = new RedbackObject(session, this, objectConfig, dbData);
-						putInCurrentTransaction(object);
+					DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
+					if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
+						dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+					DataMap dbSort = generateDBSort(session, objectConfig, sort);
+					DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
+					resultList = dbResult.getList("result");
+				} else {
+					Function gs = objectConfig.getGenerationScript();
+					if(gs != null) {
+						Object o = gs.execute(createScriptContext(session));
+						if(o instanceof DataList)
+							resultList = (DataList)o;
 					}
-					objectList.add(object);
 				}
-				if(addRelated)
-					addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
+				
+				if(resultList != null) 
+				{
+					for(int i = 0; i < resultList.size(); i++)
+					{
+						DataMap dbData = resultList.getObject(i);
+						RedbackObject object = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
+						if(object == null)
+						{
+							object = new RedbackObject(session, this, objectConfig, dbData);
+							putInCurrentTransaction(object);
+						}
+						objectList.add(object);
+					}
+					if(addRelated)
+						addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
+				}
 			}
 			catch(Exception e)
 			{

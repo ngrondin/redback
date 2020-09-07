@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
+import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
@@ -70,6 +71,7 @@ public class ProcessInstance
 			scriptContext.put("pid", getId());
 			scriptContext.put("pm", new ProcessManagerJSWrapper(processManager, this));
 			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getProcessUserSession(domain)));
+			scriptContext.put("oc", new ObjectClientJSWrapper(processManager.getObjectClient(), processManager.getProcessUserSession(domain)));
 			scriptContext.put("processuser", processManager.getProcessUserSession(domain).getUserProfile().getUsername());
 			updateScriptBindings();
 		} catch(Exception e) {

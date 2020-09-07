@@ -45,7 +45,7 @@ public class DynamicForm extends ReportUnit {
 
 	public DynamicForm(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		font = PDType1Font.TIMES_ROMAN;
+		font = PDType1Font.HELVETICA;
 		fontSize = 12f;
 		width = c.containsKey("width") ? c.getNumber("width").floatValue() : -1;
 		orderAttribute = config.getString("orderattribute");

@@ -16,6 +16,8 @@ import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
+import io.redback.client.RedbackObjectRemote;
+import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
 import io.redback.managers.processmanager.ProcessInstance;
@@ -61,6 +63,8 @@ public class JSConverter {
 			return new JSDate((Date)object);
 		} else if(object instanceof RedbackObject) {
 			return new RedbackObjectJSWrapper((RedbackObject)object);
+		} else if(object instanceof RedbackObjectRemote) {
+			return new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)object);
 		} else if(object instanceof ProcessInstance) {
 			return new ProcessInstanceJSWrapper((ProcessInstance)object);
 		} else {

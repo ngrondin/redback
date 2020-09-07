@@ -19,6 +19,7 @@ public class ObjectConfig
 	protected DataMap config;
 	protected HashMap<String, AttributeConfig> attributes;
 	protected HashMap<String, Function> scripts;
+	protected Function generationScript;
 	protected Expression canDeleteExpr;
 	protected List<String> scriptVars;
 	
@@ -50,6 +51,10 @@ public class ObjectConfig
 		{
 			DataMap attrCfg = list.getObject(i);
 			attributes.put(attrCfg.getString("name"), new AttributeConfig(objectManager, this, attrCfg));
+		}
+		
+		if(config.containsKey("datagen")) {
+			generationScript = new Function(objectManager.getJSManager(), getName() + "_datagen", scriptVars, config.getString("datagen"));
 		}
 				
 		DataMap scriptsCfg = config.getObject("scripts");
@@ -107,6 +112,14 @@ public class ObjectConfig
 		else
 			return false;
 	}
+	
+	public boolean isPersistent() 
+	{
+		if(config.containsKey("collection"))
+			return true;
+		else 
+			return false;
+	}
 
 	public Set<String> getAttributeNames()
 	{
@@ -131,6 +144,11 @@ public class ObjectConfig
 	public List<String> getScriptVariables()
 	{
 		return scriptVars;
+	}
+	
+	public Function getGenerationScript()
+	{
+		return generationScript;
 	}
 
 }

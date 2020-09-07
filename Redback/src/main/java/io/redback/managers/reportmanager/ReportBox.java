@@ -1,5 +1,6 @@
 package io.redback.managers.reportmanager;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ public class ReportBox {
 	public String text;
 	public PDFont font;
 	public float fontSize;
+	public Color color;
 	public float lineWidth;
 	public byte[] bytes;
 	public boolean checked;
@@ -24,6 +26,7 @@ public class ReportBox {
 	
 	private ReportBox() {
 		children = new ArrayList<ReportBox>();
+		color = Color.DARK_GRAY;
 	}
 	
 	public static ReportBox VContainer(boolean canBreak) {
@@ -183,6 +186,24 @@ public class ReportBox {
 			}
 		}
 		return null;
+	}
+	
+	public String toString() {
+		return toString(0);
+	}
+	
+	public String toString(int indent) {
+		String s = "";
+		for(int i = 0; i < indent; i++)
+			s = s + "  ";
+		s = s  + type + " [" + width + ", " + height;
+		if(type.equals("text"))
+			s = s + ", " + text;
+		s = s + ", " + canBreak + "]";
+		for(ReportBox rb: children) {
+			s = s + "\r\n" + rb.toString(indent + 1);
+		}
+		return s;
 	}
 
 }

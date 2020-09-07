@@ -1,5 +1,6 @@
 package io.redback.managers.reportmanager.units;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ public class Field extends ReportDataUnit {
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
 		String valueStr = getSringValue(context);
 		ReportBox rb1 = ReportBox.Text(label, font, labelFontSize);
+		rb1.color = Color.GRAY;
 		rb1.height += 5;
 		ReportBox rb2 = ReportBox.Text(valueStr, font, fontSize);
 		rb2.height += 5;

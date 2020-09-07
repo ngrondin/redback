@@ -19,7 +19,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 	private Logger logger = Logger.getLogger("io.redback");
 	protected ObjectManager objectManager;
 	protected Session session;
-	protected String[] members = {"getObject", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "execute"};
+	protected String[] members = {"getObject", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute"};
 	
 	public ObjectManagerJSWrapper(ObjectManager om, Session s)
 	{
@@ -101,7 +101,20 @@ public class ObjectManagerJSWrapper implements ProxyObject
 					}
 				}
 			};
-		} else if(key.equals("execute")) {
+		} else if(key.equals("deleteObject")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String objectName = arguments[0].asString(); 
+					String uid = arguments[1].asString(); 
+					try {
+						objectManager.deleteObject(session, objectName, uid);
+						return null;
+					} catch (Exception e) {
+						logger.severe("Error in deleteObject : " + e.getMessage());
+						throw new RuntimeException("Errror in deleteObject", e);
+					}
+				}
+			};		} else if(key.equals("execute")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String functionName = arguments[0].asString(); 
