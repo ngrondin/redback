@@ -40,7 +40,7 @@ public class Report {
 			ReportBox root = reportConfig.produce(context);
 			List<ReportBox> pages = paginate(root);
 			for(int i = 0; i < pages.size(); i++)
-				renderPage(pages.get(i), i++);
+				renderPage(pages.get(i), i);
 		} catch(Exception e) {
 			e.printStackTrace();
 			throw new RedbackException("Error producing report", e);
@@ -69,7 +69,10 @@ public class Report {
 				remainder = top.breakAt(700);
 				remainder.x = 0;
 				remainder.y = 0;
-				pages.add(i + 1, remainder);
+				if(i + 1 < pages.size())
+					pages.add(i + 1, remainder);
+				else
+					pages.add(remainder);
 				i++;
 			}			
 		}
@@ -95,17 +98,20 @@ public class Report {
 		} else if(reportBox.type.equals("hline")) {
 			stream.setLineWidth(0.3f);
 			stream.setStrokingColor(Color.BLACK);
-			stream.moveTo(offsetx, pageTop - offsety + (reportBox.height / 2));
-			stream.lineTo(offsetx + reportBox.width, 782 - offsety + (reportBox.height / 2));
+			stream.moveTo(offsetx, pageTop - offsety + reportBox.height);//(reportBox.height / 2) + 2);
+			stream.lineTo(offsetx + reportBox.width, 782 - offsety + reportBox.height);//(reportBox.height / 2) + 2);
 			stream.stroke();
 
 		} else if(reportBox.type.equals("text")) {
 			if(reportBox.text != null) {
+				String txt = reportBox.text;
+				while(txt.length() > 0 && (reportBox.font.getStringWidth(txt) / 1000f * reportBox.fontSize) > reportBox.width)
+					txt = txt.substring(0, txt.length() - 1);
 				stream.beginText(); 
 				stream.setNonStrokingColor(reportBox.color);
 				stream.setFont(reportBox.font, reportBox.fontSize);
 				stream.newLineAtOffset(offsetx, pageTop - offsety);
-				stream.showText(reportBox.text);      
+				stream.showText(txt);      
 				stream.endText();
 			}
 						

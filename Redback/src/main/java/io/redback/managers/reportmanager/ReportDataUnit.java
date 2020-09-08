@@ -3,8 +3,8 @@ package io.redback.managers.reportmanager;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.Currency;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.pdfbox.pdmodel.font.PDFont;
@@ -45,9 +45,15 @@ public abstract class ReportDataUnit extends ReportUnit {
 		String valueStr = value != null ? value.toString() : "";
 		if(format != null) {
 			if(format.equals("currency")) {
-				NumberFormat formatter = NumberFormat.getCurrencyInstance();
+				NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
 				valueStr = formatter.format(Float.parseFloat(valueStr));
-			}	
+			} else if(format.equals("duration")) {
+				Long dur = Long.parseLong(valueStr);
+				valueStr = "";
+				if(dur >= 3600000) valueStr += Math.abs(dur / 3600000) + "h ";
+				if(dur > 60000 && (dur % 60000) != 0) valueStr += Math.abs((dur % 3600000) / 60000) + "m ";
+				if(dur > 0 && dur < 60000) valueStr += Math.abs((dur % 60000) / 1000) + "s";
+			}
 		}
 		return valueStr;
 	}
