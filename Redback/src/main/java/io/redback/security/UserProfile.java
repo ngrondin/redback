@@ -2,7 +2,10 @@ package io.redback.security;
 
 import java.util.ArrayList;
 
+import io.firebus.utils.DataEntity;
+import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataList;
+import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 
 public class UserProfile 
@@ -69,38 +72,65 @@ public class UserProfile
 		return profile.getString("attributes." + name);
 	}
 
-	public String getRights(String name)
+	public boolean getRights(String name, String operation, DataMap context)
 	{
-		return profile.getString("rights." + name);
+		String op = operation.equalsIgnoreCase("read") ? "r" : operation.equalsIgnoreCase("write") ? "w" : operation.equalsIgnoreCase("execute") ? "x" : "";
+		DataEntity cfg = profile.get("rights." + name);
+		if(cfg instanceof DataLiteral) {
+			DataLiteral lit = (DataLiteral)cfg;
+			if(lit.getType() == DataLiteral.TYPE_BOOLEAN) {
+				return lit.getBoolean();
+			} else if(lit.getType() == DataLiteral.TYPE_STRING) {
+				String str = lit.getString();
+				if(str.contains(op))
+					return true;
+				else 
+					return false;
+			}
+		} else if(cfg instanceof DataMap) {
+			DataEntity opCfg = ((DataMap)cfg).get(operation);
+			if(opCfg instanceof DataLiteral) {
+				return ((DataLiteral)opCfg).getBoolean();
+			} else if(opCfg instanceof DataMap) {
+				if(context != null) {
+					DataFilter filter = new DataFilter((DataMap)cfg);
+					return filter.apply(context);
+				} else {
+					return true;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	public boolean canRead(String name)
 	{
-		String r = getRights(name);
-		if(r != null  &&  r.toLowerCase().contains("r"))
-			return true;
-		else
-			return false;
+		return getRights(name, "read", null);
 	}
 
 	public boolean canWrite(String name)
 	{
-		String r = getRights(name);
-		if(r != null  &&  r.toLowerCase().contains("w"))
-			return true;
-		else
-			return false;
+		return getRights(name, "write", null);
 	}
 
 	public boolean canExecute(String name)
 	{
-		String r = getRights(name);
-		if(r != null  &&  r.toLowerCase().contains("x"))
-			return true;
-		else
-			return false;
+		return getRights(name, "execute", null);
 	}
 
+	public DataMap getReadFilter(String name) 
+	{
+		DataEntity cfg = profile.get("rights." + name);
+		if(cfg instanceof DataMap) {
+			DataEntity opCfg = ((DataMap)cfg).get("read");
+			if(opCfg instanceof DataMap) {
+				return (DataMap)opCfg;
+			}
+		}
+		return null;		
+	}
+	
 	public DataMap getJSON()
 	{
 		return profile;

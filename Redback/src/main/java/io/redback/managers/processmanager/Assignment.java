@@ -11,6 +11,7 @@ public class Assignment
 	public String processName;
 	public String pid;
 	public String interaction;
+	public String type;
 	public String label;
 	public String message;
 	public List<Action> actions;
@@ -32,11 +33,12 @@ public class Assignment
 		actions = new ArrayList<Action>();
 	}
 	
-	public Assignment(String pn, String pi, String i, String l, String m)
+	public Assignment(String pn, String pi, String i, String t, String l, String m)
 	{
 		processName = pn;
 		pid = pi;
 		interaction = i;
+		type = t;
 		label = l;
 		message = m;
 		actions = new ArrayList<Action>();
@@ -61,6 +63,7 @@ public class Assignment
 		map.put("process", processName);
 		map.put("pid", pid);
 		map.put("interaction", interaction);
+		map.put("type", type);
 		map.put("label", label);
 		map.put("message", message);
 		DataList actionList = new DataList();

@@ -251,7 +251,7 @@ public class ProcessManager
 		return pi;
 	}
 
-	public List<Assignment> getAssignments(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
+	public List<Assignment> getAssignments(Actionner actionner, String type, DataMap filter, DataList viewdata) throws RedbackException
 	{
 		List<Assignment> list = new ArrayList<Assignment>();
 		loadGroupsOf(actionner);
@@ -277,10 +277,10 @@ public class ProcessManager
 			}
 			else
 			{
-				assignment = new Assignment(pi.getProcessName(), pi.getId(), "processexception", "Exception", "The process has stopped due to an exception and requires restart");
+				assignment = new Assignment(pi.getProcessName(), pi.getId(), "processexception", "exception", "Exception", "The process has stopped due to an exception and requires restart");
 				assignment.addAction("restart", "Restart");
 			}
-			if(assignment != null)
+			if(assignment != null && (type == null || assignment.type.equals(type)))
 			{
 				if(viewdata != null  &&  viewdata.size() > 0)
 				{
@@ -296,9 +296,9 @@ public class ProcessManager
 		return list;
 	}
 	
-	public int getAssignmentCount(Actionner actionner) throws RedbackException
+	public int getAssignmentCount(Actionner actionner, String type) throws RedbackException
 	{
-		List<Assignment> assignments = getAssignments(actionner, null, null);
+		List<Assignment> assignments = getAssignments(actionner, type, null, null);
 		int count = assignments.size();
 		return count;
 	}

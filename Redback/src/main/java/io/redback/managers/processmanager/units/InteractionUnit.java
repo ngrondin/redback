@@ -24,7 +24,6 @@ public class InteractionUnit extends ProcessUnit
 	protected ArrayList<AssigneeConfig> assigneeConfigs;
 	protected ArrayList<ActionConfig> actionConfigs;
 	protected DataMap notificationConfig;
-	protected String interactionCode;
 	protected Expression labelExpression;
 	protected Expression messageExpression;
 
@@ -46,7 +45,6 @@ public class InteractionUnit extends ProcessUnit
 				actionConfigs.add(new ActionConfig(processManager, p, this, list.getObject(i)));
 		}
 		notificationConfig = config.getObject("notification");
-		interactionCode = notificationConfig.getString("code");
 		labelExpression = new Expression(pm.getJSManager(), jsFunctionNameRoot + "_labelexpr", pm.getScriptVariableNames(), notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
 		messageExpression = new Expression(pm.getJSManager(), jsFunctionNameRoot + "_msgexpr", pm.getScriptVariableNames(), notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
 	}
@@ -114,9 +112,10 @@ public class InteractionUnit extends ProcessUnit
 		{
 			Map<String, Object> context = pi.getScriptContext();
 			String code = notificationConfig.getString("code");
+			String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
 			String label = (String)labelExpression.eval(context);
 			String message = (String)messageExpression.eval(context);
-			Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), code, label, message);
+			Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), code, type, label, message);
 			for(ActionConfig actionConfig: actionConfigs)
 			{
 				if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeMatch(actionner, pi.getAssigneeById((String)actionConfig.evaluateExclusiveId(pi)))))

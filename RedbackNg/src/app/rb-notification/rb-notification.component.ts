@@ -29,12 +29,12 @@ export class RbNotificationComponent implements OnInit {
   }
 
   public getCount() {
-    this.apiService.getAssignmentCount().subscribe(resp => this.setCount(resp));
+    this.apiService.getAssignmentCount('exception').subscribe(resp => this.setCount(resp));
   }
 
   public getList() {
     this.loading = true;
-    this.apiService.listAssignments({}).subscribe(resp => this.setList(resp));
+    this.apiService.listAssignments('exception', {}).subscribe(resp => this.setList(resp));
   }
 
   public setCount(data: any) {

@@ -34,7 +34,7 @@ public class ActionUnit extends ProcessUnit
 		DataMap filter = new DataMap();
 		if(process != null) 
 			filter.put("process", process);
-		List<Assignment> assignments = processManager.getAssignments(actionner, filter, null);
+		List<Assignment> assignments = processManager.getAssignments(actionner, null, filter, null);
 		for(int i = 0; i < assignments.size(); i++)
 		{
 			Assignment assignment = assignments.get(i);

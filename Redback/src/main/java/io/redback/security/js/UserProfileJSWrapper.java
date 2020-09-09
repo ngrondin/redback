@@ -1,14 +1,15 @@
 package io.redback.security.js;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
+import io.firebus.utils.DataMap;
 import io.redback.security.UserProfile;
+import io.redback.utils.js.JSConverter;
 
 public class UserProfileJSWrapper implements ProxyObject
 {
@@ -37,7 +38,7 @@ public class UserProfileJSWrapper implements ProxyObject
 		} else if(key.equals("getRights")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
-					return userProfile.getRights(arguments[0].asString());
+					return userProfile.getRights(arguments[0].asString(), arguments[1].asString(), (DataMap)JSConverter.toJava(arguments[2]));
 				}
 			};
 		} else if(key.equals("canRead")) {

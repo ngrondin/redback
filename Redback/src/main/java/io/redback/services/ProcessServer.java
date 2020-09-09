@@ -75,9 +75,10 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 				}
 				else if(action.equals("getassignments"))
 				{
+					String type = request.getString("type");
 					DataMap filter = request.getObject("filter");
 					DataList viewdata = request.getList("viewdata");
-					List<Assignment> result = getAssignments(session, filter, viewdata);
+					List<Assignment> result = getAssignments(session, type, filter, viewdata);
 					DataList responseList = new DataList();
 					for(int i = 0; i < result.size(); i++)
 						responseList.add(result.get(i).getDataMap());
@@ -86,7 +87,8 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 				}
 				else if(action.equals("getassignmentcount"))
 				{
-					int count = getAssignmentCount(session);
+					String type = request.getString("type");
+					int count = getAssignmentCount(session, type);
 					responseData = new DataMap();
 					responseData.put("count", count);
 				}
@@ -122,8 +124,8 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 	
 	protected abstract void processAction(Session session, String pid, String processAction, DataMap data) throws RedbackException;
 	
-	protected abstract List<Assignment> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException;
+	protected abstract List<Assignment> getAssignments(Session session, String type, DataMap filter, DataList viewdata) throws RedbackException;
 	
-	protected abstract int getAssignmentCount(Session session) throws RedbackException;
+	protected abstract int getAssignmentCount(Session session, String type) throws RedbackException;
 	
 }

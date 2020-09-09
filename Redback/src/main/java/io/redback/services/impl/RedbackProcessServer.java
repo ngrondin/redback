@@ -41,19 +41,19 @@ public class RedbackProcessServer extends ProcessServer
 		processManager.commitCurrentTransaction();
 	}
 	
-	protected List<Assignment> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException
+	protected List<Assignment> getAssignments(Session session, String type, DataMap filter, DataList viewdata) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session.getUserProfile());
 		processManager.initiateCurrentTransaction();
-		List<Assignment> result = processManager.getAssignments(actionner, filter, viewdata);
+		List<Assignment> result = processManager.getAssignments(actionner, type, filter, viewdata);
 		processManager.commitCurrentTransaction();
 		return result;
 	}
 	
-	protected int getAssignmentCount(Session session) throws RedbackException {
+	protected int getAssignmentCount(Session session, String type) throws RedbackException {
 		Actionner actionner = new Actionner(session.getUserProfile());
 		processManager.initiateCurrentTransaction();
-		int count = processManager.getAssignmentCount(actionner);
+		int count = processManager.getAssignmentCount(actionner, type);
 		processManager.commitCurrentTransaction();
 		return count;
 	}

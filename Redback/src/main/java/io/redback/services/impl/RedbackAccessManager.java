@@ -196,41 +196,78 @@ public class RedbackAccessManager extends AccessManager
 	
 	protected void mergeRights(DataMap to, DataMap from)
 	{
-		Iterator<String> it = from.keySet().iterator();
-		while(it.hasNext())
+		DataMap fromRb = from.getObject("rb");
+		DataMap toRb = to.getObject("rb");
+		if(toRb == null) {
+			toRb = new DataMap();
+			to.put("rb", toRb);
+		}
+		
+		Iterator<String> catIt = fromRb.keySet().iterator();
+		while(catIt.hasNext())
 		{
-			String key = it.next();
-			DataEntity e = from.get(key);
-			if(e instanceof DataMap)
-			{
-				DataMap fromSub = (DataMap)e;
-				if(!fromSub.keySet().isEmpty())
-				{
-					DataMap toSub = to.getObject(key);
-					if(toSub == null)
-					{
-						toSub = new DataMap();
-						to.put(key, toSub);
-					}
-					mergeRights(toSub, (DataMap)e);
-				}
+			String cat = catIt.next();
+			DataMap fromCat = fromRb.getObject(cat);
+			DataMap toCat = toRb.getObject(cat);
+			if(toCat == null) {
+				toCat = new DataMap();
+				toRb.put(cat, toCat);
 			}
-			else if(e instanceof DataLiteral)
-			{
-				String fromRight = ((DataLiteral)e).getString();
-				String toRight = to.getString(key);
-				if(toRight == null)
-					toRight = "";
-				String result = "";
-				if(toRight.contains("r") || fromRight.contains("r"))
-					result += "r";
-				if(toRight.contains("w") || fromRight.contains("w"))
-					result += "w";
-				if(toRight.contains("x") || fromRight.contains("x"))
-					result += "x";
-				to.put(key, result);				
+			
+			Iterator<String> itemIt = fromCat.keySet().iterator();
+			while(itemIt.hasNext()) {
+				String item = itemIt.next();
+				DataEntity fromItem = fromCat.get(item);
+				DataEntity toItem = toCat.get(item);
+				if(toItem == null) {
+					toCat.put(item, fromItem);
+				} else {
+					DataMap toRights = convertToLongRights(toItem);
+					DataMap fromRights = convertToLongRights(fromItem);
+					String[] ops = new String[] {"read", "write", "execute"};
+					boolean canBeShort = true;
+					for(int i = 0; i < ops.length; i++) {
+						DataEntity toOp = toRights.get(ops[i]);
+						DataEntity fromOp = fromRights.get(ops[i]);
+						if(toOp instanceof DataLiteral && ((DataLiteral)toOp).getBoolean() == false || fromOp instanceof DataLiteral && ((DataLiteral)fromOp).getBoolean() == false) {
+							toRights.put(ops[i], false);
+						} else if(toOp instanceof DataMap && fromOp instanceof DataMap) {
+							((DataMap)toOp).merge((DataMap)fromOp);
+							canBeShort = false;
+						} else if(toOp instanceof DataLiteral && ((DataLiteral)toOp).getBoolean() == true && fromOp instanceof DataLiteral && ((DataLiteral)fromOp).getBoolean() == true) {
+							toRights.put(ops[i], true);
+						} else {
+							toRights.put(ops[i], fromOp);
+							canBeShort = false;
+						}
+					}
+					if(canBeShort) {
+						String sh = "";
+						for(int i = 0; i < ops.length; i++) {
+							if(toRights.getBoolean(ops[i]))
+								sh += i == 0 ? "r" : i == 1 ? "w" : i == 2 ? "x" : "";
+						}
+						toCat.put(item, sh);
+					} else {
+						toCat.put(item, toRights);
+					}
+				}				
 			}
 		}
+	}
+	
+	protected DataMap convertToLongRights(DataEntity e)
+	{
+		if(e instanceof DataMap) {
+			return (DataMap)e;
+		} else {
+			String s = ((DataLiteral)e).getString();
+			DataMap ret = new DataMap();
+			ret.put("read", s.contains("r"));
+			ret.put("write", s.contains("w"));
+			ret.put("execute", s.contains("x"));
+			return ret;
+		} 
 	}
 	
 	
