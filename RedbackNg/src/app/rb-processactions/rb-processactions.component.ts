@@ -38,7 +38,7 @@ export class RbProcessactionsComponent implements OnInit {
       this.pid = null;
       this.message = null;
       this.actions = [];
-      this.apiService.listAssignments(null, filter).subscribe(resp => this.setAssignment(resp));
+      this.apiService.listAssignments(filter).subscribe(resp => this.setAssignment(resp));
     }
   }
 

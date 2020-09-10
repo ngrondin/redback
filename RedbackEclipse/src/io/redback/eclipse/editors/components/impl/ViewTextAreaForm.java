@@ -22,7 +22,7 @@ public class ViewTextAreaForm extends Form
 		new TextField(_data, "attribute", "Attribute", this, SWT.NONE);
 		new TextField(_data, "icon", "Icon", this, SWT.NONE);
 		new TextField(_data, "size", "Size", this, SWT.NONE);
-		new TextField(_data, "row", "Row", this, SWT.NONE);
+		new TextField(_data, "rows", "Rows", this, SWT.NONE);
 		new TextField(_data, "show", "Show (!)", this, SWT.NONE);
 		new TextField(_data, "grow", "Grow", this, SWT.NONE);
 		new TextField(_data, "shrink", "Shrink", this, SWT.NONE);

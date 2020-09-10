@@ -315,20 +315,19 @@ export class ApiService {
 
   /********* Process **********/
 
-  listAssignments(type: string, filter: any): Observable<any> {
+  listAssignments(filter: any): Observable<any> {
     const req = {
       action: 'getassignments',
-      type: type,
       filter: filter,
       viewdata:['objectname', 'uid']
     };
     return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }
 
-  getAssignmentCount(type: string): Observable<any> {
+  getAssignmentCount(filter: any): Observable<any> {
     const req = {
       action: 'getassignmentcount',
-      type: type
+      filter: filter
     };    
     return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }

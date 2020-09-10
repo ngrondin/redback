@@ -22,7 +22,7 @@ public class ProcessDomainServiceForm extends ProcessForm
 	public void createUI() {
 		
 		new TextField(_data, "name", "Name", this, SWT.NONE);
-		new TextField(_data, "service", "Service", this, SWT.NONE);
+		new TextField(_data, "function", "Function", this, SWT.NONE);
 		new MapField(_data, "data", "Data", this, SWT.NONE);
 		new MapField(_data, "outmap", "Result Map", this, SWT.NONE);
 		new SelectField(_data, "nextnode", "Next Node", nodeOptions, nodeOptionLabels, this, SWT.NONE);

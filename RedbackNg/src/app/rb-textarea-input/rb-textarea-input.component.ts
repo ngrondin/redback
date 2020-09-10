@@ -25,10 +25,16 @@ export class RbTextareaInputComponent implements OnInit {
   }
 
   public get value(): string {
-    if(this.rbObject != null)
-      return this.rbObject.data[this.attribute];
-    else
+    if(this.rbObject != null) {
+      let val = this.rbObject.data[this.attribute];
+      if(typeof val == 'object') {
+        return JSON.stringify(val, null, 2);
+      } else {
+        return val;
+      }
+    } else {
       return null;  
+    }
   }
 
   public set value(val: string) {

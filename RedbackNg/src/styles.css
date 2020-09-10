@@ -109,6 +109,10 @@ rb-list-scroll > mat-action-list > button {
 	color: #999999;	
 }
 
+.rb-menu-container {
+	display: flex;
+	flex-direction: column;
+}
 
 rb-menu > .mat-list-base {
 	padding-top: 0px;
