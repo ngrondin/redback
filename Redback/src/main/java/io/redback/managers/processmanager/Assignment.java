@@ -5,15 +5,13 @@ import java.util.List;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
+import io.redback.utils.Notification;
 
 public class Assignment 
 {
 	public String processName;
 	public String pid;
-	public String interaction;
-	public String type;
-	public String label;
-	public String message;
+	public Notification notification;
 	public List<Action> actions;
 	public DataMap data;
 
@@ -33,14 +31,11 @@ public class Assignment
 		actions = new ArrayList<Action>();
 	}
 	
-	public Assignment(String pn, String pi, String i, String t, String l, String m)
+	public Assignment(String pn, String pi, Notification n)
 	{
 		processName = pn;
 		pid = pi;
-		interaction = i;
-		type = t;
-		label = l;
-		message = m;
+		notification = n;
 		actions = new ArrayList<Action>();
 	}
 	
@@ -62,10 +57,10 @@ public class Assignment
 		DataMap map = new DataMap();
 		map.put("process", processName);
 		map.put("pid", pid);
-		map.put("interaction", interaction);
-		map.put("type", type);
-		map.put("label", label);
-		map.put("message", message);
+		map.put("code", notification.getCode());
+		map.put("type", notification.getType());
+		map.put("label", notification.getLabel());
+		map.put("message", notification.getMessage());
 		DataList actionList = new DataList();
 		for(int i = 0; i < actions.size(); i++)
 		{

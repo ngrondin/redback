@@ -12,6 +12,7 @@ import io.redback.client.FileClient;
 import io.redback.client.ObjectClient;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
+import io.redback.utils.RedbackFile;
 
 public class ReportManager {
 	private Logger logger = Logger.getLogger("io.redback");
@@ -75,6 +76,16 @@ public class ReportManager {
 			report.produce(filter);
 		} 
 		return report;
+	}
+	
+	public String produceAndStore(Session session, String name, DataMap filter) throws RedbackException {
+		Report report = produce(session, name, filter);
+		if(report != null) {
+			RedbackFile file = fileClient.putFile(session, name + ".pdf", "application/pdf", session.getUserProfile().getUsername(), report.getBytes());
+			return file.uid;
+		} else {
+			return null;
+		}
 	}
 
 	public void clearCaches() {

@@ -26,6 +26,7 @@ public class MultilineText extends ReportDataUnit {
 			if(width > -1) 
 				rb.width = width;					
 			rb.height = height;
+			rb.color = color;
 			c.addChild(rb);
 		}
 		return c;

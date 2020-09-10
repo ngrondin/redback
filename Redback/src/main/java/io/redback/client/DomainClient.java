@@ -17,10 +17,11 @@ public class DomainClient extends Client {
 		super(fb, sn);
 	}
 	
-	public void putReport(Session session, String name, String category, DataMap report) throws RedbackException {
+	public void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "putreport");
+			req.put("domain", domain);
 			req.put("name", name);
 			req.put("category", category);
 			req.put("report", report);
@@ -30,10 +31,11 @@ public class DomainClient extends Client {
 		}
 	}
 
-	public void putVariable(Session session, String name, String category, DataEntity var) throws RedbackException {
+	public void putVariable(Session session, String domain, String name, String category, DataEntity var) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "putvariable");
+			req.put("domain", domain);
 			req.put("name", name);
 			req.put("category", category);
 			req.put("variable", var);
@@ -43,10 +45,11 @@ public class DomainClient extends Client {
 		}
 	}
 
-	public void putFunction(Session session, String name, String function) throws RedbackException {
+	public void putFunction(Session session, String domain, String name, String function) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "putfunction");
+			req.put("domain", domain);
 			req.put("name", name);
 			req.put("function", function);
 			request(session, req);
@@ -55,10 +58,11 @@ public class DomainClient extends Client {
 		}
 	}
 
-	public DataMap getReport(Session session, String name) throws RedbackException {
+	public DataMap getReport(Session session, String domain, String name) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "getreport");
+			req.put("domain", domain);
 			req.put("name", name);
 			DataMap resp = request(session, req);
 			return resp;			
@@ -84,10 +88,11 @@ public class DomainClient extends Client {
 		}
 	}
 
-	public DataEntity getVariable(Session session, String name) throws RedbackException {
+	public DataEntity getVariable(Session session, String domain, String name) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "getvariable");
+			req.put("domain", domain);
 			req.put("name", name);
 			DataMap resp = request(session, req);
 			return resp;				
@@ -96,15 +101,28 @@ public class DomainClient extends Client {
 		}
 	}
 
-	public void executeFunction(Session session, String name, DataMap param) throws RedbackException {
+	public void executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "executefunction");
+			req.put("domain", domain);
 			req.put("name", name);
 			req.put("param", param);
 			request(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error executing domain function", e);
+		}
+	}
+	
+	public void clearCache(Session session, String domain, String name) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "clearcache");
+			req.put("domain", domain);
+			req.put("name", name);
+			request(session, req);
+		} catch(Exception e) {
+			throw new RedbackException("Error clearing domain cache", e);
 		}
 	}
 }

@@ -57,7 +57,7 @@ public class JSManager {
 			SourceEntry fe = sourceEntries.get(id);
 			if(fe != null) {
 				fe.src = src;
-				fe.lastUpdated = lastUpdated;
+				fe.lastUpdated = now;
 			} else {
 				sourceEntries.put(id, new SourceEntry(src, now));	
 			}	
@@ -88,6 +88,7 @@ public class JSManager {
 	protected void compileEngine(EngineEntry engineEntry) throws RedbackException {
 		try {
 			synchronized(sourceEntries) {
+				long now = System.currentTimeMillis();
 				Iterator<String> it = sourceEntries.keySet().iterator();
 				while(it.hasNext()) {
 					String functionId = it.next();
@@ -95,7 +96,7 @@ public class JSManager {
 					if(sourceEntry.lastUpdated >= engineEntry.lastCompiled)
 						engineEntry.engine.eval(sourceEntry.src);
 				}
-				engineEntry.lastCompiled = System.currentTimeMillis();
+				engineEntry.lastCompiled = now;
 			}
 		} catch(Exception e) {
 			throw new RedbackException("Problem recompiling engine", e);

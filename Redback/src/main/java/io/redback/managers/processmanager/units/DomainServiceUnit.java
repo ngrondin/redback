@@ -18,7 +18,7 @@ import io.redback.utils.js.JSConverter;
 public class DomainServiceUnit extends ProcessUnit 
 {
 	//private Logger logger = Logger.getLogger("io.redback");
-	protected String domainServiceName;
+	protected String functionName;
 	protected ExpressionMap inputExpressionMap;
 	protected ExpressionMap outputExpressionMap;
 	protected String nextNode;
@@ -27,7 +27,7 @@ public class DomainServiceUnit extends ProcessUnit
 	{
 		super(pm, p, config);
 		processManager = pm;
-		domainServiceName = config.getString("service");
+		functionName = config.getString("function");
 		inputExpressionMap = new ExpressionMap(processManager.getJSManager(), jsFunctionNameRoot + "_inexpr", pm.getScriptVariableNames(), config.get("data") != null ? config.getObject("data") : new DataMap());
 		List<String> outVars = new ArrayList<String>(pm.getScriptVariableNames());
 		outVars.add("result");
@@ -44,9 +44,10 @@ public class DomainServiceUnit extends ProcessUnit
 			Map<String, Object> context = pi.getScriptContext();
 			DataMap data = inputExpressionMap.eval(context);
 			DataMap req = new DataMap();
-			req.put("service", domainServiceName);
+			req.put("action", "executefunction");
 			req.put("domain", pi.getDomain());
-			req.put("data", data);
+			req.put("name", functionName);
+			req.put("param", data);
 			Payload payload = new Payload();
 			payload.setData(req.toString());
 			payload.metadata.put("token", sysUserSession.getToken());

@@ -9,6 +9,6 @@ public class DomainReport extends DomainEntry {
 	}
 
 	public DataMap getReportConfig() {
-		return config.getObject("report");
+		return config.getObject("source");
 	}
 }

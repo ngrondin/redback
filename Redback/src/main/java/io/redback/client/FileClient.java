@@ -73,8 +73,16 @@ public class FileClient extends Client {
 	}
 
 	public RedbackFile putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException {
-		//TODO complete this
-		return null;
+		try {
+			Payload payload = new Payload(bytes);
+			payload.metadata.put("filename", fileName);
+			payload.metadata.put("mime", mime);
+			Payload respPayload = requestPayload(session, payload);
+			DataMap resp = new DataMap(respPayload.getString());
+			return new RedbackFile(resp.getString("fileuid"), fileName, mime, resp.getString("thumbnail"), username, new Date(), bytes);
+		} catch(Exception e) {
+			throw new RedbackException("Error link files to object", e);
+		}			
 	}
 
 }

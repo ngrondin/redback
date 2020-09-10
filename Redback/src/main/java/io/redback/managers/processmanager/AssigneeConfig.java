@@ -1,5 +1,7 @@
 package io.redback.managers.processmanager;
 
+import java.util.Map;
+
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.jsmanager.Expression;
@@ -40,9 +42,9 @@ public class AssigneeConfig
 		assigneeExpr = new Expression(processManager.getJSManager(), "pm_assignee_" + StringUtils.base16(assigneeStr.hashCode()), pm.getScriptVariableNames(), assigneeStr);
 	}
 	
-	public Object evaluateId(ProcessInstance pi) throws RedbackException
+	public Object evaluateId(Map<String, Object> context) throws RedbackException
 	{
-		return assigneeExpr.eval(pi.getScriptContext());
+		return assigneeExpr.eval(context);
 	}
 	
 	public int getType()

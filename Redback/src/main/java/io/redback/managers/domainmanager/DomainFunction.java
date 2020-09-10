@@ -18,11 +18,11 @@ public class DomainFunction extends DomainEntry {
 		super(c);
 		jsManager = jsm;
 		domainManager = dm;
-		List<String> params = Arrays.asList(new String[] {"session", "dm", "om", "fm"});
-		function = new Function(jsManager, "domain_" + config.getString("domain") + "_" + config.getString("name"), params, config.getString("function"));
+		List<String> params = Arrays.asList(new String[] {"log", "session", "dm", "oc", "fc", "nc", "rc", "param"});
+		function = new Function(jsManager, "domain_" + config.getString("domain") + "_" + config.getString("name"), params, config.getString("source"));
 	}
 
-	public void execute(Map<String, Object> context) throws RedbackException {
-		function.execute(context);
+	public Object execute(Map<String, Object> context) throws RedbackException {
+		return function.execute(context);
 	}
 }

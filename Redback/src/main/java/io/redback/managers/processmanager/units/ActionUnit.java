@@ -34,11 +34,13 @@ public class ActionUnit extends ProcessUnit
 		DataMap filter = new DataMap();
 		if(process != null) 
 			filter.put("process", process);
-		List<Assignment> assignments = processManager.getAssignments(actionner, null, filter, null);
+		//if(interactionCode != null)
+		//	filter.put("notification.code", interactionCode);
+		List<Assignment> assignments = processManager.getAssignments(actionner, filter, null);
 		for(int i = 0; i < assignments.size(); i++)
 		{
 			Assignment assignment = assignments.get(i);
-			if(interactionCode == null || (interactionCode != null && interactionCode.equals(assignment.interaction)))
+			if(interactionCode == null || (interactionCode != null && interactionCode.equals(assignment.notification.code)))
 			{
 				boolean actionExists = false;
 				for(int j = 0; j < assignment.actions.size(); j++)
@@ -46,7 +48,7 @@ public class ActionUnit extends ProcessUnit
 						actionExists = true;
 				if(actionExists)
 				{
-					logger.fine("Actionning interaction '" + assignment.interaction + "' with action '" + action +"' in process '" + assignment.processName + "' instance '" + assignment.pid +"'");
+					logger.fine("Actionning interaction '" + assignment.notification.code + "' with action '" + action +"' in process '" + assignment.processName + "' instance '" + assignment.pid +"'");
 					processManager.processAction(actionner, assignment.pid, action, null);
 				}
 				else

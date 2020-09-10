@@ -19,12 +19,14 @@ public class DomainClientJSWrapper implements ProxyObject {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected DomainClient domainClient;
 	protected Session session;
-	protected String[] members = {"putVariable", "getVariable", "executeFunction"};
+	protected String domain;
+	protected String[] members = {"putVariable", "getVariable", "executeFunction", "clearCache"};
 
-	public DomainClientJSWrapper(DomainClient dc, Session s)
+	public DomainClientJSWrapper(DomainClient dc, Session s, String d)
 	{
 		domainClient = dc;
 		session = s;
+		domain = d;
 	}
 	
 	public Object getMember(String key) {
@@ -36,11 +38,11 @@ public class DomainClientJSWrapper implements ProxyObject {
 					DataEntity var = (DataMap)JSConverter.toJava(arguments[2]);
 					try
 					{
-						domainClient.putVariable(session, name, category, var);
+						domainClient.putVariable(session, domain, name, category, var);
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error putting report :" + e);
+						logger.severe("Error putting variable :" + e);
 					}
 					return null;
 				}
@@ -51,12 +53,12 @@ public class DomainClientJSWrapper implements ProxyObject {
 					String name = arguments[0].asString();
 					try
 					{
-						Object o = domainClient.getVariable(session, name);
+						Object o = domainClient.getVariable(session, domain, name);
 						return JSConverter.toJS(o);
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error putting report :" + e);
+						logger.severe("Error getting domain variable :" + e);
 					}
 					return null;
 				}
@@ -68,15 +70,30 @@ public class DomainClientJSWrapper implements ProxyObject {
 					DataMap param = (DataMap)JSConverter.toJava(arguments[1]);
 					try
 					{
-						domainClient.executeFunction(session, name, param);
+						domainClient.executeFunction(session, domain, name, param);
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error putting report :" + e);
+						logger.severe("Error executing domain function :" + e);
 					}
 					return null;
 				}
 			};
+		} else if(key.equals("clearCache")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String name = arguments[0].asString();
+					try
+					{
+						domainClient.clearCache(session, domain, name);
+					}
+					catch(Exception e)
+					{
+						logger.severe("Error clearing domain cache :" + e);
+					}
+					return null;
+				}
+			};		
 		} else {
 			return null;
 		}

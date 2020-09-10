@@ -12,11 +12,11 @@ public class ReportClient extends Client {
 		super(fb, sn);
 	}
 	
-	protected byte[] produce(Session session, String name, DataMap filter) throws RedbackException {
+	public byte[] produce(Session session, String name, DataMap filter) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "produce");
-			req.put("name", name);
+			req.put("report", name);
 			req.put("filter", filter);
 			Payload resp = requestPayload(session, new Payload(req.toString()));
 			return resp.data;
@@ -25,11 +25,11 @@ public class ReportClient extends Client {
 		}
 	}
 
-	protected String produceAndStore(Session session, String name, DataMap filter) throws RedbackException {
+	public String produceAndStore(Session session, String name, DataMap filter) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "producestore");
-			req.put("name", name);
+			req.put("report", name);
 			req.put("filter", filter);
 			DataMap resp = request(session, req);
 			return resp.getString("fileuid");

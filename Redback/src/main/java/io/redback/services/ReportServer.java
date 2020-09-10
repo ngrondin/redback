@@ -42,7 +42,10 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 					response = new Payload(report.getBytes());
 					response.metadata.put("mime", "application/pdf");
 				}
-			} else {
+			} else if(action.equals("producestore")) {
+				String fileUid = produceAndStore(session, reportName, filter);
+				response = new Payload(new DataMap("fileuid", fileUid).toString());
+			} else{
 				throw new FunctionErrorException("No valid action was provided");
 			}			
 		}
@@ -68,4 +71,6 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 	}
 	
 	protected abstract Report produce(Session session, String name, DataMap filter) throws RedbackException;
+	
+	protected abstract String produceAndStore(Session session, String name, DataMap filter) throws RedbackException;
 }

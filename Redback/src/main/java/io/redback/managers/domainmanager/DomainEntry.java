@@ -12,7 +12,7 @@ public class DomainEntry {
 		config = c;
 		name = config.getString("name");
 		type = config.getString("type");
-		_canCache = config.getBoolean("cancache"); 
+		_canCache = config.containsKey("cancache") ? config.getBoolean("cancache") : true; 
 	}
 	
 	public String getName() {

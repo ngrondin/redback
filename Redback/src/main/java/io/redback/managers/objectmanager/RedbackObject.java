@@ -13,6 +13,7 @@ import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
@@ -158,21 +159,11 @@ public class RedbackObject extends RedbackElement
 		updatedAttributes = new ArrayList<String>();
 		scriptContext = objectManager.createScriptContext(session);
 		scriptContext.put("self", new RedbackObjectJSWrapper(this));
-		/*scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
-		scriptContext.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
-		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
-		scriptContext.put("pm", new ProcessManagerProxyJSWrapper(objectManager.getFirebus(), objectManager.processServiceName, session));
-		scriptContext.put("fm", new FileClientJSWrapper(objectManager.getFileClient(), session));
-		scriptContext.put("geo", new GeoClientJSWrapper(objectManager.getGeoClient()));
-		scriptContext.put("global", JSConverter.toJS(objectManager.getGlobalVariables()));
-		scriptContext.put("log", new LoggerJSFunction());
-		scriptContext.put("canRead", new SessionRightsJSFunction(session, "read"));
-		scriptContext.put("canWrite", new SessionRightsJSFunction(session, "write"));
-		scriptContext.put("canExecute", new SessionRightsJSFunction(session, "execute"));*/
 	}
 	
 	protected void updateScriptContext() throws RedbackException 
 	{
+		scriptContext.put("dc", new DomainClientJSWrapper(objectManager.getDomainClient(), session, getDomain().getString()));
 		scriptContext.put("uid", getUID().getString());
 		Iterator<String> it = getAttributeNames().iterator();
 		while(it.hasNext())

@@ -35,7 +35,7 @@ public class NotificationClientJSWrapper implements ProxyObject {
 					DataList addresses = (DataList)JSConverter.toJava(arguments[0]);
 					String subject = arguments[1].asString();
 					String body = arguments[2].asString();
-					DataList attachments = (DataList)JSConverter.toJava(arguments[3]);
+					DataList attachments = arguments.length >= 4 ? (DataList)JSConverter.toJava(arguments[3]) : null;
 					try
 					{
 						List<String> addList = new ArrayList<String>();

@@ -1,6 +1,8 @@
 package io.redback.managers.reportmanager;
 
+import java.awt.Color;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 	protected Expression valueExpr;
 	protected PDFont font;
 	protected float fontSize;
+	protected Color color;
 	protected float height;
 	protected float width;
 	protected String format;
@@ -30,12 +33,26 @@ public abstract class ReportDataUnit extends ReportUnit {
 		valueExpr = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_text_value", jsParams, c.getString("value"));
 		width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
 		font = PDType1Font.HELVETICA;
-		fontSize = 12f;
+		fontSize = config.containsKey("fontsize") ? config.getNumber("fontsize").floatValue() : 12f;
 		height = 20f;
+		color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
 		format = config.getString("format");
+	}
+	
+	protected Color getColor(String c) {
+		try {
+			final Field f = Color.class.getField(c);
+			if(f != null)
+				return (Color)f.get(null);
+			else
+				return Color.DARK_GRAY;
+		} catch(Exception e) {
+			return Color.DARK_GRAY;
+		}
 	}
 
 	public abstract ReportBox produce(Map<String, Object> context) throws IOException, RedbackException;
+	
 	
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
 		Map<String, Object> jsContext = new HashMap<String, Object>();

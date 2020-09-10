@@ -54,10 +54,9 @@ public class ProcessManagerJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					try {
-						String type = arguments[0].asString();
-						DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
-						DataList viewData = (DataList)JSConverter.toJava(arguments[2]);
-						List<Assignment> list = processManager.getAssignments(actionner, type, filter, viewData);
+						DataMap filter = (DataMap)JSConverter.toJava(arguments[0]);
+						DataList viewData = (DataList)JSConverter.toJava(arguments[1]);
+						List<Assignment> list = processManager.getAssignments(actionner, filter, viewData);
 						return JSConverter.toJS(list);
 					} catch (Exception e) {
 						throw new RuntimeException("Errror in getNotifications", e);

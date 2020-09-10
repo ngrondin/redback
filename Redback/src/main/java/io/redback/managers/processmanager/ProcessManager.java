@@ -24,6 +24,7 @@ import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.Notification;
 
 
 
@@ -251,7 +252,7 @@ public class ProcessManager
 		return pi;
 	}
 
-	public List<Assignment> getAssignments(Actionner actionner, String type, DataMap filter, DataList viewdata) throws RedbackException
+	public List<Assignment> getAssignments(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
 	{
 		List<Assignment> list = new ArrayList<Assignment>();
 		loadGroupsOf(actionner);
@@ -273,14 +274,14 @@ public class ProcessManager
 			Assignment assignment = null;
 			if(pu instanceof InteractionUnit)
 			{
-				assignment = ((InteractionUnit)pu).getNotification(actionner, pi);
+				assignment = ((InteractionUnit)pu).getAssignment(actionner, pi);
 			}
 			else
 			{
-				assignment = new Assignment(pi.getProcessName(), pi.getId(), "processexception", "exception", "Exception", "The process has stopped due to an exception and requires restart");
+				assignment = new Assignment(pi.getProcessName(), pi.getId(), new Notification("processexception", "exception", "Exception", "The process has stopped due to an exception and requires restart"));
 				assignment.addAction("restart", "Restart");
 			}
-			if(assignment != null && (type == null || assignment.type.equals(type)))
+			if(assignment != null)
 			{
 				if(viewdata != null  &&  viewdata.size() > 0)
 				{
@@ -296,9 +297,9 @@ public class ProcessManager
 		return list;
 	}
 	
-	public int getAssignmentCount(Actionner actionner, String type) throws RedbackException
+	public int getAssignmentCount(Actionner actionner, DataMap filter) throws RedbackException
 	{
-		List<Assignment> assignments = getAssignments(actionner, type, null, null);
+		List<Assignment> assignments = getAssignments(actionner, filter, null);
 		int count = assignments.size();
 		return count;
 	}

@@ -25,6 +25,7 @@ public class ProcessInstance
 	protected DataMap data;
 	protected String currentNode;
 	protected boolean complete;
+	protected DataMap interactionDetails;
 	protected DataList assignees;
 	protected Actionner lastActioner;
 	protected Map<String, Object> scriptContext;
@@ -54,6 +55,8 @@ public class ProcessInstance
 		currentNode = c.getString("currentnode");
 		complete = c.getBoolean("compelte");
 		data = c.getObject("data");
+		if(c.containsKey("interaction"))
+			interactionDetails = c.getObject("interaction");
 		if(c.containsKey("assignees")  &&  c.get("assignees") instanceof DataList)
 			assignees = c.getList("assignees");
 		else
@@ -142,6 +145,16 @@ public class ProcessInstance
 		return currentNode;
 	}
 	
+	public void setInteractionDetails(DataMap d)
+	{
+		interactionDetails = d;
+	}
+	
+	public void clearInteractionDetails()
+	{
+		interactionDetails = null;
+	}
+	
 	public void addAssignee(Assignee a)
 	{
 		assignees.add(a.getJSON());
@@ -187,6 +200,8 @@ public class ProcessInstance
 		retVal.put("domain", domain);
 		retVal.put("currentnode", currentNode);
 		retVal.put("lastupdate", new Date());
+		if(interactionDetails != null)
+			retVal.put("interaction", interactionDetails);
 		if(assignees.size() > 0)
 			retVal.put("assignees", assignees);
 		if(lastActioner != null)

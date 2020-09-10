@@ -15,6 +15,7 @@ import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.utils.Notification;
 import io.redback.managers.processmanager.Process;
 
 public class InteractionUnit extends ProcessUnit 
@@ -52,10 +53,15 @@ public class InteractionUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.finer("Starting interaction node execution");
+		Map<String, Object> context = pi.getScriptContext();
+		DataMap interactionDetails = new DataMap();
+		interactionDetails.put("code", notificationConfig.getString("code"));
+		interactionDetails.put("type", notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception");
+		pi.setInteractionDetails(interactionDetails);
 		for(int i = 0; i < assigneeConfigs.size(); i++)
 		{
 			AssigneeConfig assigneeConfig = assigneeConfigs.get(i);
-			Object assigneeObject = assigneeConfig.evaluateId(pi);
+			Object assigneeObject = assigneeConfig.evaluateId(context);
 			if(assigneeObject instanceof String)
 			{
 				logger.finer("Adding assignee " + (String)assigneeObject);
@@ -89,6 +95,7 @@ public class InteractionUnit extends ProcessUnit
 					logger.fine("Actionning interaction with '" + action + "'");
 					foundAction = true;
 					pi.clearAssignees();
+					pi.clearInteractionDetails();
 					pi.setLastActioner(actionner);
 					pi.setCurrentNode(actionConfig.getNextNode());
 				}
@@ -106,16 +113,12 @@ public class InteractionUnit extends ProcessUnit
 		logger.finer("Finished interaction node action");
 	}
 	
-	public Assignment getNotification(Actionner actionner, ProcessInstance pi) throws RedbackException
+	public Assignment getAssignment(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
 		if(isAssignee(actionner, pi))
 		{
 			Map<String, Object> context = pi.getScriptContext();
-			String code = notificationConfig.getString("code");
-			String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
-			String label = (String)labelExpression.eval(context);
-			String message = (String)messageExpression.eval(context);
-			Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), code, type, label, message);
+			Assignment assignment = new Assignment(pi.getProcessName(), pi.getId(), getNotification(context));
 			for(ActionConfig actionConfig: actionConfigs)
 			{
 				if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeMatch(actionner, pi.getAssigneeById((String)actionConfig.evaluateExclusiveId(pi)))))
@@ -124,6 +127,15 @@ public class InteractionUnit extends ProcessUnit
 			return assignment;		
 		}
 		return null;
+	}
+	
+	protected Notification getNotification(Map<String, Object> context) throws RedbackException 
+	{
+		String code = notificationConfig.getString("code");
+		String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
+		String label = (String)labelExpression.eval(context);
+		String message = (String)messageExpression.eval(context);
+		return new Notification(code, type, label, message);
 	}
 		
 	protected boolean isAssignee(Actionner actionner, ProcessInstance pi)
@@ -147,4 +159,6 @@ public class InteractionUnit extends ProcessUnit
 			return false;
 		}
 	}
+	
+	
 }

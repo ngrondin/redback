@@ -10,7 +10,7 @@ public class DomainVariable extends DomainEntry {
 	}
 	
 	public DataEntity getVariable() {
-		return config.get("variable");
+		return config.get("source");
 	}
 
 }

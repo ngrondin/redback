@@ -19,12 +19,18 @@ import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.NotificationClient;
 import io.redback.client.ObjectClient;
+import io.redback.client.ReportClient;
 import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
+import io.redback.client.js.ObjectClientJSWrapper;
+import io.redback.client.js.ReportClientJSWrapper;
+import io.redback.managers.domainmanager.js.DomainManagerJSWrapper;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.LoggerJSFunction;
 
 public class DomainManager implements Consumer {
 	private Logger logger = Logger.getLogger("io.redback");
@@ -35,11 +41,13 @@ public class DomainManager implements Consumer {
 	protected String dataServiceName;
 	protected String fileServiceName;
 	protected String notificationServiceName;
+	protected String reportServiceName;
 	protected ConfigurationClient configClient;
 	protected ObjectClient objectClient;
 	protected DataClient dataClient;
 	protected FileClient fileClient;
 	protected NotificationClient notificationClient;
+	protected ReportClient reportClient;
 	protected CollectionConfig collection;
 	protected Map<String, DomainEntry> entries;
 
@@ -51,12 +59,14 @@ public class DomainManager implements Consumer {
 		dataServiceName = config.getString("dataservice");
 		fileServiceName = config.getString("fileservice");
 		notificationServiceName = config.getString("notificationservice");
+		reportServiceName = config.getString("reportservice");
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		objectClient = new ObjectClient(firebus, objectServiceName);
 		dataClient = new DataClient(firebus, dataServiceName);
 		fileClient = new FileClient(firebus, fileServiceName);
 		notificationClient = new NotificationClient(firebus, notificationServiceName);
-		collection = new CollectionConfig(config.getObject("collection"));
+		reportClient = new ReportClient(firebus, reportServiceName);
+		collection = new CollectionConfig(config.getObject("collection"), "rbdm_entry");
 		entries = new HashMap<String, DomainEntry>();	
 		firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
 	}
@@ -130,25 +140,25 @@ public class DomainManager implements Consumer {
 	
 	protected void putEntry(String domain, String name, DomainEntry entry) throws RedbackException {
 		DataMap key = new DataMap();
-		key.put(collection.getField("_id"), domain + "_" + entry.getType() + "_" + name);
-		dataClient.putData(collection.getName(), key, collection.convertObjectToSpecific(entry.getConfig()));
+		key.put("domain", domain);
+		key.put("name", name);
+		dataClient.putData(collection.getName(), collection.convertObjectToSpecific(key), collection.convertObjectToSpecific(entry.getConfig()));
 		if(entry.canCache()) {
-			entries.put(domain + "." + name, entry);
+			//entries.put(domain + "." + name, entry);
 			firebus.publish("_rb_domain_cache_clear", new Payload(key.toString()));
 		}
 	}
 	
 	public void consume(Payload payload) {
 		try {
-			DataMap msg = new DataMap(payload.getString());
-			entries.remove(msg.getString("domain") + "." + msg.getString("name"));
+			DataMap key = new DataMap(payload.getString());
+			entries.remove(key.getString("domain") + "." + key.getString("name"));
 		} catch(Exception e) {
 			logger.severe("Error consuming cache control message: " + e.getMessage());
 		}
 	}
 	
-	public void putReport(Session session, String name, String category, DataMap report) throws RedbackException {
-		String domain = session.getUserProfile().getAttribute("rb.defaultdomain");
+	public void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException {
 		DataMap entryMap = new DataMap();
 		entryMap.put("type", "report");
 		entryMap.put("domain", domain);
@@ -160,8 +170,7 @@ public class DomainManager implements Consumer {
 		putEntry(domain, name, dr);
 	}
 	
-	public void putVariable(Session session, String name, String category, DataEntity var) throws RedbackException {
-		String domain = session.getUserProfile().getAttribute("rb.defaultdomain");
+	public void putVariable(Session session, String domain, String name, String category, DataEntity var) throws RedbackException {
 		DataMap entryMap = new DataMap();
 		entryMap.put("type", "variable");
 		entryMap.put("domain", domain);
@@ -173,8 +182,7 @@ public class DomainManager implements Consumer {
 		putEntry(domain, name, dv);
 	}
 	
-	public void putFunction(Session session, String name, String function) throws RedbackException {
-		String domain = session.getUserProfile().getAttribute("rb.defaultdomain");
+	public void putFunction(Session session, String domain, String name, String function) throws RedbackException {
 		DataMap entryMap = new DataMap();
 		entryMap.put("type", "variable");
 		entryMap.put("domain", domain);
@@ -185,34 +193,52 @@ public class DomainManager implements Consumer {
 		putEntry(domain, name, df);
 	}
 	
-	public DataMap getReport(Session session, String name) throws RedbackException {
-		String domain = session.getUserProfile().getAttribute("rb.defaultdomain");
+	public DataMap getReport(Session session, String domain, String name) throws RedbackException {
 		DomainReport dr = (DomainReport)getEntry(domain, name);
 		return dr.getReportConfig();
 	}
 	
 	public List<DataMap> listReports(Session session, String category) throws RedbackException {
-		String domain = session.getUserProfile().getAttribute("rb.defaultdomain");
-		List<DomainEntry> entries = listEntries(domain, category);
+		List<DomainEntry> entries = new ArrayList<DomainEntry>();
+		for(String domain :session.getUserProfile().getDomains()) {
+			List<DomainEntry> domainEntries = listEntries(domain, category);
+			entries.addAll(domainEntries);	
+		}
 		List<DataMap> reportConfigs = entries.stream().map(entry -> ((DomainReport)entry).getReportConfig()).collect(Collectors.toList());
 		return reportConfigs;
 	}
 	
-	public DataEntity getVariable(Session session, String name) throws RedbackException {
-		String domain = session.getUserProfile().getAttribute("rb.defaultdomain");
+	public DataEntity getVariable(Session session, String domain, String name) throws RedbackException {
 		DomainVariable dv = (DomainVariable)getEntry(domain, name);
 		return dv.getVariable();
 	}
 	
-	public void executeFunction(Session session, String name, DataMap param) throws RedbackException {
-		String domain = session.getUserProfile().getAttribute("rb.defaultdomain");
+	public DataMap executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
 		DomainFunction df = (DomainFunction)getEntry(domain, name);
-		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("session", new SessionJSWrapper(session));
-		//context.put("dm", new SessionJSWrapper(session));
-		//context.put("oc", new FileClientJSWrapper(fileClient, session));
-		context.put("fc", new FileClientJSWrapper(fileClient, session));
-		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
-		df.execute(context);
+		if(df != null) {
+			Map<String, Object> context = new HashMap<String, Object>();
+			context.put("log", new LoggerJSFunction());
+			context.put("session", new SessionJSWrapper(session));
+			context.put("dm", new DomainManagerJSWrapper(this, session, domain));
+			context.put("oc", new ObjectClientJSWrapper(objectClient, session));
+			context.put("fc", new FileClientJSWrapper(fileClient, session));
+			context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
+			context.put("rc", new ReportClientJSWrapper(reportClient, session));
+			context.put("param", JSConverter.toJS(param));
+			Object o = df.execute(context);
+			if(o instanceof DataMap)
+				return (DataMap)o;
+			else
+				return null;
+		} else {
+			return null;
+		}
+	}
+	
+	public void clearCache(Session session, String domain, String name) {
+		DataMap key = new DataMap();
+		key.put("domain", domain);
+		key.put("name", name);
+		firebus.publish("_rb_domain_cache_clear", new Payload(key.toString()));
 	}
 }

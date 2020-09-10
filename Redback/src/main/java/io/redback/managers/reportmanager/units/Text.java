@@ -22,6 +22,7 @@ public class Text extends ReportDataUnit {
 		if(width > -1)
 			rb.width = width;
 		rb.height = height;
+		rb.color = color;
 		return rb;
 	}
 

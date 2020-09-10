@@ -25,7 +25,11 @@ public class LoggerJSFunction implements ProxyExecutable
 		String level = arguments[0].asString();
 		String msg = arguments[1].asString();
 		if(level.equals("info"))
+			logger.info((String)msg);
+		if(level.equals("fine"))
 			logger.fine((String)msg);
+		if(level.equals("finder"))
+			logger.finer((String)msg);
 		return null;
 	}
 }

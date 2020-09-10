@@ -19,36 +19,40 @@ public class RedbackDomainServer extends DomainServer {
 		domainManager = new DomainManager(firebus, config);
 	}
 
-	public void putReport(Session session, String name, String category, DataMap report) throws RedbackException {
-		domainManager.putReport(session, name, category, report);
+	public void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException {
+		domainManager.putReport(session, domain, name, category, report);
 	}
 
-	public void putVariable(Session session, String name, String category, DataEntity var) throws RedbackException {
-		domainManager.putVariable(session, name, category, var);
+	public void putVariable(Session session, String domain, String name, String category, DataEntity var) throws RedbackException {
+		domainManager.putVariable(session, domain, name, category, var);
 	}
 
-	public void putFunction(Session session, String name, String function) throws RedbackException {
-		domainManager.putFunction(session, name, function);
+	public void putFunction(Session session, String domain, String name, String function) throws RedbackException {
+		domainManager.putFunction(session, domain, name, function);
 	}
 
-	public DataMap getReport(Session session, String name) throws RedbackException {
-		return domainManager.getReport(session, name);
+	public DataMap getReport(Session session, String domain, String name) throws RedbackException {
+		return domainManager.getReport(session, domain, name);
 	}
 
 	public List<DataMap> listReports(Session session, String category) throws RedbackException {
 		return domainManager.listReports(session, category);
 	}
 
-	public DataEntity getVariable(Session session, String name) throws RedbackException {
-		return domainManager.getVariable(session, name);
+	public DataEntity getVariable(Session session, String domain, String name) throws RedbackException {
+		return domainManager.getVariable(session, domain, name);
 	}
 
-	public void executeFunction(Session session, String name, DataMap param) throws RedbackException {
-		
+	public DataMap executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
+		return domainManager.executeFunction(session, domain, name, param);
 	}
 
 	public void clearCaches() {
 
+	}
+
+	public void clearCache(Session session, String domain, String name) throws RedbackException {
+		domainManager.clearCache(session, domain, name);
 	}
 
 }

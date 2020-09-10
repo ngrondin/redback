@@ -31,6 +31,7 @@ public class Field extends ReportDataUnit {
 		rb2.height += 5;
 		if(width > -1)
 			rb2.width = width;
+		rb2.color = color;
 		ReportBox c = ReportBox.VContainer(false);
 		c.addChild(rb1);
 		c.addChild(rb2);

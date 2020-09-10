@@ -21,8 +21,13 @@ public class RedbackReportServer extends ReportServer {
 		return reportManager.produce(session, name, filter);
 	}
 
+	protected String produceAndStore(Session session, String name, DataMap filter) throws RedbackException {
+		return reportManager.produceAndStore(session, name, filter);
+	}
+
 	public void clearCaches() {
 		reportManager.clearCaches();
 	}
+
 
 }

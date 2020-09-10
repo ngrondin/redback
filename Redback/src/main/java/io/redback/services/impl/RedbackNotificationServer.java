@@ -45,52 +45,58 @@ public class RedbackNotificationServer extends NotificationServer {
 	}
 
 	protected void email(Session session, List<String> addresses, String subject, String body, List<String> attachments) throws RedbackException {
-		try {
-			Properties prop = System.getProperties();
-	        prop.put("mail.smtp.host", smtpServer); 
-	        prop.put("mail.smtp.socketFactory.port", "465");
-	        prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");		        
-	        prop.put("mail.smtp.auth", "true");
-	        prop.put("mail.smtp.port", "465"); 
-	        prop.put("mail.transport.protocol", "smtp");
-	
-	        javax.mail.Session mailSession = javax.mail.Session.getInstance(prop, new javax.mail.Authenticator() {
-	        	protected PasswordAuthentication getPasswordAuthentication() {
-	        		return new PasswordAuthentication(smtpUser,smtpPass);
-	        	}
-	        });
-	        
-	        logger.info("Sending email");
-	        Message msg = new MimeMessage(mailSession);
-	        msg.setFrom(new InternetAddress("info@redbackwms.com", "RedbackWMS"));
-	        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(String.join(",", addresses), false));
-	        msg.setSubject(subject);
-	        if(attachments == null) {
-	        	msg.setText(body); 
-	        } else {
-	            Multipart multipart = new MimeMultipart();
+		Thread worker = new Thread() {
+			public void run() {
+				try {
+					if(attachments != null && attachments.size() > 0)
+						sleep(2000);
+					Properties prop = System.getProperties();
+			        prop.put("mail.smtp.host", smtpServer); 
+			        prop.put("mail.smtp.socketFactory.port", "465");
+			        prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");		        
+			        prop.put("mail.smtp.auth", "true");
+			        prop.put("mail.smtp.port", "465"); 
+			        prop.put("mail.transport.protocol", "smtp");
+			
+			        javax.mail.Session mailSession = javax.mail.Session.getInstance(prop, new javax.mail.Authenticator() {
+			        	protected PasswordAuthentication getPasswordAuthentication() {
+			        		return new PasswordAuthentication(smtpUser,smtpPass);
+			        	}
+			        });
+			        
+			        logger.info("Sending email");
+			        Message msg = new MimeMessage(mailSession);
+			        msg.setFrom(new InternetAddress("info@redbackwms.com", "RedbackWMS"));
+			        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(String.join(",", addresses), false));
+			        msg.setSubject(subject);
+			        if(attachments == null) {
+			        	msg.setText(body); 
+			        } else {
+			            Multipart multipart = new MimeMultipart();
 
-	            BodyPart messageBodyPart = new MimeBodyPart();
-	            messageBodyPart.setText(body);
-	            multipart.addBodyPart(messageBodyPart);
+			            BodyPart messageBodyPart = new MimeBodyPart();
+			            messageBodyPart.setText(body);
+			            multipart.addBodyPart(messageBodyPart);
 
-	            for(String fileUid: attachments) {
-	            	RedbackFile file = fileClient.getFile(session, fileUid);
-		            BodyPart fileBodyPart = new MimeBodyPart();
-		            DataSource source = new ByteArrayDataSource(file.bytes, file.mime);
-		            fileBodyPart.setDataHandler(new DataHandler(source));
-		            fileBodyPart.setFileName(file.fileName);
-		            multipart.addBodyPart(fileBodyPart);
-	            }
-	            
-	            msg.setContent(multipart);
-	        }
-	        msg.setSentDate(new Date());
-	        
-	        Transport.send(msg);	
-		} catch(Exception e) {
-			throw new RedbackException("Problem sending email", e);
-		}
+			            for(String fileUid: attachments) {
+			            	RedbackFile file = fileClient.getFile(session, fileUid);
+				            BodyPart fileBodyPart = new MimeBodyPart();
+				            DataSource source = new ByteArrayDataSource(file.bytes, file.mime);
+				            fileBodyPart.setDataHandler(new DataHandler(source));
+				            fileBodyPart.setFileName(file.fileName);
+				            multipart.addBodyPart(fileBodyPart);
+			            }
+			            
+			            msg.setContent(multipart);
+			        }
+			        msg.setSentDate(new Date());
+			        Transport.send(msg);	
+				} catch(Exception e) {
+					logger.severe("Problem sending email : " + e.getMessage());
+				}
+			}
+		};
+		worker.start();
 	}
 
 	public void clearCaches() {

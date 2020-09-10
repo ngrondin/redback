@@ -35,7 +35,8 @@ public class ObjectConfig
 		scriptVars.add("pm");
 		scriptVars.add("firebus");
 		scriptVars.add("geo");
-		scriptVars.add("fm");
+		scriptVars.add("fc");
+		scriptVars.add("dc");
 		scriptVars.add("userprofile");
 		scriptVars.add("self");
 		scriptVars.add("canRead");
