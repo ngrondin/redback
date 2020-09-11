@@ -16,7 +16,8 @@
         [showXAxisLabel]="true"
         [showYAxisLabel]="true"
         [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel">
+        [yAxisLabel]="yAxisLabel"
+        (select)="onClick($event)">
     </ngx-charts-bar-vertical>    
     <ngx-charts-bar-vertical-2d
         *ngIf="type == 'vbar' && is2d"
@@ -28,7 +29,8 @@
         [showXAxisLabel]="true"
         [showYAxisLabel]="true"
         [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel">
+        [yAxisLabel]="yAxisLabel"
+        (select)="onClick($event)">
     </ngx-charts-bar-vertical-2d>
     <ngx-charts-bar-horizontal
         *ngIf="type == 'hbar' && !is2d"
@@ -40,7 +42,8 @@
         [showXAxisLabel]="true"
         [showYAxisLabel]="true"
         [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel">
+        [yAxisLabel]="yAxisLabel"
+        (select)="onClick($event)">
     </ngx-charts-bar-horizontal>    
     <ngx-charts-bar-horizontal-2d
         *ngIf="type == 'hbar' && is2d"
@@ -52,7 +55,8 @@
         [showXAxisLabel]="true"
         [showYAxisLabel]="true"
         [xAxisLabel]="xAxisLabel"
-        [yAxisLabel]="yAxisLabel">
+        [yAxisLabel]="yAxisLabel"
+        (select)="onClick($event)">
     </ngx-charts-bar-horizontal-2d>
     <ngx-charts-pie-chart
         *ngIf="type == 'pie' && !is2d"
@@ -60,7 +64,8 @@
         [results]="graphData"
         [doughnut]="true"
         [labels]="true"
-        [legend]="false">
+        [legend]="false"
+        (select)="onClick($event)">
     </ngx-charts-pie-chart>
     <ngx-charts-gauge
         *ngIf="type == 'gauge'"
@@ -71,13 +76,15 @@
         [legendPosition]="'below'"
         [legendTitle]="null"
         [min]="min"
-        [max]="max">
+        [max]="max"
+        (select)="onClick($event)">
     </ngx-charts-gauge>    
     <ngx-charts-number-card
         *ngIf="type == 'number'"
         [scheme]="colorScheme"
         [results]="graphData"
-        [cardColor]="'#232837'">
+        [cardColor]="'#232837'"
+        (select)="onClick($event)">
     </ngx-charts-number-card>
     <ngx-charts-line-chart
         *ngIf="type == 'line'"
@@ -92,6 +99,7 @@
         [yAxis]="true"
         [xAxisLabel]="xAxisLabel"
         [yAxisLabel]="yAxisLabel"
-        [timeline]="false">
+        [timeline]="false"
+        (select)="onClick($event)">
     </ngx-charts-line-chart>    
 </div>

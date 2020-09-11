@@ -1,5 +1,6 @@
-import { Component, OnInit, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { RbAggregate } from 'app/datamodel';
+import { MapService } from 'app/map.service';
 
 @Component({
   selector: 'rb-graph',
@@ -15,15 +16,16 @@ export class RbGraphComponent implements OnInit {
   @Input('min') min: number = 0;
   @Input('max') max: number = 100;
   @Input('aggregates') aggregates: RbAggregate[];
+  @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   colorScheme = {
-    //domain: ['#9370DB', '#87CEFA', '#FA8072', '#FF7F50', '#90EE90', '#9370DB']
-    //domain: ['#01579B', '#0277BD', '#0288D1', '#039BE5', '#29B6F6', '#81D4F4']
     domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
   };
   graphData: any[];
 
-  constructor() { }
+  constructor(
+    private mapService: MapService
+  ) { }
 
   ngOnInit() {
   }
@@ -43,7 +45,7 @@ export class RbGraphComponent implements OnInit {
         if(cats.indexOf(cat) == -1) {
           cats.push(cat);
           let category: any = {
-            name: this.nullToEmptyString(agg.getDimension(this.categories.labelattribute)),
+            name: this.nullToEmptyString(agg.getDimension(this.categories.labelattribute)), 
             series: this.getSeriesDataForCategory(cat)
           }
           this.graphData.push(category);
@@ -64,7 +66,7 @@ export class RbGraphComponent implements OnInit {
         if(!isNaN(Date.parse(name))) {
           name = new Date(Date.parse(name.toString()));
         }
-        series.push({name: name, value: value});
+        series.push({name: name, label: 'll', value: value});
       }
     }
     return series;
@@ -116,5 +118,31 @@ export class RbGraphComponent implements OnInit {
     } else {
       return str;
     }
+  }
+
+  public onClick(event: any) {
+    let objectname = null;
+    let filter = {};
+    const name = event.name;
+    this.aggregates.forEach(agg => {
+      objectname = agg.objectname;
+      if(name == agg.getDimension(this.series.labelattribute)) {
+        filter[this.series.dimension] = "'" + agg.getDimension(this.series.dimension) + "'";
+      }
+    });
+    const cat = event.series;
+    if(cat != null) {
+      this.aggregates.forEach(agg => {
+        if(cat == agg.getDimension(this.categories.labelattribute)) {
+          filter[this.categories.dimension] = "'" + agg.getDimension(this.categories.dimension) + "'";
+        }
+      });
+    }
+    let target = {
+      object: objectname,
+      filter: filter,
+      reset: true
+    };
+    this.navigate.emit(target);
   }
 }

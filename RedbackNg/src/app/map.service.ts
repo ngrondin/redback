@@ -45,7 +45,9 @@ export class MapService {
 
       for (const __key in __inMap) {
         let __value = __inMap[__key];
-        if(typeof __value == "string") {
+        if(__value == null) {
+          __value = null;
+        } else if(typeof __value == "string") {
           __value = eval(__varString + __value);
         } else if(typeof __value == "object" ) {
           if(Array.isArray(__value)) {
