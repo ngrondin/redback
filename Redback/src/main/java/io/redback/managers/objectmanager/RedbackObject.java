@@ -54,6 +54,7 @@ public class RedbackObject extends RedbackElement
 					data.put(attributeConfig.getName(), val);
 				}
 			}
+			postInitScriptContextUpdate();
 			updateScriptContext();
 			executeScriptsForEvent("onload");
 		}
@@ -113,7 +114,8 @@ public class RedbackObject extends RedbackElement
 				{
 					error("No domain has been provided and no default domain has been configure for the user");
 				}
-				
+				postInitScriptContextUpdate();
+
 				Iterator<String> it = config.getAttributeNames().iterator();
 				while(it.hasNext())
 				{
@@ -132,7 +134,7 @@ public class RedbackObject extends RedbackElement
 						executeAttributeScriptsForEvent(attributeName, "onupdate");
 					}
 				}
-				updateScriptContext();
+				updateScriptContext();				
 				executeScriptsForEvent("oncreate");
 			}
 			catch(FunctionTimeoutException | FunctionErrorException e)
@@ -161,10 +163,14 @@ public class RedbackObject extends RedbackElement
 		scriptContext.put("self", new RedbackObjectJSWrapper(this));
 	}
 	
-	protected void updateScriptContext() throws RedbackException 
+	protected void postInitScriptContextUpdate() throws RedbackException
 	{
 		scriptContext.put("dc", new DomainClientJSWrapper(objectManager.getDomainClient(), session, getDomain().getString()));
 		scriptContext.put("uid", getUID().getString());
+	}
+	
+	protected void updateScriptContext() throws RedbackException 
+	{
 		Iterator<String> it = getAttributeNames().iterator();
 		while(it.hasNext())
 		{	
@@ -315,10 +321,11 @@ public class RedbackObject extends RedbackElement
 	
 	public void put(String name, Value value) throws RedbackException
 	{
-		if(config.getAttributeConfig(name) != null)
+		AttributeConfig attributeConfig = getObjectConfig().getAttributeConfig(name);
+		if(attributeConfig != null)
 		{
 			Value actualValue = value;
-			if(value.getObject() instanceof DataMap && getObjectConfig().getAttributeConfig(name).getRelatedObjectConfig() != null) 
+			if(value.getObject() instanceof DataMap && attributeConfig.getRelatedObjectConfig() != null) 
 			{
 				DataMap filter = (DataMap)value.getObject();
 				ArrayList<RedbackObject> list = objectManager.listRelatedObjects(session, getObjectConfig().getName(), uid.getString(), name, filter, null, false);
@@ -334,8 +341,12 @@ public class RedbackObject extends RedbackElement
 				{
 					data.put(name, actualValue);
 					updatedAttributes.add(name);	
-					updateScriptContext();
+					//updateScriptContext();
+					if(attributeConfig.getExpression() == null) 
+						scriptContext.put(name, JSConverter.toJS(actualValue.getObject()));
+					scriptContext.put("previousValue", currentValue.getObject());
 					executeAttributeScriptsForEvent(name, "onupdate");
+					scriptContext.remove("previousValue");
 				}
 				else
 				{

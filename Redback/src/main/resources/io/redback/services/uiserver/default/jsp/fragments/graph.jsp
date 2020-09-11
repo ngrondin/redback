@@ -10,5 +10,6 @@
 	[max]="'<%=config.max%>'" <%
 if(parents.aggregateset != null) { %>	
 	[aggregates]="<%=parents.aggregateset%>.aggregates" <%
-} %> >
+} %> 
+	(navigate)="navigateTo($event)">
 </rb-graph>

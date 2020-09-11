@@ -64,7 +64,7 @@ public class RedbackNotificationServer extends NotificationServer {
 			        	}
 			        });
 			        
-			        logger.info("Sending email");
+			        logger.fine("Sending email");
 			        Message msg = new MimeMessage(mailSession);
 			        msg.setFrom(new InternetAddress("info@redbackwms.com", "RedbackWMS"));
 			        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(String.join(",", addresses), false));

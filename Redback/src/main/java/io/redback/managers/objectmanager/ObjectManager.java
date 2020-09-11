@@ -650,7 +650,7 @@ public class ObjectManager
 			String key = it.next();
 			if(key.equals("$eq")  ||  key.equals("$gt")  ||  key.equals("$gte")  ||  key.equals("$lt")  ||  key.equals("$lte")  ||  key.equals("$ne"))
 			{
-				dbFilter.put(key, objectFilter.getString(key));
+				dbFilter.put(key, objectFilter.get(key));
 			}
 			else if(key.equals("$in")  ||  key.equals("$nin"))
 			{

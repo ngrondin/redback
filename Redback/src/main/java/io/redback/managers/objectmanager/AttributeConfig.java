@@ -1,8 +1,9 @@
 package io.redback.managers.objectmanager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-
+import java.util.List;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -42,6 +43,8 @@ public class AttributeConfig
 			defaultValue = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_default", objectConfig.getScriptVariables(), config.getString("default"));
 		
 		DataMap scriptsCfg = config.getObject("scripts");
+		List<String> scriptVars = new ArrayList<String>(objectConfig.getScriptVariables());
+		scriptVars.add("previousValue");
 		if(scriptsCfg != null)
 		{
 			Iterator<String> events = scriptsCfg.keySet().iterator();
@@ -50,7 +53,8 @@ public class AttributeConfig
 				String event = events.next();
 				try
 				{
-					Function function = new Function(objectManager.getJSManager(), oc.getName() + "_" + getName() + "_event_" + event, objectConfig.getScriptVariables(), scriptsCfg.getString(event));
+					String name = oc.getName() + "_" + getName() + "_event_" + event;
+					Function function = new Function(objectManager.getJSManager(), name, scriptVars, scriptsCfg.getString(event));
 					scripts.put(event, function);
 				} 
 				catch(RedbackException e)

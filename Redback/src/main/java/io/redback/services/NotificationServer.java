@@ -49,10 +49,8 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 							attList.add(attachments.getString(i));
 						}
 					}
-					System.out.println("Going to send email");
 					email(session, addList, subject, body, attList);
 					response = new Payload(new DataMap("result", "ok").toString());
-					System.out.println("Sent email");
 				}
 			} else {
 				throw new FunctionErrorException("No valid action was provided");
