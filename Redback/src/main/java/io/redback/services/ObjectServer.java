@@ -17,6 +17,7 @@ import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
+import io.redback.utils.Timer;
 
 public abstract class ObjectServer extends AuthenticatedServiceProvider 
 {
@@ -35,6 +36,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 		try
 		{
 			DataMap request = new DataMap(payload.getString());
+			Timer timer = new Timer("rbos", request.toString(0, true));
 			String action = request.getString("action");
 			String objectName = request.getString("object");
 			DataMap options = request.getObject("options");
@@ -197,7 +199,8 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 			else
 			{
 				throw new FunctionErrorException("Requests must have at least an 'action' attribute");
-			}					
+			}	
+			timer.mark();
 		}
 		catch(DataException | RedbackException e)
 		{
