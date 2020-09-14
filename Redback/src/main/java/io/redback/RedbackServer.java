@@ -23,6 +23,7 @@ import io.firebus.interfaces.StreamProvider;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.services.Service;
+import io.redback.utils.Watchdog;
 
 public class RedbackServer implements Consumer
 {
@@ -191,6 +192,8 @@ public class RedbackServer implements Consumer
 				logger.severe("No class or name provided for service");
 			}
 		}
+		
+		new Watchdog();
 	}
 
 	public void consume(Payload payload) {
