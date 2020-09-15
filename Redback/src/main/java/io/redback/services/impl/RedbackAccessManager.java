@@ -85,12 +85,13 @@ public class RedbackAccessManager extends AccessManager
 		}
 		catch (Exception exception)
 		{
+			exception.printStackTrace();
 		    error("JWT token is invalid", exception);
 		}
 		return session;
 	}
 	
-	protected UserProfile getUserProfile(String username) throws RedbackException
+	protected synchronized UserProfile getUserProfile(String username) throws RedbackException
 	{
 		long now = System.currentTimeMillis();
 		CachedUserProfile userProfile = null;
@@ -98,7 +99,7 @@ public class RedbackAccessManager extends AccessManager
 			if(cachedUserProfiles.get(i).getUsername().equalsIgnoreCase(username))
 				userProfile = cachedUserProfiles.get(i);
 		
-		if(userProfile != null && userProfile.expiry > now)
+		if(userProfile != null && userProfile.expiry < now)
 		{
 			cachedUserProfiles.remove(userProfile);
 			userProfile = null;

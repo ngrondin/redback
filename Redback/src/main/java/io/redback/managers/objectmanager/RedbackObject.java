@@ -509,9 +509,9 @@ public class RedbackObject extends RedbackElement
 			Value attrValue = get(attrName);
 
 			DataMap attributeValidation = new DataMap();
-			
 			attributeValidation.put("editable", isEditable(attrName));
 			attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
+
 			if(attributeConfig.hasRelatedObject())
 			{
 				DataMap relatedObjectValidation = new DataMap();
@@ -530,7 +530,6 @@ public class RedbackObject extends RedbackElement
 			}
 
 			dataNode.put(attrName, attrValue.getObject());
-			
 		}
 		object.put("data", dataNode);
 		
