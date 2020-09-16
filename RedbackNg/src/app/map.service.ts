@@ -30,16 +30,16 @@ export class MapService {
       let uid = null;
       let __varString = "";
       if(obj != null && typeof obj != 'undefined') {
-        uid = obj.uid;
+        __varString = __varString + "var uid = '" + obj.uid + "';\r\n"
         for(const attr in obj.data) {
           let val = obj.data[attr];
           if(typeof val == 'object') {
             val = JSON.stringify(val);
           } 
           if(typeof val == 'string') {
-            val = "'" + val.replace(/\'/g, "\\'").replace(/\"/g, "\\\"") + "'";
+            val = "'" + val.replace(/\'/g, "\\'").replace(/\"/g, "\\\"").replace(/\n/g, "\\n").replace(/\r/g, "\\r") + "'";
           } 
-          __varString = __varString + "var " + attr + " = " + val + ";"
+          __varString = __varString + "var " + attr + " = " + val + ";\r\n"
         }
       } 
 
