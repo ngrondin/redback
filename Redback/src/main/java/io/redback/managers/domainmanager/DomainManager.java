@@ -71,7 +71,7 @@ public class DomainManager implements Consumer {
 		firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
 	}
 
-	protected DomainEntry getEntry(String domain, String name) throws RedbackException {
+	protected DomainEntry getDomainEntry(String domain, String name) throws RedbackException {
 		DomainEntry entry = entries.get(domain + "." + name);
 		if(entry == null)
 		{
@@ -105,7 +105,7 @@ public class DomainManager implements Consumer {
 		return entry;
 	}
 	
-	protected List<DomainEntry> listEntries(String domain, String category) throws RedbackException {
+	protected List<DomainEntry> listDomainEntriesInCategory(String domain, String category) throws RedbackException {
 		List<DomainEntry> list = new ArrayList<DomainEntry>();
 		try
 		{
@@ -127,12 +127,46 @@ public class DomainManager implements Consumer {
 				if(entry != null && entry.canCache()) {
 					entries.put(domain + "." + entry.name, entry);
 				}
+				list.add(entry);
 			}
 		}
 		catch(Exception e)
 		{
 			logger.severe(e.getMessage());
 			throw new RedbackException("Exception listing domain entries", e);
+		}
+		return list;
+	}
+	
+	protected List<DomainEntry> listAllEntriesWithName(String name) throws RedbackException {
+		List<DomainEntry> list = new ArrayList<DomainEntry>();
+		try
+		{
+			DataMap filter = new DataMap();
+			filter.put(collection.getField("name"), name);
+			DataMap resp = dataClient.getData(collection.getName(), filter, null);
+			DataList result = resp.getList("result");
+			for(int i = 0; i < result.size(); i++) {
+				DataMap entryMap = collection.convertObjectToCanonical(result.getObject(i));
+				String domain = entryMap.getString("domain");
+				DomainEntry entry = null;
+				if(entryMap.getString("type").equals("function")) {
+					entry = new DomainFunction(this, jsManager, entryMap);
+				} else if(entryMap.getString("type").equals("report")) {
+					entry = new DomainReport(entryMap);
+				} else if(entryMap.getString("type").equals("variable")) {
+					entry = new DomainVariable(entryMap);
+				}	
+				if(entry != null && entry.canCache()) {
+					entries.put(domain + "." + entry.name, entry);
+				}
+				list.add(entry);
+			}
+		}
+		catch(Exception e)
+		{
+			logger.severe(e.getMessage());
+			throw new RedbackException("Exception listing all entries with name", e);
 		}
 		return list;
 	}
@@ -165,7 +199,7 @@ public class DomainManager implements Consumer {
 		entryMap.put("name", name);
 		entryMap.put("category", category);
 		entryMap.put("roles", new DataList());
-		entryMap.put("report", report);
+		entryMap.put("source", report);
 		DomainReport dr = new DomainReport(entryMap);
 		putEntry(domain, name, dr);
 	}
@@ -177,7 +211,7 @@ public class DomainManager implements Consumer {
 		entryMap.put("name", name);
 		entryMap.put("category", category);
 		entryMap.put("roles", new DataList());
-		entryMap.put("variable", var);
+		entryMap.put("source", var);
 		DomainVariable dv = new DomainVariable(entryMap);
 		putEntry(domain, name, dv);
 	}
@@ -188,20 +222,23 @@ public class DomainManager implements Consumer {
 		entryMap.put("domain", domain);
 		entryMap.put("name", name);
 		entryMap.put("roles", new DataList());
-		entryMap.put("function", function);
+		entryMap.put("source", function);
 		DomainFunction df = new DomainFunction(this, jsManager, entryMap);
 		putEntry(domain, name, df);
 	}
 	
 	public DataMap getReport(Session session, String domain, String name) throws RedbackException {
-		DomainReport dr = (DomainReport)getEntry(domain, name);
-		return dr.getReportConfig();
+		DomainReport dr = (DomainReport)getDomainEntry(domain, name);
+		if(dr != null)
+			return dr.getReportConfig();
+		else
+			return null;
 	}
 	
 	public List<DataMap> listReports(Session session, String category) throws RedbackException {
 		List<DomainEntry> entries = new ArrayList<DomainEntry>();
 		for(String domain :session.getUserProfile().getDomains()) {
-			List<DomainEntry> domainEntries = listEntries(domain, category);
+			List<DomainEntry> domainEntries = listDomainEntriesInCategory(domain, category);
 			entries.addAll(domainEntries);	
 		}
 		List<DataMap> reportConfigs = entries.stream().map(entry -> ((DomainReport)entry).getReportConfig()).collect(Collectors.toList());
@@ -209,30 +246,64 @@ public class DomainManager implements Consumer {
 	}
 	
 	public DataEntity getVariable(Session session, String domain, String name) throws RedbackException {
-		DomainVariable dv = (DomainVariable)getEntry(domain, name);
-		return dv.getVariable();
+		DomainVariable dv = (DomainVariable)getDomainEntry(domain, name);
+		if(dv != null)
+			return dv.getVariable();
+		else 
+			return null;
 	}
 	
 	public DataMap executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
-		DomainFunction df = (DomainFunction)getEntry(domain, name);
-		if(df != null) {
-			Map<String, Object> context = new HashMap<String, Object>();
-			context.put("log", new LoggerJSFunction());
-			context.put("session", new SessionJSWrapper(session));
-			context.put("dm", new DomainManagerJSWrapper(this, session, domain));
-			context.put("oc", new ObjectClientJSWrapper(objectClient, session));
-			context.put("fc", new FileClientJSWrapper(fileClient, session));
-			context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
-			context.put("rc", new ReportClientJSWrapper(reportClient, session));
-			context.put("param", JSConverter.toJS(param));
-			Object o = df.execute(context);
-			if(o instanceof DataMap)
-				return (DataMap)o;
-			else
-				return null;
+		List<DomainEntry> functions = new ArrayList<DomainEntry>();
+		if(domain.equals("*")) {
+			List<DomainEntry> allFunctions = listAllEntriesWithName(name);
+			if(session.getUserProfile().getDomains().contains("*")) {
+				functions.addAll(allFunctions);
+			} else {
+				List<String> domains = session.getUserProfile().getDomains();
+				for(String d: domains) {
+					for(DomainEntry de: allFunctions) {
+						if(de.getDomain().equals(d))
+							functions.add(de);
+					}
+				}
+			}
 		} else {
-			return null;
+			functions.add(getDomainEntry(domain, name));
 		}
+			
+		Map<String, Object> context = new HashMap<String, Object>();
+		context.put("log", new LoggerJSFunction());
+		context.put("session", new SessionJSWrapper(session));
+		context.put("oc", new ObjectClientJSWrapper(objectClient, session));
+		context.put("fc", new FileClientJSWrapper(fileClient, session));
+		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
+		context.put("rc", new ReportClientJSWrapper(reportClient, session));
+		context.put("param", JSConverter.toJS(param));
+
+		DataMap multiDomainResult = new DataMap();
+		for(DomainEntry de: functions) {
+			DomainFunction df = (DomainFunction)de;
+			context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
+			context.put("domain", df.getDomain());
+			try {
+				Object o = df.execute(context);
+				if(o instanceof DataMap)
+					multiDomainResult.put(df.getDomain(), (DataMap)o);
+			} catch(Exception e) {
+				String msg = "";
+				Throwable t = e;
+				while(t != null) {
+					msg = msg + ": " + t.getMessage();
+					t = t.getCause();
+				}
+				logger.severe("Error executing domain function " + name + " in domain " + df.getDomain() + ": " + msg);
+			}
+		}
+		if(domain.equals("*"))
+			return multiDomainResult;
+		else
+			return multiDomainResult.getObject(domain);
 	}
 	
 	public void clearCache(Session session, String domain, String name) {

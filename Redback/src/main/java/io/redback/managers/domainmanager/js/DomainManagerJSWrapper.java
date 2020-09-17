@@ -9,6 +9,7 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.utils.DataEntity;
+import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.redback.managers.domainmanager.DomainManager;
 import io.redback.security.Session;
@@ -35,10 +36,12 @@ public class DomainManagerJSWrapper implements ProxyObject {
 				public Object execute(Value... arguments) {
 					String name = arguments[0].asString();
 					String category = arguments[1].asString();
-					DataEntity var = (DataMap)JSConverter.toJava(arguments[2]);
+					Object val = JSConverter.toJava(arguments[2]);
+					if(!(val instanceof DataEntity))
+						val = new DataLiteral(val);
 					try
 					{
-						domainManager.putVariable(session, domain, name, category, var);
+						domainManager.putVariable(session, domain, name, category, (DataEntity)val);
 					}
 					catch(Exception e)
 					{

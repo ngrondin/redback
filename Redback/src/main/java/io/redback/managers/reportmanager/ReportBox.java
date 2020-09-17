@@ -114,19 +114,21 @@ public class ReportBox {
 	}
 
 	public void addChild(ReportBox c) {
-		children.add(c);
-		if(vertical) {
-			c.x = 0;
-			c.y = height;
-			height += c.height;
-			if(c.width > width)
-				width = c.width;
-		} else {
-			c.x = width;
-			c.y = 0;
-			width += c.width;
-			if(c.height > height)
-				height = c.height;
+		if(c != null) {
+			children.add(c);
+			if(vertical) {
+				c.x = 0;
+				c.y = height;
+				height += c.height;
+				if(c.width > width)
+					width = c.width;
+			} else {
+				c.x = width;
+				c.y = 0;
+				width += c.width;
+				if(c.height > height)
+					height = c.height;
+			}
 		}
 	}
 	

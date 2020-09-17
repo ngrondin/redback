@@ -13,9 +13,15 @@ public class ReportClient extends Client {
 	}
 	
 	public byte[] produce(Session session, String name, DataMap filter) throws RedbackException {
+		return produce(session, null, name, filter);
+	}
+		
+	public byte[] produce(Session session, String domain, String name, DataMap filter) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "produce");
+			if(domain != null)
+				req.put("domain", domain);
 			req.put("report", name);
 			req.put("filter", filter);
 			Payload resp = requestPayload(session, new Payload(req.toString()));
@@ -26,9 +32,15 @@ public class ReportClient extends Client {
 	}
 
 	public String produceAndStore(Session session, String name, DataMap filter) throws RedbackException {
+		return produceAndStore(session, null, name, filter);
+	}
+		
+	public String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "producestore");
+			if(domain != null)
+				req.put("domain", domain);
 			req.put("report", name);
 			req.put("filter", filter);
 			DataMap resp = request(session, req);

@@ -38,7 +38,11 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 					putFunction(session, domain, name, request.getString("function"));
 				} else if(action.equals("getreport")) {
 					DataMap reportConfig = getReport(session, domain, name);
-					return new Payload(reportConfig.toString());
+					if(reportConfig != null) {
+						return new Payload(reportConfig.toString());
+					} else {
+						return new Payload();
+					}
 				} else if(action.equals("listreport")) {
 					List<DataMap> list = listReports(session, category);
 					DataMap resp = new DataMap();
@@ -50,8 +54,12 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 					return new Payload(resp.toString());
 				} else if(action.equals("getvariable")) {
 					DataEntity entity = getVariable(session, domain, name);
-					DataMap resp = new DataMap("result", entity);
-					return new Payload(resp.toString());
+					if(entity != null) {
+						DataMap resp = new DataMap("result", entity);
+						return new Payload(resp.toString());
+					} else {
+						return new Payload();
+					}
 				} else if(action.equals("executefunction")) {
 					DataMap ret = executeFunction(session, domain, name, request.getObject("param"));
 					return new Payload(ret != null ? ret.toString() : new DataMap("result", "ok").toString());

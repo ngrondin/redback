@@ -29,13 +29,14 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 			String get = request.getString("get");
 			String action = request.getString("action");
 			String reportName = get != null && get.length() > 1 ? get.substring(1) : request.getString("report");
+			String domain = request.getString("domain");
 			String format = request.getString("format");
 			DataMap filter = request.get("filter") instanceof DataMap ? request.getObject("filter") : new DataMap(request.getString("filter"));
 			if(action == null) 
 				action = "produce";
 			
 			if(action.equals("produce")) {
-				Report report = produce(session, reportName, filter);
+				Report report = produce(session, domain, reportName, filter);
 				if(format != null && format.equals("json")) {
 					//TODO Add json format
 				} else {
@@ -43,7 +44,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 					response.metadata.put("mime", "application/pdf");
 				}
 			} else if(action.equals("producestore")) {
-				String fileUid = produceAndStore(session, reportName, filter);
+				String fileUid = produceAndStore(session, domain, reportName, filter);
 				response = new Payload(new DataMap("fileuid", fileUid).toString());
 			} else{
 				throw new FunctionErrorException("No valid action was provided");
@@ -70,7 +71,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 	
-	protected abstract Report produce(Session session, String name, DataMap filter) throws RedbackException;
+	protected abstract Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException;
 	
-	protected abstract String produceAndStore(Session session, String name, DataMap filter) throws RedbackException;
+	protected abstract String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException;
 }

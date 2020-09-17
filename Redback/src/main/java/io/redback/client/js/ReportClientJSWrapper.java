@@ -30,11 +30,12 @@ public class ReportClientJSWrapper implements ProxyObject {
 		if(key.equals("produce")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
-					String name = arguments[0].asString();
-					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
+					String domain = arguments.length == 3 ? arguments[0].asString() : null; 
+					String name = arguments.length == 3 ? arguments[1].asString() : arguments[0].asString();
+					DataMap filter = (DataMap)JSConverter.toJava(arguments.length == 3 ? arguments[2] : arguments[1]);
 					try
 					{
-						byte[] bytes = reportClient.produce(session, name, filter);
+						byte[] bytes = reportClient.produce(session, domain, name, filter);
 						return bytes;
 					}
 					catch(Exception e)
@@ -47,11 +48,12 @@ public class ReportClientJSWrapper implements ProxyObject {
 		} else if(key.equals("produceAndStore")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
-					String name = arguments[0].asString();
-					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
+					String domain = arguments.length == 3 ? arguments[0].asString() : null; 
+					String name = arguments.length == 3 ? arguments[1].asString() : arguments[0].asString();
+					DataMap filter = (DataMap)JSConverter.toJava(arguments.length == 3 ? arguments[2] : arguments[1]);
 					try
 					{
-						String fileUid = reportClient.produceAndStore(session, name, filter);
+						String fileUid = reportClient.produceAndStore(session, domain, name, filter);
 						return JSConverter.toJS(fileUid);
 					}
 					catch(Exception e)

@@ -28,8 +28,12 @@ public class Client {
 		{
 			Payload reqP = new Payload(req.toString());
 			Payload respP = requestPayload(session, reqP);
-			DataMap resp = new DataMap(respP.getString());
-			return resp;
+			if(respP.getBytes().length > 0) {
+				DataMap resp = new DataMap(respP.getString());
+				return resp;
+			} else {
+				return null;
+			}
 		}
 		catch(Exception e)
 		{
