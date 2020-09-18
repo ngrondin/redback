@@ -12,6 +12,7 @@ export class RbFilelistComponent implements OnInit {
   @Input('list') list: RbFile[];
   @Input('selectedFile') selectedFile: RbFile;
   @Input('downloadOnSelect') downloadOnSelect: boolean;
+  @Input('details') showDetails: boolean = true;
   @Input('isLoading') isLoading: boolean;
 
   @Output() selected: EventEmitter<any> = new EventEmitter();

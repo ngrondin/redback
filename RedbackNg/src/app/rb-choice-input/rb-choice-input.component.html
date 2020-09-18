@@ -2,9 +2,9 @@
     [style.width]="widthString" >
     <mat-label>{{label}}</mat-label>
     <mat-select
+        *ngIf="!readonly"
         [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         (selectionChange)="commit()"
-        [disabled]="readonly"
         [(value)]="value">
         <mat-option
             *ngFor="let choice of choicelist"
@@ -12,6 +12,12 @@
             {{choice.display}}
         </mat-option>
     </mat-select>
+    <input 
+        matInput 
+        *ngIf="readonly"
+        [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
+        [(ngModel)]="displayValue"
+        [readonly]="true">
     <mat-icon 
         matPrefix
         class="rb-grey-icon">{{icon}}

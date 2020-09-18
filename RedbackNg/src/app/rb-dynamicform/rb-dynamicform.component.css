@@ -17,12 +17,44 @@
     font-weight: 500;
 }
 
+.rb-df-line {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+
 .rb-df-linetitle {
     font-size: smaller;
 
 }
 
 .rb-df-linedetail {
-    font-size: smaller;
+    font-size: 0.75rem;
+    color: lightgray;
+    padding-left: 30px;
+    padding-bottom: 10px;
+}
+
+.rb-df-headspace {
+    padding-top: 10px;
+}
+
+.rb-df-lineinput {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-df-lineinput-vert {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-df-linelabel {
+    font-size: 0.8rem;
+    color: grey;
+}
+
+.rb-df-linelabel-small {
+    font-size: 0.8rem;
     color: grey;
 }

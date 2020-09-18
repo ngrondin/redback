@@ -270,36 +270,41 @@ public class DomainManager implements Consumer {
 				}
 			}
 		} else {
-			functions.add(getDomainEntry(domain, name));
+			DomainEntry de = getDomainEntry(domain, name);
+			if(de != null)
+				functions.add(de);
 		}
-			
-		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("log", new LoggerJSFunction());
-		context.put("session", new SessionJSWrapper(session));
-		context.put("oc", new ObjectClientJSWrapper(objectClient, session));
-		context.put("fc", new FileClientJSWrapper(fileClient, session));
-		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
-		context.put("rc", new ReportClientJSWrapper(reportClient, session));
-		context.put("param", JSConverter.toJS(param));
-
-		DataMap multiDomainResult = new DataMap();
-		for(DomainEntry de: functions) {
-			DomainFunction df = (DomainFunction)de;
-			context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
-			context.put("domain", df.getDomain());
-			try {
-				Object o = df.execute(context);
-				if(o instanceof DataMap)
-					multiDomainResult.put(df.getDomain(), (DataMap)o);
-			} catch(Exception e) {
-				logger.severe(StringUtils.rollUpExceptions(e));
-				//logger.severe(StringUtils.getStackTrace(e));
+		
+		if(functions.size() > 0) {
+			Map<String, Object> context = new HashMap<String, Object>();
+			context.put("log", new LoggerJSFunction());
+			context.put("session", new SessionJSWrapper(session));
+			context.put("oc", new ObjectClientJSWrapper(objectClient, session));
+			context.put("fc", new FileClientJSWrapper(fileClient, session));
+			context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
+			context.put("rc", new ReportClientJSWrapper(reportClient, session));
+			context.put("param", JSConverter.toJS(param));
+	
+			DataMap multiDomainResult = new DataMap();
+			for(DomainEntry de: functions) {
+				DomainFunction df = (DomainFunction)de;
+				context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
+				context.put("domain", df.getDomain());
+				try {
+					Object o = df.execute(context);
+					if(o instanceof DataMap)
+						multiDomainResult.put(df.getDomain(), (DataMap)o);
+				} catch(Exception e) {
+					logger.severe(StringUtils.rollUpExceptions(e));
+				}
 			}
+			if(domain.equals("*"))
+				return multiDomainResult;
+			else
+				return multiDomainResult.getObject(domain);
+		} else {
+			return null;
 		}
-		if(domain.equals("*"))
-			return multiDomainResult;
-		else
-			return multiDomainResult.getObject(domain);
 	}
 	
 	public void clearCache(Session session, String domain, String name) {

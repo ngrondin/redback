@@ -13,13 +13,10 @@
             {{object.get(titleattribute)}}
         </div>
         <div
-            class="rb-df-linedetail">
-            {{object.get(detailattribute)}}
-        </div>
-        <div
-            class="rb-df-lineinput"
+            class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'string'">
             <rb-input
+                style="margin-bottom: -15px;"
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="20"
@@ -29,12 +26,13 @@
             </rb-input>
         </div>
         <div
-            class="rb-df-lineinput"
+            class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'textarea'">
             <rb-textarea-input
+                style="margin-bottom: -15px;"
                 [object]="object"
                 [attribute]="valueattribute"
-                [size]="20"
+                [size]="30"
                 [rows]="3"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
@@ -42,9 +40,10 @@
             </rb-textarea-input>
         </div>        
         <div
-            class="rb-df-lineinput"
+            class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'choice'">
             <rb-choice-input
+                style="margin-bottom: -15px;"
                 [object]="object"
                 [attribute]="valueattribute"
                 [choicelist]="object.get(optionsattribute)"
@@ -56,25 +55,55 @@
             </rb-choice-input>
         </div>        
         <div
-            class="rb-df-lineinput"
+            class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'files'">
-            <mat-icon>attach_file</mat-icon>
-            &nbsp;&nbsp;{{object.get(labelattribute)}}
-            <rb-fileset
-                #fileset="fileset"
-                [object]="object.objectname"
-                [relatedObject]="object"
-                [active]="true">
-                    <rb-filedrop
-                        [uploader]="fileset.uploader"
-                        (dropped)="fileset.upload($event)">
-                        <rb-filelist
-                            [list]="fileset.list"
-                            [downloadOnSelect]="true">
-                        </rb-filelist>
-                    </rb-filedrop>
-            </rb-fileset>
+            <mat-icon
+                style="color:gray; width:30px">
+                attach_file
+            </mat-icon>
+            <div
+                class="rb-df-lineinput-vert">
+                <div
+                    class="rb-df-linelabel">
+                    {{object.get(labelattribute)}}
+                </div>
+                <rb-fileset
+                    #fileset="fileset"
+                    [object]="object.objectname"
+                    [relatedObject]="object"
+                    [active]="true">
+                        <rb-filedrop
+                            [uploader]="fileset.uploader"
+                            (dropped)="fileset.upload($event)">
+                            <rb-filelist
+                                [list]="fileset.list"
+                                [details]="false"
+                                [downloadOnSelect]="true">
+                            </rb-filelist>
+                        </rb-filedrop>
+                </rb-fileset>
+            </div>
         </div>
+        <div
+            class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'signature'">
+            <mat-icon
+                style="color:gray; width:30px">
+                gesture
+            </mat-icon>
+            <div
+                class="rb-df-lineinput-vert">
+                <div
+                    class="rb-df-linelabel">
+                    {{object.get(labelattribute)}}
+                </div>
+                <rb-file-input
+                    [object]="object"
+                    [attribute]="valueattribute"
+                    [editable]="editable">
+                </rb-file-input>
+            </div>
+        </div>        
         <div
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'checkbox'">
@@ -88,9 +117,10 @@
             </rb-switch-input>
         </div>                
         <div
-            class="rb-df-lineinput"
+            class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'number'">
             <rb-input
+                style="margin-bottom: -15px;"            
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="20"
@@ -104,7 +134,12 @@
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'unknown'">
             Unknown type<br><br>
-        </div>        
+        </div> 
+        <div
+            *ngIf="object.get(detailattribute) != null"
+            class="rb-df-linedetail">
+            {{object.get(detailattribute)}}
+        </div>
     </div>
 </div>
 <div

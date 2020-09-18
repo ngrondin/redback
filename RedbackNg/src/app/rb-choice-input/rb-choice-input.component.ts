@@ -35,6 +35,20 @@ export class RbChoiceInputComponent extends RbInputCommonComponent implements On
     return val;
   }
 
+  public get displayValue(): any {
+    let dv: any = null;
+    if(this.rbObject != null) {
+      let v = this.rbObject.get(this.attribute);
+      for(let opt of this.choicelist) {
+        if(opt['value'] == v)
+          dv = opt['display'];
+      }
+    } else {
+      dv = "";  
+    }
+    return dv;
+  }
+
   public set value(val: any) {
     this.editedValue = val;
   }
