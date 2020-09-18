@@ -5,10 +5,11 @@
         class="rb-df-line">
         <div
             class="rb-df-category"
-            *ngIf="isFirstInCategory(object) && categoryattribute != null">
+            *ngIf="isFirstInCategory(object) && categoryattribute != null && object.get(categoryattribute) != null">
             {{object.get(categoryattribute)}}
         </div>
         <div
+            *ngIf="titleattribute != null && object.get(titleattribute)"
             class="rb-df-linetitle">
             {{object.get(titleattribute)}}
         </div>

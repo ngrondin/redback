@@ -101,12 +101,16 @@ export class RbDynamicformComponent implements OnInit {
       if(this.orderattribute != null) {
         this.sortedVisibleList = this.sortedVisibleList.sort((a, b) => {
           if(this.categoryattribute != null) {
-            let c = a.get(this.categoryorderattribute) - b.get(this.categoryorderattribute);
+            let acat = a.get(this.categoryorderattribute);
+            let bcat = b.get(this.categoryorderattribute);
+            let c = (acat | 0) - (bcat | 0); 
             if(c != 0) {
               return c;
             }
           }
-          return a.get(this.orderattribute) - b.get(this.orderattribute);
+          let aord = a.get(this.orderattribute);
+          let bord = b.get(this.orderattribute);
+          return (aord | 0) - (bord | 0); 
         });
       }
     } else {
