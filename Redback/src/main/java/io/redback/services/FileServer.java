@@ -5,8 +5,6 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
@@ -24,15 +22,14 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 		super(n, c, f);
 	}
 	
-	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
+	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
-		throw new FunctionErrorException("Redback File Service always needs to receive authenticated requests");
+		throw new RedbackException("Redback File Service always needs to receive authenticated requests");
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
+	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
 	{
-		try
-		{
+		try {
 			logger.info("Authenticated file service start");
 			Payload response = null;
 			if(payload.metadata.containsKey("filename") && payload.metadata.containsKey("mime"))
@@ -115,11 +112,8 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 			}
 			logger.info("Authenticated file service finished");
 			return response;
-		}
-		catch(RedbackException | DataException | FunctionTimeoutException | FunctionErrorException e)
-		{
-			logger.severe(e.getMessage());
-			throw new FunctionErrorException("Error on the file server", e);
+		} catch(DataException e) {
+			throw new RedbackException("Error in file server", e);
 		}
 		
 	}
@@ -130,12 +124,12 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 		return null;
 	}
 
-	public abstract RedbackFile getFile(String fileUid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
+	public abstract RedbackFile getFile(String fileUid) throws RedbackException;
 
-	public abstract List<RedbackFile> listFilesFor(String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
+	public abstract List<RedbackFile> listFilesFor(String object, String uid) throws RedbackException;
 
-	public abstract void linkFileTo(String fileUid, String object, String uid) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
+	public abstract void linkFileTo(String fileUid, String object, String uid) throws RedbackException;
 
-	public abstract RedbackFile putFile(String fileName, String mime, String username, byte[] bytes) throws DataException, RedbackException, FunctionErrorException, FunctionTimeoutException;
+	public abstract RedbackFile putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException;
 	
 }

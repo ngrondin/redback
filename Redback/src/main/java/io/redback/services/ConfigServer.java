@@ -10,6 +10,7 @@ import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.utils.StringUtils;
 
 public abstract class ConfigServer extends Service implements ServiceProvider
 {
@@ -48,10 +49,14 @@ public abstract class ConfigServer extends Service implements ServiceProvider
 		}
 		catch(Exception e)
 		{
+			logger.severe(StringUtils.getStackTrace(e));
+			throw new FunctionErrorException("Exception in config service", e);
+			/*
 			String errorMsg = buildErrorMessage(e);
 			logger.severe(errorMsg);
 			logger.severe(getStackTrace(e));
 			throw new FunctionErrorException(errorMsg);
+			*/
 		}
 		
 		logger.finer("Config service finish");

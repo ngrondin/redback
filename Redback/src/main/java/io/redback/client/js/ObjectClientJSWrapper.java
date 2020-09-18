@@ -1,7 +1,7 @@
 package io.redback.client.js;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -16,7 +16,7 @@ import io.redback.utils.js.JSConverter;
 
 public class ObjectClientJSWrapper implements ProxyObject {
 	
-	private Logger logger = Logger.getLogger("io.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected ObjectClient objectClient;
 	protected Session session;
 	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects"};
@@ -40,9 +40,8 @@ public class ObjectClientJSWrapper implements ProxyObject {
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error getting remote object :" + e);
+						throw new RuntimeException("Error getting remote object", e);
 					}
-					return null;
 				}
 			};
 		} else if(key.equals("listObjects")) {
@@ -57,9 +56,8 @@ public class ObjectClientJSWrapper implements ProxyObject {
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error listing remote objects :" + e);
+						throw new RuntimeException("Error listing remote object", e);
 					}
-					return null;
 				}
 			};
 		} else if(key.equals("listAllObjects")) {
@@ -74,9 +72,8 @@ public class ObjectClientJSWrapper implements ProxyObject {
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error listing remote objects :" + e);
+						throw new RuntimeException("Error listing remote object", e);
 					}
-					return null;
 				}
 			};
 		} else {

@@ -3,7 +3,7 @@ package io.redback.client.js;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -17,7 +17,7 @@ import io.redback.utils.js.JSConverter;
 
 public class NotificationClientJSWrapper implements ProxyObject {
 	
-	private Logger logger = Logger.getLogger("io.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected NotificationClient notificationClient;
 	protected Session session;
 	protected String[] members = {"email"};
@@ -50,12 +50,12 @@ public class NotificationClientJSWrapper implements ProxyObject {
 							}
 						}
 						notificationClient.email(session, addList, subject, body, attList);
+						return null;
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error putting report :" + e);
+						throw new RuntimeException("Error sending email", e);
 					}
-					return null;
 				}
 			};
 		} else {

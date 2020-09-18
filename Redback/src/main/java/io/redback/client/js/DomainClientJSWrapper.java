@@ -1,7 +1,6 @@
 package io.redback.client.js;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -16,7 +15,6 @@ import io.redback.utils.js.JSConverter;
 
 public class DomainClientJSWrapper implements ProxyObject {
 	
-	private Logger logger = Logger.getLogger("io.redback");
 	protected DomainClient domainClient;
 	protected Session session;
 	protected String domain;
@@ -39,12 +37,12 @@ public class DomainClientJSWrapper implements ProxyObject {
 					try
 					{
 						domainClient.putVariable(session, domain, name, category, var);
+						return null;
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error putting variable :" + e);
+						throw new RuntimeException("Error putting domain variable", e);
 					}
-					return null;
 				}
 			};
 		} else if(key.equals("getVariable")) {
@@ -58,9 +56,8 @@ public class DomainClientJSWrapper implements ProxyObject {
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error getting domain variable :" + e);
+						throw new RuntimeException("Error getting domain variable", e);
 					}
-					return null;
 				}
 			};
 		} else if(key.equals("executeFunction")) {
@@ -71,12 +68,12 @@ public class DomainClientJSWrapper implements ProxyObject {
 					try
 					{
 						domainClient.executeFunction(session, domain, name, param);
+						return null;
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error executing domain function :" + e);
+						throw new RuntimeException("Error executing domain function", e);
 					}
-					return null;
 				}
 			};
 		} else if(key.equals("clearCache")) {
@@ -86,12 +83,12 @@ public class DomainClientJSWrapper implements ProxyObject {
 					try
 					{
 						domainClient.clearCache(session, domain, name);
+						return null;
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error clearing domain cache :" + e);
+						throw new RuntimeException("Error clearing domain cache", e);
 					}
-					return null;
 				}
 			};		
 		} else {

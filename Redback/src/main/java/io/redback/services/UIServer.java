@@ -1,12 +1,9 @@
 package io.redback.services;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
@@ -23,7 +20,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 		super(n, c, f);
 	}
 	
-	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
+	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try
 		{
@@ -53,16 +50,13 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 			logger.finer("UI unauthenticated service finish");
 			return response;
 		}
-		catch(Exception e)
+		catch(DataException e)
 		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
+			throw new RedbackException("Error in UI server", e);
 		}
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
+	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try
 		{
@@ -123,12 +117,9 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 			logger.finer("UI authenticated service finish");
 			return response;
 		}
-		catch(Exception e)
+		catch(DataException e)
 		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
+			throw new RedbackException("Error in UI server", e);
 		}
 		
 	}
@@ -152,13 +143,13 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 		return get;
 	}
 	
-	protected abstract HTML getApp(Session session, String name, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException;
+	protected abstract HTML getApp(Session session, String name, String version) throws RedbackException;
 	
-	protected abstract HTML getMenu(Session session, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException;
+	protected abstract HTML getMenu(Session session, String version) throws RedbackException;
 	
 	protected abstract HTML getView(Session session, String viewName, String version);
 	
-	protected abstract byte[] getResource(String name, String version) throws FunctionErrorException, FunctionTimeoutException, DataException, RedbackException, IOException;
+	protected abstract byte[] getResource(String name, String version) throws RedbackException;
 
 	protected String getResourceMimeType(String name)
 	{

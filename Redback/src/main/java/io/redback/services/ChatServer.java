@@ -2,7 +2,6 @@ package io.redback.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.StreamInformation;
@@ -13,7 +12,7 @@ import io.redback.security.Session;
 
 
 public abstract class ChatServer extends AuthenticatedStreamProvider {
-	private Logger logger = Logger.getLogger("io.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	
 	public ChatServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);

@@ -82,14 +82,12 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 			}
 			else
 			{
-				error("The requested configuration '" + service + "/" + category + "/" + name + "' is not found");
-				return null;
+				throw new RedbackException("The requested configuration '" + service + "/" + category + "/" + name + "' is not found");
 			}
 		}
 		catch(IOException | DataException e)
 		{
-			error("Error getting config " + service + "/" + category + "/" + name, e);
-			return null;
+			throw new RedbackException("Error getting config " + service + "/" + category + "/" + name, e);
 		}
 	}
 	
@@ -163,9 +161,7 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 		}
 		catch(Exception e)
 		{
-			error("Error getting a config list", e);
-			return null;
-
+			throw new RedbackException("Error getting a config list", e);
 		}
 	}
 

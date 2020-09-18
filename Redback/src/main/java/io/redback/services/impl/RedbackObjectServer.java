@@ -34,7 +34,7 @@ public class RedbackObjectServer extends ObjectServer
 			object = objectManager.getObject(session, objectName, uid);
 			objectManager.commitCurrentTransaction();
 		} catch (ScriptException e) {
-			error("Error getting object", e);
+			throw new RedbackException("Error getting object", e);
 		}
 		return object;
 	}
@@ -51,7 +51,7 @@ public class RedbackObjectServer extends ObjectServer
 			objects = objectManager.listObjects(session, objectName, filter, search, sort, addRelated, page, pageSize);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
-			error("Error listing objects", e);
+			throw new RedbackException("Error listing objects", e);
 		}
 		return objects;	
 	}
@@ -67,7 +67,7 @@ public class RedbackObjectServer extends ObjectServer
 			objects = objectManager.listRelatedObjects(session, objectName, uid, attribute, filter, search, addRelated, page, pageSize);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
-			error("Error listing objects", e);
+			throw new RedbackException("Error listing objects", e);
 		}
 		return objects;	
 	}
@@ -81,10 +81,10 @@ public class RedbackObjectServer extends ObjectServer
 			if(object != null) {
 				objectManager.commitCurrentTransaction();
 			} else {
-				error("No such object to update");
+				throw new RedbackException("No such object to update");
 			}
 		} catch(ScriptException e) {
-			error("Error listing objects", e);
+			throw new RedbackException("Error listing objects", e);
 		}
 		return object;
 	}
@@ -97,7 +97,7 @@ public class RedbackObjectServer extends ObjectServer
 			object = objectManager.createObject(session, objectName, uid, domain, data);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
-			error("Error creating object", e);
+			throw new RedbackException("Error creating object", e);
 		}
 		return object;
 	}
@@ -108,7 +108,7 @@ public class RedbackObjectServer extends ObjectServer
 			objectManager.deleteObject(session, objectName, uid);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
-			error("Error creating object", e);
+			throw new RedbackException("Error creating object", e);
 		}
 	}
 
@@ -120,7 +120,7 @@ public class RedbackObjectServer extends ObjectServer
 			object = objectManager.executeFunction(session, objectName, uid, function, data);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
-			error("Error executing function on object", e);
+			throw new RedbackException("Error executing function on object", e);
 		}
 		return object;
 	}
@@ -131,7 +131,7 @@ public class RedbackObjectServer extends ObjectServer
 			objectManager.executeFunction(session, function);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
-			error("Error executing function on object", e);
+			throw new RedbackException("Error executing function on object", e);
 		}
 
 		return null;
@@ -149,7 +149,7 @@ public class RedbackObjectServer extends ObjectServer
 			aggregates = objectManager.aggregateObjects(session, objectName, filter, tuple, metrics, sort, addRelated);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
-			error("Error listing objects", e);
+			throw new RedbackException("Error listing objects", e);
 		}
 		return aggregates;	
 	}

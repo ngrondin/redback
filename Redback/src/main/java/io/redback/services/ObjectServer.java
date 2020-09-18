@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
@@ -29,12 +28,11 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 		super(n, c, f);
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
+	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
 	{
-		logger.finer("Object service start");
-		Payload response = null;
-		try
-		{
+		try {
+			logger.finer("Object service start");
+			Payload response = null;
 			DataMap request = new DataMap(payload.getString());
 			Timer timer = new Timer("rbos", request.toString(0, true));
 			String action = request.getString("action");
@@ -65,7 +63,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						}
 						else
 						{
-							throw new FunctionErrorException("A 'get' action requires a 'uid' attribute");
+							throw new RedbackException("A 'get' action requires a 'uid' attribute");
 						}
 					}
 					else if(action.equals("list"))
@@ -88,7 +86,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						}
 						else
 						{
-							throw new FunctionErrorException("A 'list' action requires either a filter, a search or a uid-attribute pair");
+							throw new RedbackException("A 'list' action requires either a filter, a search or a uid-attribute pair");
 						}
 					}
 					else if(action.equals("listrelated"))
@@ -108,7 +106,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						}
 						else
 						{
-							throw new FunctionErrorException("A 'listrelated' action requires either a uid-attribute pair");
+							throw new RedbackException("A 'listrelated' action requires either a uid-attribute pair");
 						}
 					}					
 					else if(action.equals("update"))
@@ -122,7 +120,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						}
 						else
 						{
-							throw new FunctionErrorException("An 'update' action requires a 'uid' and a 'data' attribute");
+							throw new RedbackException("An 'update' action requires a 'uid' and a 'data' attribute");
 						}
 					}
 					else if(action.equals("create"))
@@ -151,7 +149,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						}
 						else
 						{
-							throw new FunctionErrorException("A 'create' action requires a 'uid' and a 'function' attribute");
+							throw new RedbackException("A 'create' action requires a 'uid' and a 'function' attribute");
 						}
 					}
 					else if(action.equals("aggregate"))
@@ -167,12 +165,12 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						}
 						else
 						{
-							throw new FunctionErrorException("A 'aggregate' action requires a filter, a tuple and a metric");
+							throw new RedbackException("A 'aggregate' action requires a filter, a tuple and a metric");
 						}
 					}					
 					else
 					{
-						throw new FunctionErrorException("The '" + action + "' action is not valid as an object request");
+						throw new RedbackException("The '" + action + "' action is not valid as an object request");
 					}
 				}
 				else
@@ -187,36 +185,30 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						}
 						else
 						{
-							throw new FunctionErrorException("A global 'execute' action requires a 'function' attribute");
+							throw new RedbackException("A global 'execute' action requires a 'function' attribute");
 						}
 					}
 					else
 					{
-						throw new FunctionErrorException("No object was provided");
+						throw new RedbackException("No object was provided");
 					}
 				}
 			}
 			else
 			{
-				throw new FunctionErrorException("Requests must have at least an 'action' attribute");
+				throw new RedbackException("Requests must have at least an 'action' attribute");
 			}	
 			timer.mark();
+			logger.finer("Object service finish");
+			return response;	
+		} catch(DataException e) {
+			throw new RedbackException("Error in object server", e);
 		}
-		catch(DataException | RedbackException e)
-		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
-		}		
-
-		logger.finer("Object service finish");
-		return response;	
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload)	throws FunctionErrorException
+	public Payload unAuthenticatedService(Session session, Payload payload)	throws RedbackException
 	{
-		throw new FunctionErrorException("All requests need to be authenticated");
+		throw new RedbackException("All requests need to be authenticated");
 	}
 
 

@@ -3,7 +3,6 @@ package io.redback.services.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,15 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.Firebus;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.exceptions.FunctionTimeoutException;
-import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -37,7 +32,7 @@ import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class RedbackUIServer extends UIServer 
 {
-	private Logger logger = Logger.getLogger("io.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected String devpath;
 	protected JSManager jsManager;
 	protected HashMap<String, Function> jspScripts;
@@ -56,7 +51,7 @@ public class RedbackUIServer extends UIServer
 	}
 
 
-	protected HTML getApp(Session session, String name, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	protected HTML getApp(Session session, String name, String version) throws RedbackException
 	{
 		HTML html = null;
 		Map<String, Object> context = new HashMap<String, Object>();
@@ -111,49 +106,53 @@ public class RedbackUIServer extends UIServer
 	}
 	
 	
-	protected HTML getMenu(Session session, String version) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
+	protected HTML getMenu(Session session, String version) throws RedbackException
 	{
-		DataMap menu = new DataMap("{type:menu, content:[]}");
-		DataMap result = configClient.listConfigs("rbui", "menu");
-		DataList resultList = result.getList("result");
-		for(int i = 0; i < resultList.size(); i++)
-		{
-			if(resultList.getObject(i).getString("type").equals("menugroup"))
+		try {
+			DataMap menu = new DataMap("{type:menu, content:[]}");
+			DataMap result = configClient.listConfigs("rbui", "menu");
+			DataList resultList = result.getList("result");
+			for(int i = 0; i < resultList.size(); i++)
 			{
-				boolean validGroup = false;
-				DataMap menuGroup = resultList.getObject(i);
-				menuGroup.put("content", new DataList());
-				for(int j = 0; j < resultList.size(); j++)
+				if(resultList.getObject(i).getString("type").equals("menugroup"))
 				{
-					if(resultList.getObject(j).getString("type").equals("menulink") && menuGroup.getString("name").equals(resultList.getObject(j).getString("group")))
+					boolean validGroup = false;
+					DataMap menuGroup = resultList.getObject(i);
+					menuGroup.put("content", new DataList());
+					for(int j = 0; j < resultList.size(); j++)
 					{
-						DataMap menuLink = resultList.getObject(j);
-						if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
+						if(resultList.getObject(j).getString("type").equals("menulink") && menuGroup.getString("name").equals(resultList.getObject(j).getString("group")))
 						{
-							menuGroup.getList("content").add(menuLink);
-							validGroup = true;
+							DataMap menuLink = resultList.getObject(j);
+							if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
+							{
+								menuGroup.getList("content").add(menuLink);
+								validGroup = true;
+							}
 						}
 					}
-				}
-				if(validGroup)
+					if(validGroup)
+					{
+						menuGroup.getList("content").sort("order");
+						menu.getList("content").add(menuGroup);
+					}
+				} 
+				else if(resultList.getObject(i).getString("type").equals("menulink") && resultList.getObject(i).getString("group") == null)
 				{
-					menuGroup.getList("content").sort("order");
-					menu.getList("content").add(menuGroup);
+					DataMap menuLink = resultList.getObject(i);
+					if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
+						menu.getList("content").add(menuLink);
 				}
-			} 
-			else if(resultList.getObject(i).getString("type").equals("menulink") && resultList.getObject(i).getString("group") == null)
-			{
-				DataMap menuLink = resultList.getObject(i);
-				if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
-					menu.getList("content").add(menuLink);
 			}
+			menu.getList("content").sort("order");
+			Map<String, Object> context = new HashMap<String, Object>();
+			context.put("session", new SessionJSWrapper(session));
+			context.put("utils", new RedbackUtilsJSWrapper());
+			context.put("parents", JSConverter.toJS(new DataMap()));
+			return generateHTMLFromComponentConfig(session, menu, version, context);
+		} catch(Exception e) {
+			throw new RedbackException("Error getting menu", e);
 		}
-		menu.getList("content").sort("order");
-		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("session", new SessionJSWrapper(session));
-		context.put("utils", new RedbackUtilsJSWrapper());
-		context.put("parents", JSConverter.toJS(new DataMap()));
-		return generateHTMLFromComponentConfig(session, menu, version, context);
 	}
 	
 	protected HTML getView(Session session, String viewName, String version)
@@ -341,72 +340,76 @@ public class RedbackUIServer extends UIServer
 			catch(Exception e)
 			{
 				String error = "Error when trying to retreive " + name + ".jsp";
-				logger.severe(error + " : " + e.getMessage());
-				error(error, e);
+				//logger.severe(error + " : " + e.getMessage());
+				throw new RedbackException(error, e);
 			}					
 		}
 		return script;
 	}	
 
 
-	protected byte[] getResource(String name, String version) throws FunctionErrorException, FunctionTimeoutException, DataException, RedbackException, IOException
+	protected byte[] getResource(String name, String version) throws RedbackException
 	{
-		byte[] bytes = null;
-		if(version == null)
-			version = "default";
-		String type = "";
-		if(name.endsWith(".js"))
-			type = "js";
-		else if(name.endsWith(".css"))
-			type = "css";
-		else if(name.endsWith(".svg"))
-			type = "svg";
-		else if(name.endsWith(".ico"))
-			type = "ico";
-		else if(name.endsWith(".png"))
-			type = "png";
-		else if(name.endsWith(".apk"))
-			type = "apk";
-		else if(name.endsWith(".ipa"))
-			type = "ipa";
-		else if(name.endsWith(".plist"))
-			type = "plist";
-		
-		if(type.equals("svg"))
-		{
-			DataMap result = configClient.getConfig("rbui", "resource", name); 
-			bytes = StringUtils.unescape(result.getString("content")).getBytes();
-		}
-		else
-		{
-			InputStream is = null;
-			if(devpath != null)
-			{
-				File file = new File(devpath + "/" + version + "/client/" + type + "/" + name);
-				if(file.exists())
-					is = new FileInputStream(file);
-			}
-			else
-			{
-				is = this.getClass().getResourceAsStream("/io/redback/services/uiserver/" + version + "/client/" + type + "/" + name);
-			}
+		try {
+			byte[] bytes = null;
+			if(version == null)
+				version = "default";
+			String type = "";
+			if(name.endsWith(".js"))
+				type = "js";
+			else if(name.endsWith(".css"))
+				type = "css";
+			else if(name.endsWith(".svg"))
+				type = "svg";
+			else if(name.endsWith(".ico"))
+				type = "ico";
+			else if(name.endsWith(".png"))
+				type = "png";
+			else if(name.endsWith(".apk"))
+				type = "apk";
+			else if(name.endsWith(".ipa"))
+				type = "ipa";
+			else if(name.endsWith(".plist"))
+				type = "plist";
 			
-			if(is != null)
+			if(type.equals("svg"))
 			{
-				ByteArrayOutputStream result = new ByteArrayOutputStream();
-				byte[] buffer = new byte[1024];
-				int length;
-				while ((length = is.read(buffer)) != -1)
-				    result.write(buffer, 0, length);
-				is.close();
-				bytes = result.toByteArray();
+				DataMap result = configClient.getConfig("rbui", "resource", name); 
+				bytes = StringUtils.unescape(result.getString("content")).getBytes();
 			}
 			else
 			{
-				error("The resource was not found : " + name);
+				InputStream is = null;
+				if(devpath != null)
+				{
+					File file = new File(devpath + "/" + version + "/client/" + type + "/" + name);
+					if(file.exists())
+						is = new FileInputStream(file);
+				}
+				else
+				{
+					is = this.getClass().getResourceAsStream("/io/redback/services/uiserver/" + version + "/client/" + type + "/" + name);
+				}
+				
+				if(is != null)
+				{
+					ByteArrayOutputStream result = new ByteArrayOutputStream();
+					byte[] buffer = new byte[1024];
+					int length;
+					while ((length = is.read(buffer)) != -1)
+					    result.write(buffer, 0, length);
+					is.close();
+					bytes = result.toByteArray();
+				}
+				else
+				{
+					throw new RedbackException("The resource was not found : " + name);
+				}
 			}
+			return bytes;
+		} catch(Exception e) {
+			throw new RedbackException("Error getting resources", e);
 		}
-		return bytes;
 	}
 	
 

@@ -1,6 +1,11 @@
 package io.redback.utils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Date;
+
+import org.graalvm.polyglot.PolyglotException;
+import org.graalvm.polyglot.SourceSection;
 
 import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
@@ -137,5 +142,34 @@ public class StringUtils
 			ret = "\"" + ret.replaceAll("\"", "\"\"") + "\"";
 		}
 		return ret;
+	}
+	
+	public static String rollUpExceptions(Throwable e) {
+		String msg = "";
+		Throwable t = e;
+		while(t != null) {
+			if(msg.length() > 0)
+				msg = msg + ": ";
+			msg = msg + t.getMessage();
+			if(t instanceof PolyglotException) {
+				PolyglotException pge = (PolyglotException)t;
+				SourceSection ss = pge.getSourceLocation();
+				if(ss != null) {
+					msg = msg + " (" + ss.toString() + ")";
+				}
+				t = pge.asHostException();
+			} 
+			t = t.getCause();
+		}
+		return msg;
+	}
+	
+	public static String getStackTrace(Exception e)
+	{
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		String sStackTrace = sw.toString(); 
+		return sStackTrace;
 	}
 }

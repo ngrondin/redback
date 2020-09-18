@@ -4,7 +4,6 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
@@ -20,7 +19,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		super(n, c, f);
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException {
+	public Payload authenticatedService(Session session, Payload payload) throws RedbackException {
 		logger.finer("Report service start");
 		Payload response = null;
 		try
@@ -47,24 +46,21 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 				String fileUid = produceAndStore(session, domain, reportName, filter);
 				response = new Payload(new DataMap("fileuid", fileUid).toString());
 			} else{
-				throw new FunctionErrorException("No valid action was provided");
+				throw new RedbackException("No valid action was provided");
 			}			
 		}
-		catch(DataException | RedbackException e)
+		catch(DataException e)
 		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
+			throw new RedbackException("Error in report server", e);
 		}		
 
 		logger.finer("Report service finish");
 		return response;	
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload)	throws FunctionErrorException
+	public Payload unAuthenticatedService(Session session, Payload payload)	throws RedbackException
 	{
-		throw new FunctionErrorException("All requests need to be authenticated");
+		throw new RedbackException("All requests need to be authenticated");
 	}
 
 	public ServiceInformation getServiceInformation() {

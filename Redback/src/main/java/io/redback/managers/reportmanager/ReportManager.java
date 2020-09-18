@@ -1,5 +1,6 @@
 package io.redback.managers.reportmanager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +49,13 @@ public class ReportManager {
 	
 	protected ReportConfig getConfig(Session session, String domain, String name) throws RedbackException {
 		ReportConfig reportConfig = null;
-		List<String> domains = session.getUserProfile().getDomains();
-		if(domain != null && (domains.contains(domain) || domains.contains("*"))) {
-			domains.clear();
-			domains.add(domain);
+		List<String> domains = new ArrayList<String>();
+		List<String> userDomains = session.getUserProfile().getDomains();
+		if(domain != null) {
+			if(userDomains.contains(domain) || userDomains.contains("*"))
+				domains.add(domain);
+		} else {
+			domains.addAll(userDomains);
 		}
 		
 		for(int i = 0; i < domains.size() && reportConfig == null; i++) {

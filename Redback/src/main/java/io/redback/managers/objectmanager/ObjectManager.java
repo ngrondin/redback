@@ -300,7 +300,7 @@ public class ObjectManager
 				}
 				catch(Exception e)
 				{
-					error( "Problem initiating object : " + e.getMessage(), e);
+					throw new RedbackException("Problem initiating object " + objectName, e);
 				}		
 			}
 			if(object == null)
@@ -309,8 +309,7 @@ public class ObjectManager
 		}
 		else
 		{
-			error("User does not have the right to read object " + objectName);
-			return null;
+			throw new RedbackException("User does not have the right to read object " + objectName);
 		}
 	}
 	
@@ -378,14 +377,13 @@ public class ObjectManager
 			}
 			else
 			{
-				error("No object config is available for '" + objectName + "'");	
+				throw new RedbackException("No object config is available for '" + objectName + "'");	
 			}
 			return objectList;			
 		}
 		else 
 		{
-			error("User does not have the right to read object " + objectName);
-			return null;
+			throw new RedbackException("User does not have the right to read object " + objectName);
 		}
 	}
 	
@@ -548,12 +546,11 @@ public class ObjectManager
 			}
 			else
 			{
-				error("No object config is available for '" + objectName + "'");	
+				throw new RedbackException("No object config is available for '" + objectName + "'");	
 			}
 			return list;	
 		} else {
-			error("User does not have the right to read object " + objectName);
-			return null;			
+			throw new RedbackException("User does not have the right to read object " + objectName);
 		}
 	}
 	
@@ -840,6 +837,7 @@ public class ObjectManager
 		}
 	}
 
+	/*
 	protected void error(String msg) throws RedbackException
 	{
 		error(msg, null);
@@ -853,7 +851,7 @@ public class ObjectManager
 		else
 			throw new RedbackException(msg);
 	}
-
+	 */
 
 }
 

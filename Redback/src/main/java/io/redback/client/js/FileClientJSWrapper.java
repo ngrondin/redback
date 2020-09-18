@@ -1,7 +1,6 @@
 package io.redback.client.js;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -13,7 +12,6 @@ import io.redback.security.Session;
 
 public class FileClientJSWrapper implements ProxyObject {
 	
-	private Logger logger = Logger.getLogger("io.redback");
 	protected FileClient fileClient;
 	protected Session session;
 	protected String[] members = {"linkFileTo"};
@@ -34,12 +32,12 @@ public class FileClientJSWrapper implements ProxyObject {
 					try
 					{
 						fileClient.linkFileTo(session, fileUid, object, objectuid);
+						return null;
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error link file to object :" + e);
+						throw new RuntimeException("Error linking file to object", e);
 					}
-					return null;
 				}
 			};
 		} else {

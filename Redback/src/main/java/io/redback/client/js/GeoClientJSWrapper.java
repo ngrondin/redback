@@ -2,7 +2,7 @@ package io.redback.client.js;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -16,7 +16,7 @@ import io.redback.utils.js.JSConverter;
 
 public class GeoClientJSWrapper implements ProxyObject {
 	
-	private Logger logger = Logger.getLogger("io.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected GeoClient geoClient;
 	protected String[] members = {"geocode", "address"};
 
@@ -39,12 +39,12 @@ public class GeoClientJSWrapper implements ProxyObject {
 							Geometry geometry = geoClient.geocode((String)arg);
 							return JSConverter.toJS(geometry.toDataMap());
 						}
+						return null;
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error processing geo request :" + e);
+						throw new RuntimeException("Error processing geo request", e);
 					}
-					return null;
 				}
 			};
 		} else if(key.equals("address")) {
@@ -58,9 +58,8 @@ public class GeoClientJSWrapper implements ProxyObject {
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error getting address list :" + e);
+						throw new RuntimeException("Error getting address list", e);
 					}
-					return null;
 				}
 			};
 		} else {

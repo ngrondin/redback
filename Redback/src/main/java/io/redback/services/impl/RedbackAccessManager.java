@@ -81,12 +81,12 @@ public class RedbackAccessManager extends AccessManager
 		} 
 		catch (RedbackException exception)
 		{
-			error("Cannot retrieve the user profile", exception);
+			throw new RedbackException("Cannot retrieve the user profile", exception);
 		}
 		catch (Exception exception)
 		{
 			exception.printStackTrace();
-		    error("JWT token is invalid", exception);
+			throw new RedbackException("JWT token is invalid", exception);
 		}
 		return session;
 	}
@@ -165,7 +165,7 @@ public class RedbackAccessManager extends AccessManager
 			}
 			catch(Exception e)
 			{
-				error("Error getting user profile for " + username, e);
+				throw new RedbackException("Error getting user profile for " + username, e);
 			}
 		}
 		return userProfile;

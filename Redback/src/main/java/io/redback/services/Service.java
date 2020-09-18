@@ -1,20 +1,13 @@
 package io.redback.services;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import io.firebus.Firebus;
-import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.exceptions.FunctionTimeoutException;
-import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 
 public abstract class Service 
 {
-	private Logger logger = Logger.getLogger("io.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected String serviceName;
 	protected Firebus firebus;
 	protected DataMap config;
@@ -25,7 +18,7 @@ public abstract class Service
 		config = c;
 		firebus = f;
 	}
-
+/*
 	protected DataMap request(String service, DataMap request) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
 	{
 		return request(service, request.toString());
@@ -45,11 +38,11 @@ public abstract class Service
 		}
 		else
 		{
-			error("Service Name or Request is null in firebus request");
-			return null;
+			throw new FunctionErrorException("Service Name or Request is null in firebus request");
 		}
 	}
-	
+	*/
+	/*
 	protected Object error(String msg) throws RedbackException
 	{
 		return error(msg, null);
@@ -78,6 +71,7 @@ public abstract class Service
 		return msg;
 	}
 	
+	
 	protected String getStackTrace(Exception e)
 	{
 		StringWriter sw = new StringWriter();
@@ -86,7 +80,7 @@ public abstract class Service
 		String sStackTrace = sw.toString(); 
 		return sStackTrace;
 	}
-	
+	*/
 	public abstract void clearCaches();
 
 }

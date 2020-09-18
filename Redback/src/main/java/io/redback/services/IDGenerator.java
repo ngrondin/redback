@@ -9,6 +9,7 @@ import io.firebus.information.ServiceInformation;
 import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.utils.StringUtils;
 
 public abstract class IDGenerator extends Service implements ServiceProvider
 {
@@ -31,10 +32,8 @@ public abstract class IDGenerator extends Service implements ServiceProvider
 		}
 		catch(Exception e)
 		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
+			logger.severe(StringUtils.getStackTrace(e));
+			throw new FunctionErrorException("Exception in id generator service", e);
 		}
 		logger.finer("ID generator service finish");
 		return response;

@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
+import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -25,11 +25,10 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException {
-		logger.finer("Notification service start");
-		Payload response = null;
-		try
-		{
+	public Payload authenticatedService(Session session, Payload payload) throws RedbackException {
+		try {
+			logger.finer("Notification service start");
+			Payload response = null;
 			DataMap request = new DataMap(payload.getString());
 			String action = request.getString("action");
 			if(action != null) {
@@ -53,23 +52,18 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 					response = new Payload(new DataMap("result", "ok").toString());
 				}
 			} else {
-				throw new FunctionErrorException("No valid action was provided");
+				throw new RedbackException("No valid action was provided");
 			}
+	
+			logger.finer("Notification service finish");
+			return response;	
+		} catch(DataException e) {
+			throw new RedbackException("Error in Notification server", e);
 		}
-		catch(Exception e)
-		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
-		}		
-
-		logger.finer("Notification service finish");
-		return response;		
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException {
-		throw new FunctionErrorException("Notification requests need to be authenticated");
+	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException {
+		throw new RedbackException("Notification requests need to be authenticated");
 	}
 	
 	protected abstract void email(Session session, List<String> addresses, String subject, String body, List<String> attachments) throws RedbackException;

@@ -14,6 +14,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Role;
 import io.redback.security.Session;
+import io.redback.utils.StringUtils;
 
 public abstract class AccessManager extends Service implements ServiceProvider
 {
@@ -78,8 +79,8 @@ public abstract class AccessManager extends Service implements ServiceProvider
 		}
 		catch(Exception e)
 		{	
-			logger.severe(buildErrorMessage(e));
-			throw new FunctionErrorException(e.getMessage());
+			logger.severe(StringUtils.getStackTrace(e));
+			throw new FunctionErrorException("Exception in access management service", e);
 		}
 		
 		responsePayload.setData(response.toString());

@@ -78,8 +78,7 @@ public class RedbackIDGenerator extends IDGenerator
 		}
 		catch(Exception e)
 		{
-			error("Error getting next id", e);
-			return null;
+			throw new RedbackException("Error getting next id", e);
 		}
 	}
 	

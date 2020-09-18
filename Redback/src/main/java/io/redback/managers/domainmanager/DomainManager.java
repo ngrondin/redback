@@ -29,6 +29,7 @@ import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.StringUtils;
 import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.LoggerJSFunction;
 
@@ -255,7 +256,7 @@ public class DomainManager implements Consumer {
 	
 	public DataMap executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
 		List<DomainEntry> functions = new ArrayList<DomainEntry>();
-		if(domain.equals("*")) {
+		if(domain == null || (domain != null && domain.equals("*"))) {
 			List<DomainEntry> allFunctions = listAllEntriesWithName(name);
 			if(session.getUserProfile().getDomains().contains("*")) {
 				functions.addAll(allFunctions);
@@ -291,13 +292,8 @@ public class DomainManager implements Consumer {
 				if(o instanceof DataMap)
 					multiDomainResult.put(df.getDomain(), (DataMap)o);
 			} catch(Exception e) {
-				String msg = "";
-				Throwable t = e;
-				while(t != null) {
-					msg = msg + ": " + t.getMessage();
-					t = t.getCause();
-				}
-				logger.severe("Error executing domain function " + name + " in domain " + df.getDomain() + ": " + msg);
+				logger.severe(StringUtils.rollUpExceptions(e));
+				//logger.severe(StringUtils.getStackTrace(e));
 			}
 		}
 		if(domain.equals("*"))

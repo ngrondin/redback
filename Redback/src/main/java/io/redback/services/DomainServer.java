@@ -4,7 +4,6 @@ import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
@@ -22,7 +21,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException {
+	public Payload authenticatedService(Session session, Payload payload) throws RedbackException {
 		try {
 			DataMap request = new DataMap(payload.getString());
 			String action = request.getString("action");
@@ -72,12 +71,12 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 			}
 			return null;
 		} catch(Exception e) {
-			throw new FunctionErrorException("Error executing domain service", e);
+			throw new RedbackException("Error executing domain service", e);
 		}
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException {
-		throw new FunctionErrorException("Domain server only accepts authenticated requests");
+	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException {
+		throw new RedbackException("Domain server only accepts authenticated requests");
 	}
 
 	public abstract void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException;

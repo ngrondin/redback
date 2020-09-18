@@ -12,17 +12,20 @@ import io.firebus.interfaces.StreamHandler;
 import io.firebus.interfaces.StreamProvider;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.AccessManagementClient;
 import io.redback.security.Session;
 
 public abstract class AuthenticatedStreamProvider extends Service implements StreamProvider, StreamHandler {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String accessManagementService;
+	protected AccessManagementClient accessManagementClient;
 	protected Map<StreamEndpoint, Session> endpointToSession;
 	protected Map<Session, StreamEndpoint> sessionToEndpoint;
 	
 	public AuthenticatedStreamProvider(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 		accessManagementService = config.getString("accessmanagementservice");
+		accessManagementClient = new AccessManagementClient(firebus, accessManagementService);
 		endpointToSession = new HashMap<StreamEndpoint, Session>();
 		sessionToEndpoint = new HashMap<Session, StreamEndpoint>();
 	}
@@ -32,9 +35,11 @@ public abstract class AuthenticatedStreamProvider extends Service implements Str
 		Session session = null;
 		String token = payload.metadata.get("token");
 		try {
-			DataMap result = request(accessManagementService, "{action:validate, token:\"" + token + "\"}");
-			if(result != null  &&  result.getString("result").equals("ok"))
-				session = new Session(result.getObject("session"));
+			if(token != null)
+			{
+				session = accessManagementClient.validate(token);
+			}
+
 			if(session != null) {
 				onNewStream(session);
 				endpointToSession.put(streamEndpoint, session);

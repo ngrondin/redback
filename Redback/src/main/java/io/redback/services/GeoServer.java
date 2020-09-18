@@ -13,6 +13,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.Geometry;
+import io.redback.utils.StringUtils;
 
 public abstract class GeoServer extends Service implements ServiceProvider
 {
@@ -80,10 +81,8 @@ public abstract class GeoServer extends Service implements ServiceProvider
 		}
 		catch(Exception e)
 		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
+			logger.severe(StringUtils.getStackTrace(e));
+			throw new FunctionErrorException("Exception in geo service", e);
 		}		
 
 		logger.finer("Geo service finish");

@@ -1,7 +1,7 @@
 package io.redback.client.js;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -15,7 +15,7 @@ import io.redback.utils.js.JSConverter;
 
 public class ReportClientJSWrapper implements ProxyObject {
 	
-	private Logger logger = Logger.getLogger("io.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected ReportClient reportClient;
 	protected Session session;
 	protected String[] members = {"produce", "produceAndStore"};
@@ -40,9 +40,8 @@ public class ReportClientJSWrapper implements ProxyObject {
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error producing report :" + e);
+						throw new RuntimeException("Error producting report", e);
 					}
-					return null;
 				}
 			};
 		} else if(key.equals("produceAndStore")) {
@@ -58,9 +57,8 @@ public class ReportClientJSWrapper implements ProxyObject {
 					}
 					catch(Exception e)
 					{
-						logger.severe("Error producing report :" + e);
+						throw new RuntimeException("Error producting report", e);
 					}
-					return null;
 				}
 			};
 		} else {

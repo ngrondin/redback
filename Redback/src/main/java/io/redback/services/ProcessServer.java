@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
@@ -25,13 +24,13 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 	}
 
 	
-	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException
+	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
-		throw new FunctionErrorException("All requests need to be authenticated");
+		throw new RedbackException("All requests need to be authenticated");
 	}
 
 	
-	public Payload authenticatedService(Session session, Payload payload) throws FunctionErrorException
+	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		logger.finer("Process service start");
 		Payload response = new Payload();
@@ -55,7 +54,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 					}
 					else
 					{
-						throw new FunctionErrorException("A 'initiate' action requires a 'name' attribute");
+						throw new RedbackException("A 'initiate' action requires a 'name' attribute");
 					}
 				}
 				else if(action.equals("processaction"))
@@ -70,7 +69,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 					}
 					else
 					{
-						throw new FunctionErrorException("A 'processaction' request requires 'pid' and 'processaction' attributes");
+						throw new RedbackException("A 'processaction' request requires 'pid' and 'processaction' attributes");
 					}
 				}
 				else if(action.equals("getassignments"))
@@ -94,17 +93,14 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 			}
 			else
 			{
-				throw new FunctionErrorException("Requests must have at least an 'action' attribute");
+				throw new RedbackException("Requests must have at least an 'action' attribute");
 			}					
 
 			response.setData(responseData.toString());
 		}
-		catch(DataException | RedbackException e)
+		catch(DataException e)
 		{
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
+			throw new RedbackException("Error in process server", e);
 		}
 
 		logger.finer("Process service finish");
