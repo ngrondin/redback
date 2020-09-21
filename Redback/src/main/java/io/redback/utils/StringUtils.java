@@ -157,7 +157,8 @@ public class StringUtils
 				if(ss != null) {
 					msg = msg + " (" + ss.toString() + ")";
 				}
-				t = pge.asHostException();
+				if(pge.isHostException())
+					t = pge.asHostException();
 			} 
 			t = t.getCause();
 		}
