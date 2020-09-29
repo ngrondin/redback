@@ -1,0 +1,20 @@
+<mat-form-field
+    [style.width]="(size * 15) + 'px'" >
+    <mat-label>{{label}}</mat-label>
+    <input 
+        #input
+        matInput 
+        [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
+        [(ngModel)]="displayvalue"
+        (change)="commit()"
+        (focus)="focus($event)"
+        (blur)="blur($event)"
+        (keydown)="keydown($event)"
+        [readonly]="readonly"
+        autocomplete="off">
+    <mat-icon 
+        matPrefix
+        class="rb-grey-icon">
+        {{icon}}
+    </mat-icon>   
+</mat-form-field>
