@@ -18,7 +18,7 @@ public class DomainFunction extends DomainEntry {
 		super(c);
 		jsManager = jsm;
 		domainManager = dm;
-		List<String> params = Arrays.asList(new String[] {"log", "session", "dm", "oc", "fc", "nc", "rc", "domain", "param"});
+		List<String> params = Arrays.asList(new String[] {"log", "session", "dm", "oc", "fc", "nc", "rc", "gc", "domain", "param"});
 		function = new Function(jsManager, "domain_" + config.getString("domain") + "_" + config.getString("name"), params, config.getString("source"));
 	}
 

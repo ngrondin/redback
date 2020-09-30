@@ -17,10 +17,12 @@ import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
+import io.redback.client.GatewayClient;
 import io.redback.client.NotificationClient;
 import io.redback.client.ObjectClient;
 import io.redback.client.ReportClient;
 import io.redback.client.js.FileClientJSWrapper;
+import io.redback.client.js.GatewayClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.client.js.ReportClientJSWrapper;
@@ -37,41 +39,65 @@ public class DomainManager implements Consumer {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
 	protected JSManager jsManager;
+	protected boolean includeLoaded;
 	protected String configServiceName;
 	protected String objectServiceName;
 	protected String dataServiceName;
 	protected String fileServiceName;
 	protected String notificationServiceName;
 	protected String reportServiceName;
+	protected String gatewayClientName;
 	protected ConfigurationClient configClient;
 	protected ObjectClient objectClient;
 	protected DataClient dataClient;
 	protected FileClient fileClient;
 	protected NotificationClient notificationClient;
 	protected ReportClient reportClient;
+	protected GatewayClient gatewayClient;
 	protected CollectionConfig collection;
 	protected Map<String, DomainEntry> entries;
 
 	public DomainManager(Firebus fb, DataMap config) {
 		firebus = fb;
 		jsManager = new JSManager();
+		includeLoaded = false;
 		configServiceName = config.getString("configservice");
 		objectServiceName = config.getString("objectservice");
 		dataServiceName = config.getString("dataservice");
 		fileServiceName = config.getString("fileservice");
 		notificationServiceName = config.getString("notificationservice");
 		reportServiceName = config.getString("reportservice");
+		gatewayClientName = config.getString("gatewayservice");
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		objectClient = new ObjectClient(firebus, objectServiceName);
 		dataClient = new DataClient(firebus, dataServiceName);
 		fileClient = new FileClient(firebus, fileServiceName);
 		notificationClient = new NotificationClient(firebus, notificationServiceName);
 		reportClient = new ReportClient(firebus, reportServiceName);
+		gatewayClient = new GatewayClient(firebus, gatewayClientName);
 		collection = new CollectionConfig(config.getObject("collection"), "rbdm_entry");
 		entries = new HashMap<String, DomainEntry>();	
 		firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
 	}
 
+	protected void loadIncludeScripts() throws RedbackException
+	{
+		DataMap result = configClient.listConfigs("rbdm", "include");
+		DataList resultList = result.getList("result");
+		for(int i = 0; i < resultList.size(); i++)
+		{
+			try 
+			{
+				jsManager.addSource("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
+			}
+			catch(Exception e) 
+			{
+				throw new RedbackException("Problem compiling include scripts", e);
+			}
+		}
+		includeLoaded = true;
+	}
+	
 	protected DomainEntry getDomainEntry(String domain, String name) throws RedbackException {
 		DomainEntry entry = entries.get(domain + "." + name);
 		if(entry == null)
@@ -188,6 +214,7 @@ public class DomainManager implements Consumer {
 		try {
 			DataMap key = new DataMap(payload.getString());
 			entries.remove(key.getString("domain") + "." + key.getString("name"));
+			includeLoaded = false;
 		} catch(Exception e) {
 			logger.severe("Error consuming cache control message: " + e.getMessage());
 		}
@@ -205,12 +232,11 @@ public class DomainManager implements Consumer {
 		putEntry(domain, name, dr);
 	}
 	
-	public void putVariable(Session session, String domain, String name, String category, DataEntity var) throws RedbackException {
+	public void putVariable(Session session, String domain, String name, DataEntity var) throws RedbackException {
 		DataMap entryMap = new DataMap();
 		entryMap.put("type", "variable");
 		entryMap.put("domain", domain);
 		entryMap.put("name", name);
-		entryMap.put("category", category);
 		entryMap.put("roles", new DataList());
 		entryMap.put("source", var);
 		DomainVariable dv = new DomainVariable(entryMap);
@@ -255,6 +281,9 @@ public class DomainManager implements Consumer {
 	}
 	
 	public DataMap executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
+		if(!includeLoaded)
+			loadIncludeScripts();
+		
 		List<DomainEntry> functions = new ArrayList<DomainEntry>();
 		if(domain == null || (domain != null && domain.equals("*"))) {
 			List<DomainEntry> allFunctions = listAllEntriesWithName(name);
@@ -283,6 +312,7 @@ public class DomainManager implements Consumer {
 			context.put("fc", new FileClientJSWrapper(fileClient, session));
 			context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
 			context.put("rc", new ReportClientJSWrapper(reportClient, session));
+			context.put("gc", new GatewayClientJSWrapper(gatewayClient));
 			context.put("param", JSConverter.toJS(param));
 	
 			DataMap multiDomainResult = new DataMap();

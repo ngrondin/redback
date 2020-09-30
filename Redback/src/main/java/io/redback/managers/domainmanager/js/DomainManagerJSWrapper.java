@@ -35,13 +35,12 @@ public class DomainManagerJSWrapper implements ProxyObject {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String name = arguments[0].asString();
-					String category = arguments[1].asString();
-					Object val = JSConverter.toJava(arguments[2]);
+					Object val = JSConverter.toJava(arguments[1]);
 					if(!(val instanceof DataEntity))
 						val = new DataLiteral(val);
 					try
 					{
-						domainManager.putVariable(session, domain, name, category, (DataEntity)val);
+						domainManager.putVariable(session, domain, name, (DataEntity)val);
 					}
 					catch(Exception e)
 					{

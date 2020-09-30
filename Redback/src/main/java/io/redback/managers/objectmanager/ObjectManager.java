@@ -30,8 +30,8 @@ import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.jsmanager.JSManager;
-import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
-import io.redback.managers.objectmanagers.js.ProcessManagerProxyJSWrapper;
+import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
+import io.redback.managers.objectmanager.js.ProcessManagerProxyJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
@@ -167,6 +167,7 @@ public class ObjectManager
 				throw new RedbackException("Problem compiling include scripts", e);
 			}
 		}
+		includeLoaded = true;
 	}
 
 	protected ScriptConfig getGlobalScript(String name) throws RedbackException

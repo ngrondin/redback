@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
 
+import org.bson.internal.Base64;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.SourceSection;
 
@@ -105,6 +106,17 @@ public class StringUtils
 		}
 	}
 	
+	public static String base64encode(String s) 
+	{
+		return Base64.encode(s.getBytes());
+	}
+	
+	public static String base64decode(String s) 
+	{
+		return new String(Base64.decode(s));
+	}
+
+
 	public static String base16(int n) 
 	{
 		String s = "";

@@ -140,6 +140,10 @@ public class RedbackConfigEditor extends EditorPart implements IResourceChangeLi
 					if(rbConfigType.equals("process")) {
 						manager = new ProcessManager(data, this, composite, SWT.HORIZONTAL);
 					} 
+				} else if(rbService.equals("rbdm")) {
+					if(rbConfigType.equals("include")) {
+						manager = new IncludeManager(data, this, composite, SWT.HORIZONTAL);
+					} 
 				}
 			}
 		}

@@ -1,7 +1,6 @@
 package io.redback.utils.js;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -15,7 +14,7 @@ import io.redback.utils.StringUtils;
 
 public class RedbackUtilsJSWrapper implements ProxyObject
 {
-	protected String[] members = {"convertDataEntityToAttributeString", "convertDataMapToAttributeString", "convertFilterForClient"};
+	protected String[] members = {"convertDataEntityToAttributeString", "convertDataMapToAttributeString", "convertFilterForClient", "base64encode", "base64decode"};
 	
 	public RedbackUtilsJSWrapper() {
 	}
@@ -37,6 +36,18 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					return RedbackUIServer.convertFilter((DataMap)JSConverter.toJava(arguments[0]));
+				}
+			};
+		} else if(key.equals("base64encode")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return JSConverter.toJS(StringUtils.base64encode(arguments[0].asString()));
+				}
+			};
+		} else if(key.equals("base64decode")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return JSConverter.toJS(StringUtils.base64decode(arguments[0].asString()));
 				}
 			};
 		} else {

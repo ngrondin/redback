@@ -11,8 +11,8 @@ import javax.script.ScriptException;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.managers.objectmanagers.js.ObjectManagerJSWrapper;
-import io.redback.managers.objectmanagers.js.RedbackAggregateJSWrapper;
+import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
+import io.redback.managers.objectmanager.js.RedbackAggregateJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;

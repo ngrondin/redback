@@ -32,7 +32,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 				if(action.equals("putreport")) {
 					putReport(session, domain, name, category, request.getObject("report"));
 				} else if(action.equals("putvariable")) {
-					putVariable(session, domain, name, category, request.getObject("variable"));
+					putVariable(session, domain, name, request.getObject("variable"));
 				} else if(action.equals("putfunction")) {
 					putFunction(session, domain, name, request.getString("function"));
 				} else if(action.equals("getreport")) {
@@ -81,7 +81,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 
 	public abstract void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException;
 	
-	public abstract void putVariable(Session session, String domain, String name, String category, DataEntity var) throws RedbackException;
+	public abstract void putVariable(Session session, String domain, String name, DataEntity var) throws RedbackException;
 	
 	public abstract void putFunction(Session session, String domain, String name, String function) throws RedbackException;
 	

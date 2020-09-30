@@ -14,6 +14,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.LoggerJSFunction;
+import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class JSManager {
 	
@@ -71,6 +72,7 @@ public class JSManager {
 			ScriptEngine engine = engineManager.getEngineByName("graal.js");
 			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("log", new LoggerJSFunction());
 			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("global", JSConverter.toJS(globalVariables));
+			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("rbutils", new RedbackUtilsJSWrapper());
 			ee = new EngineEntry(engine, 0);
 			engines.put(l, ee);
 		}

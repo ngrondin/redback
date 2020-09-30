@@ -23,8 +23,8 @@ public class RedbackDomainServer extends DomainServer {
 		domainManager.putReport(session, domain, name, category, report);
 	}
 
-	public void putVariable(Session session, String domain, String name, String category, DataEntity var) throws RedbackException {
-		domainManager.putVariable(session, domain, name, category, var);
+	public void putVariable(Session session, String domain, String name, DataEntity var) throws RedbackException {
+		domainManager.putVariable(session, domain, name, var);
 	}
 
 	public void putFunction(Session session, String domain, String name, String function) throws RedbackException {

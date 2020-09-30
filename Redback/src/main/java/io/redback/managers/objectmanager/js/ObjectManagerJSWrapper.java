@@ -1,4 +1,4 @@
-package io.redback.managers.objectmanagers.js;
+package io.redback.managers.objectmanager.js;
 
 import java.util.Arrays;
 import java.util.logging.Logger;

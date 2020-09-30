@@ -19,7 +19,7 @@ import io.firebus.utils.DataMap;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.managers.objectmanager.RedbackObject;
-import io.redback.managers.objectmanagers.js.RedbackObjectJSWrapper;
+import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.js.ProcessInstanceJSWrapper;
 
