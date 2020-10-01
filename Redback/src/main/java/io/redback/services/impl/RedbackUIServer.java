@@ -311,7 +311,7 @@ public class RedbackUIServer extends UIServer
 					is.close();
 					String jsp = new String(bytes);
 					
-					jsp = jsp.replace("\r\n", "\\r\\n").replace("'", "\\'");
+					jsp = jsp.replace("\r", "\\r").replace("\n", "\\n").replace("'", "\\'");
 					int pos1 = -1;
 					int pos2 = -1;
 					while((pos1 = jsp.indexOf("<%=")) != -1  &&  (pos2 = jsp.indexOf("%>", pos1 + 2)) != -1)

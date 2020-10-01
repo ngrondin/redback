@@ -38,13 +38,13 @@ public class HTML
 		int pos = -1;
 		while((pos = sb.indexOf(tag)) > -1)
 		{
-			int posNewLine = sb.substring(0, pos).lastIndexOf("\r\n");
+			int posNewLine = sb.substring(0, pos).lastIndexOf("\n");
 			if(posNewLine == -1)
 				posNewLine = 0;
 			else
-				posNewLine = posNewLine + 2;
+				posNewLine = posNewLine + 1;
 			String indentStr = sb.substring(posNewLine, pos);
-			sb.replace(pos, pos + tag.length(), fragment.toString().replace("\r\n", "\r\n" + indentStr));
+			sb.replace(pos, pos + tag.length(), fragment.toString().replace("\n", "\n" + indentStr));
 			//sb.replace(pos, pos + tag.length(), fragment.toString());
 		}
 		return this;

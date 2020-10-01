@@ -1,4 +1,4 @@
-<rb-modal 
+<rb-modal
 	#<%=id%>="modal"
 	[name]="<%=config.name%>"
 	[hidden]="activeModal != '<%=config.name%>'"
