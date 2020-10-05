@@ -95,8 +95,13 @@ public class JSManager {
 				while(it.hasNext()) {
 					String functionId = it.next();
 					SourceEntry sourceEntry = sourceEntries.get(functionId);
-					if(sourceEntry.lastUpdated >= engineEntry.lastCompiled)
-						engineEntry.engine.eval(sourceEntry.src);
+					if(sourceEntry.lastUpdated >= engineEntry.lastCompiled) {
+						try {
+							engineEntry.engine.eval(sourceEntry.src);
+						} catch(Exception e) {
+							throw new RedbackException("Problem recompiling script [" + functionId + "]", e);
+						}
+					}
 				}
 				engineEntry.lastCompiled = now;
 			}
