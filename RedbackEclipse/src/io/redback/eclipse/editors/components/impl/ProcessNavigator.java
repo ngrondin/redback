@@ -81,7 +81,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 		display = Display.getCurrent();
 		addMenuDetectListener(this);
 		setLayout(new FillLayout());
-
+		setBackground(new Color(display, 255, 255, 255));
+		
 		canvas = new Canvas(this, SWT.NO_REDRAW_RESIZE | SWT.H_SCROLL | SWT.V_SCROLL);
 		canvas.setBackground(new Color(display, 255, 255, 255));
 		canvas.addPaintListener(this);
@@ -167,11 +168,14 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 				String id = node.getString("id");
 				
 				//Box
-				if(node == selectedNode)
+				if(node == selectedNode) {
+					gc.setBackground(new Color(display, 255, 255, 255));
 					gc.setForeground(new Color(display, 200, 0, 0));
-				else
+				} else { 
+					gc.setBackground(new Color(display, 255, 255, 255));
 					gc.setForeground(new Color(display, 0, 0, 0));
-				gc.drawRectangle(x, y, boxWidth, boxHeight);
+				}
+				gc.fillRectangle(x, y, boxWidth, boxHeight);
 				
 				//Header
 				if(node == selectedNode) {

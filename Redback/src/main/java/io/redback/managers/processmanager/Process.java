@@ -32,7 +32,7 @@ public class Process
 		processManager = pm;
 		nodes = new HashMap<String, ProcessUnit>();
 		name = config.getString("name");
-		version = config.getNumber("version").intValue();
+		version = config.containsKey("version") ? config.getNumber("version").intValue() : 0;
 		domain = config.getString("domain");
 		startNode = config.getString("startnode");
 		DataList nodeList = config.getList("nodes");
