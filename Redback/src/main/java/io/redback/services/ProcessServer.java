@@ -76,10 +76,13 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 				{
 					DataMap filter = request.getObject("filter");
 					DataList viewdata = request.getList("viewdata");
-					List<Assignment> result = getAssignments(session, filter, viewdata);
 					DataList responseList = new DataList();
-					for(int i = 0; i < result.size(); i++)
-						responseList.add(result.get(i).getDataMap());
+					List<Assignment> result = getAssignments(session, filter, viewdata);
+					if(result != null) 
+					{
+						for(int i = 0; i < result.size(); i++)
+							responseList.add(result.get(i).getDataMap());
+					}
 					responseData = new DataMap();
 					responseData.put("result", responseList);
 				}
