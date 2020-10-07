@@ -1,5 +1,8 @@
 package io.redback.services.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -7,16 +10,24 @@ import java.util.logging.Logger;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.Address;
 import javax.mail.BodyPart;
+import javax.mail.Flags;
+import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
+import javax.mail.Store;
 import javax.mail.Transport;
+import javax.mail.Flags.Flag;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.search.FlagTerm;
 import javax.mail.util.ByteArrayDataSource;
+
+import com.sun.mail.imap.IMAPFolder;
 
 import io.firebus.Firebus;
 import io.firebus.utils.DataMap;
@@ -24,6 +35,7 @@ import io.redback.RedbackException;
 import io.redback.client.FileClient;
 import io.redback.security.Session;
 import io.redback.services.NotificationServer;
+import io.redback.utils.Email;
 import io.redback.utils.RedbackFile;
 
 public class RedbackNotificationServer extends NotificationServer {
@@ -44,11 +56,20 @@ public class RedbackNotificationServer extends NotificationServer {
 		fileClient = new FileClient(firebus, fileServiceName);
 	}
 
-	protected void email(Session session, List<String> addresses, String subject, String body, List<String> attachments) throws RedbackException {
+	protected void email(Session session, List<String> addresses, String fromAddress, String fromName, String subject, String body, List<String> attachments) throws RedbackException {
+
+	}
+
+	public void clearCaches() {
+		
+	}
+
+	@Override
+	protected void sendEmail(Session session, Email email) throws RedbackException {
 		Thread worker = new Thread() {
 			public void run() {
 				try {
-					if(attachments != null && attachments.size() > 0)
+					if(email.attachments != null && email.attachments.size() > 0)
 						sleep(2000);
 					Properties prop = System.getProperties();
 			        prop.put("mail.smtp.host", smtpServer); 
@@ -66,19 +87,19 @@ public class RedbackNotificationServer extends NotificationServer {
 			        
 			        logger.fine("Sending email");
 			        Message msg = new MimeMessage(mailSession);
-			        msg.setFrom(new InternetAddress("info@redbackwms.com", "RedbackWMS"));
-			        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(String.join(",", addresses), false));
-			        msg.setSubject(subject);
-			        if(attachments == null) {
-			        	msg.setText(body); 
+			        msg.setFrom(new InternetAddress(email.fromAddress, email.fromName));
+			        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(String.join(",", email.addresses), false));
+			        msg.setSubject(email.subject);
+			        if(email.attachments == null) {
+			        	msg.setText(email.body); 
 			        } else {
 			            Multipart multipart = new MimeMultipart();
 
 			            BodyPart messageBodyPart = new MimeBodyPart();
-			            messageBodyPart.setText(body);
+			            messageBodyPart.setText(email.body);
 			            multipart.addBodyPart(messageBodyPart);
 
-			            for(String fileUid: attachments) {
+			            for(String fileUid: email.attachments) {
 			            	RedbackFile file = fileClient.getFile(session, fileUid);
 				            BodyPart fileBodyPart = new MimeBodyPart();
 				            DataSource source = new ByteArrayDataSource(file.bytes, file.mime);
@@ -96,11 +117,67 @@ public class RedbackNotificationServer extends NotificationServer {
 				}
 			}
 		};
-		worker.start();
+		worker.start();	
 	}
 
-	public void clearCaches() {
-		
+	
+	protected List<Email> getEmails(Session session, String server, String username, String password, String folderName) throws RedbackException {
+    	List<Email> emails = new ArrayList<Email>();
+        try 
+        {
+			Properties props = System.getProperties();
+			props.setProperty("mail.store.protocol", "imaps");
+			
+			javax.mail.Session mailSession = javax.mail.Session.getDefaultInstance(props, null);
+			Store store = mailSession.getStore("imaps");
+			store.connect(server, username, password);
+			IMAPFolder folder = (IMAPFolder) store.getFolder(folderName);
+			folder.open(Folder.READ_WRITE);
+			
+			Message[] messages = folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+			for (int i=0; i < messages.length;i++) 
+			{
+				Message msg =  messages[i];
+				List<String> to = new ArrayList<String>();
+				Address[] addresses = msg.getAllRecipients();
+				for(int j = 0; j < addresses.length; j++)
+					to.add(addresses[j].toString());
+				String body = null;
+				List<String> attachments = null;
+				Object content = msg.getContent();
+				if(content instanceof String) {
+					body = (String)content;
+				} else if(content instanceof MimeMultipart) {
+					attachments = new ArrayList<String>();
+					MimeMultipart mmp = (MimeMultipart)content;
+					for(int j = 0; j < mmp.getCount(); j++) {
+						BodyPart bp = mmp.getBodyPart(j);
+						if(bp.isMimeType("text/plain")) {
+							body = (String)bp.getContent();
+						} else if(bp.isMimeType("text/html")) {
+
+						} else {
+							InputStream is = bp.getInputStream();
+						    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+						    int read;
+						    while((read = is.read()) != -1)
+						    	buffer.write(read);
+						    RedbackFile file = fileClient.putFile(session, bp.getFileName(), bp.getContentType(), session.getUserProfile().getUsername(), buffer.toByteArray());
+						    attachments.add(file.uid);
+						}
+					}
+				}
+				Email email = new Email(to, msg.getFrom()[0].toString(), null, msg.getSubject(), body, attachments);
+				emails.add(email);
+				msg.setFlag(Flag.SEEN, true);
+			}
+			folder.close(true);
+			store.close();
+		}
+		catch(Exception e) {
+			throw new RedbackException("Error getting emails", e);
+		} 		
+		return emails;
 	}
 
 }

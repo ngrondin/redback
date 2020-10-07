@@ -1,6 +1,5 @@
 package io.redback.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -12,6 +11,7 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
+import io.redback.utils.Email;
 
 public abstract class NotificationServer extends AuthenticatedServiceProvider {
 
@@ -32,24 +32,24 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 			DataMap request = new DataMap(payload.getString());
 			String action = request.getString("action");
 			if(action != null) {
-				if(action.equals("email")) {
-					DataList addresses = request.getList("addresses");
-					List<String> addList = new ArrayList<String>();
-					for(int i = 0; i < addresses.size(); i++) {
-						addList.add(addresses.getString(i));
-					}
-					String subject = request.getString("subject");
-					String body = request.getString("body");
-					DataList attachments = request.getList("attachments");
-					List<String> attList = null;
-					if(attachments != null) {
-						attList = new ArrayList<String>();
-						for(int i = 0; i < attachments.size(); i++) {
-							attList.add(attachments.getString(i));
-						}
-					}
-					email(session, addList, subject, body, attList);
+				if(action.equals("sendemail")) {
+					sendEmail(session, new Email(request));
 					response = new Payload(new DataMap("result", "ok").toString());
+				} else if(action.equals("getemails")) {
+					String server = request.getString("server");
+					String username = request.getString("username");
+					String password = request.getString("password");
+					String folder = request.getString("folder");
+					List<Email> emails = getEmails(session, server, username, password, folder);
+					if(emails != null) {
+						DataList result = new DataList();
+						for(Email email: emails) {
+							result.add(email.toDataMap());
+						}
+						response = new Payload(new DataMap("result", result).toString());
+					} else {
+						response = new Payload(new DataMap("result", new DataList()).toString());
+					}
 				}
 			} else {
 				throw new RedbackException("No valid action was provided");
@@ -66,7 +66,8 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 		throw new RedbackException("Notification requests need to be authenticated");
 	}
 	
-	protected abstract void email(Session session, List<String> addresses, String subject, String body, List<String> attachments) throws RedbackException;
+	protected abstract void sendEmail(Session session, Email email) throws RedbackException;
 
+	protected abstract List<Email> getEmails(Session session, String server, String username, String password, String folder)  throws RedbackException;
 
 }

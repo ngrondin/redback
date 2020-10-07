@@ -11,8 +11,10 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.utils.DataList;
+import io.firebus.utils.DataMap;
 import io.redback.client.NotificationClient;
 import io.redback.security.Session;
+import io.redback.utils.Email;
 import io.redback.utils.js.JSConverter;
 
 public class NotificationClientJSWrapper implements ProxyObject {
@@ -20,7 +22,7 @@ public class NotificationClientJSWrapper implements ProxyObject {
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected NotificationClient notificationClient;
 	protected Session session;
-	protected String[] members = {"email"};
+	protected String[] members = {"sendemail", "getemails"};
 
 	public NotificationClientJSWrapper(NotificationClient nc, Session s)
 	{
@@ -29,13 +31,15 @@ public class NotificationClientJSWrapper implements ProxyObject {
 	}
 	
 	public Object getMember(String key) {
-		if(key.equals("email")) {
+		if(key.equals("sendemail")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					DataList addresses = (DataList)JSConverter.toJava(arguments[0]);
-					String subject = arguments[1].asString();
-					String body = arguments[2].asString();
-					DataList attachments = arguments.length >= 4 ? (DataList)JSConverter.toJava(arguments[3]) : null;
+					String fromAddress = arguments[1].asString();
+					String fromName = arguments[2].asString();
+					String subject = arguments[3].asString();
+					String body = arguments[4].asString();
+					DataList attachments = arguments.length >= 6 ? (DataList)JSConverter.toJava(arguments[5]) : null;
 					try
 					{
 						List<String> addList = new ArrayList<String>();
@@ -49,8 +53,30 @@ public class NotificationClientJSWrapper implements ProxyObject {
 								attList.add(attachments.getString(i));
 							}
 						}
-						notificationClient.email(session, addList, subject, body, attList);
+						notificationClient.sendEmail(session, addList, fromAddress, fromName, subject, body, attList);
 						return null;
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error sending email", e);
+					}
+				}
+			};
+		} else if(key.equals("getemails")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String server = arguments[0].asString();
+					String username = arguments[1].asString();
+					String password = arguments[2].asString();
+					String folder = arguments[3].asString();
+					try
+					{
+						List<Email> emails = notificationClient.getEmails(session, server, username, password, folder);
+						DataList result = new DataList();
+						for(Email email: emails)
+							result.add(email.toDataMap());
+						DataMap resp = new DataMap("result", result);
+						return JSConverter.toJS(resp);
 					}
 					catch(Exception e)
 					{
