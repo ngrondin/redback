@@ -43,8 +43,12 @@ public class RedbackDomainServer extends DomainServer {
 		return domainManager.getVariable(session, domain, name);
 	}
 
-	public DataMap executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
+	public Object executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
 		return domainManager.executeFunction(session, domain, name, param);
+	}
+
+	public void executeFunctionInAllDomains(Session session, String name, DataMap param) {
+		domainManager.executeFunctionInAllDomains(session, name, param);
 	}
 
 	public void clearCaches() {

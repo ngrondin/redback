@@ -104,7 +104,7 @@ public class DomainClient extends Client {
 	public void executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
-			req.put("action", "executefunction");
+			req.put("action", "execute");
 			req.put("domain", domain);
 			req.put("name", name);
 			req.put("param", param);

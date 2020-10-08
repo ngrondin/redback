@@ -16,6 +16,7 @@ export class Target {
   selectedObject: RbObject;
   title: string;
   _breadcrumbLabel: string;
+  mode: string;
 
   constructor(t: string, vs: string, v: string, f: any) {
     this.view = v;
@@ -54,7 +55,7 @@ export class DesktopRootComponent implements OnInit {
   @Input() menuView : string;
   @Input() version : string;
   menuTarget: Target;
-  menuMode: string;
+  //menuMode: string;
   menuWidth: number;
   viewTargetStack: Target[];
   title: string = "Welcome";
@@ -66,7 +67,7 @@ export class DesktopRootComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.menuMode = 'large';
+    //this.menuMode = 'large';
     this.menuWidth = 251;
     if(this.version == null)
       this.version = 'default';
@@ -77,6 +78,7 @@ export class DesktopRootComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     if("menuView" in changes) {
       this.menuTarget = new Target('menu', this.version, this.menuView, null);
+      this.menuTarget.mode = 'large';
         //url: this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/' + this.version + '/' + this.menuView,
     }
     if("initialView" in changes) {
@@ -110,12 +112,14 @@ export class DesktopRootComponent implements OnInit {
   }
 
   toggleMenuMode() {
-    if(this.menuMode == 'large') {
-      this.menuMode = 'small';
-      this.menuWidth = 53;
+    if(this.menuTarget.mode == 'large') {
+      //this.menuMode = 'small';
+      this.menuTarget.mode = 'small';
+      //this.menuWidth = 53;
     } else {
-      this.menuMode = 'large';
-      this.menuWidth = 251;
+      //this.menuMode = 'large';
+      this.menuTarget.mode = 'large';
+      //this.menuWidth = 251;
     }
   }
 

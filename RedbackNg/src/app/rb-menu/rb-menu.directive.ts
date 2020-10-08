@@ -1,10 +1,11 @@
-import { Directive } from '@angular/core';
+import { Directive, Input } from '@angular/core';
 
 @Directive({
   selector: 'rb-menu',
   exportAs: 'menu',
 })
 export class RbMenuDirective {
+  @Input('mode') mode = 'large';
   public largemenu : boolean;
   public groupOpen : boolean[];
 
@@ -14,7 +15,7 @@ export class RbMenuDirective {
   }
 
   get isLarge() : boolean {
-    return true;
+    return this.mode == 'large';
   }
 
   public toggleGroup(grp : string) {

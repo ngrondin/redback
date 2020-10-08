@@ -14,7 +14,7 @@ import io.redback.utils.StringUtils;
 
 public class RedbackUtilsJSWrapper implements ProxyObject
 {
-	protected String[] members = {"convertDataEntityToAttributeString", "convertDataMapToAttributeString", "convertFilterForClient", "base64encode", "base64decode"};
+	protected String[] members = {"convertDataEntityToAttributeString", "convertDataMapToAttributeString", "convertFilterForClient", "base64encode", "base64decode", "urlencode", "urldecode"};
 	
 	public RedbackUtilsJSWrapper() {
 	}
@@ -48,6 +48,18 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					return JSConverter.toJS(StringUtils.base64decode(arguments[0].asString()));
+				}
+			};
+		} else if(key.equals("urlencode")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return JSConverter.toJS(StringUtils.urlencode(arguments[0].asString()));
+				}
+			};
+		} else if(key.equals("urldecode")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return JSConverter.toJS(StringUtils.urldecode(arguments[0].asString()));
 				}
 			};
 		} else {

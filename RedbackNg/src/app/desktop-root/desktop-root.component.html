@@ -41,8 +41,7 @@
     autosize>
     <mat-sidenav 
         mode="side" 
-        opened
-        [style.width.px]="menuWidth">
+        opened>
         <div
             class="rb-menu-nav">
             <div
@@ -61,11 +60,11 @@
                     mat-icon-button
                     (click)="toggleMenuMode()">
                     <mat-icon
-                        *ngIf="menuMode == 'small'">
+                        *ngIf="menuTarget.mode == 'small'">
                         navigate_next
                     </mat-icon>
                     <mat-icon
-                        *ngIf="menuMode == 'large'">
+                        *ngIf="menuTarget.mode == 'large'">
                         navigate_before
                     </mat-icon>
                 </button>                

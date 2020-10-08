@@ -63,7 +63,20 @@ import { RbModalComponent } from './rb-modal/rb-modal.component';
 import { RbFileInputComponent } from './rb-file-input/rb-file-input.component';
 import { RbVcollapseComponent } from './rb-vcollapse/rb-vcollapse.component';
 import { RbCurrencyInputComponent } from './rb-currency-input/rb-currency-input.component';
+import { RbCodeInputComponent } from './rb-code-input/rb-code-input.component';
+import { AceEditorModule } from 'ng2-ace-editor';
+import { AceConfigInterface, AceModule, ACE_CONFIG } from 'ngx-ace-wrapper';
+import 'brace';
+import 'brace/mode/text';
+import 'brace/mode/html';
+import 'brace/mode/javascript';
+import 'brace/theme/github';
+import 'brace/theme/eclipse';
 
+/*
+const DEFAULT_ACE_CONFIG: AceConfigInterface = {
+};
+*/
 @NgModule({
   imports: [
     CommonModule,
@@ -95,7 +108,9 @@ import { RbCurrencyInputComponent } from './rb-currency-input/rb-currency-input.
     AgmOverlays,
     AgmCoreModule.forRoot({
       apiKey: 'AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'
-    })
+    }),
+    AceEditorModule,
+    AceModule
   ],
   declarations: [
     DesktopRootComponent,
@@ -142,7 +157,8 @@ import { RbCurrencyInputComponent } from './rb-currency-input/rb-currency-input.
     RbGraphComponent,
     RbChatComponent,
     RbVcollapseComponent,
-    RbCurrencyInputComponent
+    RbCurrencyInputComponent,
+    RbCodeInputComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -197,7 +213,8 @@ import { RbCurrencyInputComponent } from './rb-currency-input/rb-currency-input.
     RbGraphComponent,
     RbChatComponent,
     RbVcollapseComponent,
-    RbCurrencyInputComponent
+    RbCurrencyInputComponent,
+    RbCodeInputComponent
   ],
   providers: [
     CookieService,
@@ -205,7 +222,11 @@ import { RbCurrencyInputComponent } from './rb-currency-input/rb-currency-input.
     DataService,
     ConfigService,
     DragService,
-    MapService
+    MapService/*,
+    {
+      provide: ACE_CONFIG,
+      useValue: DEFAULT_ACE_CONFIG
+    }*/
   ],
   entryComponents: [
     RbPopupListComponent,

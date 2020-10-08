@@ -16,7 +16,7 @@
         matInput 
         *ngIf="readonly"
         [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
-        [(ngModel)]="displayValue"
+        [ngModel]="displayValue"
         [readonly]="true">
     <mat-icon 
         matPrefix

@@ -2,6 +2,9 @@ package io.redback.utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Date;
 
 import org.bson.internal.Base64;
@@ -127,6 +130,22 @@ public class StringUtils
 		return s;
 	}
 	
+	public static String urlencode(String s) {
+		try {
+			return URLEncoder.encode(s, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			return s;
+		}
+	}
+	
+	public static String urldecode(String s) {
+		try {
+			return URLDecoder.decode(s, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			return s;
+		}
+	}
+		
 	
 	public static String convertObjectToCSVField(Object obj) {
 		String ret = "";

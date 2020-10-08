@@ -1,0 +1,12 @@
+:host {
+    min-width: 400px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    border: solid 1px grey;
+    margin: 6px;
+}
+
+.editor {
+    flex: 1 1 auto;
+}

@@ -3,7 +3,6 @@ package io.redback.utils.js;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -12,7 +11,7 @@ import org.graalvm.polyglot.proxy.ProxyInstant;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 public class JSDate implements ProxyObject, ProxyInstant {
-	protected String[] members = {"getTime"};
+	protected String[] members = {"getTime", "toISOString"};
 	protected Date date;
 	
 	public JSDate(Date dt) {
@@ -28,6 +27,12 @@ public class JSDate implements ProxyObject, ProxyInstant {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					return date.getTime();
+				}
+			};			
+		} else if(key.equals("toISOString")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return date.toInstant().toString();
 				}
 			};			
 		} else {

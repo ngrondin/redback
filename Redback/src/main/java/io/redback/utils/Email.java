@@ -26,10 +26,10 @@ public class Email {
 	public Email(DataMap map) {
 		DataList addressList = map.getList("addresses");
 		addresses = new ArrayList<String>();
-		for(int i = 0; i < addresses.size(); i++) {
+		for(int i = 0; i < addressList.size(); i++) {
 			addresses.add(addressList.getString(i));
 		}
-		fromAddress = map.getString("from");
+		fromAddress = map.getString("fromaddress");
 		fromName = map.getString("fromname");
 		subject = map.getString("subject");
 		body = map.getString("body");					

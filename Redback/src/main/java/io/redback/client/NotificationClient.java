@@ -25,6 +25,8 @@ public class NotificationClient extends Client {
 			for(String add : addresses)
 				adds.add(add);
 			req.put("addresses", adds);
+			req.put("fromaddress", fromAddress);
+			req.put("fromname", fromName);
 			req.put("subject", subject);
 			req.put("body", body);
 			if(attachments != null) {

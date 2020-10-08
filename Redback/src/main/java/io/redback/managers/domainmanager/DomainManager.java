@@ -1,6 +1,7 @@
 package io.redback.managers.domainmanager;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,8 @@ public class DomainManager implements Consumer {
 	protected NotificationClient notificationClient;
 	protected ReportClient reportClient;
 	protected GatewayClient gatewayClient;
-	protected CollectionConfig collection;
+	protected CollectionConfig entryCollection;
+	protected CollectionConfig logCollection;
 	protected Map<String, DomainEntry> entries;
 
 	public DomainManager(Firebus fb, DataMap config) {
@@ -75,7 +77,8 @@ public class DomainManager implements Consumer {
 		notificationClient = new NotificationClient(firebus, notificationServiceName);
 		reportClient = new ReportClient(firebus, reportServiceName);
 		gatewayClient = new GatewayClient(firebus, gatewayClientName);
-		collection = new CollectionConfig(config.getObject("collection"), "rbdm_entry");
+		entryCollection = new CollectionConfig(config.getObject("entrycollection"), "rbdm_entry");
+		logCollection = new CollectionConfig(config.getObject("logcollection"), "rbdm_log");
 		entries = new HashMap<String, DomainEntry>();	
 		firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
 	}
@@ -105,12 +108,12 @@ public class DomainManager implements Consumer {
 			try
 			{
 				DataMap filter = new DataMap();
-				filter.put(collection.getField("domain"), domain);
-				filter.put(collection.getField("name"), name);
-				DataMap resp = dataClient.getData(collection.getName(), filter, null);
+				filter.put(entryCollection.getField("domain"), domain);
+				filter.put(entryCollection.getField("name"), name);
+				DataMap resp = dataClient.getData(entryCollection.getName(), filter, null);
 				DataList result = resp.getList("result");
 				if(result.size() > 0) {
-					DataMap entryMap = collection.convertObjectToCanonical(result.getObject(0));
+					DataMap entryMap = entryCollection.convertObjectToCanonical(result.getObject(0));
 					if(entryMap.getString("type").equals("function")) {
 						entry = new DomainFunction(this, jsManager, entryMap);
 					} else if(entryMap.getString("type").equals("report")) {
@@ -137,12 +140,12 @@ public class DomainManager implements Consumer {
 		try
 		{
 			DataMap filter = new DataMap();
-			filter.put(collection.getField("domain"), domain);
-			filter.put(collection.getField("category"), category);
-			DataMap resp = dataClient.getData(collection.getName(), filter, null);
+			filter.put(entryCollection.getField("domain"), domain);
+			filter.put(entryCollection.getField("category"), category);
+			DataMap resp = dataClient.getData(entryCollection.getName(), filter, null);
 			DataList result = resp.getList("result");
 			for(int i = 0; i < result.size(); i++) {
-				DataMap entryMap = collection.convertObjectToCanonical(result.getObject(i));
+				DataMap entryMap = entryCollection.convertObjectToCanonical(result.getObject(i));
 				DomainEntry entry = null;
 				if(entryMap.getString("type").equals("function")) {
 					entry = new DomainFunction(this, jsManager, entryMap);
@@ -170,11 +173,11 @@ public class DomainManager implements Consumer {
 		try
 		{
 			DataMap filter = new DataMap();
-			filter.put(collection.getField("name"), name);
-			DataMap resp = dataClient.getData(collection.getName(), filter, null);
+			filter.put(entryCollection.getField("name"), name);
+			DataMap resp = dataClient.getData(entryCollection.getName(), filter, null);
 			DataList result = resp.getList("result");
 			for(int i = 0; i < result.size(); i++) {
-				DataMap entryMap = collection.convertObjectToCanonical(result.getObject(i));
+				DataMap entryMap = entryCollection.convertObjectToCanonical(result.getObject(i));
 				String domain = entryMap.getString("domain");
 				DomainEntry entry = null;
 				if(entryMap.getString("type").equals("function")) {
@@ -203,10 +206,26 @@ public class DomainManager implements Consumer {
 		DataMap key = new DataMap();
 		key.put("domain", domain);
 		key.put("name", name);
-		dataClient.putData(collection.getName(), collection.convertObjectToSpecific(key), collection.convertObjectToSpecific(entry.getConfig()));
+		dataClient.putData(entryCollection.getName(), entryCollection.convertObjectToSpecific(key), entryCollection.convertObjectToSpecific(entry.getConfig()));
 		if(entry.canCache()) {
 			//entries.put(domain + "." + name, entry);
 			firebus.publish("_rb_domain_cache_clear", new Payload(key.toString()));
+		}
+	}
+	
+	protected void addFunctionLog(Session session, DomainFunction function, String message) {
+		try {
+			String id = function.getDomain() + "." + function.getName() + "." + System.currentTimeMillis();
+			DataMap key = new DataMap("_id", id);
+			DataMap log = new DataMap();
+			log.put("domain", function.getDomain());
+			log.put("name", function.getName());
+			log.put("entry", message);
+			log.put("username", session.getUserProfile().getUsername());
+			log.put("date", new Date());
+			dataClient.putData(logCollection.getName(), logCollection.convertObjectToSpecific(key), logCollection.convertObjectToSpecific(log));
+		} catch(Exception e) {
+			logger.severe(StringUtils.rollUpExceptions(e));
 		}
 	}
 	
@@ -280,12 +299,44 @@ public class DomainManager implements Consumer {
 			return null;
 	}
 	
-	public DataMap executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
+	public Object executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
+		Object result = null;
 		if(!includeLoaded)
 			loadIncludeScripts();
+
+		DomainEntry de = getDomainEntry(domain, name);
 		
-		List<DomainEntry> functions = new ArrayList<DomainEntry>();
-		if(domain == null || (domain != null && domain.equals("*"))) {
+		if(de != null && de instanceof DomainFunction) {
+			Map<String, Object> context = new HashMap<String, Object>();
+			context.put("log", new LoggerJSFunction());
+			context.put("session", new SessionJSWrapper(session));
+			context.put("oc", new ObjectClientJSWrapper(objectClient, session));
+			context.put("fc", new FileClientJSWrapper(fileClient, session));
+			context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
+			context.put("rc", new ReportClientJSWrapper(reportClient, session));
+			context.put("gc", new GatewayClientJSWrapper(gatewayClient));
+			context.put("param", JSConverter.toJS(param));
+
+			DomainFunction df = (DomainFunction)de;
+			context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
+			context.put("domain", df.getDomain());
+			try {
+				result = df.execute(context);
+				addFunctionLog(session, df, "Execution completed");
+			} catch(Exception e) {
+				addFunctionLog(session, df, StringUtils.rollUpExceptions(e));
+				throw new RedbackException("Error executing domain script", e);
+			}
+		}
+		return result;
+	}
+	
+	public void executeFunctionInAllDomains(Session session, String name, DataMap param) {
+		try {
+			if(!includeLoaded) 
+				loadIncludeScripts();
+			
+			List<DomainEntry> functions = new ArrayList<DomainEntry>();
 			List<DomainEntry> allFunctions = listAllEntriesWithName(name);
 			if(session.getUserProfile().getDomains().contains("*")) {
 				functions.addAll(allFunctions);
@@ -298,42 +349,38 @@ public class DomainManager implements Consumer {
 					}
 				}
 			}
-		} else {
-			DomainEntry de = getDomainEntry(domain, name);
-			if(de != null)
-				functions.add(de);
-		}
-		
-		if(functions.size() > 0) {
-			Map<String, Object> context = new HashMap<String, Object>();
-			context.put("log", new LoggerJSFunction());
-			context.put("session", new SessionJSWrapper(session));
-			context.put("oc", new ObjectClientJSWrapper(objectClient, session));
-			context.put("fc", new FileClientJSWrapper(fileClient, session));
-			context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
-			context.put("rc", new ReportClientJSWrapper(reportClient, session));
-			context.put("gc", new GatewayClientJSWrapper(gatewayClient));
-			context.put("param", JSConverter.toJS(param));
-	
-			DataMap multiDomainResult = new DataMap();
-			for(DomainEntry de: functions) {
-				DomainFunction df = (DomainFunction)de;
-				context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
-				context.put("domain", df.getDomain());
-				try {
-					Object o = df.execute(context);
-					if(o instanceof DataMap)
-						multiDomainResult.put(df.getDomain(), (DataMap)o);
-				} catch(Exception e) {
-					logger.severe(StringUtils.rollUpExceptions(e));
-				}
-			}
-			if(domain.equals("*"))
-				return multiDomainResult;
-			else
-				return multiDomainResult.getObject(domain);
-		} else {
-			return null;
+			
+			if(functions.size() > 0) {
+				Map<String, Object> context = new HashMap<String, Object>();
+				context.put("log", new LoggerJSFunction());
+				context.put("session", new SessionJSWrapper(session));
+				context.put("oc", new ObjectClientJSWrapper(objectClient, session));
+				context.put("fc", new FileClientJSWrapper(fileClient, session));
+				context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
+				context.put("rc", new ReportClientJSWrapper(reportClient, session));
+				context.put("gc", new GatewayClientJSWrapper(gatewayClient));
+				context.put("param", JSConverter.toJS(param));
+				DomainManager thisDomainManager = this;
+
+				Thread worker = new Thread() {
+					public void run() {
+						for(DomainEntry de: functions) {
+							DomainFunction df = (DomainFunction)de;
+							context.put("dm", new DomainManagerJSWrapper(thisDomainManager, session, df.getDomain()));
+							context.put("domain", df.getDomain());
+							try {
+								df.execute(context);
+								addFunctionLog(session, df, "Execution completed");
+							} catch(Exception e) {
+								addFunctionLog(session, df, StringUtils.rollUpExceptions(e));
+							}
+						}
+					}
+				};
+				worker.start();	
+			} 			
+		} catch(Exception e) {
+			logger.severe(StringUtils.rollUpExceptions(e));
 		}
 	}
 	

@@ -1,39 +1,39 @@
 {
   "/rbui/view/*": {
-    "target": "http://localhost",
+    "target": "http://localhost:8000",
     "secure": false
   },
   "/rbui/resource/*": {
-    "target": "http://localhost",
+    "target": "http://localhost:8000",
     "secure": false
   },
   "/rbui/menu/*": {
-    "target": "http://localhost",
+    "target": "http://localhost:8000",
     "secure": false
   },
   "/rbos": {
-    "target": "http://localhost/rbos",
+    "target": "http://localhost:8000/rbos",
     "secure": false
   },
   "/rbpm": {
-    "target": "http://localhost/rbpm",
+    "target": "http://localhost:8000/rbpm",
     "secure": false
   },
   "/rbfs": {
-    "target": "http://localhost/rbfs",
+    "target": "http://localhost:8000/rbfs",
     "secure": false
   },
   "/rbrs": {
-    "target": "http://localhost/rbrs",
+    "target": "http://localhost:8000/rbrs",
     "secure": false
   },
   "/rbsi": {
-    "target": "ws://localhost/rbsi",
+    "target": "ws://localhost:8000/rbsi",
     "secure": false,
     "ws":true
   },
   "/rbch": {
-    "target": "ws://localhost/rbch",
+    "target": "ws://localhost:8000/rbch",
     "secure": false,
     "ws":true
   }    

@@ -69,14 +69,56 @@ public class GatewayClient extends Client
 			req.put("cookie", cookie);
 		return call(req);
 	}
+	
+	public DataMap put(String url, Object body) throws RedbackException {
+		DataMap req = new DataMap();
+		req.put("method", "put");
+		req.put("url", url);
+		req.put("body", body);
+		return call(req);	
+	}
+	
+	public DataMap putForm(String url, DataMap form) throws RedbackException {
+		DataMap req = new DataMap();
+		req.put("method", "put");
+		req.put("url", url);
+		req.put("form", form);
+		return call(req);	
+	}
+
+	public DataMap put(String url, Object body, DataMap headers, DataMap cookie) throws RedbackException {
+		DataMap req = new DataMap();
+		req.put("method", "put");
+		req.put("url", url);
+		req.put("body", body);
+		if(headers != null)
+			req.put("headers", headers);
+		if(cookie != null)
+			req.put("cookie", cookie);
+		return call(req);	
+	}
+
+	public DataMap putForm(String url, DataMap form, DataMap headers, DataMap cookie) throws RedbackException {
+		DataMap req = new DataMap();
+		req.put("method", "put");
+		req.put("url", url);
+		req.put("form", form);
+		if(headers != null)
+			req.put("headers", headers);
+		if(cookie != null)
+			req.put("cookie", cookie);
+		return call(req);
+	}	
 
 	protected DataMap call(DataMap req) throws RedbackException
 	{
 		Object ret = request(req);
 		if(ret instanceof DataMap)
 			return (DataMap)ret;
-		else
+		else if(ret instanceof String)
 			return new DataMap("result", ret.toString());
+		else 
+			return new DataMap();
 	}
 
 
