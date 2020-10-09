@@ -1,0 +1,60 @@
+<div
+    class="rb-table-header-container">
+    <div
+        class="rb-table-header">
+        <div
+            class="rb-table-colheader"
+            *ngFor="let col of columns"
+            [style.width.px]="col.width"
+            (click)="clickColumn(col)">
+            {{col.label}}
+        </div>
+    </div>
+</div>
+<div
+    class="rb-table-body-container">                                                                                                                                                    
+    <div
+        class="rb-table-body">
+        <div
+            class="rb-table-row"
+            *ngFor="let object of list">
+            <div
+                class="rb-table-rowitem"
+                *ngFor="let col of columns"
+                [style.width.px]="col.width">
+                <rb-input
+                    *ngIf="col.type == 'input'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [editable]="true">
+                </rb-input>
+                <rb-datetime-input
+                    *ngIf="col.type == 'datepicker'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [format]="col.format"
+                    [editable]="true">
+                </rb-datetime-input>
+                <rb-related-input
+                    *ngIf="col.type == 'relatedinput'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [displayattribute]="col.displayAttribute"
+                    [editable]="true">
+                </rb-related-input>
+            </div>
+            <div
+                class="rb-table-rowbutton">
+                <button
+                    mat-icon-button
+                    (click)="deleteObject(object)">
+                    <mat-icon>clear</mat-icon>
+                </button>        
+            </div>
+        </div>    
+    </div>
+                                                                                                                                              
+</div>

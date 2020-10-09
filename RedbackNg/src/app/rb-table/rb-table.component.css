@@ -1,0 +1,47 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.rb-table-header-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-table-header {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-table-colheader {
+    display: flex;
+    flex-direction: row;
+    margin: 0px 10px 0px 0px;
+    font-size: 0.9rem;
+    color: darkgray;
+    cursor: pointer;
+}
+
+.rb-table-body-container {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+
+.rb-table-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-table-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.rb-table-rowitem {
+    display: flex;
+    flex-direction: row;
+    margin: 0px 10px 0px 0px
+}
