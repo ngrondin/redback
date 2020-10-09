@@ -50,8 +50,8 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
         val = null;  
       }
     } else {
-      if(this.value != null) {
-        val = this.formatDate(new Date(this.value));
+      if(this._value != null) {
+        val = this.formatDate(new Date(this._value));
       } else {
         val = null;
       }

@@ -1,3 +1,9 @@
+<mat-icon 
+    *ngIf="icon != null" 
+    class="rb-grey-icon"
+    [style.margin-top.px]="10">
+    {{icon}}
+</mat-icon>
 <mat-form-field 
     [style.width]="widthString" >
     <mat-label>{{label}}</mat-label>
@@ -10,7 +16,4 @@
         autocomplete="off"
         [rows]="rows">
     </textarea>
-    <mat-icon 
-        matPrefix
-        class="rb-grey-icon">{{icon}}</mat-icon>
 </mat-form-field>

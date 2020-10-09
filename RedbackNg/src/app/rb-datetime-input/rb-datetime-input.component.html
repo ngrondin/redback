@@ -1,5 +1,10 @@
+<mat-icon 
+   *ngIf="icon != null" 
+   class="rb-grey-icon">
+   {{icon}}
+</mat-icon>  
 <mat-form-field
-    [style.width]="(size * 15) + 'px'" >
+    [style.width]="widthString">
     <mat-label>{{label}}</mat-label>
     <input 
         #input
@@ -11,8 +16,4 @@
         (keydown)="keydown($event)"
         [readonly]="readonly"
         autocomplete="off">
-    <mat-icon 
-        matPrefix
-        class="rb-grey-icon">{{icon}}
-    </mat-icon>  
 </mat-form-field>

@@ -13,7 +13,7 @@ export abstract class RbInputCommonComponent implements OnInit {
   @Input('editable') editable: boolean;
   @Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
-  @Input('value') value: string;
+  @Input('value') _value: string;
   @Output('valueChange') valueChange = new EventEmitter();
   @Output('change') change = new EventEmitter();
 
@@ -58,5 +58,13 @@ export abstract class RbInputCommonComponent implements OnInit {
     } else {
       return !this.editable;
     }
+  }
+
+
+  public get widthString() : string {
+    if(this.size != null)
+      return (15*this.size) + 'px';
+    else
+      return '100%';
   }
 }

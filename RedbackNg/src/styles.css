@@ -180,6 +180,14 @@ rb-menu > .mat-list-base {
 	transition: background-color 0.1s step-start;
 }
 
+.mat-form-field-underline {
+	background-color: lightgray !important;
+}
+
+.xxxmat-form-field-prefix {
+	margin-right: 10px;
+}
+
 rb-textarea-input .mat-form-field-flex {
     align-items: start!important;
 }
@@ -253,19 +261,9 @@ rb-tab {
 }
 
 
-.mat-form-field-underline {
-	left: 30px;
-	right: 0px;
-	width: auto !important;
-	background-color: lightgray !important;
-}
-
-.mat-form-field-prefix {
-	margin-right: 10px;
-}
-
 .rb-grey-icon {
 	color: grey;
+	margin-right: 5px;
 }
 
 

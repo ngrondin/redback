@@ -1,3 +1,8 @@
+<mat-icon 
+    *ngIf="icon != null" 
+    class="rb-grey-icon">
+    {{icon}}
+</mat-icon>
 <mat-form-field 
     [style.width]="widthString" >
     <mat-label>{{label}}</mat-label>
@@ -18,8 +23,4 @@
         [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         [ngModel]="displayValue"
         [readonly]="true">
-    <mat-icon 
-        matPrefix
-        class="rb-grey-icon">{{icon}}
-    </mat-icon>
 </mat-form-field>

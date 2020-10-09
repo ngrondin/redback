@@ -73,7 +73,6 @@ export class RbListComponent implements OnInit {
   }
 
   private formatText(txt: string) : string {
-    
     if(this.isoDateRegExp.test(txt)) {
       return (new Date(txt)).toLocaleString();
     } else {

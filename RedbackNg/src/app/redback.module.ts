@@ -72,6 +72,7 @@ import 'brace/mode/html';
 import 'brace/mode/javascript';
 import 'brace/theme/github';
 import 'brace/theme/eclipse';
+import { RbTableComponent } from './rb-table/rb-table.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -158,7 +159,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbChatComponent,
     RbVcollapseComponent,
     RbCurrencyInputComponent,
-    RbCodeInputComponent
+    RbCodeInputComponent,
+    RbTableComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -214,7 +216,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbChatComponent,
     RbVcollapseComponent,
     RbCurrencyInputComponent,
-    RbCodeInputComponent
+    RbCodeInputComponent,
+    RbTableComponent
   ],
   providers: [
     CookieService,

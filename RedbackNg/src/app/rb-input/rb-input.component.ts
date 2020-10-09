@@ -16,9 +16,6 @@ export class RbInputComponent extends RbInputCommonComponent implements OnInit {
    }
 
   ngOnInit() {
-    if(this.icon == null) {
-      this.icon = 'description';
-    }
   }
 
   public get value(): string {
@@ -40,12 +37,6 @@ export class RbInputComponent extends RbInputCommonComponent implements OnInit {
     this.editedValue = val;
   }
 
-  public get widthString() : string {
-    if(this.size != null)
-      return (15*this.size) + 'px';
-    else
-      return '100%';
-  }
 
   commit() {
     this.previousValue = this.editedValue;
