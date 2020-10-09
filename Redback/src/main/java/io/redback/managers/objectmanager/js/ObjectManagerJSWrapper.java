@@ -19,7 +19,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 	private Logger logger = Logger.getLogger("io.redback");
 	protected ObjectManager objectManager;
 	protected Session session;
-	protected String[] members = {"getObject", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute"};
+	protected String[] members = {"getObject", "listObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute"};
 	
 	public ObjectManagerJSWrapper(ObjectManager om, Session s)
 	{
@@ -43,7 +43,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 					}
 				}
 			};
-		} else if(key.equals("getObjectList")) {
+		} else if(key.equals("getObjectList") || key.equals("listObjects")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					try {

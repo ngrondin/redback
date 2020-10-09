@@ -19,7 +19,7 @@ public class RedbackObjectJSWrapper implements ProxyObject
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected RedbackObject rbObject;
-	protected String[] members = {"getRelated", "save", "getUpdatedAttributes", "isNew", "isAttributeUpdated"};
+	protected String[] members = {"getRelated", "save", "getUpdatedAttributes", "isNew", "isAttributeUpdated", "delete"};
 	
 	public RedbackObjectJSWrapper(RedbackObject o)
 	{
@@ -75,6 +75,21 @@ public class RedbackObjectJSWrapper implements ProxyObject
 						if(rbObject.getUpdatedAttributes().contains(attribute))
 							ret = true;
 						return JSConverter.toJS(ret);
+					}
+				};				
+			}			
+			else if(name.equals("delete"))
+			{
+				return new ProxyExecutable() {
+					public Object execute(Value... arguments) {
+						try {
+							rbObject.delete();
+							return null;
+						} catch(Exception e) {
+							String errMsg = "Error deleting object : " + constructErrorString(e);
+							logger.severe(errMsg);
+							throw new RuntimeException(errMsg);
+						}	
 					}
 				};				
 			}			

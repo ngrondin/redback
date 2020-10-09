@@ -434,7 +434,7 @@ public class RedbackObject extends RedbackElement
 		{
 			DataMap key = new DataMap();
 			key.put(config.getUIDDBKey(), getUID().getObject());
-			objectManager.getDataClient().deleteData(config.getName(), key);
+			objectManager.getDataClient().deleteData(config.getCollection(), key);
 		}
 		else if(updatedAttributes.size() > 0  ||  isNewObject == true)
 		{
