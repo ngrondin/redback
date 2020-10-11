@@ -43,6 +43,17 @@ export class RbLogComponent implements OnInit {
     return str;
   }
 
+  getEntryForItem(object: RbObject) : string {
+    let str : string = object.data[this.entryattribute];
+    if(str == null) {
+      str = "";
+    } else {
+      str = str.split('\r\n').join('<br>').split('\t').join('&nbsp;&nbsp;');
+    }
+    return str;
+  }
+  
+
   post() {
     let msg: any = {};
     msg[this.entryattribute] = "'" + this.value.replace("'", "\\'") + "'";

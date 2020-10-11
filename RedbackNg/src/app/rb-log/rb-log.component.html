@@ -37,8 +37,8 @@
             </div>
         </div>
         <div
-            class="rb-log-entry">
-            {{item.data[this.entryattribute]}}
+            class="rb-log-entry"
+            [innerHTML]="getEntryForItem(item)">
         </div>
     </div >
 
