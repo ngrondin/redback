@@ -27,6 +27,7 @@ import io.redback.client.js.GatewayClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.client.js.ReportClientJSWrapper;
+import io.redback.managers.domainmanager.js.DomainLoggerJS;
 import io.redback.managers.domainmanager.js.DomainManagerJSWrapper;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
@@ -34,7 +35,6 @@ import io.redback.security.js.SessionJSWrapper;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.JSConverter;
-import io.redback.utils.js.LoggerJSFunction;
 
 public class DomainManager implements Consumer {
 	private Logger logger = Logger.getLogger("io.redback");
@@ -307,8 +307,9 @@ public class DomainManager implements Consumer {
 		DomainEntry de = getDomainEntry(domain, name);
 		
 		if(de != null && de instanceof DomainFunction) {
+			DomainLoggerJS dl = new DomainLoggerJS();
 			Map<String, Object> context = new HashMap<String, Object>();
-			context.put("log", new LoggerJSFunction());
+			context.put("log", dl);
 			context.put("session", new SessionJSWrapper(session));
 			context.put("oc", new ObjectClientJSWrapper(objectClient, session));
 			context.put("fc", new FileClientJSWrapper(fileClient, session));
@@ -321,10 +322,13 @@ public class DomainManager implements Consumer {
 			context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
 			context.put("domain", df.getDomain());
 			try {
+				long start = System.currentTimeMillis();
 				result = df.execute(context);
-				addFunctionLog(session, df, "Execution completed");
+				dl.log("Execution completed in " + (System.currentTimeMillis() - start) + "ms");
+				addFunctionLog(session, df, dl.getLog());
 			} catch(Exception e) {
-				addFunctionLog(session, df, StringUtils.rollUpExceptions(e));
+				dl.log(StringUtils.rollUpExceptions(e));
+				addFunctionLog(session, df, dl.getLog());
 				throw new RedbackException("Error executing domain script", e);
 			}
 		}
@@ -351,8 +355,9 @@ public class DomainManager implements Consumer {
 			}
 			
 			if(functions.size() > 0) {
+				DomainLoggerJS dl = new DomainLoggerJS();
 				Map<String, Object> context = new HashMap<String, Object>();
-				context.put("log", new LoggerJSFunction());
+				context.put("log", dl);
 				context.put("session", new SessionJSWrapper(session));
 				context.put("oc", new ObjectClientJSWrapper(objectClient, session));
 				context.put("fc", new FileClientJSWrapper(fileClient, session));
@@ -369,10 +374,13 @@ public class DomainManager implements Consumer {
 							context.put("dm", new DomainManagerJSWrapper(thisDomainManager, session, df.getDomain()));
 							context.put("domain", df.getDomain());
 							try {
+								long start = System.currentTimeMillis();
 								df.execute(context);
-								addFunctionLog(session, df, "Execution completed");
+								dl.log("Execution completed in " + (System.currentTimeMillis() - start) + "ms");
+								addFunctionLog(session, df, dl.getLog());
 							} catch(Exception e) {
-								addFunctionLog(session, df, StringUtils.rollUpExceptions(e));
+								dl.log(StringUtils.rollUpExceptions(e));
+								addFunctionLog(session, df, dl.getLog());
 							}
 						}
 					}

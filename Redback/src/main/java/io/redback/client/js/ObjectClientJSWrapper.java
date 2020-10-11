@@ -19,7 +19,7 @@ public class ObjectClientJSWrapper implements ProxyObject {
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected ObjectClient objectClient;
 	protected Session session;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects"};
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject"};
 
 	public ObjectClientJSWrapper(ObjectClient oc, Session s)
 	{
@@ -68,6 +68,22 @@ public class ObjectClientJSWrapper implements ProxyObject {
 					try
 					{
 						Object o = objectClient.listAllObjects(session, objectname, filter, true);
+						return JSConverter.toJS(o);
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error listing remote object", e);
+					}
+				}
+			};
+		} else if(key.equals("createObject")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String objectname = arguments[0].asString();
+					DataMap data = (DataMap)JSConverter.toJava(arguments[1]);
+					try
+					{
+						Object o = objectClient.createObject(session, objectname, data, true);
 						return JSConverter.toJS(o);
 					}
 					catch(Exception e)

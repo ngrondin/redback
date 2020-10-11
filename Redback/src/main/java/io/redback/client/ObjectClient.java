@@ -69,4 +69,20 @@ public class ObjectClient extends Client
 			throw new RedbackException("Error listing objects", e);
 		}
 	}
+	
+	public RedbackObjectRemote createObject(Session session, String objectname, DataMap data, boolean addRelated) throws RedbackException  {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "create");
+			req.put("object", objectname);
+			req.put("data", data);
+			if(addRelated)
+				req.put("options", new DataMap("addrelated", true));
+			DataMap resp = request(session, req);
+			RedbackObjectRemote ror = new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
+			return ror;
+		} catch(Exception e) {
+			throw new RedbackException("Error listing objects", e);
+		}
+	}
 }

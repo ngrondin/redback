@@ -44,7 +44,7 @@ public class DomainServiceUnit extends ProcessUnit
 			Map<String, Object> context = pi.getScriptContext();
 			DataMap data = inputExpressionMap.eval(context);
 			DataMap req = new DataMap();
-			req.put("action", "executefunction");
+			req.put("action", "execute");
 			req.put("domain", pi.getDomain());
 			req.put("name", functionName);
 			req.put("param", data);

@@ -68,9 +68,11 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 				} else if(action.equals("clearcache")) {
 					clearCache(session, domain, name);
 					return new Payload(new DataMap("result", "ok").toString());
+				} else {
+					throw new RedbackException("The action '" + action + "' is not valid");
 				}
 			} else {
-				throw new RedbackException("The action needs to be specified");
+				throw new RedbackException("The action needs to be provided");
 			}
 			return null;
 		} catch(Exception e) {
