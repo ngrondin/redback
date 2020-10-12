@@ -149,6 +149,7 @@ public class RedbackUIServer extends UIServer
 			context.put("session", new SessionJSWrapper(session));
 			context.put("utils", new RedbackUtilsJSWrapper());
 			context.put("parents", JSConverter.toJS(new DataMap()));
+			context.put("nextid", 1000);
 			return generateHTMLFromComponentConfig(session, menu, version, context);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting menu", e);
@@ -184,6 +185,7 @@ public class RedbackUIServer extends UIServer
 							context.put("session", new SessionJSWrapper(session));
 							context.put("utils", new RedbackUtilsJSWrapper());
 							context.put("parents", JSConverter.toJS(new DataMap()));
+							context.put("nextid", 1000);
 							context.put("canWrite", true);
 							context.put("canExecute", true);
 							viewHTML.append("<rb-view\r\n\t(afterload)=\"setTitle('" + viewConfig.getString("label") + "')\">\r\n\t#content#\r\n</rb-view>");
@@ -236,7 +238,8 @@ public class RedbackUIServer extends UIServer
 			}
 			else
 			{
-				String id = type + (new Random()).nextInt(10000);
+				String id = type + ((int)context.get("nextid"));
+				context.put("nextid", ((int)context.get("nextid")) + 1);
 				String inlineStyle = "";
 				String grow = componentConfig.getString("grow");
 				String shrink = componentConfig.getString("shrink");
