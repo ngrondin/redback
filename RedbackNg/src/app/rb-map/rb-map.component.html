@@ -8,22 +8,31 @@
     (mapClick)="mapClick($event)"
     (mousemove)="mouseMove($event)">
     <agm-overlay
-        *ngFor="let mapObject of mapObjects"
-        [latitude]="mapObject.latitude"
-        [longitude]="mapObject.longitude"
-        [zIndex]="mapObject.zindex"
-        (markerClick)="objectClick(mapObject)"
-        (markerRightClick)="objectRightClick(mapObject)">
+        *ngFor="let mapPoint of mapPoints"
+        [latitude]="mapPoint.latitude"
+        [longitude]="mapPoint.longitude"
+        [zIndex]="mapPoint.zindex"
+        (markerClick)="objectClick(mapPoint)"
+        (markerRightClick)="objectRightClick(mapPoint)">
         <div
-            [class]="'rb-mapicon-' + mapObject.icon + (mapObject.animate != null ? ' rb-mapicon-' + mapObject.icon + '-animate-' + mapObject.animate : '')"
-            [style.border-color]="mapObject.color">
+            [class]="'rb-mapicon-' + mapPoint.icon + (mapPoint.animate != null ? ' rb-mapicon-' + mapPoint.icon + '-animate-' + mapPoint.animate : '')"
+            [style.border-color]="mapPoint.color">
             <span
                 class="rb-map-initial"
-                *ngIf="mapObject.initials != null">
-                {{mapObject.initials}}
+                *ngIf="mapPoint.initials != null">
+                {{mapPoint.initials}}
             </span>
         </div>
     </agm-overlay> 
+    <agm-polyline
+        *ngFor="let mapPolygon of mapPolygons"
+        [strokeColor]="'red'">
+        <agm-polyline-point
+            *ngFor="let point of mapPolygon.path"
+            [latitude]="point.lat"
+            [longitude]="point.lng">
+        </agm-polyline-point>
+    </agm-polyline>
     <agm-overlay
         *ngIf="showLabel"
         [latitude]="labellatLon.latitude"

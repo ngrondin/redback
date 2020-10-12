@@ -23,6 +23,7 @@ class MapSeriesConfig {
   animateMap: Translator;
   visibleAttribute: string;
   linkAttribute: string;
+  dateAttribute: string;
 
   constructor(json: any) {
     this.dataset = json.dataset;
@@ -38,10 +39,11 @@ class MapSeriesConfig {
     this.animateMap = new Translator(json.animatemap);
     this.visibleAttribute = json.visibleattribute;
     this.linkAttribute = json.linkattribute;
+    this.dateAttribute = json.dateattribute;
   }
 }
 
-class MapObject {
+class MapPoint {
   object: RbObject;
   latitude: number;
   longitude: number;
@@ -67,6 +69,22 @@ class MapObject {
   }
 }
 
+class MapPolygon {
+  objects: RbObject[];
+  path: any[];
+  zindex: number;
+
+  constructor() {
+    this.objects = [];
+    this.path = [];
+  }
+
+  public addObject(object: RbObject, lat: number, lng: number) {
+    this.objects.push(object);
+    this.path.push({lat: lat, lng: lng});
+  }
+}
+
 @Component({
   selector: 'rb-map',
   templateUrl: './rb-map.component.html',
@@ -87,8 +105,9 @@ export class RbMapComponent implements OnInit {
   @ViewChild('map', { read: AgmMap }) map: AgmMap;
 
   seriesConfigs: MapSeriesConfig[] = [];
-  mapObjects: MapObject[] = [];
-  selectedMapObject: MapObject;
+  mapPoints: MapPoint[] = [];
+  mapPolygons: MapPolygon[] = [];
+  selectedMapPoint: MapPoint;
 
   minLat: number;
   maxLat: number;
@@ -183,7 +202,8 @@ export class RbMapComponent implements OnInit {
   }
 
   calcAll() {
-    this.mapObjects = [];
+    this.mapPoints = [];
+    this.mapPolygons = [];
     this.minLat = 90;
     this.maxLat = -90;
     this.minLon = 180;
@@ -200,81 +220,89 @@ export class RbMapComponent implements OnInit {
   }
 
   calcList(list: RbObject[], cfg: MapSeriesConfig) {
+    if(cfg.dateAttribute == null) {
+      this.calcMapPoints(list, cfg);
+    } else {
+      this.calcPolygon(list, cfg);
+    }
+  }
+
+  calcMapPoints(list: RbObject[], cfg: MapSeriesConfig) {
     for(let object of list) {
-      let latitude = null;
-      let longitude = null;   
-      if(cfg.geometryAttribute != null ) {
-        let geometry: any = object.get(cfg.geometryAttribute);
-        if(geometry != null) {
-          if(geometry.type == 'point' && geometry.coords != null) {
-            if(!isNaN(geometry.coords.latitude) && !isNaN(geometry.coords.longitude)) {
-              latitude = geometry.coords.latitude;
-              longitude = geometry.coords.longitude;
-            }
+      let latLon = this.getObjectLatLon(object, cfg);
+      if(latLon != null) {
+        let label = null;
+        if(cfg.labelAttribute != null) {
+          label = object.get(cfg.labelAttribute);
+        }
+  
+        let initials = null;
+        if(cfg.initialsAttribute != null) {
+          initials = new InitialsMaker().get(object.get(cfg.initialsAttribute));
+        }
+  
+        let icon = "pin";
+        if(cfg.icon != null) {
+          icon = cfg.icon;
+        } else if(cfg.iconAttribute != null) {
+          icon = cfg.iconMap.get(object.get(cfg.iconAttribute), object == this.selectedObject);
+        } 
+  
+        let color = (object == this.selectedObject ? 'red' : '#3f51b5');
+        if(cfg.colorAttribute != null) {
+          color = cfg.colorMap.get(object.get(cfg.colorAttribute), object == this.selectedObject);
+        } 
+  
+        let animate: string = null;
+        if(cfg.animateAttribute != null) {
+          animate = cfg.animateMap.get(object.get(cfg.animateAttribute), object == this.selectedObject);
+        }
+  
+        let link = null;
+        if(cfg.linkAttribute != null) {
+          link = {
+            object: cfg.linkAttribute == 'uid' ? object.objectname : object.related[cfg.linkAttribute].objectname,
+            filter: {uid: "'" + (cfg.linkAttribute == 'uid' ? object.uid : object.get(cfg.linkAttribute)) + "'"}
+          };
+        }
+  
+        let visible: boolean = true;
+        if(cfg.visibleAttribute != null) {
+          visible = object.get(cfg.visibleAttribute);
+        }
+  
+        if(visible) {
+          if(latLon.latitude < this.minLat) this.minLat = latLon.latitude - 0.5;
+          if(latLon.latitude > this.maxLat) this.maxLat = latLon.latitude + 0.5;
+          if(latLon.longitude < this.minLon) this.minLon = latLon.longitude - 0.5;
+          if(latLon.longitude > this.maxLon) this.maxLon = latLon.longitude + 0.5;
+          let mapPoint = new MapPoint(object, latLon.latitude, latLon.longitude, label, initials, icon, color, animate, link, object == this.selectedObject ? 10 : 5);
+          this.mapPoints.push(mapPoint);
+          if(object == this.selectedObject) {
+            this.selectedMapPoint = mapPoint;
           }
-        }
-      } 
-
-      let label = null;
-      if(cfg.labelAttribute != null) {
-        label = object.get(cfg.labelAttribute);
-      }
-
-      let initials = null;
-      if(cfg.initialsAttribute != null) {
-        initials = new InitialsMaker().get(object.get(cfg.initialsAttribute));
-      }
-
-      let icon = "pin";
-      if(cfg.icon != null) {
-        icon = cfg.icon;
-      } else if(cfg.iconAttribute != null) {
-        icon = cfg.iconMap.get(object.get(cfg.iconAttribute), object == this.selectedObject);
-      } 
-
-      let color = (object == this.selectedObject ? 'red' : '#3f51b5');
-      if(cfg.colorAttribute != null) {
-        color = cfg.colorMap.get(object.get(cfg.colorAttribute), object == this.selectedObject);
-      } 
-
-      let animate: string = null;
-      if(cfg.animateAttribute != null) {
-        animate = cfg.animateMap.get(object.get(cfg.animateAttribute), object == this.selectedObject);
-      }
-
-      let link = null;
-      if(cfg.linkAttribute != null) {
-        link = {
-          object: cfg.linkAttribute == 'uid' ? object.objectname : object.related[cfg.linkAttribute].objectname,
-          filter: {uid: "'" + (cfg.linkAttribute == 'uid' ? object.uid : object.get(cfg.linkAttribute)) + "'"}
-        };
-      }
-
-      let visible: boolean = true;
-      if(cfg.visibleAttribute != null) {
-        visible = object.get(cfg.visibleAttribute);
-      }
-
-      if(latitude != null && longitude != null && visible) {
-        if(latitude < this.minLat) this.minLat = latitude - 0.5;
-        if(latitude > this.maxLat) this.maxLat = latitude + 0.5;
-        if(longitude < this.minLon) this.minLon = longitude - 0.5;
-        if(longitude > this.maxLon) this.maxLon = longitude + 0.5;
-        let mapObject = new MapObject(object, latitude, longitude, label, initials, icon, color, animate, link, object == this.selectedObject ? 10 : 5);
-        this.mapObjects.push(mapObject);
-        if(object == this.selectedObject) {
-          this.selectedMapObject = mapObject;
-        }
+        }        
       }
     }
   }
 
+  calcPolygon(list: RbObject[], cfg: MapSeriesConfig) {
+    let mapPolygon = new MapPolygon();
+    for(let object of list) {
+      let latLon = this.getObjectLatLon(object, cfg);
+      if(latLon != null) {
+        mapPolygon.addObject(object, latLon.latitude, latLon.longitude);
+      }
+    }
+    this.mapPolygons.push(mapPolygon);
+  }
+
   calcMapCoords() : any {
-    if(this.selectedMapObject != null) {
+    if(this.selectedMapPoint != null) {
       this.zoomOfMap = 12;
-      this.mapLatitude = this.selectedMapObject.latitude;
-      this.mapLongitude = this.selectedMapObject.longitude;
-    } else if(this.mapObjects.length > 0) {
+      this.mapLatitude = this.selectedMapPoint.latitude;
+      this.mapLongitude = this.selectedMapPoint.longitude;
+    } else if(this.mapPoints.length > 0) {
       this.mapLatitude = ((this.maxLat + this.minLat) / 2);
       this.mapLongitude = ((this.maxLon + this.minLon) / 2);
       if(this.maxLat - this.minLat < 0 || this.maxLon - this.minLon < 0) {
@@ -285,6 +313,23 @@ export class RbMapComponent implements OnInit {
     } else {
       this.zoomOfMap = 2;
     }
+  }
+
+  private getObjectLatLon(object: RbObject, cfg: MapSeriesConfig) {
+    if(cfg.geometryAttribute != null ) {
+      let geometry: any = object.get(cfg.geometryAttribute);
+      if(geometry != null) {
+        if(geometry.type == 'point' && geometry.coords != null) {
+          if(!isNaN(geometry.coords.latitude) && !isNaN(geometry.coords.longitude)) {
+            return {
+              latitude: geometry.coords.latitude,
+              longitude: geometry.coords.longitude  
+            }
+          }
+        }
+      }
+    } 
+    return null;
   }
 
 
@@ -304,18 +349,18 @@ export class RbMapComponent implements OnInit {
   }
   
 
-  objectClick(mapObject: MapObject) {
-    this.selectObject.emit(mapObject.object);
-    if(mapObject.label != null) {
-      this.labellatLon.latitude = mapObject.latitude;
-      this.labellatLon.longitude = mapObject.longitude;
-      this.labelText = mapObject.label;
-      this.labelLink = mapObject.link;
+  objectClick(mapPoint: MapPoint) {
+    this.selectObject.emit(mapPoint.object);
+    if(mapPoint.label != null) {
+      this.labellatLon.latitude = mapPoint.latitude;
+      this.labellatLon.longitude = mapPoint.longitude;
+      this.labelText = mapPoint.label;
+      this.labelLink = mapPoint.link;
       this.showLabel = true;
     }
   }
 
-  objectRightClick(mapObject: MapObject) {
+  objectRightClick(mapPoint: MapPoint) {
   }
 
   mapClick(event: any) {

@@ -9,6 +9,7 @@ import { ViewContainerComponent } from './rb-view-container.component';
 import { DataService } from 'app/data.service';
 
 
+
 @Component({
   selector: 'rb-view-loader',
   templateUrl: './rb-view-loader.component.html',
@@ -23,6 +24,7 @@ export class RbViewLoaderComponent implements OnInit {
 
   private currentView: string;
   private componentRef: ComponentRef<ViewContainerComponent>;
+  private factoryCache: any = {};
 
   constructor(
     private http: Http,
@@ -50,14 +52,18 @@ export class RbViewLoaderComponent implements OnInit {
   }
 
   compileTemplate(body: string) {
-
-    const typeDecorator: TypeDecorator = Component({ selector: 'rb-view-container', template: body});
-    const decoratedComponent = typeDecorator(ViewContainerComponent);
-    const moduleClass = class RuntimeComponentModule { };
-    const decoratedNgModule = NgModule({ imports: [CommonModule, RedbackModule], declarations: [decoratedComponent] })(moduleClass);
-    const module: ModuleWithComponentFactories<any> = this.compiler.compileModuleAndAllComponentsSync(decoratedNgModule);
-    let factory = module.componentFactories.find(f => f.componentType == decoratedComponent);
-
+    let hash = body.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
+    let factory = this.factoryCache[hash];
+    if(factory == null) {
+      const typeDecorator: TypeDecorator = Component({ selector: 'rb-view-container', template: body});
+      const decoratedComponent = typeDecorator(ViewContainerComponent);
+      const moduleClass = class RuntimeComponentModule { };
+      const decoratedNgModule = NgModule({ imports: [CommonModule, RedbackModule], declarations: [decoratedComponent] })(moduleClass);
+      const module: ModuleWithComponentFactories<any> = this.compiler.compileModuleAndAllComponentsSync(decoratedNgModule);
+      factory = module.componentFactories.find(f => f.componentType == decoratedComponent);
+      this.factoryCache[hash] = factory;
+    } 
+    
     if (this.componentRef) {
       this.componentRef.destroy();
       this.componentRef = null; 
