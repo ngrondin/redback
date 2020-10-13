@@ -67,9 +67,18 @@ public abstract class ReportDataUnit extends ReportUnit {
 			} else if(format.equals("duration")) {
 				Long dur = Long.parseLong(valueStr);
 				valueStr = "";
-				if(dur >= 3600000) valueStr += Math.abs(dur / 3600000) + "h ";
-				if(dur > 60000 && (dur % 60000) != 0) valueStr += Math.abs((dur % 3600000) / 60000) + "m ";
-				if(dur > 0 && dur < 60000) valueStr += Math.abs((dur % 60000) / 1000) + "s";
+				if(dur >= 3600000) {
+					valueStr += Math.abs(dur / 3600000) + "h";
+				}
+				if(dur > 60000 && (dur % 3600000) != 0) {
+					long mins = Math.abs((dur % 3600000) / 60000);
+					if(dur > 3600000 && mins < 10)
+						valueStr += "0";
+					valueStr += mins + "m";
+				}
+				if(dur > 0 && dur < 60000) {
+					valueStr += Math.abs((dur % 60000) / 1000) + "s";
+				}
 			}
 		}
 		return valueStr;
