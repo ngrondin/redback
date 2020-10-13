@@ -57,8 +57,8 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
     newDate.setFullYear(this.year);
     newDate.setMonth(this.month);
     newDate.setDate(this.day);
-    newDate.setHours(this.hour);
-    newDate.setMinutes(this.minute);
+    newDate.setHours(this.config.hourPart == true ? this.hour : 0);
+    newDate.setMinutes(this.config.minutePart == true ? this.minute : 0);
     newDate.setSeconds(0);
     newDate.setMilliseconds(0);
     return newDate;

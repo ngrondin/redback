@@ -288,7 +288,8 @@ export class RbMapComponent implements OnInit {
 
   calcPolygon(list: RbObject[], cfg: MapSeriesConfig) {
     let mapPolygon = new MapPolygon();
-    for(let object of list) {
+    let sortedList = list.sort((a: RbObject, b: RbObject) => (new Date(a.get(cfg.dateAttribute))).getTime() - (new Date(b.get(cfg.dateAttribute))).getTime());
+    for(let object of sortedList) {
       let latLon = this.getObjectLatLon(object, cfg);
       if(latLon != null) {
         mapPolygon.addObject(object, latLon.latitude, latLon.longitude);
