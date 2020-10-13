@@ -31,13 +31,12 @@ public class DomainClient extends Client {
 		}
 	}
 
-	public void putVariable(Session session, String domain, String name, String category, DataEntity var) throws RedbackException {
+	public void putVariable(Session session, String domain, String name, DataEntity var) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "putvariable");
 			req.put("domain", domain);
 			req.put("name", name);
-			req.put("category", category);
 			req.put("variable", var);
 			request(session, req);			
 		} catch(Exception e) {

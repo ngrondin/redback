@@ -21,7 +21,7 @@ export class RbListComponent implements OnInit {
 
   @Output() selectedObjectChange: EventEmitter<any> = new EventEmitter();
 
-  isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/;
+  isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
 
   constructor() { }
 

@@ -32,11 +32,10 @@ public class DomainClientJSWrapper implements ProxyObject {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String name = arguments[0].asString();
-					String category = arguments[1].asString();
-					DataEntity var = (DataMap)JSConverter.toJava(arguments[2]);
+					DataEntity var = (DataMap)JSConverter.toJava(arguments[1]);
 					try
 					{
-						domainClient.putVariable(session, domain, name, category, var);
+						domainClient.putVariable(session, domain, name, var);
 						return null;
 					}
 					catch(Exception e)
