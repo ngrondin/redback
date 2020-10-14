@@ -31,7 +31,6 @@ public class ObjectConfig
 		scripts = new HashMap<String, Function>();
 
 		scriptVars = new ArrayList<String>();
-		scriptVars.add("rbutils");
 		scriptVars.add("om");
 		scriptVars.add("pm");
 		scriptVars.add("firebus");

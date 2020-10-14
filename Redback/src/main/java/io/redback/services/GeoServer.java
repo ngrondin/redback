@@ -60,7 +60,10 @@ public abstract class GeoServer extends Service implements ServiceProvider
 				{
 					if(request.containsKey("search"))
 					{
-						List<String> addresses = address(request.getString("search"));
+						String searchTerm = request.getString("search");
+						Geometry location = request.containsKey("location") ? new Geometry(request.getObject("location")) : null;
+						Long radius = request.containsKey("radius") ? request.getNumber("radius").longValue() : null; 
+						List<String> addresses = address(searchTerm, location, radius);
 						DataList list = new DataList();
 						for(String a: addresses)
 							list.add(a);
@@ -102,6 +105,6 @@ public abstract class GeoServer extends Service implements ServiceProvider
 	
 	protected abstract String geocode(Geometry geometry) throws RedbackException;
 	
-	protected abstract List<String> address(String search) throws RedbackException;	
+	protected abstract List<String> address(String search, Geometry location, Long radius) throws RedbackException;	
 
 }

@@ -51,9 +51,11 @@ public class GeoClientJSWrapper implements ProxyObject {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String search = arguments[0].asString();
+					Geometry location = arguments.length > 1 ? new Geometry((DataMap)JSConverter.toJava(arguments[1])) : null;
+					Long radius = arguments.length > 2 ? arguments[2].asLong() : null;
 					try
 					{
-						List<String> list = geoClient.address(search);
+						List<String> list = geoClient.address(search, location, radius);
 						return JSConverter.toJS(list);
 					}
 					catch(Exception e)

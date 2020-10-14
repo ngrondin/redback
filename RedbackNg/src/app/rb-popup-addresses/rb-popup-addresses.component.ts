@@ -11,6 +11,8 @@ import { ApiService } from 'app/api.service';
 })
 export class RbPopupAddressesComponent extends RbPopupComponent implements OnInit {
   public list: String[] = [];
+  public center: any;
+  public radius: number;
   public search: String;
   public isLoading: boolean;
 
@@ -26,6 +28,10 @@ export class RbPopupAddressesComponent extends RbPopupComponent implements OnIni
   }
 
   ngOnInit(): void {
+    if(this.config.center != null) {
+      this.center = this.config.center;
+      this.radius = this.config.radius;
+    }    
   }
 
   public getHighlighted() {
@@ -35,7 +41,7 @@ export class RbPopupAddressesComponent extends RbPopupComponent implements OnIni
   public setSearch(val: String) {
     this.search = val;
     this.isLoading = true;
-    this.apiService.predictAddresses(this.search).subscribe(json => this.setAddresses(json));
+    this.apiService.predictAddresses(this.search, this.center, this.radius).subscribe(json => this.setAddresses(json));
   }
 
   public setAddresses(json: any) {

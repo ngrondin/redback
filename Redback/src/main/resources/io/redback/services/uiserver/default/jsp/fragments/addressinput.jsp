@@ -15,13 +15,16 @@ if(config.icon == null) {%>
 	[icon]="'<%=config.icon%>'"<%
 }
 if(config.size != null) { %>	
-	[size]="<%=(config.size == null ? 20 : config.size) %>" <%
+	[size]="<%=config.size%>" <%
 } 
 if(parents.dataset != null) { %>	
 	[object]="<%=parents.dataset%>.selectedObject" <%
 } 
 if(config.attribute != null) { %>	
-	[attribute]="'<%=(config.attribute == null ? 20 : config.attribute) %>'" <%
+	[attribute]="'<%=config.attribute%>'" <%
+}
+if(config.centerattribute != null) { %>	
+	[centerattribute]="'<%=config.centerattribute%>'" <%
 }%>	
 	[editable]="<%=canWrite%>">
 </rb-address-input>

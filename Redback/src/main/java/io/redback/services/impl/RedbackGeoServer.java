@@ -71,14 +71,19 @@ public class RedbackGeoServer extends GeoServer
 		return address;
 	}
 
-	protected List<String> address(String search)  throws RedbackException
+	protected List<String> address(String search, Geometry location, Long radius)  throws RedbackException
 	{
 		List<String> list = new ArrayList<String>();
 		try
 		{
+			String url = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + search.replaceAll(" ", "%20") + "&key=" + apiKey;
+			if(location != null) 
+				url += "&location=" + location.getLatitude() + "," + location.getLongitude();
+			if(radius != null) 
+				url += "&radius=" + radius;
 			DataMap request = new DataMap();
 			request.put("method", "get");
-			request.put("url", "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + search.replaceAll(" ", "%20") + "&key=" + apiKey);
+			request.put("url", url);
 			Payload respPayload = firebus.requestService(outboundService, new Payload(request.toString()));
 			DataMap resp = new DataMap(respPayload.getString());
 			if(resp.getList("predictions").size() > 0) {

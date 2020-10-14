@@ -344,10 +344,15 @@ export class ApiService {
   /********* Google Location **********/  
 
   
-  predictAddresses(search: String): Observable<any> {
+  predictAddresses(search: String, center: any, radius: number): Observable<any> {
     return new Observable<any>((observer) => {
       setTimeout(() => {
-        this.placesAutocompleteService.getQueryPredictions({input: search.toString()}, (predictions, status) => {
+        var req = {
+          input: search.toString(),
+          location: center != null ? new google.maps.LatLng(center) : null,
+          radius: radius
+        }
+        this.placesAutocompleteService.getQueryPredictions(req, (predictions, status) => {
           observer.next(predictions);
           observer.complete();
         });

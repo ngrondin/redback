@@ -39,11 +39,15 @@ public class GeoClient extends Client {
 		}		
 	}
 	
-	public List<String> address(String search) throws RedbackException {
+	public List<String> address(String search, Geometry location, Long radius) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "address");
 			req.put("search", search);
+			if(location != null)
+				req.put("location", location.toDataMap());
+			if(radius != null)
+				req.put("radius", radius);
 			DataMap resp = request(req);
 			List<String> list = new ArrayList<String>();
 			for(int i = 0; i < resp.getList("result").size(); i++) {

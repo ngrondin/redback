@@ -38,8 +38,6 @@ import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
-import io.redback.utils.js.LoggerJSFunction;
-import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class ObjectManager
 {
@@ -138,9 +136,6 @@ public class ObjectManager
 	public Map<String, Object> createScriptContext(Session session) throws RedbackException
 	{
 		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("global", JSConverter.toJS(getGlobalVariables()));
-		context.put("log", new LoggerJSFunction());
-		context.put("rbutils", new RedbackUtilsJSWrapper());
 		context.put("om", new ObjectManagerJSWrapper(this, session));
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("firebus", new FirebusJSWrapper(firebus, session));

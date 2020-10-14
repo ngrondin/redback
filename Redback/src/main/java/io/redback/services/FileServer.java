@@ -30,7 +30,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try {
-			logger.info("Authenticated file service start");
+			logger.finer("Authenticated file service start");
 			Payload response = null;
 			if(payload.metadata.containsKey("filename") && payload.metadata.containsKey("mime"))
 			{
@@ -110,7 +110,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 			{
 				response = new Payload("{error:\"no action taken\"}");
 			}
-			logger.info("Authenticated file service finished");
+			logger.finer("Authenticated file service finished");
 			return response;
 		} catch(DataException e) {
 			throw new RedbackException("Error in file server", e);

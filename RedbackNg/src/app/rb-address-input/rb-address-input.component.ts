@@ -1,4 +1,4 @@
-import { Component, OnInit, Injector, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, Injector, ViewContainerRef, Input } from '@angular/core';
 import { RbPopupInputComponent } from 'app/rb-popup-input/rb-popup-input.component';
 import { RbPopupComponent } from 'app/rb-popup/rb-popup.component';
 import { Overlay } from '@angular/cdk/overlay';
@@ -10,7 +10,7 @@ import { RbPopupAddressesComponent } from 'app/rb-popup-addresses/rb-popup-addre
   styleUrls: ['./rb-address-input.component.css']
 })
 export class RbAddressInputComponent extends RbPopupInputComponent implements OnInit {
-
+  @Input('centerattribute') centerAttribute: string;
   searchValue: string; 
 
   constructor(
@@ -53,7 +53,18 @@ export class RbAddressInputComponent extends RbPopupInputComponent implements On
   }
 
   public getPopupConfig() {
-    return {};
+    let cfg = {}
+    if(this.centerAttribute != null) {
+      let geo = this.rbObject.get(this.centerAttribute);
+      if(geo != null) {
+        cfg['center'] = {
+          lat: geo.coords.latitude,
+          lng: geo.coords.longitude
+        };
+        cfg['radius'] = 100000;
+      }
+    } 
+    return cfg;
   }
 
   public addPopupSubscription(instance: RbPopupComponent) {
