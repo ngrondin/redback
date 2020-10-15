@@ -54,7 +54,16 @@ export class AppComponent {
 
     let currentUrl = window.location.href;
     let pos = currentUrl.indexOf(this.apiService.uiService);
-    this.apiService.baseUrl = (pos > -1 ? currentUrl.substring(0, pos - 1) : currentUrl.substring(0, currentUrl.length - 1));
+    if(pos > -1) {
+      currentUrl = currentUrl.substring(0, pos - 1);
+    }
+    if(currentUrl.endsWith("#")) {
+      currentUrl = currentUrl.substring(0, currentUrl.length - 1);
+    }
+    if(currentUrl.endsWith("/")) {
+      currentUrl = currentUrl.substring(0, currentUrl.length - 1);
+    }
+    this.apiService.baseUrl = currentUrl;
 
     this.iconsets = JSON.parse(native.getAttribute("iconsets").replace(/'/g, '"'))
     for(const set of this.iconsets) {
