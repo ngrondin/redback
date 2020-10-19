@@ -8,7 +8,7 @@ if(showExpr.indexOf('.relatedObject.') > -1) showExpr = parents.dataset + '.rela
 	*ngIf="<%=showExpr%>"
 	[label]="'<%=config.label%>'"<%
 if(config.icon == null) {%>
-	[icon]="'money_attach'"<%	
+	[icon]="'attach_money'"<%	
 } else if(config.icon.indexOf(':') >= 0) {%>
 	[icon]="'<%=config.icon%>'"<%
 } else {%>

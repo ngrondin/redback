@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.bson.internal.Base64;
@@ -204,4 +205,32 @@ public class StringUtils
 		String sStackTrace = sw.toString(); 
 		return sStackTrace;
 	}
+	
+	public static int levenshtein(String s1, String s2) 
+	{
+	    int[][] dp = new int[s1.length() + 1][s2.length() + 1];
+	    for (int i = 0; i <= s1.length(); i++) {
+	    	for (int j = 0; j <= s2.length(); j++) {
+	    		if (i == 0) {
+	    			dp[i][j] = j;
+	    		}
+	    		else if (j == 0) {
+	    			dp[i][j] = i;
+	    		} else {
+	                dp[i][j] = min(
+	                		dp[i - 1][j - 1] + (s1.charAt(i - 1) ==  s2.charAt(j - 1) ? 0 : 1), 
+	                		dp[i - 1][j] + 1, 
+	                		dp[i][j - 1] + 1
+	                	);
+	            }
+	        }
+	    }
+	 
+	    return dp[s1.length()][s2.length()];
+	}
+	
+    public static int min(int... numbers) {
+        return Arrays.stream(numbers).min().orElse(Integer.MAX_VALUE);
+    }
+	
 }

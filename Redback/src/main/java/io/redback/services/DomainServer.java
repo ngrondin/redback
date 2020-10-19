@@ -54,8 +54,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 				} else if(action.equals("getvariable")) {
 					DataEntity entity = getVariable(session, domain, name);
 					if(entity != null) {
-						DataMap resp = new DataMap("result", entity);
-						return new Payload(resp.toString());
+						return new Payload(entity.toString());
 					} else {
 						return new Payload();
 					}

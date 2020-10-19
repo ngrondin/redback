@@ -6,6 +6,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -14,6 +15,9 @@ import java.util.Formatter;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -133,7 +137,10 @@ public class RedbackFileServer extends FileServer
 				data.put(fileCollection.getField("date"), new Date());
 				data.put(fileCollection.getField("hash"), hashStr);
 				if(mime.startsWith("image")) {
-					thumbnail = getBase64Thumbnail(bytes);
+					thumbnail = getBase64ThumbnailOfImage(bytes);
+					data.put(fileCollection.getField("thumbnail"), thumbnail);
+				} else if(mime.equals("application/pdf")) {
+					thumbnail = getBase64ThumbnailOfPDF(bytes);
 					data.put(fileCollection.getField("thumbnail"), thumbnail);
 				}
 				dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), fileUid), data);
@@ -180,12 +187,36 @@ public class RedbackFileServer extends FileServer
 		return type;
 	}
 	
-	public String getBase64Thumbnail(byte[] bytes) throws RedbackException 
+	public String getBase64ThumbnailOfImage(byte[] bytes) throws RedbackException 
 	{
 		String b64img = null;
 		try
 		{
 			BufferedImage orig = ImageIO.read(new ByteArrayInputStream(bytes));
+			return getBase64Thumbnail(orig);
+		}
+		catch(Exception e) 
+		{
+		}
+		return b64img;
+	}
+	
+	public String getBase64ThumbnailOfPDF(byte[] bytes) throws RedbackException
+	{
+		try {
+			PDDocument doc = PDDocument.load(new ByteArrayInputStream(bytes));
+		    PDFRenderer renderer = new PDFRenderer(doc);
+		    BufferedImage img = renderer.renderImage(0, 0.1f);
+		    return getBase64Thumbnail(img);
+		} catch(Exception e) {
+			throw new RedbackException("Error reading PDF", e);
+		}
+	}
+	
+	public String getBase64Thumbnail(BufferedImage orig) throws RedbackException
+	{
+		try
+		{
 			int newHeight = 80;
 			int newWidth = orig.getWidth() / (orig.getHeight() / newHeight);
 			BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
@@ -195,13 +226,14 @@ public class RedbackFileServer extends FileServer
 			gc.drawImage(orig.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH),0,0,null);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ImageIO.write(img, "png", baos);
-			b64img = "data:image/png;base64, " + (new String(Base64.getEncoder().encode(baos.toByteArray()), "UTF-8"));
+			return ("data:image/png;base64, " + (new String(Base64.getEncoder().encode(baos.toByteArray()), "UTF-8")));
 		}
 		catch(Exception e) 
 		{
+			throw new RedbackException("Error creating thumbnail", e);
 		}
-		return b64img;
 	}
+	
 
 	public void clearCaches() 
 	{

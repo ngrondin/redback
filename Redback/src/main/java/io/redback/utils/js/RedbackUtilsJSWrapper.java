@@ -25,7 +25,8 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 			"base64decode", 
 			"urlencode", 
 			"urldecode",
-			"getTimezoneOffset"
+			"getTimezoneOffset",
+			"levenshtein"
 		};
 	
 	public RedbackUtilsJSWrapper() {
@@ -83,7 +84,15 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 					return hereAndNow.getOffset().getTotalSeconds() * 1000;
 				}
 			};
-		} else {
+		} else if(key.equals("levenshtein")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String s1 = arguments[0].asString();
+					String s2 = arguments[1].asString();
+					return StringUtils.levenshtein(s1, s2);
+				}
+			};
+		} else {	
 			return null;
 		}
 	}
