@@ -15,7 +15,7 @@ public class GatewayClientJSWrapper implements ProxyObject {
 	
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected GatewayClient gatewayClient;
-	protected String[] members = {"get", "post", "postform", "put", "putform"};
+	protected String[] members = {"get", "post", "postform", "put", "putform", "patch", "patchform"};
 
 	public GatewayClientJSWrapper(GatewayClient gc)
 	{
@@ -112,6 +112,42 @@ public class GatewayClientJSWrapper implements ProxyObject {
 					}
 				}
 			};
+		} else if(key.equals("patch")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String url = arguments[0].asString();
+					Object body = JSConverter.toJava(arguments[1]);
+					DataMap headers = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
+					DataMap cookie = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
+					try
+					{
+						DataMap ret = gatewayClient.patch(url, body, headers, cookie);
+						return JSConverter.toJS(ret);
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error on gateway patch", e);
+					}
+				}
+			};
+		} else if(key.equals("patchform")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String url = arguments[0].asString();
+					DataMap form = (DataMap)JSConverter.toJava(arguments[1]);
+					DataMap headers = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
+					DataMap cookie = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
+					try
+					{
+						DataMap ret = gatewayClient.patchForm(url, form, headers, cookie);
+						return JSConverter.toJS(ret);
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error on gateway patch", e);
+					}
+				}
+			};			
 		} else {
 			return null;
 		}

@@ -298,39 +298,57 @@ public class DomainManager implements Consumer {
 		else 
 			return null;
 	}
+
 	
-	public Object executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
+	protected Object execute(Session session, DomainFunction df, DataMap param) throws RedbackException {
 		Object result = null;
+		DomainLoggerJS dl = new DomainLoggerJS(session, this, df);
+		Map<String, Object> context = new HashMap<String, Object>();
+		context.put("session", new SessionJSWrapper(session));
+		context.put("oc", new ObjectClientJSWrapper(objectClient, session));
+		context.put("fc", new FileClientJSWrapper(fileClient, session));
+		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
+		context.put("rc", new ReportClientJSWrapper(reportClient, session));
+		context.put("gc", new GatewayClientJSWrapper(gatewayClient));
+		context.put("param", JSConverter.toJS(param));
+		context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
+		context.put("domain", df.getDomain());
+		context.put("log", dl);
+
 		if(!includeLoaded)
 			loadIncludeScripts();
 
-		DomainEntry de = getDomainEntry(domain, name);
-		
-		if(de != null && de instanceof DomainFunction) {
-			DomainLoggerJS dl = new DomainLoggerJS();
-			Map<String, Object> context = new HashMap<String, Object>();
-			context.put("log", dl);
-			context.put("session", new SessionJSWrapper(session));
-			context.put("oc", new ObjectClientJSWrapper(objectClient, session));
-			context.put("fc", new FileClientJSWrapper(fileClient, session));
-			context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
-			context.put("rc", new ReportClientJSWrapper(reportClient, session));
-			context.put("gc", new GatewayClientJSWrapper(gatewayClient));
-			context.put("param", JSConverter.toJS(param));
-
-			DomainFunction df = (DomainFunction)de;
-			context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
-			context.put("domain", df.getDomain());
-			try {
-				long start = System.currentTimeMillis();
-				result = df.execute(context);
-				dl.log("Execution completed in " + (System.currentTimeMillis() - start) + "ms");
-				addFunctionLog(session, df, dl.getLog());
-			} catch(Exception e) {
-				dl.log(StringUtils.rollUpExceptions(e));
-				addFunctionLog(session, df, dl.getLog());
-				throw new RedbackException("Error executing domain script", e);
+		try {
+			result = df.execute(context);
+			dl.commit();
+		} catch(Exception e) {
+			dl.log(StringUtils.rollUpExceptions(e));
+			dl.commit();
+			throw new RedbackException("Error executing domain script", e);
+		}
+		return result;
+	}
+	
+	protected void executeAsync(Session session, DomainFunction df, DataMap param) {
+		Thread worker = new Thread() {
+			public void run() {
+				try {
+					execute(session, df, param);
+				} catch(Exception e) {}
 			}
+		};
+		worker.start();	
+	}
+	
+	public Object executeFunction(Session session, String domain, String name, DataMap param, boolean async) throws RedbackException {
+		Object result = null;
+		DomainEntry de = getDomainEntry(domain, name);
+		if(de != null && de instanceof DomainFunction) {
+			DomainFunction df = (DomainFunction)de;
+			if(async)
+				executeAsync(session, df, param);
+			else
+				result = execute(session, df, param);
 		}
 		return result;
 	}
@@ -355,37 +373,10 @@ public class DomainManager implements Consumer {
 			}
 			
 			if(functions.size() > 0) {
-				DomainLoggerJS dl = new DomainLoggerJS();
-				Map<String, Object> context = new HashMap<String, Object>();
-				context.put("log", dl);
-				context.put("session", new SessionJSWrapper(session));
-				context.put("oc", new ObjectClientJSWrapper(objectClient, session));
-				context.put("fc", new FileClientJSWrapper(fileClient, session));
-				context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
-				context.put("rc", new ReportClientJSWrapper(reportClient, session));
-				context.put("gc", new GatewayClientJSWrapper(gatewayClient));
-				context.put("param", JSConverter.toJS(param));
-				DomainManager thisDomainManager = this;
-
-				Thread worker = new Thread() {
-					public void run() {
-						for(DomainEntry de: functions) {
-							DomainFunction df = (DomainFunction)de;
-							context.put("dm", new DomainManagerJSWrapper(thisDomainManager, session, df.getDomain()));
-							context.put("domain", df.getDomain());
-							try {
-								long start = System.currentTimeMillis();
-								df.execute(context);
-								dl.log("Execution completed in " + (System.currentTimeMillis() - start) + "ms");
-								addFunctionLog(session, df, dl.getLog());
-							} catch(Exception e) {
-								dl.log(StringUtils.rollUpExceptions(e));
-								addFunctionLog(session, df, dl.getLog());
-							}
-						}
-					}
-				};
-				worker.start();	
+				for(DomainEntry de: functions) {
+					DomainFunction df = (DomainFunction)de;
+					executeAsync(session, df, param);
+				}
 			} 			
 		} catch(Exception e) {
 			logger.severe(StringUtils.rollUpExceptions(e));

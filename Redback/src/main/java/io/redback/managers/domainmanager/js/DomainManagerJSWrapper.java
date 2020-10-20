@@ -72,7 +72,7 @@ public class DomainManagerJSWrapper implements ProxyObject {
 					DataMap param = (DataMap)JSConverter.toJava(arguments[1]);
 					try
 					{
-						domainManager.executeFunction(session, domain, name, param);
+						domainManager.executeFunction(session, domain, name, param, false);
 					}
 					catch(Exception e)
 					{

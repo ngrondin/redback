@@ -59,7 +59,9 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 						return new Payload();
 					}
 				} else if(action.equals("execute")) {
-					Object ret = executeFunction(session, domain, name, request.getObject("param"));
+					boolean async = request.getBoolean("async");
+					DataMap param = request.getObject("param");
+					Object ret = executeFunction(session, domain, name, param, async);
 					return new Payload(ret != null ? ret.toString() : new DataMap("result", "ok").toString());
 				} else if(action.equals("executeinalldomains")) {
 					executeFunctionInAllDomains(session, name, request.getObject("param"));
@@ -95,7 +97,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 	
 	public abstract DataEntity getVariable(Session session, String domain, String name) throws RedbackException;
 	
-	public abstract Object executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException;
+	public abstract Object executeFunction(Session session, String domain, String name, DataMap param, boolean async) throws RedbackException;
 
 	public abstract void executeFunctionInAllDomains(Session session, String name, DataMap param);
 

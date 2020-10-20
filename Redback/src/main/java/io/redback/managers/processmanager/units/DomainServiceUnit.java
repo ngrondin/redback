@@ -19,6 +19,7 @@ public class DomainServiceUnit extends ProcessUnit
 {
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected String functionName;
+	protected boolean async;
 	protected ExpressionMap inputExpressionMap;
 	protected ExpressionMap outputExpressionMap;
 	protected String nextNode;
@@ -28,6 +29,7 @@ public class DomainServiceUnit extends ProcessUnit
 		super(pm, p, config);
 		processManager = pm;
 		functionName = config.getString("function");
+		async = config.getBoolean("async");
 		inputExpressionMap = new ExpressionMap(processManager.getJSManager(), jsFunctionNameRoot + "_inexpr", pm.getScriptVariableNames(), config.get("data") != null ? config.getObject("data") : new DataMap());
 		List<String> outVars = new ArrayList<String>(pm.getScriptVariableNames());
 		outVars.add("result");
@@ -48,6 +50,7 @@ public class DomainServiceUnit extends ProcessUnit
 			req.put("domain", pi.getDomain());
 			req.put("name", functionName);
 			req.put("param", data);
+			req.put("async", async);
 			Payload payload = new Payload();
 			payload.setData(req.toString());
 			payload.metadata.put("token", sysUserSession.getToken());

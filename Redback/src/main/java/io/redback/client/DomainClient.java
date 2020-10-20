@@ -100,13 +100,14 @@ public class DomainClient extends Client {
 		}
 	}
 
-	public void executeFunction(Session session, String domain, String name, DataMap param) throws RedbackException {
+	public void executeFunction(Session session, String domain, String name, DataMap param, boolean async) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "execute");
 			req.put("domain", domain);
 			req.put("name", name);
 			req.put("param", param);
+			req.put("async", async);
 			request(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error executing domain function", e);

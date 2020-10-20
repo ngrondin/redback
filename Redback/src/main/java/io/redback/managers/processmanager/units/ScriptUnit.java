@@ -5,7 +5,6 @@ import java.util.Map;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;

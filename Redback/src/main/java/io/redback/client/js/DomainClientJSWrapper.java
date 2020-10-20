@@ -64,9 +64,10 @@ public class DomainClientJSWrapper implements ProxyObject {
 				public Object execute(Value... arguments) {
 					String name = arguments[0].asString();
 					DataMap param = (DataMap)JSConverter.toJava(arguments[1]);
+					boolean async = arguments.length > 2 ? arguments[2].asBoolean() : false;
 					try
 					{
-						domainClient.executeFunction(session, domain, name, param);
+						domainClient.executeFunction(session, domain, name, param, async);
 						return null;
 					}
 					catch(Exception e)
