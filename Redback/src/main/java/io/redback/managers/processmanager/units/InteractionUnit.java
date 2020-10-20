@@ -24,6 +24,7 @@ public class InteractionUnit extends ProcessUnit
 	protected String assigneeType;
 	protected ArrayList<AssigneeConfig> assigneeConfigs;
 	protected ArrayList<ActionConfig> actionConfigs;
+	protected String nextNodeInterruption;
 	protected DataMap notificationConfig;
 	protected Expression labelExpression;
 	protected Expression messageExpression;
@@ -48,6 +49,7 @@ public class InteractionUnit extends ProcessUnit
 		notificationConfig = config.getObject("notification");
 		labelExpression = new Expression(pm.getJSManager(), jsFunctionNameRoot + "_labelexpr", pm.getScriptVariableNames(), notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
 		messageExpression = new Expression(pm.getJSManager(), jsFunctionNameRoot + "_msgexpr", pm.getScriptVariableNames(), notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
+		nextNodeInterruption = config.getString("interruption");
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException
@@ -80,8 +82,16 @@ public class InteractionUnit extends ProcessUnit
 		}
 		logger.finer("Finished interaction node execution");
 	}
+	
+	public void interrupt(Actionner actionner, ProcessInstance pi) throws RedbackException
+	{
+		logger.finer("Starting interaction node interruption");
+		if(nextNodeInterruption != null)
+			pi.setCurrentNode(nextNodeInterruption);
+		logger.finer("Finished interaction node interruption");
+	}
 
-	public void processAction(Actionner actionner, ProcessInstance pi, String action, DataMap data) throws RedbackException
+	public void action(Actionner actionner, ProcessInstance pi, String action, DataMap data) throws RedbackException
 	{
 		logger.finer("Starting interaction node action");
 		boolean foundAction = false;
@@ -149,12 +159,18 @@ public class InteractionUnit extends ProcessUnit
 	protected boolean assigneeMatch(Actionner actionner, Assignee assignee)
 	{
 		if(assignee != null && actionner != null) {
-			if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId()))
+			if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId())) {
 				return true;
-			else if(assignee.getType() == actionner.getType() && (assignee.getId().equals(actionner.getId()) || assignee.getId().equals("*")))
+			} else if(assignee.getType() == actionner.getType()) {
+				if(assignee.getId().equals(actionner.getId())) {
+					return true;
+				} else if(assignee.getId().equals("*")) {
+					return true;
+				}
 				return true;
-			else 
+			} else { 
 				return false;
+			}
 		} else {
 			return false;
 		}

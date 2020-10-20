@@ -45,9 +45,26 @@ public class ProcessAssignmentRemote {
 	public void action(String action)
 	{
 		DataMap request = new DataMap();
-		request.put("action", "processaction");
+		request.put("action", "actionprocess");
 		request.put("pid", getPid());
 		request.put("processaction", action);
+		try
+		{
+			Payload requestPayload = new Payload(request.toString());
+			requestPayload.metadata.put("token", token);
+			firebus.requestService(processService, requestPayload);
+		}
+		catch(Exception e) 
+		{
+			throw new RuntimeException("Error actionning process", e);						
+		}	
+	}
+	
+	public void interrupt()
+	{
+		DataMap request = new DataMap();
+		request.put("action", "interruptprocess");
+		request.put("pid", getPid());
 		try
 		{
 			Payload requestPayload = new Payload(request.toString());

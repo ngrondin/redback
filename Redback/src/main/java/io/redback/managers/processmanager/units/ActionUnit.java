@@ -49,7 +49,7 @@ public class ActionUnit extends ProcessUnit
 				if(actionExists)
 				{
 					logger.fine("Actionning interaction '" + assignment.notification.code + "' with action '" + action +"' in process '" + assignment.processName + "' instance '" + assignment.pid +"'");
-					processManager.processAction(actionner, assignment.pid, action, null);
+					processManager.actionProcess(actionner, assignment.pid, action, null);
 				}
 				else
 				{

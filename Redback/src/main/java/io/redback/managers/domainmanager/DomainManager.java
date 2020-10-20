@@ -21,11 +21,13 @@ import io.redback.client.FileClient;
 import io.redback.client.GatewayClient;
 import io.redback.client.NotificationClient;
 import io.redback.client.ObjectClient;
+import io.redback.client.ProcessClient;
 import io.redback.client.ReportClient;
 import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.GatewayClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.client.js.ObjectClientJSWrapper;
+import io.redback.client.js.ProcessClientJSWrapper;
 import io.redback.client.js.ReportClientJSWrapper;
 import io.redback.managers.domainmanager.js.DomainLoggerJS;
 import io.redback.managers.domainmanager.js.DomainManagerJSWrapper;
@@ -43,6 +45,7 @@ public class DomainManager implements Consumer {
 	protected boolean includeLoaded;
 	protected String configServiceName;
 	protected String objectServiceName;
+	protected String processServiceName;
 	protected String dataServiceName;
 	protected String fileServiceName;
 	protected String notificationServiceName;
@@ -50,6 +53,7 @@ public class DomainManager implements Consumer {
 	protected String gatewayClientName;
 	protected ConfigurationClient configClient;
 	protected ObjectClient objectClient;
+	protected ProcessClient processClient;
 	protected DataClient dataClient;
 	protected FileClient fileClient;
 	protected NotificationClient notificationClient;
@@ -65,6 +69,7 @@ public class DomainManager implements Consumer {
 		includeLoaded = false;
 		configServiceName = config.getString("configservice");
 		objectServiceName = config.getString("objectservice");
+		processServiceName = config.getString("processservice");
 		dataServiceName = config.getString("dataservice");
 		fileServiceName = config.getString("fileservice");
 		notificationServiceName = config.getString("notificationservice");
@@ -72,6 +77,7 @@ public class DomainManager implements Consumer {
 		gatewayClientName = config.getString("gatewayservice");
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		objectClient = new ObjectClient(firebus, objectServiceName);
+		processClient = new ProcessClient(firebus, processServiceName);
 		dataClient = new DataClient(firebus, dataServiceName);
 		fileClient = new FileClient(firebus, fileServiceName);
 		notificationClient = new NotificationClient(firebus, notificationServiceName);
@@ -306,6 +312,7 @@ public class DomainManager implements Consumer {
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("session", new SessionJSWrapper(session));
 		context.put("oc", new ObjectClientJSWrapper(objectClient, session));
+		context.put("pc", new ProcessClientJSWrapper(processClient, session));
 		context.put("fc", new FileClientJSWrapper(fileClient, session));
 		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
 		context.put("rc", new ReportClientJSWrapper(reportClient, session));

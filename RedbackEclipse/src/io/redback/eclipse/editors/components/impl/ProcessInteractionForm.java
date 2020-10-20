@@ -70,6 +70,7 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 
 		Composite col3 = new Composite(this, SWT.NONE);
 		col3.setLayout(new RowLayout(SWT.VERTICAL));
+		new SelectField(_data, "interruption", "Interruption", nodeOptions, nodeOptionLabels, col3, SWT.NONE);
 		list = _data.getList("actions");
 		for(int i = 0; i < list.size(); i++) {
 			DataMap action = list.getObject(i);

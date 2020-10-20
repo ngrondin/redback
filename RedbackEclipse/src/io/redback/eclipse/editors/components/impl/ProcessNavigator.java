@@ -230,8 +230,12 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 				DataList actions = node.getList("actions");
 				for(int j = 0; j < actions.size(); j++) {
 					DataMap destNode = getNode(actions.getObject(j).getString("nextnode"));
+					gc.setLineStyle(SWT.LINE_SOLID);
 					paintConnector(gc, node, destNode, actions.getObject(j).getString("action"));
 				}
+				DataMap interruptDestNode = getNode(node.getString("interruption"));
+				gc.setLineStyle(SWT.LINE_DOT);
+				paintConnector(gc, node, interruptDestNode, "interrupt");				
 			} else if(type.equals("condition")) {
 				DataList actions = node.getList("actions");
 				DataMap trueNode = getNode(node.getString("truenode"));

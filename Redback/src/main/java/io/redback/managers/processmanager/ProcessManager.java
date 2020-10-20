@@ -304,7 +304,7 @@ public class ProcessManager
 		return count;
 	}
 	
-	public void processAction(Actionner actionner, String pid, String action, DataMap data) throws RedbackException
+	public void actionProcess(Actionner actionner, String pid, String action, DataMap data) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(pid);
 		logger.finer("Processing action " + action + " on process " + pi.getProcessName() + ":" + pid);
@@ -313,7 +313,24 @@ public class ProcessManager
 		if(pu instanceof InteractionUnit)
 		{
 			loadGroupsOf(actionner);
-			process.processAction(actionner, pi, action, data);
+			process.action(actionner, pi, action, data);
+		}
+		else
+		{
+			throw new RedbackException("The process in not on an interaction node");
+		}
+		logger.finer("Finished processing action");
+	}
+	
+	public void interruptProcess(Actionner actionner, String pid) throws RedbackException
+	{
+		ProcessInstance pi = getProcessInstance(pid);
+		logger.finer("Interrupting interaction on process " + pi.getProcessName() + ":" + pid);
+		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
+		ProcessUnit pu = process.getNode(pi.getCurrentNode());
+		if(pu instanceof InteractionUnit)
+		{
+			process.interrupt(actionner, pi);
 		}
 		else
 		{

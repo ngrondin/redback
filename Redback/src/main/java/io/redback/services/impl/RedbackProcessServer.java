@@ -33,14 +33,32 @@ public class RedbackProcessServer extends ProcessServer
 		return pi;
 	}
 	
-	protected void processAction(Session session, String pid, String processAction, DataMap data) throws RedbackException
+	protected void actionProcess(Session session, String pid, String processAction, DataMap data) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session.getUserProfile());
 		processManager.initiateCurrentTransaction();
-		processManager.processAction(actionner, pid, processAction, data);
+		processManager.actionProcess(actionner, pid, processAction, data);
 		processManager.commitCurrentTransaction();
 	}
 	
+	protected void interruptProcess(Session session, String pid) throws RedbackException {
+		Actionner actionner = new Actionner(session.getUserProfile());
+		processManager.initiateCurrentTransaction();
+		processManager.interruptProcess(actionner, pid);
+		processManager.commitCurrentTransaction();
+	}
+
+	protected void interruptProcesses(Session session, DataMap filter) throws RedbackException {
+		Actionner actionner = new Actionner(session.getUserProfile());
+		processManager.initiateCurrentTransaction();
+		List<ProcessInstance> list = processManager.findProcesses(actionner, filter);
+		for(ProcessInstance pi: list) {
+			processManager.interruptProcess(actionner, pi.getId());
+		}
+		processManager.commitCurrentTransaction();		
+	}
+
+
 	protected List<Assignment> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session.getUserProfile());

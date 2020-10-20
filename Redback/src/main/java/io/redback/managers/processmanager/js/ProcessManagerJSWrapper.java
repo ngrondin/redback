@@ -22,7 +22,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 	protected ProcessManager processManager;
 	protected ProcessInstance processInstance;
 	protected Actionner actionner;
-	protected String[] members = {"initiateProcess", "getNotifications", "processAction", "findProcesses"};
+	protected String[] members = {"initiateProcess", "getNotifications", "processAction", "actionProcess", "interruptProcess", "findProcesses"};
 	
 	public ProcessManagerJSWrapper(ProcessManager pm, ProcessInstance pi)
 	{
@@ -64,7 +64,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 				}
 			};
 		}
-		else if(name.equals("processAction"))
+		else if(name.equals("processAction") || name.equals("actionProcess"))
 		{
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
@@ -72,7 +72,21 @@ public class ProcessManagerJSWrapper implements ProxyObject
 						String pid = arguments[0].asString();
 						String event = arguments[1].asString();
 						DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
-						processManager.processAction(actionner, pid, event, data);
+						processManager.actionProcess(actionner, pid, event, data);
+						return null;
+					} catch (Exception e) {
+						throw new RuntimeException("Errror in processAction", e);
+					}
+				}
+			};
+		}
+		else if(name.equals("interrupt"))
+		{
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					try {
+						String pid = arguments[0].asString();
+						processManager.interruptProcess(actionner, pid);
 						return null;
 					} catch (Exception e) {
 						throw new RuntimeException("Errror in processAction", e);

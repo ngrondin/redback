@@ -57,19 +57,45 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 						throw new RedbackException("A 'initiate' action requires a 'name' attribute");
 					}
 				}
-				else if(action.equals("processaction"))
+				else if(action.equals("processaction") || action.equals("actionprocess"))
 				{
 					String pid = request.getString("pid");
 					String processAction = request.getString("processaction");
 					DataMap data = request.getObject("data");
 					if(pid != null &&  processAction != null)
 					{
-						processAction(session, pid, processAction, data);
+						actionProcess(session, pid, processAction, data);
 						responseData = new DataMap("result", "ok");
 					}
 					else
 					{
-						throw new RedbackException("A 'processaction' request requires 'pid' and 'processaction' attributes");
+						throw new RedbackException("A 'actionprocess' request requires 'pid' and 'processaction' attributes");
+					}
+				}
+				else if(action.equals("interruptprocess"))
+				{
+					String pid = request.getString("pid");
+					if(pid != null)
+					{
+						interruptProcess(session, pid);
+						responseData = new DataMap("result", "ok");
+					}
+					else
+					{
+						throw new RedbackException("A 'interruptprocess' request requires 'pid'");
+					}
+				}
+				else if(action.equals("interruptprocesses"))
+				{
+					DataMap filter = request.getObject("filter");
+					if(filter != null)
+					{
+						interruptProcesses(session, filter);
+						responseData = new DataMap("result", "ok");
+					}
+					else
+					{
+						throw new RedbackException("A 'interruptprocesses' request requires 'filter'");
 					}
 				}
 				else if(action.equals("getassignments"))
@@ -120,8 +146,12 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 
 	protected abstract ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException;
 	
-	protected abstract void processAction(Session session, String pid, String processAction, DataMap data) throws RedbackException;
+	protected abstract void actionProcess(Session session, String pid, String processAction, DataMap data) throws RedbackException;
 	
+	protected abstract void interruptProcess(Session session, String pid) throws RedbackException;
+
+	protected abstract void interruptProcesses(Session session, DataMap filter) throws RedbackException;
+
 	protected abstract List<Assignment> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException;
 	
 	protected abstract int getAssignmentCount(Session session, DataMap filter) throws RedbackException;

@@ -21,7 +21,7 @@ public class ProcessManagerProxyJSWrapper implements ProxyObject
 	protected Firebus firebus;
 	protected String processServiceName;
 	protected Session session;
-	protected String[] members = {"initiate", "getAssignment", "action"};
+	protected String[] members = {"initiate", "getAssignment", "action", "actionProcess", "interruptProcess"};
 	
 	public ProcessManagerProxyJSWrapper(Firebus f, String ps, Session s)
 	{
@@ -90,15 +90,39 @@ public class ProcessManagerProxyJSWrapper implements ProxyObject
 					return null;				
 				}
 			};				
-		} else if(key.equals("action")) {
+		} else if(key.equals("action") || key.equals("actionProcess")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String pid = arguments[0].asString();
 					String action = arguments[1].asString();
 					DataMap request = new DataMap();
-					request.put("action", "processaction");
+					request.put("action", "actionprocess");
 					request.put("pid", pid);
 					request.put("processaction", action);
+					try
+					{
+						Payload requestPayload = new Payload(request.toString());
+						requestPayload.metadata.put("token", session.getToken());
+						firebus.requestService(processServiceName, requestPayload);
+					}
+					catch(Exception e) 
+					{
+						logger.severe("Error actionning process : " + e);
+						throw new RuntimeException("Error actionning process", e);						
+					}	
+					return null;
+				}
+			};				
+		} else if(key.equals("interruptProcess")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					RedbackObjectJSWrapper object = arguments[0].asProxyObject();
+					DataMap request = new DataMap();
+					request.put("action", "interruptprocesses");
+					DataMap filter = new DataMap();
+					filter.put("data.objectname", object.getMember("objectname"));
+					filter.put("data.uid", object.getMember("uid"));
+					request.put("filter", filter);
 					try
 					{
 						Payload requestPayload = new Payload(request.toString());
