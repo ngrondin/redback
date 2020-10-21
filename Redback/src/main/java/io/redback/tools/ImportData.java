@@ -1,11 +1,11 @@
 package io.redback.tools;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -14,7 +14,6 @@ import io.firebus.utils.DataMap;
 
 public class ImportData extends Thread
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	
 	protected Firebus firebus;
 	protected String token;
@@ -46,15 +45,16 @@ public class ImportData extends Thread
 		Map<String, String> keyMap = new HashMap<String, String>();
 		try
 		{
-			URL url;
-			logger.info("Starting to import " + fileurl);
-			if(fileurl.startsWith("classpath:"))
-				url = this.getClass().getClassLoader().getResource(fileurl.substring(11));
-			else
-				url = new URL(fileurl);
-			if(url != null) 
+			InputStream is = null;
+			System.out.println("Starting to import " + fileurl);
+			if(fileurl.startsWith("classpath:")) {
+				URL url = this.getClass().getClassLoader().getResource(fileurl.substring(11));
+				is = url.openStream();
+			} else {
+				is = new FileInputStream(fileurl);
+			}
+			if(is != null) 
 			{
-				InputStream is = url.openStream();
 				DataMap input = new DataMap(is);
 				is.close();
 				boolean skippedAtLeastOne;
@@ -105,7 +105,7 @@ public class ImportData extends Thread
 									{
 										DataMap existing = list.getObject(0);
 										newUid = existing.getString("uid");
-										logger.fine("Found existing object " + objectname + "." + newUid);
+										System.out.println("Found existing object " + objectname + "." + newUid);
 									}
 									else
 									{
@@ -119,7 +119,7 @@ public class ImportData extends Thread
 										response = firebus.requestService(objectService, request);
 										fbRespmap = new DataMap(response.getString());
 										newUid = fbRespmap.getString("uid");
-										logger.fine("Created object " + objectname + "." + newUid);
+										System.out.println("Imported object " + objectname + "." + newUid);
 									}
 									String oldKey = objectname + "." + oldUid;
 									keyMap.put(oldKey, newUid);
@@ -127,22 +127,22 @@ public class ImportData extends Thread
 								}
 								catch(Exception e)
 								{
-									logger.info("Error creating object : " + e.getMessage());
+									System.err.println("Error creating object : " + e.getMessage());
 								}
 							}
 							else
 							{
 								skippedAtLeastOne = true;
-								logger.fine("Skipping object " + objectname + "." + oldUid + " for the moment");
+								System.out.println("Skipping object " + objectname + "." + oldUid + " for the moment");
 							}
 						}				
 					}
 				} while(skippedAtLeastOne);
-				logger.info("Finished importing " + fileurl);
+				System.out.println("Finished importing " + fileurl);
 			}
 			else
 			{
-				logger.severe("File was not found : " + fileurl);
+				System.err.println("File was not found : " + fileurl);
 			}
 		}
 		catch(Exception e)

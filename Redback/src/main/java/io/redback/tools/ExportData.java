@@ -2,13 +2,10 @@ package io.redback.tools;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Date;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -34,6 +31,34 @@ public class ExportData extends Thread
 		filepath = fp;
 	}
 	
+	public ExportData(Firebus fb, String t, String os, String set, String d, String fp)
+	{
+		firebus = fb;
+		token = t;
+		objectService = os;
+		domain = d;
+		filepath = fp;
+		try {
+			InputStream is = getClass().getResourceAsStream("/io/redback/data/_sets.json");
+			if(is != null) {
+				DataMap sets = new DataMap(is);
+				is.close();
+				DataList list = sets.getList(set);
+				if(list != null) {
+					objectList = new String[list.size()];
+					for(int i = 0; i < list.size(); i++) 
+						objectList[i] = list.getString(i);
+				} else {
+					objectList = new String[0];
+				}
+			} else {
+				objectList = new String[0];
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void exportDataAsync()
 	{
 		start();
@@ -53,6 +78,7 @@ public class ExportData extends Thread
 			for(int i = 0; i < objectList.length; i++)
 			{
 				String objectname = objectList[i];
+				System.out.print("Reading object " + objectname);
 				int newUID = 0;
 				boolean hasMore = true;
 				DataMap fbReqmap = new DataMap();
@@ -60,9 +86,12 @@ public class ExportData extends Thread
 				fbReqmap.put("object", objectname);
 				fbReqmap.put("filter", new DataMap());
 				fbReqmap.put("options", new DataMap("addvalidation", true));
+				fbReqmap.put("pagesize", 50);
 				int page = 0;
+				int count = 0;
 				while(hasMore)
 				{
+					System.out.print(".");
 					fbReqmap.put("page", page);
 					Payload fbReq = new Payload(fbReqmap.toString());
 					fbReq.metadata.put("token", token);
@@ -80,6 +109,7 @@ public class ExportData extends Thread
 								newUID++;
 							}
 						}
+						count += list.size();
 						if(list.size() < 50)
 							hasMore = false;
 						else
@@ -90,6 +120,7 @@ public class ExportData extends Thread
 						hasMore = false;
 					}
 				}
+				System.out.println(count + " records");
 			}
 			
 			DataMap result = new DataMap();
@@ -119,7 +150,7 @@ public class ExportData extends Thread
 							}
 							else
 							{
-								throw new Exception("Broken link in " + oldKey + " for attribute " + att);
+								System.err.println("Broken link in " + oldKey + " for attribute " + att);
 							}
 						}
 					}
