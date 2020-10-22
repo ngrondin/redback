@@ -73,12 +73,25 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 						response.metadata.put("username", file.username);
 						response.metadata.put("date", file.date.toInstant().toString());
 					} 
+					else if(action.equals("getmetadata")) 
+					{
+						RedbackFile file = getMetadata(request.getString("fileuid"));
+						DataMap fileInfo = new DataMap();
+						fileInfo.put("fileuid", file.uid);
+						fileInfo.put("filename", file.fileName);
+						fileInfo.put("mime", file.mime);
+						fileInfo.put("thumbnail", file.thumbnail);
+						fileInfo.put("username", file.username);
+						fileInfo.put("date", file.date.toInstant().toString());
+						response = new Payload(fileInfo.toString());
+					} 
 					else if(action.equals("link")) 
 					{
 						String object = request.getString("object");
 						String uid = request.getString("uid");
 						String fileUid = request.getString("fileuid");
 						linkFileTo(fileUid, object, uid);
+						response = new Payload((new DataMap("result", "ok")).toString());
 					}
 					else if(action.equals("list"))
 					{
@@ -125,6 +138,8 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 	}
 
 	public abstract RedbackFile getFile(String fileUid) throws RedbackException;
+
+	public abstract RedbackFile getMetadata(String fileUid) throws RedbackException;
 
 	public abstract List<RedbackFile> listFilesFor(String object, String uid) throws RedbackException;
 

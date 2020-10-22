@@ -1,9 +1,7 @@
 package io.redback.client.js;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-//import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -34,26 +32,11 @@ public class NotificationClientJSWrapper implements ProxyObject {
 		if(key.equals("sendemail")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
-					DataList addresses = (DataList)JSConverter.toJava(arguments[0]);
-					String fromAddress = arguments[1].asString();
-					String fromName = arguments[2].asString();
-					String subject = arguments[3].asString();
-					String body = arguments[4].asString();
-					DataList attachments = arguments.length >= 6 ? (DataList)JSConverter.toJava(arguments[5]) : null;
+					DataMap emailDataMap = (DataMap)JSConverter.toJava(arguments[0]);
+					Email email = new Email(emailDataMap);
 					try
 					{
-						List<String> addList = new ArrayList<String>();
-						for(int i = 0; i < addresses.size(); i++) {
-							addList.add(addresses.getString(i));
-						}
-						List<String> attList = null;
-						if(attachments != null) {
-							attList = new ArrayList<String>();
-							for(int i = 0; i < attachments.size(); i++) {
-								attList.add(attachments.getString(i));
-							}
-						}
-						notificationClient.sendEmail(session, addList, fromAddress, fromName, subject, body, attList);
+						notificationClient.sendEmail(session, email);
 						return null;
 					}
 					catch(Exception e)

@@ -6,7 +6,6 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -77,6 +76,31 @@ public class RedbackFileServer extends FileServer
 					fileAdapter = defaultFileService;
 				Payload filePayload = firebus.requestService(fileAdapter, new Payload(fileUid), 10000);
 				file = new RedbackFile(fileUid, fileName, mime, thumbnail, username, date, filePayload.getBytes());
+			}
+			else
+			{
+				throw new RedbackException("File not found " + fileUid);
+			}
+			return file;
+		} catch(Exception e) {
+			throw new RedbackException("Error getting file", e);
+		}
+	}
+	
+	public RedbackFile getMetadata(String fileUid) throws RedbackException
+	{
+		try {
+			RedbackFile file = null;
+			DataMap resp = dataClient.getData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), fileUid), null);
+			if(resp.getList("result").size() > 0)
+			{
+				DataMap fileInfo = fileCollection.convertObjectToCanonical(resp.getList("result").getObject(0));
+				String fileName = fileInfo.getString("filename");
+				String mime = fileInfo.getString("mime");
+				String thumbnail = fileInfo.getString("thumbnail");
+				String username = fileInfo.getString("user");
+				Date date = fileInfo.getDate("date");
+				file = new RedbackFile(fileUid, fileName, mime, thumbnail, username, date, null);
 			}
 			else
 			{

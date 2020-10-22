@@ -4,6 +4,8 @@ package io.redback.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.internet.InternetAddress;
+
 import io.firebus.Firebus;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
@@ -17,24 +19,15 @@ public class NotificationClient extends Client {
 		super(fb, sn);
 	}
 	
-	public void sendEmail(Session session, List<String> addresses, String fromAddress, String fromName, String subject, String body, List<String> attachments) throws RedbackException {
+	public void sendEmail(Session session, InternetAddress[] to, InternetAddress from, String subject, String body, List<String> attachments) throws RedbackException {
+		Email email = new Email(to, from, subject, body, attachments);
+		sendEmail(session, email);
+	}
+	
+	public void sendEmail(Session session, Email email) throws RedbackException {
 		try {
-			DataMap req = new DataMap();
+			DataMap req = email.toDataMap();
 			req.put("action", "sendemail");
-			DataList adds = new DataList();
-			for(String add : addresses)
-				adds.add(add);
-			req.put("addresses", adds);
-			req.put("fromaddress", fromAddress);
-			req.put("fromname", fromName);
-			req.put("subject", subject);
-			req.put("body", body);
-			if(attachments != null) {
-				DataList atts = new DataList();
-				for(String att : attachments)
-					atts.add(att);
-				req.put("attachments", atts);
-			}
 			request(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error sending emails", e);
@@ -49,6 +42,7 @@ public class NotificationClient extends Client {
 			req.put("server", server);
 			req.put("username", username);
 			req.put("password", password);
+			req.put("folder", folder);
 			DataMap resp = request(session, req);
 			DataList result = resp.getList("result");
 			for(int i = 0; i < result.size(); i++) {

@@ -7,14 +7,16 @@ import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
+import io.firebus.utils.DataMap;
 import io.redback.client.FileClient;
 import io.redback.security.Session;
+import io.redback.utils.js.JSConverter;
 
 public class FileClientJSWrapper implements ProxyObject {
 	
 	protected FileClient fileClient;
 	protected Session session;
-	protected String[] members = {"linkFileTo"};
+	protected String[] members = {"linkFileTo", "getMetadata"};
 
 	public FileClientJSWrapper(FileClient fc, Session s)
 	{
@@ -37,6 +39,21 @@ public class FileClientJSWrapper implements ProxyObject {
 					catch(Exception e)
 					{
 						throw new RuntimeException("Error linking file to object", e);
+					}
+				}
+			};
+		} else if(key.equals("getMetadata")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String fileUid = arguments[0].toString();
+					try
+					{
+						DataMap resp = fileClient.getMetadata(session, fileUid);
+						return JSConverter.toJS(resp);
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error getting metadata of file", e);
 					}
 				}
 			};

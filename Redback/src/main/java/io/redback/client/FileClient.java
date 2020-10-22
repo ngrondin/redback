@@ -37,6 +37,18 @@ public class FileClient extends Client {
 			throw new RedbackException("Error getting file", e);
 		}
 	}
+	
+	public DataMap getMetadata(Session session, String fileUid) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "getmetadata");
+			req.put("fileuid", fileUid);
+			DataMap resp = request(session, req);
+			return resp;
+		} catch(Exception e) {
+			throw new RedbackException("Error getting file", e);
+		}
+	}
 
 	public List<RedbackFile> listFilesFor(Session session, String object, String uid)  throws RedbackException {
 		List<RedbackFile> files = new ArrayList<RedbackFile>();

@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -87,8 +86,8 @@ public class RedbackNotificationServer extends NotificationServer {
 			        
 			        logger.fine("Sending email");
 			        Message msg = new MimeMessage(mailSession);
-			        msg.setFrom(new InternetAddress(email.fromAddress, email.fromName));
-			        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(String.join(",", email.addresses), false));
+			        msg.setFrom(email.from);
+			        msg.setRecipients(Message.RecipientType.TO, email.to);
 			        msg.setSubject(email.subject);
 			        if(email.attachments == null) {
 			        	msg.setText(email.body); 
@@ -138,10 +137,6 @@ public class RedbackNotificationServer extends NotificationServer {
 			for (int i=0; i < messages.length;i++) 
 			{
 				Message msg =  messages[i];
-				List<String> to = new ArrayList<String>();
-				Address[] addresses = msg.getAllRecipients();
-				for(int j = 0; j < addresses.length; j++)
-					to.add(addresses[j].toString());
 				String body = null;
 				List<String> attachments = null;
 				Object content = msg.getContent();
@@ -156,6 +151,8 @@ public class RedbackNotificationServer extends NotificationServer {
 							body = (String)bp.getContent();
 						} else if(bp.isMimeType("text/html")) {
 
+						} else if(bp.isMimeType("multipart/ALTERNATIVE")) {
+
 						} else {
 							InputStream is = bp.getInputStream();
 						    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -167,7 +164,7 @@ public class RedbackNotificationServer extends NotificationServer {
 						}
 					}
 				}
-				Email email = new Email(to, msg.getFrom()[0].toString(), null, msg.getSubject(), body, attachments);
+				Email email = new Email((InternetAddress[])msg.getAllRecipients(), (InternetAddress)msg.getFrom()[0], msg.getSubject(), body, attachments);
 				emails.add(email);
 				msg.setFlag(Flag.SEEN, true);
 			}

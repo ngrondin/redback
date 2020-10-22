@@ -3,34 +3,40 @@ package io.redback.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.internet.InternetAddress;
+
+import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
+import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 
 public class Email {
-	public List<String> addresses;
-	public String fromAddress;
-	public String fromName;
+	public InternetAddress[] to;
+	public InternetAddress from;
 	public String subject;
 	public String body;
 	public List<String> attachments;
 	
-	public Email(List<String> a, String fa, String fn, String s, String b, List<String> f) {
-		addresses = a;
-		fromAddress = fa;
-		fromName = fn;
+	public Email(InternetAddress[] t, InternetAddress fr, String s, String b, List<String> f) {
+		to = t;
+		from = fr;
 		subject = s;
 		body = b;
 		attachments = f;
 	}
 	
 	public Email(DataMap map) {
-		DataList addressList = map.getList("addresses");
-		addresses = new ArrayList<String>();
-		for(int i = 0; i < addressList.size(); i++) {
-			addresses.add(addressList.getString(i));
+		if(map.get("to") instanceof DataList) {
+			DataList toList = map.getList("to");
+			to = new InternetAddress[toList.size()];
+			for(int i = 0; i < toList.size(); i++) {
+				to[i] = toInternetAddress(toList.get(i));
+			}
+		} else if(map.get("to") instanceof DataLiteral) {
+			to = new InternetAddress[1];
+			to[0] = toInternetAddress(map.get("to"));
 		}
-		fromAddress = map.getString("fromaddress");
-		fromName = map.getString("fromname");
+		from = toInternetAddress(map.get("from"));
 		subject = map.getString("subject");
 		body = map.getString("body");					
 		DataList attList = map.getList("attachments");
@@ -42,16 +48,36 @@ public class Email {
 		}
 	}
 	
+	protected InternetAddress toInternetAddress(DataEntity entity) {
+		try {
+			if(entity instanceof DataLiteral) {
+				return new InternetAddress(entity.toString());
+			} else if(entity instanceof DataMap) {
+				DataMap addr = (DataMap)entity;
+				return new InternetAddress(addr.getString("address"), addr.getString("name"));
+			}
+		} catch(Exception e) {}
+		return null;
+	}
+	
 	public DataMap toDataMap() {
 		DataMap map = new DataMap();
-		if(addresses != null && addresses.size() > 0) {
-			DataList addList = new DataList();
-			for(String address: addresses)
-				addList.add(address);
-			map.put("addresses", addList);
+		if(to != null && to.length > 0) {
+			DataList toList = new DataList();
+			for(int i = 0; i < to.length; i++) {
+				DataMap toMap = new DataMap();
+				toMap.put("address", to[i].getAddress());
+				toMap.put("name", to[i].getPersonal());
+				toList.add(toMap);
+			}
+			map.put("to", toList);
 		}
-		map.put("fromname", fromName);
-		map.put("fromaddress", fromAddress);
+		if(from != null) {
+			DataMap fromMap = new DataMap();
+			fromMap.put("address", from.getAddress());
+			fromMap.put("name", from.getPersonal());
+			map.put("from", fromMap);
+		}
 		map.put("subject", subject);
 		map.put("body", body);
 		if(attachments != null && attachments.size() > 0) {
