@@ -29,9 +29,15 @@ public class RedbackObjectRemote {
 		return data.getString("uid");
 	}
 	
+	public String getDomain() {
+		return data.getString("domain");
+	}
+	
 	public String getString(String attribute) {
 		if(attribute.equals("uid"))
 			return getUid();
+		else if(attribute.equals("domain"))
+			return getDomain();
 		else
 			return ((DataLiteral)get(attribute)).getString();
 	}

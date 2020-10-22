@@ -18,6 +18,7 @@ public class ProcessClientJSWrapper implements ProxyObject
 {
 	protected ProcessClient processClient;
 	protected Session session;
+	protected String domainLock;
 	protected String[] members = {"initiate", "getAssignment", "actionProcess", "interruptProcess", "interruptProcesses"};
 	
 	public ProcessClientJSWrapper(ProcessClient pc, Session s)
@@ -26,6 +27,12 @@ public class ProcessClientJSWrapper implements ProxyObject
 		session = s;
 	}
 
+	public ProcessClientJSWrapper(ProcessClient pc, Session s, String dl)
+	{
+		processClient = pc;
+		session = s;
+		domainLock = dl;
+	}
 
 	public Object getMember(String key) {
 		if(key.equals("initiate")) {
@@ -34,6 +41,8 @@ public class ProcessClientJSWrapper implements ProxyObject
 					String process = arguments[0].asString();
 					String domain = arguments[1].asString();
 					DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
+					if(domainLock != null)
+						domain = domainLock;
 					try
 					{
 						processClient.initiate(session, process, domain, data);
@@ -49,6 +58,8 @@ public class ProcessClientJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					DataMap filter = (DataMap)JSConverter.toJava(arguments[0]);
+					if(domainLock != null)
+						filter.put("domain", domainLock);
 					try
 					{
 						ProcessAssignmentRemote par = processClient.getAssignment(session, filter);
@@ -97,6 +108,8 @@ public class ProcessClientJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					DataMap filter = (DataMap)JSConverter.toJava(arguments[0]);
+					if(domainLock != null)
+						filter.put("domain", domainLock);
 					try
 					{
 						processClient.interruptProcesses(session, filter);

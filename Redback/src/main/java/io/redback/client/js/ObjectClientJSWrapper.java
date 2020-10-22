@@ -19,12 +19,20 @@ public class ObjectClientJSWrapper implements ProxyObject {
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected ObjectClient objectClient;
 	protected Session session;
+	protected String domainLock;
 	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject"};
 
 	public ObjectClientJSWrapper(ObjectClient oc, Session s)
 	{
 		objectClient = oc;
 		session = s;
+	}
+	
+	public ObjectClientJSWrapper(ObjectClient oc, Session s, String dl)
+	{
+		objectClient = oc;
+		session = s;
+		domainLock = dl;
 	}
 	
 	public Object getMember(String key) {
@@ -36,7 +44,10 @@ public class ObjectClientJSWrapper implements ProxyObject {
 					try
 					{
 						RedbackObjectRemote ror = objectClient.getObject(session, objectname, uid);
-						return new RedbackObjectRemoteJSWrapper(ror);
+						if(domainLock == null || (domainLock != null && ror.getDomain().equals(domainLock)))
+							return new RedbackObjectRemoteJSWrapper(ror);
+						else
+							return null;
 					}
 					catch(Exception e)
 					{
@@ -49,6 +60,8 @@ public class ObjectClientJSWrapper implements ProxyObject {
 				public Object execute(Value... arguments) {
 					String objectname = arguments[0].asString();
 					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
+					if(domainLock != null)
+						filter.put("domain", domainLock);
 					try
 					{
 						Object o = objectClient.listObjects(session, objectname, filter);
@@ -65,6 +78,8 @@ public class ObjectClientJSWrapper implements ProxyObject {
 				public Object execute(Value... arguments) {
 					String objectname = arguments[0].asString();
 					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
+					if(domainLock != null)
+						filter.put("domain", domainLock);
 					try
 					{
 						Object o = objectClient.listAllObjects(session, objectname, filter, true);
@@ -80,10 +95,13 @@ public class ObjectClientJSWrapper implements ProxyObject {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String objectname = arguments[0].asString();
-					DataMap data = (DataMap)JSConverter.toJava(arguments[1]);
+					String domain = arguments.length == 2 ? null : arguments[1].asString(); 
+					DataMap data = (DataMap)JSConverter.toJava(arguments.length == 2 ? arguments[1] : arguments[2]);
+					if(domainLock != null)
+						domain = domainLock;
 					try
 					{
-						Object o = objectClient.createObject(session, objectname, data, true);
+						Object o = objectClient.createObject(session, objectname, domain, data, true);
 						return JSConverter.toJS(o);
 					}
 					catch(Exception e)

@@ -71,11 +71,17 @@ public class ObjectClient extends Client
 	}
 	
 	public RedbackObjectRemote createObject(Session session, String objectname, DataMap data, boolean addRelated) throws RedbackException  {
+		return createObject(session, objectname, null, data, addRelated);
+	}
+	
+	public RedbackObjectRemote createObject(Session session, String objectname, String domain, DataMap data, boolean addRelated) throws RedbackException  {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "create");
 			req.put("object", objectname);
 			req.put("data", data);
+			if(domain != null) 
+				req.put("domain", domain);
 			if(addRelated)
 				req.put("options", new DataMap("addrelated", true));
 			DataMap resp = request(session, req);

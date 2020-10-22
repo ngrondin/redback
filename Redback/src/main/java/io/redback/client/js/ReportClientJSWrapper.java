@@ -18,12 +18,20 @@ public class ReportClientJSWrapper implements ProxyObject {
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected ReportClient reportClient;
 	protected Session session;
+	protected String domainLock;
 	protected String[] members = {"produce", "produceAndStore"};
 
 	public ReportClientJSWrapper(ReportClient rc, Session s)
 	{
 		reportClient = rc;
 		session = s;
+	}
+	
+	public ReportClientJSWrapper(ReportClient rc, Session s, String dl)
+	{
+		reportClient = rc;
+		session = s;
+		domainLock = dl;
 	}
 	
 	public Object getMember(String key) {
@@ -33,6 +41,8 @@ public class ReportClientJSWrapper implements ProxyObject {
 					String domain = arguments.length == 3 ? arguments[0].asString() : null; 
 					String name = arguments.length == 3 ? arguments[1].asString() : arguments[0].asString();
 					DataMap filter = (DataMap)JSConverter.toJava(arguments.length == 3 ? arguments[2] : arguments[1]);
+					if(domainLock != null && domain != null)
+						domain = domainLock;
 					try
 					{
 						byte[] bytes = reportClient.produce(session, domain, name, filter);
@@ -50,6 +60,8 @@ public class ReportClientJSWrapper implements ProxyObject {
 					String domain = arguments.length == 3 ? arguments[0].asString() : null; 
 					String name = arguments.length == 3 ? arguments[1].asString() : arguments[0].asString();
 					DataMap filter = (DataMap)JSConverter.toJava(arguments.length == 3 ? arguments[2] : arguments[1]);
+					if(domainLock != null && domain != null)
+						domain = domainLock;
 					try
 					{
 						String fileUid = reportClient.produceAndStore(session, domain, name, filter);

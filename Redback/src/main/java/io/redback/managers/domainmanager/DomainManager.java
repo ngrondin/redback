@@ -311,11 +311,11 @@ public class DomainManager implements Consumer {
 		DomainLoggerJS dl = new DomainLoggerJS(session, this, df);
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("session", new SessionJSWrapper(session));
-		context.put("oc", new ObjectClientJSWrapper(objectClient, session));
-		context.put("pc", new ProcessClientJSWrapper(processClient, session));
+		context.put("oc", new ObjectClientJSWrapper(objectClient, session, df.getDomain()));
+		context.put("pc", new ProcessClientJSWrapper(processClient, session, df.getDomain()));
 		context.put("fc", new FileClientJSWrapper(fileClient, session));
 		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
-		context.put("rc", new ReportClientJSWrapper(reportClient, session));
+		context.put("rc", new ReportClientJSWrapper(reportClient, session, df.getDomain()));
 		context.put("gc", new GatewayClientJSWrapper(gatewayClient));
 		context.put("param", JSConverter.toJS(param));
 		context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
