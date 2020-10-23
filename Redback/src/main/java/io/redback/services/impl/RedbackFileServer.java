@@ -242,7 +242,8 @@ public class RedbackFileServer extends FileServer
 		try
 		{
 			int newHeight = 80;
-			int newWidth = orig.getWidth() / (orig.getHeight() / newHeight);
+			double scale = (double)orig.getHeight() / (double)newHeight;
+			int newWidth = (int)((double)orig.getWidth() / scale);
 			BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
 			Graphics2D gc = img.createGraphics();
 			gc.setColor(Color.WHITE);
