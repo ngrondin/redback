@@ -1,7 +1,6 @@
 package io.redback.managers.objectmanager.js;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -16,7 +15,6 @@ import io.redback.utils.js.JSConverter;
 
 public class ObjectManagerJSWrapper implements ProxyObject
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected ObjectManager objectManager;
 	protected Session session;
 	protected String[] members = {"getObject", "listObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute"};
@@ -38,8 +36,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						else
 							return null;
 					} catch (Exception e) {
-						logger.severe("Errror in getObject : " + e.getMessage());
-						throw new RuntimeException("Errror in getObject", e);
+						throw new RuntimeException("Error in getObject", e);
 					}
 				}
 			};
@@ -52,8 +49,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
 						return JSConverter.toJS(objectManager.listObjects(session, objectName, filter, null, sort, false, 0, 50));
 					} catch (Exception e) {
-						logger.severe("Errror in getObjectList : " + e.getMessage());
-						throw new RuntimeException("Errror in getObjectList", e);
+						throw new RuntimeException("Error in listObjects", e);
 					}
 				}
 			};
@@ -63,8 +59,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 					try {
 						return JSConverter.toJS(objectManager.listRelatedObjects(session, arguments[0].asString(), arguments[1].asString(), arguments[2].asString(), (DataMap)JSConverter.toJava(arguments[3]), null, false));
 					} catch (Exception e) {
-						logger.severe("Errror in getRelatedObjectList : " + e.getMessage());
-						throw new RuntimeException("Errror in getRelatedObjectList", e);
+						throw new RuntimeException("Error in getRelatedObjectList", e);
 					}
 				}
 			};
@@ -78,8 +73,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						else
 							return null;
 					} catch (Exception e) {
-						logger.severe("Errror in updateObject : " + e.getMessage());
-						throw new RuntimeException("Errror in updateObject", e);
+						throw new RuntimeException("Error in updateObject", e);
 					}
 				}
 			};
@@ -96,8 +90,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						else
 							return null;
 					} catch (Exception e) {
-						logger.severe("Errror in createObject : " + e.getMessage());
-						throw new RuntimeException("Errror in createObject", e);
+						throw new RuntimeException("Error in createObject", e);
 					}
 				}
 			};
@@ -110,8 +103,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						objectManager.deleteObject(session, objectName, uid);
 						return null;
 					} catch (Exception e) {
-						logger.severe("Error in deleteObject : " + e.getMessage());
-						throw new RuntimeException("Errror in deleteObject", e);
+						throw new RuntimeException("Error in deleteObject", e);
 					}
 				}
 			};		} else if(key.equals("execute")) {
@@ -122,7 +114,6 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						objectManager.executeFunction(session, functionName);
 						return null;
 					} catch (Exception e) {
-						logger.severe("Error in execute : " + e.getMessage());
 						throw new RuntimeException("Error in execute", e);
 					}
 				}

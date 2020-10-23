@@ -10,6 +10,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.HTML;
+import io.redback.utils.Timer;
 
 public abstract class UIServer extends AuthenticatedServiceProvider
 {
@@ -63,6 +64,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 			logger.finer("UI authenticated service start");
 			Payload response = new Payload();
 			String get = extractGetString(payload);
+			Timer timer = new Timer("rbui", get);
 
 			if(get != null)
 			{
@@ -115,6 +117,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				}
 			}
 			logger.finer("UI authenticated service finish");
+			timer.mark();
 			return response;
 		}
 		catch(DataException e)

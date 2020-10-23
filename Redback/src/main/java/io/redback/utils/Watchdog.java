@@ -16,7 +16,7 @@ public class Watchdog extends Thread {
 				long totalHeap = (Runtime.getRuntime().totalMemory() / 1048576);
 				long freeHeap = (Runtime.getRuntime().freeMemory() / 1048576);
 				long usedHeap = totalHeap - freeHeap;
-				System.out.println("memory:" + usedHeap + ":" + totalHeap + ":" + maxHeap);
+				System.out.println("memory::" + System.currentTimeMillis() + ":" + usedHeap + ":" + totalHeap + ":" + maxHeap);
 				Thread.sleep(60000);
 			} catch(Exception e) {
 				e.printStackTrace();

@@ -60,7 +60,7 @@ public class RedbackObject extends RedbackElement
 		}
 		else
 		{
-			error("User does not have the right to read object " + config.getName());
+			throw new RedbackException("User does not have the right to read object " + config.getName());
 		}
 	}
 	
@@ -82,7 +82,7 @@ public class RedbackObject extends RedbackElement
 					}
 					else
 					{
-						error("Another object " + config.getName() + " already exists with uid " + u, null);
+						throw new RedbackException("Another object " + config.getName() + " already exists with uid " + u, null);
 					}
 				}
 				else if(config.getUIDGeneratorName() != null)
@@ -91,7 +91,7 @@ public class RedbackObject extends RedbackElement
 				}
 				else
 				{
-					error("No UID has been provided or no UID Generator has been configured for object " + config.getName() , null);
+					throw new RedbackException("No UID has been provided or no UID Generator has been configured for object " + config.getName() , null);
 				}
 				
 				if(!config.isDomainManaged()) 
@@ -112,7 +112,7 @@ public class RedbackObject extends RedbackElement
 				}
 				else
 				{
-					error("No domain has been provided and no default domain has been configure for the user");
+					throw new RedbackException("No domain has been provided and no default domain has been configure for the user");
 				}
 				postInitScriptContextUpdate();
 
@@ -139,12 +139,12 @@ public class RedbackObject extends RedbackElement
 			}
 			catch(FunctionTimeoutException | FunctionErrorException e)
 			{
-				error("Problem initiating object " + config.getName(), e);
+				throw new RedbackException("Problem initiating object " + config.getName(), e);
 			}
 		}
 		else
 		{
-			error("User does not have the right to create object " + config.getName());
+			throw new RedbackException("User does not have the right to create object " + config.getName());
 		}		
 	}
 	
@@ -351,15 +351,15 @@ public class RedbackObject extends RedbackElement
 				else
 				{
 					if(canWrite)
-						error("User '" + session.getUserProfile().getUsername() + "' does not have the right to update attribute '" + name + "' on object '" + config.getName() + ":" + getUID().getString() + "'");
+						throw new RedbackException("User '" + session.getUserProfile().getUsername() + "' does not have the right to update attribute '" + name + "' on object '" + config.getName() + ":" + getUID().getString() + "'");
 					else
-						error("User '" + session.getUserProfile().getUsername() + "' does not have the right to update object '" + config.getName() + ":" + getUID().getString() + "'");
+						throw new RedbackException("User '" + session.getUserProfile().getUsername() + "' does not have the right to update object '" + config.getName() + ":" + getUID().getString() + "'");
 				}
 			}
 		}
 		else
 		{
-			error("This attribute '" + name + "' does not exist");
+			throw new RedbackException("This attribute '" + name + "' does not exist");
 		}
 	}
 
@@ -470,7 +470,7 @@ public class RedbackObject extends RedbackElement
 			}
 			else
 			{
-				error("User does not have the right to update object " + config.getName());
+				throw new RedbackException("User does not have the right to update object " + config.getName());
 			}
 		}
 	}
@@ -483,8 +483,7 @@ public class RedbackObject extends RedbackElement
 		}
 		else
 		{
-			error("User does not have the right to execute functions in object " + config.getName());
-			return null;
+			throw new RedbackException("User does not have the right to execute functions in object " + config.getName());
 		}
 	}
 	
@@ -568,12 +567,13 @@ public class RedbackObject extends RedbackElement
 		} 
 		catch (RedbackException e)
 		{
-			error("Problem occurred executing a script", e);
+			throw new RedbackException("Problem occurred executing script " + name, e);
 		}		
 		logger.finer("Finish executing script : " + name);
 		return retVal;
 	}
 	
+	/*
 	protected void error(String msg) throws RedbackException
 	{
 		error(msg, null);
@@ -587,7 +587,8 @@ public class RedbackObject extends RedbackElement
 		else
 			throw new RedbackException(msg);
 	}
-
+*/
+	
 	public String toString()
 	{
 		try
