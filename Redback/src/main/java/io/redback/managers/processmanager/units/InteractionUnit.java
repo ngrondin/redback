@@ -86,8 +86,11 @@ public class InteractionUnit extends ProcessUnit
 	public void interrupt(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
 		logger.finer("Starting interaction node interruption");
-		if(nextNodeInterruption != null)
+		if(nextNodeInterruption != null) {
+			pi.clearAssignees();
+			pi.clearInteractionDetails();
 			pi.setCurrentNode(nextNodeInterruption);
+		}
 		logger.finer("Finished interaction node interruption");
 	}
 
