@@ -55,8 +55,10 @@ export class RbViewLoaderComponent implements OnInit {
     let hash = body.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
     let factory = this.factoryCache[hash];
     if(factory == null) {
+      const componentClass = class RuntimeComponentClass extends ViewContainerComponent {};
       const typeDecorator: TypeDecorator = Component({ selector: 'rb-view-container', template: body});
-      const decoratedComponent = typeDecorator(ViewContainerComponent);
+      const decoratedComponent = typeDecorator(componentClass);
+      //const decoratedComponent = typeDecorator(ViewContainerComponent);
       const moduleClass = class RuntimeComponentModule { };
       const decoratedNgModule = NgModule({ imports: [CommonModule, RedbackModule], declarations: [decoratedComponent] })(moduleClass);
       const module: ModuleWithComponentFactories<any> = this.compiler.compileModuleAndAllComponentsSync(decoratedNgModule);
