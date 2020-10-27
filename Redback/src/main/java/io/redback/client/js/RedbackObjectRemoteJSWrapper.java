@@ -3,23 +3,21 @@ package io.redback.client.js;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-
+import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.utils.js.JSConverter;
 
 public class RedbackObjectRemoteJSWrapper implements ProxyObject
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected RedbackObjectRemote rbObjectRemote;
-	protected String[] members = {"getRelated"};
+	protected String[] members = {"getRelated", "execute"};
 	
 	public RedbackObjectRemoteJSWrapper(RedbackObjectRemote o)
 	{
@@ -36,6 +34,21 @@ public class RedbackObjectRemoteJSWrapper implements ProxyObject
 					if(ror != null)
 						return new RedbackObjectRemoteJSWrapper(ror);
 					return null;
+				}
+			};				
+		}
+		else if(name.equals("execute"))
+		{
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String function = arguments[0].asString();
+					DataMap data = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
+					try {
+						rbObjectRemote.execute(function, data);
+						return null;
+					} catch(Exception e) {
+						throw new RuntimeException("Error executing function on object", e);
+					}
 				}
 			};				
 		}
@@ -80,13 +93,12 @@ public class RedbackObjectRemoteJSWrapper implements ProxyObject
 		} 
 		catch (RedbackException e)
 		{
-			String errMsg = "Error setting the Redback Object attribute '" + key + "' : " + constructErrorString(e);
-			logger.severe(errMsg);
-			throw new RuntimeException(errMsg);		
+			String errMsg = "Error setting the Redback Object attribute '" + key + "'";
+			throw new RuntimeException(errMsg, e);		
 		}		
 	}
 
-	
+	/*
 	protected String constructErrorString(Throwable e) 
 	{
 		String ret = "";
@@ -99,5 +111,5 @@ public class RedbackObjectRemoteJSWrapper implements ProxyObject
 		}
 		return ret;
 	}
-
+	 */
 }

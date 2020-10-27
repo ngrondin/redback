@@ -109,4 +109,22 @@ public class RedbackObjectRemote {
 		return ret;
 	}
 	
+	public void execute(String function, DataMap param) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "execute");
+			req.put("object", data.getString("objectname"));
+			req.put("uid", getUid());
+			req.put("function", function);
+			req.put("data", param);
+			Payload reqP = new Payload(req.toString());
+			reqP.metadata.put("token", token);
+			Payload respP = firebus.requestService(objectService, reqP);
+			DataMap resp = new DataMap(respP.getString());
+			this.data = resp;
+		} catch(Exception e) {
+			throw new RedbackException("Error execute function on object", e);
+		}		
+	}
+	
 }
