@@ -2,9 +2,10 @@ package io.redback.managers.reportmanager;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -29,7 +30,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 
 	public ReportDataUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		jsParams = Arrays.asList(new String[] {"params", "object"});
+		jsParams = Arrays.asList(new String[] {"params", "object", "page"});
 		valueExpr = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_text_value", jsParams, c.getString("value"));
 		width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
 		font = PDType1Font.HELVETICA;
@@ -38,18 +39,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 		color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
 		format = config.getString("format");
 	}
-	
-	protected Color getColor(String c) {
-		try {
-			final Field f = Color.class.getField(c);
-			if(f != null)
-				return (Color)f.get(null);
-			else
-				return Color.DARK_GRAY;
-		} catch(Exception e) {
-			return Color.DARK_GRAY;
-		}
-	}
+
 
 	public abstract ReportBox produce(Map<String, Object> context) throws IOException, RedbackException;
 	
@@ -58,6 +48,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 		Map<String, Object> jsContext = new HashMap<String, Object>();
 		RedbackObjectRemote object = (RedbackObjectRemote)context.get("object");
 		jsContext.put("object", new RedbackObjectRemoteJSWrapper(object));
+		jsContext.put("page", context.get("page"));
 		Object value = valueExpr.eval(jsContext);
 		String valueStr = value != null ? value.toString() : "";
 		if(format != null) {
@@ -79,6 +70,12 @@ public abstract class ReportDataUnit extends ReportUnit {
 				if(dur > 0 && dur < 60000) {
 					valueStr += Math.abs((dur % 60000) / 1000) + "s";
 				}
+			} else if(format.equals("date") && value != null && value instanceof Date) {
+				DateFormat formatter = DateFormat.getDateInstance();
+				valueStr = formatter.format(value);
+			} else if(format.equals("datetime") && value != null && value instanceof Date) {
+				DateFormat formatter = DateFormat.getDateTimeInstance();
+				valueStr = formatter.format(value);
 			}
 		}
 		return valueStr;

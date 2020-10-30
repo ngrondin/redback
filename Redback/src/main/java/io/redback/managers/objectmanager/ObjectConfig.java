@@ -36,6 +36,8 @@ public class ObjectConfig
 		scriptVars.add("firebus");
 		scriptVars.add("geo");
 		scriptVars.add("fc");
+		scriptVars.add("rc");
+		scriptVars.add("nc");
 		scriptVars.add("dc");
 		scriptVars.add("userprofile");
 		scriptVars.add("self");

@@ -1,5 +1,6 @@
 package io.redback.managers.reportmanager;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import io.redback.managers.reportmanager.units.DynamicForm;
 import io.redback.managers.reportmanager.units.Field;
 import io.redback.managers.reportmanager.units.HLine;
 import io.redback.managers.reportmanager.units.HSection;
+import io.redback.managers.reportmanager.units.Image;
 import io.redback.managers.reportmanager.units.MultilineText;
 import io.redback.managers.reportmanager.units.Space;
 import io.redback.managers.reportmanager.units.Text;
@@ -60,11 +62,26 @@ public abstract class ReportUnit {
 			newUnit = new Space(rm, rc, c);
 		else if(type.equals("hline"))
 			newUnit = new HLine(rm, rc, c);
+		else if(type.equals("image"))
+			newUnit = new Image(rm, rc, c);		
 		return newUnit;
 	}
 	
 	protected float getStringWidth(String text, PDFont pdfFont, float fontSize) throws IOException {
 		return pdfFont.getStringWidth(text) / 1000f * fontSize;
+	}
+	
+	
+	protected Color getColor(String c) {
+		try {
+			final java.lang.reflect.Field f = Color.class.getField(c);
+			if(f != null)
+				return (Color)f.get(null);
+			else
+				return Color.DARK_GRAY;
+		} catch(Exception e) {
+			return Color.DARK_GRAY;
+		}
 	}
 	
 	protected List<String> cutToLines(String text, PDFont pdfFont, float fontSize, float width) throws IOException {

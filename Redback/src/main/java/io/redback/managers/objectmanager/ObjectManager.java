@@ -25,8 +25,12 @@ import io.redback.client.DataClient;
 import io.redback.client.DomainClient;
 import io.redback.client.FileClient;
 import io.redback.client.GeoClient;
+import io.redback.client.NotificationClient;
+import io.redback.client.ReportClient;
 import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.GeoClientJSWrapper;
+import io.redback.client.js.NotificationClientJSWrapper;
+import io.redback.client.js.ReportClientJSWrapper;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.jsmanager.JSManager;
@@ -52,6 +56,8 @@ public class ObjectManager
 	protected String signalConsumerName;
 	protected String geoServiceName;
 	protected String fileServiceName;
+	protected String reportServiceName;
+	protected String notificationServiceName;
 	protected String domainServiceName;
 	protected DataMap globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
@@ -63,6 +69,8 @@ public class ObjectManager
 	protected ConfigurationClient configClient;
 	protected GeoClient geoClient;
 	protected FileClient fileClient;
+	protected ReportClient reportClient;
+	protected NotificationClient notificationClient;
 	protected DomainClient domainClient;
 
 	public ObjectManager(Firebus fb, DataMap config)
@@ -77,12 +85,16 @@ public class ObjectManager
 		signalConsumerName = config.getString("signalconsumer");
 		geoServiceName = config.getString("geoservice");
 		fileServiceName = config.getString("fileservice");
+		reportServiceName = config.getString("reportservice");
+		notificationServiceName = config.getString("notificationservice");
 		domainServiceName = config.getString("domainservice");
 		globalVariables = config.getObject("globalvariables");
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		geoClient = new GeoClient(firebus, geoServiceName);
 		fileClient = new FileClient(firebus, fileServiceName);
+		reportClient = new ReportClient(firebus, reportServiceName);
+		notificationClient = new NotificationClient(firebus, notificationServiceName);
 		domainClient = new DomainClient(firebus, domainServiceName);
 		objectConfigs = new HashMap<String, ObjectConfig>();
 		globalScripts = new HashMap<String, ScriptConfig>();
@@ -115,7 +127,17 @@ public class ObjectManager
 	{
 		return fileClient;
 	}
+	
+	public ReportClient getReportClient()
+	{
+		return reportClient;
+	}
 
+	public NotificationClient getNotificationClient()
+	{
+		return notificationClient;
+	}
+	
 	public DomainClient getDomainClient()
 	{
 		return domainClient;
@@ -142,6 +164,8 @@ public class ObjectManager
 		context.put("om", new ObjectManagerJSWrapper(this, session));
 		context.put("pm", new ProcessManagerProxyJSWrapper(getFirebus(), processServiceName, session));
 		context.put("fc", new FileClientJSWrapper(getFileClient(), session));
+		context.put("rc", new ReportClientJSWrapper(getReportClient(), session));
+		context.put("nc", new NotificationClientJSWrapper(getNotificationClient(), session));
 		context.put("geo", new GeoClientJSWrapper(geoClient));
 		context.put("canRead", new SessionRightsJSFunction(session, "read"));
 		context.put("canWrite", new SessionRightsJSFunction(session, "write"));

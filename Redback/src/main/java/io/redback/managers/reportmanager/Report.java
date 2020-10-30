@@ -11,7 +11,6 @@ import java.util.Map;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 import io.firebus.utils.DataMap;
@@ -39,8 +38,11 @@ public class Report {
 			context.put("document", document);
 			ReportBox root = reportConfig.produce(context);
 			List<ReportBox> pages = paginate(root);
-			for(int i = 0; i < pages.size(); i++)
-				renderPage(pages.get(i), i);
+			for(int i = 0; i < pages.size(); i++) {
+				context.put("page", (i + 1));
+				ReportBox footer = reportConfig.produceFooter(context);
+				renderPage(pages.get(i), footer, i);
+			}
 		} catch(Exception e) {
 			e.printStackTrace();
 			throw new RedbackException("Error producing report", e);
@@ -79,12 +81,13 @@ public class Report {
 		return pages;
 	}
 	
-	protected void renderPage(ReportBox content, int pageNumber) throws IOException {
+	protected void renderPage(ReportBox content, ReportBox footer, int pageNumber) throws IOException {
 		PDPage pdPage = new PDPage();
 		document.addPage(pdPage);
 		PDPageContentStream contentStream = new PDPageContentStream(document, pdPage);
 		renderReportBox(pdPage, contentStream, content, 50, 50);
-		renderFooter(pdPage, contentStream, pageNumber);
+		renderReportBox(pdPage, contentStream, footer, 50, 730);
+		//renderFooter(pdPage, contentStream, pageNumber);
 		contentStream.close();			
 	}
 	
@@ -98,8 +101,9 @@ public class Report {
 		} else if(reportBox.type.equals("hline")) {
 			stream.setLineWidth(0.3f);
 			stream.setStrokingColor(Color.BLACK);
-			stream.moveTo(offsetx, pageTop - offsety + reportBox.height);//(reportBox.height / 2) + 2);
-			stream.lineTo(offsetx + reportBox.width, 782 - offsety + reportBox.height);//(reportBox.height / 2) + 2);
+			float y = pageTop - offsety - reportBox.height - 4;
+			stream.moveTo(offsetx, y);//(reportBox.height / 2) + 2);
+			stream.lineTo(offsetx + reportBox.width, y);//(reportBox.height / 2) + 2);
 			stream.stroke();
 
 		} else if(reportBox.type.equals("text")) {
@@ -110,7 +114,7 @@ public class Report {
 				stream.beginText(); 
 				stream.setNonStrokingColor(reportBox.color);
 				stream.setFont(reportBox.font, reportBox.fontSize);
-				stream.newLineAtOffset(offsetx, pageTop - offsety);
+				stream.newLineAtOffset(offsetx, pageTop - offsety - reportBox.height);
 				stream.showText(txt);      
 				stream.endText();
 			}
@@ -129,27 +133,13 @@ public class Report {
 
 		} else if(reportBox.type.equals("image")) {
 			PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, reportBox.bytes, "image");
-            stream.drawImage(pdImage, offsetx, pageTop - offsety - reportBox.height);
+            stream.drawImage(pdImage, offsetx, pageTop - offsety - reportBox.height, reportBox.width, reportBox.height);
 
 		} else if(reportBox.type.equals("empty")) {
 			
 		}
 	}
 	
-	public void renderFooter(PDPage page, PDPageContentStream stream, int pageNumber) throws IOException {
-		stream.setLineWidth(0.3f);
-		stream.setStrokingColor(Color.LIGHT_GRAY);
-		stream.moveTo(30, 35);
-		stream.lineTo(580, 35);
-		stream.stroke();
-		
-		stream.beginText(); 
-		stream.setNonStrokingColor(Color.LIGHT_GRAY);
-		stream.setFont(PDType1Font.HELVETICA, 10f);
-		stream.newLineAtOffset(550, 20);
-		stream.showText(String.valueOf(pageNumber + 1));      
-		stream.endText();
-	}
 	
 	public byte[] getBytes() throws RedbackException {
 		try {
