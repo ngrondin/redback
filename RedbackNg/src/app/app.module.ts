@@ -8,6 +8,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 
+import {Compiler, COMPILER_OPTIONS, CompilerFactory} from '@angular/core';
+import {JitCompilerFactory} from '@angular/platform-browser-dynamic';
+export function createCompiler(compilerFactory: CompilerFactory) {
+  return compilerFactory.createCompiler();
+}
 
 @NgModule({
   imports: [
@@ -25,6 +30,9 @@ import { ToastrModule } from 'ngx-toastr';
     AppComponent 
   ],
   providers: [
+    {provide: COMPILER_OPTIONS, useValue: {}, multi: true},
+    {provide: CompilerFactory, useClass: JitCompilerFactory, deps: [COMPILER_OPTIONS]},
+    {provide: Compiler, useFactory: createCompiler, deps: [CompilerFactory]}    
   ],
   entryComponents :[
   ],

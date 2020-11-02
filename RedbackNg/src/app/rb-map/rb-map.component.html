@@ -6,7 +6,8 @@
     [styles]="defaultStyles"
     (mapRightClick)="mapRightClick($event)"
     (mapClick)="mapClick($event)"
-    (mousemove)="mouseMove($event)">
+    (mousemove)="mouseMove($event)"
+    (zoomChange)="zoomChange($event)">
     <agm-overlay
         *ngFor="let mapPoint of mapPoints"
         [latitude]="mapPoint.latitude"

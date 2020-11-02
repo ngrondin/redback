@@ -116,7 +116,9 @@ export class RbMapComponent implements OnInit {
   zoomOfMap: number;
   mapLatitude: number;
   mapLongitude: number;
-
+  userMovedOrZoomed: boolean = false;
+  preventNextMoveOrZoom: boolean = false;
+  
   showContextMenu: boolean = false;
   contextMenuPosition: any = {x: 0, y: 0};
   showLabel: boolean = false;
@@ -299,20 +301,24 @@ export class RbMapComponent implements OnInit {
   }
 
   calcMapCoords() : any {
-    if(this.selectedMapPoint != null) {
-      this.zoomOfMap = 12;
-      this.mapLatitude = this.selectedMapPoint.latitude;
-      this.mapLongitude = this.selectedMapPoint.longitude;
-    } else if(this.mapPoints.length > 0) {
-      this.mapLatitude = ((this.maxLat + this.minLat) / 2);
-      this.mapLongitude = ((this.maxLon + this.minLon) / 2);
-      if(this.maxLat - this.minLat < 0 || this.maxLon - this.minLon < 0) {
-        this.zoomOfMap = 2;
+    if(this.preventNextMoveOrZoom == false) {
+      if(this.selectedMapPoint != null) {
+        this.zoomOfMap = 12;
+        this.mapLatitude = this.selectedMapPoint.latitude;
+        this.mapLongitude = this.selectedMapPoint.longitude;
+      } else if(this.mapPoints.length > 0) {
+        this.mapLatitude = ((this.maxLat + this.minLat) / 2);
+        this.mapLongitude = ((this.maxLon + this.minLon) / 2);
+        if(this.maxLat - this.minLat < 0 || this.maxLon - this.minLon < 0) {
+          this.zoomOfMap = 2;
+        } else {
+          this.zoomOfMap = (1.0 / (60.0 + (this.maxLon - this.minLon)) * 500.0);
+        }
       } else {
-        this.zoomOfMap = (1.0 / (60.0 + (this.maxLon - this.minLon)) * 500.0);
+        this.zoomOfMap = 2;
       }
     } else {
-      this.zoomOfMap = 2;
+      this.preventNextMoveOrZoom = false;
     }
   }
 
@@ -351,6 +357,7 @@ export class RbMapComponent implements OnInit {
   
 
   objectClick(mapPoint: MapPoint) {
+    this.preventNextMoveOrZoom = true;
     this.selectObject.emit(mapPoint.object);
     if(mapPoint.label != null) {
       this.labellatLon.latitude = mapPoint.latitude;
@@ -377,6 +384,10 @@ export class RbMapComponent implements OnInit {
         this.contextMenuPosition = {x: this.mousePosition.x, y: this.mousePosition.y};
       }
     }
+  }
+
+  zoomChange(event: any) {
+    this.userMovedOrZoomed = true;
   }
 
   labelClick() {

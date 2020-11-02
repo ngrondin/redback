@@ -42,6 +42,7 @@ export class RbViewLoaderComponent implements OnInit {
         this.dataService.clearAllLocalObject();
         let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/' + this.target.type + '/' + this.target.version + '/' + this.target.view;
         this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
+          //res => this.compileTemplate("<rb-dataset [object]=\"'wp'\" [fetchAll]=\"\" [(userFilter)]=\"currentTarget.filter\" [(searchString)]=\"currentTarget.search\" [(selectedObject)]=\"currentTarget.selectedObject\" [active]=\"true\"></rb-dataset>")
           res => this.compileTemplate(res.text())
         );
         this.currentView = this.target.view;
