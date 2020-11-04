@@ -33,7 +33,7 @@ for(var i = 0; i < list.length; i++) {
 if(config.round == true) { %>
 <button
 	mat-icon-button 
-	matTooltip="Geeneral actions for this record"
+	matTooltip="General actions for this record"
     [matTooltipShowDelay]="1000"
 	class="mat-mini-fab mat-primary rb-button"
 	[matMenuTriggerFor]="<%=id%>">
@@ -43,7 +43,7 @@ if(config.round == true) { %>
 <div>
 	<button
 		mat-stroked-button 
-		matTooltip="Geenral actions for this record"
+		matTooltip="General actions for this record"
 	    [matTooltipShowDelay]="1000"
 		class="mat-primary rb-button"
 		[matMenuTriggerFor]="<%=id%>">

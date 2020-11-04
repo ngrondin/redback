@@ -28,6 +28,7 @@ export class RbDatasetDirective implements OnChanges {
   @Output('userFilterChange') userFilterChange: EventEmitter<any> = new EventEmitter();
   @Output('userSortChange') userSortChange: EventEmitter<any> = new EventEmitter();
   @Output('selectedObjectChange') selectedObjectChange: EventEmitter<any> = new EventEmitter();
+  @Output('openModal') openModal: EventEmitter<any> = new EventEmitter();
 
   public id: String;
   public dataSubscription: Subscription;
@@ -224,6 +225,8 @@ export class RbDatasetDirective implements OnChanges {
       });
     } else if(_name == 'executeglobal') {
       this.dataService.executeGlobal(param, null);
+    } else if(_name == 'modal') {
+      this.openModal.emit(param);
     } else if(this.selectedObject != null) {
       this.dataService.executeObject(this.selectedObject, name, param);
     }

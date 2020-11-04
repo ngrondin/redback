@@ -21,6 +21,7 @@ if(typeof parents.dataset == 'undefined' && typeof parents.datasetgroup == 'unde
 if(typeof parents.datasetgroup != 'undefined' && config.name != null) { %>
 	(initiated)="<%=parents.datasetgroup%>.register('<%=config.name%>', <%=id%>)" <%
 } %>
-	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
+	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>"
+	(openModal)="openModal($event)">
 	#content#
 </rb-dataset>
