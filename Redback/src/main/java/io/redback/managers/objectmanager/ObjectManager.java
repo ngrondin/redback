@@ -283,6 +283,7 @@ public class ObjectManager
 								}
 								if(relatedObject == null) // Because of a broken link in the DB
 								{
+									logger.severe("Broken data link for object '" + objectConfig.getName() + (element instanceof RedbackObject ? ":" + ((RedbackObject)element).getUID() : "") + "." + attributeName);
 									ObjectConfig zombieObjectConfig = getObjectConfig(relatedObjectConfig.getObjectName());
 									String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
 									relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));
