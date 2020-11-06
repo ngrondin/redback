@@ -60,11 +60,12 @@ public class ObjectClientJSWrapper implements ProxyObject {
 				public Object execute(Value... arguments) {
 					String objectname = arguments[0].asString();
 					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
+					DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
 					try
 					{
-						Object o = objectClient.listObjects(session, objectname, filter);
+						Object o = objectClient.listObjects(session, objectname, filter, sort);
 						return JSConverter.toJS(o);
 					}
 					catch(Exception e)
@@ -78,11 +79,12 @@ public class ObjectClientJSWrapper implements ProxyObject {
 				public Object execute(Value... arguments) {
 					String objectname = arguments[0].asString();
 					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
+					DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
 					try
 					{
-						Object o = objectClient.listAllObjects(session, objectname, filter, true);
+						Object o = objectClient.listAllObjects(session, objectname, filter, sort, true);
 						return JSConverter.toJS(o);
 					}
 					catch(Exception e)

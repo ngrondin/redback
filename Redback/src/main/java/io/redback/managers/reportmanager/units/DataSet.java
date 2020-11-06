@@ -28,6 +28,8 @@ public class DataSet extends ReportContainerUnit {
 	protected String object;
 	protected Expression filterExp;
 	protected ExpressionMap filterExpMap;
+	protected Expression sortExp;
+	protected ExpressionMap sortExpMap;
 	
 	public DataSet(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
@@ -40,6 +42,13 @@ public class DataSet extends ReportContainerUnit {
 			else if(filter instanceof DataLiteral)
 				filterExp = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_filter", jsParams, ((DataLiteral)filter).getString());	
 		}
+		if(c.containsKey("sort")) {
+			DataEntity sort = c.get("sort");
+			if(sort instanceof DataMap)
+				sortExpMap = new ExpressionMap(reportManager.getJSManager(), jsFunctionNameRoot + "_filter", jsParams, ((DataMap)sort));
+			else if(sort instanceof DataLiteral)
+				sortExp = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_filter", jsParams, ((DataLiteral)sort).getString());	
+		}		
 	}
 
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
@@ -50,8 +59,9 @@ public class DataSet extends ReportContainerUnit {
 		jsContext.put("object", new RedbackObjectRemoteJSWrapper(currentObject));
 		ObjectClient oc = reportManager.getObjectClient();
 		DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
+		DataMap sort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap.eval(jsContext));
 		Session session = (Session)context.get("session");
-		List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, filter, true);
+		List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, filter, sort, true);
 		context.put("dataset", rors);
 
 		ReportBox c = ReportBox.VContainer(true);

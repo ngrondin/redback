@@ -30,17 +30,17 @@ public class ObjectClient extends Client
 		}
 	}
 
-	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter) throws RedbackException  {
-		return listObjects(session, objectname, filter, true, 0);
+	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort) throws RedbackException  {
+		return listObjects(session, objectname, filter, sort, true, 0);
 	}
 
-	public List<RedbackObjectRemote> listAllObjects(Session session, String objectname, DataMap filter, boolean addRelated) throws RedbackException  {
+	public List<RedbackObjectRemote> listAllObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
 		List<RedbackObjectRemote> list = new ArrayList<RedbackObjectRemote>();
 		int page = 0;
 		boolean more = true;
 		while(more) 
 		{
-			List<RedbackObjectRemote> sublist = listObjects(session, objectname, filter, addRelated, page++);
+			List<RedbackObjectRemote> sublist = listObjects(session, objectname, filter, sort, addRelated, page++);
 			list.addAll(sublist);
 			if(sublist.size() < 50)
 				more = false;
@@ -49,12 +49,14 @@ public class ObjectClient extends Client
 	}
 
 		
-	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, boolean addRelated, int page) throws RedbackException  {
+	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int page) throws RedbackException  {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "list");
 			req.put("object", objectname);
 			req.put("filter", filter);
+			if(sort != null)
+				req.put("sort", sort);
 			req.put("page", page);
 			if(addRelated)
 				req.put("options", new DataMap("addrelated", true));
