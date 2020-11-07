@@ -356,9 +356,7 @@ public class DomainManager implements Consumer {
 				executeAsync(session, df, param);
 			else
 				result = execute(session, df, param);
-		} else {
-			throw new RedbackException("Domain entry is not a function");
-		}
+		} 
 		return result;
 	}
 	
