@@ -1,14 +1,17 @@
 package io.redback.services;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataException;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.reportmanager.Report;
+import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.security.Session;
 
 public abstract class ReportServer extends AuthenticatedServiceProvider {
@@ -29,8 +32,9 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 			String action = request.getString("action");
 			String reportName = get != null && get.length() > 1 ? get.substring(1) : request.getString("report");
 			String domain = request.getString("domain");
+			String category = request.getString("category");
 			String format = request.getString("format");
-			DataMap filter = request.get("filter") instanceof DataMap ? request.getObject("filter") : new DataMap(request.getString("filter"));
+			DataMap filter = request.containsKey("filter") ? (request.get("filter") instanceof DataMap ? request.getObject("filter") : new DataMap(request.getString("filter"))) : null;
 			if(action == null) 
 				action = "produce";
 			
@@ -45,7 +49,13 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 			} else if(action.equals("producestore")) {
 				String fileUid = produceAndStore(session, domain, reportName, filter);
 				response = new Payload(new DataMap("fileuid", fileUid).toString());
-			} else{
+			} else if(action.equals("list")) {
+				List<ReportInfo> reports = list(session, category);
+				DataList result = new DataList();
+				for(ReportInfo ri: reports)
+					result.add(ri.toDataMap());
+				response = new Payload(new DataMap("result", result).toString());
+			} else {
 				throw new RedbackException("No valid action was provided");
 			}			
 		}
@@ -70,4 +80,6 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 	protected abstract Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException;
 	
 	protected abstract String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException;
+	
+	protected abstract List<ReportInfo> list(Session session, String category) throws RedbackException;
 }

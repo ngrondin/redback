@@ -59,7 +59,7 @@ public class DataSet extends ReportContainerUnit {
 		jsContext.put("object", new RedbackObjectRemoteJSWrapper(currentObject));
 		ObjectClient oc = reportManager.getObjectClient();
 		DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
-		DataMap sort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap.eval(jsContext));
+		DataMap sort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);
 		Session session = (Session)context.get("session");
 		List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, filter, sort, true);
 		context.put("dataset", rors);

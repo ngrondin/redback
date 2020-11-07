@@ -4,100 +4,119 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import io.firebus.Firebus;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
-import io.redback.client.DomainClient;
+import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.ObjectClient;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
+import io.redback.utils.CollectionConfig;
 import io.redback.utils.RedbackFile;
 
 public class ReportManager {
-	private Logger logger = Logger.getLogger("io.redback");
+	//private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
 	protected JSManager jsManager;
 	protected String configServiceName;
 	protected String objectServiceName;
+	protected String dataServiceName;
 	protected String fileServiceName;
-	protected String domainServiceName;
 	protected ConfigurationClient configClient;
 	protected ObjectClient objectClient;
+	protected DataClient dataClient;
 	protected FileClient fileClient;
-	protected DomainClient domainClient;
+	protected CollectionConfig collection;
 	protected Map<String, ReportConfig> configs;
 	protected Map<String, Map<String, ReportConfig>> domainConfigs;
+	protected Map<Integer, List<ReportConfig>> listsQueried;
 
 	public ReportManager(Firebus fb, DataMap config) {
 		firebus = fb;
 		jsManager = new JSManager();
 		configServiceName = config.getString("configservice");
 		objectServiceName = config.getString("objectservice");
+		dataServiceName = config.getString("dataservice");
 		fileServiceName = config.getString("fileservice");
-		domainServiceName = config.getString("domainservice");
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		objectClient = new ObjectClient(firebus, objectServiceName);
+		dataClient = new DataClient(firebus, dataServiceName);
 		fileClient = new FileClient(firebus, fileServiceName);
-		domainClient = new DomainClient(firebus, domainServiceName);
+		collection = new CollectionConfig(config.getObject("collection"));
 		configs = new HashMap<String, ReportConfig>();
 		domainConfigs = new HashMap<String, Map<String, ReportConfig>>();
+		listsQueried = new HashMap<Integer, List<ReportConfig>>();
 	}
 	
 	protected ReportConfig getConfig(Session session, String domain, String name) throws RedbackException {
-		ReportConfig reportConfig = null;
-		List<String> domains = new ArrayList<String>();
-		List<String> userDomains = session.getUserProfile().getDomains();
 		if(domain != null) {
-			if(userDomains.contains(domain) || userDomains.contains("*"))
-				domains.add(domain);
-		} else {
-			domains.addAll(userDomains);
-		}
-		
-		for(int i = 0; i < domains.size() && reportConfig == null; i++) {
-			String d = domains.get(i);
-			if(!d.equals("*")) {
-				Map<String, ReportConfig> dc = domainConfigs.get(d);
-				if(dc == null) {
-					dc = new HashMap<String, ReportConfig>();
-					domainConfigs.put(d, dc);
-				}
-				if(!dc.containsKey(name)) {
-					DataMap reportData = domainClient.getReport(session, d, name);
-					if(reportData != null) {
-						reportConfig = new ReportConfig(this, reportData);
-						dc.put(name, reportConfig);
-					} else {
-						dc.put(name, null);
-					}
+			List<String> userDomains = session.getUserProfile().getDomains();
+			if(userDomains.contains(domain) || userDomains.contains("*")) {
+				if(!domainConfigs.containsKey(domain)) 
+					domainConfigs.put(domain, new HashMap<String, ReportConfig>());
+				if(domainConfigs.get(domain).containsKey(name)) {
+					return domainConfigs.get(domain).get(name);
 				} else {
-					reportConfig = dc.get(name);
-				}			
+					DataMap key = new DataMap();
+					key.put("domain", domain);
+					key.put("name", name);
+					DataMap res = dataClient.getData(collection.getName(), collection.convertObjectToSpecific(key), null);
+					if(res.containsKey("result") && res.getList("result").size() > 0) {
+						DataMap cfg = collection.convertObjectToCanonical(res.getList("result").getObject(0));
+						ReportConfig rc = new ReportConfig(this, cfg);
+						domainConfigs.get(domain).put(name, rc);
+						return rc;
+					} else {
+						return null;
+					}
+				} 
+			} else {
+				return null;
+			}
+		} else {
+			if(configs.containsKey(name)) {
+				return configs.get(name);
+			} else {
+				ReportConfig rc = new ReportConfig(this, configClient.getConfig("rbrs", "report", name));
+				configs.put(name, rc);
+				return rc;
 			}
 		}
-		
-		if(reportConfig == null) {
-			reportConfig = configs.get(name); 
+	}
+	
+	protected List<ReportConfig> listConfigs(Session session, String category) throws RedbackException {
+		DataMap filter = new DataMap();
+		filter.put("domain", session.getUserProfile().getDBFilterDomainClause());
+		filter.put("category", category);
+		int h = filter.toString().hashCode();
+		if(!listsQueried.containsKey(h)) {
+			List<ReportConfig> list = new ArrayList<ReportConfig>();
+			DataMap res = dataClient.getData(collection.getName(), collection.convertObjectToSpecific(filter), null);
+			if(res.containsKey("result")) {
+				DataList resList = res.getList("result");
+				for(int i = 0; i < resList.size(); i++) {
+					DataMap cfg = collection.convertObjectToCanonical(resList.getObject(i));
+					list.add(new ReportConfig(this, cfg));
+				}
+			} 
+			res = configClient.listConfigs("rbrs", "report", new DataMap("category", category));
+			if(res.containsKey("result")) {
+				DataList resList = res.getList("result");
+				for(int i = 0; i < resList.size(); i++) {
+					DataMap cfg = collection.convertObjectToCanonical(resList.getObject(i));
+					list.add(new ReportConfig(this, cfg));
+				}
+			} 
+			listsQueried.put(h, list);
+			return list;
+		} else {
+			return listsQueried.get(h);
 		}
-		
-		if(reportConfig == null)
-		{
-			try
-			{
-				reportConfig = new ReportConfig(this, configClient.getConfig("rbrs", "report", name));
-				configs.put(name, reportConfig);
-			}
-			catch(Exception e)
-			{
-				logger.severe(e.getMessage());
-				throw new RedbackException("Exception getting report config", e);
-			}
-		}
-		return reportConfig;
 	}
 
 	public ObjectClient getObjectClient() {
@@ -131,8 +150,19 @@ public class ReportManager {
 			return null;
 		}
 	}
-
+	
+	public List<ReportInfo> list(Session session, String category) throws RedbackException {
+		List<ReportConfig> configs = listConfigs(session, category);
+		List<ReportInfo> infos = new ArrayList<ReportInfo>();
+		for(ReportConfig rc: configs) {
+			infos.add(new ReportInfo(rc.getName(), rc.getDescription(), rc.getDomain()));
+		}
+		return infos;		
+	}
+	
 	public void clearCaches() {
 		configs.clear();
+		domainConfigs.clear();
+		listsQueried.clear();
 	}
 }

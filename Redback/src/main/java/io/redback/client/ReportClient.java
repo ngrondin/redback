@@ -1,9 +1,14 @@
 package io.redback.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.security.Session;
 
 public class ReportClient extends Client {
@@ -48,6 +53,22 @@ public class ReportClient extends Client {
 		} catch(Exception e) {
 			throw new RedbackException("Error producing and storing report", e);
 		}
+	}
+	
+	public List<ReportInfo> list(Session session, String category) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "list");
+			req.put("category", category);
+			DataMap resp = request(session, req);
+			DataList result = resp.getList("result");
+			List<ReportInfo> list = new ArrayList<ReportInfo>();
+			for(int i = 0; i < list.size(); i++)
+				list.add(new ReportInfo(result.getObject(i)));
+			return list;
+		} catch(Exception e) {
+			throw new RedbackException("Error producing and storing report", e);
+		}		
 	}
 
 }

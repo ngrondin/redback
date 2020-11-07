@@ -1,9 +1,12 @@
 package io.redback.services.impl;
 
+import java.util.List;
+
 import io.firebus.Firebus;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.reportmanager.Report;
+import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
 import io.redback.services.ReportServer;
@@ -23,6 +26,10 @@ public class RedbackReportServer extends ReportServer {
 
 	protected String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException {
 		return reportManager.produceAndStore(session, domain, name, filter);
+	}
+
+	protected List<ReportInfo> list(Session session, String category) throws RedbackException {
+		return reportManager.list(session, category);
 	}
 
 	public void clearCaches() {

@@ -13,6 +13,9 @@ public class ReportConfig {
 	protected ReportManager reportManager;
 	protected DataMap config;
 	protected String name;
+	protected String description;
+	protected String domain;
+	protected String category;
 	protected List<ReportUnit> rootUnits;
 	protected List<ReportUnit> footerUnits;
 	
@@ -20,6 +23,9 @@ public class ReportConfig {
 		config = c;
 		reportManager = rm;
 		name = config.getString("name");
+		description = config.getString("description");
+		domain = config.getString("domain");
+		category = config.getString("category");
 		DataList content = config.getList("content");
 		rootUnits = new ArrayList<ReportUnit>();
 		for(int i = 0; i < content.size(); i++) {
@@ -36,6 +42,18 @@ public class ReportConfig {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+	
+	public String getDomain() {
+		return domain;
+	}
+	
+	public String getCategory() {
+		return category;
 	}
 	
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {

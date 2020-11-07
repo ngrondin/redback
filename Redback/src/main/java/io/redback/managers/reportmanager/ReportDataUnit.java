@@ -53,29 +53,45 @@ public abstract class ReportDataUnit extends ReportUnit {
 		String valueStr = value != null ? value.toString() : "";
 		if(format != null) {
 			if(format.equals("currency")) {
-				NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
-				valueStr = formatter.format(Float.parseFloat(valueStr));
+				try {
+					NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
+					valueStr = formatter.format(Float.parseFloat(valueStr));
+				} catch(Exception e) {
+					valueStr = "Bad data for currency";
+				}
 			} else if(format.equals("duration")) {
-				Long dur = Long.parseLong(valueStr);
-				valueStr = "";
-				if(dur >= 3600000) {
-					valueStr += Math.abs(dur / 3600000) + "h";
-				}
-				if(dur > 60000 && (dur % 3600000) != 0) {
-					long mins = Math.abs((dur % 3600000) / 60000);
-					if(dur > 3600000 && mins < 10)
-						valueStr += "0";
-					valueStr += mins + "m";
-				}
-				if(dur > 0 && dur < 60000) {
-					valueStr += Math.abs((dur % 60000) / 1000) + "s";
+				try {
+					Long dur = Long.parseLong(valueStr);
+					valueStr = "";
+					if(dur >= 3600000) {
+						valueStr += Math.abs(dur / 3600000) + "h";
+					}
+					if(dur > 60000 && (dur % 3600000) != 0) {
+						long mins = Math.abs((dur % 3600000) / 60000);
+						if(dur > 3600000 && mins < 10)
+							valueStr += "0";
+						valueStr += mins + "m";
+					}
+					if(dur > 0 && dur < 60000) {
+						valueStr += Math.abs((dur % 60000) / 1000) + "s";
+					}
+				} catch(Exception e) {
+					valueStr = "Bad data for duration";
 				}
 			} else if(format.equals("date") && value != null && value instanceof Date) {
-				DateFormat formatter = DateFormat.getDateInstance();
-				valueStr = formatter.format(value);
+				try {
+					DateFormat formatter = DateFormat.getDateInstance();
+					valueStr = formatter.format(value);
+				} catch(Exception e) {
+					valueStr = "Bad data for date";
+				}
 			} else if(format.equals("datetime") && value != null && value instanceof Date) {
-				DateFormat formatter = DateFormat.getDateTimeInstance();
-				valueStr = formatter.format(value);
+				try {
+					DateFormat formatter = DateFormat.getDateTimeInstance();
+					valueStr = formatter.format(value);
+				} catch(Exception e) {
+					valueStr = "Bad data for datetime";
+				}
 			}
 		}
 		return valueStr;

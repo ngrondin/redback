@@ -51,12 +51,6 @@ public abstract class ConfigServer extends Service implements ServiceProvider
 		{
 			logger.severe(StringUtils.getStackTrace(e));
 			throw new FunctionErrorException("Exception in config service", e);
-			/*
-			String errorMsg = buildErrorMessage(e);
-			logger.severe(errorMsg);
-			logger.severe(getStackTrace(e));
-			throw new FunctionErrorException(errorMsg);
-			*/
 		}
 		
 		logger.finer("Config service finish");
