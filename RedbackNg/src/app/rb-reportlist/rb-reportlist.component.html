@@ -1,0 +1,16 @@
+<div
+    class="rb-reportlist-list">
+    <div
+        class="rb-reportlist-report"
+        *ngFor="let report of reports">
+        <button
+            mat-button
+            (click)="launch(report)">
+            <mat-icon>launch</mat-icon>
+        </button>
+        <div
+            class="rb-reportlist-name">
+            {{report.description || report.name}}
+        </div>
+    </div>
+</div>

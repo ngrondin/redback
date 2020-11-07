@@ -73,6 +73,8 @@ import 'brace/mode/javascript';
 import 'brace/theme/github';
 import 'brace/theme/eclipse';
 import { RbTableComponent } from './rb-table/rb-table.component';
+import { ReportService } from './report.service';
+import { RbReportlistComponent } from './rb-reportlist/rb-reportlist.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -160,7 +162,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbVcollapseComponent,
     RbCurrencyInputComponent,
     RbCodeInputComponent,
-    RbTableComponent
+    RbTableComponent,
+    RbReportlistComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -217,7 +220,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbVcollapseComponent,
     RbCurrencyInputComponent,
     RbCodeInputComponent,
-    RbTableComponent
+    RbTableComponent,
+    RbReportlistComponent
   ],
   providers: [
     CookieService,
@@ -225,7 +229,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     DataService,
     ConfigService,
     DragService,
-    MapService/*,
+    MapService,
+    ReportService/*,
     {
       provide: ACE_CONFIG,
       useValue: DEFAULT_ACE_CONFIG
@@ -235,7 +240,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbPopupListComponent,
     RbPopupDatetimeComponent,
     RbFilterBuilderComponent,
-    RbPopupAddressesComponent
+    RbPopupAddressesComponent,
+    RbReportlistComponent
   ],
   bootstrap: [
   ] 

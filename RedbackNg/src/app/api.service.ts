@@ -360,12 +360,11 @@ export class ApiService {
     })    
   }
 
-  /********* Launch Report **********/  
-
-  launchReport(report: String, filter: any) {
-    window.open(this.baseUrl + '/' + this.reportService + '?report=' + report + '&filter=' + JSON.stringify(filter));
+  /******* Reporting Service *********/
+  
+  listReports(category: string): Observable<any> {
+    return this.http.get<any>(this.baseUrl + '/' + this.reportService + '?action=list&category=' + category, httpOptions);
   }
-
 }
 
  

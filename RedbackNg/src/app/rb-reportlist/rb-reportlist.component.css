@@ -1,0 +1,18 @@
+.rb-reportlist-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-reportlist-report {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+.rb-reportlist-name {
+    display: flex;
+    width: 400px;
+    padding-left: 20px;
+    
+}

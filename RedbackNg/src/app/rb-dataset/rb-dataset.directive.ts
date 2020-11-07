@@ -4,6 +4,7 @@ import { DataService } from '../data.service';
 import { MapService } from 'app/map.service';
 import { Observable, Subscription } from 'rxjs';
 import { ApiService } from 'app/api.service';
+import { ReportService } from 'app/report.service';
 
 @Directive({
   selector: 'rb-dataset',
@@ -47,7 +48,8 @@ export class RbDatasetDirective implements OnChanges {
   constructor(
     private dataService: DataService,
     private apiService: ApiService,
-    private mapService: MapService
+    private mapService: MapService,
+    private reportService: ReportService
   ) {   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -210,11 +212,15 @@ export class RbDatasetDirective implements OnChanges {
       this.dataService.exportObjects(this.objectname, filter, this.searchString);
     } else if(_name == 'report') {
       if(this.selectedObject != null) {
-        this.apiService.launchReport(param, {"uid": this.selectedObject.uid})
+        this.reportService.launchReport(param, null, {"uid": this.selectedObject.uid});
       }
     } else if(_name == 'reportall') {
       const filter = this.mergeFilters();
-      this.apiService.launchReport(param, filter)
+      this.reportService.launchReport(param, null, filter);
+    } else if(_name == 'reportlist') {
+      const allFilter = this.mergeFilters();
+      const selectedFilter = this.selectedObject != null ? {"uid": this.selectedObject.uid} : null;
+      this.reportService.popupReportList(param, selectedFilter, allFilter);
     } else if(_name == 'executeall') {
       let delay: number = 0;
       this._list.forEach((object) => {
