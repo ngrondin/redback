@@ -38,11 +38,12 @@ public class FirebusRequestUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.finer("Starting firebus call node");
-		Session sysUserSession = processManager.getProcessUserSession(pi.getDomain());
+		Session sysUserSession = pi.getOutboundActionner().getSession();
 		Map<String, Object> context = pi.getScriptContext();
 		DataMap data = inputExpressionMap.eval(context);
 		Payload payload = new Payload(data.toString());
 		payload.metadata.put("token", sysUserSession.getToken());
+		payload.metadata.put("session", sysUserSession.getId());
 		try
 		{
 			logger.finest("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());

@@ -19,10 +19,12 @@ import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.AccessManagementClient;
 import io.redback.client.ObjectClient;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
+import io.redback.security.UserProfile;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.Notification;
 
@@ -39,6 +41,7 @@ public class ProcessManager
 	protected String objectServiceName;
 	protected String domainServiceName;
 	protected ObjectClient objectClient;
+	protected AccessManagementClient accessManagementClient;
 	protected CollectionConfig piCollectionConfig;
 	protected CollectionConfig gmCollectionConfig;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
@@ -46,7 +49,8 @@ public class ProcessManager
 	protected String processUserName;
 	protected String jwtSecret;
 	protected String jwtIssuer;
-	protected Session sysUserSession;
+	protected String sysUserToken;
+	protected UserProfile sysUserProfile;
 	protected DataMap globalVariables;
 	protected List<String> scriptVars;
 	
@@ -57,6 +61,7 @@ public class ProcessManager
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
+		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 		objectServiceName = config.getString("objectservice");
 		objectClient = new ObjectClient(firebus, objectServiceName);
 		domainServiceName = config.getString("domainservice");
@@ -165,7 +170,7 @@ public class ProcessManager
 		return process;
 	}
 	
-	protected ProcessInstance getProcessInstance(String pid) throws RedbackException
+	protected ProcessInstance getProcessInstance(Actionner actionner, String pid) throws RedbackException
 	{
 		ProcessInstance pi = getFromCurrentTransaction(pid);
 		if(pi == null)
@@ -176,7 +181,7 @@ public class ProcessManager
 				request.put("object", piCollectionConfig.getName());
 				request.put("filter", new DataMap(piCollectionConfig.getField("_id"), pid));
 				DataMap response = request(dataServiceName, request);
-				pi = new ProcessInstance(this, piCollectionConfig.convertObjectToCanonical(response.getObject("result.0")));
+				pi = new ProcessInstance(actionner, this, piCollectionConfig.convertObjectToCanonical(response.getObject("result.0")));
 				putInCurrentTransaction(pi);
 			} 
 			catch (Exception e) 
@@ -187,31 +192,32 @@ public class ProcessManager
 		return pi;
 	}
 	
-	public Session getProcessUserSession(String domain) throws RedbackException 
+	public Session getProcessUserSession(String sessionId) throws RedbackException 
 	{
-		if(sysUserSession != null  &&  sysUserSession.expiry < System.currentTimeMillis())
-			sysUserSession = null;
+		Session session = new Session(sessionId);
+		if(sysUserProfile != null  &&  sysUserProfile.getExpiry() < System.currentTimeMillis())
+			sysUserProfile = null;
 
-		if(sysUserSession == null)
+		if(sysUserProfile == null)
 		{
 			try
 			{
 				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
-				String token = JWT.create()
+				sysUserToken = JWT.create()
 						.withIssuer(jwtIssuer)
 						.withClaim("email", processUserName)
 						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
 						.sign(algorithm);
-				DataMap result = request(accessManagerServiceName, new DataMap("{action:validate, token:\"" + token + "\"}"));
-				if(result != null  &&  result.getString("result").equals("ok"))
-					sysUserSession = new Session(result.getObject("session"));
+				sysUserProfile = accessManagementClient.validate(session, sysUserToken);
 			}
 			catch(Exception e)
 			{
 				error("Error authenticating sys user", e);
 			}
 		}
-		return sysUserSession;
+		session.setUserProfile(sysUserProfile);
+		session.setToken(sysUserToken);
+		return session;
 	}
 	
 	public DataMap getGlobalVariables()
@@ -236,7 +242,6 @@ public class ProcessManager
 		Process process = getProcess(processName);
 		if(process != null)
 		{
-			
 			if(domain == null && actionner.isUser())
 				domain = actionner.getUserProfile().getAttribute("rb.defaultdomain");
 			pi = process.createInstance(actionner, domain, data);
@@ -306,7 +311,7 @@ public class ProcessManager
 	
 	public void actionProcess(Actionner actionner, String pid, String action, DataMap data) throws RedbackException
 	{
-		ProcessInstance pi = getProcessInstance(pid);
+		ProcessInstance pi = getProcessInstance(actionner, pid);
 		logger.finer("Processing action " + action + " on process " + pi.getProcessName() + ":" + pid);
 		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
 		ProcessUnit pu = process.getNode(pi.getCurrentNode());
@@ -324,7 +329,7 @@ public class ProcessManager
 	
 	public void interruptProcess(Actionner actionner, String pid) throws RedbackException
 	{
-		ProcessInstance pi = getProcessInstance(pid);
+		ProcessInstance pi = getProcessInstance(actionner, pid);
 		logger.finer("Interrupting interaction on process " + pi.getProcessName() + ":" + pid);
 		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
 		ProcessUnit pu = process.getNode(pi.getCurrentNode());
@@ -367,7 +372,7 @@ public class ProcessManager
 				ProcessInstance pi = getFromCurrentTransaction(pid);
 				if(pi == null)
 				{
-					pi = new ProcessInstance(this, resultList.getObject(i));
+					pi = new ProcessInstance(actionner, this, resultList.getObject(i));
 					putInCurrentTransaction(pi);
 					logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId() + " in database with data " + pi.getData());
 					list.add(pi);

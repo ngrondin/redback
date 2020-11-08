@@ -22,6 +22,16 @@ public class UserProfile
 		return profile.getString("username");
 	}
 	
+	public long getExpiry()
+	{
+		return profile.getNumber("expiry").longValue();
+	}
+	
+	public void setExpiry(long l)
+	{
+		profile.put("expiry", l);
+	}
+	
 	public String getPasswordHash()
 	{
 		return profile.getString("passwordhash");

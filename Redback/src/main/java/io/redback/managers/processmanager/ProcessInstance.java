@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
+import io.redback.RedbackException;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.utils.js.FirebusJSWrapper;
@@ -17,6 +18,8 @@ import io.redback.utils.js.JSConverter;
 
 public class ProcessInstance 
 {
+	protected Actionner inboundActionner;
+	protected Actionner outboundActionner;
 	protected ProcessManager processManager;
 	protected String processName;
 	protected int processVersion;
@@ -31,8 +34,9 @@ public class ProcessInstance
 	protected Map<String, Object> scriptContext;
 	//protected JSONList receivedNotifications;
 	
-	protected ProcessInstance(ProcessManager pm, String pn, int v, String dom, DataMap d)
+	protected ProcessInstance(Actionner a, ProcessManager pm, String pn, int v, String dom, DataMap d) throws RedbackException
 	{
+		inboundActionner = a;
 		processManager = pm;
 		processName = pn;
 		processVersion = v;
@@ -45,8 +49,9 @@ public class ProcessInstance
 		//receivedNotifications = new JSONList();
 	}
 	
-	protected ProcessInstance(ProcessManager pm, DataMap c)
+	protected ProcessInstance(Actionner a, ProcessManager pm, DataMap c) throws RedbackException
 	{
+		inboundActionner = a;
 		processManager = pm;
 		processName = c.getString("process");
 		processVersion = c.getNumber("version").intValue();
@@ -67,15 +72,16 @@ public class ProcessInstance
 		createScriptBindings();
 	}
 	
-	protected void createScriptBindings()
+	protected void createScriptBindings() throws RedbackException
 	{
+		outboundActionner = new Actionner(this, processManager.getProcessUserSession(inboundActionner.getSession().getId()));
 		scriptContext = new HashMap<String, Object>();
 		try {
 			scriptContext.put("pid", getId());
-			scriptContext.put("pm", new ProcessManagerJSWrapper(processManager, this));
-			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), processManager.getProcessUserSession(domain)));
-			scriptContext.put("oc", new ObjectClientJSWrapper(processManager.getObjectClient(), processManager.getProcessUserSession(domain)));
-			scriptContext.put("processuser", processManager.getProcessUserSession(domain).getUserProfile().getUsername());
+			scriptContext.put("pm", new ProcessManagerJSWrapper(outboundActionner, processManager));
+			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), outboundActionner.getSession()));
+			scriptContext.put("oc", new ObjectClientJSWrapper(processManager.getObjectClient(), outboundActionner.getSession()));
+			scriptContext.put("processuser", outboundActionner.getUserProfile().getUsername());
 			updateScriptBindings();
 		} catch(Exception e) {
 		}
@@ -106,6 +112,12 @@ public class ProcessInstance
 		return domain;
 	}
 	
+	public Actionner getOutboundActionner()
+	{
+		return outboundActionner;
+	}
+	
+	
 	public DataMap getData()
 	{
 		return data;
@@ -114,6 +126,11 @@ public class ProcessInstance
 	public Map<String, Object> getScriptContext()
 	{
 		return scriptContext;
+	}
+	
+	public ProcessManager getProcessManager()
+	{
+		return processManager;
 	}
 	
 	public void setData(DataMap d)

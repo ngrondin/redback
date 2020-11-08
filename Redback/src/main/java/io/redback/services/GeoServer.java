@@ -7,15 +7,13 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
-import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.Geometry;
-import io.redback.utils.StringUtils;
 
-public abstract class GeoServer extends Service implements ServiceProvider
+public abstract class GeoServer extends ServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 
@@ -29,7 +27,7 @@ public abstract class GeoServer extends Service implements ServiceProvider
 		return null;
 	}
 
-	public Payload service(Payload payload) throws FunctionErrorException {
+	public Payload redbackService(Session session, Payload payload) throws RedbackException {
 		logger.finer("Geo service start");
 		Payload response = new Payload();
 		try
@@ -84,8 +82,7 @@ public abstract class GeoServer extends Service implements ServiceProvider
 		}
 		catch(Exception e)
 		{
-			logger.severe(StringUtils.getStackTrace(e));
-			throw new FunctionErrorException("Exception in geo service", e);
+			throw new RedbackException("Exception in geo service", e);
 		}		
 
 		logger.finer("Geo service finish");
@@ -93,9 +90,6 @@ public abstract class GeoServer extends Service implements ServiceProvider
 		
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload) throws FunctionErrorException {
-		return null;
-	}
 
 	public void clearCaches() {
 		

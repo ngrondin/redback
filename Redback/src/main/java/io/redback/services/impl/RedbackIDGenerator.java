@@ -5,6 +5,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
+import io.redback.security.Session;
 import io.redback.services.IDGenerator;
 
 public class RedbackIDGenerator extends IDGenerator
@@ -23,7 +24,7 @@ public class RedbackIDGenerator extends IDGenerator
 
 	}
 	
-	protected String getNextId(String name) throws RedbackException
+	protected String getNextId(Session session, String name) throws RedbackException
 	{
 		try
 		{
@@ -31,7 +32,7 @@ public class RedbackIDGenerator extends IDGenerator
 			DataMap idConfig = configCache.getObject(name);
 			if(idConfig == null)
 			{
-				idConfig = configClient.getConfig("rbid", "key", name);
+				idConfig = configClient.getConfig(session, "rbid", "key", name);
 				configCache.put(name, idConfig);
 			}
 			

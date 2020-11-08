@@ -22,7 +22,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		super(n, c, f);
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws RedbackException {
+	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		logger.finer("Report service start");
 		Payload response = null;
 		try
@@ -68,7 +68,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		return response;	
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload)	throws RedbackException
+	public Payload redbackUnauthenticatedService(Session session, Payload payload)	throws RedbackException
 	{
 		throw new RedbackException("All requests need to be authenticated");
 	}

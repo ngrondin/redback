@@ -87,7 +87,7 @@ public class RedbackObject extends RedbackElement
 				}
 				else if(config.getUIDGeneratorName() != null)
 				{
-					uid = objectManager.getNewID(config.getUIDGeneratorName());
+					uid = objectManager.getNewID(session, config.getUIDGeneratorName());
 				}
 				else
 				{
@@ -125,7 +125,7 @@ public class RedbackObject extends RedbackElement
 					Expression defaultValue = attributeConfig.getDefaultValue();
 					Value value = null;
 					if(idGeneratorName != null)
-						value = objectManager.getNewID(idGeneratorName);
+						value = objectManager.getNewID(session, idGeneratorName);
 					else if(defaultValue != null)
 						value = new Value(defaultValue.eval(scriptContext));
 					if(value != null) {

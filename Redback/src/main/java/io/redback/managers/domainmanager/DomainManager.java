@@ -89,9 +89,9 @@ public class DomainManager implements Consumer {
 		firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
 	}
 
-	protected void loadIncludeScripts() throws RedbackException
+	protected void loadIncludeScripts(Session session) throws RedbackException
 	{
-		DataMap result = configClient.listConfigs("rbdm", "include");
+		DataMap result = configClient.listConfigs(session, "rbdm", "include");
 		DataList resultList = result.getList("result");
 		for(int i = 0; i < resultList.size(); i++)
 		{
@@ -323,7 +323,7 @@ public class DomainManager implements Consumer {
 		context.put("log", dl);
 
 		if(!includeLoaded)
-			loadIncludeScripts();
+			loadIncludeScripts(session);
 
 		try {
 			result = df.execute(context);
@@ -363,7 +363,7 @@ public class DomainManager implements Consumer {
 	public void executeFunctionInAllDomains(Session session, String name, DataMap param) {
 		try {
 			if(!includeLoaded) 
-				loadIncludeScripts();
+				loadIncludeScripts(session);
 			
 			List<DomainEntry> functions = new ArrayList<DomainEntry>();
 			List<DomainEntry> allFunctions = listAllEntriesWithName(name);

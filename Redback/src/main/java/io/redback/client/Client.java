@@ -27,6 +27,7 @@ public class Client {
 		try
 		{
 			Payload reqP = new Payload(req.toString());
+			reqP.metadata.put("mime", "application/json");
 			Payload respP = requestPayload(session, reqP);
 			if(respP.getBytes().length > 0) {
 				DataMap resp = new DataMap(respP.getString());
@@ -47,8 +48,10 @@ public class Client {
 		{
 			try
 			{
-				if(session != null)
-					reqP.metadata.put("token", session.getToken());
+				if(session != null) {
+					reqP.metadata.put("session", session.id);
+					reqP.metadata.put("token", session.token);
+				}
 				Payload respP = firebus.requestService(serviceName, reqP);
 				return respP;
 			}
@@ -75,8 +78,11 @@ public class Client {
 			try
 			{
 				Payload reqP = new Payload(req.toString());
-				if(session != null)
-					reqP.metadata.put("token", session.getToken());
+				if(session != null) {
+					reqP.metadata.put("session", session.id);
+					reqP.metadata.put("token", session.token);
+				}
+				reqP.metadata.put("mime", "application/json");
 				firebus.publish(serviceName, reqP);
 			}
 			catch(Exception e)

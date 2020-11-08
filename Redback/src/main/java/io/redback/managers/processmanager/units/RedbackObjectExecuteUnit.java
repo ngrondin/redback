@@ -47,7 +47,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 		if(processManager.getObjectServiceName() != null)
 		{
 			Map<String, Object> context = pi.getScriptContext();
-			Session sysUserSession = processManager.getProcessUserSession(pi.getDomain());
+			Session sysUserSession = pi.getOutboundActionner().getSession();
 			DataMap functionParams = inputExpressionMap.eval(context);
 			String objectUID = (String)objectUIDExpression.eval(context);
 			DataMap req = new DataMap();
@@ -59,6 +59,8 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 			Payload payload = new Payload();
 			payload.setData(req.toString());
 			payload.metadata.put("token", sysUserSession.getToken());
+			payload.metadata.put("session", sysUserSession.getId());
+			payload.metadata.put("mime", "application/json");
 			try
 			{
 				logger.finest("Calling redback object service " + processManager.getObjectServiceName() + " " + payload.getString());

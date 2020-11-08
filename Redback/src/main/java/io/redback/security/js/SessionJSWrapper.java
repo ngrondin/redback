@@ -36,7 +36,7 @@ public class SessionJSWrapper implements ProxyObject
 		} else if(key.equals("userProfile")) {
 			return new UserProfileJSWrapper(session.getUserProfile());
 		} else if(key.equals("expiry")) {
-			return JSConverter.toJS(session.expiry);
+			return JSConverter.toJS(session.getUserProfile().getExpiry());
 		} else {
 			return null;
 		}

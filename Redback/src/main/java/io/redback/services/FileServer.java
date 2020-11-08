@@ -1,7 +1,6 @@
 package io.redback.services;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -15,22 +14,19 @@ import io.redback.utils.RedbackFile;
 
 public abstract class FileServer extends AuthenticatedServiceProvider
 {
-	private Logger logger = Logger.getLogger("io.redback");
-
 	public FileServer(String n, DataMap c, Firebus f)
 	{
 		super(n, c, f);
 	}
 	
-	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException
+	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		throw new RedbackException("Redback File Service always needs to receive authenticated requests");
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
+	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try {
-			logger.finer("Authenticated file service start");
 			Payload response = null;
 			if(payload.metadata.containsKey("filename") && payload.metadata.containsKey("mime"))
 			{
@@ -123,7 +119,6 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 			{
 				response = new Payload("{error:\"no action taken\"}");
 			}
-			logger.finer("Authenticated file service finished");
 			return response;
 		} catch(DataException e) {
 			throw new RedbackException("Error in file server", e);

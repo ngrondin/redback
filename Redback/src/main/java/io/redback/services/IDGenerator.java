@@ -1,41 +1,32 @@
 package io.redback.services;
 
-import java.util.logging.Logger;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
-import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.utils.StringUtils;
+import io.redback.security.Session;
 
-public abstract class IDGenerator extends Service implements ServiceProvider
+public abstract class IDGenerator extends ServiceProvider
 {
-	private Logger logger = Logger.getLogger("io.redback");
-
 	public IDGenerator(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
 	}
 
-	public Payload service(Payload payload) throws FunctionErrorException 
+	public Payload redbackService(Session session, Payload payload) throws RedbackException 
 	{
-		logger.finer("ID generator service start");
 		Payload response = new Payload();
 		String idName = payload.getString();
 		try
 		{
-			String id = getNextId(idName);
+			String id = getNextId(session, idName);
 			response.setData(id);
 		}
 		catch(Exception e)
 		{
-			logger.severe(StringUtils.getStackTrace(e));
-			throw new FunctionErrorException("Exception in id generator service", e);
+			throw new RedbackException("Exception in id generator service", e);
 		}
-		logger.finer("ID generator service finish");
 		return response;
 	}
 
@@ -45,6 +36,6 @@ public abstract class IDGenerator extends Service implements ServiceProvider
 		return null;
 	}
 
-	protected abstract String getNextId(String name) throws RedbackException;
+	protected abstract String getNextId(Session session, String name) throws RedbackException;
 
 }

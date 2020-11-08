@@ -1,29 +1,23 @@
 package io.redback.services;
 
-import java.util.logging.Logger;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
-import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.utils.StringUtils;
+import io.redback.security.Session;
 
-public abstract class ConfigServer extends Service implements ServiceProvider
+public abstract class ConfigServer extends ServiceProvider
 {
-	private Logger logger = Logger.getLogger("io.redback");
-
 	public ConfigServer(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
 	}
 
-	public Payload service(Payload payload) throws FunctionErrorException 
+	public Payload redbackService(Session session, Payload payload) throws RedbackException
 	{
-		logger.finer("Config service start");
 		Payload response = new Payload();
 		try
 		{
@@ -49,11 +43,9 @@ public abstract class ConfigServer extends Service implements ServiceProvider
 		}
 		catch(Exception e)
 		{
-			logger.severe(StringUtils.getStackTrace(e));
-			throw new FunctionErrorException("Exception in config service", e);
+			throw new RedbackException("Exception in config service", e);
 		}
 		
-		logger.finer("Config service finish");
 		return response;
 	}
 	

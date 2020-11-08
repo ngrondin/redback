@@ -7,16 +7,14 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
-import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Role;
 import io.redback.security.Session;
-import io.redback.utils.StringUtils;
+import io.redback.security.UserProfile;
 
-public abstract class AccessManager extends Service implements ServiceProvider
+public abstract class AccessManager extends ServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected HashMap<String, Role> roles;
@@ -41,7 +39,7 @@ public abstract class AccessManager extends Service implements ServiceProvider
 		}
 	}
 
-	public Payload service(Payload payload) throws FunctionErrorException 
+	public Payload redbackService(Session session, Payload payload) throws RedbackException 
 	{
 		logger.finer("Access manager service start");
 		Payload responsePayload = new Payload();
@@ -54,21 +52,12 @@ public abstract class AccessManager extends Service implements ServiceProvider
 			if(action.equals("validate"))
 			{
 				String token = request.getString("token");
-				Session session = validateToken(token);
+				UserProfile userProfile = validateToken(session, token);
 				
-				if(session != null)
+				if(userProfile != null)
 				{
-					if(System.currentTimeMillis() < session.expiry)
-					{
-						response.put("result", "ok");
-						response.put("session", session.getJSON());
-						//extendSession(session);
-					}
-					else
-					{
-						response.put("result", "failed");
-						response.put("error", "Session has expired");
-					}
+					response.put("result", "ok");
+					response.put("userprofile", userProfile.getJSON());
 				}
 				else
 				{
@@ -79,8 +68,7 @@ public abstract class AccessManager extends Service implements ServiceProvider
 		}
 		catch(Exception e)
 		{	
-			logger.severe(StringUtils.getStackTrace(e));
-			throw new FunctionErrorException("Exception in access management service", e);
+			throw new RedbackException("Exception in access management service", e);
 		}
 		
 		responsePayload.setData(response.toString());
@@ -95,5 +83,5 @@ public abstract class AccessManager extends Service implements ServiceProvider
 	
 
 	
-	protected abstract Session validateToken(String token) throws RedbackException;
+	protected abstract UserProfile validateToken(Session session, String token) throws RedbackException;
 }

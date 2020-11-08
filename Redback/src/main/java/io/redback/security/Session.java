@@ -1,46 +1,65 @@
 package io.redback.security;
 
-import io.firebus.utils.DataMap;
+import java.util.Random;
+
 
 
 public class Session
 {
-	//public UUID sessionId;
+	public String id;
 	public String token;
 	public UserProfile userProfile;
-	public long expiry;
 
-	public Session(String t, UserProfile up, long e)
+	public Session() 
+	{
+		init(null, null, null);
+	}
+	
+	public Session(String i)
+	{
+		init(i, null, null);
+	}
+	
+	public Session(String t, UserProfile up)
+	{
+		init(null, t, up);
+	}
+	
+	public Session(String i, String t, UserProfile up)
+	{
+		init(i, t, up);
+	}
+	
+	protected void init(String i, String t, UserProfile up) 
+	{
+		if(i == null) {
+			Random rnd = new Random();
+			char[] array = new char[10];	
+			for(int j = 0; j < array.length; j++) {
+				array[j] = (char)(97 + rnd.nextInt(26));
+			}
+		    id = new String(array);			
+		} else {
+			id = i;
+		}
+		token = t;
+		userProfile = up;	
+	}
+	
+	public void setUserProfile(UserProfile up) 
+	{
+		userProfile = up;
+	}
+	
+	public void setToken(String t)
 	{
 		token = t;
-		userProfile = up;
-		expiry = e;
 	}
 	
-	/*
-	public Session(UUID si, UserProfile up, long e)
+	public String getId()
 	{
-		sessionId = si;
-		userProfile = up;
-		expiry = e;
+		return id;
 	}
-	*/
-	
-	public Session(DataMap json)
-	{
-		//sessionId = UUID.fromString(json.getString("sessionid"));
-		token = json.getString("token");
-		expiry = json.getNumber("expiry").longValue();
-		userProfile = new UserProfile(json.getObject("userprofile"));
-	}
-	
-	
-	/*
-	public UUID getSessionId()
-	{
-		return sessionId;
-	}
-	*/
 	
 	public String getToken()
 	{
@@ -52,13 +71,5 @@ public class Session
 		return userProfile;
 	}
 	
-	public DataMap getJSON()
-	{
-		DataMap resp = new DataMap();
-		//resp.put("sessionid", sessionId.toString());
-		resp.put("token", token);
-		resp.put("expiry", expiry);
-		resp.put("userprofile", userProfile.getJSON());
-		return resp;
-	}
+
 }

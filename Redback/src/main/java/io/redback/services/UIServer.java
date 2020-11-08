@@ -10,7 +10,6 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.HTML;
-import io.redback.utils.Timer;
 
 public abstract class UIServer extends AuthenticatedServiceProvider
 {
@@ -21,7 +20,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 		super(n, c, f);
 	}
 	
-	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException
+	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try
 		{
@@ -38,7 +37,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				if(category.equals("resource"))
 				{
 					logger.finer("Get resource " + name);
-					response.setData(getResource(name, version));
+					response.setData(getResource(session, name, version));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
 				else
@@ -57,14 +56,12 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 		}
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
+	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try
 		{
-			logger.finer("UI authenticated service start");
 			Payload response = new Payload();
 			String get = extractGetString(payload);
-			Timer timer = new Timer("rbui", get);
 
 			if(get != null)
 			{
@@ -94,7 +91,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				if(category.equals("resource"))
 				{
 					logger.finer("Get resource " + name);
-					response.setData(getResource(name, version));
+					response.setData(getResource(session, name, version));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
 				else if(category.equals("app"))
@@ -116,8 +113,6 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 					response.metadata.put("mime", "text/html");
 				}
 			}
-			logger.finer("UI authenticated service finish");
-			timer.mark();
 			return response;
 		}
 		catch(DataException e)
@@ -152,7 +147,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	
 	protected abstract HTML getView(Session session, String viewName, String version);
 	
-	protected abstract byte[] getResource(String name, String version) throws RedbackException;
+	protected abstract byte[] getResource(Session session, String name, String version) throws RedbackException;
 
 	protected String getResourceMimeType(String name)
 	{

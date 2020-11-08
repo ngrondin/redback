@@ -20,15 +20,16 @@ import io.redback.utils.js.JSConverter;
 public class ProcessManagerJSWrapper implements ProxyObject
 {
 	protected ProcessManager processManager;
-	protected ProcessInstance processInstance;
+	//protected ProcessInstance processInstance;
 	protected Actionner actionner;
 	protected String[] members = {"initiateProcess", "getNotifications", "processAction", "actionProcess", "interruptProcess", "findProcesses"};
 	
-	public ProcessManagerJSWrapper(ProcessManager pm, ProcessInstance pi)
+	public ProcessManagerJSWrapper(Actionner a, ProcessManager pm)
 	{
+		actionner = a;
 		processManager = pm;
-		processInstance = pi;
-		actionner = new Actionner(pi);
+		//processInstance = pi;
+		//actionner = new Actionner(pi);
 	}
 	
 	public Object getMember(String name)

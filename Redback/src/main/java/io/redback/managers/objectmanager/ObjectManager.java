@@ -173,9 +173,9 @@ public class ObjectManager
 		return context;
 	}
 	
-	protected void loadIncludeScripts() throws RedbackException
+	protected void loadIncludeScripts(Session session) throws RedbackException
 	{
-		DataMap result = configClient.listConfigs("rbo", "include");
+		DataMap result = configClient.listConfigs(session, "rbo", "include");
 		DataList resultList = result.getList("result");
 		for(int i = 0; i < resultList.size(); i++)
 		{
@@ -191,7 +191,7 @@ public class ObjectManager
 		includeLoaded = true;
 	}
 
-	protected ScriptConfig getGlobalScript(String name) throws RedbackException
+	protected ScriptConfig getGlobalScript(Session session, String name) throws RedbackException
 	{
 		ScriptConfig scriptConfig = globalScripts.get(name);
 		if(scriptConfig == null)
@@ -199,8 +199,8 @@ public class ObjectManager
 			try
 			{
 				if(!includeLoaded)
-					loadIncludeScripts();
-				scriptConfig = new ScriptConfig(jsManager, configClient.getConfig("rbo", "script", name));
+					loadIncludeScripts(session);
+				scriptConfig = new ScriptConfig(jsManager, configClient.getConfig(session, "rbo", "script", name));
 				globalScripts.put(name, scriptConfig);
 			}
 			catch(Exception e)
@@ -212,7 +212,7 @@ public class ObjectManager
 		return scriptConfig;
 	}
 	
-	protected ObjectConfig getObjectConfig(String object) throws RedbackException
+	protected ObjectConfig getObjectConfig(Session session, String object) throws RedbackException
 	{
 		ObjectConfig objectConfig = objectConfigs.get(object);
 		if(objectConfig == null)
@@ -220,8 +220,8 @@ public class ObjectManager
 			try
 			{
 				if(!includeLoaded)
-					loadIncludeScripts();
-				objectConfig = new ObjectConfig(this, configClient.getConfig("rbo", "object", object));
+					loadIncludeScripts(session);
+				objectConfig = new ObjectConfig(this, configClient.getConfig(session, "rbo", "object", object));
 				objectConfigs.put(object, objectConfig);
 			}
 			catch(Exception e)
@@ -284,7 +284,7 @@ public class ObjectManager
 								if(relatedObject == null) // Because of a broken link in the DB
 								{
 									logger.severe("Broken data link for object '" + objectConfig.getName() + (element instanceof RedbackObject ? ":" + ((RedbackObject)element).getUID() : "") + "." + attributeName);
-									ObjectConfig zombieObjectConfig = getObjectConfig(relatedObjectConfig.getObjectName());
+									ObjectConfig zombieObjectConfig = getObjectConfig(session, relatedObjectConfig.getObjectName());
 									String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
 									relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));
 								}
@@ -306,7 +306,7 @@ public class ObjectManager
 			RedbackObject object = getFromCurrentTransaction(objectName, id);
 			if(object == null)
 			{
-				ObjectConfig objectConfig = getObjectConfig(objectName);
+				ObjectConfig objectConfig = getObjectConfig(session, objectName);
 				try
 				{
 					DataMap dbFilter = new DataMap("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
@@ -342,7 +342,7 @@ public class ObjectManager
 		if(session.getUserProfile().canRead("rb.objects." + objectName))
 		{
 			ArrayList<RedbackObject> objectList = new ArrayList<RedbackObject>();
-			ObjectConfig objectConfig = getObjectConfig(objectName);
+			ObjectConfig objectConfig = getObjectConfig(session, objectName);
 			if(objectConfig != null)
 			{
 				try
@@ -441,7 +441,7 @@ public class ObjectManager
 	
 	public RedbackObject createObject(Session session, String objectName, String uid, String domain, DataMap initialData) throws RedbackException, ScriptException
 	{
-		ObjectConfig objectConfig = getObjectConfig(objectName);
+		ObjectConfig objectConfig = getObjectConfig(session, objectName);
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
 		putInCurrentTransaction(object);
 		if(initialData != null)
@@ -491,7 +491,7 @@ public class ObjectManager
 	
 	public void executeFunction(Session session, String function) throws RedbackException, ScriptException
 	{
-		ScriptConfig scriptCfg = this.getGlobalScript(function);
+		ScriptConfig scriptCfg = getGlobalScript(session, function);
 		if(scriptCfg != null)
 		{
 			if(session.getUserProfile().canExecute("rb.scripts." + function))
@@ -507,7 +507,7 @@ public class ObjectManager
 		if(session.getUserProfile().canRead("rb.objects." + objectName))
 		{
 			List<RedbackAggregate> list = new ArrayList<RedbackAggregate>();
-			ObjectConfig objectConfig = getObjectConfig(objectName);
+			ObjectConfig objectConfig = getObjectConfig(session, objectName);
 			if(objectConfig != null)
 			{
 				try
@@ -577,9 +577,12 @@ public class ObjectManager
 		}
 	}
 	
-	public Value getNewID(String name) throws FunctionErrorException, FunctionTimeoutException
+	public Value getNewID(Session session, String name) throws FunctionErrorException, FunctionTimeoutException
 	{
-		Payload response = firebus.requestService(idGeneratorServiceName, new Payload(name)); 
+		Payload request = new Payload(name);
+		request.metadata.put("mime", "text/plain");
+		request.metadata.put("session", session.getId());
+		Payload response = firebus.requestService(idGeneratorServiceName, request); 
 		String value = response.getString();
 		return new Value(value);
 	}
@@ -695,7 +698,7 @@ public class ObjectManager
 				{
 					DataList dbList = new DataList();
 					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-					ObjectConfig nextObjectConfig = getObjectConfig(roc.getObjectName());
+					ObjectConfig nextObjectConfig = getObjectConfig(session, roc.getObjectName());
 					ArrayList<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, null, false, 0, 1000);
 					if(list.size() > 0) {
 						for(int k = 0; k < list.size(); k++)
@@ -767,7 +770,7 @@ public class ObjectManager
 	{
 		DataMap filter = new DataMap();
 		DataList orList = new DataList();
-		ObjectConfig config = getObjectConfig(objectName);
+		ObjectConfig config = getObjectConfig(session, objectName);
 		orList.add(new DataMap("uid", "*" + searchText + "*"));
 		Iterator<String> it = config.getAttributeNames().iterator();
 		while(it.hasNext())
@@ -785,7 +788,7 @@ public class ObjectManager
 				{
 					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
 					String relatedObejctName = roc.getObjectName();
-					ObjectConfig relatedConfig = getObjectConfig(relatedObejctName);
+					ObjectConfig relatedConfig = getObjectConfig(session, relatedObejctName);
 					if(relatedConfig != null)
 					{
 						DataList relatedOrList = new DataList();

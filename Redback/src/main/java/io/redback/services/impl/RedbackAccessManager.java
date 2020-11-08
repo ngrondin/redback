@@ -1,7 +1,8 @@
 package io.redback.services.impl;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -18,11 +19,11 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
-import io.redback.security.CachedUserProfile;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 import io.redback.services.AccessManager;
+import io.redback.utils.CacheEntry;
 
 public class RedbackAccessManager extends AccessManager 
 {
@@ -35,8 +36,7 @@ public class RedbackAccessManager extends AccessManager
 	protected DataClient dataClient;
 	protected DataList hardUsers;
 	protected ConfigurationClient configClient;
-	//protected ArrayList<Session> cachedSessions;
-	protected ArrayList<CachedUserProfile> cachedUserProfiles;
+	protected Map<String, CacheEntry<UserProfile>> cachedUserProfiles;
 
 
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
@@ -57,13 +57,11 @@ public class RedbackAccessManager extends AccessManager
 			outboundService = config.getString("outboundservice");
 		}
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
-		//cachedSessions = new ArrayList<Session>();
-		cachedUserProfiles = new ArrayList<CachedUserProfile>();
+		cachedUserProfiles = new HashMap<String, CacheEntry<UserProfile>>();
 	}
 
-	protected Session validateToken(String token) throws RedbackException
+	protected UserProfile validateToken(Session session, String token) throws RedbackException
 	{
-		Session session = null;
 		try 
 		{
 		    Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -75,9 +73,9 @@ public class RedbackAccessManager extends AccessManager
 			DecodedJWT jwt = JWT.decode(token);
 			Claim usernameClaim = jwt.getClaim("email");
 			String username = usernameClaim.asString();
-			UserProfile profile = getUserProfile(username);
-			if(profile != null)
-				session = new Session(token, profile, jwt.getExpiresAt().getTime());
+			UserProfile profile = getUserProfile(session, username);
+			profile.setExpiry(jwt.getExpiresAt().getTime());
+			return profile;
 		} 
 		catch (RedbackException exception)
 		{
@@ -85,27 +83,26 @@ public class RedbackAccessManager extends AccessManager
 		}
 		catch (Exception exception)
 		{
-			exception.printStackTrace();
 			throw new RedbackException("JWT token is invalid", exception);
 		}
-		return session;
 	}
 	
-	protected synchronized UserProfile getUserProfile(String username) throws RedbackException
+	protected synchronized UserProfile getUserProfile(Session session, String username) throws RedbackException
 	{
 		long now = System.currentTimeMillis();
-		CachedUserProfile userProfile = null;
-		for(int i = 0; i < cachedUserProfiles.size(); i++)
-			if(cachedUserProfiles.get(i).getUsername().equalsIgnoreCase(username))
-				userProfile = cachedUserProfiles.get(i);
+		CacheEntry<UserProfile> ce = cachedUserProfiles.get(username);
 		
-		if(userProfile != null && userProfile.expiry < now)
+		if(ce != null && ce.hasExpired())
 		{
-			cachedUserProfiles.remove(userProfile);
-			userProfile = null;
+			cachedUserProfiles.remove(username);
+			ce = null;
 		}
 
-		if(userProfile == null)
+		if(ce != null)
+		{
+			return ce.get();
+		}
+		else
 		{
 			try
 			{
@@ -151,7 +148,7 @@ public class RedbackAccessManager extends AccessManager
 					for(int j = 0; j < rolesList.size(); j++)
 					{
 						String roleName = rolesList.getString(j);
-						Role role = getRole(roleName);
+						Role role = getRole(session, roleName);
 						if(role != null)
 						{
 							DataMap roleRights = role.getAllRights();
@@ -159,8 +156,12 @@ public class RedbackAccessManager extends AccessManager
 						}
 					}
 					userConfig.put("rights", rights);
-					userProfile = new CachedUserProfile(userConfig, now + 300000);	
-					cachedUserProfiles.add(userProfile);
+					UserProfile userProfile = new UserProfile(userConfig);
+					ce = new CacheEntry<UserProfile>(userProfile, now + 900000);
+					cachedUserProfiles.put(username, ce);
+					return userProfile;
+				} else {
+					throw new RedbackException("Error getting user profile for " + username);
 				}
 			}
 			catch(Exception e)
@@ -168,17 +169,16 @@ public class RedbackAccessManager extends AccessManager
 				throw new RedbackException("Error getting user profile for " + username, e);
 			}
 		}
-		return userProfile;
 	}
 	
-	protected Role getRole(String name) throws RedbackException
+	protected Role getRole(Session session, String name) throws RedbackException
 	{
 		Role role = roles.get(name);
 		if(role == null)
 		{
 			try
 			{
-				role =  new Role(configClient.getConfig("rbam", "role", name));
+				role =  new Role(configClient.getConfig(session, "rbam", "role", name));
 				roles.put(name, role);
 			}
 			catch(Exception e)
@@ -189,12 +189,12 @@ public class RedbackAccessManager extends AccessManager
 		return role;		
 	}
 
-	
+/*	
 	protected void extendSession(Session session)
 	{
 
 	}
-	
+*/	
 	protected void mergeRights(DataMap to, DataMap from)
 	{
 		DataMap fromRb = from.getObject("rb");

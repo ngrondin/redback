@@ -3,8 +3,6 @@ package io.redback.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.ServiceInformation;
@@ -16,25 +14,20 @@ import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
-import io.redback.utils.Timer;
 
 public abstract class ObjectServer extends AuthenticatedServiceProvider 
 {
-	private Logger logger = Logger.getLogger("io.redback");
-
 
 	public ObjectServer(String n, DataMap c, Firebus f)
 	{
 		super(n, c, f);
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
+	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try {
-			logger.finer("Object service start");
 			Payload response = null;
 			DataMap request = new DataMap(payload.getString());
-			Timer timer = new Timer("rbos", request.toString(0, true));
 			String action = request.getString("action");
 			String objectName = request.getString("object");
 			DataMap options = request.getObject("options");
@@ -198,15 +191,13 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 			{
 				throw new RedbackException("Requests must have at least an 'action' attribute");
 			}	
-			timer.mark();
-			logger.finer("Object service finish");
 			return response;	
 		} catch(DataException e) {
 			throw new RedbackException("Error in object server", e);
 		}
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload)	throws RedbackException
+	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		throw new RedbackException("All requests need to be authenticated");
 	}

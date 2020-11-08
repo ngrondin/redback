@@ -42,7 +42,7 @@ public class DomainServiceUnit extends ProcessUnit
 		logger.finer("Starting domain service call node");
 		if(processManager.getDomainServiceName() != null)
 		{
-			Session sysUserSession = processManager.getProcessUserSession(pi.getDomain());
+			Session sysUserSession = pi.getOutboundActionner().getSession();
 			Map<String, Object> context = pi.getScriptContext();
 			DataMap data = inputExpressionMap.eval(context);
 			DataMap req = new DataMap();
@@ -54,6 +54,8 @@ public class DomainServiceUnit extends ProcessUnit
 			Payload payload = new Payload();
 			payload.setData(req.toString());
 			payload.metadata.put("token", sysUserSession.getToken());
+			payload.metadata.put("session", sysUserSession.getId());
+			payload.metadata.put("mime", "application/json");
 			try
 			{
 				logger.finest("Calling " + processManager.getDomainServiceName() + " " + payload.getString());

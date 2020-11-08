@@ -25,7 +25,7 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws RedbackException {
+	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		try {
 			logger.finer("Notification service start");
 			Payload response = null;
@@ -62,7 +62,7 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 		}
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException {
+	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException {
 		throw new RedbackException("Notification requests need to be authenticated");
 	}
 	

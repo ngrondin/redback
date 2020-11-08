@@ -82,7 +82,7 @@ public class ReportManager {
 			if(configs.containsKey(name)) {
 				return configs.get(name);
 			} else {
-				ReportConfig rc = new ReportConfig(this, configClient.getConfig("rbrs", "report", name));
+				ReportConfig rc = new ReportConfig(this, configClient.getConfig(session, "rbrs", "report", name));
 				configs.put(name, rc);
 				return rc;
 			}
@@ -104,7 +104,7 @@ public class ReportManager {
 					list.add(new ReportConfig(this, cfg));
 				}
 			} 
-			res = configClient.listConfigs("rbrs", "report", new DataMap("category", category));
+			res = configClient.listConfigs(session, "rbrs", "report", new DataMap("category", category));
 			if(res.containsKey("result")) {
 				DataList resList = res.getList("result");
 				for(int i = 0; i < resList.size(); i++) {

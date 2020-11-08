@@ -1,7 +1,6 @@
 package io.redback.services;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -13,11 +12,9 @@ import io.redback.RedbackException;
 import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.security.Session;
-import io.redback.utils.Timer;
 
 public abstract class ProcessServer extends AuthenticatedServiceProvider
 {
-	private Logger logger = Logger.getLogger("io.redback");
 
 	public ProcessServer(String n, DataMap c, Firebus f)
 	{
@@ -25,22 +22,20 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 	}
 
 	
-	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException
+	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		throw new RedbackException("All requests need to be authenticated");
 	}
 
 	
-	public Payload authenticatedService(Session session, Payload payload) throws RedbackException
+	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
-		logger.finer("Process service start");
 		Payload response = new Payload();
 		try
 		{
 			DataMap request = new DataMap(payload.getString());
 			String action = request.getString("action");
 			DataMap responseData = null;
-			Timer timer = new Timer("rbpm", request.toString(0, true));
 			
 			if(action != null)
 			{
@@ -127,14 +122,12 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 				throw new RedbackException("Requests must have at least an 'action' attribute");
 			}					
 			response.setData(responseData.toString());
-			timer.mark();
 		}
 		catch(DataException e)
 		{
 			throw new RedbackException("Error in process server", e);
 		}
 
-		logger.finer("Process service finish");
 		return response;	
 	}
 

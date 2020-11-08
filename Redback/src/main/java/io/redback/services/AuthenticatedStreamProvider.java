@@ -8,14 +8,13 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.interfaces.StreamHandler;
-import io.firebus.interfaces.StreamProvider;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.AccessManagementClient;
 import io.redback.security.Session;
+import io.redback.security.UserProfile;
 
-public abstract class AuthenticatedStreamProvider extends Service implements StreamProvider, StreamHandler {
+public abstract class AuthenticatedStreamProvider extends StreamProvider {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String accessManagementService;
 	protected AccessManagementClient accessManagementClient;
@@ -32,15 +31,17 @@ public abstract class AuthenticatedStreamProvider extends Service implements Str
 
 
 	public void acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
-		Session session = null;
+		Session session = new Session(payload.metadata.get("session"));
+		UserProfile up = null;
 		String token = payload.metadata.get("token");
 		try {
 			if(token != null)
 			{
-				session = accessManagementClient.validate(token);
+				up = accessManagementClient.validate(session, token);
 			}
 
-			if(session != null) {
+			if(up != null) {
+				session.setUserProfile(up);
 				onNewStream(session);
 				endpointToSession.put(streamEndpoint, session);
 				sessionToEndpoint.put(session, streamEndpoint);

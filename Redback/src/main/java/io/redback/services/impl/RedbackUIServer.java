@@ -63,9 +63,9 @@ public class RedbackUIServer extends UIServer
 		{
 			DataMap appConfig = null;
 			if(name != null) {
-				appConfig = configClient.getConfig("rbui", "app", name); 
+				appConfig = configClient.getConfig(session, "rbui", "app", name); 
 			} else {
-				DataMap result = configClient.listConfigs("rbui", "app", new DataMap("isdefault", true));
+				DataMap result = configClient.listConfigs(session, "rbui", "app", new DataMap("isdefault", true));
 				if(result.getList("result").size() > 0) {
 					appConfig = result.getList("result").getObject(0);
 				}
@@ -110,7 +110,7 @@ public class RedbackUIServer extends UIServer
 	{
 		try {
 			DataMap menu = new DataMap("{type:menu, content:[]}");
-			DataMap result = configClient.listConfigs("rbui", "menu");
+			DataMap result = configClient.listConfigs(session, "rbui", "menu");
 			DataList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 			{
@@ -174,7 +174,7 @@ public class RedbackUIServer extends UIServer
 					DataMap viewConfig = viewConfigs.get(viewName);
 					if(viewConfig == null)
 					{
-						viewConfig = configClient.getConfig("rbui", "view", viewName);
+						viewConfig = configClient.getConfig(session, "rbui", "view", viewName);
 						viewConfigs.put(viewName, viewConfig);
 					}
 					if(viewConfig != null)
@@ -351,7 +351,7 @@ public class RedbackUIServer extends UIServer
 	}	
 
 
-	protected byte[] getResource(String name, String version) throws RedbackException
+	protected byte[] getResource(Session session, String name, String version) throws RedbackException
 	{
 		try {
 			byte[] bytes = null;
@@ -377,7 +377,7 @@ public class RedbackUIServer extends UIServer
 			
 			if(type.equals("svg"))
 			{
-				DataMap result = configClient.getConfig("rbui", "resource", name); 
+				DataMap result = configClient.getConfig(session, "rbui", "resource", name); 
 				bytes = StringUtils.unescape(result.getString("content")).getBytes();
 			}
 			else

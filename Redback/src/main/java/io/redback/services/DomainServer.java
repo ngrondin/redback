@@ -21,7 +21,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 
-	public Payload authenticatedService(Session session, Payload payload) throws RedbackException {
+	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		try {
 			DataMap request = new DataMap(payload.getString());
 			String action = request.getString("action");
@@ -81,7 +81,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 		}
 	}
 
-	public Payload unAuthenticatedService(Session session, Payload payload) throws RedbackException {
+	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException {
 		throw new RedbackException("Domain server only accepts authenticated requests");
 	}
 

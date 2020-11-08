@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.utils.DataMap;
+import io.redback.security.Session;
 import io.redback.security.UserProfile;
 
 public class Actionner 
@@ -11,23 +12,27 @@ public class Actionner
 	protected String id;
 	protected UserProfile userProfile;
 	protected ProcessInstance processInstance;
+	protected Session session;
 	protected int type;
 	protected List<String> groups;
 	public static int USER = 1;
 	public static int PROCESS = 3;
 
 
-	public Actionner(UserProfile up) 
+	public Actionner(Session s) 
 	{
-		userProfile = up;
+		session = s;
+		userProfile = session.getUserProfile();
 		id = userProfile.getUsername();
 		type = USER;
 		groups = new ArrayList<String>();
 	}
 	
-	public Actionner(ProcessInstance pi)
+	public Actionner(ProcessInstance pi, Session s) 
 	{
 		processInstance = pi;
+		session = s;
+		userProfile = session.getUserProfile();
 		id = processInstance.getId();
 		type = PROCESS;
 		groups = new ArrayList<String>();
@@ -82,6 +87,11 @@ public class Actionner
 	public ProcessInstance getProcessInstance()
 	{
 		return processInstance;
+	}
+	
+	public Session getSession() 
+	{
+		return session;
 	}
 	
 	public List<String> getGroups()
