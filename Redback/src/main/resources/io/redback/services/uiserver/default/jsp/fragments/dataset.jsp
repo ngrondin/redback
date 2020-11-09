@@ -9,7 +9,10 @@ if(config.object != null) { %>
 }
 if(config.basefilter != null) { %>
 	[baseFilter]="<%=utils.convertDataMapToAttributeString(config.basefilter)%>"<% 
-} 
+}
+if(config.basesort != null) { %>
+	[baseSort]="<%=utils.convertDataMapToAttributeString(config.basesort)%>"<% 
+}  
 if(typeof parents.dataset == 'undefined' && typeof parents.datasetgroup == 'undefined') { %>
 	[(userFilter)]="currentTarget.filter" 
 	[(searchString)]="currentTarget.search" 

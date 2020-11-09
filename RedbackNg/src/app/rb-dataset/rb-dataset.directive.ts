@@ -17,6 +17,7 @@ export class RbDatasetDirective implements OnChanges {
   @Input('relatedObject') relatedObject: RbObject;
   @Input('relatedFilter') relatedFilter: any;
   @Input('baseFilter') baseFilter: any;
+  @Input('baseSort') baseSort: any;
   @Input('fetchAll') fetchAll: boolean = false;
 
   @Input('searchString') inputSearchString: any;
@@ -110,7 +111,8 @@ export class RbDatasetDirective implements OnChanges {
   public fetchNextPage() {
     if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
       const filter = this.mergeFilters();
-      this.dataService.listObjects(this.objectname, filter, this.searchString, this.userSort, this.nextPage, this.pageSize).subscribe(data => this.setData(data));
+      const sort = this.userSort != null ? this.userSort : this.baseSort;
+      this.dataService.listObjects(this.objectname, filter, this.searchString, sort, this.nextPage, this.pageSize).subscribe(data => this.setData(data));
       this.nextPage = this.nextPage + 1;
       this.fetchThreads = this.fetchThreads + 1;
       this.dataService.subscribeObjectCreation(this.id, this.objectname, filter);

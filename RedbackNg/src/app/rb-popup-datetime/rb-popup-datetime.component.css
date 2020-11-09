@@ -78,6 +78,7 @@
     right: 0;
     bottom: 0;
     left: 0;
+    pointer-events: none;
 }
 
 .rb-datetime-clock-dial-pointer {
@@ -88,6 +89,7 @@
     top: 15%;
     transform-origin: 50% 100%;
     width: 1%;
+    pointer-events: none;
 }
 
 .rb-datetime-clock-dial-number {
@@ -99,8 +101,8 @@
     width: 10%;
     height: 10%;
     transform-origin: 50% 50%;
-    cursor: pointer;
     text-align: center;
     font-size: 13px;
+    pointer-events: none;
 }
   
