@@ -9,6 +9,7 @@ import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.managers.domainmanager.DomainFunctionInfo;
 import io.redback.security.Session;
 
 public abstract class DomainServer extends AuthenticatedServiceProvider {
@@ -29,24 +30,18 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 			String name = request.getString("name");
 			String category = request.getString("category");
 			if(action != null) {
-				if(action.equals("putreport")) {
-					putReport(session, domain, name, category, request.getObject("report"));
-				} else if(action.equals("putvariable")) {
+				if(action.equals("putvariable")) {
 					putVariable(session, domain, name, request.getObject("variable"));
 				} else if(action.equals("putfunction")) {
 					putFunction(session, domain, name, request.getString("function"));
-				} else if(action.equals("getreport")) {
-					DataMap reportConfig = getReport(session, domain, name);
-					if(reportConfig != null) {
-						return new Payload(reportConfig.toString());
-					} else {
-						return new Payload();
-					}
-				} else if(action.equals("listreport")) {
-					List<DataMap> list = listReports(session, category);
+				} else if(action.equals("listfunctions")) {
+					List<DomainFunctionInfo> list = listFunctions(session, domain, category);
 					DataMap resp = new DataMap();
 					DataList result = new DataList();
-					for(DataMap map : list) {
+					for(DomainFunctionInfo dfi : list) {
+						DataMap map = new DataMap();
+						map.put("name", dfi.name);
+						map.put("description", dfi.description);
 						result.add(map);
 					}
 					resp.put("result", result);
@@ -85,17 +80,20 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 		throw new RedbackException("Domain server only accepts authenticated requests");
 	}
 
-	public abstract void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException;
+	//public abstract void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException;
 	
 	public abstract void putVariable(Session session, String domain, String name, DataEntity var) throws RedbackException;
 	
+	public abstract DataEntity getVariable(Session session, String domain, String name) throws RedbackException;
+
+	//public abstract DataMap getReport(Session session, String domain, String name) throws RedbackException;
+	
+	//public abstract List<DataMap> listReports(Session session, String category) throws RedbackException;
+	
+	
 	public abstract void putFunction(Session session, String domain, String name, String function) throws RedbackException;
 	
-	public abstract DataMap getReport(Session session, String domain, String name) throws RedbackException;
-	
-	public abstract List<DataMap> listReports(Session session, String category) throws RedbackException;
-	
-	public abstract DataEntity getVariable(Session session, String domain, String name) throws RedbackException;
+	public abstract List<DomainFunctionInfo> listFunctions(Session session, String domain, String category) throws RedbackException;
 	
 	public abstract Object executeFunction(Session session, String domain, String name, DataMap param, boolean async) throws RedbackException;
 

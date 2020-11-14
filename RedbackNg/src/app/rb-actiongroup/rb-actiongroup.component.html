@@ -1,0 +1,36 @@
+<button
+    *ngIf="round"
+    mat-button 
+    matTooltip="General actions for this record"
+    [matTooltipShowDelay]="1000"
+    aria-label="Action Group" 
+	class="mat-mini-fab mat-primary rb-button rb-action-group-button" 
+    [matMenuTriggerFor]="actiongroupmenu">
+	<mat-icon>linear_scale</mat-icon>
+</button>
+<div>
+    <button
+        *ngIf="!round"
+        mat-stroked-button 
+        matTooltip="General actions for this record"
+        [matTooltipShowDelay]="1000"
+        aria-label="Action Group" 
+        class="mat-primary rb-button rb-action-group-button" 
+        [matMenuTriggerFor]="actiongroupmenu">
+        Actions
+    </button>
+</div>
+<mat-menu
+    #actiongroupmenu="matMenu">
+    <div
+        *ngIf="actions.length == 0"
+        class="rb-action-group-message">
+        No actions
+    </div>
+    <button
+        mat-menu-item
+        *ngFor="let action of actions"
+        (click)="clickAction(action)">
+        {{action.label}}
+    </button>
+</mat-menu>

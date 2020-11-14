@@ -75,6 +75,7 @@ import 'brace/theme/eclipse';
 import { RbTableComponent } from './rb-table/rb-table.component';
 import { ReportService } from './report.service';
 import { RbReportlistComponent } from './rb-reportlist/rb-reportlist.component';
+import { RbActiongroupComponent } from './rb-actiongroup/rb-actiongroup.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -163,7 +164,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbCurrencyInputComponent,
     RbCodeInputComponent,
     RbTableComponent,
-    RbReportlistComponent
+    RbReportlistComponent,
+    RbActiongroupComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -221,7 +223,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbCurrencyInputComponent,
     RbCodeInputComponent,
     RbTableComponent,
-    RbReportlistComponent
+    RbReportlistComponent,
+    RbActiongroupComponent
   ],
   providers: [
     CookieService,

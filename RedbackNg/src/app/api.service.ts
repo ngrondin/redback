@@ -21,6 +21,7 @@ export class ApiService {
   public uiService: string;
   public objectService: string;
   public fileService: string;
+  public domainService: string;
   public reportService: string;
   public processService: string;
   public signalService: string;
@@ -184,6 +185,32 @@ export class ApiService {
 
   listFiles(object: string, uid: string): Observable<any> {
     return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?action=list&object=' + object + '&uid=' + uid, httpOptions);
+  }
+
+  /******* Domain *********/
+
+  listDomainFunctions(category: string): Observable<any> {
+    const req = {
+      action: 'listfunctions',
+      category: category
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.domainService, req, httpOptions);
+  }
+
+  executeDomain(func: string, domain: string, param: any) {
+    const req = {
+      action: 'execute',
+      name: func,
+      domain: domain,
+      param: param
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.domainService, req, httpOptions);
+  }
+
+  /******* Reporting Service *********/
+  
+  listReports(category: string): Observable<any> {
+    return this.http.get<any>(this.baseUrl + '/' + this.reportService + '?action=list&category=' + category, httpOptions);
   }
 
   /******* Signals *********/
@@ -360,11 +387,6 @@ export class ApiService {
     })    
   }
 
-  /******* Reporting Service *********/
-  
-  listReports(category: string): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/' + this.reportService + '?action=list&category=' + category, httpOptions);
-  }
 }
 
  

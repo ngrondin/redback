@@ -245,6 +245,7 @@ public class DomainManager implements Consumer {
 		}
 	}
 	
+	/*
 	public void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException {
 		DataMap entryMap = new DataMap();
 		entryMap.put("type", "report");
@@ -256,6 +257,7 @@ public class DomainManager implements Consumer {
 		DomainReport dr = new DomainReport(entryMap);
 		putEntry(domain, name, dr);
 	}
+	*/
 	
 	public void putVariable(Session session, String domain, String name, DataEntity var) throws RedbackException {
 		DataMap entryMap = new DataMap();
@@ -268,17 +270,16 @@ public class DomainManager implements Consumer {
 		putEntry(domain, name, dv);
 	}
 	
-	public void putFunction(Session session, String domain, String name, String function) throws RedbackException {
-		DataMap entryMap = new DataMap();
-		entryMap.put("type", "variable");
-		entryMap.put("domain", domain);
-		entryMap.put("name", name);
-		entryMap.put("roles", new DataList());
-		entryMap.put("source", function);
-		DomainFunction df = new DomainFunction(this, jsManager, entryMap);
-		putEntry(domain, name, df);
+	public DataEntity getVariable(Session session, String domain, String name) throws RedbackException {
+		DomainVariable dv = (DomainVariable)getDomainEntry(domain, name);
+		if(dv != null)
+			return dv.getVariable();
+		else 
+			return null;
 	}
-	
+
+
+	/*
 	public DataMap getReport(Session session, String domain, String name) throws RedbackException {
 		DomainReport dr = (DomainReport)getDomainEntry(domain, name);
 		if(dr != null)
@@ -296,16 +297,39 @@ public class DomainManager implements Consumer {
 		List<DataMap> reportConfigs = entries.stream().map(entry -> ((DomainReport)entry).getReportConfig()).collect(Collectors.toList());
 		return reportConfigs;
 	}
+	*/
 	
-	public DataEntity getVariable(Session session, String domain, String name) throws RedbackException {
-		DomainVariable dv = (DomainVariable)getDomainEntry(domain, name);
-		if(dv != null)
-			return dv.getVariable();
-		else 
-			return null;
+	public void putFunction(Session session, String domain, String name, String function) throws RedbackException {
+		DataMap entryMap = new DataMap();
+		entryMap.put("type", "variable");
+		entryMap.put("domain", domain);
+		entryMap.put("name", name);
+		entryMap.put("roles", new DataList());
+		entryMap.put("source", function);
+		DomainFunction df = new DomainFunction(this, jsManager, entryMap);
+		putEntry(domain, name, df);
 	}
-
 	
+	public List<DomainFunctionInfo> listFunctions(Session session, String domain, String category) throws RedbackException {
+		List<DomainEntry> list = null;
+		if(domain != null) {
+			list = listDomainEntriesInCategory(domain, category);
+		} else {
+			list = new ArrayList<DomainEntry>();
+			List<String> domains = session.getUserProfile().getDomains();
+			for(String d: domains)
+				if(!d.equals("*"))
+					list.addAll(listDomainEntriesInCategory(d, category));
+		}
+		
+		List<DomainFunctionInfo> retList = new ArrayList<DomainFunctionInfo>();
+		for(DomainEntry de: list) {
+			if(de instanceof DomainFunction)
+				retList.add(new DomainFunctionInfo(de.getName(), de.getDescription()));
+		}
+		return retList;
+	}
+		
 	protected Object execute(Session session, DomainFunction df, DataMap param) throws RedbackException {
 		Object result = null;
 		DomainLoggerJS dl = new DomainLoggerJS(session, this, df);
