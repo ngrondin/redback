@@ -30,7 +30,7 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
   }
 
 
-  public openPopup(direction) {
+  public openPopup(direction, maxHeight) {
     if(!this.readonly) {
       let positionStrategy: any = null;
 
@@ -43,7 +43,8 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
       this.overlayRef = this.overlay.create({
         positionStrategy: positionStrategy,
         hasBackdrop: true,
-        backdropClass: 'cdk-overlay-transparent-backdrop'
+        backdropClass: 'cdk-overlay-transparent-backdrop',
+        maxHeight: maxHeight
       });
       this.overlayRef.backdropClick().subscribe(() => this._cancel());
 
@@ -101,9 +102,9 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
     if(this.overlayRef == null) {
       let position: any = this.getPositionOf(event.target);
       if(position.top > (window.innerHeight / 2)) {
-        this.openPopup('up');
+        this.openPopup('up', position.top);
       } else {
-        this.openPopup('down');
+        this.openPopup('down', (window.innerHeight - position.top - event.target.clientHeight - 40));
       }
     }
   }

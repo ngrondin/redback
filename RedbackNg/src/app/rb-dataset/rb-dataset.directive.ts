@@ -5,6 +5,7 @@ import { MapService } from 'app/map.service';
 import { Observable, Subscription } from 'rxjs';
 import { ApiService } from 'app/api.service';
 import { ReportService } from 'app/report.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Directive({
   selector: 'rb-dataset',
@@ -50,7 +51,8 @@ export class RbDatasetDirective implements OnChanges {
     private dataService: DataService,
     private apiService: ApiService,
     private mapService: MapService,
-    private reportService: ReportService
+    private reportService: ReportService,
+    private toastr: ToastrService
   ) {   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -233,6 +235,13 @@ export class RbDatasetDirective implements OnChanges {
       });
     } else if(_name == 'executeglobal') {
       this.dataService.executeGlobal(param, null);
+    } else if(_name == 'executedomain') {
+      if(this.selectedObject != null) {
+        this.apiService.executeDomain(param, this.selectedObject.domain, {"uid": this.selectedObject.uid}).subscribe(
+          json => {},
+          error => {this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});}
+        );
+      }
     } else if(_name == 'modal') {
       this.openModal.emit(param);
     } else if(this.selectedObject != null) {
