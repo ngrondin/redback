@@ -119,8 +119,10 @@ public class RedbackFileServer extends FileServer
 		filter1.put(linkCollection.getField("objectuid"), uid);
 		DataMap resp1 = dataClient.getData(linkCollection.getName(), filter1, null);
 		DataList filter2List = new DataList();
-		for(int i = 0; i < resp1.getList("result").size(); i++) 
-			filter2List.add(resp1.getList("result").getObject(i).getString("fileuid"));
+		for(int i = 0; i < resp1.getList("result").size(); i++) {
+			DataMap resp1Item = linkCollection.convertObjectToCanonical(resp1.getList("result").getObject(i));
+			filter2List.add(resp1Item.getString("fileuid"));
+		}
 		DataMap filter2 = new DataMap(fileCollection.getField("fileuid"), new DataMap("$in", filter2List));
 		DataMap resp2 = dataClient.getData(fileCollection.getName(), filter2, null);
 		List<RedbackFile> list = new ArrayList<RedbackFile>();
