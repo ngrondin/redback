@@ -1,6 +1,8 @@
 package io.redback.utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import io.firebus.utils.DataMap;
 
@@ -43,35 +45,47 @@ public class CollectionConfig {
 		return out;
 	}
 
-	public DataMap convertObjectToCanonical(DataMap in) {
-		DataMap out = (DataMap)in.getCopy(); 
+	public DataMap convertObjectToCanonical(DataMap specific) {
+		DataMap canonical = new DataMap(); //(DataMap)specific.getCopy(); 
+		List<String> specificKeysTranslated = new ArrayList<String>();
 		if(config != null && config.getObject("map") != null) {
-			Iterator<String> it = config.getObject("map").keySet().iterator();
+			DataMap map = config.getObject("map");
+			Iterator<String> it = map.keySet().iterator();
 			while(it.hasNext()) {
 				String canonicalkey = it.next();
-				String inKey = getField(canonicalkey);
-				if(inKey != null && out.containsKey(inKey) && !inKey.equals(canonicalkey)) {
-					out.put(canonicalkey, out.get(inKey));
-					out.remove(inKey);
-				}
-			}
+				String specificKey = getField(canonicalkey);
+				specificKeysTranslated.add(specificKey);
+				canonical.put(canonicalkey, specific.get(specificKey));
+			}			
 		}
-		return out;
+		Iterator<String> it2 = specific.keySet().iterator();
+		while(it2.hasNext()) {
+			String specificKey = it2.next();
+			if(!specificKeysTranslated.contains(specificKey))
+				canonical.put(specificKey, specific.get(specificKey));
+		}
+		return canonical;
 	}
 	
-	public DataMap convertObjectToSpecific(DataMap in) {
-		DataMap out = (DataMap)in.getCopy(); 
+	public DataMap convertObjectToSpecific(DataMap canonical) {
+		DataMap specific = new DataMap(); //(DataMap)specific.getCopy(); 
+		List<String> canonicalKeysTranslated = new ArrayList<String>();
 		if(config != null && config.getObject("map") != null) {
-			Iterator<String> it = config.getObject("map").keySet().iterator();
+			DataMap map = config.getObject("map");
+			Iterator<String> it = map.keySet().iterator();
 			while(it.hasNext()) {
 				String canonicalkey = it.next();
-				String inKey = getField(canonicalkey);
-				if(inKey != null && out.containsKey(canonicalkey) && !inKey.equals(canonicalkey)) {
-					out.put(inKey, out.get(canonicalkey));
-					out.remove(canonicalkey);
-				}
-			}
+				String specificKey = getField(canonicalkey);
+				canonicalKeysTranslated.add(canonicalkey);
+				canonical.put(specificKey, canonical.get(canonicalkey));
+			}			
 		}
-		return out;
+		Iterator<String> it2 = canonical.keySet().iterator();
+		while(it2.hasNext()) {
+			String canonicalKey = it2.next();
+			if(!canonicalKeysTranslated.contains(canonicalKey))
+				specific.put(canonicalKey, canonical.get(canonicalKey));
+		}
+		return specific;
 	}
 }
