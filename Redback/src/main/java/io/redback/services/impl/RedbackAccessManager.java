@@ -74,7 +74,8 @@ public class RedbackAccessManager extends AccessManager
 			Claim usernameClaim = jwt.getClaim("email");
 			String username = usernameClaim.asString();
 			UserProfile profile = getUserProfile(session, username);
-			profile.setExpiry(jwt.getExpiresAt().getTime());
+			if(profile != null)
+				profile.setExpiry(jwt.getExpiresAt().getTime());
 			return profile;
 		} 
 		catch (RedbackException exception)
@@ -137,8 +138,10 @@ public class RedbackAccessManager extends AccessManager
 					req.put("method", "get");
 					req.put("url", idmUrl + "?user=" + username);
 					req.put("authorization", idmKey);
-				    Payload respP = firebus.requestService(outboundService, new Payload(req.toString()));
-					userConfig = new DataMap(respP.getString());
+					try {
+						Payload respP = firebus.requestService(outboundService, new Payload(req.toString()));
+						userConfig = new DataMap(respP.getString());
+					} catch(Exception e) {}
 				}
 	
 				if(userConfig != null)
@@ -161,7 +164,8 @@ public class RedbackAccessManager extends AccessManager
 					cachedUserProfiles.put(username, ce);
 					return userProfile;
 				} else {
-					throw new RedbackException("Error getting user profile for " + username);
+					return null;
+					//throw new RedbackException("Error getting user profile for " + username);
 				}
 			}
 			catch(Exception e)

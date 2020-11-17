@@ -40,7 +40,7 @@ public class AccessManagementClient extends Client
 					cachedUserProfiles.put(token, new CacheEntry<UserProfile>(up, System.currentTimeMillis() + 120000));
 					return up;
 				} else {
-					throw new RedbackException("Token cannot be validated");
+					return null;
 				}
 			} catch(Exception e) {
 				throw new RedbackException("Error validating token with access manager", e);

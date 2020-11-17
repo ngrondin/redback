@@ -30,9 +30,26 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 			if(get != null)
 			{
 				String[] parts = get.split("/");
-				String category = parts[0];
-				String name = parts[1];
+				String category = null;
+				String name = null;
 				String version = null;
+				if(parts.length >= 3)
+				{
+					category = parts[0];
+					version = parts[1];
+					name = parts[2];
+				}
+				if(parts.length == 2)
+				{
+					category = parts[0];
+					name = parts[1];
+				}
+				else if(parts.length == 1)
+				{
+					category = "app";
+					if(!parts[0].equals(""))
+						name = parts[0];
+				}
 				
 				if(category.equals("resource"))
 				{
@@ -78,7 +95,6 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				if(parts.length == 2)
 				{
 					category = parts[0];
-					//version = "default";
 					name = parts[1];
 				}
 				else if(parts.length == 1)
