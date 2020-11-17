@@ -39,7 +39,7 @@ export class RbDynamicformComponent implements OnInit {
   getTypeOf(object: RbObject) : string {
     if(this.typeattribute != null) {
       let type = object.get(this.typeattribute);
-      if(type == 'string' || type == 'textarea' || type == 'choice' || type == 'files' || type == 'checkbox' || type == 'signature' || type == 'number') {
+      if(type == 'string' || type == 'textarea' || type == 'choice' || type == 'files' || type == 'checkbox' || type == 'signature' || type == 'number' || type == 'date') {
         return type;
       } else {
         return 'unknown';

@@ -54,7 +54,21 @@
                 [editable]="editable"
                 (change)="calcSortedVisibleList()">
             </rb-choice-input>
-        </div>        
+        </div>
+        <div
+            class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'date'">
+            <rb-datetime-input
+                style="margin-bottom: -15px;"
+                [object]="object"
+                [attribute]="valueattribute"
+                [size]="15"
+                [icon]="'calendar_today'"
+                [label]="object.get(labelattribute)"
+                [editable]="editable"
+                (change)="calcSortedVisibleList()">
+            </rb-datetime-input>
+        </div>  
         <div
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'files'">
