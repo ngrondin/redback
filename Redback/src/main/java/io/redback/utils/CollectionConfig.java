@@ -55,7 +55,8 @@ public class CollectionConfig {
 				String canonicalkey = it.next();
 				String specificKey = getField(canonicalkey);
 				specificKeysTranslated.add(specificKey);
-				canonical.put(canonicalkey, specific.get(specificKey));
+				if(specific.containsKey(specificKey))
+					canonical.put(canonicalkey, specific.get(specificKey));
 			}			
 		}
 		Iterator<String> it2 = specific.keySet().iterator();
@@ -77,7 +78,8 @@ public class CollectionConfig {
 				String canonicalkey = it.next();
 				String specificKey = getField(canonicalkey);
 				canonicalKeysTranslated.add(canonicalkey);
-				canonical.put(specificKey, canonical.get(canonicalkey));
+				if(canonical.containsKey(canonicalkey))
+					specific.put(specificKey, canonical.get(canonicalkey));
 			}			
 		}
 		Iterator<String> it2 = canonical.keySet().iterator();
