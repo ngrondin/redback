@@ -41,19 +41,17 @@ export class RbActiongroupComponent implements OnInit {
   public get actions() {
     let ret = [];
     let object = this.dataset.selectedObject;
-    if(object != null) {
-      if(this._actions != null) {
-        this._actions.forEach(item => {
-          if(eval(item.show)) {
-            ret.push(item);
-          }
-        });
-      }
-      if(this._domainActions != null) {
-        this._domainActions.forEach(item => {
+    if(this._actions != null) {
+      this._actions.forEach(item => {
+        if(item.show == null || item.show == true || (typeof item.show == 'string' && (item.show.indexOf('object.') == -1 || object != null) && eval(item.show))) {
           ret.push(item);
-        });
-      }
+        }
+      });
+    }
+    if(this._domainActions != null) {
+      this._domainActions.forEach(item => {
+        ret.push(item);
+      });
     }
     return ret;
   }
