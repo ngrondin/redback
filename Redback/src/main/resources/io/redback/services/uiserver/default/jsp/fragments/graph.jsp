@@ -9,7 +9,7 @@
 	[min]="'<%=config.min%>'"
 	[max]="'<%=config.max%>'" <%
 if(parents.aggregateset != null) { %>	
-	[aggregates]="<%=parents.aggregateset%>.aggregates" <%
-} %> 
-	(navigate)="navigateTo($event)">
+	[aggregates]="<%=parents.aggregateset%>.aggregates"  
+	(selectDimensions)="<%=parents.aggregateset%>.selectDimensions($event)"<%
+} %>>
 </rb-graph>

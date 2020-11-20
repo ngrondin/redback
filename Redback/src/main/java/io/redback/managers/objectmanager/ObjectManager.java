@@ -532,19 +532,30 @@ public class ObjectManager
 					for(int i = 0; i < metrics.size(); i++)
 					{
 						DataMap metric = metrics.getObject(i);
-						String function = metric.getString("function");
-						if(function.equals("count") || function.equals("sum") || function.equals("max") || function.equals("min"))
-						{
-							DataMap dbMetric = new DataMap();
-							dbMetric.put("function", function);
-							if(!function.equals("count"))
+						String metricName = metric.getString("name");
+						if(metricName != null && objectConfig.getAttributeConfig(metricName) == null) {
+							String function = metric.getString("function");
+							if(function.equals("count") || function.equals("sum") || function.equals("max") || function.equals("min"))
 							{
-								String attribute = metric.getString("attribute");
-								if(attribute != null)
-									dbMetric.put("field", objectConfig.getAttributeConfig(attribute).getDBKey());
+								DataMap dbMetric = new DataMap();
+								dbMetric.put("function", function);
+								if(!function.equals("count"))
+								{
+									String attribute = metric.getString("attribute");
+									if(attribute != null)
+										dbMetric.put("field", objectConfig.getAttributeConfig(attribute).getDBKey());
+								}
+								dbMetric.put("name", metricName);
+								dbMetrics.add(metric);
+							} 
+							else
+							{
+								throw new RedbackException("The metric function hasn't been provided");
 							}
-							dbMetric.put("name", metric.getString("name"));
-							dbMetrics.add(metric);
+						} 
+						else 
+						{
+							throw new RedbackException("A metric cannot have the same name as one of the object's attribute");
 						}
 					}
 					DataMap dbSort = generateDBSort(session, objectConfig, sort);

@@ -23,6 +23,7 @@ if(typeof parents.dataset == 'undefined') { %>
 	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.master.relationship)%>" 
 	[relatedObject]="<%=parents.dataset%>.selectedObject"<% 
 } %>
-	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
+	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>"
+	(navigate)="navigateTo($event)">
 	#content#
 </rb-aggregateset>

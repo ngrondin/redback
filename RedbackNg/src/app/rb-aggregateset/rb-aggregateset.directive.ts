@@ -24,6 +24,7 @@ export class RbAggregatesetDirective {
   @Output('userFilterChange') userFilterChange: EventEmitter<any> = new EventEmitter();
   @Output('searchStringChange') searchStringChange: EventEmitter<any> = new EventEmitter();
   @Output('selectedObjectChange') selectedObjectChange: EventEmitter<any> = new EventEmitter();
+  @Output('navigate') navigateEvent: EventEmitter<any> = new EventEmitter();
 
   public aggregates: RbAggregate[] = [];
   public searchString: string;
@@ -65,7 +66,7 @@ export class RbAggregatesetDirective {
   public refreshData() {
     this.aggregates = [];
     if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
-      const filter = this.mergeFilters();
+      const filter = this.mapService.resolveMap(this.mergeFilters(), this.relatedObject, null, this.relatedObject);
       this.dataService.aggregateObjects(this.objectname, filter, this.tuple, this.metrics).subscribe(
         data => this.setAggregates(data)
       );
@@ -86,13 +87,23 @@ export class RbAggregatesetDirective {
     if(this.userFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.userFilter);
     }
-    
-    filter = this.mapService.resolveMap(filter, this.relatedObject, null, this.relatedObject);
 
     return filter;
   }
 
   public setAggregates(data: RbAggregate[]) {
     this.aggregates = data;
+  }
+
+
+  public selectDimensions(dimensionsFilter: any) {
+    let filter = this.mergeFilters();
+    filter = this.mapService.mergeMaps(filter, dimensionsFilter);
+    let target = {
+      object: this.objectname,
+      filter: filter,
+      reset: true
+    };
+    this.navigateEvent.emit(target);
   }
 }

@@ -16,7 +16,7 @@ export class RbGraphComponent implements OnInit {
   @Input('min') min: number = 0;
   @Input('max') max: number = 100;
   @Input('aggregates') aggregates: RbAggregate[];
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  @Output('selectDimensions') selectDimensionsEvent: EventEmitter<any> = new EventEmitter();
 
   colorScheme = {
     domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
@@ -121,28 +121,24 @@ export class RbGraphComponent implements OnInit {
   }
 
   public onClick(event: any) {
-    let objectname = null;
+    console.log("Graph click");
     let filter = {};
     const name = event.name;
     this.aggregates.forEach(agg => {
-      objectname = agg.objectname;
-      if(name == agg.getDimension(this.series.labelattribute)) {
-        filter[this.series.dimension] = "'" + agg.getDimension(this.series.dimension) + "'";
+      if(name == (agg.getDimension(this.series.labelattribute) || "")) {
+        let dimensionValue = agg.getDimension(this.series.dimension);
+        filter[this.series.dimension] = dimensionValue != null ? "'" + dimensionValue + "'" : null;
       }
     });
     const cat = event.series;
     if(cat != null) {
       this.aggregates.forEach(agg => {
-        if(cat == agg.getDimension(this.categories.labelattribute)) {
-          filter[this.categories.dimension] = "'" + agg.getDimension(this.categories.dimension) + "'";
+        if(cat == (agg.getDimension(this.categories.labelattribute) || "")) {
+          let dimensionValue = agg.getDimension(this.categories.dimension);
+          filter[this.categories.dimension] = dimensionValue != null ? "'" + dimensionValue + "'" : null;
         }
       });
     }
-    let target = {
-      object: objectname,
-      filter: filter,
-      reset: true
-    };
-    this.navigate.emit(target);
+    this.selectDimensionsEvent.emit(filter);
   }
 }
