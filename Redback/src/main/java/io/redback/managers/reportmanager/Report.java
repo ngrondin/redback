@@ -1,8 +1,6 @@
 package io.redback.managers.reportmanager;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,8 +8,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.imageio.ImageIO;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -71,7 +67,7 @@ public class Report {
 		}
 		for(int i = 0; i < pages.size(); i++) {
 			ReportBox remainder = pages.get(i);
-			while(remainder != null && remainder.height > 700) {
+			while(remainder != null && remainder.height > 670) {
 				ReportBox top = remainder;
 				remainder = top.breakAt(700);
 				remainder.x = 0;
@@ -138,7 +134,7 @@ public class Report {
 			}
 			byte[] bytes = Base64.getDecoder().decode(base64Str);
 			PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, bytes, "image");
-            stream.drawImage(pdImage, offsetx, pageTop - offsety - reportBox.height, reportBox.width, reportBox.height);
+            stream.drawImage(pdImage, offsetx, pageTop - offsety - reportBox.height - 3, reportBox.width, reportBox.height);
 		} else if(reportBox.type.equals("image")) {
 			PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, reportBox.bytes, "image");
             stream.drawImage(pdImage, offsetx, pageTop - offsety - reportBox.height, reportBox.width, reportBox.height);

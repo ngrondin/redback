@@ -185,30 +185,46 @@ public class DynamicForm extends ReportUnit {
 				FileClient fc = reportManager.getFileClient();
 				List<RedbackFile> files = fc.listFilesFor(session, "formitem", ror.getUid());
 				for(RedbackFile file: files) {
-					BufferedImage orig = ImageIO.read(new ByteArrayInputStream(file.bytes));
-					if(orig.getHeight() > 0) {
-						int newHeight = 300;
-						int newWidth = (int)((float)orig.getWidth() / ((float)orig.getHeight() / (float)newHeight));
-						BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-						Graphics2D gc = img.createGraphics();
-						gc.setColor(Color.WHITE);
-						gc.fillRect(0, 0, newWidth, newHeight);
-						gc.drawImage(orig.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH),0,0,null);
-						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						ImageIO.write(img, "png", baos);
-						ReportBox rb = ReportBox.Image(baos.toByteArray(), 400, 300);
+					ReportBox rb = reportBoxFromFile(file);
+					if(rb != null) {
 						formItemRb.addChild(rb);
-					}					
-					formItemRb.canBreak = true;
+						formItemRb.canBreak = true;
+					}
 				}
 				
 			} else if(type.equals("signature")) {
-				
+				DataMap fileObj = (DataMap)ror.get(valueAttribute);
+				if(fileObj != null) {
+					FileClient fc = reportManager.getFileClient();
+					RedbackFile file = fc.getFile(session, fileObj.getString("fileuid"));
+					ReportBox rb = reportBoxFromFile(file);
+					if(rb != null) {
+						formItemRb.addChild(rb);
+					}
+				}
 			}
-			formItemRb.height += 10;
+			formItemRb.height += 12;
 			container.addChild(formItemRb);
 		}
 		return container;	
+	}
+	
+	protected ReportBox reportBoxFromFile(RedbackFile file) throws IOException {
+		ReportBox ret = null;
+		BufferedImage orig = ImageIO.read(new ByteArrayInputStream(file.bytes));
+		if(orig.getHeight() > 0) {
+			int newHeight = 300;
+			int newWidth = (int)((float)orig.getWidth() / ((float)orig.getHeight() / (float)newHeight));
+			BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+			Graphics2D gc = img.createGraphics();
+			gc.setColor(Color.WHITE);
+			gc.fillRect(0, 0, newWidth, newHeight);
+			gc.drawImage(orig.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH),0,0,null);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ImageIO.write(img, "png", baos);
+			ret = ReportBox.Image(baos.toByteArray(), 400, 300);
+		}					
+		return ret;	
 	}
 
 }
