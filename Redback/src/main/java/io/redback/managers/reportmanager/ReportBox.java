@@ -26,7 +26,6 @@ public class ReportBox {
 	
 	private ReportBox() {
 		children = new ArrayList<ReportBox>();
-		color = Color.DARK_GRAY;
 	}
 	
 	public static ReportBox VContainer(boolean canBreak) {
@@ -55,6 +54,7 @@ public class ReportBox {
 		rb.canBreak = false;
 		rb.width = w;
 		rb.height = h;
+		rb.color = Color.DARK_GRAY;
 		return rb;
 	}
 	
@@ -67,6 +67,7 @@ public class ReportBox {
 		rb.canBreak = false;
 		rb.width = w;
 		rb.height = h;
+		rb.color = Color.DARK_GRAY;
 		return rb;
 	}
 	
@@ -81,6 +82,7 @@ public class ReportBox {
 			rb.width = font.getStringWidth(text) / 1000f * fontSize;
 		} catch(Exception e) {}
 		rb.height = fontSize;
+		rb.color = Color.DARK_GRAY;
 		return rb;
 	}
 	
@@ -91,6 +93,7 @@ public class ReportBox {
 		rb.canBreak = false;
 		rb.width = w;
 		rb.height = h;
+		rb.color = Color.DARK_GRAY;
 		return rb;
 	}
 	
@@ -112,7 +115,7 @@ public class ReportBox {
 		rb.height = h;
 		return rb;
 	}
-
+	
 	public void addChild(ReportBox c) {
 		if(c != null) {
 			children.add(c);

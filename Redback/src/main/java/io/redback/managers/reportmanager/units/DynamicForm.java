@@ -7,8 +7,10 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -82,51 +84,76 @@ public class DynamicForm extends ReportUnit {
 			String cat = ror.getString(catAttribute);
 			if(cat == null) cat = "";
 			if(!cat.equals(lastCat)) {
-				ReportBox catRb = ReportBox.Text(cat, font, fontSize);
-				float catWidth = (width == -1 ? catRb.width : width);
-				container.addChild(ReportBox.Empty(catWidth, 5));
+				ReportBox catRb = ReportBox.VContainer(false);
+				catRb.color = Color.decode("#3f51b5");
+				if(width > -1)
+					catRb.width = width;
+				ReportBox catTextRb = ReportBox.Text(cat, font, fontSize);
+				catTextRb.color = Color.WHITE;
+				catRb.addChild(catTextRb);
+				catRb.height += 4;
+				catTextRb.x += 5;
 				container.addChild(catRb);
-				container.addChild(ReportBox.HLine(catWidth, 10));
 				lastCat = cat;
 			}
-			ReportBox item = ReportBox.VContainer(false);
+			ReportBox formItemRb = ReportBox.VContainer(false);
 			String type = ror.getString(typeAttribute);
 			String label = ror.getString(labelAttribute);
-			ReportBox labelAnswer = ReportBox.HContainer(false);
+			ReportBox labelAnswerRowRb = ReportBox.HContainer(false);
 			float labelWidth = 0;
 			if(label != null) {
 				ReportBox rb = ReportBox.Text(label, font, fontSize);
+				rb.color = Color.decode("#666666");
+				rb.fontSize = 11f;
 				labelWidth = rb.width;
-				labelAnswer.addChild(rb);
+				labelAnswerRowRb.addChild(rb);
 			}
-			item.addChild(labelAnswer);
+			formItemRb.addChild(labelAnswerRowRb);
 			String detail = ror.getString(detailAttribute);
 			if(detail != null) {
-				item.addChild(ReportBox.Text(detail, font, fontSize - 2));
+				ReportBox detailRb = ReportBox.Text(detail, font, fontSize - 4);
+				detailRb.color = Color.lightGray;
+				formItemRb.addChild(detailRb);
 			}
 			
 			if(type.equals("string") || type.equals("textarea")) {
 				String value = ror.getString(valueAttribute);
 				if(value != null) {
 					ReportBox row = ReportBox.HContainer(false);
-					row.addChild(ReportBox.Empty(20, 10));
+					//row.addChild(ReportBox.Empty(20, 10));
 					ReportBox col = ReportBox.VContainer(false);
+					col.addChild(ReportBox.Empty(10, 3));
+					String[] lines = value.split("\\n");
+					for(int i = 0; i < lines.length; i++) {
+						String line = lines[i];
+						List<String> sublines = cutToLines(line, font, fontSize, width > -1 ? width : 200);
+						for(String subline : sublines) {
+							col.addChild(ReportBox.Text(subline, font, fontSize));
+						}		
+						
+					}
 					col.addChild(ReportBox.Empty(10, 10));
-					List<String> lines = cutToLines(value, font, fontSize, width > -1 ? width : 200);
-					for(String line : lines) {
-						col.addChild(ReportBox.Text(line, font, fontSize));
-					}		
 					row.addChild(col);
-					item.addChild(row);
+					formItemRb.addChild(row);
 				}	
 				
 			} else if(type.equals("number")) {
 				String value = ror.getNumber(valueAttribute).toString();
 				ReportBox rb = ReportBox.Text(value, font, fontSize);
 				if(width > -1) {
-					labelAnswer.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
+					labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
 				}
-				labelAnswer.addChild(rb);
+				labelAnswerRowRb.addChild(rb);
+				
+			} else if(type.equals("date")) {
+				Date value = ror.getDate(valueAttribute);
+				DateFormat formatter = DateFormat.getDateTimeInstance();
+				String valueStr = formatter.format(value);
+				ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+				if(width > -1) {
+					labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
+				}
+				labelAnswerRowRb.addChild(rb);
 				
 			} else if(type.equals("choice")) {
 				String value = ror.getString(valueAttribute);
@@ -142,17 +169,17 @@ public class DynamicForm extends ReportUnit {
 				}
 				ReportBox rb = ReportBox.Text(display, font, fontSize);
 				if(width > -1) {
-					labelAnswer.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
+					labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
 				}
-				labelAnswer.addChild(rb);
+				labelAnswerRowRb.addChild(rb);
 				
 			} else if(type.equals("checkbox")) {
 				boolean value = ror.getBool(valueAttribute);
 				ReportBox rb = ReportBox.Checkbox(value, 12, 12);
 				if(width > -1) {
-					labelAnswer.addChild(ReportBox.Empty(width - labelWidth - 12, 12));
+					labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - 12, 12));
 				}
-				labelAnswer.addChild(rb);
+				labelAnswerRowRb.addChild(rb);
 
 			} else if(type.equals("files")) {
 				FileClient fc = reportManager.getFileClient();
@@ -170,19 +197,16 @@ public class DynamicForm extends ReportUnit {
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						ImageIO.write(img, "png", baos);
 						ReportBox rb = ReportBox.Image(baos.toByteArray(), 400, 300);
-						item.addChild(rb);
+						formItemRb.addChild(rb);
 					}					
-					//ReportBox rb = ReportBox.Image(new byte[] {}, 400, 300);
-					//System.out.println("Added picture");
-					//item.addChild(rb);
-					item.canBreak = true;
+					formItemRb.canBreak = true;
 				}
 				
 			} else if(type.equals("signature")) {
 				
 			}
-			item.height += 10;
-			container.addChild(item);
+			formItemRb.height += 10;
+			container.addChild(formItemRb);
 		}
 		return container;	
 	}

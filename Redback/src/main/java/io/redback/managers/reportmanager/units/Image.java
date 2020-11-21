@@ -30,7 +30,7 @@ public class Image extends ReportUnit {
 
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
 		if(base64 != null) {
-		String parts[] = base64.split(",");
+			String parts[] = base64.split(",");
 			byte[] bytes = Base64.getDecoder().decode(parts[1]);
 			BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
 			ReportBox rb = ReportBox.Image(bytes, width == -1 ? img.getWidth() : width, height == -1 ? img.getHeight() : height);
