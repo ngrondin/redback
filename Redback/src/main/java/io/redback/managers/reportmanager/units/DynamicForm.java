@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
+import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -120,7 +121,6 @@ public class DynamicForm extends ReportUnit {
 				String value = ror.getString(valueAttribute);
 				if(value != null) {
 					ReportBox row = ReportBox.HContainer(false);
-					//row.addChild(ReportBox.Empty(20, 10));
 					ReportBox col = ReportBox.VContainer(false);
 					col.addChild(ReportBox.Empty(10, 3));
 					String[] lines = value.split("\\n");
@@ -138,40 +138,47 @@ public class DynamicForm extends ReportUnit {
 				}	
 				
 			} else if(type.equals("number")) {
-				String value = ror.getNumber(valueAttribute).toString();
-				ReportBox rb = ReportBox.Text(value, font, fontSize);
-				if(width > -1) {
-					labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
+				Number value = ror.getNumber(valueAttribute);
+				if(value != null) {
+					String valueStr = value.toString();
+					ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+					if(width > -1) {
+						labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
+					}
+					labelAnswerRowRb.addChild(rb);
 				}
-				labelAnswerRowRb.addChild(rb);
 				
 			} else if(type.equals("date")) {
 				Date value = ror.getDate(valueAttribute);
-				DateFormat formatter = DateFormat.getDateTimeInstance();
-				String valueStr = formatter.format(value);
-				ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
-				if(width > -1) {
-					labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
+				if(value != null) {
+					DateFormat formatter = DateFormat.getDateTimeInstance();
+					String valueStr = formatter.format(value);
+					ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+					if(width > -1) {
+						labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
+					}
+					labelAnswerRowRb.addChild(rb);
 				}
-				labelAnswerRowRb.addChild(rb);
 				
 			} else if(type.equals("choice")) {
 				String value = ror.getString(valueAttribute);
-				String display = value;
-				if(ror.get(optionsAttribute) != null) {
-					DataList options = (DataList)ror.get(optionsAttribute);
-					for(int i = 0; i < options.size(); i++) {
-						DataMap option = options.getObject(i);
-						if(option.getString("value").equals(value)) {
-							display = option.getString("display");
-						}
-					}					
+				if(value != null) {
+					String display = value;
+					if(ror.get(optionsAttribute) != null) {
+						DataList options = (DataList)ror.get(optionsAttribute);
+						for(int i = 0; i < options.size(); i++) {
+							DataMap option = options.getObject(i);
+							if(option.getString("value").equals(value)) {
+								display = option.getString("display");
+							}
+						}					
+					}
+					ReportBox rb = ReportBox.Text(display, font, fontSize);
+					if(width > -1) {
+						labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
+					}
+					labelAnswerRowRb.addChild(rb);
 				}
-				ReportBox rb = ReportBox.Text(display, font, fontSize);
-				if(width > -1) {
-					labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
-				}
-				labelAnswerRowRb.addChild(rb);
 				
 			} else if(type.equals("checkbox")) {
 				boolean value = ror.getBool(valueAttribute);
@@ -187,18 +194,20 @@ public class DynamicForm extends ReportUnit {
 				for(RedbackFile file: files) {
 					ReportBox rb = reportBoxFromFile(file);
 					if(rb != null) {
+						formItemRb.addChild(ReportBox.Empty(5, 5));
 						formItemRb.addChild(rb);
 						formItemRb.canBreak = true;
 					}
 				}
 				
 			} else if(type.equals("signature")) {
-				DataMap fileObj = (DataMap)ror.get(valueAttribute);
-				if(fileObj != null) {
+				DataEntity de = ror.get(valueAttribute);
+				if(de != null && de instanceof DataMap) {
 					FileClient fc = reportManager.getFileClient();
-					RedbackFile file = fc.getFile(session, fileObj.getString("fileuid"));
+					RedbackFile file = fc.getFile(session, ((DataMap)de).getString("fileuid"));
 					ReportBox rb = reportBoxFromFile(file);
 					if(rb != null) {
+						formItemRb.addChild(ReportBox.Empty(5, 5));
 						formItemRb.addChild(rb);
 					}
 				}
