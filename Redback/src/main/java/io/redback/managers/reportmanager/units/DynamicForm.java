@@ -1,11 +1,8 @@
 package io.redback.managers.reportmanager.units;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Collections;
@@ -31,6 +28,7 @@ import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.managers.reportmanager.ReportUnit;
 import io.redback.security.Session;
+import io.redback.utils.ImageUtils;
 import io.redback.utils.RedbackFile;
 
 public class DynamicForm extends ReportUnit {
@@ -95,6 +93,7 @@ public class DynamicForm extends ReportUnit {
 				catRb.height += 4;
 				catTextRb.x += 5;
 				container.addChild(catRb);
+				container.addChild(ReportBox.Empty(10, 5));
 				lastCat = cat;
 			}
 			ReportBox formItemRb = ReportBox.VContainer(false);
@@ -192,7 +191,7 @@ public class DynamicForm extends ReportUnit {
 				FileClient fc = reportManager.getFileClient();
 				List<RedbackFile> files = fc.listFilesFor(session, "formitem", ror.getUid());
 				for(RedbackFile file: files) {
-					ReportBox rb = reportBoxFromFile(file);
+					ReportBox rb = reportBoxFromFile(file, 300);
 					if(rb != null) {
 						formItemRb.addChild(ReportBox.Empty(5, 5));
 						formItemRb.addChild(rb);
@@ -205,7 +204,7 @@ public class DynamicForm extends ReportUnit {
 				if(de != null && de instanceof DataMap) {
 					FileClient fc = reportManager.getFileClient();
 					RedbackFile file = fc.getFile(session, ((DataMap)de).getString("fileuid"));
-					ReportBox rb = reportBoxFromFile(file);
+					ReportBox rb = reportBoxFromFile(file, 50);
 					if(rb != null) {
 						formItemRb.addChild(ReportBox.Empty(5, 5));
 						formItemRb.addChild(rb);
@@ -218,21 +217,15 @@ public class DynamicForm extends ReportUnit {
 		return container;	
 	}
 	
-	protected ReportBox reportBoxFromFile(RedbackFile file) throws IOException {
+	protected ReportBox reportBoxFromFile(RedbackFile file, int newHeight) throws RedbackException {
 		ReportBox ret = null;
-		BufferedImage orig = ImageIO.read(new ByteArrayInputStream(file.bytes));
-		if(orig.getHeight() > 0) {
-			int newHeight = 300;
-			int newWidth = (int)((float)orig.getWidth() / ((float)orig.getHeight() / (float)newHeight));
-			BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-			Graphics2D gc = img.createGraphics();
-			gc.setColor(Color.WHITE);
-			gc.fillRect(0, 0, newWidth, newHeight);
-			gc.drawImage(orig.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH),0,0,null);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ImageIO.write(img, "png", baos);
-			ret = ReportBox.Image(baos.toByteArray(), 400, 300);
-		}					
+			try {
+			int ori = ImageUtils.getOrientation(file.bytes);
+			BufferedImage img = ImageUtils.getImage(file.bytes, -1, newHeight, ori);
+			ret = ReportBox.Image(ImageUtils.getBytes(img, "png"), img.getWidth(), img.getHeight());
+		} catch(Exception e) {
+			throw new RedbackException("Error getting ReportBox image", e);
+		}
 		return ret;	
 	}
 

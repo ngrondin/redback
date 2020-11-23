@@ -3,6 +3,8 @@ package io.redback.services.impl;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,6 +20,12 @@ import javax.imageio.ImageIO;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.jpeg.JpegDirectory;
+
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.utils.DataList;
@@ -26,6 +34,7 @@ import io.redback.RedbackException;
 import io.redback.client.DataClient;
 import io.redback.services.FileServer;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.ImageUtils;
 import io.redback.utils.RedbackFile;
 
 public class RedbackFileServer extends FileServer 
@@ -163,10 +172,10 @@ public class RedbackFileServer extends FileServer
 				data.put(fileCollection.getField("date"), new Date());
 				data.put(fileCollection.getField("hash"), hashStr);
 				if(mime.startsWith("image")) {
-					thumbnail = getBase64ThumbnailOfImage(bytes);
+					thumbnail = ImageUtils.getBase64ThumbnailOfImage(bytes);
 					data.put(fileCollection.getField("thumbnail"), thumbnail);
 				} else if(mime.equals("application/pdf")) {
-					thumbnail = getBase64ThumbnailOfPDF(bytes);
+					thumbnail = ImageUtils.getBase64ThumbnailOfPDF(bytes);
 					data.put(fileCollection.getField("thumbnail"), thumbnail);
 				}
 				dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), fileUid), data);
@@ -212,7 +221,7 @@ public class RedbackFileServer extends FileServer
 			type = "image/png";
 		return type;
 	}
-	
+	/*
 	public String getBase64ThumbnailOfImage(byte[] bytes) throws RedbackException 
 	{
 		String b64img = null;
@@ -259,8 +268,79 @@ public class RedbackFileServer extends FileServer
 		{
 			throw new RedbackException("Error creating thumbnail", e);
 		}
-	}
+	}*/
 	
+	/*
+	public byte[] straightenImage(String mime, byte[] orig) throws RedbackException
+	{
+		try
+		{
+			if(mime.equals("image/jpeg")) {
+				Metadata metadata = ImageMetadataReader.readMetadata(new ByteArrayInputStream(orig));
+			    Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+			    JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
+			    int orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+			    int width = jpegDirectory.getImageWidth();
+			    int height = jpegDirectory.getImageHeight();
+			    if(orientation > 1) {
+				    AffineTransform t = new AffineTransform();
+				    switch (orientation) {
+					    case 1:
+					        break;
+					    case 2: // Flip X
+					        t.scale(-1.0, 1.0);
+					        t.translate(-width, 0);
+					        break;
+					    case 3: // PI rotation 
+					        t.translate(width, height);
+					        t.rotate(Math.PI);
+					        break;
+					    case 4: // Flip Y
+					        t.scale(1.0, -1.0);
+					        t.translate(0, -height);
+					        break;
+					    case 5: // - PI/2 and Flip X
+					        t.rotate(-Math.PI / 2);
+					        t.scale(-1.0, 1.0);
+					        break;
+					    case 6: // -PI/2 and -width
+					        t.translate(height, 0);
+					        t.rotate(Math.PI / 2);
+					        break;
+					    case 7: // PI/2 and Flip
+					        t.scale(-1.0, 1.0);
+					        t.translate(-height, 0);
+					        t.translate(0, width);
+					        t.rotate(  3 * Math.PI / 2);
+					        break;
+					    case 8: // PI / 2
+					        t.translate(0, width);
+					        t.rotate(  3 * Math.PI / 2);
+					        break;
+				    }
+				    AffineTransformOp op = new AffineTransformOp(t, AffineTransformOp.TYPE_BICUBIC);
+				    BufferedImage origImg = ImageIO.read(new ByteArrayInputStream(orig));
+				    BufferedImage destImage = op.createCompatibleDestImage(origImg, (origImg.getType() == BufferedImage.TYPE_BYTE_GRAY) ? origImg.getColorModel() : null );
+				    Graphics2D g = destImage.createGraphics();
+				    g.setBackground(Color.WHITE);
+				    g.clearRect(0, 0, destImage.getWidth(), destImage.getHeight());
+				    destImage = op.filter(origImg, destImage);
+				    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ImageIO.write(destImage, "jpeg", baos);
+				    return baos.toByteArray();				    	
+			    } else {
+			    	return orig;
+			    }		    
+			} else {
+				return orig;
+			}			
+		}
+		catch(Exception e) 
+		{
+			return orig;
+		}
+	}
+	*/
 
 	public void clearCaches() 
 	{

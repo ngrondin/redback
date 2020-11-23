@@ -38,7 +38,7 @@ public class Report {
 			context.put("filter", filter);
 			context.put("document", document);
 			ReportBox root = reportConfig.produce(context);
-			List<ReportBox> pages = paginate(root);
+			List<ReportBox> pages = paginate(root, 685);
 			for(int i = 0; i < pages.size(); i++) {
 				context.put("page", (i + 1));
 				ReportBox footer = reportConfig.produceFooter(context);
@@ -50,7 +50,7 @@ public class Report {
 		}
 	}
 	
-	protected List<ReportBox> paginate(ReportBox root) {
+	protected List<ReportBox> paginate(ReportBox root, float maxHeight) {
 		List<ReportBox> pages = new ArrayList<ReportBox>();
 		List<Float> breakPoints = new ArrayList<Float>();
 		root.resolveBreakPoints(breakPoints, 0);
@@ -67,16 +67,18 @@ public class Report {
 		}
 		for(int i = 0; i < pages.size(); i++) {
 			ReportBox remainder = pages.get(i);
-			while(remainder != null && remainder.height > 670) {
+			while(remainder != null && remainder.height > maxHeight) {
 				ReportBox top = remainder;
-				remainder = top.breakAt(700);
-				remainder.x = 0;
-				remainder.y = 0;
-				if(i + 1 < pages.size())
-					pages.add(i + 1, remainder);
-				else
-					pages.add(remainder);
-				i++;
+				remainder = top.breakAt(maxHeight);
+				if(remainder != null) {
+					remainder.x = 0;
+					remainder.y = 0;
+					if(i + 1 < pages.size())
+						pages.add(i + 1, remainder);
+					else
+						pages.add(remainder);
+					i++;
+				}
 			}			
 		}
 		return pages;
