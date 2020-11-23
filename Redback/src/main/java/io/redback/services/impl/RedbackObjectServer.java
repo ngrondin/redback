@@ -112,12 +112,12 @@ public class RedbackObjectServer extends ObjectServer
 		}
 	}
 
-	protected RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException
+	protected RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = null;
 		try {
 			objectManager.initiateCurrentTransaction();
-			object = objectManager.executeFunction(session, objectName, uid, function, data);
+			object = objectManager.executeFunction(session, objectName, uid, function, param);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			throw new RedbackException("Error executing function on object", e);
@@ -125,10 +125,10 @@ public class RedbackObjectServer extends ObjectServer
 		return object;
 	}
 	
-	protected RedbackObject execute(Session session, String function) throws RedbackException {
+	protected RedbackObject execute(Session session, String function, DataMap param) throws RedbackException {
 		try {
 			objectManager.initiateCurrentTransaction();
-			objectManager.executeFunction(session, function);
+			objectManager.executeFunction(session, function, param);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			throw new RedbackException("Error executing function on object", e);

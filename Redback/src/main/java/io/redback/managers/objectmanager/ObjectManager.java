@@ -469,35 +469,29 @@ public class ObjectManager
 			object.delete();
 	}	
 	
-	public RedbackObject executeFunction(Session session, String objectName, String id, String function, DataMap updateData) throws RedbackException, ScriptException
+	public RedbackObject executeFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException, ScriptException
 	{
 		RedbackObject object = getObject(session, objectName, id);
 		if(object != null)
 		{
-			if(updateData != null)
-			{
-				Iterator<String> it = updateData.keySet().iterator();
-				while(it.hasNext())
-				{
-					String attributeName = it.next();
-					object.put(attributeName, updateData.getString(attributeName));
-				}
-			}
 			object.execute(function);
 			object.save();
 		}
 		return object;
 	}
 	
-	public void executeFunction(Session session, String function) throws RedbackException, ScriptException
+	public void executeFunction(Session session, String function, DataMap param) throws RedbackException, ScriptException
 	{
 		ScriptConfig scriptCfg = getGlobalScript(session, function);
 		if(scriptCfg != null)
 		{
-			if(session.getUserProfile().canExecute("rb.scripts." + function))
-				scriptCfg.execute(this.createScriptContext(session));
-			else
+			if(session.getUserProfile().canExecute("rb.scripts." + function)) {
+				Map<String, Object> context = this.createScriptContext(session);
+				context.put("param", JSConverter.toJS(param));
+				scriptCfg.execute(context);
+			} else {
 				throw new RedbackException("No rights to execute global function " + function);
+			}
 		}
 	}	
 	
