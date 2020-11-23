@@ -201,8 +201,8 @@ export class DataService {
   }
 
   
-  executeGlobal(func: string, param: string) {
-    this.apiService.executeGlobal(func).subscribe(
+  executeGlobal(func: string, param: any) {
+    this.apiService.executeGlobal(func, param).subscribe(
       resp => {
         null
       },

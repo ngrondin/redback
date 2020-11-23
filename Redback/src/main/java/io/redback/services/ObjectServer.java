@@ -134,10 +134,10 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					{
 						String uid = request.getString("uid");
 						String function = request.getString("function");
-						DataMap data = request.getObject("data");
+						DataMap param = request.containsKey("param") ? request.getObject("param") : request.containsKey("data") ? request.getObject("data") : null;
 						if(uid != null)
 						{
-							RedbackObject object = execute(session, objectName, uid, function, data);
+							RedbackObject object = execute(session, objectName, uid, function, param);
 							response = formatResponse(object, format, addValidation, addRelated);
 						}
 						else
@@ -171,9 +171,10 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					if(action.equals("execute"))
 					{
 						String function = request.getString("function");
+						DataMap param = request.getObject("param");
 						if(function != null)
 						{
-							execute(session, function);
+							execute(session, function, param);
 							response = formatResponse(new DataMap("result", "ok"), format, addValidation, addRelated);
 						}
 						else
@@ -332,9 +333,9 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 
 	protected abstract void delete(Session session, String objectName, String uid) throws RedbackException;
 
-	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap data) throws RedbackException;
+	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException;
 
-	protected abstract RedbackObject execute(Session session, String function) throws RedbackException;
+	protected abstract RedbackObject execute(Session session, String function, DataMap param) throws RedbackException;
 
 	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException;
 

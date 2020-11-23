@@ -123,8 +123,9 @@ public class ObjectManagerJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String functionName = arguments[0].asString(); 
+					DataMap param = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
 					try {
-						objectManager.executeFunction(session, functionName);
+						objectManager.executeFunction(session, functionName, param);
 						return null;
 					} catch (Exception e) {
 						throw new RuntimeException("Error in execute", e);

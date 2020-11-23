@@ -139,10 +139,11 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
   
-  executeGlobal(func: string) {
+  executeGlobal(func: string, param: any) {
     const req = {
       action: 'execute',
       function: func,
+      param: param
     };
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }

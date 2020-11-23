@@ -234,7 +234,11 @@ export class RbDatasetDirective implements OnChanges {
         delay += 50;
       });
     } else if(_name == 'executeglobal') {
-      this.dataService.executeGlobal(param, null);
+      let funcParam = {
+        "filter": this.mergeFilters(),
+        "selecteduid": (this.selectedObject != null ? this.selectedObject.uid : null)
+      }
+      this.dataService.executeGlobal(param, funcParam);
     } else if(_name == 'executedomain') {
       if(this.selectedObject != null) {
         this.apiService.executeDomain(param, this.selectedObject.domain, {"uid": this.selectedObject.uid}).subscribe(
