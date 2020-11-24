@@ -1,5 +1,5 @@
 <rb-dataset 
-	#<%=id%>="dataset" <% 
+	#<%=id%> <% 
 if(config.inlineStyle != null) {%>
 	style="<%=config.inlineStyle%>"<%
 }
