@@ -125,8 +125,14 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				else if(category.equals("view"))
 				{
 					logger.finer("Get view " + name);
-					response.setData(getView(session, name, version).toString());
+					response.setData(getHTMLView(session, name, version).toString());
 					response.metadata.put("mime", "text/html");
+				}
+				else if(category.equals("viewcc"))
+				{
+					logger.finer("Get viewcc " + name);
+					response.setData(getClientConfigView(session, name, version).toString());
+					response.metadata.put("mime", "application/json");
 				}
 			}
 			return response;
@@ -161,8 +167,10 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	
 	protected abstract HTML getMenu(Session session, String version) throws RedbackException;
 	
-	protected abstract HTML getView(Session session, String viewName, String version);
-	
+	protected abstract HTML getHTMLView(Session session, String viewName, String version);
+
+	protected abstract DataMap getClientConfigView(Session session, String viewName, String version);
+
 	protected abstract byte[] getResource(Session session, String name, String version) throws RedbackException;
 
 	protected String getResourceMimeType(String name)
