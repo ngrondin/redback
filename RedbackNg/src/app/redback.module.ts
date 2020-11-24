@@ -76,6 +76,13 @@ import { RbTableComponent } from './rb-table/rb-table.component';
 import { ReportService } from './report.service';
 import { RbReportlistComponent } from './rb-reportlist/rb-reportlist.component';
 import { RbActiongroupComponent } from './rb-actiongroup/rb-actiongroup.component';
+import { RbDatasetComponent } from './rb-dataset/rb-dataset.component';
+import { RbContainerComponent } from './rb-container/rb-container.component';
+import { RbLayoutComponent } from './rb-layout/rb-layout.component';
+import { RbHsectionComponent } from './rb-hsection/rb-hsection.component';
+import { RbVsectionComponent } from './rb-vsection/rb-vsection.component';
+import { RbTabComponent } from './rb-tab/rb-tab.component';
+import { RbTabSectionComponent } from './rb-tab-section/rb-tab-section.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -118,9 +125,14 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
   ],
   declarations: [
     DesktopRootComponent,
+    RbContainerComponent,
     RbViewLoaderComponent,
     RbViewDirective,
+    RbLayoutComponent,
+    RbHsectionComponent,
+    RbVsectionComponent,
     RbDatasetDirective,
+    RbDatasetComponent,
     RbDatasetGroupDirective,
     RbListScrollDirective,
     RbListComponent,
@@ -136,6 +148,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbMapComponent,
     RbMenuDirective,
     RbTabDirective,
+    RbTabComponent,
+    RbTabSectionComponent,
     RbTabSectionDirective,
     RbFilterBuilderComponent,
     RbProcessactionsComponent,
@@ -177,9 +191,14 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     MatProgressSpinnerModule,
     MatMenuModule,
     MatTooltipModule,
+    RbContainerComponent,
+    RbLayoutComponent,
+    RbHsectionComponent,
+    RbVsectionComponent,
     RbViewLoaderComponent,
     RbViewDirective,
     RbDatasetDirective,
+    RbDatasetComponent,
     RbDatasetGroupDirective,
     RbListScrollDirective,
     RbListComponent,
@@ -194,6 +213,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbSearchComponent,
     RbMapComponent,
     RbMenuDirective,
+    RbTabComponent,
+    RbTabSectionComponent,
     RbTabDirective,
     RbTabSectionDirective,
     RbFilterBuilderComponent,

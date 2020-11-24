@@ -1,18 +1,19 @@
-import { Directive, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { ObjectResp, RbObject } from '../datamodel';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { RbObject } from '../datamodel';
 import { DataService } from '../data.service';
 import { MapService } from 'app/map.service';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ApiService } from 'app/api.service';
 import { ReportService } from 'app/report.service';
 import { ToastrService } from 'ngx-toastr';
+import { RbContainerComponent } from 'app/rb-container/rb-container.component';
 
-@Directive({
-  selector: 'rb-dataset-old',
-  exportAs: 'datasetold'
+@Component({
+  selector: 'rb-dataset',
+  templateUrl: './rb-dataset.component.html',
+  styleUrls: ['./rb-dataset.component.css']
 })
-export class RbDatasetDirective implements OnChanges {
-
+export class RbDatasetComponent extends RbContainerComponent implements OnInit {
   @Input('active') active: boolean;
   @Input('object') objectname: string;
   @Input('relatedObject') relatedObject: RbObject;
@@ -53,7 +54,9 @@ export class RbDatasetDirective implements OnChanges {
     private mapService: MapService,
     private reportService: ReportService,
     private toastr: ToastrService
-  ) {   }
+  ) {
+    super();
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     let doRefresh: boolean = false;
@@ -267,7 +270,5 @@ export class RbDatasetDirective implements OnChanges {
     }
     this.selectedObject = null;
   }
-
-
 
 }
