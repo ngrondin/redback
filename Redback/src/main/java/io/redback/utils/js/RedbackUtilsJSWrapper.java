@@ -26,7 +26,8 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 			"urlencode", 
 			"urldecode",
 			"getTimezoneOffset",
-			"levenshtein"
+			"levenshtein",
+			"base64MimeMessage"
 		};
 	
 	public RedbackUtilsJSWrapper() {
@@ -92,6 +93,20 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 					return StringUtils.levenshtein(s1, s2);
 				}
 			};
+		} else if(key.equals("base64MimeMessage")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					try {
+						String to = arguments[0].asString();
+						String from = arguments[1].asString();
+						String subject = arguments[2].asString();
+						String body = arguments[3].asString();
+						return StringUtils.base64MimeMessage(to, from, subject, body);
+					} catch(Exception e) {
+						throw new RuntimeException("Error creating Base64 Mime Message", e);
+					}
+				}
+			};			
 		} else {	
 			return null;
 		}

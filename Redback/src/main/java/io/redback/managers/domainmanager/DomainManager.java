@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -19,12 +18,14 @@ import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.GatewayClient;
+import io.redback.client.IntegrationClient;
 import io.redback.client.NotificationClient;
 import io.redback.client.ObjectClient;
 import io.redback.client.ProcessClient;
 import io.redback.client.ReportClient;
 import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.GatewayClientJSWrapper;
+import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.client.js.ProcessClientJSWrapper;
@@ -50,7 +51,8 @@ public class DomainManager implements Consumer {
 	protected String fileServiceName;
 	protected String notificationServiceName;
 	protected String reportServiceName;
-	protected String gatewayClientName;
+	protected String gatewayServiceName;
+	protected String integrationServiceName;
 	protected ConfigurationClient configClient;
 	protected ObjectClient objectClient;
 	protected ProcessClient processClient;
@@ -59,6 +61,7 @@ public class DomainManager implements Consumer {
 	protected NotificationClient notificationClient;
 	protected ReportClient reportClient;
 	protected GatewayClient gatewayClient;
+	protected IntegrationClient integrationClient;
 	protected CollectionConfig entryCollection;
 	protected CollectionConfig logCollection;
 	protected Map<String, DomainEntry> entries;
@@ -74,7 +77,8 @@ public class DomainManager implements Consumer {
 		fileServiceName = config.getString("fileservice");
 		notificationServiceName = config.getString("notificationservice");
 		reportServiceName = config.getString("reportservice");
-		gatewayClientName = config.getString("gatewayservice");
+		gatewayServiceName = config.getString("gatewayservice");
+		integrationServiceName = config.getString("integrationservice");
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		objectClient = new ObjectClient(firebus, objectServiceName);
 		processClient = new ProcessClient(firebus, processServiceName);
@@ -82,7 +86,8 @@ public class DomainManager implements Consumer {
 		fileClient = new FileClient(firebus, fileServiceName);
 		notificationClient = new NotificationClient(firebus, notificationServiceName);
 		reportClient = new ReportClient(firebus, reportServiceName);
-		gatewayClient = new GatewayClient(firebus, gatewayClientName);
+		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
+		integrationClient = new IntegrationClient(firebus, integrationServiceName);
 		entryCollection = new CollectionConfig(config.getObject("entrycollection"), "rbdm_entry");
 		logCollection = new CollectionConfig(config.getObject("logcollection"), "rbdm_log");
 		entries = new HashMap<String, DomainEntry>();	
@@ -341,6 +346,7 @@ public class DomainManager implements Consumer {
 		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
 		context.put("rc", new ReportClientJSWrapper(reportClient, session, df.getDomain()));
 		context.put("gc", new GatewayClientJSWrapper(gatewayClient));
+		context.put("ic", new IntegrationClientJSWrapper(integrationClient, session, df.getDomain()));
 		context.put("param", JSConverter.toJS(param));
 		context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
 		context.put("domain", df.getDomain());
