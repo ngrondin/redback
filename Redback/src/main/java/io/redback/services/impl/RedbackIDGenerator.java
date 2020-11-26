@@ -1,5 +1,7 @@
 package io.redback.services.impl;
 
+import java.util.UUID;
+
 import io.firebus.Firebus;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -69,6 +71,8 @@ public class RedbackIDGenerator extends IDGenerator
 						next++;
 						idConfig.put("next", next);
 					}
+				} else if(idConfig.getString("type").equals("uuid")) {
+					id = UUID.randomUUID().toString();
 				}
 				return id;
 			}
