@@ -81,7 +81,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 				}
 			};
 		}
-		else if(name.equals("interrupt"))
+		else if(name.equals("interruptProcess"))
 		{
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {

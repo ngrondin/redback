@@ -30,7 +30,9 @@ public abstract class ConfigServer extends ServiceProvider
 			
 			if(action.equals("get"))
 			{
-				response.setData(getConfig(service, category, name).toString());
+				DataMap config = getConfig(service, category, name);
+				if(config != null)
+					response.setData(config.toString());
 			} 
 			else if(action.equals("list"))
 			{

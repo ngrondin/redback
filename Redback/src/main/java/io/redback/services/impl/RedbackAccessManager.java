@@ -182,8 +182,11 @@ public class RedbackAccessManager extends AccessManager
 		{
 			try
 			{
-				role =  new Role(configClient.getConfig(session, "rbam", "role", name));
-				roles.put(name, role);
+				DataMap config = configClient.getConfig(session, "rbam", "role", name);
+				if(config != null) {
+					role =  new Role(config);
+					roles.put(name, role);
+				}
 			}
 			catch(Exception e)
 			{
@@ -193,12 +196,6 @@ public class RedbackAccessManager extends AccessManager
 		return role;		
 	}
 
-/*	
-	protected void extendSession(Session session)
-	{
-
-	}
-*/	
 	protected void mergeRights(DataMap to, DataMap from)
 	{
 		DataMap fromRb = from.getObject("rb");

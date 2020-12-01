@@ -62,13 +62,14 @@ export class RbGraphComponent implements OnInit {
       let thisCat: String = this.categories != null ? agg.getDimension(this.categories.dimension) : null;
       if(cat == null || cat == thisCat) {
         let name: any = this.nullToEmptyString(agg.getDimension(this.series.labelattribute));
-        let value = agg.getMetric(this.value.name);
-        if(!isNaN(Date.parse(name))) {
-          name = new Date(Date.parse(name.toString()));
+        if(typeof name == 'string' && name.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})[+-](\d{2})\:(\d{2})/)) {
+          name = new Date(Date.parse(name));
         }
+        let value = agg.getMetric(this.value.name);
         series.push({name: name, label: 'll', value: value});
       }
     }
+    //series.sort((a, b) => a > b ? 1 : -1);
     return series;
   }
 
@@ -127,7 +128,7 @@ export class RbGraphComponent implements OnInit {
     this.aggregates.forEach(agg => {
       if(name == (agg.getDimension(this.series.labelattribute) || "")) {
         let dimensionValue = agg.getDimension(this.series.dimension);
-        filter[this.series.dimension] = dimensionValue != null ? "'" + dimensionValue + "'" : null;
+        filter[this.series.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
       }
     });
     const cat = event.series;
@@ -135,7 +136,7 @@ export class RbGraphComponent implements OnInit {
       this.aggregates.forEach(agg => {
         if(cat == (agg.getDimension(this.categories.labelattribute) || "")) {
           let dimensionValue = agg.getDimension(this.categories.dimension);
-          filter[this.categories.dimension] = dimensionValue != null ? "'" + dimensionValue + "'" : null;
+          filter[this.categories.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
         }
       });
     }

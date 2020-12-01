@@ -110,9 +110,12 @@ public class RedbackIntegrationServer extends IntegrationServer {
 				form.put("redirect_uri", config.redirectUri);
 				DataMap refreshResp = gatewayClient.postForm(config.refreshUrl, form);
 				if(refreshResp != null) {
-					tokens.put("refresh_token", refreshResp.getString("refresh_token"));
-					tokens.put("access_token", refreshResp.getString("access_token"));
-					tokens.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
+					if(refreshResp.getString("refresh_token") != null)
+						tokens.put("refresh_token", refreshResp.getString("refresh_token"));
+					if(refreshResp.getString("access_token") != null)
+						tokens.put("access_token", refreshResp.getString("access_token"));
+					if(refreshResp.getNumber("expires_in") != null)
+						tokens.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
 					DataMap key = new DataMap();
 					key.put("client", config.name);
 					key.put("domain", domain);
@@ -161,13 +164,15 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	}
 
 	protected List<DataMap> list(Session session, String client, String domain, String objectName, DataMap filter, DataMap options, int page, int pageSize) throws RedbackException {
+		List<DataMap> respList = new ArrayList<DataMap>();
 		ClientConfig config = getClientConfig(session, client);
 		Map<String, Object> context = createScriptContext(session, config, domain, "list", objectName, null, filter, null, options);
 		DataMap resp = gatewayRequest(config, context);
 		DataList list = resp.getList("list");
-		List<DataMap> respList = new ArrayList<DataMap>();
-		for(int i = 0; i < list.size(); i++) {
-			respList.add(list.getObject(i));
+		if(list != null) {
+			for(int i = 0; i < list.size(); i++) {
+				respList.add(list.getObject(i));
+			}
 		}
 		return respList;
 	}
@@ -186,7 +191,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 
 	protected void delete(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException {
 		ClientConfig config = getClientConfig(session, client);
-		Map<String, Object> context = createScriptContext(session, config, domain, "delete", objectName, null, null, null, options);
+		Map<String, Object> context = createScriptContext(session, config, domain, "delete", objectName, uid, null, null, options);
 		gatewayRequest(config, context);
 	}
 

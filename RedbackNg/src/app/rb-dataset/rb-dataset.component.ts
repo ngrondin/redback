@@ -228,7 +228,9 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
       const allFilter = this.mergeFilters();
       const selectedFilter = this.selectedObject != null ? {"uid": this.selectedObject.uid} : null;
       this.reportService.popupReportList(param, selectedFilter, allFilter);
-    } else if(_name == 'executeall') {
+    } else if(_name == 'execute') {
+      this.dataService.executeObject(this.selectedObject, param, null);
+   } else if(_name == 'executeall') {
       let delay: number = 0;
       this._list.forEach((object) => {
         setTimeout(() => {

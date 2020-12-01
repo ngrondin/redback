@@ -11,6 +11,7 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
 import io.redback.security.Session;
 
@@ -40,6 +41,7 @@ public class FirebusJSWrapper implements ProxyObject
 						{
 							Payload request = new Payload(requestObject.toString());
 							request.metadata.put("token", session.getToken());
+							request.metadata.put("session", session.getId());
 							if(metaData != null) 
 							{
 								Iterator<String> it = metaData.keySet().iterator();
@@ -51,8 +53,12 @@ public class FirebusJSWrapper implements ProxyObject
 							logger.finest("Requesting firebus service : " + serviceName + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
 							Payload response = firebus.requestService(serviceName, request);
 							logger.finest("Receiving firebus service respnse");
-							DataMap responseObject = new DataMap(response.getString());
-							return JSConverter.toJS(responseObject);
+							try {
+								DataMap responseObject = new DataMap(response.getString());
+								return JSConverter.toJS(responseObject);
+							} catch(DataException e ) {
+								return response.getString();
+							}
 						}
 						catch(Exception e)
 						{

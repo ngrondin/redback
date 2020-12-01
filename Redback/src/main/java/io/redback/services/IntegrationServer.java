@@ -82,6 +82,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 					{
 						String uid = request.getString("uid");
 						delete(session, client, domain, objectName, uid, options);
+						response = new DataMap("result", "ok");
 					}					
 					else
 					{

@@ -225,6 +225,8 @@ export class RbDatasetDirective implements OnChanges {
       const allFilter = this.mergeFilters();
       const selectedFilter = this.selectedObject != null ? {"uid": this.selectedObject.uid} : null;
       this.reportService.popupReportList(param, selectedFilter, allFilter);
+    } else if(_name == 'execute') {
+      this.dataService.executeObject(this.selectedObject, param, null);
     } else if(_name == 'executeall') {
       let delay: number = 0;
       this._list.forEach((object) => {

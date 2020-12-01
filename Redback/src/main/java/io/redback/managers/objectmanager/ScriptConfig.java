@@ -41,9 +41,10 @@ public class ScriptConfig
 	{
 		return source;
 	}
+
 	
 	public void execute(Map<String, Object> context) throws RedbackException
 	{
-		function.execute(context);
+		function.execute(context);	
 	}	
 }

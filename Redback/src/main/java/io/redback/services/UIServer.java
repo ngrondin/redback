@@ -199,7 +199,14 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	{
 		HTML html = new HTML();
 		html.append("<div>" + msg + "<br/>");
-		html.append(e.getMessage());
+		if(e != null) {
+			String emsg = e.getMessage();
+			StackTraceElement[] elems = e.getStackTrace();
+			if(elems.length > 0) {
+				emsg += " (" + elems[0].getFileName() + "  " + elems[0].getLineNumber() + ")";
+			}
+			html.append(emsg);
+		}
 		Throwable t = e;
 		while((t = t.getCause()) != null)
 			html.append("<br/>" + t.getMessage());
