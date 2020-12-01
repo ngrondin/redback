@@ -11,6 +11,7 @@ import javax.script.ScriptException;
 
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.js.DomainClientJSWrapper;
@@ -251,7 +252,7 @@ public class RedbackObject extends RedbackElement
 						}
 						else
 						{
-							ArrayList<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0, 1);
+							List<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0, 1);
 							if(resultList.size() > 0)
 								related.put(name, resultList.get(0));
 						}
@@ -267,14 +268,14 @@ public class RedbackObject extends RedbackElement
 		 return null;
 	}
 	
-	public ArrayList<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText) throws RedbackException
+	public List<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText) throws RedbackException
 	{
 		return getRelatedList(attributeName, additionalFilter, searchText, 0, 50);
 	}
 	
-	public ArrayList<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, int page, int pageSize) throws RedbackException
+	public List<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, int page, int pageSize) throws RedbackException
 	{
-		ArrayList<RedbackObject> relatedObjectList = null;
+		List<RedbackObject> relatedObjectList = null;
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
 		if(roc != null)
 		{
@@ -328,7 +329,7 @@ public class RedbackObject extends RedbackElement
 			if(value.getObject() instanceof DataMap && attributeConfig.getRelatedObjectConfig() != null) 
 			{
 				DataMap filter = (DataMap)value.getObject();
-				ArrayList<RedbackObject> list = objectManager.listRelatedObjects(session, getObjectConfig().getName(), uid.getString(), name, filter, null, false);
+				List<RedbackObject> list = objectManager.listRelatedObjects(session, getObjectConfig().getName(), uid.getString(), name, filter, null, false);
 				if(list.size() > 0) 
 					actualValue = new Value(list.get(0).get(getObjectConfig().getAttributeConfig(name).getRelatedObjectConfig().getLinkAttributeName()).getString());
 				else
@@ -573,21 +574,18 @@ public class RedbackObject extends RedbackElement
 		return retVal;
 	}
 	
-	/*
-	protected void error(String msg) throws RedbackException
-	{
-		error(msg, null);
+	public boolean filterApplies(DataMap objectFilter) {
+		DataMap dataView = new DataMap();
+		Iterator<String> it = data.keySet().iterator();
+		while(it.hasNext()) {
+			String key = it.next();
+			dataView.put(key, data.get(key).getObject());
+		}
+		dataView.put("uid", uid.getObject());
+		dataView.put("domain", domain.getObject());
+		DataFilter filter = new DataFilter(objectFilter);
+		return filter.apply(dataView);		
 	}
-	
-	protected void error(String msg, Exception cause) throws RedbackException
-	{
-		logger.severe(msg);
-		if(cause != null)
-			throw new RedbackException(msg, cause);
-		else
-			throw new RedbackException(msg);
-	}
-*/
 	
 	public String toString()
 	{

@@ -7,6 +7,7 @@ import io.firebus.information.StreamInformation;
 import io.firebus.interfaces.Consumer;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.utils.StringUtils;
 
 
 public abstract class SignalServer extends AuthenticatedStreamProvider implements Consumer {
@@ -26,7 +27,7 @@ public abstract class SignalServer extends AuthenticatedStreamProvider implement
 		try {
 			onSignal(new DataMap(payload.getString()));
 		} catch(Exception e) {
-			logger.severe(e.getMessage());
+			logger.severe(StringUtils.getStackTrace(e));
 		}
 	}
 

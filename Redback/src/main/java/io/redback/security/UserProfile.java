@@ -103,7 +103,7 @@ public class UserProfile
 				return ((DataLiteral)opCfg).getBoolean();
 			} else if(opCfg instanceof DataMap) {
 				if(context != null) {
-					DataFilter filter = new DataFilter((DataMap)cfg);
+					DataFilter filter = new DataFilter((DataMap)cfg); //This is not correct at the DataMap will be an ExpressionMap
 					return filter.apply(context);
 				} else {
 					return true;
