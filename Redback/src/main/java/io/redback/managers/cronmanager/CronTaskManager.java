@@ -141,7 +141,7 @@ public class CronTaskManager extends Thread {
 									logger.severe("Error executing cron task : " + e.getMessage());
 								}
 								if(ctc.getPeriod() > 0) {
-									ctc.setNextRun(ctc.getNextRun() + ctc.getPeriod());
+									ctc.setNextRun(current + ctc.getPeriod());
 									unlockTask(ctc);
 								} else {
 									deleteTask(ctc);

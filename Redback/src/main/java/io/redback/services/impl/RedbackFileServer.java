@@ -59,7 +59,8 @@ public class RedbackFileServer extends FileServer
 			fileServices.add(list.getString(i));
 		defaultFileService = config.getString("defaultadapter");
 		fileCollection = new CollectionConfig(c.getObject("filecollection"));
-		linkCollection = new CollectionConfig(c.getObject("linkcollection"));
+		if(c.containsKey("linkcollection"))
+			linkCollection = new CollectionConfig(c.getObject("linkcollection"));
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
 		try {
 			messageDigest = MessageDigest.getInstance("SHA-1");
@@ -123,21 +124,29 @@ public class RedbackFileServer extends FileServer
 	
 	public List<RedbackFile> listFilesFor(String object, String uid) throws RedbackException
 	{
-		DataMap filter1 = new DataMap();
-		filter1.put(linkCollection.getField("object"), object);
-		filter1.put(linkCollection.getField("objectuid"), uid);
-		DataMap resp1 = dataClient.getData(linkCollection.getName(), filter1, null);
-		DataList filter2List = new DataList();
-		for(int i = 0; i < resp1.getList("result").size(); i++) {
-			DataMap resp1Item = linkCollection.convertObjectToCanonical(resp1.getList("result").getObject(i));
-			filter2List.add(resp1Item.getString("fileuid"));
+		DataMap fileFilter = null;
+		if(linkCollection != null) {
+			DataMap linkFilter = new DataMap();
+			linkFilter.put(linkCollection.getField("object"), object);
+			linkFilter.put(linkCollection.getField("objectuid"), uid);
+			DataMap linksData = dataClient.getData(linkCollection.getName(), linkFilter, null);
+			DataList fileFilterList = new DataList();
+			for(int i = 0; i < linksData.getList("result").size(); i++) {
+				DataMap linkData = linksData.getList("result").getObject(i);
+				DataMap linkCanonicalData = linkCollection.convertObjectToCanonical(linkData);
+				fileFilterList.add(linkCanonicalData.getString("fileuid"));
+			}
+			fileFilter = new DataMap(fileCollection.getField("fileuid"), new DataMap("$in", fileFilterList));
+		} else {
+			fileFilter = new DataMap();
+			fileFilter.put(fileCollection.getField("object"), object);
+			fileFilter.put(fileCollection.getField("objectuid"), uid);
 		}
-		DataMap filter2 = new DataMap(fileCollection.getField("fileuid"), new DataMap("$in", filter2List));
-		DataMap resp2 = dataClient.getData(fileCollection.getName(), filter2, null);
+		DataMap filesData = dataClient.getData(fileCollection.getName(), fileFilter, null);
 		List<RedbackFile> list = new ArrayList<RedbackFile>();
-		for(int i = 0; i < resp2.getList("result").size(); i++) 
+		for(int i = 0; i < filesData.getList("result").size(); i++) 
 		{
-			DataMap fileInfo = fileCollection.convertObjectToCanonical(resp2.getList("result").getObject(i));
+			DataMap fileInfo = fileCollection.convertObjectToCanonical(filesData.getList("result").getObject(i));
 			String fileUid = fileInfo.getString("fileuid");
 			String fileName = fileInfo.getString("filename");
 			String mime = fileInfo.getString("mime");
@@ -159,8 +168,15 @@ public class RedbackFileServer extends FileServer
 		        formatter.format("%02x", b);
 		    String hashStr = formatter.toString();
 		    formatter.close();
-		    DataMap resp = dataClient.getData(fileCollection.getName(), new DataMap(fileCollection.getField("hash"), hashStr), null);
-		    if(resp.getList("result").size() == 0) 
+		    
+			DataMap existingFileData = null;
+			if(linkCollection != null) { // This is because with the link collection, files can be reused. Without it, files have to be re-created every time
+			    DataMap resp = dataClient.getData(fileCollection.getName(), new DataMap(fileCollection.getField("hash"), hashStr), null);
+			    if(resp.getList("result").size() > 0) 
+			    	existingFileData = resp.getList("result").getObject(0);
+			}
+			
+		    if(existingFileData == null) 
 		    {
 				String fileUid = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
 				Date date = new Date();
@@ -187,7 +203,7 @@ public class RedbackFileServer extends FileServer
 		    }
 		    else
 		    {
-				DataMap fileInfo = fileCollection.convertObjectToCanonical(resp.getList("result").getObject(0));
+				DataMap fileInfo = fileCollection.convertObjectToCanonical(existingFileData);
 				String fileUid = fileInfo.getString("fileuid");
 				String thumbnail = fileInfo.getString("thumbnail");
 				Date date = fileInfo.getDate("date");
@@ -201,12 +217,21 @@ public class RedbackFileServer extends FileServer
 
 	public void linkFileTo(String fileUid, String object, String uid) throws RedbackException {
 		try {
-			DataMap data = new DataMap();
-			String linkId = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
-			data.put(linkCollection.getField("fileuid"), fileUid);
-			data.put(linkCollection.getField("object"), object);
-			data.put(linkCollection.getField("objectuid"), uid);
-			dataClient.putData(linkCollection.getName(), new DataMap(linkCollection.getField("linkid"), linkId), data);
+			if(linkCollection != null) {
+				String linkId = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
+				DataMap key = new DataMap(linkCollection.getField("linkid"), linkId);
+				DataMap data = new DataMap();
+				data.put(linkCollection.getField("fileuid"), fileUid);
+				data.put(linkCollection.getField("object"), object);
+				data.put(linkCollection.getField("objectuid"), uid);
+				dataClient.putData(linkCollection.getName(), key, data);
+			} else {
+				DataMap key = new DataMap(fileCollection.getField("fileuid"), fileUid);
+				DataMap data = new DataMap();
+				data.put(fileCollection.getField("object"), object);
+				data.put(fileCollection.getField("objectuid"), uid);
+				dataClient.putData(fileCollection.getName(), key, data);
+			}
 		} catch(Exception e) {
 			throw new RedbackException("Error linking file");
 		}
@@ -221,126 +246,7 @@ public class RedbackFileServer extends FileServer
 			type = "image/png";
 		return type;
 	}
-	/*
-	public String getBase64ThumbnailOfImage(byte[] bytes) throws RedbackException 
-	{
-		String b64img = null;
-		try
-		{
-			BufferedImage orig = ImageIO.read(new ByteArrayInputStream(bytes));
-			return getBase64Thumbnail(orig);
-		}
-		catch(Exception e) 
-		{
-		}
-		return b64img;
-	}
-	
-	public String getBase64ThumbnailOfPDF(byte[] bytes) throws RedbackException
-	{
-		try {
-			PDDocument doc = PDDocument.load(new ByteArrayInputStream(bytes));
-		    PDFRenderer renderer = new PDFRenderer(doc);
-		    BufferedImage img = renderer.renderImage(0, 0.1f);
-		    return getBase64Thumbnail(img);
-		} catch(Exception e) {
-			throw new RedbackException("Error reading PDF", e);
-		}
-	}
-	
-	public String getBase64Thumbnail(BufferedImage orig) throws RedbackException
-	{
-		try
-		{
-			int newHeight = 80;
-			double scale = (double)orig.getHeight() / (double)newHeight;
-			int newWidth = (int)((double)orig.getWidth() / scale);
-			BufferedImage img = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-			Graphics2D gc = img.createGraphics();
-			gc.setColor(Color.WHITE);
-			gc.fillRect(0, 0, newWidth, newHeight);
-			gc.drawImage(orig.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH),0,0,null);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ImageIO.write(img, "png", baos);
-			return ("data:image/png;base64, " + (new String(Base64.getEncoder().encode(baos.toByteArray()), "UTF-8")));
-		}
-		catch(Exception e) 
-		{
-			throw new RedbackException("Error creating thumbnail", e);
-		}
-	}*/
-	
-	/*
-	public byte[] straightenImage(String mime, byte[] orig) throws RedbackException
-	{
-		try
-		{
-			if(mime.equals("image/jpeg")) {
-				Metadata metadata = ImageMetadataReader.readMetadata(new ByteArrayInputStream(orig));
-			    Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-			    JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
-			    int orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-			    int width = jpegDirectory.getImageWidth();
-			    int height = jpegDirectory.getImageHeight();
-			    if(orientation > 1) {
-				    AffineTransform t = new AffineTransform();
-				    switch (orientation) {
-					    case 1:
-					        break;
-					    case 2: // Flip X
-					        t.scale(-1.0, 1.0);
-					        t.translate(-width, 0);
-					        break;
-					    case 3: // PI rotation 
-					        t.translate(width, height);
-					        t.rotate(Math.PI);
-					        break;
-					    case 4: // Flip Y
-					        t.scale(1.0, -1.0);
-					        t.translate(0, -height);
-					        break;
-					    case 5: // - PI/2 and Flip X
-					        t.rotate(-Math.PI / 2);
-					        t.scale(-1.0, 1.0);
-					        break;
-					    case 6: // -PI/2 and -width
-					        t.translate(height, 0);
-					        t.rotate(Math.PI / 2);
-					        break;
-					    case 7: // PI/2 and Flip
-					        t.scale(-1.0, 1.0);
-					        t.translate(-height, 0);
-					        t.translate(0, width);
-					        t.rotate(  3 * Math.PI / 2);
-					        break;
-					    case 8: // PI / 2
-					        t.translate(0, width);
-					        t.rotate(  3 * Math.PI / 2);
-					        break;
-				    }
-				    AffineTransformOp op = new AffineTransformOp(t, AffineTransformOp.TYPE_BICUBIC);
-				    BufferedImage origImg = ImageIO.read(new ByteArrayInputStream(orig));
-				    BufferedImage destImage = op.createCompatibleDestImage(origImg, (origImg.getType() == BufferedImage.TYPE_BYTE_GRAY) ? origImg.getColorModel() : null );
-				    Graphics2D g = destImage.createGraphics();
-				    g.setBackground(Color.WHITE);
-				    g.clearRect(0, 0, destImage.getWidth(), destImage.getHeight());
-				    destImage = op.filter(origImg, destImage);
-				    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					ImageIO.write(destImage, "jpeg", baos);
-				    return baos.toByteArray();				    	
-			    } else {
-			    	return orig;
-			    }		    
-			} else {
-				return orig;
-			}			
-		}
-		catch(Exception e) 
-		{
-			return orig;
-		}
-	}
-	*/
+
 
 	public void clearCaches() 
 	{
