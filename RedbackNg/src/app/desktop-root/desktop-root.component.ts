@@ -63,7 +63,8 @@ export class DesktopRootComponent implements OnInit {
   constructor(
     private configService : ConfigService,
     public dragService: DragService,
-    private domSanitizer: DomSanitizer
+    private domSanitizer: DomSanitizer,
+    private cookieService: CookieService
   ) { }
 
   ngOnInit() {
@@ -139,7 +140,8 @@ export class DesktopRootComponent implements OnInit {
   }
 
   logout() {
-
+    this.cookieService.deleteAll('/');
+    window.location.href = "/";
   }
 
   @HostListener('mouseup', ['$event']) onMouseUp($event) {
