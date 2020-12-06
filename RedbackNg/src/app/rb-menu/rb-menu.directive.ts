@@ -1,7 +1,7 @@
 import { Directive, Input } from '@angular/core';
 
 @Directive({
-  selector: 'rb-menu',
+  selector: 'rb-menu-old',
   exportAs: 'menu',
 })
 export class RbMenuDirective {

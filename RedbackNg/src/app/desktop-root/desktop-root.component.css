@@ -14,26 +14,6 @@
     flex-grow: 1;
 }
 
-.rb-menu-nav {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.rb-menu-container {
-    display: flex;
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex: 1 1 auto;
-}
-
-.rb-menu {
-    display: block;
-}
-
-.rb-menu-control {
-    display: flex;
-}
 
 .rb-drag-box {
     display: block;

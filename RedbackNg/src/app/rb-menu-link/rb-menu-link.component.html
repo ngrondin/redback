@@ -1,0 +1,58 @@
+<button
+	mat-list-item 
+	class="rb-menu-link-button" 	
+    (click)="click()"
+    (contextmenu)="rightclick($event)">
+    <mat-icon 
+        *ngIf="config.icon.indexOf(':') >= 0"
+        [svgIcon]="config.icon"
+        class="rb-menu-link-icon">
+    </mat-icon>
+    <mat-icon
+        *ngIf="config.icon.indexOf(':') == -1"
+        class="rb-menu-link-icon">
+        {{config.icon}}
+    </mat-icon>
+	<span 
+		flex
+		class="rb-menu-link-text"
+		*ngIf="mode == 'large'">
+        {{config.label}}
+	</span>
+</button> 
+<div
+    class="rb-menu-link-popup-back"
+    [style.visibility]="cmShow ? 'visible' : 'hidden'"
+    (click)="closePopup()">
+    <div
+        class="rb-menu-link-popup-container"
+        [style.top.px]="cmTop"
+        [style.left.px]="cmLeft">
+        <mat-action-list>
+            <button
+                mat-list-item
+                *ngIf="!isInPersonalMenu()"
+                (click)="addToPersonalMenu()">
+                Add to Personal Menu
+            </button>
+            <button
+                mat-list-item
+                *ngIf="isInPersonalMenu()"
+                (click)="removeFromPersonalMenu()">
+                Remove from Personal Menu
+            </button>
+            <button
+                mat-list-item
+                *ngIf="!isInGroupMenu()"
+                (click)="addToGroupMenu()">
+                Add to Group Menu
+            </button>
+            <button
+                mat-list-item
+                *ngIf="isInGroupMenu()"
+                (click)="removeFromGroupMenu()">
+                Remove from Group Menu
+            </button>                        
+        </mat-action-list>
+    </div>
+</div>

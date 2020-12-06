@@ -14,7 +14,6 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.Firebus;
-import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -106,7 +105,7 @@ public class RedbackUIServer extends UIServer
 	}
 	
 	
-	protected HTML getMenu(Session session, String version) throws RedbackException
+	protected DataMap getMenu(Session session, String version) throws RedbackException
 	{
 		try {
 			DataMap menu = new DataMap("{type:menu, content:[]}");
@@ -145,12 +144,15 @@ public class RedbackUIServer extends UIServer
 				}
 			}
 			menu.getList("content").sort("order");
+			return menu;
+			/*
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("session", new SessionJSWrapper(session));
 			context.put("utils", new RedbackUtilsJSWrapper());
 			context.put("parents", JSConverter.toJS(new DataMap()));
 			context.put("nextid", 1000);
 			return generateHTMLFromComponentConfig(session, menu, version, context);
+			*/
 		} catch(Exception e) {
 			throw new RedbackException("Error getting menu", e);
 		}
@@ -223,12 +225,12 @@ public class RedbackUIServer extends UIServer
 		return viewHTML;
 	}
 
-	protected DataMap getClientConfigView(Session session, String viewName, String version)
+	protected DataMap getViewConfig(Session session, String viewName, String version)
 	{
-		return getClientConfigView(session, viewName, version, null);
+		return getViewConfig(session, viewName, version, null);
 	}
 
-	protected DataMap getClientConfigView(Session session, String viewName, String version, Map<String, Object> context) 
+	protected DataMap getViewConfig(Session session, String viewName, String version, Map<String, Object> context) 
 	{
 		DataMap clientConfig = new DataMap();
 		if(session != null)

@@ -31,6 +31,7 @@ var versionOrDefault = version != null ? version : 'default';
     domainservice="<%=deployment.domainservicepath%>"
     reportservice="<%=deployment.reportservicepath%>"
     processservice="<%=deployment.processservicepath%>"
+    userpreferenceservice="<%=deployment.userpreferenceservicepath%>"
     signalservice="<%=deployment.signalservicepath%>"
     chatservice="<%=deployment.chatservicepath%>">
   </app-root>

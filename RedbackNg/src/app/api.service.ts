@@ -24,6 +24,7 @@ export class ApiService {
   public domainService: string;
   public reportService: string;
   public processService: string;
+  public userprefService: string;
   public signalService: string;
   public signalWebsocket: WebSocketSubject<any>;
   public signalObservers: Observer<String>[] = [];
@@ -212,6 +213,28 @@ export class ApiService {
   
   listReports(category: string): Observable<any> {
     return this.http.get<any>(this.baseUrl + '/' + this.reportService + '?action=list&category=' + category, httpOptions);
+  }
+
+
+  /******* User Preference Service *********/
+
+  getUserPreference(type: string, name: string): Observable<any> {
+    const req = {
+      action: 'get',
+      type: type,
+      name: name
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.userprefService, req, httpOptions);
+  }
+
+  putUserPreference(type: string, name: string, value: any): Observable<any> {
+    const req = {
+      action: 'put',
+      type: type,
+      name: name,
+      value: value
+    };
+    return this.http.post<any>(this.baseUrl + '/' + this.userprefService, req, httpOptions);
   }
 
   /******* Signals *********/

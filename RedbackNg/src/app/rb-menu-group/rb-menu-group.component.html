@@ -1,0 +1,52 @@
+<mat-divider></mat-divider> 
+<button
+	mat-list-item 
+	class="rb-menu-group-button" 	
+    (click)="click()">
+    <mat-icon 
+        *ngIf="config.icon.indexOf(':') >= 0"
+        [svgIcon]="config.icon"
+        class="rb-menu-group-icon">
+    </mat-icon>
+    <mat-icon
+        *ngIf="config.icon.indexOf(':') == -1"
+        class="rb-menu-group-icon">
+        {{config.icon}}
+    </mat-icon>
+	<span 
+		flex
+		class="rb-menu-group-text"
+		*ngIf="mode == 'large'">
+        {{config.label}}
+    </span>
+    <mat-icon 
+        *ngIf="mode == 'large' && !isOpen"
+        class="rb-menu-group-icon">
+        keyboard_arrow_down
+    </mat-icon>
+    <mat-icon 
+        *ngIf="mode == 'large' && isOpen"
+        class="rb-menu-group-icon">
+        keyboard_arrow_up
+    </mat-icon>
+</button> 
+<div
+    *ngIf="isOpen">
+    <mat-divider></mat-divider> 
+    <div
+        class="rb-menu-item"
+        *ngFor="let item of content">
+        <rb-menu-group
+            *ngIf="item.type == 'menugroup'"
+            [config]="item"
+            [mode]="mode"
+            (navigate)="navigateTo($event)">
+        </rb-menu-group>
+        <rb-menu-link
+            *ngIf="item.type == 'menulink'"
+            [config]="item"
+            [mode]="mode"
+            (navigate)="navigateTo($event)">
+        </rb-menu-link>
+    </div>
+</div>

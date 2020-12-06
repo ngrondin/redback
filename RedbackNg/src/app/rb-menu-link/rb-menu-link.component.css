@@ -1,0 +1,41 @@
+:host {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+}
+
+
+.rb-menu-link-text {
+	flex-grow: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-weight: 300;
+	padding-left: 12px;
+	width: 170px;
+	max-width: 170px;
+}
+
+.rb-menu-link-icon {
+	color:#888888;
+}
+
+.rb-menu-link-popup-back {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
+}
+
+.rb-menu-link-popup-container {
+	position: fixed;
+	z-index: 1001;
+	background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
+        0 13px 19px 2px rgba(0, 0, 0, 0.14),
+        0 5px 24px 4px rgba(0, 0, 0, 0.12);
+    display: flex;	
+}

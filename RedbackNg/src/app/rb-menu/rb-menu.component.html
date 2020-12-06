@@ -1,0 +1,63 @@
+<div
+    class="rb-menu-container">
+    <mat-action-list>
+        <div
+            class="rb-menu-item"
+            *ngFor="let item of content">
+            <rb-menu-group
+                *ngIf="item.type == 'menugroup'"
+                [config]="item"
+                [mode]="mode"
+                (navigate)="navigateTo($event)">
+            </rb-menu-group>
+            <rb-menu-link
+                *ngIf="item.type == 'menulink'"
+                [config]="item"
+                [mode]="mode"
+                (navigate)="navigateTo($event)">
+            </rb-menu-link>
+        </div>    
+    </mat-action-list>    
+</div>
+<div
+    class="rb-menu-control">
+    <button
+        mat-icon-button
+        (click)="toggleMenuMode()">
+        <mat-icon
+            *ngIf="mode == 'small'">
+            navigate_next
+        </mat-icon>
+        <mat-icon
+            *ngIf="mode == 'large'">
+            navigate_before
+        </mat-icon>
+    </button>
+    <button
+        mat-icon-button
+        *ngIf="mode == 'large'"
+        class="rb-menu-control-grew-button"
+        (click)="setMenu('full')">
+        <mat-icon>
+            subject
+        </mat-icon>
+    </button>  
+    <button
+        mat-icon-button
+        *ngIf="mode == 'large'"
+        class="rb-menu-control-grew-button"
+        (click)="setMenu('group')">
+        <mat-icon>
+            group
+        </mat-icon>
+    </button>       
+    <button
+        mat-icon-button
+        *ngIf="mode == 'large'"
+        class="rb-menu-control-grew-button"
+        (click)="setMenu('personal')">
+        <mat-icon>
+            person
+        </mat-icon>
+    </button>       
+</div>

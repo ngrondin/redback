@@ -42,34 +42,9 @@
     <mat-sidenav 
         mode="side" 
         opened>
-        <div
-            class="rb-menu-nav">
-            <div
-                class="rb-menu-container">
-                <div
-                    class="rb-menu">
-                    <rb-view-loader 
-                        [target]="menuTarget"
-                        (navigate)="navigateTo($event)">
-                    </rb-view-loader>
-                </div>
-            </div>
-            <div
-                class="rb-menu-control">
-                <button
-                    mat-icon-button
-                    (click)="toggleMenuMode()">
-                    <mat-icon
-                        *ngIf="menuTarget.mode == 'small'">
-                        navigate_next
-                    </mat-icon>
-                    <mat-icon
-                        *ngIf="menuTarget.mode == 'large'">
-                        navigate_before
-                    </mat-icon>
-                </button>                
-            </div>
-        </div>
+        <rb-menu
+            (navigate)="navigateTo($event)">
+        </rb-menu>
     </mat-sidenav>
     <mat-sidenav-content>
         <div

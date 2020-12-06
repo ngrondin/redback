@@ -83,6 +83,10 @@ import { RbHsectionComponent } from './rb-hsection/rb-hsection.component';
 import { RbVsectionComponent } from './rb-vsection/rb-vsection.component';
 import { RbTabComponent } from './rb-tab/rb-tab.component';
 import { RbTabSectionComponent } from './rb-tab-section/rb-tab-section.component';
+import { RbMenuComponent } from './rb-menu/rb-menu.component';
+import { RbMenuGroupComponent } from './rb-menu-group/rb-menu-group.component';
+import { RbMenuLinkComponent } from './rb-menu-link/rb-menu-link.component';
+import { MenuService } from './menu.service';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -146,7 +150,9 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbPopupAddressesComponent,
     RbSearchComponent,
     RbMapComponent,
-    RbMenuDirective,
+    RbMenuComponent,
+    RbMenuGroupComponent,
+    RbMenuLinkComponent,
     RbTabDirective,
     RbTabComponent,
     RbTabSectionComponent,
@@ -212,7 +218,9 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbPopupAddressesComponent,
     RbSearchComponent,
     RbMapComponent,
-    RbMenuDirective,
+    RbMenuComponent,
+    RbMenuGroupComponent,
+    RbMenuLinkComponent,
     RbTabComponent,
     RbTabSectionComponent,
     RbTabDirective,
@@ -254,7 +262,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     ConfigService,
     DragService,
     MapService,
-    ReportService/*,
+    ReportService,
+    MenuService/*,
     {
       provide: ACE_CONFIG,
       useValue: DEFAULT_ACE_CONFIG

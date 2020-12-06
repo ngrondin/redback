@@ -1,0 +1,30 @@
+
+:host {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+}
+
+.rb-menu-group-text {
+	flex-grow: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-weight: 500;
+	padding-left: 12px;
+	width: 170px;
+	max-width: 170px;
+}
+
+.rb-menu-group-icon {
+	color:dimgray;
+}
+
+.rb-menu-group {
+	background: #f8f8fa;
+}
+
+.rb-menu-item {
+    display: flex;
+	flex-direction: row;
+}
