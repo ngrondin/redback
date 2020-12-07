@@ -69,6 +69,11 @@ export class RbGraphComponent implements OnInit {
         series.push({name: name, label: 'll', value: value});
       }
     }
+    if(this.series.sortby == null || this.series.sortby == 'name') {
+      series.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)); 
+    } else if(this.series.sortby == 'value') {
+      series.sort((a, b) => a.value - b.value);
+    }
     return series;
   }
 
