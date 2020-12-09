@@ -366,7 +366,7 @@ public class DomainManager implements Consumer {
 		return result;
 	}
 	
-	protected void executeAsync(Session session, DomainFunction df, DataMap param) {
+	/*protected void executeAsync(Session session, DomainFunction df, DataMap param) {
 		Thread worker = new Thread() {
 			public void run() {
 				try {
@@ -375,17 +375,14 @@ public class DomainManager implements Consumer {
 			}
 		};
 		worker.start();	
-	}
+	}*/
 	
 	public Object executeFunction(Session session, String domain, String name, DataMap param, boolean async) throws RedbackException {
 		Object result = null;
 		DomainEntry de = getDomainEntry(domain, name);
 		if(de != null && de instanceof DomainFunction) {
 			DomainFunction df = (DomainFunction)de;
-			if(async)
-				executeAsync(session, df, param);
-			else
-				result = execute(session, df, param);
+			result = execute(session, df, param);
 		} 
 		return result;
 	}
@@ -412,7 +409,7 @@ public class DomainManager implements Consumer {
 			if(functions.size() > 0) {
 				for(DomainEntry de: functions) {
 					DomainFunction df = (DomainFunction)de;
-					executeAsync(session, df, param);
+					execute(session, df, param);
 				}
 			} 			
 		} catch(Exception e) {

@@ -172,10 +172,9 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					{
 						String function = request.getString("function");
 						DataMap param = request.getObject("param");
-						boolean async = request.getBoolean("async");
 						if(function != null)
 						{
-							execute(session, function, param, async);
+							execute(session, function, param);
 							response = formatResponse(new DataMap("result", "ok"), format, addValidation, addRelated);
 						}
 						else
@@ -336,7 +335,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException;
 
-	protected abstract RedbackObject execute(Session session, String function, DataMap param, boolean async) throws RedbackException;
+	protected abstract RedbackObject execute(Session session, String function, DataMap param) throws RedbackException;
 
 	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException;
 

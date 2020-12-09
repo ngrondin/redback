@@ -2,7 +2,6 @@ package io.redback.services.impl;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.script.ScriptException;
 
@@ -19,8 +18,6 @@ import io.redback.services.ObjectServer;
 
 public class RedbackObjectServer extends ObjectServer
 {
-	private Logger logger = Logger.getLogger("io.redback");
-
 	protected ObjectManager objectManager;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 
@@ -128,25 +125,11 @@ public class RedbackObjectServer extends ObjectServer
 		return object;
 	}
 	
-	protected RedbackObject execute(Session session, String function, DataMap param, boolean async) throws RedbackException {
+	protected RedbackObject execute(Session session, String function, DataMap param) throws RedbackException {
 		try {
-			if(async) {
-				(new Thread() {
-					public void run() {
-						try {
-							objectManager.initiateCurrentTransaction();
-							objectManager.executeFunction(session, function, param);
-							objectManager.commitCurrentTransaction();
-						} catch(Exception e) {
-							logger.severe("Error executing async global function: " + e.getMessage());
-						}
-					}
-				}).start();
-			} else {
-				objectManager.initiateCurrentTransaction();
-				objectManager.executeFunction(session, function, param);
-				objectManager.commitCurrentTransaction();
-			}
+			objectManager.initiateCurrentTransaction();
+			objectManager.executeFunction(session, function, param);
+			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			throw new RedbackException("Error executing function on object", e);
 		}

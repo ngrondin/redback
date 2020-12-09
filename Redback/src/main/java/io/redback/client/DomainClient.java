@@ -107,8 +107,7 @@ public class DomainClient extends Client {
 			req.put("domain", domain);
 			req.put("name", name);
 			req.put("param", param);
-			req.put("async", async);
-			request(session, req);
+			request(session, req, async);
 		} catch(Exception e) {
 			throw new RedbackException("Error executing domain function", e);
 		}

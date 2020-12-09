@@ -19,17 +19,22 @@ public class Client {
 	
 	protected DataMap request(DataMap req) throws RedbackException
 	{
-		return request(null, req);
+		return request(null, req, false);
 	}
 	
 	protected DataMap request(Session session, DataMap req) throws RedbackException
+	{
+		return request(session, req, false);
+	}
+	
+	protected DataMap request(Session session, DataMap req, boolean async) throws RedbackException
 	{
 		try
 		{
 			Payload reqP = new Payload(req.toString());
 			reqP.metadata.put("mime", "application/json");
-			Payload respP = requestPayload(session, reqP);
-			if(respP.getBytes().length > 0) {
+			Payload respP = requestPayload(session, reqP, async);
+			if(respP != null && respP.getBytes().length > 0) {
 				DataMap resp = new DataMap(respP.getString());
 				return resp;
 			} else {
@@ -44,6 +49,11 @@ public class Client {
 	
 	protected Payload requestPayload(Session session, Payload reqP) throws RedbackException 
 	{
+		return requestPayload(session, reqP, false);
+	}
+	
+	protected Payload requestPayload(Session session, Payload reqP, boolean async) throws RedbackException 
+	{
 		if(serviceName != null)
 		{
 			try
@@ -52,7 +62,11 @@ public class Client {
 					reqP.metadata.put("session", session.id);
 					reqP.metadata.put("token", session.token);
 				}
-				Payload respP = firebus.requestService(serviceName, reqP);
+				Payload respP = null;
+				if(async)
+					firebus.requestServiceAndForget(serviceName, reqP);
+				else
+					respP = firebus.requestService(serviceName, reqP);
 				return respP;
 			}
 			catch(Exception e)

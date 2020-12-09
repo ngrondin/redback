@@ -230,8 +230,12 @@ public class CronTaskManager extends Thread {
 				DataMap call = ctc.getFirebusCall();
 				String serviceName = config.getString(call.getString("service"));
 				Payload req = new Payload(call.getObject("payload").toString());
+				boolean faf = call.getBoolean("fireandforget");
 				req.metadata.put("token", session.getToken());
-				firebus.requestService(serviceName, req);
+				if(faf)
+					firebus.requestServiceAndForget(serviceName, req);
+				else
+					firebus.requestService(serviceName, req);
 			}
 		} catch (Exception e) {
 			throw new RedbackException("Error running the cron task", e);
