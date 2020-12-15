@@ -1,0 +1,52 @@
+<mat-action-list>
+    <div
+        *ngFor="let item of list"
+        class="rb-list-repeater">
+        <button
+            mat-list-item 
+            [rb-drag-object]="item"
+            [ngClass]="selectedObject == item ? userpref.getAtlClassFor('rb-list-item-active') : ''"
+            (click)="itemClicked(item)">
+            <div 
+                class="rb-list-item">
+                <div
+                    class="rb-list-item-metaline">
+                    <span
+                        class="rb-list-item-meta1">
+                        {{getMeta1For(item)}}
+                    </span>
+                    <div
+                        class="rb-list-item-metaspacer">
+                    </div>
+                    <span
+                        class="rb-list-item-meta2">
+                        {{getMeta2For(item)}}
+                    </span>
+                </div>
+                <span
+                    class="rb-list-item-main">
+                    {{getMainFor(item)}}
+                </span>
+                <span
+                    class="rb-list-item-sub">
+                    {{getSubFor(item)}}
+                </span>
+            </div>
+        </button> 
+        <div
+            class="rb-list-divider">
+        </div>
+    </div>
+</mat-action-list>
+<div
+    class="rb-spinner-container"
+    *ngIf="list.length == 0 && isLoading == false">
+    No records
+</div>	
+<div
+    class="rb-spinner-container"
+    *ngIf="isLoading">
+    <mat-spinner
+        diameter="20">
+    </mat-spinner>
+</div>	

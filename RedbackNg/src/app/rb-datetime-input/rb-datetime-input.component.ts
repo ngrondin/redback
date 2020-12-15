@@ -15,13 +15,10 @@ import { RbPopupComponent } from 'app/rb-popup/rb-popup.component';
   styleUrls: ['./rb-datetime-input.component.css']
 })
 export class RbDatetimeInputComponent extends RbPopupInputComponent implements OnInit {
-
   @Input('format') format: string;
-
   @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
 
-  overlayRef: OverlayRef;
-  popupDatetimeComponentRef: ComponentRef<RbPopupDatetimeComponent>;
+  editingStr: string;
 
   constructor(
     public injector: Injector,
@@ -38,30 +35,37 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
 
   public get displayvalue(): string {
     let val: string = null;
-    if(this.attribute != null) {
-      if(this.rbObject != null) {
-        let iso : string = this.rbObject.get(this.attribute);
-        if(iso != null) {
-          val = this.formatDate(new Date(iso));
+    if(this.overlayRef != null) {
+      val = this.editingStr;
+    } else {
+      if(this.attribute != null) {
+        if(this.rbObject != null) {
+          let iso : string = this.rbObject.get(this.attribute);
+          if(iso != null) {
+            val = this.formatDate(new Date(iso));
+          } else {
+            val = null;
+          }
+        } else {
+          val = null;  
+        }
+      } else {
+        if(this._value != null) {
+          val = this.formatDate(new Date(this._value));
         } else {
           val = null;
         }
-      } else {
-        val = null;  
       }
-    } else {
-      if(this._value != null) {
-        val = this.formatDate(new Date(this._value));
-      } else {
-        val = null;
-      }
+      this.checkValueChange(val);
     }
-    this.checkValueChange(val);
     return val;
   }
 
-  public set displayvalue(val: string) {
-    
+  public set displayvalue(str: string) {
+    this.editingStr = str;
+    if(this.popupComponentRef != null) {
+      this.popupComponentRef.instance.setSearch(this.editingStr);
+    }
   }
 
   private formatDate(dt: Date) : string {
@@ -100,7 +104,14 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
   }
 
   public startEditing() {
-    
+    this.editingStr = "";
+  }
+
+  public keyTyped(keyCode: number) {
+    if((keyCode == 8 || keyCode == 27) && (this.editingStr == "" || this.editingStr == null)) {
+      this.closePopup();
+      this.rbObject.setValue(this.attribute, null);
+    } 
   }
 
   public finishEditing() {

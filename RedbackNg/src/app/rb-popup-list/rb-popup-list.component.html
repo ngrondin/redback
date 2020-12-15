@@ -19,13 +19,13 @@
         *ngFor="let item of list">
         <button 
             mat-button 
-            class="rb-list-select-button"
+            [ngClass]="'rb-list-select-button' + (getHighlighted() == item ? ' rb-list-select-button-hightlight' : '')"
             (click)="select(item)">
             {{item.data[config.displayattribute]}}
         </button>
         <button 
             mat-button 
-            class="rb-list-expand-button"
+            [ngClass]="'rb-list-expand-button' + (getHighlighted() == item ? ' rb-list-select-button-hightlight' : '')"
             *ngIf="isHierarchical"
             (click)="expand(item)">
                 <mat-icon>expand_more</mat-icon>

@@ -150,10 +150,25 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
     return angle;
   }
 
-  public getHighlighted() {
-    
+  public getHighlighted(): any {
+    return this.getDate()
   }
-  public setSearch(val: String) {
-    
+
+  public setSearch(val: string) {
+    try {
+      let dt = new Date(val);
+      this.year = dt.getFullYear();
+      this.month = dt.getMonth();
+      this.day = dt.getDate();
+      this.hour = dt.getHours();
+      this.minute = dt.getMinutes();
+    } catch(err) {
+    }
+  }
+
+  public keyTyped(keyCode: number) {
+    if(keyCode == 13) {
+      this.nextPart();  
+    }
   }
 }

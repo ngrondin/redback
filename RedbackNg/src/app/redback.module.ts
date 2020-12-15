@@ -87,6 +87,7 @@ import { RbMenuComponent } from './rb-menu/rb-menu.component';
 import { RbMenuGroupComponent } from './rb-menu-group/rb-menu-group.component';
 import { RbMenuLinkComponent } from './rb-menu-link/rb-menu-link.component';
 import { MenuService } from './menu.service';
+import { RbList4Component } from './rb-list4/rb-list4.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -140,6 +141,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbDatasetGroupDirective,
     RbListScrollDirective,
     RbListComponent,
+    RbList4Component,
     RbInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,
@@ -208,6 +210,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbDatasetGroupDirective,
     RbListScrollDirective,
     RbListComponent,
+    RbList4Component,
     RbInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,

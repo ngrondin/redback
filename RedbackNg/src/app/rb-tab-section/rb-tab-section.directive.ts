@@ -2,7 +2,7 @@ import { Directive, Input } from '@angular/core';
 import { RbTabDirective } from 'app/rb-tab/rb-tab.directive';
 
 @Directive({
-  selector: 'rb-tab-section',
+  selector: 'rb-tab-section-d',
   exportAs: 'tabsection'
 })
 export class RbTabSectionDirective {

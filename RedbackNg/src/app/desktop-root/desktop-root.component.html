@@ -31,10 +31,32 @@
             #usermenu="matMenu">
             <button
                 mat-menu-item
+                [matMenuTriggerFor]="prefmenu">
+                Preferences
+            </button>
+            <button
+                mat-menu-item
                 (click)="logout()">
                 Logout
             </button>
-        </mat-menu>        
+        </mat-menu>
+        <mat-menu
+            #prefmenu="matMenu">
+            <button
+                mat-menu-item
+                [matMenuTriggerFor]="uialtmenu">
+                UI Styles
+            </button>
+        </mat-menu>
+        <mat-menu
+            #uialtmenu="matMenu">
+            <button
+                *ngFor="let alt of userprefService.uiAlternates"
+                mat-menu-item
+                (click)="userprefService.selecteduialt = alt">
+                {{alt}}
+            </button>
+        </mat-menu>
     </mat-toolbar-row>
 </mat-toolbar>
 <mat-sidenav-container

@@ -1,0 +1,50 @@
+:host {
+    display:flex;
+    flex-direction: column;
+}
+
+.rb-tabsection-tabheaders {
+    display:flex;
+    flex-direction: row;
+    padding: 4px 4px 0px 4px;
+}
+
+.rb-tabsection-tabheader {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex-grow: 0;
+	flex-shrink: 0;
+	border: 0px Solid;
+	cursor: pointer;
+	padding: 0px;
+    color: darkblue;
+    border-radius: 5px 5px 0px 0px;
+}
+
+.rb-tabsection-tabheader-button {
+	font-weight: initial;
+	font-size: 1.0rem;
+	margin: 0px 5px 0px 5px !important;
+}
+
+.rb-tabsection-tabheader-active {
+  border-bottom: 2px Solid red;
+}
+
+.rb-tabsection-tabheader-button-active {
+
+}
+
+.rb-tabsection-tabheader-active-alt1 {
+    background-color: #5262bc;
+    color: white;
+}
+
+.rb-tabsection-tabheader-button-active-alt1 {
+}
+
+.rb-tabsection-divider {
+    display:flex;
+    border-bottom: 1px solid #cccccc;
+}

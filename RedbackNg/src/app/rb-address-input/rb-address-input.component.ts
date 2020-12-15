@@ -75,6 +75,13 @@ export class RbAddressInputComponent extends RbPopupInputComponent implements On
     this.searchValue = this.rbObject.get(this.attribute);
   }
 
+  public keyTyped(keyCode: number) {
+    if((keyCode == 8 || keyCode == 27) && this.searchValue == "") {
+      this.closePopup();
+      this.rbObject.setValue(this.attribute, null);
+    } 
+  }
+
   public finishEditing() {
     this.rbObject.setValue(this.attribute, this.searchValue);
   }

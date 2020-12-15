@@ -1,3 +1,18 @@
-<div>Tab Headers</div>
+<div
+    class="rb-tabsection-tabheaders">
+    <div
+        [ngClass]="'rb-tabsection-tabheader' + (isTabActive(tab) ? userpref.getAtlClassFor(' rb-tabsection-tabheader-active') : '')"
+        *ngFor="let tab of tabs">
+        <button
+            mat-button
+            [ngClass]="'rb-tabsection-tabheader-button' + (isTabActive(tab) ? userpref.getAtlClassFor(' rb-tabsection-tabheader-button-active') : '')"
+            (click)="select(tab)">
+            {{tab.label}}
+        </button>
+    </div>
+</div>
+<div
+    class="rb-tabsection-divider">
+</div>
 <ng-content></ng-content>
 <div #container></div>

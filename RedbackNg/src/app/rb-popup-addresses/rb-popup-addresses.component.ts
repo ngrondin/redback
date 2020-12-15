@@ -15,6 +15,7 @@ export class RbPopupAddressesComponent extends RbPopupComponent implements OnIni
   public radius: number;
   public search: String;
   public isLoading: boolean;
+  public highlightIndex: number = -1;
 
 
   constructor(
@@ -35,13 +36,33 @@ export class RbPopupAddressesComponent extends RbPopupComponent implements OnIni
   }
 
   public getHighlighted() {
-    return null;
+    if(this.highlightIndex > -1 && this.highlightIndex < this.list.length) {
+      return this.list[this.highlightIndex];
+    } else {
+      return null;
+    }
   }
 
   public setSearch(val: String) {
     this.search = val;
     this.isLoading = true;
     this.apiService.predictAddresses(this.search, this.center, this.radius).subscribe(json => this.setAddresses(json));
+  }
+
+  public keyTyped(keyCode: number) {
+    if(keyCode == 40) { // Down
+      if(this.highlightIndex < this.list.length - 1) {
+        this.highlightIndex++;
+      }
+    } else if(keyCode == 38) { // Up
+      if(this.highlightIndex > 0) {
+        this.highlightIndex--;
+      }
+    } else if(keyCode == 13) {
+      if(this.highlightIndex > -1 && this.highlightIndex < this.list.length) {
+        this.select(this.list[this.highlightIndex]);
+      }
+    }
   }
 
   public setAddresses(json: any) {

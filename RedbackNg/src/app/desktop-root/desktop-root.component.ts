@@ -6,6 +6,7 @@ import { DataService } from 'app/data.service';
 import { RbObject } from 'app/datamodel';
 import { ConfigService } from 'app/config.service';
 import { DragService } from 'app/rb-drag/drag.service';
+import { UserprefService } from 'app/userpref.service';
 
 export class Target {
   view: string;
@@ -63,6 +64,7 @@ export class DesktopRootComponent implements OnInit {
   constructor(
     private configService : ConfigService,
     public dragService: DragService,
+    public userprefService: UserprefService,
     private domSanitizer: DomSanitizer,
     private cookieService: CookieService
   ) { }

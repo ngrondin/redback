@@ -37,6 +37,10 @@
     text-align: left;
 }
 
+.rb-list-select-button-hightlight {
+    background-color: #eceef8;
+}
+
 .rb-list-expand-button {
 
 }

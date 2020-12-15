@@ -17,6 +17,7 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
   public list: RbObject[] = [];
   public search: string;
   public isLoading: boolean;
+  public highlightIndex: number = -1;
 
   constructor(
     @Inject(CONTAINER_DATA) public config: any, 
@@ -59,6 +60,22 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
     this.getData();
   }
 
+  public keyTyped(keyCode: number) {
+    if(keyCode == 40) { // Down
+      if(this.highlightIndex < this.list.length - 1) {
+        this.highlightIndex++;
+      }
+    } else if(keyCode == 38) { // Up
+      if(this.highlightIndex > 0) {
+        this.highlightIndex--;
+      }
+    } else if(keyCode == 13) {
+      if(this.highlightIndex > -1 && this.highlightIndex < this.list.length) {
+        this.select(this.list[this.highlightIndex]);
+      }
+    }
+  }
+
   public select(object: RbObject) {
     this.selected.emit(object);
   }
@@ -76,7 +93,11 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
     this.getData();
   }
 
-  public getHighlighted() {
-    throw new Error("Method not implemented.");
+  public getHighlighted() : any {
+    if(this.highlightIndex > -1 && this.highlightIndex < this.list.length) {
+      return this.list[this.highlightIndex];
+    } else {
+      return null;
+    }
   }  
 }

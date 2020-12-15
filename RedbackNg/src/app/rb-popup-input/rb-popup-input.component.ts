@@ -60,10 +60,16 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
   }
 
   public closePopup() {
-    this.overlayRef.dispose();
-    this.overlayRef = null;
+    if(this.overlayRef != null) {
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
     this.popupComponentRef = null;
     this.inputContainerRef.element.nativeElement.blur();
+  }
+
+  public getHighlighted() : any {
+    return this.popupComponentRef != null ? this.popupComponentRef.instance.getHighlighted() : null;
   }
 
   public _cancel() {
@@ -77,8 +83,13 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
   }
 
   public _finish() {
+    let value = this.popupComponentRef != null ? this.popupComponentRef.instance.getHighlighted() : null;
     this.closePopup();
-    this.finishEditing();
+    if(value != null) {
+      this.finishEditingWithSelection(value);
+    } else {
+      this.finishEditing();
+    }
   }
 
   public abstract getPopupClass() : any;
@@ -89,13 +100,13 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
 
   public abstract startEditing();
 
+  public abstract keyTyped(keyCode: number);
+
   public abstract finishEditing();
 
   public abstract finishEditingWithSelection(value: any);
 
   public abstract cancelEditing();
-
-  public abstract erase();
 
   public focus(event: any) {
     this.startEditing();
@@ -116,15 +127,16 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
   }
 
   public keydown(event: any) {
-    if(event.keyCode == 13) {
-      this._finish();
-    } else if(event.keyCode == 9) {
+    if(event.keyCode == 9) {
       this._finish();
     } else if(event.keyCode == 27) {
       this._cancel();
-    } else if(event.keyCode == 8 || event.keyCode == 127) {
-      this.erase();
-    }
+    } else {
+      this.keyTyped(event.keyCode);
+      if(this.popupComponentRef != null) {
+        this.popupComponentRef.instance.keyTyped(event.keyCode);
+      }
+    }    
   }
 
 

@@ -3,7 +3,7 @@
         mat-list-item 
         *ngFor="let item of list" 
         [rb-drag-object]="item"
-        [ngClass]="selectedObject == item ? 'rb-list-item-active' : ''"
+        [ngClass]="selectedObject == item ? userpref.getAtlClassFor('rb-list-item-active') : ''"
         (click)="itemClicked(item)">
         <div 
             class="rb-list-item">

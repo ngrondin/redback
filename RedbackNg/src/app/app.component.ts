@@ -4,6 +4,7 @@ import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ApiService } from './api.service';
 import { ConfigService } from './config.service';
+import { UserprefService } from './userpref.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -29,7 +30,8 @@ export class AppComponent {
       private matIconRegistry: MatIconRegistry,
       private domSanitizer: DomSanitizer,
       private apiService: ApiService,
-      private configService: ConfigService ) {
+      private configService: ConfigService,
+      private userprefService: UserprefService ) {
     var native = this.elementRef.nativeElement;
     this.type = native.getAttribute("type");
     this.apptitle = native.getAttribute("apptitle");
@@ -71,5 +73,6 @@ export class AppComponent {
     for(const set of this.iconsets) {
       this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'));
     }
+    this.userprefService.load();
   }
 }

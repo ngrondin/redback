@@ -80,20 +80,20 @@ export class RbRelatedInputComponent extends RbPopupInputComponent implements On
     this.searchValue = '';
   }
 
+  public keyTyped(keyCode: number) {
+    if((keyCode == 8 || keyCode == 27) && this.searchValue == "") {
+      this.closePopup();
+      this.rbObject.setValueAndRelated(this.attribute, null, null);
+    } 
+  }
+
   public finishEditing() {
-    let object: RbObject = this.popupComponentRef.instance.getHighlighted();
-    if(object != null) {
-      this.setValue(object);
-    }
+
   }
   
   public finishEditingWithSelection(value: any) {
     let object: RbObject = value;
     this.setValue(object);
-  }
-
-  public erase() {
-    this.rbObject.setValueAndRelated(this.attribute, null, null);
   }
 
   public cancelEditing() {

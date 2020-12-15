@@ -14,8 +14,10 @@ export abstract class RbPopupComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  public abstract getHighlighted();
+  public abstract getHighlighted() : any;
 
   public abstract setSearch(val: String);
+
+  public abstract keyTyped(keyCode: number);
 
 }

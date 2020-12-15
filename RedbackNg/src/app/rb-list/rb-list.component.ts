@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
+import { UserprefService } from 'app/userpref.service';
 
 @Component({
   selector: 'rb-list',
@@ -23,7 +24,9 @@ export class RbListComponent implements OnInit {
 
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
 
-  constructor() { }
+  constructor(
+    public userpref: UserprefService
+  ) { }
 
   ngOnInit() {
   }

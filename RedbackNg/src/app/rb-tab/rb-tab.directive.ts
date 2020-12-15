@@ -1,7 +1,7 @@
 import { Directive, Input, Output, EventEmitter } from '@angular/core';
 
 @Directive({
-  selector: 'rb-tab',
+  selector: 'rb-tab-d',
   exportAs: 'tab'
 })
 export class RbTabDirective {
