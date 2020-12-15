@@ -221,8 +221,13 @@ public class ObjectManager
 			{
 				if(!includeLoaded)
 					loadIncludeScripts(session);
-				objectConfig = new ObjectConfig(this, configClient.getConfig(session, "rbo", "object", object));
-				objectConfigs.put(object, objectConfig);
+				DataMap cfg = configClient.getConfig(session, "rbo", "object", object);
+				if(cfg != null) {
+					objectConfig = new ObjectConfig(this, cfg);
+					objectConfigs.put(object, objectConfig);
+				} else {
+					throw new RedbackException("Object config '" + object + "' is null");
+				}
 			}
 			catch(Exception e)
 			{
@@ -356,7 +361,7 @@ public class ObjectManager
 					{
 						
 						DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
-						if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
+						if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains() && !objectFilter.containsKey("domain"))
 							dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 						DataMap dbSort = generateDBSort(session, objectConfig, sort);
 						DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);

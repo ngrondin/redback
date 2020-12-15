@@ -84,7 +84,7 @@ public class ExportData extends Thread
 				DataMap fbReqmap = new DataMap();
 				fbReqmap.put("action", "list");
 				fbReqmap.put("object", objectname);
-				fbReqmap.put("filter", new DataMap());
+				fbReqmap.put("filter", new DataMap("domain", domain));
 				fbReqmap.put("options", new DataMap("addvalidation", true));
 				fbReqmap.put("pagesize", 50);
 				int page = 0;

@@ -22,39 +22,48 @@ public class CLI {
 			String fbnetwork = null;
 			String fbpassword = null;
 			String objectService = null;
+			String username = null;
+			String jwtissuer = null;
+			String jwtsecret = null;				
+			String home = System.getProperty("user.home");
+			String fileName = home + "/.redbackcli.properties";
+			File propFile = new File(fileName);
 			Properties prop = new Properties();
-			File propFile = new File("redbackcli.properties");
 			if(propFile.exists()) {
 				prop.load(new FileInputStream(propFile));
-				token = prop.getProperty("jwt");
+				username = prop.getProperty("username");
+				jwtsecret = prop.getProperty("jwtsecret");
+				jwtissuer = prop.getProperty("jwtissuer");
 				fbnetwork = prop.getProperty("fbnet");
 				fbpassword = prop.getProperty("fbpass");
 				objectService = prop.getProperty("os");
 			} else {
 				System.out.print("Username: ");
-				String username = lineReader.readLine();
+				username = lineReader.readLine();
+				prop.put("username", username);
 				System.out.print("JWT Secret: ");
-				String jwtsecret = lineReader.readLine();
+				jwtsecret = lineReader.readLine();
+				prop.put("jwtsecret", jwtsecret);
 				System.out.print("JWT Issuer: ");
-				String jwtissuer = lineReader.readLine();
+				jwtissuer = lineReader.readLine();
+				prop.put("jwtissuer", jwtissuer);
 				System.out.print("Firebus Network: ");
 				fbnetwork = lineReader.readLine();
+				prop.put("fbnet", fbnetwork);
 				System.out.print("Firebus Password: ");
 				fbpassword = lineReader.readLine();
+				prop.put("fbpass", fbpassword);
 				System.out.print("Object service: ");
 				objectService = lineReader.readLine();
-				Algorithm algorithm = Algorithm.HMAC256(jwtsecret);
-				token = JWT.create()
-						.withIssuer(jwtissuer)
-						.withClaim("email", username)
-						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
-						.sign(algorithm);
-				prop.put("jwt", token);
-				prop.put("fbnet", fbnetwork);
-				prop.put("fbpass", fbpassword);
 				prop.put("os", objectService);
-				prop.store(new FileOutputStream("redbackcli.properties"), "");
+				prop.store(new FileOutputStream(fileName), "");
 			}
+			Algorithm algorithm = Algorithm.HMAC256(jwtsecret);
+			token = JWT.create()
+					.withIssuer(jwtissuer)
+					.withClaim("email", username)
+					.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
+					.sign(algorithm);
 			
 			if(token != null && fbnetwork != null && fbpassword != null) {
 				Firebus firebus = new Firebus(fbnetwork, fbpassword);

@@ -1,10 +1,8 @@
 <rb-tab
-	#<%=id%>="tab"
-	[id]="'<%=id%>'"
+	#<%=id%>
+	[tabsection]="<%=parents.tabsection%>"
 	[label]="'<%=config.label%>'"
-	style="<%=config.inlineStyle%>"
-	[active]="<%=parents.tabsection%>.isTabVisible(<%=id%>)"
-	[hidden]="!<%=id%>.active"
-	(initialised)="<%=parents.tabsection%>.register(<%=id%>, <%=config.isdefault != null ? config.isdefault : false%>)">
+	[isdefault]="<%=config.isdefault%>"
+	style="<%=config.inlineStyle%>">
 	#content#
 </rb-tab>

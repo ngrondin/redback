@@ -1,24 +1,8 @@
 <rb-tab-section 
-	#<%=id%>="tabsection"
-	style="<%=config.inlineStyle%>"
-	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
-	<div
-		class="rb-tab-header-section">
-		<div
-			class="rb-tab-header"
-			*ngFor="let tab of <%=id%>.tabs"
-			[ngClass]="<%=id%>.isTabVisible(tab) ? 'rb-tabheader-active' : ''">			
-			<button
-				mat-button
-				class="rb-tab-button" 
-				(click)="<%=id%>.select(tab)">
-				{{tab.label}}
-			</button>
-		</div>
-	</div>
-	<mat-divider></mat-divider>
-	<div
-		class="rb-tab-content-section">	
-		#content#
-	</div>
+	#<%=id%>
+	style="<%=config.inlineStyle%>" <%
+if(typeof parents.tab != 'undefined') { %>
+	[tab]="<%=parents.tab%>" <%
+} %> >	
+	#content#
 </rb-tab-section>
