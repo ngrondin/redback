@@ -1,3 +1,4 @@
+import { HostListener } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
@@ -16,6 +17,7 @@ export class RbList4Component implements OnInit {
   @Input('meta2attribute') meta2attribute: string;
 
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
+  reachedBottom: boolean = false;
 
   constructor(
     public userpref: UserprefService
@@ -83,6 +85,15 @@ export class RbList4Component implements OnInit {
 
   itemClicked(item: RbObject) {
     this.dataset.select(item);
+  }
+
+  @HostListener('scroll', ['$event']) 
+  onScroll(event) {
+    if(event.currentTarget.scrollTop > Math.floor(event.currentTarget.scrollHeight - event.currentTarget.clientHeight - 10) && this.reachedBottom == false) {
+      this.dataset.fetchNextPage();
+      this.reachedBottom = true;
+      setTimeout(() => {this.reachedBottom = false}, 1000);
+    }
   }
   
 }

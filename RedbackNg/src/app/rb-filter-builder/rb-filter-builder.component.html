@@ -123,6 +123,7 @@
             </div>    
         </rb-tab>
         <rb-tab
+            *ngIf="sortConfig != null"
             [tabsection]="fbts"
             [label]="'Sort'"
             [isdefault]="false">

@@ -1,3 +1,4 @@
+import { HostListener } from '@angular/core';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { UserprefService } from 'app/userpref.service';
@@ -82,4 +83,5 @@ export class RbListComponent implements OnInit {
       return txt;
     }
   }
+
 }
