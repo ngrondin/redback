@@ -33,8 +33,9 @@ public class FirebusJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String serviceName = arguments[0].asString();
-					DataMap metaData = (DataMap)JSConverter.toJava(arguments.length == 3 ? arguments[1] : null);
-					DataMap requestObject = (DataMap)JSConverter.toJava(arguments.length == 3 ? arguments[2] : arguments[1]);
+					DataMap requestObject = (DataMap)JSConverter.toJava(arguments[1]);
+					DataMap metaData = (DataMap)JSConverter.toJava(arguments.length >= 3 ? arguments[2] : null);
+					int timeout = arguments.length >= 4 ? arguments[3].asInt() : 10000;
 					if(serviceName != null)
 					{
 						try
@@ -51,7 +52,7 @@ public class FirebusJSWrapper implements ProxyObject
 								}
 							}
 							logger.finest("Requesting firebus service : " + serviceName + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
-							Payload response = firebus.requestService(serviceName, request);
+							Payload response = firebus.requestService(serviceName, request, timeout);
 							logger.finest("Receiving firebus service respnse");
 							try {
 								DataMap responseObject = new DataMap(response.getString());
