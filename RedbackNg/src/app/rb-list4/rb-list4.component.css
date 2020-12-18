@@ -1,13 +1,22 @@
 :host {
-	display: flex;
-	overflow: auto;
+    display: flex;
+    position: relative;
+	overflow: hidden;
 	flex-direction: column;
     flex: 1 1 auto;
     width: 300px;
 }
 
-:host > mat-action-list > .rb-list-repeater > button {
+:host > .rb-list-container > mat-action-list > .rb-list-repeater > button {
 	height: auto!important;
+}
+
+.rb-list-container {
+    display: flex;
+	overflow: auto;
+	flex-direction: column;
+    flex: 1 1 auto;
+    width: 300px;  
 }
 
 .rb-list-repeater {
@@ -23,6 +32,7 @@
 	margin: 12px 4px 12px 4px;
     min-height: 48px;
     overflow: hidden;
+    justify-content: center;
 }
 
 .rb-list-item-active {
@@ -39,6 +49,7 @@
 .rb-list-item-metaline {
     display: flex;
     flex-direction: row;
+    height: 16px;
 }
 
 .rb-list-item-meta1 {
@@ -57,6 +68,15 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 16px;
+}
+
+.rb-list-item-meta2-badge {
+    color: white;  
+    background-color: lightgray;
+    border-radius: 8px;
+    text-align: center;
+    padding: 0px 3px 0px 3px;
 }
 
 .rb-list-item-metaspacer {
@@ -75,9 +95,23 @@
 .rb-list-item-sub {
     color: #aaaaaa;
     font-size: small;
+    line-height: 16px;
+    min-height: 16px;
 }
 
 .rb-list-divider {
     border-bottom: 1px solid #e0e0e0;
     width: 90%;
+}
+
+.rb-list-floating-count{
+    display:block;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background: lightgray;
+    color: white;
+    height: 20px;
+    padding: 3px 10px 3px 10px;
+    border-radius: 12px;
 }

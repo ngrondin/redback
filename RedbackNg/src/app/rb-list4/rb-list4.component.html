@@ -1,52 +1,64 @@
-<mat-action-list>
-    <div
-        *ngFor="let item of list"
-        class="rb-list-repeater">
-        <button
-            mat-list-item 
-            [rb-drag-object]="item"
-            [ngClass]="selectedObject == item ? userpref.getAtlClassFor('rb-list-item-active') : ''"
-            (click)="itemClicked(item)">
-            <div 
-                class="rb-list-item">
-                <div
-                    class="rb-list-item-metaline">
-                    <span
-                        class="rb-list-item-meta1">
-                        {{getMeta1For(item)}}
-                    </span>
+<div
+    class="rb-list-container"
+    (scroll)="onScroll($event)">
+    <mat-action-list>
+        <div
+            *ngFor="let item of list"
+            class="rb-list-repeater">
+            <button
+                mat-list-item 
+                [rb-drag-object]="item"
+                [ngClass]="selectedObject == item ? userpref.getAtlClassFor('rb-list-item-active') : ''"
+                (click)="itemClicked(item)">
+                <div 
+                    class="rb-list-item">
                     <div
-                        class="rb-list-item-metaspacer">
+                        class="rb-list-item-metaline"
+                        *ngIf="hasMetaLine()">
+                        <span
+                            class="rb-list-item-meta1">
+                            {{getMeta1For(item)}}
+                        </span>
+                        <div
+                            class="rb-list-item-metaspacer">
+                        </div>
+                        <span
+                            [ngClass]="'rb-list-item-meta2' + (isMeta2aBadge(item) ? ' rb-list-item-meta2-badge' : '')">
+                            {{getMeta2For(item)}}
+                        </span>
                     </div>
                     <span
-                        class="rb-list-item-meta2">
-                        {{getMeta2For(item)}}
+                        class="rb-list-item-main"
+                        *ngIf="hasMainLine()">
+                        {{getMainFor(item)}}
+                    </span>
+                    <span
+                        class="rb-list-item-sub"
+                        *ngIf="hasSubLine()">
+                        {{getSubFor(item)}}
                     </span>
                 </div>
-                <span
-                    class="rb-list-item-main">
-                    {{getMainFor(item)}}
-                </span>
-                <span
-                    class="rb-list-item-sub">
-                    {{getSubFor(item)}}
-                </span>
+            </button> 
+            <div
+                class="rb-list-divider">
             </div>
-        </button> 
-        <div
-            class="rb-list-divider">
         </div>
-    </div>
-</mat-action-list>
+    </mat-action-list>
+    <div
+        class="rb-spinner-container"
+        *ngIf="list.length == 0 && isLoading == false">
+        No records
+    </div>	
+    <div
+        class="rb-spinner-container"
+        *ngIf="isLoading">
+        <mat-spinner
+            diameter="20">
+        </mat-spinner>
+    </div>	
+</div>
 <div
-    class="rb-spinner-container"
-    *ngIf="list.length == 0 && isLoading == false">
-    No records
-</div>	
-<div
-    class="rb-spinner-container"
-    *ngIf="isLoading">
-    <mat-spinner
-        diameter="20">
-    </mat-spinner>
-</div>	
+    *ngIf="showCount()"
+    class="rb-list-floating-count">
+    {{getCountText()}}
+</div>

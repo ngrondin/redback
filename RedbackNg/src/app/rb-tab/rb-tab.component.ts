@@ -13,7 +13,8 @@ export class RbTabComponent extends RbContainerComponent implements OnInit {
   @Input('label') label : string;
   @Input('isdefault') isdefault : boolean = false;
 
-  constructor() {
+  constructor(
+  ) {
     super();
   }
 

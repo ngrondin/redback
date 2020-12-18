@@ -2,7 +2,6 @@ import { Input, ViewContainerRef } from '@angular/core';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { RbContainerComponent } from 'app/rb-container/rb-container.component';
 import { RbTabComponent } from 'app/rb-tab/rb-tab.component';
-import { RbTabDirective } from 'app/rb-tab/rb-tab.directive';
 import { UserprefService } from 'app/userpref.service';
 
 @Component({
@@ -17,6 +16,11 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   
   tabs: RbTabComponent[] = [];
   activeTab: RbTabComponent;
+
+  cmTop: number = 100;
+  cmLeft: number = 100;
+  cmShow: boolean = false;
+  cmTab: RbTabComponent;
 
   constructor(
     public userpref: UserprefService
@@ -36,9 +40,12 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   }
 
   public register(tab: RbTabComponent) {
-    this.tabs.push(tab);
-    if(tab.isdefault == true) {
-      this.activeTab = tab;
+    let swtch = this.userpref.getUISwitch('tab',  tab.label);
+    if(swtch == null || swtch == true) {
+      this.tabs.push(tab);
+      if(tab.isdefault == true) {
+        this.activeTab = tab;
+      }
     }
   }
 
@@ -49,4 +56,28 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   public isTabActive(tab: RbTabComponent): boolean {
     return (this.active && this.activeTab != null && this.activeTab == tab);
   }
+
+  openPopup(event: any, tab: RbTabComponent) {
+    this.cmTab = tab;
+    this.cmTop = event.clientY;
+    this.cmLeft = event.clientX;
+    this.cmShow = true;
+  }
+
+  closePopup() {
+    this.cmShow = false;
+  }
+
+  hideTabDomain() {
+    this.userpref.setUISwitch('domain', 'tab', this.cmTab.label, false);
+    if(this.tabs.indexOf(this.cmTab) > -1) {
+      this.tabs.splice(this.tabs.indexOf(this.cmTab), 1);
+      if(this.activeTab == this.cmTab) {
+        this.activeTab = null;
+      }
+    }
+    this.cmShow = false;
+    this.cmTab = null;
+  }
+
 }

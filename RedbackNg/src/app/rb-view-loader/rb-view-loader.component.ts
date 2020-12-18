@@ -14,6 +14,7 @@ import { RbVsectionComponent } from 'app/rb-vsection/rb-vsection.component';
 import { RbContainerComponent } from 'app/rb-container/rb-container.component';
 import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
 import { RbTabComponent } from 'app/rb-tab/rb-tab.component';
+import { UserprefService } from 'app/userpref.service';
 
 
 
@@ -48,6 +49,7 @@ export class RbViewLoaderComponent implements OnInit {
     private compiler: Compiler,
     private apiService: ApiService,
     private dataService: DataService,
+    private userprefService: UserprefService,
     private componentFactoryResolver:ComponentFactoryResolver
   ) { }
 
@@ -61,12 +63,17 @@ export class RbViewLoaderComponent implements OnInit {
         if(this.mode == 1) {
           let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/' + this.target.type + '/' + this.target.version + '/' + this.target.view;
           this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
-            res => this.compileTemplate(res.text())
+            res => {
+              this.userprefService.setCurrentView(this.target.view);
+              this.compileTemplate(res.text());
+            }
           );
         } else if(this.mode == 2) {
           let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
           this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
-            res => this.buildConfig(res.json())
+            res => {
+              this.buildConfig(res.json())
+            }
           );
         }
         this.currentView = this.target.view;

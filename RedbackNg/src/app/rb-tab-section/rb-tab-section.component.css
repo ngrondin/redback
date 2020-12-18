@@ -48,3 +48,24 @@
     display:flex;
     border-bottom: 1px solid #cccccc;
 }
+
+
+.rb-tabsection-popup-back {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
+}
+
+.rb-tabsection-popup-container {
+	position: fixed;
+	z-index: 1001;
+	background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
+        0 13px 19px 2px rgba(0, 0, 0, 0.14),
+        0 5px 24px 4px rgba(0, 0, 0, 0.12);
+    display: flex;	
+}

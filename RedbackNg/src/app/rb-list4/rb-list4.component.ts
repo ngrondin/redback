@@ -38,6 +38,22 @@ export class RbList4Component implements OnInit {
     return this.dataset != null ? this.dataset.isLoading : false;
   }
 
+  public hasMainLine() : boolean {
+    return this.mainattribute != null;
+  }
+
+  public hasSubLine() : boolean {
+    return this.subattribute != null;
+  }
+
+  public hasMetaLine() : boolean {
+    return this.meta1attribute != null || this.meta2attribute != null;
+  }
+
+  public isMeta2aBadge(item: RbObject): boolean {
+    return !isNaN(parseInt(this.getMeta2For(item)));
+  }
+
   getMainFor(item: RbObject) : string {
     if(this.mainattribute != null) {
       let val = item.get(this.mainattribute);
@@ -82,12 +98,19 @@ export class RbList4Component implements OnInit {
     }
   }
 
+  showCount() : boolean {
+    return this.dataset.list.length > 10;
+  }
+
+  getCountText() : string {
+    return this.dataset.list.length + (this.dataset.list.length % this.dataset.pageSize == 0 ? '+' : '');
+  }
+
 
   itemClicked(item: RbObject) {
     this.dataset.select(item);
   }
 
-  @HostListener('scroll', ['$event']) 
   onScroll(event) {
     if(event.currentTarget.scrollTop > Math.floor(event.currentTarget.scrollHeight - event.currentTarget.clientHeight - 10) && this.reachedBottom == false) {
       this.dataset.fetchNextPage();

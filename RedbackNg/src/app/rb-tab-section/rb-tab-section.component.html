@@ -6,7 +6,8 @@
         <button
             mat-button
             [ngClass]="'rb-tabsection-tabheader-button' + (isTabActive(tab) ? userpref.getAtlClassFor(' rb-tabsection-tabheader-button-active') : '')"
-            (click)="select(tab)">
+            (click)="select(tab)"
+            (contextmenu)="openPopup($event, tab)">
             {{tab.label}}
         </button>
     </div>
@@ -14,5 +15,23 @@
 <div
     class="rb-tabsection-divider">
 </div>
+<div
+    class="rb-tabsection-popup-back"
+    [style.visibility]="cmShow ? 'visible' : 'hidden'"
+    (click)="closePopup()">
+    <div
+        class="rb-tabsection-popup-container"
+        [style.top.px]="cmTop"
+        [style.left.px]="cmLeft">
+        <mat-action-list>
+            <button
+                mat-list-item
+                (click)="hideTabDomain()">
+                Hide Tab for Domain
+            </button>                      
+        </mat-action-list>
+    </div>
+</div>
 <ng-content></ng-content>
 <div #container></div>
+

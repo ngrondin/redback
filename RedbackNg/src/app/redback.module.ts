@@ -17,8 +17,6 @@ import { FormsModule } from '@angular/forms';
 import { RbRelatedInputComponent } from './rb-related-input/rb-related-input.component';
 import { RbPopupListComponent } from './rb-popup-list/rb-popup-list.component';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { RbTabDirective } from './rb-tab/rb-tab.directive';
-import { RbTabSectionDirective } from './rb-tab-section/rb-tab-section.directive';
 import { RbPopupDatetimeComponent } from './rb-popup-datetime/rb-popup-datetime.component';
 import { RbDatetimeInputComponent } from './rb-datetime-input/rb-datetime-input.component';
 import { RbTextareaInputComponent } from './rb-textarea-input/rb-textarea-input.component';
@@ -155,10 +153,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbMenuComponent,
     RbMenuGroupComponent,
     RbMenuLinkComponent,
-    RbTabDirective,
     RbTabComponent,
     RbTabSectionComponent,
-    RbTabSectionDirective,
     RbFilterBuilderComponent,
     RbProcessactionsComponent,
     RbGlobalSeachComponent,
@@ -226,8 +222,6 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbMenuLinkComponent,
     RbTabComponent,
     RbTabSectionComponent,
-    RbTabDirective,
-    RbTabSectionDirective,
     RbFilterBuilderComponent,
     RbProcessactionsComponent,
     RbGlobalSeachComponent,
