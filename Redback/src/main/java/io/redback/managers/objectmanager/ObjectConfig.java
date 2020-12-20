@@ -31,15 +31,16 @@ public class ObjectConfig
 		scripts = new HashMap<String, Function>();
 
 		scriptVars = new ArrayList<String>();
+		scriptVars.add("session");
+		scriptVars.add("userprofile");
+		scriptVars.add("firebus");
 		scriptVars.add("om");
 		scriptVars.add("pm");
-		scriptVars.add("firebus");
 		scriptVars.add("geo");
 		scriptVars.add("fc");
 		scriptVars.add("rc");
 		scriptVars.add("nc");
 		scriptVars.add("dc");
-		scriptVars.add("userprofile");
 		scriptVars.add("self");
 		scriptVars.add("canRead");
 		scriptVars.add("canWrite");

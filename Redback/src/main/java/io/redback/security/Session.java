@@ -9,6 +9,7 @@ public class Session
 	public String id;
 	public String token;
 	public UserProfile userProfile;
+	public long timezoneOffset;
 
 	public Session() 
 	{
@@ -56,6 +57,20 @@ public class Session
 		token = t;
 	}
 	
+	public void setTimezoneOffsetString(String tzo) 
+	{
+		if(tzo != null) {
+			try {
+				timezoneOffset = Long.parseLong(tzo) * 60000;
+			} catch(Exception e) {}
+		}
+	}
+
+	public void setTimezoneOffsetMS(long tzo) 
+	{
+		timezoneOffset = tzo;
+	}
+
 	public String getId()
 	{
 		return id;
@@ -71,5 +86,14 @@ public class Session
 		return userProfile;
 	}
 	
+	public long getTimezoneOffsetMS()
+	{
+		return timezoneOffset;
+	}
+	
+	public String getTimezoneOffsetString()
+	{
+		return Long.toString(timezoneOffset / 60000);
+	}
 
 }

@@ -61,6 +61,7 @@ public class Client {
 				if(session != null) {
 					reqP.metadata.put("session", session.id);
 					reqP.metadata.put("token", session.token);
+					reqP.metadata.put("timezone", session.getTimezoneOffsetString());
 				}
 				Payload respP = null;
 				if(async)
@@ -95,6 +96,7 @@ public class Client {
 				if(session != null) {
 					reqP.metadata.put("session", session.id);
 					reqP.metadata.put("token", session.token);
+					reqP.metadata.put("timezone", session.getTimezoneOffsetString());
 				}
 				reqP.metadata.put("mime", "application/json");
 				firebus.publish(serviceName, reqP);

@@ -13,7 +13,7 @@ import io.redback.utils.js.JSConverter;
 public class SessionJSWrapper implements ProxyObject
 {
 	protected Session session;
-	protected String[] members = {"userProfile", "getToken", "expiry", "getUserProfile"};
+	protected String[] members = {"userProfile", "getToken", "expiry", "getUserProfile", "tzo"};
 	
 	public SessionJSWrapper(Session s)
 	{
@@ -37,6 +37,8 @@ public class SessionJSWrapper implements ProxyObject
 			return new UserProfileJSWrapper(session.getUserProfile());
 		} else if(key.equals("expiry")) {
 			return JSConverter.toJS(session.getUserProfile().getExpiry());
+		} else if(key.equals("tzo")) {
+			return session.getTimezoneOffsetMS();
 		} else {
 			return null;
 		}

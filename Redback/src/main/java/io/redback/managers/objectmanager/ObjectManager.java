@@ -37,6 +37,7 @@ import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
 import io.redback.managers.objectmanager.js.ProcessManagerProxyJSWrapper;
 import io.redback.security.Session;
+import io.redback.security.js.SessionJSWrapper;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.StringUtils;
@@ -158,15 +159,15 @@ public class ObjectManager
 	public Map<String, Object> createScriptContext(Session session) throws RedbackException
 	{
 		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("om", new ObjectManagerJSWrapper(this, session));
+		context.put("session", new SessionJSWrapper(session));
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("firebus", new FirebusJSWrapper(firebus, session));
 		context.put("om", new ObjectManagerJSWrapper(this, session));
 		context.put("pm", new ProcessManagerProxyJSWrapper(getFirebus(), processServiceName, session));
+		context.put("geo", new GeoClientJSWrapper(geoClient));
 		context.put("fc", new FileClientJSWrapper(getFileClient(), session));
 		context.put("rc", new ReportClientJSWrapper(getReportClient(), session));
 		context.put("nc", new NotificationClientJSWrapper(getNotificationClient(), session));
-		context.put("geo", new GeoClientJSWrapper(geoClient));
 		context.put("canRead", new SessionRightsJSFunction(session, "read"));
 		context.put("canWrite", new SessionRightsJSFunction(session, "write"));
 		context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
@@ -808,10 +809,11 @@ public class ObjectManager
 	
 	protected DataMap generateSearchFilter(Session session, String objectName, String searchText) throws RedbackException
 	{
+		String regexExpr = "^(?i)" + searchText + "";
 		DataMap filter = new DataMap();
 		DataList orList = new DataList();
 		ObjectConfig config = getObjectConfig(session, objectName);
-		orList.add(new DataMap("uid", new DataMap("$regex", searchText)));
+		orList.add(new DataMap("uid", new DataMap("$regex", regexExpr)));
 		Iterator<String> it = config.getAttributeNames().iterator();
 		while(it.hasNext())
 		{
@@ -821,7 +823,7 @@ public class ObjectManager
 				if(attributeConfig.canBeSearched())
 				{
 					DataMap orTerm = new DataMap();
-					orTerm.put(attributeConfig.getName(), new DataMap("$regex", searchText));
+					orTerm.put(attributeConfig.getName(), new DataMap("$regex", regexExpr));
 					orList.add(orTerm);
 				}
 				if(attributeConfig.hasRelatedObject())
@@ -839,7 +841,7 @@ public class ObjectManager
 							if(relatedAttributeConfig.getDBKey() != null  &&  !relatedAttributeConfig.hasRelatedObject() && relatedAttributeConfig.canBeSearched())
 							{
 								DataMap orTerm = new DataMap();
-								orTerm.put(relatedAttributeConfig.getName(), new DataMap("$regex", searchText));
+								orTerm.put(relatedAttributeConfig.getName(), new DataMap("$regex", regexExpr));
 								relatedOrList.add(orTerm);
 							}
 						}
