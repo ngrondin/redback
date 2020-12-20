@@ -38,6 +38,7 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
   public dataSubscription: Subscription;
   public _list: RbObject[] = [];
   public _selectedObject: RbObject;
+  public totalCount: number = -1;
   public searchString: string;
   public userFilter: any;
   public userSort: any;
@@ -104,6 +105,7 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
 
   public refreshData() {
     this.nextPage = 0;
+    this.totalCount = -1;
     this._list = [];
     if(this.fetchAll) {
       setTimeout(() => this.fetchNextPage(), 1);
@@ -141,9 +143,15 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
   }
 
   private setData(data: RbObject[]) {
-    this._list = [...this._list.concat(data)];
+    let newList = [...this._list]; //Creating a new list instance forces a refresh of bindings
+    for(var i = 0; i < data.length; i++) {
+      if(newList.indexOf(data[i]) == -1) {
+        newList.push(data[i]);
+      }
+    } 
+    this._list = newList;
     this.fetchThreads = this.fetchThreads - 1;
-    if(this.fetchAll && data.length > 0) {
+    if(this.fetchAll == true && data.length == this.pageSize) {
       this.fetchNextPage();
     } else if(this.fetchThreads == 0) {
       this.isLoading = false;
@@ -155,6 +163,14 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
       } else if(this._list.length > 1) {
         if(this.selectedObject != null && !this._list.includes(this.selectedObject)) {
           this._selectedObject = null;
+        }
+      }
+      if(this.nextPage == 1) { 
+        if(this.fetchAll == false && this._list.length > 10) {
+          const filter = this.mergeFilters();
+          this.apiService.aggregateObjects(this.objectname, filter, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
+        } else {
+          this.totalCount = this._list.length;
         }
       }
     }

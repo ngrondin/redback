@@ -1,6 +1,9 @@
 <button
 	mat-list-item 
-	class="rb-menu-link-button" 	
+    class="rb-menu-link-button" 	
+    [matTooltip]="getTooltip()"
+    [matTooltipShowDelay]="500"
+    [matTooltipPosition]="'right'"
     (click)="click()"
     (contextmenu)="rightclick($event)">
     <mat-icon 

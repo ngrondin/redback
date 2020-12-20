@@ -99,11 +99,11 @@ export class RbList4Component implements OnInit {
   }
 
   showCount() : boolean {
-    return this.dataset.list.length > 10;
+    return this.dataset.totalCount > 10;
   }
 
   getCountText() : string {
-    return this.dataset.list.length + (this.dataset.list.length % this.dataset.pageSize == 0 ? '+' : '');
+    return this.dataset.totalCount.toString();
   }
 
 

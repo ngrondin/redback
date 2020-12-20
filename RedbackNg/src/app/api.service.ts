@@ -8,7 +8,9 @@ import { ResponseContentType, RequestOptions } from '@angular/http';
 
 
 const httpOptions = {
-  headers: new HttpHeaders().set("Content-Type", "application/json"),
+  headers: new HttpHeaders()
+    .set("Content-Type", "application/json")
+    .set("firebus-timezone", ((new Date()).getTimezoneOffset()).toLocaleString()),
   withCredentials: true
 };
 

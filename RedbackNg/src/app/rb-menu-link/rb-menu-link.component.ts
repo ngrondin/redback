@@ -23,6 +23,10 @@ export class RbMenuLinkComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  getTooltip() : string {
+    return this.mode != 'large' ? this.config.label : null;
+  }
+
   click() {
     this.navigate.emit({view:this.config.view, filter:{}, reset:true});
   }
