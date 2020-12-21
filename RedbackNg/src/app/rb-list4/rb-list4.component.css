@@ -100,6 +100,12 @@
 }
 
 .rb-list-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rb-list-divider-line {
     border-bottom: 1px solid #e0e0e0;
     width: 90%;
 }

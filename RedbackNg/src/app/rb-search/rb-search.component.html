@@ -1,13 +1,13 @@
-<mat-form-field
-    [style.width]="widthString" >
+<mat-icon 
+    class="rb-grey-icon">
+    search
+</mat-icon>
+<mat-form-field>
     <mat-label>Search</mat-label>
     <input 
         matInput 
         [(ngModel)]="value"
         (keyup)="keyup($event)">
-    <mat-icon 
-        matPrefix
-        class="rb-grey-icon">search</mat-icon>
 </mat-form-field>
 <button 
     mat-button

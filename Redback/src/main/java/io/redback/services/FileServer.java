@@ -105,7 +105,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 							fileInfo.put("mime", file.mime);
 							fileInfo.put("thumbnail", file.thumbnail);
 							fileInfo.put("username", file.username);
-							fileInfo.put("date", file.date.toInstant().toString());
+							fileInfo.put("date", file.date != null ? file.date.toInstant().toString() : null);
 							fileInfo.put("relatedobject", object);
 							fileInfo.put("relateduid", uid);
 							list.add(fileInfo);
