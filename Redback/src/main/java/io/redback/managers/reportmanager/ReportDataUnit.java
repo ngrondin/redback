@@ -27,6 +27,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 	protected float height;
 	protected float width;
 	protected String format;
+	protected boolean commaToLine;
 
 	public ReportDataUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
@@ -38,6 +39,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 		height = 20f;
 		color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
 		format = config.getString("format");
+		commaToLine = config.containsKey("commatoline") ? config.getBoolean("commatoline") : false;
 	}
 
 
@@ -49,8 +51,13 @@ public abstract class ReportDataUnit extends ReportUnit {
 		RedbackObjectRemote object = (RedbackObjectRemote)context.get("object");
 		jsContext.put("object", new RedbackObjectRemoteJSWrapper(object));
 		jsContext.put("page", context.get("page"));
-		Object value = valueExpr.eval(jsContext);
+		Object value = null;
+		try {
+			value = valueExpr.eval(jsContext);
+		} catch(Exception e) {}
 		String valueStr = value != null ? value.toString() : "";
+		if(commaToLine) 
+			valueStr = valueStr.replaceAll(", ", "\r\n").replaceAll(",", "\r\n");
 		if(format != null) {
 			if(format.equals("currency")) {
 				try {
