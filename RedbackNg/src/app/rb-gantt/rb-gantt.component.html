@@ -2,7 +2,8 @@
     class="rb-gantt-toolbar">
     <button
         [matMenuTriggerFor]="zoomMenu"
-        mat-outlined-button>
+        mat-stroked-button
+		class="mat-primary">
         <mat-icon>zoom_in</mat-icon>
     </button>
     <mat-menu #zoomMenu="matMenu">
@@ -12,8 +13,9 @@
     </mat-menu>    
     &nbsp;
     <button
-        mat-outlined-button
-        [matMenuTriggerFor]="spanMenu">
+        [matMenuTriggerFor]="spanMenu"
+        mat-stroked-button
+		class="mat-primary">
         <mat-icon>swap_horiz</mat-icon>
     </button>
     <mat-menu #spanMenu="matMenu">
@@ -63,7 +65,8 @@
             [style.top.px]="-scrollTop">
             <div
                 *ngFor="let lane of ganttData; let i = index"
-                [class]="'rb-gantt-lanehead rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
+                [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
+                [style.height.px]="lane.height"
                 [style.cursor]="lanesConfig.modal != null ? 'pointer' : ''"
                 (click)="clickLane(lane)">
                 <div
@@ -86,7 +89,8 @@
             </div>
             <div
                 *ngFor="let lane of ganttData; let i = index"
-                [class]="'rb-gantt-lane rb-gantt-laneheight ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
+                [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
+                [style.height.px]="lane.height"
                 [style.width.px]="widthPX"
                 (rb-drag-dropzone)="dropped($event, lane)"
                 [rb-drag-changeform]="getSizeForObjectCallback">
@@ -97,6 +101,8 @@
                     (click)="clickSpread(spread)"
                     [style.width.px]="spread.width"
                     [style.left.px]="spread.start"
+                    [style.height.px]="spread.config.isBackground ? lane.height : spread.height"
+                    [style.top.px]="spread.top"
                     [style.background-color]="spread.color">
                     <div
                         class="rb-gantt-smalllabel">

@@ -20,7 +20,6 @@ import io.redback.managers.processmanager.Process;
 
 public class InteractionUnit extends ProcessUnit 
 {
-	//protected DataList actionsConfig;
 	protected String assigneeType;
 	protected ArrayList<AssigneeConfig> assigneeConfigs;
 	protected ArrayList<ActionConfig> actionConfigs;
@@ -153,10 +152,17 @@ public class InteractionUnit extends ProcessUnit
 		
 	protected boolean isAssignee(Actionner actionner, ProcessInstance pi)
 	{
-		for(Assignee assignee: pi.getAssignees())
-			if(assigneeMatch(actionner, assignee))
-				return true;
-		return false;
+		if(actionner.getId().equals(pi.getProcessManager().getProcessUsername())) 
+		{
+			return true;
+		} 
+		else 
+		{
+			for(Assignee assignee: pi.getAssignees())
+				if(assigneeMatch(actionner, assignee))
+					return true;
+			return false;
+		}
 	}
 	
 	protected boolean assigneeMatch(Actionner actionner, Assignee assignee)
@@ -169,8 +175,9 @@ public class InteractionUnit extends ProcessUnit
 					return true;
 				} else if(assignee.getId().equals("*")) {
 					return true;
+				} else {
+					return false;
 				}
-				return true;
 			} else { 
 				return false;
 			}

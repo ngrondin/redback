@@ -80,4 +80,20 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     this.cmTab = null;
   }
 
+  overflows(element) : boolean {
+    if (element.offsetWidth < element.scrollWidth) {
+      return true;
+    } else {
+      return false;
+    } 
+  }
+
+  scrollRight(element) {
+    element.scrollLeft += 60;
+  }
+
+  scrollLeft(element) {
+    element.scrollLeft -= 60;
+  }
+
 }

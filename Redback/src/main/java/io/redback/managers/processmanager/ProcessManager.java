@@ -192,6 +192,11 @@ public class ProcessManager
 		return pi;
 	}
 	
+	public String getProcessUsername() 
+	{
+		return processUserName;
+	}
+	
 	public Session getProcessUserSession(String sessionId) throws RedbackException 
 	{
 		Session session = new Session(sessionId);
@@ -264,12 +269,15 @@ public class ProcessManager
 		DataMap fullFilter = new DataMap();
 		if(filter != null)
 			fullFilter.merge(filter);
-		DataList assigneeInList = new DataList();
-		assigneeInList.add(actionner.getId());
-		List<String> groups = actionner.getGroups();
-		for(int i = 0; i < groups.size(); i++)
-			assigneeInList.add(groups.get(i));
-		fullFilter.put("assignees.id", new DataMap("$in", assigneeInList));
+		if(!actionner.getId().equals(getProcessUsername())) 
+		{
+			DataList assigneeInList = new DataList();
+			assigneeInList.add(actionner.getId());
+			List<String> groups = actionner.getGroups();
+			for(int i = 0; i < groups.size(); i++)
+				assigneeInList.add(groups.get(i));
+			fullFilter.put("assignees.id", new DataMap("$in", assigneeInList));
+		}
 		List<ProcessInstance> instances = findProcesses(actionner, fullFilter);
 		for(int i = 0; i < instances.size(); i++)
 		{

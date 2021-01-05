@@ -5,8 +5,15 @@
 
 .rb-tabsection-tabheaders {
     display:flex;
-    flex-direction: row;
-    padding: 4px 4px 0px 4px;
+	flex-direction: row;
+	flex: 0 0 auto;
+	padding: 4px 4px 0px 4px;
+	overflow: hidden;
+}
+.rb-tabsection-tabheaderscroll {
+    display:flex;
+	flex: 1 1 auto;
+	overflow: hidden;
 }
 
 .rb-tabsection-tabheader {
@@ -46,7 +53,7 @@
 
 .rb-tabsection-divider {
     display:flex;
-    border-bottom: 1px solid #cccccc;
+    border-top: 1px solid #cccccc;
 }
 
 

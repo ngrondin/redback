@@ -6,6 +6,8 @@ import { trigger } from '@angular/animations';
 import { MATERIAL_SANITY_CHECKS } from '@angular/material';
 import { Md5 } from 'ts-md5/dist/md5';
 
+let ganttLaneHeight: number = 42;
+
 class GanttLaneConfig {
   dataset: string;
   labelAttribute: string;
@@ -60,15 +62,27 @@ class GanttLane {
   id: string;
   label: string;
   icon: string;
+  height: number;
   spreads: GanttSpread[];
   object: RbObject;
 
-  constructor(i: string, l: string, ic: string, o: RbObject, s: GanttSpread[]) {
+  constructor(i: string, l: string, ic: string, o: RbObject) {
     this.id = i;
     this.label = l != null ? l : "";
     this.icon = ic;
-    this.spreads = s;
     this.object = o;
+    this.height = ganttLaneHeight;
+  }
+
+  setSpreads(s: GanttSpread[]) {
+    this.spreads = s;
+    let max: number = 0;
+    for(let i = 0; i < this.spreads.length; i++) {
+      if(this.spreads[i].sublane > max) {
+        max = this.spreads[i].sublane;
+      }
+    }
+    this.height = ganttLaneHeight * (max + 1);
   }
 }
 
@@ -77,22 +91,33 @@ class GanttSpread {
   label: string;
   start: number;
   width: number;
+  top: number;
+  height: number;
+  sublane: number;
   lane: string;
   color: string;
   canEdit: Boolean;
   object: RbObject;
   config: GanttSeriesConfig;
 
-  constructor(i: string, l: string, s: number, w: number, ln: string, c: string, ce: Boolean, o: RbObject, cfg: GanttSeriesConfig) {
+  constructor(i: string, l: string, s: number, w: number, h: number, ln: string, c: string, ce: Boolean, o: RbObject, cfg: GanttSeriesConfig) {
     this.id = i;
     this.label = l;
     this.start = s;
     this.width = w;
+    this.height = h;
+    this.sublane = 0;
     this.lane = ln;
     this.color = c;
     this.canEdit = ce;
     this.object = o;
     this.config = cfg;
+    this.setSubLane(0);
+  }
+
+  setSubLane(sl: number) {
+    this.sublane = sl;
+    this.top = (this.sublane * ganttLaneHeight) + (ganttLaneHeight - this.height) / 2;
   }
 }
 
@@ -133,7 +158,7 @@ export class RbGanttComponent implements OnInit {
   scrollTop: number;
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  ganttData: any[];
+  ganttData: GanttLane[];
   dayMarks: GanttMark[];
   hourMarks: GanttMark[];
 
@@ -170,6 +195,10 @@ export class RbGanttComponent implements OnInit {
     this.spanMS = 259200000;
     this.zoomMS = 259200000;
     this.redraw();
+  }
+
+  public get laneHeight() : number {
+    return ganttLaneHeight;
   }
 
   haveListsChanged(): Boolean {
@@ -261,7 +290,9 @@ export class RbGanttComponent implements OnInit {
       if(this.lanesConfig.iconMap != null) {
         icon = this.lanesConfig.iconMap[icon];
       }
-      let lane = new GanttLane(obj.uid, label, icon, obj, this.getSpreads(obj.uid))
+      let lane = new GanttLane(obj.uid, label, icon, obj);
+      let spreads: GanttSpread[] = this.getSpreads(obj.uid);
+      lane.setSpreads(spreads);
       lanes.push(lane);
     }
     if(lanes.length > 0) {
@@ -297,6 +328,7 @@ export class RbGanttComponent implements OnInit {
                 widthPX = widthPX + startPX;
                 startPX = 0;
               }
+              let height = cfg.isBackground ? ganttLaneHeight : 28;
               let label = cfg.isBackground ? "" : obj.get(cfg.labelAttribute);
               let color = 'white';
               if(cfg.colorAttribute != null) {
@@ -308,14 +340,32 @@ export class RbGanttComponent implements OnInit {
               }
               let canEdit: Boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
               if(color != null) {
-                spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, canEdit, obj, cfg));
+                spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, height, laneId, color, canEdit, obj, cfg));
               }
             }
           }
         }
       }
     }
+    this.adjustSpreadTops(spreads);
     return spreads;
+  }
+
+  private adjustSpreadTops(spreads: GanttSpread[]) {
+    for(var i = 0; i < spreads.length; i++) {
+      let s: GanttSpread = spreads[i];
+      if(!s.config.isBackground) {
+        let hasOverlap: boolean;
+        do {
+          hasOverlap = false;
+          for(var j = 0; j < spreads.length && j < i; j++) {
+            let os: GanttSpread = spreads[j];
+            if(!os.config.isBackground && s.start < os.start + os.width && os.start < s.start + s.width && s.sublane == os.sublane) hasOverlap = true;
+          }
+          if(hasOverlap) s.setSubLane(s.sublane + 1);
+        } while(hasOverlap);
+      }
+    }
   }
 
   private getHourMarks() : GanttMark[] {
