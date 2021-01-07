@@ -360,7 +360,8 @@ public class ProcessManager
 		{
 			DataMap fullFilterMap = new DataMap();
 			fullFilterMap.merge(filter);
-			fullFilterMap.put("domain", actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
+			if(!actionner.getId().equals(getProcessUsername()))
+				fullFilterMap.put("domain", actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
 			DataFilter fullFilter = new DataFilter(fullFilterMap);
 			long txId = Thread.currentThread().getId();
 			HashMap<String, ProcessInstance> txProcesses = transactions.get(txId);
