@@ -104,7 +104,11 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
   }
 
   public startEditing() {
-    this.editingStr = "";
+    if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
+      this.editingStr = this.formatDate(new Date(this.rbObject.get(this.attribute)));
+    } else {
+      this.editingStr = '';
+    }
   }
 
   public keyTyped(keyCode: number) {

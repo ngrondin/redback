@@ -37,6 +37,11 @@ export class RbInputComponent extends RbInputCommonComponent implements OnInit {
     this.editedValue = val;
   }
 
+  public focus(event: any) {
+    if(!this.readonly) {
+      setTimeout(() => {event.target.select();}, 200);
+    }
+  }
 
   commit() {
     this.previousValue = this.editedValue;

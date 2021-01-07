@@ -60,7 +60,6 @@ export abstract class RbInputCommonComponent implements OnInit {
     }
   }
 
-
   public get widthString() : string {
     if(this.size != null)
       return (15*this.size) + 'px';

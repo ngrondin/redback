@@ -77,7 +77,11 @@ export class RbRelatedInputComponent extends RbPopupInputComponent implements On
 
 
   public startEditing() {
-    this.searchValue = '';
+    if(this.rbObject != null && this.rbObject.related[this.attribute] != null ) {
+      this.searchValue = this.rbObject.related[this.attribute].get(this.displayattribute);
+    } else {
+      this.searchValue = '';
+    }
   }
 
   public keyTyped(keyCode: number) {

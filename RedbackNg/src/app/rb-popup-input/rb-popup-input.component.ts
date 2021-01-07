@@ -109,13 +109,16 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
   public abstract cancelEditing();
 
   public focus(event: any) {
-    this.startEditing();
     if(this.overlayRef == null) {
+      this.startEditing();
       let position: any = this.getPositionOf(event.target);
       if(position.top > (window.innerHeight / 2)) {
         this.openPopup('up', position.top);
       } else {
         this.openPopup('down', (window.innerHeight - position.top - event.target.clientHeight - 40));
+      }
+      if(!this.readonly) {
+        setTimeout(() => {event.target.select();}, 200);
       }
     }
   }
@@ -151,4 +154,9 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent imple
       return { top : 0, left: 0};
     }
   }
+
+  public get textIsTemporary(): boolean {
+    return this.overlayRef != null;
+  }
+
 }

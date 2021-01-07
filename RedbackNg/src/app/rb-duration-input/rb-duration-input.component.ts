@@ -50,7 +50,9 @@ export class RbDurationInputComponent extends RbInputCommonComponent implements 
           val = val + " " + seconds + "s";
         if(milli != 0 && !greaterThanMinute)
           val = val + " " + milli + "ms";
-          ret = val.substr(1);
+        if(ms == 0) 
+          val = " 0";
+        ret = val.substr(1);
       } else {
         ret = null;
       }
@@ -68,7 +70,7 @@ export class RbDurationInputComponent extends RbInputCommonComponent implements 
   }
 
   public focus(event: any) {
-    
+    setTimeout(() => {event.target.select();}, 200);
   }
 
   public blur(event: any) {
@@ -77,35 +79,54 @@ export class RbDurationInputComponent extends RbInputCommonComponent implements 
 
   public commit() {
     let val = 0;
-    let multiplier = -1;
+    let input = this.editingValue.replace(/\s/g, '');
+    input = input.replace(/years/gi, 'y');
+    input = input.replace(/year/gi, 'y');
+    input = input.replace(/weeks/gi, 'w');
+    input = input.replace(/week/gi, 'w');
+    input = input.replace(/days/gi, 'd');
+    input = input.replace(/day/gi, 'd');
+    input = input.replace(/hours/gi, 'h');
+    input = input.replace(/hour/gi, 'h');
+    input = input.replace(/minutes/gi, 'm');
+    input = input.replace(/minute/gi, 'm');
+    input = input.replace(/seconds/gi, 's');
+    input = input.replace(/second/gi, 's');
     let str: string = "";
-    let strParts: string[] = this.editingValue.split('');
-    for(let c of strParts) {
-      if(c == 'y' || c == 'Y')
-        multiplier = 31536000000;
-      else if(c == 'w' || c == 'W')
-        multiplier = 604800000;
-      else if(c == 'd' || c == 'D')
-        multiplier = 86400000;
-      else if(c == 'h' || c == 'H')
-        multiplier = 3600000;
-      else if(c == 'm' || c == 'M')
-        multiplier = 60000;
-      else if(c == 's' || c == 'S')
-        multiplier = 1000;
-      else 
+    let error: boolean = false;
+    for(let c of input.split('')) {
+      if((c >= '0' && c <= '9') || c == '.') {
         str = str + c;
-
-      if(multiplier > -1) {
-        val += Number.parseFloat(str) * multiplier;
+      } else {
+        let multiplier = -1;
+        if(c == 'y' || c == 'Y')
+          multiplier = 31536000000.0;
+        else if(c == 'w' || c == 'W')
+          multiplier = 604800000.0;
+        else if(c == 'd' || c == 'D')
+          multiplier = 86400000.0;
+        else if(c == 'h' || c == 'H')
+          multiplier = 3600000.0;
+        else if(c == 'm' || c == 'M')
+          multiplier = 60000.0;
+        else if(c == 's' || c == 'S')
+          multiplier = 1000.0;
+        if(multiplier > -1) {
+          val += Number.parseFloat(str) * multiplier;
+        } else {
+          error = true;
+        }
         str = "";
-        multiplier = -1;
-      }  
+      }
     }
-    if(str.length > 0)
-      val = val + Number.parseInt(str);
-
-    this.rbObject.setValue(this.attribute, val);
+    if(!error) {
+      if(str.length > 0) {
+        val = val + (val == 0 ? 3600000.0 : 0) * Number.parseFloat(str);
+      }      
+      this.rbObject.setValue(this.attribute, val);
+    } else {
+      this.rbObject.setValue(this.attribute, null);
+    }
     this.editing = false;
     this.editingValue = null;
   }

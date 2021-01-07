@@ -11,6 +11,7 @@
         [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         [(ngModel)]="value"
         (change)="commit()"
+        (focus)="focus($event)"
         [readonly]="readonly"
         autocomplete="off"
         [type]="type != null ? type : 'text'">

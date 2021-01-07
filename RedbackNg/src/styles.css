@@ -163,6 +163,11 @@ rb-menu > .mat-list-base {
 	transition: color 0.1s step-start!important;
 }
 
+.rb-input-text-temporary {
+	color:  #3f51b5!important;
+	transition: color 0.1s step-start!important;
+}
+
 .rb-input-flasher {
     background-color: transparent;
     position: absolute;

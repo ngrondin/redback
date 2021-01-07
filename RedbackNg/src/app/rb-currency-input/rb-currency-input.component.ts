@@ -52,7 +52,9 @@ export class RbCurrencyInputComponent extends RbInputCommonComponent implements 
   }
 
   public focus(event: any) {
-    
+    if(!this.readonly) {
+      setTimeout(() => {event.target.select();}, 200);
+    }
   }
 
   public blur(event: any) {

@@ -9,7 +9,7 @@
     <input 
         #input
         matInput 
-        [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
+        [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '') + (textIsTemporary ? ' rb-input-text-temporary' : '')"
         [(ngModel)]="displayvalue"
         (focus)="focus($event)"
         (blur)="blur($event)"
