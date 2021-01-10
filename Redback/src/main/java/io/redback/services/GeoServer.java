@@ -72,6 +72,18 @@ public abstract class GeoServer extends ServiceProvider
 						throw new FunctionErrorException("An 'address' action requires an 'address' attribute");
 					}					
 				}
+				else if(action.equals("timezone"))
+				{
+					if(request.containsKey("geometry"))
+					{
+						String zoneId = timezone(new Geometry(request.getObject("geometry")));
+						responseData = new DataMap("timezone", zoneId);
+					}
+					else
+					{
+						throw new FunctionErrorException("A 'timezone' action requires a 'geometry' attribute");
+					}
+				}
 				else
 				{
 					throw new FunctionErrorException("Valid actions are 'address', 'geocode' and 'reversegc'");
@@ -101,4 +113,6 @@ public abstract class GeoServer extends ServiceProvider
 	
 	protected abstract List<String> address(String search, Geometry location, Long radius) throws RedbackException;	
 
+	protected abstract String timezone(Geometry geometry) throws RedbackException;
+	
 }

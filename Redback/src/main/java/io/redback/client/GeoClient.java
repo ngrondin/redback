@@ -58,4 +58,16 @@ public class GeoClient extends Client {
 			throw new RedbackException("Error geocoding", e);
 		}		
 	}	
+	
+	public String timezone(Geometry geometry) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "timezone");
+			req.put("geometry", geometry.toDataMap());
+			DataMap resp = request(req);
+			return resp.getString("timezone");
+		} catch(Exception e) {
+			throw new RedbackException("Error getting timezone", e);
+		}		
+	}
 }

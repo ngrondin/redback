@@ -18,6 +18,7 @@ import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.GatewayClient;
+import io.redback.client.GeoClient;
 import io.redback.client.IntegrationClient;
 import io.redback.client.NotificationClient;
 import io.redback.client.ObjectClient;
@@ -25,6 +26,7 @@ import io.redback.client.ProcessClient;
 import io.redback.client.ReportClient;
 import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.GatewayClientJSWrapper;
+import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.client.js.ObjectClientJSWrapper;
@@ -52,6 +54,7 @@ public class DomainManager implements Consumer {
 	protected String notificationServiceName;
 	protected String reportServiceName;
 	protected String gatewayServiceName;
+	protected String geoServiceName;
 	protected String integrationServiceName;
 	protected ConfigurationClient configClient;
 	protected ObjectClient objectClient;
@@ -61,6 +64,7 @@ public class DomainManager implements Consumer {
 	protected NotificationClient notificationClient;
 	protected ReportClient reportClient;
 	protected GatewayClient gatewayClient;
+	protected GeoClient geoClient;
 	protected IntegrationClient integrationClient;
 	protected CollectionConfig entryCollection;
 	protected CollectionConfig logCollection;
@@ -78,6 +82,7 @@ public class DomainManager implements Consumer {
 		notificationServiceName = config.getString("notificationservice");
 		reportServiceName = config.getString("reportservice");
 		gatewayServiceName = config.getString("gatewayservice");
+		geoServiceName = config.getString("geoservice");
 		integrationServiceName = config.getString("integrationservice");
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		objectClient = new ObjectClient(firebus, objectServiceName);
@@ -87,6 +92,7 @@ public class DomainManager implements Consumer {
 		notificationClient = new NotificationClient(firebus, notificationServiceName);
 		reportClient = new ReportClient(firebus, reportServiceName);
 		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
+		geoClient = new GeoClient(firebus, geoServiceName);
 		integrationClient = new IntegrationClient(firebus, integrationServiceName);
 		entryCollection = new CollectionConfig(config.getObject("entrycollection"), "rbdm_entry");
 		logCollection = new CollectionConfig(config.getObject("logcollection"), "rbdm_log");
@@ -250,20 +256,6 @@ public class DomainManager implements Consumer {
 		}
 	}
 	
-	/*
-	public void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException {
-		DataMap entryMap = new DataMap();
-		entryMap.put("type", "report");
-		entryMap.put("domain", domain);
-		entryMap.put("name", name);
-		entryMap.put("category", category);
-		entryMap.put("roles", new DataList());
-		entryMap.put("source", report);
-		DomainReport dr = new DomainReport(entryMap);
-		putEntry(domain, name, dr);
-	}
-	*/
-	
 	public void putVariable(Session session, String domain, String name, DataEntity var) throws RedbackException {
 		DataMap entryMap = new DataMap();
 		entryMap.put("type", "variable");
@@ -283,27 +275,6 @@ public class DomainManager implements Consumer {
 			return null;
 	}
 
-
-	/*
-	public DataMap getReport(Session session, String domain, String name) throws RedbackException {
-		DomainReport dr = (DomainReport)getDomainEntry(domain, name);
-		if(dr != null)
-			return dr.getReportConfig();
-		else
-			return null;
-	}
-	
-	public List<DataMap> listReports(Session session, String category) throws RedbackException {
-		List<DomainEntry> entries = new ArrayList<DomainEntry>();
-		for(String domain :session.getUserProfile().getDomains()) {
-			List<DomainEntry> domainEntries = listDomainEntriesInCategory(domain, category);
-			entries.addAll(domainEntries);	
-		}
-		List<DataMap> reportConfigs = entries.stream().map(entry -> ((DomainReport)entry).getReportConfig()).collect(Collectors.toList());
-		return reportConfigs;
-	}
-	*/
-	
 	public void putFunction(Session session, String domain, String name, String function) throws RedbackException {
 		DataMap entryMap = new DataMap();
 		entryMap.put("type", "variable");
@@ -346,6 +317,7 @@ public class DomainManager implements Consumer {
 		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
 		context.put("rc", new ReportClientJSWrapper(reportClient, session, df.getDomain()));
 		context.put("gc", new GatewayClientJSWrapper(gatewayClient));
+		context.put("geo", new GeoClientJSWrapper(geoClient));
 		context.put("ic", new IntegrationClientJSWrapper(integrationClient, session, df.getDomain()));
 		context.put("param", JSConverter.toJS(param));
 		context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));

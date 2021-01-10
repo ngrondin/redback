@@ -1,6 +1,7 @@
 package io.redback.utils.js;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
+import io.firebus.utils.ZonedTime;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.managers.objectmanager.RedbackObject;
@@ -61,6 +63,10 @@ public class JSConverter {
 			return JSConverter.toJS(obj);
 		} else if(object instanceof Date) {
 			return new JSDate((Date)object);
+		} else if(object instanceof ZonedDateTime) {
+			return new JSDate(Date.from(((ZonedDateTime)object).toInstant()));
+		} else if(object instanceof ZonedTime) {
+			return new JSZonedTime((ZonedTime)object);
 		} else if(object instanceof RedbackObject) {
 			return new RedbackObjectJSWrapper((RedbackObject)object);
 		} else if(object instanceof RedbackObjectRemote) {
@@ -79,6 +85,9 @@ public class JSConverter {
 			Instant ins = value.asInstant();
 			Date dt = Date.from(ins);
 			return dt;
+		} else if(value.isHostObject() && value.asHostObject() instanceof JSZonedTime) {
+			ZonedTime zt = ((JSZonedTime)value.asHostObject()).getTime();
+			return zt;
 		} else if(value.hasArrayElements()) {
 			DataList list = new DataList();
 			for(int i = 0; i < value.getArraySize(); i++) {

@@ -1,7 +1,9 @@
 package io.redback.services.impl;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -9,17 +11,20 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.services.GeoServer;
 import io.redback.utils.Geometry;
+import net.iakovlev.timeshape.TimeZoneEngine;
 
 public class RedbackGeoServer extends GeoServer
 {
 	protected String apiKey;
 	protected String outboundService;
+	protected TimeZoneEngine tzEngine;
 
 	public RedbackGeoServer(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
 		apiKey = config.getString("apikey");
 		outboundService = config.getString("outboundservice");
+		tzEngine = TimeZoneEngine.initialize();
 	}
 
 	protected Geometry geocode(String address) throws RedbackException
@@ -102,4 +107,13 @@ public class RedbackGeoServer extends GeoServer
 		return list;
 	}
 
+	protected String timezone(Geometry geometry)  throws RedbackException
+	{
+		String zoneId = null;
+		Optional<ZoneId> zoneIdOpt = tzEngine.query(geometry.getLatitude(), geometry.getLongitude());
+		if(zoneIdOpt.isPresent()) {
+			zoneId = zoneIdOpt.get().getId();
+		}
+		return zoneId;
+	}
 }

@@ -1,10 +1,14 @@
 package io.redback.managers.objectmanager;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
+import io.firebus.utils.ZonedTime;
 
 
 public class Value
@@ -13,6 +17,7 @@ public class Value
 	protected Number numberValue;
 	protected Boolean boolValue;
 	protected Date dateValue;
+	protected ZonedTime timeValue;
 	protected DataMap mapValue;
 	protected DataList listValue;
 	protected Class<?> valueClass;
@@ -63,6 +68,11 @@ public class Value
 				valueClass = Date.class;
 				dateValue = l.getDate();
 			}
+			else if(l.getType() == DataLiteral.TYPE_TIME)
+			{
+				valueClass = ZonedTime.class;
+				timeValue = l.getTime();
+			}
 		}
 		else if(v instanceof DataMap)
 		{
@@ -73,13 +83,7 @@ public class Value
 		{
 			valueClass = DataList.class;
 			listValue = (DataList)v;
-		}/*
-		else if(v instanceof JSObject)
-		{
-			DataMap map = FirebusDataUtil.convertJSObjectToDataObject((JSObject)v);
-			valueClass = DataMap.class;
-			mapValue = map;
-		}*/
+		}
 	}
 	
 	public Object getObject()
@@ -92,6 +96,8 @@ public class Value
 			return boolValue;
 		else if(valueClass == Date.class)
 			return dateValue;
+		else if(valueClass == ZonedTime.class)
+			return timeValue;
 		else if(valueClass == DataMap.class)
 			return mapValue;
 		else if(valueClass == DataList.class)
@@ -109,6 +115,8 @@ public class Value
 			return "" + boolValue;
 		else if(valueClass == Date.class)
 			return dateValue.toString();
+		else if(valueClass == ZonedTime.class)
+			return timeValue.toString();
 		else if(valueClass == DataMap.class)
 			return mapValue.toString();
 		else if(valueClass == DataList.class)
@@ -153,6 +161,17 @@ public class Value
 			return null;
 		else if(valueClass == Date.class)
 			return dateValue;
+		else if(valueClass == ZonedTime.class)
+			return Date.from(timeValue.atDate(ZonedDateTime.now()).toInstant());
+		return null;
+	}
+	
+	public ZonedTime getTime()
+	{
+		if(valueClass == Date.class)
+			return new ZonedTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(((Date)dateValue).getTime()), ZoneId.systemDefault()));
+		else if(valueClass == ZonedTime.class)
+			return timeValue;
 		return null;
 	}
 	
@@ -219,6 +238,9 @@ public class Value
 							return true;
 				if(valueClass == Date.class)
 					if(getNumber().equals(v.getNumber()))
+							return true;
+				if(valueClass == ZonedTime.class)
+					if(getDate().getTime() == v.getDate().getTime())
 							return true;
 			}
 			else if(valueClass == String.class && v.getValueClass() == Number.class)

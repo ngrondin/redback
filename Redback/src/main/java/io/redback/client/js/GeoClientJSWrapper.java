@@ -18,7 +18,7 @@ public class GeoClientJSWrapper implements ProxyObject {
 	
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected GeoClient geoClient;
-	protected String[] members = {"geocode", "address"};
+	protected String[] members = {"geocode", "address", "timezone"};
 
 	public GeoClientJSWrapper(GeoClient gc)
 	{
@@ -64,6 +64,22 @@ public class GeoClientJSWrapper implements ProxyObject {
 					}
 				}
 			};
+		} else if(key.equals("timezone")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					DataMap geoMap = (DataMap)JSConverter.toJava(arguments[0]);
+					try
+					{
+						Geometry geo = new Geometry(geoMap);
+						String timezone = geoClient.timezone(geo);
+						return timezone;
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error processing timezone request", e);
+					}
+				}
+			};			
 		} else {
 			return null;
 		}
