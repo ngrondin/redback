@@ -52,7 +52,7 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
     this.calcCalendarSettings();
   }
 
-  public getDate() : Date {
+  public getOutput() : any {
     let newDate = new Date();
     newDate.setFullYear(this.year);
     newDate.setMonth(this.month);
@@ -65,7 +65,7 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
   }
 
   public calcCalendarSettings() {
-    let firstOfTheMonth = new Date(this.getDate().setDate(1));
+    let firstOfTheMonth = new Date(this.getOutput().setDate(1));
     let firstOfNextMonth = new Date((new Date(firstOfTheMonth.getTime() + 2678400000)).setDate(1));
     let daysInMonth = (firstOfNextMonth.getTime() - firstOfTheMonth.getTime()) / 86400000;
     this.firstDayOfMonth = firstOfTheMonth.getDay() - 1;
@@ -128,7 +128,7 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
     if(this.currentPart == 2 && this.config.minutePart == false)
       this.currentPart++;
     if(this.currentPart == 3) 
-      this.selected.emit(this.getDate());
+      this.selected.emit(this.getOutput());
   }
 
   public getAngleFromClick(event: any) : number {
@@ -151,7 +151,7 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
   }
 
   public getHighlighted(): any {
-    return this.getDate()
+    return this.getOutput()
   }
 
   public setSearch(val: string) {

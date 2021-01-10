@@ -219,3 +219,121 @@ export class XY {
         this.y = b;
     }
 }
+
+export class Time {
+    hours: number = 0;
+    minutes: number = 0;
+    seconds: number = 0;
+    nano: number = 0;
+    zoneId: string = 'UTC';
+
+    constructor(iso?: string) {
+        if(iso != null) {
+            let str: string = iso;
+            let timeStr: string = null;
+            this.zoneId = 'UTC';
+            if(str.startsWith("T")) str = str.substring(1);
+            let pos1: number = str.indexOf("[");
+            let pos2: number = str.indexOf("]");
+            let pos3: number = str.indexOf("+");
+            if(pos3 == -1) pos3 = str.indexOf("-");
+            if(pos3 == -1) pos3 = str.indexOf("Z");
+            
+            if(pos1 == -1 && pos2 == -1 && pos3 == -1) {
+                timeStr = str;
+            } else if(pos1 > -1 && pos2 > -1 && pos3 == -1) {
+                timeStr = str.substring(0, pos1).trim();
+                this.zoneId = str.substring(pos1 + 1, pos2);
+            } else if(pos1 == -1 && pos2 == -1 && pos3 > -1) {
+                timeStr = str.substring(0, pos3).trim();
+                this.zoneId = str.substring(pos3);
+            } 
+            if(timeStr != null) {
+                let timeParts: string[] = timeStr.split(":");
+                if(timeParts.length > 0)
+                    this.hours = Number.parseInt(timeParts[0]); 
+                if(timeParts.length > 1)
+                    this.minutes = Number.parseInt(timeParts[1]); 
+                if(timeParts.length > 2) {
+                    if(timeParts[2].indexOf(".") > -1) {
+                        let subParts: string[] = timeParts[2].split("\\.");
+                        this.seconds = Number.parseInt(subParts[0]); 
+                        this.nano = Number.parseInt(subParts[1]) * Math.pow(10, (9 - subParts[1].length)); 
+                    } else {
+                        this.seconds = Number.parseInt(timeParts[2]); 
+                        this.nano = 0;
+                    }
+                }
+            }
+        } else {
+            let dt = new Date();
+            this.hours = dt.getHours();
+            this.minutes = dt.getMinutes();
+            this.seconds = dt.getSeconds();
+            this.nano = 0;
+            this.zoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
+    }
+
+    public getHours(): number {
+        return this.hours;
+    }
+
+    public getMinutes(): number {
+        return this.minutes;
+    }
+
+    public getSeconds(): number {
+        return this.seconds;
+    }
+
+    public setHours(h: number) {
+        this.hours = h;
+    }
+
+    public setMinutes(m: number) {
+        this.minutes = m;
+    }
+
+    public setSeconds(s: number) {
+        this.seconds = s;
+    }
+
+    public atDate(date: Date) : Date {
+        let inputDate = new Date(date.getTime());
+        inputDate.setMilliseconds(0);
+        let tempDate = new Date(inputDate.toLocaleString("en-US", {timeZone: this.zoneId}));
+        tempDate.setMilliseconds(0);
+        var diff = inputDate.getTime() - tempDate.getTime();
+        tempDate.setHours(this.hours);
+        tempDate.setMinutes(this.minutes);
+        tempDate.setSeconds(this.seconds);
+        tempDate.setMilliseconds(this.nano / 1000000);
+        var outputDate = new Date(tempDate.getTime() + diff);
+        return outputDate;
+    }
+
+    public toString(): string {
+        let str = "T";
+        str = str + this.hours.toString().padStart(2, '0');
+        str = str + ":";
+        str = str + this.minutes.toString().padStart(2, '0');
+        str = str + ":";
+        str = str + this.seconds.toString().padStart(2, '0');
+        if(this.nano > 0) {
+            str = str + ".";
+			if((this.nano / 1000000) - Math.floor(this.nano / 1000000) == 0) {
+                str = str + (this.nano / 1000000).toString().padStart(3, "0");
+            } else if((this.nano / 1000) - Math.floor(this.nano / 1000) == 0) {
+                str = str + (this.nano / 1000).toString().padStart(6, "0");
+			} else {
+                str = str + (this.nano).toString().padStart(9, "0");
+			}
+        }
+        str = str + "[";
+        str = str + this.zoneId;
+        str = str + "]";
+        return str;
+    }
+
+}

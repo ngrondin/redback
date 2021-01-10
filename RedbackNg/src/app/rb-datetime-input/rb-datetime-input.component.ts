@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ComponentRef, Injector, ViewContainerRef, ViewChild, Output, EventEmitter } from '@angular/core';
-import { RbObject } from 'app/datamodel';
+import { RbObject, Time } from 'app/datamodel';
 import { OverlayRef, Overlay } from '@angular/cdk/overlay';
 import { RbPopupListComponent } from 'app/rb-popup-list/rb-popup-list.component';
 import { CONTAINER_DATA } from 'app/tokens';
@@ -38,24 +38,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
     if(this.overlayRef != null) {
       val = this.editingStr;
     } else {
-      if(this.attribute != null) {
-        if(this.rbObject != null) {
-          let iso : string = this.rbObject.get(this.attribute);
-          if(iso != null) {
-            val = this.formatDate(new Date(iso));
-          } else {
-            val = null;
-          }
-        } else {
-          val = null;  
-        }
-      } else {
-        if(this._value != null) {
-          val = this.formatDate(new Date(this._value));
-        } else {
-          val = null;
-        }
-      }
+      val = this.formatDateTime(this.getDateValue());
       this.checkValueChange(val);
     }
     return val;
@@ -68,22 +51,52 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
     }
   }
 
-  private formatDate(dt: Date) : string {
-    let val = this.format;
-    val = val.replace('YYYY', dt.getFullYear().toString());
-    val = val.replace('YY', (dt.getFullYear() % 100).toString());
-    val = val.replace('MM', this.convertToStringAndPad(dt.getMonth() + 1, 2));
-    val = val.replace('DD', this.convertToStringAndPad(dt.getDate(), 2));
-    val = val.replace('HH', this.convertToStringAndPad(dt.getHours(), 2));
-    val = val.replace('mm', this.convertToStringAndPad(dt.getMinutes(), 2));
+  private formatDateTime(dt: Date) : string {
+    let val = "";
+    if(dt != null) {
+      val = this.format;
+      val = val.replace('YYYY', dt.getFullYear().toString());
+      val = val.replace('YY', (dt.getFullYear() % 100).toString());
+      val = val.replace('MM', (dt.getMonth() + 1).toString().padStart(2, "0"));
+      val = val.replace('DD', (dt.getDate()).toString().padStart(2, "0"));
+      val = val.replace('HH', (dt.getHours()).toString().padStart(2, "0"));
+      val = val.replace('mm', (dt.getMinutes()).toString().padStart(2, "0"));
+    }
     return val;
   }
 
-  private convertToStringAndPad(num: number, n: number) : string {
-    let ret :string = num.toString();
-    while(ret.length < n) 
-      ret = '0' + ret;
-    return ret;
+  private getDateValue() : Date {
+    let iso: string = this.getISOValue();
+    let dt: Date = null;
+    if(iso != null) {
+      if(iso.startsWith("T")) {
+        dt = (new Time(iso)).atDate(new Date());
+      } else {
+        dt = new Date(iso);
+      }
+    }
+    if(dt != null && isNaN(dt.getTime())) {
+      dt = null;
+    }
+    return dt;
+  }
+
+  private getISOValue() : string {
+    let iso: string = null;
+    if(this.attribute != null) {
+      if(this.rbObject != null) {
+        iso = this.rbObject.get(this.attribute);
+      } 
+    } else {
+      if(this._value != null) {
+        iso = this._value;
+      } 
+    }
+    return iso;
+  }
+
+  private hasDatePart() : boolean {
+    return this.format.indexOf('YY') > -1 || this.format.indexOf('MM') > -1 || this.format.indexOf('DD') > -1;
   }
 
   public getPopupClass() {
@@ -92,7 +105,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
 
   public getPopupConfig() {
     return {
-      initialDate: this.rbObject != null && this.rbObject.data[this.attribute] != null ? new Date(this.rbObject.data[this.attribute]) : new Date(),
+      initialDate: this.getDateValue() || (new Date()),
       datePart: this.format.indexOf('YY') > -1 || this.format.indexOf('MM') > -1 || this.format.indexOf('DD') > -1 ? true : false,
       hourPart: this.format.indexOf('HH') > -1 ? true : false,
       minutePart: this.format.indexOf('mm') > -1 ? true : false
@@ -105,7 +118,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
 
   public startEditing() {
     if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
-      this.editingStr = this.formatDate(new Date(this.rbObject.get(this.attribute)));
+      this.editingStr = this.formatDateTime(this.getDateValue());
     } else {
       this.editingStr = '';
     }
@@ -126,8 +139,19 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
     let dt: Date = value;
     if(this.attribute != null) {
       if(this.rbObject != null) {
-        let val: string = (dt != null ? dt.toISOString() : null);
-        this.previousValue = (dt != null ? this.formatDate(dt) : null);
+        let val: string = null;
+        if(dt == null) {
+          val = null;
+        } else if(this.hasDatePart()) {
+          val = dt.toISOString();
+        } else {
+          let time: Time = new Time(); 
+          time.setHours(dt.getHours());
+          time.setMinutes(dt.getMinutes());
+          time.setSeconds(dt.getSeconds());
+          val = time.toString();
+        }
+        this.previousValue = val; 
         this.rbObject.setValue(this.attribute, val);
       }
     } else {

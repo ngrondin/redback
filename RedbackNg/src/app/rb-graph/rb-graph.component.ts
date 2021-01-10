@@ -51,6 +51,7 @@ export class RbGraphComponent implements OnInit {
           this.graphData.push(category);
         }
       }
+      this.graphData.sort((a, b) => (a.name.toString() > b.name.toString()) ? 1 : ((b.name.toString() > a.name.toString()) ? -1 : 0)); 
     } else {
       this.graphData = this.getSeriesDataForCategory(null);
     } 
@@ -59,8 +60,8 @@ export class RbGraphComponent implements OnInit {
   getSeriesDataForCategory(cat: String) : any[] {
     let series: any[] = [];
     for(let agg of this.aggregates) {
-      let thisCat: String = this.categories != null ? agg.getDimension(this.categories.dimension) : null;
-      if(cat == null || cat == thisCat) {
+      let thisCat: String = this.categories != null ? this.nullToEmptyString(agg.getDimension(this.categories.dimension)) : null;
+      if(cat === null || cat === thisCat) {
         let name: any = this.nullToEmptyString(agg.getDimension(this.series.labelattribute));
         if(typeof name == 'string' && name.match(/^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:.\d{1,9})?(?:Z|[+-][01]\d:[0-5]\d)$/)) {
           name = new Date(Date.parse(name));
@@ -70,7 +71,7 @@ export class RbGraphComponent implements OnInit {
       }
     }
     if(this.series.sortby == null || this.series.sortby == 'name') {
-      series.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0)); 
+      series.sort((a, b) => (a.name.toString() > b.name.toString()) ? 1 : ((b.name.toString() > a.name.toString()) ? -1 : 0)); 
     } else if(this.series.sortby == 'value') {
       series.sort((a, b) => a.value - b.value);
     }
