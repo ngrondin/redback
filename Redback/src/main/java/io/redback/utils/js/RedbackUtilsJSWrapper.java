@@ -82,7 +82,7 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 					String tzName = arguments[0].asString();
 					ZoneId here = ZoneId.of(tzName);
 					ZonedDateTime hereAndNow = Instant.now().atZone(here);
-					return hereAndNow.getOffset().getTotalSeconds() * 1000;
+					return -1 * hereAndNow.getOffset().getTotalSeconds() * 1000;
 				}
 			};
 		} else if(key.equals("levenshtein")) {

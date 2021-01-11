@@ -11,7 +11,7 @@ import org.graalvm.polyglot.proxy.ProxyInstant;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 public class JSDate implements ProxyObject, ProxyInstant {
-	protected String[] members = {"getTime", "toISOString"};
+	protected String[] members = {"getTime", "toISOString", "getTimezoneOffset"};
 	protected Date date;
 	
 	public JSDate(Date dt) {
@@ -33,6 +33,12 @@ public class JSDate implements ProxyObject, ProxyInstant {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					return date.toInstant().toString();
+				}
+			};			
+		} else if(key.equals("getTimezoneOffset")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return date.getTimezoneOffset();
 				}
 			};			
 		} else {

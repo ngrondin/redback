@@ -9,7 +9,7 @@ public class Session
 	public String id;
 	public String token;
 	public UserProfile userProfile;
-	public long timezoneOffset;
+	public String timezone;
 
 	public Session() 
 	{
@@ -57,18 +57,9 @@ public class Session
 		token = t;
 	}
 	
-	public void setTimezoneOffsetString(String tzo) 
+	public void setTimezone(String zoneId) 
 	{
-		if(tzo != null) {
-			try {
-				timezoneOffset = Long.parseLong(tzo) * 60000;
-			} catch(Exception e) {}
-		}
-	}
-
-	public void setTimezoneOffsetMS(long tzo) 
-	{
-		timezoneOffset = tzo;
+		timezone = zoneId;
 	}
 
 	public String getId()
@@ -86,14 +77,9 @@ public class Session
 		return userProfile;
 	}
 	
-	public long getTimezoneOffsetMS()
+	public String getTimezone()
 	{
-		return timezoneOffset;
-	}
-	
-	public String getTimezoneOffsetString()
-	{
-		return Long.toString(timezoneOffset / 60000);
+		return timezone;
 	}
 
 }

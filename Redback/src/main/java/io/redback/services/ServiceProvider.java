@@ -22,7 +22,7 @@ public abstract class ServiceProvider extends Service implements io.firebus.inte
 	{
 		try {
 			Session session = new Session(payload.metadata.get("session"));
-			session.setTimezoneOffsetString(payload.metadata.get("timezone"));
+			session.setTimezone(payload.metadata.get("timezone"));
 			Timer timer = new Timer(serviceName, session.getId(), getLogline(payload));
 			logger.finer("Service '" + serviceName + "' started");
 			Payload response = redbackService(session, payload);
