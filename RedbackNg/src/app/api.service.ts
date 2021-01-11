@@ -10,7 +10,7 @@ import { ResponseContentType, RequestOptions } from '@angular/http';
 const httpOptions = {
   headers: new HttpHeaders()
     .set("Content-Type", "application/json")
-    .set("firebus-timezone", ((new Date()).getTimezoneOffset()).toLocaleString()),
+    .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone),
   withCredentials: true
 };
 

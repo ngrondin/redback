@@ -231,7 +231,7 @@ export class Time {
         if(iso != null) {
             let str: string = iso;
             let timeStr: string = null;
-            this.zoneId = 'UTC';
+            this.zoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
             if(str.startsWith("T")) str = str.substring(1);
             let pos1: number = str.indexOf("[");
             let pos2: number = str.indexOf("]");
