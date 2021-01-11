@@ -1,9 +1,7 @@
 package io.redback.services.impl;
 
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -11,20 +9,24 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.services.GeoServer;
 import io.redback.utils.Geometry;
-import net.iakovlev.timeshape.TimeZoneEngine;
 
 public class RedbackGeoServer extends GeoServer
 {
 	protected String apiKey;
 	protected String outboundService;
-	protected TimeZoneEngine tzEngine;
+	protected String geocodeUrl;
+	protected String addressUrl;
+	protected String timezoneUrl;
+
 
 	public RedbackGeoServer(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
 		apiKey = config.getString("apikey");
 		outboundService = config.getString("outboundservice");
-		tzEngine = TimeZoneEngine.initialize();
+		geocodeUrl = config.containsKey("geocodeurl") ? config.getString("geocodeurl") : "https://maps.googleapis.com/maps/api/geocode/json";
+		addressUrl = config.containsKey("addressurl") ? config.getString("addressurl") : "https://maps.googleapis.com/maps/api/place/autocomplete/json";
+		timezoneUrl = config.containsKey("timezoneurl") ? config.getString("timezoneurl") : "https://maps.googleapis.com/maps/api/timezone/json";
 	}
 
 	protected Geometry geocode(String address) throws RedbackException
@@ -34,7 +36,7 @@ public class RedbackGeoServer extends GeoServer
 		{
 			DataMap request = new DataMap();
 			request.put("method", "get");
-			request.put("url", "https://maps.googleapis.com/maps/api/geocode/json?address=" + address.replaceAll(" ", "%20") + "&key=" + apiKey);
+			request.put("url", geocodeUrl + "?address=" + address.replaceAll(" ", "%20") + "&key=" + apiKey);
 			Payload respPayload = firebus.requestService(outboundService, new Payload(request.toString()));
 			DataMap resp = new DataMap(respPayload.getString());
 			if(resp.getList("results").size() > 0) {
@@ -62,7 +64,7 @@ public class RedbackGeoServer extends GeoServer
 		{
 			DataMap request = new DataMap();
 			request.put("method", "get");
-			request.put("url", "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + geometry.getLatitude() + "," + geometry.getLongitude() + "&key=" + apiKey);
+			request.put("url", geocodeUrl + "?latlng=" + geometry.getLatitude() + "," + geometry.getLongitude() + "&key=" + apiKey);
 			Payload respPayload = firebus.requestService(outboundService, new Payload(request.toString()));
 			DataMap resp = new DataMap(respPayload.getString());
 			if(resp.getList("results").size() > 0) {
@@ -81,7 +83,7 @@ public class RedbackGeoServer extends GeoServer
 		List<String> list = new ArrayList<String>();
 		try
 		{
-			String url = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + search.replaceAll(" ", "%20") + "&key=" + apiKey;
+			String url = addressUrl + "?input=" + search.replaceAll(" ", "%20") + "&key=" + apiKey;
 			if(location != null) 
 				url += "&location=" + location.getLatitude() + "," + location.getLongitude();
 			if(radius != null) 
@@ -110,9 +112,20 @@ public class RedbackGeoServer extends GeoServer
 	protected String timezone(Geometry geometry)  throws RedbackException
 	{
 		String zoneId = null;
-		Optional<ZoneId> zoneIdOpt = tzEngine.query(geometry.getLatitude(), geometry.getLongitude());
-		if(zoneIdOpt.isPresent()) {
-			zoneId = zoneIdOpt.get().getId();
+		try
+		{
+			DataMap request = new DataMap();
+			request.put("method", "get");
+			request.put("url", timezoneUrl + "?location=" + geometry.getLatitude() + "," + geometry.getLongitude());
+			Payload respPayload = firebus.requestService(outboundService, new Payload(request.toString()));
+			DataMap resp = new DataMap(respPayload.getString());
+			if(resp.containsKey("timezone")) {
+				zoneId = resp.getString("timezone");
+			}
+		}
+		catch(Exception e)
+		{
+			throw new RedbackException("Error getting timezone", e);
 		}
 		return zoneId;
 	}
