@@ -21,6 +21,7 @@
     </div>
 </div>
 <div
-    *ngIf="isOpen">
+    [style.display]="isOpen ? 'flex' : 'hidden'">
     <ng-content></ng-content>
+    <div #container></div>    
 </div>

@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { ApiService } from 'app/api.service';
-import { DataService } from 'app/data.service';
+import { ApiService } from 'app/services/api.service';
+import { DataService } from 'app/services/data.service';
 
 @Component({
   selector: 'rb-notification',

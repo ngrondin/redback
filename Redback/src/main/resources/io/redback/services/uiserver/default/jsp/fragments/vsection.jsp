@@ -1,13 +1,6 @@
-<% 
-var showExpr = true;
-if(typeof parents.dataset != 'undefined') {
-	showExpr = (config.show != null ? config.show : 'true').split('object').join(parents.dataset + '.selectedObject').split('relatedObject').join(parents.dataset + '.relatedObject');
-	if(showExpr.indexOf('.selectedObject.') > -1) showExpr = parents.dataset + '.selectedObject != null && (' + showExpr + ')';
-	if(showExpr.indexOf('.relatedObject.') > -1) showExpr = parents.dataset + '.relatedObject != null && (' + showExpr + ')';
-}
-%><div
-	class="rb-vsection" 
+<rb-vsection
 	style="<%=config.inlineStyle%>"
-	*ngIf="<%=showExpr%>">
+	[dataset]="<%=parents.dataset%>"
+	[show]="'<%=rbutils.encode(config.show)%>'">
 	#content#
-</div>
+</rb-vsection>

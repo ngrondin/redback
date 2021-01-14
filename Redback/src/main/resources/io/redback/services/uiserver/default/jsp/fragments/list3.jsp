@@ -3,9 +3,7 @@ if(config.view != null) { %>
 	[view]="'<%=config.view%>'" <%
 }
 if(typeof parents.dataset != 'undefined') { %>
-	[list]="<%=parents.dataset%>.list"
-	[(selectedObject)]="<%=parents.dataset%>.selectedObject"
-	[isLoading]="<%=parents.dataset%>.isLoading" <%
+	[dataset]="<%=parents.dataset%>" <%
 }
 if(config.headerattribute != null) { %>
 	[headerattribute]="'<%=config.headerattribute%>'" <%

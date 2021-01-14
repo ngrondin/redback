@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -143,7 +144,7 @@ public class StringUtils
 	public static String urlencode(String s) {
 		try {
 			return URLEncoder.encode(s, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		} catch (Exception e) {
 			return s;
 		}
 	}
@@ -154,6 +155,14 @@ public class StringUtils
 		} catch (UnsupportedEncodingException e) {
 			return s;
 		}
+	}
+	
+	public static String encode(String s) {
+		String r = null;
+		if(s != null) {
+			r = s.replaceAll(" ", "%20").replaceAll("\"", "%22").replaceAll("'", "%27");
+		}
+		return r;
 	}
 		
 	

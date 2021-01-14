@@ -16,12 +16,10 @@ if(config.metrics != null) { %>
 	[metrics]="<%=utils.convertDataEntityToAttributeString(config.metrics)%>"<% 
 } 
 if(typeof parents.dataset == 'undefined') { %>
-	[(userFilter)]="currentTarget.filter" 
-	[(searchString)]="currentTarget.search" 
-	[(selectedObject)]="currentTarget.selectedObject" <%
+	[datatarget]="currentTarget.dataTarget" <%
 } else if(config.master != null) { %>
 	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.master.relationship)%>" 
-	[relatedObject]="<%=parents.dataset%>.selectedObject"<% 
+	[dataset]="<%=parents.dataset%><% 
 } %>
 	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>"
 	(navigate)="navigateTo($event)">

@@ -1,11 +1,11 @@
 import { Component, OnInit, Output, EventEmitter, Inject } from '@angular/core';
 import { CONTAINER_DATA } from 'app/tokens';
-import { DateTimePopupConfig } from 'app/rb-popup-datetime/rb-popup-datetime.component';
+import { DateTimePopupConfig } from 'app/popups/rb-popup-datetime/rb-popup-datetime.component';
 import { OverlayRef, validateHorizontalPosition } from '@angular/cdk/overlay';
 import { MatSelect } from '@angular/material/select';
-import { DataService } from 'app/data.service';
+import { DataService } from 'app/services/data.service';
 import { RbAggregate } from 'app/datamodel';
-import { MapService } from 'app/map.service';
+import { MapService } from 'app/services/map.service';
 
 export class FilterBuilderConfig {
   filterConfig: any;

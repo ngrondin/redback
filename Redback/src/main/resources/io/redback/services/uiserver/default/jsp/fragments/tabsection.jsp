@@ -2,7 +2,7 @@
 	#<%=id%>
 	style="<%=config.inlineStyle%>" <%
 if(typeof parents.tab != 'undefined') { %>
-	[tab]="<%=parents.tab%>" <%
+	[activator]="<%=parents.tab%>" <%
 } %> >	
 	#content#
 </rb-tab-section>

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
-import { DataService } from 'app/data.service';
-import { ConfigService } from 'app/config.service';
+import { DataService } from 'app/services/data.service';
+import { ConfigService } from 'app/services/config.service';
 
 @Component({
   selector: 'rb-global-search',

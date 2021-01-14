@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { RbContainerComponent } from 'app/rb-container/rb-container.component';
+import { RbContainerComponent } from 'app/abstract/rb-container';
+
 
 @Component({
   selector: 'rb-hsection',
@@ -7,12 +8,20 @@ import { RbContainerComponent } from 'app/rb-container/rb-container.component';
   styleUrls: ['./rb-hsection.component.css']
 })
 export class RbHsectionComponent extends RbContainerComponent implements OnInit {
-
   constructor() {
     super();
   }
 
-  ngOnInit(): void {
+  containerInit() {
+  }
+
+  containerDestroy() {
+  }
+
+  onDatasetEvent(event: any) {
+  }
+
+  onActivationEvent(state: boolean) {
   }
 
 }

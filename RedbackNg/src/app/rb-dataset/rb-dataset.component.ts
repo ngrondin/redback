@@ -1,53 +1,49 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { RbObject } from '../datamodel';
-import { DataService } from '../data.service';
-import { MapService } from 'app/map.service';
-import { Subscription } from 'rxjs';
-import { ApiService } from 'app/api.service';
-import { ReportService } from 'app/report.service';
+import { DataService } from '../services/data.service';
+import { MapService } from 'app/services/map.service';
+import { Observable, Subscription } from 'rxjs';
+import { ApiService } from 'app/services/api.service';
+import { ReportService } from 'app/services/report.service';
 import { ToastrService } from 'ngx-toastr';
-import { RbContainerComponent } from 'app/rb-container/rb-container.component';
+import { DataTarget } from 'app/desktop-root/desktop-root.component';
+import { RbContainerComponent } from 'app/abstract/rb-container';
+import { RbActivatorComponent } from 'app/abstract/rb-activator';
+import { Observer } from 'rxjs';
+import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
 
 @Component({
   selector: 'rb-dataset',
   templateUrl: './rb-dataset.component.html',
   styleUrls: ['./rb-dataset.component.css']
 })
-export class RbDatasetComponent extends RbContainerComponent implements OnInit {
-  @Input('active') active: boolean;
-  @Input('object') objectname: string;
-  @Input('relatedObject') relatedObject: RbObject;
-  @Input('relatedFilter') relatedFilter: any;
+export class RbDatasetComponent extends RbContainerComponent  {
+  @Input('object') object: string;
   @Input('baseFilter') baseFilter: any;
   @Input('baseSort') baseSort: any;
   @Input('fetchAll') fetchAll: boolean = false;
+  @Input('name') name: string;
 
-  @Input('searchString') inputSearchString: any;
-  @Input('userFilter') inputUserFilter: any;
-  @Input('userSort') inputUserSort: any;
-  @Input('selectedObject') inputSelectedObject: any;
+  @Input('dataTarget') dataTarget: DataTarget;
+  @Input('master') master: any;
 
-  @Output('initiated') initated: EventEmitter<any> = new EventEmitter();
-  @Output('searchStringChange') searchStringChange: EventEmitter<any> = new EventEmitter();
-  @Output('userFilterChange') userFilterChange: EventEmitter<any> = new EventEmitter();
-  @Output('userSortChange') userSortChange: EventEmitter<any> = new EventEmitter();
-  @Output('selectedObjectChange') selectedObjectChange: EventEmitter<any> = new EventEmitter();
   @Output('openModal') openModal: EventEmitter<any> = new EventEmitter();
 
   public id: String;
-  public dataSubscription: Subscription;
-  public _list: RbObject[] = [];
-  public _selectedObject: RbObject;
+  private dataSubscription: Subscription;
+  private _list: RbObject[] = [];
+  private _selectedObject: RbObject;
   public totalCount: number = -1;
   public searchString: string;
   public userFilter: any;
   public userSort: any;
   public isLoading: boolean;
-  public initiated: boolean = false;
   public firstLoad: boolean = true;
   public nextPage: number;
   public pageSize: number;
   public fetchThreads: number;
+  private observers: Observer<string>[] = [];
+
 
   constructor(
     private dataService: DataService,
@@ -59,43 +55,20 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
     super();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    let doRefresh: boolean = false;
-    if("relatedObject" in changes || "active" in changes) {
-      doRefresh = true;
+  containerInit() {
+    this.id = "" + Math.floor(Math.random() * 10000);
+    this.dataSubscription = this.dataService.getObjectCreateObservable().subscribe(object => this.receiveNewlyCreatedData(object));
+    this.pageSize = this.fetchAll == true ? 250 : 50;
+    this.fetchThreads = 0;
+    if(this.datasetgroup != null) {
+      this.datasetgroup.register(this.name, this);
     }
-    if("inputSearchString" in changes && this.searchString != this.inputSearchString) {
-      this.searchString = this.inputSearchString;
-      doRefresh = true;
-    }
-    if("inputUserFilter" in changes && this.userFilter != this.inputUserFilter) {
-      this.userFilter = this.inputUserFilter;
-      doRefresh = true;
-    }
-    if("inputUserSort" in changes && this.userSort != this.inputUserSort) {
-      this.userSort = this.inputUserSort;
-      doRefresh = true;
-    }
-    if("inputSelectedObject" in changes && this.selectedObject != this.inputSelectedObject) {
-      this._selectedObject = this.inputSelectedObject;
-      doRefresh = true;
-    }
-    if(doRefresh && this.initiated && this.active) {
+    if(this.active) {
       this.refreshData();
     }
   }
 
-  ngOnInit() {
-    this.id = "" + Math.floor(Math.random() * 10000);
-    this.dataSubscription = this.dataService.getObjectCreateObservable().subscribe(object => this.receiveNewlyCreatedData(object));
-    this.initiated = true;
-    this.pageSize = this.fetchAll == true ? 250 : 50;
-    this.fetchThreads = 0;
-    this.refreshData();
-    this.initated.emit(this);
-  }
-
-  ngOnDestroy() {
+  containerDestroy() {
     this.dataSubscription.unsubscribe();
   }
 
@@ -103,10 +76,48 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
     return [...this._list];
   }
 
-  public refreshData() {
+  public get relatedObject() : RbObject {
+    return this.dataset != null ? this.dataset.selectedObject : null;
+  }
+
+  public get selectedObject(): RbObject {
+    return this._selectedObject;
+  }
+
+  public set selectedObject(obj: RbObject) {
+    this.select(obj);
+  }
+
+  getObservable() : Observable<string>  {
+    return new Observable<string>((observer) => {
+      this.observers.push(observer);
+    });
+  }
+
+  onDatasetEvent(event: string) {
+    if(this.active == true) {
+      if(event == 'select' || event == 'loaded') {
+        this.refreshData();
+      } else if(event == 'cleared') {
+        this.clearData();
+      }
+    }
+  }
+
+  onActivationEvent(state: any) {
+    state == true ? this.refreshData() : this.clearData();
+  }
+
+  public clearData() {
     this.nextPage = 0;
     this.totalCount = -1;
     this._list = [];
+    this._selectedObject = null;
+    this.publishEvent('cleared');
+  }
+
+  public refreshData() {
+    this.clearData();
     if(this.fetchAll) {
       setTimeout(() => this.fetchNextPage(), 1);
       setTimeout(() => this.fetchNextPage(), 500);
@@ -116,13 +127,13 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
   }
 
   public fetchNextPage() {
-    if(this.relatedFilter == null || (this.relatedFilter != null && this.relatedObject != null)) {
+    if(this.master == null || (this.master != null && this.relatedObject != null)) {
       const filter = this.mergeFilters();
       const sort = this.userSort != null ? this.userSort : this.baseSort;
-      this.dataService.listObjects(this.objectname, filter, this.searchString, sort, this.nextPage, this.pageSize).subscribe(data => this.setData(data));
+      this.dataService.listObjects(this.object, filter, this.searchString, sort, this.nextPage, this.pageSize).subscribe(data => this.setData(data));
       this.nextPage = this.nextPage + 1;
       this.fetchThreads = this.fetchThreads + 1;
-      this.dataService.subscribeObjectCreation(this.id, this.objectname, filter);
+      this.dataService.subscribeObjectCreation(this.id, this.object, filter);
       this.isLoading = true;
     }
   }
@@ -132,8 +143,8 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
     if(this.baseFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.baseFilter);
     }
-    if(this.relatedFilter != null && this.relatedObject != null) {
-      filter = this.mapService.mergeMaps(filter, this.relatedFilter);
+    if(this.master != null && this.relatedObject != null) {
+      filter = this.mapService.mergeMaps(filter, this.master.relationship);
     } 
     if(this.userFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.userFilter);
@@ -168,16 +179,20 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
       if(this.nextPage == 1) { 
         if(this.fetchAll == false && this._list.length > 10) {
           const filter = this.mergeFilters();
-          this.apiService.aggregateObjects(this.objectname, filter, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
+          this.apiService.aggregateObjects(this.object, filter, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
         } else {
           this.totalCount = this._list.length;
         }
+      }
+      this.publishEvent('loaded');
+      if(this.datasetgroup != null) {
+        this.datasetgroup.loaded(this.name);
       }
     }
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
-    if(object.objectname == this.objectname && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && this._list.length < 50) {
+    if(object.objectname == this.object && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && this._list.length < 50) {
       this._list.push(object);
       if(this._list.length == 1) {
         this._selectedObject = this._list[0];
@@ -185,32 +200,37 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
     }
   }
 
-  public get selectedObject(): RbObject {
-    return this._selectedObject;
-  }
-
-  public set selectedObject(obj: RbObject) {
-    this.select(obj);
-  }
-
   public select(item: RbObject) {
     this._selectedObject = item;
-    this.selectedObjectChange.emit(item);
+    if(this.dataTarget != null) {
+      this.dataTarget.selectedObject = item;
+    }
+    this.publishEvent('select');
   }
 
   public search(str: string) {
     this.searchString = str;
     this.refreshData();
-    this.searchStringChange.emit(str);
+    if(this.dataTarget != null) {
+      this.dataTarget.search = str;
+    }
   }
 
   public filterSort(event: any) {
     this.userFilter = event.filter;
     this.userSort = event.sort;
     this.refreshData();
-    this.userFilterChange.emit(event.filter);
-    this.userSortChange.emit(event.sort);
+    if(this.dataTarget != null) {
+      this.dataTarget.filter = event.filter;
+      this.dataTarget.sort = event.sort;
+    }
   } 
+
+  public publishEvent(event: string) {
+    this.observers.forEach((observer) => {
+      observer.next(event);
+    });     
+  }
 
   public action(name: string, param: string) {
     let _name: string = name.toLowerCase();
@@ -220,9 +240,9 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
         data = this.mapService.mergeMaps(data, this.mapService.resolveMap(param, this.selectedObject, this.selectedObject, this.relatedObject))
       }
       if(_name == 'create') {
-        this.dataService.createObject(this.objectname, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
+        this.dataService.createObject(this.object, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
       } else if(_name == 'createinmemory') {
-        this.dataService.createObjectInMemory(this.objectname, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
+        this.dataService.createObjectInMemory(this.object, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
       }
     } else if(_name == 'delete') {
       if(this.selectedObject != null) {
@@ -232,7 +252,7 @@ export class RbDatasetComponent extends RbContainerComponent implements OnInit {
       
     } else if(_name == 'exportall') {
       const filter = this.mergeFilters();
-      this.dataService.exportObjects(this.objectname, filter, this.searchString);
+      this.dataService.exportObjects(this.object, filter, this.searchString);
     } else if(_name == 'report') {
       if(this.selectedObject != null) {
         this.reportService.launchReport(param, null, {"uid": this.selectedObject.uid});

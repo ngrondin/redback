@@ -15,7 +15,7 @@
             <button
                 mat-button
                 [ngClass]="'rb-tabsection-tabheader-button' + (isTabActive(tab) ? userpref.getAtlClassFor(' rb-tabsection-tabheader-button-active') : '')"
-                (click)="select(tab)"
+                (click)="selectTab(tab)"
                 (contextmenu)="openPopup($event, tab)">
                 {{tab.label}}
             </button>

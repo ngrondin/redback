@@ -1,7 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { RbFile } from 'app/datamodel';
-import { ApiService } from 'app/api.service';
+import { ApiService } from 'app/services/api.service';
 import { DomSanitizer } from '@angular/platform-browser';
+import { RbFilesetDirective } from 'app/rb-fileset/rb-fileset.directive';
 
 @Component({
   selector: 'rb-filelist',
@@ -9,13 +10,10 @@ import { DomSanitizer } from '@angular/platform-browser';
   styleUrls: ['./rb-filelist.component.css']
 })
 export class RbFilelistComponent implements OnInit {
-  @Input('list') list: RbFile[];
-  @Input('selectedFile') selectedFile: RbFile;
+  @Input('fileset') fileset: RbFilesetDirective;
   @Input('downloadOnSelect') downloadOnSelect: boolean;
   @Input('details') showDetails: boolean = true;
   @Input('isLoading') isLoading: boolean;
-
-  @Output() selected: EventEmitter<any> = new EventEmitter();
 
   hasFileOver: boolean = false;
 
@@ -26,6 +24,14 @@ export class RbFilelistComponent implements OnInit {
 
   }
 
+  get list(): RbFile[] {
+    return this.fileset != null ? this.fileset.list : [];
+  }
+
+  get selectedFile(): RbFile {
+    return this.fileset != null ? this.fileset.selectedFile : null;
+  }
+
   ngOnInit() {
   }
 
@@ -34,7 +40,7 @@ export class RbFilelistComponent implements OnInit {
   }
 
   select(file: RbFile) {
-    this.selected.emit(file);
+    this.fileset.select(file);
     if(this.downloadOnSelect) {
       window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + file.fileUid);
     }

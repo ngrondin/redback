@@ -5,7 +5,7 @@ if(showExpr.indexOf('.relatedObject.') > -1) showExpr = parents.dataset + '.rela
 %><rb-address-input
 	class="rb-input-margin"
 	style="<%=config.inlineStyle%>"
-	*ngIf="<%=showExpr%>"
+	[show]="'<%=rbutils.encode(config.show)%>'"
 	[label]="'<%=config.label%>'"<%
 if(config.icon == null) {%>
 	[icon]="'description'"<%	
@@ -18,7 +18,7 @@ if(config.size != null) { %>
 	[size]="<%=config.size%>" <%
 } 
 if(parents.dataset != null) { %>	
-	[object]="<%=parents.dataset%>.selectedObject" <%
+	[dataset]="<%=parents.dataset%>" <%
 } 
 if(config.attribute != null) { %>	
 	[attribute]="'<%=config.attribute%>'" <%

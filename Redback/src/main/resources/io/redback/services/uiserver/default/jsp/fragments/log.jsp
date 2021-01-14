@@ -1,15 +1,11 @@
-<% 
-var showExpr = (config.show != null ? config.show : 'true').split('object').join(parents.dataset + '.selectedObject').split('relatedObject').join(parents.dataset + '.relatedObject');
-if(showExpr.indexOf('.selectedObject.') > -1) showExpr = parents.dataset + '.selectedObject != null && (' + showExpr + ')';
-if(showExpr.indexOf('.relatedObject.') > -1) showExpr = parents.dataset + '.relatedObject != null && (' + showExpr + ')';
-%><rb-log
+<rb-log
 	style="<%=config.inlineStyle%>"
-	*ngIf="<%=showExpr%>"<%
+	[show]="'<%=rbutils.encode(config.show)%>'"<%
 if(config.size != null) { %>	
 	[size]="<%=(config.size == null ? 20 : config.size) %>" <%
 } 
 if(typeof parents.dataset != 'undefined') { %>	
-	[list]="<%=parents.dataset%>.list" <%
+	[dataset]="<%=parents.dataset%>" <%
 } 
 if(config.userattribute != null) { %>	
 	[userattribute]="'<%=config.userattribute%>'" <%

@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { ApiService } from 'app/api.service';
-import { ReportService } from 'app/report.service';
+import { ApiService } from 'app/services/api.service';
+import { ReportService } from 'app/services/report.service';
 
 @Component({
   selector: 'rb-reportlist',

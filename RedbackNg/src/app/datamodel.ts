@@ -1,4 +1,4 @@
-import { DataService } from './data.service';
+import { DataService } from './services/data.service';
 import { analyzeAndValidateNgModules } from '@angular/compiler';
 
 export class ObjectResp {

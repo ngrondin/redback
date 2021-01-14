@@ -14,17 +14,18 @@ if(config.basesort != null) { %>
 	[baseSort]="<%=utils.convertDataMapToAttributeString(config.basesort)%>"<% 
 }  
 if(typeof parents.dataset == 'undefined' && typeof parents.datasetgroup == 'undefined') { %>
-	[(userFilter)]="currentTarget.filter" 
-	[(searchString)]="currentTarget.search" 
-	[(selectedObject)]="currentTarget.selectedObject" <%
+	[dataTarget]="currentTarget.dataTarget" <%
 } else if(config.master != null) { %>
 	[relatedFilter]="<%=utils.convertDataMapToAttributeString(config.master.relationship)%>" 
-	[relatedObject]="<%=parents.dataset%>.selectedObject"<% 
+	[dataset]="<%=parents.dataset%>"<% 
 }  
 if(typeof parents.datasetgroup != 'undefined' && config.name != null) { %>
-	(initiated)="<%=parents.datasetgroup%>.register('<%=config.name%>', <%=id%>)" <%
+	[datasetgroup]="<%=parents.datasetgroup%>" <%
+} 
+if(typeof parents.tab != 'undefined') { %>
+	[activator]="<%=parents.tab%>" <%
 } %>
-	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>"
+	[name]="'<%=config.name%>'"
 	(openModal)="openModal($event)">
 	#content#
 </rb-dataset>

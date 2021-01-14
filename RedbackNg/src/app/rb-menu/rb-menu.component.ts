@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { ApiService } from 'app/api.service';
+import { ApiService } from 'app/services/api.service';
 import { Http } from '@angular/http';
-import { MenuService } from 'app/menu.service';
+import { MenuService } from 'app/services/menu.service';
 
 @Component({
   selector: 'rb-menu',

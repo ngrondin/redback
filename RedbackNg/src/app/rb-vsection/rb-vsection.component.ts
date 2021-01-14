@@ -1,5 +1,7 @@
+import { HostBinding } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import { RbContainerComponent } from 'app/rb-container/rb-container.component';
+import { RbContainerComponent } from 'app/abstract/rb-container';
+
 
 @Component({
   selector: 'rb-vsection',
@@ -7,12 +9,19 @@ import { RbContainerComponent } from 'app/rb-container/rb-container.component';
   styleUrls: ['./rb-vsection.component.css']
 })
 export class RbVsectionComponent extends RbContainerComponent implements OnInit {
-
   constructor() {
     super();
   }
 
-  ngOnInit(): void {
+  containerInit() {
   }
 
+  containerDestroy() {
+  }
+
+  onDatasetEvent(event: any) {
+  }
+
+  onActivationEvent(state: boolean) {
+  }
 }

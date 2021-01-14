@@ -1,13 +1,12 @@
 <rb-map
 	#<%=id%>="rbMap" <%
 if(typeof parents.datasetgroup != 'undefined' && config.series != null) { %>
-	[lists]="<%=parents.datasetgroup%>.lists"
+	[datasetgroup]="<%=parents.datasetgroup%>"
 	[series]="<%=utils.convertDataEntityToAttributeString(config.series)%>"
 	[selectedObject]="<%=parents.datasetgroup%>.selectedObject"
 	(selectObject)="<%=parents.datasetgroup%>.select($event)" <%
 } else if(typeof parents.dataset != 'undefined') { %>
-	[list]="<%=parents.dataset%>.list"	
-	[selectedObject]="<%=parents.dataset%>.selectedObject"
+	[dataset]="<%=parents.dataset%>"	
 	[geoattribute]="'<%=config.geoattribute%>'"
 	[labelattribute]="'<%=config.labelattribute%>'"
 	[descriptionattribute]="'<%=config.descriptionattribute%>'"

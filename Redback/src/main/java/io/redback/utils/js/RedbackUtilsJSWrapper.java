@@ -25,6 +25,7 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 			"base64decode", 
 			"urlencode", 
 			"urldecode",
+			"encode",
 			"getTimezoneOffset",
 			"levenshtein",
 			"base64MimeMessage"
@@ -74,6 +75,12 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					return JSConverter.toJS(StringUtils.urldecode(arguments[0].asString()));
+				}
+			};
+		} else if(key.equals("encode")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					return StringUtils.encode(arguments[0].asString());
 				}
 			};
 		} else if(key.equals("getTimezoneOffset")) {

@@ -4,7 +4,7 @@ if(config.inlineStyle != null) {%>
 	style="<%=config.inlineStyle%>"<%
 }
 if(typeof parents.dataset != 'undefined') { %>
-	[relatedObject]="<%=parents.dataset%>.selectedObject" <%
+	[dataset]="<%=parents.dataset%>" <%
 } %>
 	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
 	#content#

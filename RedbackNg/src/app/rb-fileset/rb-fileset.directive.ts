@@ -1,16 +1,17 @@
 import { Directive, Input, SimpleChanges } from '@angular/core';
 import { RbObject, RbFile } from 'app/datamodel';
-import { DataService } from 'app/data.service';
+import { DataService } from 'app/services/data.service';
 import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
-import { ApiService } from 'app/api.service';
+import { ApiService } from 'app/services/api.service';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Directive({
   selector: 'rb-fileset',
   exportAs: 'fileset'
 })
 export class RbFilesetDirective {
-  @Input('object') objectname: string;
-  @Input('relatedObject') relatedObject: RbObject;
+  @Input('dataset') relatedDataset: RbDatasetComponent;
+  @Input('relatedObject') _relatedObject: RbObject;
   @Input('active') active: boolean;
 
   public list: RbFile[] = [];
@@ -27,6 +28,10 @@ export class RbFilesetDirective {
     this.uploader.response.subscribe( (res: any) => this.afterUpload(res) );
    }
 
+  get relatedObject() : RbObject {
+    return this.relatedDataset != null ? this.relatedDataset.selectedObject : this._relatedObject != null ? this._relatedObject : null;
+  }
+
   ngOnInit() {
     this.refreshData();
     this.initiated = true;
@@ -40,7 +45,6 @@ export class RbFilesetDirective {
       this.list = [];
     }
   }
-
   
   public refreshData() {
     if(this.relatedObject != null) {
@@ -72,10 +76,12 @@ export class RbFilesetDirective {
       this.uploader.uploadAll();
     }
   }
-
   
   public afterUpload(resp: any) {
     this.refreshData();
   }
   
+  public select(file: RbFile) {
+    this.selectedFile = file;
+  }
 }

@@ -23,13 +23,13 @@
 <mat-menu
     #actiongroupmenu="matMenu">
     <div
-        *ngIf="actions.length == 0"
+        *ngIf="actionData.length == 0"
         class="rb-action-group-message">
         No actions
     </div>
     <button
         mat-menu-item
-        *ngFor="let action of actions"
+        *ngFor="let action of actionData"
         (click)="clickAction(action)">
         {{action.label}}
     </button>

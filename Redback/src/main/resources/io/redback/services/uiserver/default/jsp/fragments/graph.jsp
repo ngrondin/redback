@@ -9,7 +9,6 @@
 	[min]="'<%=config.min%>'"
 	[max]="'<%=config.max%>'" <%
 if(parents.aggregateset != null) { %>	
-	[aggregates]="<%=parents.aggregateset%>.aggregates"  
-	(selectDimensions)="<%=parents.aggregateset%>.selectDimensions($event)"<%
+	[aggregateset]="<%=parents.aggregateset%>" <%
 } %>>
 </rb-graph>

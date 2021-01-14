@@ -1,15 +1,17 @@
 import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { RbFile } from 'app/datamodel';
-import { ApiService } from 'app/api.service';
+import { ApiService } from 'app/services/api.service';
 import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
+import { RbFilesetDirective } from 'app/rb-fileset/rb-fileset.directive';
+import { RbContainerComponent } from 'app/abstract/rb-container';
 
 @Component({
   selector: 'rb-filedrop',
   templateUrl: './rb-filedrop.component.html',
   styleUrls: ['./rb-filedrop.component.css']
 })
-export class RbFiledropComponent implements OnInit {
-  @Input('uploader') uploader: FileUploader;
+export class RbFiledropComponent extends RbContainerComponent {
+  @Input('fileset') fileset: RbFilesetDirective;
 
   @Output() dropped: EventEmitter<any> = new EventEmitter();
 
@@ -17,17 +19,26 @@ export class RbFiledropComponent implements OnInit {
 
   constructor(
     private apiService: ApiService
-  ) { 
-
+  ) {
+    super();
   }
 
-  ngOnInit() {
+  get uploader() : FileUploader {
+    return this.fileset != null ? this.fileset.uploader : null;
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    
+  containerInit() {
   }
-  
+
+  containerDestroy() {
+  }
+
+  onDatasetEvent(event: string) {
+  }
+
+  onActivationEvent(state: boolean) {
+  }
+
   fileOver(event: any) {
     if(this.hasFileOver != event) {
       this.hasFileOver = event;
@@ -35,7 +46,8 @@ export class RbFiledropComponent implements OnInit {
   }
 
   fileDropped(event: any) {
-    this.dropped.emit(event);
+    this.fileset.upload(event);
+    //this.dropped.emit(event);
   }
  
 }

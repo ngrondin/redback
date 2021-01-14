@@ -2,9 +2,9 @@ import { Component, Input, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ApiService } from './api.service';
-import { ConfigService } from './config.service';
-import { UserprefService } from './userpref.service';
+import { ApiService } from './services/api.service';
+import { ConfigService } from './services/config.service';
+import { UserprefService } from './services/userpref.service';
 
 @Component({
   viewProviders: [MatIconRegistry],

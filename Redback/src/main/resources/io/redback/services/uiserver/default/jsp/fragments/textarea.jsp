@@ -1,11 +1,7 @@
-<% 
-var showExpr = (config.show != null ? config.show : 'true').split('object').join(parents.dataset + '.selectedObject').split('relatedObject').join(parents.dataset + '.relatedObject');
-if(showExpr.indexOf('.selectedObject.') > -1) showExpr = parents.dataset + '.selectedObject != null && (' + showExpr + ')';
-if(showExpr.indexOf('.relatedObject.') > -1) showExpr = parents.dataset + '.relatedObject != null && (' + showExpr + ')';
-%><rb-textarea-input
+<rb-textarea-input
 	class="rb-input-margin"
 	style="<%=config.inlineStyle%>"
-	*ngIf="<%=showExpr%>"
+	[show]="'<%=rbutils.encode(config.show)%>'"
 	[label]="'<%=config.label%>'"<%
 if(config.icon == null) {%>
 	[icon]="'description'"<%	
@@ -18,7 +14,7 @@ if(config.size != null) { %>
 	[size]="<%=(config.size == null ? 20 : config.size) %>" <%
 } 
 if(parents.dataset != null) { %>	
-	[object]="<%=parents.dataset%>.selectedObject" <%
+	[dataset]="<%=parents.dataset%>" <%
 } 
 if(config.attribute != null) { %>	
 	[attribute]="'<%=(config.attribute == null ? 20 : config.attribute) %>'" <%
@@ -26,6 +22,5 @@ if(config.attribute != null) { %>
 if(config.rows != null) { %>	
 	[rows]="<%=(config.rows == null ? 20 : config.rows) %>" <%
 } %>	
-	[editable]="<%=canWrite%>"
-	>
+	[editable]="<%=canWrite%>">
 </rb-textarea-input>

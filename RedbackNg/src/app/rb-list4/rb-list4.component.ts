@@ -2,7 +2,7 @@ import { HostListener } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
-import { UserprefService } from 'app/userpref.service';
+import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
   selector: 'rb-list4',

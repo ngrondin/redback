@@ -3,6 +3,7 @@ import { OverlayRef, Overlay } from '@angular/cdk/overlay';
 import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { RbFilterBuilderComponent, FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Component({
   selector: 'rb-search',
@@ -10,14 +11,11 @@ import { RbFilterBuilderComponent, FilterBuilderConfig } from 'app/rb-filter-bui
   styleUrls: ['./rb-search.component.css']
 })
 export class RbSearchComponent implements OnInit {
-
+  @Input('dataset') dataset: RbDatasetComponent;
   @Input('icon') icon: string;
   @Input('size') size: number;
-  @Input('filterconfig') filterConfig: any;
-  @Input('sortconfig') sortConfig: any;
-  @Input('object') objectname: any;
-  @Output() search: EventEmitter<any> = new EventEmitter();
-  @Output() filterSort: EventEmitter<any> = new EventEmitter();
+  @Input('filterconfig') filterconfig: any;
+  @Input('sortconfig') sortconfig: any;
 
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;
@@ -41,7 +39,8 @@ export class RbSearchComponent implements OnInit {
       let currentValue = this.value;
       setTimeout(()=> {
         if(this.value == currentValue)
-          this.search.emit(this.value);
+          this.dataset.search(this.value);
+          //this.search.emit(this.value);
       }, 500);
       this.previousValue = this.value;
     }
@@ -58,11 +57,11 @@ export class RbSearchComponent implements OnInit {
     });
 
     let config: FilterBuilderConfig = new FilterBuilderConfig();
-    config.filterConfig = this.filterConfig;
+    config.filterConfig = this.filterconfig;
     config.initialFilter = this.filterValue;
-    config.sortConfig = this.sortConfig;
+    config.sortConfig = this.sortconfig;
     config.initialSort = this.sortValue;
-    config.objectname = this.objectname;
+    config.objectname = this.dataset.object;
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);
@@ -80,7 +79,7 @@ export class RbSearchComponent implements OnInit {
     this.overlayRef = null;
     this.filterValue = event.filter;
     this.sortValue = event.sort;
-    this.filterSort.emit({filter: this.filterValue, sort: this.sortValue});
+    this.dataset.filterSort({filter: this.filterValue, sort: this.sortValue});
   }
 
   cancelFilterBuilder() {

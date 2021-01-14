@@ -1,17 +1,16 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ApiService } from 'app/api.service';
+import { ApiService } from 'app/services/api.service';
 import { RbObject } from 'app/datamodel';
-import { DataService } from 'app/data.service';
+import { DataService } from 'app/services/data.service';
 import { ToastrService } from 'ngx-toastr';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 
 @Component({
   selector: 'rb-processactions',
   templateUrl: './rb-processactions.component.html',
   styleUrls: ['./rb-processactions.component.css']
 })
-export class RbProcessactionsComponent implements OnInit {
-
-  @Input('object') rbObject: RbObject;
+export class RbProcessactionsComponent extends RbDataObserverComponent implements OnInit {
   @Input('round') round: boolean = false;
 
   pid: string;
@@ -23,10 +22,25 @@ export class RbProcessactionsComponent implements OnInit {
     private apiService: ApiService,
     private dataService: DataService,
     private toastr: ToastrService
-  ) { }
+  ) {
+    super();
+  }
 
-  ngOnInit() {
+  dataObserverInit() {
     this.setAssignment(null);
+  }
+
+  dataObserverDestroy() {
+  }
+
+  onDatasetEvent(event: any) {
+  }
+
+  onActivationEvent(event: any) {
+  }
+
+  get rbObject() : RbObject {
+    return this.dataset != null ? this.dataset.selectedObject : null;
   }
 
   activate() {

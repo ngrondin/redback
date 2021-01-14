@@ -1,5 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { RbObject } from 'app/datamodel';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Component({
   selector: 'rb-link',
@@ -7,8 +8,8 @@ import { RbObject } from 'app/datamodel';
   styleUrls: ['./rb-link.component.css']
 })
 export class RbLinkComponent implements OnInit {
-
-  @Input('object') rbObject: RbObject;
+  @Input('dataset') dataset: RbDatasetComponent;
+  //@Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
   @Input('view') view: string;
 
@@ -16,6 +17,10 @@ export class RbLinkComponent implements OnInit {
 
   
   constructor() { }
+
+  get rbObject() : RbObject {
+    return this.dataset != null ? this.dataset.selectedObject : null;
+  }
 
   ngOnInit() {
   }

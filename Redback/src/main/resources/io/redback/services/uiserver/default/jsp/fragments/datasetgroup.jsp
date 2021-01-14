@@ -1,8 +1,10 @@
 <rb-datasetgroup 
-	#<%=id%>="datasetgroup" <% 
+	#<%=id%> <% 
 if(config.inlineStyle != null) {%>
 	style="<%=config.inlineStyle%>"<%
-} %>
-	[active]="<%=(typeof parents.tab !== 'undefined' ? parents.tab + ".active" : "true")%>">
+} 
+if(typeof parents.tab != 'undefined') { %>
+	[activator]="<%=parents.tab%>" <%
+} %>>
 	#content#
 </rb-datasetgroup>

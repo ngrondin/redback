@@ -1,12 +1,8 @@
-<% 
-var showExpr = (config.show != null ? config.show : 'true').split('object').join(parents.dataset + '.selectedObject').split('relatedObject').join(parents.dataset + '.relatedObject');
-if(showExpr.indexOf('.selectedObject.') > -1) showExpr = parents.dataset + '.selectedObject != null && (' + showExpr + ')';
-if(showExpr.indexOf('.relatedObject.') > -1) showExpr = parents.dataset + '.relatedObject != null && (' + showExpr + ')';
-%><rb-dynamicform
+<rb-dynamicform
 	style="<%=config.inlineStyle%>"
-	*ngIf="<%=showExpr%>"<%
+	[show]="'<%=rbutils.encode(config.show)%>'"<%
 if(typeof parents.dataset != 'undefined') { %>	
-	[list]="<%=parents.dataset%>.list"
+	[dataset]="<%=parents.dataset%>"
 	[isLoading]="<%=parents.dataset%>.isLoading" <%
 } 
 if(config.valueattribute != null) { %>	

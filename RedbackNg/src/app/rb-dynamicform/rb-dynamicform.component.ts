@@ -1,14 +1,15 @@
 import { Component, OnInit, Input, SimpleChange } from '@angular/core';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { stringify } from 'querystring';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Component({
   selector: 'rb-dynamicform',
   templateUrl: './rb-dynamicform.component.html',
   styleUrls: ['./rb-dynamicform.component.css']
 })
-export class RbDynamicformComponent implements OnInit {
-  @Input() list : RbObject[];
+export class RbDynamicformComponent extends RbDataObserverComponent {
+  @Input('dataset') dataset: RbDatasetComponent;
   @Input('isLoading') isLoading: any;
   @Input() valueattribute : string;
   @Input() typeattribute : string;
@@ -25,9 +26,24 @@ export class RbDynamicformComponent implements OnInit {
 
   sortedVisibleList: RbObject[];
 
-  constructor() { }
+  constructor() {
+    super();
+  }
 
-  ngOnInit() {
+  get list(): RbObject[] {
+    return this.dataset != null ? this.dataset.list : null;
+  }
+
+  dataObserverInit() {
+  }
+
+  dataObserverDestroy() {
+  }
+
+  onDatasetEvent(event: any) {
+  }
+
+  onActivationEvent(event: any) {
   }
 
   ngOnChanges(changes : SimpleChange) {

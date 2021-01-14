@@ -2,11 +2,13 @@ import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ViewContaine
 import { RbObject } from 'app/datamodel';
 
 import { AgmCoreModule, AgmMap } from '@agm/core';
-import { ApiService } from 'app/api.service';
+import { ApiService } from 'app/services/api.service';
 import { ElementSchemaRegistry } from '@angular/compiler';
 import { MatMenuTrigger, MatMenu, MatMenuPanel } from '@angular/material';
 import { isError } from 'util';
 import { Translator, InitialsMaker } from 'app/helpers';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 
 
 class MapSeriesConfig {
@@ -91,15 +93,11 @@ class MapPolygon {
   styleUrls: ['./rb-map.component.css'],
   exportAs: 'rbMap'
 })
-export class RbMapComponent implements OnInit {
-  @Input('lists') lists : any;
-  @Input('list') list: RbObject[];
+export class RbMapComponent extends RbDataObserverComponent {
   @Input('series') series: any[];
-  @Input('selectedObject') selectedObject: RbObject;
   @Input('geoattribute') geoattribute: string;
   @Input('labelattribute') labelattribute: string;
   @Input('descriptionattribute') descriptionattribute: string;
-  @Output() selectObject: EventEmitter<any> = new EventEmitter();
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('map', { read: AgmMap }) map: AgmMap;
@@ -143,34 +141,48 @@ export class RbMapComponent implements OnInit {
 
   constructor(
     private apiService: ApiService
-  ) { }
+  ) {
+    super();
+  }
 
-  ngOnChanges(changes : SimpleChange) {
-    if('series' in changes && this.series != null) {
+  dataObserverInit() {
+    this.zoomOfMap = 2;
+    if(this.series != null) {
       this.seriesConfigs = [];
       for(let item of this.series) {
         this.seriesConfigs.push(new MapSeriesConfig(item));
       }
-    }
-    if(('geoattribute' in changes || 'labelattribute' in changes)) {
+    } else if(this.geoattribute != null) {
       if(this.seriesConfigs.length == 0) {
         this.seriesConfigs.push(new MapSeriesConfig({}));
       }
       this.seriesConfigs[0].geometryAttribute = this.geoattribute;
       this.seriesConfigs[0].labelAttribute = this.labelattribute;
-    }    
-    if('lists' in changes || 'list' in changes) {
-      if(this.haveListsChanged()) {
-        this.calcAll();
-      }
     }
-    if('selectedObject' in changes) {
+  }
+
+  dataObserverDestroy() {
+  }
+
+  onActivationEvent(event: any) {
+  }
+
+  onDatasetEvent(event: any) {
+    if(this.haveListsChanged()) {
       this.calcAll();
     }
   }
-  
-  ngOnInit() {
-    this.zoomOfMap = 2;
+
+  get selectedObject() : RbObject {
+    return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
+  }
+
+  get list(): RbObject[] {
+    return this.dataset != null ? this.dataset.list : null;
+  }
+
+  get lists(): any {
+    return this.datasetgroup != null ? this.datasetgroup.lists : null;
   }
 
   haveListsChanged(): Boolean {
@@ -358,7 +370,11 @@ export class RbMapComponent implements OnInit {
 
   objectClick(mapPoint: MapPoint) {
     this.preventNextMoveOrZoom = true;
-    this.selectObject.emit(mapPoint.object);
+    if(this.dataset != null) {
+      this.dataset.select(mapPoint.object);
+    } else if (this.datasetgroup != null) {
+      this.datasetgroup.select(mapPoint.object);
+    }
     if(mapPoint.label != null) {
       this.labellatLon.latitude = mapPoint.latitude;
       this.labellatLon.longitude = mapPoint.longitude;

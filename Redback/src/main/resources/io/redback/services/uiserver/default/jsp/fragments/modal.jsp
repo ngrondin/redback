@@ -1,7 +1,6 @@
 <rb-modal
 	#<%=id%>="modal"
 	[name]="<%=config.name%>"
-	[hidden]="activeModal != '<%=config.name%>'"
-	(close)="closeModal()">
+	(closeModal)="closeModal()">
 	#content#
 </rb-modal>

@@ -1,10 +1,6 @@
 import { Component, OnInit, Input, SimpleChange, Output, EventEmitter } from '@angular/core';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { ObserveOnMessage } from 'rxjs/internal/operators/observeOn';
-import { RbSearchComponent } from 'app/rb-search/rb-search.component';
-import { trigger } from '@angular/animations';
-import { MATERIAL_SANITY_CHECKS } from '@angular/material';
-import { Md5 } from 'ts-md5/dist/md5';
 
 let ganttLaneHeight: number = 42;
 
@@ -137,13 +133,9 @@ class GanttMark {
   templateUrl: './rb-gantt.component.html',
   styleUrls: ['./rb-gantt.component.css']
 })
-export class RbGanttComponent implements OnInit {
-  @Input('list') list: RbObject[];
-  @Input('lists') lists : any;
+export class RbGanttComponent extends RbDataObserverComponent {
   @Input('lanes') lanes : any;
   @Input('series') series: any[];
-  @Input('selectedObject') selectedObject: RbObject;
-  @Output() selectedObjectChange: EventEmitter<any> = new EventEmitter();
   @Output('openModal') openModal: EventEmitter<any> = new EventEmitter();
 
   lanesConfig: GanttLaneConfig;
@@ -170,31 +162,48 @@ export class RbGanttComponent implements OnInit {
   lastRecalc: number = 0;
   public getSizeForObjectCallback: Function;
   
-  constructor() { }
+  constructor() {
+    super();
+  }
 
-
-  ngOnChanges(changes : SimpleChange) {
-    if('lanes' in changes && this.lanes != null) {
+  dataObserverInit() {
+    this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
+    this.spanMS = 259200000;
+    this.zoomMS = 259200000;
+    if(this.lanes != null) {
       this.lanesConfig = new GanttLaneConfig(this.lanes);
     }
-    if('series' in changes && this.series != null) {
+    if(this.series != null) {
       this.seriesConfigs = [];
       for(let item of this.series) {
         this.seriesConfigs.push(new GanttSeriesConfig(item));
       }
     }
-    if('lists' in changes || 'list' in changes) {
-      if(this.haveListsChanged()) {
-        this.redraw();
-      }
+    this.redraw();
+  }
+
+  dataObserverDestroy() {
+  }
+
+  onDatasetEvent(event: any) {
+    if(this.haveListsChanged()) {
+      this.redraw();
     }
   }
 
-  ngOnInit() {
-    this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
-    this.spanMS = 259200000;
-    this.zoomMS = 259200000;
-    this.redraw();
+  onActivationEvent(event: any) {
+  }
+
+  get selectedObject() : RbObject {
+    return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
+  }
+
+  get list(): RbObject[] {
+    return this.dataset != null ? this.dataset.list : null;
+  }
+
+  get lists(): any {
+    return this.datasetgroup != null ? this.datasetgroup.lists : null;
   }
 
   public get laneHeight() : number {
@@ -425,15 +434,23 @@ export class RbGanttComponent implements OnInit {
     return null;
   }
 
+  public select(object: RbObject) {
+    if(this.dataset != null) {
+      this.dataset.select(object);
+    } else if(this.datasetgroup != null) {
+      this.datasetgroup.select(object);
+    }
+  }
+
   public clickSpread(spread: GanttSpread) {
-    this.selectedObjectChange.emit(spread.object);
+    this.select(spread.object);
     if(spread.config.modal != null) {
       this.openModal.emit(spread.config.modal);
     }
   }
 
   public clickLane(lane: GanttLane) {
-    this.selectedObjectChange.emit(lane.object);
+    this.select(lane.object);
     if(this.lanesConfig.modal != null) {
       this.openModal.emit(this.lanesConfig.modal);
     }

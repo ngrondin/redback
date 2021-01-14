@@ -1,6 +1,6 @@
 import { HostBinding } from '@angular/core';
 import { Component, Input, OnInit, SimpleChange } from '@angular/core';
-import { RbContainerComponent } from 'app/rb-container/rb-container.component';
+import { RbActivatorComponent } from 'app/abstract/rb-activator';
 import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
 
 @Component({
@@ -8,7 +8,7 @@ import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.compone
   templateUrl: './rb-tab.component.html',
   styleUrls: ['./rb-tab.component.css']
 })
-export class RbTabComponent extends RbContainerComponent implements OnInit {
+export class RbTabComponent extends RbActivatorComponent implements OnInit {
   @Input('tabsection') tabsection : RbTabSectionComponent;
   @Input('label') label : string;
   @Input('isdefault') isdefault : boolean = false;
@@ -18,21 +18,21 @@ export class RbTabComponent extends RbContainerComponent implements OnInit {
     super();
   }
 
-  ngOnChanges(changes : SimpleChange) {
-    if('tabsection' in changes && this.tabsection != null) {
-      this.tabsection.register(this);
-    }
+  activatorInit() {
+    this.tabsection.register(this);
   }
 
-  ngOnInit(): void {
+  activatorDestroy() {
   }
 
-  public get active() : boolean {
-    return this.tabsection.isTabActive(this);
+  onDatasetEvent(event: string) {
+  }
+
+  onActivationEvent(state: boolean) {
   }
 
   @HostBinding('style.display') get visitility() {
-    return this.active ? 'flex' : 'none';
+    return this.activatorOn ? 'flex' : 'none';
   }
 
 

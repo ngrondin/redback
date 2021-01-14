@@ -1,32 +1,39 @@
 import { Component, OnInit, Input, SimpleChanges, HostListener } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
-import { ApiService } from 'app/api.service';
 import { DomSanitizer } from '@angular/platform-browser';
-import { DataService } from 'app/data.service';
 import { RbObject } from 'app/datamodel';
-import { ConfigService } from 'app/config.service';
+import { ConfigService } from 'app/services/config.service';
 import { DragService } from 'app/rb-drag/drag.service';
-import { UserprefService } from 'app/userpref.service';
+import { UserprefService } from 'app/services/userpref.service';
+
+export class DataTarget {
+  filter: any;
+  sort: any;
+  search: string;
+  selectedObject: RbObject;
+
+  constructor(f: any, s: string, so: RbObject) {
+    this.filter = f;
+    this.search = s;
+    this.selectedObject = so;
+  }
+}
 
 export class Target {
   view: string;
   version: string;
   type: string;
-  filter: any;
-  search: string;
-  selectedObject: RbObject;
   title: string;
   _breadcrumbLabel: string;
   mode: string;
+  dataTarget: DataTarget;
 
   constructor(t: string, vs: string, v: string, f: any) {
     this.view = v;
     this.version = vs;
     this.type = t;
-    this.filter = f;
-    this.search = null;
-    this.selectedObject = null;
     this.title = null;
+    this.dataTarget = new DataTarget(f, null, null);
   }
 
   get breadcrumbLabel(): string {

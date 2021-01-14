@@ -3,7 +3,7 @@ if(config.view != null) { %>
 	[view]="'<%=config.view%>'" <%
 }
 if(typeof parents.dataset != 'undefined') { %>
-	[object]="<%=parents.dataset%>.selectedObject"
+	[dataset]="<%=parents.dataset%>"
 	[attribute]="'<%=config.attribute%>'" <%
 } %>
 	(navigate)="navigateTo($event)" >

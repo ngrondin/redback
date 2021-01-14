@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ApiService } from 'app/api.service';
-import { RbDatasetDirective } from 'app/rb-dataset/rb-dataset.directive';
+import { ApiService } from 'app/services/api.service';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Component({
   selector: 'rb-actiongroup',
@@ -8,9 +8,9 @@ import { RbDatasetDirective } from 'app/rb-dataset/rb-dataset.directive';
   styleUrls: ['./rb-actiongroup.component.css']
 })
 export class RbActiongroupComponent implements OnInit {
-  @Input('dataset') dataset: RbDatasetDirective;
-  @Input('actions') _actions: any;
-  @Input('domaincategory') domainCategory: string;
+  @Input('dataset') dataset: RbDatasetComponent;
+  @Input('actions') actions: any;
+  @Input('domaincategory') domaincategory: string;
   @Input('round') round: boolean = false;
 
   message: string;
@@ -23,8 +23,8 @@ export class RbActiongroupComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    if(this.domainCategory != null && this.domainCategory != "") {
-      this.apiService.listDomainFunctions(this.domainCategory).subscribe(json => {
+    if(this.domaincategory != null && this.domaincategory != "") {
+      this.apiService.listDomainFunctions(this.domaincategory).subscribe(json => {
         this._domainActions = [];
         json.result.forEach(item => {
           this._domainActions.push({
@@ -38,11 +38,11 @@ export class RbActiongroupComponent implements OnInit {
     }
   }
 
-  public get actions() {
+  public get actionData() {
     let ret = [];
     let object = this.dataset.selectedObject;
-    if(this._actions != null) {
-      this._actions.forEach(item => {
+    if(this.actions != null) {
+      this.actions.forEach(item => {
         if(item.show == null || item.show == true || (typeof item.show == 'string' && (item.show.indexOf('object.') == -1 || object != null) && eval(item.show))) {
           ret.push(item);
         }

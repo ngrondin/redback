@@ -1,0 +1,9 @@
+:host {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	flex: 1 1 auto;
+	border: 0px Solid;
+	vertical-align:top;
+	overflow: hidden;
+}

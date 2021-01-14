@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { RbAggregate } from 'app/datamodel';
-import { MapService } from 'app/map.service';
+import { RbAggregatesetComponent } from 'app/rb-aggregateset/rb-aggregateset.component';
+import { MapService } from 'app/services/map.service';
 
 @Component({
   selector: 'rb-graph',
@@ -15,8 +16,9 @@ export class RbGraphComponent implements OnInit {
   @Input('value') value: any;
   @Input('min') min: number = 0;
   @Input('max') max: number = 100;
-  @Input('aggregates') aggregates: RbAggregate[];
-  @Output('selectDimensions') selectDimensionsEvent: EventEmitter<any> = new EventEmitter();
+  @Input('aggregateset') aggregateSet: RbAggregatesetComponent;
+  //@Input('aggregates') aggregates: RbAggregate[];
+  //@Output('selectDimensions') selectDimensionsEvent: EventEmitter<any> = new EventEmitter();
 
   colorScheme = {
     domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
@@ -27,13 +29,17 @@ export class RbGraphComponent implements OnInit {
     private mapService: MapService
   ) { }
 
+  get aggregates(): RbAggregate[] {
+    return this.aggregateSet != null ? this.aggregateSet.aggregates : null;
+  }
+
   ngOnInit() {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if("aggregates" in changes) {
+    //if("aggregateSet.aggregates" in changes) {
       this.calcGraphData();
-    }
+    //}
   }
 
   calcGraphData() {
@@ -109,7 +115,7 @@ export class RbGraphComponent implements OnInit {
     } else if(this.type == 'gauge') {
       return {x: 350, y: 250};
     } else if(this.type == 'number') {
-      return {x: 170 * (this.graphData.length), y: 170}
+      return {x: 170 * (100 /*this.graphData.length*/), y: 170}
     } else if(this.type == 'line') {
       return {x: 800, y: 250};
     } else {
@@ -145,6 +151,7 @@ export class RbGraphComponent implements OnInit {
         }
       });
     }
-    this.selectDimensionsEvent.emit(filter);
+    this.aggregateSet.selectDimensions(filter);
+    //this.selectDimensionsEvent.emit(filter);
   }
 }

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChange } from '@angular/core';
 import { RbObject } from 'app/datamodel';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 class TableColumnConfig {
   label: string;
@@ -27,9 +28,10 @@ class TableColumnConfig {
   styleUrls: ['./rb-table.component.css']
 })
 export class RbTableComponent implements OnInit {
-  @Input('list') list: any;
+  @Input('dataset') dataset: RbDatasetComponent;
+  //@Input('list') list: any;
   @Input('columns') _cols: any;
-  @Input('selectedObject') selectedObject: RbObject;
+  //@Input('selectedObject') selectedObject: RbObject;
   @Output() selectedObjectChange: EventEmitter<any> = new EventEmitter();
   @Output() deleteSelected: EventEmitter<any> = new EventEmitter();
   @Output() filterSort: EventEmitter<any> = new EventEmitter();
@@ -37,6 +39,14 @@ export class RbTableComponent implements OnInit {
   columns: TableColumnConfig[];
 
   constructor() { }
+
+  get selectedObject() : RbObject {
+    return this.dataset != null ? this.dataset.selectedObject : null;
+  }
+
+  get list(): RbObject[] {
+    return this.dataset != null ? this.dataset.list : null;
+  }
 
   ngOnInit(): void {
   }

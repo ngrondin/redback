@@ -83,15 +83,12 @@
                     {{object.get(labelattribute)}}
                 </div>
                 <rb-fileset
-                    #fileset="fileset"
-                    [object]="object.objectname"
-                    [relatedObject]="object"
-                    [active]="true">
+                    #fileset
+                    [relatedObject]="object">
                         <rb-filedrop
-                            [uploader]="fileset.uploader"
-                            (dropped)="fileset.upload($event)">
+                            [fileset]="fileset">
                             <rb-filelist
-                                [list]="fileset.list"
+                                [fileset]="fileset"
                                 [details]="false"
                                 [downloadOnSelect]="true">
                             </rb-filelist>

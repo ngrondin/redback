@@ -1,8 +1,10 @@
 import { Input, ViewContainerRef } from '@angular/core';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { RbContainerComponent } from 'app/rb-container/rb-container.component';
+import { RbActivatorComponent } from 'app/abstract/rb-activator';
+import { RbContainerComponent } from 'app/abstract/rb-container';
 import { RbTabComponent } from 'app/rb-tab/rb-tab.component';
-import { UserprefService } from 'app/userpref.service';
+import { UserprefService } from 'app/services/userpref.service';
+import { Subscription } from 'rxjs/internal/Subscription';
 
 @Component({
   selector: 'rb-tab-section',
@@ -10,7 +12,6 @@ import { UserprefService } from 'app/userpref.service';
   styleUrls: ['./rb-tab-section.component.css']
 })
 export class RbTabSectionComponent extends RbContainerComponent implements OnInit {
-  @Input('tab') tab : RbTabComponent;
 
   @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
   
@@ -28,15 +29,25 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     super();
   }
 
-  ngOnInit(): void {
+  containerInit() {
   }
 
-  public get active() : boolean {
-    if(this.tab == null) {
-      return true;
+  containerDestroy() {
+  }
+
+  onDatasetEvent(event: any) {
+  }
+
+  onActivationEvent(state: any) {
+    if(state == true) {
+      if(this.activeTab != null) {
+        this.activeTab.activate();
+      }
     } else {
-      return this.tab.active;
-    }
+      if(this.activeTab != null) {
+        this.activeTab.deactivate();
+      }
+    }    
   }
 
   public register(tab: RbTabComponent) {
@@ -45,12 +56,22 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
       this.tabs.push(tab);
       if(tab.isdefault == true) {
         this.activeTab = tab;
+        tab.active = true;
+      } else {
+        tab.active = false;
       }
     }
   }
 
-  public select(tab: RbTabComponent) {
+
+  public selectTab(tab: RbTabComponent) {
+    if(this.activeTab != null && this.activeTab != tab) {
+      this.activeTab.deactivate();
+    }
     this.activeTab = tab;
+    if(this.active == true) {
+      this.activeTab.activate();
+    }
   }
 
   public isTabActive(tab: RbTabComponent): boolean {

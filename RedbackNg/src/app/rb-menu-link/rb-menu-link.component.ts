@@ -1,6 +1,6 @@
 import { EventEmitter, Input, Output } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import { MenuService } from 'app/menu.service';
+import { MenuService } from 'app/services/menu.service';
 
 @Component({
   selector: 'rb-menu-link',

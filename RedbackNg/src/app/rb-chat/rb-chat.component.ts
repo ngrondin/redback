@@ -1,7 +1,7 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
-import { ApiService } from 'app/api.service';
-import { ConfigService } from 'app/config.service';
-import { DataService } from 'app/data.service';
+import { ApiService } from 'app/services/api.service';
+import { ConfigService } from 'app/services/config.service';
+import { DataService } from 'app/services/data.service';
 
 export class Chat {
   id: String;
