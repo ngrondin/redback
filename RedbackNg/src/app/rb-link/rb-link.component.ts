@@ -9,7 +9,6 @@ import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 })
 export class RbLinkComponent implements OnInit {
   @Input('dataset') dataset: RbDatasetComponent;
-  //@Input('object') rbObject: RbObject;
   @Input('attribute') attribute: string;
   @Input('view') view: string;
 

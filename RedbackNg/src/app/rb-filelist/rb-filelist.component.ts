@@ -2,16 +2,18 @@ import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@
 import { RbFile } from 'app/datamodel';
 import { ApiService } from 'app/services/api.service';
 import { DomSanitizer } from '@angular/platform-browser';
-import { RbFilesetDirective } from 'app/rb-fileset/rb-fileset.directive';
+import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
+import { RbComponent } from 'app/abstract/rb-component';
+import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
   selector: 'rb-filelist',
   templateUrl: './rb-filelist.component.html',
   styleUrls: ['./rb-filelist.component.css']
 })
-export class RbFilelistComponent implements OnInit {
-  @Input('fileset') fileset: RbFilesetDirective;
-  @Input('downloadOnSelect') downloadOnSelect: boolean;
+export class RbFilelistComponent extends RbComponent {
+  @Input('fileset') fileset: RbFilesetComponent;
+  @Input('downloadOnSelect') downloadOnSelect: boolean = true;
   @Input('details') showDetails: boolean = true;
   @Input('isLoading') isLoading: boolean;
 
@@ -19,9 +21,10 @@ export class RbFilelistComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private domSanitizer: DomSanitizer    
-  ) { 
-
+    private domSanitizer: DomSanitizer,
+    public userpref: UserprefService
+  ) {
+    super();
   }
 
   get list(): RbFile[] {
@@ -32,11 +35,13 @@ export class RbFilelistComponent implements OnInit {
     return this.fileset != null ? this.fileset.selectedFile : null;
   }
 
-  ngOnInit() {
+  componentInit() {
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    
+  componentDestroy() {
+  }
+
+  onActivationEvent(state: boolean) {
   }
 
   select(file: RbFile) {

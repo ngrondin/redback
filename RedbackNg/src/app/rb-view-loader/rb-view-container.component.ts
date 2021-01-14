@@ -1,12 +1,12 @@
 import { Component, ViewChild, ViewContainerRef, ComponentRef, Compiler, ComponentFactory, NgModule, ModuleWithComponentFactories, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange } from '@angular/core';
-import { Target } from 'app/desktop-root/desktop-root.component';
+import { ViewTarget } from 'app/datamodel';
 
 @Component({
     selector: 'rb-view-container',
     template: '<div>View Container</div>'
   })
   export class ViewContainerComponent {
-    @Input('target') currentTarget: Target;
+    @Input('target') currentTarget: ViewTarget;
     @Output() navigate: EventEmitter<any> = new EventEmitter();
     
     activeModal: string;

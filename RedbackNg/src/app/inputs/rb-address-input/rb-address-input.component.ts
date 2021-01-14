@@ -11,7 +11,9 @@ import { RbPopupAddressesComponent } from 'app/popups/rb-popup-addresses/rb-popu
 })
 export class RbAddressInputComponent extends RbPopupInputComponent {
   @Input('centerattribute') centerAttribute: string;
+
   searchValue: string; 
+  defaultIcon: string = 'description';
 
   constructor(
     public injector: Injector,

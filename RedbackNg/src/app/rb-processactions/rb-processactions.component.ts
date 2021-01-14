@@ -10,7 +10,7 @@ import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
   templateUrl: './rb-processactions.component.html',
   styleUrls: ['./rb-processactions.component.css']
 })
-export class RbProcessactionsComponent extends RbDataObserverComponent implements OnInit {
+export class RbProcessactionsComponent extends RbDataObserverComponent  {
   @Input('round') round: boolean = false;
 
   pid: string;

@@ -23,6 +23,7 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
 
   searchValue: string; 
   highlightedObject: RbObject;
+  defaultIcon: string = 'description';
 
   constructor(
     public injector: Injector,

@@ -1,5 +1,6 @@
 import { HostListener } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { UserprefService } from 'app/services/userpref.service';
@@ -9,8 +10,7 @@ import { UserprefService } from 'app/services/userpref.service';
   templateUrl: './rb-list4.component.html',
   styleUrls: ['./rb-list4.component.css']
 })
-export class RbList4Component implements OnInit {
-  @Input('dataset') dataset: RbDatasetComponent;
+export class RbList4Component extends RbDataObserverComponent {
   @Input('mainattribute') mainattribute: string;
   @Input('subattribute') subattribute: string;
   @Input('meta1attribute') meta1attribute: string;
@@ -21,9 +21,20 @@ export class RbList4Component implements OnInit {
 
   constructor(
     public userpref: UserprefService
-  ) { }
+  ) {
+    super();
+  }
 
-  ngOnInit(): void {
+  dataObserverInit() {
+  }
+
+  dataObserverDestroy() {
+  }
+
+  onDatasetEvent(event: string) {
+  }
+
+  onActivationEvent(state: boolean) {
   }
 
   public get list() : RbObject[] {

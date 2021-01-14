@@ -14,7 +14,6 @@ export class RbVcollapseComponent extends RbContainerComponent {
   }
 
   containerInit() {
-    this.open = false;
   }
 
   containerDestroy() {
@@ -26,7 +25,7 @@ export class RbVcollapseComponent extends RbContainerComponent {
   onActivationEvent(state: boolean) {
   }
 
-  public get isOpen() {
+  public get isOpen(): boolean {
     return this.open;
   }
 

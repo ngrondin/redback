@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, SimpleChange } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Component({
   selector: 'rb-dynamicform',
@@ -9,47 +8,48 @@ import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
   styleUrls: ['./rb-dynamicform.component.css']
 })
 export class RbDynamicformComponent extends RbDataObserverComponent {
-  @Input('dataset') dataset: RbDatasetComponent;
-  @Input('isLoading') isLoading: any;
-  @Input() valueattribute : string;
-  @Input() typeattribute : string;
-  @Input() optionsattribute : string;
-  @Input() titleattribute : string;
-  @Input() detailattribute : string;
-  @Input() labelattribute : string;
-  @Input() orderattribute : string;
-  @Input() categoryattribute : string;
-  @Input() categoryorderattribute : string;
-  @Input() dependencyattribute : string;
-  @Input() dependencyvalueattribute : string;
-  @Input() editable : boolean;
+  @Input('valueattribute') valueattribute : string;
+  @Input('typeattribute') typeattribute : string;
+  @Input('optionsattribute') optionsattribute : string;
+  @Input('titleattribute') titleattribute : string;
+  @Input('detailattribute') detailattribute : string;
+  @Input('labelattribute') labelattribute : string;
+  @Input('orderattribute') orderattribute : string;
+  @Input('categoryattribute') categoryattribute : string;
+  @Input('categoryorderattribute') categoryorderattribute : string;
+  @Input('dependencyattribute') dependencyattribute : string;
+  @Input('dependencyvalueattribute') dependencyvalueattribute : string;
+  @Input('editable') editable : string;
 
   sortedVisibleList: RbObject[];
+  isEditable: boolean;
 
   constructor() {
     super();
   }
 
-  get list(): RbObject[] {
-    return this.dataset != null ? this.dataset.list : null;
-  }
-
   dataObserverInit() {
+    this.evalEditable();
+    this.calcSortedVisibleList();
   }
 
   dataObserverDestroy() {
   }
 
   onDatasetEvent(event: any) {
+    this.evalEditable();
+    this.calcSortedVisibleList();
   }
 
   onActivationEvent(event: any) {
   }
 
-  ngOnChanges(changes : SimpleChange) {
-    if('list' in changes) {
-      this.calcSortedVisibleList();
-    }
+  get list(): RbObject[] {
+    return this.dataset != null ? this.dataset.list : null;
+  }
+
+  public get isLoading() : boolean {
+    return this.dataset != null ? this.dataset.isLoading : false;
   }
 
   getTypeOf(object: RbObject) : string {
@@ -131,6 +131,23 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
       }
     } else {
       this.sortedVisibleList = [];
+    }
+  }
+
+  public evalEditable() {
+    if(this.editable == null) {
+      this.isEditable = true;
+    } else if(this.editable == 'true') {
+      this.isEditable = true;
+    } else if(this.editable == 'false') {
+        this.isEditable = false;
+    } else {
+        let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
+        if(!(this.editable.indexOf("relatedObject.") > -1 && relatedObject == null)) {
+            this.isEditable = eval(this.editable);            
+        } else {
+            this.isEditable = false;
+        }
     }
   }
 }

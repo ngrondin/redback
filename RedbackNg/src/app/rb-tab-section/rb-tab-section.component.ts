@@ -55,8 +55,7 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     if(swtch == null || swtch == true) {
       this.tabs.push(tab);
       if(tab.isdefault == true) {
-        this.activeTab = tab;
-        tab.active = true;
+        this.selectTab(tab);
       } else {
         tab.active = false;
       }

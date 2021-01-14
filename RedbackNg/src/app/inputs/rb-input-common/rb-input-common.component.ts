@@ -2,6 +2,7 @@ import { HostBinding } from '@angular/core';
 import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { RbDatetimeInputComponent } from '../rb-datetime-input/rb-datetime-input.component';
 
 @Component({
   selector: 'rb-input-common',
@@ -11,19 +12,23 @@ import { RbObject } from 'app/datamodel';
 export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   @Input('object') _rbObject: RbObject;
   @Input('label') label: string;
-  @Input('icon') icon: string;
+  @Input('icon') _icon: string;
   @Input('size') size: number;
-  @Input('editable') editable: boolean;
+  @Input('grow') grow: number;
+  @Input('editable') editable: boolean = true;
   @Input('attribute') attribute: string;
   @Input('value') _value: string;
   @Output('valueChange') valueChange = new EventEmitter();
   @Output('change') change = new EventEmitter();
   @HostBinding('class.rb-input-margin') marginclass: boolean = true;
+  @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
+
 
   previousObject: RbObject;
   previousValue: any;
   editedValue: any;
   flasherOn: boolean = false;
+  abstract defaultIcon: string;
 
   constructor() {
     super();
@@ -43,6 +48,10 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
 
   get rbObject() : RbObject {
     return this.dataset != null ? this.dataset.selectedObject : this._rbObject;
+  }
+
+  get icon(): string {
+    return this._icon != null ? this._icon : this.defaultIcon;
   }
 
   public checkValueChange(value: any) {

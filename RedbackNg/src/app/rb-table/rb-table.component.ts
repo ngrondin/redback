@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChange } from '@angular/core';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
@@ -27,19 +28,31 @@ class TableColumnConfig {
   templateUrl: './rb-table.component.html',
   styleUrls: ['./rb-table.component.css']
 })
-export class RbTableComponent implements OnInit {
-  @Input('dataset') dataset: RbDatasetComponent;
-  //@Input('list') list: any;
+export class RbTableComponent extends RbDataObserverComponent {
   @Input('columns') _cols: any;
-  //@Input('selectedObject') selectedObject: RbObject;
-  @Output() selectedObjectChange: EventEmitter<any> = new EventEmitter();
-  @Output() deleteSelected: EventEmitter<any> = new EventEmitter();
-  @Output() filterSort: EventEmitter<any> = new EventEmitter();
 
   columns: TableColumnConfig[];
 
-  constructor() { }
+  constructor() {
+    super();
+  }
 
+  dataObserverInit() {
+    this.columns = [];
+    for(let item of this._cols) {
+      this.columns.push(new TableColumnConfig(item));
+    }
+  }
+
+  dataObserverDestroy() {
+  }
+
+  onDatasetEvent(event: string) {
+  }
+
+  onActivationEvent(state: boolean) {
+  }
+  
   get selectedObject() : RbObject {
     return this.dataset != null ? this.dataset.selectedObject : null;
   }
@@ -48,21 +61,8 @@ export class RbTableComponent implements OnInit {
     return this.dataset != null ? this.dataset.list : null;
   }
 
-  ngOnInit(): void {
-  }
-
-
-  ngOnChanges(changes : SimpleChange) {
-    if('_cols' in changes && this._cols != null) {
-      this.columns = [];
-      for(let item of this._cols) {
-        this.columns.push(new TableColumnConfig(item));
-      }
-    }
-  }
-
   clickColumn(column: TableColumnConfig) {
-    this.filterSort.emit({
+    this.dataset.filterSort({
       filter: {},
       sort: {
         "0": {
@@ -74,7 +74,6 @@ export class RbTableComponent implements OnInit {
   }
 
   deleteObject(object: RbObject) {
-    this.selectedObjectChange.emit(object);
-    this.deleteSelected.emit();
+    this.dataset.delete(object);
   }
 }

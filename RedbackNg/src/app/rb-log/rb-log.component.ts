@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Component({
   selector: 'rb-log',
@@ -9,18 +8,17 @@ import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
   styleUrls: ['./rb-log.component.css']
 })
 export class RbLogComponent extends RbDataObserverComponent {
-  @Input('dataset') dataset: RbDatasetComponent;
   @Input('size') size: number;
-  @Input('editable') editable: boolean;
-  //@Input('list') list: RbObject[];
   @Input('userattribute') userattribute: string;
   @Input('dateattribute') dateattribute: string;
   @Input('entryattribute') entryattribute: string;
   @Input('categoryattribute') categoryattribute: string;
+  @Input('editable') editable: string;
   
   @Output() posted: EventEmitter<any> = new EventEmitter();
 
   public value: string; 
+  public isEditable: boolean = true;
 
   constructor() {
     super();
@@ -69,12 +67,34 @@ export class RbLogComponent extends RbDataObserverComponent {
     }
     return str;
   }
-  
+
+  keydown(event: any) {
+    if(event.keyCode == 13) {
+      this.post();
+    }
+  }
 
   post() {
     let msg: any = {};
     msg[this.entryattribute] = "'" + this.value.replace("'", "\\'") + "'";
-    this.posted.emit(msg);
+    this.dataset.action('create', msg);
     this.value = "";
+  }
+
+  public evalEditable() {
+    if(this.editable == null) {
+      this.isEditable = true;
+    } else if(this.editable == 'true') {
+      this.isEditable = true;
+    } else if(this.editable == 'false') {
+        this.isEditable = false;
+    } else {
+        let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
+        if(!(this.editable.indexOf("relatedObject.") > -1 && relatedObject == null)) {
+            this.isEditable = eval(this.editable);            
+        } else {
+            this.isEditable = false;
+        }
+    }
   }
 }

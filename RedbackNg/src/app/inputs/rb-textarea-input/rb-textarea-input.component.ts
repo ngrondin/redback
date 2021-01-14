@@ -12,6 +12,7 @@ export class RbTextareaInputComponent extends RbInputCommonComponent {
   @Input('rows') rows: number = 3;
 
   editedValue: string;
+  defaultIcon: string = 'description';
 
   constructor() {
     super();

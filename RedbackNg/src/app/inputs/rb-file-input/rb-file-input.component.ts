@@ -15,6 +15,7 @@ export class RbFileInputComponent extends RbInputCommonComponent implements OnIn
 
   hasFileOver: boolean = false;
   public uploader: FileUploader;
+  defaultIcon: string = 'description';
 
   constructor(
     private apiService: ApiService,

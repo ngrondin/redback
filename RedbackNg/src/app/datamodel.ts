@@ -1,5 +1,7 @@
 import { DataService } from './services/data.service';
 import { analyzeAndValidateNgModules } from '@angular/compiler';
+import { RbDatasetComponent } from './rb-dataset/rb-dataset.component';
+import { ValueComparator } from './helpers';
 
 export class ObjectResp {
     objects: object;
@@ -16,6 +18,7 @@ export class RbObject {
     changed: any;
     dataService: DataService;
     lastUpdated: number;
+    datasets: RbDatasetComponent[] = [];
 
     constructor(json: any, ds: DataService) {
         this.dataService = ds;
@@ -27,9 +30,11 @@ export class RbObject {
 
     updateFromServer(json: any) {
         const inData: any = json.data;
+        let isChanged: boolean = false;
         for(const attribute in json.data) {
-            if(this.data[attribute] != json.data[attribute]) {
+            if(ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
                 this.data[attribute] = json.data[attribute];
+                isChanged = true;
             }
 
             if(json.related != null) {
@@ -49,8 +54,11 @@ export class RbObject {
         
         }
 
-        this.changed = [];
-        this.lastUpdated = (new Date()).getTime();
+        if(isChanged) {
+            this.changed = [];
+            this.lastUpdated = (new Date()).getTime();
+            this.adviseSetsOfChange();
+        }
     }
 
     get(attr: string) : any {
@@ -112,6 +120,7 @@ export class RbObject {
             this.related[attribute] = related;
             this.changed.push(attribute);
             this.lastUpdated = (new Date()).getTime();
+            //this.adviseSetsOfChange();
             return true;
         }
         return false;
@@ -129,6 +138,25 @@ export class RbObject {
             o.related[a] = this.related[a].simplify();
         }
         return o;
+    }
+
+    addSet(set: RbDatasetComponent) {
+        if(this.datasets.indexOf(set) == -1) {
+            this.datasets.push(set);
+        }
+    }
+
+    removeSet(set: RbDatasetComponent) {
+        let index = this.datasets.indexOf(set);
+        if(index > -1) {
+            this.datasets.splice(index);
+        }
+    }
+
+    adviseSetsOfChange() {
+        for(let set of this.datasets) {
+            set.objectUpdated(this);
+        }
     }
 }
 
@@ -337,3 +365,48 @@ export class Time {
     }
 
 }
+
+
+export class DataTarget {
+    objectname: string;
+    filter: any;
+    sort: any;
+    userFilter: any;
+    userSearch: string;
+    userSelectedObject: RbObject;
+  
+    constructor(o: string, f: any) {
+      this.objectname = o
+      this.filter = f;
+    }
+  }
+  
+  export class ViewTarget {
+    view: string;
+    version: string;
+    title: string;
+    _breadcrumbLabel: string;
+    mode: string;
+    dataTarget: DataTarget;
+  
+    constructor(vs: string, v: string, o: string, f: any) {
+      this.version = vs;
+      this.view = v;
+      this.title = null;
+      if(f != null) {
+        this.dataTarget = new DataTarget(o, f);
+      }
+    }
+  
+    get breadcrumbLabel(): string {
+      if(this._breadcrumbLabel != null) {
+        return this._breadcrumbLabel;
+      } else {
+        return this.title; 
+      }
+    }
+  
+    set breadcrumbLabel(v: string) {
+      this._breadcrumbLabel = v;
+    }
+  }

@@ -39,13 +39,25 @@ export class RbFilesetComponent extends RbContainerComponent {
   }
 
   onDatasetEvent(event: any) {
+    if(this.active == true) {
+      if(event == 'select' || event == 'loaded') {
+        this.refreshData();
+      } else if(event == 'cleared') {
+        this.clearData();
+      }
+    }
   }
 
-  onActivationEvent(event: any) {
+  onActivationEvent(state: any) {
+    state == true ? this.refreshData() : this.clearData();
   }
 
   get relatedObject() : RbObject {
     return this.dataset != null ? this.dataset.selectedObject : this._relatedObject != null ? this._relatedObject : null;
+  }
+
+  public clearData() {
+    this.list = [];
   }
 
   public refreshData() {

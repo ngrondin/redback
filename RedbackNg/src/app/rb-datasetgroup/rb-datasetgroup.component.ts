@@ -75,8 +75,8 @@ export class RbDatasetGroupComponent extends RbContainerComponent {
     this.publishEvent('groupselect');
   }
 
-  public loaded(name: string) {
-    this.publishEvent('grouploaded');
+  public groupMemberEvent(name: string, event: string) {
+    this.publishEvent('group_' + name + "_" + event);
   }
 
   public publishEvent(event: string) {

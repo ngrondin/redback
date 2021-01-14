@@ -14,11 +14,12 @@ import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
   templateUrl: './rb-datetime-input.component.html',
   styleUrls: ['./rb-datetime-input.component.css']
 })
-export class RbDatetimeInputComponent extends RbPopupInputComponent implements OnInit {
-  @Input('format') format: string;
+export class RbDatetimeInputComponent extends RbPopupInputComponent {
+  @Input('format') format: string = 'YYYY-MM-DD HH:mm';
   @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
 
   editingStr: string;
+  defaultIcon: string = 'calendar_today';
 
   constructor(
     public injector: Injector,
@@ -27,11 +28,6 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent implements O
   ) {
     super(injector, overlay, viewContainerRef);
    }
-
-  ngOnInit() {
-    if(this.format == null)
-      this.format = 'YYYY-MM-DD HH:mm';
-  }
 
   public get displayvalue(): string {
     let val: string = null;

@@ -2,8 +2,9 @@ import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@
 import { RbFile } from 'app/datamodel';
 import { ApiService } from 'app/services/api.service';
 import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
-import { RbFilesetDirective } from 'app/rb-fileset/rb-fileset.directive';
+
 import { RbContainerComponent } from 'app/abstract/rb-container';
+import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
 
 @Component({
   selector: 'rb-filedrop',
@@ -11,7 +12,7 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
   styleUrls: ['./rb-filedrop.component.css']
 })
 export class RbFiledropComponent extends RbContainerComponent {
-  @Input('fileset') fileset: RbFilesetDirective;
+  @Input('fileset') fileset: RbFilesetComponent;
 
   @Output() dropped: EventEmitter<any> = new EventEmitter();
 

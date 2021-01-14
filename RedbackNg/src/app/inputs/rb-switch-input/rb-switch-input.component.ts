@@ -7,33 +7,16 @@ import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-comm
   templateUrl: './rb-switch-input.component.html',
   styleUrls: ['./rb-switch-input.component.css']
 })
-export class RbSwitchInputComponent extends RbInputCommonComponent implements OnInit {
+export class RbSwitchInputComponent extends RbInputCommonComponent {
 
-  //@Input('label') label: string;
-  //@Input('icon') icon: string;
-  //@Input('editable') editable: boolean;
-  //@Input('object') rbObject: RbObject;
-  //@Input('attribute') attribute: string;
-  //@Input('mode') mode: string;
-  //@Output('change') change = new EventEmitter();
-  
   mode = 'checkbox';
   editedValue: boolean;
+  defaultIcon: string = 'description';
 
   constructor() {
     super();
   }
 
-  ngOnInit() {
-  }
-/*
-  public get readonly(): boolean {
-    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
-      return !(this.editable && this.rbObject.validation[this.attribute].editable);
-    else
-      return true;      
-  }
-*/
   public get value(): boolean {
     if(this.rbObject != null) {
       return this.rbObject.data[this.attribute];

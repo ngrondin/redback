@@ -10,6 +10,7 @@ import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-comm
 export class RbDurationInputComponent extends RbInputCommonComponent implements OnInit {
   editing: boolean;
   editingValue: string;
+  defaultIcon: string = 'timelapse';
 
   constructor() {
     super();

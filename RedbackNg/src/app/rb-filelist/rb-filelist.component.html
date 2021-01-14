@@ -2,7 +2,7 @@
     class="rb-file-container">
     <div
         *ngFor="let file of list" 
-        [ngClass]="selectedFile == file ? 'rb-files-item-active' : ''"
+        [ngClass]="selectedFile == file ? userpref.getAtlClassFor('rb-files-item-active') : ''"
         (click)="select(file)">
         <div
             class="rb-files-item">

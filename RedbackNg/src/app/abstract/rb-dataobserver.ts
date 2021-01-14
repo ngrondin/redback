@@ -1,5 +1,5 @@
 import { HostBinding } from "@angular/core";
-import { OnInit, Input } from "@angular/core";
+import { Input } from "@angular/core";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
 import { Subscription } from "rxjs";
@@ -9,7 +9,6 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('dataset') dataset: RbDatasetComponent;
     @Input('datasetgroup') datasetgroup: RbDatasetGroupComponent;
     @Input('show') show: string;
-    
     
     public datasetSubscription: Subscription;
     public datasetGroupSubscription: Subscription;

@@ -1,6 +1,7 @@
 import { HostBinding } from '@angular/core';
 import { Component, OnInit, HostListener, Output, EventEmitter, Input } from '@angular/core';
 import { RbContainerComponent } from 'app/abstract/rb-container';
+import { ModalService } from 'app/services/modal.service';
 
 @Component({
   selector: 'rb-modal',
@@ -10,16 +11,20 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
 })
 export class RbModalComponent extends RbContainerComponent {
   @Input('name') name: string;
-  @Output('closeModal') closeModal: EventEmitter<any> = new EventEmitter();
+  @HostBinding('style.display') get visitility() {return this.isOpen ? 'flex' : 'none'; }
+  @HostListener('click', ['$event']) onMouseMove($event) {this.close() }
 
   isOpen: boolean = false;
   
-  constructor() {
+  constructor(
+    private modalService: ModalService
+  ) {
     super();
   }
 
   containerInit() {
     this.isOpen = false;
+    this.modalService.register(this.name, this);
   }
 
   containerDestroy() {
@@ -31,12 +36,13 @@ export class RbModalComponent extends RbContainerComponent {
   onActivationEvent(state: boolean) {
   }
 
-  @HostListener('click', ['$event']) 
-  onMouseMove($event) {
-    this.closeModal.emit();
+  public open() {
+    this.isOpen = true;
   }
 
-  @HostBinding('style.display') get visitility() {
-    return this.isOpen ? 'flex' : 'none';
+  public close() {
+    this.isOpen = false;
   }
+
+
 }

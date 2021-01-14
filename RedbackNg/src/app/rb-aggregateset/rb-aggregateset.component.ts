@@ -1,12 +1,10 @@
 import { EventEmitter, Input, Output } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'app/services/data.service';
-import { RbAggregate, RbObject } from 'app/datamodel';
-import { DataTarget } from 'app/desktop-root/desktop-root.component';
+import { DataTarget, RbAggregate, RbObject } from 'app/datamodel';
 import { MapService } from 'app/services/map.service';
 import { RbContainerComponent } from 'app/abstract/rb-container';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
-import { Observer } from 'rxjs';
+import { Observable, Observer } from 'rxjs';
 
 @Component({
   selector: 'rb-aggregateset',
@@ -16,7 +14,7 @@ import { Observer } from 'rxjs';
 export class RbAggregatesetComponent extends RbContainerComponent {
   @Input('object') objectname: string;
   @Input('master') master: any;
-  @Input('baseFilter') baseFilter: any;
+  @Input('basefilter') baseFilter: any;
   @Input('tuple') tuple: any;
   @Input('metrics') metrics: any;
   @Input('datatarget') dataTarget: DataTarget;
@@ -59,6 +57,12 @@ export class RbAggregatesetComponent extends RbContainerComponent {
     return this.dataset != null ? this.dataset.selectedObject : null;
   }
 
+  getObservable() : Observable<string>  {
+    return new Observable<string>((observer) => {
+      this.observers.push(observer);
+    });
+  }
+
   public refreshData() {
     this.aggregates = [];
     if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
@@ -76,7 +80,7 @@ export class RbAggregatesetComponent extends RbContainerComponent {
       filter = this.mapService.mergeMaps(filter, this.baseFilter);
     }
 
-    if(this.master.relationship != null && this.relatedObject != null) {
+    if(this.master != null && this.master.relationship != null && this.relatedObject != null) {
       filter = this.mapService.mergeMaps(filter, this.master.relationship);
     } 
 
@@ -89,6 +93,7 @@ export class RbAggregatesetComponent extends RbContainerComponent {
 
   public setAggregates(data: RbAggregate[]) {
     this.aggregates = data;
+    this.publishEvent('loaded');
   }
 
 
@@ -101,5 +106,11 @@ export class RbAggregatesetComponent extends RbContainerComponent {
       reset: true
     };
     this.navigateEvent.emit(target);
+  }
+
+  public publishEvent(event: string) {
+    this.observers.forEach((observer) => {
+      observer.next(event);
+    });     
   }
 }

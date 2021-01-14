@@ -23,7 +23,7 @@
                 [size]="20"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
-                [editable]="editable">
+                [editable]="isEditable">
             </rb-input>
         </div>
         <div
@@ -37,7 +37,7 @@
                 [rows]="3"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
-                [editable]="editable">
+                [editable]="isEditable">
             </rb-textarea-input>
         </div>        
         <div
@@ -51,7 +51,7 @@
                 [size]="20"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
-                [editable]="editable"
+                [editable]="isEditable"
                 (change)="calcSortedVisibleList()">
             </rb-choice-input>
         </div>
@@ -65,7 +65,7 @@
                 [size]="15"
                 [icon]="'calendar_today'"
                 [label]="object.get(labelattribute)"
-                [editable]="editable"
+                [editable]="isEditable"
                 (change)="calcSortedVisibleList()">
             </rb-datetime-input>
         </div>  
@@ -112,7 +112,7 @@
                 <rb-file-input
                     [object]="object"
                     [attribute]="valueattribute"
-                    [editable]="editable">
+                    [editable]="isEditable">
                 </rb-file-input>
             </div>
         </div>        
@@ -124,7 +124,7 @@
                 [attribute]="valueattribute"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
-                [editable]="editable"
+                [editable]="isEditable"
                 (change)="calcSortedVisibleList()">
             </rb-switch-input>
         </div>                
@@ -139,7 +139,7 @@
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
                 [type]="'number'"
-                [editable]="editable">
+                [editable]="isEditable">
             </rb-input>
         </div>
         <div

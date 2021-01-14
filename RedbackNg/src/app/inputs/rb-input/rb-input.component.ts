@@ -1,6 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { RbObject } from '../../datamodel';
-import {FormControl, FormGroupDirective, NgForm, Validators} from '@angular/forms';
+import { Component, Input } from '@angular/core';
 import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
 
 @Component({
@@ -10,6 +8,8 @@ import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-comm
 })
 export class RbInputComponent extends RbInputCommonComponent {
   @Input('type') type: string;
+
+  defaultIcon: string = 'description';
 
   constructor() {
     super();

@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, SimpleChange, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { ModalService } from 'app/services/modal.service';
 
 let ganttLaneHeight: number = 42;
 
@@ -136,7 +137,6 @@ class GanttMark {
 export class RbGanttComponent extends RbDataObserverComponent {
   @Input('lanes') lanes : any;
   @Input('series') series: any[];
-  @Output('openModal') openModal: EventEmitter<any> = new EventEmitter();
 
   lanesConfig: GanttLaneConfig;
   seriesConfigs: GanttSeriesConfig[];
@@ -162,7 +162,9 @@ export class RbGanttComponent extends RbDataObserverComponent {
   lastRecalc: number = 0;
   public getSizeForObjectCallback: Function;
   
-  constructor() {
+  constructor(
+    private modalService: ModalService
+  ) {
     super();
   }
 
@@ -186,6 +188,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: any) {
+    //console.log('Gantt data event ' + event);
     if(this.haveListsChanged()) {
       this.redraw();
     }
@@ -445,14 +448,14 @@ export class RbGanttComponent extends RbDataObserverComponent {
   public clickSpread(spread: GanttSpread) {
     this.select(spread.object);
     if(spread.config.modal != null) {
-      this.openModal.emit(spread.config.modal);
+      this.modalService.open(spread.config.modal);
     }
   }
 
   public clickLane(lane: GanttLane) {
     this.select(lane.object);
     if(this.lanesConfig.modal != null) {
-      this.openModal.emit(this.lanesConfig.modal);
+      this.modalService.open(this.lanesConfig.modal);
     }
   }
 
@@ -487,6 +490,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
     }
     if(Object.keys(update).length > 0) {
       event.object.setValues(update);
+      this.redraw();
     }
   }
 

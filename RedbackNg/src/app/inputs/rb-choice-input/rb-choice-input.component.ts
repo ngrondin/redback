@@ -12,6 +12,7 @@ export class RbChoiceInputComponent extends RbInputCommonComponent {
   @Output('change') change = new EventEmitter();
 
   public editedValue: string; 
+  defaultIcon: string = 'description';
 
   constructor() {
     super();

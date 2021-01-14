@@ -1,10 +1,7 @@
 import { Component, ViewChild, ViewContainerRef, ComponentRef, Compiler, ComponentFactory, NgModule, ModuleWithComponentFactories, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange, TypeDecorator } from '@angular/core';
 import { Http } from '@angular/http';
 import { __asyncDelegator } from 'tslib';
-import { CommonModule } from '@angular/common';
-import { RedbackModule } from '../redback.module';
 import { ApiService } from 'app/services/api.service';
-import { Target } from 'app/desktop-root/desktop-root.component';
 import { ViewContainerComponent } from './rb-view-container.component';
 import { DataService } from 'app/services/data.service';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
@@ -50,7 +47,15 @@ import { RbTableComponent } from 'app/rb-table/rb-table.component';
 import { RbVcollapseComponent } from 'app/rb-vcollapse/rb-vcollapse.component';
 import { RbHseparatorComponent } from 'app/rb-hseparator/rb-hseparator.component';
 import { RbSpacerComponent } from 'app/rb-spacer/rb-spacer.component';
+import { RbGraphComponent } from 'app/rb-graph/rb-graph.component';
+import { ViewTarget } from 'app/datamodel';
 
+
+export class ViewCacheEntry {
+  title: string;
+  rootComponentRefs: ComponentRef<Component>[] = [];
+  topDatasets: RbDatasetComponent[] = [];
+}
 
 
 @Component({
@@ -60,20 +65,21 @@ import { RbSpacerComponent } from 'app/rb-spacer/rb-spacer.component';
 })
 export class RbViewLoaderComponent implements OnInit {
 
-  @Input('target') private target: Target;
+  @Input('target') private target: ViewTarget;
   @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
-  @Output() titlechange: EventEmitter<any> = new EventEmitter();
+  //@Output() titlechange: EventEmitter<any> = new EventEmitter();
 
   private currentView: string;
-  private componentRef: ComponentRef<ViewContainerComponent>;
+  //private componentRef: ComponentRef<ViewContainerComponent>;
   private rootComponentRefs: ComponentRef<Component>[] = [];
-  private factoryCache: any = {};
+  //private factoryCache: any = {};
   private viewCache: any = {};
-  private mode: number = 2;
+  //private mode: number = 2;
 
   private registry = {
     "dataset": RbDatasetComponent,
+    "datasetgroup": RbDatasetGroupComponent,
     "layout": RbLayoutComponent,
     "form": RbFormComponent,
     "hsection": RbHsectionComponent,
@@ -111,7 +117,8 @@ export class RbViewLoaderComponent implements OnInit {
     "table": RbTableComponent,
     "vcollapse": RbVcollapseComponent,
     "hseparator": RbHseparatorComponent,
-    "spacer": RbSpacerComponent
+    "spacer": RbSpacerComponent,
+    "graph": RbGraphComponent
   }
 
   constructor(
@@ -131,7 +138,7 @@ export class RbViewLoaderComponent implements OnInit {
     if("target" in changes && this.target != null) {
       if(this.target.view != this.currentView) {
         this.dataService.clearAllLocalObject();
-        if(this.mode == 1) {
+        /*if(this.mode == 1) {
           let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/' + this.target.type + '/' + this.target.version + '/' + this.target.view;
           this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
             res => {
@@ -139,21 +146,22 @@ export class RbViewLoaderComponent implements OnInit {
               this.compileTemplate(res.text());
             }
           );
-        } else if(this.mode == 2) {
+        } else if(this.mode == 2) {*/
           let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
           this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
             res => {
               this.buildConfig(res.json())
             }
           );
-        }
+        //}
         this.currentView = this.target.view;
-      } else if(this.componentRef != null) {
+      } /*else if(this.componentRef != null) {
         this.componentRef.instance.currentTarget = this.target;
-      } 
+      } */
     } 
   }
 
+  /*
   compileTemplate(body: string) {
     let hash = body.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
     let factory = this.factoryCache[hash];
@@ -178,31 +186,40 @@ export class RbViewLoaderComponent implements OnInit {
     newViewComponentRef.instance.navigate.subscribe(e => this.navigate.emit(e));
     this.componentRef = newViewComponentRef;
   }
-
+*/
 
   buildConfig(config: any) {
     this.rootComponentRefs.forEach(item => this.container.detach(this.container.indexOf(item.hostView)));
-    let hash = JSON.stringify(config).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
-    this.rootComponentRefs = this.viewCache[hash];
-    if(this.rootComponentRefs == null) {
-      this.rootComponentRefs = [];
-      let context: any = {};
+    let hash = JSON.stringify(config).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
+    let entry: ViewCacheEntry = this.viewCache[hash];
+    if(entry == null) {
+      entry = new ViewCacheEntry();
+      let topDatasets: RbDatasetComponent[] = [];
       if(config['content'] != null) {
         for(let item of config['content']) {
-          this.rootComponentRefs.push(this.buildConfigRecursive(item, context));
+          entry.rootComponentRefs.push(this.buildConfigRecursive(item, {}, topDatasets));
         }
       }
-      this.viewCache[hash] = this.rootComponentRefs;
+      entry.title = config.label;
+      entry.topDatasets = topDatasets;
+      this.viewCache[hash] = entry;
     }
-    if(this.rootComponentRefs != null) {
-      for(let item of this.rootComponentRefs) {
+    if(entry != null) {
+      this.rootComponentRefs = entry.rootComponentRefs;
+      for(let item of entry.rootComponentRefs) {
         this.container.insert(item.hostView);
       }
+      for(let item of entry.topDatasets) {
+        if(this.target.dataTarget != null && (this.target.dataTarget.objectname == null || (this.target.dataTarget.objectname == item.object))) {
+          item.dataTarget = this.target.dataTarget;
+        }
+        item.reset();
+      }
+      this.target.title = entry.title;
     }
-    this.target.title = config.label;
   }
 
-  buildConfigRecursive(config: any, context: any) {
+  buildConfigRecursive(config: any, context: any, topDatasets: RbDatasetComponent[]) {
     let newComponentRef: ComponentRef<Component> = null;
     let componentClass = this.registry[config.type];
     if(componentClass != null) {
@@ -232,6 +249,13 @@ export class RbViewLoaderComponent implements OnInit {
             newInstance[inputs[input]] = val;
           }
         };
+        if(newInstance instanceof RbDatasetComponent && newInstance['master'] == null) {
+          topDatasets.push(newInstance);
+        }
+        var outputs: any = factory['componentDef']['outputs'];
+        if(outputs['navigate'] != null) {
+          newInstance['navigate'].subscribe(e => this.navigate.emit(e))
+        }
         if(config['content'] != null) {
           if(newInstance instanceof RbContainerComponent && newInstance.container != null) {
             let newContext = Object.assign({}, context);
@@ -250,7 +274,7 @@ export class RbViewLoaderComponent implements OnInit {
             }
             let newContainer: RbContainerComponent = <RbContainerComponent>newInstance;
             for(let childConfig of config['content']) {
-              let childComponentRef: ComponentRef<Component> = this.buildConfigRecursive(childConfig, newContext);
+              let childComponentRef: ComponentRef<Component> = this.buildConfigRecursive(childConfig, newContext, topDatasets);
               if(childComponentRef != null) {
                 newContainer.container.insert(childComponentRef.hostView);
               }

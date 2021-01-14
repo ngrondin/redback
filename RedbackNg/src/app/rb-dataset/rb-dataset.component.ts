@@ -1,16 +1,15 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { RbObject } from '../datamodel';
+import { Component, Input } from '@angular/core';
+import { DataTarget, RbObject } from '../datamodel';
 import { DataService } from '../services/data.service';
 import { MapService } from 'app/services/map.service';
 import { Observable, Subscription } from 'rxjs';
 import { ApiService } from 'app/services/api.service';
 import { ReportService } from 'app/services/report.service';
 import { ToastrService } from 'ngx-toastr';
-import { DataTarget } from 'app/desktop-root/desktop-root.component';
 import { RbContainerComponent } from 'app/abstract/rb-container';
-import { RbActivatorComponent } from 'app/abstract/rb-activator';
 import { Observer } from 'rxjs';
-import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
+import { ModalService } from 'app/services/modal.service';
+
 
 @Component({
   selector: 'rb-dataset',
@@ -19,15 +18,13 @@ import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.com
 })
 export class RbDatasetComponent extends RbContainerComponent  {
   @Input('object') object: string;
-  @Input('baseFilter') baseFilter: any;
-  @Input('baseSort') baseSort: any;
-  @Input('fetchAll') fetchAll: boolean = false;
+  @Input('basefilter') baseFilter: any;
+  @Input('basesort') baseSort: any;
+  @Input('fetchall') fetchAll: boolean = false;
   @Input('name') name: string;
 
   @Input('dataTarget') dataTarget: DataTarget;
   @Input('master') master: any;
-
-  @Output('openModal') openModal: EventEmitter<any> = new EventEmitter();
 
   public id: String;
   private dataSubscription: Subscription;
@@ -50,7 +47,8 @@ export class RbDatasetComponent extends RbContainerComponent  {
     private apiService: ApiService,
     private mapService: MapService,
     private reportService: ReportService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private modalService: ModalService
   ) {
     super();
   }
@@ -63,17 +61,29 @@ export class RbDatasetComponent extends RbContainerComponent  {
     if(this.datasetgroup != null) {
       this.datasetgroup.register(this.name, this);
     }
-    if(this.active) {
-      this.refreshData();
-    }
+    this.reset();
   }
 
   containerDestroy() {
     this.dataSubscription.unsubscribe();
   }
 
+  onDatasetEvent(event: string) {
+    if(this.active == true) {
+      if(event == 'select' || event == 'loaded') {
+        this.refreshData();
+      } else if(event == 'cleared') {
+        this.clearData();
+      }
+    }
+  }
+
+  onActivationEvent(state: any) {
+    state == true ? this.refreshData() : this.clearData();
+  }
+
   public get list() : RbObject[] {
-    return [...this._list];
+    return this._list;
   }
 
   public get relatedObject() : RbObject {
@@ -94,43 +104,45 @@ export class RbDatasetComponent extends RbContainerComponent  {
     });
   }
 
-  onDatasetEvent(event: string) {
-    if(this.active == true) {
-      if(event == 'select' || event == 'loaded') {
-        this.refreshData();
-      } else if(event == 'cleared') {
-        this.clearData();
-      }
+  public reset() {
+    this.searchString = this.dataTarget != null && this.dataTarget.userSearch != null ? this.dataTarget.userSearch : null;
+    this.userFilter = this.dataTarget != null && this.dataTarget.userFilter != null ? this.dataTarget.userFilter : null;
+    this.userSort = null;
+    this.refreshData();
+    if(this.dataTarget != null && this.dataTarget.userSelectedObject != null) {
+      this._selectedObject = this.dataTarget.userSelectedObject;
     }
   }
 
-  onActivationEvent(state: any) {
-    state == true ? this.refreshData() : this.clearData();
+  public refreshData() {
+    if(this.active) {
+      this.clearData();
+      if(this.fetchAll) {
+        setTimeout(() => this.fetchNextPage(), 1);
+        setTimeout(() => this.fetchNextPage(), 500);
+      } else {
+        this.fetchNextPage();
+      }
+    }
   }
 
   public clearData() {
     this.nextPage = 0;
     this.totalCount = -1;
+    for(let obj of this._list) {
+      obj.removeSet(this);
+    }
     this._list = [];
     this._selectedObject = null;
     this.publishEvent('cleared');
   }
 
-  public refreshData() {
-    this.clearData();
-    if(this.fetchAll) {
-      setTimeout(() => this.fetchNextPage(), 1);
-      setTimeout(() => this.fetchNextPage(), 500);
-    } else {
-      this.fetchNextPage();
-    }
-  }
-
   public fetchNextPage() {
     if(this.master == null || (this.master != null && this.relatedObject != null)) {
       const filter = this.mergeFilters();
-      const sort = this.userSort != null ? this.userSort : this.baseSort;
-      this.dataService.listObjects(this.object, filter, this.searchString, sort, this.nextPage, this.pageSize).subscribe(data => this.setData(data));
+      const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
+      const search = this.searchString;
+      this.dataService.listObjects(this.object, filter, search, sort, this.nextPage, this.pageSize).subscribe(data => this.setData(data));
       this.nextPage = this.nextPage + 1;
       this.fetchThreads = this.fetchThreads + 1;
       this.dataService.subscribeObjectCreation(this.id, this.object, filter);
@@ -146,6 +158,9 @@ export class RbDatasetComponent extends RbContainerComponent  {
     if(this.master != null && this.relatedObject != null) {
       filter = this.mapService.mergeMaps(filter, this.master.relationship);
     } 
+    if(this.dataTarget != null) {
+      filter = this.mapService.mergeMaps(filter, this.dataTarget.filter);
+    } 
     if(this.userFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.userFilter);
     }
@@ -154,13 +169,13 @@ export class RbDatasetComponent extends RbContainerComponent  {
   }
 
   private setData(data: RbObject[]) {
-    let newList = [...this._list]; //Creating a new list instance forces a refresh of bindings
     for(var i = 0; i < data.length; i++) {
-      if(newList.indexOf(data[i]) == -1) {
-        newList.push(data[i]);
+      let obj: RbObject = data[i];
+      if(this._list.indexOf(obj) == -1) {
+        this._list.push(obj);
+        obj.addSet(this);
       }
     } 
-    this._list = newList;
     this.fetchThreads = this.fetchThreads - 1;
     if(this.fetchAll == true && data.length == this.pageSize) {
       this.fetchNextPage();
@@ -185,25 +200,27 @@ export class RbDatasetComponent extends RbContainerComponent  {
         }
       }
       this.publishEvent('loaded');
-      if(this.datasetgroup != null) {
-        this.datasetgroup.loaded(this.name);
-      }
     }
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
     if(object.objectname == this.object && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && this._list.length < 50) {
       this._list.push(object);
+      object.addSet(this);
       if(this._list.length == 1) {
         this._selectedObject = this._list[0];
       }
     }
   }
 
+  public objectUpdated(object: RbObject) {
+    this.publishEvent('update');
+  }
+
   public select(item: RbObject) {
     this._selectedObject = item;
     if(this.dataTarget != null) {
-      this.dataTarget.selectedObject = item;
+      this.dataTarget.userSelectedObject = item;
     }
     this.publishEvent('select');
   }
@@ -212,7 +229,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
     this.searchString = str;
     this.refreshData();
     if(this.dataTarget != null) {
-      this.dataTarget.search = str;
+      this.dataTarget.userSearch = str;
     }
   }
 
@@ -221,15 +238,43 @@ export class RbDatasetComponent extends RbContainerComponent  {
     this.userSort = event.sort;
     this.refreshData();
     if(this.dataTarget != null) {
-      this.dataTarget.filter = event.filter;
-      this.dataTarget.sort = event.sort;
+      this.dataTarget.userFilter = event.filter;
     }
   } 
+
+  public delete(object: RbObject) {
+    this.remove(object);
+    this.dataService.deleteObject(this.selectedObject).subscribe(result => this.removeSelected());
+  }
+
+  public addObjectAndSelect(obj: RbObject) {
+    if(this._list.indexOf(obj) > -1) {
+      this._list.splice(this._list.indexOf(obj));
+    }
+    this._list.unshift(obj);
+    obj.addSet(this);
+    this.select(obj);
+  }
+
+  public removeSelected() {
+    this.remove(this.selectedObject);
+    this.selectedObject = null;
+  }
+
+  public remove(object: RbObject) {
+    if(this._list.indexOf(object) > -1) {
+      this._list.splice(this._list.indexOf(object), 1);
+      object.removeSet(this);
+    }
+  }
 
   public publishEvent(event: string) {
     this.observers.forEach((observer) => {
       observer.next(event);
-    });     
+    }); 
+    if(this.datasetgroup != null) {
+      this.datasetgroup.groupMemberEvent(this.name, event);
+    }
   }
 
   public action(name: string, param: string) {
@@ -288,25 +333,12 @@ export class RbDatasetComponent extends RbContainerComponent  {
         );
       }
     } else if(_name == 'modal') {
-      this.openModal.emit(param);
+      this.modalService.open(param);
     } else if(this.selectedObject != null) {
       this.dataService.executeObject(this.selectedObject, name, param);
     }
   }
 
-  public addObjectAndSelect(obj: RbObject) {
-    if(this._list.indexOf(obj) > -1) {
-      this._list.splice(this._list.indexOf(obj));
-    }
-    this._list.unshift(obj);
-    this.select(obj);
-  }
 
-  public removeSelected() {
-    if(this._list.indexOf(this.selectedObject) > -1) {
-      this._list.splice(this._list.indexOf(this.selectedObject), 1);
-    }
-    this.selectedObject = null;
-  }
 
 }

@@ -45,3 +45,23 @@ export class InitialsMaker {
         return ret;
     }
 }
+
+export class ValueComparator{ 
+    public static notEqual(a: any, b: any): boolean {
+        return !this.equal(a, b);
+    }
+
+    public static equal(a: any, b: any): boolean {
+        if(a == null && b == null) {
+            return true;
+        } else if(a == null || b == null) {
+            return false;
+        } else if(typeof a == 'object' && typeof b == 'object') {
+            return JSON.stringify(a) == JSON.stringify(b);
+        } else if(typeof a == 'object' || typeof b == 'object') {
+            return false;
+        } else {
+            return a == b;
+        }
+    }
+}

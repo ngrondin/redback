@@ -4,8 +4,7 @@
     flex: 0 1 auto;
     width: 800px;
     overflow: hidden;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin: 10px;
 }
 
 .rb-log-post {

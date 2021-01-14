@@ -14,6 +14,7 @@ export class RbCurrencyInputComponent extends RbInputCommonComponent implements 
 
   editing: boolean;
   editingValue: string;
+  defaultIcon: string = 'attach_money';
 
   constructor() {
     super();

@@ -1,17 +1,19 @@
 <div
     class="rb-log-post"
-    *ngIf="editable">
+    *ngIf="isEditable">
+    <mat-icon 
+        style="margin-top: 15px;"
+        class="rb-grey-icon">
+        create
+    </mat-icon>
     <mat-form-field
         style="flex-grow:1;">
         <mat-label>New Note</mat-label>
         <input 
             matInput 
             [(ngModel)]="value"
-            autocomplete="off">
-        <mat-icon 
-            matPrefix
-            class="rb-grey-icon">create</mat-icon>
-        
+            (keydown)="keydown($event)"
+            autocomplete="off">        
     </mat-form-field >
     <button
         mat-raised-button
