@@ -9,14 +9,11 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('dataset') dataset: RbDatasetComponent;
     @Input('datasetgroup') datasetgroup: RbDatasetGroupComponent;
     @Input('show') show: string;
+    @HostBinding('style.display') get visitility() { return this.showResult ? 'flex' : 'none'; }
     
     public datasetSubscription: Subscription;
     public datasetGroupSubscription: Subscription;
     public showResult: boolean = true;
-
-    @HostBinding('style.display') get visitility() {
-        return this.showResult ? 'flex' : 'none';
-    }
 
     constructor() {
         super();
@@ -65,15 +62,17 @@ export abstract class RbDataObserverComponent extends RbComponent {
             this.showResult = true;
         } else if(this.show == 'false') {
             this.showResult = false;
-        } else {
+        } else if(this.dataset != null && (this.dataset.selectedObject != null || this.dataset.relatedObject != null)) {
             let str: string = decodeURIComponent(this.show);
-            let object = this.dataset != null ? this.dataset.selectedObject : null;
-            let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
+            let object = this.dataset.selectedObject;
+            let relatedObject = this.dataset.relatedObject;
             if(!((str.indexOf("object.") > -1 && object == null) || (str.indexOf("relatedObject.") > -1 && relatedObject == null))) {
                 this.showResult = eval(str);            
             } else {
                 this.showResult = false;
             }
+        } else {
+            this.showResult = false;
         }
     }
   }

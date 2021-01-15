@@ -1,27 +1,35 @@
+import { AfterViewInit } from "@angular/core";
 import { Input, OnInit } from "@angular/core";
 import { Subscription } from "rxjs";
 import { RbActivatorComponent } from "./rb-activator";
 
 
-export abstract class RbComponent implements OnInit {
+export abstract class RbComponent implements OnInit/*, AfterViewInit*/ {
     @Input('activator') activator: RbActivatorComponent;
 
     public active: boolean;
     private activatorSubscription: Subscription;
+    private start: number;
 
-    constructor() { }
+    constructor() { 
+      this.start = (new Date()).getTime();
+    }
   
     ngOnInit(): void {
-        if(this.activator != null) {
-            this.active = this.activator.active;
-            this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => this.setActive(state));
-          } else {
-            this.active = true;
-          }
-      
-        this.componentInit();
+      if(this.activator != null) {
+        this.active = this.activator.active;
+        this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => this.setActive(state));
+      } else {
+        this.active = true;
+      }
+      this.componentInit();
     }
 
+    /*ngAfterViewInit(): void {
+      let end: number = (new Date()).getTime();
+      console.log(this.constructor.name + ' ' + end + ' ' + (end - this.start));
+    }*/
+    
     ngOnDestroy(): void {
         if(this.activatorSubscription != null) {
           this.activatorSubscription.unsubscribe();

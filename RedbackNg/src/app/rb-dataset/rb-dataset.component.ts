@@ -61,7 +61,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
     if(this.datasetgroup != null) {
       this.datasetgroup.register(this.name, this);
     }
-    this.reset();
+    //this.reset();
   }
 
   containerDestroy() {
