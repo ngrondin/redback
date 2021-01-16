@@ -18,7 +18,6 @@ export class RbAggregatesetComponent extends RbContainerComponent {
   @Input('tuple') tuple: any;
   @Input('metrics') metrics: any;
   @Input('datatarget') dataTarget: DataTarget;
-  @Output('navigate') navigateEvent: EventEmitter<any> = new EventEmitter();
 
   public aggregates: RbAggregate[] = [];
   public searchString: string;
@@ -74,7 +73,7 @@ export class RbAggregatesetComponent extends RbContainerComponent {
     }
   }
 
-  private mergeFilters() : any {
+  public mergeFilters() : any {
     let filter = {};
     if(this.baseFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.baseFilter);
@@ -96,17 +95,11 @@ export class RbAggregatesetComponent extends RbContainerComponent {
     this.publishEvent('loaded');
   }
 
-
+/*
   public selectDimensions(dimensionsFilter: any) {
-    let filter = this.mergeFilters();
-    filter = this.mapService.mergeMaps(filter, dimensionsFilter);
-    let target = {
-      object: this.objectname,
-      filter: filter,
-      reset: true
-    };
-    this.navigateEvent.emit(target);
+
   }
+*/
 
   public publishEvent(event: string) {
     this.observers.forEach((observer) => {

@@ -17,6 +17,8 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
   @Input('value') value: any;
   @Input('min') min: number = 0;
   @Input('max') max: number = 100;
+  @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
+
 
   colorScheme = {
     domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
@@ -149,12 +151,12 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
 
   public onClick(event: any) {
     console.log("Graph click");
-    let filter = {};
+    let dimensionFilter = {};
     const name = event.name;
     this.aggregates.forEach(agg => {
       if(name == (agg.getDimension(this.series.labelattribute) || "")) {
         let dimensionValue = agg.getDimension(this.series.dimension);
-        filter[this.series.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
+        dimensionFilter[this.series.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
       }
     });
     const cat = event.series;
@@ -162,10 +164,18 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
       this.aggregates.forEach(agg => {
         if(cat == (agg.getDimension(this.categories.labelattribute) || "")) {
           let dimensionValue = agg.getDimension(this.categories.dimension);
-          filter[this.categories.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
+          dimensionFilter[this.categories.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
         }
       });
     }
-    this.aggregateset.selectDimensions(filter);
+
+    let aggregatesetfilter = this.aggregateset.mergeFilters();
+    let filter = this.mapService.mergeMaps(aggregatesetfilter, dimensionFilter);
+    let target = {
+      object: this.aggregateset.objectname,
+      filter: filter,
+      reset: true
+    };
+    this.navigate.emit(target);
   }
 }

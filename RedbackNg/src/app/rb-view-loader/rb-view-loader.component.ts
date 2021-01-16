@@ -6,7 +6,6 @@ import { DataService } from 'app/services/data.service';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
 import { RbTabComponent } from 'app/rb-tab/rb-tab.component';
-import { UserprefService } from 'app/services/userpref.service';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
 import { RbActivatorComponent } from 'app/abstract/rb-activator';
@@ -34,7 +33,6 @@ export class LoadedView {
     this.rootComponentRefs.forEach(item => {
       container.detach(container.indexOf(item.hostView))
     });
-    this.clearData();
   }
 
   clearData() {
@@ -43,12 +41,14 @@ export class LoadedView {
     }
   }
 
-  resetData(dataTarget: DataTarget) {
+  setTarget(dataTarget: DataTarget) {
     for(let dataset of this.topDatasets) {
       if(dataTarget != null && (dataTarget.objectname == null || (dataTarget.objectname == dataset.object))) {
-        dataset.dataTarget = dataTarget;
+        if(dataset.dataTarget != dataTarget) {
+          dataset.dataTarget = dataTarget;
+          setTimeout(() => dataset.reset(), 1);
+        }
       }
-      setTimeout(() => dataset.reset(), 1);
     }
   }
 }
@@ -64,24 +64,17 @@ export class RbViewLoaderComponent implements OnInit {
   @Input('target') private target: ViewTarget;
   @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
-  //@Output() titlechange: EventEmitter<any> = new EventEmitter();
 
   private currentView: string;
-  //private componentRef: ComponentRef<ViewContainerComponent>;
-  //private rootComponentRefs: ComponentRef<Component>[] = [];
   private currentLoadedView: LoadedView = null;
-  //private factoryCache: any = {};
   private viewCache: any = {};
-  //private mode: number = 2;
   private factoryRegistry: any = {};
 
   constructor(
     private injector: Injector,
     private http: Http,
-    //private compiler: Compiler,
     private apiService: ApiService,
     private dataService: DataService,
-    //private userprefService: UserprefService,
     private componentFactoryResolver:ComponentFactoryResolver
   ) { }
 
@@ -97,55 +90,16 @@ export class RbViewLoaderComponent implements OnInit {
     if("target" in changes && this.target != null) {
       if(this.target.view != this.currentView) {
         this.dataService.clearAllLocalObject();
-        /*if(this.mode == 1) {
-          let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/' + this.target.type + '/' + this.target.version + '/' + this.target.view;
-          this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
-            res => {
-              this.userprefService.setCurrentView(this.target.view);
-              this.compileTemplate(res.text());
-            }
-          );
-        } else if(this.mode == 2) {*/
-          let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
-          this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
-            res => {
-              this.buildConfig(res.json())
-            }
-          );
-        //}
+        let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
+        this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
+          res => {
+            this.buildConfig(res.json())
+          }
+        );
         this.currentView = this.target.view;
-      } /*else if(this.componentRef != null) {
-        this.componentRef.instance.currentTarget = this.target;
-      } */
+      }
     } 
   }
-
-  /*
-  compileTemplate(body: string) {
-    let hash = body.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
-    let factory = this.factoryCache[hash];
-    if(factory == null) {
-      const componentClass = class RuntimeComponentClass extends ViewContainerComponent {};
-      const typeDecorator: TypeDecorator = Component({ selector: 'rb-view-container', template: body});
-      const decoratedComponent = typeDecorator(componentClass);
-      const moduleClass = class RuntimeComponentModule { };
-      const decoratedNgModule = NgModule({ imports: [CommonModule, RedbackModule], declarations: [decoratedComponent] })(moduleClass);
-      const module: ModuleWithComponentFactories<any> = this.compiler.compileModuleAndAllComponentsSync(decoratedNgModule);
-      factory = module.componentFactories.find(f => f.componentType == decoratedComponent);
-      this.factoryCache[hash] = factory;
-    } 
-    
-    if (this.componentRef) {
-      this.componentRef.destroy();
-      this.componentRef = null; 
-    }
-
-    let newViewComponentRef : ComponentRef<ViewContainerComponent> = this.container.createComponent(factory);
-    newViewComponentRef.instance.currentTarget = this.target;
-    newViewComponentRef.instance.navigate.subscribe(e => this.navigate.emit(e));
-    this.componentRef = newViewComponentRef;
-  }
-*/
 
   buildConfig(config: any) {
     console.time('build');
@@ -168,7 +122,7 @@ export class RbViewLoaderComponent implements OnInit {
     if(entry != null) {
       this.currentLoadedView = entry;
       entry.attach(this.container);
-      entry.resetData(this.target.dataTarget);
+      entry.setTarget(this.target.dataTarget);
       this.target.title = entry.title;
     }
     console.timeEnd('build');

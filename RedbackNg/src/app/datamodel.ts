@@ -15,7 +15,7 @@ export class RbObject {
     data: any = {};
     related: any = {};
     validation: any = {};
-    changed: any;
+    changed: any = [];
     dataService: DataService;
     lastUpdated: number;
     datasets: RbDatasetComponent[] = [];
