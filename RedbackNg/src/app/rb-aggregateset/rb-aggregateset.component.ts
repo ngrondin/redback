@@ -66,7 +66,7 @@ export class RbAggregatesetComponent extends RbContainerComponent {
     this.aggregates = [];
     if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
       const filter = this.mapService.resolveMap(this.mergeFilters(), this.relatedObject, null, this.relatedObject);
-      this.dataService.aggregateObjects(this.objectname, filter, this.tuple, this.metrics).subscribe(
+      this.dataService.aggregateObjects(this.objectname, filter, null, this.tuple, this.metrics).subscribe(
         data => this.setAggregates(data)
       );
       this.isLoading = true;

@@ -64,4 +64,18 @@ export class ValueComparator{
             return a == b;
         }
     }
+
+    public static valueCompare(a: any, b: any, key: string): number {
+        let valA = a[key];
+        let valB = b[key];
+        if(valA == null) {
+          return -1;
+        } else if(valB == null) {
+          return 1;
+        } else if(valA > valB) {
+          return 1;
+        } else {
+          return -1;
+        }
+      }
 }

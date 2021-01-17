@@ -268,12 +268,12 @@ public class RedbackObject extends RedbackElement
 		 return null;
 	}
 	
-	public List<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText) throws RedbackException
+	public List<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, DataMap sort) throws RedbackException
 	{
-		return getRelatedList(attributeName, additionalFilter, searchText, 0, 50);
+		return getRelatedList(attributeName, additionalFilter, searchText, sort, 0, 50);
 	}
 	
-	public List<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, int page, int pageSize) throws RedbackException
+	public List<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, DataMap sort, int page, int pageSize) throws RedbackException
 	{
 		List<RedbackObject> relatedObjectList = null;
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
@@ -282,7 +282,7 @@ public class RedbackObject extends RedbackElement
 			DataMap relatedObjectListFilter = getRelatedListFilter(attributeName);
 			if(additionalFilter != null)
 				relatedObjectListFilter.merge(additionalFilter);
-			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, null, false, page, pageSize);
+			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, sort, false, page, pageSize);
 		}
 		return relatedObjectList;		
 	}
@@ -329,7 +329,7 @@ public class RedbackObject extends RedbackElement
 			if(value.getObject() instanceof DataMap && attributeConfig.getRelatedObjectConfig() != null) 
 			{
 				DataMap filter = (DataMap)value.getObject();
-				List<RedbackObject> list = objectManager.listRelatedObjects(session, getObjectConfig().getName(), uid.getString(), name, filter, null, false);
+				List<RedbackObject> list = objectManager.listRelatedObjects(session, getObjectConfig().getName(), uid.getString(), name, filter, null, null, false);
 				if(list.size() > 0) 
 					actualValue = new Value(list.get(0).get(getObjectConfig().getAttributeConfig(name).getRelatedObjectConfig().getLinkAttributeName()).getString());
 				else

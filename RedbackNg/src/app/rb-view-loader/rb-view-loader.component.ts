@@ -88,16 +88,13 @@ export class RbViewLoaderComponent implements OnInit {
 
   ngOnChanges(changes : SimpleChange) {
     if("target" in changes && this.target != null) {
-      if(this.target.view != this.currentView) {
-        this.dataService.clearAllLocalObject();
-        let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
-        this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
-          res => {
-            this.buildConfig(res.json())
-          }
-        );
-        this.currentView = this.target.view;
-      }
+      let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
+      this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
+        res => {
+          this.buildConfig(res.json())
+        }
+      );
+      this.currentView = this.target.view;
     } 
   }
 

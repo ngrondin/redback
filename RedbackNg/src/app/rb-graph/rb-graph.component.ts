@@ -1,6 +1,10 @@
+import { ContentChild, HostBinding, ViewChild, ViewContainerRef, ViewRef } from '@angular/core';
+import { HostListener } from '@angular/core';
 import { Component, OnInit, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { RbAggregateObserverComponent } from 'app/abstract/rb-aggregateobserver';
 import { RbAggregate } from 'app/datamodel';
+import { ValueComparator } from 'app/helpers';
 import { RbAggregatesetComponent } from 'app/rb-aggregateset/rb-aggregateset.component';
 import { MapService } from 'app/services/map.service';
 
@@ -17,13 +21,19 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
   @Input('value') value: any;
   @Input('min') min: number = 0;
   @Input('max') max: number = 100;
+  @Input('grow') grow: number;
+  @Input('shrink') shrink: number;
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
-
-
+  @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 1;}
+  @HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
+  //@HostBinding('style.width.px') get hostWidth() { return this.type == 'number' ? 140 : null; }
+  //@HostBinding('style.height.px') get hostHeight() { return this.type == 'number' ? 140 : null; }
+  
   colorScheme = {
     domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
   };
   graphData: any[];
+  hovering: boolean = false;
 
   constructor(
     private mapService: MapService
@@ -32,13 +42,16 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
   }
 
   aggregatesetObserverInit() {
-    this.calcGraphData();
+    setTimeout(() => this.calcGraphData(), 1); // because the graph needs the parent to be fully drawn to calculate its dimensions
   }
 
   aggregatesetObserverDestroy() {
   }
 
   onActivationEvent(state: boolean) {
+    if(state == true) {
+      setTimeout(() => this.calcGraphData(), 1);
+    }
   }
 
   onAggregatesetEvent(event: string) {
@@ -61,6 +74,11 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
     return this.categories != null ? true : false;
   }
 
+  get showRefresh(): boolean {
+    return this.hovering == true;
+  }
+
+  /*
   get width(): number {
     return this.getSize().x;
   }
@@ -68,6 +86,7 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
   get height(): number {
     return this.getSize().y;
   }
+*/
 
   calcGraphData() {
     if(this.categories != null) {
@@ -84,7 +103,7 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
           this.graphData.push(category);
         }
       }
-      this.graphData.sort((a, b) => this.valueCompare(a, b, 'name')); 
+      this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, 'name')); 
     } else {
       this.graphData = this.getSeriesDataForCategory(null);
     } 
@@ -104,23 +123,11 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
       }
     }
     let sortKey = this.series.sortby == null || this.series.sortby == 'name' ? 'name' : 'value';
-    series.sort((a, b) => this.valueCompare(a, b, sortKey));
+    series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey));
     return series;
   }
 
-  private valueCompare(a: any, b: any, key: string): number {
-    let valA = a[key];
-    let valB = b[key];
-    if(valA == null) {
-      return -1;
-    } else if(valB == null) {
-      return 1;
-    } else if(valA > valB) {
-      return 1;
-    } else {
-      return -1;
-    }
-  }
+
 
   private getSize(): any {
     if(this.type == 'hbar' || this.type == 'vbar') {
@@ -178,4 +185,17 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
     };
     this.navigate.emit(target);
   }
+
+  refresh() {
+    this.aggregateset.refreshData();
+  }
+
+  @HostListener('mouseenter', ['$event']) onMouseEnter($event) {
+    this.hovering = true;
+  }
+
+  @HostListener('mouseleave', ['$event']) onMouseLeave($event) {
+    this.hovering = false;
+  }
+
 }

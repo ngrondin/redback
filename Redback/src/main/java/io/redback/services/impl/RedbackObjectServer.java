@@ -64,7 +64,7 @@ public class RedbackObjectServer extends ObjectServer
 				filter = new DataMap();
 
 			objectManager.initiateCurrentTransaction();
-			objects = objectManager.listRelatedObjects(session, objectName, uid, attribute, filter, search, addRelated, page, pageSize);
+			objects = objectManager.listRelatedObjects(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			throw new RedbackException("Error listing objects", e);
@@ -142,11 +142,11 @@ public class RedbackObjectServer extends ObjectServer
 		objectManager.refreshAllConfigs();
 	}
 
-	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException {
+	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException {
 		List<RedbackAggregate> aggregates = null;
 		try {
 			objectManager.initiateCurrentTransaction();
-			aggregates = objectManager.aggregateObjects(session, objectName, filter, tuple, metrics, sort, addRelated);
+			aggregates = objectManager.aggregateObjects(session, objectName, filter, searchText, tuple, metrics, sort, addRelated);
 			objectManager.commitCurrentTransaction();
 		} catch(ScriptException e) {
 			throw new RedbackException("Error listing objects", e);

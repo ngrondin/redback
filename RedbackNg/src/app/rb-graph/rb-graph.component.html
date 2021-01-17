@@ -1,11 +1,21 @@
 <div
-    class="rb-chart-title">
-    {{label}}
+    class="rb-chart-header">
+    <div
+        class="rb-chart-refresh">
+        <button
+            mat-icon-button
+            (click)="refresh()"
+            *ngIf="showRefresh">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </div>
+    <div
+        class="rb-chart-title">
+        <span>{{label}}</span>
+    </div>
 </div>
 <div 
-    class="rb-chart-container"
-    [style.width.px]="width"
-    [style.height.px]="height">
+    class="rb-chart-container">
     <ngx-charts-bar-vertical
         *ngIf="type == 'vbar' && !is2d"
         [scheme]="colorScheme"

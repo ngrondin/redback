@@ -6,6 +6,7 @@ import { MatSelect } from '@angular/material/select';
 import { DataService } from 'app/services/data.service';
 import { RbAggregate } from 'app/datamodel';
 import { MapService } from 'app/services/map.service';
+import { ValueComparator } from 'app/helpers';
 
 export class FilterBuilderConfig {
   filterConfig: any;
@@ -65,7 +66,9 @@ export class FilterItemConstruct {
     this.config = c;
     if(this.config.type == 'string') {
       if(v != null) {
-        if(v != null && v.startsWith("'*") && v.endsWith("*'")) {
+        if(v == 'null') {
+          this.val1 = null;
+        } else if(v.startsWith("'*") && v.endsWith("*'")) {
           this.val1 = v.substring(2, v.length - 2);
         } else {
           this.val1 = v;
@@ -116,7 +119,11 @@ export class FilterItemConstruct {
 
   public getFilterValue() : any {
     if(this.config.type == 'string') {
-      return "'*" + this.val1 + "*'"; 
+      if(this.val1 == null) {
+        return "null";
+      } else {
+        return "'*" + this.val1 + "*'"; 
+      }
     } else if(this.config.type == 'date') {
       if(this.val1 == 'last15') {
         return {"$gt":"(new Date((new Date()).getTime() - 900000)).toISOString()"};
@@ -308,12 +315,13 @@ export class RbFilterBuilderComponent implements OnInit {
         }
       }
       fltr = this.mapService.resolveMap(fltr, null, null, null);
-      this.dataService.aggregateObjects(this.config.objectname, fltr, [fac.attribute], [{function:"count", name:"count"}]).subscribe(list => {
+      this.dataService.aggregateObjects(this.config.objectname, fltr, null, [fac.attribute], [{function:"count", name:"count"}]).subscribe(list => {
         fac.options = list.map(agg => {return {
           name: agg.getDimension(fac.attribute + "." + fac.displayAttribute), 
           value: agg.getDimension(fac.attribute),
           count:agg.getMetric("count")
         }});
+        fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
       });
     }    
   }

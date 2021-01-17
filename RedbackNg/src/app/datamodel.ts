@@ -371,9 +371,10 @@ export class DataTarget {
     objectname: string;
     filter: any;
     sort: any;
-    userFilter: any;
-    userSearch: string;
-    userSelectedObject: RbObject;
+    search: string;
+    //userFilter: any;
+    //userSearch: string;
+    selectedObject: RbObject;
   
     constructor(o: string, f: any) {
       this.objectname = o

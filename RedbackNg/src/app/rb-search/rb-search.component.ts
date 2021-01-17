@@ -4,23 +4,24 @@ import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { RbFilterBuilderComponent, FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 
 @Component({
   selector: 'rb-search',
   templateUrl: './rb-search.component.html',
   styleUrls: ['./rb-search.component.css']
 })
-export class RbSearchComponent implements OnInit {
+export class RbSearchComponent extends RbDataObserverComponent {
   @Input('dataset') dataset: RbDatasetComponent;
   @Input('icon') icon: string;
   @Input('size') size: number;
-  @Input('filterconfig') filterconfig: any;
-  @Input('sortconfig') sortconfig: any;
+  @Input('filter') filterconfig: any;
+  @Input('sort') sortconfig: any;
 
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;
 
-  public value;
+  public searchValue;
   private previousValue;
   public filterValue: any;
   public sortValue: any;
@@ -29,20 +30,35 @@ export class RbSearchComponent implements OnInit {
     public injector: Injector,
     public overlay: Overlay,
     public viewContainerRef: ViewContainerRef
-) { }
+  ) {
+    super();
+  }
 
-  ngOnInit() {
+  dataObserverInit() {
+  }
+
+  dataObserverDestroy() {
+  }
+
+  onDatasetEvent(event: string) {
+    if(event == 'reset') {
+      this.searchValue = null;
+      this.filterValue = null;
+      this.sortValue = null;
+    }
+  }
+
+  onActivationEvent(state: boolean) {
   }
 
   keyup(event: any) {
-    if(this.value !== this.previousValue) {
-      let currentValue = this.value;
+    if(this.searchValue !== this.previousValue) {
+      let currentValue = this.searchValue;
       setTimeout(()=> {
-        if(this.value == currentValue)
-          this.dataset.search(this.value);
-          //this.search.emit(this.value);
+        if(this.searchValue == currentValue)
+          this.dataset.search(this.searchValue);
       }, 500);
-      this.previousValue = this.value;
+      this.previousValue = this.searchValue;
     }
   }
 

@@ -46,8 +46,14 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
         filter[this.config.parentattribute] = null;
       }
     }
+    let sort = {
+      "0":{
+        attribute: this.config.displayattribute,
+        dir: 1
+      }
+    }
     this.isLoading = true;
-    this.dataService.listRelatedObjects(this.config.rbObject.objectname, this.config.rbObject.uid, this.config.attribute, filter, this.search).subscribe(data => this.setData(data));
+    this.dataService.listRelatedObjects(this.config.rbObject.objectname, this.config.rbObject.uid, this.config.attribute, filter, this.search, sort).subscribe(data => this.setData(data));
   }
 
   public setData(objects: RbObject[]) {

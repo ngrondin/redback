@@ -418,16 +418,16 @@ public class ObjectManager
 		}
 	}
 	
-	public List<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated) throws RedbackException
+	public List<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, DataMap sort, boolean addRelated) throws RedbackException
 	{
-		return listRelatedObjects(session, objectName, uid, attributeName, filterData, searchText, addRelated, 0, 50);
+		return listRelatedObjects(session, objectName, uid, attributeName, filterData, searchText, sort, addRelated, 0, 50);
 	}
 	
-	public List<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, boolean addRelated, int page, int pageSize) throws RedbackException
+	public List<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
-			return object.getRelatedList(attributeName, filterData, searchText, page, pageSize);
+			return object.getRelatedList(attributeName, filterData, searchText, sort, page, pageSize);
 		else
 			return new ArrayList<RedbackObject>();
 	}
@@ -504,7 +504,7 @@ public class ObjectManager
 	}	
 	
 	@SuppressWarnings("unchecked")
-	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException
+	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException
 	{
 		if(session.getUserProfile().canRead("rb.objects." + objectName))
 		{
@@ -517,6 +517,8 @@ public class ObjectManager
 					DataMap objectFilter = new DataMap();
 					if(filter != null)
 						objectFilter.merge(filter);
+					if(searchText != null  &&  searchText.length() > 0)
+						objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
 					DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 					if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
 						dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());

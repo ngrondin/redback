@@ -72,13 +72,14 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string): Observable<any> {
+  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any): Observable<any> {
     const req = {
       action: 'list',
       object: name,
       uid: uid,
       attribute: attribute,
       filter: filter,
+      sort: sort,
       options: {
         addrelated: true,
         addvalidation: true
@@ -151,11 +152,12 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  aggregateObjects(name: string, filter: any, tuple: any, metrics: any): Observable<any> {
+  aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any): Observable<any> {
     const req = {
       action: 'aggregate',
       object: name,
       filter: filter,
+      search: search,
       tuple: tuple,
       metrics: metrics,
       options: {

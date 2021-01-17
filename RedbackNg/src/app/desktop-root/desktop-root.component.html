@@ -69,8 +69,7 @@
         </rb-menu>
     </mat-sidenav>
     <mat-sidenav-content>
-        <div
-            class="rb-vsection">
+        <rb-vsection>
             <rb-breadcrumb
                 *ngIf="viewTargetStack.length > 1"
                 [targetStack]="viewTargetStack"
@@ -80,7 +79,7 @@
                 [target]="currentViewTarget"
                 (navigate)="navigateTo($event)">
             </rb-view-loader>
-        </div>
+        </rb-vsection>
     </mat-sidenav-content>
 </mat-sidenav-container>
 <div

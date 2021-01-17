@@ -40,7 +40,7 @@ export class DesktopRootComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if("initialView" in changes) {
-      this.pushViewTarget(new ViewTarget(this.version, this.initialView, null, null), true);
+      this.pushViewTarget(new ViewTarget(this.version, this.initialView, null, {}), true);
     }
   }
 

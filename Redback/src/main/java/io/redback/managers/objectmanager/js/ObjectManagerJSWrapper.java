@@ -70,7 +70,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					try {
-						return JSConverter.toJS(objectManager.listRelatedObjects(session, arguments[0].asString(), arguments[1].asString(), arguments[2].asString(), (DataMap)JSConverter.toJava(arguments[3]), null, false));
+						return JSConverter.toJS(objectManager.listRelatedObjects(session, arguments[0].asString(), arguments[1].asString(), arguments[2].asString(), (DataMap)JSConverter.toJava(arguments[3]), null, null, false));
 					} catch (Exception e) {
 						throw new RuntimeException("Error in getRelatedObjectList", e);
 					}

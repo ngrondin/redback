@@ -9,6 +9,7 @@ import { ToastrService } from 'ngx-toastr';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { Observer } from 'rxjs';
 import { ModalService } from 'app/services/modal.service';
+import { ValueComparator } from 'app/helpers';
 
 
 @Component({
@@ -61,10 +62,10 @@ export class RbDatasetComponent extends RbContainerComponent  {
     if(this.datasetgroup != null) {
       this.datasetgroup.register(this.name, this);
     }
-    //this.reset();
   }
 
   containerDestroy() {
+    this.clearData();
     this.dataSubscription.unsubscribe();
   }
 
@@ -105,12 +106,18 @@ export class RbDatasetComponent extends RbContainerComponent  {
   }
 
   public reset() {
-    this.searchString = this.dataTarget != null && this.dataTarget.userSearch != null ? this.dataTarget.userSearch : null;
-    this.userFilter = this.dataTarget != null && this.dataTarget.userFilter != null ? this.dataTarget.userFilter : null;
-    this.userSort = null;
-    this.refreshData();
-    if(this.dataTarget != null && this.dataTarget.userSelectedObject != null) {
-      this._selectedObject = this.dataTarget.userSelectedObject;
+    if(this.dataTarget != null && (this.dataTarget.filter != null || this.dataTarget.search != null)) {
+      if(ValueComparator.notEqual(this.dataTarget.filter, this.userFilter) || (this.dataTarget.search != this.searchString)) {
+        this.searchString = this.dataTarget.search;
+        this.userFilter = this.dataTarget.filter;
+        this.userSort = null;
+        this.refreshData();
+        this.publishEvent('reset');
+      }
+    } else {
+      this.searchString = null;
+      this.userFilter = null;
+      this.userSort = null;
     }
   }
 
@@ -194,7 +201,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
       if(this.nextPage == 1) { 
         if(this.fetchAll == false && this._list.length > 10) {
           const filter = this.mergeFilters();
-          this.apiService.aggregateObjects(this.object, filter, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
+          this.apiService.aggregateObjects(this.object, filter, this.searchString, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
         } else {
           this.totalCount = this._list.length;
         }
@@ -220,7 +227,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
   public select(item: RbObject) {
     this._selectedObject = item;
     if(this.dataTarget != null) {
-      this.dataTarget.userSelectedObject = item;
+      this.dataTarget.selectedObject = item;
     }
     this.publishEvent('select');
   }
@@ -229,7 +236,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
     this.searchString = str;
     this.refreshData();
     if(this.dataTarget != null) {
-      this.dataTarget.userSearch = str;
+      this.dataTarget.search = str;
     }
   }
 
@@ -238,7 +245,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
     this.userSort = event.sort;
     this.refreshData();
     if(this.dataTarget != null) {
-      this.dataTarget.userFilter = event.filter;
+      this.dataTarget.filter = event.filter;
     }
   } 
 
