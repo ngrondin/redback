@@ -519,53 +519,73 @@ public class ObjectManager
 						objectFilter.merge(filter);
 					if(searchText != null  &&  searchText.length() > 0)
 						objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
-					DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
-					if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
-						dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-					DataList dbTuple = new DataList();
-					for(int i = 0; i < tuple.size(); i++) {
-						if(tuple.get(i) instanceof DataMap) {
-							DataMap tupleItem = (DataMap)tuple.getObject(i).getCopy();
-							tupleItem.put("attribute", objectConfig.getAttributeConfig(tupleItem.getString("attribute")).getDBKey());
-							dbTuple.add(tupleItem);
-						} else {
-							dbTuple.add(objectConfig.getAttributeConfig(tuple.getString(i)).getDBKey());
-						}
-					}
-					DataList dbMetrics = new DataList();
-					for(int i = 0; i < metrics.size(); i++)
-					{
-						DataMap metric = metrics.getObject(i);
-						String metricName = metric.getString("name");
-						if(metricName != null && objectConfig.getAttributeConfig(metricName) == null) {
-							String function = metric.getString("function");
-							if(function.equals("count") || function.equals("sum") || function.equals("max") || function.equals("min"))
-							{
-								DataMap dbMetric = new DataMap();
-								dbMetric.put("function", function);
-								if(!function.equals("count"))
-								{
-									String attribute = metric.getString("attribute");
-									if(attribute != null)
-										dbMetric.put("field", objectConfig.getAttributeConfig(attribute).getDBKey());
-								}
-								dbMetric.put("name", metricName);
-								dbMetrics.add(metric);
-							} 
-							else
-							{
-								throw new RedbackException("The metric function hasn't been provided");
-							}
-						} 
-						else 
-						{
-							throw new RedbackException("A metric cannot have the same name as one of the object's attribute");
-						}
-					}
-					DataMap dbSort = generateDBSort(session, objectConfig, sort);
-					DataMap dbResult = dataClient.aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics, dbSort);
-					DataList dbResultList = dbResult.getList("result");
+					DataList dbResultList = null;
 					
+					if(objectConfig.isPersistent()) 
+					{
+						DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
+						if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
+							dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+						DataList dbTuple = new DataList();
+						for(int i = 0; i < tuple.size(); i++) {
+							if(tuple.get(i) instanceof DataMap) {
+								DataMap tupleItem = (DataMap)tuple.getObject(i).getCopy();
+								tupleItem.put("attribute", objectConfig.getAttributeConfig(tupleItem.getString("attribute")).getDBKey());
+								dbTuple.add(tupleItem);
+							} else {
+								dbTuple.add(objectConfig.getAttributeConfig(tuple.getString(i)).getDBKey());
+							}
+						}
+						DataList dbMetrics = new DataList();
+						for(int i = 0; i < metrics.size(); i++)
+						{
+							DataMap metric = metrics.getObject(i);
+							String metricName = metric.getString("name");
+							if(metricName != null && objectConfig.getAttributeConfig(metricName) == null) {
+								String function = metric.getString("function");
+								if(function.equals("count") || function.equals("sum") || function.equals("max") || function.equals("min"))
+								{
+									DataMap dbMetric = new DataMap();
+									dbMetric.put("function", function);
+									if(!function.equals("count"))
+									{
+										String attribute = metric.getString("attribute");
+										if(attribute != null)
+											dbMetric.put("field", objectConfig.getAttributeConfig(attribute).getDBKey());
+									}
+									dbMetric.put("name", metricName);
+									dbMetrics.add(metric);
+								} 
+								else
+								{
+									throw new RedbackException("The metric function hasn't been provided");
+								}
+							} 
+							else 
+							{
+								throw new RedbackException("A metric cannot have the same name as one of the object's attribute");
+							}
+						}
+						DataMap dbSort = generateDBSort(session, objectConfig, sort);
+						DataMap dbResult = dataClient.aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics, dbSort);
+						dbResultList = dbResult.getList("result");
+					} 
+					else 
+					{
+						Function gs = objectConfig.getGenerationScript();
+						if(gs != null) {
+							Map<String, Object> context = createScriptContext(session);
+							context.put("filter", JSConverter.toJS(filter));
+							context.put("tuple", JSConverter.toJS(tuple));
+							context.put("metrics", JSConverter.toJS(metrics));
+							Object o = gs.execute(context);
+							if(o instanceof DataList)
+								dbResultList = (DataList)o;
+							else
+								dbResultList = new DataList();
+						}
+					}					
+										
 					for(int i = 0; i < dbResultList.size(); i++)
 					{
 						DataMap dbData = dbResultList.getObject(i);
