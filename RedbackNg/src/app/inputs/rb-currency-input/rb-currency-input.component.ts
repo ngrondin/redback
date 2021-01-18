@@ -12,17 +12,13 @@ export class RbCurrencyInputComponent extends RbInputCommonComponent implements 
   @Input('thousandsSeparator') thousandsSeparator: string = ",";
   @Input('decimalSeparator') decimalSeparator: string = ".";
 
-  editing: boolean;
+  editing: boolean = false;
   editingValue: string;
   defaultIcon: string = 'attach_money';
 
   constructor() {
     super();
    }
-
-  ngOnInit() {
-    this.editing = false;
-  }
 
   get displayvalue() : string {
     let ret: string = null;

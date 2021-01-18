@@ -249,9 +249,8 @@ export class RbDatasetComponent extends RbContainerComponent  {
     }
   } 
 
-  public delete(object: RbObject) {
-    this.remove(object);
-    this.dataService.deleteObject(this.selectedObject).subscribe(result => this.removeSelected());
+  public delete(obj: RbObject) {
+    this.dataService.deleteObject(obj).subscribe(result => this.remove(obj));
   }
 
   public addObjectAndSelect(obj: RbObject) {
@@ -268,10 +267,10 @@ export class RbDatasetComponent extends RbContainerComponent  {
     this.selectedObject = null;
   }
 
-  public remove(object: RbObject) {
-    if(this._list.indexOf(object) > -1) {
-      this._list.splice(this._list.indexOf(object), 1);
-      object.removeSet(this);
+  public remove(obj: RbObject) {
+    if(this._list.indexOf(obj) > -1) {
+      this._list.splice(this._list.indexOf(obj), 1);
+      obj.removeSet(this);
     }
   }
 

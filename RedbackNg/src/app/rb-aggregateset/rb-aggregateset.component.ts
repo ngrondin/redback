@@ -38,8 +38,9 @@ export class RbAggregatesetComponent extends RbContainerComponent {
 
 
   containerInit() {
-    this.initiated = true;
-    this.refreshData();
+    if(this.active == true) {
+      this.refreshData();
+    }
   }
 
   containerDestroy() {
@@ -48,8 +49,11 @@ export class RbAggregatesetComponent extends RbContainerComponent {
   onDatasetEvent(event: any) {
   }
 
-  onActivationEvent(event: any) {
-
+  onActivationEvent(state: any) {
+    if(state == true && this.initiated == false) {
+      this.refreshData();
+    }
+    console.log('aggregateset active=' + state)
   }
 
   get relatedObject() : RbObject {
@@ -92,14 +96,9 @@ export class RbAggregatesetComponent extends RbContainerComponent {
 
   public setAggregates(data: RbAggregate[]) {
     this.aggregates = data;
+    this.initiated = true;
     this.publishEvent('loaded');
   }
-
-/*
-  public selectDimensions(dimensionsFilter: any) {
-
-  }
-*/
 
   public publishEvent(event: string) {
     this.observers.forEach((observer) => {

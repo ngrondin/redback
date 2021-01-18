@@ -76,4 +76,8 @@ export class RbTableComponent extends RbDataObserverComponent {
   deleteObject(object: RbObject) {
     this.dataset.delete(object);
   }
+
+  canDelete(object: RbObject) {
+    return true;
+  }
 }

@@ -50,6 +50,7 @@
                 class="rb-table-rowbutton">
                 <button
                     mat-icon-button
+                    *ngIf="canDelete(object)"
                     (click)="deleteObject(object)">
                     <mat-icon>clear</mat-icon>
                 </button>        

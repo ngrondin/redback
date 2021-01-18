@@ -21,9 +21,10 @@ export class RbMenuComponent implements OnInit {
   ngOnInit(): void {
     this.menuService.getStartingMenu().subscribe(resp => {
       this.content = resp.menu.content;
-      this._type = resp.type,
-      this._mode = resp.mode
-    })
+      this._type = resp.type;
+      this._mode = resp.mode;
+      this.sendResize();
+    });
   }
 
   public get mode(): string {
@@ -37,6 +38,7 @@ export class RbMenuComponent implements OnInit {
       this._mode = 'small'
     }
     this.menuService.setDefaultMenu(this._type, this.mode);
+    this.sendResize();
   }
   
   navigateTo(event: any) {
@@ -47,6 +49,13 @@ export class RbMenuComponent implements OnInit {
     this._type = type;
     this.content = this.menuService.getMenu(this._type).content;
     this.menuService.setDefaultMenu(this._type, this.mode);
+    this.sendResize();
+  }
+
+  private sendResize() {
+    setTimeout(_ => {
+      window.dispatchEvent(new Event('resize'));
+    });   
   }
 
 }

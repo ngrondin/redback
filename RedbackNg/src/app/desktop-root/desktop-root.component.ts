@@ -19,8 +19,8 @@ export class DesktopRootComponent implements OnInit {
   @Input() username : string;
   @Input() userdisplay : string;
   @Input() initialView : string;
-  @Input() version : string;
-  viewTargetStack: ViewTarget[];
+  @Input() version : string = 'default';
+  viewTargetStack: ViewTarget[] = [];
   title: string = "Welcome";
  
   constructor(
@@ -32,20 +32,22 @@ export class DesktopRootComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    if(this.version == null)
-      this.version = 'default';
-    if(this.viewTargetStack == null)
-      this.viewTargetStack = [];
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if("initialView" in changes) {
-      this.pushViewTarget(new ViewTarget(this.version, this.initialView, null, {}), true);
+    if(this.initialView != null) {
+      setTimeout(() => this.pushViewTarget(new ViewTarget(this.version, this.initialView, null, {}), true), 500);
     }
   }
 
+
   get logoUrl() : any {
     return this.domSanitizer.bypassSecurityTrustResourceUrl(this.logo);
+  }
+
+  get currentTitle(): string {
+    if(this.currentViewTarget != null) {
+      return this.currentViewTarget.title;
+    } else {
+      return "Welcome";
+    }
   }
 
   setTitle($event) {
