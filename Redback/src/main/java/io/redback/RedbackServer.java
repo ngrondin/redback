@@ -36,24 +36,26 @@ public class RedbackServer implements Consumer
 	{
 		List<Logger> loggers = new ArrayList<Logger>();
 		DataList loggerConfigs = config.getList("loggers");
-		for(int i = 0; i < loggerConfigs.size(); i++)
-		{
-			try
+		if(loggerConfigs != null) {
+			for(int i = 0; i < loggerConfigs.size(); i++)
 			{
-				DataMap loggerConfig = loggerConfigs.getObject(i);
-				Logger logger = Logger.getLogger(loggerConfig.getString("name"));
-				Formatter formatter = (Formatter)Class.forName(loggerConfig.getString("formatter")).newInstance();
-				FileHandler fileHandler = new FileHandler(loggerConfig.getString("filename"));
-				fileHandler.setFormatter(formatter);
-				fileHandler.setLevel(Level.parse(loggerConfig.getString("level")));
-				logger.addHandler(fileHandler);
-				logger.setUseParentHandlers(false);
-				logger.setLevel(Level.parse(loggerConfig.getString("level")));
-				loggers.add(logger);
-			}
-			catch(Exception e)
-			{
-				logger.severe("General error when configuring loggers : " + e.getMessage());
+				try
+				{
+					DataMap loggerConfig = loggerConfigs.getObject(i);
+					Logger logger = Logger.getLogger(loggerConfig.getString("name"));
+					Formatter formatter = (Formatter)Class.forName(loggerConfig.getString("formatter")).newInstance();
+					FileHandler fileHandler = new FileHandler(loggerConfig.getString("filename"));
+					fileHandler.setFormatter(formatter);
+					fileHandler.setLevel(Level.parse(loggerConfig.getString("level")));
+					logger.addHandler(fileHandler);
+					logger.setUseParentHandlers(false);
+					logger.setLevel(Level.parse(loggerConfig.getString("level")));
+					loggers.add(logger);
+				}
+				catch(Exception e)
+				{
+					logger.severe("General error when configuring loggers : " + e.getMessage());
+				}
 			}
 		}
 		
