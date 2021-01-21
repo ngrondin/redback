@@ -120,7 +120,7 @@ export class RbObject {
             this.related[attribute] = related;
             this.changed.push(attribute);
             this.lastUpdated = (new Date()).getTime();
-            //this.adviseSetsOfChange();
+            this.adviseSetsOfChange();
             return true;
         }
         return false;
