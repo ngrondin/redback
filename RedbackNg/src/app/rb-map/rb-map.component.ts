@@ -168,9 +168,9 @@ export class RbMapComponent extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: any) {
-    if(this.haveListsChanged()) {
-      this.calcAll();
-    }
+    //if(this.haveListsChanged()) {
+    this.calcAll();
+    //}
   }
 
   get selectedObject() : RbObject {

@@ -76,6 +76,7 @@ export class DesktopRootComponent implements OnInit {
       this.viewTargetStack = [];
     }
     this.viewTargetStack.push(target);
+    this.userprefService.setCurrentView(target.view);
   }
 
   get currentViewTarget(): ViewTarget {
