@@ -32,7 +32,8 @@ public class RedbackAccessManager extends AccessManager
 	protected String type;
 	protected String outboundService;
 	protected String idmUrl;
-	protected String idmKey;
+	protected String idmClientId;
+	protected String idmClientSecret;
 	protected DataClient dataClient;
 	protected DataList hardUsers;
 	protected ConfigurationClient configClient;
@@ -53,7 +54,8 @@ public class RedbackAccessManager extends AccessManager
 		} else if(config.containsKey("idmurl") && config.containsKey("outboundservice")) {
 			type = "idm";
 			idmUrl = config.getString("idmurl");
-			idmKey = config.getString("idmkey");
+			idmClientId = config.getString("idmclientid");
+			idmClientSecret = config.getString("idmclientsecret");
 			outboundService = config.getString("outboundservice");
 		}
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
@@ -135,13 +137,15 @@ public class RedbackAccessManager extends AccessManager
 				}
 				else if(type.equals("idm")) {
 					DataMap req = new DataMap();
-					req.put("method", "get");
-					req.put("url", idmUrl + "?user=" + username);
-					req.put("authorization", idmKey);
-					try {
-						Payload respP = firebus.requestService(outboundService, new Payload(req.toString()));
-						userConfig = new DataMap(respP.getString());
-					} catch(Exception e) {}
+					req.put("method", "post");
+					req.put("url", idmUrl);
+					DataMap reqBody = new DataMap();
+					reqBody.put("user", username);
+					reqBody.put("client_id", idmClientId);
+					reqBody.put("client_secret", idmClientSecret);
+					req.put("body", reqBody);
+					Payload respP = firebus.requestService(outboundService, new Payload(req.toString()));
+					userConfig = new DataMap(respP.getString());
 				}
 	
 				if(userConfig != null)
