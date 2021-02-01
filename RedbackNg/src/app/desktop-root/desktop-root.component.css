@@ -40,7 +40,7 @@ mat-sidenav-container {
 
 mat-sidenav {
     display: flex;
-    border-right: Solid 1px gray;
+    border-right: Solid 1px rgba(0,0,0,.12)
 }
 
 mat-sidenav-content {

@@ -168,9 +168,7 @@ export class RbMapComponent extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: any) {
-    //if(this.haveListsChanged()) {
     this.calcAll();
-    //}
   }
 
   get selectedObject() : RbObject {
@@ -226,8 +224,11 @@ export class RbMapComponent extends RbDataObserverComponent {
     if(this.list != null && this.seriesConfigs[0] != null) {
       this.calcList(this.list, this.seriesConfigs[0]);
     } else if(this.lists != null && this.seriesConfigs.length > 0) {
-      for(let ser of this.seriesConfigs) {
-        this.calcList(this.lists[ser.dataset], ser);
+      for(let seriesConfig of this.seriesConfigs) {
+        let list = this.lists[seriesConfig.dataset];
+        if(list != null) {
+          this.calcList(list, seriesConfig);
+        }
       }
     }
     this.calcMapCoords();

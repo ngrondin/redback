@@ -114,9 +114,6 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent {
         this.openPopup('down', (window.innerHeight - position.top - event.target.clientHeight - 40));
       }
       event.target.select();
-      /*if(!this.readonly) {
-        setTimeout(() => {event.target.select();}, 200);
-      }*/
     }
   }
 

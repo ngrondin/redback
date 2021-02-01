@@ -156,7 +156,7 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
 
   public setSearch(val: string) {
     try {
-      let dt = new Date(val);
+      let dt = new Date((this.config.datePart == false ? '1970-01-01 ' : '') + val);
       this.year = dt.getFullYear();
       this.month = dt.getMonth();
       this.day = dt.getDate();
@@ -168,7 +168,7 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
 
   public keyTyped(keyCode: number) {
     if(keyCode == 13) {
-      this.nextPart();  
+      this.selected.emit(this.getOutput());
     }
   }
 }
