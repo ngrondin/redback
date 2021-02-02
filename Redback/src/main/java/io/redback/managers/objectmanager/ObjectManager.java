@@ -505,7 +505,7 @@ public class ObjectManager
 	}	
 	
 	@SuppressWarnings("unchecked")
-	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated) throws RedbackException
+	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
 		if(session.getUserProfile().canRead("rb.objects." + objectName))
 		{
@@ -568,7 +568,7 @@ public class ObjectManager
 							}
 						}
 						DataMap dbSort = generateDBSort(session, objectConfig, sort);
-						DataMap dbResult = dataClient.aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics, dbSort);
+						DataMap dbResult = dataClient.aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics, dbSort, page, pageSize);
 						dbResultList = dbResult.getList("result");
 					} 
 					else 

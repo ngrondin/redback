@@ -27,6 +27,8 @@ export class RbAggregatesetComponent extends RbContainerComponent {
   public firstLoad: boolean = true;
   private observers: Observer<string>[] = [];
   public active: boolean;
+  public nextPage: number = 0;
+
 
 
   constructor(
@@ -68,13 +70,8 @@ export class RbAggregatesetComponent extends RbContainerComponent {
 
   public refreshData() {
     this.aggregates = [];
-    if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
-      const filter = this.mapService.resolveMap(this.mergeFilters(), this.relatedObject, null, this.relatedObject);
-      this.dataService.aggregateObjects(this.objectname, filter, null, this.tuple, this.metrics).subscribe(
-        data => this.setAggregates(data)
-      );
-      this.isLoading = true;
-    }
+    this.nextPage = 0;
+    this.fetchNextPage();
   }
 
   public mergeFilters() : any {
@@ -82,22 +79,37 @@ export class RbAggregatesetComponent extends RbContainerComponent {
     if(this.baseFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.baseFilter);
     }
-
     if(this.master != null && this.master.relationship != null && this.relatedObject != null) {
       filter = this.mapService.mergeMaps(filter, this.master.relationship);
     } 
-
     if(this.userFilter != null) {
       filter = this.mapService.mergeMaps(filter, this.userFilter);
     }
-
     return filter;
   }
 
+  public fetchNextPage() {
+    if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
+      const filter = this.mapService.resolveMap(this.mergeFilters(), this.relatedObject, null, this.relatedObject);
+      this.dataService.aggregateObjects(this.objectname, filter, null, this.tuple, this.metrics, this.nextPage).subscribe(
+        data => this.setAggregates(data)
+      );
+      this.isLoading = true;
+    }
+  }
+
   public setAggregates(data: RbAggregate[]) {
-    this.aggregates = data;
-    this.initiated = true;
-    this.publishEvent('loaded');
+    for(let agg of data) {
+      this.aggregates.push(agg);
+    }
+    if(data.length == 50) {
+      this.nextPage = this.nextPage + 1;
+      this.fetchNextPage();
+    } else {
+      this.initiated = true;
+      this.isLoading = false;
+      this.publishEvent('loaded');
+    }
   }
 
   public publishEvent(event: string) {

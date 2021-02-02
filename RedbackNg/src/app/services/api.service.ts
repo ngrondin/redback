@@ -152,7 +152,7 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any): Observable<any> {
+  aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, page: number = 0, pageSize: number = 50): Observable<any> {
     const req = {
       action: 'aggregate',
       object: name,
@@ -160,6 +160,8 @@ export class ApiService {
       search: search,
       tuple: tuple,
       metrics: metrics,
+      page: page,
+      pagesize: pageSize,
       options: {
         addrelated: true
       }

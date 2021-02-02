@@ -39,7 +39,7 @@ public class DataClient extends Client
 		return request(req);
 	}
 
-	public DataMap aggregateData(String object, DataMap filter, DataList tuple, DataList metrics, DataMap sort) throws RedbackException
+	public DataMap aggregateData(String object, DataMap filter, DataList tuple, DataList metrics, DataMap sort, int page, int pageSize) throws RedbackException
 	{
 		DataMap req = new DataMap();
 		req.put("object", object);
@@ -48,6 +48,8 @@ public class DataClient extends Client
 		req.put("metrics", metrics);
 		if(sort != null)
 			req.put("sort", sort);
+		req.put("page", page);
+		req.put("pagesize", pageSize);
 		return request(req);
 	}
 
