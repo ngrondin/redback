@@ -89,7 +89,7 @@ export class DesktopRootComponent implements OnInit {
 
   logout() {
     this.cookieService.deleteAll('/');
-    window.location.href = "/";
+    window.location.href = "/logout";
   }
 
   @HostListener('mouseup', ['$event']) onMouseUp($event) {
