@@ -12,7 +12,7 @@ public class Expression extends Executor
 	
 	public Expression(JSManager jsm, String fn, List<String> p, String exp) throws RedbackException
 	{
-		super(jsm, fn, p, "function " + fn + "(" + (p != null ? String.join(",", p) : "") + ") { return (" + exp + ");}");
+		super(jsm, fn, p, "return (" + exp + ");");
 		if(exp == null)
 			fixedValueNull = true;
 		else if(exp.matches("[-+]?\\d*\\.?\\d+"))

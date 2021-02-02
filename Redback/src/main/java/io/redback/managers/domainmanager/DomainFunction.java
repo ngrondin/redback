@@ -18,8 +18,9 @@ public class DomainFunction extends DomainEntry {
 		super(c);
 		jsManager = jsm;
 		domainManager = dm;
+		String funcName = "domain_" + config.getString("domain") + "_" + config.getString("name");
 		List<String> params = Arrays.asList(new String[] {"log", "session", "dm", "oc", "pc", "fc", "nc", "rc", "gc", "geo", "ic", "domain", "param"});
-		function = new Function(jsManager, "domain_" + config.getString("domain") + "_" + config.getString("name"), params, config.getString("source"));
+		function = new Function(jsManager, funcName, params, config.getString("source"));
 	}
 
 	public Object execute(Map<String, Object> context) throws RedbackException {

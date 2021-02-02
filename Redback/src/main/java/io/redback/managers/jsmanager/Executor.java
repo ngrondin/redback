@@ -17,11 +17,11 @@ public abstract class Executor {
 	protected JSManager jsManager;
 	protected String functionName;
 	
-	public Executor(JSManager jsm, String fn, List<String> p, String src) {
+	public Executor(JSManager jsm, String fn, List<String> p, String body) {
 		jsManager = jsm;
-		functionName = fn;
-		sourceString = src;
+		functionName = fn.replaceAll(" ", "_").replaceAll("-", "_");
 		paramNames = p;
+		sourceString = "function " + functionName + "(" + (paramNames != null ? String.join(",", paramNames) : "") + ") {" + body + "}";
 		if(paramNames == null)
 			paramNames = new ArrayList<String>();
 		jsManager.addSource(functionName, sourceString);

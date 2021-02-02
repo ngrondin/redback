@@ -1,8 +1,8 @@
 package io.redback.managers.jsmanager;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -36,11 +36,13 @@ public class JSManager {
 		}
 	}
 	
+	private Logger logger = Logger.getLogger("io.redback");
 	protected ScriptEngineManager engineManager;
 	protected Map<String, SourceEntry> sourceEntries;
 	protected Map<Long, EngineEntry> engines;
 	protected long lastUpdated;
 	protected DataMap globalVariables;
+	protected boolean _dropCompilationErrors = false;
 	
 	public JSManager() {
 		sourceEntries = new HashMap<String, SourceEntry>();
@@ -50,6 +52,10 @@ public class JSManager {
 	
 	public void setGlobalVariables(DataMap gv) {
 		globalVariables = gv;
+	}
+	
+	public void dropCompilationErrors(boolean v) {
+		_dropCompilationErrors = v;
 	}
 	
 	public void addSource(String id, String src) {
@@ -91,15 +97,20 @@ public class JSManager {
 		try {
 			synchronized(sourceEntries) {
 				long now = System.currentTimeMillis();
-				Iterator<String> it = sourceEntries.keySet().iterator();
-				while(it.hasNext()) {
-					String functionId = it.next();
+				String[] functionIds = sourceEntries.keySet().toArray(new String[0]); // Done so the map can be modified during recompilation
+				for(int i = 0; i < functionIds.length; i++) {
+					String functionId = functionIds[i];
 					SourceEntry sourceEntry = sourceEntries.get(functionId);
 					if(sourceEntry.lastUpdated >= engineEntry.lastCompiled) {
 						try {
 							engineEntry.engine.eval(sourceEntry.src);
 						} catch(Exception e) {
-							throw new RedbackException("Problem recompiling script [" + functionId + "]", e);
+							if(_dropCompilationErrors) {
+								logger.severe("Problem recompiling script [" + functionId + "]: " + e.getMessage());
+								sourceEntries.remove(functionId);
+							} else {
+								throw new RedbackException("Problem recompiling script [" + functionId + "]", e);
+							}
 						}
 					}
 				}

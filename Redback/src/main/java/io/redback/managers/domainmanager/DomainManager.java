@@ -73,6 +73,7 @@ public class DomainManager implements Consumer {
 	public DomainManager(Firebus fb, DataMap config) {
 		firebus = fb;
 		jsManager = new JSManager();
+		jsManager.dropCompilationErrors(true);
 		includeLoaded = false;
 		configServiceName = config.getString("configservice");
 		objectServiceName = config.getString("objectservice");
