@@ -94,7 +94,7 @@ public class DomainClient extends Client {
 			req.put("domain", domain);
 			req.put("name", name);
 			DataMap resp = request(session, req);
-			return resp;				
+			return resp.get("result");				
 		} catch(Exception e) {
 			throw new RedbackException("Error getting domain variable", e);
 		}

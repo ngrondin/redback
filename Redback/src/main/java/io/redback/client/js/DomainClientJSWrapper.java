@@ -50,8 +50,8 @@ public class DomainClientJSWrapper implements ProxyObject {
 					String name = arguments[0].asString();
 					try
 					{
-						Object o = domainClient.getVariable(session, domain, name);
-						return JSConverter.toJS(o);
+						DataEntity de = domainClient.getVariable(session, domain, name);
+						return JSConverter.toJS(de);
 					}
 					catch(Exception e)
 					{

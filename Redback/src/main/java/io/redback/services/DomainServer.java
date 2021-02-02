@@ -48,11 +48,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 					return new Payload(resp.toString());
 				} else if(action.equals("getvariable")) {
 					DataEntity entity = getVariable(session, domain, name);
-					if(entity != null) {
-						return new Payload(entity.toString());
-					} else {
-						return new Payload();
-					}
+					return new Payload((new DataMap("result", entity)).toString());
 				} else if(action.equals("execute")) {
 					boolean async = request.getBoolean("async");
 					DataMap param = request.getObject("param");

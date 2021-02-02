@@ -56,6 +56,17 @@ public class UserProfile
 		return domains;
 	}
 	
+	public String getDefaultDomain()
+	{
+		String domain = getAttribute("rb.defaultdomain");
+		if(domain == null && profile.containsKey("domains")) {
+			DataList list = profile.getList("domains");
+			if(list.size() > 0) 
+				domain = list.getString(0);
+		}
+		return domain;
+	}
+	
 	public boolean hasAllDomains()
 	{
 		boolean hasAllDomains = false;

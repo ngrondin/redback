@@ -27,6 +27,7 @@ import io.redback.client.FileClient;
 import io.redback.client.GeoClient;
 import io.redback.client.NotificationClient;
 import io.redback.client.ReportClient;
+import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
@@ -360,7 +361,6 @@ public class ObjectManager
 					DataList dbResultList = null;
 					if(objectConfig.isPersistent()) 
 					{
-						
 						DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 						if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains() && !objectFilter.containsKey("domain"))
 							dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
@@ -371,6 +371,7 @@ public class ObjectManager
 						Function gs = objectConfig.getGenerationScript();
 						if(gs != null) {
 							Map<String, Object> context = createScriptContext(session);
+							context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
 							context.put("filter", JSConverter.toJS(filter));
 							Object o = gs.execute(context);
 							if(o instanceof DataList)
