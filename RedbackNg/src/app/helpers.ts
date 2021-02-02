@@ -65,17 +65,17 @@ export class ValueComparator{
         }
     }
 
-    public static valueCompare(a: any, b: any, key: string): number {
+    public static valueCompare(a: any, b: any, key: string, dir: number = 1): number {
         let valA = a[key];
         let valB = b[key];
         if(valA == null) {
-          return -1;
+          return -1 * dir;
         } else if(valB == null) {
-          return 1;
+          return 1 * dir;
         } else if(valA > valB) {
-          return 1;
+          return 1 * dir;
         } else {
-          return -1;
+          return -1 * dir;
         }
       }
 }

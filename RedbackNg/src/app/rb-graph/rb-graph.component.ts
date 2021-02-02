@@ -123,7 +123,8 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
       }
     }
     let sortKey = this.series.sortby == null || this.series.sortby == 'name' ? 'name' : 'value';
-    series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey));
+    let sortDir = this.series.sortdir != null ? this.series.sortdir : 1;
+    series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir));
     return series;
   }
 
