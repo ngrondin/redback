@@ -30,3 +30,8 @@
     color: lightgray;
     cursor: pointer;
 }
+
+.rb-vcollapse-container {
+    display: flex;
+    flex-direction: column;
+}

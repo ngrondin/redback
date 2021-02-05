@@ -78,19 +78,9 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
     return this.hovering == true;
   }
 
-  /*
-  get width(): number {
-    return this.getSize().x;
-  }
-
-  get height(): number {
-    return this.getSize().y;
-  }
-*/
-
   calcGraphData() {
+    this.graphData = [];
     if(this.categories != null) {
-      this.graphData = [];
       let cats: String[] = [];
       for(let agg of this.aggregates) {
         let cat = this.nullToEmptyString(agg.getDimension(this.categories.dimension));

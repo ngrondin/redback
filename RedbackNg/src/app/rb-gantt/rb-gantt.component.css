@@ -19,6 +19,11 @@
     height: 64px;
 }
 
+.rb-gantt-header-dateinput {
+    margin: -10px 15px -20px 10px;
+    padding: 0px;
+}
+
 .rb-gantt-corner {
     display: flex;
     width: 250px;

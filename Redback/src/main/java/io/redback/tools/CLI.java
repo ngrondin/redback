@@ -12,6 +12,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
+import io.firebus.FirebusAdmin;
+import io.firebus.information.NodeInformation;
 
 public class CLI {
 
@@ -66,12 +68,14 @@ public class CLI {
 					.sign(algorithm);
 			
 			if(token != null && fbnetwork != null && fbpassword != null) {
-				Firebus firebus = new Firebus(fbnetwork, fbpassword);
+				FirebusAdmin firebus = new FirebusAdmin(fbnetwork, fbpassword);
 				boolean quit = false;
+				System.out.println("export [set] [domain]");
+				System.out.println("import [domain] [file]");
 				while(!quit) {
 					System.out.print("> ");
 					String cmd = lineReader.readLine();
-					if(cmd.equals("quit")) {
+					if(cmd.equals("quit") || cmd.equals("exit")) {
 						quit = true;
 					} else if(cmd.startsWith("export ")) {
 						String[] parts = cmd.split(" ");
@@ -87,7 +91,11 @@ public class CLI {
 						ImportData importData = new ImportData(firebus, token, objectService, domain, filename);
 						importData.importData();
 						System.out.println("Import done");
-					} 
+					} else if(cmd.equals("dir")) {
+						NodeInformation[] list = firebus.getNodeList();
+						for(int i = 0; i < list.length; i++) 
+							System.out.println(list[i].toString());
+					}
 				}
 				firebus.close();
 			} else {

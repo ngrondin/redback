@@ -38,7 +38,7 @@ public class Report {
 			context.put("filter", filter);
 			context.put("document", document);
 			ReportBox root = reportConfig.produce(context);
-			List<ReportBox> pages = paginate(root, 685);
+			List<ReportBox> pages = paginate(root, 667);
 			for(int i = 0; i < pages.size(); i++) {
 				context.put("page", (i + 1));
 				ReportBox footer = reportConfig.produceFooter(context);

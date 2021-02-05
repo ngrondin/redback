@@ -85,7 +85,13 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
       } 
     } else {
       if(this._value != null) {
-        iso = this._value;
+        if(typeof this._value == 'string') {
+          iso = this._value;
+        } else if(typeof this._value.atDate == 'function') {
+          iso = this._value.toString();
+        } else if(typeof this._value.getTime == 'function') {
+          iso = this._value.toISOString();
+        }
       } 
     }
     return iso;

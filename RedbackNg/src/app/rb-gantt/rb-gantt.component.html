@@ -1,5 +1,11 @@
 <div
     class="rb-gantt-toolbar">
+    <rb-datetime-input
+        *ngIf="locktonow == false"
+        class="rb-gantt-header-dateinput"
+        [format]="'YYYY-MM-DD'"
+        [(value)]="startDate">
+    </rb-datetime-input>
     <button
         [matMenuTriggerFor]="zoomMenu"
         mat-stroked-button
@@ -68,7 +74,9 @@
                 [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
                 [style.height.px]="lane.height"
                 [style.cursor]="lanesConfig.modal != null ? 'pointer' : ''"
-                (click)="clickLane(lane)">
+                (click)="clickLane(lane)"
+                (rb-drag-dropzone)="dropped($event, lane, true)"
+                [rb-drag-changeform]="getSizeForObjectCallback">
                 <div
                     class="rb-gantt-mainlabel">
                     {{lane.label}}

@@ -137,9 +137,11 @@ class GanttMark {
 export class RbGanttComponent extends RbDataObserverComponent {
   @Input('lanes') lanes : any;
   @Input('series') series: any[];
+  @Input('locktonow') locktonow: boolean = false;
 
   lanesConfig: GanttLaneConfig;
   seriesConfigs: GanttSeriesConfig[];
+  _startDate: Date = new Date();
   spanMS: number;
   zoomMS: number;
   markIntervalMS: number;
@@ -188,7 +190,6 @@ export class RbGanttComponent extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: any) {
-    //console.log('Gantt data event ' + event);
     if(this.haveListsChanged()) {
       this.redraw();
     }
@@ -207,6 +208,15 @@ export class RbGanttComponent extends RbDataObserverComponent {
 
   get lists(): any {
     return this.datasetgroup != null ? this.datasetgroup.lists : null;
+  }
+
+  get startDate(): Date {
+    return this._startDate;
+  }
+
+  set startDate(dt: Date) {
+    this._startDate = new Date(dt);
+    this.redraw();
   }
 
   public get laneHeight() : number {
@@ -282,8 +292,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
     if(this.spanMS < this.zoomMS) {
       this.spanMS = this.zoomMS;
     }
-    let now = new Date();
-    this.startMS = now.getTime();
+    this.startMS = this.startDate != null ? this.startDate.getTime() : (new Date()).getTime();
     this.endMS = this.startMS + this.spanMS;
     this.multiplier = window.innerWidth / this.zoomMS;
     this.widthPX = this.spanMS * this.multiplier;
@@ -459,34 +468,36 @@ export class RbGanttComponent extends RbDataObserverComponent {
     }
   }
 
-  public dropped(event, lane: GanttLane) {
+  public dropped(event: any, lane: GanttLane, ignoreTime: boolean = false) {
     let update: any = {};
     let object: RbObject = event.object;
     let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
-    let previousStart = object.get(config.startAttribute);
-    let tgt = event.mouseEvent.target;
-    let left = event.mouseEvent.offsetX - event.offset.x;
-    while(tgt.className.indexOf("rb-gantt-lane") == -1) {
-      left = left + tgt.offsetLeft;
-      tgt = tgt.offsetParent;
-    }
-    let newStartMS = this.startMS + (left / this.multiplier);
-    let newStart = (new Date(newStartMS)).toISOString();
-    if(previousStart != newStart) {
-      update[config.startAttribute] = newStart;
-      if(config.durationAttribute == null && config.endAttribute != null) {
-        let previousStartMS = (new Date(previousStart)).getTime();
-        let previousEndMS = (new Date(event.object.get(config.endAttribute))).getTime();
-        let durationMS = previousEndMS - previousStartMS;
-        let newEnd = (new Date(newStartMS + durationMS)).toISOString();
-        update[config.endAttribute] = newEnd;
-      } 
+
+    if(ignoreTime == false) {
+      let previousStart = object.get(config.startAttribute);
+      let tgt = event.mouseEvent.target;
+      let left = event.mouseEvent.offsetX - event.offset.x;
+      while(tgt.className.indexOf("rb-gantt-lane") == -1) {
+        left = left + tgt.offsetLeft;
+        tgt = tgt.offsetParent;
+      }
+      let newStartMS = this.startMS + (left / this.multiplier);
+      let newStart = (new Date(newStartMS)).toISOString();
+      if(previousStart != newStart) {
+        update[config.startAttribute] = newStart;
+        if(config.durationAttribute == null && config.endAttribute != null) {
+          let previousStartMS = (new Date(previousStart)).getTime();
+          let previousEndMS = (new Date(event.object.get(config.endAttribute))).getTime();
+          let durationMS = previousEndMS - previousStartMS;
+          let newEnd = (new Date(newStartMS + durationMS)).toISOString();
+          update[config.endAttribute] = newEnd;
+        } 
+      }
     }
 
-    let previousLane = object.get(config.laneAttribute);
-    let newLane = lane.id;
-    if(previousLane != newLane) {
-      update[config.laneAttribute] = newLane;
+    let previousLaneId = object.get(config.laneAttribute);
+    if(previousLaneId != lane.id) {
+      update[config.laneAttribute] = lane.id;
     }
     if(Object.keys(update).length > 0) {
       event.object.setValues(update);

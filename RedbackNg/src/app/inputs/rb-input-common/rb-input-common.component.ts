@@ -17,7 +17,7 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   @Input('grow') grow: number;
   @Input('editable') editable: boolean = true;
   @Input('attribute') attribute: string;
-  @Input('value') _value: string;
+  @Input('value') _value: any;
   @Output('valueChange') valueChange = new EventEmitter();
   @Output('change') change = new EventEmitter();
   @HostBinding('class.rb-input-margin') marginclass: boolean = true;

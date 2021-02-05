@@ -8,8 +8,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,10 +46,14 @@ public class RedbackServer implements Consumer
 					DataMap loggerConfig = loggerConfigs.getObject(i);
 					Logger logger = Logger.getLogger(loggerConfig.getString("name"));
 					Formatter formatter = (Formatter)Class.forName(loggerConfig.getString("formatter")).newInstance();
-					FileHandler fileHandler = new FileHandler(loggerConfig.getString("filename"));
-					fileHandler.setFormatter(formatter);
-					fileHandler.setLevel(Level.parse(loggerConfig.getString("level")));
-					logger.addHandler(fileHandler);
+					Handler handler = null;
+					if(loggerConfig.containsKey("filename")) 
+						handler = new FileHandler(loggerConfig.getString("filename"));
+					else
+						handler = new ConsoleHandler();
+					handler.setFormatter(formatter);
+					handler.setLevel(Level.parse(loggerConfig.getString("level")));
+					logger.addHandler(handler);
 					logger.setUseParentHandlers(false);
 					logger.setLevel(Level.parse(loggerConfig.getString("level")));
 					loggers.add(logger);
@@ -237,7 +243,8 @@ public class RedbackServer implements Consumer
 					{
 						int pos2 = configString.indexOf("}}", pos1);
 						String key = configString.substring(pos1 + 2, pos2);
-						String val = props.getProperty(key) != null ? props.getProperty(key) : "";
+						String val = props != null && props.getProperty(key) != null ? props.getProperty(key) : System.getenv(key);
+						if(val == null) val = "";
 						configString = configString.substring(0, pos1) + val + configString.substring(pos2 + 2);
 					}
 					config = new DataMap(configString);
