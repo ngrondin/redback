@@ -27,6 +27,8 @@
         [showYAxisLabel]="true"
         [xAxisLabel]="xAxisLabel"
         [yAxisLabel]="yAxisLabel"
+        [yScaleMax]="max"
+        [yScaleMin]="min"
         (select)="onClick($event)">
     </ngx-charts-bar-vertical>    
     <ngx-charts-bar-vertical-2d
@@ -53,6 +55,8 @@
         [showYAxisLabel]="true"
         [xAxisLabel]="xAxisLabel"
         [yAxisLabel]="yAxisLabel"
+        [xScaleMax]="max"
+        [xScaleMin]="min"
         (select)="onClick($event)">
     </ngx-charts-bar-horizontal>    
     <ngx-charts-bar-horizontal-2d

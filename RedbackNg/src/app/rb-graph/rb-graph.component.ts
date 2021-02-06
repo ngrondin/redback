@@ -19,8 +19,8 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
   @Input('series') series: any;
   @Input('categories') categories: any;
   @Input('value') value: any;
-  @Input('min') min: number = 0;
-  @Input('max') max: number = 100;
+  @Input('min') min: number;
+  @Input('max') max: number;
   @Input('grow') grow: number;
   @Input('shrink') shrink: number;
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
