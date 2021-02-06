@@ -373,6 +373,7 @@ public class ObjectManager
 							Map<String, Object> context = createScriptContext(session);
 							context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
 							context.put("filter", JSConverter.toJS(filter));
+							context.put("action", "list");
 							Object o = gs.execute(context);
 							if(o instanceof DataList)
 								dbResultList = (DataList)o;
@@ -579,6 +580,7 @@ public class ObjectManager
 							context.put("filter", JSConverter.toJS(filter));
 							context.put("tuple", JSConverter.toJS(tuple));
 							context.put("metrics", JSConverter.toJS(metrics));
+							context.put("action", "aggregate");
 							Object o = gs.execute(context);
 							if(o instanceof DataList)
 								dbResultList = (DataList)o;

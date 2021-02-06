@@ -60,6 +60,9 @@ public class ObjectConfig
 		if(config.containsKey("datagen")) {
 			List<String> scriptVars2 = new ArrayList<String>(scriptVars);
 			scriptVars2.add("filter");
+			scriptVars2.add("tuple");
+			scriptVars2.add("metrics");
+			scriptVars2.add("action");
 			generationScript = new Function(objectManager.getJSManager(), getName() + "_datagen", scriptVars2, config.getString("datagen"));
 		}
 				
