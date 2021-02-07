@@ -3,6 +3,7 @@ import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-comm
 import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
 import { ApiService } from 'app/services/api.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { HostBinding } from '@angular/core';
 
 @Component({
   selector: 'rb-file-input',
@@ -10,8 +11,11 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   styleUrls: ['./rb-file-input.component.css']
 })
 export class RbFileInputComponent extends RbInputCommonComponent implements OnInit {
-
+  @Input('width') width: number;
+  @Input('height') height: number;
   @Output() dropped: EventEmitter<any> = new EventEmitter();
+  @HostBinding('style.width.px') get hostWidth() { return this.width != null ? this.width : 100;}
+  @HostBinding('style.height.px') get hostHeight() { return this.height != null ? this.height : 100;}
 
   hasFileOver: boolean = false;
   public uploader: FileUploader;

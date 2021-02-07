@@ -109,11 +109,7 @@ rb-menu > .mat-list-base {
 }
 
 .rb-input-margin {
-	/*margin-left: 6px;
-	margin-right: 6px;
-	margin-top: 6px;*/
-	margin-bottom: -5px;
-	padding: 7px 5px 0px 15px;
+	margin: 7px 5px -5px 15px;
 }
 
 .rb-input-text-color {

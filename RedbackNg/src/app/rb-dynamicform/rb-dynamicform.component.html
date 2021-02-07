@@ -73,7 +73,7 @@
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'files'">
             <mat-icon
-                style="color:gray; width:30px">
+                style="color:gray; width:30px; margin-left: 15px">
                 attach_file
             </mat-icon>
             <div
@@ -89,7 +89,7 @@
                             [fileset]="fileset">
                             <rb-filelist
                                 [fileset]="fileset"
-                                [details]="false"
+                                [details]="true"
                                 [downloadOnSelect]="true">
                             </rb-filelist>
                         </rb-filedrop>
@@ -100,7 +100,7 @@
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'signature'">
             <mat-icon
-                style="color:gray; width:30px">
+                style="color:gray; width:30px; margin-left: 15px">
                 gesture
             </mat-icon>
             <div
@@ -110,9 +110,12 @@
                     {{object.get(labelattribute)}}
                 </div>
                 <rb-file-input
+                    style="margin-left:0px;"
                     [object]="object"
                     [attribute]="valueattribute"
-                    [editable]="isEditable">
+                    [editable]="isEditable"
+                    [width]="300"
+                    [height]="80">
                 </rb-file-input>
             </div>
         </div>        
@@ -125,6 +128,7 @@
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
                 [editable]="isEditable"
+                [grow]="1"
                 (change)="calcSortedVisibleList()">
             </rb-switch-input>
         </div>                

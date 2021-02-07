@@ -1,16 +1,18 @@
 :host {
     display: flex;
+    flex-direction: row;
     flex: 0 0 auto;
+    padding-bottom: 10px;
 }
 
 .rb-file-input-box {
     display: flex;
-    flex: 0 0 auto;
-    min-width: 100px;
-    min-height: 100px;
+    flex: 1 1 auto;
     border: 1px solid rgb(172, 171, 171);
+    border-radius: 4px;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 .rb-file-input-active {

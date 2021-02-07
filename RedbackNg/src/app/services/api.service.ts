@@ -276,7 +276,7 @@ export class ApiService {
   
   signalHeartbeat() {
     this.signalWebsocket.next({action:"heartbeat"});
-    setTimeout(() => {this.signalHeartbeat()}, 60000);
+    setTimeout(() => {this.signalHeartbeat()}, 30000);
   }
 
   getSignalObservable() : Observable<any>  {
@@ -360,7 +360,7 @@ export class ApiService {
 
   chatHeartbeat() {
     this.chatWebsocket.next({action:"heartbeat"});
-    setTimeout(() => {this.chatHeartbeat()}, 60000);
+    setTimeout(() => {this.chatHeartbeat()}, 30000);
   }
 
   getChatObservable() : Observable<any>  {
