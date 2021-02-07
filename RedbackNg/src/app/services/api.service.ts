@@ -30,6 +30,7 @@ export class ApiService {
   public signalService: string;
   public signalWebsocket: WebSocketSubject<any>;
   public signalObservers: Observer<String>[] = [];
+  public signalConnected: boolean = false;
   public chatService: string;
   public chatWebsocket: WebSocketSubject<any>;
   public chatObservers: Observer<String>[] = [];
@@ -261,12 +262,14 @@ export class ApiService {
 }
 
   receiveSignal(signal: String) {
+    this.signalConnected = true;
     this.signalObservers.forEach((observer) => {
       observer.next(signal);
     });
   }
 
   signalError(error: String) {
+    this.signalConnected = false;
     setTimeout(() => {this.initSignalWebsocketSubscribe()}, 1000);
   }
 
@@ -282,8 +285,8 @@ export class ApiService {
     });
   }
 
-  SignalWebsocketConnected() : Boolean {
-    return this.signalWebsocket != null;
+  signalWebsocketConnected() : Boolean {
+    return this.signalConnected;
   }
 
   subscribeToSignal(req: any) {

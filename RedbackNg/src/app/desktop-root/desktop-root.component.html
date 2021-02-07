@@ -84,6 +84,9 @@
 </mat-sidenav-container>
 <div
     class="rb-footer">
+    <div
+        [class]="'rb-footer-indicator' + (apiService.signalWebsocketConnected() ? ' rb-footer-indicator-on' : '')">
+    </div>
 </div>
 <div
     class="rb-drag-box"

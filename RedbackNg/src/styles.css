@@ -10,12 +10,6 @@ body {
     flex-direction: column;
 }
 
-.rb-footer {
-	display: flex;
-	flex: 0 0 auto;
-	height:12px;
-	background: #3f51b5;
-}
 
 rb-view-loader {
 	display: flex;

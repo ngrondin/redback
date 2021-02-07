@@ -5,6 +5,7 @@ import { ViewTarget } from 'app/datamodel';
 import { ConfigService } from 'app/services/config.service';
 import { DragService } from 'app/rb-drag/drag.service';
 import { UserprefService } from 'app/services/userpref.service';
+import { ApiService } from 'app/services/api.service';
 
 
 
@@ -28,7 +29,8 @@ export class DesktopRootComponent implements OnInit {
     public dragService: DragService,
     public userprefService: UserprefService,
     private domSanitizer: DomSanitizer,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    public apiService: ApiService
   ) { }
 
   ngOnInit() {
