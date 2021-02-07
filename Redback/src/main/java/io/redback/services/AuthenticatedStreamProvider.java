@@ -46,7 +46,6 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 				endpointToSession.put(streamEndpoint, session);
 				sessionToEndpoint.put(session, streamEndpoint);
 				streamEndpoint.setHandler(this);
-				
 			} else {
 				throw new RedbackException("User session cannot be created");
 			}

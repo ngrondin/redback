@@ -50,9 +50,6 @@ public class RedbackSignalServer extends SignalServer {
 		sessionToObjectCreate = new HashMap<Session, List<String[]>>();
 	}
 
-	protected void onNewStream(Session session, StreamEndpoint streamEndpoint) throws RedbackException {
-	}
-
 	protected void onSignal(DataMap signal) throws RedbackException {
 		String type = signal.getString("type");
 		if(type.equals("objectupdate")) {
@@ -80,7 +77,7 @@ public class RedbackSignalServer extends SignalServer {
 	}
 
 	protected void onNewStream(Session session) throws RedbackException {
-
+		sendStreamData(session, new Payload((new DataMap("action", "heartbeat")).toString()));
 	}
 
 	protected void onStreamData(Session session, Payload payload) throws RedbackException {
@@ -140,6 +137,8 @@ public class RedbackSignalServer extends SignalServer {
 					}
 				} else if(req.getString("action").equals("unsubscribe")) {
 					unsubscribe(session);
+				} else if(req.getString("action").equals("heartbeat")) {
+					sendStreamData(session, new Payload((new DataMap("action", "heartbeat")).toString()));
 				}
 			}
 		} catch(Exception e) {
