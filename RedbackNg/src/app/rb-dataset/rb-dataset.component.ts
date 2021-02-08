@@ -211,9 +211,10 @@ export class RbDatasetComponent extends RbContainerComponent  {
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
-    if(object.objectname == this.object && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && this._list.length < 50) {
+    if(object.objectname == this.object && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
       this._list.push(object);
       object.addSet(this);
+      this.publishEvent('loaded');
       if(this._list.length == 1) {
         this._selectedObject = this._list[0];
       }
