@@ -65,3 +65,9 @@
     class="rb-list-floating-count">
     {{getCountText()}}
 </div>
+<div
+    *ngIf="showRefresh()"
+    class="rb-list-floating-refresh"
+    (click)="refresh()">
+    <mat-icon>refresh</mat-icon>
+</div>

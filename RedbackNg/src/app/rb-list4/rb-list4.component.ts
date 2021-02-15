@@ -117,9 +117,16 @@ export class RbList4Component extends RbDataObserverComponent {
     return this.dataset.totalCount.toString();
   }
 
+  showRefresh() : boolean {
+    return true;
+  }
 
   itemClicked(item: RbObject) {
     this.dataset.select(item);
+  }
+
+  refresh() {
+    this.dataset.refreshData();
   }
 
   onScroll(event) {

@@ -1,4 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
@@ -7,7 +8,7 @@ import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
   templateUrl: './rb-link.component.html',
   styleUrls: ['./rb-link.component.css']
 })
-export class RbLinkComponent implements OnInit {
+export class RbLinkComponent extends RbDataObserverComponent {
   @Input('dataset') dataset: RbDatasetComponent;
   @Input('attribute') attribute: string;
   @Input('view') view: string;
@@ -15,13 +16,24 @@ export class RbLinkComponent implements OnInit {
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   
-  constructor() { }
+  constructor() {
+    super();
+  }
+
+  dataObserverInit() {
+  }
+
+  dataObserverDestroy() {
+  }
+
+  onDatasetEvent(event: string) {
+  }
+
+  onActivationEvent(state: boolean) {
+  }
 
   get rbObject() : RbObject {
     return this.dataset != null ? this.dataset.selectedObject : null;
-  }
-
-  ngOnInit() {
   }
 
   public navigateTo() {

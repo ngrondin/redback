@@ -55,7 +55,6 @@ export class RbAggregatesetComponent extends RbContainerComponent {
     if(state == true && this.initiated == false) {
       this.refreshData();
     }
-    console.log('aggregateset active=' + state)
   }
 
   get relatedObject() : RbObject {
