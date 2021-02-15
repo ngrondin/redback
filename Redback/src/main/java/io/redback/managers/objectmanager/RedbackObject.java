@@ -461,6 +461,20 @@ public class RedbackObject extends RedbackElement
 				}
 				objectManager.getDataClient().putData(config.getCollection(), key, dbData);
 				objectManager.signal(this);
+			}
+			else
+			{
+				throw new RedbackException("User does not have the right to update object " + config.getName());
+			}
+		}
+	}
+	
+	public void afterSave() throws ScriptException, RedbackException
+	{
+		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true))
+		{
+			if(canWrite)
+			{
 				executeScriptsForEvent("aftersave");
 				if(isNewObject)
 				{
@@ -473,7 +487,7 @@ public class RedbackObject extends RedbackElement
 			{
 				throw new RedbackException("User does not have the right to update object " + config.getName());
 			}
-		}
+		}		
 	}
 	
 	public Object execute(String eventName) throws ScriptException, RedbackException

@@ -85,23 +85,23 @@ public class Process
 	
 	public void startInstance(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Starting process '" + name + "' instance");
+		logger.fine("Starting process '" + name + "' instance");
 		pi.setCurrentNode(startNode);
 		pi.setOriginator(actionner.getId());
 		execute(pi);
-		logger.info("Process '" + name + "' started instance '" + pi.getId() + "'");
+		logger.fine("Process '" + name + "' started instance '" + pi.getId() + "'");
 	}
 	
 	public void continueInstance(ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Continuing process '" + name + "' instance");
+		logger.fine("Continuing process '" + name + "' instance");
 		execute(pi);
-		logger.info("Process '" + name + "' has continued '" + pi.getId() + "'");
+		logger.fine("Process '" + name + "' has continued '" + pi.getId() + "'");
 	}
 	
 	public void action(Actionner actionner, ProcessInstance pi, String action, DataMap data) throws RedbackException
 	{
-		logger.info("Processing action '" + action + "' of  process " + name + ":" + pi.getId() + "");
+		logger.fine("Processing action '" + action + "' of  process " + name + ":" + pi.getId() + "");
 		String currentNodeId = pi.getCurrentNode();
 		if(currentNodeId != null)
 		{
@@ -124,12 +124,12 @@ public class Process
 			else
 				error("Process instance " + pi.getId() + " has not been start yet");
 		}	
-		logger.info("Finished processing action '" + action + "' of  " + name + ":" + pi.getId() + "");
+		logger.fine("Finished processing action '" + action + "' of  " + name + ":" + pi.getId() + "");
 	}
 	
 	public void interrupt(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
-		logger.info("Interrupting process " + name + ":" + pi.getId() + "");
+		logger.fine("Interrupting process " + name + ":" + pi.getId() + "");
 		String currentNodeId = pi.getCurrentNode();
 		if(currentNodeId != null)
 		{
@@ -152,7 +152,7 @@ public class Process
 			else
 				error("Process instance " + pi.getId() + " has not been start yet");
 		}	
-		logger.info("Finished interrupting  " + name + ":" + pi.getId() + "");
+		logger.fine("Finished interrupting  " + name + ":" + pi.getId() + "");
 	}
 	
 	protected void execute(ProcessInstance pi) throws RedbackException
@@ -163,7 +163,7 @@ public class Process
 			while(currentNodeId != null  &&  nodes.get(currentNodeId) != null  &&   !pi.isComplete()  &&  !(nodes.get(currentNodeId) instanceof InteractionUnit))
 			{
 				ProcessUnit node = nodes.get(currentNodeId);
-				logger.info("Executing node '" + node.getName() + "'");
+				logger.fine("Executing node '" + node.getName() + "'");
 				node.execute(pi);
 				currentNodeId = pi.getCurrentNode();
 			}
@@ -174,7 +174,7 @@ public class Process
 				{
 					if(nodes.get(currentNodeId) instanceof InteractionUnit)
 					{
-						logger.info("Executing node '" + nodes.get(currentNodeId).getName() + "'");
+						logger.fine("Executing node '" + nodes.get(currentNodeId).getName() + "'");
 						((InteractionUnit)nodes.get(currentNodeId)).execute(pi);			
 					}
 				}

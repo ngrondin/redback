@@ -3,9 +3,13 @@ package io.redback.tools;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -20,6 +24,7 @@ public class ImportData extends Thread
 	protected String objectService;
 	protected String domain;
 	protected String fileurl;
+	protected String username;
 	
 	public ImportData(Firebus fb, String t, String os, String d, String fu)
 	{
@@ -28,6 +33,8 @@ public class ImportData extends Thread
 		objectService = os;
 		domain = d;
 		fileurl = fu;
+		DecodedJWT jwt = JWT.decode(token);
+		username = jwt.getClaim("email").asString();
 	}
 	
 	public void importDataAsync()
@@ -85,6 +92,20 @@ public class ImportData extends Thread
 										data.put(att, newForeignUid);
 									else
 										skip = true;
+								}
+								else if(valStr != null && valStr.startsWith("=") && valStr.endsWith("="))
+								{
+									String val = valStr.substring(1, valStr.length() - 1);
+									if(val.equals("username"))
+									{
+										data.put(att, username);
+									}
+									else if(val.startsWith("date-")) 
+									{
+										long ms = Long.parseLong(val.substring(5)) * 86400000;
+										Date date = new Date(System.currentTimeMillis() - ms);
+										data.put(att, date);
+									}
 								}
 							}
 							if(!skip)

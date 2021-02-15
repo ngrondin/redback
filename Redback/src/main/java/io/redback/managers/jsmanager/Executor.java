@@ -21,7 +21,7 @@ public abstract class Executor {
 		jsManager = jsm;
 		functionName = fn.replaceAll(" ", "_").replaceAll("-", "_");
 		paramNames = p;
-		sourceString = "function " + functionName + "(" + (paramNames != null ? String.join(",", paramNames) : "") + ") {" + body + "}";
+		sourceString = "function " + functionName + "(" + (paramNames != null ? String.join(",", paramNames) : "") + ") {" + body + "\r\n}";
 		if(paramNames == null)
 			paramNames = new ArrayList<String>();
 		jsManager.addSource(functionName, sourceString);

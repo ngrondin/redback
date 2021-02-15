@@ -66,7 +66,7 @@ public class ObjectManager
 	protected HashMap<String, ScriptConfig> globalScripts;
 	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters;
-	protected HashMap<Long, HashMap<String, RedbackObject>> transactions;
+	protected HashMap<Long, List<RedbackObject>> transactions;
 	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
 	protected GeoClient geoClient;
@@ -101,7 +101,7 @@ public class ObjectManager
 		objectConfigs = new HashMap<String, ObjectConfig>();
 		globalScripts = new HashMap<String, ScriptConfig>();
 		readRightsFilters = new HashMap<String, ExpressionMap>();
-		transactions = new HashMap<Long, HashMap<String, RedbackObject>>();
+		transactions = new HashMap<Long, List<RedbackObject>>();
 		jsManager.setGlobalVariables(globalVariables);
 	}
 	
@@ -630,7 +630,7 @@ public class ObjectManager
 		long txId = Thread.currentThread().getId();
 		synchronized(transactions)
 		{
-			transactions.put(txId, new HashMap<String, RedbackObject>());
+			transactions.put(txId, new ArrayList<RedbackObject>());
 		}
 	}
 	
@@ -639,12 +639,13 @@ public class ObjectManager
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))
 		{
-			return transactions.get(txId).get(objectName + uid);
+			List<RedbackObject> list = transactions.get(txId);
+			for(RedbackObject object: list) {
+				if(object.getObjectConfig().getName().equals(objectName) && object.getUID().getString().equals(uid))
+					return object;
+			}
 		}
-		else
-		{
-			return null;
-		}
+		return null;
 	}
 
 	protected List<RedbackObject> listFromCurrentTransaction(String objectName, DataMap objectFilter) throws RedbackException
@@ -653,12 +654,9 @@ public class ObjectManager
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))
 		{
-			Map<String, RedbackObject> map = transactions.get(txId);
-			if(map.size() > 0) {
-				Iterator<String> it = map.keySet().iterator();
-				while(it.hasNext()) {
-					String key = it.next();
-					RedbackObject rbo = map.get(key);
+			List<RedbackObject> objectList = transactions.get(txId);
+			if(objectList.size() > 0) {
+				for(RedbackObject rbo: objectList) {
 					if(rbo.getObjectConfig().getName().equals(objectName)) {
 						if(rbo.filterApplies(objectFilter))
 							list.add(rbo);
@@ -675,9 +673,9 @@ public class ObjectManager
 		synchronized(transactions)
 		{
 			if(!transactions.containsKey(txId))
-				transactions.put(txId, new HashMap<String, RedbackObject>());
+				transactions.put(txId, new ArrayList<RedbackObject>());
 		}
-		transactions.get(txId).put(obj.getObjectConfig().getName() + obj.getUID().getString(), obj);
+		transactions.get(txId).add(obj);
 	}
 	
 	public void commitCurrentTransaction() throws ScriptException, RedbackException
@@ -688,20 +686,17 @@ public class ObjectManager
 			RedbackObject[] arr = null; 
 			synchronized(transactions)
 			{
-				HashMap<String, RedbackObject> objects = transactions.get(txId);
+				List<RedbackObject> objects = transactions.get(txId);
 				arr = new RedbackObject[objects.size()];
 				int i = 0;
-				Iterator<String> it = objects.keySet().iterator();
-				while(it.hasNext())
-				{
-					String key = it.next();
-					RedbackObject object = objects.get(key);
+				for(RedbackObject object: objects)
 					arr[i++] = object;
-				}
 				transactions.remove(txId);
 			}
 			for(int i = 0; i < arr.length; i++)
 				arr[i].save();
+			for(int i = 0; i < arr.length; i++)
+				arr[i].afterSave();
 		}		
 	}
 	
