@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable, of, Observer } from 'rxjs';
-import { ObjectResp, RbObject, RbFile, RbAggregate } from '../datamodel';
-import { ToastrService } from 'ngx-toastr';
+import { RbObject, RbFile, RbAggregate } from '../datamodel';
+import { ErrorService } from './error.service';
 
 
 
@@ -16,7 +16,7 @@ export class DataService {
 
   constructor(
     private apiService: ApiService,
-    private toastr: ToastrService
+    private errorService: ErrorService
   ) {
     this.allObjects = [];
     this.saveImmediatly = true;
@@ -66,9 +66,7 @@ export class DataService {
           observer.next(rbObject);
           observer.complete();
         },
-        error => {
-          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-        }
+        error => this.errorService.receiveHttpError(error)
       );
     })
     return dataObservable; 
@@ -83,9 +81,7 @@ export class DataService {
           observer.next(rbObjectArray);
           observer.complete();
         }, 
-        error => {
-          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-        }
+        error => this.errorService.receiveHttpError(error)
       )
     })
     return dataObservable; 
@@ -100,9 +96,7 @@ export class DataService {
           observer.next(rbObjectArray);
           observer.complete();
         },
-        error => {
-          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-        }
+        error => this.errorService.receiveHttpError(error)
       );
     })
     return dataObservable; 
@@ -142,8 +136,10 @@ export class DataService {
         this.updateObjectFromServer(resp)
       },
       error => {
-        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-      });
+        this.errorService.receiveHttpError(error);
+        rbObject.refresh();
+      }
+    );
   }
 
   createObject(name: string, uid: string, data: any) : Observable<RbObject> {
@@ -155,9 +151,7 @@ export class DataService {
           observer.next(newObj);
           observer.complete();
         },
-        error => {
-          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-        }
+        error => this.errorService.receiveHttpError(error)
       );
     })
     return dataObservable;     
@@ -171,9 +165,7 @@ export class DataService {
           observer.next(resp);
           observer.complete();
         },
-        error => {
-          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-        }
+        error => this.errorService.receiveHttpError(error)
       );
     })
     return dataObservable;     
@@ -194,9 +186,7 @@ export class DataService {
       resp => {
         !this.apiService.signalWebsocketConnected() ? this.updateObjectFromServer(resp) : null
       },
-      error => {
-        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-      }      
+      error => this.errorService.receiveHttpError(error)
     );
   }
 
@@ -206,9 +196,7 @@ export class DataService {
       resp => {
         null
       },
-      error => {
-        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-      }      
+      error => this.errorService.receiveHttpError(error)
     );
   }
 
@@ -221,9 +209,7 @@ export class DataService {
           observer.next(rbAggregateArray);
           observer.complete();
         }, 
-        error => {
-          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-        }
+        error => this.errorService.receiveHttpError(error)
       )
     })
     return dataObservable; 
@@ -241,9 +227,7 @@ export class DataService {
         link.click();
         document.body.removeChild(link);
       },
-      error => {
-        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-      }
+      error => this.errorService.receiveHttpError(error)
     );
   }
 
@@ -257,9 +241,7 @@ export class DataService {
           observer.next(rbFileArray);
           observer.complete();
         }, 
-        error => {
-          this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-        }
+        error => this.errorService.receiveHttpError(error)
       )
     })
     return fileObservable; 

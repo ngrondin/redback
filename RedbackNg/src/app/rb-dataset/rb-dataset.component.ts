@@ -10,6 +10,7 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
 import { Observer } from 'rxjs';
 import { ModalService } from 'app/services/modal.service';
 import { ValueComparator } from 'app/helpers';
+import { ErrorService } from 'app/services/error.service';
 
 
 @Component({
@@ -48,8 +49,8 @@ export class RbDatasetComponent extends RbContainerComponent  {
     private apiService: ApiService,
     private mapService: MapService,
     private reportService: ReportService,
-    private toastr: ToastrService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private errorService: ErrorService
   ) {
     super();
   }
@@ -336,7 +337,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
       if(this.selectedObject != null) {
         this.apiService.executeDomain(param, this.selectedObject.domain, {"uid": this.selectedObject.uid}).subscribe(
           json => {},
-          error => {this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});}
+          error => this.errorService.receiveHttpError(error)
         );
       }
     } else if(_name == 'modal') {

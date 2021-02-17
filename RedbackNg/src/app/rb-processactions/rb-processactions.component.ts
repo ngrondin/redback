@@ -4,6 +4,7 @@ import { RbObject } from 'app/datamodel';
 import { DataService } from 'app/services/data.service';
 import { ToastrService } from 'ngx-toastr';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { ErrorService } from 'app/services/error.service';
 
 @Component({
   selector: 'rb-processactions',
@@ -21,7 +22,7 @@ export class RbProcessactionsComponent extends RbDataObserverComponent  {
   constructor(
     private apiService: ApiService,
     private dataService: DataService,
-    private toastr: ToastrService
+    private errorService: ErrorService
   ) {
     super();
   }
@@ -74,9 +75,7 @@ export class RbProcessactionsComponent extends RbDataObserverComponent  {
       resp => {
         this.receiveActionResponse(resp)
       },
-      error => {
-        this.toastr.error(error.headers.status, error.error.error, {disableTimeOut: true});
-      }
+      error => this.errorService.receiveHttpError(error)
     );
   }
 

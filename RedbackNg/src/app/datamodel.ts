@@ -158,6 +158,10 @@ export class RbObject {
             set.objectUpdated(this);
         }
     }
+
+    refresh() {
+        this.dataService.getServerObject(this.objectname, this.uid).subscribe((obj) => {});
+    }
 }
 
 
