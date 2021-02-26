@@ -58,7 +58,25 @@ export class RbListComponent extends RbDataObserverComponent {
 
   getIconFor(item: RbObject) : string {
     if(this.iconattribute != null) {
-      return item.get(this.iconattribute)
+      let value = item.get(this.iconattribute);
+      if(this.iconmap != null) {
+        return this.iconmap[value];
+      } else {
+        return value;
+      }
+    } else {
+      return "";
+    }
+  }
+
+  getColorFor(item: RbObject) : string {
+    if(this.colorattribute != null) {
+      let value = item.get(this.colorattribute);
+      if(this.colormap != null) {
+        return this.colormap[value];
+      } else {
+        return value;
+      }
     } else {
       return "";
     }

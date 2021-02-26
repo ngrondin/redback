@@ -11,6 +11,8 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	font-weight: 300;
+	font-size: 0.9rem;
+	color: #444444;
 	padding-left: 12px;
 	width: 170px;
 	max-width: 170px;

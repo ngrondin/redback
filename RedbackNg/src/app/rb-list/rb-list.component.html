@@ -9,7 +9,8 @@
             class="rb-list-item">
             <div
                 *ngIf="iconattribute != null"
-                class="rb-list-item-icon">
+                class="rb-list-item-icon"
+                [style.color]="getColorFor(item)">
                 <mat-icon>{{getIconFor(item)}}</mat-icon>
             </div>
             <div
