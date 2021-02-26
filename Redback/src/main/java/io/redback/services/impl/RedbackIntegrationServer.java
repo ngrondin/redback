@@ -41,7 +41,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 			clientSecrect = cfg.getString("clientsecret");
 			redirectUri = cfg.getString("redirecturi");
 			refreshUrl = cfg.getString("refreshurl");
-			List<String> params = Arrays.asList(new String[] {"userprofile", "clientid", "clientsecret", "action", "object", "uid", "filter", "data", "options", "accesstoken", "response"});
+			List<String> params = Arrays.asList(new String[] {"userprofile", "clientid", "clientsecret", "action", "object", "uid", "filter", "data", "options", "clientdata", "response"});
 			headerExpr = new Expression(jsManager, "client_" + name + "_header", params, cfg.getString("header"));
 			urlExpr = new Expression(jsManager, "client_" + name + "_url", params, cfg.getString("url"));
 			methodExpr = new Expression(jsManager, "client_" + name + "_method", params, cfg.getString("method"));
@@ -57,9 +57,9 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
 	protected GatewayClient gatewayClient;
-	protected CollectionConfig tokenCollection;
+	protected CollectionConfig clientDataCollection;
 	protected Map<String, ClientConfig> clientConfigs;
-	protected Map<String, DataMap> cachedTokens;
+	protected Map<String, DataMap> cachedClientData;
 
 
 	public RedbackIntegrationServer(String n, DataMap c, Firebus f) {
@@ -71,9 +71,9 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
-		tokenCollection = new CollectionConfig(c.getObject("tokencollection"), "rbin_tokens");
+		clientDataCollection = new CollectionConfig(c.getObject("clientdatacollection"), "rbin_clientdata");
 		clientConfigs = new HashMap<String, ClientConfig>();
-		cachedTokens = new HashMap<String, DataMap>();
+		cachedClientData = new HashMap<String, DataMap>();
 	}
 	
 	protected ClientConfig getClientConfig(Session session, String client) throws RedbackException {
@@ -86,45 +86,45 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		return config;
 	}
 	
-	protected String getAccessToken(Session session, ClientConfig config, String domain) throws RedbackException {
-		DataMap tokens = cachedTokens.get(config.name + domain);
-		if(tokens == null) {
+	protected DataMap getClientData(Session session, ClientConfig config, String domain) throws RedbackException {
+		DataMap clientData = cachedClientData.get(config.name + domain);
+		if(clientData == null) {
 			DataMap filter = new DataMap();
 			filter.put("client", config.name);
 			filter.put("domain", domain);
-			DataMap resp = dataClient.getData(tokenCollection.getName(), tokenCollection.convertObjectToSpecific(filter), null);
-			if(resp != null && resp.getList("result") != null) {
-				tokens = resp.getList("result").getObject(0);
-				cachedTokens.put(config.name + domain, tokens);
+			DataMap resp = dataClient.getData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(filter), null);
+			if(resp != null && resp.getList("result") != null && resp.getList("result").size() > 0) {
+				clientData = resp.getList("result").getObject(0);
+				cachedClientData.put(config.name + domain, clientData);
 			}			
 		}
 		
-		if(tokens != null) {
-			long expiry = tokens.getNumber("expiry").longValue();
+		if(clientData != null) {
+			long expiry = clientData.containsKey("expiry") ? clientData.getNumber("expiry").longValue() : 0;
 			if(expiry < System.currentTimeMillis()) {
 				DataMap form = new DataMap();
 				form.put("client_id", config.clientId);
 				form.put("client_secret", config.clientSecrect);
 				form.put("grant_type", "refresh_token");
-				form.put("refresh_token", tokens.getString("refresh_token"));
+				form.put("refresh_token", clientData.getString("refresh_token"));
 				form.put("redirect_uri", config.redirectUri);
 				DataMap refreshResp = gatewayClient.postForm(config.refreshUrl, form);
 				if(refreshResp != null) {
 					if(refreshResp.getString("refresh_token") != null)
-						tokens.put("refresh_token", refreshResp.getString("refresh_token"));
+						clientData.put("refresh_token", refreshResp.getString("refresh_token"));
 					if(refreshResp.getString("access_token") != null)
-						tokens.put("access_token", refreshResp.getString("access_token"));
+						clientData.put("access_token", refreshResp.getString("access_token"));
 					if(refreshResp.getNumber("expires_in") != null)
-						tokens.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
+						clientData.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
 					DataMap key = new DataMap();
 					key.put("client", config.name);
 					key.put("domain", domain);
-					dataClient.putData(tokenCollection.getName(), tokenCollection.convertObjectToSpecific(key), tokens);
+					dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key), clientData);
 				} else {
 					throw new RedbackException("Error refreshing tokens");
 				}				
 			}
-			return tokens.getString("access_token");
+			return clientData;
 		} else {
 			throw new RedbackException("Could not find tokens for client " + config.name + " and domain " + domain);
 		}
@@ -136,13 +136,13 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("clientid", config.clientId);
 		context.put("clientsecret", config.clientSecrect);
+		context.put("clientdata", JSConverter.toJS(getClientData(session, config, domain)));
 		context.put("action", action);
 		context.put("object", objectName);
 		context.put("uid", uid);
 		context.put("filter", JSConverter.toJS(filter));
 		context.put("data", JSConverter.toJS(data));
 		context.put("options", JSConverter.toJS(options));
-		context.put("accesstoken", getAccessToken(session, config, domain));
 		return context;
 	}
 	
@@ -197,7 +197,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 
 	public void clearCaches() {
 		clientConfigs.clear();
-		cachedTokens.clear();
+		cachedClientData.clear();
 	}
 
 }
