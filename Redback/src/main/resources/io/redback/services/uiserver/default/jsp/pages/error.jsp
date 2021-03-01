@@ -24,7 +24,11 @@ var versionOrDefault = version != null ? version : 'default';
 	<div class="errorbox">
 		<h2>Redback Error</h2>
 		<span>#errormessage#</span>
-		<a href="/logout">Logout</a>
+		<a id="logout" href="/logout">Logout</a>
 	</div>
+	<script>
+		var a = document.getElementById("logout");
+		a.href = "/logout?return=" + window.location.pathname;
+	</script>
 </body>
 </html>

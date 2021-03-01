@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
@@ -31,7 +32,7 @@ import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class RedbackUIServer extends UIServer 
 {
-	//private Logger logger = Logger.getLogger("io.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected String devpath;
 	protected JSManager jsManager;
 	protected HashMap<String, Function> jspScripts;
@@ -83,16 +84,19 @@ public class RedbackUIServer extends UIServer
 					}
 					catch(Exception e)
 					{
+						logger.warning("Error retrieving application " + appName + " : " + e.getMessage());
 						html = executeJSP("pages/error", version, context).inject("errormessage", formatErrorMessage("Error retrieving application " + appName, e));
 					}
 				}
 				else
 				{
+					logger.warning("No access to application " + appName + " for user " + session.getUserProfile().getUsername());
 					html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("No access to application " + appName + ""));
 				}
 			}
 			else 
 			{
+				logger.warning("No application name provided and no default configured");
 				html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("No application name provided and no default configured"));
 			}
 		}
