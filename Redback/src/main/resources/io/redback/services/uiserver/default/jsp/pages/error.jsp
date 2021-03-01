@@ -12,11 +12,19 @@ var versionOrDefault = version != null ? version : 'default';
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC78ZWKE3Shecj9QgDf84TW9kk7r5NrVPE&libraries=places"></script>
+  <style>
+  	html {height: 100%;}
+  	body {display:flex; align-items: center; justify-content: center; height: 100%;}
+  	.errorbox {display: flex; flex-direction: column; align-items: center; border: 1px solid lightgray; border-radius: 4px; padding: 15px; font-family: sans-serif; font-size: larger;}
+  	.errorbox h2 {margin: 10px 0px 20px 0px;}
+  	a {color: grey; margin-top: 10px;} 
+  </style>
 </head>
 <body>
-	<div class="loginbox" ng-app="loginmodule" ng-controller="form">
+	<div class="errorbox">
 		<h2>Redback Error</h2>
-		#errormessage#
+		<span>#errormessage#</span>
+		<a href="/logout">Logout</a>
 	</div>
 </body>
 </html>

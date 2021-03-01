@@ -76,8 +76,9 @@ public class RedbackAccessManager extends AccessManager
 			Claim usernameClaim = jwt.getClaim("email");
 			String username = usernameClaim.asString();
 			UserProfile profile = getUserProfile(session, username);
-			if(profile != null)
-				profile.setExpiry(jwt.getExpiresAt().getTime());
+			if(profile == null) 
+				profile = createEmptyProfile(username);
+			profile.setExpiry(jwt.getExpiresAt().getTime());
 			return profile;
 		} 
 		catch (RedbackException exception)
@@ -144,8 +145,13 @@ public class RedbackAccessManager extends AccessManager
 					reqBody.put("client_id", idmClientId);
 					reqBody.put("client_secret", idmClientSecret);
 					req.put("body", reqBody);
-					Payload respP = firebus.requestService(outboundService, new Payload(req.toString()));
-					userConfig = new DataMap(respP.getString());
+					try {
+						Payload respP = firebus.requestService(outboundService, new Payload(req.toString()));
+						userConfig = new DataMap(respP.getString());
+					} catch(Exception e) {
+						if(!e.getMessage().contains("Invalid user id"))
+							throw e;
+					}
 				}
 	
 				if(userConfig != null)
@@ -260,6 +266,16 @@ public class RedbackAccessManager extends AccessManager
 				}				
 			}
 		}
+	}
+	
+	protected UserProfile createEmptyProfile(String username) 
+	{
+		DataMap userConfig = new DataMap();
+		userConfig.put("username", username);
+		userConfig.put("domains", new DataList());
+		userConfig.put("roles", new DataList());
+		UserProfile userProfile = new UserProfile(userConfig);
+		return userProfile;
 	}
 	
 	protected DataMap convertToLongRights(DataEntity e)
