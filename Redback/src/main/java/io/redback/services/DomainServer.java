@@ -76,16 +76,9 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 		throw new RedbackException("Domain server only accepts authenticated requests");
 	}
 
-	//public abstract void putReport(Session session, String domain, String name, String category, DataMap report) throws RedbackException;
-	
 	public abstract void putVariable(Session session, String domain, String name, DataEntity var) throws RedbackException;
 	
-	public abstract DataEntity getVariable(Session session, String domain, String name) throws RedbackException;
-
-	//public abstract DataMap getReport(Session session, String domain, String name) throws RedbackException;
-	
-	//public abstract List<DataMap> listReports(Session session, String category) throws RedbackException;
-	
+	public abstract DataEntity getVariable(Session session, String domain, String name) throws RedbackException;	
 	
 	public abstract void putFunction(Session session, String domain, String name, String function) throws RedbackException;
 	

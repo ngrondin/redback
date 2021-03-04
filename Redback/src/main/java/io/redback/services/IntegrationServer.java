@@ -83,11 +83,16 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 						String uid = request.getString("uid");
 						delete(session, client, domain, objectName, uid, options);
 						response = new DataMap("result", "ok");
-					}					
+					}		
 					else
 					{
 						throw new RedbackException("The '" + action + "' action is not valid as an object request");
 					}
+				}
+				else if(action.equals("clearcacheddata"))
+				{
+					clearCachedClientData(session, client, domain);
+					response = new DataMap("result", "ok");
 				}
 				else
 				{
@@ -128,5 +133,6 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 
 	protected abstract void delete(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException;
 
+	protected abstract void clearCachedClientData(Session session, String client, String domain) throws RedbackException;
 
 }

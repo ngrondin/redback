@@ -15,7 +15,7 @@ import io.redback.utils.js.JSConverter;
 public class IntegrationClientJSWrapper implements ProxyObject {
 	
 	protected IntegrationClient integrationClient;
-	protected String[] members = {"get", "list", "update", "create", "delete"};
+	protected String[] members = {"get", "list", "update", "create", "delete", "clearCachedClientData"};
 	protected String domain;
 	protected Session session;
 
@@ -115,6 +115,21 @@ public class IntegrationClientJSWrapper implements ProxyObject {
 					catch(Exception e)
 					{
 						throw new RuntimeException("Error on integration delete", e);
+					}
+				}
+			};
+		} else if(key.equals("clearCachedClientData")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String client = arguments[0].asString();
+					try
+					{
+						integrationClient.clearCachedClientData(session, client, domain);
+						return null;
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error on integration clear cached client data", e);
 					}
 				}
 			};

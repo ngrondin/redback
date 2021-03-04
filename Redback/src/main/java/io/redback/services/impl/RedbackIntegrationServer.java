@@ -87,7 +87,8 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	}
 	
 	protected DataMap getClientData(Session session, ClientConfig config, String domain) throws RedbackException {
-		DataMap clientData = cachedClientData.get(config.name + domain);
+		String cacheKey = config.name + domain;
+		DataMap clientData = cachedClientData.get(cacheKey);
 		if(clientData == null) {
 			DataMap filter = new DataMap();
 			filter.put("client", config.name);
@@ -95,34 +96,40 @@ public class RedbackIntegrationServer extends IntegrationServer {
 			DataMap resp = dataClient.getData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(filter), null);
 			if(resp != null && resp.getList("result") != null && resp.getList("result").size() > 0) {
 				clientData = resp.getList("result").getObject(0);
-				cachedClientData.put(config.name + domain, clientData);
+				cachedClientData.put(cacheKey, clientData);
 			}			
 		}
 		
 		if(clientData != null) {
+			String accessToken = clientData.getString("access_token");
 			long expiry = clientData.containsKey("expiry") ? clientData.getNumber("expiry").longValue() : 0;
-			if(expiry < System.currentTimeMillis()) {
-				DataMap form = new DataMap();
-				form.put("client_id", config.clientId);
-				form.put("client_secret", config.clientSecrect);
-				form.put("grant_type", "refresh_token");
-				form.put("refresh_token", clientData.getString("refresh_token"));
-				form.put("redirect_uri", config.redirectUri);
-				DataMap refreshResp = gatewayClient.postForm(config.refreshUrl, form);
-				if(refreshResp != null) {
-					if(refreshResp.getString("refresh_token") != null)
-						clientData.put("refresh_token", refreshResp.getString("refresh_token"));
-					if(refreshResp.getString("access_token") != null)
-						clientData.put("access_token", refreshResp.getString("access_token"));
-					if(refreshResp.getNumber("expires_in") != null)
-						clientData.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
-					DataMap key = new DataMap();
-					key.put("client", config.name);
-					key.put("domain", domain);
-					dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key), clientData);
+			if(accessToken == null || accessToken.equals("") || expiry < System.currentTimeMillis()) {
+				String refreshToken = clientData.getString("refresh_token");
+				if(refreshToken != null && !refreshToken.equals("")) {
+					DataMap form = new DataMap();
+					form.put("client_id", config.clientId);
+					form.put("client_secret", config.clientSecrect);
+					form.put("grant_type", "refresh_token");
+					form.put("refresh_token", refreshToken);
+					form.put("redirect_uri", config.redirectUri);
+					DataMap refreshResp = gatewayClient.postForm(config.refreshUrl, form);
+					if(refreshResp != null) {
+						if(refreshResp.getString("refresh_token") != null)
+							clientData.put("refresh_token", refreshResp.getString("refresh_token"));
+						if(refreshResp.getString("access_token") != null)
+							clientData.put("access_token", refreshResp.getString("access_token"));
+						if(refreshResp.getNumber("expires_in") != null)
+							clientData.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
+						DataMap key = new DataMap();
+						key.put("client", config.name);
+						key.put("domain", domain);
+						dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key), clientData);
+					} else {
+						throw new RedbackException("Error refreshing tokens");
+					}				
 				} else {
-					throw new RedbackException("Error refreshing tokens");
-				}				
+					throw new RedbackException("No availabile refresh token");
+				}
 			}
 			return clientData;
 		} else {
@@ -195,9 +202,18 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		gatewayRequest(config, context);
 	}
 
+	protected void clearCachedClientData(Session session, String client, String domain) throws RedbackException {
+		String key = client + domain;
+		if(cachedClientData.containsKey(key)) {
+			cachedClientData.remove(key);
+		}
+	}
+
+	
 	public void clearCaches() {
 		clientConfigs.clear();
 		cachedClientData.clear();
 	}
+
 
 }

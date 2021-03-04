@@ -25,6 +25,7 @@ import io.redback.client.DataClient;
 import io.redback.client.DomainClient;
 import io.redback.client.FileClient;
 import io.redback.client.GeoClient;
+import io.redback.client.IntegrationClient;
 import io.redback.client.NotificationClient;
 import io.redback.client.ReportClient;
 import io.redback.client.js.DomainClientJSWrapper;
@@ -61,6 +62,7 @@ public class ObjectManager
 	protected String reportServiceName;
 	protected String notificationServiceName;
 	protected String domainServiceName;
+	protected String integrationServiceName;
 	protected DataMap globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 	protected HashMap<String, ScriptConfig> globalScripts;
@@ -74,6 +76,7 @@ public class ObjectManager
 	protected ReportClient reportClient;
 	protected NotificationClient notificationClient;
 	protected DomainClient domainClient;
+	protected IntegrationClient integrationClient;
 
 	public ObjectManager(Firebus fb, DataMap config)
 	{
@@ -90,6 +93,7 @@ public class ObjectManager
 		reportServiceName = config.getString("reportservice");
 		notificationServiceName = config.getString("notificationservice");
 		domainServiceName = config.getString("domainservice");
+		integrationServiceName = config.getString("integrationservice");
 		globalVariables = config.getObject("globalvariables");
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
@@ -98,6 +102,7 @@ public class ObjectManager
 		reportClient = new ReportClient(firebus, reportServiceName);
 		notificationClient = new NotificationClient(firebus, notificationServiceName);
 		domainClient = new DomainClient(firebus, domainServiceName);
+		integrationClient = new IntegrationClient(firebus, integrationServiceName);
 		objectConfigs = new HashMap<String, ObjectConfig>();
 		globalScripts = new HashMap<String, ScriptConfig>();
 		readRightsFilters = new HashMap<String, ExpressionMap>();
@@ -143,6 +148,11 @@ public class ObjectManager
 	public DomainClient getDomainClient()
 	{
 		return domainClient;
+	}
+	
+	public IntegrationClient getIntegrationClient()
+	{
+		return integrationClient;
 	}
 	
 	public DataMap getGlobalVariables()

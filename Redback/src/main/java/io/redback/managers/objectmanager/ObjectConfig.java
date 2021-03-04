@@ -41,6 +41,7 @@ public class ObjectConfig
 		scriptVars.add("rc");
 		scriptVars.add("nc");
 		scriptVars.add("dc");
+		scriptVars.add("ic");
 		scriptVars.add("self");
 		scriptVars.add("canRead");
 		scriptVars.add("canWrite");

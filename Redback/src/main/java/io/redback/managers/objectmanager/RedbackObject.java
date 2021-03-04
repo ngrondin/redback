@@ -15,6 +15,7 @@ import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.js.DomainClientJSWrapper;
+import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
@@ -167,6 +168,7 @@ public class RedbackObject extends RedbackElement
 	protected void postInitScriptContextUpdate() throws RedbackException
 	{
 		scriptContext.put("dc", new DomainClientJSWrapper(objectManager.getDomainClient(), session, getDomain().getString()));
+		scriptContext.put("ic", new IntegrationClientJSWrapper(objectManager.getIntegrationClient(), session, getDomain().getString()));
 		scriptContext.put("uid", getUID().getString());
 	}
 	

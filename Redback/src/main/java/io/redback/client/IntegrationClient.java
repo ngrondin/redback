@@ -71,6 +71,14 @@ public class IntegrationClient extends Client {
 			req.put("options", options);
 		return request(session, req);
 	}
+	
+	public void clearCachedClientData(Session session, String client, String domain) throws RedbackException {
+		DataMap req = new DataMap();
+		req.put("client", client);
+		req.put("domain", domain);
+		req.put("action", "clearcacheddata");
+		request(session, req);
+	}
 
 	
 }
