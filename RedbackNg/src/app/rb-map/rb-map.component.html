@@ -2,12 +2,12 @@
     #map
     [latitude]="mapLatitude" 
     [longitude]="mapLongitude"
-    [zoom]="zoomOfMap"
-    [styles]="defaultStyles"
+    [zoom]="zoomOfMap"    [styles]="defaultStyles"
     (mapRightClick)="mapRightClick($event)"
     (mapClick)="mapClick($event)"
     (mousemove)="mouseMove($event)"
-    (zoomChange)="zoomChange($event)">
+    (zoomChange)="zoomChange($event)"
+    (mapReady)="onMapReady($event)">
     <agm-overlay
         *ngFor="let mapPoint of mapPoints"
         [latitude]="mapPoint.latitude"

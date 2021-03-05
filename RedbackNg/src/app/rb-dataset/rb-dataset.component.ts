@@ -150,7 +150,10 @@ export class RbDatasetComponent extends RbContainerComponent  {
       const filter = this.mergeFilters();
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
       const search = this.searchString;
-      this.dataService.listObjects(this.object, filter, search, sort, this.nextPage, this.pageSize).subscribe(data => this.setData(data));
+      this.dataService.listObjects(this.object, filter, search, sort, this.nextPage, this.pageSize).subscribe({
+        next: (data) => this.setData(data),
+        error: (error) => {this.isLoading = false;}
+      });
       this.nextPage = this.nextPage + 1;
       this.fetchThreads = this.fetchThreads + 1;
       this.dataService.subscribeObjectCreation(this.id, this.object, filter);

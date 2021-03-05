@@ -53,7 +53,11 @@ export class MapService {
           if(Array.isArray(__value)) {
             let __outArray = [];
             for(const __valueItem of __value) {
-              __outArray.push(eval(__varString + __valueItem));
+              if(typeof __valueItem == "object") {
+                __outArray.push(this.resolveMap(__valueItem, obj, selectedObject, relatedObject));
+              } else if(typeof __valueItem == "string") {
+                __outArray.push(eval(__varString + __valueItem));
+              }
             }
             __value = __outArray;
           } else {

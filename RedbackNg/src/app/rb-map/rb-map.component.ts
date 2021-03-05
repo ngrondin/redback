@@ -9,6 +9,7 @@ import { isError } from 'util';
 import { Translator, InitialsMaker } from 'app/helpers';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { ElementRef } from '@angular/core';
 
 
 class MapSeriesConfig {
@@ -98,9 +99,11 @@ export class RbMapComponent extends RbDataObserverComponent {
   @Input('geoattribute') geoattribute: string;
   @Input('labelattribute') labelattribute: string;
   @Input('descriptionattribute') descriptionattribute: string;
+  @Input('dateattribute') dateattribute: string;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('map', { read: AgmMap }) map: AgmMap;
+  @ViewChild('map') elementView: ElementRef;
 
   seriesConfigs: MapSeriesConfig[] = [];
   mapPoints: MapPoint[] = [];
@@ -140,7 +143,8 @@ export class RbMapComponent extends RbDataObserverComponent {
   ];
 
   constructor(
-    private apiService: ApiService
+    private elementRef:ElementRef
+    //private apiService: ApiService
   ) {
     super();
   }
@@ -158,6 +162,7 @@ export class RbMapComponent extends RbDataObserverComponent {
       }
       this.seriesConfigs[0].geometryAttribute = this.geoattribute;
       this.seriesConfigs[0].labelAttribute = this.labelattribute;
+      this.seriesConfigs[0].dateAttribute = this.dateattribute;
     }
   }
 
@@ -165,10 +170,14 @@ export class RbMapComponent extends RbDataObserverComponent {
   }
 
   onActivationEvent(event: any) {
+    setTimeout(() => this.calcAll(), 300);
   }
 
   onDatasetEvent(event: any) {
     this.calcAll();
+  }
+
+  onMapReady(event: any) {
   }
 
   get selectedObject() : RbObject {
@@ -183,55 +192,29 @@ export class RbMapComponent extends RbDataObserverComponent {
     return this.datasetgroup != null ? this.datasetgroup.lists : null;
   }
 
-  haveListsChanged(): Boolean {
-    let changed: Boolean = false;
-    let count: number = 0;
-    if(this.list != null) {
-      for(let obj of this.list) {
-        count += 1;
-        if(obj['lastUpdated'] > this.lastObjectUpdate) {
-          changed = true;
-          this.lastObjectUpdate = obj['lastUpdated'];
-        }
-      }
-    }
-    if(this.lists != null) {
-      for(let ser of this.seriesConfigs) {
-        for(let obj of this.lists[ser.dataset]) {
-          count += 1;
-          if(obj['lastUpdated'] > this.lastObjectUpdate) {
-            changed = true;
-            this.lastObjectUpdate = obj['lastUpdated'];
+  calcAll() {
+    if(this.active) {
+      console.log("calc all");
+      this.minLat = 90;
+      this.maxLat = -90;
+      this.minLon = 180;
+      this.maxLon = -180;
+      this.mapPoints = [];
+      this.mapPolygons = [];
+      this.selectedMapPoint = null;
+  
+      if(this.list != null && this.seriesConfigs[0] != null) {
+        this.calcList(this.list, this.seriesConfigs[0]);
+      } else if(this.lists != null && this.seriesConfigs.length > 0) {
+        for(let seriesConfig of this.seriesConfigs) {
+          let list = this.lists[seriesConfig.dataset];
+          if(list != null) {
+            this.calcList(list, seriesConfig);
           }
         }
       }
+      this.calcMapCoords();
     }
-    if(count != this.lastObjectCount) {
-      changed = true;
-      this.lastObjectCount = count;
-    }
-    return changed;
-  }
-
-  calcAll() {
-    this.mapPoints = [];
-    this.mapPolygons = [];
-    this.minLat = 90;
-    this.maxLat = -90;
-    this.minLon = 180;
-    this.maxLon = -180;
-
-    if(this.list != null && this.seriesConfigs[0] != null) {
-      this.calcList(this.list, this.seriesConfigs[0]);
-    } else if(this.lists != null && this.seriesConfigs.length > 0) {
-      for(let seriesConfig of this.seriesConfigs) {
-        let list = this.lists[seriesConfig.dataset];
-        if(list != null) {
-          this.calcList(list, seriesConfig);
-        }
-      }
-    }
-    this.calcMapCoords();
   }
 
   calcList(list: RbObject[], cfg: MapSeriesConfig) {
@@ -287,10 +270,7 @@ export class RbMapComponent extends RbDataObserverComponent {
         }
   
         if(visible) {
-          if(latLon.latitude < this.minLat) this.minLat = latLon.latitude - 0.5;
-          if(latLon.latitude > this.maxLat) this.maxLat = latLon.latitude + 0.5;
-          if(latLon.longitude < this.minLon) this.minLon = latLon.longitude - 0.5;
-          if(latLon.longitude > this.maxLon) this.maxLon = latLon.longitude + 0.5;
+          this.calcMinMaxLatLon(latLon);
           let mapPoint = new MapPoint(object, latLon.latitude, latLon.longitude, label, initials, icon, color, animate, link, object == this.selectedObject ? 10 : 5);
           this.mapPoints.push(mapPoint);
           if(object == this.selectedObject) {
@@ -307,10 +287,19 @@ export class RbMapComponent extends RbDataObserverComponent {
     for(let object of sortedList) {
       let latLon = this.getObjectLatLon(object, cfg);
       if(latLon != null) {
+        this.calcMinMaxLatLon(latLon);
         mapPolygon.addObject(object, latLon.latitude, latLon.longitude);
       }
     }
     this.mapPolygons.push(mapPolygon);
+  }
+
+  calcMinMaxLatLon(latLon: any) {
+    if(latLon.latitude < this.minLat) this.minLat = latLon.latitude;
+    if(latLon.latitude > this.maxLat) this.maxLat = latLon.latitude;
+    if(latLon.longitude < this.minLon) this.minLon = latLon.longitude;
+    if(latLon.longitude > this.maxLon) this.maxLon = latLon.longitude;
+
   }
 
   calcMapCoords() : any {
@@ -319,13 +308,23 @@ export class RbMapComponent extends RbDataObserverComponent {
         this.zoomOfMap = 12;
         this.mapLatitude = this.selectedMapPoint.latitude;
         this.mapLongitude = this.selectedMapPoint.longitude;
-      } else if(this.mapPoints.length > 0) {
+      } else if(this.mapPoints.length > 0 || this.mapPolygons.length > 0) {
         this.mapLatitude = ((this.maxLat + this.minLat) / 2);
         this.mapLongitude = ((this.maxLon + this.minLon) / 2);
         if(this.maxLat - this.minLat < 0 || this.maxLon - this.minLon < 0) {
           this.zoomOfMap = 2;
         } else {
-          this.zoomOfMap = (1.0 / (60.0 + (this.maxLon - this.minLon)) * 500.0);
+          let pxWidth = this.map['_elem'].nativeElement.clientWidth;
+          let pxHeight = this.map['_elem'].nativeElement.clientHeight;
+          let mWidth = Math.floor(this.distance(this.mapLatitude, this.minLon, this.mapLatitude, this.maxLon));
+          let mHeight = Math.floor(this.distance(this.minLat, this.mapLongitude, this.maxLat, this.mapLongitude));
+          let vertmperpx = Math.floor(mHeight / pxHeight);
+          let horimperpx = Math.floor(mWidth / pxWidth);
+          console.log(pxWidth + "x" + pxHeight + "  " + mWidth + "x" + mHeight + "  " + horimperpx + "x" + vertmperpx);
+          this.zoomOfMap = Math.floor(Math.log2(156543.03392 * Math.cos(this.mapLatitude * Math.PI / 180) / Math.max(vertmperpx, horimperpx)));
+          console.log('zoom is ' + this.zoomOfMap);
+          //this.zoomOfMap = (350.0 / (60.0 + (Math.max(this.maxLon - this.minLon, this.maxLat - this.minLat))));
+          //console.log("zoom is " + this.zoomOfMap);
         }
       } else {
         this.zoomOfMap = 2;
@@ -415,6 +414,20 @@ export class RbMapComponent extends RbDataObserverComponent {
 
   mouseMove(event: any) {
     this.mousePosition = {x: event.offsetX, y: event.offsetY};
+  }
+
+  distance(lat1: number, lon1: number, lat2: number, lon2: number) : number {
+    const R = 6371e3; // metres
+    const φ1 = lat1 * Math.PI/180; // φ, λ in radians
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const d = R * c; // in metres
+    return d;
   }
 
 }
