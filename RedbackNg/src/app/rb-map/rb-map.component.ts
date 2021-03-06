@@ -194,7 +194,7 @@ export class RbMapComponent extends RbDataObserverComponent {
 
   calcAll() {
     if(this.active) {
-      console.log("calc all");
+      //console.log("calc all");
       this.minLat = 90;
       this.maxLat = -90;
       this.minLon = 180;
@@ -318,13 +318,11 @@ export class RbMapComponent extends RbDataObserverComponent {
           let pxHeight = this.map['_elem'].nativeElement.clientHeight;
           let mWidth = Math.floor(this.distance(this.mapLatitude, this.minLon, this.mapLatitude, this.maxLon));
           let mHeight = Math.floor(this.distance(this.minLat, this.mapLongitude, this.maxLat, this.mapLongitude));
-          let vertmperpx = Math.floor(mHeight / pxHeight);
-          let horimperpx = Math.floor(mWidth / pxWidth);
-          console.log(pxWidth + "x" + pxHeight + "  " + mWidth + "x" + mHeight + "  " + horimperpx + "x" + vertmperpx);
+          let vertmperpx = (mHeight / pxHeight);
+          let horimperpx = (mWidth / pxWidth);
+          //console.log(pxWidth + "x" + pxHeight + "  " + mWidth + "x" + mHeight + "  " + horimperpx + "x" + vertmperpx);
           this.zoomOfMap = Math.floor(Math.log2(156543.03392 * Math.cos(this.mapLatitude * Math.PI / 180) / Math.max(vertmperpx, horimperpx)));
-          console.log('zoom is ' + this.zoomOfMap);
-          //this.zoomOfMap = (350.0 / (60.0 + (Math.max(this.maxLon - this.minLon, this.maxLat - this.minLat))));
-          //console.log("zoom is " + this.zoomOfMap);
+          //console.log('zoom is ' + this.zoomOfMap);
         }
       } else {
         this.zoomOfMap = 2;
