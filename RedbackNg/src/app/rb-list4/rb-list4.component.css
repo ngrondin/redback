@@ -4,7 +4,7 @@
 	overflow: hidden;
 	flex-direction: column;
     flex: 1 1 auto;
-    width: 300px;
+    width: 17.5vw;
 }
 
 :host > .rb-list-container > mat-action-list > .rb-list-repeater > button {
@@ -16,7 +16,7 @@
 	overflow: auto;
 	flex-direction: column;
     flex: 1 1 auto;
-    width: 300px;  
+    width: 17.5vw;  
 }
 
 .rb-list-repeater {
@@ -30,7 +30,7 @@
     flex: 1 1 auto;
 	flex-direction: column;
 	margin: 12px 4px 12px 4px;
-    min-height: 48px;
+    min-height: 3vw;
     overflow: hidden;
     justify-content: center;
 }
@@ -53,7 +53,7 @@
 }
 
 .rb-list-item-meta1 {
-    font-size: smaller;
+    font-size: 0.75rem;
     font-weight: 400;
     color: #888888;
     white-space: nowrap;
@@ -62,7 +62,7 @@
 }
 
 .rb-list-item-meta2 {
-    font-size: smaller;
+    font-size: 0.75rem;
     font-weight: 400;
     color: #666666;  
     white-space: nowrap;
@@ -90,11 +90,12 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 1.0rem;
 }
 
 .rb-list-item-sub {
     color: #aaaaaa;
-    font-size: small;
+    font-size: 0.75rem;
     line-height: 16px;
     min-height: 16px;
 }

@@ -1,7 +1,10 @@
-
 :host {
     display: flex;
     padding: 0px;
+}
+
+:host mat-icon {
+    /*font-size: 1.5rem;*/
 }
 
 .rb-globalsearch-search {
@@ -9,8 +12,9 @@
     border-color: darkblue;
     border-width: 0px;
     background-color: #444488;
+    width: 12vw;
     height: 28px;
-    font-size: 12pt;
+    font-size: 0.8rem;
     color: white;
     margin-left: 5px;
     margin-right: 5px;
@@ -56,7 +60,7 @@
 
 .rb-globalsearch-listsub {
     color: #aaaaaa;
-    font-size: small;
+    font-size: 0.8rem;
     margin: -12px 0px 0px 0px;
     max-width: 330px;
     white-space: nowrap;

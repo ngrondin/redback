@@ -4,6 +4,10 @@
 	flex: 1 1 auto;
 }
 
+.rb-menu-link-button {
+	height: 2.8vw;
+}
+
 
 .rb-menu-link-text {
 	flex-grow: 1;
@@ -13,13 +17,14 @@
 	font-weight: 300;
 	font-size: 0.9rem;
 	color: #444444;
-	padding-left: 12px;
-	width: 170px;
-	max-width: 170px;
+	padding-left: 0.8vw;
+	width: 10vw;
+	max-width: 10vw;
 }
 
 .rb-menu-link-icon {
 	color:#888888;
+	font-size: 1.5rem;
 }
 
 .rb-menu-link-popup-back {

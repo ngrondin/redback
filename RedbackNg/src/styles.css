@@ -2,10 +2,15 @@
 
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
-html, body { height: 100%; }
-body { 
-    margin: 0; 
+html {
+	height: 100%;
+	font-size: 0.95vw;
     font-family: Roboto, "Helvetica Neue", sans-serif; 
+}
+
+body { 
+	height: 100%;
+    margin: 0; 
     display: flex;
     flex-direction: column;
 }
@@ -41,7 +46,11 @@ rb-layout {
 
 
 .rb-button {
-	margin: 8px !important;
+	margin: 0.5vw!important;
+	font-size: 0.9rem;
+	padding: 0vw 0.8vw!important;
+	line-height: 2vw!important;
+	min-width: 3vw!important;
 }
 
 .mat-stroked-button {
@@ -61,15 +70,6 @@ rb-list-scroll > mat-action-list {
 
 rb-list-scroll > mat-action-list > button {
 	height: auto!important;
-}
-
-.rb-list-line1 {
-	font-size: 16px;
-}
-
-.rb-list-line2 {
-	font-size: 14px;
-	color: #999999;	
 }
 
 
@@ -226,6 +226,7 @@ rb-tab {
 .rb-grey-icon {
 	color: grey;
 	margin-right: 5px;
+	font-size: 1.4vw;
 }
 
 

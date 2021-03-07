@@ -16,7 +16,7 @@
     display: flex;
     flex-direction: row;
     flex: 0 0 auto;
-    height: 64px;
+    height: 3.7vw;
 }
 
 .rb-gantt-header-dateinput {
@@ -26,7 +26,7 @@
 
 .rb-gantt-corner {
     display: flex;
-    width: 250px;
+    width: 15vw;
 }
 
 .rb-gantt-headertrackcontainer {
@@ -49,13 +49,13 @@
 .rb-gantt-daytrack {
     display:flex;
     position: relative;
-    height: 32px;
+    height: 1.9vw;
 }
 
 .rb-gantt-hourtrack {
     display: flex;
     position: relative;
-    height: 32px;
+    height: 1.9vw;
     border-top: 1px solid lightgray;
 }
 
@@ -82,7 +82,7 @@
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
-    width: 250px;
+    width: 15vw;
 }
 
 .rb-gantt-laneheadscontainer {
@@ -105,7 +105,7 @@
     flex: 1 1 auto;
     overflow: auto;
     position: relative;
-    width: 100px;
+    width: 5.9vw;
 }
 
 .rb-gantt-lanes {
@@ -135,7 +135,7 @@
 
 .rb-gantt-spreadbox {
     border: 1px solid darkblue;
-    height: 28px;
+    height: 1.6vw;
     top: 7px;
     background-color: white;
     border-radius: 3px;
@@ -147,7 +147,7 @@
 }
 
 .rb-gantt-spreadbackground {
-    height: 42px;
+    height: 2.5vw;
     z-index: 50;
 }
 
@@ -165,7 +165,7 @@
 
 
 .rb-gantt-laneheight {
-    height: 42px;
+    height: 2.5vw;
     flex: 0 0 auto;
 }
 

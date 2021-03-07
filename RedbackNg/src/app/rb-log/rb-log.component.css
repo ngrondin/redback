@@ -39,7 +39,7 @@
     width: 50%;
     height:24px;
     color: #3f51b5;
-    font-size: smaller;
+    font-size: 0.8rem;
 }
 
 .rb-log-date {
@@ -47,7 +47,7 @@
     width: 50%;
     height:24px;
     color: #3f51b5;
-    font-size: smaller;
+    font-size: 0.8rem;
 }
 
 .rb-log-entry {

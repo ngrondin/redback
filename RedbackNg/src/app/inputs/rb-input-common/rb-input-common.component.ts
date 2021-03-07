@@ -88,7 +88,7 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
 
   public get widthString() : string {
     if(this.size != null)
-      return (15*this.size) + 'px';
+      return (0.88 * this.size) + 'vw';
     else
       return '100%';
   }

@@ -21,7 +21,8 @@
     display: flex;
 }
 
-.rb-menu-control-grew-button {
+.rb-menu-control mat-icon {
+    font-size: 1.5rem;
     color: grey;
 }
 

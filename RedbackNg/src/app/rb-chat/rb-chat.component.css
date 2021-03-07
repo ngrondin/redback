@@ -4,15 +4,20 @@
     position: relative;
 }
 
+
+:host button {
+    font-size: 1.5rem!important;
+}
+
 .rb-chat-badge {
     position: absolute;
     top: 0px;
     right: 45%;
-    height: 24px;
-    min-width: 18px;
-    border-radius: 12px;
+    height: 1.4vw;
+    min-width: 1.1vw;
+    border-radius: 0.7vw;
     background-color: red;
-    font-size: small;
+    font-size: 0.8rem;
     text-align: center;
     line-height: 200%;
     padding-left: 3px;

@@ -30,12 +30,12 @@ agm-map {
         0 13px 19px 2px rgba(0, 0, 0, 0.14),
         0 5px 24px 4px rgba(0, 0, 0, 0.12);
     white-space: nowrap;
-    font-size: 18px;
+    font-size: 1.2rem;
     cursor: default;
 }
 
 .rb-map-label-button {
-    font-size: initial;
+    font-size: 1.0rem;
     padding: 6px 12px 6px 12px;
 }
 

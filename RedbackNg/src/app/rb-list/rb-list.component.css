@@ -3,7 +3,7 @@
 	overflow: auto;
 	flex-direction: column;
     flex: 1 1 auto;
-    width: 300px;
+    width: 17.5vw;
 }
 
 :host > mat-action-list > button {
@@ -47,14 +47,15 @@
 }
 
 .rb-list-item-header {
+    font-size: 1.0rem;
 }
 
 .rb-list-item-subhead {
-    font-size: smaller;
+    font-size: 0.8rem;
     font-weight: 500;
 }
 
 .rb-list-item-supptext {
     color: #aaaaaa;
-    font-size: small;
+    font-size: 0.8rem;
 }

@@ -5,6 +5,10 @@
 	flex: 1 1 auto;
 }
 
+.rb-menu-group-button {
+	height: 2.8vw;
+}
+
 .rb-menu-group-text {
 	flex-grow: 1;
 	white-space: nowrap;
@@ -13,13 +17,14 @@
 	font-weight: 500;
 	font-size: 0.9rem;
 	color: #444444;
-	padding-left: 12px;
-	width: 170px;
-	max-width: 170px;
+	padding-left: 0.8vw;
+	width: 10vw;
+	max-width: 10vw;
 }
 
 .rb-menu-group-icon {
 	color:dimgray;
+	font-size: 1.5rem;
 }
 
 .rb-menu-group {
