@@ -5,7 +5,6 @@ import { MapService } from 'app/services/map.service';
 import { Observable, Subscription } from 'rxjs';
 import { ApiService } from 'app/services/api.service';
 import { ReportService } from 'app/services/report.service';
-import { ToastrService } from 'ngx-toastr';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { Observer } from 'rxjs';
 import { ModalService } from 'app/services/modal.service';

@@ -64,9 +64,9 @@ rb-layout {
 .rb-button {
 	margin: 0.5vw!important;
 	font-size: 0.9rem;
-	padding: 0vw 0.8vw!important;
+	/*padding: 0vw 0.8vw!important;*/
 	line-height: 2vw!important;
-	min-width: 3vw!important;
+	min-width: 2.5vw!important;
 }
 
 .mat-stroked-button {

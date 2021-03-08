@@ -1,14 +1,11 @@
-<mat-icon 
-    class="rb-grey-icon">
-    search
-</mat-icon>
-<mat-form-field>
-    <mat-label>Search</mat-label>
-    <input 
-        matInput 
-        [(ngModel)]="searchValue"
-        (keyup)="keyup($event)">
-</mat-form-field>
+<rb-input
+    [(value)]="searchValue"
+    [icon]="'search'"
+    [label]="'Search'"
+    [grow]="1"
+    [size]="1"
+    (keyup)="keyup($event)">
+</rb-input>
 <button 
     mat-button
     *ngIf="filterconfig != null"

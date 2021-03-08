@@ -138,10 +138,10 @@ export class RbViewLoaderComponent implements OnInit {
       var inputs = factory['componentDef']['declaredInputs'];
       for(var input of Object.keys(inputs)) {
         let val: any = null;
-        if(input == 'dataset' && context['dataprovider'] != null && context['dataprovider'] instanceof RbDatasetComponent) {
-          val = context['dataprovider'];
-        } else if(input == 'datasetgroup' && context['dataprovider'] != null && context['dataprovider'] instanceof RbDatasetGroupComponent) {
-          val = context['dataprovider'];
+        if(input == 'dataset' && context['dataset'] != null && context['dataset'] instanceof RbDatasetComponent) {
+          val = context['dataset'];
+        } else if(input == 'datasetgroup' && context['datasetgroup'] != null && context['datasetgroup'] instanceof RbDatasetGroupComponent) {
+          val = context['datasetgroup'];
         } else if(input == 'fileset' && context['fileset'] != null && context['fileset'] instanceof RbFilesetComponent) {
           val = context['fileset'];
         } else if(input == 'aggregateset' && context['aggregateset'] != null && context['aggregateset'] instanceof RbAggregatesetComponent) {
@@ -168,9 +168,9 @@ export class RbViewLoaderComponent implements OnInit {
         if(newInstance instanceof RbContainerComponent && newInstance.container != null) {
           let newContext = Object.assign({}, context);
           if(newInstance instanceof RbDatasetComponent) {
-            newContext['dataprovider'] = newInstance;
+            newContext['dataset'] = newInstance;
           } else if(newInstance instanceof RbDatasetGroupComponent) {
-            newContext['dataprovider'] = newInstance;
+            newContext['datasetgroup'] = newInstance;
           } else if(newInstance instanceof RbFilesetComponent) {
             newContext['fileset'] = newInstance;
           } else if(newInstance instanceof RbAggregatesetComponent) {

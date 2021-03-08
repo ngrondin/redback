@@ -29,6 +29,9 @@
     font-size: 0.75rem;
     color: rgb(175, 175, 175);
     z-index: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;  
 }
 
 .rb-input-label-big {
@@ -57,6 +60,7 @@
     height: 0px;
     border-top: 3px solid var(--main-color);
     margin-top: -2px;
+    z-index: 2;
 }
 
 .rb-input-underline-editing {

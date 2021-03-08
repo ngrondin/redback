@@ -17,9 +17,10 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   @Input('grow') grow: number;
   @Input('editable') editable: boolean = true;
   @Input('attribute') attribute: string;
-  @Input('value') _value: any;
+  @Input('value') value: any;
   @Output('valueChange') valueChange = new EventEmitter();
   @Output('change') change = new EventEmitter();
+  @Output('keyup') keyupEvent = new EventEmitter();
   @HostBinding('class.rb-input-margin') marginclass: boolean = true;
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
   @HostBinding('style.width') get styleWidth() { if(this.size != null) {return (0.88 * this.size) + 'vw';} else {return '12vw'};}
@@ -50,17 +51,9 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   get rbObject() : RbObject {
     return this.dataset != null ? this.dataset.selectedObject : this._rbObject;
   }
-/*
-  public get value(): any {
-    return this._value;
-  }
 
-  public set value(val: any) {
-    this.editedValue = val;
-  }
-*/
   public get displayvalue(): any {
-    return this._value;
+    return this.value;
   }
 
   public set displayvalue(val: any) {
@@ -123,7 +116,13 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   
   }
 
-  public commit() {
+  public keyup(event: any) {
+    this.valueChange.emit(this.editedValue);
+    this.keyupEvent.emit(event);
+  }
 
+  public commit() {
+    this.value = this.editedValue;
+    this.editedValue = null;
   }
 }

@@ -24,7 +24,7 @@ export class RbInputComponent extends RbInputCommonComponent {
         val = this.rbObject.get(this.attribute);
       }
     } else {
-      val = null;
+      val = this.value;
     }
     this.checkValueChange(val);
     return val;
@@ -42,7 +42,9 @@ export class RbInputComponent extends RbInputCommonComponent {
   commit() {
     super.commit();
     this.previousValue = this.editedValue;
-    this.rbObject.setValue(this.attribute, this.editedValue);
+    if(this.rbObject != null) {
+      this.rbObject.setValue(this.attribute, this.editedValue);
+    }
     this.change.emit(this.editedValue);
   }
 

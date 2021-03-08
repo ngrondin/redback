@@ -6,7 +6,7 @@
 <div
     class="rb-input-container">
     <span
-        [class]="'rb-input-label' + (displayvalue == null ? ' rb-input-label-big' : '')">
+        [class]="'rb-input-label' + ((displayvalue == null || displayvalue == '') && !isEditing ? ' rb-input-label-big' : '')">
         {{label}}
     </span>    
     <input 
@@ -17,6 +17,7 @@
         (focus)="focus($event)"
         (blur)="blur($event)"
         (keydown)="keydown($event)"
+        (keyup)="keyup($event)"
         [readonly]="readonly"
         autocomplete="off"
         [type]="'text'">

@@ -4,14 +4,10 @@
     padding-right: 8px;
 }
 
-:host > mat-form-field {
-    flex: 1 1 auto;
-    width: 80px;
+:host > rb-input {
+    margin: 0px;
 }
 
-:host > mat-icon {
-    padding-top: 15px;
-}
 
 .rb-filter-button {
     padding: 0px;
