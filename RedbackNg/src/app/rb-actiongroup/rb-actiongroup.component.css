@@ -4,3 +4,7 @@
     color: grey;
     padding: 10px;
 }
+
+.rb-action-group-item {
+    font-size: 0.95rem;
+}

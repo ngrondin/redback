@@ -59,15 +59,15 @@ mat-toolbar-row {
 mat-sidenav-container {
     display: flex;
     flex: 1 1 auto;
+
 }
 
 mat-sidenav {
     display: flex;
-    border-right: Solid 1px rgba(0,0,0,.12)
+    border-right: Solid 1px rgba(0,0,0,.12);
 }
 
 mat-sidenav-content {
     display: flex;
     flex: 1 1 auto;
 }
-

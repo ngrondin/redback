@@ -8,8 +8,6 @@
 .rb-menu-container {
     display: flex;
 	flex-direction: column;
-    overflow-y: overlay;
-    overflow-x: hidden;
     flex: 1 1 auto;
 }
 

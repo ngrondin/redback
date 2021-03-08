@@ -29,6 +29,7 @@
     </div>
     <button
         mat-menu-item
+        class="rb-action-group-item"
         *ngFor="let action of actionData"
         (click)="clickAction(action)">
         {{action.label}}

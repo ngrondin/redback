@@ -12,6 +12,7 @@
 	--v16px: 0.94vw;
 	--v24px: 1.41vw;
 	--v32px: 1.88vw;
+	--v36px: 2.11vw;
 	--v48px: 2.82vw;
 }
 
@@ -258,7 +259,9 @@ rb-fileset {
 	flex: 1 1 auto;
 }
 
-
+.mat-drawer-inner-container {
+    overflow: hidden!important;
+}
 
 .agm-map-container-inner {
     height: 100% !important;
@@ -304,5 +307,14 @@ rb-fileset {
 {
 	/*background-color:#c2c2f0;*/
 } 
+
+.hscroll {
+	overflow-x:hidden;
+	overflow-y: auto;
+	overflow-y: overlay;
+	scrollbar-color: #bcbcf6 transparent;
+	scrollbar-width: thin;
+}
+
 
 [hidden] { display: none !important;}

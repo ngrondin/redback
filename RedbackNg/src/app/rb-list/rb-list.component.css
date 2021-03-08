@@ -1,12 +1,18 @@
 :host {
 	display: flex;
-	overflow: overlay;
+	overflow: hidden;
 	flex-direction: column;
     flex: 1 1 auto;
     width: 17.5vw;
 }
 
-:host > mat-action-list > button {
+.rb-list-container {
+	display: flex;
+	flex-direction: column;
+    flex: 1 1 auto;   
+}
+
+:host > .rb-list-container > mat-action-list > button {
 	height: auto!important;
 }
 
@@ -34,7 +40,9 @@
     justify-content: center;
     color: grey;
     margin-left: -5px;
-    padding-right: 10px;
+    padding-right: var(--v10px);
+    width: var(--v24px);
+    height: var(--v24px);
 }
 
 .mat-icon{

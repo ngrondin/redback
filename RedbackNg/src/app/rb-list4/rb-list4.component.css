@@ -13,7 +13,7 @@
 
 .rb-list-container {
     display: flex;
-	overflow: overlay;
+	/*overflow: scroll;*/
 	flex-direction: column;
     flex: 1 1 auto;
     width: 17.5vw;  

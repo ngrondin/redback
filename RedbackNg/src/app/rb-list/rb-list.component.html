@@ -1,45 +1,49 @@
-<mat-action-list>
-    <button
-        mat-list-item 
-        *ngFor="let item of list" 
-        [rb-drag-object]="item"
-        [ngClass]="selectedObject == item ? userpref.getAtlClassFor('rb-list-item-active') : ''"
-        (click)="itemClicked(item)">
-        <div 
-            class="rb-list-item">
-            <div
-                *ngIf="iconattribute != null"
-                class="rb-list-item-icon"
-                [style.color]="getColorFor(item)">
-                <mat-icon>{{getIconFor(item)}}</mat-icon>
-            </div>
-            <div
-                class="rb-list-item-datablock">
-                <span
-                    class="rb-list-item-header">
-                    {{getHeaderFor(item)}}
-                </span>
-                <span
-                    class="rb-list-item-subhead">
-                    {{getSubheadFor(item)}}
-                </span>
-                <span
-                    class="rb-list-item-supptext">
-                    {{getSuppTextFor(item)}}
-                </span>
-            </div>
-        </div>
-    </button>
-</mat-action-list>
 <div
-    class="rb-spinner-container"
-    *ngIf="list.length == 0 && isLoading == false">
-    No records
-</div>	
-<div
-    class="rb-spinner-container"
-    *ngIf="isLoading">
-    <mat-spinner
-        diameter="20">
-    </mat-spinner>
-</div>	
+    class="rb-list-container hscroll">
+    <mat-action-list>
+        <button
+            mat-list-item 
+            *ngFor="let item of list" 
+            [rb-drag-object]="item"
+            [ngClass]="selectedObject == item ? userpref.getAtlClassFor('rb-list-item-active') : ''"
+            (click)="itemClicked(item)">
+            <div 
+                class="rb-list-item">
+                <div
+                    *ngIf="iconattribute != null"
+                    class="rb-list-item-icon"
+                    [style.color]="getColorFor(item)">
+                    <mat-icon>{{getIconFor(item)}}</mat-icon>
+                </div>
+                <div
+                    class="rb-list-item-datablock">
+                    <span
+                        class="rb-list-item-header">
+                        {{getHeaderFor(item)}}
+                    </span>
+                    <span
+                        class="rb-list-item-subhead">
+                        {{getSubheadFor(item)}}
+                    </span>
+                    <span
+                        class="rb-list-item-supptext">
+                        {{getSuppTextFor(item)}}
+                    </span>
+                </div>
+            </div>
+        </button>
+    </mat-action-list>
+    <div
+        class="rb-spinner-container"
+        *ngIf="list.length == 0 && isLoading == false">
+        No records
+    </div>	
+    <div
+        class="rb-spinner-container"
+        *ngIf="isLoading">
+        <mat-spinner
+            diameter="20">
+        </mat-spinner>
+    </div>
+</div>
+	
