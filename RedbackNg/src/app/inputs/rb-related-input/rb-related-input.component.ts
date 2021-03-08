@@ -1,19 +1,14 @@
-import { Component, OnInit, Input, ViewChild, ViewContainerRef, Injector, InjectionToken, ComponentRef } from '@angular/core';
-import { OverlayRef, CdkOverlayOrigin, Overlay, OverlayConfig } from  '@angular/cdk/overlay';
-import { RbInputComponent } from '../rb-input/rb-input.component';
+import { Component, OnInit, Input, ViewContainerRef, Injector } from '@angular/core';
+import { Overlay } from  '@angular/cdk/overlay';
 import { RbObject } from '../../datamodel';
-import { MatDialog } from '@angular/material/dialog';
 import { RbPopupListComponent } from '../../popups/rb-popup-list/rb-popup-list.component';
-import { ComponentPortal, PortalInjector } from '@angular/cdk/portal';
-import { CONTAINER_DATA } from '../../tokens';
-import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
 import { RbPopupInputComponent } from 'app/inputs/rb-popup-input/rb-popup-input.component';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 
 @Component({
   selector: 'rb-related-input',
-  templateUrl: './rb-related-input.component.html',
-  styleUrls: ['./rb-related-input.component.css']
+  templateUrl: '../rb-input-common/rb-input-common.component.html',
+  styleUrls: ['../rb-input-common/rb-input-common.component.css']
 })
 export class RbRelatedInputComponent extends RbPopupInputComponent  {
 

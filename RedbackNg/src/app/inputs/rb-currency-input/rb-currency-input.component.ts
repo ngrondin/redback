@@ -4,8 +4,8 @@ import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-comm
 
 @Component({
   selector: 'rb-currency-input',
-  templateUrl: './rb-currency-input.component.html',
-  styleUrls: ['./rb-currency-input.component.css']
+  templateUrl: '../rb-input-common/rb-input-common.component.html',
+  styleUrls: ['../rb-input-common/rb-input-common.component.css']
 })
 export class RbCurrencyInputComponent extends RbInputCommonComponent implements OnInit {
   @Input('decimalCount') decimalCount: number = 2;

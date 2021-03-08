@@ -3,8 +3,8 @@ import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-comm
 
 @Component({
   selector: 'rb-input',
-  templateUrl: './rb-input.component.html',
-  styleUrls: ['./rb-input.component.css']
+  templateUrl: '../rb-input-common/rb-input-common.component.html',
+  styleUrls: ['../rb-input-common/rb-input-common.component.css']
 })
 export class RbInputComponent extends RbInputCommonComponent {
   @Input('type') type: string;
@@ -15,7 +15,7 @@ export class RbInputComponent extends RbInputCommonComponent {
     super();
   }
 
-  public get value(): string {
+  public get displayvalue(): string {
     let val: string = null;
     if(this.rbObject != null) {
       if(this.attribute == 'uid') {
@@ -30,18 +30,17 @@ export class RbInputComponent extends RbInputCommonComponent {
     return val;
   }
 
-  public set value(val: string) {
+  public set displayvalue(val: string) {
     this.editedValue = val;
   }
 
   public focus(event: any) {
+    super.focus(event);
     event.target.select();
-    /*if(!this.readonly) {
-      setTimeout(() => {event.target.select();}, 200);
-    }*/
   }
 
   commit() {
+    super.commit();
     this.previousValue = this.editedValue;
     this.rbObject.setValue(this.attribute, this.editedValue);
     this.change.emit(this.editedValue);

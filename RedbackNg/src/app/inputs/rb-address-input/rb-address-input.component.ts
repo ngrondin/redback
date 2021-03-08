@@ -6,8 +6,8 @@ import { RbPopupAddressesComponent } from 'app/popups/rb-popup-addresses/rb-popu
 
 @Component({
   selector: 'rb-address-input',
-  templateUrl: './rb-address-input.component.html',
-  styleUrls: ['./rb-address-input.component.css']
+  templateUrl: '../rb-input-common/rb-input-common.component.html',
+  styleUrls: ['../rb-input-common/rb-input-common.component.css']
 })
 export class RbAddressInputComponent extends RbPopupInputComponent {
   @Input('centerattribute') centerAttribute: string;

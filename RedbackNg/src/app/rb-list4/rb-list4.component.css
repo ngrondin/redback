@@ -13,7 +13,7 @@
 
 .rb-list-container {
     display: flex;
-	overflow: auto;
+	overflow: overlay;
 	flex-direction: column;
     flex: 1 1 auto;
     width: 17.5vw;  
@@ -29,8 +29,8 @@
     display: flex;
     flex: 1 1 auto;
 	flex-direction: column;
-	margin: 12px 4px 12px 4px;
-    min-height: 3vw;
+	margin: var(--v12px) var(--v5px) var(--v12px) var(--v5px);
+    min-height: 3.1vw;
     overflow: hidden;
     justify-content: center;
 }
@@ -49,7 +49,7 @@
 .rb-list-item-metaline {
     display: flex;
     flex-direction: row;
-    height: 16px;
+    height: var(--v16px);
 }
 
 .rb-list-item-meta1 {
@@ -68,7 +68,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 16px;
+    min-width: var(--v16px);
 }
 
 .rb-list-item-meta2-badge {
@@ -86,7 +86,7 @@
 
 .rb-list-item-main {
     font-weight: 400;
-    line-height: 24px;
+    line-height: var(--v24px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -96,8 +96,8 @@
 .rb-list-item-sub {
     color: #aaaaaa;
     font-size: 0.75rem;
-    line-height: 16px;
-    min-height: 16px;
+    line-height: var(--v16px);
+    min-height: var(--v16px);
 }
 
 .rb-list-divider {

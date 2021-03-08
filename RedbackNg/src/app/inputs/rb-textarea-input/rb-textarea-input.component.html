@@ -1,19 +1,27 @@
 <mat-icon 
     *ngIf="icon != null" 
-    class="rb-grey-icon"
-    [style.margin-top.px]="10">
+    class="rb-input-icon">
     {{icon}}
 </mat-icon>
-<mat-form-field 
-    [style.width]="widthString" >
-    <mat-label>{{label}}</mat-label>
+<div
+    class="rb-input-container">
+    <span
+        [class]="'rb-input-label' + (displayvalue == null ? ' rb-input-label-big' : '')">
+        {{label}}
+    </span>
     <textarea 
         #input
-        matInput 
-        [(ngModel)]="value"
+        [class]="'rb-input-input rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
+        [(ngModel)]="displayvalue"
         (change)="commit()"
+        (focus)="focus($event)"
+        (blur)="blur($event)"
+        (keydown)="keydown($event)"
         [readonly]="readonly"
         autocomplete="off"
         [rows]="rows">
     </textarea>
-</mat-form-field>
+    <div
+        [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
+    </div>
+</div>

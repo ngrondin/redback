@@ -1,6 +1,6 @@
 :host {
 	display: flex;
-	overflow: auto;
+	overflow: overlay;
 	flex-direction: column;
     flex: 1 1 auto;
     width: 17.5vw;

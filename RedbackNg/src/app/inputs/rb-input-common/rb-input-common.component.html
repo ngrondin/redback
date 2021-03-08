@@ -1,1 +1,26 @@
-<p>rb-input-common works!</p>
+<mat-icon 
+    *ngIf="icon != null" 
+    class="rb-input-icon">
+    {{icon}}
+</mat-icon>
+<div
+    class="rb-input-container">
+    <span
+        [class]="'rb-input-label' + (displayvalue == null ? ' rb-input-label-big' : '')">
+        {{label}}
+    </span>    
+    <input 
+        #input
+        [class]="'rb-input-input rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
+        [(ngModel)]="displayvalue"
+        (change)="commit()"
+        (focus)="focus($event)"
+        (blur)="blur($event)"
+        (keydown)="keydown($event)"
+        [readonly]="readonly"
+        autocomplete="off"
+        [type]="'text'">
+    <div
+        [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
+    </div>
+</div>

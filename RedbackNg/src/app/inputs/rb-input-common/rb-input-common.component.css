@@ -1,0 +1,65 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)
+}
+
+.rb-input-icon {
+	color: grey;
+	margin-right: var(--v5px);
+	font-size: 1.4rem;
+    width: var(--v24px);
+    height: var(--v24px);
+}
+
+.rb-input-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    position: relative;
+    align-items: center;
+}
+
+.rb-input-label {
+    display: block;
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    font-size: 0.75rem;
+    color: rgb(175, 175, 175);
+    z-index: 0;
+}
+
+.rb-input-label-big {
+    font-size: 1.0rem;
+    margin-top: var(--v16px);
+    transition: margin 300ms, font-size 300ms;
+}
+
+.rb-input-input {
+    display: flex;
+    font-size: 1rem;
+    border-width: 0px 0px 1px 0px;
+    border-color: lightgrey;
+    background-color: transparent;
+    outline: none;
+    margin-top: var(--v16px);
+    padding: 3px;
+    width: 100%;
+    z-index: 1;
+}
+
+
+
+.rb-input-underline {
+    width: 0%;
+    height: 0px;
+    border-top: 3px solid var(--main-color);
+    margin-top: -2px;
+}
+
+.rb-input-underline-editing {
+    width: 100%;
+    transition: width 200ms ease-out;
+}

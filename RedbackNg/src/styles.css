@@ -2,6 +2,19 @@
 
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
+:root {
+	--main-color: #3f51b5;
+	--bw: 100vw;
+	--v5px: 0.29vw;
+	--v8px: 0.47vw;
+	--v10px: 0.48vw;
+	--v12px: 0.70vw;
+	--v16px: 0.94vw;
+	--v24px: 1.41vw;
+	--v32px: 1.88vw;
+	--v48px: 2.82vw;
+}
+
 html {
 	height: 100%;
 	font-size: 0.95vw;
@@ -15,6 +28,9 @@ body {
     flex-direction: column;
 }
 
+textarea {
+	font-family: inherit;
+}
 
 rb-view-loader {
 	display: flex;
@@ -108,9 +124,9 @@ rb-menu > .mat-list-base {
 	color:#888888;
 }
 
-.rb-input-margin {
+/*.rb-input-margin {
 	margin: 7px 5px -5px 15px;
-}
+}*/
 
 .rb-input-text-color {
 	color: currentColor!important;
@@ -248,17 +264,29 @@ rb-fileset {
     height: 100% !important;
 }
 
-::-webkit-scrollbar-track
-{
-	border-radius: 6px;
-	background-color: #eeeeee;
-}
 
 ::-webkit-scrollbar
 {
-	width: 8px;
-	height: 8px;
-	background-color: #FFFFFF;
+	width: var(--v8px);
+	height: var(--v8px);
+	background-color: transparent;
+}
+
+::-webkit-scrollbar:hover
+{
+	/*background-color: #222222;*/
+}
+
+::-webkit-scrollbar-track
+{
+	/*border-radius: 6px;
+	background-color: #eeeeee;*/
+}
+
+::-webkit-scrollbar-track:hover
+{
+	/*border-radius: 6px;
+	background-color: #eeeeee;*/
 }
 
 ::-webkit-scrollbar-thumb
@@ -269,12 +297,12 @@ rb-fileset {
 
 ::-webkit-scrollbar-thumb:hover
 {
-	background-color:#c2c2f0;
+	background-color: #bcbcf6;
 }
 
 ::-webkit-scrollbar-thumb:active
 {
-	background-color:#c2c2f0;
+	/*background-color:#c2c2f0;*/
 } 
 
 [hidden] { display: none !important;}

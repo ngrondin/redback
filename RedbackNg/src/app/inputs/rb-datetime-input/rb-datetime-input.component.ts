@@ -11,8 +11,8 @@ import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 
 @Component({
   selector: 'rb-datetime-input',
-  templateUrl: './rb-datetime-input.component.html',
-  styleUrls: ['./rb-datetime-input.component.css']
+  templateUrl: '../rb-input-common/rb-input-common.component.html',
+  styleUrls: ['../rb-input-common/rb-input-common.component.css']
 })
 export class RbDatetimeInputComponent extends RbPopupInputComponent {
   @Input('format') format: string = 'YYYY-MM-DD HH:mm';
@@ -48,7 +48,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
   }
 
   private formatDateTime(dt: Date) : string {
-    let val = "";
+    let val = null;
     if(dt != null) {
       val = this.format;
       val = val.replace('YYYY', dt.getFullYear().toString());

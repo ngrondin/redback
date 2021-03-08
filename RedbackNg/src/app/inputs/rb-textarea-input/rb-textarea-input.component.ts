@@ -6,7 +6,7 @@ import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-comm
 @Component({
   selector: 'rb-textarea-input',
   templateUrl: './rb-textarea-input.component.html',
-  styleUrls: ['./rb-textarea-input.component.css']
+  styleUrls: ['../rb-input-common/rb-input-common.component.css']
 })
 export class RbTextareaInputComponent extends RbInputCommonComponent {
   @Input('rows') rows: number = 3;
@@ -18,10 +18,12 @@ export class RbTextareaInputComponent extends RbInputCommonComponent {
     super();
   }
 
-  public get value(): string {
+  public get displayvalue(): string {
     if(this.rbObject != null) {
       let val = this.rbObject.data[this.attribute];
-      if(typeof val == 'object') {
+      if(val == null || val == "") {
+        return null;
+      } else if(typeof val == 'object') {
         return JSON.stringify(val, null, 2);
       } else {
         return val;
@@ -31,7 +33,7 @@ export class RbTextareaInputComponent extends RbInputCommonComponent {
     }
   }
 
-  public set value(val: string) {
+  public set displayvalue(val: string) {
     this.editedValue = val;
   }
 

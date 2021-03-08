@@ -87,6 +87,7 @@ import { RbAggregatesetComponent } from './rb-aggregateset/rb-aggregateset.compo
 import { RbFilesetComponent } from './rb-fileset/rb-fileset.component';
 import { RbHseparatorComponent } from './rb-hseparator/rb-hseparator.component';
 import { RbSpacerComponent } from './rb-spacer/rb-spacer.component';
+import { RbInputCommonComponent } from './inputs/rb-input-common/rb-input-common.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -114,6 +115,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     MatSlideToggleModule,
     MatTooltipModule,
     FileUploadModule,
+    FormsModule,
     OverlayModule,
     FormsModule,
     BrowserAnimationsModule,

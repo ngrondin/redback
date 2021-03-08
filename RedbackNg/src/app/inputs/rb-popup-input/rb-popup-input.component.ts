@@ -1,7 +1,6 @@
 import { Component, OnInit, ComponentRef, Injector, ViewContainerRef, ViewChild } from '@angular/core';
 import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
 import { OverlayRef, Overlay } from '@angular/cdk/overlay';
-import { RbPopupListComponent } from 'app/popups/rb-popup-list/rb-popup-list.component';
 import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal, ComponentType } from '@angular/cdk/portal';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
@@ -105,6 +104,7 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent {
   public abstract cancelEditing();
 
   public focus(event: any) {
+    super.focus(event);
     if(this.overlayRef == null) {
       this.startEditing();
       let position: any = this.getPositionOf(event.target);
@@ -118,12 +118,14 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent {
   }
 
   public blur(event: any) {
+    super.blur(event);
     if(this.overlayRef != null) {
       this.inputContainerRef.element.nativeElement.focus();
     }
   }
 
   public keydown(event: any) {
+    super.keydown(event);
     if(event.keyCode == 9) {
       this._finish();
     } else if(event.keyCode == 27) {
@@ -136,8 +138,10 @@ export abstract class RbPopupInputComponent extends RbInputCommonComponent {
     }    
   }
 
+  public commit() {
+    super.commit();
+  }
 
-  
   public getPositionOf(element: any) : any {
     if(element.offsetParent != null) {
       let position: any = this.getPositionOf(element.offsetParent);
