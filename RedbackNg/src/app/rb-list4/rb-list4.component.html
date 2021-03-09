@@ -8,10 +8,10 @@
             <button
                 mat-list-item 
                 [rb-drag-object]="item"
-                [ngClass]="selectedObject == item ? userpref.getAtlClassFor('rb-list-item-active') : ''"
+                [class]="'rb-list-item' + (selectedObject == item ? ' ' + userpref.getAtlClassFor('rb-list-item-active') : '')"
                 (click)="itemClicked(item)">
                 <div 
-                    class="rb-list-item">
+                    class="rb-list-item-data">
                     <div
                         class="rb-list-item-metaline"
                         *ngIf="hasMetaLine()">

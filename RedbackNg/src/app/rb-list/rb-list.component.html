@@ -5,10 +5,10 @@
             mat-list-item 
             *ngFor="let item of list" 
             [rb-drag-object]="item"
-            [ngClass]="selectedObject == item ? userpref.getAtlClassFor('rb-list-item-active') : ''"
+            [ngClass]="'rb-list-item' + (selectedObject == item ? ' ' + userpref.getAtlClassFor('rb-list-item-active') : '')"
             (click)="itemClicked(item)">
             <div 
-                class="rb-list-item">
+                class="rb-list-item-data">
                 <div
                     *ngIf="iconattribute != null"
                     class="rb-list-item-icon"

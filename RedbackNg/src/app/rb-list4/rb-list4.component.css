@@ -26,13 +26,7 @@
 }
 
 .rb-list-item {
-    display: flex;
-    flex: 1 1 auto;
-	flex-direction: column;
-	margin: var(--v12px) var(--v5px) var(--v12px) var(--v5px);
-    min-height: 3.1vw;
-    overflow: hidden;
-    justify-content: center;
+    border-left: 4px Solid transparent;
 }
 
 .rb-list-item-active {
@@ -45,6 +39,17 @@
 	padding-left: -4px;
     background-color: #eceef8;
 }
+
+.rb-list-item-data {
+    display: flex;
+    flex: 1 1 auto;
+	flex-direction: column;
+    margin: var(--v12px) var(--v5px) var(--v12px) var(--v5px);
+    min-height: 3.2vw;
+    overflow: hidden;
+    justify-content: center;
+}
+
 
 .rb-list-item-metaline {
     display: flex;

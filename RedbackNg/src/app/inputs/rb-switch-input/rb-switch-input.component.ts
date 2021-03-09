@@ -10,14 +10,13 @@ import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-comm
 export class RbSwitchInputComponent extends RbInputCommonComponent {
 
   mode = 'checkbox';
-  editedValue: boolean;
-  defaultIcon: string = 'description';
 
   constructor() {
     super();
+    this.defaultSize = null;
   }
 
-  public get value(): boolean {
+  public get displayvalue(): boolean {
     if(this.rbObject != null) {
       return this.rbObject.data[this.attribute];
     } else {
@@ -25,7 +24,7 @@ export class RbSwitchInputComponent extends RbInputCommonComponent {
     }
   }
 
-  public set value(val: boolean) {
+  public set displayvalue(val: boolean) {
     this.editedValue = val;
   }
 

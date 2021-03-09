@@ -10,7 +10,7 @@
         *ngIf="!readonly"
         [class]="'rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         (selectionChange)="commit()"
-        [(value)]="value">
+        [(value)]="selectedvalue">
         <mat-option
             *ngFor="let choice of choicelist"
             [value]="choice.value">

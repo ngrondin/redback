@@ -7,14 +7,14 @@
     <mat-slide-toggle
         matInput 
         *ngIf="mode == 'slider'"
-        [checked]="value"
+        [checked]="displayvalue"
         [disabled]="readonly"
         (change)="toggle()">
     </mat-slide-toggle>
     <mat-checkbox
         matInput 
         *ngIf="mode == 'checkbox'"
-        [checked]="value"
+        [checked]="displayvalue"
         [disabled]="readonly"
         (change)="toggle()"
         color="primary">

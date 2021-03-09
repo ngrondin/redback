@@ -17,7 +17,6 @@
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'string'">
             <rb-input
-                style="margin-bottom: -15px;"
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="20"
@@ -30,7 +29,6 @@
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'textarea'">
             <rb-textarea-input
-                style="margin-bottom: -15px;"
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="30"
@@ -44,7 +42,6 @@
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'choice'">
             <rb-choice-input
-                style="margin-bottom: -15px;"
                 [object]="object"
                 [attribute]="valueattribute"
                 [choicelist]="object.get(optionsattribute)"
@@ -59,7 +56,6 @@
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'date'">
             <rb-datetime-input
-                style="margin-bottom: -15px;"
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="15"
@@ -136,7 +132,6 @@
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'number'">
             <rb-input
-                style="margin-bottom: -15px;"            
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="20"

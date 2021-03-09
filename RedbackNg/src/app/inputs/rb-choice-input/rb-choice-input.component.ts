@@ -18,7 +18,7 @@ export class RbChoiceInputComponent extends RbInputCommonComponent {
     super();
   }
 
-  public get value(): any {
+  public get selectedvalue(): any {
     let val: any = null;
     if(this.rbObject != null) {
       let v = this.rbObject.get(this.attribute);
@@ -47,7 +47,7 @@ export class RbChoiceInputComponent extends RbInputCommonComponent {
     return dv;
   }
 
-  public set value(val: any) {
+  public set selectedvalue(val: any) {
     this.editedValue = val;
   }
   

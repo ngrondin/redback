@@ -1,5 +1,6 @@
 :host {
     display: flex;
     flex-direction: row;
-    align-items: baseline;
+    align-items: center;
+    margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)
 }

@@ -23,7 +23,7 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   @Output('keyup') keyupEvent = new EventEmitter();
   @HostBinding('class.rb-input-margin') marginclass: boolean = true;
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
-  @HostBinding('style.width') get styleWidth() { if(this.size != null) {return (0.88 * this.size) + 'vw';} else {return '12vw'};}
+  @HostBinding('style.width') get styleWidth() { return (this.size != null ? ((0.88 * this.size) + 'vw'): this.defaultSize != null ? ((0.88 * this.defaultSize) + 'vw'): null);}
 
   previousObject: RbObject;
   previousValue: any;
@@ -31,6 +31,7 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   flasherOn: boolean = false;
   isEditing: boolean = false;
   defaultIcon: string;
+  defaultSize: number = 15;
 
   constructor() {
     super();
@@ -53,11 +54,11 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   }
 
   public get displayvalue(): any {
-    return this.value;
+    return null;//this.value;
   }
 
   public set displayvalue(val: any) {
-    this.editedValue = val;
+    //this.editedValue = val;
   }
 
   get icon(): string {
@@ -122,7 +123,7 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   }
 
   public commit() {
-    this.value = this.editedValue;
-    this.editedValue = null;
+    //this.value = this.editedValue;
+    //this.editedValue = null;
   }
 }

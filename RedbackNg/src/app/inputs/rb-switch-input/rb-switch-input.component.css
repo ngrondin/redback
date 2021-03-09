@@ -1,5 +1,12 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: var(--v16px) var(--v5px) var(--v12px) var(--v16px)
+}
+
 .rb-switch-container {
-    padding: 10px 10px 15px 10px;
+    /*padding: 10px 10px 15px 10px;*/
     display: flex;
     flex-grow: 1;
     flex-direction: row;
@@ -7,5 +14,5 @@
 
 .rb-switch-label {
     flex-grow: 1;
-    margin-right: 5px;
+    margin-right: var(--v8px);
 }

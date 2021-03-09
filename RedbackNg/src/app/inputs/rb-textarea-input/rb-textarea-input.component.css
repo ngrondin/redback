@@ -3,3 +3,7 @@
     flex-direction: row;
     align-items: flex-start;
 }
+
+:host .rb-input-icon {
+    color: green;
+}

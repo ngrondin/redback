@@ -62,3 +62,8 @@
     font-size: 0.8rem;
     color: grey;
 }
+
+.rb-df-lineinput rb-choice-input {
+    margin-top: 0px!important;
+    margin-bottom: -5px!important;
+}

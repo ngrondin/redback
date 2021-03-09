@@ -17,10 +17,7 @@
 }
 
 .rb-list-item {
-	display: flex;
-	flex-direction: row;
-	margin: 12px 4px 12px 4px;
-    min-height: 40px;
+    border-left: 4px Solid transparent;
 }
 
 .rb-list-item-active {
@@ -32,6 +29,13 @@
 	border-left: 4px Solid #7985cb;
 	padding-left: -4px;
     background-color: #eceef8;
+}
+
+.rb-list-item-data {
+	display: flex;
+	flex-direction: row;
+	margin: 12px 4px 12px 4px;
+    min-height: 40px;
 }
 
 .rb-list-item-icon {
