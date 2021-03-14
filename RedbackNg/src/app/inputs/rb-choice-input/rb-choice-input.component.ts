@@ -1,67 +1,97 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { RbObject } from 'app/datamodel';
-import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
+import { Overlay } from '@angular/cdk/overlay';
+import { Component, OnInit, Input, Output, EventEmitter, Injector, ViewContainerRef } from '@angular/core';
+
+import { RbPopupHardlistComponent } from 'app/popups/rb-popup-hardlist/rb-popup-hardlist.component';
+import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+import { RbPopupInputComponent } from '../rb-popup-input/rb-popup-input.component';
 
 @Component({
   selector: 'rb-choice-input',
-  templateUrl: './rb-choice-input.component.html',
-  styleUrls: ['./rb-choice-input.component.css']
+  templateUrl: '../rb-input-common/rb-input-common.component.html',
+  styleUrls: ['../rb-input-common/rb-input-common.component.css']
 })
-export class RbChoiceInputComponent extends RbInputCommonComponent {
+export class RbChoiceInputComponent extends RbPopupInputComponent {
   @Input('choicelist') choicelist: any;
-  @Output('change') change = new EventEmitter();
-
+  
   public editedValue: string; 
   defaultIcon: string = 'description';
 
-  constructor() {
-    super();
+  constructor(
+    public injector: Injector,
+    public overlay: Overlay,
+    public viewContainerRef: ViewContainerRef
+  ) {
+    super(injector, overlay, viewContainerRef);
   }
 
-  public get selectedvalue(): any {
+  public get selectedItem(): any {
     let val: any = null;
     if(this.rbObject != null) {
-      let v = this.rbObject.get(this.attribute);
-      for(let opt of this.choicelist) {
-        if(opt['value'] == v)
-          val = opt['value'];
+      val = this.rbObject.get(this.attribute);
+    } else {
+      val = this.value;
+    }
+    for(let opt of this.choicelist) {
+      if(opt['value'] == val) {
+        return opt;
+      }
+    }
+    return null;
+  }
+
+  public get displayvalue(): any {
+    let item = this.selectedItem;
+    if(item != null) {
+      return item['display'];
+    }
+    return null;
+  }
+
+  public set displayvalue(val: any) {
+
+  }
+
+  public getPopupClass() {
+   return RbPopupHardlistComponent;
+  }
+
+  public getPopupConfig() {
+    return this.choicelist;
+  }
+
+  public addPopupSubscription(instance: RbPopupComponent) {
+    
+  }
+
+  public startEditing() {
+    
+  }
+
+  public keyTyped(keyCode: number) {
+    
+  }
+
+  public finishEditing() {
+    
+  }
+
+  public finishEditingWithSelection(value: any) {
+    this.setValue(value);
+  }
+
+  public cancelEditing() {
+    
+  }
+
+  setValue(value: any) {
+    if(this.attribute != null) {
+      if(this.attribute != 'uid') {
+        this.rbObject.setValue(this.attribute, value);
       }
     } else {
-      val = null;  
+      this.value = value
     }
-    this.checkValueChange(val);
-    return val;
-  }
-
-  public get displayValue(): any {
-    let dv: any = null;
-    if(this.rbObject != null) {
-      let v = this.rbObject.get(this.attribute);
-      for(let opt of this.choicelist) {
-        if(opt['value'] == v)
-          dv = opt['display'];
-      }
-    } else {
-      dv = "";  
-    }
-    return dv;
-  }
-
-  public set selectedvalue(val: any) {
-    this.editedValue = val;
-  }
-  
-  public get widthString() : string {
-    if(this.size != null)
-      return (15*this.size) + 'px';
-    else
-      return '100%';
-  }
-
-  commit() {
-    if(this.attribute != 'uid') {
-      this.rbObject.setValue(this.attribute, this.editedValue);
-    }
-    this.change.emit(this.editedValue);
+    this.change.emit(value);
+    this.valueChange.emit(value);
   }
 }

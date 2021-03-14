@@ -1,0 +1,68 @@
+<div
+    class="rb-cal-toolbar">
+    <rb-search
+        [dataset]="dataset"
+        [size]="15"
+        [grow]="0">
+    </rb-search>
+    <rb-spacer></rb-spacer>
+    <rb-choice-input
+        [choicelist]="months"
+        [label]="'Month'"
+        [showicon]="false"
+        [size]="6"
+        [(value)]="month"
+        (change)="setMonth($event)">
+    </rb-choice-input>
+    <rb-input
+        [label]="'Year'"
+        [showicon]="false"
+        [size]="5"
+        [(value)]="year"
+        (change)="setYear($event)">
+    </rb-input>
+</div>
+<div
+    class="rb-cal-week-header">
+    <div
+        *ngFor="let day of days"
+        class="rb-cal-day-of-week">
+        <span>{{day}}</span>   
+    </div>
+</div>
+<div
+    *ngFor="let week of weeks; index as w"
+    class="rb-cal-week">
+    <div
+        *ngFor="let day of week"
+        class="rb-cal-day-container">
+        <div
+            *ngIf="day != null"
+            [class]="'rb-cal-day' + (day == '1' ? ' rb-cal-firstday' : '')">
+            <div
+                class="rb-cal-day-header"
+                (click)="clickDay(day)">
+                {{day}}
+            </div>
+            <div
+                class="rb-cal-day-content">
+                <div
+                    *ngFor="let item of data[day]"
+                    class="rb-cal-item"
+                    [style.backgroundColor]="item.color"
+                    (click)="clickItem(item)">
+                    {{item.label}}
+                </div>
+            </div>        
+            <div
+                *ngIf="data[day].length > 3"
+                class="rb-cal-count">
+                {{data[day].length}}
+            </div>
+        </div>
+        <div
+            *ngIf="day == null"
+            class="rb-cal-noday">     
+        </div>
+    </div>
+</div>

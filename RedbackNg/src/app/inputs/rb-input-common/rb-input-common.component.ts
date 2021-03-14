@@ -13,6 +13,7 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   @Input('object') _rbObject: RbObject;
   @Input('label') label: string;
   @Input('icon') _icon: string;
+  @Input('showicon') showicon: boolean = true;
   @Input('size') size: number;
   @Input('grow') grow: number;
   @Input('editable') editable: boolean = true;

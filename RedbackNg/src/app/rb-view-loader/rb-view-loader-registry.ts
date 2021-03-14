@@ -12,6 +12,7 @@ import { RbTextareaInputComponent } from "app/inputs/rb-textarea-input/rb-textar
 import { RbActiongroupComponent } from "app/rb-actiongroup/rb-actiongroup.component";
 import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
 import { RbButtonComponent } from "app/rb-button/rb-button.component";
+import { RbCalendarComponent } from "app/rb-calendar/rb-calendar.component";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
 import { RbDynamicformComponent } from "app/rb-dynamicform/rb-dynamicform.component";
@@ -80,5 +81,6 @@ export const componentRegistry = {
     "vcollapse": RbVcollapseComponent,
     "hseparator": RbHseparatorComponent,
     "spacer": RbSpacerComponent,
-    "graph": RbGraphComponent
+    "graph": RbGraphComponent,
+    "calendar": RbCalendarComponent
   }

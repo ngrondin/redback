@@ -88,6 +88,8 @@ import { RbFilesetComponent } from './rb-fileset/rb-fileset.component';
 import { RbHseparatorComponent } from './rb-hseparator/rb-hseparator.component';
 import { RbSpacerComponent } from './rb-spacer/rb-spacer.component';
 import { RbInputCommonComponent } from './inputs/rb-input-common/rb-input-common.component';
+import { RbCalendarComponent } from './rb-calendar/rb-calendar.component';
+import { RbPopupHardlistComponent } from './popups/rb-popup-hardlist/rb-popup-hardlist.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -188,7 +190,9 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbButtonComponent,
     RbFormComponent,
     RbHseparatorComponent,
-    RbSpacerComponent
+    RbSpacerComponent,
+    RbCalendarComponent,
+    RbPopupHardlistComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -257,7 +261,9 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbButtonComponent,
     RbFormComponent,
     RbHseparatorComponent,
-    RbSpacerComponent
+    RbSpacerComponent,
+    RbCalendarComponent,
+    RbPopupHardlistComponent
   ],
   providers: [
     CookieService,

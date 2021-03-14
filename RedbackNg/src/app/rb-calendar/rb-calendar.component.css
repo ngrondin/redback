@@ -1,0 +1,108 @@
+:host{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+.rb-cal-toolbar {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-cal-week-header {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+    padding-bottom: var(--v5px);
+}
+
+.rb-cal-day-of-week {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex: 1 1 0;
+    color: grey;
+}
+
+.rb-cal-week {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 0;
+}
+
+.rb-cal-day-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    overflow: hidden;
+}
+
+.rb-cal-day {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    border-right: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+    overflow: hidden;
+    position: relative;
+}
+
+.rb-cal-firstday {
+    border-left: 1px solid lightgray;
+ }
+
+.rb-cal-day-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    background-color: #d8d8d8;
+    color: #666;
+    cursor: pointer;
+}
+
+.rb-cal-day-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+}
+
+.rb-cal-noday {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+}
+
+.rb-cal-item {
+    border: 1px solid darkblue;
+    height: var(--v16px);
+    margin: 2px;
+    padding: var(--v5px);
+    background-color: white;
+    border-radius: 3px;
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+    user-select: none; 
+    cursor: pointer;
+    z-index: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+}
+
+.rb-cal-count {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    background: lightgray;
+    border: 1px solid grey;
+    border-radius: var(--v8px);
+    color: grey;
+    min-width: var(--v16px);
+    height: var(--v16px);
+    z-index: 2;
+    opacity: 0.7;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 0px 2px 0px 2px;
+}

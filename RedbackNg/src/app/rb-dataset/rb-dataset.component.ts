@@ -22,6 +22,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
   @Input('basefilter') baseFilter: any;
   @Input('basesort') baseSort: any;
   @Input('fetchall') fetchAll: boolean = false;
+  @Input('loadonreset') loadOnReset: boolean = true;
   @Input('name') name: string;
 
   @Input('dataTarget') dataTarget: DataTarget;
@@ -111,7 +112,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
         this.searchString = this.dataTarget.search;
         this.userFilter = this.dataTarget.filter;
         this.userSort = null;
-        this.refreshData();
+        if(this.loadOnReset) this.refreshData();
         this.publishEvent('reset');
       }
     } else {

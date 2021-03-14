@@ -1,9 +1,8 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ViewContainerRef, ComponentRef, Injector } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ViewContainerRef, ComponentRef, Injector, HostBinding } from '@angular/core';
 import { OverlayRef, Overlay } from '@angular/cdk/overlay';
 import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { RbFilterBuilderComponent, FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 
 @Component({
@@ -12,11 +11,14 @@ import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
   styleUrls: ['./rb-search.component.css']
 })
 export class RbSearchComponent extends RbDataObserverComponent {
-  @Input('dataset') dataset: RbDatasetComponent;
   @Input('icon') icon: string;
-  @Input('size') size: number;
+  @Input('size') size: number = 1;
+  @Input('grow') grow: number = 1;
   @Input('filter') filterconfig: any;
   @Input('sort') sortconfig: any;
+  @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
+  @HostBinding('style.width') get styleWidth() { return (this.size != null ? ((0.88 * this.size) + 'vw'): null);}
+
 
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;
@@ -103,11 +105,11 @@ export class RbSearchComponent extends RbDataObserverComponent {
     this.overlayRef = null;
   }
 
-
+/*
   public get widthString() : string {
     if(this.size != null)
       return '' + (15 * this.size) + 'px';
     else
       return '100%';
-  }
+  }*/
 }
