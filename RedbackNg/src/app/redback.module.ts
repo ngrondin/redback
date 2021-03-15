@@ -10,7 +10,6 @@ import { CookieService } from 'ngx-cookie-service';
 import { RbListScrollDirective } from './rb-list-scroll/rb-list-scroll.directive';
 import { ApiService } from './services/api.service';
 import { DataService } from './services/data.service';
-import { RbInputComponent } from './inputs/rb-input/rb-input.component';
 import { FormsModule } from '@angular/forms';
 import { RbRelatedInputComponent } from './inputs/rb-related-input/rb-related-input.component';
 import { RbPopupListComponent } from './popups/rb-popup-list/rb-popup-list.component';
@@ -50,7 +49,6 @@ import { RbDragChangeformDirective } from './rb-drag/rb-drag-changeform.directiv
 import { AgmOverlays } from "agm-overlays"
 import { RbChatComponent } from './rb-chat/rb-chat.component';
 import { RbAddressInputComponent } from './inputs/rb-address-input/rb-address-input.component';
-import { RbPopupInputComponent } from './inputs/rb-popup-input/rb-popup-input.component';
 import { RbPopupAddressesComponent } from './popups/rb-popup-addresses/rb-popup-addresses.component';
 import { RbModalComponent } from './rb-modal/rb-modal.component';
 import { RbFileInputComponent } from './inputs/rb-file-input/rb-file-input.component';
@@ -87,9 +85,10 @@ import { RbAggregatesetComponent } from './rb-aggregateset/rb-aggregateset.compo
 import { RbFilesetComponent } from './rb-fileset/rb-fileset.component';
 import { RbHseparatorComponent } from './rb-hseparator/rb-hseparator.component';
 import { RbSpacerComponent } from './rb-spacer/rb-spacer.component';
-import { RbInputCommonComponent } from './inputs/rb-input-common/rb-input-common.component';
 import { RbCalendarComponent } from './rb-calendar/rb-calendar.component';
 import { RbPopupHardlistComponent } from './popups/rb-popup-hardlist/rb-popup-hardlist.component';
+import { RbStringInputComponent } from './inputs/rb-string-input/rb-string-input.component';
+import { RbNumberInputComponent } from './inputs/rb-number-input/rb-number-input.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -143,7 +142,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbListScrollDirective,
     RbListComponent,
     RbList4Component,
-    RbInputComponent,
+    RbStringInputComponent,
+    RbNumberInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,
     RbDatetimeInputComponent,
@@ -214,7 +214,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbListScrollDirective,
     RbListComponent,
     RbList4Component,
-    RbInputComponent,
+    RbNumberInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,
     RbDatetimeInputComponent,

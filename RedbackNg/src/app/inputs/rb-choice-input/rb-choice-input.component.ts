@@ -1,14 +1,14 @@
 import { Overlay } from '@angular/cdk/overlay';
-import { Component, OnInit, Input, Output, EventEmitter, Injector, ViewContainerRef } from '@angular/core';
+import { Component, Input, Injector, ViewContainerRef } from '@angular/core';
 
 import { RbPopupHardlistComponent } from 'app/popups/rb-popup-hardlist/rb-popup-hardlist.component';
-import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
-import { RbPopupInputComponent } from '../rb-popup-input/rb-popup-input.component';
+import { RbPopupInputComponent } from '../abstract/rb-popup-input';
+
 
 @Component({
   selector: 'rb-choice-input',
-  templateUrl: '../rb-input-common/rb-input-common.component.html',
-  styleUrls: ['../rb-input-common/rb-input-common.component.css']
+  templateUrl: '../abstract/rb-field-input.html',
+  styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbChoiceInputComponent extends RbPopupInputComponent {
   @Input('choicelist') choicelist: any;
@@ -59,39 +59,8 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
     return this.choicelist;
   }
 
-  public addPopupSubscription(instance: RbPopupComponent) {
-    
-  }
-
-  public startEditing() {
-    
-  }
-
-  public keyTyped(keyCode: number) {
-    
-  }
-
-  public finishEditing() {
-    
-  }
-
   public finishEditingWithSelection(value: any) {
-    this.setValue(value);
-  }
-
-  public cancelEditing() {
-    
-  }
-
-  setValue(value: any) {
-    if(this.attribute != null) {
-      if(this.attribute != 'uid') {
-        this.rbObject.setValue(this.attribute, value);
-      }
-    } else {
-      this.value = value
-    }
-    this.change.emit(value);
-    this.valueChange.emit(value);
+    super.finishEditingWithSelection(value);
+    this.commit(value);
   }
 }

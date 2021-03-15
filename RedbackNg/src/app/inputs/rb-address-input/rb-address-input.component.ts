@@ -1,18 +1,16 @@
 import { Component, OnInit, Injector, ViewContainerRef, Input } from '@angular/core';
-import { RbPopupInputComponent } from 'app/inputs/rb-popup-input/rb-popup-input.component';
-import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 import { Overlay } from '@angular/cdk/overlay';
+import { RbPopupInputComponent } from '../abstract/rb-popup-input';
 import { RbPopupAddressesComponent } from 'app/popups/rb-popup-addresses/rb-popup-addresses.component';
 
 @Component({
   selector: 'rb-address-input',
-  templateUrl: '../rb-input-common/rb-input-common.component.html',
-  styleUrls: ['../rb-input-common/rb-input-common.component.css']
+  templateUrl: '../abstract/rb-field-input.html',
+  styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbAddressInputComponent extends RbPopupInputComponent {
   @Input('centerattribute') centerAttribute: string;
 
-  searchValue: string; 
   defaultIcon: string = 'description';
 
   constructor(
@@ -22,27 +20,24 @@ export class RbAddressInputComponent extends RbPopupInputComponent {
   ) {
     super(injector, overlay, viewContainerRef);
   }
-
-
   
   public get displayvalue(): string {
     let val: string = null;
-    if(this.popupComponentRef != null) {
-      val = this.searchValue;
+    if(this.isEditing) {
+      val = this.editedValue;
     } else if(this.rbObject != null) {
-      val = this.rbObject.get(this.attribute);
-      this.checkValueChange(val);
+      val = this.value;
     }
     return val;
   }
 
   public set displayvalue(str: string) {
-    this.searchValue = str;
-    if(this.popupComponentRef != null) {
-      let currentValue = this.searchValue;
+    this.editedValue = str;
+    if(this.isEditing) {
+      let currentValue = this.editedValue;
       setTimeout(()=> {
-        if(this.searchValue == currentValue) {
-          this.popupComponentRef.instance.setSearch(this.searchValue);
+        if(this.editedValue == currentValue) {
+          this.popupComponentRef.instance.setSearch(this.editedValue);
         }
       }, 1000);     
     }
@@ -67,34 +62,21 @@ export class RbAddressInputComponent extends RbPopupInputComponent {
     return cfg;
   }
 
-  public addPopupSubscription(instance: RbPopupComponent) {
-    
-  }
-
   public startEditing() {
-    this.searchValue = this.rbObject.get(this.attribute);
+    super.startEditing();
+    this.editedValue = this.rbObject.get(this.attribute);
   }
 
-  public keyTyped(keyCode: number) {
-    if((keyCode == 8 || keyCode == 27) && this.searchValue == "") {
-      this.closePopup();
-      this.rbObject.setValue(this.attribute, null);
+  public onKeyTyped(keyCode: number) {
+    super.onKeyTyped(keyCode);
+    if((keyCode == 8 || keyCode == 27) && this.editedValue == "") {
+      this.finishEditingWithSelection(null);
     } 
   }
 
-  public finishEditing() {
-    this.rbObject.setValue(this.attribute, this.searchValue);
-  }
-
   public finishEditingWithSelection(value: any) {
-    this.rbObject.setValue(this.attribute, value);
+    super.finishEditingWithSelection(value);
+    this.commit(value);
   }
-
-  public erase() {
-  }
-
-  public cancelEditing() {
-  }
-
 
 }

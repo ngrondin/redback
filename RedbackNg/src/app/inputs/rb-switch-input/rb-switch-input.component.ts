@@ -1,13 +1,12 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { RbObject } from 'app/datamodel';
-import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
+import { RbInputComponent } from '../abstract/rb-input';
 
 @Component({
   selector: 'rb-switch-input',
   templateUrl: './rb-switch-input.component.html',
   styleUrls: ['./rb-switch-input.component.css']
 })
-export class RbSwitchInputComponent extends RbInputCommonComponent {
+export class RbSwitchInputComponent extends RbInputComponent {
 
   mode = 'checkbox';
 
@@ -16,31 +15,29 @@ export class RbSwitchInputComponent extends RbInputCommonComponent {
     this.defaultSize = null;
   }
 
+  inputInit() {
+  }
+
   public get displayvalue(): boolean {
-    if(this.rbObject != null) {
-      return this.rbObject.data[this.attribute];
-    } else {
-      return false;  
+    let ret = this.value;
+    if(ret == null) {
+      ret = false;
     }
+    return ret;
   }
 
   public set displayvalue(val: boolean) {
-    this.editedValue = val;
+    
   }
 
   public toggle() {
-    if(this.editedValue == null || this.editedValue == false) {
-      this.editedValue = true;
+    let newValue = null;
+    if(this.value == null || this.value == false) {
+      newValue = true;
     } else {
-      this.editedValue = false;
+      newValue = false;
     }
-    this.commit();
+    this.commit(newValue);
   }
 
-  commit() {
-    if(this.attribute != 'uid') {
-      this.rbObject.setValue(this.attribute, this.editedValue);
-    }
-    this.change.emit(this.editedValue);
-  }
 }

@@ -1,17 +1,16 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
-import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
+import { RbFieldInputComponent } from '../abstract/rb-field-input';
 
 @Component({
   selector: 'rb-textarea-input',
   templateUrl: './rb-textarea-input.component.html',
-  styleUrls: ['../rb-input-common/rb-input-common.component.css']
+  styleUrls: ['../abstract/rb-field-input.css']
 })
-export class RbTextareaInputComponent extends RbInputCommonComponent {
+export class RbTextareaInputComponent extends RbFieldInputComponent {
   @Input('rows') rows: number = 3;
 
-  editedValue: string;
   defaultIcon: string = 'description';
 
   constructor() {
@@ -37,17 +36,14 @@ export class RbTextareaInputComponent extends RbInputCommonComponent {
     this.editedValue = val;
   }
 
-  public get readonly(): boolean {
-    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
-      return !(this.editable && this.rbObject.validation[this.attribute].editable);
-    else
-      return true;      
+  public startEditing() {
+    super.startEditing();
+    this.editedValue = this.value;
   }
 
-  commit() {
-    this.rbObject.setValue(this.attribute, this.editedValue);
-    this.change.emit(this.editedValue);
+  public finishEditing() {
+    this.commit(this.editedValue);
+    super.finishEditing();
   }
-
 
 }

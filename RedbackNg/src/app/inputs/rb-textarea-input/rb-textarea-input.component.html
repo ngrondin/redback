@@ -1,5 +1,5 @@
 <mat-icon 
-    *ngIf="icon != null" 
+    *ngIf="showicon" 
     class="rb-input-icon">
     {{icon}}
 </mat-icon>
@@ -8,15 +8,15 @@
     <span
         [class]="'rb-input-label' + ((displayvalue === null || displayvalue === '') && !isEditing ? ' rb-input-label-big' : '')">
         {{label}}
-    </span>
+    </span>    
     <textarea 
         #input
         [class]="'rb-input-input rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         [(ngModel)]="displayvalue"
-        (change)="commit()"
-        (focus)="focus($event)"
-        (blur)="blur($event)"
-        (keydown)="keydown($event)"
+        (focus)="onFocus($event)"
+        (blur)="onBlur($event)"
+        (keydown)="onKeydown($event)"
+        (keyup)="onKeyup($event)"
         [readonly]="readonly"
         autocomplete="off"
         [rows]="rows">

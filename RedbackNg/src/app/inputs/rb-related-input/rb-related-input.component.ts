@@ -2,13 +2,12 @@ import { Component, OnInit, Input, ViewContainerRef, Injector } from '@angular/c
 import { Overlay } from  '@angular/cdk/overlay';
 import { RbObject } from '../../datamodel';
 import { RbPopupListComponent } from '../../popups/rb-popup-list/rb-popup-list.component';
-import { RbPopupInputComponent } from 'app/inputs/rb-popup-input/rb-popup-input.component';
-import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+import { RbPopupInputComponent } from '../abstract/rb-popup-input';
 
 @Component({
   selector: 'rb-related-input',
-  templateUrl: '../rb-input-common/rb-input-common.component.html',
-  styleUrls: ['../rb-input-common/rb-input-common.component.css']
+  templateUrl: '../abstract/rb-field-input.html',
+  styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbRelatedInputComponent extends RbPopupInputComponent  {
 
@@ -16,7 +15,6 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
   @Input('parentattribute') parentattribute: string;
   @Input('childattribute') childattribute: string;
 
-  searchValue: string; 
   highlightedObject: RbObject;
   defaultIcon: string = 'description';
 
@@ -30,22 +28,22 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
 
   public get displayvalue(): string {
     let val: string = null;
-    if(this.overlayRef != null) {
-      val = this.searchValue;
+    if(this.isEditing) {
+      val = this.editedValue;
     } else if(this.rbObject != null && this.rbObject.related[this.attribute] != null ) {
+      let check = this.value; //this is to force a check if changed
       val = this.rbObject.related[this.attribute].get(this.displayattribute);
-      this.checkValueChange(val);
     }
     return val;
   }
 
   public set displayvalue(str: string) {
-    this.searchValue = str;
-    if(this.popupComponentRef != null) {
-      let currentValue = this.searchValue;
+    this.editedValue = str;
+    if(this.isEditing) {
+      let currentValue = this.editedValue;
       setTimeout(()=> {
-        if(this.searchValue == currentValue)
-        this.popupComponentRef.instance.setSearch(this.searchValue);
+        if(this.editedValue == currentValue)
+        this.popupComponentRef.instance.setSearch(this.editedValue);
       }, 500);     
     }
   }
@@ -64,41 +62,28 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
     };
   }
 
-  public addPopupSubscription(instance: RbPopupComponent) {
-    
-  }
-
-
   public startEditing() {
+    super.startEditing();
     if(this.rbObject != null && this.rbObject.related[this.attribute] != null ) {
-      this.searchValue = this.rbObject.related[this.attribute].get(this.displayattribute);
+      this.editedValue = this.rbObject.related[this.attribute].get(this.displayattribute);
     } else {
-      this.searchValue = '';
+      this.editedValue = null;
     }
   }
 
-  public keyTyped(keyCode: number) {
-    if((keyCode == 8 || keyCode == 27) && this.searchValue == "") {
-      this.closePopup();
-      this.rbObject.setValueAndRelated(this.attribute, null, null);
+  public onKeyTyped(keyCode: number) {
+    super.onKeyTyped(keyCode);
+    if((keyCode == 8 || keyCode == 27) && this.editedValue == "") {
+      this.finishEditingWithSelection(null);
     } 
   }
 
-  public finishEditing() {
-
-  }
-  
-  public finishEditingWithSelection(value: any) {
+ public finishEditingWithSelection(value: any) {
+    super.finishEditingWithSelection(value);
     let object: RbObject = value;
-    this.setValue(object);
-  }
-
-  public cancelEditing() {
-  }
-
-  private setValue(object: RbObject) {
     let link = this.rbObject.validation[this.attribute].related.link;
-    let val = (link == 'uid') ? object.uid : object.data[link];
-    this.rbObject.setValueAndRelated(this.attribute, val, object);
+    let val = object != null ? link == 'uid' ? object.uid : object.data[link] : null;
+    this.commit(val, object);
   }
+
 }

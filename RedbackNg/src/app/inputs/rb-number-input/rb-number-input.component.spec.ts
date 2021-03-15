@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RbInputCommonComponent } from './rb-input-common.component';
+import { RbNumberInputComponent } from './rb-number-input.component';
 
-describe('RbInputCommonComponent', () => {
-  let component: RbInputCommonComponent;
-  let fixture: ComponentFixture<RbInputCommonComponent>;
+describe('RbNumberInputComponent', () => {
+  let component: RbNumberInputComponent;
+  let fixture: ComponentFixture<RbNumberInputComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RbInputCommonComponent ]
+      declarations: [ RbNumberInputComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(RbInputCommonComponent);
+    fixture = TestBed.createComponent(RbNumberInputComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

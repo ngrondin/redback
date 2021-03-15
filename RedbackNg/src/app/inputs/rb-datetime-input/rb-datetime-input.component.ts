@@ -1,24 +1,17 @@
-import { Component, OnInit, Input, ComponentRef, Injector, ViewContainerRef, ViewChild, Output, EventEmitter } from '@angular/core';
-import { RbObject, Time } from 'app/datamodel';
-import { OverlayRef, Overlay } from '@angular/cdk/overlay';
-import { RbPopupListComponent } from 'app/popups/rb-popup-list/rb-popup-list.component';
-import { CONTAINER_DATA } from 'app/tokens';
-import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
-import { DateTimePopupConfig, RbPopupDatetimeComponent } from 'app/popups/rb-popup-datetime/rb-popup-datetime.component';
-import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
-import { RbPopupInputComponent } from 'app/inputs/rb-popup-input/rb-popup-input.component';
-import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+import { Component,  Input, Injector, ViewContainerRef } from '@angular/core';
+import { Time } from 'app/datamodel';
+import { Overlay } from '@angular/cdk/overlay';
+import { RbPopupDatetimeComponent } from 'app/popups/rb-popup-datetime/rb-popup-datetime.component';
+import { RbPopupInputComponent } from '../abstract/rb-popup-input';
 
 @Component({
   selector: 'rb-datetime-input',
-  templateUrl: '../rb-input-common/rb-input-common.component.html',
-  styleUrls: ['../rb-input-common/rb-input-common.component.css']
+  templateUrl: '../abstract/rb-field-input.html',
+  styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbDatetimeInputComponent extends RbPopupInputComponent {
   @Input('format') format: string = 'YYYY-MM-DD HH:mm';
-  @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
-
-  editingStr: string;
+  
   defaultIcon: string = 'calendar_today';
 
   constructor(
@@ -31,19 +24,18 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
 
   public get displayvalue(): string {
     let val: string = null;
-    if(this.overlayRef != null) {
-      val = this.editingStr;
+    if(this.isEditing) {
+      val = this.editedValue;
     } else {
       val = this.formatDateTime(this.getDateValue());
-      this.checkValueChange(val);
     }
     return val;
   }
 
   public set displayvalue(str: string) {
-    this.editingStr = str;
+    this.editedValue = str;
     if(this.popupComponentRef != null) {
-      this.popupComponentRef.instance.setSearch(this.editingStr);
+      this.popupComponentRef.instance.setSearch(this.editedValue);
     }
   }
 
@@ -79,20 +71,14 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
 
   private getISOValue() : string {
     let iso: string = null;
-    if(this.attribute != null) {
-      if(this.rbObject != null) {
-        iso = this.rbObject.get(this.attribute);
-      } 
-    } else {
-      if(this.value != null) {
-        if(typeof this.value == 'string') {
-          iso = this.value;
-        } else if(typeof this.value.atDate == 'function') {
-          iso = this.value.toString();
-        } else if(typeof this.value.getTime == 'function') {
-          iso = this.value.toISOString();
-        }
-      } 
+    if(this.value == null) {
+      iso = null;
+    } else if(typeof this.value == "string") {
+      iso = this.value;
+    }  else if(typeof this.value.atDate == 'function') {
+      iso = this.value.toString();
+    } else if(typeof this.value.getTime == 'function') {
+      iso = this.value.toISOString();
     }
     return iso;
   }
@@ -114,58 +100,39 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     };
   }
 
-  public addPopupSubscription(instance: RbPopupComponent) {
-    
-  }
-
   public startEditing() {
+    super.startEditing();
     if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
-      this.editingStr = this.formatDateTime(this.getDateValue());
+      this.editedValue = this.formatDateTime(this.getDateValue());
     } else {
-      this.editingStr = '';
+      this.editedValue = '';
     }
   }
 
-  public keyTyped(keyCode: number) {
-    if((keyCode == 8 || keyCode == 27) && (this.editingStr == "" || this.editingStr == null)) {
-      this.closePopup();
-      this.rbObject.setValue(this.attribute, null);
+  public onKeyTyped(keyCode: number) {
+    super.onKeyTyped(keyCode);
+    if((keyCode == 8 || keyCode == 27) && (this.editedValue == "" || this.editedValue == null)) {
+      this.finishEditing();
     } 
   }
 
-  public finishEditing() {
-    
-  }
-
   public finishEditingWithSelection(value: any) {
+    super.finishEditingWithSelection(value);
     let dt: Date = value;
-    if(this.attribute != null) {
-      if(this.rbObject != null) {
-        let val: string = null;
-        if(dt == null) {
-          val = null;
-        } else if(this.hasDatePart()) {
-          val = dt.toISOString();
-        } else {
-          let time: Time = new Time(); 
-          time.setHours(dt.getHours());
-          time.setMinutes(dt.getMinutes());
-          time.setSeconds(dt.getSeconds());
-          val = time.toString();
-        }
-        this.previousValue = val; 
-        this.rbObject.setValue(this.attribute, val);
-      }
+    let val: string = null;
+    if(dt == null) {
+      val = null;
+    } else if(this.hasDatePart()) {
+      val = dt.toISOString();
     } else {
-      this.valueChange.emit(dt.toISOString());
+      let time: Time = new Time(); 
+      time.setHours(dt.getHours());
+      time.setMinutes(dt.getMinutes());
+      time.setSeconds(dt.getSeconds());
+      val = time.toString();
     }
+    this.commit(val);
   }
 
-  public erase() {
-    this.rbObject.setValue(this.attribute, null);
-  }
 
-  public cancelEditing() {
-    
-  }
 }

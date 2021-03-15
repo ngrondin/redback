@@ -5,6 +5,7 @@
   [theme]="theme"
   [mode]="mode"
   [config]="config"
-  [(value)]="code"
-  (blur)="onChanged($event)">
+  [disabled]="readonly"
+  [(value)]="displayvalue"
+  (blur)="onBlur($event)">
 </ace>

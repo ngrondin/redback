@@ -1,19 +1,17 @@
 import { Input } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
+import { RbFieldInputComponent } from '../abstract/rb-field-input';
 
 @Component({
   selector: 'rb-currency-input',
-  templateUrl: '../rb-input-common/rb-input-common.component.html',
-  styleUrls: ['../rb-input-common/rb-input-common.component.css']
+  templateUrl: '../abstract/rb-field-input.html',
+  styleUrls: ['../abstract/rb-field-input.css']
 })
-export class RbCurrencyInputComponent extends RbInputCommonComponent implements OnInit {
+export class RbCurrencyInputComponent extends RbFieldInputComponent  {
   @Input('decimalCount') decimalCount: number = 2;
   @Input('thousandsSeparator') thousandsSeparator: string = ",";
   @Input('decimalSeparator') decimalSeparator: string = ".";
 
-  editing: boolean = false;
-  editingValue: string;
   defaultIcon: string = 'attach_money';
 
   constructor() {
@@ -22,8 +20,8 @@ export class RbCurrencyInputComponent extends RbInputCommonComponent implements 
 
   get displayvalue() : string {
     let ret: string = null;
-    if(this.editing) {
-      ret = this.editingValue;
+    if(this.isEditing) {
+      ret = this.editedValue;
     } else {
       if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
         let amount = this.rbObject.data[this.attribute];
@@ -35,34 +33,28 @@ export class RbCurrencyInputComponent extends RbInputCommonComponent implements 
       } else {
         ret = null;
       }
-      this.checkValueChange(ret);
     }
     return ret;
   }
 
   set displayvalue(val: string) {
-    this.editingValue = val;
+    this.editedValue = val;
   }
 
-  public keydown(event: any) {
-
-  }
-
-  public focus(event: any) {
+  public onFocus(event: any) {
+    super.onFocus(event);
     event.target.select();
-    /*if(!this.readonly) {
-      setTimeout(() => {event.target.select();}, 200);
-    }*/
   }
 
-  public blur(event: any) {
-    
+  public startEditing() {
+    let val = this.displayvalue;
+    super.startEditing();
+    this.editedValue = val;
   }
 
-  public commit() {
-    let val = parseFloat(this.editingValue);
-    this.rbObject.setValue(this.attribute, val);
-    this.editing = false;
-    this.editingValue = null;
+  public finishEditing() {
+    let val = parseFloat(this.editedValue);
+    this.commit(val);
+    super.finishEditing()
   }
 }

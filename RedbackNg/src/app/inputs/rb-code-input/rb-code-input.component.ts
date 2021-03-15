@@ -1,52 +1,45 @@
 import { Input } from '@angular/core';
-import { Output } from '@angular/core';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RbObject } from 'app/datamodel';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
-import { EventEmitter } from 'events';
+import { RbInputComponent } from '../abstract/rb-input';
 
 @Component({
   selector: 'rb-code-input',
   templateUrl: './rb-code-input.component.html',
   styleUrls: ['./rb-code-input.component.css']
 })
-export class RbCodeInputComponent implements OnInit {
-  @Input('dataset') dataset: RbDatasetComponent;
-  @Input('size') size: number;
+export class RbCodeInputComponent extends RbInputComponent {
+
   @Input('rows') rows: number;
-  @Input('editable') editable: boolean;
-  //@Input('object') rbObject: RbObject;
-  @Input('attribute') attribute: string;
   @Input('mode') mode: string;
-  @Output('change') change = new EventEmitter();
 
   editedValue: string;
 
   theme: string = "eclipse";
 
-  constructor() { }
+  constructor() {
+    super();
+  }
 
-  ngOnInit(): void {
+  inputInit() {
+  }
+
+  public get displayvalue(): any {
+    let ret = this.value;
+    if(typeof ret === 'object') {
+      ret = JSON.stringify(ret, null, 2);
+    }
+    return ret;
+  }
+
+  public set displayvalue(val: any) {
+    this.editedValue = val;
   }
 
   public get rbObject(): RbObject {
     return this.dataset != null && this.dataset.selectedObject != null ? this.dataset.selectedObject : null;
   }
 
-  public get code(): string {
-    let ret = null;
-    if(this.rbObject != null) {
-      ret = this.rbObject.data[this.attribute];
-      if(typeof ret === 'object') {
-        ret = JSON.stringify(ret, null, 2);
-      }
-    } 
-    return ret;
-  }
-
-  public set code(val: string) {
-    this.editedValue = val;
-  }
 
   public get config(): any {
     let ret = {
@@ -71,28 +64,9 @@ export class RbCodeInputComponent implements OnInit {
     }
   }
 
-  public onChanged(value: any) {
-    this.commit();
+  public onBlur(value: any) {
+    this.commit(this.editedValue);
   }
  
-
-  public get readonly(): boolean {
-    if(this.rbObject != null && this.rbObject.validation[this.attribute] != null)
-      return !(this.editable && this.rbObject.validation[this.attribute].editable);
-    else
-      return true;      
-  }
-
-  public get widthString() : string {
-    if(this.size != null)
-      return (15*this.size) + 'px';
-    else
-      return '100%';
-  }
-
-  commit() {
-    this.rbObject.setValue(this.attribute, this.editedValue);
-    this.change.emit(this.editedValue);
-  }
 
 }

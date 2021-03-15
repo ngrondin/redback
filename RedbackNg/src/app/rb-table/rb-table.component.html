@@ -22,13 +22,13 @@
                 class="rb-table-rowitem"
                 *ngFor="let col of columns"
                 [style.width.px]="col.width">
-                <rb-input
+                <rb-string-input
                     *ngIf="col.type == 'input'"
                     [size]="col.size"
                     [object]="object"
                     [attribute]="col.attribute"
                     [editable]="true">
-                </rb-input>
+                </rb-string-input>
                 <rb-datetime-input
                     *ngIf="col.type == 'datepicker'"
                     [size]="col.size"

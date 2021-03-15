@@ -1,36 +1,28 @@
 import { HostBinding } from '@angular/core';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { SimpleChanges } from '@angular/core';
+import { Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 
-/*@Component({
-  selector: 'rb-input-common',
-  templateUrl: './rb-input-common.component.html',
-  styleUrls: ['./rb-input-common.component.css'],
-})*/
-export abstract class RbInputCommonComponent extends RbDataObserverComponent {
+
+export abstract class RbInputComponent extends RbDataObserverComponent {
+  @Input('attribute') attribute: string;    
   @Input('object') _rbObject: RbObject;
+  @Input('value') _value: any;
   @Input('label') label: string;
   @Input('icon') _icon: string;
   @Input('showicon') showicon: boolean = true;
   @Input('size') size: number;
   @Input('grow') grow: number;
   @Input('editable') editable: boolean = true;
-  @Input('attribute') attribute: string;
-  @Input('value') value: any;
   @Output('valueChange') valueChange = new EventEmitter();
-  @Output('change') change = new EventEmitter();
-  @Output('keyup') keyupEvent = new EventEmitter();
-  @HostBinding('class.rb-input-margin') marginclass: boolean = true;
+  
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
   @HostBinding('style.width') get styleWidth() { return (this.size != null ? ((0.88 * this.size) + 'vw'): this.defaultSize != null ? ((0.88 * this.defaultSize) + 'vw'): null);}
 
-  previousObject: RbObject;
   previousValue: any;
-  editedValue: any;
+  previousObject: RbObject;
   flasherOn: boolean = false;
-  isEditing: boolean = false;
   defaultIcon: string;
   defaultSize: number = 15;
 
@@ -39,7 +31,10 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   }
 
   dataObserverInit() {
+      this.inputInit();
   }
+
+  abstract inputInit();
 
   dataObserverDestroy() {
   }
@@ -50,16 +45,38 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
   onActivationEvent(state: boolean) {
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+  }
+
   get rbObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : this._rbObject;
+    if(this.dataset != null) {
+        return this.dataset.selectedObject;
+    } else {
+        return this._rbObject;
+    }
   }
 
-  public get displayvalue(): any {
-    return null;//this.value;
-  }
-
-  public set displayvalue(val: any) {
-    //this.editedValue = val;
+  get value() : any {
+    let val = null;
+    if(this.attribute != null) {
+        if(this.rbObject != null) {
+            if(this.attribute == 'uid') {
+                val = this.rbObject.uid;
+            } else {
+                val = this.rbObject.get(this.attribute);
+            } 
+        } else {
+            val = null;
+        }
+    } else {
+        val = this._value;
+    }
+    if(this.previousValue != val && (this.rbObject == null || this.previousObject == this.rbObject)) {
+        this.flash();
+    }   
+    this.previousValue = val;
+    this.previousObject = this.rbObject; 
+    return val;
   }
 
   get icon(): string {
@@ -84,47 +101,28 @@ export abstract class RbInputCommonComponent extends RbDataObserverComponent {
     }
   }
 
-  public get widthString() : string {
-    if(this.size != null)
-      return (0.88 * this.size) + 'vw';
-    else
-      return '100%';
-  }
+  public abstract get displayvalue(): any;
 
-  public checkValueChange(value: any) {
-    if(this.previousValue != value && this.previousObject == this.rbObject) {
-      this.flash();
-    }
-    this.previousValue = value;
-    this.previousObject = this.rbObject;
-  }
+  public abstract set displayvalue(val: any);
 
   public flash() {
     setTimeout(() => {this.flasherOn = true}, 1);
     setTimeout(() => {this.flasherOn = false}, 100);
   }
 
-  public focus(event: any) {
-    if(!this.readonly) {
-      this.isEditing = true;
-    }
-  }
-
-  public blur(event: any) {
-    this.isEditing = false;
-  }
-
-  public keydown(event: any) {
-  
-  }
-
-  public keyup(event: any) {
-    this.valueChange.emit(this.editedValue);
-    this.keyupEvent.emit(event);
-  }
-
-  public commit() {
-    //this.value = this.editedValue;
-    //this.editedValue = null;
+  public commit(val: any, related: RbObject = null) {
+    if(this.attribute != null) {
+        if(this.rbObject != null) {
+            this.rbObject.setValueAndRelated
+            if(related != null) {
+                return this.rbObject.setValueAndRelated(this.attribute, val, related)
+            } else {
+                return this.rbObject.setValue(this.attribute, val);
+            } 
+        } 
+    } else {
+        this._value = val;
+    }      
+    this.valueChange.emit(val);
   }
 }

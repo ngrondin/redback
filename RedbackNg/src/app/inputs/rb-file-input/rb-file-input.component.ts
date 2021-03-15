@@ -1,16 +1,17 @@
 import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { RbInputCommonComponent } from 'app/inputs/rb-input-common/rb-input-common.component';
 import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
 import { ApiService } from 'app/services/api.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HostBinding } from '@angular/core';
+import { RbInputComponent } from '../abstract/rb-input';
 
 @Component({
   selector: 'rb-file-input',
   templateUrl: './rb-file-input.component.html',
   styleUrls: ['./rb-file-input.component.css']
 })
-export class RbFileInputComponent extends RbInputCommonComponent implements OnInit {
+export class RbFileInputComponent extends RbInputComponent  {
+
   @Input('width') width: number;
   @Input('height') height: number;
   @Output() dropped: EventEmitter<any> = new EventEmitter();
@@ -30,11 +31,20 @@ export class RbFileInputComponent extends RbInputCommonComponent implements OnIn
     this.uploader.response.subscribe( (res: any) => this.fileUploaded(res) );
   }
 
-  ngOnInit() {
+  inputInit() {
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    
+  public get displayvalue(): any {
+    if(this.rbObject != null) {
+      let val = this.rbObject.get(this.attribute);
+      if(val != null && val.thumbnail != null) {
+        return this.domSanitizer.bypassSecurityTrustResourceUrl(val.thumbnail);;
+      }
+    } 
+    return null;
+  }
+
+  public set displayvalue(val: any) {
   }
 
   get fileUid() : String{
@@ -46,15 +56,6 @@ export class RbFileInputComponent extends RbInputCommonComponent implements OnIn
     return null;
   } 
 
-  get thumbnail() {
-    if(this.rbObject != null) {
-      let val = this.rbObject.get(this.attribute);
-      if(val != null && val.thumbnail != null) {
-        return this.domSanitizer.bypassSecurityTrustResourceUrl(val.thumbnail);;
-      }
-    } 
-    return null;
-  }
 
   hasThumbnail(): boolean {
     if(this.rbObject != null) {
@@ -87,10 +88,7 @@ export class RbFileInputComponent extends RbInputCommonComponent implements OnIn
   }
 
   fileUploaded(res: any) {
-    if(this.rbObject != null) {
-      this.rbObject.setValue(this.attribute, JSON.parse(res));
-      this.change.emit(this.editedValue);
-    }    
+    this.commit( JSON.parse(res));
   }
 
   openFile() {

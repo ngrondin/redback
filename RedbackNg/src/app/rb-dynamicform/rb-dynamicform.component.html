@@ -16,14 +16,14 @@
         <div
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'string'">
-            <rb-input
+            <rb-string-input
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="20"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
                 [editable]="isEditable">
-            </rb-input>
+            </rb-string-input>
         </div>
         <div
             class="rb-df-lineinput rb-df-headspace"
@@ -131,15 +131,14 @@
         <div
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'number'">
-            <rb-input
+            <rb-number-input
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="20"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
-                [type]="'number'"
                 [editable]="isEditable">
-            </rb-input>
+            </rb-number-input>
         </div>
         <div
             class="rb-df-lineinput"

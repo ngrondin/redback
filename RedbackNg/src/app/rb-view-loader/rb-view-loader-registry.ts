@@ -5,8 +5,8 @@ import { RbCurrencyInputComponent } from "app/inputs/rb-currency-input/rb-curren
 import { RbDatetimeInputComponent } from "app/inputs/rb-datetime-input/rb-datetime-input.component";
 import { RbDurationInputComponent } from "app/inputs/rb-duration-input/rb-duration-input.component";
 import { RbFileInputComponent } from "app/inputs/rb-file-input/rb-file-input.component";
-import { RbInputComponent } from "app/inputs/rb-input/rb-input.component";
 import { RbRelatedInputComponent } from "app/inputs/rb-related-input/rb-related-input.component";
+import { RbStringInputComponent } from "app/inputs/rb-string-input/rb-string-input.component";
 import { RbSwitchInputComponent } from "app/inputs/rb-switch-input/rb-switch-input.component";
 import { RbTextareaInputComponent } from "app/inputs/rb-textarea-input/rb-textarea-input.component";
 import { RbActiongroupComponent } from "app/rb-actiongroup/rb-actiongroup.component";
@@ -49,7 +49,7 @@ export const componentRegistry = {
     "vsection": RbVsectionComponent,
     "tabsection": RbTabSectionComponent,
     "tab": RbTabComponent,
-    "input": RbInputComponent,
+    "input": RbStringInputComponent,
     "relatedinput": RbRelatedInputComponent,
     "list3": RbListComponent,
     "list4": RbList4Component,

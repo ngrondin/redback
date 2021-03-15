@@ -1,11 +1,11 @@
-<rb-input
+<rb-string-input
     [(value)]="searchValue"
     [icon]="'search'"
     [label]="'Search'"
     [grow]="1"
     [size]="1"
     (keyup)="keyup($event)">
-</rb-input>
+</rb-string-input>
 <button 
     mat-button
     *ngIf="filterconfig != null"

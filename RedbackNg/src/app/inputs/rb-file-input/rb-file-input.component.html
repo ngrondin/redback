@@ -10,7 +10,7 @@
         class="rb-file-input-img"
         [style.width.px] = "size"
         *ngIf="hasThumbnail()"
-        [src]="thumbnail">
+        [src]="displayvalue">
     <mat-icon
         class="rb-file-input-icon"
         *ngIf="!hasThumbnail() && fileUid != null">
