@@ -2,7 +2,8 @@
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)
+margin-right: 5px;
+    /*margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)*/
 }
 
 .rb-input-icon {
@@ -49,6 +50,7 @@
     background-color: transparent;
     outline: none;
     margin-top: var(--v16px);
+    margin-right: var(--v5px);
     padding: 3px;
     width: 100%;
     z-index: 1;
@@ -67,4 +69,10 @@
 .rb-input-underline-editing {
     width: 100%;
     transition: width 200ms ease-out;
+}
+
+
+.rb-input-button {
+    padding: 0px;
+    min-width: 32px;
 }

@@ -1,0 +1,27 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    background-color: white;
+    border-bottom: 1px solid lightgrey;
+}
+
+.rb-vh-title { 
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin-right: 50px;
+    margin-bottom: var(--v8px);
+    margin-left: var(--v8px);
+}
+
+.rb-vh-breadcrumb {
+    margin-bottom: var(--v8px);
+}
+
+.rb-vh-space {
+    flex: 1 1 auto;
+}
+
+.rb-vh-more {
+    color: lightgray;
+}

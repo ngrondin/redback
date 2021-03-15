@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
 
 @Component({
@@ -7,7 +7,6 @@ import { RbFieldInputComponent } from '../abstract/rb-field-input';
   styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbStringInputComponent extends RbFieldInputComponent {
-
 
   constructor() {
     super();

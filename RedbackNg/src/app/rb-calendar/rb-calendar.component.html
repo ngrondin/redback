@@ -3,7 +3,8 @@
     <rb-search
         [dataset]="dataset"
         [size]="15"
-        [grow]="0">
+        [grow]="0"
+        [margin]="true">
     </rb-search>
     <rb-spacer></rb-spacer>
     <rb-choice-input
@@ -11,15 +12,13 @@
         [label]="'Month'"
         [showicon]="false"
         [size]="6"
-        [(value)]="month"
-        (change)="setMonth($event)">
+        [(value)]="month">
     </rb-choice-input>
     <rb-string-input
         [label]="'Year'"
         [showicon]="false"
         [size]="5"
-        [(value)]="year"
-        (change)="setYear($event)">
+        [(value)]="year">
     </rb-string-input>
 </div>
 <div

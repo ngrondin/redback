@@ -1,0 +1,37 @@
+<div
+    class="rb-vh-title">
+    {{title}}
+</div>
+<rb-breadcrumb
+    *ngIf="targetStack.length > 1"
+    class="rb-vh-breadcrumb"
+    [targetStack]="targetStack"
+    [color]="color.fore"
+    (backTo)="backTo($event)">
+</rb-breadcrumb>
+<div
+    class="rb-vh-space">
+</div>
+<button
+    class="rb-vh-more"
+    mat-icon-button
+    [matMenuTriggerFor]="headermenu">
+    <mat-icon>more_vert</mat-icon>
+</button>
+<mat-menu
+    #headermenu="matMenu">
+    <button
+        mat-menu-item
+        [matMenuTriggerFor]="headercolor">
+        Header Color
+    </button>
+</mat-menu>
+<mat-menu
+    #headercolor="matMenu">
+    <button
+        *ngFor="let color of colors"
+        mat-menu-item
+        (click)="selectColor(color)">
+        {{color.name}}
+    </button>
+</mat-menu>

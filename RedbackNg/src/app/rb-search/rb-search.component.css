@@ -4,7 +4,7 @@
     padding-right: 8px;
 }
 
-:host > rb-input {
+:host > rb-string-input {
     margin: 5px 0px 0px 0px;
 }
 

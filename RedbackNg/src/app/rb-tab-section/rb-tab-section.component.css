@@ -37,19 +37,26 @@
 }
 
 .rb-tabsection-tabheader-active {
-  border-bottom: 2px Solid red;
+    background-color: #5262bc;
+    color: white;
 }
 
 .rb-tabsection-tabheader-button-active {
-
 }
 
 .rb-tabsection-tabheader-active-alt1 {
+  border-bottom: 2px Solid red;
+}
+
+.rb-tabsection-tabheader-active-alt2 {
     background-color: #5262bc;
     color: white;
 }
 
 .rb-tabsection-tabheader-button-active-alt1 {
+}
+
+.rb-tabsection-tabheader-button-active-alt2 {
 }
 
 .rb-tabsection-divider {

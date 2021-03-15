@@ -71,7 +71,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     } else {
         val = this._value;
     }
-    if(this.previousValue != val && (this.rbObject == null || this.previousObject == this.rbObject)) {
+    if(val != null && this.previousValue != val && (this.rbObject == null || (this.rbObject != null && this.previousObject != null && this.previousObject == this.rbObject))) {
         this.flash();
     }   
     this.previousValue = val;

@@ -125,9 +125,9 @@ rb-menu > .mat-list-base {
 	color:#888888;
 }
 
-/*.rb-input-margin {
-	margin: 7px 5px -5px 15px;
-}*/
+.rb-input-margin {
+	margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)
+}
 
 .rb-input-text-color {
 	color: currentColor!important;

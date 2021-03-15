@@ -5,6 +5,7 @@
         &nbsp;&nbsp;
         <span>{{apptitle}}</span>
         <span
+            *ngIf="userprefService.selecteduialt != 'alt2'"
             class="rb-pagetitle">
             &nbsp;&nbsp;|&nbsp;&nbsp;{{currentTitle}}
         </span>
@@ -70,10 +71,16 @@
     <mat-sidenav-content>
         <rb-vsection>
             <rb-breadcrumb
-                *ngIf="viewTargetStack.length > 1"
+                *ngIf="viewTargetStack.length > 1 && userprefService.selecteduialt != 'alt2'"
                 [targetStack]="viewTargetStack"
                 (backTo)="backTo($event)">
             </rb-breadcrumb>
+            <rb-view-header
+                *ngIf="userprefService.selecteduialt == 'alt2'"
+                [title]="currentTitle"
+                [targetStack]="viewTargetStack"
+                (backTo)="backTo($event)">
+            </rb-view-header>
             <rb-view-loader 
                 [target]="currentViewTarget"
                 (navigate)="navigateTo($event)">

@@ -1,15 +1,33 @@
-<rb-string-input
-    [(value)]="searchValue"
-    [icon]="'search'"
-    [label]="'Search'"
-    [grow]="1"
-    [size]="1"
-    (keyup)="keyup($event)">
-</rb-string-input>
+<mat-icon 
+    *ngIf="showicon" 
+    class="rb-input-icon">
+    {{icon}}
+</mat-icon>
+<div
+    class="rb-input-container">
+    <span
+        [class]="'rb-input-label' + ((displayvalue === null || displayvalue === '') && !isEditing ? ' rb-input-label-big' : '')">
+        {{label}}
+    </span>    
+    <input 
+        #input
+        [class]="'rb-input-input rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
+        [(ngModel)]="displayvalue"
+        (focus)="onFocus($event)"
+        (blur)="onBlur($event)"
+        (keydown)="onKeydown($event)"
+        (keyup)="onKeyup($event)"
+        [readonly]="readonly"
+        autocomplete="off"
+        [type]="'text'">
+    <div
+        [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
+    </div>
+</div>
 <button 
     mat-button
     *ngIf="filterconfig != null"
-    class="rb-grey-icon rb-filter-button"
+    class="rb-grey-icon rb-input-button"
     (click)="openFilterBuilder()">
     <mat-icon>filter_list</mat-icon>
 </button>

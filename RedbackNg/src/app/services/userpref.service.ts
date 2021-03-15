@@ -7,7 +7,7 @@ import { ApiService } from './api.service';
 export class UserprefService {
 
   selectedUIAlt: string = 'base';
-  uiAlternates: string[] = ['base', 'alt1'];
+  uiAlternates: string[] = ['base', 'alt1', 'alt2'];
   currentView: string;
   domainUISwitches: any = {};
   roleUISwitches: any = {};

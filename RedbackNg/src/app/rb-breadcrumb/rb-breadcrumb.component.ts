@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostBinding } from '@angular/core';
 
 @Component({
   selector: 'rb-breadcrumb',
@@ -6,10 +6,11 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
   styleUrls: ['./rb-breadcrumb.component.css']
 })
 export class RbBreadcrumbComponent implements OnInit {
-  @Input() targetStack : any[];
-
+  @Input('targetStack') targetStack : any[];
+  @Input('color') color: string;
   @Output('backTo') back: EventEmitter<any> = new EventEmitter();
-
+  @HostBinding('style.color') get foreColor() { return this.color != null ? this.color : "grey";}
+  
 
   constructor() { }
 

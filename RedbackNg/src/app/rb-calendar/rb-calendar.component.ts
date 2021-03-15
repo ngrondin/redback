@@ -57,8 +57,8 @@ export class RbCalendarComponent extends RbDataObserverComponent {
 
   seriesConfigs: CalendarSeriesConfig[];
   data: any = {};
-  year: number;
-  month: number;
+  _year: number;
+  _month: number;
   firstDay: number;
   days: any = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   months: any = [
@@ -84,8 +84,8 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   dataObserverInit() {
     let dt = new Date();
     dt.setDate(1);
-    this.year = dt.getFullYear();
-    this.month = dt.getMonth();
+    this._year = dt.getFullYear();
+    this._month = dt.getMonth();
     if(this.series != null) {
       this.seriesConfigs = [];
       for(let item of this.series) {
@@ -119,25 +119,42 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     return this.datasetgroup != null ? this.datasetgroup.lists : null;
   }
 
+  get year():  number {
+    return this._year;
+  }
+
+  set year(val: number) {
+    this._year = val;
+    this.filterDataset();
+  }
+
+  get month() : number {
+    return this._month;
+  }
+
+  set month(val: number) {
+    this._month = val;
+    this.filterDataset();
+  }
+
   redraw() {
     this.calcParams();
     this.calcLists();
   }
 
   calcParams() {
-    let firstOfMonth = new Date((new Date()).setDate(1));
-    let month = firstOfMonth.getMonth();
-    let firstofNextMonth = new Date((new Date(firstOfMonth.getTime()).setMonth(month + 1)));
-    this.firstDay = firstOfMonth.getDate();
-    let dayCount = ((firstofNextMonth.getTime() - firstOfMonth.getTime()) / 86400000) + this.firstDay;
-    let weekCount = Math.ceil(dayCount / 7);
+    let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
+    let firstofNextMonth = new Date((new Date(firstOfMonth.getTime()).setMonth(this.month + 1)));
+    this.firstDay = firstOfMonth.getDay();
+    let dayCount = Math.ceil(((firstofNextMonth.getTime() - firstOfMonth.getTime()) / 86400000) - 0.1);
+    let weekCount = Math.ceil((dayCount + this.firstDay) / 7);
     this.weeks = [];
     this.data = {};
     let i = 1 - this.firstDay;
     for(var w = 0; w < weekCount; w++) {
       let days = [];
       for(var day of this.days) {
-        if(i > 0 && i <= 31) {
+        if(i > 0 && i <= dayCount) {
           let dayOfMonthStr = i.toString();
           days.push(dayOfMonthStr);
           this.data[dayOfMonthStr] = [];
@@ -174,7 +191,11 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   putEntryInData(entry: CalendarEntry) {
     if(entry.date.getFullYear() == this.year && entry.date.getMonth() == this.month) {
       let dayOfMonth = entry.date.getDate();
-      this.data[dayOfMonth].push(entry);
+      if(this.data[dayOfMonth] != null) {
+        this.data[dayOfMonth].push(entry);
+      } else {
+        alert('boom');
+      }
      }
   }
 
@@ -213,15 +234,7 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     }
   }
 
-  setYear(event: any) {
-    this.year = event;
-    this.filterDataset();
-  }
 
-  setMonth(event: any) {
-    this.month = event;
-    this.filterDataset();
-  }
 
   filterDataset() {
     let startDate = new Date(this.year, this.month, 1, 0, 0, 0, 0);
