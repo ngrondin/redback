@@ -13,6 +13,7 @@ import io.redback.RedbackException;
 import io.redback.client.AccessManagementClient;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
+import io.redback.utils.StringUtils;
 
 public abstract class AuthenticatedStreamProvider extends StreamProvider {
 	private Logger logger = Logger.getLogger("io.redback");
@@ -52,6 +53,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 		}
 		catch(Exception e)
 		{
+			logger.severe(StringUtils.getStackTrace(e));
 			throw new FunctionErrorException("Cannot accept stream", e);
 		}
 	}
@@ -61,8 +63,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 		try {
 			onStreamData(session, payload);
 		} catch(Exception e) {
-			e.printStackTrace();
-			logger.severe("Error receiving stream data : " + e.getMessage());
+			logger.severe(StringUtils.getStackTrace(e));
 		}
 	}
 	
@@ -84,7 +85,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 			endpointToSession.remove(streamEndpoint);
 			sessionToEndpoint.remove(session);
 		} catch(Exception e) {
-			logger.severe("Error closing the stream data : " + e.getMessage());
+			logger.severe(StringUtils.getStackTrace(e));
 		}
 	}
 
