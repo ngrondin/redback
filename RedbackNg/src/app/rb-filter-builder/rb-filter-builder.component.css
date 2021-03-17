@@ -16,16 +16,17 @@
     flex-grow: 1;
 }
 
-.rb-filter-builder-canvas {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
+.rb-fb-labelcol {
+    text-align: end;
+    vertical-align: top;
+    padding: 25px 25px 5px 25px;
 }
 
-.rb-filter-builder-line {
+.rb-fb-maincol {
+    white-space: nowrap;
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    padding: 5px;
 }
 
 .rb-filter-builder-label {
@@ -37,9 +38,9 @@
 }
 
 .rb-filter-builder-multiselect-table {
-    padding: 10px;
+    padding: 20px 0px 10px 0px;
 }
 
 .rb-filter-builder-multiselect-tablecell {
-    padding: 0px 10px 0px 10px;
+    padding: 0px 10px 0px 0px;
 }

@@ -112,7 +112,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
         this.searchString = this.dataTarget.search;
         this.userFilter = this.dataTarget.filter;
         this.userSort = null;
-        if(this.loadOnReset) this.refreshData();
+        if(this.loadOnReset && this.active) this.refreshData();
         this.publishEvent('reset');
       }
     } else {

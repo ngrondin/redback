@@ -66,7 +66,7 @@ export class RbObject {
             if(attr == 'uid') {
                 return this.uid;
             } else if(attr.indexOf('.') == -1) {
-                return this.data[attr];
+                return this.data[attr] || null;
             } else {
                 let relationship = attr.substring(0, attr.indexOf('.'));
                 let finalattr = attr.substring(attr.indexOf('.') + 1);

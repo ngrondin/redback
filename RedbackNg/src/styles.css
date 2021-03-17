@@ -129,6 +129,10 @@ rb-menu > .mat-list-base {
 	margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)
 }
 
+.rb-switch-margin {
+    margin: var(--v16px) var(--v5px) var(--v12px) var(--v16px)
+}
+
 .rb-input-text-color {
 	color: currentColor!important;
 	transition: color 0.6s ease-out!important;

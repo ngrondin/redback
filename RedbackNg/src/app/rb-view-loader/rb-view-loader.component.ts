@@ -23,13 +23,13 @@ export class LoadedView {
   rootComponentRefs: ComponentRef<Component>[] = [];
   topDatasets: RbDatasetComponent[] = [];
 
-  attach(container: ViewContainerRef) {
+  attachTo(container: ViewContainerRef) {
     for(let item of this.rootComponentRefs) {
       container.insert(item.hostView);
     }
   }
 
-  detach(container: ViewContainerRef) {
+  detachFrom(container: ViewContainerRef) {
     this.rootComponentRefs.forEach(item => {
       container.detach(container.indexOf(item.hostView))
     });
@@ -42,11 +42,13 @@ export class LoadedView {
   }
 
   setTarget(dataTarget: DataTarget) {
-    for(let dataset of this.topDatasets) {
-      if(dataTarget != null && (dataTarget.objectname == null || (dataTarget.objectname == dataset.object))) {
-        if(dataset.dataTarget != dataTarget) {
-          dataset.dataTarget = dataTarget;
-          setTimeout(() => dataset.reset(), 1);
+    if(dataTarget != null) {
+      for(let dataset of this.topDatasets) {
+        if(dataTarget.objectname == null || (dataTarget.objectname == dataset.object)) {
+          if(dataset.dataTarget != dataTarget) {
+            dataset.dataTarget = dataTarget;
+            setTimeout(() => dataset.reset(), 1);
+          }
         }
       }
     }
@@ -91,21 +93,22 @@ export class RbViewLoaderComponent implements OnInit {
       let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
       this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
         res => {
-          this.buildConfig(res.json())
+          this.showView(res.json())
         }
       );
       this.currentView = this.target.view;
     } 
   }
 
-  buildConfig(config: any) {
-    console.time('build');
+  showView(config: any) {
     if(this.currentLoadedView != null) {
-      this.currentLoadedView.detach(this.container);
+      this.currentLoadedView.detachFrom(this.container);
     }
+    this.target.title = config.label;
     let hash = JSON.stringify(config).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
+      console.time('build');
       entry = new LoadedView();
       entry.title = config.label;
       entry.topDatasets = [];
@@ -115,14 +118,13 @@ export class RbViewLoaderComponent implements OnInit {
         }
       }
       this.viewCache[hash] = entry;
+      console.timeEnd('build');
     }
     if(entry != null) {
       this.currentLoadedView = entry;
-      entry.attach(this.container);
+      entry.attachTo(this.container);
       entry.setTarget(this.target.dataTarget);
-      this.target.title = entry.title;
     }
-    console.timeEnd('build');
   }
 
   buildConfigRecursive(parent: ViewContainerRef, config: any, context: any, topDatasets: RbDatasetComponent[]) {

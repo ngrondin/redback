@@ -36,6 +36,12 @@ export class RbTextareaInputComponent extends RbFieldInputComponent {
     this.editedValue = val;
   }
 
+  public onKeydown(event: any) {
+    if(event.keyCode == 27) {
+      this.cancelEditing();
+    } 
+  }
+
   public startEditing() {
     super.startEditing();
     this.editedValue = this.value;

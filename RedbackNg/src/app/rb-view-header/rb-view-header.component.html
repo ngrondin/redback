@@ -1,14 +1,25 @@
 <div
-    class="rb-vh-title">
-    {{title}}
-</div>
-<rb-breadcrumb
-    *ngIf="targetStack.length > 1"
-    class="rb-vh-breadcrumb"
-    [targetStack]="targetStack"
-    [color]="color.fore"
-    (backTo)="backTo($event)">
-</rb-breadcrumb>
+    class="rb-vh-textcontainer">
+    <div
+        *ngFor="let target of targetStack; let i = index"
+        class="rb-vh-stackitem">
+        <span
+            *ngIf="i > 0"
+            class="rb-vh-bc-link">
+            &nbsp;&nbsp;&gt;&nbsp;&nbsp;
+        </span>
+        <span
+            class="rb-vh-bc-link"
+            *ngIf="i < targetStack.length - 1"
+            (click)="backTo(target)">
+            {{target.breadcrumbLabel}}
+        </span>
+    </div>
+    <div
+        class="rb-vh-title">
+        {{title}}
+    </div>
+</div>    
 <div
     class="rb-vh-space">
 </div>
@@ -25,6 +36,11 @@
         [matMenuTriggerFor]="headercolor">
         Header Color
     </button>
+    <button
+        mat-menu-item
+        [matMenuTriggerFor]="headerpattern">
+        Header Pattern
+    </button>    
 </mat-menu>
 <mat-menu
     #headercolor="matMenu">
@@ -33,5 +49,14 @@
         mat-menu-item
         (click)="selectColor(color)">
         {{color.name}}
+    </button>
+</mat-menu>
+<mat-menu
+    #headerpattern="matMenu">
+    <button
+        *ngFor="let pattern of patterns"
+        mat-menu-item
+        (click)="selectPattern(pattern)">
+        {{pattern.name}}
     </button>
 </mat-menu>

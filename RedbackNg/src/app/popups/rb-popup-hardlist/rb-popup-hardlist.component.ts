@@ -38,6 +38,10 @@ export class RbPopupHardlistComponent extends RbPopupComponent implements OnInit
   }
 
   public select(item: any) {
-    this.selected.emit(item.value);
+    let val = item;
+    if(item['value'] != null) {
+      val = item['value'];
+    }
+    this.selected.emit(val);
   }
 }

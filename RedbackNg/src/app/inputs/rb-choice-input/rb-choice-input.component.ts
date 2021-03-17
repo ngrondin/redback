@@ -32,7 +32,7 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
       val = this.value;
     }
     for(let opt of this.choicelist) {
-      if(opt['value'] == val) {
+      if((opt['value'] != null && opt['value'] == val) || (opt['value'] == null && opt === val)) {
         return opt;
       }
     }
@@ -42,7 +42,7 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
   public get displayvalue(): any {
     let item = this.selectedItem;
     if(item != null) {
-      return item['display'];
+      return item['display'] || item['label'];
     }
     return null;
   }

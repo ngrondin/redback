@@ -2,8 +2,9 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin: var(--v16px) var(--v5px) var(--v12px) var(--v16px)
+    
 }
+
 
 .rb-switch-container {
     /*padding: 10px 10px 15px 10px;*/

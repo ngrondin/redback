@@ -1,3 +1,4 @@
+import { HostBinding } from '@angular/core';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbInputComponent } from '../abstract/rb-input';
 
@@ -7,7 +8,9 @@ import { RbInputComponent } from '../abstract/rb-input';
   styleUrls: ['./rb-switch-input.component.css']
 })
 export class RbSwitchInputComponent extends RbInputComponent {
-
+  @Input('margin') margin: boolean = true;
+  @HostBinding('class.rb-switch-margin') get marginclass() { return this.margin }
+  
   mode = 'checkbox';
 
   constructor() {

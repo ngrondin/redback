@@ -5,7 +5,7 @@
             mat-button 
             class="rb-hardlist-button"
             (click)="select(item)">
-            {{item.display}}
+            {{item.display || item.label}}
         </button>
     </mat-list-item>    
 </mat-list>

@@ -221,6 +221,8 @@ export class RbFilterBuilderComponent implements OnInit {
   sortConfig: SortConfig;
   sort: any;
   sortConstructs: SortItemConstruct[];
+  _attributeToAddToFilter: any;
+  _attributeToAddToSort: any;
 
   datechoice: any = [
     { value: "last15", display: "Last 15 Minutes"},
@@ -277,21 +279,29 @@ export class RbFilterBuilderComponent implements OnInit {
 
   }
 
-  addAttributeToFilter(event: any) {
-    let fac: FilterAttributeConfig = event.value;
-    let src: MatSelect = event.source;
-    let fic = new FilterItemConstruct(fac, null);
-    this.filterConstructs.push(fic);
-    src.value = null;
-    this.getAggregatesFor(fac);
+  get attributeToAddToFilter() : any {
+    return this._attributeToAddToFilter;
   }
 
-  addAttributeToSort(event: any) {
-    let sac: SortAttributeConfig = event.value;
-    let src: MatSelect = event.source;
+  set attributeToAddToFilter(val: any) {
+    this._attributeToAddToFilter = val;
+    let fac: FilterAttributeConfig = val;
+    let fic = new FilterItemConstruct(fac, null);
+    this.filterConstructs.push(fic);
+    this.getAggregatesFor(fac);
+    setTimeout(() => {this._attributeToAddToFilter = null}, 200);
+  }
+
+  get attributeToAddToSort() : any {
+    return this._attributeToAddToSort;
+  }
+
+  set attributeToAddToSort(val: any) {
+    this._attributeToAddToSort = val;
+    let sac: SortAttributeConfig = val;
     let sic = new SortItemConstruct(sac, this.sortConstructs.length, {dir:1});
     this.sortConstructs.push(sic);
-    src.value = null;
+    setTimeout(() => {this._attributeToAddToSort = null}, 200);
   }
 
   removeFilterItem(fic: FilterItemConstruct) {

@@ -6,16 +6,16 @@
     border-bottom: 1px solid lightgrey;
 }
 
-.rb-vh-title { 
-    font-size: 1.15rem;
-    font-weight: 500;
-    margin-right: 50px;
-    margin-bottom: var(--v8px);
-    margin-left: var(--v8px);
+.rb-vh-textcontainer {
+    margin: 8px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
 }
 
-.rb-vh-breadcrumb {
-    margin-bottom: var(--v8px);
+.rb-vh-title { 
+    font-size: 18px;
+    font-weight: 500;
 }
 
 .rb-vh-space {
@@ -24,4 +24,14 @@
 
 .rb-vh-more {
     color: lightgray;
+}
+
+.rb-vh-stackitem {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-vh-bc-link {
+    cursor: pointer;
+    font-size: 14px;
 }

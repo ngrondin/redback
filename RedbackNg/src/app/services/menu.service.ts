@@ -112,8 +112,9 @@ export class MenuService {
   removeFromMenu(menu: any, item: any) {
     if(menu != null && menu.content != null) {
       for(var i = 0; i < menu.content.length; i++) {
-        if(menu.content[i].name == item.name) {
-          menu.content.splice(i);
+        if(menu.content[i] === item) {
+          menu.content.splice(i, 1);
+          return;
         }
       }
     }
