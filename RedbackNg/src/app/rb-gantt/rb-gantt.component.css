@@ -106,6 +106,8 @@
     overflow: auto;
     position: relative;
     width: 5.9vw;
+    scrollbar-color: #bcbcf6 transparent;
+	scrollbar-width: thin;
 }
 
 .rb-gantt-lanes {

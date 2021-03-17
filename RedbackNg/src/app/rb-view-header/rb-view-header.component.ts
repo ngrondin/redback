@@ -114,7 +114,7 @@ export class RbViewHeaderComponent implements OnInit {
 
   darken(hex) : string {
     let rgb = this.hexToRgb(hex);
-    let ratio = 0.90;
+    let ratio = 0.88;
     rgb.r = Math.floor(rgb.r * ratio);
     rgb.g = Math.floor(rgb.g * ratio);
     rgb.b = Math.floor(rgb.b * ratio);
