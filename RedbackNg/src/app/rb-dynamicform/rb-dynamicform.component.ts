@@ -18,6 +18,7 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
   @Input('categoryattribute') categoryattribute : string;
   @Input('categoryorderattribute') categoryorderattribute : string;
   @Input('dependencyattribute') dependencyattribute : string;
+  @Input('dependencyoperatorattribute') dependencyoperatorattribute : string;
   @Input('dependencyvalueattribute') dependencyvalueattribute : string;
   @Input('editable') editable : string;
 
@@ -70,7 +71,7 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
     if(index == 0) {
       return true;
     } else {
-      if(this.sortedVisibleList[index - 1].get(this.categoryattribute) != object.get(this.categoryattribute)) {
+      if(this.sortedVisibleList[index - 1].get(this.categoryorderattribute) != object.get(this.categoryorderattribute)) {
         return true;
       } else {
         return false;
@@ -97,11 +98,18 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
             let dependentLinkAttribute = (this.dependencyattribute.indexOf(".") > -1 ? this.dependencyattribute.substr(0, this.dependencyattribute.indexOf(".")) : "uid");
             let depObj = this.lookupObjectFromList(dependentLinkAttribute, dependentLinkValue);
             if(depObj != null) {
-              let dependentValues: any[] = obj.get(this.dependencyvalueattribute);
+              let dependentValue: any = obj.get(this.dependencyvalueattribute);
               let depObjVal: any = depObj.get(this.valueattribute);
-              for(let v of dependentValues) {
-                if(v == depObjVal) {
-                  return true;
+              let depOperator = obj.get(this.dependencyoperatorattribute) || 'eq';
+              if(depOperator == 'eq' && Array.isArray(dependentValue)) {
+                for(let v of dependentValue) {
+                  if(v == depObjVal) {
+                    return true;
+                  }
+                }
+              } else if(depOperator == 'eq') {
+                if(dependentValue == depObjVal) {
+                    return true;
                 }
               }
               return false;

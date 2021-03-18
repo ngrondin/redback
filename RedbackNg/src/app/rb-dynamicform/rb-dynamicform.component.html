@@ -19,7 +19,7 @@
             <rb-string-input
                 [object]="object"
                 [attribute]="valueattribute"
-                [size]="20"
+                [grow]="1"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
                 [editable]="isEditable">
@@ -68,51 +68,57 @@
         <div
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'files'">
-            <mat-icon
-                style="color:gray; width:30px; margin-left: 15px">
-                attach_file
-            </mat-icon>
             <div
-                class="rb-df-lineinput-vert">
+                class="rb-df-inputwrapper">
+                <mat-icon
+                    style="color:gray; width:30px; margin-left: 15px">
+                    attach_file
+                </mat-icon>
                 <div
-                    class="rb-df-linelabel">
-                    {{object.get(labelattribute)}}
-                </div>
-                <rb-fileset
-                    #fileset
-                    [relatedObject]="object">
-                        <rb-filedrop
-                            [fileset]="fileset">
-                            <rb-filelist
-                                [fileset]="fileset"
-                                [details]="true"
-                                [downloadOnSelect]="true">
-                            </rb-filelist>
-                        </rb-filedrop>
-                </rb-fileset>
+                    class="rb-df-lineinput-vert">
+                    <div
+                        class="rb-df-linelabel">
+                        {{object.get(labelattribute)}}
+                    </div>
+                    <rb-fileset
+                        #fileset
+                        [relatedObject]="object">
+                            <rb-filedrop
+                                [fileset]="fileset">
+                                <rb-filelist
+                                    [fileset]="fileset"
+                                    [details]="true"
+                                    [downloadOnSelect]="true">
+                                </rb-filelist>
+                            </rb-filedrop>
+                    </rb-fileset>
+                </div>            
             </div>
         </div>
         <div
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'signature'">
-            <mat-icon
-                style="color:gray; width:30px; margin-left: 15px">
-                gesture
-            </mat-icon>
             <div
-                class="rb-df-lineinput-vert">
+                class="rb-df-inputwrapper">
+                <mat-icon
+                    style="color:gray; width:30px; margin-left: 15px">
+                    gesture
+                </mat-icon>
                 <div
-                    class="rb-df-linelabel">
-                    {{object.get(labelattribute)}}
-                </div>
-                <rb-file-input
-                    style="margin-left:0px;"
-                    [object]="object"
-                    [attribute]="valueattribute"
-                    [editable]="isEditable"
-                    [width]="300"
-                    [height]="80">
-                </rb-file-input>
+                    class="rb-df-lineinput-vert">
+                    <div
+                        class="rb-df-linelabel">
+                        {{object.get(labelattribute)}}
+                    </div>
+                    <rb-file-input
+                        style="margin-left:0px;"
+                        [object]="object"
+                        [attribute]="valueattribute"
+                        [editable]="isEditable"
+                        [width]="300"
+                        [height]="80">
+                    </rb-file-input>
+                </div>                
             </div>
         </div>        
         <div
@@ -134,7 +140,7 @@
             <rb-number-input
                 [object]="object"
                 [attribute]="valueattribute"
-                [size]="20"
+                [size]="8"
                 [icon]="'description'"
                 [label]="object.get(labelattribute)"
                 [editable]="isEditable">

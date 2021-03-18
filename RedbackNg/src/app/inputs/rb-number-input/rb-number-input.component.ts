@@ -23,6 +23,10 @@ export class RbNumberInputComponent extends RbFieldInputComponent {
   
   public set displayvalue(val: any) {
     if(this.isEditing) {
+      if(isNaN(val) && val != '-' && !isNaN(this.editedValue)) {
+        var curVal = this.editedValue;
+        setTimeout(() => {this.editedValue = curVal}, 200);
+      }
       this.editedValue = val;
     } 
   }

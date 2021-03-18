@@ -27,10 +27,10 @@
 }
 
 .mat-button {
-    display: flex;
-    flex-direction: row;
     font-size: 1.0rem;
     font-weight: initial;
     height: 48px;
     width: 100%;
+    text-align: initial;
 }
+
