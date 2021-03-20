@@ -79,6 +79,17 @@ export class RbObject {
         if(typeof ret == 'undefined') ret = null;
         return ret;
     }
+
+    getRelated(attr: string) : RbObject {
+        let ret: RbObject = null;
+        if(attr != null) {
+            if(attr.indexOf('.') == -1) {
+                ret = this.related[attr];
+            }
+        }
+        if(typeof ret == 'undefined') ret = null;
+        return ret;        
+    }
     
     canEdit(attribute: string) : boolean {
         return (this.validation != null && this.validation[attribute] != null && this.validation[attribute].editable == true);

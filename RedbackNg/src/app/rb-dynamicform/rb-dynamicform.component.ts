@@ -94,9 +94,10 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
       if(this.dependencyattribute != null) {
         this.sortedVisibleList = this.list.filter(obj => {
           let dependentLinkValue = obj.get(this.dependencyattribute);
-          if(dependentLinkValue != null) {
-            let dependentLinkAttribute = (this.dependencyattribute.indexOf(".") > -1 ? this.dependencyattribute.substr(0, this.dependencyattribute.indexOf(".")) : "uid");
-            let depObj = this.lookupObjectFromList(dependentLinkAttribute, dependentLinkValue);
+          if(dependentLinkValue != null) {            
+            //let dependentLinkAttribute = (this.dependencyattribute.indexOf(".") > -1 ? this.dependencyattribute.substr(0, this.dependencyattribute.indexOf(".")) : "uid");
+            //let depObj = this.lookupObjectFromList(dependentLinkAttribute, dependentLinkValue);
+            let depObj = obj.getRelated(this.dependencyattribute);
             if(depObj != null) {
               let dependentValue: any = obj.get(this.dependencyvalueattribute);
               let depObjVal: any = depObj.get(this.valueattribute);
