@@ -8,7 +8,7 @@ var versionOrDefault = version != null ? version : 'default';
   <meta charset="utf-8">
   <title><%=config.label%></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url = '<%=config.mobileapp%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=deployment.objectservicepath%>&processservice=<%=deployment.processservicepath%>&fileservice=<%=deployment.fileservicepath%>&chatservice=<%=deployment.chatservicepath%>'" />
+  <meta http-equiv="refresh" content="0; url = '<%=config.mobileapp%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=deployment.objectservicepath%>&processservice=<%=deployment.processservicepath%>&fileservice=<%=deployment.fileservicepath%>&chatservice=<%=deployment.chatservicepath%>&notificationservice=<%=deployment.notificationservicepath%>'" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />  
@@ -17,7 +17,7 @@ var versionOrDefault = version != null ? version : 'default';
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script>
     window.onload = function() {
-        window.location = '<%=config.mobileapp%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=deployment.objectservicepath%>&processservice=<%=deployment.processservicepath%>&fileservice=<%=deployment.fileservicepath%>&chatservice=<%=deployment.chatservicepath%>';
+        window.location = '<%=config.mobileapp%>://login?token=<%=session.getToken()%>&expiry=<%=session.expiry.toString()%>&username=<%=session.getUserProfile().getUsername()%>&objectservice=<%=deployment.objectservicepath%>&processservice=<%=deployment.processservicepath%>&fileservice=<%=deployment.fileservicepath%>&chatservice=<%=deployment.chatservicepath%>&notificationservice=<%=deployment.notificationservicepath%>';
         setTimeout(function() {window.close();}, 2000);
     }
     

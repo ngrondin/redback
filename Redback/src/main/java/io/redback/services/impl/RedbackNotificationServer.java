@@ -177,4 +177,12 @@ public class RedbackNotificationServer extends NotificationServer {
 		return emails;
 	}
 
+	protected void registerFCMToken(Session session, String token) throws RedbackException {
+		System.out.println("Registering token: " + token + "");
+	}
+
+	protected void sendFCMMessage(Session session, String username, String message) throws RedbackException {		// TODO Auto-generated method stub
+		
+	}
+
 }
