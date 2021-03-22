@@ -54,5 +54,17 @@ public class NotificationClient extends Client {
 		return emails;
 	}
 
+	public void sendFCMMessage(Session session, String username, String subject, String message) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "sendfcmmessage");
+			req.put("username", username);
+			req.put("subject", subject);
+			req.put("message", message);
+			request(session, req);
+		} catch(Exception e) {
+			throw new RedbackException("Error sending FCM Message", e);
+		}		
+	}
 
 }

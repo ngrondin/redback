@@ -2,7 +2,14 @@ package io.redback.services.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.security.KeyFactory;
+
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -26,14 +33,20 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.search.FlagTerm;
 import javax.mail.util.ByteArrayDataSource;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.RSAKeyProvider;
 import com.sun.mail.imap.IMAPFolder;
 
 import io.firebus.Firebus;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.DataClient;
 import io.redback.client.FileClient;
+import io.redback.client.GatewayClient;
 import io.redback.security.Session;
 import io.redback.services.NotificationServer;
+import io.redback.utils.CollectionConfig;
 import io.redback.utils.Email;
 import io.redback.utils.RedbackFile;
 
@@ -43,16 +56,30 @@ public class RedbackNotificationServer extends NotificationServer {
 	protected String smtpServer;
 	protected String smtpUser;
 	protected String smtpPass;
+	protected String dataServiceName;
+	protected DataClient dataClient;
+	protected CollectionConfig collectionConfig;
 	protected String fileServiceName;
 	protected FileClient fileClient;
+	protected String gatewayServiceName;
+	protected GatewayClient gatewayClient;
+	protected DataMap fcmAccountKey;
+	protected String fcmAccessToken;
+	protected long fcmAccessTokenExpiry;
 
 	public RedbackNotificationServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 		smtpServer = config.getString("smtpserver");
 		smtpUser = config.getString("smtpuser");
 		smtpPass = config.getString("smtppassword");
+		dataServiceName = config.getString("dataservice");
+		dataClient = new DataClient(firebus, dataServiceName);
+		collectionConfig = new CollectionConfig(config.getObject("collection"), "rbns_usertokens");
 		fileServiceName = config.getString("fileservice");
 		fileClient = new FileClient(firebus, fileServiceName);
+		gatewayServiceName = config.getString("gatewayservice");
+		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
+		fcmAccountKey = config.getObject("fcmaccountkey");
 	}
 
 	protected void email(Session session, List<String> addresses, String fromAddress, String fromName, String subject, String body, List<String> attachments) throws RedbackException {
@@ -178,11 +205,80 @@ public class RedbackNotificationServer extends NotificationServer {
 	}
 
 	protected void registerFCMToken(Session session, String token) throws RedbackException {
-		System.out.println("Registering token: " + token + "");
+		if(dataClient != null && collectionConfig != null) {
+			DataMap key = new DataMap(collectionConfig.getField("_id"), session.getUserProfile().getUsername());
+			DataMap data = new DataMap(collectionConfig.getField("fcmtoken"), token);
+			dataClient.putData(collectionConfig.getName(), key, data);
+		} else {
+			throw new RedbackException("No data client was configured");
+		}
+	}
+	
+	private String getFCMAccessToken() throws RedbackException {
+		try {
+			long now = System.currentTimeMillis();
+			if(fcmAccessToken == null || fcmAccessTokenExpiry < now) {
+				String keyStr = fcmAccountKey.getString("private_key");
+				keyStr = keyStr.replaceAll("\\n", "").replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "");
+				byte[] pkcs8EncodedKey = Base64.getDecoder().decode(keyStr);
+				KeyFactory factory = KeyFactory.getInstance("RSA");
+				KeySpec ks = new PKCS8EncodedKeySpec(pkcs8EncodedKey);//fcmAccountKey.getString("private_key").getBytes());
+				final RSAPrivateKey privateKey = (RSAPrivateKey)factory.generatePrivate(ks);
+				Algorithm algorithm = Algorithm.RSA256(new RSAKeyProvider() {
+					public String getPrivateKeyId() {return fcmAccountKey.getString("private_key_id");}
+					public RSAPublicKey getPublicKeyById(String keyId) {return null;}
+					public RSAPrivateKey getPrivateKey() { return privateKey; }
+				});
+			    String token = JWT.create()
+			    		.withIssuer(fcmAccountKey.getString("client_email"))
+			    		.withAudience(fcmAccountKey.getString("token_uri"))
+			    		.withExpiresAt(new Date((new Date()).getTime() + 1800000))
+			    		.withClaim("scope", "https://www.googleapis.com/auth/cloud-platform")
+			    		.withClaim("iat", ((new Date()).getTime() / 1000))
+			    		.sign(algorithm);	
+			    DataMap form = new DataMap();
+			    form.put("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
+			    form.put("assertion", token);
+			    DataMap resp = gatewayClient.postForm(fcmAccountKey.getString("token_uri"), form, null, null);
+			    fcmAccessToken = resp.getString("access_token");
+			    fcmAccessTokenExpiry = now + (resp.getNumber("expires_in").longValue() * 1000);
+			} 
+		    return fcmAccessToken;
+		} catch(Exception e) {
+			throw new RedbackException("Error generating FCM token", e);
+		}
 	}
 
-	protected void sendFCMMessage(Session session, String username, String message) throws RedbackException {		// TODO Auto-generated method stub
-		
+	protected void sendFCMMessage(Session session, String username, String subject, String message) throws RedbackException {
+		if(gatewayClient != null && dataClient != null) {
+			try {
+				String accessToken = getFCMAccessToken();	
+				DataMap filter = new DataMap(collectionConfig.getField("_id"), username);
+				DataMap userResults = dataClient.getData(collectionConfig.getName(), filter, null);
+				String fcmToken = userResults.getList("result").size() > 0 ? userResults.getList("result").getObject(0).getString(collectionConfig.getField("fcmtoken")) : null;
+				if(fcmToken != null) {
+					DataMap fcmDataPart = new DataMap();
+					fcmDataPart.put("sound", "default");
+					DataMap fcmNotificationPart = new DataMap();
+					fcmNotificationPart.put("title", subject);
+					fcmNotificationPart.put("body", message);
+					DataMap fcmMessage = new DataMap();
+					fcmMessage.put("token", fcmToken);
+					fcmMessage.put("data", fcmDataPart);
+					fcmMessage.put("notification", fcmNotificationPart);
+					DataMap body = new DataMap("message", fcmMessage);
+					DataMap headers = new DataMap();
+					headers.put("Content-Type", "application/json");
+					headers.put("Authorization", "Bearer " + accessToken);
+					gatewayClient.post("https://fcm.googleapis.com/v1/projects/redback-1517221886624/messages:send", body, headers, null);
+				}
+			
+			} catch(Exception e) {
+				throw new RedbackException("Error sending FCM message", e);
+			}
+		} else {
+			throw new RedbackException("Gateway client or Data client not configured");
+		}
 	}
 
 }

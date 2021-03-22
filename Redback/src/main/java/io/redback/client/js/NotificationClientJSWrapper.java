@@ -20,7 +20,7 @@ public class NotificationClientJSWrapper implements ProxyObject {
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected NotificationClient notificationClient;
 	protected Session session;
-	protected String[] members = {"sendemail", "getemails"};
+	protected String[] members = {"sendemail", "getemails", "sendfcmmessage"};
 
 	public NotificationClientJSWrapper(NotificationClient nc, Session s)
 	{
@@ -64,6 +64,23 @@ public class NotificationClientJSWrapper implements ProxyObject {
 					catch(Exception e)
 					{
 						throw new RuntimeException("Error sending email", e);
+					}
+				}
+			};
+		} else if(key.equals("sendfcmmessage")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String username = arguments[0].asString();
+					String subject = arguments[1].asString();
+					String message = arguments[2].asString();
+					try
+					{
+						notificationClient.sendFCMMessage(session, username, subject, message);
+						return null;
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error sending fcm message", e);
 					}
 				}
 			};
