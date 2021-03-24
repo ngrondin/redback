@@ -22,8 +22,10 @@ public class HSection extends ReportContainerUnit {
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
 		ReportBox c = ReportBox.HContainer(true);
 		c.breakBefore = pagebreak;
-		for(ReportUnit unit: contentUnits) {
-			c.addChild(unit.produce(context));
+		if(show(context)) {
+			for(ReportUnit unit: contentUnits) {
+				c.addChild(unit.produce(context));
+			}
 		}
 		return c;		
 	}

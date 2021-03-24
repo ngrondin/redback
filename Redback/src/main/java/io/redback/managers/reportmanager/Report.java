@@ -96,7 +96,7 @@ public class Report {
 	
 	protected void renderReportBox(PDPage page, PDPageContentStream stream, ReportBox reportBox, float offsetx, float offsety) throws IOException {
 
-		float pageTop = 782;
+		float pageTop = 800;//782;
 		if(reportBox.type.equals("container")) {
 			if(reportBox.color != null) {
 				stream.setNonStrokingColor(reportBox.color);

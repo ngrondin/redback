@@ -58,12 +58,13 @@ public class RedbackObjectRemote {
 		if(attribute.indexOf(".") == -1) {
 			return data.get("data." + attribute);
 		} else {
-			String[] parts = attribute.split(".");
-			if(data.containsKey("related") && data.containsKey("related." + parts[0])) {				
+			String[] parts = attribute.split("\\.");
+			return data.get("related." + parts[0] + ".data." + parts[1]);
+			/*if(data.containsKey("related") && data.containsKey("related." + parts[0])) {				
 				return data.get("related." + parts[0] + ".data." + parts[1]);
 			} else {
 				return null;
-			}
+			}*/
 		}
 	}
 	

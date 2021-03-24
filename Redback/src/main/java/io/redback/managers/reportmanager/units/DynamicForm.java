@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,6 +45,9 @@ public class DynamicForm extends ReportDataUnit {
 	protected String catAttribute;
 	protected String labelAttribute;
 	protected String detailAttribute;
+	protected String dependencyAttribute;
+	protected String dependecyOperatorAttribute;
+	protected String dependecyValueAttribute;
 
 	public DynamicForm(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
@@ -58,6 +62,9 @@ public class DynamicForm extends ReportDataUnit {
 		catAttribute = config.getString("categoryattribute");
 		labelAttribute = config.getString("labelattribute");
 		detailAttribute = config.getString("detailattribute");
+		dependencyAttribute = config.getString("dependencyattribute");
+		dependecyOperatorAttribute = config.getString("dependencyoperatorattribute");
+		dependecyValueAttribute = config.getString("dependencyvalueattribute");
 	}
 
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
@@ -77,143 +84,169 @@ public class DynamicForm extends ReportDataUnit {
 					return 0;
 			}
 		});	
+		Map<String, RedbackObjectRemote> orderMap = new HashMap<String, RedbackObjectRemote>();
 
 		ReportBox container = ReportBox.VContainer(true);
-		String lastCat = "";
+		String lastCatOrder = "";
 		for(RedbackObjectRemote ror: rors) {
 			String cat = ror.getString(catAttribute);
+			String catOrder = ror.getString(catOrderAttribute);
+			String order = ror.getString(orderAttribute);
+			orderMap.put(order, ror);
 			if(cat == null) cat = "";
-			if(!cat.equals(lastCat)) {
+			if(catOrder == null) catOrder = "";
+			if(!catOrder.equals(lastCatOrder)) {
 				ReportBox catRb = ReportBox.VContainer(false);
 				catRb.color = Color.decode("#3f51b5");
 				if(width > -1)
 					catRb.width = width;
 				ReportBox catTextRb = ReportBox.Text(cat, font, fontSize);
+				catTextRb.height = 12;
 				catTextRb.color = Color.WHITE;
 				catRb.addChild(catTextRb);
 				catRb.height += 4;
 				catTextRb.x += 5;
 				container.addChild(catRb);
 				container.addChild(ReportBox.Empty(10, 5));
-				lastCat = cat;
+				lastCatOrder = catOrder;
 			}
-			ReportBox formItemRb = ReportBox.VContainer(false);
-			String type = ror.getString(typeAttribute);
-			String label = ror.getString(labelAttribute);
-			ReportBox labelAnswerRowRb = ReportBox.HContainer(false);
-			float labelWidth = 0;
-			if(label != null) {
-				ReportBox rb = ReportBox.Text(label, font, fontSize);
-				rb.color = Color.decode("#666666");
-				rb.fontSize = 11f;
-				labelWidth = rb.width;
-				labelAnswerRowRb.addChild(rb);
-			}
-			formItemRb.addChild(labelAnswerRowRb);
-			String detail = ror.getString(detailAttribute);
-			if(detail != null) {
-				ReportBox detailRb = ReportBox.Text(detail, font, fontSize - 4);
-				detailRb.color = Color.lightGray;
-				formItemRb.addChild(detailRb);
-			}
-			
-			if(type.equals("string") || type.equals("textarea")) {
-				String value = ror.getString(valueAttribute);
-				if(value != null) {
-					ReportBox row = ReportBox.HContainer(false);
-					ReportBox col = ReportBox.VContainer(false);
-					col.addChild(ReportBox.Empty(10, 3));
-					String[] lines = value.split("\\n");
-					for(int i = 0; i < lines.length; i++) {
-						String line = lines[i];
-						List<String> sublines = cutToLines(line, width > -1 ? width : 200);
-						for(String subline : sublines) {
-							col.addChild(ReportBox.Text(subline, font, fontSize));
-						}		
-						
-					}
-					col.addChild(ReportBox.Empty(10, 10));
-					row.addChild(col);
-					formItemRb.addChild(row);
-				}	
-				
-			} else if(type.equals("number")) {
-				Number value = ror.getNumber(valueAttribute);
-				if(value != null) {
-					String valueStr = value.toString();
-					ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
-					if(width > -1) {
-						labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
-					}
-					labelAnswerRowRb.addChild(rb);
-				}
-				
-			} else if(type.equals("date")) {
-				Date value = ror.getDate(valueAttribute);
-				if(value != null) {
-					DateFormat formatter = DateFormat.getDateTimeInstance();
-					String valueStr = formatter.format(value);
-					ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
-					if(width > -1) {
-						labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
-					}
-					labelAnswerRowRb.addChild(rb);
-				}
-				
-			} else if(type.equals("choice")) {
-				String value = ror.getString(valueAttribute);
-				if(value != null) {
-					String display = value;
-					if(ror.get(optionsAttribute) != null) {
-						DataList options = (DataList)ror.get(optionsAttribute);
-						for(int i = 0; i < options.size(); i++) {
-							DataMap option = options.getObject(i);
-							if(option.getString("value").equals(value)) {
-								display = option.getString("display");
+			boolean showItem = true;
+			String depOrder = dependencyAttribute != null ? ror.getString(dependencyAttribute) : null;
+			if(depOrder != null) {
+				showItem = false;
+				String depRorValue = ror.getString(dependencyAttribute + "." + valueAttribute);
+				if(depRorValue != null) {
+					String depOp = ror.getString(dependecyOperatorAttribute);
+					String depVal = ror.getString(dependecyValueAttribute);
+					if(depOp != null && depVal != null) {
+						if(depOp.equals("eq")) {
+							if(depVal.equals(depRorValue)) {
+								showItem = true;
 							}
-						}					
-					}
-					ReportBox rb = ReportBox.Text(display, font, fontSize);
-					if(width > -1) {
-						labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - rb.width, fontSize));
-					}
-					labelAnswerRowRb.addChild(rb);
-				}
-				
-			} else if(type.equals("checkbox")) {
-				boolean value = ror.getBool(valueAttribute);
-				ReportBox rb = ReportBox.Checkbox(value, 12, 12);
-				if(width > -1) {
-					labelAnswerRowRb.addChild(ReportBox.Empty(width - labelWidth - 12, 12));
-				}
-				labelAnswerRowRb.addChild(rb);
-
-			} else if(type.equals("files")) {
-				FileClient fc = reportManager.getFileClient();
-				List<RedbackFile> files = fc.listFilesFor(session, "formitem", ror.getUid());
-				for(RedbackFile file: files) {
-					ReportBox rb = reportBoxFromFile(file, 300);
-					if(rb != null) {
-						formItemRb.addChild(ReportBox.Empty(5, 5));
-						formItemRb.addChild(rb);
-						formItemRb.canBreak = true;
-					}
-				}
-				
-			} else if(type.equals("signature")) {
-				DataEntity de = ror.get(valueAttribute);
-				if(de != null && de instanceof DataMap) {
-					FileClient fc = reportManager.getFileClient();
-					RedbackFile file = fc.getFile(session, ((DataMap)de).getString("fileuid"));
-					ReportBox rb = reportBoxFromFile(file, 50);
-					if(rb != null) {
-						formItemRb.addChild(ReportBox.Empty(5, 5));
-						formItemRb.addChild(rb);
+						}
 					}
 				}
 			}
-			formItemRb.height += 12;
-			container.addChild(formItemRb);
+			if(showItem) {
+				ReportBox formItemRb = ReportBox.VContainer(false);
+				String type = ror.getString(typeAttribute);
+				String label = ror.getString(labelAttribute);
+				ReportBox labelAnswerRowRb = ReportBox.HContainer(false);
+				float marginWidth = 10;
+				labelAnswerRowRb.addChild(ReportBox.Empty(marginWidth, 5));
+				float labelWidth = 0;
+				if(label != null) {
+					ReportBox rb = ReportBox.Text(label, font, fontSize);
+					rb.color = Color.decode("#666666");
+					rb.fontSize = 11f;
+					labelWidth = rb.width;
+					labelAnswerRowRb.addChild(rb);
+					labelAnswerRowRb.addChild(ReportBox.Empty(20, 5));
+				}
+				float answerMaxWidth = width > -1 ? width - labelWidth - (2 * marginWidth) - 20 : -1;
+				
+				if(type.equals("string")) {
+					String value = ror.getString(valueAttribute);
+					if(value != null) {
+						String valueStr = value.toString();
+						ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
+					}
+					
+				} else if(type.equals("textarea")) {
+					String value = ror.getString(valueAttribute);
+					if(value != null) {
+						ReportBox col = ReportBox.VContainer(false);
+						String[] lines = value.split("\\n");
+						for(int i = 0; i < lines.length; i++) {
+							String line = lines[i];
+							List<String> sublines = cutToLines(line, answerMaxWidth > -1 ? answerMaxWidth : 200);
+							for(String subline : sublines) {
+								col.addChild(ReportBox.Text(subline, font, fontSize));
+							}		
+							
+						}
+						addChildAlignedLeft(labelAnswerRowRb, col, answerMaxWidth);
+					}
+					
+				} else if(type.equals("number")) {
+					Number value = ror.getNumber(valueAttribute);
+					if(value != null) {
+						String valueStr = value.toString();
+						if(Math.floor(value.doubleValue()) == value.doubleValue()) {
+							valueStr = "" + value.intValue();
+						}
+						ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
+					}
+					
+				} else if(type.equals("date")) {
+					Date value = ror.getDate(valueAttribute);
+					if(value != null) {
+						DateFormat formatter = DateFormat.getDateTimeInstance();
+						String valueStr = formatter.format(value);
+						ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
+					}
+					
+				} else if(type.equals("choice")) {
+					String value = ror.getString(valueAttribute);
+					if(value != null) {
+						String display = value;
+						if(ror.get(optionsAttribute) != null) {
+							DataList options = (DataList)ror.get(optionsAttribute);
+							for(int i = 0; i < options.size(); i++) {
+								DataMap option = options.getObject(i);
+								if(option.getString("value").equals(value)) {
+									display = option.getString("display");
+								}
+							}					
+						}
+						ReportBox rb = ReportBox.Text(display, font, fontSize);
+						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
+					}
+					
+				} else if(type.equals("checkbox")) {
+					boolean value = ror.getBool(valueAttribute);
+					ReportBox rb = ReportBox.Checkbox(value, 12, 12);
+					addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
+
+				} else if(type.equals("signature")) {
+					DataEntity de = ror.get(valueAttribute);
+					if(de != null && de instanceof DataMap) {
+						FileClient fc = reportManager.getFileClient();
+						RedbackFile file = fc.getFile(session, ((DataMap)de).getString("fileuid"));
+						ReportBox rb = reportBoxFromFile(file, 50);
+						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
+					}
+
+				}
+				formItemRb.addChild(labelAnswerRowRb);
+				String detail = ror.getString(detailAttribute);
+				if(detail != null) {
+					ReportBox detailRb = ReportBox.Text(detail, font, fontSize - 4);
+					detailRb.color = Color.lightGray;
+					formItemRb.addChild(detailRb);
+				}
+				if(type.equals("files")) {
+					FileClient fc = reportManager.getFileClient();
+					List<RedbackFile> files = fc.listFilesFor(session, "formitem", ror.getUid());
+					for(RedbackFile file: files) {
+						ReportBox rb = reportBoxFromFile(file, 250);
+						if(rb != null) {
+							float margin = width > -1 ? (width - rb.width) / 2f : 0;
+							ReportBox row = ReportBox.HContainer(false);
+							row.addChild(ReportBox.Empty(margin, 5));
+							row.addChild(rb);
+							formItemRb.addChild(row);
+						}
+					}
+					formItemRb.canBreak = true;
+				}				
+				formItemRb.height += 12;
+				container.addChild(formItemRb);				
+			}
+
 		}
 		return container;	
 	}
@@ -228,6 +261,17 @@ public class DynamicForm extends ReportDataUnit {
 			throw new RedbackException("Error getting ReportBox image", e);
 		}
 		return ret;	
+	}
+	
+	protected void addChildAlignedLeft(ReportBox hcontainer, ReportBox child, float maxRemainingWidth) {
+		if(maxRemainingWidth > -1) {
+			float space = Math.max(0, maxRemainingWidth - child.width);
+			hcontainer.addChild(ReportBox.Empty(space, 5));
+		}
+		if(child.width > maxRemainingWidth) {
+			child.width = maxRemainingWidth;
+		}
+		hcontainer.addChild(child);
 	}
 
 }
