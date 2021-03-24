@@ -2,11 +2,9 @@ package io.redback.managers.reportmanager;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.pdfbox.pdmodel.font.PDFont;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -66,11 +64,11 @@ public abstract class ReportUnit {
 			newUnit = new Image(rm, rc, c);		
 		return newUnit;
 	}
-	
+	/*
 	protected float getStringWidth(String text, PDFont pdfFont, float fontSize) throws IOException {
 		return pdfFont.getStringWidth(text) / 1000f * fontSize;
 	}
-	
+	*/
 	
 	protected Color getColor(String c) {
 		try {
@@ -84,37 +82,7 @@ public abstract class ReportUnit {
 		}
 	}
 	
-	protected List<String> cutToLines(String text, PDFont pdfFont, float fontSize, float width) throws IOException {
-		List<String> lines = new ArrayList<String>();
-	    int lastSpace = -1;
-	    while (text.length() > 0)
-	    {
-	        int spaceIndex = text.indexOf(' ', lastSpace + 1);
-	        if (spaceIndex < 0)
-	            spaceIndex = text.length();
-	        String subString = text.substring(0, spaceIndex);
-	        float size = getStringWidth(subString, pdfFont, fontSize);
-	        if (size > width)
-	        {
-	            if (lastSpace < 0)
-	                lastSpace = spaceIndex;
-	            subString = text.substring(0, lastSpace);
-	            lines.add(subString);
-	            text = text.substring(lastSpace).trim();
-	            lastSpace = -1;
-	        }
-	        else if (spaceIndex == text.length())
-	        {
-	            lines.add(text);
-	            text = "";
-	        }
-	        else
-	        {
-	            lastSpace = spaceIndex;
-	        }
-	    }
-	    return lines;
-	}
+
 	
 	public abstract ReportBox produce(Map<String, Object> context) throws IOException, RedbackException;
 }

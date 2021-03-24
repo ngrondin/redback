@@ -32,6 +32,10 @@ public class RedbackReportServer extends ReportServer {
 		return reportManager.list(session, category);
 	}
 
+	protected void clearDomainCache(Session session, String domain, String name) throws RedbackException {
+		reportManager.clearDomainCache(session, domain, name);
+	}
+	
 	public void clearCaches() {
 		reportManager.clearCaches();
 	}

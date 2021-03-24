@@ -19,7 +19,7 @@ public class ReportClientJSWrapper implements ProxyObject {
 	protected ReportClient reportClient;
 	protected Session session;
 	protected String domainLock;
-	protected String[] members = {"produce", "produceAndStore"};
+	protected String[] members = {"produce", "produceAndStore", "clearDomainCache"};
 
 	public ReportClientJSWrapper(ReportClient rc, Session s)
 	{
@@ -70,6 +70,24 @@ public class ReportClientJSWrapper implements ProxyObject {
 					catch(Exception e)
 					{
 						throw new RuntimeException("Error producting report", e);
+					}
+				}
+			};
+		} else if(key.equals("clearDomainCache")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String domain = arguments.length == 2 ? arguments[0].asString() : null; 
+					String name = arguments.length == 2 ? arguments[1].asString() : arguments[0].asString();
+					if(domainLock != null && domain != null)
+						domain = domainLock;
+					try
+					{
+						reportClient.clearDomainCache(session, domain, name);
+						return null;
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error clearing domain cache", e);
 					}
 				}
 			};

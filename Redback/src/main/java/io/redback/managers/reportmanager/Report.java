@@ -109,7 +109,7 @@ public class Report {
 		} else if(reportBox.type.equals("hline")) {
 			stream.setLineWidth(0.3f);
 			stream.setStrokingColor(Color.BLACK);
-			float y = pageTop - offsety - reportBox.height - 4;
+			float y = pageTop - offsety - (reportBox.height / 2);// - 4;
 			stream.moveTo(offsetx, y);//(reportBox.height / 2) + 2);
 			stream.lineTo(offsetx + reportBox.width, y);//(reportBox.height / 2) + 2);
 			stream.stroke();

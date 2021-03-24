@@ -165,4 +165,9 @@ public class ReportManager {
 		domainConfigs.clear();
 		listsQueried.clear();
 	}
+	
+	public void clearDomainCache(Session session, String domain, String name) throws RedbackException {
+		if(domainConfigs.get(domain) != null)
+			domainConfigs.get(domain).remove(name);
+	}
 }

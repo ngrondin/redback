@@ -55,6 +55,8 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 				for(ReportInfo ri: reports)
 					result.add(ri.toDataMap());
 				response = new Payload(new DataMap("result", result).toString());
+			} else if(action.equals("cleardomaincache")) {
+				this.clearDomainCache(session, domain, reportName);
 			} else {
 				throw new RedbackException("No valid action was provided");
 			}			
@@ -82,4 +84,6 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 	protected abstract String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException;
 	
 	protected abstract List<ReportInfo> list(Session session, String category) throws RedbackException;
+	
+	protected abstract void clearDomainCache(Session session, String domain, String name) throws RedbackException;
 }

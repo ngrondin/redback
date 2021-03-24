@@ -71,4 +71,16 @@ public class ReportClient extends Client {
 		}		
 	}
 
+	public void clearDomainCache(Session session, String domain, String name) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "cleardomaincache");
+			if(domain != null)
+				req.put("domain", domain);
+			req.put("report", name);
+			requestPayload(session, new Payload(req.toString()));
+		} catch(Exception e) {
+			throw new RedbackException("Error clearing domain cache", e);
+		}		
+	}
 }

@@ -81,7 +81,7 @@ public class ReportBox {
 		try {
 			rb.width = font.getStringWidth(text) / 1000f * fontSize;
 		} catch(Exception e) {}
-		rb.height = fontSize;
+		rb.height = 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize;;
 		rb.color = Color.DARK_GRAY;
 		return rb;
 	}

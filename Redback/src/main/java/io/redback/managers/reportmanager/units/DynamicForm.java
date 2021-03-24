@@ -25,15 +25,16 @@ import io.redback.client.FileClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.managers.reportmanager.ReportBox;
 import io.redback.managers.reportmanager.ReportConfig;
+import io.redback.managers.reportmanager.ReportDataUnit;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.managers.reportmanager.ReportUnit;
 import io.redback.security.Session;
 import io.redback.utils.ImageUtils;
 import io.redback.utils.RedbackFile;
 
-public class DynamicForm extends ReportUnit {
-	protected PDFont font;
-	protected float fontSize;
+public class DynamicForm extends ReportDataUnit {
+	//protected PDFont font;
+	//protected float fontSize;
 	protected float width;
 	protected String orderAttribute;
 	protected String valueAttribute;
@@ -46,8 +47,8 @@ public class DynamicForm extends ReportUnit {
 
 	public DynamicForm(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		font = PDType1Font.HELVETICA;
-		fontSize = 12f;
+		//font = PDType1Font.HELVETICA;
+		//fontSize = 12f;
 		width = c.containsKey("width") ? c.getNumber("width").floatValue() : -1;
 		orderAttribute = config.getString("orderattribute");
 		valueAttribute = config.getString("valueattribute");
@@ -125,7 +126,7 @@ public class DynamicForm extends ReportUnit {
 					String[] lines = value.split("\\n");
 					for(int i = 0; i < lines.length; i++) {
 						String line = lines[i];
-						List<String> sublines = cutToLines(line, font, fontSize, width > -1 ? width : 200);
+						List<String> sublines = cutToLines(line, width > -1 ? width : 200);
 						for(String subline : sublines) {
 							col.addChild(ReportBox.Text(subline, font, fontSize));
 						}		

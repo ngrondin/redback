@@ -22,7 +22,7 @@ public class HLine extends ReportUnit {
 	}
 
 	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
-		ReportBox rb = ReportBox.HLine(width, 1);
+		ReportBox rb = ReportBox.HLine(width, 10);
 		rb.color = color;
 		return rb;
 	}

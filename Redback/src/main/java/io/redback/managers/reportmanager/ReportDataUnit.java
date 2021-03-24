@@ -4,9 +4,11 @@ import java.awt.Color;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -36,7 +38,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 		width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
 		font = PDType1Font.HELVETICA;
 		fontSize = config.containsKey("fontsize") ? config.getNumber("fontsize").floatValue() : 12f;
-		height = 20f;
+		height = config.containsKey("height") ? config.getNumber("height").floatValue() : 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize;
 		color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
 		format = config.getString("format");
 		commaToLine = config.containsKey("commatoline") ? config.getBoolean("commatoline") : false;
@@ -45,6 +47,41 @@ public abstract class ReportDataUnit extends ReportUnit {
 
 	public abstract ReportBox produce(Map<String, Object> context) throws IOException, RedbackException;
 	
+	protected float getStringWidth(String text) throws IOException {
+		return font.getStringWidth(text) / 1000f * fontSize;
+	}
+	
+	protected List<String> cutToLines(String text, float width) throws IOException {
+		List<String> lines = new ArrayList<String>();
+	    int lastSpace = -1;
+	    while (text.length() > 0)
+	    {
+	        int spaceIndex = text.indexOf(' ', lastSpace + 1);
+	        if (spaceIndex < 0)
+	            spaceIndex = text.length();
+	        String subString = text.substring(0, spaceIndex);
+	        float size = getStringWidth(subString);
+	        if (size > width)
+	        {
+	            if (lastSpace < 0)
+	                lastSpace = spaceIndex;
+	            subString = text.substring(0, lastSpace);
+	            lines.add(subString);
+	            text = text.substring(lastSpace).trim();
+	            lastSpace = -1;
+	        }
+	        else if (spaceIndex == text.length())
+	        {
+	            lines.add(text);
+	            text = "";
+	        }
+	        else
+	        {
+	            lastSpace = spaceIndex;
+	        }
+	    }
+	    return lines;
+	}
 	
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
 		Map<String, Object> jsContext = new HashMap<String, Object>();
