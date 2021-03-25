@@ -1,18 +1,38 @@
+.rb-reportlist-container {
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+    min-height: 150px;
+}
+
 .rb-reportlist-list {
     display: flex;
     flex-direction: column;
+    padding: 16px 24px 10px 5px;
+    color: #444444;
 }
 
 .rb-reportlist-report {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding-bottom: 20px;
+    padding: 10px 0px 10px 0px;
 }
 
-.rb-reportlist-name {
-    display: flex;
-    width: 400px;
-    padding-left: 20px;
+.mat-button {
+    font-size: 18px!important;
+}
+
+.rb-reportlist-icon {
+    color: #888888;
     
+}
+
+.rb-reportlist-spinner-conntainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    flex: 1 1 auto;
+    justify-content: center;
 }

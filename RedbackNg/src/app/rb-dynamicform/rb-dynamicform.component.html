@@ -27,6 +27,42 @@
         </div>
         <div
             class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'address'">
+            <rb-string-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [grow]="1"
+                [icon]="'location_on'"
+                [label]="object.get(labelattribute)"
+                [editable]="isEditable">
+            </rb-string-input>
+        </div>
+        <div
+            class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'phone'">
+            <rb-string-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [grow]="1"
+                [icon]="'call'"
+                [label]="object.get(labelattribute)"
+                [editable]="isEditable">
+            </rb-string-input>
+        </div>  
+        <div
+            class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'email'">
+            <rb-string-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [grow]="1"
+                [icon]="'email'"
+                [label]="object.get(labelattribute)"
+                [editable]="isEditable">
+            </rb-string-input>
+        </div>                       
+        <div
+            class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'textarea'">
             <rb-textarea-input
                 [object]="object"
@@ -46,7 +82,7 @@
                 [attribute]="valueattribute"
                 [choicelist]="object.get(optionsattribute)"
                 [size]="20"
-                [icon]="'description'"
+                [icon]="'list'"
                 [label]="object.get(labelattribute)"
                 [editable]="isEditable"
                 (change)="calcSortedVisibleList()">

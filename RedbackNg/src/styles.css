@@ -263,6 +263,10 @@ rb-fileset {
 	flex: 1 1 auto;
 }
 
+.mat-dialog-container {
+	padding: 8px!important;
+}
+
 .mat-drawer-inner-container {
     overflow: hidden!important;
 }

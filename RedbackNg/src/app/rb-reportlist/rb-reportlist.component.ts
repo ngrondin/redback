@@ -10,6 +10,7 @@ import { ReportService } from 'app/services/report.service';
 })
 export class RbReportlistComponent implements OnInit {
   reports: any = [];
+  isLoading: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -21,7 +22,9 @@ export class RbReportlistComponent implements OnInit {
   ngOnInit(): void {
     this.apiService.listReports(this.data.category).subscribe((json) => {
       this.reports = json.result;
+      this.isLoading = false;
     });
+    this.isLoading = true;
   }
 
   public launch(report: any) {

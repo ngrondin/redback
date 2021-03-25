@@ -145,7 +145,7 @@ public class DynamicForm extends ReportDataUnit {
 				}
 				float answerMaxWidth = width > -1 ? width - labelWidth - (2 * marginWidth) - 20 : -1;
 				
-				if(type.equals("string")) {
+				if(type.equals("string") || type.equals("address") || type.equals("phone") || type.equals("email")) {
 					String value = ror.getString(valueAttribute);
 					if(value != null) {
 						String valueStr = value.toString();

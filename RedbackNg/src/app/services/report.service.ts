@@ -21,7 +21,6 @@ export class ReportService {
 
   public popupReportList(category: String, selectedFilter: any, allFilter: any) {
     let dialogRef = this.dialog.open(RbReportlistComponent, {
-      width: '600px',
       data: {
         category: category,
         selectedFilter: selectedFilter,

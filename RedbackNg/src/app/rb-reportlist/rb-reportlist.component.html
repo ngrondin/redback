@@ -1,16 +1,31 @@
 <div
-    class="rb-reportlist-list">
-    <div
-        class="rb-reportlist-report"
-        *ngFor="let report of reports">
-        <button
-            mat-button
-            (click)="launch(report)">
-            <mat-icon>launch</mat-icon>
-        </button>
-        <div
-            class="rb-reportlist-name">
-            {{report.description || report.name}}
-        </div>
-    </div>
+    class="rb-reportlist-container">
+    <rb-tab-section
+        #rlts>
+        <rb-tab
+            [tabsection]="rlts"
+            [label]="'Reports'"
+            [isdefault]="true">
+            <div
+                class="rb-reportlist-list">
+                <div
+                    class="rb-reportlist-report"
+                    *ngFor="let report of reports">
+                    <button
+                        mat-button
+                        (click)="launch(report)">
+                        <mat-icon class="rb-reportlist-icon">insert_drive_file</mat-icon>
+                        {{report.description || report.name}}                     
+                    </button>
+                </div>            
+            </div>
+            <div
+                class="rb-reportlist-spinner-conntainer"
+                *ngIf="isLoading">
+                <mat-spinner
+                    diameter="20">
+                </mat-spinner>
+            </div>	
+        </rb-tab>
+    </rb-tab-section>
 </div>
