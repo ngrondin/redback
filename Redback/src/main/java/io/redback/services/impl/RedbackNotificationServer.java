@@ -99,10 +99,10 @@ public class RedbackNotificationServer extends NotificationServer {
 						sleep(2000);
 					Properties prop = System.getProperties();
 			        prop.put("mail.smtp.host", smtpServer); 
-			        prop.put("mail.smtp.socketFactory.port", "465");
+			        prop.put("mail.smtp.socketFactory.port", "587");
 			        prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");		        
 			        prop.put("mail.smtp.auth", "true");
-			        prop.put("mail.smtp.port", "465"); 
+			        prop.put("mail.smtp.port", "587"); 
 			        prop.put("mail.transport.protocol", "smtp");
 			
 			        javax.mail.Session mailSession = javax.mail.Session.getInstance(prop, new javax.mail.Authenticator() {
