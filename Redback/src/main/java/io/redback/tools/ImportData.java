@@ -113,9 +113,11 @@ public class ImportData extends Thread
 								try
 								{
 									DataMap fbReqmap = new DataMap();
+									DataMap filter = (DataMap)data.getCopy(); 
+									filter.put("domain", domain);
 									fbReqmap.put("action", "list");
 									fbReqmap.put("object", objectname);
-									fbReqmap.put("filter", data);
+									fbReqmap.put("filter", filter);
 									Payload request = new Payload(fbReqmap.toString());
 									request.metadata.put("token", token);
 									Payload response = firebus.requestService(objectService, request);
