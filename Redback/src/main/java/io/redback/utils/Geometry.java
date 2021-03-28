@@ -10,11 +10,19 @@ public class Geometry {
 	}
 	
 	public double getLatitude() {
-		return config.getNumber("coords.latitude").doubleValue();
+		Number num = config.getNumber("coords.latitude");
+		if(num != null)
+			return num.doubleValue();
+		else
+			return 0;
 	}
 	
 	public double getLongitude() {
-		return config.getNumber("coords.longitude").doubleValue();
+		Number num = config.getNumber("coords.longitude");
+		if(num != null)
+			return num.doubleValue();
+		else
+			return 0;
 	}
 	
 	public DataMap toDataMap() {

@@ -143,31 +143,35 @@ public class RedbackGeoServer extends GeoServer
 	protected GeoRoute travel(Geometry start, Geometry end) throws RedbackException 
 	{
 		GeoRoute route = null;	
-		try
-		{
-			DataMap request = new DataMap();
-			request.put("method", "get");
-			request.put("url", distanceUrl + "?origins=" + start.getLatitude() + "," + start.getLongitude() + "&destinations=" + end.getLatitude() + "," + end.getLongitude() + "&key=" + apiKey);
-			DataMap resp = requestService(request);
-			DataList rows = resp.getList("rows");
-			if(rows.size() > 0) {
-				DataList elements = ((DataMap)rows.get(0)).getList("elements");
-				if(elements.size() > 0) {
-					DataMap element = (DataMap)elements.get(0);
-					if(element.getString("status").equals("OK")) {
-						DataMap rc = new DataMap();
-						rc.put("start", start.toDataMap());
-						rc.put("end", end.toDataMap());
-						rc.put("distance", element.getNumber("distance.value").longValue());
-						rc.put("duration", 1000 * element.getNumber("duration.value").longValue());
-						route = new GeoRoute(rc);						
+		if(start != null && end != null) {
+			try
+			{
+				DataMap request = new DataMap();
+				request.put("method", "get");
+				request.put("url", distanceUrl + "?origins=" + start.getLatitude() + "," + start.getLongitude() + "&destinations=" + end.getLatitude() + "," + end.getLongitude() + "&key=" + apiKey);
+				DataMap resp = requestService(request);
+				DataList rows = resp.getList("rows");
+				if(rows.size() > 0) {
+					DataList elements = ((DataMap)rows.get(0)).getList("elements");
+					if(elements.size() > 0) {
+						DataMap element = (DataMap)elements.get(0);
+						if(element.getString("status").equals("OK")) {
+							DataMap rc = new DataMap();
+							rc.put("start", start.toDataMap());
+							rc.put("end", end.toDataMap());
+							rc.put("distance", element.getNumber("distance.value").longValue());
+							rc.put("duration", 1000 * element.getNumber("duration.value").longValue());
+							route = new GeoRoute(rc);						
+						}
 					}
 				}
 			}
-		}
-		catch(Exception e)
-		{
-			throw new RedbackException("Error getting distance and time", e);
+			catch(Exception e)
+			{
+				throw new RedbackException("Error getting distance and time", e);
+			}
+		} else {
+			throw new RedbackException("Error getting distance; start or end cannot be null");
 		}
 		return route;
 	}

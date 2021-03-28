@@ -45,7 +45,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 						ProcessInstance pi = processManager.initiateProcess(actionner, name, domain, data);
 						return new ProcessInstanceJSWrapper(pi);
 					} catch (Exception e) {
-						throw new RuntimeException("Errror in initiateProcess", e);
+						throw new RuntimeException("Error in initiateProcess", e);
 					}
 				}
 			};
@@ -60,7 +60,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 						List<Assignment> list = processManager.getAssignments(actionner, filter, viewData);
 						return JSConverter.toJS(list);
 					} catch (Exception e) {
-						throw new RuntimeException("Errror in getNotifications", e);
+						throw new RuntimeException("Error in getNotifications", e);
 					}
 				}
 			};
@@ -76,7 +76,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 						processManager.actionProcess(actionner, pid, event, data);
 						return null;
 					} catch (Exception e) {
-						throw new RuntimeException("Errror in processAction", e);
+						throw new RuntimeException("Error in processAction", e);
 					}
 				}
 			};
@@ -90,7 +90,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 						processManager.interruptProcess(actionner, pid);
 						return null;
 					} catch (Exception e) {
-						throw new RuntimeException("Errror in processAction", e);
+						throw new RuntimeException("Error in processAction", e);
 					}
 				}
 			};
@@ -104,7 +104,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 						ArrayList<ProcessInstance> list = processManager.findProcesses(actionner, filter);
 						return JSConverter.toJS(list);
 					} catch (Exception e) {
-						throw new RuntimeException("Errror in findProcesses", e);
+						throw new RuntimeException("Error in findProcesses", e);
 					}
 				}
 			};
