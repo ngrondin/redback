@@ -1,7 +1,7 @@
 <div
     class="rb-switch-container">
     <div
-        class="rb-switch-label">
+        [class]="'rb-switch-label' + (mandatoryalert ? ' rb-switch-label-mandatory' : '') ">
         {{label}}
     </div>
     <mat-slide-toggle

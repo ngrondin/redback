@@ -20,6 +20,8 @@
     text-align: end;
     vertical-align: top;
     padding: 25px 25px 5px 25px;
+    /*width: 1px;
+    white-space: nowrap;*/
 }
 
 .rb-fb-maincol {
@@ -27,6 +29,11 @@
     display: flex;
     flex-direction: row;
     padding: 5px;
+}
+
+.rb-fb-buttoncol {
+    /*width: 66px;
+    white-space: nowrap;*/
 }
 
 .rb-filter-builder-label {

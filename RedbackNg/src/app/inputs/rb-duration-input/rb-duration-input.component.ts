@@ -18,8 +18,8 @@ export class RbDurationInputComponent extends RbFieldInputComponent implements O
     if(this.isEditing) {
       ret = this.editedValue;
     } else {
-      if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
-        let ms = this.rbObject.data[this.attribute];
+      if(this.value != null) {
+        let ms = this.value;
         let years = Math.floor(ms / 31536000000);
         let weeks = Math.floor((ms % 31536000000) / 604800000);
         let days = Math.floor((ms % 604800000) / 86400000);

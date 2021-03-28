@@ -17,3 +17,7 @@
     flex-grow: 1;
     margin-right: var(--v8px);
 }
+
+.rb-switch-label-mandatory {
+    color: red;
+}

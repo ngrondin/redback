@@ -15,6 +15,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('size') size: number;
   @Input('grow') grow: number;
   @Input('editable') editable: boolean = true;
+  @Input('mandatory') mandatory: boolean = false;
   @Output('valueChange') valueChange = new EventEmitter();
   
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
@@ -98,6 +99,28 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
       }
     } else {
       return !this.editable;
+    }
+  }
+
+  public get mandatoryalert(): boolean {
+    if(this.value == null) {
+      if(this.attribute != null) {
+        if(this.rbObject != null) {
+          if(this.attribute == 'uid') {
+            return true;
+          } else if(this.rbObject.validation[this.attribute] != null) {
+            return this.mandatory || this.rbObject.validation[this.attribute].mandatory;
+          } else {
+            return false;      
+          }
+        } else {
+          return false;
+        }
+      } else {
+        return this.mandatory;
+      }    
+    } else {
+      return false;
     }
   }
 

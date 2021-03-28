@@ -6,164 +6,174 @@
             [tabsection]="fbts"
             [label]="'Filter'"
             [isdefault]="true">
-            <table>
-                <tr>
-                    <td
-                        class="rb-fb-labelcol">
-                        Add filter for : 
-                    </td>
-                    <td>
-                        <rb-choice-input
-                            [choicelist]="filterConfig.attributes"
-                            [label]="'Attributes'"
-                            [icon]="'search'"
-                            [margin]="false"
-                            [size]="12"
-                            [(value)]="attributeToAddToFilter">
-                        </rb-choice-input>
-                    </td>
-                </tr>
-                <tr
-                    *ngFor="let filterConstruct of filterConstructs">
-                    <td
-                        class="rb-fb-labelcol">
-                        <span
-                            class="rb-filter-builder-label">
-                            {{filterConstruct.config.label}} : 
-                        </span>
-                    </td>
-                    <td
-                        class="rb-fb-maincol">
+            <rb-vsection>
+                <rb-hsection
+                    style="flex-grow:0">
+                    <table>
+                        <tr>
+                            <td
+                                class="rb-fb-labelcol">
+                                Add filter for : 
+                            </td>
+                            <td>
+                                <rb-choice-input
+                                    [choicelist]="filterConfig.attributes"
+                                    [label]="'Attributes'"
+                                    [icon]="'search'"
+                                    [margin]="false"
+                                    [size]="12"
+                                    [(value)]="attributeToAddToFilter">
+                                </rb-choice-input>
+                            </td>
+                        </tr>
+                        <tr
+                            *ngFor="let filterConstruct of filterConstructs">
+                            <td
+                                class="rb-fb-labelcol">
+                                <span
+                                    class="rb-filter-builder-label">
+                                    {{filterConstruct.config.label}} : 
+                                </span>
+                            </td>
+                            <td
+                                class="rb-fb-maincol">
 
-                        <rb-string-input
-                            *ngIf="filterConstruct.config.type == 'string'"
-                            [label]="null"
-                            [size]="15"
-                            [margin]="false"
-                            [(value)]="filterConstruct.val1">
-                        </rb-string-input>
+                                <rb-string-input
+                                    *ngIf="filterConstruct.config.type == 'string'"
+                                    [label]="null"
+                                    [size]="15"
+                                    [margin]="false"
+                                    [(value)]="filterConstruct.val1">
+                                </rb-string-input>
 
-                        <rb-choice-input
-                            *ngIf="filterConstruct.config.type == 'date'"
-                            [choicelist]="datechoice"
-                            [label]="null"
-                            [icon]="'date_range'"
-                            [size]="12"
-                            [margin]="false"
-                            [(value)]="filterConstruct.val1">
-                        </rb-choice-input>
+                                <rb-choice-input
+                                    *ngIf="filterConstruct.config.type == 'date'"
+                                    [choicelist]="datechoice"
+                                    [label]="null"
+                                    [icon]="'date_range'"
+                                    [size]="12"
+                                    [margin]="false"
+                                    [(value)]="filterConstruct.val1">
+                                </rb-choice-input>
 
-                        <rb-datetime-input
-                            *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'since' || filterConstruct.val1 == 'between')"
-                            [margin]="false"
-                            [(value)]=filterConstruct.val2>
-                        </rb-datetime-input>  
+                                <rb-datetime-input
+                                    *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'since' || filterConstruct.val1 == 'between')"
+                                    [margin]="false"
+                                    [(value)]=filterConstruct.val2>
+                                </rb-datetime-input>  
 
-                        <rb-datetime-input
-                            *ngIf="filterConstruct.config.type == 'date' &&  filterConstruct.val1 == 'between'"
-                            [margin]="false"
-                            [(value)]=filterConstruct.val3>
-                        </rb-datetime-input>  
+                                <rb-datetime-input
+                                    *ngIf="filterConstruct.config.type == 'date' &&  filterConstruct.val1 == 'between'"
+                                    [margin]="false"
+                                    [(value)]=filterConstruct.val3>
+                                </rb-datetime-input>  
 
-                        <table
-                            *ngIf="filterConstruct.config.type == 'multiselect'"
-                            class="rb-filter-builder-multiselect-table">
-                            <tr
-                                *ngFor="let option of filterConstruct.config.options">
-                                <td
-                                    class="rb-filter-builder-multiselect-tablecell">
-                                    {{option.name}}
-                                </td>
-                                <td
-                                    class="rb-filter-builder-multiselect-tablecell"
-                                    style="font-size: 0.8rem;">
-                                    {{option.count}}
-                                </td>
-                                <td
-                                    class="rb-filter-builder-multiselect-tablecell">    
-                                    <rb-switch-input
-                                        [margin]="false"
-                                        [value]="filterConstruct.val1.includes(option.value)"
-                                        (valueChange)="$event == true ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexof(option.value))">
-                                    </rb-switch-input>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                    <td>
-                        <button
-                            mat-button
-                            class="mat-mini mat-primary" 
-                            (click)="removeFilterItem(filterConstruct)">
-                            <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
-                        </button>
-            
-                    </td>
-                </tr>
-            </table>               
+                                <table
+                                    *ngIf="filterConstruct.config.type == 'multiselect'"
+                                    class="rb-filter-builder-multiselect-table">
+                                    <tr
+                                        *ngFor="let option of filterConstruct.config.options">
+                                        <td
+                                            class="rb-filter-builder-multiselect-tablecell">
+                                            {{option.name}}
+                                        </td>
+                                        <td
+                                            class="rb-filter-builder-multiselect-tablecell"
+                                            style="font-size: 0.8rem;">
+                                            {{option.count}}
+                                        </td>
+                                        <td
+                                            class="rb-filter-builder-multiselect-tablecell">    
+                                            <rb-switch-input
+                                                [margin]="false"
+                                                [value]="filterConstruct.val1.includes(option.value)"
+                                                (valueChange)="$event == true ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexof(option.value))">
+                                            </rb-switch-input>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td
+                                class="rb-fb-buttoncol">
+                                <button
+                                    mat-button
+                                    class="mat-mini mat-primary" 
+                                    (click)="removeFilterItem(filterConstruct)">
+                                    <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
+                                </button>
+                    
+                            </td>
+                        </tr>
+                    </table>  
+                </rb-hsection>    
+            </rb-vsection>
         </rb-tab>
         <rb-tab
             *ngIf="sortConfig != null"
             [tabsection]="fbts"
             [label]="'Sort'"
             [isdefault]="false">
-            <table>
-                <tr>
-                    <td
-                        class="rb-fb-labelcol">
-                        Sort on : 
-                    </td>
-                    <td
-                        colspan="2">
-                        <rb-choice-input
-                            [choicelist]="sortConfig.attributes"
-                            [label]="'Attributes'"
-                            [icon]="'sort'"
-                            [margin]="false"
-                            [size]="12"
-                            [(value)]="attributeToAddToSort">
-                        </rb-choice-input>
-                    </td>
-                </tr>
-                <tr
-                    *ngFor="let sortConstruct of sortConstructs">
-                    <td
-                        class="rb-fb-labelcol">
-                        <span
-                            class="rb-filter-builder-label">
-                            {{sortConstruct.config.label}} : 
-                        </span>
-                    </td>
-                    <td
-                        class="rb-fb-maincol">
-                        <button
-                            mat-button
-                            class="mat-mini mat-primary rb-button" 
-                            (click)="toggleDir(sortConstruct)">
-                            <mat-icon 
-                                *ngIf="sortConstruct.direction == 1"
-                                class="md-hue-3" >
-                                keyboard_arrow_up
-                            </mat-icon>
-                            <mat-icon 
-                                *ngIf="sortConstruct.direction == -1"
-                                class="md-hue-3" >
-                                keyboard_arrow_down
-                            </mat-icon>
-                        </button>                           
-                    </td>
-                    <td>
-                        <button
-                            mat-button
-                            class="mat-mini mat-primary " 
-                            (click)="removeSortItem(sortConstruct)">
-                            <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
-                        </button>
-                        
-                    </td>   
-                </tr>             
-            </table>             
-        
+            <rb-vsection>
+                <rb-hsection
+                    style="flex-grow:0">
+                    <table>
+                        <tr>
+                            <td
+                                class="rb-fb-labelcol">
+                                Sort on : 
+                            </td>
+                            <td
+                                colspan="2">
+                                <rb-choice-input
+                                    [choicelist]="sortConfig.attributes"
+                                    [label]="'Attributes'"
+                                    [icon]="'sort'"
+                                    [margin]="false"
+                                    [size]="12"
+                                    [(value)]="attributeToAddToSort">
+                                </rb-choice-input>
+                            </td>
+                        </tr>
+                        <tr
+                            *ngFor="let sortConstruct of sortConstructs">
+                            <td
+                                class="rb-fb-labelcol">
+                                <span
+                                    class="rb-filter-builder-label">
+                                    {{sortConstruct.config.label}} : 
+                                </span>
+                            </td>
+                            <td
+                                class="rb-fb-maincol">
+                                <button
+                                    mat-button
+                                    class="mat-mini mat-primary rb-button" 
+                                    (click)="toggleDir(sortConstruct)">
+                                    <mat-icon 
+                                        *ngIf="sortConstruct.direction == 1"
+                                        class="md-hue-3" >
+                                        keyboard_arrow_up
+                                    </mat-icon>
+                                    <mat-icon 
+                                        *ngIf="sortConstruct.direction == -1"
+                                        class="md-hue-3" >
+                                        keyboard_arrow_down
+                                    </mat-icon>
+                                </button>                           
+                            </td>
+                            <td>
+                                <button
+                                    mat-button
+                                    class="mat-mini mat-primary " 
+                                    (click)="removeSortItem(sortConstruct)">
+                                    <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
+                                </button>
+                                
+                            </td>   
+                        </tr>             
+                    </table>   
+                </rb-hsection>          
+            </rb-vsection>   
         </rb-tab>
     </rb-tab-section>
     <div>

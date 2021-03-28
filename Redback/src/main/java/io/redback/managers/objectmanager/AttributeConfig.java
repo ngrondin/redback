@@ -18,6 +18,7 @@ public class AttributeConfig
 	protected HashMap<String, Function> scripts;
 	protected RelatedObjectConfig relatedObjectConfig;
 	protected Expression editable;
+	protected Expression mandatory;
 	protected Expression expression;
 	protected Expression defaultValue;
 	
@@ -35,7 +36,12 @@ public class AttributeConfig
 			editable = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_editable", objectConfig.getScriptVariables(), config.getString("editable"));
 		else 
 			editable = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_editable", objectConfig.getScriptVariables(), "true");
-		
+
+		if(config.get("mandatory") != null && config.getString("mandatory").length() > 0)
+			mandatory = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_mandatory", objectConfig.getScriptVariables(), config.getString("mandatory"));
+		else 
+			mandatory = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_mandatory", objectConfig.getScriptVariables(), "false");
+
 		if(config.get("expression") != null && config.getString("expression").length() > 0)
 			expression = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_expression", objectConfig.getScriptVariables(), config.getString("expression"));
 
@@ -83,6 +89,11 @@ public class AttributeConfig
 	public Expression getEditableExpression()
 	{
 		return editable;
+	}
+	
+	public Expression getMandatoryExpression()
+	{
+		return mandatory;
 	}
 	
 	public String getIdGeneratorName()

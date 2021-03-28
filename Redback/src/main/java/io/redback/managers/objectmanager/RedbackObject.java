@@ -406,6 +406,17 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 	
+	public boolean isMandatory(String name) throws RedbackException
+	{
+		Expression expression = config.getAttributeConfig(name).getMandatoryExpression(); 
+		Object o = expression.eval(scriptContext);
+		if(o instanceof Boolean)
+			return (Boolean)o;
+		else
+			return false;
+	}
+		
+	
 	public boolean canDelete() throws RedbackException
 	{
 		Expression expression = config.getCanDeleteExpression();
@@ -526,6 +537,7 @@ public class RedbackObject extends RedbackElement
 
 			DataMap attributeValidation = new DataMap();
 			attributeValidation.put("editable", isEditable(attrName));
+			attributeValidation.put("mandatory", isMandatory(attrName));
 			attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
 
 			if(attributeConfig.hasRelatedObject())

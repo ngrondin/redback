@@ -1,17 +1,17 @@
 <mat-icon 
     *ngIf="showicon" 
-    class="rb-input-icon">
+    [class]="'rb-input-icon' + (mandatoryalert ? ' rb-input-icon-mandatory' : '') ">
     {{icon}}
 </mat-icon>
 <div
     class="rb-input-container">
     <span
-        [class]="'rb-input-label' + ((displayvalue === null || displayvalue === '') && !isEditing ? ' rb-input-label-big' : '')">
+        [class]="'rb-input-label' + (mandatoryalert ? ' rb-input-label-mandatory' : '')  + ((displayvalue === null || displayvalue === '') && !isEditing ? ' rb-input-label-big' : '')">
         {{label}}
     </span>    
     <input 
         #input
-        [class]="'rb-input-input rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
+        [class]="'rb-input-input rb-input-text-color' + (mandatoryalert ? ' rb-input-mandatory' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
         [(ngModel)]="displayvalue"
         (focus)="onFocus($event)"
         (blur)="onBlur($event)"
