@@ -130,7 +130,7 @@ public class CSVReport extends Report {
 					} else if(format.equals("time") && value != null && value instanceof Number) {
 						try {
 							Long ms = ((Long)value).longValue();
-							Date date = new Date(ms);
+							Date date = new Date(1000 * (ms / 1000));
 							ZonedDateTime zdt = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.of("UTC"));
 							valueStr = zdt.format(DateTimeFormatter.ISO_LOCAL_TIME);
 						} catch(Exception ex) {
