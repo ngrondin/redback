@@ -1,4 +1,4 @@
-package io.redback.managers.reportmanager;
+package io.redback.managers.reportmanager.pdf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,18 +12,20 @@ import io.redback.RedbackException;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.managers.jsmanager.Expression;
+import io.redback.managers.reportmanager.ReportConfig;
+import io.redback.managers.reportmanager.ReportManager;
 
-public abstract class ReportContainerUnit extends ReportUnit {
-	protected List<ReportUnit> contentUnits;
+public abstract class ContainerUnit extends Unit {
+	protected List<Unit> contentUnits;
 	protected boolean canBreak;
 	protected Expression showExpr;
 	
-	public ReportContainerUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
+	public ContainerUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
 		DataList content = config.getList("content");
-		contentUnits = new ArrayList<ReportUnit>();
+		contentUnits = new ArrayList<Unit>();
 		for(int i = 0; i < content.size(); i++) {
-			contentUnits.add(ReportUnit.fromConfig(reportManager, reportConfig, content.getObject(i)));
+			contentUnits.add(Unit.fromConfig(reportManager, reportConfig, content.getObject(i)));
 		}
 		canBreak = config.containsKey("canbreak") ? config.getBoolean("canbreak") : true;
 		jsParams = Arrays.asList(new String[] {"params", "object", "page"});

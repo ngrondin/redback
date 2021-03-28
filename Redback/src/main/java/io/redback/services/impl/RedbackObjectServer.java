@@ -23,7 +23,7 @@ public class RedbackObjectServer extends ObjectServer
 
 	public RedbackObjectServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
-		objectManager = new ObjectManager(firebus, config);
+		objectManager = new ObjectManager(n, config, firebus);
 	}
 
 	protected RedbackObject get(Session session, String objectName, String uid) throws RedbackException

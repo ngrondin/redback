@@ -11,6 +11,7 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
+import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 
 public abstract class GeoServer extends ServiceProvider
@@ -84,9 +85,19 @@ public abstract class GeoServer extends ServiceProvider
 						throw new FunctionErrorException("A 'timezone' action requires a 'geometry' attribute");
 					}
 				}
+				else if(action.equals("travel")) 
+				{
+					Geometry start = new Geometry(request.getObject("start"));
+					Geometry end = new Geometry(request.getObject("end"));
+					GeoRoute route = travel(start, end);
+					if(route != null)
+						responseData = route.toDataMap();
+					else
+						throw new RedbackException("Cannot find route");
+				}
 				else
 				{
-					throw new FunctionErrorException("Valid actions are 'address', 'geocode' and 'reversegc'");
+					throw new FunctionErrorException("Valid actions are 'address', 'geocode', 'timezone' and 'travel'");
 				}
 			}
 			response.setData(responseData.toString());
@@ -114,5 +125,7 @@ public abstract class GeoServer extends ServiceProvider
 	protected abstract List<String> address(String search, Geometry location, Long radius) throws RedbackException;	
 
 	protected abstract String timezone(Geometry geometry) throws RedbackException;
+	
+	protected abstract GeoRoute travel(Geometry start, Geometry end) throws RedbackException;
 	
 }

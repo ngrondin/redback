@@ -49,6 +49,7 @@ import io.redback.utils.js.JSConverter;
 public class ObjectManager
 {
 	private Logger logger = Logger.getLogger("io.redback");
+	protected String name;
 	protected Firebus firebus;
 	protected JSManager jsManager;
 	protected boolean includeLoaded;
@@ -78,8 +79,9 @@ public class ObjectManager
 	protected DomainClient domainClient;
 	protected IntegrationClient integrationClient;
 
-	public ObjectManager(Firebus fb, DataMap config)
+	public ObjectManager(String n, DataMap config, Firebus fb)
 	{
+		name = n;
 		firebus = fb;
 		includeLoaded = false;
 		jsManager = new JSManager();
@@ -383,7 +385,10 @@ public class ObjectManager
 							Map<String, Object> context = createScriptContext(session);
 							context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
 							context.put("filter", JSConverter.toJS(filter));
+							context.put("sort", JSConverter.toJS(sort));
 							context.put("action", "list");
+							context.put("page", page);
+							context.put("pageSize", pageSize);
 							Object o = gs.execute(context);
 							if(o instanceof DataList)
 								dbResultList = (DataList)o;
@@ -495,7 +500,7 @@ public class ObjectManager
 		if(object != null)
 		{
 			object.execute(function);
-			object.save();
+			//object.save();
 		}
 		return object;
 	}
@@ -514,6 +519,24 @@ public class ObjectManager
 			}
 		}
 	}	
+	
+	public void fork(Session session, String objectName, String id, String function) throws RedbackException, ScriptException
+	{
+		DataMap request = new DataMap();
+		request.put("action", "execute");
+		request.put("object", objectName);
+		request.put("uid", id);
+		request.put("function", function);
+		Payload reqP = new Payload(request.toString());
+		reqP.metadata.put("session", session.id);
+		reqP.metadata.put("token", session.token);
+		reqP.metadata.put("timezone", session.getTimezone());
+		try {
+			firebus.requestServiceAndForget(name, reqP);
+		} catch(Exception e) {
+			throw new RedbackException("Error forking execution");
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
 	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException

@@ -1,4 +1,4 @@
-package io.redback.managers.reportmanager;
+package io.redback.managers.reportmanager.pdf;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.pdfbox.pdmodel.font.PDFont;
 
-public class ReportBox {
+public class Box {
 	public String type;
 	public String text;
 	public PDFont font;
@@ -22,14 +22,14 @@ public class ReportBox {
 	public float y;
 	public float width;
 	public float height;
-	public List<ReportBox> children;
+	public List<Box> children;
 	
-	private ReportBox() {
-		children = new ArrayList<ReportBox>();
+	private Box() {
+		children = new ArrayList<Box>();
 	}
 	
-	public static ReportBox VContainer(boolean canBreak) {
-		ReportBox rb = new ReportBox();
+	public static Box VContainer(boolean canBreak) {
+		Box rb = new Box();
 		rb.type = "container";
 		rb.vertical = true;
 		rb.canBreak = canBreak;
@@ -38,8 +38,8 @@ public class ReportBox {
 		return rb;
 	}
 	
-	public static ReportBox HContainer(boolean canBreak) {
-		ReportBox rb = new ReportBox();
+	public static Box HContainer(boolean canBreak) {
+		Box rb = new Box();
 		rb.type = "container";
 		rb.vertical = false;
 		rb.canBreak = canBreak;
@@ -48,8 +48,8 @@ public class ReportBox {
 		return rb;
 	}
 	
-	public static ReportBox HLine(float w, float h) {
-		ReportBox rb = new ReportBox();
+	public static Box HLine(float w, float h) {
+		Box rb = new Box();
 		rb.type = "hline";
 		rb.canBreak = false;
 		rb.width = w;
@@ -58,8 +58,8 @@ public class ReportBox {
 		return rb;
 	}
 	
-	public static ReportBox Text(String text, PDFont font, float fontSize, float w, float h) {
-		ReportBox rb = new ReportBox();
+	public static Box Text(String text, PDFont font, float fontSize, float w, float h) {
+		Box rb = new Box();
 		rb.type = "text";
 		rb.text = text;
 		rb.font = font;
@@ -71,8 +71,8 @@ public class ReportBox {
 		return rb;
 	}
 	
-	public static ReportBox Text(String text, PDFont font, float fontSize) {
-		ReportBox rb = new ReportBox();
+	public static Box Text(String text, PDFont font, float fontSize) {
+		Box rb = new Box();
 		rb.type = "text";
 		rb.text = text;
 		rb.font = font;
@@ -86,8 +86,8 @@ public class ReportBox {
 		return rb;
 	}
 	
-	public static ReportBox Checkbox(boolean checked, float w, float h) {
-		ReportBox rb = new ReportBox();
+	public static Box Checkbox(boolean checked, float w, float h) {
+		Box rb = new Box();
 		rb.type = "checkbox";
 		rb.checked = checked;
 		rb.canBreak = false;
@@ -97,8 +97,8 @@ public class ReportBox {
 		return rb;
 	}
 	
-	public static ReportBox Image(byte[] bytes, float w, float h) {
-		ReportBox rb = new ReportBox();
+	public static Box Image(byte[] bytes, float w, float h) {
+		Box rb = new Box();
 		rb.type = "image";
 		rb.bytes = bytes;
 		rb.canBreak = false;
@@ -107,8 +107,8 @@ public class ReportBox {
 		return rb;
 	}
 	
-	public static ReportBox Empty(float w, float h) {
-		ReportBox rb = new ReportBox();
+	public static Box Empty(float w, float h) {
+		Box rb = new Box();
 		rb.type = "empty";
 		rb.canBreak = false;
 		rb.width = w;
@@ -116,7 +116,7 @@ public class ReportBox {
 		return rb;
 	}
 	
-	public void addChild(ReportBox c) {
+	public void addChild(Box c) {
 		if(c != null) {
 			children.add(c);
 			if(vertical) {
@@ -135,8 +135,8 @@ public class ReportBox {
 		}
 	}
 	
-	public ReportBox cloneWithoutChildren() {
-		ReportBox clone = new ReportBox();
+	public Box cloneWithoutChildren() {
+		Box clone = new Box();
 		clone.canBreak = canBreak;
 		clone.checked = checked;
 		clone.font = font;
@@ -156,13 +156,13 @@ public class ReportBox {
 		float h = offset;
 		if(breakBefore)
 			breakPoints.add(h);
-		for(ReportBox child: children) {
+		for(Box child: children) {
 			child.resolveBreakPoints(breakPoints, h);
 			h += child.height;
 		}
 	}
 	
-	public ReportBox breakAt(float bp) {
+	public Box breakAt(float bp) {
 		if(height > bp && canBreak) {
 			if(vertical) {
 				float y = 0;
@@ -172,17 +172,17 @@ public class ReportBox {
 					i++;
 				}
 				if(i < children.size()) {
-					ReportBox clone = cloneWithoutChildren();
-					ReportBox limitRb = children.get(i);
+					Box clone = cloneWithoutChildren();
+					Box limitRb = children.get(i);
 					if( bp > limitRb.y && limitRb.canBreak) {
 						float prevHeight = limitRb.height;
-						ReportBox newChild = limitRb.breakAt(bp - y);
+						Box newChild = limitRb.breakAt(bp - y);
 						height -= (prevHeight - limitRb.height);
 						clone.addChild(newChild);
 						i++;
 					} 
 					while(children.size() > i) {
-						ReportBox child = children.remove(i);
+						Box child = children.remove(i);
 						height -= child.height;
 						clone.addChild(child);
 					}
@@ -205,7 +205,7 @@ public class ReportBox {
 		if(type.equals("text"))
 			s = s + ", " + text;
 		s = s + ", " + canBreak + "]";
-		for(ReportBox rb: children) {
+		for(Box rb: children) {
 			s = s + "\r\n" + rb.toString(indent + 1);
 		}
 		return s;

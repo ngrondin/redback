@@ -17,7 +17,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 {
 	protected ObjectManager objectManager;
 	protected Session session;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute"};
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute", "fork"};
 	
 	public ObjectManagerJSWrapper(ObjectManager om, Session s)
 	{
@@ -119,7 +119,8 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						throw new RuntimeException("Error in deleteObject", e);
 					}
 				}
-			};		} else if(key.equals("execute")) {
+			};		
+		} else if(key.equals("execute")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String functionName = arguments[0].asString(); 
@@ -129,6 +130,19 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						return null;
 					} catch (Exception e) {
 						throw new RuntimeException("Error in execute", e);
+					}
+				}
+			};
+		} else if(key.equals("fork")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					RedbackObjectJSWrapper obj = arguments[0].asProxyObject();
+					String function = arguments[1].asString(); 
+					try {
+						objectManager.fork(session, obj.getMember("objectname").toString(), obj.getMember("uid").toString(), function);
+						return null;
+					} catch (Exception e) {
+						throw new RuntimeException("Error in fork", e);
 					}
 				}
 			};

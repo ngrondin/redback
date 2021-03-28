@@ -6,6 +6,7 @@ import java.util.List;
 import io.firebus.Firebus;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 
 public class GeoClient extends Client {
@@ -68,6 +69,19 @@ public class GeoClient extends Client {
 			return resp.getString("timezone");
 		} catch(Exception e) {
 			throw new RedbackException("Error getting timezone", e);
+		}		
+	}
+	
+	public GeoRoute travel(Geometry start, Geometry end) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "travel");
+			req.put("start", start.toDataMap());
+			req.put("end", end.toDataMap());
+			DataMap resp = request(req);
+			return new GeoRoute(resp);
+		} catch(Exception e) {
+			throw new RedbackException("Error getting travel distance and time", e);
 		}		
 	}
 }

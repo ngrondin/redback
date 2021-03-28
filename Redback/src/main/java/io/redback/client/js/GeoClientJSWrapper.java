@@ -11,6 +11,7 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.utils.DataMap;
 import io.redback.client.GeoClient;
+import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 import io.redback.utils.js.JSConverter;
 
@@ -18,7 +19,7 @@ public class GeoClientJSWrapper implements ProxyObject {
 	
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected GeoClient geoClient;
-	protected String[] members = {"geocode", "address", "timezone"};
+	protected String[] members = {"geocode", "address", "timezone", "travel"};
 
 	public GeoClientJSWrapper(GeoClient gc)
 	{
@@ -80,7 +81,22 @@ public class GeoClientJSWrapper implements ProxyObject {
 					}
 				}
 			};			
-		} else {
+		} else if(key.equals("travel")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					DataMap start = (DataMap)JSConverter.toJava(arguments[0]);
+					DataMap end = (DataMap)JSConverter.toJava(arguments[1]);
+					try
+					{
+						GeoRoute route = geoClient.travel(new Geometry(start), new Geometry(end));
+						return JSConverter.toJS(route.toDataMap());
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error processing travel request", e);
+					}
+				}
+			};			} else {
 			return null;
 		}
 	}

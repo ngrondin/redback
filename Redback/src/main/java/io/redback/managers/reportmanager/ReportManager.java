@@ -15,6 +15,8 @@ import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.ObjectClient;
 import io.redback.managers.jsmanager.JSManager;
+import io.redback.managers.reportmanager.csv.CSVReport;
+import io.redback.managers.reportmanager.pdf.PDFReport;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.RedbackFile;
@@ -135,8 +137,14 @@ public class ReportManager {
 		ReportConfig config = getConfig(session, domain, name);
 		Report report = null;
 		if(config != null) {
-			report = new Report(session, this, config);
-			report.produce(filter);
+			if(config.getType().equals("pdf"))
+				report = new PDFReport(session, this, config);
+			else if(config.getType().equals("csv"))
+				report = new CSVReport(session, this, config);
+			if(report != null)
+				report.produce(filter);
+			else 
+				throw new RedbackException("Unknown report type");
 		} 
 		return report;
 	}

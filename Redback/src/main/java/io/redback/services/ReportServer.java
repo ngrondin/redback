@@ -33,19 +33,17 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 			String reportName = get != null && get.length() > 1 ? get.substring(1) : request.getString("report");
 			String domain = request.getString("domain");
 			String category = request.getString("category");
-			String format = request.getString("format");
+			String timezone = request.getString("timezone");
 			DataMap filter = request.containsKey("filter") ? (request.get("filter") instanceof DataMap ? request.getObject("filter") : new DataMap(request.getString("filter"))) : null;
 			if(action == null) 
 				action = "produce";
+			if(timezone != null)
+				session.setTimezone(timezone);
 			
 			if(action.equals("produce")) {
 				Report report = produce(session, domain, reportName, filter);
-				if(format != null && format.equals("json")) {
-					//TODO Add json format
-				} else {
-					response = new Payload(report.getBytes());
-					response.metadata.put("mime", "application/pdf");
-				}
+				response = new Payload(report.getBytes());
+				response.metadata.put("mime", report.getMime());
 			} else if(action.equals("producestore")) {
 				String fileUid = produceAndStore(session, domain, reportName, filter);
 				response = new Payload(new DataMap("fileuid", fileUid).toString());

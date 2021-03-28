@@ -1,16 +1,14 @@
-package io.redback.managers.reportmanager.units;
+package io.redback.managers.reportmanager.pdf;
 
 import java.io.IOException;
 import java.util.Map;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.managers.reportmanager.ReportBox;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
-import io.redback.managers.reportmanager.ReportUnit;
 
-public class Space extends ReportUnit {
+public class Space extends Unit {
 	protected float width;
 	protected float height;
 	
@@ -20,8 +18,8 @@ public class Space extends ReportUnit {
 		height = config.containsKey("height") ? config.getNumber("height").floatValue() : 10;
 	}
 
-	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
-		return ReportBox.Empty(width, height);
+	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
+		return Box.Empty(width, height);
 	}
 
 }

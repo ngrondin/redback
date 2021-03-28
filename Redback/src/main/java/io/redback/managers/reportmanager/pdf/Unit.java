@@ -1,4 +1,4 @@
-package io.redback.managers.reportmanager;
+package io.redback.managers.reportmanager.pdf;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -8,20 +8,11 @@ import java.util.Map;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.managers.reportmanager.units.DataSet;
-import io.redback.managers.reportmanager.units.DynamicForm;
-import io.redback.managers.reportmanager.units.Field;
-import io.redback.managers.reportmanager.units.HLine;
-import io.redback.managers.reportmanager.units.HSection;
-import io.redback.managers.reportmanager.units.Image;
-import io.redback.managers.reportmanager.units.MultilineText;
-import io.redback.managers.reportmanager.units.Space;
-import io.redback.managers.reportmanager.units.Text;
-import io.redback.managers.reportmanager.units.VList;
-import io.redback.managers.reportmanager.units.VSection;
+import io.redback.managers.reportmanager.ReportConfig;
+import io.redback.managers.reportmanager.ReportManager;
 import io.redback.utils.StringUtils;
 
-public abstract class ReportUnit {
+public abstract class Unit {
 	protected DataMap config;
 	protected ReportManager reportManager;
 	protected ReportConfig reportConfig;
@@ -29,7 +20,7 @@ public abstract class ReportUnit {
 	protected List<String> jsParams;
 	protected boolean pagebreak; 
 	
-	public ReportUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException  {
+	public Unit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException  {
 		config = c;
 		reportManager = rm;
 		reportConfig = rc;
@@ -37,8 +28,8 @@ public abstract class ReportUnit {
 		pagebreak = config.containsKey("pagebreak") ? config.getBoolean("pagebreak") : false;
 	}
 	
-	protected static ReportUnit fromConfig(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
-		ReportUnit newUnit = null;
+	protected static Unit fromConfig(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
+		Unit newUnit = null;
 		String type = c.getString("type"); 
 		if(type.equals("dataset"))
 			newUnit = new DataSet(rm, rc, c);
@@ -84,5 +75,5 @@ public abstract class ReportUnit {
 	
 
 	
-	public abstract ReportBox produce(Map<String, Object> context) throws IOException, RedbackException;
+	public abstract Box produce(Map<String, Object> context) throws IOException, RedbackException;
 }

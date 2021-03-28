@@ -1,4 +1,4 @@
-package io.redback.managers.reportmanager;
+package io.redback.managers.reportmanager.pdf;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -20,8 +20,10 @@ import io.redback.RedbackException;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.managers.jsmanager.Expression;
+import io.redback.managers.reportmanager.ReportConfig;
+import io.redback.managers.reportmanager.ReportManager;
 
-public abstract class ReportDataUnit extends ReportUnit {
+public abstract class DataUnit extends Unit {
 	protected Expression valueExpr;
 	protected PDFont font;
 	protected float fontSize;
@@ -31,7 +33,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 	protected String format;
 	protected boolean commaToLine;
 
-	public ReportDataUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
+	public DataUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
 		jsParams = Arrays.asList(new String[] {"params", "object", "page"});
 		valueExpr = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_text_value", jsParams, c.getString("value"));
@@ -45,7 +47,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 	}
 
 
-	public abstract ReportBox produce(Map<String, Object> context) throws IOException, RedbackException;
+	public abstract Box produce(Map<String, Object> context) throws IOException, RedbackException;
 	
 	protected float getStringWidth(String text) throws IOException {
 		return font.getStringWidth(text) / 1000f * fontSize;
@@ -95,7 +97,7 @@ public abstract class ReportDataUnit extends ReportUnit {
 		String valueStr = value != null ? value.toString() : "";
 		if(commaToLine) 
 			valueStr = valueStr.replaceAll(", ", "\r\n").replaceAll(",", "\r\n");
-		if(format != null) {
+		if(value != null && format != null) {
 			if(format.equals("currency")) {
 				try {
 					NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);

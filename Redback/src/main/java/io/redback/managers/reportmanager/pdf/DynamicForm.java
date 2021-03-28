@@ -1,4 +1,4 @@
-package io.redback.managers.reportmanager.units;
+package io.redback.managers.reportmanager.pdf;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -24,16 +24,13 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.FileClient;
 import io.redback.client.RedbackObjectRemote;
-import io.redback.managers.reportmanager.ReportBox;
 import io.redback.managers.reportmanager.ReportConfig;
-import io.redback.managers.reportmanager.ReportDataUnit;
 import io.redback.managers.reportmanager.ReportManager;
-import io.redback.managers.reportmanager.ReportUnit;
 import io.redback.security.Session;
 import io.redback.utils.ImageUtils;
 import io.redback.utils.RedbackFile;
 
-public class DynamicForm extends ReportDataUnit {
+public class DynamicForm extends DataUnit {
 	//protected PDFont font;
 	//protected float fontSize;
 	protected float width;
@@ -67,7 +64,7 @@ public class DynamicForm extends ReportDataUnit {
 		dependecyValueAttribute = config.getString("dependencyvalueattribute");
 	}
 
-	public ReportBox produce(Map<String, Object> context) throws IOException, RedbackException {
+	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
 		Session session = (Session)context.get("session");
 
 		List<RedbackObjectRemote> rors = ((List<?>)context.get("dataset"))
@@ -86,7 +83,7 @@ public class DynamicForm extends ReportDataUnit {
 		});	
 		Map<String, RedbackObjectRemote> orderMap = new HashMap<String, RedbackObjectRemote>();
 
-		ReportBox container = ReportBox.VContainer(true);
+		Box container = Box.VContainer(true);
 		String lastCatOrder = "";
 		for(RedbackObjectRemote ror: rors) {
 			String cat = ror.getString(catAttribute);
@@ -96,18 +93,18 @@ public class DynamicForm extends ReportDataUnit {
 			if(cat == null) cat = "";
 			if(catOrder == null) catOrder = "";
 			if(!catOrder.equals(lastCatOrder)) {
-				ReportBox catRb = ReportBox.VContainer(false);
+				Box catRb = Box.VContainer(false);
 				catRb.color = Color.decode("#3f51b5");
 				if(width > -1)
 					catRb.width = width;
-				ReportBox catTextRb = ReportBox.Text(cat, font, fontSize);
+				Box catTextRb = Box.Text(cat, font, fontSize);
 				catTextRb.height = 12;
 				catTextRb.color = Color.WHITE;
 				catRb.addChild(catTextRb);
 				catRb.height += 4;
 				catTextRb.x += 5;
 				container.addChild(catRb);
-				container.addChild(ReportBox.Empty(10, 5));
+				container.addChild(Box.Empty(10, 5));
 				lastCatOrder = catOrder;
 			}
 			boolean showItem = true;
@@ -128,20 +125,20 @@ public class DynamicForm extends ReportDataUnit {
 				}
 			}
 			if(showItem) {
-				ReportBox formItemRb = ReportBox.VContainer(false);
+				Box formItemRb = Box.VContainer(false);
 				String type = ror.getString(typeAttribute);
 				String label = ror.getString(labelAttribute);
-				ReportBox labelAnswerRowRb = ReportBox.HContainer(false);
+				Box labelAnswerRowRb = Box.HContainer(false);
 				float marginWidth = 10;
-				labelAnswerRowRb.addChild(ReportBox.Empty(marginWidth, 5));
+				labelAnswerRowRb.addChild(Box.Empty(marginWidth, 5));
 				float labelWidth = 0;
 				if(label != null) {
-					ReportBox rb = ReportBox.Text(label, font, fontSize);
+					Box rb = Box.Text(label, font, fontSize);
 					rb.color = Color.decode("#666666");
 					rb.fontSize = 11f;
 					labelWidth = rb.width;
 					labelAnswerRowRb.addChild(rb);
-					labelAnswerRowRb.addChild(ReportBox.Empty(20, 5));
+					labelAnswerRowRb.addChild(Box.Empty(20, 5));
 				}
 				float answerMaxWidth = width > -1 ? width - labelWidth - (2 * marginWidth) - 20 : -1;
 				
@@ -149,20 +146,20 @@ public class DynamicForm extends ReportDataUnit {
 					String value = ror.getString(valueAttribute);
 					if(value != null) {
 						String valueStr = value.toString();
-						ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+						Box rb = Box.Text(valueStr, font, fontSize);
 						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
 					}
 					
 				} else if(type.equals("textarea")) {
 					String value = ror.getString(valueAttribute);
 					if(value != null) {
-						ReportBox col = ReportBox.VContainer(false);
+						Box col = Box.VContainer(false);
 						String[] lines = value.split("\\n");
 						for(int i = 0; i < lines.length; i++) {
 							String line = lines[i];
 							List<String> sublines = cutToLines(line, answerMaxWidth > -1 ? answerMaxWidth : 200);
 							for(String subline : sublines) {
-								col.addChild(ReportBox.Text(subline, font, fontSize));
+								col.addChild(Box.Text(subline, font, fontSize));
 							}		
 							
 						}
@@ -176,7 +173,7 @@ public class DynamicForm extends ReportDataUnit {
 						if(Math.floor(value.doubleValue()) == value.doubleValue()) {
 							valueStr = "" + value.intValue();
 						}
-						ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+						Box rb = Box.Text(valueStr, font, fontSize);
 						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
 					}
 					
@@ -185,7 +182,7 @@ public class DynamicForm extends ReportDataUnit {
 					if(value != null) {
 						DateFormat formatter = DateFormat.getDateTimeInstance();
 						String valueStr = formatter.format(value);
-						ReportBox rb = ReportBox.Text(valueStr, font, fontSize);
+						Box rb = Box.Text(valueStr, font, fontSize);
 						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
 					}
 					
@@ -202,13 +199,13 @@ public class DynamicForm extends ReportDataUnit {
 								}
 							}					
 						}
-						ReportBox rb = ReportBox.Text(display, font, fontSize);
+						Box rb = Box.Text(display, font, fontSize);
 						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
 					}
 					
 				} else if(type.equals("checkbox")) {
 					boolean value = ror.getBool(valueAttribute);
-					ReportBox rb = ReportBox.Checkbox(value, 12, 12);
+					Box rb = Box.Checkbox(value, 12, 12);
 					addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
 
 				} else if(type.equals("signature")) {
@@ -216,7 +213,7 @@ public class DynamicForm extends ReportDataUnit {
 					if(de != null && de instanceof DataMap) {
 						FileClient fc = reportManager.getFileClient();
 						RedbackFile file = fc.getFile(session, ((DataMap)de).getString("fileuid"));
-						ReportBox rb = reportBoxFromFile(file, 50);
+						Box rb = reportBoxFromFile(file, 50);
 						addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
 					}
 
@@ -224,7 +221,7 @@ public class DynamicForm extends ReportDataUnit {
 				formItemRb.addChild(labelAnswerRowRb);
 				String detail = ror.getString(detailAttribute);
 				if(detail != null) {
-					ReportBox detailRb = ReportBox.Text(detail, font, fontSize - 4);
+					Box detailRb = Box.Text(detail, font, fontSize - 4);
 					detailRb.color = Color.lightGray;
 					formItemRb.addChild(detailRb);
 				}
@@ -232,11 +229,11 @@ public class DynamicForm extends ReportDataUnit {
 					FileClient fc = reportManager.getFileClient();
 					List<RedbackFile> files = fc.listFilesFor(session, "formitem", ror.getUid());
 					for(RedbackFile file: files) {
-						ReportBox rb = reportBoxFromFile(file, 250);
+						Box rb = reportBoxFromFile(file, 250);
 						if(rb != null) {
 							float margin = width > -1 ? (width - rb.width) / 2f : 0;
-							ReportBox row = ReportBox.HContainer(false);
-							row.addChild(ReportBox.Empty(margin, 5));
+							Box row = Box.HContainer(false);
+							row.addChild(Box.Empty(margin, 5));
 							row.addChild(rb);
 							formItemRb.addChild(row);
 						}
@@ -251,22 +248,22 @@ public class DynamicForm extends ReportDataUnit {
 		return container;	
 	}
 	
-	protected ReportBox reportBoxFromFile(RedbackFile file, int newHeight) throws RedbackException {
-		ReportBox ret = null;
+	protected Box reportBoxFromFile(RedbackFile file, int newHeight) throws RedbackException {
+		Box ret = null;
 			try {
 			int ori = ImageUtils.getOrientation(file.bytes);
 			BufferedImage img = ImageUtils.getImage(file.bytes, -1, newHeight, ori);
-			ret = ReportBox.Image(ImageUtils.getBytes(img, "png"), img.getWidth(), img.getHeight());
+			ret = Box.Image(ImageUtils.getBytes(img, "png"), img.getWidth(), img.getHeight());
 		} catch(Exception e) {
 			throw new RedbackException("Error getting ReportBox image", e);
 		}
 		return ret;	
 	}
 	
-	protected void addChildAlignedLeft(ReportBox hcontainer, ReportBox child, float maxRemainingWidth) {
+	protected void addChildAlignedLeft(Box hcontainer, Box child, float maxRemainingWidth) {
 		if(maxRemainingWidth > -1) {
 			float space = Math.max(0, maxRemainingWidth - child.width);
-			hcontainer.addChild(ReportBox.Empty(space, 5));
+			hcontainer.addChild(Box.Empty(space, 5));
 		}
 		if(child.width > maxRemainingWidth) {
 			child.width = maxRemainingWidth;

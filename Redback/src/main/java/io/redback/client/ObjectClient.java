@@ -47,6 +47,7 @@ public class ObjectClient extends Client
 			if(sort != null)
 				req.put("sort", sort);
 			req.put("page", page);
+			req.put("pagesize", 50);
 			if(addRelated)
 				req.put("options", new DataMap("addrelated", true));
 			DataMap resp = request(session, req);
@@ -69,7 +70,7 @@ public class ObjectClient extends Client
 		{
 			List<RedbackObjectRemote> sublist = listObjects(session, objectname, filter, sort, addRelated, page++);
 			list.addAll(sublist);
-			if(sublist.size() < 50)
+			if(sublist.size() != 50)
 				more = false;
 		}
 		return list;
