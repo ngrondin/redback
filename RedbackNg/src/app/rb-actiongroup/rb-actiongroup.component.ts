@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
   selector: 'rb-actiongroup',
@@ -19,7 +20,8 @@ export class RbActiongroupComponent implements OnInit {
 
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    public userpref: UserprefService
   ) { }
 
   ngOnInit(): void {
@@ -44,7 +46,10 @@ export class RbActiongroupComponent implements OnInit {
     if(this.actions != null) {
       this.actions.forEach(item => {
         if(item.show == null || item.show == true || (typeof item.show == 'string' && (item.show.indexOf('object.') == -1 || object != null) && eval(item.show))) {
-          ret.push(item);
+          let swtch = this.userpref.getUISwitch('action',  item.action + "_" + item.param);
+          if(swtch == null || swtch == true) {
+            ret.push(item);
+          }
         }
       });
     }
