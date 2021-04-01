@@ -9,7 +9,7 @@
     <button
         [matMenuTriggerFor]="zoomMenu"
         mat-stroked-button
-		class="mat-primary rb-button">
+		class="mat-primary rb-button rb-gantt-button">
         <mat-icon>zoom_in</mat-icon>
     </button>
     <mat-menu #zoomMenu="matMenu">
@@ -21,7 +21,7 @@
     <button
         [matMenuTriggerFor]="spanMenu"
         mat-stroked-button
-		class="mat-primary rb-button">
+		class="mat-primary rb-button rb-gantt-button">
         <mat-icon>swap_horiz</mat-icon>
     </button>
     <mat-menu #spanMenu="matMenu">
@@ -29,6 +29,21 @@
         <button mat-menu-item (click)="setSpan(604800000)">7 Days</button>
         <button mat-menu-item (click)="setSpan(1209600000)">14 Days</button>
     </mat-menu>    
+    <button
+        mat-stroked-button
+		class="mat-primary rb-button rb-gantt-button"
+        (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+    </button> 
+    <button
+        [matMenuTriggerFor]="settingsMenu"
+        mat-icon-button
+		class="mat-primary rb-gantt-button">
+        <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #settingsMenu="matMenu">
+        <button mat-menu-item (click)="toggleDragFilter()">{{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}</button>
+    </mat-menu>         
 </div>
 <div
     class="rb-gantt-header">

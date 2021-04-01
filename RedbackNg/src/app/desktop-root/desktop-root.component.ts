@@ -3,9 +3,9 @@ import { CookieService } from 'ngx-cookie-service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ViewTarget } from 'app/datamodel';
 import { ConfigService } from 'app/services/config.service';
-import { DragService } from 'app/rb-drag/drag.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { ApiService } from 'app/services/api.service';
+import { DragService } from 'app/services/drag.service';
 
 
 

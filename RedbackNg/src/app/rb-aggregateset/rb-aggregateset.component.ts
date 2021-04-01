@@ -2,7 +2,7 @@ import { EventEmitter, Input, Output } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'app/services/data.service';
 import { DataTarget, RbAggregate, RbObject } from 'app/datamodel';
-import { MapService } from 'app/services/map.service';
+import { FilterService } from 'app/services/filter.service';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { Observable, Observer } from 'rxjs';
 
@@ -33,7 +33,7 @@ export class RbAggregatesetComponent extends RbContainerComponent {
 
   constructor(
     private dataService: DataService,
-    private mapService: MapService
+    private filterService: FilterService
   ) {
     super();
   }
@@ -76,20 +76,20 @@ export class RbAggregatesetComponent extends RbContainerComponent {
   public mergeFilters() : any {
     let filter = {};
     if(this.baseFilter != null) {
-      filter = this.mapService.mergeMaps(filter, this.baseFilter);
+      filter = this.filterService.mergeFilters(filter, this.baseFilter);
     }
     if(this.master != null && this.master.relationship != null && this.relatedObject != null) {
-      filter = this.mapService.mergeMaps(filter, this.master.relationship);
+      filter = this.filterService.mergeFilters(filter, this.master.relationship);
     } 
     if(this.userFilter != null) {
-      filter = this.mapService.mergeMaps(filter, this.userFilter);
+      filter = this.filterService.mergeFilters(filter, this.userFilter);
     }
     return filter;
   }
 
   public fetchNextPage() {
     if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
-      const filter = this.mapService.resolveMap(this.mergeFilters(), this.relatedObject, null, this.relatedObject);
+      const filter = this.filterService.resolveFilter(this.mergeFilters(), this.relatedObject, null, this.relatedObject);
       this.dataService.aggregateObjects(this.objectname, filter, null, this.tuple, this.metrics, this.nextPage).subscribe(
         data => this.setAggregates(data)
       );

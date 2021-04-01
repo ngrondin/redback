@@ -1,7 +1,10 @@
 import { Component, OnInit, Input, SimpleChange, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { DragService } from 'app/services/drag.service';
+import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
+import { Subscription } from 'rxjs';
 
 let ganttLaneHeight: number = 42;
 
@@ -11,6 +14,7 @@ class GanttLaneConfig {
   iconAttribute: string;
   iconMap: any;
   modal: string;
+  dragfilter: any;
 
   constructor(json: any) {
     this.dataset = json.dataset;
@@ -18,6 +22,7 @@ class GanttLaneConfig {
     this.iconAttribute = json.iconattribute;
     this.iconMap = json.iconmap;
     this.modal = json.modal;
+    this.dragfilter = json.dragfilter;
   }
 }
 
@@ -149,6 +154,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
   endMS: number;
   multiplier: number;
   widthPX: number;
+  doDragFilter: boolean = false;
   scrollTop: number;
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -163,14 +169,18 @@ export class RbGanttComponent extends RbDataObserverComponent {
   recalcPlanned: boolean = false;
   lastRecalc: number = 0;
   public getSizeForObjectCallback: Function;
+  dragSubscription: Subscription;
   
   constructor(
-    private modalService: ModalService
+    private modalService: ModalService,
+    private dragService: DragService,
+    private filterService: FilterService
   ) {
     super();
   }
 
   dataObserverInit() {
+    this.dragSubscription = this.dragService.getObservable().subscribe(event => this.onDragEvent(event));
     this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
     this.spanMS = 259200000;
     this.zoomMS = 259200000;
@@ -183,10 +193,11 @@ export class RbGanttComponent extends RbDataObserverComponent {
         this.seriesConfigs.push(new GanttSeriesConfig(item));
       }
     }
-    this.redraw();
+    this.filterDataset();
   }
 
   dataObserverDestroy() {
+    this.dragSubscription.unsubscribe();
   }
 
   onDatasetEvent(event: any) {
@@ -196,6 +207,12 @@ export class RbGanttComponent extends RbDataObserverComponent {
   }
 
   onActivationEvent(event: any) {
+  }
+
+  onDragEvent(event: any) {
+    if(this.lanesConfig.dragfilter != null) {
+      this.redraw();
+    }
   }
 
   get selectedObject() : RbObject {
@@ -216,7 +233,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
 
   set startDate(dt: Date) {
     this._startDate = new Date(dt);
-    this.redraw();
+    this.filterDataset();
   }
 
   public get laneHeight() : number {
@@ -263,7 +280,33 @@ export class RbGanttComponent extends RbDataObserverComponent {
 
   setSpan(ms: number) {
     this.spanMS = ms;
-    this.redraw();
+    this.filterDataset();
+  }
+
+  refresh() {
+    if(this.dataset != null) {
+      this.dataset.refreshData();
+    }
+    if(this.datasetgroup != null) {
+      this.datasetgroup.refreshAllData();
+    }
+  }
+
+  toggleDragFilter() {
+    this.doDragFilter = !this.doDragFilter;
+  }
+
+  filterDataset() {
+    for(let cfg of this.seriesConfigs) {
+      let filter: any = {};
+      filter[cfg.endAttribute] = {$gt: this.startDate.toISOString()};
+      filter[cfg.startAttribute] = {$lt: (new Date(this.startDate.getTime() + this.spanMS)).toISOString()};
+      if(this.datasetgroup != null) {
+        this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
+      } else {
+        this.dataset.filterSort({filter: filter});
+      } 
+    }
   }
 
   redraw() {
@@ -304,17 +347,27 @@ export class RbGanttComponent extends RbDataObserverComponent {
 
   private getLanes() {
     let lanes : GanttLane[] = [];
+    let laneFilter: any = null;
+    if(this.doDragFilter && this.dragService.object != null && this.lanesConfig.dragfilter != null) {
+      laneFilter =  this.filterService.resolveFilter(this.lanesConfig.dragfilter, this.dragService.object, null, null);
+    };
     let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
     for(let obj of list) {
-      let label = obj.get(this.lanesConfig.labelAttribute);
-      let icon = obj.get(this.lanesConfig.iconAttribute);
-      if(this.lanesConfig.iconMap != null) {
-        icon = this.lanesConfig.iconMap[icon];
+      let show = true;
+      if(laneFilter != null) {
+        if(!this.filterService.applies(laneFilter, obj)) show = false;
       }
-      let lane = new GanttLane(obj.uid, label, icon, obj);
-      let spreads: GanttSpread[] = this.getSpreads(obj.uid);
-      lane.setSpreads(spreads);
-      lanes.push(lane);
+      if(show) {
+        let label = obj.get(this.lanesConfig.labelAttribute);
+        let icon = obj.get(this.lanesConfig.iconAttribute);
+        if(this.lanesConfig.iconMap != null) {
+          icon = this.lanesConfig.iconMap[icon];
+        }
+        let lane = new GanttLane(obj.uid, label, icon, obj);
+        let spreads: GanttSpread[] = this.getSpreads(obj.uid);
+        lane.setSpreads(spreads);
+        lanes.push(lane);
+      }
     }
     if(lanes.length > 0) {
       lanes.sort((a, b) => (a != null && b != null ? a.label.localeCompare(b.label) : 0));

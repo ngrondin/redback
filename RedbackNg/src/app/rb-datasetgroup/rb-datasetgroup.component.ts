@@ -62,6 +62,13 @@ export class RbDatasetGroupComponent extends RbContainerComponent {
     this.active = state;
   }
 
+  public refreshAllData() {
+    for(let name of Object.keys(this.datasets)) {
+      let ds: RbDatasetComponent = this.datasets[name];
+      ds.refreshData();
+    }
+  }
+
   public select(obj: RbObject) {
     this._selectedObject = obj;
     for(let name of Object.keys(this.datasets)) {

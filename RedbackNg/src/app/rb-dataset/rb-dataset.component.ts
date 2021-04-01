@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { DataTarget, RbObject } from '../datamodel';
 import { DataService } from '../services/data.service';
-import { MapService } from 'app/services/map.service';
+import { FilterService } from 'app/services/filter.service';
 import { Observable, Subscription } from 'rxjs';
 import { ApiService } from 'app/services/api.service';
 import { ReportService } from 'app/services/report.service';
@@ -47,7 +47,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
   constructor(
     private dataService: DataService,
     private apiService: ApiService,
-    private mapService: MapService,
+    private filterService: FilterService,
     private reportService: ReportService,
     private modalService: ModalService,
     private errorService: ErrorService
@@ -164,18 +164,18 @@ export class RbDatasetComponent extends RbContainerComponent  {
   private mergeFilters() : any {
     let filter = {};
     if(this.baseFilter != null) {
-      filter = this.mapService.mergeMaps(filter, this.baseFilter);
+      filter = this.filterService.mergeFilters(filter, this.baseFilter);
     }
     if(this.master != null && this.relatedObject != null) {
-      filter = this.mapService.mergeMaps(filter, this.master.relationship);
+      filter = this.filterService.mergeFilters(filter, this.master.relationship);
     } 
     if(this.dataTarget != null) {
-      filter = this.mapService.mergeMaps(filter, this.dataTarget.filter);
+      filter = this.filterService.mergeFilters(filter, this.dataTarget.filter);
     } 
     if(this.userFilter != null) {
-      filter = this.mapService.mergeMaps(filter, this.userFilter);
+      filter = this.filterService.mergeFilters(filter, this.userFilter);
     }
-    filter = this.mapService.resolveMap(filter, this.relatedObject, this.selectedObject, this.relatedObject);
+    filter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
     return filter;
   }
 
@@ -293,7 +293,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
     if(_name == 'create' || _name == 'createinmemory') {
       let data = this.mergeFilters();
       if(param != null) {
-        data = this.mapService.mergeMaps(data, this.mapService.resolveMap(param, this.selectedObject, this.selectedObject, this.relatedObject))
+        data = this.filterService.mergeFilters(data, this.filterService.resolveFilter(param, this.selectedObject, this.selectedObject, this.relatedObject))
       }
       if(_name == 'create') {
         this.dataService.createObject(this.object, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));

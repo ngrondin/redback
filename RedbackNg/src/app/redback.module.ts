@@ -41,8 +41,7 @@ import { ConfigService } from './services/config.service';
 import { RbGanttComponent } from './rb-gantt/rb-gantt.component';
 import { RbDragObjectDirective } from './rb-drag/rb-drag-object.directive';
 import { RbDragDropzoneDirective } from './rb-drag/rb-drag-dropzone.directive';
-import { DragService } from './rb-drag/drag.service';
-import { MapService } from './services/map.service';
+import { FilterService } from './services/filter.service';
 import { RbGraphComponent } from './rb-graph/rb-graph.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { RbDragChangeformDirective } from './rb-drag/rb-drag-changeform.directive';
@@ -90,6 +89,7 @@ import { RbPopupHardlistComponent } from './popups/rb-popup-hardlist/rb-popup-ha
 import { RbStringInputComponent } from './inputs/rb-string-input/rb-string-input.component';
 import { RbNumberInputComponent } from './inputs/rb-number-input/rb-number-input.component';
 import { RbViewHeaderComponent } from './rb-view-header/rb-view-header.component';
+import { DragService } from './services/drag.service';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -274,7 +274,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     DataService,
     ConfigService,
     DragService,
-    MapService,
+    FilterService,
     ReportService,
     MenuService/*,
     {

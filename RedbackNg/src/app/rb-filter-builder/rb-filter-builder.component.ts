@@ -5,7 +5,7 @@ import { OverlayRef, validateHorizontalPosition } from '@angular/cdk/overlay';
 import { MatSelect } from '@angular/material/select';
 import { DataService } from 'app/services/data.service';
 import { RbAggregate } from 'app/datamodel';
-import { MapService } from 'app/services/map.service';
+import { FilterService } from 'app/services/filter.service';
 import { ValueComparator } from 'app/helpers';
 
 export class FilterBuilderConfig {
@@ -240,7 +240,7 @@ export class RbFilterBuilderComponent implements OnInit {
     @Inject(CONTAINER_DATA) public config: FilterBuilderConfig, 
     public overlayRef: OverlayRef,
     public dataService: DataService,
-    private mapService: MapService
+    private filterService: FilterService
   ) { 
     this.filter = this.config.initialFilter;
     if(this.config.filterConfig != null) {
@@ -324,7 +324,7 @@ export class RbFilterBuilderComponent implements OnInit {
           fltr[key] = this.filter[key];
         }
       }
-      fltr = this.mapService.resolveMap(fltr, null, null, null);
+      fltr = this.filterService.resolveFilter(fltr, null, null, null);
       this.dataService.aggregateObjects(this.config.objectname, fltr, null, [fac.attribute], [{function:"count", name:"count"}]).subscribe(list => {
         fac.options = list.map(agg => {return {
           name: agg.getDimension(fac.attribute + "." + fac.displayAttribute), 

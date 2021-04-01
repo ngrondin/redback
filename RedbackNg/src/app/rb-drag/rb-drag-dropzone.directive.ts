@@ -1,5 +1,5 @@
 import { Directive, ElementRef, Output, EventEmitter, HostListener, Input } from '@angular/core';
-import { DragService } from './drag.service';
+import { DragService } from 'app/services/drag.service';
 
 @Directive({
   selector: '[rb-drag-dropzone]'

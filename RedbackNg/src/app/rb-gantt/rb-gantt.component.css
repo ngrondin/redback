@@ -60,20 +60,20 @@
 }
 
 .rb-gantt-mark {
-    display: block;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     position: absolute;
     font-size: smaller;
     border-left: solid 1px lightgray;
     height: 100%;
     z-index: 100;
-    padding-top: 6px;
-    margin-bottom: -6px;
 }
 
 .rb-gantt-body {
     display: flex;
     flex-direction: row;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     overflow: hidden;
     border-bottom: 1px solid lightgray;
 }
@@ -113,7 +113,7 @@
 .rb-gantt-lanes {
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     position: relative;
 }
 
@@ -185,4 +185,8 @@
 
 .rb-gantt-backgroundcolor2 {
     background-color: #f4f4f4;
+}
+
+.rb-gantt-button {
+    margin: 0.3vw!important;
 }

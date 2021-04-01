@@ -6,7 +6,7 @@ import { RbAggregateObserverComponent } from 'app/abstract/rb-aggregateobserver'
 import { RbAggregate } from 'app/datamodel';
 import { ValueComparator } from 'app/helpers';
 import { RbAggregatesetComponent } from 'app/rb-aggregateset/rb-aggregateset.component';
-import { MapService } from 'app/services/map.service';
+import { FilterService } from 'app/services/filter.service';
 
 @Component({
   selector: 'rb-graph',
@@ -36,7 +36,7 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
   hovering: boolean = false;
 
   constructor(
-    private mapService: MapService
+    private filterService: FilterService
   ) {
     super();
   }
@@ -171,7 +171,7 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
     }
 
     let aggregatesetfilter = this.aggregateset.mergeFilters();
-    let filter = this.mapService.mergeMaps(aggregatesetfilter, dimensionFilter);
+    let filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
     let target = {
       object: this.aggregateset.objectname,
       filter: filter,
