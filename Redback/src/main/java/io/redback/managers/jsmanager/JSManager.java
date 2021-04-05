@@ -10,6 +10,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import io.firebus.FirebusThread;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.utils.js.JSConverter;
@@ -73,6 +74,7 @@ public class JSManager {
 	}
 	
 	protected EngineEntry addEngine(Long l) {
+		logger.info("Adding new JS engine for thead " + l);
 		EngineEntry ee = null;
 		synchronized(engines) {
 			ScriptEngine engine = engineManager.getEngineByName("graal.js");
@@ -122,7 +124,7 @@ public class JSManager {
 	}
 	
 	protected Object execute(String function, Object[] params) throws RedbackException, NoSuchMethodException, ScriptException {
-		Long id = Thread.currentThread().getId();
+		Long id = ((FirebusThread)Thread.currentThread()).getFunctionExecutionId();
 		EngineEntry engineEntry = getEngine(id);
 		if(engineEntry == null)
 			engineEntry = addEngine(id);

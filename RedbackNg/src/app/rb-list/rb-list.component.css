@@ -27,14 +27,14 @@
 }
 
 .rb-list-item-active-alt1 {
-	border-left: 4px Solid red;
-	padding-left: -4px;
-}
-
-.rb-list-item-active-alt2 {
 	border-left: 4px Solid #7985cb;
 	padding-left: -4px;
     background-color: #eceef8;
+}
+
+.rb-list-item-active-alt2 {
+	border-left: 4px Solid red;
+	padding-left: -4px;
 }
 
 .rb-list-item-data {

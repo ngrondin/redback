@@ -71,12 +71,12 @@
     <mat-sidenav-content>
         <rb-vsection>
             <rb-breadcrumb
-                *ngIf="viewTargetStack.length > 1 && userprefService.selecteduialt != 'alt2'"
+                *ngIf="viewTargetStack.length > 1 && userprefService.selecteduialt != 'base'"
                 [targetStack]="viewTargetStack"
                 (backTo)="backTo($event)">
             </rb-breadcrumb>
             <rb-view-header
-                *ngIf="userprefService.selecteduialt == 'alt2'"
+                *ngIf="userprefService.selecteduialt == 'base'"
                 [title]="currentTitle"
                 [targetStack]="viewTargetStack"
                 (backTo)="backTo($event)">

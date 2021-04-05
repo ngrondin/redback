@@ -113,6 +113,7 @@ public class RedbackServer implements Consumer
 			DataMap serviceConfig = serviceConfigs.getObject(i); 
 			String className = serviceConfig.getString("class");
 			String name = serviceConfig.getString("name");
+			int concurrent = serviceConfig.containsKey("concurrent") ? serviceConfig.getNumber("concurrent").intValue() : 10;
 			DataMap deploymentConfig = serviceConfig.getObject("config");
 			if(className != null && name != null)
 			{
@@ -178,11 +179,11 @@ public class RedbackServer implements Consumer
 					if(service != null)
 					{
 						if(service instanceof ServiceProvider)
-							firebus.registerServiceProvider(name, ((ServiceProvider)service), 10);
+							firebus.registerServiceProvider(name, ((ServiceProvider)service), concurrent);
 						if(service instanceof StreamProvider)
-							firebus.registerStreamProvider(name, ((StreamProvider)service), 10);
+							firebus.registerStreamProvider(name, ((StreamProvider)service), concurrent);
 						if(service instanceof Consumer)
-							firebus.registerConsumer(name, ((Consumer)service), 10);
+							firebus.registerConsumer(name, ((Consumer)service), concurrent);
 						services.add(service);
 					}
 				}

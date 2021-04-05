@@ -19,13 +19,13 @@
 }
 
 .rb-files-item-active-alt1 {
-    border-left: 3px solid red;
-}
-
-.rb-files-item-active-alt2 {
 	border-left: 4px Solid #7985cb;
 	padding-left: -4px;
     background-color: #eceef8;
+}
+
+.rb-files-item-active-alt2 {
+    border-left: 3px solid red;
 }
 
 .rb-files-imgbox {
