@@ -40,7 +40,7 @@ public class ReportManager {
 
 	public ReportManager(Firebus fb, DataMap config) {
 		firebus = fb;
-		jsManager = new JSManager();
+		jsManager = new JSManager("report");
 		configServiceName = config.getString("configservice");
 		objectServiceName = config.getString("objectservice");
 		dataServiceName = config.getString("dataservice");

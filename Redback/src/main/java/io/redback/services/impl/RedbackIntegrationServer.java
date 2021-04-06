@@ -64,7 +64,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 
 	public RedbackIntegrationServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
-		jsManager = new JSManager();
+		jsManager = new JSManager("integration");
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		gatewayServiceName = config.getString("gatewayservice");

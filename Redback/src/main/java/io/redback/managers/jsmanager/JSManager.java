@@ -38,6 +38,7 @@ public class JSManager {
 	}
 	
 	private Logger logger = Logger.getLogger("io.redback");
+	protected String name;
 	protected ScriptEngineManager engineManager;
 	protected Map<String, SourceEntry> sourceEntries;
 	protected Map<Long, EngineEntry> engines;
@@ -45,7 +46,8 @@ public class JSManager {
 	protected DataMap globalVariables;
 	protected boolean _dropCompilationErrors = false;
 	
-	public JSManager() {
+	public JSManager(String n) {
+		name = n;
 		sourceEntries = new HashMap<String, SourceEntry>();
 		engines = new HashMap<Long, EngineEntry>();
 		engineManager = new ScriptEngineManager();
@@ -74,7 +76,7 @@ public class JSManager {
 	}
 	
 	protected EngineEntry addEngine(Long l) {
-		logger.info("Adding new JS engine for thead " + l);
+		logger.info("Adding new JS engine " + name + "_" + l);
 		EngineEntry ee = null;
 		synchronized(engines) {
 			ScriptEngine engine = engineManager.getEngineByName("graal.js");

@@ -84,7 +84,7 @@ public class ObjectManager
 		name = n;
 		firebus = fb;
 		includeLoaded = false;
-		jsManager = new JSManager();
+		jsManager = new JSManager("object");
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");

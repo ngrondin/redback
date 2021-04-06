@@ -43,17 +43,19 @@ export class DragService {
   }
 
   public endDrag() {
-    if(this.sourceElement != null && this.sourceElement.nativeElement != null) {
-      this.sourceElement.nativeElement.style.visibility = "";
-    }
-    this.sourceElement = null;
-    this.isDragging = false;
     this.object = null;
     this.mouseOrigin = null;
     this.offset = null;
     this.position = null;
     this.size = null;
-    this.publishEvent({type:"end"});
+    if(this.isDragging) {
+      this.isDragging = false;
+      if(this.sourceElement != null && this.sourceElement.nativeElement != null) {
+        this.sourceElement.nativeElement.style.visibility = "";
+      }
+      this.publishEvent({type:"end"});
+    }
+    this.sourceElement = null;
   }
 
   getObservable() : Observable<any>  {

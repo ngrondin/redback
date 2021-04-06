@@ -57,7 +57,7 @@ public class ProcessManager
 	public ProcessManager(Firebus fb, DataMap config)
 	{
 		firebus = fb;
-		jsManager = new JSManager();
+		jsManager = new JSManager("process");
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");

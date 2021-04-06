@@ -44,7 +44,7 @@ public class RedbackUIServer extends UIServer
 	{
 		super(n, c, f);
 		devpath = config.getString("devpath");
-		jsManager = new JSManager(); 
+		jsManager = new JSManager("ui"); 
 		jspScripts = new HashMap<String, Function>();
 		viewConfigs = new HashMap<String, DataMap>();
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
