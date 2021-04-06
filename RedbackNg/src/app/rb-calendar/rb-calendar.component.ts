@@ -119,6 +119,10 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     return this.datasetgroup != null ? this.datasetgroup.lists : null;
   }
 
+  get isLoading() : boolean {
+    return this.dataset != null ? this.dataset.isLoading : this.datasetgroup != null ? this.datasetgroup.isLoading : false;
+  }
+
   get year():  number {
     return this._year;
   }

@@ -236,8 +236,12 @@ export class RbGanttComponent extends RbDataObserverComponent {
     this.filterDataset();
   }
 
-  public get laneHeight() : number {
+  get laneHeight() : number {
     return ganttLaneHeight;
+  }
+
+  get isLoading() : boolean {
+    return this.dataset != null ? this.dataset.isLoading : this.datasetgroup != null ? this.datasetgroup.isLoading : false;
   }
 
   haveListsChanged(): Boolean {

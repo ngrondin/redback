@@ -99,6 +99,7 @@ export class RbDatasetGroupComponent extends RbContainerComponent {
         l = true;
       }
     }
+    //console.log("loading is " + l);
     return l;
   }
 }

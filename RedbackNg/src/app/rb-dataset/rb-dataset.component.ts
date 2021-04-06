@@ -36,11 +36,10 @@ export class RbDatasetComponent extends RbContainerComponent  {
   public searchString: string;
   public userFilter: any;
   public userSort: any;
-  public isLoading: boolean;
   public firstLoad: boolean = true;
   public nextPage: number;
   public pageSize: number;
-  public fetchThreads: number;
+  public fetchThreads: number = 0;
   private observers: Observer<string>[] = [];
 
 
@@ -100,6 +99,14 @@ export class RbDatasetComponent extends RbContainerComponent  {
     this.select(obj);
   }
 
+  public get isLoading() : boolean {
+    return this.fetchThreads > 0;
+  }
+
+  public get canLoadData() : boolean {
+    return this.active && (this.master == null || (this.master != null && this.relatedObject != null));
+  }
+
   getObservable() : Observable<string>  {
     return new Observable<string>((observer) => {
       this.observers.push(observer);
@@ -123,12 +130,14 @@ export class RbDatasetComponent extends RbContainerComponent  {
   }
 
   public refreshData() {
-    if(this.active) {
+    if(this.canLoadData) {
       this.clearData();
       if(this.fetchAll) {
+        this.fetchThreads = 2;
         setTimeout(() => this.fetchNextPage(), 1);
-        setTimeout(() => this.fetchNextPage(), 500);
+        setTimeout(() => this.fetchNextPage(), 200);
       } else {
+        this.fetchThreads = 1;
         this.fetchNextPage();
       }
     }
@@ -146,19 +155,15 @@ export class RbDatasetComponent extends RbContainerComponent  {
   }
 
   public fetchNextPage() {
-    if(this.master == null || (this.master != null && this.relatedObject != null)) {
-      const filter = this.mergeFilters();
-      const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
-      const search = this.searchString;
-      this.dataService.listObjects(this.object, filter, search, sort, this.nextPage, this.pageSize).subscribe({
-        next: (data) => this.setData(data),
-        error: (error) => {this.isLoading = false;}
-      });
-      this.nextPage = this.nextPage + 1;
-      this.fetchThreads = this.fetchThreads + 1;
-      this.dataService.subscribeObjectCreation(this.id, this.object, filter);
-      this.isLoading = true;
-    }
+    const filter = this.mergeFilters();
+    const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
+    const search = this.searchString;
+    this.dataService.listObjects(this.object, filter, search, sort, this.nextPage, this.pageSize).subscribe({
+      next: (data) => this.setData(data),
+      error: (error) => {this.fetchThreads--;}
+    });
+    this.nextPage = this.nextPage + 1;
+    this.dataService.subscribeObjectCreation(this.id, this.object, filter);
   }
 
   private mergeFilters() : any {
@@ -187,11 +192,13 @@ export class RbDatasetComponent extends RbContainerComponent  {
         obj.addSet(this);
       }
     } 
-    this.fetchThreads = this.fetchThreads - 1;
-    if(this.fetchAll == true && data.length == this.pageSize) {
+    if(data.length == this.pageSize && this.fetchAll == true) {
       this.fetchNextPage();
-    } else if(this.fetchThreads == 0) {
-      this.isLoading = false;
+    } else {
+      this.fetchThreads--;
+    }
+    if(this.fetchThreads == 0) {
+      console.log("dataset " + this.object + " finished loading");
       this.firstLoad = false;
       if(this._list.length == 0) {
         this._selectedObject = null;

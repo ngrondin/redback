@@ -82,10 +82,10 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   finishEditing() {
+    this.dataset.search(this.editedValue);
     this.commit(this.editedValue);
     super.finishEditing();
   }
-
 
   openFilterBuilder() {
     this.overlayRef = this.overlay.create({
