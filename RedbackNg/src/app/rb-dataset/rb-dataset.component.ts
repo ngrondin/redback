@@ -36,6 +36,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
   public searchString: string;
   public userFilter: any;
   public userSort: any;
+  public filter: any;
   public firstLoad: boolean = true;
   public nextPage: number;
   public pageSize: number;
@@ -71,8 +72,10 @@ export class RbDatasetComponent extends RbContainerComponent  {
 
   onDatasetEvent(event: string) {
     if(this.active == true) {
-      if(event == 'select' || event == 'loaded') {
+      if(event == 'select') {
         this.refreshData();
+      } else if(event == 'loaded') {
+
       } else if(event == 'cleared') {
         this.clearData();
       }
@@ -132,6 +135,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
   public refreshData() {
     if(this.canLoadData) {
       this.clearData();
+      this.calcFilter();
       if(this.fetchAll) {
         this.fetchThreads = 2;
         setTimeout(() => this.fetchNextPage(), 1);
@@ -155,18 +159,16 @@ export class RbDatasetComponent extends RbContainerComponent  {
   }
 
   public fetchNextPage() {
-    const filter = this.mergeFilters();
     const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
     const search = this.searchString;
-    this.dataService.listObjects(this.object, filter, search, sort, this.nextPage, this.pageSize).subscribe({
+    this.dataService.listObjects(this.object, this.filter, search, sort, this.nextPage, this.pageSize).subscribe({
       next: (data) => this.setData(data),
       error: (error) => {this.fetchThreads--;}
     });
     this.nextPage = this.nextPage + 1;
-    this.dataService.subscribeObjectCreation(this.id, this.object, filter);
   }
 
-  private mergeFilters() : any {
+  private calcFilter() {
     let filter = {};
     if(this.baseFilter != null) {
       filter = this.filterService.mergeFilters(filter, this.baseFilter);
@@ -181,7 +183,8 @@ export class RbDatasetComponent extends RbContainerComponent  {
       filter = this.filterService.mergeFilters(filter, this.userFilter);
     }
     filter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
-    return filter;
+    this.filter = filter;
+    this.dataService.subscribeObjectCreation(this.id, this.object, this.filter);
   }
 
   private setData(data: RbObject[]) {
@@ -211,8 +214,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
       }
       if(this.nextPage == 1) { 
         if(this.fetchAll == false && this._list.length > 10) {
-          const filter = this.mergeFilters();
-          this.apiService.aggregateObjects(this.object, filter, this.searchString, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
+          this.apiService.aggregateObjects(this.object, this.filter, this.searchString, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
         } else {
           this.totalCount = this._list.length;
         }
@@ -223,11 +225,13 @@ export class RbDatasetComponent extends RbContainerComponent  {
   
   private receiveNewlyCreatedData(object: RbObject) {
     if(object.objectname == this.object && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
-      this._list.push(object);
-      object.addSet(this);
-      this.publishEvent('loaded');
-      if(this._list.length == 1) {
-        this._selectedObject = this._list[0];
+      if(this.filterService.applies(this.filter, object)) {
+        this._list.push(object);
+        object.addSet(this);
+        this.publishEvent('loaded');
+        if(this._list.length == 1) {
+          this._selectedObject = this._list[0];
+        }  
       }
     }
   }
@@ -298,9 +302,9 @@ export class RbDatasetComponent extends RbContainerComponent  {
   public action(name: string, param: string) {
     let _name: string = name.toLowerCase();
     if(_name == 'create' || _name == 'createinmemory') {
-      let data = this.mergeFilters();
+      let data = this.filter;
       if(param != null) {
-        data = this.filterService.mergeFilters(data, this.filterService.resolveFilter(param, this.selectedObject, this.selectedObject, this.relatedObject))
+        data = this.filterService.mergeFilters(this.filter, this.filterService.resolveFilter(param, this.selectedObject, this.selectedObject, this.relatedObject))
       }
       if(_name == 'create') {
         this.dataService.createObject(this.object, null, data).subscribe(newObject => this.addObjectAndSelect(newObject));
@@ -314,19 +318,16 @@ export class RbDatasetComponent extends RbContainerComponent  {
     } else if(_name == 'save') {
       
     } else if(_name == 'exportall') {
-      const filter = this.mergeFilters();
-      this.dataService.exportObjects(this.object, filter, this.searchString);
+      this.dataService.exportObjects(this.object, this.filter, this.searchString);
     } else if(_name == 'report') {
       if(this.selectedObject != null) {
         this.reportService.launchReport(param, null, {"uid": this.selectedObject.uid});
       }
     } else if(_name == 'reportall') {
-      const filter = this.mergeFilters();
-      this.reportService.launchReport(param, null, filter);
+      this.reportService.launchReport(param, null, this.filter);
     } else if(_name == 'reportlist') {
-      const allFilter = this.mergeFilters();
       const selectedFilter = this.selectedObject != null ? {"uid": this.selectedObject.uid} : null;
-      this.reportService.popupReportList(param, selectedFilter, allFilter);
+      this.reportService.popupReportList(param, selectedFilter, this.filter);
     } else if(_name == 'execute') {
       this.dataService.executeObject(this.selectedObject, param, null);
    } else if(_name == 'executeall') {
@@ -339,7 +340,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
       });
     } else if(_name == 'executeglobal') {
       let funcParam = {
-        "filter": this.mergeFilters(),
+        "filter": this.filter,
         "selecteduid": (this.selectedObject != null ? this.selectedObject.uid : null)
       }
       this.dataService.executeGlobal(param, funcParam);

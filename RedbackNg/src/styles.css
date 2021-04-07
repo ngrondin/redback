@@ -324,5 +324,17 @@ rb-fileset {
 	scrollbar-width: thin;
 }
 
+.hscroll-nobar {
+	overflow-x:hidden;
+	overflow-y: auto;
+	overflow-y: overlay;
+	scrollbar-color: #bcbcf6 transparent;
+	scrollbar-width: none;
+}
+
+.hscroll-nobar::-webkit-scrollbar
+{
+	width: 0px;
+}
 
 [hidden] { display: none !important;}

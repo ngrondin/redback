@@ -1,5 +1,5 @@
 <div
-    class="rb-menu-container hscroll">
+    [class]="'rb-menu-container' + (mode == 'large' ? ' hscroll' : ' hscroll-nobar')">
     <mat-action-list>
         <div
             class="rb-menu-item"
