@@ -475,7 +475,9 @@ public class ObjectManager
 			{
 				boolean isFilter = false;
 				Object value = initialData.get(attributeName);
-				if(value instanceof DataMap)
+				if(attributeName.startsWith("$")) 
+					isFilter = true;
+				else if(value instanceof DataMap)
 					for(String key: ((DataMap)value).keySet())
 						if(key.startsWith("$"))
 							isFilter = true;

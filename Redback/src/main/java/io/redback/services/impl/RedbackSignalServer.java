@@ -7,12 +7,11 @@ import java.util.Map;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.StreamEndpoint;
+import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.SignalServer;
-import io.redback.utils.FilterProcessor;
 
 public class RedbackSignalServer extends SignalServer {
 
@@ -23,17 +22,18 @@ public class RedbackSignalServer extends SignalServer {
 
 	protected class FilterSubscription extends Subscription {
 		public String id;
-		public DataMap filter;
+		//public DataMap filter;
+		public DataFilter filter;
 		public Session session;
 		
 		public FilterSubscription(String i, Session s, DataMap f) {
 			id = i;
 			session = s;
-			filter = f;
+			filter = new DataFilter(f);
 		}
 
 		public boolean matches(DataMap data) {
-			return FilterProcessor.apply(data, filter);
+			return filter.apply(data);
 		}
 	}
 	
@@ -123,7 +123,7 @@ public class RedbackSignalServer extends SignalServer {
 								if(fs.id.equals(req.getString("id"))) 
 									filterSubscription = fs;
 							if(filterSubscription != null) {
-								filterSubscription.filter = req.getObject("filter");
+								filterSubscription.filter = new DataFilter(req.getObject("filter"));
 							} else {
 								list.add(new FilterSubscription(req.getString("id"), session, req.getObject("filter")));
 							}
