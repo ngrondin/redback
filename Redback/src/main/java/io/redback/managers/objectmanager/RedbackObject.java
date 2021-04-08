@@ -527,6 +527,7 @@ public class RedbackObject extends RedbackElement
 		DataMap validatonNode = new DataMap();
 		DataMap relatedNode = new DataMap();
 
+		validatonNode.put("_candelete", this.canDelete());
 		Iterator<String> it = config.getAttributeNames().iterator();
 		while(it.hasNext())
 		{
