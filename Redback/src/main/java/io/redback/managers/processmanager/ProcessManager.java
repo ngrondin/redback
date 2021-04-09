@@ -292,7 +292,7 @@ public class ProcessManager
 			else
 			{
 				assignment = new Assignment(pi.getProcessName(), pi.getId(), new Notification("processexception", "exception", "Exception", "The process has stopped due to an exception and requires restart"));
-				assignment.addAction("restart", "Restart");
+				assignment.addAction("restart", "Restart", true);
 			}
 			if(assignment != null)
 			{

@@ -134,7 +134,7 @@ public class InteractionUnit extends ProcessUnit
 			for(ActionConfig actionConfig: actionConfigs)
 			{
 				if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeMatch(actionner, pi.getAssigneeById((String)actionConfig.evaluateExclusiveId(pi)))))
-					assignment.addAction(actionConfig.getActionName(), actionConfig.getActionDescription());
+					assignment.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain());
 			}
 			return assignment;		
 		}

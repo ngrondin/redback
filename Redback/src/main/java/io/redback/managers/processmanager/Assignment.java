@@ -18,11 +18,13 @@ public class Assignment
 	public class Action {
 		public String action;
 		public String description;
+		public boolean main;
 		
-		public Action(String a, String d)
+		public Action(String a, String d, boolean m)
 		{
 			action = a;
 			description = d;
+			main = m;
 		}
 	}
 	
@@ -39,9 +41,9 @@ public class Assignment
 		actions = new ArrayList<Action>();
 	}
 	
-	public void addAction(String action, String desc)
+	public void addAction(String action, String desc, boolean m)
 	{
-		Action a = new Action(action, desc);
+		Action a = new Action(action, desc, m);
 		actions.add(a);
 	}
 	
@@ -67,6 +69,7 @@ public class Assignment
 			DataMap action = new DataMap();
 			action.put("action", actions.get(i).action);
 			action.put("description", actions.get(i).description);
+			action.put("main", actions.get(i).main);
 			actionList.add(action);
 		}
 		map.put("actions", actionList);		
