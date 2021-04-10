@@ -29,11 +29,16 @@ public class JSZonedTime implements ProxyObject {
 		if(key.equals("atDate")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
-					Date inDate = (Date)JSConverter.toJava(arguments[0]);
-					ZonedDateTime inZDT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(inDate.getTime()), ZoneId.systemDefault());
-					ZonedDateTime outZDT = zonedTime.atDate(inZDT);
-					Date outDate = Date.from(outZDT.toInstant());
-					return JSConverter.toJS(outDate);
+					Object inDateObj = JSConverter.toJava(arguments[0]);
+					if(inDateObj instanceof Date) {
+						Date inDate = (Date)inDateObj;
+						ZonedDateTime inZDT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(inDate.getTime()), ZoneId.systemDefault());
+						ZonedDateTime outZDT = zonedTime.atDate(inZDT);
+						Date outDate = Date.from(outZDT.toInstant());
+						return JSConverter.toJS(outDate);	
+					} else {
+						throw new RuntimeException("Not a valid date");
+					}
 				}
 			};			
 		} else if(key.equals("toString")) {
