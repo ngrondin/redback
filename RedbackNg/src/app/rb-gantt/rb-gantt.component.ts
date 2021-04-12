@@ -194,7 +194,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
         this.seriesConfigs.push(new GanttSeriesConfig(item));
       }
     }
-    if(this.dofilter) {
+    if(this.dofilter && this.active) {
       this.filterDataset();
     }
   }
@@ -314,8 +314,8 @@ export class RbGanttComponent extends RbDataObserverComponent {
   filterDataset() {
     for(let cfg of this.seriesConfigs) {
       let filter: any = {};
-      if(cfg.endAttribute != null) filter[cfg.endAttribute] = {$gt: this.startDate.toISOString()};
-      if(cfg.startAttribute != null) filter[cfg.startAttribute] = {$lt: (new Date(this.startDate.getTime() + this.spanMS)).toISOString()};
+      if(cfg.endAttribute != null) filter[cfg.endAttribute] = {$gt: "'" + this.startDate.toISOString() + "'"};
+      if(cfg.startAttribute != null) filter[cfg.startAttribute] = {$lt: "'" + (new Date(this.startDate.getTime() + this.spanMS)).toISOString() + "'"};
       if(this.datasetgroup != null) {
         this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
       } else {

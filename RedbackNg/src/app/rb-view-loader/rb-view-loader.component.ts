@@ -44,7 +44,7 @@ export class LoadedView {
   setTarget(dataTarget: DataTarget) {
     if(dataTarget != null) {
       for(let dataset of this.topDatasets) {
-        if(dataTarget.objectname == null || (dataTarget.objectname == dataset.object)) {
+        if(dataset.ignoretarget == false && (dataTarget.objectname == null || (dataTarget.objectname == dataset.object))) {
           if(dataset.dataTarget != dataTarget) {
             dataset.dataTarget = dataTarget;
             setTimeout(() => dataset.reset(), 1);

@@ -245,9 +245,9 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     let endDate = new Date((new Date(startDate.getTime())).setMonth(startDate.getMonth() + 1));
     for(let cfg of this.seriesConfigs) {
       let f1 = {};
-      f1[cfg.dateAttribute] = {$gt: startDate.toISOString()};
+      f1[cfg.dateAttribute] = {$gt: "'" + startDate.toISOString() + "'"};
       let f2 = {};
-      f2[cfg.dateAttribute] = {$lt: endDate.toISOString()};
+      f2[cfg.dateAttribute] = {$lt: "'" + endDate.toISOString() + "'"};
       let filter = {$and:[f1, f2]};
       if(this.datasetgroup != null) {
         this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
