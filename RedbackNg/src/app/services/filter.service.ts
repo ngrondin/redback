@@ -43,12 +43,18 @@ export class FilterService {
         }
       } 
 
+      function evalValue(__value) {
+        var ret = null;
+        try { ret = eval(__varString + __value); } catch(err) {}
+        return ret;
+      }
+
       for (const __key in __inMap) {
         let __value = __inMap[__key];
         if(__value == null) {
           __value = null;
         } else if(typeof __value == "string") {
-          __value = eval(__varString + __value);
+          __value = evalValue(__value);
         } else if(typeof __value == "object" ) {
           if(Array.isArray(__value)) {
             let __outArray = [];
@@ -56,7 +62,7 @@ export class FilterService {
               if(typeof __valueItem == "object") {
                 __outArray.push(this.resolveFilter(__valueItem, obj, selectedObject, relatedObject));
               } else if(typeof __valueItem == "string") {
-                __outArray.push(eval(__varString + __valueItem));
+                __outArray.push(evalValue(__valueItem));
               }
             }
             __value = __outArray;
