@@ -143,6 +143,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
   @Input('lanes') lanes : any;
   @Input('series') series: any[];
   @Input('locktonow') locktonow: boolean = false;
+  @Input('dofilter') dofilter: boolean = true;
 
   lanesConfig: GanttLaneConfig;
   seriesConfigs: GanttSeriesConfig[];
@@ -193,7 +194,9 @@ export class RbGanttComponent extends RbDataObserverComponent {
         this.seriesConfigs.push(new GanttSeriesConfig(item));
       }
     }
-    this.filterDataset();
+    if(this.dofilter) {
+      this.filterDataset();
+    }
   }
 
   dataObserverDestroy() {
@@ -233,7 +236,11 @@ export class RbGanttComponent extends RbDataObserverComponent {
 
   set startDate(dt: Date) {
     this._startDate = new Date(dt);
-    this.filterDataset();
+    if(this.dofilter) {
+      this.filterDataset();
+    } else {
+      this.redraw();
+    }
   }
 
   get laneHeight() : number {
@@ -284,7 +291,11 @@ export class RbGanttComponent extends RbDataObserverComponent {
 
   setSpan(ms: number) {
     this.spanMS = ms;
-    this.filterDataset();
+    if(this.dofilter) {
+      this.filterDataset();
+    } else {
+      this.redraw();
+    }
   }
 
   refresh() {
@@ -303,8 +314,8 @@ export class RbGanttComponent extends RbDataObserverComponent {
   filterDataset() {
     for(let cfg of this.seriesConfigs) {
       let filter: any = {};
-      filter[cfg.endAttribute] = {$gt: this.startDate.toISOString()};
-      filter[cfg.startAttribute] = {$lt: (new Date(this.startDate.getTime() + this.spanMS)).toISOString()};
+      if(cfg.endAttribute != null) filter[cfg.endAttribute] = {$gt: this.startDate.toISOString()};
+      if(cfg.startAttribute != null) filter[cfg.startAttribute] = {$lt: (new Date(this.startDate.getTime() + this.spanMS)).toISOString()};
       if(this.datasetgroup != null) {
         this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
       } else {

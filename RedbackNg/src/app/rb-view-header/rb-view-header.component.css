@@ -1,7 +1,7 @@
 :host {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
     background-color: white;
     border-bottom: 1px solid lightgrey;
 }
@@ -14,7 +14,7 @@
 }
 
 .rb-vh-title { 
-    font-size: 18px;
+    font-size: 1vw;
     font-weight: 500;
 }
 
@@ -24,6 +24,15 @@
 
 .rb-vh-more {
     color: lightgray;
+    width: 2.12vw;
+    height: 2.12vw;
+    line-height: 2.12vw;
+}
+
+ mat-icon {
+    font-size: 1vw!important;
+    width: var(--v24px);
+    height: var(--v24px);
 }
 
 .rb-vh-stackitem {

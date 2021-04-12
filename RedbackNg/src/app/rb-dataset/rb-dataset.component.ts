@@ -34,8 +34,8 @@ export class RbDatasetComponent extends RbContainerComponent  {
   private _selectedObject: RbObject;
   public totalCount: number = -1;
   public searchString: string;
-  public userFilter: any;
-  public userSort: any;
+  public userFilter: any = null;
+  public userSort: any = null;
   public filter: any;
   public firstLoad: boolean = true;
   public nextPage: number;
@@ -119,8 +119,8 @@ export class RbDatasetComponent extends RbContainerComponent  {
   public reset() {
     if(this.dataTarget != null && (this.dataTarget.filter != null || this.dataTarget.search != null)) {
       if(ValueComparator.notEqual(this.dataTarget.filter, this.userFilter) || (this.dataTarget.search != this.searchString)) {
-        this.searchString = this.dataTarget.search;
-        this.userFilter = this.dataTarget.filter;
+        this.searchString = this.dataTarget.search || null;
+        this.userFilter = this.dataTarget.filter || null;
         this.userSort = null;
         if(this.loadOnReset && this.active) this.refreshData();
         this.publishEvent('reset');
@@ -176,9 +176,9 @@ export class RbDatasetComponent extends RbContainerComponent  {
     if(this.master != null && this.relatedObject != null) {
       filter = this.filterService.mergeFilters(filter, this.master.relationship);
     } 
-    if(this.dataTarget != null) {
+    /*if(this.dataTarget != null) {
       filter = this.filterService.mergeFilters(filter, this.dataTarget.filter);
-    } 
+    }*/ 
     if(this.userFilter != null) {
       filter = this.filterService.mergeFilters(filter, this.userFilter);
     }
