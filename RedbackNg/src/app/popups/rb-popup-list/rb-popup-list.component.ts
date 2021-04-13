@@ -53,7 +53,7 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
       }
     }
     this.isLoading = true;
-    this.dataService.listRelatedObjects(this.config.rbObject.objectname, this.config.rbObject.uid, this.config.attribute, filter, this.search, sort).subscribe(data => this.setData(data));
+    this.dataService.listRelatedObjects(this.config.rbObject.objectname, this.config.rbObject.uid, this.config.attribute, filter, this.search, sort, true).subscribe(data => this.setData(data));
   }
 
   public setData(objects: RbObject[]) {

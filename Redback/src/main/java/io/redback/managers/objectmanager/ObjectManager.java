@@ -386,6 +386,7 @@ public class ObjectManager
 							context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
 							context.put("filter", JSConverter.toJS(filter));
 							context.put("sort", JSConverter.toJS(sort));
+							context.put("search", searchText);
 							context.put("action", "list");
 							context.put("page", page);
 							context.put("pageSize", pageSize);

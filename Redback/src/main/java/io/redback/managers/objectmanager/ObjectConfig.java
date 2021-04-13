@@ -62,6 +62,7 @@ public class ObjectConfig
 			List<String> scriptVars2 = new ArrayList<String>(scriptVars);
 			scriptVars2.add("filter");
 			scriptVars2.add("sort");
+			scriptVars2.add("search");
 			scriptVars2.add("tuple");
 			scriptVars2.add("metrics");
 			scriptVars2.add("page");

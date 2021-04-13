@@ -72,8 +72,8 @@ export class DataService {
     return dataObservable; 
   }
 
-  listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number) : Observable<any> {
-    const apiObservable = this.apiService.listObjects(name, filter, search, sort, page, pageSize);
+  listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean) : Observable<any> {
+    const apiObservable = this.apiService.listObjects(name, filter, search, sort, page, pageSize, addRelated);
     const dataObservable = new Observable((observer) => {
       apiObservable.subscribe(
         resp => {
@@ -87,8 +87,8 @@ export class DataService {
     return dataObservable; 
   }
 
-  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any) : Observable<any> {
-    const apiObservable = this.apiService.listRelatedObjects(name, uid, attribute, filter, search, sort);
+  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean) : Observable<any> {
+    const apiObservable = this.apiService.listRelatedObjects(name, uid, attribute, filter, search, sort, addRelated);
     const dataObservable = new Observable((observer) => {
       apiObservable.subscribe(
         resp => {

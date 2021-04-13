@@ -55,7 +55,7 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number): Observable<any> {
+  listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean): Observable<any> {
     const req = {
       action: 'list',
       object: name,
@@ -64,7 +64,7 @@ export class ApiService {
       page: page,
       pagesize: pageSize,
       options: {
-        addrelated: true,
+        addrelated: addRelated,
         addvalidation: true
       }
     };
@@ -73,7 +73,7 @@ export class ApiService {
     return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
-  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any): Observable<any> {
+  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean): Observable<any> {
     const req = {
       action: 'list',
       object: name,
@@ -82,7 +82,7 @@ export class ApiService {
       filter: filter,
       sort: sort,
       options: {
-        addrelated: true,
+        addrelated: addRelated,
         addvalidation: true
       }
     };

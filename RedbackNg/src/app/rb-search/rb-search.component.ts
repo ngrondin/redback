@@ -4,6 +4,7 @@ import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { RbFilterBuilderComponent, FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
 import { RbFieldInputComponent } from 'app/inputs/abstract/rb-field-input';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Component({
   selector: 'rb-search',
@@ -19,6 +20,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
 
   public filterValue: any;
   public sortValue: any;
+  public queuedSearch: string = null;
 
   constructor(    
     public injector: Injector,
@@ -61,14 +63,28 @@ export class RbSearchComponent extends RbFieldInputComponent {
 
   public set displayvalue(val: any) {
     this.editedValue = val;
-    if(this.editedValue !== this.previousValue) {
+    if(this.editedValue !== this.queuedSearch) {
       let currentValue = this.editedValue;
       setTimeout(()=> {
-        if(this.editedValue == currentValue)
-          this.dataset.search(this.editedValue);
+        if(this.editedValue == currentValue) {
+          this.search();
+        }
       }, 500);
-      this.previousValue = this.editedValue;
+      this.queuedSearch = this.editedValue;
     }
+  }
+
+  search() {
+    if(this.dataset != null) {
+      this.dataset.search(this.editedValue);
+    } else if(this.datasetgroup != null) {
+      for(let dsname of Object.keys(this.datasetgroup.datasets)) {
+        let ds: RbDatasetComponent = this.datasetgroup.datasets[dsname];
+        ds.search(this.editedValue);
+      }
+      this.datasetgroup
+    }
+    this.queuedSearch = null;
   }
 
   onFocus(event: any) {
@@ -82,7 +98,9 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   finishEditing() {
-    this.dataset.search(this.editedValue);
+    if(this.queuedSearch != null) {
+      this.search();
+    }
     this.commit(this.editedValue);
     super.finishEditing();
   }

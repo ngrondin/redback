@@ -12,6 +12,9 @@ class CalendarSeriesConfig {
   labelAttribute: string;
   colorAttribute: string;
   colorMap: any;
+  color: string;
+  linkAttribute: string;
+  linkView: string;
   modal: string;
   canEdit: boolean;
 
@@ -22,6 +25,9 @@ class CalendarSeriesConfig {
     this.labelAttribute = json.labelattribute;
     this.colorAttribute = json.colorattribute;
     this.colorMap = json.colormap;
+    this.color = json.color;
+    this.linkAttribute = json.linkattribute;
+    this.linkView = json.linkview;
     this.modal = json.modal;
   }
 }
@@ -185,7 +191,9 @@ export class RbCalendarComponent extends RbDataObserverComponent {
           } else {
             color = obj.get(cfg.colorAttribute);
           }
-        }        
+        } else if(cfg.color != null) {
+          color = cfg.color;
+        }       
         let entry = new CalendarEntry(obj.uid, label, date, color, obj, cfg);
         this.putEntryInData(entry);
       }
@@ -208,11 +216,11 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     let endDate = new Date((new Date(startDate.getTime())).setDate(startDate.getDate() + 1));
     if(this.seriesConfigs.length > 0) {
       let cfg = this.seriesConfigs[0];
-      let f1 = {};
-      f1[cfg.dateAttribute] = {$gt: startDate.toISOString()};
-      let f2 = {};
-      f2[cfg.dateAttribute] = {$lt: endDate.toISOString()};
-      let filter = {$and:[f1, f2]};
+      let filter = {};
+      filter[cfg.dateAttribute] = {
+        $gt: "'" + startDate.toISOString() + "'",
+        $lt: "'" + endDate.toISOString() + "'"
+      }      
       let objectname = null;
       if(this.datasetgroup != null) {
         objectname = this.datasetgroup.datasets[cfg.dataset].object;
@@ -230,10 +238,17 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   clickItem(item: CalendarEntry) {
     let object = item.object;
     if(object != null) {
-      let target = {
-        object: object.objectname,
-        filter: {uid: "'" + object.uid + "'"}
-      };
+      let target = {};
+      if(item.config.linkView != null) {
+        target['view'] = item.config.linkView;
+      } else {
+        target['object'] = object.objectname;
+      }
+      if(item.config.linkAttribute != null) {
+        target['filter'] = {uid: "'" + object.get(item.config.linkAttribute) + "'"};
+      } else {
+        target['filter'] = {uid: "'" + object.uid + "'"};
+      }
       this.navigate.emit(target);
     }
   }
@@ -244,11 +259,11 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     let startDate = new Date(this.year, this.month, 1, 0, 0, 0, 0);
     let endDate = new Date((new Date(startDate.getTime())).setMonth(startDate.getMonth() + 1));
     for(let cfg of this.seriesConfigs) {
-      let f1 = {};
-      f1[cfg.dateAttribute] = {$gt: "'" + startDate.toISOString() + "'"};
-      let f2 = {};
-      f2[cfg.dateAttribute] = {$lt: "'" + endDate.toISOString() + "'"};
-      let filter = {$and:[f1, f2]};
+      let filter = {};
+      filter[cfg.dateAttribute] = {
+        $gt: "'" + startDate.toISOString() + "'",
+        $lt: "'" + endDate.toISOString() + "'"
+      }
       if(this.datasetgroup != null) {
         this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
       } else {

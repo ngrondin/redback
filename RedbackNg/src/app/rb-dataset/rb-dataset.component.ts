@@ -21,13 +21,15 @@ export class RbDatasetComponent extends RbContainerComponent  {
   @Input('object') object: string;
   @Input('basefilter') baseFilter: any;
   @Input('basesort') baseSort: any;
+  @Input('dataTarget') dataTarget: DataTarget;
+  @Input('master') master: any;
+
+  @Input('name') name: string;
   @Input('fetchall') fetchAll: boolean = false;
   @Input('fetchonreset') fetchonreset: boolean = true;
   @Input('ignoretarget') ignoretarget: boolean = false;
-  @Input('name') name: string;
+  @Input('addrelated') addrelated: boolean = true;
 
-  @Input('dataTarget') dataTarget: DataTarget;
-  @Input('master') master: any;
 
   public id: String;
   private dataSubscription: Subscription;
@@ -162,7 +164,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
   public fetchNextPage() {
     const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
     const search = this.searchString;
-    this.dataService.listObjects(this.object, this.filter, search, sort, this.nextPage, this.pageSize).subscribe({
+    this.dataService.listObjects(this.object, this.filter, search, sort, this.nextPage, this.pageSize, this.addrelated).subscribe({
       next: (data) => this.setData(data),
       error: (error) => {this.fetchThreads--;}
     });

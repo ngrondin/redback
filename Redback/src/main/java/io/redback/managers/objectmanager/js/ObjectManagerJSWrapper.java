@@ -47,7 +47,8 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						String objectName = arguments[0].asString();
 						DataMap filter = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
 						DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-						return JSConverter.toJS(objectManager.listObjects(session, objectName, filter, null, sort, false, 0, 50));
+						String search = arguments.length > 3 ? arguments[3].asString() : null;
+						return JSConverter.toJS(objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 50));
 					} catch (Exception e) {
 						throw new RuntimeException("Error in listObjects", e);
 					}
@@ -60,7 +61,8 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						String objectName = arguments[0].asString();
 						DataMap filter = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
 						DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-						return JSConverter.toJS(objectManager.listObjects(session, objectName, filter, null, sort, false, 0, 5000));
+						String search = arguments.length > 3 ? arguments[3].asString() : null;
+						return JSConverter.toJS(objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 5000));
 					} catch (Exception e) {
 						throw new RuntimeException("Error in listObjects", e);
 					}
