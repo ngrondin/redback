@@ -7,11 +7,11 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.processmanager.Actionner;
-import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.security.Session;
 import io.redback.services.ProcessServer;
+import io.redback.utils.Notification;
 
 public class RedbackProcessServer extends ProcessServer
 {
@@ -59,11 +59,11 @@ public class RedbackProcessServer extends ProcessServer
 	}
 
 
-	protected List<Assignment> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException
+	protected List<Notification> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
 		processManager.initiateCurrentTransaction();
-		List<Assignment> result = processManager.getAssignments(actionner, filter, viewdata);
+		List<Notification> result = processManager.getNotifications(actionner, filter, viewdata);
 		processManager.commitCurrentTransaction();
 		return result;
 	}
@@ -71,7 +71,7 @@ public class RedbackProcessServer extends ProcessServer
 	protected int getAssignmentCount(Session session, DataMap filter) throws RedbackException {
 		Actionner actionner = new Actionner(session);
 		processManager.initiateCurrentTransaction();
-		int count = processManager.getAssignmentCount(actionner, filter);
+		int count = processManager.getNotificationCount(actionner, filter);
 		processManager.commitCurrentTransaction();
 		return count;
 	}

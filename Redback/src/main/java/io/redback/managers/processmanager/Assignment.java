@@ -8,25 +8,14 @@ import io.firebus.utils.DataMap;
 import io.redback.utils.Notification;
 
 public class Assignment 
-{
+{/*
 	public String processName;
 	public String pid;
 	public Notification notification;
 	public List<Action> actions;
 	public DataMap data;
 
-	public class Action {
-		public String action;
-		public String description;
-		public boolean main;
-		
-		public Action(String a, String d, boolean m)
-		{
-			action = a;
-			description = d;
-			main = m;
-		}
-	}
+
 	
 	public Assignment()
 	{
@@ -81,5 +70,5 @@ public class Assignment
 	public String toString()
 	{
 		return getDataMap().toString();
-	}
+	}*/
 }

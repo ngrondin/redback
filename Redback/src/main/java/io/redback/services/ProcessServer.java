@@ -9,9 +9,9 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.security.Session;
+import io.redback.utils.Notification;
 
 public abstract class ProcessServer extends AuthenticatedServiceProvider
 {
@@ -100,7 +100,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 					DataMap filter = request.getObject("filter");
 					DataList viewdata = request.getList("viewdata");
 					DataList responseList = new DataList();
-					List<Assignment> result = getAssignments(session, filter, viewdata);
+					List<Notification> result = getAssignments(session, filter, viewdata);
 					if(result != null) 
 					{
 						for(int i = 0; i < result.size(); i++)
@@ -147,7 +147,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 
 	protected abstract void interruptProcesses(Session session, DataMap filter) throws RedbackException;
 
-	protected abstract List<Assignment> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException;
+	protected abstract List<Notification> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException;
 	
 	protected abstract int getAssignmentCount(Session session, DataMap filter) throws RedbackException;
 	

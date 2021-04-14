@@ -15,6 +15,7 @@ import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
+import io.redback.utils.Notification;
 import io.redback.utils.js.JSConverter;
 
 public class ProcessManagerJSWrapper implements ProxyObject
@@ -57,7 +58,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 					try {
 						DataMap filter = (DataMap)JSConverter.toJava(arguments[0]);
 						DataList viewData = (DataList)JSConverter.toJava(arguments[1]);
-						List<Assignment> list = processManager.getAssignments(actionner, filter, viewData);
+						List<Notification> list = processManager.getNotifications(actionner, filter, viewData);
 						return JSConverter.toJS(list);
 					} catch (Exception e) {
 						throw new RuntimeException("Error in getNotifications", e);

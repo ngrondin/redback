@@ -2,27 +2,27 @@ package io.redback.services.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.utils.DataFilter;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.SignalServer;
 
 public class RedbackSignalServer extends SignalServer {
-
+/*
 	protected abstract class Subscription {
 		public abstract boolean matches(DataMap signal);
 	};
-	
-
-	protected class FilterSubscription extends Subscription {
+*/
+	protected class FilterSubscription /*extends Subscription */{
 		public String id;
-		//public DataMap filter;
 		public DataFilter filter;
 		public Session session;
 		
@@ -37,17 +37,33 @@ public class RedbackSignalServer extends SignalServer {
 		}
 	}
 	
-	protected Map<String, Map<String, List<Session>>> objectUpdate;
-	protected Map<String, Map<String, List<FilterSubscription>>> objectCreate;
-	protected Map<Session, List<String[]>> sessionToObjectUpdate;
-	protected Map<Session, List<String[]>> sessionToObjectCreate;
+	protected abstract class Pointer {
+		
+	}
+	
+	protected class ObjectDomainPointer extends Pointer {
+		public String objectname;
+		public String domain;
+		public ObjectDomainPointer(String o, String d) {objectname = o; domain = d;}
+	}
+
+	protected class ObjectUIDPointer extends Pointer {
+		public String objectname;
+		public String uid;
+		public ObjectUIDPointer(String o, String i) {objectname = o; uid = i;}
+	}
+	
+	protected Map<String, Map<String, List<Session>>> uniqueObjectSubsriptions;
+	protected Map<String, Map<String, List<FilterSubscription>>> objectFilterSubscriptions;
+	protected Map<Session, List<ObjectUIDPointer>> sessionObjectUIDPointers;
+	protected Map<Session, List<ObjectDomainPointer>> sessionObjectDomainPointers;
 	
 	public RedbackSignalServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
-		objectUpdate = new HashMap<String, Map<String, List<Session>>>();
-		objectCreate = new HashMap<String, Map<String, List<FilterSubscription>>>();
-		sessionToObjectUpdate = new HashMap<Session, List<String[]>>();
-		sessionToObjectCreate = new HashMap<Session, List<String[]>>();
+		uniqueObjectSubsriptions = new HashMap<String, Map<String, List<Session>>>();
+		objectFilterSubscriptions = new HashMap<String, Map<String, List<FilterSubscription>>>();
+		sessionObjectUIDPointers = new HashMap<Session, List<ObjectUIDPointer>>();
+		sessionObjectDomainPointers = new HashMap<Session, List<ObjectDomainPointer>>();
 	}
 
 	protected void onSignal(DataMap signal) throws RedbackException {
@@ -55,7 +71,7 @@ public class RedbackSignalServer extends SignalServer {
 		if(type.equals("objectupdate")) {
 			String objectName = signal.getString("object.objectname");
 			String uid = signal.getString("object.uid");
-			Map<String, List<Session>> map = objectUpdate.get(objectName);
+			Map<String, List<Session>> map = uniqueObjectSubsriptions.get(objectName);
 			if(map != null) {
 				List<Session> list = map.get(uid);
 				if(list != null)
@@ -65,13 +81,27 @@ public class RedbackSignalServer extends SignalServer {
 		} else if(type.equals("objectcreate")) {
 			String objectName = signal.getString("object.objectname");
 			String domain = signal.getString("object.domain");
-			Map<String, List<FilterSubscription>> map = objectCreate.get(objectName);
+			Map<String, List<FilterSubscription>> map = objectFilterSubscriptions.get(objectName);
 			if(map != null) {
 				List<FilterSubscription> list = map.get(domain);
 				if(list != null)
 					for(FilterSubscription subs : list) 
 						if(subs.matches(signal.getObject("object.data")))
 							sendStreamData(subs.session, new Payload(signal.toString()));
+			}
+		} else if(type.equals("processnotification")) {
+			DataList to = signal.getObject("notification").getList("to");
+			if(to != null && to.size() > 0) {
+				Iterator<Session> it = sessionToEndpoint.keySet().iterator();
+				while(it.hasNext()) {
+					Session session = it.next();
+					for(int i = 0; i < to.size(); i++) {
+						String username = to.getString(i);
+						if(session.getUserProfile().getUsername().equals(username)) {
+							sendStreamData(session, new Payload(signal.toString()));
+						}
+					}
+				}
 			}
 		}
 	}
@@ -89,10 +119,10 @@ public class RedbackSignalServer extends SignalServer {
 					String object = req.getString("objectname");
 					if(type.equals("objectupdate")) {
 						String uid = req.getString("uid");
-						Map<String, List<Session>> objMap = objectUpdate.get(object);
+						Map<String, List<Session>> objMap = uniqueObjectSubsriptions.get(object);
 						if(objMap == null) {
 							objMap = new HashMap<String, List<Session>>();
-							objectUpdate.put(object, objMap);
+							uniqueObjectSubsriptions.put(object, objMap);
 						}
 						List<Session> list = objMap.get(uid);
 						if(list == null) {
@@ -100,17 +130,17 @@ public class RedbackSignalServer extends SignalServer {
 							objMap.put(uid, list);
 						}
 						list.add(session);
-						List<String[]> pointers = sessionToObjectUpdate.get(session);
+						List<ObjectUIDPointer> pointers = sessionObjectUIDPointers.get(session);
 						if(pointers == null) {
-							pointers = new ArrayList<String[]>();
-							sessionToObjectUpdate.put(session, pointers);
+							pointers = new ArrayList<ObjectUIDPointer>();
+							sessionObjectUIDPointers.put(session, pointers);
 						}
-						pointers.add(new String[] {object, uid});
+						pointers.add(new ObjectUIDPointer(object, uid));
 					} else if(type.equals("objectcreate")) {
-						Map<String, List<FilterSubscription>> objMap = objectCreate.get(object);
+						Map<String, List<FilterSubscription>> objMap = objectFilterSubscriptions.get(object);
 						if(objMap == null) {
 							objMap = new HashMap<String, List<FilterSubscription>>();
-							objectCreate.put(object, objMap);
+							objectFilterSubscriptions.put(object, objMap);
 						}
 						for(String domain: session.getUserProfile().getDomains()) {
 							List<FilterSubscription> list = objMap.get(domain);
@@ -127,12 +157,12 @@ public class RedbackSignalServer extends SignalServer {
 							} else {
 								list.add(new FilterSubscription(req.getString("id"), session, req.getObject("filter")));
 							}
-							List<String[]> pointers = sessionToObjectCreate.get(session);
+							List<ObjectDomainPointer> pointers = sessionObjectDomainPointers.get(session);
 							if(pointers == null) {
-								pointers = new ArrayList<String[]>();
-								sessionToObjectCreate.put(session, pointers);
+								pointers = new ArrayList<ObjectDomainPointer>();
+								sessionObjectDomainPointers.put(session, pointers);
 							}
-							pointers.add(new String[] {object, domain});						
+							pointers.add(new ObjectDomainPointer(object, domain));						
 						}
 					}
 				} else if(req.getString("action").equals("unsubscribe")) {
@@ -155,45 +185,45 @@ public class RedbackSignalServer extends SignalServer {
 		try {
 			synchronized(this) {
 		
-				List<String[]> pointers = sessionToObjectUpdate.get(session);
-				if(pointers != null) {
-					for(String[] pointer: pointers) {
-						Map<String, List<Session>> map = objectUpdate.get(pointer[0]);
+				List<ObjectUIDPointer> p1 = sessionObjectUIDPointers.get(session);
+				if(p1 != null) {
+					for(ObjectUIDPointer pointer: p1) {
+						Map<String, List<Session>> map = uniqueObjectSubsriptions.get(pointer.objectname);
 						if(map != null) {
-							List<Session> list = map.get(pointer[1]);
+							List<Session> list = map.get(pointer.uid);
 							if(list != null) {
 								list.remove(session);
-								if(objectUpdate.get(pointer[0]).get(pointer[1]).size() == 0) {
-									objectUpdate.get(pointer[0]).remove(pointer[1]);
-									if(objectUpdate.get(pointer[0]).size() == 0)
-										objectUpdate.remove(pointer[0]);
+								if(list.size() == 0) {
+									map.remove(pointer.uid);
+									if(map.size() == 0)
+										uniqueObjectSubsriptions.remove(pointer.objectname);
 								}
 							}
 						}
 					}
-					sessionToObjectUpdate.remove(session);
+					sessionObjectUIDPointers.remove(session);
 				}
 				
-				pointers = sessionToObjectCreate.get(session);
-				if(pointers != null) {
-					for(String[] pointer: pointers) {
-						Map<String, List<FilterSubscription>> map = objectCreate.get(pointer[0]);
+				List<ObjectDomainPointer> p2 = sessionObjectDomainPointers.get(session);
+				if(p2 != null) {
+					for(ObjectDomainPointer pointer: p2) {
+						Map<String, List<FilterSubscription>> map = objectFilterSubscriptions.get(pointer.objectname);
 						if(map != null) 
 						{
-							List<FilterSubscription> list = map.get(pointer[1]);
+							List<FilterSubscription> list = map.get(pointer.domain);
 							if(list != null) {
 								for(int i = 0; i < list.size(); i++)
 									if(list.get(i).session == session)
 										list.remove(i--);
-								if(objectCreate.get(pointer[0]).get(pointer[1]).size() == 0) {
-									objectCreate.get(pointer[0]).remove(pointer[1]);
-									if(objectCreate.get(pointer[0]).size() == 0)
-										objectCreate.remove(pointer[0]);
+								if(list.size() == 0) {
+									map.remove(pointer.domain);
+									if(map.size() == 0)
+										objectFilterSubscriptions.remove(pointer.objectname);
 								}
 							}
 						}
 					}
-					sessionToObjectCreate.remove(session);
+					sessionObjectDomainPointers.remove(session);
 				}
 			}
 		} catch(Exception e) {

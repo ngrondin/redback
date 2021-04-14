@@ -40,6 +40,7 @@ public class ProcessManager
 	protected String accessManagerServiceName;
 	protected String objectServiceName;
 	protected String domainServiceName;
+	protected String signalConsumerName;
 	protected ObjectClient objectClient;
 	protected AccessManagementClient accessManagementClient;
 	protected CollectionConfig piCollectionConfig;
@@ -65,6 +66,7 @@ public class ProcessManager
 		objectServiceName = config.getString("objectservice");
 		objectClient = new ObjectClient(firebus, objectServiceName);
 		domainServiceName = config.getString("domainservice");
+		signalConsumerName = config.getString("signalconsumer");
 		processUserName = config.getString("processuser");
 		jwtSecret = config.getString("jwtsecret");
 		jwtIssuer = config.getString("jwtissuer");
@@ -262,10 +264,11 @@ public class ProcessManager
 		return pi;
 	}
 
-	public List<Assignment> getAssignments(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
+	public List<Notification> getNotifications(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
 	{
-		List<Assignment> list = new ArrayList<Assignment>();
-		loadGroupsOf(actionner);
+		List<Notification> list = new ArrayList<Notification>();
+		if(actionner.isUser())
+			loadGroupsOf(actionner);
 		DataMap fullFilter = new DataMap();
 		if(filter != null)
 			fullFilter.merge(filter);
@@ -284,35 +287,29 @@ public class ProcessManager
 			ProcessInstance pi = instances.get(i);
 			Process process = getProcess(pi.getProcessName());
 			ProcessUnit pu = process.getNode(pi.getCurrentNode());
-			Assignment assignment = null;
+			Notification notification = null;
 			if(pu instanceof InteractionUnit)
-			{
-				assignment = ((InteractionUnit)pu).getAssignment(actionner, pi);
-			}
-			else
-			{
-				assignment = new Assignment(pi.getProcessName(), pi.getId(), new Notification("processexception", "exception", "Exception", "The process has stopped due to an exception and requires restart"));
-				assignment.addAction("restart", "Restart", true);
-			}
-			if(assignment != null)
+				notification = ((InteractionUnit)pu).getAssignment(actionner, pi);
+
+			if(notification != null)
 			{
 				if(viewdata != null  &&  viewdata.size() > 0)
 				{
 					for(int j = 0; j < viewdata.size(); j++)
 					{
 						String key = viewdata.getString(j); 
-						assignment.addData(key, pi.getData().getString(key));
+						notification.addData(key, pi.getData().getString(key));
 					}
 				}
-				list.add(assignment);
+				list.add(notification);
 			}
 		}
 		return list;
 	}
 	
-	public int getAssignmentCount(Actionner actionner, DataMap filter) throws RedbackException
+	public int getNotificationCount(Actionner actionner, DataMap filter) throws RedbackException
 	{
-		List<Assignment> assignments = getAssignments(actionner, filter, null);
+		List<Notification> assignments = getNotifications(actionner, filter, null);
 		int count = assignments.size();
 		return count;
 	}
@@ -417,6 +414,52 @@ public class ProcessManager
 			throw new RedbackException("Error retreiving groups", e);
 		} 	
 		logger.finer("Finished finding groups");
+	}
+	
+	public List<String> getUsersOfGroup(String domain, String groupid) throws RedbackException
+	{
+		logger.finer("Finding users for group " + groupid);
+		List<String> users = new ArrayList<String>();
+		try 
+		{
+			DataMap request = new DataMap();
+			request.put("object", gmCollectionConfig.getName());
+			DataMap filter = new DataMap();
+			filter.put(gmCollectionConfig.getField("domain"), domain);
+			filter.put(gmCollectionConfig.getField("group"), groupid);
+			request.put("filter", filter);
+			DataMap result = request(dataServiceName, request);		
+			DataList resultList = result.getList("result");
+			for(int i = 0; i < resultList.size(); i++)
+				users.add(resultList.getObject(i).getString(gmCollectionConfig.getField("username")));
+		} 
+		catch (Exception e) 
+		{
+			throw new RedbackException("Error retreiving user for group", e);
+		} 	
+		logger.finer("Finished finding users for group");	
+		return users;
+	}
+	
+	public void sendNotification(Notification notification)
+	{
+		if(signalConsumerName != null) 
+		{
+			try 
+			{
+				DataMap signal = new DataMap();
+				signal.put("type", "processnotification");
+				signal.put("notification", notification.getDataMap());
+				Payload payload = new Payload(signal.toString());
+				logger.finest("Publishing signal : " + signal);
+				firebus.publish(signalConsumerName, payload);
+				logger.finest("Published signal : " + signal);
+			}
+			catch(Exception e) 
+			{
+				logger.severe("Cannot send out signal : " + e.getMessage());
+			}
+		}
 	}
 	
 	public void initiateCurrentTransaction() 

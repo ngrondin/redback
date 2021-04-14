@@ -2,14 +2,15 @@ package io.redback.managers.processmanager.units;
 
 import java.util.List;
 
+
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.processmanager.Actionner;
-import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.Process;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.utils.Notification;
 
 public class ActionUnit extends ProcessUnit 
 {
@@ -36,20 +37,20 @@ public class ActionUnit extends ProcessUnit
 			filter.put("process", process);
 		//if(interactionCode != null)
 		//	filter.put("notification.code", interactionCode);
-		List<Assignment> assignments = processManager.getAssignments(actionner, filter, null);
-		for(int i = 0; i < assignments.size(); i++)
+		List<Notification> notifications = processManager.getNotifications(actionner, filter, null);
+		for(int i = 0; i < notifications.size(); i++)
 		{
-			Assignment assignment = assignments.get(i);
-			if(interactionCode == null || (interactionCode != null && interactionCode.equals(assignment.notification.code)))
+			Notification notification = notifications.get(i);
+			if(interactionCode == null || (interactionCode != null && interactionCode.equals(notification.code)))
 			{
 				boolean actionExists = false;
-				for(int j = 0; j < assignment.actions.size(); j++)
-					if(assignment.actions.get(j).action.equals(action))
+				for(int j = 0; j < notification.actions.size(); j++)
+					if(notification.actions.get(j).action.equals(action))
 						actionExists = true;
 				if(actionExists)
 				{
-					logger.fine("Actionning interaction '" + assignment.notification.code + "' with action '" + action +"' in process '" + assignment.processName + "' instance '" + assignment.pid +"'");
-					processManager.actionProcess(actionner, assignment.pid, action, null);
+					logger.fine("Actionning interaction '" + notification.code + "' with action '" + action +"' in process '" + notification.processName + "' instance '" + notification.pid +"'");
+					processManager.actionProcess(actionner, notification.pid, action, null);
 				}
 				else
 				{
