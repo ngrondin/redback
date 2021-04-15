@@ -1,32 +1,46 @@
 <button
-    *ngIf="round"
+    *ngIf="showround"
     mat-button 
     matTooltip="Process actions for this record"
     [matTooltipShowDelay]="1000"
     aria-label="Process Actions" 
 	class="mat-mini-fab mat-primary rb-button rb-process-actions-button" 
-    (click)="activate()"
+    (menuOpened)="activate()"
+    (menuClosed)="deactivate()"
     [matMenuTriggerFor]="processactionmenu">
 	<mat-icon>linear_scale</mat-icon>
 </button>
 <div>
     <button
-        *ngIf="!round"
+        *ngIf="showstandard"
         mat-stroked-button 
         matTooltip="Process actions for this record"
         [matTooltipShowDelay]="1000"
         aria-label="Process Actions" 
         class="mat-primary rb-button rb-process-actions-button" 
-        (click)="activate()"
+        (menuOpened)="activate()"
+        (menuClosed)="deactivate()"
         [matMenuTriggerFor]="processactionmenu">
         Process
     </button>
+    <button
+        *ngIf="showfocus"
+        mat-flat-button 
+        matTooltip="Process actions for this record"
+        [matTooltipShowDelay]="1000"
+        aria-label="Process Actions" 
+        class="mat-primary rb-button rb-process-actions-button" 
+        (menuOpened)="activate()"
+        (menuClosed)="deactivate()"
+        [matMenuTriggerFor]="processactionmenu">
+        Process
+    </button>    
 </div>
 <mat-menu
     #processactionmenu="matMenu">
     <div
         class="rb-processaction-message"
-        [style.color]="pid == null ? 'lightgrey' : 'black'">
+        [style.color]="notification == null ? 'lightgrey' : 'black'">
         {{message}}
     </div>
     <button
@@ -35,12 +49,5 @@
         *ngFor="let action of actions"
         (click)="clickAction(action.action)">
         {{action.description}}
-    </button>
-    <div
-        class="rb-spinner-container"
-        *ngIf="loading">
-        <mat-spinner
-            diameter="20">
-        </mat-spinner>
-    </div>    
+    </button>  
 </mat-menu>

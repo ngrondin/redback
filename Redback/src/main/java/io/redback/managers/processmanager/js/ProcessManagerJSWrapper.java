@@ -102,7 +102,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 				public Object execute(Value... arguments) {
 					try {
 						DataMap filter = (DataMap)JSConverter.toJava(arguments[0]);
-						ArrayList<ProcessInstance> list = processManager.findProcesses(actionner, filter);
+						ArrayList<ProcessInstance> list = processManager.findProcesses(actionner, filter, 0, 50);
 						return JSConverter.toJS(list);
 					} catch (Exception e) {
 						throw new RuntimeException("Error in findProcesses", e);

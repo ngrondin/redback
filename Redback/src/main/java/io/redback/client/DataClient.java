@@ -30,15 +30,27 @@ public class DataClient extends Client
 		return getData(object, filter, sort, 0, 50);
 	}	
 
-	public DataMap putData(String object, DataMap key, DataMap data) throws RedbackException
+	public DataMap getData(String object, DataMap filter) throws RedbackException
+	{
+		return getData(object, filter, null, 0, 50);
+	}	
+	
+	public DataMap putData(String object, DataMap key, DataMap data, boolean replace) throws RedbackException
 	{
 		DataMap req = new DataMap();
 		req.put("object", object);
 		req.put("key", key);
 		req.put("data", data);
+		if(replace) 
+			req.put("operation", "replace");
 		return request(req);
 	}
 
+	public DataMap putData(String object, DataMap key, DataMap data) throws RedbackException
+	{
+		return putData(object, key, data, false);
+	}
+	
 	public DataMap aggregateData(String object, DataMap filter, DataList tuple, DataList metrics, DataMap sort, int page, int pageSize) throws RedbackException
 	{
 		DataMap req = new DataMap();

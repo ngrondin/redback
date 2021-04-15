@@ -100,7 +100,9 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 					DataMap filter = request.getObject("filter");
 					DataList viewdata = request.getList("viewdata");
 					DataList responseList = new DataList();
-					List<Notification> result = getAssignments(session, filter, viewdata);
+					int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
+					int pageSize = request.containsKey("pageSize") ? request.getNumber("pageSize").intValue() : 50;
+					List<Notification> result = getAssignments(session, filter, viewdata, page, pageSize);
 					if(result != null) 
 					{
 						for(int i = 0; i < result.size(); i++)
@@ -147,7 +149,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 
 	protected abstract void interruptProcesses(Session session, DataMap filter) throws RedbackException;
 
-	protected abstract List<Notification> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException;
+	protected abstract List<Notification> getAssignments(Session session, DataMap filter, DataList viewdata, int page, int pageSize) throws RedbackException;
 	
 	protected abstract int getAssignmentCount(Session session, DataMap filter) throws RedbackException;
 	

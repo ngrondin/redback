@@ -2,66 +2,169 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { UserprefService } from 'app/services/userpref.service';
+import { NotificationService } from 'app/services/notification.service';
+import { Subscription } from 'rxjs';
+import { RbNotification, RbObject } from 'app/datamodel';
+import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { RbActivatorComponent } from 'app/abstract/rb-activator';
+import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
+
+export class RbActiongroupAction {
+  action: string;
+  param: string;
+  label: string;
+  focus: boolean;
+
+  constructor(a: string, p: string, l: string, f: boolean) {
+    this.action = a;
+    this.param = p;
+    this.label = l;
+    this.focus = f;
+  }
+}
 
 @Component({
   selector: 'rb-actiongroup',
   templateUrl: './rb-actiongroup.component.html',
   styleUrls: ['./rb-actiongroup.component.css']
 })
-export class RbActiongroupComponent implements OnInit {
+export class RbActiongroupComponent extends RbDataObserverComponent {
   @Input('dataset') dataset: RbDatasetComponent;
   @Input('actions') actions: any;
   @Input('domaincategory') domaincategory: string;
+  @Input('showprocessinteraction') showprocessinteraction: boolean;
   @Input('round') round: boolean = false;
+  @Input('hideonempty') hideonempty: boolean = false;
 
   message: string;
   loading: boolean;
-  _domainActions: any;
+  domainActions: RbActiongroupAction[];
+  notification: RbNotification;
+  notificationSubscription: Subscription;
 
+  actionData: RbActiongroupAction[] = [];
 
   constructor(
     private apiService: ApiService,
+    private notificationService: NotificationService,
     public userpref: UserprefService
-  ) { }
+  ) {
+    super();
+  }
+  
 
-  ngOnInit(): void {
+  dataObserverInit() {
     if(this.domaincategory != null && this.domaincategory != "") {
       this.apiService.listDomainFunctions(this.domaincategory).subscribe(json => {
-        this._domainActions = [];
+        this.domainActions = [];
         json.result.forEach(item => {
-          this._domainActions.push({
-            action: 'executedomain',
-            param: item.name,
-            label: item.description,
-            show: 'true'
-          })
+          this.domainActions.push(new RbActiongroupAction('executedomain', item.name,item.description, false));
         });
       });
+    } 
+    if(this.showprocessinteraction) {   
+      this.notificationSubscription = this.notificationService.getObservable().subscribe(event => this.onNotificationEvent(event));
     }
   }
 
-  public get actionData() {
-    let ret = [];
-    let object = this.dataset.selectedObject;
+  dataObserverDestroy() {
+    if(this.notificationSubscription != null) {
+      this.notificationSubscription.unsubscribe();
+    }
+  }
+
+  onDatasetEvent(event: any) {
+    if(event == 'select') {
+      if(this.showprocessinteraction) {
+        this.getNotificationThenCalcActions();
+      } else {
+        this.calcActionData();
+      }
+    }
+  }
+
+  onActivationEvent(event: any) {
+    if(this.active == true) {
+      /*if(this.showprocessinteraction) {
+        this.getNotification();
+      }*/
+    }
+  }
+
+  onNotificationEvent(event: any) {
+    if(event.type = 'notification') {
+      let notification = event.notification;
+      if(this.rbObject != null && notification.data != null && this.rbObject.objectname == notification.data.objectname && this.rbObject.uid == notification.data.uid) {
+        this.notification = notification;
+        this.calcActionData();
+      }
+    } else if(event.type == 'completion') {
+      if(this.notification != null && this.notification.process == event.process && this.notification.pid == event.pid && this.notification.code == event.code) {
+        this.notification = null;
+        this.calcActionData();
+      }
+    }
+  }
+
+  get rbObject() : RbObject {
+    return this.dataset != null ? this.dataset.selectedObject : null;
+  }
+
+  get focus() : boolean {
+    let ret: boolean = false;
+    if(this.notification != null) {
+      for(let action of this.notification.actions) {
+        if(action.main == true) {
+          ret = true;
+        }
+      }
+    }
+    return ret;
+  }
+  
+  private calcActionData() {
+    this.actionData = [];
+    let object = this.rbObject;
+    if(this.notification != null) {
+      for(var action of this.notification.actions) {
+        this.actionData.push(new RbActiongroupAction("processaction", action.action, action.description, action.main))
+      }
+    }
     if(this.actions != null) {
       this.actions.forEach(item => {
         if(item.show == null || item.show == true || (typeof item.show == 'string' && (item.show.indexOf('object.') == -1 || object != null) && eval(item.show))) {
           let swtch = this.userpref.getUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
-            ret.push(item);
+            this.actionData.push(new RbActiongroupAction(item.action, item.param, item.label, false));
           }
         }
       });
     }
-    if(this._domainActions != null) {
-      this._domainActions.forEach(item => {
-        ret.push(item);
+    if(this.domainActions != null) {
+      this.domainActions.forEach(item => {
+        this.actionData.push(item);
       });
     }
-    return ret;
   }
 
-  public clickAction(action: any) {
-    this.dataset.action(action.action, action.param);
+  private getNotificationThenCalcActions() {
+    this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => {
+      this.notification = notif;
+      this.calcActionData();
+    });
+  }
+
+  public clickAction(action: RbActiongroupAction) {
+    if(action.action == 'processaction' && this.notification != null) {
+      let notif = this.notification;
+      this.notificationService.actionNotification(this.notification, action.param).subscribe(resp => {
+        if(this.notification === notif) {
+          this.notification = null;
+        }
+        this.calcActionData();
+      });
+    } else {
+      this.dataset.action(action.action, action.param);
+    }
   }
 }

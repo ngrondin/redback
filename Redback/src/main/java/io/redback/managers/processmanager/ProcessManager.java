@@ -12,14 +12,13 @@ import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.exceptions.FunctionTimeoutException;
-import io.firebus.utils.DataException;
 import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.AccessManagementClient;
+import io.redback.client.ConfigurationClient;
+import io.redback.client.DataClient;
 import io.redback.client.ObjectClient;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.processmanager.units.InteractionUnit;
@@ -42,6 +41,8 @@ public class ProcessManager
 	protected String domainServiceName;
 	protected String signalConsumerName;
 	protected ObjectClient objectClient;
+	protected DataClient dataClient;
+	protected ConfigurationClient configClient;
 	protected AccessManagementClient accessManagementClient;
 	protected CollectionConfig piCollectionConfig;
 	protected CollectionConfig gmCollectionConfig;
@@ -60,7 +61,9 @@ public class ProcessManager
 		firebus = fb;
 		jsManager = new JSManager("process");
 		configServiceName = config.getString("configservice");
+		configClient = new ConfigurationClient(firebus, configServiceName);
 		dataServiceName = config.getString("dataservice");
+		dataClient = new DataClient(firebus, dataServiceName);
 		accessManagerServiceName = config.getString("accessmanagementservice");
 		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 		objectServiceName = config.getString("objectservice");
@@ -112,16 +115,11 @@ public class ProcessManager
 	}
 	
 
-	protected void loadProcess(String name) throws RedbackException
+	protected void loadProcess(Session session, String name) throws RedbackException
 	{
 		try
 		{
-			DataMap request = new DataMap();
-			request.put("action", "list");
-			request.put("service", "rbpm");
-			request.put("category", "process");
-			request.put("filter", new DataMap("name", name));
-			DataMap configList = request(configServiceName, request);
+			DataMap configList = configClient.listConfigs(session, "rbpm", "process", new DataMap("name", name));
 			DataList list = configList.getList("result");
 			if(list.size() > 0)
 			{
@@ -142,11 +140,11 @@ public class ProcessManager
 	
 	}
 
-	protected Process getProcess(String name) throws RedbackException
+	protected Process getProcess(Session session, String name) throws RedbackException
 	{
 		Process process = null;
 		if(!processes.containsKey(name))
-			loadProcess(name);
+			loadProcess(session, name);
 		if(processes.containsKey(name))
 		{
 			int max = -1;
@@ -162,11 +160,11 @@ public class ProcessManager
 		return process;
 	}
 	
-	protected Process getProcess(String name, int v) throws RedbackException
+	protected Process getProcess(Session session, String name, int v) throws RedbackException
 	{
 		Process process = null;
 		if(!processes.containsKey(name))
-			loadProcess(name);
+			loadProcess(session, name);
 		if(processes.containsKey(name))
 			process = processes.get(name).get(v);
 		return process;
@@ -179,10 +177,7 @@ public class ProcessManager
 		{
 			try 
 			{
-				DataMap request = new DataMap();
-				request.put("object", piCollectionConfig.getName());
-				request.put("filter", new DataMap(piCollectionConfig.getField("_id"), pid));
-				DataMap response = request(dataServiceName, request);
+				DataMap response = dataClient.getData(piCollectionConfig.getName(), new DataMap(piCollectionConfig.getField("_id"), pid));
 				pi = new ProcessInstance(actionner, this, piCollectionConfig.convertObjectToCanonical(response.getObject("result.0")));
 				putInCurrentTransaction(pi);
 			} 
@@ -219,7 +214,7 @@ public class ProcessManager
 			}
 			catch(Exception e)
 			{
-				error("Error authenticating sys user", e);
+				throw new RedbackException("Error authenticating sys user", e);
 			}
 		}
 		session.setUserProfile(sysUserProfile);
@@ -246,7 +241,7 @@ public class ProcessManager
 	{
 		logger.finer("Initiating process '" + processName + "'");
 		ProcessInstance pi = null;
-		Process process = getProcess(processName);
+		Process process = getProcess(actionner.getSession(), processName);
 		if(process != null)
 		{
 			if(domain == null && actionner.isUser())
@@ -266,6 +261,11 @@ public class ProcessManager
 
 	public List<Notification> getNotifications(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
 	{
+		return getNotifications(actionner, filter, viewdata, 0, 50);
+	}
+	
+	public List<Notification> getNotifications(Actionner actionner, DataMap filter, DataList viewdata, int page, int pageSize) throws RedbackException
+	{
 		List<Notification> list = new ArrayList<Notification>();
 		if(actionner.isUser())
 			loadGroupsOf(actionner);
@@ -281,15 +281,15 @@ public class ProcessManager
 				assigneeInList.add(groups.get(i));
 			fullFilter.put("assignees.id", new DataMap("$in", assigneeInList));
 		}
-		List<ProcessInstance> instances = findProcesses(actionner, fullFilter);
+		List<ProcessInstance> instances = findProcesses(actionner, fullFilter, page, pageSize);
 		for(int i = 0; i < instances.size(); i++)
 		{
 			ProcessInstance pi = instances.get(i);
-			Process process = getProcess(pi.getProcessName());
+			Process process = getProcess(actionner.getSession(), pi.getProcessName());
 			ProcessUnit pu = process.getNode(pi.getCurrentNode());
 			Notification notification = null;
 			if(pu instanceof InteractionUnit)
-				notification = ((InteractionUnit)pu).getAssignment(actionner, pi);
+				notification = ((InteractionUnit)pu).getNotification(actionner, pi);
 
 			if(notification != null)
 			{
@@ -309,7 +309,7 @@ public class ProcessManager
 	
 	public int getNotificationCount(Actionner actionner, DataMap filter) throws RedbackException
 	{
-		List<Notification> assignments = getNotifications(actionner, filter, null);
+		List<Notification> assignments = getNotifications(actionner, filter, null, 0, 50);
 		int count = assignments.size();
 		return count;
 	}
@@ -318,7 +318,7 @@ public class ProcessManager
 	{
 		ProcessInstance pi = getProcessInstance(actionner, pid);
 		logger.finer("Processing action " + action + " on process " + pi.getProcessName() + ":" + pid);
-		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
+		Process process = getProcess(actionner.getSession(), pi.getProcessName(), pi.getProcessVersion());
 		ProcessUnit pu = process.getNode(pi.getCurrentNode());
 		if(pu instanceof InteractionUnit)
 		{
@@ -336,7 +336,7 @@ public class ProcessManager
 	{
 		ProcessInstance pi = getProcessInstance(actionner, pid);
 		logger.finer("Interrupting interaction on process " + pi.getProcessName() + ":" + pid);
-		Process process = getProcess(pi.getProcessName(), pi.getProcessVersion());
+		Process process = getProcess(actionner.getSession(), pi.getProcessName(), pi.getProcessVersion());
 		ProcessUnit pu = process.getNode(pi.getCurrentNode());
 		if(pu instanceof InteractionUnit)
 		{
@@ -349,7 +349,7 @@ public class ProcessManager
 		logger.finer("Finished processing action");
 	}
 	
-	public ArrayList<ProcessInstance> findProcesses(Actionner actionner, DataMap filter) throws RedbackException
+	public ArrayList<ProcessInstance> findProcesses(Actionner actionner, DataMap filter, int page, int pageSize) throws RedbackException
 	{
 		logger.finer("Finding processes for " + filter.toString());
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
@@ -370,7 +370,7 @@ public class ProcessManager
 					list.add(pi);
 				}
 			}
-			DataMap result = request(dataServiceName, new DataMap("{object:rbpm_instance, filter:" + fullFilterMap + "}"));
+			DataMap result = dataClient.getData("rbpm_instance", fullFilterMap, null, page, pageSize); 
 			DataList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 			{
@@ -398,13 +398,10 @@ public class ProcessManager
 		logger.finer("Finding groups for " + actionner.getId());
 		try 
 		{
-			DataMap request = new DataMap();
-			request.put("object", gmCollectionConfig.getName());
 			DataMap filter = new DataMap();
 			filter.put(gmCollectionConfig.getField("domain"), actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
 			filter.put(gmCollectionConfig.getField("username"), actionner.getId());
-			request.put("filter", filter);
-			DataMap result = request(dataServiceName, request);		
+			DataMap result = dataClient.getData(gmCollectionConfig.getName(), filter);
 			DataList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 				actionner.addGroup(resultList.getObject(i).getString(gmCollectionConfig.getField("group")));
@@ -422,13 +419,10 @@ public class ProcessManager
 		List<String> users = new ArrayList<String>();
 		try 
 		{
-			DataMap request = new DataMap();
-			request.put("object", gmCollectionConfig.getName());
 			DataMap filter = new DataMap();
 			filter.put(gmCollectionConfig.getField("domain"), domain);
 			filter.put(gmCollectionConfig.getField("group"), groupid);
-			request.put("filter", filter);
-			DataMap result = request(dataServiceName, request);		
+			DataMap result = dataClient.getData(gmCollectionConfig.getName(), filter);
 			DataList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 				users.add(resultList.getObject(i).getString(gmCollectionConfig.getField("username")));
@@ -460,6 +454,31 @@ public class ProcessManager
 				logger.severe("Cannot send out signal : " + e.getMessage());
 			}
 		}
+	}
+	
+	public void sendInteractionCompletion(String processName, String pid, String code) 
+	{
+		if(signalConsumerName != null) 
+		{
+			try 
+			{
+				DataMap signal = new DataMap();
+				signal.put("type", "processinteractioncompletion");
+				DataMap interaction = new DataMap();
+				interaction.put("process", processName);
+				interaction.put("pid", pid);
+				interaction.put("code", code);
+				signal.put("interaction", interaction);
+				Payload payload = new Payload(signal.toString());
+				logger.finest("Publishing signal : " + signal);
+				firebus.publish(signalConsumerName, payload);
+				logger.finest("Published signal : " + signal);
+			}
+			catch(Exception e) 
+			{
+				logger.severe("Cannot send out completion signal : " + e.getMessage());
+			}
+		}		
 	}
 	
 	public void initiateCurrentTransaction() 
@@ -502,7 +521,8 @@ public class ProcessManager
 			{
 				String key = it.next();
 				ProcessInstance pi = objects.get(key);
-				commitInstance(pi);
+				if(pi.isUpdated()) 
+					commitInstance(pi);
 			}
 			synchronized(transactions)
 			{
@@ -511,52 +531,11 @@ public class ProcessManager
 		}		
 	}
 	
-	
-	protected DataMap request(String service, DataMap request) throws DataException, FunctionErrorException, FunctionTimeoutException, RedbackException
-	{
-		if(service != null  &&  request != null)
-		{
-			Payload reqPayload = new Payload(request.toString());
-			logger.finest("Requesting firebus service : " + service + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
-			Payload respPayload = firebus.requestService(service, reqPayload, 10000);
-			logger.finest("Receiving firebus config service respnse");
-			String respStr = respPayload.getString();
-			DataMap result = new DataMap(respStr);
-			return result;
-		}
-		else
-		{
-			error("Service Name or Request is null in firebus request");
-		}
-		return null;
-	}
-	
 	protected void commitInstance(ProcessInstance pi) throws RedbackException
 	{
-		try
-		{
-			logger.finest("Publishing to firebus service : " + dataServiceName + "  ");
-			firebus.requestService(dataServiceName, new Payload("{object:rbpm_instance, key: {_id:" + pi.getId() + "}, data:" + pi.getJSON() + ", operation:replace}"));
-		}
-		catch(FunctionErrorException | FunctionTimeoutException e)
-		{
-			throw new RedbackException("Error publishing data", e);
-		}		
+		logger.finest("Publishing to firebus service : " + dataServiceName + "  ");
+		DataMap key = new DataMap(piCollectionConfig.getField("_id"), pi.getId());
+		dataClient.putData(piCollectionConfig.getName(), key, pi.getJSON(), true);
 	}
 
-	
-
-	protected void error(String msg) throws RedbackException
-	{
-		error(msg, null);
-	}
-	
-	protected void error(String msg, Exception cause) throws RedbackException
-	{
-		logger.severe(msg);
-		if(cause != null)
-			throw new RedbackException(msg, cause);
-		else
-			throw new RedbackException(msg);
-	}
 }

@@ -1,6 +1,5 @@
 <button
     mat-icon-button
-    (click)="getList()"
     [matMenuTriggerFor]="assignmentlistmenu">
     <mat-icon>notifications</mat-icon>
 </button>
@@ -29,12 +28,5 @@
                 </div>
             </div>        
         </button>
-    </mat-action-list>          
-    <div
-        class="rb-spinner-container"
-        *ngIf="loading">
-        <mat-spinner
-            diameter="20">
-        </mat-spinner>
-    </div>    
+    </mat-action-list>            
 </mat-menu>

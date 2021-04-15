@@ -32,7 +32,7 @@ public class ProcessInstance
 	protected DataList assignees;
 	protected Actionner lastActioner;
 	protected Map<String, Object> scriptContext;
-	//protected JSONList receivedNotifications;
+	protected boolean updated;
 	
 	protected ProcessInstance(Actionner a, ProcessManager pm, String pn, int v, String dom, DataMap d) throws RedbackException
 	{
@@ -46,6 +46,7 @@ public class ProcessInstance
 		complete = false;
 		assignees = new DataList();
 		createScriptBindings();
+		updated = true;
 		//receivedNotifications = new JSONList();
 	}
 	
@@ -70,6 +71,7 @@ public class ProcessInstance
 		if(c.containsKey("lastactioner")  &&  c.get("lastactioner") instanceof DataMap)
 			lastActioner = new Actionner(c.getObject("lastactioner"));
 		createScriptBindings();
+		updated = false;
 	}
 	
 	protected void createScriptBindings() throws RedbackException
@@ -142,12 +144,14 @@ public class ProcessInstance
 			data.put(key, d.get(key));
 		}
 		updateScriptBindings();
+		updated = true;
 	}
 	
 	public void setOriginator(String id)
 	{
 		data.put("originator", id);
 		updateScriptBindings();
+		updated = true;
 	}
 	
 	public void setCurrentNode(String cn)
@@ -155,6 +159,7 @@ public class ProcessInstance
 		if(cn == null)
 			complete = true;
 		currentNode = cn;
+		updated = true;
 	}
 	
 	public String getCurrentNode()
@@ -165,21 +170,25 @@ public class ProcessInstance
 	public void setInteractionDetails(DataMap d)
 	{
 		interactionDetails = d;
+		updated = true;
 	}
 	
 	public void clearInteractionDetails()
 	{
 		interactionDetails = null;
+		updated = true;
 	}
 	
 	public void addAssignee(Assignee a)
 	{
 		assignees.add(a.getJSON());
+		updated = true;
 	}
 	
 	public void clearAssignees()
 	{
 		assignees = new DataList();
+		updated = true;
 	}
 	
 	public ArrayList<Assignee> getAssignees()
@@ -201,11 +210,17 @@ public class ProcessInstance
 	public void setLastActioner(Actionner la)
 	{
 		lastActioner = la;
+		updated = true;
 	}
 	
 	public boolean isComplete()
 	{
 		return complete;
+	}
+	
+	public boolean isUpdated()
+	{
+		return updated;
 	}
 	
 	public DataMap getJSON()

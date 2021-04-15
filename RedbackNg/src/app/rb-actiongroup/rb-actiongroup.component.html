@@ -10,7 +10,7 @@
 </button>
 <div>
     <button
-        *ngIf="!round"
+        *ngIf="!round && !focus"
         mat-stroked-button 
         matTooltip="General actions for this record"
         [matTooltipShowDelay]="1000"
@@ -19,6 +19,16 @@
         [matMenuTriggerFor]="actiongroupmenu">
         Actions
     </button>
+    <button
+        *ngIf="!round && focus"
+        mat-flat-button 
+        matTooltip="General actions for this record"
+        [matTooltipShowDelay]="1000"
+        aria-label="Action Group" 
+        class="mat-primary rb-button rb-action-group-button" 
+        [matMenuTriggerFor]="actiongroupmenu">
+        Actions
+    </button>    
 </div>
 <mat-menu
     #actiongroupmenu="matMenu">

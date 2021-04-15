@@ -2,6 +2,7 @@ import { DataService } from './services/data.service';
 import { analyzeAndValidateNgModules } from '@angular/compiler';
 import { RbDatasetComponent } from './rb-dataset/rb-dataset.component';
 import { ValueComparator } from './helpers';
+import { NotificationService } from './services/notification.service';
 
 export class ObjectResp {
     objects: object;
@@ -250,6 +251,46 @@ export class RbAggregate {
 }
 
 
+export class RbNotification {
+    process: string;
+    pid: string;
+    code: string;
+    type: string;
+    label: string;
+    message: string;
+    actions: RbNotificationAction[];
+    data: any;
+    notificationService: NotificationService;
+
+    constructor(json: any, ns: NotificationService) {
+        this.notificationService = ns;
+        this.process = json.process;
+        this.pid = json.pid;
+        this.code = json.code;
+        this.type = json.type;
+        this.label = json.label;
+        this.message = json.message;
+        this.data = json.data;
+        if(json.actions != null) {
+            this.actions = [];
+            for(var actionJson of json.actions) {
+                this.actions.push(new RbNotificationAction(actionJson));
+            }
+        }
+    }
+}
+
+export class RbNotificationAction {
+    action: string;
+    description: string;
+    main: boolean;
+
+    constructor(json: any) {
+        this.action = json.action;
+        this.description = json.description;
+        this.main = json.main;
+    }
+}
 
 
 export class XY {

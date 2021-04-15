@@ -1,10 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ApiService } from 'app/services/api.service';
-import { RbObject } from 'app/datamodel';
-import { DataService } from 'app/services/data.service';
-import { ToastrService } from 'ngx-toastr';
+import { RbNotification, RbNotificationAction, RbObject } from 'app/datamodel';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { ErrorService } from 'app/services/error.service';
+import { NotificationService } from 'app/services/notification.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'rb-processactions',
@@ -13,77 +11,96 @@ import { ErrorService } from 'app/services/error.service';
 })
 export class RbProcessactionsComponent extends RbDataObserverComponent  {
   @Input('round') round: boolean = false;
+  @Input('hideonempty') hideonempty: boolean = false;
 
-  pid: string;
-  actions: any;
-  message: string;
-  loading: boolean;
-  
+  notification: RbNotification;
+  subscription: Subscription;
+
   constructor(
-    private apiService: ApiService,
-    private dataService: DataService,
-    private errorService: ErrorService
+    private notificationService: NotificationService,
   ) {
     super();
   }
 
   dataObserverInit() {
-    this.setAssignment(null);
+    this.subscription = this.notificationService.getObservable().subscribe(notif => this.onNotificationEvent(notif));
   }
 
   dataObserverDestroy() {
+    this.subscription.unsubscribe();
   }
 
   onDatasetEvent(event: any) {
+    if(event == 'select') {
+      this.getNotification();
+    }
   }
 
   onActivationEvent(event: any) {
+    if(this.active == true) {
+      this.getNotification();
+    }
+  }
+
+  onNotificationEvent(event: any) {
+    if(event.type = 'notification') {
+      let notification = event.notification;
+      if(this.rbObject != null && notification.data != null && this.rbObject.objectname == notification.data.objectname && this.rbObject.uid == notification.data.uid) {
+        this.notification = notification;
+      }
+    } else if(event.type == 'completion') {
+      if(this.notification != null && this.notification.process == event.process && this.notification.pid == event.pid && this.notification.code == event.code) {
+        this.notification = null;
+      }
+    }
   }
 
   get rbObject() : RbObject {
     return this.dataset != null ? this.dataset.selectedObject : null;
   }
 
-  activate() {
-    if(this.rbObject != null) {
-      let filter: any = {
-        "data.uid": this.rbObject.uid
-      };
-      this.loading = true;
-      this.pid = null;
-      this.message = null;
-      this.actions = [];
-      this.apiService.listAssignments(filter).subscribe(resp => this.setAssignment(resp));
-    }
+  get actions() : RbNotificationAction[] {
+    return this.notification != null ? this.notification.actions : []
   }
 
-  setAssignment(data: any) {
-    if(data != null && data.result != null && data.result.length > 0) {
-      this.pid = data.result[0].pid;
-      this.actions = data.result[0].actions;
-      this.message = data.result[0].message;
-    } else {
-      this.pid = null;
-      this.message = "No actions available";
-      this.actions = [];
+  get message() : string {
+    return this.notification != null ? this.notification.message : "No actions";
+  }
+
+  get showround() : boolean {
+    return this.round;
+  }
+
+  get showstandard() : boolean {
+    return !this.round && this.notification == null && !this.hideonempty;
+  }
+
+  get showfocus() : boolean {
+    return !this.round && this.notification != null;
+  }
+
+  activate() {
+  }
+
+  deactivate() {
+  }
+
+  getNotification() {
+    if(this.rbObject != null) {
+      this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => this.notification = notif);
     }
-    this.loading = false;
   }
 
   clickAction(action: string) {
-    this.apiService.actionAssignment(this.pid, action).subscribe(
-      resp => {
-        this.receiveActionResponse(resp)
-      },
-      error => this.errorService.receiveHttpError(error)
-    );
+    let notif = this.notification;
+    this.notificationService.actionNotification(this.notification, action).subscribe(resp => {
+      if(this.notification === notif) {
+        this.notification = null;
+      }
+    });
   }
 
   receiveActionResponse(resp: any) {
-    if(resp != null && resp.rbobjectupdate != null && resp.rbobjectupdate.length > 0) {
-      for(let row of resp.rbobjectupdate) {
-        this.dataService.getServerObject(row.objectname, row.uid).subscribe(resp => {});
-      }
-    }
+
   }
 }

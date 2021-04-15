@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { ApiService } from 'app/services/api.service';
-import { DataService } from 'app/services/data.service';
+import { RbNotification } from 'app/datamodel';
+import { NotificationService } from 'app/services/notification.service';
 
 @Component({
   selector: 'rb-notification',
@@ -11,44 +11,23 @@ export class RbNotificationComponent implements OnInit {
 
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
-  public count: number;
-  public list: any[];
-  public loading: boolean;
-
   constructor(
-    private apiService: ApiService,
-    private dataService: DataService
+    private notificationService: NotificationService
   ) { 
-    this.count = 0;
-    this.loading = false;
-    this.list = [];
   }
 
   ngOnInit() {
-    this.getCount();
   }
 
-  public getCount() {
-    let filter = {"interaction.type":"exception"};
-    this.apiService.getAssignmentCount(filter).subscribe(resp => this.setCount(resp));
+  public get list() : RbNotification[] {
+    return this.notificationService.topExceptions;
   }
 
-  public getList() {
-    this.loading = true;
-    let filter = {"interaction.type":"exception"};
-    this.apiService.listAssignments(filter).subscribe(resp => this.setList(resp));
+  public get count() : number {
+    return this.notificationService.exceptionCount;
   }
 
-  public setCount(data: any) {
-    this.count = data.count;
-  }
-
-  public setList(data: any) {
-    this.list = data.result;
-    this.loading = false;
-  }
-
-  public selectNotification(notification: any) {
+  public selectNotification(notification: RbNotification) {
     let evt = {
       object : (notification.data.object != null ? notification.data.object : (notification.data.objectname != null ? notification.data.objectname : null)),
       filter : {

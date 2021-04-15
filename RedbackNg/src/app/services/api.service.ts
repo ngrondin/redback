@@ -375,11 +375,13 @@ export class ApiService {
 
   /********* Process **********/
 
-  listAssignments(filter: any): Observable<any> {
+  listAssignments(filter: any, page: number, pageSize: number): Observable<any> {
     const req = {
       action: 'getassignments',
       filter: filter,
-      viewdata:['objectname', 'uid']
+      viewdata:['objectname', 'uid'],
+      page: page,
+      pageSize: pageSize
     };
     return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }

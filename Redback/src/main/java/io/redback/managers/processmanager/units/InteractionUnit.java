@@ -94,7 +94,11 @@ public class InteractionUnit extends ProcessUnit
 			for(ActionConfig actionConfig: actionConfigs)
 				if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeId.equals((String)actionConfig.evaluateExclusiveId(pi))))
 					notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain());
-			
+			DataMap piData = pi.getData();
+			if(piData.containsKey("objectname") && piData.containsKey("uid")) { // This should be configurable
+				notification.addData("objectname", piData.getString("objectname"));
+				notification.addData("uid", piData.getString("uid"));
+			}
 			if(assigneeType == Assignee.USER) 
 			{
 				notification.addTo(assigneeId);
@@ -116,6 +120,7 @@ public class InteractionUnit extends ProcessUnit
 		if(nextNodeInterruption != null) {
 			pi.clearAssignees();
 			pi.clearInteractionDetails();
+			pi.getProcessManager().sendInteractionCompletion(pi.getProcessName(), pi.getId(), notificationConfig.getString("code"));
 			pi.setCurrentNode(nextNodeInterruption);
 		}
 		logger.finer("Finished interaction node interruption");
@@ -153,7 +158,7 @@ public class InteractionUnit extends ProcessUnit
 		logger.finer("Finished interaction node action");
 	}
 	
-	public Notification getAssignment(Actionner actionner, ProcessInstance pi) throws RedbackException
+	public Notification getNotification(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
 		if(isAssignee(actionner, pi))
 		{

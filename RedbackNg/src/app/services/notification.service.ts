@@ -1,0 +1,130 @@
+import { ApplicationInitStatus, Injectable } from '@angular/core';
+import { RbNotification } from 'app/datamodel';
+import { Observer } from 'rxjs';
+import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
+import { DataService } from './data.service';
+import { ErrorService } from './error.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class NotificationService {
+  notifications: RbNotification[];
+  page: number;
+  pageSize: number = 500;
+  private observers: Observer<any>[] = [];
+
+  constructor(
+    private apiService: ApiService,
+    private dataService: DataService,
+    private errorService: ErrorService
+  ) {
+    this.apiService.getSignalObservable().subscribe(
+      json => {
+        if(json.type == 'processnotification') {
+          this.receiveNotification(json.notification);
+        } else if(json.type == 'processinteractioncompletion') {
+          this.observers.forEach((observer) => {
+            observer.next({type:'completion', process: json.process, pid: json.pid, code: json.code});
+          }); 
+        }
+      }
+    );
+  }
+
+  public fetchAllNotifications() {
+    this.notifications = [];
+    this.page = 0;
+    this.fetchNextPage();
+  }
+
+  public getObservable() : Observable<any>  {
+    return new Observable<any>((observer) => {
+      this.observers.push(observer);
+    });
+  }
+
+  private fetchNextPage() {
+    this.apiService.listAssignments({}, this.page, this.pageSize).subscribe(
+      resp => {
+        for(let item of resp.result) {
+          this.receiveNotification(item);
+        }
+        if(resp.result.length >= this.pageSize) {
+          this.fetchNextPage();
+        }
+      },
+      error => {
+        this.errorService.receiveHttpError(error)
+      }
+    );
+    this.page++;
+  }
+
+  private receiveNotification(json: any) : RbNotification {
+    let notif: RbNotification = new RbNotification(json, this);
+    for(let i = 0; i < this.notifications.length; i++) {
+      if(this.notifications[i].pid == notif.pid) {
+        this.notifications.splice(i, 1);
+        i--;
+      }
+    }
+    this.notifications.push(notif);
+    this.observers.forEach((observer) => {
+      observer.next({type:'notification', notification: notif});
+    }); 
+    return notif;
+  }
+
+  public get exceptionCount(): number {
+    return this.notifications.filter(item => item.type == 'exception').length;
+  }
+
+  public get topExceptions(): RbNotification[] {
+    return this.notifications.filter(item => item.type == 'exception').slice(0, 100);
+  }
+
+  public getNotificationFor(objectname: string, uid: string) : Observable<RbNotification> {
+    const obs = new Observable<RbNotification>((observer) => {
+      let sub = this.notifications.filter(item => item.data != null && item.data.objectname == objectname && item.data.uid == uid);
+      if(sub.length > 0) {
+        observer.next(sub[0]);
+        observer.complete();
+      } else {
+        this.apiService.listAssignments({"data.objectname": objectname, "data.uid": uid}, 0, 50).subscribe(resp => {
+          if(resp.result.length > 0) {
+            let notif = this.receiveNotification(resp.result[0]);
+            observer.next(notif);
+            observer.complete();
+          } else {
+            observer.next(null);
+            observer.complete();
+          }
+        });
+      }
+    });
+    return obs;
+  }
+
+  actionNotification(notification: RbNotification, action: string): Observable<any> {
+    const obs = new Observable<RbNotification>((observer) => {
+      this.apiService.actionAssignment(notification.pid, action).subscribe(
+        resp => {
+          if(resp != null && resp.rbobjectupdate != null && resp.rbobjectupdate.length > 0 && !this.apiService.signalWebsocketConnected()) {
+            for(let row of resp.rbobjectupdate) {
+              this.dataService.getServerObject(row.objectname, row.uid).subscribe(resp => {});
+            }
+          }
+          this.notifications.splice(this.notifications.indexOf(notification), 1);
+          observer.next(null);
+          observer.complete();
+        },
+        error => {
+          this.errorService.receiveHttpError(error)
+        }
+      )
+    });
+    return obs;
+  }
+}

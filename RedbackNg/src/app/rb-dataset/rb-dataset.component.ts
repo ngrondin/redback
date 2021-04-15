@@ -179,9 +179,6 @@ export class RbDatasetComponent extends RbContainerComponent  {
     if(this.master != null && this.relatedObject != null) {
       filter = this.filterService.mergeFilters(filter, this.master.relationship);
     } 
-    /*if(this.dataTarget != null) {
-      filter = this.filterService.mergeFilters(filter, this.dataTarget.filter);
-    }*/ 
     if(this.userFilter != null) {
       filter = this.filterService.mergeFilters(filter, this.userFilter);
     }
@@ -204,12 +201,13 @@ export class RbDatasetComponent extends RbContainerComponent  {
       this.fetchThreads--;
     }
     if(this.fetchThreads == 0) {
-      console.log("dataset " + this.object + " finished loading");
       this.firstLoad = false;
+      console.log("dataset " + this.object + " finished loading");
+      this.publishEvent('loaded');
       if(this._list.length == 0) {
         this._selectedObject = null;
       } else if(this._list.length == 1) {
-        this._selectedObject = this._list[0];
+        this.select(this._list[0]);
       } else if(this._list.length > 1) {
         if(this.selectedObject != null && !this._list.includes(this.selectedObject)) {
           this._selectedObject = null;
@@ -222,7 +220,6 @@ export class RbDatasetComponent extends RbContainerComponent  {
           this.totalCount = this._list.length;
         }
       }
-      this.publishEvent('loaded');
     }
   }
   

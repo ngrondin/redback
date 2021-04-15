@@ -51,7 +51,7 @@ public class RedbackProcessServer extends ProcessServer
 	protected void interruptProcesses(Session session, DataMap filter) throws RedbackException {
 		Actionner actionner = new Actionner(session);
 		processManager.initiateCurrentTransaction();
-		List<ProcessInstance> list = processManager.findProcesses(actionner, filter);
+		List<ProcessInstance> list = processManager.findProcesses(actionner, filter, 0, 50);
 		for(ProcessInstance pi: list) {
 			processManager.interruptProcess(actionner, pi.getId());
 		}
@@ -59,11 +59,11 @@ public class RedbackProcessServer extends ProcessServer
 	}
 
 
-	protected List<Notification> getAssignments(Session session, DataMap filter, DataList viewdata) throws RedbackException
+	protected List<Notification> getAssignments(Session session, DataMap filter, DataList viewdata, int page, int pageSize) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
 		processManager.initiateCurrentTransaction();
-		List<Notification> result = processManager.getNotifications(actionner, filter, viewdata);
+		List<Notification> result = processManager.getNotifications(actionner, filter, viewdata, page, pageSize);
 		processManager.commitCurrentTransaction();
 		return result;
 	}

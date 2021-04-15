@@ -5,6 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ApiService } from './services/api.service';
 import { ConfigService } from './services/config.service';
 import { UserprefService } from './services/userpref.service';
+import { NotificationService } from './services/notification.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -31,6 +32,7 @@ export class AppComponent {
       private domSanitizer: DomSanitizer,
       private apiService: ApiService,
       private configService: ConfigService,
+      private notificationService: NotificationService,
       private userprefService: UserprefService ) {
     var native = this.elementRef.nativeElement;
     this.type = native.getAttribute("type");
@@ -73,6 +75,8 @@ export class AppComponent {
     for(const set of this.iconsets) {
       this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'));
     }
+
+    this.notificationService.fetchAllNotifications();
     this.userprefService.load();
   }
 }
