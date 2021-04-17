@@ -10,9 +10,13 @@ import { ToastrModule } from 'ngx-toastr';
 
 import {Compiler, COMPILER_OPTIONS, CompilerFactory} from '@angular/core';
 import {JitCompilerFactory} from '@angular/platform-browser-dynamic';
+import { Injector } from '@angular/core';
+
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
 }
+
+export let AppInjector: Injector;
 
 @NgModule({
   imports: [
@@ -40,4 +44,8 @@ export function createCompiler(compilerFactory: CompilerFactory) {
     AppComponent
   ]
 })
-export class AppModule { }
+export class AppModule { 
+  constructor(private injector: Injector) {
+    AppInjector = this.injector;
+  }  
+}

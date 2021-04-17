@@ -146,7 +146,7 @@ public class Notification {
 		if(to.size() > 0) {
 			DataList toList = new DataList();
 			for(int i = 0; i < to.size(); i++)
-				toList.add(to.get(0));
+				toList.add(to.get(i));
 			map.put("to", toList);
 		}
 		if(data != null)

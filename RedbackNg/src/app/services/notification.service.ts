@@ -25,9 +25,7 @@ export class NotificationService {
         if(json.type == 'processnotification') {
           this.receiveNotification(json.notification);
         } else if(json.type == 'processinteractioncompletion') {
-          this.observers.forEach((observer) => {
-            observer.next({type:'completion', process: json.process, pid: json.pid, code: json.code});
-          }); 
+          this.receiveCompletion(json.interaction);
         }
       }
     );
@@ -75,6 +73,16 @@ export class NotificationService {
       observer.next({type:'notification', notification: notif});
     }); 
     return notif;
+  }
+
+  private receiveCompletion(json: any) {
+    let sub = this.notifications.filter(item => item.process == json.process && item.pid == json.pid && item.code == json.code);
+    for(let notif of sub) {
+      this.observers.forEach((observer) => {
+        observer.next({type:'completion', notification: notif});
+      }); 
+      this.notifications.splice(this.notifications.indexOf(notif), 1);
+    }
   }
 
   public get exceptionCount(): number {

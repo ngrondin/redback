@@ -5,27 +5,20 @@
     [matTooltipShowDelay]="1000"
     aria-label="Action Group" 
 	class="mat-mini-fab mat-primary rb-button rb-action-group-button" 
+    (menuOpened)="activate()"
+    (menuClosed)="deactivate()"    
     [matMenuTriggerFor]="actiongroupmenu">
 	<mat-icon>linear_scale</mat-icon>
 </button>
 <div>
     <button
-        *ngIf="!round && !focus"
-        mat-stroked-button 
+        *ngIf="!round"   
         matTooltip="General actions for this record"
         [matTooltipShowDelay]="1000"
         aria-label="Action Group" 
-        class="mat-primary rb-button rb-action-group-button" 
-        [matMenuTriggerFor]="actiongroupmenu">
-        Actions
-    </button>
-    <button
-        *ngIf="!round && focus"
-        mat-flat-button 
-        matTooltip="General actions for this record"
-        [matTooltipShowDelay]="1000"
-        aria-label="Action Group" 
-        class="mat-primary rb-button rb-action-group-button" 
+        [class]="'mat-primary rb-button rb-action-group-button' + (focus && !open ? ' mat-flat-button' : ' mat-stroked-button')" 
+        (menuOpened)="activate()"
+        (menuClosed)="deactivate()"        
         [matMenuTriggerFor]="actiongroupmenu">
         Actions
     </button>    
@@ -39,7 +32,7 @@
     </div>
     <button
         mat-menu-item
-        class="rb-action-group-item"
+        [class]="'rb-action-group-item' + (action.focus ? ' rb-action-group-item-focus' : '')"
         *ngFor="let action of actionData"
         (click)="clickAction(action)">
         {{action.label}}

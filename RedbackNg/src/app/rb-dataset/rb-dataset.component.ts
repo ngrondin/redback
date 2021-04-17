@@ -265,11 +265,15 @@ export class RbDatasetComponent extends RbContainerComponent  {
     }
   } 
 
+  public create() {
+    this.dataService.createObject(this.object, null, this.filter).subscribe(newObject => this.addObjectAndSelect(newObject));
+  }
+
   public delete(obj: RbObject) {
     this.dataService.deleteObject(obj).subscribe(result => this.remove(obj));
   }
 
-  public addObjectAndSelect(obj: RbObject) {
+  private addObjectAndSelect(obj: RbObject) {
     if(this._list.indexOf(obj) > -1) {
       this._list.splice(this._list.indexOf(obj));
     }
@@ -278,19 +282,19 @@ export class RbDatasetComponent extends RbContainerComponent  {
     this.select(obj);
   }
 
-  public removeSelected() {
+  private removeSelected() {
     this.remove(this.selectedObject);
     this.selectedObject = null;
   }
 
-  public remove(obj: RbObject) {
+  private remove(obj: RbObject) {
     if(this._list.indexOf(obj) > -1) {
       this._list.splice(this._list.indexOf(obj), 1);
       obj.removeSet(this);
     }
   }
 
-  public publishEvent(event: string) {
+  private publishEvent(event: string) {
     this.observers.forEach((observer) => {
       observer.next(event);
     }); 

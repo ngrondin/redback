@@ -68,6 +68,7 @@ public class RedbackSignalServer extends SignalServer {
 
 	protected void onSignal(DataMap signal) throws RedbackException {
 		String type = signal.getString("type");
+		//System.out.println("RBSI Received signal " + signal.toString().hashCode() + " : " + signal.toString(0, true)); //Temp Logging
 		if(type.equals("objectupdate")) {
 			String objectName = signal.getString("object.objectname");
 			String uid = signal.getString("object.uid");
@@ -89,8 +90,8 @@ public class RedbackSignalServer extends SignalServer {
 						if(subs.matches(signal.getObject("object.data")))
 							sendStreamData(subs.session, new Payload(signal.toString()));
 			}
-		} else if(type.equals("processnotification")) {
-			DataList to = signal.getObject("notification").getList("to");
+		} else if(type.equals("processnotification") || type.equals("processinteractioncompletion")) {
+			DataList to = type.equals("processnotification") ? signal.getObject("notification").getList("to") : signal.getObject("interaction").getList("to"); 
 			if(to != null && to.size() > 0) {
 				Iterator<Session> it = sessionToEndpoint.keySet().iterator();
 				while(it.hasNext()) {

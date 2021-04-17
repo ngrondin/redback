@@ -1,0 +1,27 @@
+:host {
+    display:flex;
+    flex-direction: column;
+    max-width: 350px;
+}
+
+.rb-dialog-body {
+    display: flex;
+    padding: 20px;
+    color: #333333;
+}
+
+.rb-dialog-options {
+    display: flex;
+    padding: 0px 10px 0px 10px;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.rb-dialog-option {
+    display: flex;
+    padding: 10px;
+}
+
+.rb-dialog-button {
+    color: var(--main-color);
+}

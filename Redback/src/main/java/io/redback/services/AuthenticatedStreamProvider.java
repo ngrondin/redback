@@ -47,6 +47,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 				endpointToSession.put(streamEndpoint, session);
 				sessionToEndpoint.put(session, streamEndpoint);
 				streamEndpoint.setHandler(this);
+				System.out.println("ASP opened stream " + session.getId() + " for user " + up.getUsername()); //Temp Logging
 			} else {
 				throw new RedbackException("User session cannot be created");
 			}
@@ -69,6 +70,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 	
 	public void sendStreamData(Session session, Payload payload) {
 		StreamEndpoint endpoint = sessionToEndpoint.get(session);
+		System.out.println("ASP sending message to stream " + session.getId() + " : " + payload.getString().hashCode()); //Temp Logging
 		if(endpoint != null) {
 			endpoint.send(payload);
 		}
@@ -80,6 +82,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 
 	public void streamClosed(StreamEndpoint streamEndpoint) {
 		Session session = endpointToSession.get(streamEndpoint);
+		System.out.println("ASP closed stream " + session.getId()); //Temp Logging
 		try {
 			onStreamClose(session);
 			endpointToSession.remove(streamEndpoint);

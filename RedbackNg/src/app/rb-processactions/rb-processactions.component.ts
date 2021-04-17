@@ -14,6 +14,7 @@ export class RbProcessactionsComponent extends RbDataObserverComponent  {
   @Input('hideonempty') hideonempty: boolean = false;
 
   notification: RbNotification;
+  notificationRetreived: boolean = false;
   subscription: Subscription;
 
   constructor(
@@ -44,13 +45,14 @@ export class RbProcessactionsComponent extends RbDataObserverComponent  {
 
   onNotificationEvent(event: any) {
     if(event.type = 'notification') {
-      let notification = event.notification;
-      if(this.rbObject != null && notification.data != null && this.rbObject.objectname == notification.data.objectname && this.rbObject.uid == notification.data.uid) {
-        this.notification = notification;
+      if(this.rbObject != null && event.notification.data != null && this.rbObject.objectname == event.notification.data.objectname && this.rbObject.uid == event.notification.data.uid) {
+        this.notification = event.notification;
+        this.notificationRetreived = true;
       }
     } else if(event.type == 'completion') {
-      if(this.notification != null && this.notification.process == event.process && this.notification.pid == event.pid && this.notification.code == event.code) {
+      if(this.notification === event.notification) {
         this.notification = null;
+        this.notificationRetreived = false;
       }
     }
   }
@@ -87,7 +89,10 @@ export class RbProcessactionsComponent extends RbDataObserverComponent  {
 
   getNotification() {
     if(this.rbObject != null) {
-      this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => this.notification = notif);
+      this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => {
+        this.notification = notif;
+        this.notificationRetreived = true;
+      });
     }
   }
 

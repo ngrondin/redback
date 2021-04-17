@@ -1,0 +1,17 @@
+<div
+    class="rb-dialog-body">
+    {{text}}
+</div>
+<div
+    class="rb-dialog-options">
+    <div
+        class="rb-dialog-option"
+        *ngFor="let option of options">
+        <button
+            mat-stroked-button
+            class="rb-dialog-button"
+            (click)="clickOption(option)">
+            {{option.label}}
+        </button>    
+    </div>
+</div>

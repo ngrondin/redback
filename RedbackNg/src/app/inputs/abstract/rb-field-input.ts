@@ -1,7 +1,9 @@
 import { HostBinding } from '@angular/core';
 import { Input } from '@angular/core';
 import { Output, EventEmitter } from '@angular/core';
+import { AppInjector } from 'app/app.module';
 import { RbObject } from 'app/datamodel';
+import { DialogService } from 'app/services/dialog.service';
 import { RbInputComponent } from './rb-input';
 
 
@@ -14,10 +16,12 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
 
   editedValue: any;
   isEditing: boolean = false;
+  dialogService: DialogService;
 
   constructor() {
     super();
     this.defaultIcon = "description";
+    this.dialogService = AppInjector.get(DialogService);
   }
 
   inputInit() {
@@ -48,10 +52,15 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
 
 
   public startEditing() {
-    if(!this.readonly) {
+    if(this.attribute != null && this.dataset != null && this.rbObject == null) {
+      let text = this.dataset.list.length == 0 ? 'No record currently exist to edit. ' : 'No record has currently been selected to edit. ';
+      text = text + 'Do you want to create a new one?';
+      this.dialogService.openDialog(text, [{label: "Yes", callback: () => this.dataset.create()}, {label: "No", callback: () => {}}]);
+    } else if(!this.readonly) {
       this.isEditing = true;
       this.editedValue = null;
-    }
+    } 
+
   }
 
   public finishEditing() {

@@ -36,12 +36,11 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   @Input('round') round: boolean = false;
   @Input('hideonempty') hideonempty: boolean = false;
 
-  message: string;
-  loading: boolean;
+  open: boolean = false;
   domainActions: RbActiongroupAction[];
   notification: RbNotification;
+  notificationRetreived: boolean = false;
   notificationSubscription: Subscription;
-
   actionData: RbActiongroupAction[] = [];
 
   constructor(
@@ -85,22 +84,21 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
 
   onActivationEvent(event: any) {
     if(this.active == true) {
-      /*if(this.showprocessinteraction) {
-        this.getNotification();
-      }*/
+
     }
   }
 
   onNotificationEvent(event: any) {
     if(event.type = 'notification') {
-      let notification = event.notification;
-      if(this.rbObject != null && notification.data != null && this.rbObject.objectname == notification.data.objectname && this.rbObject.uid == notification.data.uid) {
-        this.notification = notification;
+      if(this.rbObject != null && event.notification.data != null && this.rbObject.objectname == event.notification.data.objectname && this.rbObject.uid == event.notification.data.uid) {
+        this.notification = event.notification;
+        this.notificationRetreived = true;
         this.calcActionData();
       }
     } else if(event.type == 'completion') {
-      if(this.notification != null && this.notification.process == event.process && this.notification.pid == event.pid && this.notification.code == event.code) {
+      if(this.notification === event.notification) {
         this.notification = null;
+        this.notificationRetreived = false;
         this.calcActionData();
       }
     }
@@ -120,6 +118,17 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
       }
     }
     return ret;
+  }
+
+  public activate() {
+    this.open = true;
+    if(this.notificationRetreived == false) {
+      this.getNotificationThenCalcActions();
+    }
+  }
+
+  public deactivate() {
+    this.open = false;
   }
   
   private calcActionData() {
@@ -150,6 +159,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   private getNotificationThenCalcActions() {
     this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => {
       this.notification = notif;
+      this.notificationRetreived = true;
       this.calcActionData();
     });
   }
@@ -160,6 +170,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
       this.notificationService.actionNotification(this.notification, action.param).subscribe(resp => {
         if(this.notification === notif) {
           this.notification = null;
+          this.notificationRetreived = false;
         }
         this.calcActionData();
       });

@@ -54,64 +54,22 @@ public class InteractionUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.finer("Starting interaction node execution");
-		Map<String, Object> context = pi.getScriptContext();
 		DataMap interactionDetails = new DataMap();
 		interactionDetails.put("code", notificationConfig.getString("code"));
 		interactionDetails.put("type", notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception");
 		pi.setInteractionDetails(interactionDetails);
-		
-		for(int i = 0; i < assigneeConfigs.size(); i++)
+		List<Assignee> assignees = getAssignes(pi);
+		for(Assignee assignee : assignees)
+			pi.addAssignee(assignee);
+		Notification notification = getNotification(pi);
+		List<String> usernames = getAssigneeUsernames(pi, assignees);
+		if(usernames.size() > 0) 
 		{
-			AssigneeConfig assigneeConfig = assigneeConfigs.get(i);
-			Object assigneeObject = assigneeConfig.evaluateId(context);
-			if(assigneeObject instanceof String)
-			{
-				addAssigneeAndSendNotification(pi, assigneeConfig.getType(), (String)assigneeObject);
-			}
-			else if(assigneeObject instanceof DataList)
-			{
-				DataList assigneeList = (DataList)assigneeObject;
-				for(int j = 0; j < assigneeList.size(); j++)
-					addAssigneeAndSendNotification(pi, assigneeConfigs.get(i).getType(), assigneeList.getString(j));
-			}
-		}
-		logger.finer("Finished interaction node execution");
-	}
-	
-	private void addAssigneeAndSendNotification(ProcessInstance pi, int assigneeType, String assigneeId) throws RedbackException 
-	{
-		logger.finer("Adding assignee " + assigneeId);
-		pi.addAssignee(new Assignee(assigneeType, assigneeId));
-		
-		if(assigneeType == Assignee.USER || assigneeType == Assignee.GROUP) 
-		{
-			Map<String, Object> context = pi.getScriptContext();
-			String code = notificationConfig.getString("code");
-			String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
-			String label = (String)labelExpression.eval(context);
-			String message = (String)messageExpression.eval(context);
-			Notification notification = new Notification(pi.getProcessName(), pi.getId(), code, type, label, message);
-			for(ActionConfig actionConfig: actionConfigs)
-				if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeId.equals((String)actionConfig.evaluateExclusiveId(pi))))
-					notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain());
-			DataMap piData = pi.getData();
-			if(piData.containsKey("objectname") && piData.containsKey("uid")) { // This should be configurable
-				notification.addData("objectname", piData.getString("objectname"));
-				notification.addData("uid", piData.getString("uid"));
-			}
-			if(assigneeType == Assignee.USER) 
-			{
-				notification.addTo(assigneeId);
-			}
-			else if(assigneeType == Assignee.GROUP)
-			{
-				List<String> users = pi.getProcessManager().getUsersOfGroup(pi.getDomain(), assigneeId);
-				for(String username : users) 
-					notification.addTo(username);
-			}
-			
+			for(String username: usernames)
+				notification.addTo(username);
 			pi.getProcessManager().sendNotification(notification);
 		}
+		logger.finer("Finished interaction node execution");
 	}
 	
 	public void interrupt(Actionner actionner, ProcessInstance pi) throws RedbackException
@@ -120,7 +78,7 @@ public class InteractionUnit extends ProcessUnit
 		if(nextNodeInterruption != null) {
 			pi.clearAssignees();
 			pi.clearInteractionDetails();
-			pi.getProcessManager().sendInteractionCompletion(pi.getProcessName(), pi.getId(), notificationConfig.getString("code"));
+			sendCompletion(pi);
 			pi.setCurrentNode(nextNodeInterruption);
 		}
 		logger.finer("Finished interaction node interruption");
@@ -142,6 +100,7 @@ public class InteractionUnit extends ProcessUnit
 					pi.clearAssignees();
 					pi.clearInteractionDetails();
 					pi.setLastActioner(actionner);
+					sendCompletion(pi);
 					pi.setCurrentNode(actionConfig.getNextNode());
 				}
 			}
@@ -158,33 +117,90 @@ public class InteractionUnit extends ProcessUnit
 		logger.finer("Finished interaction node action");
 	}
 	
-	public Notification getNotification(Actionner actionner, ProcessInstance pi) throws RedbackException
+	public Notification getNotificationForActionner(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
-		if(isAssignee(actionner, pi))
+		if(isAssignee(actionner, pi)) 
 		{
-			Map<String, Object> context = pi.getScriptContext();
-			String code = notificationConfig.getString("code");
-			String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
-			String label = (String)labelExpression.eval(context);
-			String message = (String)messageExpression.eval(context);
-			Notification notification = new Notification(pi.getProcessName(), pi.getId(), code, type, label, message);
-			for(ActionConfig actionConfig: actionConfigs)
-			{
-				if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeMatch(actionner, pi.getAssigneeById((String)actionConfig.evaluateExclusiveId(pi)))))
-					notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain());
-			}
+			Notification notification = getNotification(pi);
 			notification.addTo(actionner.getId());
 			return notification;
 		}
-		return null;
+		else
+		{
+			return null;
+		}
 	}
-	/*
-	protected Notification getNotification(ProcessInstance pi) throws RedbackException 
+	
+	private void sendCompletion(ProcessInstance pi) throws RedbackException 
 	{
-
+		List<String> usernames = getAssigneeUsernames(pi, getAssignes(pi));
+		if(usernames.size() > 0)
+			pi.getProcessManager().sendInteractionCompletion(pi.getProcessName(), pi.getId(), notificationConfig.getString("code"), usernames);
 	}
-	*/
-	protected boolean isAssignee(Actionner actionner, ProcessInstance pi)
+	
+	private List<Assignee> getAssignes(ProcessInstance pi) throws RedbackException {
+		List<Assignee> assignees = new ArrayList<Assignee>();
+		Map<String, Object> context = pi.getScriptContext();
+		for(AssigneeConfig assigneeConfig : assigneeConfigs)
+		{
+			Object assigneeObject = assigneeConfig.evaluateId(context);
+			if(assigneeObject instanceof String)
+			{
+				assignees.add(new Assignee(assigneeConfig.getType(), (String)assigneeObject));
+			}
+			else if(assigneeObject instanceof DataList)
+			{
+				DataList assigneeList = (DataList)assigneeObject;
+				for(int j = 0; j < assigneeList.size(); j++)
+					assignees.add(new Assignee(assigneeConfig.getType(), assigneeList.getString(j)));
+			}
+		}
+		return assignees;
+	}
+	
+	private List<String> getAssigneeUsernames(ProcessInstance pi, List<Assignee> assignees) throws RedbackException {
+		List<String> usernames = new ArrayList<String>();
+		for(Assignee assignee : assignees) {
+			if(assignee.getType() == Assignee.USER) 
+			{
+				if(!usernames.contains(assignee.getId()))
+					usernames.add(assignee.getId());
+			}
+			else if(assignee.getType() == Assignee.GROUP)
+			{
+				List<String> users = pi.getProcessManager().getUsersOfGroup(pi.getDomain(), assignee.getId());
+				for(String username : users) { 
+					if(!usernames.contains(username))
+						usernames.add(username);
+				}
+			}			
+		}
+		return usernames;
+	}
+	
+
+	
+	private Notification getNotification(ProcessInstance pi) throws RedbackException 
+	{
+		Map<String, Object> context = pi.getScriptContext();
+		String code = notificationConfig.getString("code");
+		String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
+		String label = (String)labelExpression.eval(context);
+		String message = (String)messageExpression.eval(context);
+		Notification notification = new Notification(pi.getProcessName(), pi.getId(), code, type, label, message);
+		for(ActionConfig actionConfig: actionConfigs)
+		{
+			//if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeMatch(actionner, pi.getAssigneeById((String)actionConfig.evaluateExclusiveId(pi)))))
+			notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain());
+		}
+		if(pi.getData() != null && pi.getData().containsKey("objectname") && pi.getData().containsKey("uid")) {
+			notification.addData("objectname", pi.getData().getString("objectname"));
+			notification.addData("uid", pi.getData().getString("uid"));
+		}
+		return notification;
+	}
+	
+	private boolean isAssignee(Actionner actionner, ProcessInstance pi)
 	{
 		if(actionner.getId().equals(pi.getProcessManager().getProcessUsername())) 
 		{
@@ -199,7 +215,7 @@ public class InteractionUnit extends ProcessUnit
 		}
 	}
 	
-	protected boolean assigneeMatch(Actionner actionner, Assignee assignee)
+	private boolean assigneeMatch(Actionner actionner, Assignee assignee)
 	{
 		if(assignee != null && actionner != null) {
 			if(assignee.getType() == Assignee.GROUP && actionner.isInGroup(assignee.getId())) {

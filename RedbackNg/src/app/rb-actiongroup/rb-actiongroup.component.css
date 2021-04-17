@@ -8,3 +8,13 @@
 .rb-action-group-item {
     font-size: 0.95rem;
 }
+
+.rb-action-group-item-focus {
+    background-color: var(--main-color);
+    color: white;
+}
+
+.rb-action-group-item-focus:hover {
+    background-color: #354e9e;
+    color: white;
+}

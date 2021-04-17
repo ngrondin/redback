@@ -2,7 +2,10 @@ import { HostBinding } from '@angular/core';
 import { SimpleChanges } from '@angular/core';
 import { Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { AppInjector } from 'app/app.module';
 import { RbObject } from 'app/datamodel';
+import { UserprefService } from 'app/services/userpref.service';
+
 
 
 export abstract class RbInputComponent extends RbDataObserverComponent {
@@ -27,12 +30,19 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   defaultIcon: string;
   defaultSize: number = 15;
 
-  constructor() {
+  constructor( ) {
     super();
   }
 
   dataObserverInit() {
-      this.inputInit();
+    if(this.dataset != null && this.attribute != null) {
+      const userpref = AppInjector.get(UserprefService);
+      let swtch = userpref.getUISwitch('input',  this.dataset.object + "." + this.attribute);
+      if(swtch == false) {
+        this.show = 'false';
+      }
+    }
+    this.inputInit();
   }
 
   abstract inputInit();

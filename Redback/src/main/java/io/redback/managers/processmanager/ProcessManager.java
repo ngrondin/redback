@@ -289,7 +289,7 @@ public class ProcessManager
 			ProcessUnit pu = process.getNode(pi.getCurrentNode());
 			Notification notification = null;
 			if(pu instanceof InteractionUnit)
-				notification = ((InteractionUnit)pu).getNotification(actionner, pi);
+				notification = ((InteractionUnit)pu).getNotificationForActionner(actionner, pi);
 
 			if(notification != null)
 			{
@@ -456,7 +456,7 @@ public class ProcessManager
 		}
 	}
 	
-	public void sendInteractionCompletion(String processName, String pid, String code) 
+	public void sendInteractionCompletion(String processName, String pid, String code, List<String> to) 
 	{
 		if(signalConsumerName != null) 
 		{
@@ -464,11 +464,15 @@ public class ProcessManager
 			{
 				DataMap signal = new DataMap();
 				signal.put("type", "processinteractioncompletion");
-				DataMap interaction = new DataMap();
-				interaction.put("process", processName);
-				interaction.put("pid", pid);
-				interaction.put("code", code);
-				signal.put("interaction", interaction);
+				DataMap intcomp = new DataMap();
+				intcomp.put("process", processName);
+				intcomp.put("pid", pid);
+				intcomp.put("code", code);
+				DataList toList = new DataList();
+				for(String username: to)
+					toList.add(username);
+				intcomp.put("to", toList);
+				signal.put("interaction", intcomp);
 				Payload payload = new Payload(signal.toString());
 				logger.finest("Publishing signal : " + signal);
 				firebus.publish(signalConsumerName, payload);
