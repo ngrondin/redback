@@ -32,10 +32,6 @@ export class RbLinkComponent extends RbDataObserverComponent {
   onActivationEvent(state: boolean) {
   }
 
-  get rbObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : null;
-  }
-
   public navigateTo() {
     if(this.rbObject != null && this.attribute != null) {
       let target = {};

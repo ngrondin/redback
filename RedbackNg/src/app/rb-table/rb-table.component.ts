@@ -52,14 +52,6 @@ export class RbTableComponent extends RbDataObserverComponent {
 
   onActivationEvent(state: boolean) {
   }
-  
-  get selectedObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : null;
-  }
-
-  get list(): RbObject[] {
-    return this.dataset != null ? this.dataset.list : null;
-  }
 
   clickColumn(column: TableColumnConfig) {
     this.dataset.filterSort({

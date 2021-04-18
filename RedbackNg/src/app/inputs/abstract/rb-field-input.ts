@@ -9,7 +9,6 @@ import { RbInputComponent } from './rb-input';
 
 export abstract class RbFieldInputComponent extends RbInputComponent {
   @Input('margin') margin: boolean = true;
-  @Output('keyup') keyupEvent = new EventEmitter();
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
   @HostBinding('style.width') get styleWidth() { return (this.size != null ? ((0.88 * this.size) + 'vw'): this.defaultSize != null ? ((0.88 * this.defaultSize) + 'vw'): null);}

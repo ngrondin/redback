@@ -94,6 +94,7 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
       this.tabs.splice(this.tabs.indexOf(this.cmTab), 1);
       if(this.activeTab == this.cmTab) {
         this.activeTab = null;
+        this.cmTab.deactivate();
       }
     }
     this.cmShow = false;

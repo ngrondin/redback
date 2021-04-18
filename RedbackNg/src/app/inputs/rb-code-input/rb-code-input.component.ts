@@ -36,11 +36,6 @@ export class RbCodeInputComponent extends RbInputComponent {
     this.editedValue = val;
   }
 
-  public get rbObject(): RbObject {
-    return this.dataset != null && this.dataset.selectedObject != null ? this.dataset.selectedObject : null;
-  }
-
-
   public get config(): any {
     let ret = {
       printMargin: false

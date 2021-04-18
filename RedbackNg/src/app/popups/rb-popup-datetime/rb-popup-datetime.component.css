@@ -40,6 +40,21 @@
     border-radius: 50%;
 }
 
+.rb-datetime-cal-daybox:hover {
+    background: var(--main-color);
+    color: white; 
+}
+
+.rb-datetime-cal-daybox-today {
+    background: rgb(255,64,129);
+    color: white; 
+}
+
+.rb-datetime-cal-daybox-today:today {
+    background: var(--main-color);
+    color: white; 
+}
+
 .rb-datetime-cal-dayheader {
     display:flex;
     width:32px;
@@ -71,7 +86,7 @@
     margin: 10px;
     cursor: pointer;
 }
-
+/*
 .rb-datetime-clock-dial-container {
     position: absolute;
     top: 0;
@@ -80,7 +95,7 @@
     left: 0;
     pointer-events: none;
 }
-
+*/
 .rb-datetime-clock-dial-pointer {
     background: darkblue;
     height: 35%;
@@ -103,6 +118,26 @@
     transform-origin: 50% 50%;
     text-align: center;
     font-size: 0.8rem;
-    pointer-events: none;
+    border-radius: 50%;
+    vertical-align: middle;
+    /*pointer-events: none;*/
 }
-  
+
+.rb-datetime-clock-dial-number span {
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.rb-datetime-clock-dial-number:hover {
+    background: var(--main-color);
+    color: white;
+}
+
+.rb-datetime-clock-dial-number-inter {
+    color: transparent;
+}
+
+.rb-datetime-clock-dial-number-inter:hover {
+    background: var(--main-color);
+    color: white;
+}

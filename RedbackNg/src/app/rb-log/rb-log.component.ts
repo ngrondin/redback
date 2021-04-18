@@ -24,10 +24,6 @@ export class RbLogComponent extends RbDataObserverComponent {
     super();
   }
 
-  get list() : RbObject[] {
-    return this.dataset != null ? this.dataset.list : null;
-  }
-  
   dataObserverInit() {
   }
 
@@ -35,9 +31,19 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: any) {
+    if(this.active == true) {
+      this.evalEditable();
+    } else {
+      this.isEditable = false;
+    }
   }
 
   onActivationEvent(event: any) {
+    if(this.active == true) {
+      this.evalEditable();
+    } else {
+      this.isEditable = false;
+    }
   }
 
   getUserForItem(object: RbObject) : string {
@@ -69,6 +75,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   keydown(event: any) {
+    console.log(event.keyCode);
     if(event.keyCode == 13) {
       this.post();
     }
@@ -79,6 +86,7 @@ export class RbLogComponent extends RbDataObserverComponent {
     msg[this.entryattribute] = "'" + this.value.replace("'", "\\'") + "'";
     this.dataset.action('create', msg);
     this.value = "";
+    //setTimeout(() => {this.value = "";}, 100);
   }
 
   public evalEditable() {
@@ -96,5 +104,6 @@ export class RbLogComponent extends RbDataObserverComponent {
             this.isEditable = false;
         }
     }
+    console.log('eval editable = ' + this.isEditable);
   }
 }

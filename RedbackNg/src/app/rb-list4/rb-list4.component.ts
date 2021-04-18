@@ -37,18 +37,6 @@ export class RbList4Component extends RbDataObserverComponent {
   onActivationEvent(state: boolean) {
   }
 
-  public get list() : RbObject[] {
-    return this.dataset != null ? this.dataset.list : [];
-  }
-
-  public get selectedObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : null;
-  }
-
-  public get isLoading() : boolean {
-    return this.dataset != null ? this.dataset.isLoading : false;
-  }
-
   public hasMainLine() : boolean {
     return this.mainattribute != null;
   }

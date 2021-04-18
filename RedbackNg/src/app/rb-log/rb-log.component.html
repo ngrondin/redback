@@ -1,22 +1,16 @@
 <div
     class="rb-log-post"
     *ngIf="isEditable">
-    <mat-icon 
-        style="margin-top: 15px;"
-        class="rb-grey-icon">
-        create
-    </mat-icon>
-    <mat-form-field
-        style="flex-grow:1;">
-        <mat-label>New Note</mat-label>
-        <input 
-            matInput 
-            [(ngModel)]="value"
-            (keydown)="keydown($event)"
-            autocomplete="off">        
-    </mat-form-field >
+    <rb-string-input
+        [label]="'New Note'"
+        [icon]="'create'"
+        [size]="40"
+        [(value)]="value"
+        (keydown)="keydown($event)">
+    </rb-string-input>
     <button
         mat-raised-button
+        class="rb-button"
         color="primary"
         (click)="post()">
         Post

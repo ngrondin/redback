@@ -1,5 +1,6 @@
 import { HostBinding } from "@angular/core";
 import { Input } from "@angular/core";
+import { RbObject } from "app/datamodel";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
 import { Subscription } from "rxjs";
@@ -56,6 +57,26 @@ export abstract class RbDataObserverComponent extends RbComponent {
     abstract dataObserverDestroy();
 
     abstract onDatasetEvent(event: string);
+
+    get list(): RbObject[] {
+        return this.dataset != null ? this.dataset.list : null;
+    }
+
+    get lists(): any {
+        return this.datasetgroup != null ? this.datasetgroup.lists : null;
+    }
+
+    get rbObject() : RbObject {
+        return this.dataset != null ? this.dataset.selectedObject : null;
+    }
+
+    get selectedObject() : RbObject {
+        return this.dataset != null ? this.dataset.selectedObject : null;
+    }
+
+    get isLoading() : boolean {
+        return this.dataset != null ? this.dataset.isLoading : false;
+    }
 
     evalShow() {
         if(this.show == 'true') {

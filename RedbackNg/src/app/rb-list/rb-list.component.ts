@@ -28,13 +28,7 @@ export class RbListComponent extends RbDataObserverComponent {
     super();
   }
 
-  get list() : RbObject[] {
-    return this.dataset != null ? this.dataset.list : null;
-  }
 
-  get selectedObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : null;
-  }
 
   get isLoading(): boolean {
     return this.dataset != null ? this.dataset.isLoading : false;

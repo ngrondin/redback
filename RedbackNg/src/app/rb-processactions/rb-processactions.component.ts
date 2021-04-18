@@ -57,10 +57,6 @@ export class RbProcessactionsComponent extends RbDataObserverComponent  {
     }
   }
 
-  get rbObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : null;
-  }
-
   get actions() : RbNotificationAction[] {
     return this.notification != null ? this.notification.actions : []
   }

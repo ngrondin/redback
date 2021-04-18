@@ -1,3 +1,5 @@
+import { Output } from '@angular/core';
+import { EventEmitter } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
 
@@ -7,7 +9,8 @@ import { RbFieldInputComponent } from '../abstract/rb-field-input';
   styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbStringInputComponent extends RbFieldInputComponent {
-
+  @Output('keydown') keydown = new EventEmitter();
+  
   constructor() {
     super();
   }

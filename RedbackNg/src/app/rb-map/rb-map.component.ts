@@ -180,18 +180,6 @@ export class RbMapComponent extends RbDataObserverComponent {
   onMapReady(event: any) {
   }
 
-  get selectedObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
-  }
-
-  get list(): RbObject[] {
-    return this.dataset != null ? this.dataset.list : null;
-  }
-
-  get lists(): any {
-    return this.datasetgroup != null ? this.datasetgroup.lists : null;
-  }
-
   calcAll() {
     if(this.active) {
       //console.log("calc all");

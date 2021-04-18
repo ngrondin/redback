@@ -45,10 +45,6 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
   onActivationEvent(event: any) {
   }
 
-  get list(): RbObject[] {
-    return this.dataset != null ? this.dataset.list : null;
-  }
-
   public get isLoading() : boolean {
     return this.dataset != null ? this.dataset.isLoading : false;
   }

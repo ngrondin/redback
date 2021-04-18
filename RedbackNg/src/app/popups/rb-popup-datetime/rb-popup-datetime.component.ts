@@ -31,8 +31,8 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
   calendar: any[];
   daysOfWeek: any[] = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   monthsOfYear: string[] = ['January', 'Feburary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  hoursOfDay: number[] = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
-  minutesOfHour: number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+  hoursOfDay: any[]; //number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+  minutesOfHour: any[]; //number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
   constructor(
     @Inject(CONTAINER_DATA) public config: DateTimePopupConfig, 
@@ -49,6 +49,22 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
     this.hour = this.config.initialDate.getHours();
     this.minute = this.config.initialDate.getMinutes();
     this.currentPart = (this.config.datePart ? 0 : (this.config.hourPart ? 1 : 2));
+    this.hoursOfDay = [];
+    for(let i = 0; i < 24; i++) {
+      this.hoursOfDay.push({
+        val: i,
+        x: Math.sin(2 * Math.PI * i / 24),
+        y: -Math.cos(2 * Math.PI * i / 24)
+      })
+    }
+    this.minutesOfHour = [];
+    for(let i = 0; i < 60; i += 5) {
+      this.minutesOfHour.push({
+        val: i,
+        x: Math.sin(2 * Math.PI * i / 60),
+        y: -Math.cos(2 * Math.PI * i / 60)
+      })
+    }    
     this.calcCalendarSettings();
   }
 
@@ -109,13 +125,25 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
     this.nextPart();
   }
 
-  public selectHour(event: any)
+  public selectHour(hour: number)
+  {
+    this.hour = hour;
+    this.nextPart();
+  }
+
+  public selectHourFromBack(event: any)
   {
     this.hour = Math.floor(((this.getAngleFromClick(event) + 7.5) % 360) / 15);
     this.nextPart();
   }
 
-  public selectMinute(event: any)
+  public selectMinute(minute: number)
+  {
+    this.minute = minute;
+    this.nextPart();
+  }
+
+  public selectMinuteFromBack(event: any)
   {
     this.minute = Math.floor(((this.getAngleFromClick(event) + 3) % 360) / 6);
     this.nextPart();

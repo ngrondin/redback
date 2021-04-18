@@ -218,6 +218,7 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbListScrollDirective,
     RbListComponent,
     RbList4Component,
+    RbStringInputComponent,
     RbNumberInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,

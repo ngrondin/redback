@@ -22,9 +22,9 @@ export class RbAggregatesetComponent extends RbContainerComponent {
   public aggregates: RbAggregate[] = [];
   public searchString: string;
   public userFilter: any;
-  public isLoading: boolean;
   public initiated: boolean = false;
   public firstLoad: boolean = true;
+  public _isLoading: boolean = false;
   private observers: Observer<string>[] = [];
   public active: boolean;
   public nextPage: number = 0;
@@ -61,6 +61,10 @@ export class RbAggregatesetComponent extends RbContainerComponent {
     return this.dataset != null ? this.dataset.selectedObject : null;
   }
 
+  get isLoading() : boolean {
+    return this._isLoading;
+  }
+
   getObservable() : Observable<string>  {
     return new Observable<string>((observer) => {
       this.observers.push(observer);
@@ -93,7 +97,7 @@ export class RbAggregatesetComponent extends RbContainerComponent {
       this.dataService.aggregateObjects(this.objectname, filter, null, this.tuple, this.metrics, this.nextPage).subscribe(
         data => this.setAggregates(data)
       );
-      this.isLoading = true;
+      this._isLoading = true;
     }
   }
 
@@ -106,7 +110,7 @@ export class RbAggregatesetComponent extends RbContainerComponent {
       this.fetchNextPage();
     } else {
       this.initiated = true;
-      this.isLoading = false;
+      this._isLoading = false;
       this.publishEvent('loaded');
     }
   }

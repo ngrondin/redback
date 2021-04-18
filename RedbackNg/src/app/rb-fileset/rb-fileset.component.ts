@@ -14,10 +14,10 @@ import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
 export class RbFilesetComponent extends RbContainerComponent {
   @Input('relatedObject') _relatedObject: RbObject;
 
-  public list: RbFile[] = [];
+  public fileList: RbFile[] = [];
   public selectedFile: RbFile;
   public uploader: FileUploader;
-  public isLoading: boolean;
+  public filesLoading: boolean;
   public initiated: boolean = false;
   public active: boolean;
 
@@ -57,7 +57,7 @@ export class RbFilesetComponent extends RbContainerComponent {
   }
 
   public clearData() {
-    this.list = [];
+    this.fileList = [];
   }
 
   public refreshData() {
@@ -65,15 +65,15 @@ export class RbFilesetComponent extends RbContainerComponent {
       this.dataService.listFiles(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
         data => this.setData(data)
       );
-      this.isLoading = true;
+      this.filesLoading = true;
     }
   }
 
   private setData(data: RbFile[]) {
-    this.list = data;
-    this.isLoading = false;
-    if(this.list.length == 1) {
-      this.selectedFile = this.list[0];
+    this.fileList = data;
+    this.filesLoading = false;
+    if(this.fileList.length == 1) {
+      this.selectedFile = this.fileList[0];
     }
   }
 

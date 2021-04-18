@@ -222,14 +222,6 @@ export class RbGanttComponent extends RbDataObserverComponent {
     return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
   }
 
-  get list(): RbObject[] {
-    return this.dataset != null ? this.dataset.list : null;
-  }
-
-  get lists(): any {
-    return this.datasetgroup != null ? this.datasetgroup.lists : null;
-  }
-
   get startDate(): Date {
     return this._startDate;
   }

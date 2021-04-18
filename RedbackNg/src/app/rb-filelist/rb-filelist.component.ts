@@ -15,7 +15,6 @@ export class RbFilelistComponent extends RbComponent {
   @Input('fileset') fileset: RbFilesetComponent;
   @Input('downloadOnSelect') downloadOnSelect: boolean = true;
   @Input('details') showDetails: boolean = true;
-  @Input('isLoading') isLoading: boolean;
 
   hasFileOver: boolean = false;
 
@@ -28,11 +27,15 @@ export class RbFilelistComponent extends RbComponent {
   }
 
   get list(): RbFile[] {
-    return this.fileset != null ? this.fileset.list : [];
+    return this.fileset != null ? this.fileset.fileList : [];
   }
 
   get selectedFile(): RbFile {
     return this.fileset != null ? this.fileset.selectedFile : null;
+  }
+
+  get isLoading(): boolean {
+    return this.fileset != null ? this.fileset.filesLoading : false;
   }
 
   componentInit() {

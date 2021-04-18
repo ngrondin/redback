@@ -104,10 +104,6 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
     }
   }
 
-  get rbObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : null;
-  }
-
   get focus() : boolean {
     let ret: boolean = false;
     if(this.notification != null) {
