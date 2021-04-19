@@ -108,6 +108,9 @@
 }
 
 .rb-datetime-clock-dial-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: transparent;
     color: #666666;
     position: absolute;
@@ -116,10 +119,8 @@
     width: 10%;
     height: 10%;
     transform-origin: 50% 50%;
-    text-align: center;
     font-size: 0.8rem;
     border-radius: 50%;
-    vertical-align: middle;
     /*pointer-events: none;*/
 }
 

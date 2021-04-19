@@ -25,6 +25,8 @@
 .rb-menu-link-icon {
 	color:#888888;
 	font-size: 1.5rem;
+	width: var(--v24px);
+	height: var(--v24px);	
 }
 
 .rb-menu-link-popup-back {

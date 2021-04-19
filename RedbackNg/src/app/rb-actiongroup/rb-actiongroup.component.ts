@@ -89,7 +89,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   }
 
   onNotificationEvent(event: any) {
-    if(event.type = 'notification') {
+    if(event.type == 'notification') {
       if(this.rbObject != null && event.notification.data != null && this.rbObject.objectname == event.notification.data.objectname && this.rbObject.uid == event.notification.data.uid) {
         this.notification = event.notification;
         this.notificationRetreived = true;

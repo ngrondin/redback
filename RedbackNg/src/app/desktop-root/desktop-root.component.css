@@ -5,7 +5,15 @@
     max-height: 100%;
 }
 
-.rb-pagetitle {
+.rb-toolbar-logo {
+    height: var(--v32px);
+}
+
+.rb-toolbar-title {
+    font-size: 1.3rem;
+}
+
+.rb-toolbar-pagetitle {
     font-size: 14px;
     color: #eeeeee;
 }
@@ -14,10 +22,14 @@
     flex-grow: 1;
 }
 
+:host .mat-toolbar .mat-toolbar-row button {
+    font-size: 0.9rem;
+}
+
 .rb-footer {
 	display: flex;
 	flex: 0 0 auto;
-	height:12px;
+	height: var(--v12px);
 	background: #3f51b5;
     flex-direction: row;
     justify-content: flex-end;
@@ -48,11 +60,11 @@
 }
 
 mat-toolbar {
-    min-height:40px
+    min-height:var(--v40px);
 }
 
 mat-toolbar-row {
-    height: 40px;
+    height: var(--v40px);
 }
 
 mat-sidenav-container {

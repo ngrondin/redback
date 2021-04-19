@@ -2,11 +2,18 @@
     padding-left: 3px;
     padding-right: 3px;
     position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 
 :host button {
-    font-size: 1.5rem!important;
+    /*font-size: 1.5rem!important;*/
+    width: var(--v36px);
+    height: var(--v36px);
+    margin: 0px !important;
+    line-height: 1.2rem;
 }
 
 .rb-chat-badge {

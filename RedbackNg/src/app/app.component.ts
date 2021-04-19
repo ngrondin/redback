@@ -73,7 +73,7 @@ export class AppComponent {
 
     this.iconsets = JSON.parse(native.getAttribute("iconsets").replace(/'/g, '"'))
     for(const set of this.iconsets) {
-      this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'));
+      this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'), {viewBox: "0 0 24 24"});
     }
 
     this.notificationService.fetchAllNotifications();

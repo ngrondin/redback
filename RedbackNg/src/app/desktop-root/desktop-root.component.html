@@ -1,12 +1,17 @@
 <mat-toolbar
     color="primary">
     <mat-toolbar-row>
-        <img [src]="logoUrl" height="25" style="vertical-align: middle;"/>
+        <img 
+            [src]="logoUrl"
+            class="rb-toolbar-logo"/>
         &nbsp;&nbsp;
-        <span>{{apptitle}}</span>
+        <span
+            class="rb-toolbar-title">
+            {{apptitle}}
+        </span>
         <span
             *ngIf="userprefService.selecteduialt != 'base'"
-            class="rb-pagetitle">
+            class="rb-toolbar-pagetitle">
             &nbsp;&nbsp;|&nbsp;&nbsp;{{currentTitle}}
         </span>
         <div

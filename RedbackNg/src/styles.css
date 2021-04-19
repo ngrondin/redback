@@ -2,18 +2,22 @@
 
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
+
 :root {
 	--main-color: #3f51b5;
 	--bw: 100vw;
 	--v5px: 0.29vw;
 	--v8px: 0.47vw;
-	--v10px: 0.48vw;
+	--v10px: 0.58vw;
 	--v12px: 0.70vw;
 	--v16px: 0.94vw;
 	--v24px: 1.41vw;
+	--v28px: 1.64vw;
 	--v32px: 1.88vw;
 	--v36px: 2.11vw;
+	--v40px: 2.35vw;
 	--v48px: 2.82vw;
+	--scale: calc(100vw / 17020px);
 }
 
 html {
@@ -60,8 +64,6 @@ rb-layout {
 	overflow: hidden;
 }
 
-
-
 .rb-button {
 	margin: 0.5vw!important;
 	font-size: 0.9rem;
@@ -88,8 +90,6 @@ rb-list-scroll > mat-action-list {
 rb-list-scroll > mat-action-list > button {
 	height: auto!important;
 }
-
-
 
 rb-menu > .mat-list-base {
 	padding-top: 0px;
@@ -250,6 +250,19 @@ rb-tab {
 	font-size: 1.4vw;
 }
 
+.rb-icon-button {
+	margin: 2px !important;
+	padding: 2px !important;
+	min-width: 0px !important; /*var(--v24px) !important;*/
+	line-height: var(--v24px) !important;
+	flex: 0 0 auto;
+}
+
+.rb-icon-button .mat-button-wrapper .mat-icon {
+	font-size: 1.5rem;
+	width: var(--v24px);
+	height: var(--v24px);
+}
 
 .rb-spinner-container {
     display: flex;
@@ -283,22 +296,22 @@ rb-fileset {
 	background-color: transparent;
 }
 
-::-webkit-scrollbar:hover
+/*::-webkit-scrollbar:hover
 {
-	/*background-color: #222222;*/
-}
+	background-color: #222222;
+}*/
 
-::-webkit-scrollbar-track
+/*::-webkit-scrollbar-track
 {
-	/*border-radius: 6px;
-	background-color: #eeeeee;*/
-}
+	border-radius: 6px;
+	background-color: #eeeeee;
+}*/
 
-::-webkit-scrollbar-track:hover
+/*::-webkit-scrollbar-track:hover
 {
-	/*border-radius: 6px;
-	background-color: #eeeeee;*/
-}
+	border-radius: 6px;
+	background-color: #eeeeee;
+}*/
 
 ::-webkit-scrollbar-thumb
 {
@@ -311,10 +324,10 @@ rb-fileset {
 	background-color: #bcbcf6;
 }
 
-::-webkit-scrollbar-thumb:active
+/*::-webkit-scrollbar-thumb:active
 {
-	/*background-color:#c2c2f0;*/
-} 
+	background-color:#c2c2f0;
+} */
 
 .hscroll {
 	overflow-x:hidden;
