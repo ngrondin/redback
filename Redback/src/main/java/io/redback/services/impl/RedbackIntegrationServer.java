@@ -2,6 +2,7 @@ package io.redback.services.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +121,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 							clientData.put("access_token", refreshResp.getString("access_token"));
 						if(refreshResp.getNumber("expires_in") != null)
 							clientData.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
+						clientData.put("lastupdate", new Date());
 						DataMap key = new DataMap();
 						key.put("client", config.name);
 						key.put("domain", domain);

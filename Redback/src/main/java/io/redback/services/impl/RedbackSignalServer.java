@@ -173,7 +173,7 @@ public class RedbackSignalServer extends SignalServer {
 				}
 			}
 		} catch(Exception e) {
-			throw new RedbackException("Error process signal subscriptions", e);
+			throw new RedbackException("Error processing signal subscriptions for payload = " + payload.getString() + "", e);
 		}
 		
 	}
