@@ -5,6 +5,7 @@ import java.util.List;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.ServiceInformation;
+import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
@@ -63,7 +64,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 					else if(action.equals("update"))
 					{
 						String uid = request.getString("uid");
-						DataMap data = request.getObject("data");
+						DataEntity data = request.get("data");
 						if(uid != null  &&  data != null)
 						{
 							response = update(session, client, domain, objectName, uid, data, options);
@@ -75,7 +76,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 					}
 					else if(action.equals("create"))
 					{
-						DataMap data = request.getObject("data");
+						DataEntity data = request.get("data");
 						response = create(session, client,domain, objectName, data, options);
 					}
 					else if(action.equals("delete"))
@@ -127,9 +128,9 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 
 	protected abstract List<DataMap> list(Session session, String client, String domain, String objectName, DataMap filter, DataMap options, int page, int pageSize) throws RedbackException;
 
-	protected abstract DataMap update(Session session, String client, String domain, String objectName, String uid, DataMap data, DataMap options) throws RedbackException;
+	protected abstract DataMap update(Session session, String client, String domain, String objectName, String uid, DataEntity data, DataMap options) throws RedbackException;
 
-	protected abstract DataMap create(Session session, String client, String domain, String objectName, DataMap data, DataMap options) throws RedbackException;
+	protected abstract DataMap create(Session session, String client, String domain, String objectName, DataEntity data, DataMap options) throws RedbackException;
 
 	protected abstract void delete(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException;
 

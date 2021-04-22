@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.firebus.Firebus;
+import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -139,7 +140,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		}
 	}
 	
-	protected Map<String, Object> createScriptContext(Session session, ClientConfig config, String domain, String action, String objectName, String uid, DataMap filter, DataMap data, DataMap options) throws RedbackException
+	protected Map<String, Object> createScriptContext(Session session, ClientConfig config, String domain, String action, String objectName, String uid, DataMap filter, DataEntity data, DataMap options) throws RedbackException
 	{
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
@@ -159,7 +160,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		DataMap resp = gatewayClient.call(
 				(String)config.methodExpr.eval(context), 
 				(String)config.urlExpr.eval(context), 
-				(DataMap)config.bodyExpr.eval(context), 
+				config.bodyExpr.eval(context), 
 				(DataMap)config.headerExpr.eval(context), 
 				null);
 		context.put("response", JSConverter.toJS(resp));
@@ -186,13 +187,13 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		return respList;
 	}
 
-	protected DataMap update(Session session, String client, String domain, String objectName, String uid, DataMap data, DataMap options) throws RedbackException {
+	protected DataMap update(Session session, String client, String domain, String objectName, String uid, DataEntity data, DataMap options) throws RedbackException {
 		ClientConfig config = getClientConfig(session, client);
 		Map<String, Object> context = createScriptContext(session, config, domain, "update", objectName, uid, null, data, options);
 		return gatewayRequest(config, context);
 	}
 
-	protected DataMap create(Session session, String client, String domain, String objectName, DataMap data, DataMap options) throws RedbackException {
+	protected DataMap create(Session session, String client, String domain, String objectName, DataEntity data, DataMap options) throws RedbackException {
 		ClientConfig config = getClientConfig(session, client);
 		Map<String, Object> context = createScriptContext(session, config, domain, "create", objectName, null, null, data, options);
 		return gatewayRequest(config, context);

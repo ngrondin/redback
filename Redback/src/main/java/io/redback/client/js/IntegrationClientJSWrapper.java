@@ -69,7 +69,7 @@ public class IntegrationClientJSWrapper implements ProxyObject {
 					String client = arguments[0].asString();
 					String objectName = arguments[1].asString();
 					String uid = arguments[2].asString();
-					DataMap data = (DataMap)JSConverter.toJava(arguments[3]);
+					Object data = JSConverter.toJava(arguments[3]);
 					DataMap options = arguments.length > 4 ? (DataMap)JSConverter.toJava(arguments[4]) : null;
 					try
 					{
@@ -87,7 +87,7 @@ public class IntegrationClientJSWrapper implements ProxyObject {
 				public Object execute(Value... arguments) {
 					String client = arguments[0].asString();
 					String objectName = arguments[1].asString();
-					DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
+					Object data = JSConverter.toJava(arguments[2]);
 					DataMap options = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
 					try
 					{

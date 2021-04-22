@@ -35,7 +35,7 @@ public class IntegrationClient extends Client {
 		return request(session, req);
 	}
 	
-	public DataMap update(Session session, String client, String domain, String objectName, String uid, DataMap data, DataMap options) throws RedbackException {
+	public DataMap update(Session session, String client, String domain, String objectName, String uid, Object data, DataMap options) throws RedbackException {
 		DataMap req = new DataMap();
 		req.put("client", client);
 		req.put("domain", domain);
@@ -48,7 +48,7 @@ public class IntegrationClient extends Client {
 		return request(session, req);
 	}
 
-	public DataMap create(Session session, String client, String domain, String objectName, DataMap data, DataMap options) throws RedbackException {
+	public DataMap create(Session session, String client, String domain, String objectName, Object data, DataMap options) throws RedbackException {
 		DataMap req = new DataMap();
 		req.put("client", client);
 		req.put("domain", domain);
