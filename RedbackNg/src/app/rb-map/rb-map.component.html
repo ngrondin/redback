@@ -17,7 +17,8 @@
         (markerRightClick)="objectRightClick(mapPoint)">
         <div
             [class]="'rb-mapicon-' + mapPoint.icon + (mapPoint.animate != null ? ' rb-mapicon-' + mapPoint.icon + '-animate-' + mapPoint.animate : '')"
-            [style.border-color]="mapPoint.color">
+            [style.border-color]="mapPoint.color"
+            [style.z-index]="mapPoint.zindex">
             <span
                 class="rb-map-initial"
                 *ngIf="mapPoint.initials != null">

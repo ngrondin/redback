@@ -1,3 +1,4 @@
+import { ValueTransformer } from '@angular/compiler/src/util';
 import { HostListener } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
@@ -50,7 +51,8 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public isMeta2aBadge(item: RbObject): boolean {
-    return !isNaN(parseInt(this.getMeta2For(item)));
+    let val = this.getMeta2For(item);
+    return val != null && val != '' && !isNaN(Number(val));
   }
 
   getMainFor(item: RbObject) : string {

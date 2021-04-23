@@ -1,5 +1,5 @@
 :host {
-    padding-top: 10px;
+    padding-top: var(--v16px);
 }
 
 .rb-link-button {
