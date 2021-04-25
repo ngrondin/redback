@@ -39,7 +39,7 @@ public class ProcessManager
 	protected String accessManagerServiceName;
 	protected String objectServiceName;
 	protected String domainServiceName;
-	protected String signalConsumerName;
+	protected String processNotificationChannel;
 	protected ObjectClient objectClient;
 	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
@@ -69,7 +69,7 @@ public class ProcessManager
 		objectServiceName = config.getString("objectservice");
 		objectClient = new ObjectClient(firebus, objectServiceName);
 		domainServiceName = config.getString("domainservice");
-		signalConsumerName = config.getString("signalconsumer");
+		processNotificationChannel = config.getString("processnotificationchannel");
 		processUserName = config.getString("processuser");
 		jwtSecret = config.getString("jwtsecret");
 		jwtIssuer = config.getString("jwtissuer");
@@ -437,33 +437,26 @@ public class ProcessManager
 	
 	public void sendNotification(Notification notification)
 	{
-		if(signalConsumerName != null) 
-		{
+		if(processNotificationChannel != null) {
 			try 
 			{
-				DataMap signal = new DataMap();
-				signal.put("type", "processnotification");
-				signal.put("notification", notification.getDataMap());
-				Payload payload = new Payload(signal.toString());
-				logger.finest("Publishing signal : " + signal);
-				firebus.publish(signalConsumerName, payload);
-				logger.finest("Published signal : " + signal);
+				Payload payload = new Payload(notification.getDataMap().toString());
+				logger.finest("Publishing process notification");
+				firebus.publish(processNotificationChannel, payload);
+				logger.finest("Published process notification");
 			}
 			catch(Exception e) 
 			{
 				logger.severe("Cannot send out signal : " + e.getMessage());
-			}
+			}	
 		}
 	}
 	
 	public void sendInteractionCompletion(String processName, String pid, String code, List<String> to) 
 	{
-		if(signalConsumerName != null) 
-		{
+		if(processNotificationChannel != null) {
 			try 
 			{
-				DataMap signal = new DataMap();
-				signal.put("type", "processinteractioncompletion");
 				DataMap intcomp = new DataMap();
 				intcomp.put("process", processName);
 				intcomp.put("pid", pid);
@@ -472,17 +465,18 @@ public class ProcessManager
 				for(String username: to)
 					toList.add(username);
 				intcomp.put("to", toList);
-				signal.put("interaction", intcomp);
-				Payload payload = new Payload(signal.toString());
-				logger.finest("Publishing signal : " + signal);
-				firebus.publish(signalConsumerName, payload);
-				logger.finest("Published signal : " + signal);
+				intcomp.put("completed", true);
+				Payload payload = new Payload(intcomp.toString());
+				logger.finest("Publishing process notification completion");
+				firebus.publish(processNotificationChannel, payload);
+				logger.finest("Published process notification completion");
+
 			}
 			catch(Exception e) 
 			{
-				logger.severe("Cannot send out completion signal : " + e.getMessage());
-			}
-		}		
+				logger.severe("Cannot send out signal : " + e.getMessage());
+			}	
+		}
 	}
 	
 	public void initiateCurrentTransaction() 

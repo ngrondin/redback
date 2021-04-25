@@ -57,13 +57,13 @@ public class ObjectManager
 	protected String dataServiceName;
 	protected String idGeneratorServiceName;
 	protected String processServiceName;
-	protected String signalConsumerName;
 	protected String geoServiceName;
 	protected String fileServiceName;
 	protected String reportServiceName;
 	protected String notificationServiceName;
 	protected String domainServiceName;
 	protected String integrationServiceName;
+	protected String objectUpdateChannel;
 	protected DataMap globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
 	protected HashMap<String, ScriptConfig> globalScripts;
@@ -89,13 +89,13 @@ public class ObjectManager
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");
 		processServiceName = config.getString("processservice");
-		signalConsumerName = config.getString("signalconsumer");
 		geoServiceName = config.getString("geoservice");
 		fileServiceName = config.getString("fileservice");
 		reportServiceName = config.getString("reportservice");
 		notificationServiceName = config.getString("notificationservice");
 		domainServiceName = config.getString("domainservice");
 		integrationServiceName = config.getString("integrationservice");
+		objectUpdateChannel = config.getString("objectupdatechannel");
 		globalVariables = config.getObject("globalvariables");
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
@@ -933,26 +933,20 @@ public class ObjectManager
 	
 	protected void signal(RedbackObject object)
 	{
-		if(signalConsumerName != null) 
+		if(objectUpdateChannel != null) 
 		{
 			try 
 			{
-				DataMap signal = new DataMap();
-				if(object.isNew())
-					signal.put("type", "objectcreate");
-				else
-					signal.put("type", "objectupdate");
-				signal.put("object", object.getJSON(true, true));
-				Payload payload = new Payload(signal.toString());
-				logger.finest("Publishing signal : " + signal);
-				firebus.publish(signalConsumerName, payload);
-				logger.finest("Published signal : " + signal);
+				Payload payload = new Payload(object.getJSON(true, true).toString());
+				logger.finest("Publishing object update");
+				firebus.publish(objectUpdateChannel, payload);
+				logger.finest("Published object update");
 			}
 			catch(Exception e) 
 			{
 				logger.severe("Cannot send out signal : " + e.getMessage());
 			}
-		}
+		}		
 	}
 
 }
