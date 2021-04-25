@@ -1,4 +1,4 @@
-import { Component, Input, ElementRef } from '@angular/core';
+import { Component, Input, ElementRef, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -6,6 +6,7 @@ import { ApiService } from './services/api.service';
 import { ConfigService } from './services/config.service';
 import { UserprefService } from './services/userpref.service';
 import { NotificationService } from './services/notification.service';
+import { ClientWSService } from './services/clientws.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -13,7 +14,7 @@ import { NotificationService } from './services/notification.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   apptitle: string; 
   logo: string;
   type: string;
@@ -31,6 +32,7 @@ export class AppComponent {
       private matIconRegistry: MatIconRegistry,
       private domSanitizer: DomSanitizer,
       private apiService: ApiService,
+      private clientWSService: ClientWSService,
       private configService: ConfigService,
       private notificationService: NotificationService,
       private userprefService: UserprefService ) {
@@ -53,6 +55,7 @@ export class AppComponent {
     this.apiService.userprefService = native.getAttribute("userpreferenceservice");
     this.apiService.signalService = native.getAttribute("signalservice");
     this.apiService.chatService = native.getAttribute("chatservice");
+    this.clientWSService.path = native.getAttribute("clientservice");
     let objectsString: string = native.getAttribute("objects");
     if(objectsString.length > 0) {
       this.configService.setObjectsConfig(JSON.parse(objectsString.replace(/'/g, '"')));
@@ -70,12 +73,18 @@ export class AppComponent {
       currentUrl = currentUrl.substring(0, currentUrl.length - 1);
     }
     this.apiService.baseUrl = currentUrl;
+    this.clientWSService.baseUrl = currentUrl;
 
     this.iconsets = JSON.parse(native.getAttribute("iconsets").replace(/'/g, '"'))
     for(const set of this.iconsets) {
       this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'), {viewBox: "0 0 24 24"});
     }
 
+
+  }
+
+  ngOnInit(): void {
+    this.clientWSService.initWebsocket();
     this.notificationService.fetchAllNotifications();
     this.userprefService.load();
   }

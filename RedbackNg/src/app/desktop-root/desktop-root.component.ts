@@ -6,6 +6,7 @@ import { ConfigService } from 'app/services/config.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { ApiService } from 'app/services/api.service';
 import { DragService } from 'app/services/drag.service';
+import { ClientWSService } from 'app/services/clientws.service';
 
 
 
@@ -30,7 +31,8 @@ export class DesktopRootComponent implements OnInit {
     public userprefService: UserprefService,
     private domSanitizer: DomSanitizer,
     private cookieService: CookieService,
-    public apiService: ApiService
+    public apiService: ApiService,
+    public clientWSServer: ClientWSService
   ) { }
 
   ngOnInit() {

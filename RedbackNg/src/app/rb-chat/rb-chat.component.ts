@@ -1,5 +1,6 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
+import { ClientWSService } from 'app/services/clientws.service';
 import { ConfigService } from 'app/services/config.service';
 import { DataService } from 'app/services/data.service';
 
@@ -44,11 +45,12 @@ export class RbChatComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
+    private clientWSService: ClientWSService,
     private dataService: DataService,
     private configService: ConfigService
   ) { 
-    this.apiService.initChatWebsocket();
-    let obs = this.apiService.getChatObservable();
+    //this.apiService.initChatWebsocket();
+    let obs = this.clientWSService.getChatObservable();
     if(obs != null) {
       obs.subscribe(json => this.receiveMessage(json));
     }
@@ -140,7 +142,7 @@ export class RbChatComponent implements OnInit {
 
   send(chat: Chat) {
     let to: String[] = chat.participants;
-    this.apiService.sendChat(to, chat.id, chat.object, chat.uid, chat.newmessage);
+    this.clientWSService.sendChat(to, chat.id, chat.object, chat.uid, chat.newmessage);
     let newMsg = new ChatMessage();
     newMsg.body = chat.newmessage;
     newMsg.date = new Date();
@@ -152,7 +154,8 @@ export class RbChatComponent implements OnInit {
 
   newChat() {
     this.focusChat = null;
-    this.apiService.getChatUsers();
+    this.users = [];
+    this.clientWSService.pingOtherClients().subscribe(username => this.users.push(username));
   }
 
   newChatWith(user: String) : Chat {

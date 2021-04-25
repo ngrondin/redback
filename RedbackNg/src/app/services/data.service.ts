@@ -3,6 +3,7 @@ import { ApiService } from './api.service';
 import { Observable, of, Observer } from 'rxjs';
 import { RbObject, RbFile, RbAggregate } from '../datamodel';
 import { ErrorService } from './error.service';
+import { ClientWSService } from './clientws.service';
 
 
 
@@ -16,20 +17,17 @@ export class DataService {
 
   constructor(
     private apiService: ApiService,
+    private clientWSService: ClientWSService,
     private errorService: ErrorService
   ) {
     this.allObjects = [];
     this.saveImmediatly = true;
-    this.apiService.getSignalObservable().subscribe(
+    this.clientWSService.getObjectUpdateObservable().subscribe(
       json => {
-        if(json.type == 'objectcreate') {
-          let rbObject: RbObject = this.updateObjectFromServer(json.object);
-          this.objectCreateObservers.forEach((observer) => {
-            observer.next(rbObject);
-          });      
-        } else if(json.type == 'objectupdate') {
-          this.updateObjectFromServer(json.object);
-        }
+        let rbObject: RbObject = this.updateObjectFromServer(json);
+        this.objectCreateObservers.forEach((observer) => {
+          observer.next(rbObject);
+        });              
       }
     );
   }
@@ -42,7 +40,7 @@ export class DataService {
 
   clearAllLocalObject() {
     this.allObjects = [];
-    this.apiService.clearSubscriptions();
+    this.clientWSService.clearSubscriptions();
     this.objectCreateObservers = []; 
   }
 
@@ -117,11 +115,7 @@ export class DataService {
     } else {
       rbObject = new RbObject(json, this);
       this.allObjects.push(rbObject);
-      this.apiService.subscribeToSignal({
-        "type":"objectupdate",
-        "objectname": rbObject.objectname,
-        "uid": rbObject.uid
-      });
+      this.clientWSService.subscribeToUniqueObjectUpdate(rbObject.objectname, rbObject.uid);
     }
     return rbObject;
   }
@@ -184,7 +178,7 @@ export class DataService {
   executeObject(rbObject: RbObject, func: string, param: string) {
     this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(
       resp => {
-        !this.apiService.signalWebsocketConnected() ? this.updateObjectFromServer(resp) : null
+        !this.clientWSService.isConnected() ? this.updateObjectFromServer(resp) : null
       },
       error => this.errorService.receiveHttpError(error)
     );
@@ -247,12 +241,7 @@ export class DataService {
     return fileObservable; 
   }
 
-  subscribeObjectCreation(id: String, object: String, filter: any) {
-    this.apiService.subscribeToSignal({
-      "type":"objectcreate",
-      "id": id,
-      "objectname": object,
-      "filter": filter
-    });
+  subscribeObjectCreation(id: string, object: String, filter: any) {
+    this.clientWSService.subscribeToFilterObjectUpdate(object, filter, id);
   }
 }

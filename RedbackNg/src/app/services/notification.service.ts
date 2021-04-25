@@ -3,6 +3,7 @@ import { RbNotification } from 'app/datamodel';
 import { Observer } from 'rxjs';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { ClientWSService } from './clientws.service';
 import { DataService } from './data.service';
 import { ErrorService } from './error.service';
 
@@ -17,15 +18,16 @@ export class NotificationService {
 
   constructor(
     private apiService: ApiService,
+    private clientWSService: ClientWSService,
     private dataService: DataService,
     private errorService: ErrorService
   ) {
-    this.apiService.getSignalObservable().subscribe(
+    this.clientWSService.getNotificationObservable().subscribe(
       json => {
-        if(json.type == 'processnotification') {
-          this.receiveNotification(json.notification);
-        } else if(json.type == 'processinteractioncompletion') {
-          this.receiveCompletion(json.interaction);
+        if(json.completed == true) {
+          this.receiveCompletion(json);
+        } else {
+          this.receiveNotification(json);
         }
       }
     );
@@ -119,7 +121,7 @@ export class NotificationService {
     const obs = new Observable<RbNotification>((observer) => {
       this.apiService.actionAssignment(notification.pid, action).subscribe(
         resp => {
-          if(resp != null && resp.rbobjectupdate != null && resp.rbobjectupdate.length > 0 && !this.apiService.signalWebsocketConnected()) {
+          if(resp != null && resp.rbobjectupdate != null && resp.rbobjectupdate.length > 0 && !this.clientWSService.isConnected()) {
             for(let row of resp.rbobjectupdate) {
               this.dataService.getServerObject(row.objectname, row.uid).subscribe(resp => {});
             }

@@ -39,10 +39,15 @@
     "target": "ws://localhost:8000/rbsi",
     "secure": false,
     "ws":true
-  },
+  } ,
   "/rbch": {
     "target": "ws://localhost:8000/rbch",
     "secure": false,
     "ws":true
-  }    
+  },
+  "/rbcs": {
+    "target": "ws://localhost:8000/rbcs",
+    "secure": false,
+    "ws":true
+  }  
 }

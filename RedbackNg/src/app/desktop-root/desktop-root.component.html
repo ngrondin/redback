@@ -96,7 +96,7 @@
 <div
     class="rb-footer">
     <div
-        [class]="'rb-footer-indicator' + (apiService.signalWebsocketConnected() ? ' rb-footer-indicator-on' : '')">
+        [class]="'rb-footer-indicator' + (clientWSServer.isConnected() ? ' rb-footer-indicator-on' : '')">
     </div>
 </div>
 <div

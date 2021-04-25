@@ -31,7 +31,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
   @Input('addrelated') addrelated: boolean = true;
 
 
-  public id: String;
+  public id: string;
   private dataSubscription: Subscription;
   private _list: RbObject[] = [];
   private _selectedObject: RbObject;
