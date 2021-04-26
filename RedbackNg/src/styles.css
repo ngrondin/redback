@@ -271,6 +271,10 @@ rb-tab {
     padding: 10px;
 }
 
+.rb-spinner-white svg circle {
+	stroke: white!important;
+} 
+
 rb-fileset {
 	display: flex;
 	flex: 1 1 auto;

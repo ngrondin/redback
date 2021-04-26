@@ -20,7 +20,18 @@
         (menuOpened)="activate()"
         (menuClosed)="deactivate()"        
         [matMenuTriggerFor]="actiongroupmenu">
-        Actions
+        <div
+            class="rb-spinner-container"
+            *ngIf="actionning">
+            <mat-spinner
+                [class]="focus && !open ? 'rb-spinner-white' : ''"
+                diameter="15">
+            </mat-spinner>
+        </div>
+        <span
+            *ngIf="!actionning">
+            Actions
+        </span>
     </button>    
 </div>
 <mat-menu

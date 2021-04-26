@@ -37,6 +37,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   @Input('hideonempty') hideonempty: boolean = false;
 
   open: boolean = false;
+  actionning: boolean = false;
   domainActions: RbActiongroupAction[];
   notification: RbNotification;
   notificationRetreived: boolean = false;
@@ -163,15 +164,21 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   public clickAction(action: RbActiongroupAction) {
     if(action.action == 'processaction' && this.notification != null) {
       let notif = this.notification;
-      this.notificationService.actionNotification(this.notification, action.param).subscribe(resp => {
-        if(this.notification === notif) {
-          this.notification = null;
-          this.notificationRetreived = false;
-        }
-        this.calcActionData();
-      });
+      this.actionning = true;
+      this.notificationService.actionNotification(this.notification, action.param).subscribe(() => {
+          if(this.notification === notif) {
+            this.notification = null;
+            this.notificationRetreived = false;
+          }
+        }).add(() => {
+          this.actionning = false;
+          this.calcActionData();
+        });
     } else {
-      this.dataset.action(action.action, action.param);
+      this.actionning = true;
+      this.dataset.action(action.action, action.param).subscribe().add(() => {
+        this.actionning = false;
+      });
     }
   }
 }

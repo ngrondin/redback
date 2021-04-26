@@ -117,8 +117,8 @@ export class NotificationService {
     return obs;
   }
 
-  actionNotification(notification: RbNotification, action: string): Observable<any> {
-    const obs = new Observable<RbNotification>((observer) => {
+  actionNotification(notification: RbNotification, action: string): Observable<null> {
+    const obs = new Observable<null>((observer) => {
       this.apiService.actionAssignment(notification.pid, action).subscribe(
         resp => {
           if(resp != null && resp.rbobjectupdate != null && resp.rbobjectupdate.length > 0 && !this.clientWSService.isConnected()) {
@@ -131,7 +131,8 @@ export class NotificationService {
           observer.complete();
         },
         error => {
-          this.errorService.receiveHttpError(error)
+          this.errorService.receiveHttpError(error);
+          observer.error(error);
         }
       )
     });

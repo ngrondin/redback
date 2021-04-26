@@ -84,7 +84,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   post() {
     let msg: any = {};
     msg[this.entryattribute] = "'" + this.value.replace("'", "\\'") + "'";
-    this.dataset.action('create', msg);
+    this.dataset.action('create', msg).subscribe();
     this.value = "";
     //setTimeout(() => {this.value = "";}, 100);
   }

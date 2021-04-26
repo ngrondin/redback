@@ -32,9 +32,9 @@ var versionOrDefault = version != null ? version : 'default';
     reportservice="<%=deployment.reportservicepath%>"
     processservice="<%=deployment.processservicepath%>"
     userpreferenceservice="<%=deployment.userpreferenceservicepath%>"
-    signalservice="<%=deployment.signalservicepath%>"
     chatservice="<%=deployment.chatservicepath%>"
-    clientservice="<%=deployment.clientservicepath%>">
+    clientservice="<%=deployment.clientservicepath%>"
+    usecsforapi="<%=deployment.useclientforapi%>">
   </app-root>
 
   <script src="/<%=deployment.uiservicepath%>/resource/runtime-es2015.js" type="module"></script>

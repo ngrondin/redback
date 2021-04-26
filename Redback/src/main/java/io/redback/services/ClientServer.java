@@ -62,11 +62,17 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 					String reqUid = msg.getString("requid");
 					String serviceName = msg.getString("servicename");
 					DataMap request = msg.getObject("request");
-					DataMap resp = requestService(session, serviceName, request);
 					DataMap respWrapper = new DataMap();
-					respWrapper.put("type", "serviceresponse");
-					respWrapper.put("requid", reqUid);
-					respWrapper.put("response", resp);
+					try {
+						DataMap resp = requestService(session, serviceName, request);
+						respWrapper.put("type", "serviceresponse");
+						respWrapper.put("requid", reqUid);
+						respWrapper.put("response", resp);
+					} catch(Exception e) {
+						respWrapper.put("type", "serviceerror");
+						respWrapper.put("requid", reqUid);
+						respWrapper.put("error", StringUtils.rollUpExceptions(e));
+					}
 					sendStreamData(session, new Payload(respWrapper.toString()));
 				} else if(type.equals("heartbeat")) {
 					sendStreamData(session, new Payload(new DataMap("type", "heartbeat").toString()));

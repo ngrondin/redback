@@ -1,3 +1,4 @@
+import { Observer } from "rxjs";
 
 export class Translator {
     cfg: any;
@@ -78,4 +79,29 @@ export class ValueComparator{
           return -1 * dir;
         }
       }
+}
+
+export class ObserverProxy implements Observer<any> {
+    constructor(
+        public observer: Observer<any>,
+        public callable?: (value) => void,
+        public errorCallable?: (error) => void
+    ) {
+        
+    }
+    closed?: boolean;
+    next(value) {
+        if(this.callable != null) this.callable(value);
+        this.observer.next(value);
+        this.observer.complete();
+    }
+    
+    error(error) {
+        if(this.errorCallable != null) this.errorCallable(error);
+        this.observer.error(error);
+    }
+
+    complete() {
+
+    }
 }

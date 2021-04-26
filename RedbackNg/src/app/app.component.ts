@@ -53,9 +53,9 @@ export class AppComponent implements OnInit {
     this.apiService.reportService = native.getAttribute("reportservice");
     this.apiService.processService = native.getAttribute("processservice");
     this.apiService.userprefService = native.getAttribute("userpreferenceservice");
-    this.apiService.signalService = native.getAttribute("signalservice");
     this.apiService.chatService = native.getAttribute("chatservice");
     this.clientWSService.path = native.getAttribute("clientservice");
+    this.apiService.useCSForAPI = native.getAttribute("usecsforapi") == "true" ? true : false;
     let objectsString: string = native.getAttribute("objects");
     if(objectsString.length > 0) {
       this.configService.setObjectsConfig(JSON.parse(objectsString.replace(/'/g, '"')));

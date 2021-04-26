@@ -20,6 +20,7 @@ export class ClientWSService {
   public uniqueObjectSubscriptions: any[] = [];
   public filterObjectSubscriptions: any = {};
   public connected: boolean = false;
+  public heartbeatFreq: number = 0;
 
   constructor(
     private http: HttpClient
@@ -33,7 +34,6 @@ export class ClientWSService {
         closeObserver: {next: () => this.closed()}
       });
       this.initWebsocketSubscribe();
-      this.signalHeartbeat();
     }
   }
 
@@ -42,19 +42,23 @@ export class ClientWSService {
       (msg) => this.receive(msg),
       (err) => this.error(err)
     );
-    
   }
 
   opened() {
-    console.log("WS Connection Open");
-    this.connected = true;
-    this.uniqueObjectSubscriptions.forEach(item => this.subscribeToUniqueObjectUpdate(item.objectname, item.uid));
-    Object.keys(this.filterObjectSubscriptions).forEach(key => this.subscribeToFilterObjectUpdate(this.filterObjectSubscriptions[key].objectname, this.filterObjectSubscriptions[key].filter, key));
+    this.heartbeatFreq = 500;
+    this.heartbeat();
   }
 
   receive(msg: any) {
-    this.connected = true;
     try {
+      if(this.connected == false) {
+        console.log("WS Connection Open");
+        this.uniqueObjectSubscriptions.forEach(item => this.subscribeToUniqueObjectUpdate(item.objectname, item.uid));
+        Object.keys(this.filterObjectSubscriptions).forEach(key => this.subscribeToFilterObjectUpdate(this.filterObjectSubscriptions[key].objectname, this.filterObjectSubscriptions[key].filter, key));
+        this.connected = true;
+        this.heartbeatFreq = 10000;
+      }
+
       if(msg.type == 'objectupdate') {
         this.objectUpdateObservers.forEach((observer) => {
           observer.next(msg.object);
@@ -63,11 +67,15 @@ export class ClientWSService {
         this.notificationObservers.forEach((observer) => {
           observer.next(msg.notification);
         })
-      } else if(msg.type == 'serviceresponse') {
+      } else if(msg.type == 'serviceresponse' || msg.type == 'serviceerror') {
         let observer: Observer<any> = this.requestObservers[msg.requid];
         if(observer != null) {
-          observer.next(msg.response);
-          observer.complete();
+          if(msg.type == 'serviceresponse') {
+            observer.next(msg.response);
+            observer.complete();
+          } else if(msg.type == 'serviceerror') {
+            observer.error(msg.error);
+          }
           delete this.requestObservers[msg.requid];
         }
       } else if(msg.type == 'chatmessage') {
@@ -89,16 +97,17 @@ export class ClientWSService {
   }
 
   closed() {
+    this.heartbeatFreq = 0;
     this.connected = false;
     setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
     console.log("WSS Connection closed");
   }
   
-  signalHeartbeat() {
-    if(this.connected) {
+  heartbeat() {
+    if(this.heartbeatFreq > 0) {
       this.websocket.next({type:"heartbeat"});
+      setTimeout(() => {this.heartbeat()}, this.heartbeatFreq);
     }
-    setTimeout(() => {this.signalHeartbeat()}, 10000);
   }
 
   getObjectUpdateObservable() : Observable<any>  {

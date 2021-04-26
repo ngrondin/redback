@@ -31,7 +31,8 @@ export class RbButtonComponent extends RbDataObserverComponent {
 
   public click() {
     if(this.dataset != null) {
-      this.dataset.action(this.action, this.param);
+      this.dataset.action(this.action, this.param).subscribe((rbObject) => {
+      })
     }
   }
 

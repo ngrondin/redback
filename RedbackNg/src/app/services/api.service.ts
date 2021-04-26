@@ -28,13 +28,14 @@ export class ApiService {
   public reportService: string;
   public processService: string;
   public userprefService: string;
-  public signalService: string;
+  public useCSForAPI: boolean = false;
+  public chatService: string; 
+  /*public signalService: string;
   public signalWebsocket: WebSocketSubject<any>;
   public signalObservers: Observer<String>[] = [];
   public signalConnected: boolean = false;
-  public chatService: string;
   public chatWebsocket: WebSocketSubject<any>;
-  public chatObservers: Observer<String>[] = [];
+  public chatObservers: Observer<String>[] = [];*/
   public placesAutocompleteService: any;
 
   constructor(
@@ -45,7 +46,7 @@ export class ApiService {
   }
 
   private requestService(service: string, request: any) {
-    if(this.clientWSService.isConnected()) {
+    if(this.clientWSService.isConnected() && this.useCSForAPI) {
       return this.clientWSService.request(service, request);
     } else {
       return this.http.post<any>(this.baseUrl + '/' + service, request, httpOptions);
@@ -62,7 +63,8 @@ export class ApiService {
         addvalidation: true
       }
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean): Observable<any> {
@@ -79,8 +81,8 @@ export class ApiService {
       }
     };
     if(search != null) req['search'] = search;
-    //return this.requestService(this.objectService, req);
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean): Observable<any> {
@@ -96,9 +98,9 @@ export class ApiService {
         addvalidation: true
       }
     };
-    if(search != null)
-      req['search'] = search;
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    if(search != null) req['search'] = search;
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   updateObject(name: string, uid: string, data: any) {
@@ -112,7 +114,8 @@ export class ApiService {
         addvalidation: true
       }
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   createObject(name: string, uid: string, data: any) {
@@ -128,7 +131,8 @@ export class ApiService {
     if(uid != null) {
       req['uid'] = uid;
     }
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   deleteObject(name: string, uid: string) {
@@ -137,7 +141,8 @@ export class ApiService {
       object: name,
       uid: uid
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   executeObject(name: string, uid: string, func: string) {
@@ -151,7 +156,8 @@ export class ApiService {
         addvalidation: true
       }
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
   
   executeGlobal(func: string, param: any) {
@@ -160,7 +166,8 @@ export class ApiService {
       function: func,
       param: param
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, page: number = 0, pageSize: number = 50): Observable<any> {
@@ -177,7 +184,8 @@ export class ApiService {
         addrelated: true
       }
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   exportObjects(name: string, filter: any, search: string): Observable<any> {
@@ -196,8 +204,8 @@ export class ApiService {
     if(search != null)
       req['search'] = search;
     const headers = new HttpHeaders().set('Content-Type', 'text/plain; charset=utf-8');
-    
-    return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, { headers, withCredentials: true, responseType: 'text' as 'json'});
+    return this.requestService(this.objectService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, { headers, withCredentials: true, responseType: 'text' as 'json'});
   }
 
   /******* Files *********/
@@ -213,7 +221,8 @@ export class ApiService {
       action: 'listfunctions',
       category: category
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.domainService, req, httpOptions);
+    return this.requestService(this.domainService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.domainService, req, httpOptions);
   }
 
   executeDomain(func: string, domain: string, param: any) {
@@ -223,7 +232,8 @@ export class ApiService {
       domain: domain,
       param: param
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.domainService, req, httpOptions);
+    return this.requestService(this.domainService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.domainService, req, httpOptions);
   }
 
   /******* Reporting Service *********/
@@ -241,7 +251,8 @@ export class ApiService {
       type: type,
       name: name
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.userprefService, req, httpOptions);
+    return this.requestService(this.userprefService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.userprefService, req, httpOptions);
   }
 
   putUserPreference(type: string, name: string, value: any): Observable<any> {
@@ -251,7 +262,8 @@ export class ApiService {
       name: name,
       value: value
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.userprefService, req, httpOptions);
+    return this.requestService(this.userprefService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.userprefService, req, httpOptions);
   }
 
 
@@ -265,15 +277,17 @@ export class ApiService {
       page: page,
       pageSize: pageSize
     };
-    return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
+    return this.requestService(this.processService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }
 
   getAssignmentCount(filter: any): Observable<any> {
     const req = {
       action: 'getassignmentcount',
       filter: filter
-    };    
-    return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
+    };
+    return this.requestService(this.processService, req);
+    //return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }
 
   actionAssignment(pid: string, action: string): Observable<any> {

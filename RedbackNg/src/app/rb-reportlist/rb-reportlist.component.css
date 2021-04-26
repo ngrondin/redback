@@ -19,8 +19,9 @@
     padding: 10px 0px 10px 0px;
 }
 
-.mat-button {
+.rb-reportlist-report .mat-button  {
     font-size: 18px!important;
+    font-weight: 400!important;
 }
 
 .rb-reportlist-icon {

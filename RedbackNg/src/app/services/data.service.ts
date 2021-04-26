@@ -166,32 +166,44 @@ export class DataService {
   }
 
   createObjectInMemory(name: string, uid: string, data: any) : Observable<RbObject> {
-    const dataObservable = new Observable<RbObject>((observer) => {
+    return new Observable<RbObject>((observer) => {
       let newObj: RbObject = new RbObject({objectname: name, uid: uid, data: data}, this);
       this.allObjects.push(newObj);
       observer.next(newObj);
       observer.complete();
     });
-    return dataObservable;  
   }
 
-  executeObject(rbObject: RbObject, func: string, param: string) {
-    this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(
-      resp => {
-        !this.clientWSService.isConnected() ? this.updateObjectFromServer(resp) : null
-      },
-      error => this.errorService.receiveHttpError(error)
-    );
+  executeObject(rbObject: RbObject, func: string, param: string) : Observable<null> {
+    return new Observable<null>((observer) => {
+      this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(
+        resp => {
+          if(!this.clientWSService.isConnected()) this.updateObjectFromServer(resp);
+          observer.next();
+          observer.complete();
+        },
+        error => {
+          this.errorService.receiveHttpError(error);
+          observer.error(error);
+        }
+      );
+    });
   }
 
   
-  executeGlobal(func: string, param: any) {
-    this.apiService.executeGlobal(func, param).subscribe(
-      resp => {
-        null
-      },
-      error => this.errorService.receiveHttpError(error)
-    );
+  executeGlobal(func: string, param: any) : Observable<null> {
+    return new Observable<null>((observer) => {
+      this.apiService.executeGlobal(func, param).subscribe(
+        resp => {
+          observer.next();
+          observer.complete();
+        },
+        error => {
+          this.errorService.receiveHttpError(error);
+          observer.error(error);
+        }
+      );
+    });
   }
 
   aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, page: number = 0, pageSize: number = 50) : Observable<RbAggregate[]> {
@@ -209,20 +221,26 @@ export class DataService {
     return dataObservable; 
   }
 
-  exportObjects(name: string, filter: any, search: string) {
-    const apiObservable = this.apiService.exportObjects(name, filter, search);
-    apiObservable.subscribe(
-      resp => {
-        const url = window.URL.createObjectURL(new Blob([...resp]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'export.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      },
-      error => this.errorService.receiveHttpError(error)
-    );
+  exportObjects(name: string, filter: any, search: string) : Observable<any> {
+    return new Observable<null>((observer) => {
+      this.apiService.exportObjects(name, filter, search).subscribe(
+        resp => {
+          const url = window.URL.createObjectURL(new Blob([...resp]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'export.csv');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          observer.next();
+          observer.complete();
+        },
+        error => {
+          this.errorService.receiveHttpError(error);
+          observer.error(error);
+        }
+      );
+    });
   }
 
 

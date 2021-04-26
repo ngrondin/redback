@@ -10,13 +10,20 @@ export class ErrorService {
     private toastr: ToastrService
   ) { }
 
-  receiveHttpError(httpError: any) {
-    let msg: string = httpError.error.error;
-    if(msg == null) {
+  receiveHttpError(error: any) {
+    let msg: any = error;
+    if(typeof msg == 'object') {
+      while(msg != null && typeof msg == 'object') {
+        msg = msg.error != null ? msg.error : msg.text != null ? msg.text: null;
+      }
+    }
+    if(typeof msg == 'string') {
+      console.error(msg);  
+      let parts = msg.split(" : ");
+      this.toastr.error(parts[parts.length - 1], 'Error', {disableTimeOut: true});
+    } else {
       msg = "No details";
     }
-    let parts = msg.split(" : ");
-    this.toastr.error(parts[parts.length - 1], 'Error', {disableTimeOut: true});
-    console.error(msg);
+      
   }
 }
