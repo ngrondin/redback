@@ -62,18 +62,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 					String reqUid = msg.getString("requid");
 					String serviceName = msg.getString("servicename");
 					DataMap request = msg.getObject("request");
-					DataMap respWrapper = new DataMap();
-					try {
-						DataMap resp = requestService(session, serviceName, request);
-						respWrapper.put("type", "serviceresponse");
-						respWrapper.put("requid", reqUid);
-						respWrapper.put("response", resp);
-					} catch(Exception e) {
-						respWrapper.put("type", "serviceerror");
-						respWrapper.put("requid", reqUid);
-						respWrapper.put("error", StringUtils.rollUpExceptions(e));
-					}
-					sendStreamData(session, new Payload(respWrapper.toString()));
+					requestService(session, reqUid, serviceName, request);
 				} else if(type.equals("heartbeat")) {
 					sendStreamData(session, new Payload(new DataMap("type", "heartbeat").toString()));
 				}
@@ -123,7 +112,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 
 	protected abstract void subscribeObject(Session session, String objectname, String uid) throws RedbackException;
 	
-	protected abstract DataMap requestService(Session session, String serviceName, DataMap request) throws RedbackException;
+	protected abstract void requestService(Session session, String reqUid, String serviceName, DataMap request) throws RedbackException;
 
 	protected abstract void onObjectUpdate(DataMap data) throws RedbackException;
 	

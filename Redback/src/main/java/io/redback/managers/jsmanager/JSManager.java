@@ -10,7 +10,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import io.firebus.FirebusThread;
+import io.firebus.threads.FirebusThread;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.utils.js.JSConverter;
