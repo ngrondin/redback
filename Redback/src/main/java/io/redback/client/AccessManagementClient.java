@@ -1,6 +1,7 @@
 package io.redback.client;
 
 import io.firebus.Firebus;
+import io.firebus.Payload;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
@@ -17,6 +18,21 @@ public class AccessManagementClient extends Client
 		cachedUserProfiles = new Cache<UserProfile>(120000);
 	}
 
+	public Session getSession(Payload payload) throws RedbackException
+	{
+		Session session = new Session(payload.metadata.get("session"));
+		String token = payload.metadata.get("token");
+		if(token != null) {
+			UserProfile up = validate(session, token);
+			if(up != null) {
+				session.setUserProfile(up);
+				session.setToken(token);
+				session.setTimezone(payload.metadata.get("timezone"));
+			}
+		}
+		return session;
+	}
+	
 	public UserProfile validate(Session session, String token) throws RedbackException
 	{
 		UserProfile userProfile = cachedUserProfiles.get(token);

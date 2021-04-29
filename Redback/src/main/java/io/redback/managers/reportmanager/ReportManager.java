@@ -19,7 +19,7 @@ import io.redback.managers.reportmanager.csv.CSVReport;
 import io.redback.managers.reportmanager.pdf.PDFReport;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
-import io.redback.utils.RedbackFile;
+import io.redback.utils.RedbackFileMetaData;
 
 public class ReportManager {
 	//private Logger logger = Logger.getLogger("io.redback");
@@ -152,8 +152,8 @@ public class ReportManager {
 	public String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException {
 		Report report = produce(session, domain, name, filter);
 		if(report != null) {
-			RedbackFile file = fileClient.putFile(session, name + ".pdf", "application/pdf", session.getUserProfile().getUsername(), report.getBytes());
-			return file.uid;
+			RedbackFileMetaData filemd = fileClient.putFile(session, name + ".pdf", "application/pdf", session.getUserProfile().getUsername(), report.getBytes());
+			return filemd.fileuid;
 		} else {
 			return null;
 		}

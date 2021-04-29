@@ -31,7 +31,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 	}
 
 
-	public void acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
+	public Payload acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
 		Session session = new Session(payload.metadata.get("session"));
 		UserProfile up = null;
 		String token = payload.metadata.get("token");
@@ -49,8 +49,9 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 				endpointToSession.put(streamEndpoint, session);
 				sessionToEndpoint.put(session, streamEndpoint);
 				streamEndpoint.setHandler(this);
-				onNewStream(session);
+				Payload acceptPayload = onNewStream(session, payload);
 				System.out.println("ASP opened stream " + session.getId() + " for user " + up.getUsername()); //Temp Logging
+				return acceptPayload;
 			} else {
 				throw new RedbackException("User session cannot be created");
 			}
@@ -100,7 +101,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 
 	
 
-	protected abstract void onNewStream(Session session) throws RedbackException;
+	protected abstract Payload onNewStream(Session session, Payload payload) throws RedbackException;
 
 	protected abstract void onStreamData(Session session, Payload payload) throws RedbackException;
 

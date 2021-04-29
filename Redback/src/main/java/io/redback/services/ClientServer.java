@@ -43,8 +43,9 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 		return null;
 	}
 
-	protected void onNewStream(Session session) throws RedbackException {
+	protected Payload onNewStream(Session session, Payload payload) throws RedbackException {
 		onClientConnect(session);
+		return null;
 	}
 
 	protected void onStreamData(Session session, Payload payload) throws RedbackException {

@@ -107,8 +107,9 @@ public class RedbackSignalServer extends SignalServer {
 		}
 	}
 
-	protected void onNewStream(Session session) throws RedbackException {
+	protected Payload onNewStream(Session session, Payload payload) throws RedbackException {
 		sendStreamData(session, new Payload((new DataMap("action", "heartbeat")).toString()));
+		return null;
 	}
 
 	protected void onStreamData(Session session, Payload payload) throws RedbackException {

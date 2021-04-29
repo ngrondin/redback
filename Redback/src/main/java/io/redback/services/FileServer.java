@@ -1,22 +1,34 @@
 package io.redback.services;
 
+
 import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
+import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
+import io.firebus.information.StreamInformation;
+import io.firebus.interfaces.StreamProvider;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.RedbackFile;
+import io.redback.utils.RedbackFileMetaData;
 
-public abstract class FileServer extends AuthenticatedServiceProvider
+public abstract class FileServer extends AuthenticatedServiceProvider  implements StreamProvider
 {
+	protected boolean enableStream;
+	
 	public FileServer(String n, DataMap c, Firebus f)
 	{
 		super(n, c, f);
+		enableStream = config.getBoolean("enablestream");
+		if(enableStream) {
+			firebus.registerStreamProvider(n, this, 10);
+		}
 	}
 	
 	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException
@@ -32,16 +44,16 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 			{
 				String fileName = payload.metadata.get("filename");
 				String mime = payload.metadata.get("mime");
-				RedbackFile newFile = putFile(fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
+				RedbackFileMetaData newFilemd = putFile(fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
 				if(payload.metadata.containsKey("object") && payload.metadata.containsKey("uid"))
 				{
 					String object = payload.metadata.get("object");
 					String uid = payload.metadata.get("uid");
-					linkFileTo(newFile.uid, object, uid);
+					linkFileTo(newFilemd.fileuid, object, uid);
 				}
 				DataMap resp = new DataMap();
-				resp.put("fileuid", newFile.uid);
-				resp.put("thumbnail", newFile.thumbnail);
+				resp.put("fileuid", newFilemd.fileuid);
+				resp.put("thumbnail", newFilemd.thumbnail);
 				response = new Payload(resp.toString());
 				response.metadata.put("mime", "application/json");
 			}
@@ -63,23 +75,16 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 					{
 						RedbackFile file = getFile(request.getString("fileuid"));
 						response = new Payload(file.bytes);
-						response.metadata.put("mime", file.mime);
-						response.metadata.put("filename", file.fileName);
-						response.metadata.put("uid", file.uid);
-						response.metadata.put("username", file.username);
-						response.metadata.put("date", file.date.toInstant().toString());
+						response.metadata.put("mime", file.metadata.mime);
+						response.metadata.put("filename", file.metadata.fileName);
+						response.metadata.put("uid", file.metadata.fileuid);
+						response.metadata.put("username", file.metadata.username);
+						response.metadata.put("date", file.metadata.date.toInstant().toString());
 					} 
 					else if(action.equals("getmetadata")) 
 					{
-						RedbackFile file = getMetadata(request.getString("fileuid"));
-						DataMap fileInfo = new DataMap();
-						fileInfo.put("fileuid", file.uid);
-						fileInfo.put("filename", file.fileName);
-						fileInfo.put("mime", file.mime);
-						fileInfo.put("thumbnail", file.thumbnail);
-						fileInfo.put("username", file.username);
-						fileInfo.put("date", file.date.toInstant().toString());
-						response = new Payload(fileInfo.toString());
+						RedbackFileMetaData filemd = this.getMetadata(request.getString("fileuid"));
+						response = new Payload(filemd.getDataMap().toString());
 					} 
 					else if(action.equals("link")) 
 					{
@@ -93,23 +98,11 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 					{
 						String object = request.getString("object");
 						String uid = request.getString("uid");
-						List<RedbackFile> files = listFilesFor(object, uid);
+						List<RedbackFileMetaData> fileData = listFilesFor(object, uid);
 						DataMap resp = new DataMap();
 						DataList list = new DataList();
-						for(int i = 0; i < files.size(); i++) 
-						{
-							RedbackFile file = files.get(i);
-							DataMap fileInfo = new DataMap();
-							fileInfo.put("fileuid", file.uid);
-							fileInfo.put("filename", file.fileName);
-							fileInfo.put("mime", file.mime);
-							fileInfo.put("thumbnail", file.thumbnail);
-							fileInfo.put("username", file.username);
-							fileInfo.put("date", file.date != null ? file.date.toInstant().toString() : null);
-							fileInfo.put("relatedobject", object);
-							fileInfo.put("relateduid", uid);
-							list.add(fileInfo);
-						}
+						for(RedbackFileMetaData filemd : fileData) 
+							list.add(filemd.getDataMap());
 						resp.put("list", list);
 						response = new Payload(resp.toString());
 					}
@@ -128,18 +121,61 @@ public abstract class FileServer extends AuthenticatedServiceProvider
 
 	public ServiceInformation getServiceInformation()
 	{
-		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public Payload acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
+		try {
+			Session session = accessManagementClient.getSession(payload);
+			if(session.getUserProfile() != null) {
+				DataMap request = new DataMap(payload.getString());
+				String action = request.getString("action");
+				if(action.equals("get")) {
+					String fileuid = request.getString("fileuid");
+					acceptGetStream(session, streamEndpoint, fileuid);
+				} else if(action.equals("put")) {
+					final String fileName = request.getString("filename");
+					final String objectname = request.getString("object");
+					final String objectuid = request.getString("uid");
+					acceptPutStream(session, streamEndpoint, fileName, objectname, objectuid);
+				} else if(action.equals("list")) { // This section is only for backwards compatibility of getting the list on the same get path
+					String objectname = request.getString("object");
+					String objectuid = request.getString("uid");
+					acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
+				}
+				return null;
+			} else {
+				throw new FunctionErrorException("All stream requests need to be authenticated");
+			}
+		} catch(Exception e) {
+			throw new FunctionErrorException("Cannot accept stream", e);
+		}
+	}
+
+
+	public int getStreamIdleTimeout() {
+		return 10000;
+	}
+
+
+	public StreamInformation getStreamInformation() {
 		return null;
 	}
 
 	public abstract RedbackFile getFile(String fileUid) throws RedbackException;
 
-	public abstract RedbackFile getMetadata(String fileUid) throws RedbackException;
+	public abstract RedbackFileMetaData getMetadata(String fileUid) throws RedbackException;
 
-	public abstract List<RedbackFile> listFilesFor(String object, String uid) throws RedbackException;
+	public abstract List<RedbackFileMetaData> listFilesFor(String object, String uid) throws RedbackException;
 
 	public abstract void linkFileTo(String fileUid, String object, String uid) throws RedbackException;
 
-	public abstract RedbackFile putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException;
+	public abstract RedbackFileMetaData putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException;
+	
+	public abstract void acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException;
+	
+	public abstract void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, String objectname, String objectuid) throws RedbackException;
+	
+	public abstract void acceptListFilesForStream(Session session, StreamEndpoint streamEndpoint, String objectname, String objectuid) throws RedbackException;
 	
 }

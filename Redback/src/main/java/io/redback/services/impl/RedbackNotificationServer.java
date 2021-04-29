@@ -49,6 +49,7 @@ import io.redback.services.NotificationServer;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.Email;
 import io.redback.utils.RedbackFile;
+import io.redback.utils.RedbackFileMetaData;
 
 public class RedbackNotificationServer extends NotificationServer {
 	private Logger logger = Logger.getLogger("io.redback");
@@ -128,9 +129,9 @@ public class RedbackNotificationServer extends NotificationServer {
 			            for(String fileUid: email.attachments) {
 			            	RedbackFile file = fileClient.getFile(session, fileUid);
 				            BodyPart fileBodyPart = new MimeBodyPart();
-				            DataSource source = new ByteArrayDataSource(file.bytes, file.mime);
+				            DataSource source = new ByteArrayDataSource(file.bytes, file.metadata.mime);
 				            fileBodyPart.setDataHandler(new DataHandler(source));
-				            fileBodyPart.setFileName(file.fileName);
+				            fileBodyPart.setFileName(file.metadata.fileName);
 				            multipart.addBodyPart(fileBodyPart);
 			            }
 			            
@@ -186,8 +187,8 @@ public class RedbackNotificationServer extends NotificationServer {
 						    int read;
 						    while((read = is.read()) != -1)
 						    	buffer.write(read);
-						    RedbackFile file = fileClient.putFile(session, bp.getFileName(), bp.getContentType(), session.getUserProfile().getUsername(), buffer.toByteArray());
-						    attachments.add(file.uid);
+						    RedbackFileMetaData filemd = fileClient.putFile(session, bp.getFileName(), bp.getContentType(), session.getUserProfile().getUsername(), buffer.toByteArray());
+						    attachments.add(filemd.fileuid);
 						}
 					}
 				}

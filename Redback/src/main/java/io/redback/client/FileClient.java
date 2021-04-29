@@ -12,6 +12,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.RedbackFile;
+import io.redback.utils.RedbackFileMetaData;
 
 public class FileClient extends Client {
 
@@ -31,8 +32,9 @@ public class FileClient extends Client {
 			String username = resp.metadata.get("username");
 			String dateStr = resp.metadata.get("date");
 			String thumbnail = resp.metadata.get("thumbnail");
+			RedbackFileMetaData filemd = new RedbackFileMetaData(fileUid, filename, mime, thumbnail, username, Date.from(ZonedDateTime.parse(dateStr).toInstant()), null);
 			byte[] bytes = resp.getBytes();
-			return new RedbackFile(fileUid, filename, mime, thumbnail, username, Date.from(ZonedDateTime.parse(dateStr).toInstant()), bytes);
+			return new RedbackFile(filemd, bytes);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
 		}
@@ -84,14 +86,14 @@ public class FileClient extends Client {
 		}		
 	}
 
-	public RedbackFile putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException {
+	public RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException {
 		try {
 			Payload payload = new Payload(bytes);
 			payload.metadata.put("filename", fileName);
 			payload.metadata.put("mime", mime);
 			Payload respPayload = requestPayload(session, payload);
 			DataMap resp = new DataMap(respPayload.getString());
-			return new RedbackFile(resp.getString("fileuid"), fileName, mime, resp.getString("thumbnail"), username, new Date(), bytes);
+			return new RedbackFileMetaData(resp.getString("fileuid"), fileName, mime, resp.getString("thumbnail"), username, new Date(), null);
 		} catch(Exception e) {
 			throw new RedbackException("Error link files to object", e);
 		}			
