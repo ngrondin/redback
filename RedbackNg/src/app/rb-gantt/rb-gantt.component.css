@@ -158,6 +158,8 @@
     display: inline-block;
     padding: 5px;
     flex: 1 1 auto;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .rb-gantt-smalllabel {

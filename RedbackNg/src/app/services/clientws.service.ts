@@ -56,10 +56,10 @@ export class ClientWSService {
   receive(msg: any) {
     try {
       if(this.connected == false) {
+        this.connected = true;
         console.log("WS Connection Open");
         this.uniqueObjectSubscriptions.forEach(item => this.subscribeToUniqueObjectUpdate(item.objectname, item.uid));
         Object.keys(this.filterObjectSubscriptions).forEach(key => this.subscribeToFilterObjectUpdate(this.filterObjectSubscriptions[key].objectname, this.filterObjectSubscriptions[key].filter, key));
-        this.connected = true;
         this.heartbeatFreq = 10000;
         this.stateObservers.forEach((observer) => observer.next(true));
       }

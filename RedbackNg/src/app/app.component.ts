@@ -28,6 +28,7 @@ export class AppComponent implements OnInit {
   menuView: string;
   iconsets: string[];
   events: Subject<string> = new Subject<string>();
+  firstConnected: boolean = false;
   
 
   constructor(
@@ -89,13 +90,12 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    let firstConnected: boolean = false;
     this.clientWSService.initWebsocket().subscribe(connected => {
-      if(firstConnected == false) {
+      if(this.firstConnected == false) {
+        this.firstConnected = true;
         this.menuService.load().subscribe(() => {
           this.userprefService.load().subscribe(() => {
             this.notificationService.load().subscribe(() => {
-              firstConnected = true;
               this.events.next("init");
             })
           })

@@ -27,33 +27,33 @@ export class UserprefService {
           resp => {
             if(resp.name != null && this.uiAlternates.indexOf(resp.name) > -1) {
               this.selectedUIAlt = resp.name;
-              this.apiService.getUserPreference('domain', 'uiswitch').subscribe(
-                resp => {
-                  this.domainUISwitches = resp;
-                  this.apiService.getUserPreference('role', 'uiswitch').subscribe(
-                    resp => {
-                      this.roleUISwitches = resp;
-                      this.apiService.getUserPreference('user', 'uiswitch').subscribe(
-                        resp => {
-                          this.userUISwitches = resp;
-                          observer.next();
-                          observer.complete();
-                        },
-                        error => {
-                          observer.error(error);
-                        }
-                      );
-                    },
-                    error => {
-                      observer.error(error);
-                    }
-                  );
-                },
-                error => {
-                  observer.error(error);
-                }
-              );
             }
+            this.apiService.getUserPreference('domain', 'uiswitch').subscribe(
+              resp => {
+                this.domainUISwitches = resp;
+                this.apiService.getUserPreference('role', 'uiswitch').subscribe(
+                  resp => {
+                    this.roleUISwitches = resp;
+                    this.apiService.getUserPreference('user', 'uiswitch').subscribe(
+                      resp => {
+                        this.userUISwitches = resp;
+                        observer.next();
+                        observer.complete();
+                      },
+                      error => {
+                        observer.error(error);
+                      }
+                    );
+                  },
+                  error => {
+                    observer.error(error);
+                  }
+                );
+              },
+              error => {
+                observer.error(error);
+              }
+            );         
           },
           error => {
             observer.error(error);
