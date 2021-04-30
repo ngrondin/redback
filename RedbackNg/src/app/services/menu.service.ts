@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
-import { Observable } from 'rxjs';
-import { Observer } from 'rxjs/internal/types';
+import { Observable, Observer } from 'rxjs';
 import { ApiService } from './api.service';
 
 @Injectable({
@@ -11,6 +10,8 @@ export class MenuService {
   fullMenu: any;
   personalMenu: any;
   groupMenu: any;
+  config: any;
+  observers: Observer<any>[] = [];
 
   constructor(
     private apiService: ApiService,
@@ -18,8 +19,8 @@ export class MenuService {
   ) {
   }
 
-  getStartingMenu(): Observable<any> {
-    const obs = new Observable((observer) => {
+  load(): Observable<null> {
+    const obs = new Observable<null>((observer) => {
       let respCount = 0;
       let url = this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/default/any';
       this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
@@ -34,65 +35,52 @@ export class MenuService {
                     this.groupMenu = resp
                     this.apiService.getUserPreference('user', 'defaultmenu').subscribe(
                       resp => {
-                        this.pushStartingMenu(observer, resp != null ? resp : {});
+                        this.config = resp;
+                        observer.next();
+                        observer.complete();
+                        this.publish();
                       },
                       error => {
-                        this.pushStartingMenu(observer, {});
+                        observer.error(error);
                       }
                     );
                   },
                   error => {
-                    this.pushStartingMenu(observer, {});
+                    observer.error(error);
                   }
                 );
               },
               error => {
-                this.pushStartingMenu(observer, {});
+                observer.error(error);
               }
             )
           } else {
-            this.pushStartingMenu(observer, {});
+            observer.next();
+            observer.complete();
           }
         },
         error => {
-          this.pushStartingMenu(observer, {});
+          observer.error(error);
         }
       );
      })
     return obs; 
   }
 
-  private pushStartingMenu(observer: Observer<any>, defaultConfig: any) {
-    let startingMenu = null;
-    let startingType = null;
-    if(defaultConfig.type == null) {
-      if(this.personalMenu != null && this.personalMenu.content != null) {
-        startingMenu = this.personalMenu;
-        startingType = 'personal';
-      } else if(this.groupMenu != null && this.groupMenu.content != null) {
-        startingMenu = this.groupMenu;
-        startingType = 'group';
-      } else {
-        startingMenu = this.fullMenu;
-        startingType = 'full';
-      }
-    } else if(defaultConfig.type == 'personal' && this.personalMenu != null && this.personalMenu.content != null) {
-      startingMenu = this.personalMenu;
-      startingType = 'personal';
-    } else if(defaultConfig.type == 'group' && this.groupMenu != null && this.groupMenu.content != null) {
-      startingMenu = this.groupMenu;
-      startingType = 'group';
-    } else {
-      startingMenu = this.fullMenu;
-      startingType = 'full';
-    }
-    observer.next({
-      menu: startingMenu,
-      type: startingType, 
-      mode: defaultConfig.mode != null ? defaultConfig.mode : 'large'
-    });
-    observer.complete();
+  public getObservable(): Observable<any> {
+    return new Observable<any>((observer) => {
+      this.observers.push(observer);
+    })
   }
+
+  private publish() {
+    let curMenu = this.getCurrentMenu();
+    this.observers.forEach(observer => observer.next({
+      config: this.config,
+      menu: curMenu
+    }));
+  }
+
 
   addToMenu(menu: any, item: any) {
     let exists = false;
@@ -107,6 +95,7 @@ export class MenuService {
     if(!exists) {
       menu.content.push(item);
     }
+    this.publish();
   }
 
   removeFromMenu(menu: any, item: any) {
@@ -114,6 +103,7 @@ export class MenuService {
       for(var i = 0; i < menu.content.length; i++) {
         if(menu.content[i] === item) {
           menu.content.splice(i, 1);
+          this.publish();
           return;
         }
       }
@@ -194,6 +184,27 @@ export class MenuService {
     }
   }
 
+
+  getCurrentMenu() : any {
+    let menu: any = null;
+    if(this.config.type == null) {
+      if(this.personalMenu != null && this.personalMenu.content != null) {
+        menu = this.personalMenu;
+      } else if(this.groupMenu != null && this.groupMenu.content != null) {
+        menu = this.groupMenu;
+      } else {
+        menu = this.fullMenu;
+      }
+    } else if(this.config.type == 'personal') {
+      menu = this.getPersonalMenu();
+    } else if(this.config.type == 'group') {
+      menu = this.getGroupMenu();
+    } else {
+      menu = this.getFullMenu();
+    }
+    return menu;
+  }
+
   isInMenu(type: string, name: string): boolean {
     let menu = this.getMenu(type);
     let ret: boolean = false;
@@ -207,12 +218,14 @@ export class MenuService {
     return ret;
   }
 
-  setDefaultMenu(type: string, mode: string) {
+  setMenu(type: string, mode: string) {
+    this.config = {
+      type: type,
+      mode: mode
+    }
     if(this.apiService.userprefService != null) {
-      this.apiService.putUserPreference('user', 'defaultmenu', {
-        type: type,
-        mode: mode
-      }).subscribe(resp => {});
+      this.apiService.putUserPreference('user', 'defaultmenu', this.config).subscribe(resp => {});
+      this.publish();
     }
   }
 

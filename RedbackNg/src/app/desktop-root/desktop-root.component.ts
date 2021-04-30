@@ -7,6 +7,8 @@ import { UserprefService } from 'app/services/userpref.service';
 import { ApiService } from 'app/services/api.service';
 import { DragService } from 'app/services/drag.service';
 import { ClientWSService } from 'app/services/clientws.service';
+import { Observable } from 'rxjs';
+import { Subscription } from 'rxjs/internal/Subscription';
 
 
 
@@ -22,6 +24,8 @@ export class DesktopRootComponent implements OnInit {
   @Input() userdisplay : string;
   @Input() initialView : string;
   @Input() version : string = 'default';
+  @Input() events : Observable<string>;
+  subscription: Subscription;
   viewTargetStack: ViewTarget[] = [];
   title: string = "Welcome";
  
@@ -36,11 +40,16 @@ export class DesktopRootComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    if(this.initialView != null) {
-      setTimeout(() => this.pushViewTarget(new ViewTarget(this.version, this.initialView, null, {}), true), 500);
-    }
+    this.subscription = this.events.subscribe((event) => {
+      if(event == 'init' && this.initialView != null) {
+        this.pushViewTarget(new ViewTarget(this.version, this.initialView, null, {}), true);
+      }
+    });
   }
 
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
   get logoUrl() : any {
     return this.domSanitizer.bypassSecurityTrustResourceUrl(this.logo);

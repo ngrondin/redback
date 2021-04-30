@@ -325,6 +325,7 @@ public class RedbackFileServer extends FileServer
 						resp.put("thumbnail", filemd.thumbnail);
 						ByteArrayInputStream bais = new ByteArrayInputStream(resp.toString().getBytes());
 						new StreamSender(bais, streamEndpoint);
+						logger.info("Finished putting file");
 					} catch(Exception e) {
 						logger.severe("Error putting file : " + e);
 					}	

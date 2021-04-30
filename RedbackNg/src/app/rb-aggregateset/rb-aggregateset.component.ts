@@ -5,20 +5,17 @@ import { DataTarget, RbAggregate, RbObject } from 'app/datamodel';
 import { FilterService } from 'app/services/filter.service';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { Observable, Observer } from 'rxjs';
+import { RbSetComponent } from 'app/abstract/rb-set';
 
 @Component({
   selector: 'rb-aggregateset',
   templateUrl: './rb-aggregateset.component.html',
   styleUrls: ['./rb-aggregateset.component.css']
 })
-export class RbAggregatesetComponent extends RbContainerComponent {
-  @Input('object') objectname: string;
-  @Input('master') master: any;
-  @Input('basefilter') baseFilter: any;
+export class RbAggregatesetComponent extends RbSetComponent {
   @Input('tuple') tuple: any;
   @Input('metrics') metrics: any;
-  @Input('datatarget') dataTarget: DataTarget;
-
+  
   public aggregates: RbAggregate[] = [];
   public searchString: string;
   public userFilter: any;
@@ -26,7 +23,6 @@ export class RbAggregatesetComponent extends RbContainerComponent {
   public firstLoad: boolean = true;
   public _isLoading: boolean = false;
   private observers: Observer<string>[] = [];
-  public active: boolean;
   public nextPage: number = 0;
 
 
@@ -39,13 +35,11 @@ export class RbAggregatesetComponent extends RbContainerComponent {
   }
 
 
-  containerInit() {
-    if(this.active == true) {
-      this.refreshData();
-    }
+  setInit() {
+
   }
 
-  containerDestroy() {
+  setDestroy() {
   }
 
   onDatasetEvent(event: any) {
@@ -71,10 +65,20 @@ export class RbAggregatesetComponent extends RbContainerComponent {
     });
   }
 
+  public reset() {
+    if(this.active == true) {
+      this.refreshData();
+    }
+  }
+
   public refreshData() {
-    this.aggregates = [];
-    this.nextPage = 0;
+    this.clear();
     this.fetchNextPage();
+  }
+
+  public clear() {
+    this.aggregates = [];
+    this.nextPage = 0;    
   }
 
   public mergeFilters() : any {
@@ -94,7 +98,7 @@ export class RbAggregatesetComponent extends RbContainerComponent {
   public fetchNextPage() {
     if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
       const filter = this.filterService.resolveFilter(this.mergeFilters(), this.relatedObject, null, this.relatedObject);
-      this.dataService.aggregateObjects(this.objectname, filter, null, this.tuple, this.metrics, this.nextPage).subscribe(
+      this.dataService.aggregateObjects(this.object, filter, null, this.tuple, this.metrics, this.nextPage).subscribe(
         data => this.setAggregates(data)
       );
       this._isLoading = true;

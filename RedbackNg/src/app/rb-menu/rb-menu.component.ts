@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
 import { Http } from '@angular/http';
 import { MenuService } from 'app/services/menu.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'rb-menu',
@@ -13,43 +14,38 @@ export class RbMenuComponent implements OnInit {
   _type: string;
   _mode: string;
   content: any;
+  subscription: Subscription;
 
   constructor(
     private menuService: MenuService
   ) { }
 
   ngOnInit(): void {
-    this.menuService.getStartingMenu().subscribe(resp => {
-      this.content = resp.menu.content;
-      this._type = resp.type;
-      this._mode = resp.mode;
+    this.subscription = this.menuService.getObservable().subscribe(state => {
+      this.content = state.menu.content;
+      this._type = state.config.type;
+      this._mode = state.config.mode;
       this.sendResize();
     });
   }
+
+  ngOnDestroy(): void {
+    if(this.subscription != null) {
+      this.subscription.unsubscribe();
+    }
+}
 
   public get mode(): string {
     return this._mode;
   }
 
   public toggleMenuMode() {
-    if(this._mode == 'small') {
-      this._mode = 'large'
-    } else {
-      this._mode = 'small'
-    }
-    this.menuService.setDefaultMenu(this._type, this.mode);
-    this.sendResize();
+    let newMode = this._mode == 'small' ? 'large' : 'small';
+    this.menuService.setMenu(this._type, newMode);
   }
   
-  navigateTo(event: any) {
-    this.navigate.emit(event);
-  }
-
-  setMenu(type: string) {
-    this._type = type;
-    this.content = this.menuService.getMenu(this._type).content;
-    this.menuService.setDefaultMenu(this._type, this.mode);
-    this.sendResize();
+  setMenu(newType: string) {
+    this.menuService.setMenu(newType, this._mode);
   }
 
   private sendResize() {
@@ -58,4 +54,7 @@ export class RbMenuComponent implements OnInit {
     });   
   }
 
+  navigateTo(event: any) {
+    this.navigate.emit(event);
+  }
 }

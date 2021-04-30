@@ -10,6 +10,7 @@ import { Observer } from 'rxjs';
 import { ModalService } from 'app/services/modal.service';
 import { ObserverProxy, ValueComparator } from 'app/helpers';
 import { ErrorService } from 'app/services/error.service';
+import { RbSetComponent } from 'app/abstract/rb-set';
 
 
 @Component({
@@ -17,17 +18,10 @@ import { ErrorService } from 'app/services/error.service';
   templateUrl: './rb-dataset.component.html',
   styleUrls: ['./rb-dataset.component.css']
 })
-export class RbDatasetComponent extends RbContainerComponent  {
-  @Input('object') object: string;
-  @Input('basefilter') baseFilter: any;
+export class RbDatasetComponent extends RbSetComponent  {
   @Input('basesort') baseSort: any;
-  @Input('dataTarget') dataTarget: DataTarget;
-  @Input('master') master: any;
-
   @Input('name') name: string;
   @Input('fetchall') fetchAll: boolean = false;
-  @Input('fetchonreset') fetchonreset: boolean = true;
-  @Input('ignoretarget') ignoretarget: boolean = false;
   @Input('addrelated') addrelated: boolean = true;
 
 
@@ -58,7 +52,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
     super();
   }
 
-  containerInit() {
+  setInit() {
     this.id = "" + Math.floor(Math.random() * 10000);
     this.dataSubscription = this.dataService.getObjectCreateObservable().subscribe(object => this.receiveNewlyCreatedData(object));
     this.pageSize = this.fetchAll == true ? 250 : 50;
@@ -68,8 +62,8 @@ export class RbDatasetComponent extends RbContainerComponent  {
     }
   }
 
-  containerDestroy() {
-    this.clearData();
+  setDestroy() {
+    this.clear();
     this.dataSubscription.unsubscribe();
   }
 
@@ -80,13 +74,13 @@ export class RbDatasetComponent extends RbContainerComponent  {
       } else if(event == 'loaded') {
 
       } else if(event == 'cleared') {
-        this.clearData();
+        this.clear();
       }
     }
   }
 
   onActivationEvent(state: any) {
-    state == true ? this.refreshData() : this.clearData();
+    state == true ? this.refreshData() : this.clear();
   }
 
   public get list() : RbObject[] {
@@ -137,7 +131,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
 
   public refreshData() {
     if(this.canLoadData) {
-      this.clearData();
+      this.clear();
       this.calcFilter();
       if(this.fetchAll) {
         this.fetchThreads = 2;
@@ -150,7 +144,7 @@ export class RbDatasetComponent extends RbContainerComponent  {
     }
   }
 
-  public clearData() {
+  public clear() {
     this.nextPage = 0;
     this.totalCount = -1;
     for(let obj of this._list) {

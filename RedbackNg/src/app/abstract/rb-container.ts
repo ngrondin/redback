@@ -12,7 +12,6 @@ export abstract class RbContainerComponent extends RbDataObserverComponent {
     @HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
     @HostBinding('style.background-color') get backgroundColor() { return this.color != null ? this.color : null;}
 
-    //private afterViewInitCallback;
 
     constructor() {
         super();
@@ -20,9 +19,6 @@ export abstract class RbContainerComponent extends RbDataObserverComponent {
   
     dataObserverInit(): void {
         this.containerInit();
-        /*if(this.afterViewInitCallback != null) {
-          this.afterViewInitCallback();
-        }*/
     }
 
     dataObserverDestroy() : void  {
@@ -33,19 +29,5 @@ export abstract class RbContainerComponent extends RbDataObserverComponent {
 
     abstract containerDestroy();
   
-    /*ngAfterViewInit(): void {
-      if(this.afterViewInitCallback != null) {
-        this.afterViewInitCallback();
-      }
-    }
-  
-    public afterViewInit(cb) {
-      this.afterViewInitCallback = cb;
-    }
-  
-  
-    public getContainer() : ViewContainerRef {
-      return this.container;
-    }*/
   
   }

@@ -12,6 +12,7 @@ export class ClientWSService {
   public baseUrl: string;
   public path: string;
   public websocket: WebSocketSubject<any>;
+  public stateObservers: Observer<boolean>[] = [];
   public objectUpdateObservers: Observer<any>[] = [];
   public notificationObservers: Observer<any>[] = [];
   public chatObservers: Observer<any>[] = [];
@@ -26,7 +27,7 @@ export class ClientWSService {
     private http: HttpClient
   ) { }
 
-  initWebsocket() {
+  initWebsocket() : Observable<boolean> {
     if(this.path != null && this.path != "" && this.websocket == null) {
       this.websocket = webSocket({
         url: this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.path,
@@ -35,6 +36,9 @@ export class ClientWSService {
       });
       this.initWebsocketSubscribe();
     }
+    return new Observable<boolean>((observer) => {
+      this.stateObservers.push(observer);
+    })
   }
 
   initWebsocketSubscribe() {
@@ -57,16 +61,13 @@ export class ClientWSService {
         Object.keys(this.filterObjectSubscriptions).forEach(key => this.subscribeToFilterObjectUpdate(this.filterObjectSubscriptions[key].objectname, this.filterObjectSubscriptions[key].filter, key));
         this.connected = true;
         this.heartbeatFreq = 10000;
+        this.stateObservers.forEach((observer) => observer.next(true));
       }
 
       if(msg.type == 'objectupdate') {
-        this.objectUpdateObservers.forEach((observer) => {
-          observer.next(msg.object);
-        });  
+        this.objectUpdateObservers.forEach((observer) => observer.next(msg.object));  
       } else if(msg.type == 'notification') {
-        this.notificationObservers.forEach((observer) => {
-          observer.next(msg.notification);
-        })
+        this.notificationObservers.forEach((observer) => observer.next(msg.notification))
       } else if(msg.type == 'serviceresponse' || msg.type == 'serviceerror') {
         let observer: Observer<any> = this.requestObservers[msg.requid];
         if(observer != null) {
@@ -79,13 +80,9 @@ export class ClientWSService {
           delete this.requestObservers[msg.requid];
         }
       } else if(msg.type == 'chatmessage') {
-        this.chatObservers.forEach((observer) => {
-          observer.next(msg.message);
-        })
+        this.chatObservers.forEach((observer) => observer.next(msg.message))
       } else if(msg.type == 'clientpong') {
-        this.clientPingObservers.forEach((observer) => {
-          observer.next(msg.username);
-        })
+        this.clientPingObservers.forEach((observer) => observer.next(msg.username))
       }
     } catch(err) {
       console.error('WS receive error for message ' + ': ' + err);
@@ -99,6 +96,7 @@ export class ClientWSService {
   closed() {
     this.heartbeatFreq = 0;
     this.connected = false;
+    this.stateObservers.forEach((observer) => observer.next(false));
     setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
     console.log("WSS Connection closed");
   }

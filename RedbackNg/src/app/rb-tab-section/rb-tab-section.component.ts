@@ -59,6 +59,8 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
       } else {
         tab.active = false;
       }
+    } else {
+      tab.active = false;
     }
   }
 

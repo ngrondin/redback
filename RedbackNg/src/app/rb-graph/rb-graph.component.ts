@@ -173,7 +173,7 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
     let aggregatesetfilter = this.aggregateset.mergeFilters();
     let filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
     let target = {
-      object: this.aggregateset.objectname,
+      object: this.aggregateset.object,
       filter: filter,
       reset: true
     };

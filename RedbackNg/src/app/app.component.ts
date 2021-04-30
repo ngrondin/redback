@@ -1,4 +1,4 @@
-import { Component, Input, ElementRef, OnInit } from '@angular/core';
+import { Component, Input, ElementRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconRegistry } from '@angular/material';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -7,6 +7,8 @@ import { ConfigService } from './services/config.service';
 import { UserprefService } from './services/userpref.service';
 import { NotificationService } from './services/notification.service';
 import { ClientWSService } from './services/clientws.service';
+import { MenuService } from './services/menu.service';
+import { Subject } from 'rxjs';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -25,6 +27,7 @@ export class AppComponent implements OnInit {
   initialViewTitle: string;
   menuView: string;
   iconsets: string[];
+  events: Subject<string> = new Subject<string>();
   
 
   constructor(
@@ -35,7 +38,9 @@ export class AppComponent implements OnInit {
       private clientWSService: ClientWSService,
       private configService: ConfigService,
       private notificationService: NotificationService,
-      private userprefService: UserprefService ) {
+      private userprefService: UserprefService,
+      private menuService: MenuService
+   ) {
     var native = this.elementRef.nativeElement;
     this.type = native.getAttribute("type");
     this.apptitle = native.getAttribute("apptitle");
@@ -84,8 +89,18 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.clientWSService.initWebsocket();
-    this.notificationService.fetchAllNotifications();
-    this.userprefService.load();
+    let firstConnected: boolean = false;
+    this.clientWSService.initWebsocket().subscribe(connected => {
+      if(firstConnected == false) {
+        this.menuService.load().subscribe(() => {
+          this.userprefService.load().subscribe(() => {
+            this.notificationService.load().subscribe(() => {
+              firstConnected = true;
+              this.events.next("init");
+            })
+          })
+        })
+      }
+    });
   }
 }

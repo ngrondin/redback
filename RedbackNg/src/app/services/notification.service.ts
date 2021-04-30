@@ -11,10 +11,11 @@ import { ErrorService } from './error.service';
   providedIn: 'root'
 })
 export class NotificationService {
-  notifications: RbNotification[];
+  notifications: RbNotification[] = [];
   page: number;
   pageSize: number = 500;
   private observers: Observer<any>[] = [];
+  private loadObsever: Observer<null>;
 
   constructor(
     private apiService: ApiService,
@@ -33,10 +34,11 @@ export class NotificationService {
     );
   }
 
-  public fetchAllNotifications() {
+  public load() {
     this.notifications = [];
     this.page = 0;
     this.fetchNextPage();
+    return new Observable<null>((observer) => this.loadObsever = observer);
   }
 
   public getObservable() : Observable<any>  {
@@ -53,6 +55,9 @@ export class NotificationService {
         }
         if(resp.result.length >= this.pageSize) {
           this.fetchNextPage();
+        } else {
+          this.loadObsever.next(null);
+          this.loadObsever.complete();
         }
       },
       error => {
