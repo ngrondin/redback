@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges, HostListener } from '@angular/core';
 import { RbFile } from 'app/datamodel';
 import { ApiService } from 'app/services/api.service';
 import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
@@ -39,7 +39,7 @@ export class RbFiledropComponent extends RbContainerComponent {
 
   onActivationEvent(state: boolean) {
   }
-
+/*
   fileOver(event: any) {
     if(this.hasFileOver != event) {
       this.hasFileOver = event;
@@ -50,5 +50,32 @@ export class RbFiledropComponent extends RbContainerComponent {
     this.fileset.upload(event);
     //this.dropped.emit(event);
   }
- 
+*/
+  @HostListener('drop', ['$event'])
+  public drop(event: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log("File dropped");
+    if (event.dataTransfer != null && event.dataTransfer.items) {
+      for (var i = 0; i < event.dataTransfer.items.length; i++) {
+        if (event.dataTransfer.items[i].kind === 'file') {
+          var file = event.dataTransfer.items[i].getAsFile();
+          this.fileset.uploadFile(file);
+        }
+      }
+    }
+    this.hasFileOver = false;
+  }
+  
+  @HostListener('dragover', ['$event'])
+  dragover(event: any) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.hasFileOver = true;
+  }
+
+  @HostListener('dragleave', ['$event'])
+  dragleave(event: any) {
+    this.hasFileOver = false;
+  }
 }

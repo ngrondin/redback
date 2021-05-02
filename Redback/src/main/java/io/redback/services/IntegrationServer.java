@@ -11,6 +11,7 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
+import io.redback.services.common.AuthenticatedServiceProvider;
 
 public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 

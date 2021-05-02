@@ -11,6 +11,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.managers.domainmanager.DomainFunctionInfo;
 import io.redback.security.Session;
+import io.redback.services.common.AuthenticatedServiceProvider;
 
 public abstract class DomainServer extends AuthenticatedServiceProvider {
 

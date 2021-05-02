@@ -1,4 +1,4 @@
-package io.redback.services;
+package io.redback.services.common;
 
 import java.util.logging.Logger;
 
@@ -35,17 +35,7 @@ public abstract class ServiceProvider extends Service implements io.firebus.inte
 		}
 	}
 	
-	private String getLogline(Payload payload) {
-		String mime = payload.metadata.get("mime");
-		String body = null;
-		if(mime != null && mime.equals("application/json")) {
-			body = payload.getString().replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "");
-			return body;
-		} else {
-			return "";
-		}
-		
-	}
+
 
 	protected abstract Payload redbackService(Session session, Payload payload) throws RedbackException;
 }

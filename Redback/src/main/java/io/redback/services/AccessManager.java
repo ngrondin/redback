@@ -13,6 +13,7 @@ import io.redback.RedbackException;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
+import io.redback.services.common.ServiceProvider;
 
 public abstract class AccessManager extends ServiceProvider
 {

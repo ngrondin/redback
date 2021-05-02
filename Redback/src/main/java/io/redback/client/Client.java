@@ -2,6 +2,7 @@ package io.redback.client;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
@@ -78,6 +79,45 @@ public class Client {
 		else
 		{
 			throw new RedbackException("Service name not provided");
+		}
+	}
+	
+	protected StreamEndpoint requestStream(Session session, DataMap req) throws RedbackException
+	{
+		try
+		{
+			Payload reqP = new Payload(req.toString());
+			StreamEndpoint sep = requestStream(session, reqP);
+			return sep;
+		}
+		catch(Exception e)
+		{
+			throw new RedbackException("Error requesting " + serviceName, e);
+		}
+	}
+	
+	protected StreamEndpoint requestStream(Session session, Payload reqP) throws RedbackException 
+	{
+		if(serviceName != null)
+		{
+			try
+			{
+				if(session != null) {
+					reqP.metadata.put("session", session.id);
+					reqP.metadata.put("token", session.token);
+					reqP.metadata.put("timezone", session.getTimezone());
+				}
+				StreamEndpoint sep = firebus.requestStream(serviceName, reqP, 5000);
+				return sep;
+			}
+			catch(Exception e)
+			{
+				throw new RedbackException("Error requesting " + serviceName, e);
+			}
+		}
+		else
+		{
+			throw new RedbackException("Stream name not provided");
 		}
 	}
 	

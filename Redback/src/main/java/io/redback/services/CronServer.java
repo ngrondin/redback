@@ -6,6 +6,7 @@ import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
+import io.redback.services.common.ServiceProvider;
 
 public abstract class CronServer extends ServiceProvider {
 

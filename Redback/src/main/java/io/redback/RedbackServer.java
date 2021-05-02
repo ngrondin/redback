@@ -24,7 +24,7 @@ import io.firebus.interfaces.ServiceProvider;
 import io.firebus.interfaces.StreamProvider;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.services.Service;
+import io.redback.services.common.Service;
 import io.redback.utils.Watchdog;
 
 public class RedbackServer implements Consumer

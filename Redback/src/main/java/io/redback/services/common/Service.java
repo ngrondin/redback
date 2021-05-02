@@ -1,8 +1,9 @@
-package io.redback.services;
+package io.redback.services.common;
 
 //import java.util.logging.Logger;
 
 import io.firebus.Firebus;
+import io.firebus.Payload;
 import io.firebus.utils.DataMap;
 
 public abstract class Service 
@@ -17,6 +18,18 @@ public abstract class Service
 		serviceName = n;
 		config = c;
 		firebus = f;
+	}
+	
+	protected String getLogline(Payload payload) {
+		String mime = payload.metadata.get("mime");
+		String body = null;
+		if(mime != null && mime.equals("application/json")) {
+			body = payload.getString().replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "");
+			return body;
+		} else {
+			return "";
+		}
+		
 	}
 
 	public abstract void clearCaches();

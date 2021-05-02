@@ -18,6 +18,7 @@ export class ClientWSService {
   public chatObservers: Observer<any>[] = [];
   public clientPingObservers: Observer<String>[] = [];
   public requestObservers: any = {};
+  public uploadObservers: any = {};
   public uniqueObjectSubscriptions: any[] = [];
   public filterObjectSubscriptions: any = {};
   public connected: boolean = false;
@@ -58,8 +59,10 @@ export class ClientWSService {
       if(this.connected == false) {
         this.connected = true;
         console.log("WS Connection Open");
-        this.uniqueObjectSubscriptions.forEach(item => this.subscribeToUniqueObjectUpdate(item.objectname, item.uid));
-        Object.keys(this.filterObjectSubscriptions).forEach(key => this.subscribeToFilterObjectUpdate(this.filterObjectSubscriptions[key].objectname, this.filterObjectSubscriptions[key].filter, key));
+        let resubscribe = {type: "subscribe", list: []};
+        this.uniqueObjectSubscriptions.forEach(item => resubscribe.list.push({"objectname": item.objectname, "uid": item.uid}));
+        Object.keys(this.filterObjectSubscriptions).forEach(key => resubscribe.list.push({"objectname": this.filterObjectSubscriptions[key].objectname, "filter": this.filterObjectSubscriptions[key].filter, "id": key}));
+        this.websocket.next(resubscribe);
         this.heartbeatFreq = 10000;
         this.stateObservers.forEach((observer) => observer.next(true));
       }
@@ -79,6 +82,17 @@ export class ClientWSService {
           }
           delete this.requestObservers[msg.requid];
         }
+      } else if(msg.type == 'uploadctl') {
+        let observer: Observer<null> = this.uploadObservers[msg.uploaduid];
+        if(observer != null) {
+          if(msg.ctl == 'next') {
+            observer.next(null);
+          } else if(msg.ctl == 'error') {
+            observer.error(msg.error);
+          } else if(msg.ctl == 'result') {
+            observer.complete();
+          }
+        }
       } else if(msg.type == 'chatmessage') {
         this.chatObservers.forEach((observer) => observer.next(msg.message))
       } else if(msg.type == 'clientpong') {
@@ -94,11 +108,13 @@ export class ClientWSService {
   }
 
   closed() {
-    this.heartbeatFreq = 0;
-    this.connected = false;
-    this.stateObservers.forEach((observer) => observer.next(false));
+    if(this.connected) {
+      this.heartbeatFreq = 0;
+      this.connected = false;
+      console.log("WSS Connection closed");
+      this.stateObservers.forEach((observer) => observer.next(false));
+    }
     setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
-    console.log("WSS Connection closed");
   }
   
   heartbeat() {
@@ -175,6 +191,62 @@ export class ClientWSService {
           request: request
         });
       });
+    } else {
+      return null;
+    }
+  }
+
+  upload(file: File, object: string, uid: string) : Observable<number> {
+    if(this.connected) {
+      return new Observable((observer) => {
+        let uploaduid = UUID.UUID();
+        let chunkSeq = 0;
+        let chunkSize = 262144;
+        this.uploadObservers[uploaduid] = { 
+          next: () => {
+            var start = chunkSeq * chunkSize;
+            if(start < file.size) {
+              var chunk = file.slice(start, start + chunkSize);
+              const reader = new FileReader();
+              reader.onload = () => {
+                this.websocket.next({
+                  type: "upload",
+                  uploaduid: uploaduid,
+                  sequence: chunkSeq,
+                  data: reader.result
+                });
+                chunkSeq++;  
+                observer.next(100 * start / file.size);
+              }
+              reader.readAsDataURL(chunk);
+            } else {
+              this.websocket.next({
+                type: "upload",
+                uploaduid: uploaduid,
+                complete: true
+              });
+              observer.next(100);
+            }
+          },
+          error: (error) => {
+            observer.error("Error uploading file: " + error);
+          },
+          complete: () => {
+            observer.complete();
+          }
+        };
+        this.websocket.next({
+          type:"upload",
+          uploaduid: uploaduid,
+          request: {
+            filename: file.name,
+            filesize: file.size,
+            mime: file.type,
+            object: object,
+            uid: uid
+          }
+        });       
+      })
     } else {
       return null;
     }

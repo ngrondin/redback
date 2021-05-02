@@ -13,6 +13,7 @@ import io.redback.RedbackException;
 import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.security.Session;
+import io.redback.services.common.AuthenticatedServiceProvider;
 
 public abstract class ReportServer extends AuthenticatedServiceProvider {
 

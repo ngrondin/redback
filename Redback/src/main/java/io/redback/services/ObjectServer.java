@@ -13,6 +13,7 @@ import io.redback.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
+import io.redback.services.common.AuthenticatedServiceProvider;
 import io.redback.utils.StringUtils;
 
 public abstract class ObjectServer extends AuthenticatedServiceProvider 

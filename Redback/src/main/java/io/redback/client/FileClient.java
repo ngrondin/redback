@@ -7,6 +7,7 @@ import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -38,6 +39,17 @@ public class FileClient extends Client {
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
 		}
+	}
+	
+	public StreamEndpoint getFileStream(Session session, String fileUid) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("fileuid", fileUid);
+			StreamEndpoint sep = this.requestStream(session, req);
+			return sep;
+		} catch(Exception e) {
+			throw new RedbackException("Error getting file", e);
+		}	
 	}
 	
 	public DataMap getMetadata(Session session, String fileUid) throws RedbackException {
@@ -94,6 +106,21 @@ public class FileClient extends Client {
 			Payload respPayload = requestPayload(session, payload);
 			DataMap resp = new DataMap(respPayload.getString());
 			return new RedbackFileMetaData(resp.getString("fileuid"), fileName, mime, resp.getString("thumbnail"), username, new Date(), null);
+		} catch(Exception e) {
+			throw new RedbackException("Error link files to object", e);
+		}			
+	}
+	
+	public StreamEndpoint putFileStream(Session session, String fileName, int filesize, String mime) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "put");
+			req.put("filename", fileName);
+			req.put("filesize", filesize);
+			req.put("mime", mime);
+			req.put("username", session.getUserProfile().getUsername());
+			StreamEndpoint sep = requestStream(session, req);
+			return sep;
 		} catch(Exception e) {
 			throw new RedbackException("Error link files to object", e);
 		}			

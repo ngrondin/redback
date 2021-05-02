@@ -9,6 +9,7 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
+import io.redback.services.common.AuthenticatedServiceProvider;
 import io.redback.utils.HTML;
 
 public abstract class UIServer extends AuthenticatedServiceProvider

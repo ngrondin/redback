@@ -2,24 +2,22 @@ import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
 import { DataService } from 'app/services/data.service';
 import { RbObject, RbFile } from 'app/datamodel';
-import { RbContainerComponent } from 'app/abstract/rb-container';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
+import { RbSetComponent } from 'app/abstract/rb-set';
 
 @Component({
   selector: 'rb-fileset',
   templateUrl: './rb-fileset.component.html',
   styleUrls: ['./rb-fileset.component.css']
 })
-export class RbFilesetComponent extends RbContainerComponent {
-  @Input('relatedObject') _relatedObject: RbObject;
-
+export class RbFilesetComponent extends RbSetComponent {
+  @Input('object') _rbObject : RbObject;
   public fileList: RbFile[] = [];
   public selectedFile: RbFile;
   public uploader: FileUploader;
   public filesLoading: boolean;
   public initiated: boolean = false;
-  public active: boolean;
+  public uploadProgress: number = -1;
 
   constructor(
     private dataService: DataService,
@@ -30,37 +28,42 @@ export class RbFilesetComponent extends RbContainerComponent {
     this.uploader.response.subscribe( (res: any) => this.afterUpload(res) );
    }
 
-  containerInit() {
-    this.refreshData();
+  setInit() {
     this.initiated = true;
   }
 
-  containerDestroy() {
+  setDestroy() {
   }
 
   onDatasetEvent(event: any) {
     if(this.active == true) {
       if(event == 'select' || event == 'loaded') {
-        this.refreshData();
+        this.refresh();
       } else if(event == 'cleared') {
-        this.clearData();
+        this.clear();
       }
     }
   }
 
   onActivationEvent(state: any) {
-    state == true ? this.refreshData() : this.clearData();
+    state == true ? this.refresh() : this.clear();
   }
 
   get relatedObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : this._relatedObject != null ? this._relatedObject : null;
+    return this._rbObject != null ? this._rbObject : this.rbObject;
   }
 
-  public clearData() {
+  public reset() {
+    if(this.active) {
+      this.refresh()
+    }
+  }
+
+  public clear() {
     this.fileList = [];
   }
 
-  public refreshData() {
+  public refresh() {
     if(this.relatedObject != null) {
       this.dataService.listFiles(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
         data => this.setData(data)
@@ -76,7 +79,7 @@ export class RbFilesetComponent extends RbContainerComponent {
       this.selectedFile = this.fileList[0];
     }
   }
-
+/*
   public upload(evetn: any) {
     if(this.relatedObject != null) {
       let options : FileUploaderOptions = {};
@@ -89,10 +92,18 @@ export class RbFilesetComponent extends RbContainerComponent {
       this.uploader.setOptions(options);
       this.uploader.uploadAll();
     }
+  }*/
+
+  public uploadFile(file: File) {
+    this.apiService.uploadFile(file, this.relatedObject.objectname, this.relatedObject.uid).subscribe(
+      (prog) => this.uploadProgress = prog,
+      (error) => { },
+      () => this.afterUpload(null)
+    );
   }
   
   public afterUpload(resp: any) {
-    this.refreshData();
+    this.refresh();
   }
   
   public select(file: RbFile) {

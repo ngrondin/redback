@@ -15,6 +15,7 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
+import io.redback.services.common.AuthenticatedServiceProvider;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
 
@@ -132,12 +133,22 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 				String action = request.getString("action");
 				if(action.equals("get")) {
 					String fileuid = request.getString("fileuid");
-					acceptGetStream(session, streamEndpoint, fileuid);
+					if(fileuid != null) {
+						acceptGetStream(session, streamEndpoint, fileuid);
+					} else { // For backwards compatibility, to be removed
+						String objectname = request.getString("object");
+						String objectuid = request.getString("uid");
+						if(objectname != null && objectuid != null) {
+							acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
+						}
+					}
 				} else if(action.equals("put")) {
 					final String fileName = request.getString("filename");
+					final int fileSize = request.containsKey("filesize") ? request.getNumber("filesize").intValue() : -1;
+					final String mime = request.getString("mime");
 					final String objectname = request.getString("object");
 					final String objectuid = request.getString("uid");
-					acceptPutStream(session, streamEndpoint, fileName, objectname, objectuid);
+					acceptPutStream(session, streamEndpoint, fileName, fileSize, mime, objectname, objectuid);
 				} else if(action.equals("list")) { // This section is only for backwards compatibility of getting the list on the same get path
 					String objectname = request.getString("object");
 					String objectuid = request.getString("uid");
@@ -174,7 +185,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 	
 	public abstract void acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException;
 	
-	public abstract void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, String objectname, String objectuid) throws RedbackException;
+	public abstract void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException;
 	
 	public abstract void acceptListFilesForStream(Session session, StreamEndpoint streamEndpoint, String objectname, String objectuid) throws RedbackException;
 	

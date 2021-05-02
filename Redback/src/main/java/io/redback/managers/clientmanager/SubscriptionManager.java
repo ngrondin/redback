@@ -8,18 +8,17 @@ import java.util.Map;
 import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.security.Session;
 
 public class SubscriptionManager {
 
 	protected class FilterSubscription /*extends Subscription */{
 		public String id;
 		public DataFilter filter;
-		public Session session;
+		public ClientHandler clientHandler;
 		
-		public FilterSubscription(String i, Session s, DataMap f) {
+		public FilterSubscription(String i, ClientHandler ch, DataMap f) {
 			id = i;
-			session = s;
+			clientHandler = ch;
 			filter = new DataFilter(f);
 		}
 
@@ -44,45 +43,45 @@ public class SubscriptionManager {
 		public ObjectUIDPointer(String o, String i) {objectname = o; uid = i;}
 	}
 	
-	protected Map<String, Map<String, List<Session>>> uniqueObjectSubsriptions;
+	protected Map<String, Map<String, List<ClientHandler>>> uniqueObjectSubsriptions;
 	protected Map<String, Map<String, List<FilterSubscription>>> objectFilterSubscriptions;
-	protected Map<Session, List<ObjectUIDPointer>> sessionObjectUIDPointers;
-	protected Map<Session, List<ObjectDomainPointer>> sessionObjectDomainPointers;
+	protected Map<ClientHandler, List<ObjectUIDPointer>> sessionObjectUIDPointers;
+	protected Map<ClientHandler, List<ObjectDomainPointer>> sessionObjectDomainPointers;
 	
 	public SubscriptionManager() {
-		uniqueObjectSubsriptions = new HashMap<String, Map<String, List<Session>>>();
+		uniqueObjectSubsriptions = new HashMap<String, Map<String, List<ClientHandler>>>();
 		objectFilterSubscriptions = new HashMap<String, Map<String, List<FilterSubscription>>>();
-		sessionObjectUIDPointers = new HashMap<Session, List<ObjectUIDPointer>>();
-		sessionObjectDomainPointers = new HashMap<Session, List<ObjectDomainPointer>>();	
+		sessionObjectUIDPointers = new HashMap<ClientHandler, List<ObjectUIDPointer>>();
+		sessionObjectDomainPointers = new HashMap<ClientHandler, List<ObjectDomainPointer>>();	
 	}
 	
-	public void subscribe(Session session, String objectname, String uid) throws RedbackException {
+	public void subscribe(ClientHandler clientHandler, String objectname, String uid) throws RedbackException {
 		try {
 			synchronized(this) {
-				Map<String, List<Session>> objMap = uniqueObjectSubsriptions.get(objectname);
+				Map<String, List<ClientHandler>> objMap = uniqueObjectSubsriptions.get(objectname);
 				if(objMap == null) {
-					objMap = new HashMap<String, List<Session>>();
+					objMap = new HashMap<String, List<ClientHandler>>();
 					uniqueObjectSubsriptions.put(objectname, objMap);
 				}
-				List<Session> list = objMap.get(uid);
+				List<ClientHandler> list = objMap.get(uid);
 				if(list == null) {
-					list = new ArrayList<Session>();
+					list = new ArrayList<ClientHandler>();
 					objMap.put(uid, list);
 				}
-				list.add(session);
-				List<ObjectUIDPointer> pointers = sessionObjectUIDPointers.get(session);
+				list.add(clientHandler);
+				List<ObjectUIDPointer> pointers = sessionObjectUIDPointers.get(clientHandler);
 				if(pointers == null) {
 					pointers = new ArrayList<ObjectUIDPointer>();
-					sessionObjectUIDPointers.put(session, pointers);
+					sessionObjectUIDPointers.put(clientHandler, pointers);
 				}
 				pointers.add(new ObjectUIDPointer(objectname, uid));
 			}
 		} catch(Exception e) {
-			throw new RedbackException("Error subscribing session " + session.getId() + " to " + objectname + "." + uid , e);
+			throw new RedbackException("Error subscribing session " + clientHandler.session.getId() + " to " + objectname + "." + uid , e);
 		}
 	}
 	
-	public void subscribe(Session session, String objectname, DataMap filter, String id) throws RedbackException {
+	public void subscribe(ClientHandler clientHandler, String objectname, DataMap filter, String id) throws RedbackException {
 		try {
 			synchronized(this) {
 				Map<String, List<FilterSubscription>> objMap = objectFilterSubscriptions.get(objectname);
@@ -90,7 +89,7 @@ public class SubscriptionManager {
 					objMap = new HashMap<String, List<FilterSubscription>>();
 					objectFilterSubscriptions.put(objectname, objMap);
 				}
-				for(String domain: session.getUserProfile().getDomains()) {
+				for(String domain: clientHandler.session.getUserProfile().getDomains()) {
 					List<FilterSubscription> list = objMap.get(domain);
 					if(list == null) {
 						list = new ArrayList<FilterSubscription>();
@@ -104,32 +103,32 @@ public class SubscriptionManager {
 					if(existingFilterSubscription != null) {
 						existingFilterSubscription.filter = new DataFilter(filter);
 					} else {
-						list.add(new FilterSubscription(id, session, filter));
+						list.add(new FilterSubscription(id, clientHandler, filter));
 					}
-					List<ObjectDomainPointer> pointers = sessionObjectDomainPointers.get(session);
+					List<ObjectDomainPointer> pointers = sessionObjectDomainPointers.get(clientHandler);
 					if(pointers == null) {
 						pointers = new ArrayList<ObjectDomainPointer>();
-						sessionObjectDomainPointers.put(session, pointers);
+						sessionObjectDomainPointers.put(clientHandler, pointers);
 					}
 					pointers.add(new ObjectDomainPointer(objectname, domain));						
 				}
 			}
 		} catch(Exception e) {
-			throw new RedbackException("Error subscribing session " + session.getId() + " to filter " + id + " for " + objectname, e);
+			throw new RedbackException("Error subscribing session " + clientHandler.session.getId() + " to filter " + id + " for " + objectname, e);
 		}
 	}
 	
-	public void unsubscribe(Session session) throws RedbackException {
+	public void unsubscribe(ClientHandler clientHandler) throws RedbackException {
 		try {
 			synchronized(this) {
-				List<ObjectUIDPointer> p1 = sessionObjectUIDPointers.get(session);
+				List<ObjectUIDPointer> p1 = sessionObjectUIDPointers.get(clientHandler);
 				if(p1 != null) {
 					for(ObjectUIDPointer pointer: p1) {
-						Map<String, List<Session>> map = uniqueObjectSubsriptions.get(pointer.objectname);
+						Map<String, List<ClientHandler>> map = uniqueObjectSubsriptions.get(pointer.objectname);
 						if(map != null) {
-							List<Session> list = map.get(pointer.uid);
+							List<ClientHandler> list = map.get(pointer.uid);
 							if(list != null) {
-								list.remove(session);
+								list.remove(clientHandler);
 								if(list.size() == 0) {
 									map.remove(pointer.uid);
 									if(map.size() == 0)
@@ -138,10 +137,10 @@ public class SubscriptionManager {
 							}
 						}
 					}
-					sessionObjectUIDPointers.remove(session);
+					sessionObjectUIDPointers.remove(clientHandler);
 				}
 				
-				List<ObjectDomainPointer> p2 = sessionObjectDomainPointers.get(session);
+				List<ObjectDomainPointer> p2 = sessionObjectDomainPointers.get(clientHandler);
 				if(p2 != null) {
 					for(ObjectDomainPointer pointer: p2) {
 						Map<String, List<FilterSubscription>> map = objectFilterSubscriptions.get(pointer.objectname);
@@ -150,7 +149,7 @@ public class SubscriptionManager {
 							List<FilterSubscription> list = map.get(pointer.domain);
 							if(list != null) {
 								for(int i = 0; i < list.size(); i++)
-									if(list.get(i).session == session)
+									if(list.get(i).clientHandler == clientHandler)
 										list.remove(i--);
 								if(list.size() == 0) {
 									map.remove(pointer.domain);
@@ -160,24 +159,24 @@ public class SubscriptionManager {
 							}
 						}
 					}
-					sessionObjectDomainPointers.remove(session);
+					sessionObjectDomainPointers.remove(clientHandler);
 				}
 			}
 		} catch(Exception e) {
-			throw new RedbackException("Error unsubscribing session " + session.getId(), e);
+			throw new RedbackException("Error unsubscribing session " + clientHandler.session.getId(), e);
 		}		
 	}
 	
-	public List<Session> getSubscribersFor(DataMap data) throws RedbackException {
-		List<Session> subscribers = new ArrayList<Session>();
+	public List<ClientHandler> getSubscribersFor(DataMap data) throws RedbackException {
+		List<ClientHandler> subscribers = new ArrayList<ClientHandler>();
 		String objectName = data.getString("objectname");
 		String uid = data.getString("uid");
-		Map<String, List<Session>> map1 = uniqueObjectSubsriptions.get(objectName);
+		Map<String, List<ClientHandler>> map1 = uniqueObjectSubsriptions.get(objectName);
 		if(map1 != null) {
-			List<Session> list = map1.get(uid);
+			List<ClientHandler> list = map1.get(uid);
 			if(list != null)
-				for(Session session : list) 
-					subscribers.add(session);
+				for(ClientHandler clientHandler : list) 
+					subscribers.add(clientHandler);
 		}
 
 		String domain = data.getString("domain");
@@ -186,8 +185,8 @@ public class SubscriptionManager {
 			List<FilterSubscription> list = map2.get(domain);
 			if(list != null)
 				for(FilterSubscription subs : list) 
-					if(!subscribers.contains(subs.session) && subs.matches(data.getObject("data")))
-						subscribers.add(subs.session);
+					if(!subscribers.contains(subs.clientHandler) && subs.matches(data.getObject("data")))
+						subscribers.add(subs.clientHandler);
 		}
 		return subscribers;
 	}

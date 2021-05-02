@@ -9,6 +9,8 @@ import io.firebus.interfaces.Consumer;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
+import io.redback.services.common.AuthenticatedStreamProvider;
+import io.redback.services.common.StreamHandler;
 import io.redback.utils.StringUtils;
 
 public abstract class ClientServer extends AuthenticatedStreamProvider {
@@ -39,44 +41,25 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 		}		
 	}
 
+	public StreamHandler redbackAuthenticatedStream(Session session, Payload payload) throws RedbackException {
+		return clientStream(session);
+	}
+
+	public StreamHandler redbackUnauthenticatedStream(Session session, Payload payload) throws RedbackException {
+		throw new RedbackException("All client streams need to be authenticated");
+	}
+	
 	public StreamInformation getStreamInformation() {
 		return null;
 	}
-
-	protected Payload onNewStream(Session session, Payload payload) throws RedbackException {
-		onClientConnect(session);
-		return null;
-	}
-
-	protected void onStreamData(Session session, Payload payload) throws RedbackException {
-		try {
-			DataMap msg = new DataMap(payload.getString());
-			String type = msg.getString("type");
-			if(type != null) {
-				if(type.equals("subscribe")) {
-					if(msg.containsKey("uid")) {
-						this.subscribeObject(session, msg.getString("objectname"), msg.getString("uid"));
-					} else if(msg.containsKey("filter")) {
-						this.subscribeFilter(session, msg.getString("objectname"), msg.getObject("filter"), msg.getString("id"));
-					}
-				} else if(type.equals("servicerequest")) {
-					String reqUid = msg.getString("requid");
-					String serviceName = msg.getString("servicename");
-					DataMap request = msg.getObject("request");
-					requestService(session, reqUid, serviceName, request);
-				} else if(type.equals("heartbeat")) {
-					sendStreamData(session, new Payload(new DataMap("type", "heartbeat").toString()));
-				}
-			}
-		} catch(Exception e) {
-			throw new RedbackException("Error processing client message", e);
-		}
-	}
-
-	protected void onStreamClose(Session session) throws RedbackException {
-		onClientLeave(session);
+	
+	public int getStreamIdleTimeout() {
+		return 300000;
 	}
 	
+	public abstract StreamHandler clientStream(Session session) throws RedbackException;
+
+
 	private void _onOjectUpdate(Payload payload) {
 		try {
 			onObjectUpdate(new DataMap(payload.getString()));
@@ -104,21 +87,13 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 	public void clearCaches() {
 		
 	}
-	
-	protected abstract void onClientConnect(Session session) throws RedbackException;
-	
-	protected abstract void onClientLeave(Session session) throws RedbackException;
-	
-	protected abstract void subscribeFilter(Session session, String objectname, DataMap filter, String id) throws RedbackException;
-
-	protected abstract void subscribeObject(Session session, String objectname, String uid) throws RedbackException;
-	
-	protected abstract void requestService(Session session, String reqUid, String serviceName, DataMap request) throws RedbackException;
 
 	protected abstract void onObjectUpdate(DataMap data) throws RedbackException;
 	
 	protected abstract void onNotification(DataMap data) throws RedbackException;
 	
 	protected abstract void onChatMessage(DataMap data) throws RedbackException;
+
+
 
 }

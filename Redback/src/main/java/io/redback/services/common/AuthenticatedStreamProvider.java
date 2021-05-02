@@ -1,4 +1,4 @@
-package io.redback.services;
+package io.redback.services.common;
 
 import java.util.logging.Logger;
 
@@ -10,26 +10,23 @@ import io.redback.client.AccessManagementClient;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 
-public abstract class AuthenticatedServiceProvider extends ServiceProvider
-{
+public abstract class AuthenticatedStreamProvider extends StreamProvider {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String accessManagementService;
 	protected AccessManagementClient accessManagementClient;
-
-
-	public AuthenticatedServiceProvider(String n, DataMap c, Firebus f)
-	{
+	
+	public AuthenticatedStreamProvider(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 		accessManagementService = config.getString("accessmanagementservice");
 		accessManagementClient = new AccessManagementClient(firebus, accessManagementService);
 	}
-	
-	protected Payload redbackService(Session session, Payload payload) throws RedbackException {
-		Payload response = null;
+
+	public StreamHandler redbackStream(Session session, Payload payload) throws RedbackException {
+		StreamHandler response = null;
 		String token = payload.metadata.get("token");
 		UserProfile up = null;
 		
-		logger.finer("Authenticated service start (token: " + token + ")");
+		logger.finer("Authenticated stream request start (token: " + token + ")");
 
 		if(token != null)
 			up = accessManagementClient.validate(session, token);
@@ -38,20 +35,19 @@ public abstract class AuthenticatedServiceProvider extends ServiceProvider
 		{			
 			session.setUserProfile(up);
 			session.setToken(token);
-			response = redbackAuthenticatedService(session, payload);
+			response = redbackAuthenticatedStream(session, payload);
 		}
 		else
 		{
-			response = redbackUnauthenticatedService(session, payload);
+			response = redbackUnauthenticatedStream(session, payload);
 		}
-		logger.finer("Authenticated service finish");
+		logger.finer("Authenticated stream request finish");
 		return response;
-
 	}
 
-	public abstract Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException;
+	public abstract StreamHandler redbackAuthenticatedStream(Session session, Payload payload) throws RedbackException;
 
-	public abstract Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException;
+	public abstract StreamHandler redbackUnauthenticatedStream(Session session, Payload payload) throws RedbackException;
 
 	
 }

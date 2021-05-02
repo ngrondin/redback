@@ -8,9 +8,15 @@ import { ResponseContentType, RequestOptions } from '@angular/http';
 import { ClientWSService } from './clientws.service';
 
 
-const httpOptions = {
+const httpJSONOptions = {
   headers: new HttpHeaders()
     .set("Content-Type", "application/json")
+    .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone),
+  withCredentials: true
+};
+
+const httpOptions = {
+  headers: new HttpHeaders()
     .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone),
   withCredentials: true
 };
@@ -30,12 +36,6 @@ export class ApiService {
   public userprefService: string;
   public useCSForAPI: boolean = false;
   public chatService: string; 
-  /*public signalService: string;
-  public signalWebsocket: WebSocketSubject<any>;
-  public signalObservers: Observer<String>[] = [];
-  public signalConnected: boolean = false;
-  public chatWebsocket: WebSocketSubject<any>;
-  public chatObservers: Observer<String>[] = [];*/
   public placesAutocompleteService: any;
 
   constructor(
@@ -49,7 +49,7 @@ export class ApiService {
     if(this.clientWSService.isConnected() && this.useCSForAPI) {
       return this.clientWSService.request(service, request);
     } else {
-      return this.http.post<any>(this.baseUrl + '/' + service, request, httpOptions);
+      return this.http.post<any>(this.baseUrl + '/' + service, request, httpJSONOptions);
     }
   }
 
@@ -210,8 +210,29 @@ export class ApiService {
 
   /******* Files *********/
 
+  uploadFile(file: File, object: string, uid: string) : Observable<any> {
+    if(this.clientWSService.isConnected() && this.useCSForAPI) {
+      return this.clientWSService.upload(file, object, uid);
+    } else {
+      let formData: FormData = new FormData();
+      formData.append("mime", file.type);
+      formData.append("filesize", file.size.toString());
+      formData.append("file", file, file.name);
+      if(object != null && uid != null) {
+        formData.append("object", object);
+        formData.append("uid", uid);
+      }
+      return this.http.post<any>(this.baseUrl + '/' + this.fileService, formData, httpOptions);  
+    }
+  }
+
   listFiles(object: string, uid: string): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?action=list&object=' + object + '&uid=' + uid, httpOptions);
+    return this.requestService(this.fileService, {
+      action: "list",
+      object: object,
+      uid: uid
+    });
+    //return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?action=list&object=' + object + '&uid=' + uid, httpOptions);
   }
 
   /******* Domain *********/
@@ -239,7 +260,7 @@ export class ApiService {
   /******* Reporting Service *********/
   
   listReports(category: string): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/' + this.reportService + '?action=list&category=' + category, httpOptions);
+    return this.http.get<any>(this.baseUrl + '/' + this.reportService + '?action=list&category=' + category, httpJSONOptions);
   }
 
 
