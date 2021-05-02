@@ -10,6 +10,8 @@
     flex-direction: row;
     align-items: center;
     cursor: pointer;
+    max-width: 18vw;
+    overflow:hidden;
 }
 
 .rb-files-item-active {
@@ -32,8 +34,8 @@
     display: flex;
     flex: 0 0 auto;
     padding: 8px;
-    width: 80px;
-    height: 80px;
+    width: 4vw;
+    height: 4vw;
     justify-content: center;
     align-items: center;
 }
@@ -49,6 +51,8 @@
 .rb-files-details {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
+    overflow: hidden;
 }
 
 .rb-files-thumb {
@@ -56,12 +60,13 @@
 }
 
 .rb-files-name {
-    display: flex;
     color:#424242;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .rb-files-date {
-    display: flex;
     font-size: 0.8rem;
     color: lightgray;
 }

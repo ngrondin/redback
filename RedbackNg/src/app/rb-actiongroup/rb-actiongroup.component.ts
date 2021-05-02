@@ -6,8 +6,6 @@ import { NotificationService } from 'app/services/notification.service';
 import { Subscription } from 'rxjs';
 import { RbNotification, RbObject } from 'app/datamodel';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { RbActivatorComponent } from 'app/abstract/rb-activator';
-import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
 
 export class RbActiongroupAction {
   action: string;
@@ -29,10 +27,10 @@ export class RbActiongroupAction {
   styleUrls: ['./rb-actiongroup.component.css']
 })
 export class RbActiongroupComponent extends RbDataObserverComponent {
-  @Input('dataset') dataset: RbDatasetComponent;
+  //@Input('dataset') dataset: RbDatasetComponent;
   @Input('actions') actions: any;
   @Input('domaincategory') domaincategory: string;
-  @Input('showprocessinteraction') showprocessinteraction: boolean;
+  @Input('showprocessinteraction') showprocessinteraction: boolean = false;
   @Input('round') round: boolean = false;
   @Input('hideonempty') hideonempty: boolean = false;
 
@@ -54,16 +52,19 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   
 
   dataObserverInit() {
+    if(this.showprocessinteraction) {   
+      this.notificationSubscription = this.notificationService.getObservable().subscribe(event => this.onNotificationEvent(event));
+    }
     if(this.domaincategory != null && this.domaincategory != "") {
       this.apiService.listDomainFunctions(this.domaincategory).subscribe(json => {
         this.domainActions = [];
         json.result.forEach(item => {
           this.domainActions.push(new RbActiongroupAction('executedomain', item.name,item.description, false));
         });
+        this.calcActionData();
       });
-    } 
-    if(this.showprocessinteraction) {   
-      this.notificationSubscription = this.notificationService.getObservable().subscribe(event => this.onNotificationEvent(event));
+    } else {
+      this.calcActionData();
     }
   }
 
@@ -90,18 +91,20 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   }
 
   onNotificationEvent(event: any) {
-    if(event.type == 'notification') {
-      if(this.rbObject != null && event.notification.data != null && this.rbObject.objectname == event.notification.data.objectname && this.rbObject.uid == event.notification.data.uid) {
-        this.notification = event.notification;
-        this.notificationRetreived = true;
-        this.calcActionData();
-      }
-    } else if(event.type == 'completion') {
-      if(this.notification === event.notification) {
-        this.notification = null;
-        this.notificationRetreived = false;
-        this.calcActionData();
-      }
+    if(this.showprocessinteraction) {
+      if(event.type == 'notification') {
+        if(this.rbObject != null && event.notification.data != null && this.rbObject.objectname == event.notification.data.objectname && this.rbObject.uid == event.notification.data.uid) {
+          this.notification = event.notification;
+          this.notificationRetreived = true;
+          this.calcActionData();
+        }
+      } else if(event.type == 'completion') {
+        if(this.notification === event.notification) {
+          this.notification = null;
+          this.notificationRetreived = false;
+          this.calcActionData();
+        }
+      }  
     }
   }
 
@@ -119,7 +122,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
 
   public activate() {
     this.open = true;
-    if(this.notificationRetreived == false) {
+    if(this.showprocessinteraction && this.notificationRetreived == false) {
       this.getNotificationThenCalcActions();
     }
   }
@@ -131,7 +134,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   private calcActionData() {
     this.actionData = [];
     let object = this.rbObject;
-    if(this.notification != null) {
+    if(this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
         this.actionData.push(new RbActiongroupAction("processaction", action.action, action.description, action.main))
       }

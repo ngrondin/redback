@@ -11,13 +11,13 @@ import { RbSetComponent } from 'app/abstract/rb-set';
   styleUrls: ['./rb-fileset.component.css']
 })
 export class RbFilesetComponent extends RbSetComponent {
-  @Input('object') _rbObject : RbObject;
   public fileList: RbFile[] = [];
   public selectedFile: RbFile;
   public uploader: FileUploader;
   public filesLoading: boolean;
   public initiated: boolean = false;
   public uploadProgress: number = -1;
+  public overrideRbObject: RbObject;
 
   constructor(
     private dataService: DataService,
@@ -49,8 +49,14 @@ export class RbFilesetComponent extends RbSetComponent {
     state == true ? this.refresh() : this.clear();
   }
 
+  @Input('overrideobject') set overrideobject(o : RbObject) {
+    this.overrideRbObject = o;
+    this.refresh();
+  }
+  
+
   get relatedObject() : RbObject {
-    return this._rbObject != null ? this._rbObject : this.rbObject;
+    return this.overrideRbObject != null ? this.overrideRbObject : this.rbObject;
   }
 
   public reset() {
@@ -79,20 +85,6 @@ export class RbFilesetComponent extends RbSetComponent {
       this.selectedFile = this.fileList[0];
     }
   }
-/*
-  public upload(evetn: any) {
-    if(this.relatedObject != null) {
-      let options : FileUploaderOptions = {};
-      options.url = this.apiService.baseUrl + '/' + this.apiService.fileService;
-      options.disableMultipart = false;
-      options.additionalParameter = {
-        "object" : this.relatedObject.objectname,
-        "uid" : this.relatedObject.uid
-      }
-      this.uploader.setOptions(options);
-      this.uploader.uploadAll();
-    }
-  }*/
 
   public uploadFile(file: File) {
     this.apiService.uploadFile(file, this.relatedObject.objectname, this.relatedObject.uid).subscribe(

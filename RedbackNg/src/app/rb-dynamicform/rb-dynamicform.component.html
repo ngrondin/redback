@@ -103,7 +103,7 @@
         </div>  
         <div
             class="rb-df-lineinput rb-df-headspace"
-            *ngIf="getTypeOf(object) == 'files'">
+            *ngIf="getTypeOf(object) == 'files' || getTypeOf(object) == 'photos' || getTypeOf(object) == 'videos'">
             <div
                 class="rb-df-inputwrapper">
                 <mat-icon
@@ -118,7 +118,7 @@
                     </div>
                     <rb-fileset
                         #fileset
-                        [object]="object">
+                        [overrideobject]="object">
                             <rb-filedrop
                                 [fileset]="fileset">
                                 <rb-filelist
