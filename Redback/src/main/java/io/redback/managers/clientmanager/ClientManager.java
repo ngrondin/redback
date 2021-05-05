@@ -59,7 +59,7 @@ public class ClientManager {
 		DataList to = data.getList("to"); 
 		for(ClientHandler ch: clientHandlers)
 			for(int i = 0; i < to.size(); i++) 
-				if(ch.session.getUserProfile().getUsername().equals(to.getString(i)))
+				if(ch.getSession().getUserProfile().getUsername().equals(to.getString(i)))
 					ch.receiveNotification(data);
 	}
 	

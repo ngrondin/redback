@@ -31,7 +31,7 @@ export class ClientWSService {
   initWebsocket() : Observable<boolean> {
     if(this.path != null && this.path != "" && this.websocket == null) {
       this.websocket = webSocket({
-        url: this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.path,
+        url: this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.path + '?firebus-timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone,
         openObserver: {next: () => this.opened()},
         closeObserver: {next: () => this.closed()}
       });

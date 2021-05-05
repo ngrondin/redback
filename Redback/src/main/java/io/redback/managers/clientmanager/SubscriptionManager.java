@@ -77,7 +77,7 @@ public class SubscriptionManager {
 				pointers.add(new ObjectUIDPointer(objectname, uid));
 			}
 		} catch(Exception e) {
-			throw new RedbackException("Error subscribing session " + clientHandler.session.getId() + " to " + objectname + "." + uid , e);
+			throw new RedbackException("Error subscribing session " + clientHandler.getSession().getId() + " to " + objectname + "." + uid , e);
 		}
 	}
 	
@@ -89,7 +89,7 @@ public class SubscriptionManager {
 					objMap = new HashMap<String, List<FilterSubscription>>();
 					objectFilterSubscriptions.put(objectname, objMap);
 				}
-				for(String domain: clientHandler.session.getUserProfile().getDomains()) {
+				for(String domain: clientHandler.getSession().getUserProfile().getDomains()) {
 					List<FilterSubscription> list = objMap.get(domain);
 					if(list == null) {
 						list = new ArrayList<FilterSubscription>();
@@ -114,7 +114,7 @@ public class SubscriptionManager {
 				}
 			}
 		} catch(Exception e) {
-			throw new RedbackException("Error subscribing session " + clientHandler.session.getId() + " to filter " + id + " for " + objectname, e);
+			throw new RedbackException("Error subscribing session " + clientHandler.getSession().getId() + " to filter " + id + " for " + objectname, e);
 		}
 	}
 	
@@ -163,7 +163,7 @@ public class SubscriptionManager {
 				}
 			}
 		} catch(Exception e) {
-			throw new RedbackException("Error unsubscribing session " + clientHandler.session.getId(), e);
+			throw new RedbackException("Error unsubscribing session " + clientHandler.getSession().getId(), e);
 		}		
 	}
 	

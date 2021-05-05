@@ -1,9 +1,10 @@
-import { HostBinding } from '@angular/core';
+import { HostBinding, HostListener } from '@angular/core';
 import { SimpleChanges } from '@angular/core';
 import { Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { AppInjector } from 'app/app.module';
 import { RbObject } from 'app/datamodel';
+import { DialogService } from 'app/services/dialog.service';
 import { UserprefService } from 'app/services/userpref.service';
 
 
@@ -13,6 +14,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('object') _rbObject: RbObject;
   @Input('value') _value: any;
   @Input('label') label: string;
+  @Input('tip') tip: string;
   @Input('icon') _icon: string;
   @Input('showicon') showicon: boolean = true;
   @Input('size') size: number;
@@ -29,9 +31,16 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   flasherOn: boolean = false;
   defaultIcon: string;
   defaultSize: number = 15;
+  mouseIsOver: boolean = false;
+  showTip: boolean = false;
+  dialogService: DialogService;
+  userprefService: UserprefService;
+
 
   constructor( ) {
     super();
+    this.dialogService = AppInjector.get(DialogService);
+    this.userprefService = AppInjector.get(UserprefService);
   }
 
   dataObserverInit() {
@@ -157,5 +166,22 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
         this._value = val;
     }      
     this.valueChange.emit(val);
+  }
+
+
+  @HostListener('mouseenter', ['$event']) onEnter(event: any) {
+    this.mouseIsOver = true;
+    if(this.tip != null) {
+      setTimeout(() => {
+        if(this.mouseIsOver == true) {
+          this.dialogService.showTooltip(this.tip, event.target, "below");
+        }
+      }, 1000);  
+    }
+  }
+
+  @HostListener('mouseleave', ['$event']) onLeave(event: any) {
+    this.mouseIsOver = false;
+    this.dialogService.hideTooltip();
   }
 }

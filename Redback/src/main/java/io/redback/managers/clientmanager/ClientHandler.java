@@ -19,7 +19,6 @@ public class ClientHandler extends ClientStreamHandler {
 	private Logger logger = Logger.getLogger("io.redback");
 	
 	protected ClientManager clientManager;
-	protected Session session;
 	protected Map<String, StreamEndpoint> uploads;
 	
 	public ClientHandler(ClientManager cm, Session s) {

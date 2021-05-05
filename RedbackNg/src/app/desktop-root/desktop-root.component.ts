@@ -9,6 +9,7 @@ import { DragService } from 'app/services/drag.service';
 import { ClientWSService } from 'app/services/clientws.service';
 import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { DialogService } from 'app/services/dialog.service';
 
 
 
@@ -32,6 +33,7 @@ export class DesktopRootComponent implements OnInit {
   constructor(
     private configService : ConfigService,
     public dragService: DragService,
+    public dialogService: DialogService,
     public userprefService: UserprefService,
     private domSanitizer: DomSanitizer,
     private cookieService: CookieService,
@@ -113,4 +115,7 @@ export class DesktopRootComponent implements OnInit {
     this.dragService.move($event);
   }
 
+  @HostListener('click', ['$event']) onClick($event) {
+    this.dialogService.hideTooltip();
+  }
 }

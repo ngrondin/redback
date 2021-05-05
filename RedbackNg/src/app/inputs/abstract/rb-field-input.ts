@@ -1,6 +1,5 @@
 import { HostBinding } from '@angular/core';
 import { Input } from '@angular/core';
-import { Output, EventEmitter } from '@angular/core';
 import { AppInjector } from 'app/app.module';
 import { RbObject } from 'app/datamodel';
 import { DialogService } from 'app/services/dialog.service';
@@ -15,12 +14,10 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
 
   editedValue: any;
   isEditing: boolean = false;
-  dialogService: DialogService;
-
+  
   constructor() {
     super();
     this.defaultIcon = "description";
-    this.dialogService = AppInjector.get(DialogService);
   }
 
   inputInit() {

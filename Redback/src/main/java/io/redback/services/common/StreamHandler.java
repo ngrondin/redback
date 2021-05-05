@@ -50,4 +50,8 @@ public abstract class StreamHandler implements io.firebus.interfaces.StreamHandl
 	public abstract void closed() throws RedbackException;
 	
 	public abstract Payload getAcceptPayload() throws RedbackException;
+	
+	public Session getSession() {
+		return session;
+	}
 }
