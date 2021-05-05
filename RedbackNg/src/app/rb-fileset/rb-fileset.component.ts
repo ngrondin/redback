@@ -81,9 +81,9 @@ export class RbFilesetComponent extends RbSetComponent {
   private setData(data: RbFile[]) {
     this.fileList = data;
     this.filesLoading = false;
-    if(this.fileList.length == 1) {
+    /*if(this.fileList.length == 1) {
       this.selectedFile = this.fileList[0];
-    }
+    }*/
   }
 
   public uploadFile(file: File) {

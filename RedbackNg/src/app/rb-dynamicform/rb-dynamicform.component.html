@@ -5,7 +5,7 @@
         class="rb-df-line">
         <div
             class="rb-df-category"
-            *ngIf="isFirstInCategory(object) && categoryattribute != null && object.get(categoryattribute) != null">
+            *ngIf="isFirstInCategory(object) && categoryattribute != null && object.get(categoryattribute) != null && object.get(categoryattribute) != ''">
             {{object.get(categoryattribute)}}
         </div>
         <div
@@ -147,7 +147,7 @@
                         {{object.get(labelattribute)}}
                     </div>
                     <rb-file-input
-                        style="margin-left:0px;"
+                        style="margin-left:0px; padding-left: 0px;"
                         [object]="object"
                         [attribute]="valueattribute"
                         [editable]="isEditable"

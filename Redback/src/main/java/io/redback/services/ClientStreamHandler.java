@@ -58,7 +58,8 @@ public abstract class ClientStreamHandler extends StreamHandler {
 						} else if(data.containsKey("data")) {
 							int seq = data.getNumber("sequence").intValue();
 							String base64data = data.getString("data");
-							base64data = base64data.split(",")[1];
+							if(base64data.indexOf(",") > -1)
+								base64data = base64data.split(",")[1];
 							byte[] bytes = Base64.decodeBase64(base64data);
 							uploadChunk(uploadUid, seq, bytes);
 						} else if(data.containsKey("complete")) {
