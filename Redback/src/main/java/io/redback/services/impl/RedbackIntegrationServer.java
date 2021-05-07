@@ -29,8 +29,10 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		public String name;
 		public String clientId;
 		public String clientSecrect;
-		public String redirectUri;
-		public String refreshUrl;
+		public String scope;
+		public String extraLoginParams;
+		public String loginUrl;
+		public String tokenUrl;
 		public Expression headerExpr;
 		public Expression urlExpr;
 		public Expression methodExpr;
@@ -41,8 +43,10 @@ public class RedbackIntegrationServer extends IntegrationServer {
 			name = cfg.getString("name");
 			clientId = cfg.getString("clientid");
 			clientSecrect = cfg.getString("clientsecret");
-			redirectUri = cfg.getString("redirecturi");
-			refreshUrl = cfg.getString("refreshurl");
+			scope = cfg.getString("scope");
+			extraLoginParams = cfg.getString("extraloginparams");
+			loginUrl = cfg.getString("loginurl");
+			tokenUrl = cfg.getString("tokenurl");
 			List<String> params = Arrays.asList(new String[] {"userprofile", "clientid", "clientsecret", "action", "object", "uid", "filter", "data", "options", "clientdata", "response"});
 			headerExpr = new Expression(jsManager, "client_" + name + "_header", params, cfg.getString("header"));
 			urlExpr = new Expression(jsManager, "client_" + name + "_url", params, cfg.getString("url"));
@@ -62,7 +66,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	protected CollectionConfig clientDataCollection;
 	protected Map<String, ClientConfig> clientConfigs;
 	protected Map<String, DataMap> cachedClientData;
-
+	protected String publicUrl;
 
 	public RedbackIntegrationServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
@@ -76,14 +80,23 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		clientDataCollection = new CollectionConfig(c.getObject("clientdatacollection"), "rbin_clientdata");
 		clientConfigs = new HashMap<String, ClientConfig>();
 		cachedClientData = new HashMap<String, DataMap>();
+		publicUrl = config.getString("publicurl");
+	}
+	
+	protected String getRedirectUri(String client) {
+		return publicUrl + "/" + client;
 	}
 	
 	protected ClientConfig getClientConfig(Session session, String client) throws RedbackException {
 		ClientConfig config = clientConfigs.get(client);
 		if(config == null) {
 			DataMap configData = configClient.getConfig(session, "rbin", "client", client);
-			config = new ClientConfig(configData);
-			clientConfigs.put(client, config);
+			if(configData != null) {
+				config = new ClientConfig(configData);
+				clientConfigs.put(client, config);
+			} else {
+				throw new RedbackException("Cannot find integration client " + client);
+			}
 		}
 		return config;
 	}
@@ -113,8 +126,8 @@ public class RedbackIntegrationServer extends IntegrationServer {
 					form.put("client_secret", config.clientSecrect);
 					form.put("grant_type", "refresh_token");
 					form.put("refresh_token", refreshToken);
-					form.put("redirect_uri", config.redirectUri);
-					DataMap refreshResp = gatewayClient.postForm(config.refreshUrl, form);
+					form.put("redirect_uri", getRedirectUri(config.name));
+					DataMap refreshResp = gatewayClient.postForm(config.tokenUrl, form);
 					if(refreshResp != null) {
 						if(refreshResp.getString("refresh_token") != null)
 							clientData.put("refresh_token", refreshResp.getString("refresh_token"));
@@ -205,6 +218,41 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		gatewayRequest(config, context);
 	}
 
+	protected String getLoginUrl(Session session, String client, String domain, String state) throws RedbackException {
+		ClientConfig config = getClientConfig(session, client);
+		String url = config.loginUrl + "?response_type=code&redirect_uri=" + getRedirectUri(client) + "&client_id=" + config.clientId +"&scope=" + config.scope + (config.extraLoginParams != null ? "&" + config.extraLoginParams : "") + (state != null ? "&state=" + state : "");
+		return url; 
+	}
+
+	protected void exchangeAuthCode(Session session, String client, String domain, String code) throws RedbackException {
+		ClientConfig config = getClientConfig(session, client);
+		DataMap form = new DataMap();
+		form.put("client_id", config.clientId);
+		form.put("client_secret", config.clientSecrect);
+		form.put("grant_type", "authorization_code");
+		form.put("code", code);
+		form.put("redirect_uri", getRedirectUri(config.name));
+		DataMap refreshResp = gatewayClient.postForm(config.tokenUrl, form);
+		if(refreshResp != null) {
+			DataMap clientData = new DataMap();
+			if(refreshResp.getString("refresh_token") != null)
+				clientData.put("refresh_token", refreshResp.getString("refresh_token"));
+			if(refreshResp.getString("access_token") != null)
+				clientData.put("access_token", refreshResp.getString("access_token"));
+			if(refreshResp.getNumber("expires_in") != null)
+				clientData.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
+			clientData.put("lastupdate", new Date());
+			DataMap key = new DataMap();
+			key.put("client", config.name);
+			key.put("domain", domain);
+			dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key), clientData);
+		} else {
+			throw new RedbackException("Error exchanging authorization code");
+		}			
+	}
+
+
+	
 	protected void clearCachedClientData(Session session, String client, String domain) throws RedbackException {
 		String key = client + domain;
 		if(cachedClientData.containsKey(key)) {

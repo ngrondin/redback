@@ -39,6 +39,7 @@ import com.auth0.jwt.interfaces.RSAKeyProvider;
 import com.sun.mail.imap.IMAPFolder;
 
 import io.firebus.Firebus;
+import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.DataClient;
@@ -256,24 +257,28 @@ public class RedbackNotificationServer extends NotificationServer {
 				String accessToken = getFCMAccessToken();	
 				DataMap filter = new DataMap(collectionConfig.getField("_id"), username);
 				DataMap userResults = dataClient.getData(collectionConfig.getName(), filter, null);
-				String fcmToken = userResults.getList("result").size() > 0 ? userResults.getList("result").getObject(0).getString(collectionConfig.getField("fcmtoken")) : null;
-				if(fcmToken != null) {
-					DataMap fcmDataPart = new DataMap();
-					fcmDataPart.put("sound", "default");
-					DataMap fcmNotificationPart = new DataMap();
-					fcmNotificationPart.put("title", subject);
-					fcmNotificationPart.put("body", message);
-					DataMap fcmMessage = new DataMap();
-					fcmMessage.put("token", fcmToken);
-					fcmMessage.put("data", fcmDataPart);
-					fcmMessage.put("notification", fcmNotificationPart);
-					DataMap body = new DataMap("message", fcmMessage);
-					DataMap headers = new DataMap();
-					headers.put("Content-Type", "application/json");
-					headers.put("Authorization", "Bearer " + accessToken);
-					gatewayClient.post("https://fcm.googleapis.com/v1/projects/redback-1517221886624/messages:send", body, headers, null);
-				}
-			
+				DataList list = userResults.getList("results");
+				if(list != null && list.size() > 0) {
+					for(int i = 0; i < list.size(); i++) {
+						String fcmToken = list.getObject(i).getString(collectionConfig.getField("fcmtoken"));
+						if(fcmToken != null) {
+							DataMap fcmDataPart = new DataMap();
+							fcmDataPart.put("sound", "default");
+							DataMap fcmNotificationPart = new DataMap();
+							fcmNotificationPart.put("title", subject);
+							fcmNotificationPart.put("body", message);
+							DataMap fcmMessage = new DataMap();
+							fcmMessage.put("token", fcmToken);
+							fcmMessage.put("data", fcmDataPart);
+							fcmMessage.put("notification", fcmNotificationPart);
+							DataMap body = new DataMap("message", fcmMessage);
+							DataMap headers = new DataMap();
+							headers.put("Content-Type", "application/json");
+							headers.put("Authorization", "Bearer " + accessToken);
+							gatewayClient.post("https://fcm.googleapis.com/v1/projects/redback-1517221886624/messages:send", body, headers, null);
+						}						
+					}
+				}			
 			} catch(Exception e) {
 				throw new RedbackException("Error sending FCM message", e);
 			}

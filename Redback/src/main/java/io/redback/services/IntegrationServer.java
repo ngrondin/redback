@@ -28,14 +28,32 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 		try
 		{
 			DataMap request = new DataMap(payload.getString());
-			DataMap response = null;
 			String client = request.getString("client");
 			String domain = request.getString("domain");
 			String action = request.getString("action");
+			String get = request.getString("get");
 			String objectName = request.getString("object");
 			DataMap options = request.getObject("options");
-			if(action != null)
+			if(get != null) 
 			{
+				client = get.startsWith("/") ? get.substring(1) : get;
+				String code = request.getString("code");
+				String state = request.getString("state");
+				if(state != null && state.equals("")) state = null;
+				if(domain == null) domain = session.getUserProfile().getDefaultDomain();
+				String response = null;
+				if(code == null) {
+					String redirect = getLoginUrl(session, client, domain, state);
+					response = "<html><body><script>window.location='" + redirect + "';</script></body></html>";
+				} else {
+					exchangeAuthCode(session, client, domain, code);
+					response = "<html><body>" + (state != null ? "<script>window.location='" + state + "';</script>" : "Logged in. Thank you.") + "</body></html>";
+				}
+				responsePayload = new Payload(response);
+			}
+			else if(action != null)
+			{
+				DataMap response = null;
 				if(objectName != null)
 				{
 					if(action.equals("get"))
@@ -100,17 +118,18 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 				{
 					throw new RedbackException("No object was provided");
 				}
+				
+				if(response != null) {
+					responsePayload = new Payload(response.toString());
+				} else {
+					throw new RedbackException("Null response");
+				}
 			}
 			else
 			{
 				throw new RedbackException("Requests must have at least an 'action' attribute");
-			}	
-			
-			if(response != null) {
-				responsePayload = new Payload(response.toString());
-			} else {
-				throw new RedbackException("Null response");
-			}
+			}		
+
 		}
 		catch(DataException e)
 		{
@@ -135,6 +154,10 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 
 	protected abstract void delete(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException;
 
+	protected abstract String getLoginUrl(Session session, String client, String domain, String state) throws RedbackException;
+	
+	protected abstract void exchangeAuthCode(Session session, String client, String domain, String code) throws RedbackException;
+	
 	protected abstract void clearCachedClientData(Session session, String client, String domain) throws RedbackException;
 
 }

@@ -372,6 +372,12 @@ export class RbDatasetComponent extends RbSetComponent  {
         this.modalService.open(param);
         observer.next();
         observer.complete();              
+      } else if(_name == 'externallink') {
+        let object = this.selectedObject;
+        let url = eval(param);
+        window.open(url);
+        observer.next();
+        observer.complete();   
       } else if(this.selectedObject != null) {
         this.dataService.executeObject(this.selectedObject, name, param).subscribe(new ObserverProxy(observer));
       }
