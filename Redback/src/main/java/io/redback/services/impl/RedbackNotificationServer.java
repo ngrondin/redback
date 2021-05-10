@@ -257,7 +257,7 @@ public class RedbackNotificationServer extends NotificationServer {
 				String accessToken = getFCMAccessToken();	
 				DataMap filter = new DataMap(collectionConfig.getField("_id"), username);
 				DataMap userResults = dataClient.getData(collectionConfig.getName(), filter, null);
-				DataList list = userResults.getList("results");
+				DataList list = userResults.getList("result");
 				if(list != null && list.size() > 0) {
 					for(int i = 0; i < list.size(); i++) {
 						String fcmToken = list.getObject(i).getString(collectionConfig.getField("fcmtoken"));

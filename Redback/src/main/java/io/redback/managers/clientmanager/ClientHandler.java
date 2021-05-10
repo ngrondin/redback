@@ -91,12 +91,14 @@ public class ClientHandler extends ClientStreamHandler {
 
 	public void startUpload(String uploaduid, String filename, int filesize, String mime, String object, String uid) throws RedbackException {
 		try {
+			System.out.println("Client upload starting " + uploaduid); //Temp Log
 			StreamEndpoint sep = clientManager.getFileClient().putFileStream(session, filename, filesize, mime);
 			uploads.put(uploaduid, sep);
 			sep.setHandler(new StreamHandler() {
 				public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
 					try {
-					String ctl = payload.metadata.get("ctl");
+						String ctl = payload.metadata.get("ctl");
+						System.out.println("Client upload receiving " + ctl); //Temp Log
 						if(ctl.equals("next")) {
 							sendUploadNext(uploaduid);
 						} else if(ctl.equals("error")){
