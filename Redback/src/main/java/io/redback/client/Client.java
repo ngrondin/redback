@@ -87,6 +87,7 @@ public class Client {
 		try
 		{
 			Payload reqP = new Payload(req.toString());
+			reqP.metadata.put("mime", "application/json");
 			StreamEndpoint sep = requestStream(session, reqP);
 			return sep;
 		}
@@ -133,6 +134,7 @@ public class Client {
 			try
 			{
 				Payload reqP = new Payload(req.toString());
+				reqP.metadata.put("mime", "application/json");
 				if(session != null) {
 					reqP.metadata.put("session", session.id);
 					reqP.metadata.put("token", session.token);

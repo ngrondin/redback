@@ -104,7 +104,9 @@ export class RbDatasetComponent extends RbSetComponent  {
   }
 
   public get canLoadData() : boolean {
-    return this.active && (this.master == null || (this.master != null && this.relatedObject != null));
+    return this.active 
+      && (this.master == null || (this.master != null && this.relatedObject != null))
+      && (this.requiresuserfilter == false || this.userFilter != null);
   }
 
   getObservable() : Observable<string>  {
@@ -119,7 +121,7 @@ export class RbDatasetComponent extends RbSetComponent  {
         this.searchString = this.dataTarget.search || null;
         this.userFilter = this.dataTarget.filter || null;
         this.userSort = null;
-        if(this.fetchonreset && this.active) this.refreshData();
+        this.refreshData();
         this.publishEvent('reset');
       }
     } else {

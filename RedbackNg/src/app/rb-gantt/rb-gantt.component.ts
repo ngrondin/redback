@@ -210,6 +210,9 @@ export class RbGanttComponent extends RbDataObserverComponent {
   }
 
   onActivationEvent(event: any) {
+    if(this.dofilter && this.active) {
+      this.filterDataset();
+    }
   }
 
   onDragEvent(event: any) {
@@ -304,15 +307,19 @@ export class RbGanttComponent extends RbDataObserverComponent {
   }
 
   filterDataset() {
+    let startDate = this.startDate;
+    let endDate = new Date(this.startDate.getTime() + this.spanMS);
     for(let cfg of this.seriesConfigs) {
-      let filter: any = {};
-      if(cfg.endAttribute != null) filter[cfg.endAttribute] = {$gt: "'" + this.startDate.toISOString() + "'"};
-      if(cfg.startAttribute != null) filter[cfg.startAttribute] = {$lt: "'" + (new Date(this.startDate.getTime() + this.spanMS)).toISOString() + "'"};
+      let filter = {};
+      filter[cfg.startAttribute] = {
+        $gt: "'" + startDate.toISOString() + "'",
+        $lt: "'" + endDate.toISOString() + "'"
+      }
       if(this.datasetgroup != null) {
         this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
       } else {
         this.dataset.filterSort({filter: filter});
-      } 
+      }
     }
   }
 

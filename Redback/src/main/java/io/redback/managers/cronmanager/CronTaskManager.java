@@ -230,6 +230,7 @@ public class CronTaskManager extends Thread {
 				DataMap call = ctc.getFirebusCall();
 				String serviceName = config.getString(call.getString("service"));
 				Payload req = new Payload(call.getObject("payload").toString());
+				req.metadata.put("mime", "application/json");
 				boolean faf = call.getBoolean("fireandforget");
 				req.metadata.put("token", session.getToken());
 				if(faf)

@@ -262,7 +262,6 @@ export class RbCalendarComponent extends RbDataObserverComponent {
         this.dataset.filterSort({filter: filter});
       }
     }
-
   }
 }
 

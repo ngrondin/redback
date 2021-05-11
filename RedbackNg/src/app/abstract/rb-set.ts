@@ -7,7 +7,7 @@ export abstract class RbSetComponent extends RbContainerComponent {
     @Input('object') object: string;
     @Input('basefilter') baseFilter: any;
     @Input('master') master: any;
-    @Input('fetchonreset') fetchonreset: boolean = true;
+    @Input('requiresuserfilter') requiresuserfilter: boolean = false;
     @Input('datatarget') dataTarget: DataTarget;
     @Input('ignoretarget') ignoretarget: boolean = false;
   

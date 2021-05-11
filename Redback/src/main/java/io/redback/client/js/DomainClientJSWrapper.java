@@ -67,8 +67,8 @@ public class DomainClientJSWrapper implements ProxyObject {
 					boolean async = arguments.length > 2 ? arguments[2].asBoolean() : false;
 					try
 					{
-						domainClient.executeFunction(session, domain, name, param, async);
-						return null;
+						DataMap resp = domainClient.executeFunction(session, domain, name, param, async);
+						return JSConverter.toJS(resp);
 					}
 					catch(Exception e)
 					{
