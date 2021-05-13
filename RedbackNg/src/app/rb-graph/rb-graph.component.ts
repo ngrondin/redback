@@ -1,11 +1,9 @@
 import { ContentChild, HostBinding, ViewChild, ViewContainerRef, ViewRef } from '@angular/core';
 import { HostListener } from '@angular/core';
 import { Component, OnInit, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { RbAggregateObserverComponent } from 'app/abstract/rb-aggregateobserver';
 import { RbAggregate } from 'app/datamodel';
-import { ValueComparator } from 'app/helpers';
-import { RbAggregatesetComponent } from 'app/rb-aggregateset/rb-aggregateset.component';
+import { Converter, Formatter, ValueComparator } from 'app/helpers';
 import { FilterService } from 'app/services/filter.service';
 
 @Component({
@@ -26,8 +24,6 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 1;}
   @HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
-  //@HostBinding('style.width.px') get hostWidth() { return this.type == 'number' ? 140 : null; }
-  //@HostBinding('style.height.px') get hostHeight() { return this.type == 'number' ? 140 : null; }
   
   colorScheme = {
     domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
@@ -109,6 +105,9 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
           name = new Date(Date.parse(name));
         }
         let value = agg.getMetric(this.value.name);
+        if(this.value.convert != null) {
+          value = Converter.convert(value, this.value.convert);
+        }
         series.push({name: name, label: 'll', value: value});
       }
     }
@@ -122,7 +121,7 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
   }
 
 
-
+/*
   private getSize(): any {
     if(this.type == 'hbar' || this.type == 'vbar') {
       if(this.is2d) {
@@ -140,7 +139,7 @@ export class RbGraphComponent extends RbAggregateObserverComponent {
       return {x: 400, y: 300};
     }
 
-  }
+  }*/
 
   private nullToEmptyString(str: String): String {
     if(str == null) {

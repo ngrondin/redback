@@ -47,6 +47,61 @@ export class InitialsMaker {
     }
 }
 
+export class Formatter {
+    public static format(val: any, format: string) {
+        if(format == 'duration') {
+            return this.formatDuration(val);
+        } else {
+            return val;
+        }
+    }
+
+    static formatDuration(value: any) {
+        if(value != null && !isNaN(value)) {
+            let ms = value;
+            let years = Math.floor(ms / 31536000000);
+            let weeks = Math.floor((ms % 31536000000) / 604800000);
+            let days = Math.floor((ms % 604800000) / 86400000);
+            let hours = Math.floor((ms % 86400000) / 3600000);
+            let minutes = Math.floor((ms % 3600000) / 60000);
+            let seconds = Math.floor((ms % 60000) / 1000);
+            let milli = Math.floor((ms % 1000));
+            let greaterThanMinute = ms > 60000;
+            let greaterThanHour = ms > 3600000;
+            let val = "";
+            if(years != 0)
+              val = val + " " + years + "y";
+            if(weeks != 0)
+              val = val + " " + weeks + "w";
+            if(days != 0)
+              val = val + " " + days + "d";
+            if(hours != 0)
+              val = val + " " + hours + "h";
+            if(minutes != 0)
+              val = val + " " + minutes + "m";
+            if(seconds != 0 && !greaterThanHour)
+              val = val + " " + seconds + "s";
+            if(milli != 0 && !greaterThanMinute)
+              val = val + " " + milli + "ms";
+            if(ms == 0) 
+              val = " 0";
+            return val.substr(1);
+        } else {
+            return "";
+        }
+    }
+}
+
+export class Converter {
+    public static convert(val: any, format: string) {
+        if(format == "mstohour" && !isNaN(val)) {
+            return val / 3600000;
+        } else {
+            return val;
+        }
+    }
+}
+
 export class ValueComparator{ 
     public static notEqual(a: any, b: any): boolean {
         return !this.equal(a, b);

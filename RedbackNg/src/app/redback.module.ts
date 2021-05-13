@@ -91,6 +91,7 @@ import { RbNumberInputComponent } from './inputs/rb-number-input/rb-number-input
 import { RbViewHeaderComponent } from './rb-view-header/rb-view-header.component';
 import { DragService } from './services/drag.service';
 import { RbDialogComponent } from './rb-dialog/rb-dialog.component';
+import { RbTileComponent } from './rb-tile/rb-tile.component';
 
 /*
 const DEFAULT_ACE_CONFIG: AceConfigInterface = {
@@ -196,7 +197,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbCalendarComponent,
     RbPopupHardlistComponent,
     RbViewHeaderComponent,
-    RbDialogComponent
+    RbDialogComponent,
+    RbTileComponent
   ],
   exports: [
     DesktopRootComponent,
@@ -270,7 +272,8 @@ const DEFAULT_ACE_CONFIG: AceConfigInterface = {
     RbCalendarComponent,
     RbPopupHardlistComponent,
     RbViewHeaderComponent,
-    RbDialogComponent
+    RbDialogComponent,
+    RbTileComponent
   ],
   providers: [
     CookieService,

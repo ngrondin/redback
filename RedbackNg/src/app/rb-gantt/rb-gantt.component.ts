@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, SimpleChange, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
 import { DragService } from 'app/services/drag.service';
 import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
@@ -314,6 +315,17 @@ export class RbGanttComponent extends RbDataObserverComponent {
       filter[cfg.startAttribute] = {
         $gt: "'" + startDate.toISOString() + "'",
         $lt: "'" + endDate.toISOString() + "'"
+      }
+      if(cfg.endAttribute != null) {
+        let sFilter = filter;
+        let eFilter = {}
+        eFilter[cfg.endAttribute] = {
+          $gt: "'" + startDate.toISOString() + "'",
+          $lt: "'" + endDate.toISOString() + "'"          
+        };
+        filter = {
+          $or:[sFilter, eFilter]
+        }
       }
       if(this.datasetgroup != null) {
         this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});

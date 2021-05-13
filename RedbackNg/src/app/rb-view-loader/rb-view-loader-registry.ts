@@ -38,6 +38,7 @@ import { RbSpacerComponent } from "app/rb-spacer/rb-spacer.component";
 import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.component";
 import { RbTabComponent } from "app/rb-tab/rb-tab.component";
 import { RbTableComponent } from "app/rb-table/rb-table.component";
+import { RbTileComponent } from "app/rb-tile/rb-tile.component";
 import { RbVcollapseComponent } from "app/rb-vcollapse/rb-vcollapse.component";
 import { RbVsectionComponent } from "app/rb-vsection/rb-vsection.component";
 
@@ -84,5 +85,6 @@ export const componentRegistry = {
     "hseparator": RbHseparatorComponent,
     "spacer": RbSpacerComponent,
     "graph": RbGraphComponent,
-    "calendar": RbCalendarComponent
+    "calendar": RbCalendarComponent,
+    "tile": RbTileComponent
   }
