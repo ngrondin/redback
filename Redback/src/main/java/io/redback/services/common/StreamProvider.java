@@ -24,7 +24,6 @@ public abstract class StreamProvider extends Service implements io.firebus.inter
 		try {
 			Session session = new Session(payload.metadata.get("session"));
 			session.setTimezone(payload.metadata.get("timezone"));
-			System.out.println("Stream TZ = " + payload.metadata.get("timezone")); //Temp Logging
 			Timer timer = new Timer(serviceName, session.getId(), getLogline(payload));
 			logger.finer("Stream '" + serviceName + "' started");
 			StreamHandler streamHandler = redbackStream(session, payload);

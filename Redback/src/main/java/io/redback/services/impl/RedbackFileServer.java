@@ -313,7 +313,6 @@ public class RedbackFileServer extends FileServer
 
 	public void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException {
 		try {
-			System.out.println("Fileserver starting upload"); //Temp Log
 			String tempFilename = UUID.randomUUID().toString();
 			final File file = new File(tempFilename);
 			FileOutputStream fos = new FileOutputStream(file);
