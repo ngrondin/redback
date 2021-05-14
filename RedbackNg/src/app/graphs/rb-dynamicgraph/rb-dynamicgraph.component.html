@@ -1,0 +1,103 @@
+<div 
+    class="rb-chart-container">
+    <ngx-charts-bar-vertical
+        *ngIf="type == 'vbar' && !is2d"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="false"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+        [yScaleMax]="max"
+        [yScaleMin]="min"
+        (select)="onClick($event)">
+    </ngx-charts-bar-vertical>    
+    <ngx-charts-bar-vertical-2d
+        *ngIf="type == 'vbar' && is2d"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="true"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+        (select)="onClick($event)">
+    </ngx-charts-bar-vertical-2d>
+    <ngx-charts-bar-horizontal
+        *ngIf="type == 'hbar' && !is2d"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="false"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+        [xScaleMax]="max"
+        [xScaleMin]="min"
+        (select)="onClick($event)">
+    </ngx-charts-bar-horizontal>    
+    <ngx-charts-bar-horizontal-2d
+        *ngIf="type == 'hbar' && is2d"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="true"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+        (select)="onClick($event)">
+    </ngx-charts-bar-horizontal-2d>
+    <ngx-charts-pie-chart
+        *ngIf="type == 'pie' && !is2d"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [doughnut]="true"
+        [labels]="true"
+        [legend]="false"
+        (select)="onClick($event)">
+    </ngx-charts-pie-chart>
+    <ngx-charts-gauge
+        *ngIf="type == 'gauge'"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [showText]="false"
+        [legend]="true"
+        [legendPosition]="'below'"
+        [legendTitle]="null"
+        [min]="min"
+        [max]="max"
+        (select)="onClick($event)">
+    </ngx-charts-gauge>    
+    <ngx-charts-number-card
+        *ngIf="type == 'number'"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [cardColor]="'#232837'"
+        (select)="onClick($event)">
+    </ngx-charts-number-card>
+    <ngx-charts-line-chart
+        *ngIf="type == 'line'"
+        [scheme]="colorScheme"
+        [results]="graphData"
+        [legend]="true"
+        [legendPosition]="'below'"
+        [legendTitle]="null"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [xAxis]="true"
+        [yAxis]="true"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+        [timeline]="false"
+        (select)="onClick($event)">
+    </ngx-charts-line-chart>    
+</div>

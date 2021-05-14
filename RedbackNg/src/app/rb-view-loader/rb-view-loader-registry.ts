@@ -1,3 +1,5 @@
+import { RbDynamicGraphComponent } from "app/graphs/rb-dynamicgraph/rb-dynamicgraph.component";
+import { RbNumberTilesComponent } from "app/graphs/rb-number-tiles/rb-number-tiles.component";
 import { RbAddressInputComponent } from "app/inputs/rb-address-input/rb-address-input.component";
 import { RbChoiceInputComponent } from "app/inputs/rb-choice-input/rb-choice-input.component";
 import { RbCodeInputComponent } from "app/inputs/rb-code-input/rb-code-input.component";
@@ -22,7 +24,6 @@ import { RbFilelistComponent } from "app/rb-filelist/rb-filelist.component";
 import { RbFilesetComponent } from "app/rb-fileset/rb-fileset.component";
 import { RbFormComponent } from "app/rb-form/rb-form.component";
 import { RbGanttComponent } from "app/rb-gantt/rb-gantt.component";
-import { RbGraphComponent } from "app/rb-graph/rb-graph.component";
 import { RbHsectionComponent } from "app/rb-hsection/rb-hsection.component";
 import { RbHseparatorComponent } from "app/rb-hseparator/rb-hseparator.component";
 import { RbLayoutComponent } from "app/rb-layout/rb-layout.component";
@@ -84,7 +85,8 @@ export const componentRegistry = {
     "vcollapse": RbVcollapseComponent,
     "hseparator": RbHseparatorComponent,
     "spacer": RbSpacerComponent,
-    "graph": RbGraphComponent,
+    "graph": RbDynamicGraphComponent,
     "calendar": RbCalendarComponent,
-    "tile": RbTileComponent
+    "tile": RbTileComponent,
+    "numbertiles": RbNumberTilesComponent
   }
