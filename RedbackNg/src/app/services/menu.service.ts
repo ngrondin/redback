@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, Observer } from 'rxjs';
 import { ApiService } from './api.service';
 
@@ -15,7 +15,7 @@ export class MenuService {
 
   constructor(
     private apiService: ApiService,
-    private http: Http
+    private http: HttpClient
   ) {
   }
 
@@ -23,9 +23,9 @@ export class MenuService {
     const obs = new Observable<null>((observer) => {
       let respCount = 0;
       let url = this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/default/any';
-      this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
+      this.http.get(url, { withCredentials: true, responseType: 'json' }).subscribe(
         resp => {
-          this.fullMenu = resp.json();
+          this.fullMenu = resp;
           if(this.apiService.userprefService != null) {
             this.apiService.getUserPreference('user', 'menu').subscribe(
               resp => {

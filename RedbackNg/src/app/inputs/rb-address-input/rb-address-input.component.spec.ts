@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbAddressInputComponent } from './rb-address-input.component';
 
@@ -6,7 +6,7 @@ describe('RbAddressInputComponent', () => {
   let component: RbAddressInputComponent;
   let fixture: ComponentFixture<RbAddressInputComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbAddressInputComponent ]
     })

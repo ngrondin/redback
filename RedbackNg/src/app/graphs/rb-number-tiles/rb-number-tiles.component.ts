@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { RbGraphsTilesComponent } from 'redbackgraphs';
 import { RbAggregateDisplayComponent } from '../abstract/rb-aggregate-display';
 
 

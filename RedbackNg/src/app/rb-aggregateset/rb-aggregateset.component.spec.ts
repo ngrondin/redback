@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbAggregatesetComponent } from './rb-aggregateset.component';
 
@@ -6,7 +6,7 @@ describe('RbAggregatesetComponent', () => {
   let component: RbAggregatesetComponent;
   let fixture: ComponentFixture<RbAggregatesetComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbAggregatesetComponent ]
     })

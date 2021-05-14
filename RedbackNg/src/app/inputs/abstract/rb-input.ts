@@ -1,4 +1,5 @@
 import { HostBinding, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { SimpleChanges } from '@angular/core';
 import { Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
@@ -8,7 +9,7 @@ import { DialogService } from 'app/services/dialog.service';
 import { UserprefService } from 'app/services/userpref.service';
 
 
-
+@Component({template: ''})
 export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('attribute') attribute: string;    
   @Input('object') _rbObject: RbObject;

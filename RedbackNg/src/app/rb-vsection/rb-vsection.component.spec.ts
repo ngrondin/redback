@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbVsectionComponent } from './rb-vsection.component';
 
@@ -6,7 +6,7 @@ describe('RbVsectionComponent', () => {
   let component: RbVsectionComponent;
   let fixture: ComponentFixture<RbVsectionComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbVsectionComponent ]
     })

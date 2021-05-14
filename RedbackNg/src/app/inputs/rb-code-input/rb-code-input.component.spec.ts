@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbCodeInputComponent } from './rb-code-input.component';
 
@@ -6,7 +6,7 @@ describe('RbCodeInputComponent', () => {
   let component: RbCodeInputComponent;
   let fixture: ComponentFixture<RbCodeInputComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbCodeInputComponent ]
     })

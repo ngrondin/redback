@@ -1,9 +1,10 @@
 import { AfterViewInit } from "@angular/core";
+import { Component } from "@angular/core";
 import { Input, OnInit } from "@angular/core";
 import { Subscription } from "rxjs";
 import { RbActivatorComponent } from "./rb-activator";
 
-
+@Component({template: ''})
 export abstract class RbComponent implements OnInit/*, AfterViewInit*/ {
     @Input('activator') activator: RbActivatorComponent;
 

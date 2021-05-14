@@ -1,7 +1,6 @@
 import { Component, OnInit, Inject, InjectionToken, Output, EventEmitter } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { RbObject } from '../../datamodel';
-import { OverlayRef } from '@angular/cdk/overlay';
+//import { OverlayRef } from '@angular/cdk/overlay';
 import { CONTAINER_DATA } from '../../tokens';
 import { DataService } from 'app/services/data.service';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
@@ -21,7 +20,7 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
 
   constructor(
     @Inject(CONTAINER_DATA) public config: any, 
-    public overlayRef: OverlayRef,
+    //public overlayRef: OverlayRef,
     private dataService: DataService
   ) {
     super();

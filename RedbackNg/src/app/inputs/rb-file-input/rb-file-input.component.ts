@@ -1,9 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
+//import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
 import { ApiService } from 'app/services/api.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HostBinding } from '@angular/core';
 import { RbInputComponent } from '../abstract/rb-input';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'rb-file-input',
@@ -19,16 +20,18 @@ export class RbFileInputComponent extends RbInputComponent  {
   @HostBinding('style.height.px') get hostHeight() { return this.height != null ? this.height : 100;}
 
   hasFileOver: boolean = false;
-  public uploader: FileUploader;
+  //public uploader: FileUploader;
   defaultIcon: string = 'description';
+  uploadProgress: number = -1;
+
 
   constructor(
     private apiService: ApiService,
     private domSanitizer: DomSanitizer    
   ) {
     super();
-    this.uploader = new FileUploader({});
-    this.uploader.response.subscribe( (res: any) => this.fileUploaded(res) );
+    //this.uploader = new FileUploader({});
+    //this.uploader.response.subscribe( (res: any) => this.fileUploaded(res) );
   }
 
   inputInit() {
@@ -67,8 +70,28 @@ export class RbFileInputComponent extends RbInputComponent  {
     return false;
   }
 
+  @HostListener('drop', ['$event'])
+  public drop(event: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log("File dropped");
+    if (event.dataTransfer != null && event.dataTransfer.items) {
+      for (var i = 0; i < event.dataTransfer.items.length; i++) {
+        if (event.dataTransfer.items[i].kind === 'file') {
+          var file = event.dataTransfer.items[i].getAsFile();
+          this.apiService.uploadFile(file, null, null).subscribe(
+            (resp) => {
+              if(resp.type == "result") this.fileUploaded(resp.result);
+            },
+            (error) => { }
+          );
+        }
+      }
+    }
+    this.hasFileOver = false;
+  }
 
-
+/*
   fileOver(event: any) {
     if(this.hasFileOver != event) {
       this.hasFileOver = event;
@@ -77,18 +100,18 @@ export class RbFileInputComponent extends RbInputComponent  {
 
   fileDropped(event: any) {
     this.upload(event);
-  }
+  }*/
 
   upload(evetn: any) {
-    let options : FileUploaderOptions = {};
+    /*let options : FileUploaderOptions = {};
     options.url = this.apiService.baseUrl + '/' + this.apiService.fileService;
     options.disableMultipart = false;
     this.uploader.setOptions(options);
-    this.uploader.uploadAll();
+    this.uploader.uploadAll();*/
   }
 
   fileUploaded(res: any) {
-    this.commit( JSON.parse(res));
+    this.commit(res);
   }
 
   openFile() {
@@ -98,5 +121,17 @@ export class RbFileInputComponent extends RbInputComponent  {
         window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + val.fileuid);
       }
     }     
+  }
+
+  @HostListener('dragover', ['$event'])
+  dragover(event: any) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.hasFileOver = true;
+  }
+
+  @HostListener('dragleave', ['$event'])
+  dragleave(event: any) {
+    this.hasFileOver = false;
   }
 }

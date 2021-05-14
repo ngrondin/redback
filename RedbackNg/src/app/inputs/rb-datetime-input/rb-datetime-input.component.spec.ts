@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbDatetimeInputComponent } from './rb-datetime-input.component';
 
@@ -6,7 +6,7 @@ describe('RbDatetimeInputComponent', () => {
   let component: RbDatetimeInputComponent;
   let fixture: ComponentFixture<RbDatetimeInputComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbDatetimeInputComponent ]
     })

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbMenuGroupComponent } from './rb-menu-group.component';
 
@@ -6,7 +6,7 @@ describe('RbMenuGroupComponent', () => {
   let component: RbMenuGroupComponent;
   let fixture: ComponentFixture<RbMenuGroupComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbMenuGroupComponent ]
     })

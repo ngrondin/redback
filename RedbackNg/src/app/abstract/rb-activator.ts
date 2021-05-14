@@ -1,7 +1,9 @@
+import { Component } from "@angular/core";
 import { OnInit } from "@angular/core";
 import { Observable, Observer } from "rxjs";
 import { RbContainerComponent } from "./rb-container";
 
+@Component({template: ''})
 export abstract class RbActivatorComponent extends RbContainerComponent implements OnInit {
   activatorOn: boolean;
   private activationObservers: Observer<boolean>[] = [];

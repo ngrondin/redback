@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbBreadcrumbComponent } from './rb-breadcrumb.component';
 
@@ -6,7 +6,7 @@ describe('RbBreadcrumbComponent', () => {
   let component: RbBreadcrumbComponent;
   let fixture: ComponentFixture<RbBreadcrumbComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbBreadcrumbComponent ]
     })

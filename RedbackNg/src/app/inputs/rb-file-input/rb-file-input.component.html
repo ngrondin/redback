@@ -1,4 +1,4 @@
-<div
+<!--div
     ng2FileDrop
     class="rb-file-input-box"    
     [ngClass]="hasFileOver ? 'rb-file-input-active' : ''"
@@ -16,4 +16,20 @@
         *ngIf="!hasThumbnail() && fileUid != null">
         attach_file
     </mat-icon>
+</div>-->
+<div
+    class="rb-file-input-box"    
+    [ngClass]="hasFileOver ? 'rb-file-input-active' : ''"
+    (click)="openFile()">
+    <img
+        class="rb-file-input-img"
+        [style.width.px] = "size"
+        *ngIf="hasThumbnail()"
+        [src]="displayvalue">
+    <mat-icon
+        class="rb-file-input-icon"
+        *ngIf="!hasThumbnail() && fileUid != null">
+        attach_file
+    </mat-icon>
 </div>
+

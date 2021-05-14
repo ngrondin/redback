@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbTileComponent } from './rb-tile.component';
 
@@ -6,7 +6,7 @@ describe('RbTileComponent', () => {
   let component: RbTileComponent;
   let fixture: ComponentFixture<RbTileComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbTileComponent ]
     })

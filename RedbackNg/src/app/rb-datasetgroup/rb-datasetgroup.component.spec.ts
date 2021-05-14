@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbDatasetgroupComponent } from './rb-datasetgroup.component';
 
@@ -6,7 +6,7 @@ describe('RbDatasetgroupComponent', () => {
   let component: RbDatasetgroupComponent;
   let fixture: ComponentFixture<RbDatasetgroupComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbDatasetgroupComponent ]
     })

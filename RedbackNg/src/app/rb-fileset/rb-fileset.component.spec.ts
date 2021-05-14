@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbFilesetComponent } from './rb-fileset.component';
 
@@ -6,7 +6,7 @@ describe('RbFilesetComponent', () => {
   let component: RbFilesetComponent;
   let fixture: ComponentFixture<RbFilesetComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbFilesetComponent ]
     })

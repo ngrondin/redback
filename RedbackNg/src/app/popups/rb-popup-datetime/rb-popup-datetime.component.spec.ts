@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbPopupDatetimeComponent } from './rb-popup-datetime.component';
 
@@ -6,7 +6,7 @@ describe('RbPopupDatetimeComponent', () => {
   let component: RbPopupDatetimeComponent;
   let fixture: ComponentFixture<RbPopupDatetimeComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbPopupDatetimeComponent ]
     })

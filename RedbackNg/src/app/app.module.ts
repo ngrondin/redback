@@ -11,8 +11,23 @@ import { CommonModule } from '@angular/common';
 
 import { DesktopRootComponent } from './desktop-root/desktop-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule, MatMenuModule, MatSlideToggleModule, MatTooltipModule, MatTooltip } from '@angular/material';
-import { HttpModule } from '@angular/http';
+//import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule, MatMenuModule, MatSlideToggleModule, MatTooltipModule, MatTooltip } from '@angular/material';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { RbListScrollDirective } from './rb-list-scroll/rb-list-scroll.directive';
@@ -21,7 +36,6 @@ import { DataService } from './services/data.service';
 import { FormsModule } from '@angular/forms';
 import { RbRelatedInputComponent } from './inputs/rb-related-input/rb-related-input.component';
 import { RbPopupListComponent } from './popups/rb-popup-list/rb-popup-list.component';
-import { OverlayModule } from '@angular/cdk/overlay';
 import { RbPopupDatetimeComponent } from './popups/rb-popup-datetime/rb-popup-datetime.component';
 import { RbDatetimeInputComponent } from './inputs/rb-datetime-input/rb-datetime-input.component';
 import { RbTextareaInputComponent } from './inputs/rb-textarea-input/rb-textarea-input.component';
@@ -35,7 +49,6 @@ import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component
 import { RbViewDirective } from './rb-view/rb-view.directive';
 import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.component';
 import { RbLogComponent } from './rb-log/rb-log.component';
-import { FileUploadModule } from 'ng2-file-upload';
 import { RbFilelistComponent } from './rb-filelist/rb-filelist.component';
 import { RbFiledropComponent } from './rb-filedrop/rb-filedrop.component';
 import { RbNotificationComponent } from './rb-notification/rb-notification.component';
@@ -62,7 +75,6 @@ import { RbFileInputComponent } from './inputs/rb-file-input/rb-file-input.compo
 import { RbVcollapseComponent } from './rb-vcollapse/rb-vcollapse.component';
 import { RbCurrencyInputComponent } from './inputs/rb-currency-input/rb-currency-input.component';
 import { RbCodeInputComponent } from './inputs/rb-code-input/rb-code-input.component';
-import { AceEditorModule } from 'ng2-ace-editor';
 import { AceConfigInterface, AceModule, ACE_CONFIG } from 'ngx-ace-wrapper';
 import 'brace';
 import 'brace/mode/text';
@@ -100,8 +112,7 @@ import { RbViewHeaderComponent } from './rb-view-header/rb-view-header.component
 import { DragService } from './services/drag.service';
 import { RbDialogComponent } from './rb-dialog/rb-dialog.component';
 import { RbTileComponent } from './rb-tile/rb-tile.component';
-import { RbGraphsTileComponent, RbGraphsTilesComponent, RedbackgraphsModule } from 'redbackgraphs';
-
+import { RedbackgraphsModule } from 'redbackgraphs';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -121,35 +132,28 @@ export let AppInjector: Injector;
     MatButtonModule,
     MatSidenavModule,
     MatListModule,
-    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
     MatRadioModule,
-    MatSelectModule,
     MatExpansionModule,
     MatDialogModule,
-    MatIconModule,
     MatDividerModule,
     MatProgressSpinnerModule,
     MatMenuModule,
     MatSlideToggleModule,
     MatTooltipModule,
-    FileUploadModule,
     FormsModule,
-    OverlayModule,
     FormsModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    HttpModule,
     NgxChartsModule,
-    RedbackgraphsModule,
     AgmOverlays,
     AgmCoreModule.forRoot({
       apiKey: 'AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'
     }),
-    AceEditorModule,
-    AceModule    
+    AceModule,
+    RedbackgraphsModule
   ],
   exports: [
     MatIconModule

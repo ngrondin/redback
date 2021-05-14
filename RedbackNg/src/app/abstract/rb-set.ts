@@ -1,8 +1,9 @@
+import { Component } from "@angular/core";
 import { Input } from "@angular/core";
 import { DataTarget } from "app/datamodel";
 import { RbContainerComponent } from "./rb-container";
 
-
+@Component({template: ''})
 export abstract class RbSetComponent extends RbContainerComponent {
     @Input('object') object: string;
     @Input('basefilter') baseFilter: any;

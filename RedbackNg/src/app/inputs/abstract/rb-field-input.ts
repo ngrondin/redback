@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { HostBinding } from '@angular/core';
 import { Input } from '@angular/core';
 import { AppInjector } from 'app/app.module';
@@ -5,7 +6,7 @@ import { RbObject } from 'app/datamodel';
 import { DialogService } from 'app/services/dialog.service';
 import { RbInputComponent } from './rb-input';
 
-
+@Component({template: ''})
 export abstract class RbFieldInputComponent extends RbInputComponent {
   @Input('margin') margin: boolean = true;
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }

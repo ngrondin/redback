@@ -1,10 +1,8 @@
 declare const google: any
 
 import { Injectable } from '@angular/core';
-import { Observable, of, Observer } from 'rxjs';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { ResponseContentType, RequestOptions } from '@angular/http';
+import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ClientWSService } from './clientws.service';
 
 

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbFilterBuilderComponent } from './rb-filter-builder.component';
 
@@ -6,7 +6,7 @@ describe('RbFilterBuilderComponent', () => {
   let component: RbFilterBuilderComponent;
   let fixture: ComponentFixture<RbFilterBuilderComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbFilterBuilderComponent ]
     })

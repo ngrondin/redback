@@ -1,13 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ViewContainerRef, SimpleChange } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 
-import { AgmCoreModule, AgmMap } from '@agm/core';
-import { ApiService } from 'app/services/api.service';
-import { ElementSchemaRegistry } from '@angular/compiler';
-import { MatMenuTrigger, MatMenu, MatMenuPanel } from '@angular/material';
-import { isError } from 'util';
+import { AgmMap } from '@agm/core';
 import { Translator, InitialsMaker } from 'app/helpers';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { ElementRef } from '@angular/core';
 
@@ -102,8 +97,8 @@ export class RbMapComponent extends RbDataObserverComponent {
   @Input('dateattribute') dateattribute: string;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('map', { read: AgmMap }) map: AgmMap;
-  @ViewChild('map') elementView: ElementRef;
+  //@ViewChild('map', { read: AgmMap }) map: AgmMap;
+  @ViewChild('map', {static: true}) map: ElementRef;
 
   seriesConfigs: MapSeriesConfig[] = [];
   mapPoints: MapPoint[] = [];

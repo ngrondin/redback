@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbActiongroupComponent } from './rb-actiongroup.component';
 
@@ -6,7 +6,7 @@ describe('RbActiongroupComponent', () => {
   let component: RbActiongroupComponent;
   let fixture: ComponentFixture<RbActiongroupComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbActiongroupComponent ]
     })

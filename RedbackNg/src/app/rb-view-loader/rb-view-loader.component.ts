@@ -1,5 +1,4 @@
 import { Component, ViewChild, ViewContainerRef, ComponentRef, Compiler, ComponentFactory, NgModule, ModuleWithComponentFactories, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange, TypeDecorator } from '@angular/core';
-import { Http } from '@angular/http';
 import { __asyncDelegator } from 'tslib';
 import { ApiService } from 'app/services/api.service';
 import { DataService } from 'app/services/data.service';
@@ -17,6 +16,7 @@ import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
 import { DataTarget, ViewTarget } from 'app/datamodel';
 import { componentRegistry } from './rb-view-loader-registry';
 import { RbSetComponent } from 'app/abstract/rb-set';
+import { HttpClient } from '@angular/common/http';
 
 
 export class LoadedView {
@@ -75,7 +75,7 @@ export class RbViewLoaderComponent implements OnInit {
 
   constructor(
     private injector: Injector,
-    private http: Http,
+    private http: HttpClient,
     private apiService: ApiService,
     private dataService: DataService,
     private componentFactoryResolver:ComponentFactoryResolver
@@ -92,9 +92,9 @@ export class RbViewLoaderComponent implements OnInit {
   ngOnChanges(changes : SimpleChange) {
     if("target" in changes && this.target != null) {
       let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
-      this.http.get(url, { withCredentials: true, responseType: 0 }).subscribe(
-        res => {
-          this.showView(res.json())
+      this.http.get(url, { withCredentials: true, responseType: 'json' }).subscribe(
+        resp => {
+          this.showView(resp)
         }
       );
       this.currentView = this.target.view;

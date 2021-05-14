@@ -1,8 +1,10 @@
 import { Input, ViewChild } from "@angular/core";
+import { Component } from "@angular/core";
 import { HostBinding } from "@angular/core";
 import { OnInit, AfterViewInit, ViewContainerRef } from "@angular/core";
 import { RbDataObserverComponent } from "./rb-dataobserver";
 
+@Component({template: ''})
 export abstract class RbContainerComponent extends RbDataObserverComponent {
     @Input('grow') grow: number;
     @Input('shrink') shrink: number;

@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+
 import { Injectable, Injector } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { RbDialogComponent } from 'app/rb-dialog/rb-dialog.component';
-import { RbReportlistComponent } from 'app/rb-reportlist/rb-reportlist.component';
 import { Overlay } from 'ngx-toastr';
 
 type DialogCallbackFunction = () => void;

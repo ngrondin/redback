@@ -3,7 +3,57 @@ import { Injectable } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { UUID } from 'angular2-uuid';
-import { id } from '@swimlane/ngx-charts';
+
+export class Upload {
+  uploaduid = UUID.UUID();
+  chunkSeq = 0;
+  chunkSize = 262144;
+  file: File;
+  observer: Observer<any>;
+  websocket: WebSocketSubject<any>;
+
+  constructor(f: File, o: Observer<any>, w: WebSocketSubject<any>) {
+    this.file = f;
+    this.observer = o;
+    this.websocket = w;
+  }
+
+  receiveCtl(msg: any) : boolean {
+    let ctl = msg.ctl;
+    if(ctl == 'next') {
+      var start = this.chunkSeq * this.chunkSize;
+      if(start < this.file.size) {
+        var chunk = this.file.slice(start, start + this.chunkSize);
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.websocket.next({
+            type: "upload",
+            uploaduid: this.uploaduid,
+            sequence: this.chunkSeq,
+            data: reader.result
+          });
+          this.chunkSeq++;  
+          this.observer.next({type:"progress", value: (100 * start / this.file.size)});
+        }
+        reader.readAsDataURL(chunk);
+      } else {
+        this.websocket.next({
+          type: "upload",
+          uploaduid: this.uploaduid,
+          complete: true
+        });
+      }
+      return false;
+    } else if(ctl == 'error') {
+      this.observer.error(msg.error);
+      return true;
+    } else if(ctl == 'result') {
+      this.observer.next({type:"result", result: msg.result});
+      this.observer.complete();
+      return true;
+    }
+  }
+}
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +68,7 @@ export class ClientWSService {
   public chatObservers: Observer<any>[] = [];
   public clientPingObservers: Observer<String>[] = [];
   public requestObservers: any = {};
-  public uploadObservers: any = {};
+  public uploads: any = {};
   public uniqueObjectSubscriptions: any[] = [];
   public filterObjectSubscriptions: any = {};
   public connected: boolean = false;
@@ -83,15 +133,10 @@ export class ClientWSService {
           delete this.requestObservers[msg.requid];
         }
       } else if(msg.type == 'uploadctl') {
-        let observer: Observer<null> = this.uploadObservers[msg.uploaduid];
-        if(observer != null) {
-          if(msg.ctl == 'next') {
-            observer.next(null);
-          } else if(msg.ctl == 'error') {
-            observer.error(msg.error);
-          } else if(msg.ctl == 'result') {
-            observer.complete();
-          }
+        let upload: Upload = this.uploads[msg.uploaduid];
+        if(upload != null) {
+          let done = upload.receiveCtl(msg);
+          if(done) delete this.uploads[msg.uploaduid];
         }
       } else if(msg.type == 'chatmessage') {
         this.chatObservers.forEach((observer) => observer.next(msg.message))
@@ -199,45 +244,11 @@ export class ClientWSService {
   upload(file: File, object: string, uid: string) : Observable<number> {
     if(this.connected) {
       return new Observable((observer) => {
-        let uploaduid = UUID.UUID();
-        let chunkSeq = 0;
-        let chunkSize = 262144;
-        this.uploadObservers[uploaduid] = { 
-          next: () => {
-            var start = chunkSeq * chunkSize;
-            if(start < file.size) {
-              var chunk = file.slice(start, start + chunkSize);
-              const reader = new FileReader();
-              reader.onload = () => {
-                this.websocket.next({
-                  type: "upload",
-                  uploaduid: uploaduid,
-                  sequence: chunkSeq,
-                  data: reader.result
-                });
-                chunkSeq++;  
-                observer.next(100 * start / file.size);
-              }
-              reader.readAsDataURL(chunk);
-            } else {
-              this.websocket.next({
-                type: "upload",
-                uploaduid: uploaduid,
-                complete: true
-              });
-              observer.next(100);
-            }
-          },
-          error: (error) => {
-            observer.error("Error uploading file: " + error);
-          },
-          complete: () => {
-            observer.complete();
-          }
-        };
+        let upload = new Upload(file, observer, this.websocket);
+        this.uploads[upload.uploaduid] = upload;
         this.websocket.next({
           type:"upload",
-          uploaduid: uploaduid,
+          uploaduid: upload.uploaduid,
           request: {
             filename: file.name,
             filesize: file.size,

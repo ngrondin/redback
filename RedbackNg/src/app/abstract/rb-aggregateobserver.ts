@@ -1,9 +1,11 @@
+import { Component } from "@angular/core";
 import { HostBinding } from "@angular/core";
 import { OnInit, Input } from "@angular/core";
 import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
 import { Subscription } from "rxjs";
 import { RbComponent } from "./rb-component";
 
+@Component({template: ''})
 export abstract class RbAggregateObserverComponent extends RbComponent {
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
     @Input('show') show: string;

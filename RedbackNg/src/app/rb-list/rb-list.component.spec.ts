@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbListComponent } from './rb-list.component';
 
@@ -6,7 +6,7 @@ describe('RbListComponent', () => {
   let component: RbListComponent;
   let fixture: ComponentFixture<RbListComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbListComponent ]
     })

@@ -1,10 +1,6 @@
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { Injectable, Injector } from '@angular/core';
 import { ApiService } from './api.service';
-import { RbPopupComponent } from '../popups/rb-popup/rb-popup.component';
-import { CONTAINER_DATA } from '../tokens';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { RbReportlistComponent } from '../rb-reportlist/rb-reportlist.component';
 
 @Injectable({
@@ -15,7 +11,7 @@ export class ReportService {
   constructor(
     private apiService: ApiService,
     public injector: Injector,
-    public overlay: Overlay,
+    //public overlay: Overlay,
     public dialog: MatDialog
   ) { }
 

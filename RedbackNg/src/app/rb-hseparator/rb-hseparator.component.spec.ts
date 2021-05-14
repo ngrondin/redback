@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbHseparatorComponent } from './rb-hseparator.component';
 
@@ -6,7 +6,7 @@ describe('RbHseparatorComponent', () => {
   let component: RbHseparatorComponent;
   let fixture: ComponentFixture<RbHseparatorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbHseparatorComponent ]
     })

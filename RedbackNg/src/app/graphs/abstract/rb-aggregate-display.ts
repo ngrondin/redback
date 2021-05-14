@@ -1,3 +1,4 @@
+import { Component } from "@angular/core";
 import { EventEmitter, HostBinding, HostListener, Input, Output } from "@angular/core";
 import { RbAggregateObserverComponent } from "app/abstract/rb-aggregateobserver";
 import { AppInjector } from "app/app.module";
@@ -5,6 +6,7 @@ import { RbAggregate } from "app/datamodel";
 import { ValueComparator, Converter } from "app/helpers";
 import { FilterService } from "app/services/filter.service";
 
+@Component({template: ''})
 export abstract class RbAggregateDisplayComponent extends RbAggregateObserverComponent {
     //@Input('label') label: String;
     @Input('series') series: any;
@@ -15,8 +17,8 @@ export abstract class RbAggregateDisplayComponent extends RbAggregateObserverCom
     @Input('grow') grow: number;
     @Input('shrink') shrink: number;
     @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
-    @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 1;}
-    @HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
+    //@HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 1;}
+    //@HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
     
     colorScheme = {
       domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']

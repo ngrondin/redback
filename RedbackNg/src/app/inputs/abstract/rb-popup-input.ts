@@ -1,11 +1,12 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal, PortalInjector } from '@angular/cdk/portal';
+import { Component } from '@angular/core';
 import { ComponentRef, Injector, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 import { CONTAINER_DATA } from 'app/tokens';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
 
-
+@Component({template: ''})
 export abstract class RbPopupInputComponent extends RbFieldInputComponent {
   @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
 

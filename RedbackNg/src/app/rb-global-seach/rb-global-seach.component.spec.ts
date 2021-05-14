@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbGlobalSeachComponent } from './rb-global-seach.component';
 
@@ -6,7 +6,7 @@ describe('RbGlobalSeachComponent', () => {
   let component: RbGlobalSeachComponent;
   let fixture: ComponentFixture<RbGlobalSeachComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbGlobalSeachComponent ]
     })

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RbLogComponent } from './rb-log.component';
 
@@ -6,7 +6,7 @@ describe('RbLogComponent', () => {
   let component: RbLogComponent;
   let fixture: ComponentFixture<RbLogComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RbLogComponent ]
     })

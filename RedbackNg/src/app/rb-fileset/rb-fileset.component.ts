@@ -2,7 +2,7 @@ import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
 import { DataService } from 'app/services/data.service';
 import { RbObject, RbFile } from 'app/datamodel';
-import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
+//import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
 import { RbSetComponent } from 'app/abstract/rb-set';
 
 @Component({
@@ -13,7 +13,7 @@ import { RbSetComponent } from 'app/abstract/rb-set';
 export class RbFilesetComponent extends RbSetComponent {
   public fileList: RbFile[] = [];
   public selectedFile: RbFile;
-  public uploader: FileUploader;
+  //public uploader: FileUploader;
   public filesLoading: boolean;
   public initiated: boolean = false;
   public uploadProgress: number = -1;
@@ -24,8 +24,8 @@ export class RbFilesetComponent extends RbSetComponent {
     private apiService: ApiService
   ) {
     super();
-    this.uploader = new FileUploader({});
-    this.uploader.response.subscribe( (res: any) => this.afterUpload(res) );
+    //this.uploader = new FileUploader({});
+    //this.uploader.response.subscribe( (res: any) => this.afterUpload(res) );
    }
 
   setInit() {
