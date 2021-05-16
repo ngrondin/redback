@@ -39,6 +39,7 @@ import com.auth0.jwt.interfaces.RSAKeyProvider;
 import com.sun.mail.imap.IMAPFolder;
 
 import io.firebus.Firebus;
+import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
@@ -216,6 +217,15 @@ public class RedbackNotificationServer extends NotificationServer {
 		}
 	}
 	
+	protected void removeFCMToken(Session session, String token) throws RedbackException {
+		if(dataClient != null && collectionConfig != null) {
+			DataMap key = new DataMap(collectionConfig.getField("fcmtoken"), token);
+			dataClient.deleteData(collectionConfig.getName(), key);
+		} else {
+			throw new RedbackException("No data client was configured");
+		}		
+	}
+	
 	private String getFCMAccessToken() throws RedbackException {
 		try {
 			long now = System.currentTimeMillis();
@@ -275,7 +285,17 @@ public class RedbackNotificationServer extends NotificationServer {
 							DataMap headers = new DataMap();
 							headers.put("Content-Type", "application/json");
 							headers.put("Authorization", "Bearer " + accessToken);
-							gatewayClient.post("https://fcm.googleapis.com/v1/projects/redback-1517221886624/messages:send", body, headers, null);
+							try {
+								gatewayClient.post("https://fcm.googleapis.com/v1/projects/redback-1517221886624/messages:send", body, headers, null);
+							} catch(Exception e) {
+								Throwable t = e;
+								while(t != null && !(t instanceof FunctionErrorException)) t = t.getCause();
+								if(t != null) {
+									if(t.getMessage().contains("\"errorCode\": \"INVALID_ARGUMENT\"")) {
+										this.removeFCMToken(session, fcmToken);
+									}
+								}								
+							}
 						}						
 					}
 				}			

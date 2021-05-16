@@ -169,7 +169,6 @@ export class RbGanttComponent extends RbDataObserverComponent {
   lastHash: string | Int32Array;
 
   recalcPlanned: boolean = false;
-  lastRecalc: number = 0;
   public getSizeForObjectCallback: Function;
   dragSubscription: Subscription;
   
@@ -337,15 +336,9 @@ export class RbGanttComponent extends RbDataObserverComponent {
 
   redraw() {
     if(this.recalcPlanned == false) {
-      let now = (new Date()).getTime();
-      let timeSinceLastRecalc = now - this.lastRecalc;
-      if(timeSinceLastRecalc > 250) {
-        this.calcAll();
-      } else {
-        this.recalcPlanned = true;
-        setTimeout(() => this.calcAll(), (250 - timeSinceLastRecalc));
-      }
-    } 
+      this.recalcPlanned = true;
+      setTimeout(() => this.calcAll(), 250);
+    }
   }
 
   calcAll() {
@@ -353,7 +346,6 @@ export class RbGanttComponent extends RbDataObserverComponent {
     this.ganttData = this.getLanes();
     this.dayMarks = this.getDayMarks();
     this.hourMarks = this.getHourMarks();
-    this.lastRecalc = (new Date()).getTime();
     this.recalcPlanned = false;
   }
 
@@ -407,18 +399,11 @@ export class RbGanttComponent extends RbDataObserverComponent {
       let list: RbObject[] = this.lists != null ? this.lists[cfg.dataset] : this.list;
       for(var i in list) {
         let obj = list[i];
-        if(obj.get(cfg.laneAttribute) == laneId) {
+        if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.object) {
           let startMS = (new Date(obj.get(cfg.startAttribute))).getTime();
           let startPX: number = Math.round((startMS - this.startMS) * this.multiplier);
           if(startPX < this.widthPX) {
-            let durationMS;
-            if(cfg.durationAttribute != null) {
-              durationMS = parseInt(obj.get(cfg.durationAttribute));
-            } else if(cfg.endAttribute != null) {
-              durationMS = (new Date(obj.get(cfg.endAttribute))).getTime() - startMS;
-            } else {
-              durationMS = 3600000;
-            }
+            let durationMS = this.getObjectDuration(cfg, obj);
             if(startMS + durationMS > this.endMS) {
               durationMS = this.endMS - startMS;
             }
@@ -449,6 +434,18 @@ export class RbGanttComponent extends RbDataObserverComponent {
     }
     this.adjustSpreadTops(spreads);
     return spreads;
+  }
+
+  private getObjectDuration(cfg: GanttSeriesConfig, obj: RbObject): number {
+    let durationMS;
+    if(cfg.durationAttribute != null) {
+      durationMS = parseInt(obj.get(cfg.durationAttribute));
+    } else if(cfg.endAttribute != null) {
+      durationMS = (new Date(obj.get(cfg.endAttribute))).getTime() - (new Date(obj.get(cfg.startAttribute))).getTime();
+    } else {
+      durationMS = 3600000;
+    }
+    return durationMS;
   }
 
   private adjustSpreadTops(spreads: GanttSpread[]) {
@@ -507,19 +504,13 @@ export class RbGanttComponent extends RbDataObserverComponent {
   }
 
   public getSeriesConfigForObject(object: RbObject) : GanttSeriesConfig {
-    if(this.lists != null) {
-      for(let key in this.lists) {
-        for(let obj of this.lists[key]) {
-          if(obj == object) {
-            for(let sc of this.seriesConfigs) {
-              if(sc.dataset == key) {
-                return sc;
-              }
-            }
-          }
+    if(this.datasetgroup != null) {
+      for(let cfg of this.seriesConfigs) {
+        if(this.datasetgroup.datasets[cfg.dataset].object == object.objectname) {
+          return cfg
         }
       }
-    } else if(this.list != null) {
+    } else if(this.dataset != null) {
       return this.seriesConfigs[0];
     }
     return null;
@@ -554,6 +545,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
 
     if(ignoreTime == false) {
       let previousStart = object.get(config.startAttribute);
+      let previousDuration = this.getObjectDuration(config, object);
       let tgt = event.mouseEvent.target;
       let left = event.mouseEvent.offsetX - event.offset.x;
       while(tgt.className.indexOf("rb-gantt-lane") == -1) {
@@ -565,10 +557,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
       if(previousStart != newStart) {
         update[config.startAttribute] = newStart;
         if(config.durationAttribute == null && config.endAttribute != null) {
-          let previousStartMS = (new Date(previousStart)).getTime();
-          let previousEndMS = (new Date(event.object.get(config.endAttribute))).getTime();
-          let durationMS = previousEndMS - previousStartMS;
-          let newEnd = (new Date(newStartMS + durationMS)).toISOString();
+          let newEnd = (new Date(newStartMS + previousDuration)).toISOString();
           update[config.endAttribute] = newEnd;
         } 
       }
@@ -580,7 +569,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
     }
     if(Object.keys(update).length > 0) {
       event.object.setValues(update);
-      this.redraw();
+      //this.redraw();
     }
   }
 
@@ -589,10 +578,11 @@ export class RbGanttComponent extends RbDataObserverComponent {
     this.scrollTop = event.target.scrollTop;
   }
 
-  public getSizeForObject(object: RbObject) : any {
-    let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(object);
+  public getSizeForObject(obj: RbObject) : any {
+    let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(obj);
+    let durationMS = this.getObjectDuration(cfg, obj);
     return {
-      x: Math.round(object.get(cfg.durationAttribute) * this.multiplier),
+      x: Math.round(durationMS * this.multiplier),
       y: 28
     };
   }

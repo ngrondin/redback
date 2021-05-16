@@ -169,14 +169,18 @@ export class RbDatasetComponent extends RbSetComponent  {
 
   private calcFilter() {
     let filter = {};
-    if(this.baseFilter != null) {
-      filter = this.filterService.mergeFilters(filter, this.baseFilter);
-    }
-    if(this.master != null && this.relatedObject != null) {
-      filter = this.filterService.mergeFilters(filter, this.master.relationship);
-    } 
-    if(this.userFilter != null) {
-      filter = this.filterService.mergeFilters(filter, this.userFilter);
+    if(this.userFilter != null && this.userFilter["uid"] != null) {
+      filter = this.userFilter;
+    } else {
+      if(this.baseFilter != null) {
+        filter = this.baseFilter;
+      }
+      if(this.master != null && this.relatedObject != null) {
+        filter = this.filterService.mergeFilters(filter, this.master.relationship);
+      } 
+      if(this.userFilter != null) {
+        filter = this.filterService.mergeFilters(filter, this.userFilter);
+      }  
     }
     filter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
     this.filter = filter;
