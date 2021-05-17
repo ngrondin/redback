@@ -407,7 +407,9 @@ export class RbGanttComponent extends RbDataObserverComponent {
             if(startMS + durationMS > this.endMS) {
               durationMS = this.endMS - startMS;
             }
-            let widthPX = Math.round(durationMS * this.multiplier);
+            let endMS = startMS + durationMS;
+            let endPX = Math.round((endMS - this.startMS) * this.multiplier);
+            let widthPX = endPX - startPX;
             if(startPX > -widthPX) {
               if(startPX < 0) {
                 widthPX = widthPX + startPX;
@@ -457,7 +459,9 @@ export class RbGanttComponent extends RbDataObserverComponent {
           hasOverlap = false;
           for(var j = 0; j < spreads.length && j < i; j++) {
             let os: GanttSpread = spreads[j];
-            if(!os.config.isBackground && s.start < os.start + os.width && os.start < s.start + s.width && s.sublane == os.sublane) hasOverlap = true;
+            if(!os.config.isBackground && s.start < os.start + os.width && os.start < s.start + s.width && s.sublane == os.sublane) {
+              hasOverlap = true;
+            }
           }
           if(hasOverlap) s.setSubLane(s.sublane + 1);
         } while(hasOverlap);

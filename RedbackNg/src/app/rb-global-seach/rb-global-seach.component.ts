@@ -14,7 +14,7 @@ export class RbGlobalSeachComponent implements OnInit {
   searchString: string;
   searchResult: RbObject[] = [];
   showResults: boolean = false;
-  isLoading: number = 0;
+  currentlyLoading: number = -1;
 
   constructor(
     private dataService: DataService,
@@ -27,14 +27,23 @@ export class RbGlobalSeachComponent implements OnInit {
   globalSearch() {
     this.searchResult = [];
     this.showResults = true;
-    for(let o in this.configService.objectsConfig) {
-      this.isLoading = this.isLoading + 1;
-      this.dataService.listObjects(o, null, this.searchString, null, 0, 50, true).subscribe(
+    this.currentlyLoading = 0;
+    this.search();
+  }
+
+  search() {
+    let objectnames = Object.keys(this.configService.objectsConfig);
+    if(this.currentlyLoading >= 0 && this.currentlyLoading < objectnames.length) {
+      let objectname = objectnames[this.currentlyLoading];
+      this.dataService.listObjects(objectname, null, this.searchString, null, 0, 50, true).subscribe(
         data => {
           this.searchResult = this.searchResult.concat(data);
-          this.isLoading = this.isLoading - 1;
+          this.currentlyLoading++;
+          this.search();
         }
-      );
+      ); 
+    } else {
+      this.currentlyLoading = -1;
     }
   }
 
