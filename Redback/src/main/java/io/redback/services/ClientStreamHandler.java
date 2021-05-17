@@ -22,7 +22,10 @@ public abstract class ClientStreamHandler extends StreamHandler {
 			DataMap data = new DataMap(payload.getString());
 			String type = data.getString("type");
 			if(type != null) {
-				if(type.equals("subscribe")) {
+				if(type.equals("clientinfo")) {
+					DataMap clientData = data.getObject("data");
+					registerDevice(clientData.getString("deviceid"), clientData.getString("devicename"), clientData.getString("devicemodel"), clientData.getString("deviceversion"), clientData.getString("appversion"));
+				} else if(type.equals("subscribe")) {
 					if(data.containsKey("uid")) {
 						this.subscribeObject(data.getString("objectname"), data.getString("uid"));
 					} else if(data.containsKey("filter")) {
@@ -119,6 +122,8 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		msg.put("result", resp);
 		sendClientData(msg);		
 	}
+	
+	public abstract void registerDevice(String deviceId, String deviceName, String deviceModel, String deviceVersion, String appVersion) throws RedbackException;
 	
 	public abstract void subscribeObject(String objectname, String uid) throws RedbackException;
 	

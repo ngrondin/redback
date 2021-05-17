@@ -20,6 +20,7 @@ public class ClientHandler extends ClientStreamHandler {
 	
 	protected ClientManager clientManager;
 	protected Map<String, StreamEndpoint> uploads;
+	protected String deviceId;
 	
 	public ClientHandler(ClientManager cm, Session s) {
 		super(s);
@@ -31,13 +32,17 @@ public class ClientHandler extends ClientStreamHandler {
 	
 	public void clientStreamClosed() throws RedbackException {
 		try {
-		clientManager.onClientLeave(this);
-		System.out.println("Client disconnected for " + session.getUserProfile().getUsername());
+			clientManager.onClientLeave(this);
+			System.out.println("Client disconnected for " + session.getUserProfile().getUsername());
 		} catch(Exception e) {
 			logger.severe("Error closing stream : " + e.getMessage());
 		}
 	}
 	
+	public void registerDevice(String deviceId, String deviceName, String deviceModel, String deviceVersion, String appVersion) throws RedbackException {
+		this.deviceId = deviceId;
+		clientManager.registerDevice(deviceId, deviceName, deviceModel, deviceVersion, appVersion, session.getUserProfile().getUsername());
+	}
 	
 	public void subscribeFilter(String objectname, DataMap filter, String id) throws RedbackException {
 		clientManager.subsManager.subscribe(this, objectname, filter, id);
@@ -165,6 +170,8 @@ public class ClientHandler extends ClientStreamHandler {
 	public void receiveChat(DataMap data) throws RedbackException {
 		
 	}
+
+
 	
 
 }
