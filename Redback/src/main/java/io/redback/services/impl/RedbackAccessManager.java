@@ -27,6 +27,7 @@ import io.redback.utils.CacheEntry;
 
 public class RedbackAccessManager extends AccessManager 
 {
+	protected String sysusername;
 	protected String secret;
 	protected String issuer;
 	protected String type;
@@ -43,6 +44,7 @@ public class RedbackAccessManager extends AccessManager
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
+		sysusername = config.getString("sysuser");
 		secret = config.getString("jwtsecret");
 		issuer = config.getString("jwtissuer");
 		if(config.containsKey("users")) {
@@ -111,10 +113,10 @@ public class RedbackAccessManager extends AccessManager
 			try
 			{
 				DataMap userConfig = null;
-				if(username.equals("sysuser@redbackwms.com")) 
+				if(sysusername != null && username.equals(sysusername)) 
 				{
 					userConfig = new DataMap();
-					userConfig.put("username", "sysuser@redbackwms.com");
+					userConfig.put("username", sysusername);
 					DataList doms = new DataList();
 					doms.add("*");
 					userConfig.put("domains", doms);

@@ -571,9 +571,13 @@ export class RbGanttComponent extends RbDataObserverComponent {
     if(previousLaneId != lane.id) {
       update[config.laneAttribute] = lane.id;
     }
+    
     if(Object.keys(update).length > 0) {
       event.object.setValues(update);
-      //this.redraw();
+    }
+
+    if(this.datasetgroup.datasets[config.dataset].list.indexOf(object) == -1) {
+      this.datasetgroup.datasets[config.dataset].addObjectAndSelect(object);
     }
   }
 

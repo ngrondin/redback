@@ -17,7 +17,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 {
 	protected ObjectManager objectManager;
 	protected Session session;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute", "fork"};
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute", "fork", "elevate"};
 	
 	public ObjectManagerJSWrapper(ObjectManager om, Session s)
 	{
@@ -145,6 +145,16 @@ public class ObjectManagerJSWrapper implements ProxyObject
 						return null;
 					} catch (Exception e) {
 						throw new RuntimeException("Error in fork", e);
+					}
+				}
+			};
+		} else if(key.equals("elevate")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					try {
+						return new ObjectManagerJSWrapper(objectManager, objectManager.getElevatedUserSession(session.getId()));
+					} catch(Exception e) {
+						throw new RuntimeException("Error getting elevated user session");
 					}
 				}
 			};

@@ -2,6 +2,7 @@ package io.redback.managers.objectmanager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -9,6 +10,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.script.ScriptException;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -20,6 +24,7 @@ import io.firebus.utils.DataList;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
+import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.DomainClient;
@@ -39,6 +44,7 @@ import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
 import io.redback.managers.objectmanager.js.ProcessManagerProxyJSWrapper;
 import io.redback.security.Session;
+import io.redback.security.UserProfile;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
@@ -54,6 +60,7 @@ public class ObjectManager
 	protected JSManager jsManager;
 	protected boolean includeLoaded;
 	protected String configServiceName;
+	protected String accessManagerServiceName;
 	protected String dataServiceName;
 	protected String idGeneratorServiceName;
 	protected String processServiceName;
@@ -70,6 +77,7 @@ public class ObjectManager
 	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters;
 	protected HashMap<Long, List<RedbackObject>> transactions;
+	protected AccessManagementClient accessManagementClient;
 	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
 	protected GeoClient geoClient;
@@ -78,6 +86,11 @@ public class ObjectManager
 	protected NotificationClient notificationClient;
 	protected DomainClient domainClient;
 	protected IntegrationClient integrationClient;
+	protected String elevatedUserName;
+	protected String jwtSecret;
+	protected String jwtIssuer;
+	protected String elevatedUserToken;	
+	protected UserProfile elevatedUserProfile;
 
 	public ObjectManager(String n, DataMap config, Firebus fb)
 	{
@@ -86,6 +99,7 @@ public class ObjectManager
 		includeLoaded = false;
 		jsManager = new JSManager("object");
 		configServiceName = config.getString("configservice");
+		accessManagerServiceName = config.getString("accessmanagementservice");
 		dataServiceName = config.getString("dataservice");
 		idGeneratorServiceName = config.getString("idgeneratorservice");
 		processServiceName = config.getString("processservice");
@@ -97,6 +111,7 @@ public class ObjectManager
 		integrationServiceName = config.getString("integrationservice");
 		objectUpdateChannel = config.getString("objectupdatechannel");
 		globalVariables = config.getObject("globalvariables");
+		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		geoClient = new GeoClient(firebus, geoServiceName);
@@ -105,6 +120,9 @@ public class ObjectManager
 		notificationClient = new NotificationClient(firebus, notificationServiceName);
 		domainClient = new DomainClient(firebus, domainServiceName);
 		integrationClient = new IntegrationClient(firebus, integrationServiceName);
+		elevatedUserName = config.getString("elevateduser");
+		jwtSecret = config.getString("jwtsecret");
+		jwtIssuer = config.getString("jwtissuer");
 		objectConfigs = new HashMap<String, ObjectConfig>();
 		globalScripts = new HashMap<String, ScriptConfig>();
 		readRightsFilters = new HashMap<String, ExpressionMap>();
@@ -161,6 +179,34 @@ public class ObjectManager
 	{
 		return globalVariables;
 	}
+	
+	public Session getElevatedUserSession(String sessionId) throws RedbackException 
+	{
+		Session session = new Session(sessionId);
+		if(elevatedUserProfile != null  &&  elevatedUserProfile.getExpiry() < System.currentTimeMillis())
+			elevatedUserProfile = null;
+
+		if(elevatedUserProfile == null)
+		{
+			try
+			{
+				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+				elevatedUserToken = JWT.create()
+						.withIssuer(jwtIssuer)
+						.withClaim("email", elevatedUserName)
+						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
+						.sign(algorithm);
+				elevatedUserProfile = accessManagementClient.validate(session, elevatedUserToken);
+			}
+			catch(Exception e)
+			{
+				throw new RedbackException("Error authenticating sys user", e);
+			}
+		}
+		session.setUserProfile(elevatedUserProfile);
+		session.setToken(elevatedUserToken);
+		return session;
+	}	
 	
 	public void refreshAllConfigs()
 	{

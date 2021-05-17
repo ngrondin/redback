@@ -17,6 +17,7 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('meta1attribute') meta1attribute: string;
   @Input('meta2attribute') meta2attribute: string;
 
+  enhancedList: any[];
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
   reachedBottom: boolean = false;
 
@@ -33,9 +34,11 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: string) {
+    this.redraw();
   }
 
   onActivationEvent(state: boolean) {
+    this.redraw();
   }
 
   public hasMainLine() : boolean {
@@ -50,49 +53,40 @@ export class RbList4Component extends RbDataObserverComponent {
     return this.meta1attribute != null || this.meta2attribute != null;
   }
 
-  public isMeta2aBadge(item: RbObject): boolean {
-    let val = this.getMeta2For(item);
-    return val != null && val != '' && !isNaN(Number(val));
-  }
-
-  getMainFor(item: RbObject) : string {
-    if(this.mainattribute != null) {
-      let val = item.get(this.mainattribute);
-      if((val == null || val.trim() == "")) {
-        val = "No Label";
+  public redraw() {
+    this.enhancedList = [];
+    for(let obj of this.list) {
+      let data = {};
+      if(this.mainattribute != null) {
+        data["main"] = this.formatText(obj.get(this.mainattribute));
       }
-      return this.formatText(val);
-    } else {
-      return "";
-    }
-  }
-
-  getSubFor(item: RbObject) : string {
-    if(this.subattribute != null) {
-      return this.formatText(item.get(this.subattribute));
-    } else {
-      return "";
-    }
-  }
-
-  getMeta1For(item: RbObject) : string {
-    if(this.meta1attribute != null) {
-      return this.formatText(item.get(this.meta1attribute));
-    } else {
-      return "";
-    }
-  }
-
-  getMeta2For(item: RbObject) : string {
-    if(this.meta2attribute != null) {
-      return this.formatText(item.get(this.meta2attribute));
-    } else {
-      return "";
+      if(this.subattribute != null) {
+        data["sub"] = this.formatText(obj.get(this.subattribute));
+      }
+      if(this.meta1attribute != null) {
+        data["meta1"] = this.formatText(obj.get(this.meta1attribute));
+      }
+      if(this.meta2attribute != null) {
+        data["meta2"] = this.formatText(obj.get(this.meta2attribute));
+        data["meta2isabadge"] = data["meta2"] != "" && !isNaN(Number(data["meta2"]))
+      }
+      if(data["main"] == null || data["main"] == "") {
+        if(data["sub"] != null && data["sub"] != "") {
+          data["main"] = data["sub"];
+          data["sub"] = "";
+        } else {
+          data["main"] = "No Label"
+        }
+      } 
+      data["object"] = obj;
+      this.enhancedList.push(data);                 
     }
   }
 
   private formatText(txt: string) : string {
-    if(this.isoDateRegExp.test(txt)) {
+    if(txt == null) {
+      return "";
+    } else if(this.isoDateRegExp.test(txt)) {
       return (new Date(txt)).toLocaleString();
     } else {
       return txt;

@@ -3,13 +3,13 @@
     (scroll)="onScroll($event)">
     <mat-action-list>
         <div
-            *ngFor="let item of list"
+            *ngFor="let item of enhancedList"
             class="rb-list-repeater">
             <button
                 mat-list-item 
-                [rb-drag-object]="item"
-                [class]="'rb-list-item' + (selectedObject == item ? ' ' + userpref.getAtlClassFor('rb-list-item-active') : '')"
-                (click)="itemClicked(item)">
+                [rb-drag-object]="item.object"
+                [class]="'rb-list-item' + (selectedObject == item.object ? ' ' + userpref.getAtlClassFor('rb-list-item-active') : '')"
+                (click)="itemClicked(item.object)">
                 <div 
                     class="rb-list-item-data">
                     <div
@@ -17,25 +17,25 @@
                         *ngIf="hasMetaLine()">
                         <span
                             class="rb-list-item-meta1">
-                            {{getMeta1For(item)}}
+                            {{item.meta1}}
                         </span>
                         <div
                             class="rb-list-item-metaspacer">
                         </div>
                         <span
-                            [ngClass]="'rb-list-item-meta2' + (isMeta2aBadge(item) ? ' rb-list-item-meta2-badge' : '')">
-                            {{getMeta2For(item)}}
+                            [ngClass]="'rb-list-item-meta2' + (item.meta2isabadge ? ' rb-list-item-meta2-badge' : '')">
+                            {{item.meta2}}
                         </span>
                     </div>
                     <span
                         class="rb-list-item-main"
                         *ngIf="hasMainLine()">
-                        {{getMainFor(item)}}
+                        {{item.main}}
                     </span>
                     <span
                         class="rb-list-item-sub"
                         *ngIf="hasSubLine()">
-                        {{getSubFor(item)}}
+                        {{item.sub}}
                     </span>
                 </div>
             </button> 
