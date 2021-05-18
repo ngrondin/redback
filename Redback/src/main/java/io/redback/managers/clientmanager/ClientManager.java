@@ -76,7 +76,7 @@ public class ClientManager {
 		subsManager.unsubscribe(clientHandler);
 		clientHandlers.remove(clientHandler);
 		if(deviceCollection != null && dataClient != null && clientHandler.deviceId != null) {
-			DataMap key = new DataMap("_id", clientHandler.deviceId != null);
+			DataMap key = new DataMap("_id", clientHandler.deviceId);
 			DataMap data = new DataMap();
 			data.put("lastlogout", new Date());
 			dataClient.putData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key), deviceCollection.convertObjectToSpecific(data));
