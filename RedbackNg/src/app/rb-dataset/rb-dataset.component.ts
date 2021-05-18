@@ -37,6 +37,7 @@ export class RbDatasetComponent extends RbSetComponent  {
   public firstLoad: boolean = true;
   public nextPage: number;
   public pageSize: number;
+  public hasMorePages: boolean = true;
   public fetchThreads: number = 0;
   private observers: Observer<string>[] = [];
 
@@ -57,6 +58,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     this.dataSubscription = this.dataService.getObjectCreateObservable().subscribe(object => this.receiveNewlyCreatedData(object));
     this.pageSize = this.fetchAll == true ? 250 : 50;
     this.fetchThreads = 0;
+    this.hasMorePages = true;
     if(this.datasetgroup != null) {
       this.datasetgroup.register(this.name, this);
     }
@@ -146,6 +148,7 @@ export class RbDatasetComponent extends RbSetComponent  {
 
   public clear() {
     this.nextPage = 0;
+    this.hasMorePages = true;
     this.totalCount = -1;
     for(let obj of this._list) {
       obj.removeSet(this);
@@ -156,14 +159,21 @@ export class RbDatasetComponent extends RbSetComponent  {
   }
 
   public fetchNextPage() {
-    const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
-    const search = this.searchString;
-    this.dataService.listObjects(this.object, this.filter, search, sort, this.nextPage, this.pageSize, this.addrelated).subscribe({
-      next: (data) => this.setData(data),
-      error: (error) => {this.fetchThreads--;}
-    });
-    this.fetchThreads++;
-    this.nextPage++;
+    if(this.hasMorePages) {
+      const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
+      const search = this.searchString;
+      this.dataService.listObjects(this.object, this.filter, search, sort, this.nextPage, this.pageSize, this.addrelated).subscribe({
+        next: (data) => {
+          this.fetchThreads--;
+          this.setData(data);
+        },
+        error: (error) => {
+          this.fetchThreads--;
+        }
+      });
+      this.fetchThreads++;
+      this.nextPage++;
+    }
   }
 
   private calcFilter() {
@@ -194,10 +204,12 @@ export class RbDatasetComponent extends RbSetComponent  {
         obj.addSet(this);
       }
     } 
-    if(data.length == this.pageSize && this.fetchAll == true) {
-      this.fetchNextPage();
+    if(data.length == this.pageSize) {
+      if(this.fetchAll == true) {
+        this.fetchNextPage();
+      }
     } else {
-      this.fetchThreads--;
+      this.hasMorePages = false
     }
     if(this.fetchThreads == 0) {
       this.firstLoad = false;
