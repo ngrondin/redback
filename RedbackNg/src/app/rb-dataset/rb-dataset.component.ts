@@ -136,11 +136,9 @@ export class RbDatasetComponent extends RbSetComponent  {
       this.clear();
       this.calcFilter();
       if(this.fetchAll) {
-        this.fetchThreads = 2;
         setTimeout(() => this.fetchNextPage(), 1);
         setTimeout(() => this.fetchNextPage(), 200);
       } else {
-        this.fetchThreads = 1;
         this.fetchNextPage();
       }
     }
@@ -164,7 +162,8 @@ export class RbDatasetComponent extends RbSetComponent  {
       next: (data) => this.setData(data),
       error: (error) => {this.fetchThreads--;}
     });
-    this.nextPage = this.nextPage + 1;
+    this.fetchThreads++;
+    this.nextPage++;
   }
 
   private calcFilter() {
@@ -202,7 +201,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     }
     if(this.fetchThreads == 0) {
       this.firstLoad = false;
-      console.log("dataset " + this.object + " finished loading");
+      //console.log("dataset " + this.object + " finished loading (" + this._list.length + ")");
       this.publishEvent('loaded');
       if(this._list.length == 0) {
         this._selectedObject = null;

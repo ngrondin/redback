@@ -34,6 +34,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: string) {
+    //console.log("dataset event " + event);
     this.redraw();
   }
 
@@ -54,6 +55,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public redraw() {
+    //console.log("list redraw (" + this.list.length + ")");
     this.enhancedList = [];
     for(let obj of this.list) {
       let data = {};
