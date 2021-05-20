@@ -5,11 +5,12 @@
         [label]="'New Note'"
         [icon]="'create'"
         [size]="40"
+        [margin]="false"
         [(value)]="value"
         (keydown)="keydown($event)">
     </rb-string-input>
     <button
-        mat-raised-button
+        mat-stroked-button
         class="rb-button"
         color="primary"
         (click)="post()">
@@ -17,10 +18,11 @@
     </button>
 </div>
 <div
-    class="rb-log-container">
+    class="rb-log-container hscroll">
     <div
-        class="rb-log-card"
-        *ngFor="let item of list">
+        [class]="'rb-log-card' + (canClick ? ' rb-log-card-active' : '')"
+        *ngFor="let item of list"
+        (click)="clickCard(item)">
         <div
             class="rb-log-header">
             <div

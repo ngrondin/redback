@@ -1,31 +1,41 @@
 :host {
     display: flex;
     flex-direction: column;
-    flex: 0 1 auto;
-    width: 800px;
+    flex: 1 1 auto;
+    max-width: 40vw;
     overflow: hidden;
-    margin: 10px;
+    margin: var(--v12px);
 }
 
 .rb-log-post {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
+    /*padding-right: var(--v10px);*/
 }
 
 .rb-log-container {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /*padding: 0px 20px 0px 20px;*/
 }
 
 .rb-log-card {
     display: flex;
     flex-direction: column;
     border-radius: 3px;
-    margin: 5px;
-    margin-bottom: 35px;
+    margin: 8px 0px 5px 0px;
+    padding: var(--v12px);
+    background-color: #fcfcfc;
+    border: 1px solid #dfdfdf;
+}
+
+.rb-log-card-active:hover {
+    border-color: #6a74aa;;
+    cursor: pointer;
 }
 
 .rb-log-header {
@@ -36,18 +46,18 @@
 
 .rb-log-name {
     display: flex;
-    width: 50%;
     height:24px;
-    color: #3f51b5;
+    color: #aaa;
     font-size: 0.8rem;
+    flex: 1 1 auto;
 }
 
 .rb-log-date {
     display: flex;
-    width: 50%;
     height:24px;
-    color: #3f51b5;
+    color: #aaa;
     font-size: 0.8rem;
+    flex: 0 0 auto;
 }
 
 .rb-log-entry {

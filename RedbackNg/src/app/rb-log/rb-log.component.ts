@@ -14,8 +14,11 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('entryattribute') entryattribute: string;
   @Input('categoryattribute') categoryattribute: string;
   @Input('editable') editable: string;
+  @Input('linkobjectattribute') linkobjectattribute: string;
+  @Input('linkuidattribute') linkuidattribute: string;
   
   @Output() posted: EventEmitter<any> = new EventEmitter();
+  @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   public value: string; 
   public isEditable: boolean = true;
@@ -44,6 +47,10 @@ export class RbLogComponent extends RbDataObserverComponent {
     } else {
       this.isEditable = false;
     }
+  }
+
+  public get canClick() : boolean {
+    return this.linkobjectattribute != null && this.linkuidattribute != null;
   }
 
   getUserForItem(object: RbObject) : string {
@@ -86,7 +93,16 @@ export class RbLogComponent extends RbDataObserverComponent {
     msg[this.entryattribute] = "'" + this.value.replace("'", "\\'") + "'";
     this.dataset.action('create', msg).subscribe();
     this.value = "";
-    //setTimeout(() => {this.value = "";}, 100);
+  }
+
+  clickCard(object: RbObject) {
+    if(this.canClick) {
+      let target = {};
+      target['object'] = object.get(this.linkobjectattribute);
+      target['filter'] = {uid: "'" + object.get(this.linkuidattribute) + "'"};
+      this.navigate.emit(target);
+    }
+
   }
 
   public evalEditable() {
