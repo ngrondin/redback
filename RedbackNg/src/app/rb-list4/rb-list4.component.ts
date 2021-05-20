@@ -1,9 +1,7 @@
-import { ValueTransformer } from '@angular/compiler/src/util';
-import { HostListener } from '@angular/core';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { Evaluator } from 'app/helpers';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -13,6 +11,7 @@ import { UserprefService } from 'app/services/userpref.service';
 })
 export class RbList4Component extends RbDataObserverComponent {
   @Input('mainattribute') mainattribute: string;
+  @Input('mainexpression') mainexpression: string;
   @Input('subattribute') subattribute: string;
   @Input('meta1attribute') meta1attribute: string;
   @Input('meta2attribute') meta2attribute: string;
@@ -34,7 +33,6 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: string) {
-    //console.log("dataset event " + event);
     this.redraw();
   }
 
@@ -43,7 +41,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public hasMainLine() : boolean {
-    return this.mainattribute != null;
+    return this.mainattribute != null || this.mainexpression != null;
   }
 
   public hasSubLine() : boolean {
@@ -55,12 +53,13 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public redraw() {
-    //console.log("list redraw (" + this.list.length + ")");
     this.enhancedList = [];
     for(let obj of this.list) {
       let data = {};
       if(this.mainattribute != null) {
         data["main"] = this.formatText(obj.get(this.mainattribute));
+      } else if(this.mainexpression != null) {
+        data["main"] = Evaluator.eval(this.mainexpression, obj, null);
       }
       if(this.subattribute != null) {
         data["sub"] = this.formatText(obj.get(this.subattribute));

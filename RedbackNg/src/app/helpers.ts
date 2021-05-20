@@ -1,4 +1,5 @@
 import { Observer } from "rxjs";
+import { RbObject } from "./datamodel";
 
 export class Translator {
     cfg: any;
@@ -158,5 +159,15 @@ export class ObserverProxy implements Observer<any> {
 
     complete() {
 
+    }
+}
+
+export class Evaluator {
+    public static eval(expr: string, object: RbObject, relatedObject: RbObject) {
+        if(!((expr.indexOf("object.") > -1 && object == null) || (expr.indexOf("relatedObject.") > -1 && relatedObject == null))) {
+            return eval(expr);            
+        } else {
+            return "";
+        }
     }
 }

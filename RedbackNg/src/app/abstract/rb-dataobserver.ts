@@ -89,6 +89,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
             let str: string = decodeURIComponent(this.show);
             let object = this.dataset.selectedObject;
             let relatedObject = this.dataset.relatedObject;
+            //TODO: Should be changed to use Evaluator.eval
             if(!((str.indexOf("object.") > -1 && object == null) || (str.indexOf("relatedObject.") > -1 && relatedObject == null))) {
                 this.showResult = eval(str);            
             } else {
