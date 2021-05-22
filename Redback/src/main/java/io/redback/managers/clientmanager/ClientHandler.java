@@ -39,9 +39,9 @@ public class ClientHandler extends ClientStreamHandler {
 		}
 	}
 	
-	public void registerDevice(String deviceId, String deviceName, String deviceModel, String deviceVersion, String appVersion) throws RedbackException {
+	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions) throws RedbackException {
 		this.deviceId = deviceId;
-		clientManager.registerDevice(deviceId, deviceName, deviceModel, deviceVersion, appVersion, session.getUserProfile().getUsername());
+		clientManager.registerDevice(deviceId, deviceModel, os, appVersion, locationPermissions, session.getUserProfile().getUsername());
 	}
 	
 	public void subscribeFilter(String objectname, DataMap filter, String id) throws RedbackException {
