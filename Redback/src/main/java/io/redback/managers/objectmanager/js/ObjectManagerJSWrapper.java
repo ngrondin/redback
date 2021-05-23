@@ -1,6 +1,7 @@
 package io.redback.managers.objectmanager.js;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -17,7 +18,7 @@ public class ObjectManagerJSWrapper implements ProxyObject
 {
 	protected ObjectManager objectManager;
 	protected Session session;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute", "fork", "elevate"};
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute", "fork", "elevate", "iterate"};
 	
 	public ObjectManagerJSWrapper(ObjectManager om, Session s)
 	{
@@ -151,14 +152,52 @@ public class ObjectManagerJSWrapper implements ProxyObject
 		} else if(key.equals("elevate")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
-					try {
-						return new ObjectManagerJSWrapper(objectManager, objectManager.getElevatedUserSession(session.getId()));
-					} catch(Exception e) {
-						throw new RuntimeException("Error getting elevated user session");
+					if(arguments.length > 0 && arguments[0].canExecute()) {
+						try {
+							objectManager.elevateSession(session);
+							arguments[0].execute();
+							objectManager.demoteSession(session);
+							return null;
+						} catch(Exception e) {
+							throw new RuntimeException("Error executing elevated script");
+						}
+					} else {
+						throw new RuntimeException("Requires an executable argument");
 					}
 				}
 			};
 		}
+		else if(key.equals("iterate")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String objectName = arguments[0].asString();
+					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
+					if(arguments.length >=3 && arguments[2].canExecute()) {
+						try {
+							boolean hasMore = true;
+							int page = 0;
+							while(hasMore) {
+								List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, null, null, false, page, 50);
+								for(RedbackObject object: list) {
+									arguments[2].execute(JSConverter.toJS(object));
+								}
+								if(list.size() < 50) {
+									hasMore = false;
+								} else {
+									page++;
+								}
+							}
+						} catch(Exception e) {
+							throw new RuntimeException("Error iterating through list");
+						}
+						
+					} else {
+						throw new RuntimeException("3rd argument needs to be executable");
+					}
+					return null;
+				}
+			};
+		}		
 		return null;
 	}
 

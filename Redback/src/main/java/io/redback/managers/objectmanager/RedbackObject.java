@@ -20,6 +20,7 @@ import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
+import io.redback.security.js.SessionJSWrapper;
 import io.redback.utils.js.JSConverter;
 
 public class RedbackObject extends RedbackElement

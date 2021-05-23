@@ -9,6 +9,7 @@ public class Session
 	public String id;
 	public String token;
 	public UserProfile userProfile;
+	public UserProfile elevatedUserProfile;
 	public String timezone;
 
 	public Session() 
@@ -52,6 +53,11 @@ public class Session
 		userProfile = up;
 	}
 	
+	public void setElevatedUserProfile(UserProfile up)
+	{
+		elevatedUserProfile = up;
+	}
+	
 	public void setToken(String t)
 	{
 		token = t;
@@ -74,7 +80,7 @@ public class Session
 	
 	public UserProfile getUserProfile()
 	{
-		return userProfile;
+		return elevatedUserProfile != null ? elevatedUserProfile : userProfile;
 	}
 	
 	public String getTimezone()

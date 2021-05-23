@@ -179,7 +179,7 @@ public class ObjectManager
 	{
 		return globalVariables;
 	}
-	
+	/*
 	public Session getElevatedUserSession(String sessionId) throws RedbackException 
 	{
 		Session session = new Session(sessionId);
@@ -206,7 +206,32 @@ public class ObjectManager
 		session.setUserProfile(elevatedUserProfile);
 		session.setToken(elevatedUserToken);
 		return session;
-	}	
+	}	*/
+	
+	public UserProfile getElevatedUserProfile(Session session) throws RedbackException 
+	{
+		if(elevatedUserProfile != null  &&  elevatedUserProfile.getExpiry() < System.currentTimeMillis())
+			elevatedUserProfile = null;
+
+		if(elevatedUserProfile == null)
+		{
+			try
+			{
+				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+				elevatedUserToken = JWT.create()
+						.withIssuer(jwtIssuer)
+						.withClaim("email", elevatedUserName)
+						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
+						.sign(algorithm);
+				elevatedUserProfile = accessManagementClient.validate(session, elevatedUserToken);
+			}
+			catch(Exception e)
+			{
+				throw new RedbackException("Error authenticating sys user", e);
+			}
+		}
+		return elevatedUserProfile;
+	}		
 	
 	public void refreshAllConfigs()
 	{
@@ -586,6 +611,15 @@ public class ObjectManager
 			throw new RedbackException("Error forking execution");
 		}
 	}
+	
+	public void elevateSession(Session session) throws RedbackException {
+		session.setElevatedUserProfile(getElevatedUserProfile(session));
+	}
+	
+	public void demoteSession(Session session) throws RedbackException {
+		session.setElevatedUserProfile(null);
+	}
+	
 	
 	@SuppressWarnings("unchecked")
 	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
