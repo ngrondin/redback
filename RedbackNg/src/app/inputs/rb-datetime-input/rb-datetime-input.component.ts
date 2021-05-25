@@ -112,7 +112,8 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
   public onKeyTyped(keyCode: number) {
     super.onKeyTyped(keyCode);
     if((keyCode == 8 || keyCode == 27) && (this.editedValue == "" || this.editedValue == null)) {
-      this.finishEditing();
+      //this.finishEditing();
+      this.finishEditingWithSelection(null);
     } 
   }
 
