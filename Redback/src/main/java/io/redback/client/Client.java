@@ -11,11 +11,16 @@ public class Client {
 
 	protected Firebus firebus;
 	protected String serviceName;
+	protected int defaultTimeout = 10000;
 	
 	public Client(Firebus fb, String sn)
 	{
 		firebus = fb;
 		serviceName = sn;
+	}
+	
+	public void setTimeout(int t) {
+		defaultTimeout = t;
 	}
 	
 	protected DataMap request(DataMap req) throws RedbackException
@@ -68,7 +73,7 @@ public class Client {
 				if(async)
 					firebus.requestServiceAndForget(serviceName, reqP);
 				else
-					respP = firebus.requestService(serviceName, reqP);
+					respP = firebus.requestService(serviceName, reqP, defaultTimeout);
 				return respP;
 			}
 			catch(Exception e)
