@@ -327,7 +327,7 @@ public class ProcessManager
 		}
 		else
 		{
-			throw new RedbackException("The process in not on an interaction node");
+			throw new RedbackException("The process " + pid + " is not on an interaction node to process action " + action);
 		}
 		logger.finer("Finished processing action");
 	}
@@ -344,7 +344,7 @@ public class ProcessManager
 		}
 		else
 		{
-			throw new RedbackException("The process in not on an interaction node");
+			throw new RedbackException("The process " + pid + " is not on an interaction node");
 		}
 		logger.finer("Finished processing action");
 	}

@@ -57,7 +57,6 @@ public abstract class ClientStreamHandler extends StreamHandler {
 							String object = ulReq.getString("object");
 							String uid = ulReq.getString("uid");
 							startUpload(uploadUid, filename, filesize, mime, object, uid);
-							sendUploadNext(uploadUid);
 						} else if(data.containsKey("data")) {
 							int seq = data.getNumber("sequence").intValue();
 							String base64data = data.getString("data");
@@ -77,7 +76,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 				}
 			}
 		} catch(Exception e) {
-			throw new RedbackException("error receiving client data");
+			throw new RedbackException("error receiving client data", e);
 		}
 	}
 	
@@ -85,7 +84,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		try {
 			clientStreamClosed();
 		} catch(Exception e) {
-			throw new RedbackException("error closing client stream");
+			throw new RedbackException("error closing client stream", e);
 		}
 	}
 

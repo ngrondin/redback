@@ -122,6 +122,7 @@ public class ClientHandler extends ClientStreamHandler {
 					uploads.remove(uploaduid);
 				}
 			});
+			sendUploadNext(uploaduid);
 		} catch(Exception e) {
 			throw new RedbackException("Error starting client upload", e);
 		}
