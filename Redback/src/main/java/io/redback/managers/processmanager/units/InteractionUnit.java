@@ -107,7 +107,7 @@ public class InteractionUnit extends ProcessUnit
 
 			if(!foundAction)
 			{
-				error("No such action available for this process");
+				error("No such action (" + action + ") available for process " + pi.getId());
 			}
 		}
 		else
