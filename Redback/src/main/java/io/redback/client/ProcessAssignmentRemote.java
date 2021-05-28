@@ -27,6 +27,11 @@ public class ProcessAssignmentRemote {
 		return null;
 	}
 	
+	public String getInteractionCode()
+	{
+		return data.getString("code");
+	}
+	
 	public int getActionCount()
 	{
 		return data.getList("actions").size();
@@ -40,6 +45,14 @@ public class ProcessAssignmentRemote {
 	public String getActionDescription(int i)
 	{
 		return data.getList("actions").getObject(i).getString("description");
+	}
+	
+	public boolean hasAction(String a)
+	{
+		for(int i = 0; i < data.getList("actions").size(); i++) 
+			if(data.getList("actions").getObject(i).getString("action").equals(a))
+				return true;
+		return false;
 	}
 	
 	public void action(String action)

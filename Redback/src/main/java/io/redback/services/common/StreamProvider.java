@@ -21,10 +21,11 @@ public abstract class StreamProvider extends Service implements io.firebus.inter
 	}
 
 	public Payload acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
+		Timer timer = null;
 		try {
 			Session session = new Session(payload.metadata.get("session"));
 			session.setTimezone(payload.metadata.get("timezone"));
-			Timer timer = new Timer(serviceName, session.getId(), getLogline(payload));
+			timer = new Timer(serviceName, session.getId(), getLogline(payload));
 			logger.finer("Stream '" + serviceName + "' started");
 			StreamHandler streamHandler = redbackStream(session, payload);
 			Payload acceptPayload = null;
@@ -39,6 +40,7 @@ public abstract class StreamProvider extends Service implements io.firebus.inter
 			return acceptPayload;
 		} catch(Exception e) {
 			logger.severe(StringUtils.getStackTrace(e));
+			if(timer != null) timer.mark();
 			throw new FunctionErrorException("Exception in redback stream '" + serviceName + "'", e);
 		}
 	}

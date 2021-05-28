@@ -12,6 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
 import com.auth0.jwt.JWT;
@@ -83,7 +84,10 @@ public class TestClient {
 			processClient = new ProcessClient(firebus, ps);
 		} else {
 			url = u;
-			httpClient = HttpClients.createDefault();
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+		    connectionManager.setMaxTotal(100);
+		    connectionManager.setDefaultMaxPerRoute(50);
+			httpClient = HttpClients.custom().setConnectionManager(connectionManager).build();
 			firebus.registerServiceProvider("proxy_" + os, new HTTPProxy(os), 100);
 			firebus.registerServiceProvider("proxy_" + ps, new HTTPProxy(ps), 100);
 			objectClient = new ObjectClient(firebus, "proxy_" + os);
@@ -143,5 +147,13 @@ public class TestClient {
 		filter.put("data.uid", uid);
 		ProcessAssignmentRemote par = processClient.getAssignment(newSession(role), filter);
 		return par;
+	}
+	
+	public ProcessAssignmentRemote waitForAssignment(String role, String objectname, String uid, String code) throws RedbackException {
+		ProcessAssignmentRemote processAssignment = null;
+		do {
+			processAssignment = getAssignment(role, objectname, uid);
+		} while(processAssignment != null && !processAssignment.getInteractionCode().equals(code));
+		return processAssignment;
 	}
 }

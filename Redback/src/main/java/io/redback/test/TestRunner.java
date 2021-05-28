@@ -75,6 +75,7 @@ public class TestRunner {
 								test.run(cycle, threadId);
 							} catch(Exception e) {
 								System.out.println("Error running thread " + threadId + " cycle " + cycle);
+								testClient.firebus.logStatus();
 								e.printStackTrace();
 							}
 						}

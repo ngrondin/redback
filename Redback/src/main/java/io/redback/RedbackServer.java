@@ -202,7 +202,7 @@ public class RedbackServer implements Consumer
 			}
 		}
 		
-		new Watchdog();
+		new Watchdog(firebus);
 	}
 
 	public void consume(Payload payload) {

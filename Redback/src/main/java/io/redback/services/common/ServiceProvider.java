@@ -20,10 +20,11 @@ public abstract class ServiceProvider extends Service implements io.firebus.inte
 
 	public Payload service(Payload payload) throws FunctionErrorException
 	{
+		Timer timer = null;
 		try {
 			Session session = new Session(payload.metadata.get("session"));
 			session.setTimezone(payload.metadata.get("timezone"));
-			Timer timer = new Timer(serviceName, session.getId(), getLogline(payload));
+			timer = new Timer(serviceName, session.getId(), getLogline(payload));
 			logger.finer("Service '" + serviceName + "' started");
 			Payload response = redbackService(session, payload);
 			logger.finer("Service '" + this.serviceName + "' finished");
@@ -31,6 +32,7 @@ public abstract class ServiceProvider extends Service implements io.firebus.inte
 			return response;
 		} catch(Exception e) {
 			logger.severe(StringUtils.getStackTrace(e));
+			if(timer != null) timer.mark();
 			throw new FunctionErrorException("Exception in redback service '" + serviceName + "'", e);
 		}
 	}
