@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -50,6 +51,7 @@ public class CronTaskManager extends Thread {
 	protected AccessManagementClient accessManagementClient;
 	protected Map<String, CronTaskConfig> taskConfigs;
 	protected boolean quit = false;
+	protected long randomDelay;
 
 
 	public CronTaskManager(Firebus fb, DataMap c)
@@ -69,6 +71,7 @@ public class CronTaskManager extends Thread {
 		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 		collectionConfig = new CollectionConfig(config.getObject("collection"), "rbcr_task");
 		taskConfigs = new HashMap<String, CronTaskConfig>();
+		randomDelay = (new Random()).nextInt(5000);
 		setName("rbCronTaskManager");
 		start();
 	}
@@ -77,21 +80,7 @@ public class CronTaskManager extends Thread {
 	{
 		return jsEngine;
 	}
-	
-	public void loadConfigs(Session session) throws RedbackException {
-		try {
-			taskConfigs.clear();
-			DataMap resp = configClient.listConfigs(session, "rbcr", "task");
-			DataList configList = resp.getList("result");
-			for(int i = 0; i < configList.size(); i++) {
-				CronTaskConfig ctc = new CronTaskConfig(this, configList.getObject(i));
-				ctc.setNextRun(System.currentTimeMillis());
-				taskConfigs.put(ctc.getName(), ctc);
-			}
-		} catch(Exception e) {
-			throw new RedbackException("Error loading the cron configs", e);
-		}
-	}
+
 	
 	public Session getSystemUserSession() throws RedbackException 
 	{
@@ -126,7 +115,7 @@ public class CronTaskManager extends Thread {
 			loadConfigs(getSystemUserSession());
 			while(!quit) {
 				try {
-					long current = System.currentTimeMillis();
+					long current = System.currentTimeMillis() - randomDelay;
 					long nextTime = current + 86400000;
 					refreshTaskStates();
 					Iterator<String> it = taskConfigs.keySet().iterator();
@@ -154,6 +143,7 @@ public class CronTaskManager extends Thread {
 					long sleep = nextTime - System.currentTimeMillis();
 					if(sleep < 10000)
 						sleep = 10000;
+					sleep += randomDelay;
 					Thread.sleep(sleep);
 				} catch(Exception e) {
 					logger.severe("General error in CronTaskManager thread : " + e.getMessage());
@@ -161,6 +151,21 @@ public class CronTaskManager extends Thread {
 			}
 		} catch(Exception e) {
 			logger.severe("Cron task manager cannot load configured tasks : " + e.getMessage());
+		}
+	}
+	
+	
+	public void loadConfigs(Session session) throws RedbackException {
+		try {
+			taskConfigs.clear();
+			DataMap resp = configClient.listConfigs(session, "rbcr", "task");
+			DataList configList = resp.getList("result");
+			for(int i = 0; i < configList.size(); i++) {
+				CronTaskConfig ctc = new CronTaskConfig(this, configList.getObject(i));
+				taskConfigs.put(ctc.getName(), ctc);
+			}
+		} catch(Exception e) {
+			throw new RedbackException("Error loading the cron configs", e);
 		}
 	}
 	
