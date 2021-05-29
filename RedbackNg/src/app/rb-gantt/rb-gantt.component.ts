@@ -210,6 +210,8 @@ export class RbGanttComponent extends RbDataObserverComponent {
   }
 
   onActivationEvent(event: any) {
+    this.scrollLeft = 0;
+    this.scrollTop = 0;
     if(this.dofilter && this.active) {
       this.filterDataset();
     }

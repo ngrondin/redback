@@ -7,6 +7,15 @@
         [grow]="0"
         [margin]="true">
     </rb-search>
+    <rb-choice-input
+        *ngIf="layerOptions != null"
+        [choicelist]="layerOptions"
+        [label]="'Show'"
+        [showicon]="true"
+        [icon]="'layers'"
+        [size]="10"
+        [(value)]="activeDatasets">
+    </rb-choice-input>
     <rb-spacer></rb-spacer>
     <rb-choice-input
         [choicelist]="months"

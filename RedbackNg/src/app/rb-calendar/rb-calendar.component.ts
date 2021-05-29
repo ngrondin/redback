@@ -16,6 +16,7 @@ class CalendarSeriesConfig {
   linkView: string;
   modal: string;
   canEdit: boolean;
+  active: boolean = true;
 
   constructor(json: any) {
     this.dataset = json.dataset;
@@ -58,6 +59,7 @@ class CalendarEntry {
 })
 export class RbCalendarComponent extends RbDataObserverComponent {
   @Input('series') series: any[];
+  @Input('layers') layers: any[];
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   seriesConfigs: CalendarSeriesConfig[];
@@ -81,6 +83,8 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     {display: "December", value: 11}
   ];
   weeks: any = [];
+  layerOptions: any = null;
+  _activeDatasets: any[] = [];
 
   constructor() {
     super();
@@ -96,8 +100,16 @@ export class RbCalendarComponent extends RbDataObserverComponent {
       for(let item of this.series) {
         this.seriesConfigs.push(new CalendarSeriesConfig(item));
       }
-    }    
-    this.filterDataset();
+    }  
+    if(this.layers != null && this.layers.length > 0) {
+      this.layerOptions = [];
+      for(let item of this.layers) {
+        this.layerOptions.push({display: item.label, value: item.datasets});
+      }
+      this.activeDatasets = this.layerOptions[0].value;
+    } else {
+      this.filterDataset();
+    }
   }
 
   dataObserverDestroy() {
@@ -120,6 +132,26 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     return this.dataset != null ? this.dataset.isLoading : this.datasetgroup != null ? this.datasetgroup.isLoading : false;
   }
 
+  get activeSeries() : CalendarSeriesConfig[] {
+    return this.seriesConfigs.filter(item => item.active);
+  }
+
+  get activeDatasets() : any {
+    return this._activeDatasets;
+  }
+
+  set activeDatasets(val: any) {
+    this._activeDatasets = val;
+    for(let cfg of this.seriesConfigs) {
+      if(val.indexOf(cfg.dataset) > -1) {
+        cfg.active = true;
+      } else {
+        cfg.active = false;
+      }
+    }
+    this.filterDataset();
+  }
+
   get year():  number {
     return this._year;
   }
@@ -138,6 +170,24 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     this.filterDataset();
   }
 
+
+  filterDataset() {
+    let startDate = new Date(this.year, this.month, 1, 0, 0, 0, 0);
+    let endDate = new Date((new Date(startDate.getTime())).setMonth(startDate.getMonth() + 1));
+    for(let cfg of this.activeSeries) {
+      let filter = {};
+      filter[cfg.dateAttribute] = {
+        $gt: "'" + startDate.toISOString() + "'",
+        $lt: "'" + endDate.toISOString() + "'"
+      }
+      if(this.datasetgroup != null) {
+        this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
+      } else {
+        this.dataset.filterSort({filter: filter});
+      }
+    }
+  }
+  
   redraw() {
     this.calcParams();
     this.calcLists();
@@ -169,7 +219,7 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   }
 
   calcLists() {
-    for(let cfg of this.seriesConfigs) {
+    for(let cfg of this.activeSeries) {
       let list: RbObject[] = this.lists != null ? this.lists[cfg.dataset] : this.list;
       for(var i in list) {
         let obj = list[i];
@@ -245,23 +295,6 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   }
 
 
-
-  filterDataset() {
-    let startDate = new Date(this.year, this.month, 1, 0, 0, 0, 0);
-    let endDate = new Date((new Date(startDate.getTime())).setMonth(startDate.getMonth() + 1));
-    for(let cfg of this.seriesConfigs) {
-      let filter = {};
-      filter[cfg.dateAttribute] = {
-        $gt: "'" + startDate.toISOString() + "'",
-        $lt: "'" + endDate.toISOString() + "'"
-      }
-      if(this.datasetgroup != null) {
-        this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
-      } else {
-        this.dataset.filterSort({filter: filter});
-      }
-    }
-  }
 }
 
 
