@@ -36,6 +36,17 @@
         </agm-polyline-point>
     </agm-polyline>
     <agm-overlay
+        *ngIf="mapCurrentDatePoint != null"
+        [latitude]="mapCurrentDatePoint.latitude"
+        [longitude]="mapCurrentDatePoint.longitude"
+        [zIndex]="mapCurrentDatePoint.zindex">
+        <div
+            [class]="'rb-mapicon-pin'"
+            [style.border-color]="mapCurrentDatePoint.color"
+            [style.z-index]="mapCurrentDatePoint.zindex">
+        </div>
+    </agm-overlay>     
+    <agm-overlay
         *ngIf="showLabel"
         [latitude]="labellatLon.latitude"
         [longitude]="labellatLon.longitude">
@@ -56,6 +67,12 @@
         </div>
     </agm-overlay>   
 </agm-map>
+<rb-timeslider
+    *ngIf="dateattribute != null && list != null && list.length > 0 && minDate.getTime() != maxDate.getTime()"
+    [mindate]="minDate"
+    [maxdate]="maxDate"
+    [(currentdate)]="currentDate">
+</rb-timeslider>
 <div 
     class="rb-map-menu-panel"
     *ngIf="showContextMenu"

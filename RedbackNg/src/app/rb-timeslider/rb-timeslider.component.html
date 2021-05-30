@@ -1,0 +1,32 @@
+<div
+    class="rb-timeslider-datetime">
+    {{minDate | date : 'dd/MM/yy'}}<br>{{minDate | date : 'hh:mm:ss'}}
+</div>
+<div
+    class="rb-timeslider-slider">
+    <div
+        #line
+        class="rb-timeslider-line">
+    </div>
+    <div
+        *ngIf="holding"
+        (mouseup)="mouseup($event)"
+        (mouseout)="mouseup($event)"
+        (mousemove)="mousemove($event)"
+        class="rb-timeslider-back">
+    </div>
+    <div
+        #thumb
+        class="rb-timeslider-thumb"
+        [style.left.px]="thumbLeft"
+        [style.pointer-events]="holding ? 'none' : 'auto'"
+        (mousedown)="mousedown($event)"
+        (mouseup)="mouseup($event)"
+        (mousemove)="mousemove($event)">
+        {{currentDate | date : 'dd/MM/yy'}}<br>{{currentDate | date : 'hh:mm:ss'}}
+    </div>
+</div>
+<div
+    class="rb-timeslider-datetime">
+    {{maxDate | date : 'dd/MM/yy'}}<br>{{maxDate | date : 'hh:mm:ss'}}
+</div>

@@ -1,0 +1,65 @@
+:host {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-timeslider-datetime {
+    flex: 0 0 auto;
+    font-size: 0.9rem;
+    color: grey;
+    padding: 0px 10px 0px 10px;
+}
+
+.rb-timeslider-slider {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    position: relative;
+    justify-content: center;
+}
+
+.rb-timeslider-line {
+    border-bottom: 1px solid grey;
+    height: 25px;
+}
+
+.rb-timeslider-back {
+    display: block;
+    position: absolute;
+    top: -200px;
+    left: -100px;
+    right: -100px;
+    bottom: -200px;
+    z-index: 10;
+    cursor: grabbing;
+}
+
+.rb-timeslider-thumb {
+    display:block;
+    position: absolute;
+    background-color: var(--main-color);
+    color: white;
+    padding: 3px;
+    font-size: 0.9rem;
+    top: -20px;
+    border-radius: 5px;
+    z-index: 11;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: grab;
+}
+
+.rb-timeslider-thumb::after {
+	content: " ";
+	height: 0px;
+	width: 0px;
+	position: absolute;
+	border: 8px solid transparent;
+	border-top-color: var(--main-color);
+	left: 50%;
+	top: 100%;
+    margin: 0px -8px 0px -8px;
+}

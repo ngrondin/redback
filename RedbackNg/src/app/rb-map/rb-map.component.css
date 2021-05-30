@@ -129,3 +129,31 @@ agm-map {
     font-weight: 700;
     text-align: center;
 }
+
+.rb-map-time-panel {
+	display: flex;
+	flex-direction: row;
+}
+
+.rb-map-time-top {
+
+}
+
+.rb-map-time-time {
+	flex: 0 0 auto;
+}
+
+.rb-map-time-slider {
+	flex: 1 1 auto;
+}
+
+.rb-map-time-bottom {
+
+}
+
+.mat-slider-thumb-label {
+		width: 50px!important;
+		height: 50px!important;
+		top: -62px;
+		right: -25px;
+  }

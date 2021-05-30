@@ -22,6 +22,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSliderModule } from '@angular/material/slider';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -113,6 +114,7 @@ import { DragService } from './services/drag.service';
 import { RbDialogComponent } from './rb-dialog/rb-dialog.component';
 import { RbTileComponent } from './rb-tile/rb-tile.component';
 import { RedbackgraphsModule } from 'redbackgraphs';
+import { RbTimesliderComponent } from './rb-timeslider/rb-timeslider.component';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -144,6 +146,7 @@ export let AppInjector: Injector;
     MatProgressSpinnerModule,
     MatMenuModule,
     MatSlideToggleModule,
+    MatSliderModule,
     MatTooltipModule,
     FormsModule,
     FormsModule,
@@ -226,7 +229,8 @@ export let AppInjector: Injector;
     RbPopupHardlistComponent,
     RbViewHeaderComponent,
     RbDialogComponent,
-    RbTileComponent 
+    RbTileComponent,
+    RbTimesliderComponent 
   ],
   providers: [
     {provide: COMPILER_OPTIONS, useValue: {}, multi: true},

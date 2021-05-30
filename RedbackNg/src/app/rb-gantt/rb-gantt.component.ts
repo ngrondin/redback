@@ -160,6 +160,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
   scrollTop: number;
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  dayNames: String[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   ganttData: GanttLane[];
   dayMarks: GanttMark[];
   hourMarks: GanttMark[];
@@ -502,7 +503,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
     while(cur < this.endMS) {
       let curDate: Date = new Date(cur);
       let pos = Math.round((cur - this.startMS) * this.multiplier);
-      let mark = new GanttMark(pos, curDate.getDate() + " " + this.monthNames[curDate.getMonth()] + " " + curDate.getFullYear());
+      let mark = new GanttMark(pos, this.dayNames[curDate.getDay()] + ", " + curDate.getDate() + " " + this.monthNames[curDate.getMonth()] + " " + curDate.getFullYear());
       marks.push(mark);
       cur = cur + 86400000;
     }

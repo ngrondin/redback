@@ -103,6 +103,7 @@ export class RbMapComponent extends RbDataObserverComponent {
   seriesConfigs: MapSeriesConfig[] = [];
   mapPoints: MapPoint[] = [];
   mapPolygons: MapPolygon[] = [];
+  mapCurrentDatePoint: MapPoint = null;
   selectedMapPoint: MapPoint;
 
   minLat: number;
@@ -123,6 +124,10 @@ export class RbMapComponent extends RbDataObserverComponent {
   labelLink: any = null;
   mousePosition: any = {x: 0, y: 0};
   clickCoords: any = {x: 0, y: 0};
+
+  minDate: Date = new Date();
+  maxDate: Date = new Date((new Date()).getTime() + 3600000);
+  _currentDate: Date = null;
   
   lastObjectCount: number = 0;
   lastObjectUpdate: number = 0;
@@ -139,7 +144,6 @@ export class RbMapComponent extends RbDataObserverComponent {
 
   constructor(
     private elementRef:ElementRef
-    //private apiService: ApiService
   ) {
     super();
   }
@@ -175,6 +179,30 @@ export class RbMapComponent extends RbDataObserverComponent {
   onMapReady(event: any) {
   }
 
+  public get currentDate() : Date {
+    return this._currentDate;
+  }
+
+  public set currentDate(cd: Date) {
+    this._currentDate = cd;
+    if(this.dateattribute != null && this.list != null) {
+      let closestObject = null;
+      let closestTimeDiff = 86400000;
+      for(let obj of this.list) {
+        let dt = new Date(obj.get(this.dateattribute));
+        let timeDiff = cd.getTime() - dt.getTime();
+        if(timeDiff < closestTimeDiff && timeDiff >= 0) {
+          closestObject = obj;
+          closestTimeDiff = timeDiff;
+        }
+      }
+      if(closestObject != null) {
+        let latLon = this.getObjectLatLon(closestObject, this.seriesConfigs[0]);
+        this.mapCurrentDatePoint = new MapPoint(closestObject, latLon.latitude, latLon.longitude, null, null, null, "darkred", null, null, 10);
+      }
+    }
+  }
+
   calcAll() {
     if(this.active) {
       //console.log("calc all");
@@ -185,6 +213,7 @@ export class RbMapComponent extends RbDataObserverComponent {
       this.mapPoints = [];
       this.mapPolygons = [];
       this.selectedMapPoint = null;
+      this.mapCurrentDatePoint = null;
   
       if(this.list != null && this.seriesConfigs[0] != null) {
         this.calcList(this.list, this.seriesConfigs[0]);
@@ -267,14 +296,24 @@ export class RbMapComponent extends RbDataObserverComponent {
   calcPolygon(list: RbObject[], cfg: MapSeriesConfig) {
     let mapPolygon = new MapPolygon();
     let sortedList = list.sort((a: RbObject, b: RbObject) => (new Date(a.get(cfg.dateAttribute))).getTime() - (new Date(b.get(cfg.dateAttribute))).getTime());
-    for(let object of sortedList) {
-      let latLon = this.getObjectLatLon(object, cfg);
-      if(latLon != null) {
-        this.calcMinMaxLatLon(latLon);
-        mapPolygon.addObject(object, latLon.latitude, latLon.longitude);
+    if(sortedList.length > 0) {
+      this.minDate = new Date(sortedList[0].get(cfg.dateAttribute));
+      this.maxDate = new Date(sortedList[sortedList.length - 1].get(cfg.dateAttribute));
+      if(sortedList.length == 1) {
+        let latLon = this.getObjectLatLon(sortedList[0], cfg);
+        this.mapCurrentDatePoint = new MapPoint(sortedList[0], latLon.latitude, latLon.longitude, null, null, null, "darkred", null, null, 10);
+      } else {
+        for(let object of sortedList) {
+          let latLon = this.getObjectLatLon(object, cfg);
+          if(latLon != null) {
+            this.calcMinMaxLatLon(latLon);
+            mapPolygon.addObject(object, latLon.latitude, latLon.longitude);
+          }
+        }
+        this.mapPolygons.push(mapPolygon);
       }
     }
-    this.mapPolygons.push(mapPolygon);
+
   }
 
   calcMinMaxLatLon(latLon: any) {
@@ -410,5 +449,7 @@ export class RbMapComponent extends RbDataObserverComponent {
     const d = R * c; // in metres
     return d;
   }
+
+
 
 }
