@@ -12,6 +12,8 @@ import io.redback.services.common.StreamHandler;
 import io.redback.utils.StringUtils;
 
 public abstract class ClientStreamHandler extends StreamHandler {
+	protected int heartbeatCount = 0;
+	protected long lastHeartbeat = 0;
 
 	public ClientStreamHandler(Session s) {
 		super(s);
@@ -72,6 +74,8 @@ public abstract class ClientStreamHandler extends StreamHandler {
 						throw new RedbackException("Error handling upload", e);
 					}
 				} else if(type.equals("heartbeat")) {
+					lastHeartbeat = System.currentTimeMillis();
+					heartbeatCount++;
 					sendClientData(new DataMap("type", "heartbeat"));
 				}
 			}

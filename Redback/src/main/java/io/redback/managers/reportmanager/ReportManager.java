@@ -16,6 +16,7 @@ import io.redback.client.FileClient;
 import io.redback.client.ObjectClient;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.reportmanager.csv.CSVReport;
+import io.redback.managers.reportmanager.excel.ExcelReport;
 import io.redback.managers.reportmanager.pdf.PDFReport;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
@@ -141,6 +142,8 @@ public class ReportManager {
 				report = new PDFReport(session, this, config);
 			else if(config.getType().equals("csv"))
 				report = new CSVReport(session, this, config);
+			else if(config.getType().equals("excel"))
+				report = new ExcelReport(session, this, config);
 			if(report != null)
 				report.produce(filter);
 			else 

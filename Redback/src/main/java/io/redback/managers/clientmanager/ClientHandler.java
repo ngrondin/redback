@@ -33,7 +33,7 @@ public class ClientHandler extends ClientStreamHandler {
 	public void clientStreamClosed() throws RedbackException {
 		try {
 			clientManager.onClientLeave(this);
-			System.out.println("Client disconnected for " + session.getUserProfile().getUsername());
+			System.out.println("Client disconnected for " + session.getUserProfile().getUsername() + " (hb:" + heartbeatCount + " last " + (System.currentTimeMillis() - lastHeartbeat) + "ms)");
 		} catch(Exception e) {
 			logger.severe("Error closing stream : " + e.getMessage());
 		}
