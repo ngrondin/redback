@@ -86,6 +86,7 @@ public class ProcessManager
 		scriptVars.add("oc");
 		scriptVars.add("data");
 		scriptVars.add("processuser");
+		scriptVars.add("lastactioned");
 	}
 
 	
