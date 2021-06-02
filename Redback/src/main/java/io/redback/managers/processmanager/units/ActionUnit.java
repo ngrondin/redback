@@ -35,8 +35,6 @@ public class ActionUnit extends ProcessUnit
 		DataMap filter = new DataMap();
 		if(process != null) 
 			filter.put("process", process);
-		//if(interactionCode != null)
-		//	filter.put("notification.code", interactionCode);
 		List<Notification> notifications = processManager.getNotifications(actionner, filter, null);
 		for(int i = 0; i < notifications.size(); i++)
 		{
@@ -50,7 +48,7 @@ public class ActionUnit extends ProcessUnit
 				if(actionExists)
 				{
 					logger.fine("Actionning interaction '" + notification.code + "' with action '" + action +"' in process '" + notification.processName + "' instance '" + notification.pid +"'");
-					processManager.actionProcess(actionner, notification.pid, action, null);
+					processManager.actionProcess(actionner, notification.pid, action, null, null);
 				}
 				else
 				{

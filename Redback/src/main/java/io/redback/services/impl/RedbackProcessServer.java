@@ -1,5 +1,6 @@
 package io.redback.services.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import io.firebus.Firebus;
@@ -33,11 +34,11 @@ public class RedbackProcessServer extends ProcessServer
 		return pi;
 	}
 	
-	protected void actionProcess(Session session, String pid, String processAction, DataMap data) throws RedbackException
+	protected void actionProcess(Session session, String pid, String processAction, Date date, DataMap data) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
 		processManager.initiateCurrentTransaction();
-		processManager.actionProcess(actionner, pid, processAction, data);
+		processManager.actionProcess(actionner, pid, processAction, date, data);
 		processManager.commitCurrentTransaction();
 	}
 	

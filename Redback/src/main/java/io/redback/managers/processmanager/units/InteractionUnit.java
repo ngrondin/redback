@@ -1,6 +1,7 @@
 package io.redback.managers.processmanager.units;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -84,7 +85,7 @@ public class InteractionUnit extends ProcessUnit
 		logger.finer("Finished interaction node interruption");
 	}
 
-	public void action(Actionner actionner, ProcessInstance pi, String action, DataMap data) throws RedbackException
+	public void action(Actionner actionner, ProcessInstance pi, String action, Date date, DataMap data) throws RedbackException
 	{
 		logger.finer("Starting interaction node action");
 		boolean foundAction = false;
@@ -99,7 +100,7 @@ public class InteractionUnit extends ProcessUnit
 					foundAction = true;
 					pi.clearAssignees();
 					pi.clearInteractionDetails();
-					pi.setLastActioner(actionner);
+					pi.setLastActioner(actionner, date);
 					sendCompletion(pi);
 					pi.setCurrentNode(actionConfig.getNextNode());
 				}

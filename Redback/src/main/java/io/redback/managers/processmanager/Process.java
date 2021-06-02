@@ -1,5 +1,6 @@
 package io.redback.managers.processmanager;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -99,7 +100,7 @@ public class Process
 		logger.fine("Process '" + name + "' has continued '" + pi.getId() + "'");
 	}
 	
-	public void action(Actionner actionner, ProcessInstance pi, String action, DataMap data) throws RedbackException
+	public void action(Actionner actionner, ProcessInstance pi, String action, Date date, DataMap data) throws RedbackException
 	{
 		logger.fine("Processing action '" + action + "' of  process " + name + ":" + pi.getId() + "");
 		String currentNodeId = pi.getCurrentNode();
@@ -108,7 +109,7 @@ public class Process
 			ProcessUnit currentNode = nodes.get(currentNodeId);
 			if(currentNode instanceof InteractionUnit)
 			{
-				((InteractionUnit)currentNode).action(actionner,  pi, action, data);
+				((InteractionUnit)currentNode).action(actionner, pi, action, date, data);
 				if(pi.getCurrentNode() != null)
 					execute(pi);
 			}

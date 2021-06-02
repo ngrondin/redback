@@ -314,7 +314,7 @@ public class ProcessManager
 		return count;
 	}
 	
-	public void actionProcess(Actionner actionner, String pid, String action, DataMap data) throws RedbackException
+	public void actionProcess(Actionner actionner, String pid, String action, Date date, DataMap data) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(actionner, pid);
 		logger.finer("Processing action " + action + " on process " + pi.getProcessName() + ":" + pid);
@@ -323,7 +323,7 @@ public class ProcessManager
 		if(pu instanceof InteractionUnit)
 		{
 			loadGroupsOf(actionner);
-			process.action(actionner, pi, action, data);
+			process.action(actionner, pi, action, date, data);
 		}
 		else
 		{

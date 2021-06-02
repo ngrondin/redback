@@ -31,6 +31,7 @@ public class ProcessInstance
 	protected DataMap interactionDetails;
 	protected DataList assignees;
 	protected Actionner lastActioner;
+	protected Date lastActioned;
 	protected Map<String, Object> scriptContext;
 	protected boolean updated;
 	
@@ -70,6 +71,8 @@ public class ProcessInstance
 		
 		if(c.containsKey("lastactioner")  &&  c.get("lastactioner") instanceof DataMap)
 			lastActioner = new Actionner(c.getObject("lastactioner"));
+		if(c.containsKey("lastactioned"))
+			lastActioned = c.getDate("lastactioned");
 		createScriptBindings();
 		updated = false;
 	}
@@ -92,6 +95,7 @@ public class ProcessInstance
 	public void updateScriptBindings()
 	{
 		scriptContext.put("data", JSConverter.toJS(data));
+		scriptContext.put("lastactioned", JSConverter.toJS(lastActioned));
 	}
 	
 	public String getId()
@@ -207,9 +211,10 @@ public class ProcessInstance
 		return null;
 	}
 	
-	public void setLastActioner(Actionner la)
+	public void setLastActioner(Actionner la, Date dt)
 	{
 		lastActioner = la;
+		lastActioned = dt != null ? dt : new Date();
 		updated = true;
 	}
 	
@@ -238,8 +243,8 @@ public class ProcessInstance
 			retVal.put("assignees", assignees);
 		if(lastActioner != null)
 			retVal.put("lastactioner", lastActioner.getJSON());
-		//if(receivedNotifications.size() > 0)
-		//	retVal.put("receivednotifications", receivedNotifications);
+		if(lastActioned != null)
+			retVal.put("lastactioned", lastActioned);
 		retVal.put("data", data);
 		return retVal;
 	}

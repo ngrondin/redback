@@ -1,5 +1,6 @@
 package io.redback.services;
 
+import java.util.Date;
 import java.util.List;
 
 import io.firebus.Firebus;
@@ -59,10 +60,11 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 				{
 					String pid = request.getString("pid");
 					String processAction = request.getString("processaction");
+					Date date = request.getDate("date");
 					DataMap data = request.getObject("data");
 					if(pid != null &&  processAction != null)
 					{
-						actionProcess(session, pid, processAction, data);
+						actionProcess(session, pid, processAction, date, data);
 						responseData = new DataMap("result", "ok");
 					}
 					else
@@ -144,7 +146,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 
 	protected abstract ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException;
 	
-	protected abstract void actionProcess(Session session, String pid, String processAction, DataMap data) throws RedbackException;
+	protected abstract void actionProcess(Session session, String pid, String processAction, Date date, DataMap data) throws RedbackException;
 	
 	protected abstract void interruptProcess(Session session, String pid) throws RedbackException;
 

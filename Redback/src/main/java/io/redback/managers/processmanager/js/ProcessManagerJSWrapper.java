@@ -12,7 +12,6 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.managers.processmanager.Actionner;
-import io.redback.managers.processmanager.Assignment;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.utils.Notification;
@@ -74,7 +73,7 @@ public class ProcessManagerJSWrapper implements ProxyObject
 						String pid = arguments[0].asString();
 						String event = arguments[1].asString();
 						DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
-						processManager.actionProcess(actionner, pid, event, data);
+						processManager.actionProcess(actionner, pid, event, null, data);
 						return null;
 					} catch (Exception e) {
 						throw new RuntimeException("Error in processAction", e);
