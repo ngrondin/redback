@@ -215,6 +215,7 @@ public class ProcessInstance
 	{
 		lastActioner = la;
 		lastActioned = dt != null ? dt : new Date();
+		updateScriptBindings();
 		updated = true;
 	}
 	
