@@ -22,5 +22,7 @@ public abstract class Report {
 	
 	public abstract String getMime();
 	
+	public abstract String getFilename();
+	
 	public abstract byte[] getBytes() throws RedbackException;
 }

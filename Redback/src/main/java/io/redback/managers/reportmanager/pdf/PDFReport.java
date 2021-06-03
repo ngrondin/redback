@@ -191,4 +191,8 @@ public class PDFReport extends Report {
 	public String getMime() {
 		return "application/pdf";
 	}
+	
+	public String getFilename() {
+		return reportConfig.getName() + ".pdf";
+	}
 }

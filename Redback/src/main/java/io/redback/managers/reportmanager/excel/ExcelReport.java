@@ -49,6 +49,10 @@ public class ExcelReport extends Report {
 
 		return "application/excel";
 	}
+	
+	public String getFilename() {
+		return reportConfig.getName() + ".xls";
+	}
 
 	public byte[] getBytes() throws RedbackException {
 		return baos.toByteArray();

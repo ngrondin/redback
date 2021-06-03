@@ -45,6 +45,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 				Report report = produce(session, domain, reportName, filter);
 				response = new Payload(report.getBytes());
 				response.metadata.put("mime", report.getMime());
+				response.metadata.put("filename", report.getFilename());
 			} else if(action.equals("producestore")) {
 				String fileUid = produceAndStore(session, domain, reportName, filter);
 				response = new Payload(new DataMap("fileuid", fileUid).toString());

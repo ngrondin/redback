@@ -151,5 +151,9 @@ public class CSVReport extends Report {
 	public byte[] getBytes() throws RedbackException {
 		return bytes;
 	}
+	
+	public String getFilename() {
+		return reportConfig.getName() + ".csv";
+	}
 
 }
