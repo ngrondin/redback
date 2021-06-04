@@ -83,7 +83,7 @@ export class ClientWSService {
       this.websocket = webSocket({
         url: this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.path + '?firebus-timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone,
         openObserver: {next: () => this.opened()},
-        closeObserver: {next: () => this.closed()}
+        closeObserver: {next: (closeEvent) => this.closed(closeEvent)}
       });
       this.initWebsocketSubscribe();
     }
@@ -152,7 +152,7 @@ export class ClientWSService {
     
   }
 
-  closed() {
+  closed(event: any) {
     if(this.connected) {
       this.heartbeatFreq = 0;
       this.connected = false;

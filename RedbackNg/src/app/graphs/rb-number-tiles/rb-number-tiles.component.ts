@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { RbAggregateDisplayComponent } from '../abstract/rb-aggregate-display';
-
+import { RbGraphsTilesComponent } from 'redbackgraphs';
 
 @Component({
   selector: 'rb-number-tiles',

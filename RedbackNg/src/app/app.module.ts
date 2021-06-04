@@ -76,7 +76,7 @@ import { RbFileInputComponent } from './inputs/rb-file-input/rb-file-input.compo
 import { RbVcollapseComponent } from './rb-vcollapse/rb-vcollapse.component';
 import { RbCurrencyInputComponent } from './inputs/rb-currency-input/rb-currency-input.component';
 import { RbCodeInputComponent } from './inputs/rb-code-input/rb-code-input.component';
-import { AceConfigInterface, AceModule, ACE_CONFIG } from 'ngx-ace-wrapper';
+import { AceModule } from 'ngx-ace-wrapper';
 import 'brace';
 import 'brace/mode/text';
 import 'brace/mode/html';
@@ -113,7 +113,7 @@ import { RbViewHeaderComponent } from './rb-view-header/rb-view-header.component
 import { DragService } from './services/drag.service';
 import { RbDialogComponent } from './rb-dialog/rb-dialog.component';
 import { RbTileComponent } from './rb-tile/rb-tile.component';
-import { RedbackgraphsModule } from 'redbackgraphs';
+import { RbGraphsTileComponent, RbGraphsTilesComponent, RedbackgraphsModule } from 'redbackgraphs';
 import { RbTimesliderComponent } from './rb-timeslider/rb-timeslider.component';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -230,7 +230,7 @@ export let AppInjector: Injector;
     RbViewHeaderComponent,
     RbDialogComponent,
     RbTileComponent,
-    RbTimesliderComponent 
+    RbTimesliderComponent
   ],
   providers: [
     {provide: COMPILER_OPTIONS, useValue: {}, multi: true},
