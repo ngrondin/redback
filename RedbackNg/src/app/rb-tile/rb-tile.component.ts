@@ -1,3 +1,4 @@
+import { HostListener } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 
@@ -8,6 +9,10 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
 })
 export class RbTileComponent extends RbContainerComponent {
   @Input('title') title: string;
+  @HostListener('mouseenter', ['$event']) onMouseEnter($event) { this.hovering = true; }
+  @HostListener('mouseleave', ['$event']) onMouseLeave($event) { this.hovering = false; }
+
+  hovering: boolean = false;
 
   constructor() {
     super();
@@ -25,5 +30,10 @@ export class RbTileComponent extends RbContainerComponent {
   onActivationEvent(state: boolean) {
   }
 
+  refresh() {
+    if(this.dataset != null) this.dataset.refreshData();
+    if(this.datasetgroup != null) this.datasetgroup.refreshAllData();
+    if(this.aggregateset != null) this.aggregateset.refreshData();
+  }
 
 }

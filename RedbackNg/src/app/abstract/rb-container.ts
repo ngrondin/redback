@@ -13,7 +13,7 @@ export abstract class RbContainerComponent extends RbDataObserverComponent {
     @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
     @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 1;}
     @HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
-    @HostBinding('style.flex-basis') get flexbasis() { return this.basis != null ? this.basis : "auto";}
+    @HostBinding('style.flex-basis') get flexbasis() { return this.basis != null ? this.basis : this.grow == 0 ? "auto" : 0;}
     @HostBinding('style.background-color') get backgroundColor() { return this.color != null ? this.color : null;}
 
 

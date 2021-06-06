@@ -29,7 +29,8 @@
               "src/styles.css",
               "src/app/toastr.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "preserveSymlinks": true
           },
           "configurations": {
             "production": {

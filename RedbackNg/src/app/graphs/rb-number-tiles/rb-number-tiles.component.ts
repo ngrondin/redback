@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { RbAggregateDisplayComponent } from '../abstract/rb-aggregate-display';
-import { RbGraphsTilesComponent } from 'redbackgraphs';
 
 @Component({
   selector: 'rb-number-tiles',
@@ -8,13 +7,11 @@ import { RbGraphsTilesComponent } from 'redbackgraphs';
   styleUrls: ['./rb-number-tiles.component.css']
 })
 export class RbNumberTilesComponent extends RbAggregateDisplayComponent {
-  @Input('rows') rows: number;
-  @Input('cols') cols: number;
+  @Input('rows') rows: number = 1;
+  @Input('cols') cols: number = 1;
 
   constructor() {
     super();
   }
-
-  
 
 }

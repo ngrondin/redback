@@ -2,6 +2,7 @@ import { HostBinding } from "@angular/core";
 import { Component } from "@angular/core";
 import { Input } from "@angular/core";
 import { RbObject } from "app/datamodel";
+import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
 import { Subscription } from "rxjs";
@@ -11,11 +12,13 @@ import { RbComponent } from "./rb-component";
 export abstract class RbDataObserverComponent extends RbComponent {
     @Input('dataset') dataset: RbDatasetComponent;
     @Input('datasetgroup') datasetgroup: RbDatasetGroupComponent;
+    @Input('aggregateset') aggregateset: RbAggregatesetComponent;
     @Input('show') show: string;
     @HostBinding('style.display') get visitility() { return this.showResult ? 'flex' : 'none'; }
     
     public datasetSubscription: Subscription;
     public datasetGroupSubscription: Subscription;
+    public aggregatesetSubscription: Subscription;
     public showResult: boolean = true;
 
     constructor() {
@@ -29,6 +32,9 @@ export abstract class RbDataObserverComponent extends RbComponent {
         if(this.datasetgroup != null) {
             this.datasetGroupSubscription = this.datasetgroup.getObservable().subscribe(event => this.internalDatasetEvent(event));
         }
+        if(this.aggregateset != null) {
+            this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.internalDatasetEvent(event));
+        }        
         if(this.show != null) {
             this.evalShow()
         } else {
@@ -44,6 +50,9 @@ export abstract class RbDataObserverComponent extends RbComponent {
         if(this.datasetGroupSubscription != null) {
             this.datasetGroupSubscription.unsubscribe();
         }
+        if(this.aggregatesetSubscription != null) {
+            this.aggregatesetSubscription.unsubscribe();
+        }          
         this.dataObserverDestroy();
     }
 
@@ -66,6 +75,10 @@ export abstract class RbDataObserverComponent extends RbComponent {
 
     get lists(): any {
         return this.datasetgroup != null ? this.datasetgroup.lists : null;
+    }
+
+    get aggregateList(): any {
+        return this.aggregateset != null ? this.aggregateset.list : null;
     }
 
     get rbObject() : RbObject {

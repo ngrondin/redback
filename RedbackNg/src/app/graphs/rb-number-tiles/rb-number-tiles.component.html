@@ -1,5 +1,7 @@
 <rb-graphs-tiles
     [data]="graphData"
-    [cols]="5"
-    [rows]="3">
+    [cols]="cols"
+    [rows]="rows"
+    [colormap]="colormap"
+    (selectitem)="onClick($event)">
 </rb-graphs-tiles>

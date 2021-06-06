@@ -1,13 +1,13 @@
 import { Component } from "@angular/core";
 import { EventEmitter, HostBinding, HostListener, Input, Output } from "@angular/core";
-import { RbAggregateObserverComponent } from "app/abstract/rb-aggregateobserver";
+import { RbDataObserverComponent } from "app/abstract/rb-dataobserver";
 import { AppInjector } from "app/app.module";
 import { RbAggregate } from "app/datamodel";
 import { ValueComparator, Converter } from "app/helpers";
 import { FilterService } from "app/services/filter.service";
 
 @Component({template: ''})
-export abstract class RbAggregateDisplayComponent extends RbAggregateObserverComponent {
+export abstract class RbAggregateDisplayComponent extends RbDataObserverComponent {
     //@Input('label') label: String;
     @Input('series') series: any;
     @Input('categories') categories: any;
@@ -16,6 +16,7 @@ export abstract class RbAggregateDisplayComponent extends RbAggregateObserverCom
     @Input('max') max: number;
     @Input('grow') grow: number;
     @Input('shrink') shrink: number;
+    @Input('colormap') colormap: any;
     @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
     //@HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 1;}
     //@HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
@@ -32,11 +33,11 @@ export abstract class RbAggregateDisplayComponent extends RbAggregateObserverCom
       this.filterService = AppInjector.get(FilterService);
     }
   
-    aggregatesetObserverInit() {
+    dataObserverInit() {
       setTimeout(() => this.calcGraphData(), 1); // because the graph needs the parent to be fully drawn to calculate its dimensions
     }
   
-    aggregatesetObserverDestroy() {
+    dataObserverDestroy() {
     }
   
     onActivationEvent(state: boolean) {
@@ -45,7 +46,7 @@ export abstract class RbAggregateDisplayComponent extends RbAggregateObserverCom
       }
     }
   
-    onAggregatesetEvent(event: string) {
+    onDatasetEvent(event: string) {
       this.calcGraphData();
     }
   
@@ -95,18 +96,19 @@ export abstract class RbAggregateDisplayComponent extends RbAggregateObserverCom
       for(let agg of this.aggregates) {
         let thisCat: String = this.categories != null ? this.nullToEmptyString(agg.getDimension(this.categories.dimension)) : null;
         if(cat === null || cat === thisCat) {
-          let name: any = this.nullToEmptyString(agg.getDimension(this.series.labelattribute));
-          if(typeof name == 'string' && name.match(/^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:.\d{1,9})?(?:Z|[+-][01]\d:[0-5]\d)$/)) {
-            name = new Date(Date.parse(name));
+          let code: any = this.nullToEmptyString(agg.getDimension(this.series.dimension));
+          let label: any = this.nullToEmptyString(agg.getDimension(this.series.labelattribute));
+          if(typeof label == 'string' && label.match(/^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:.\d{1,9})?(?:Z|[+-][01]\d:[0-5]\d)$/)) {
+            label = new Date(Date.parse(label));
           }
           let value = agg.getMetric(this.value.name);
           if(this.value.convert != null) {
             value = Converter.convert(value, this.value.convert);
           }
-          series.push({name: name, label: name, value: value});
+          series.push({code: code, name: label, label: label, value: value}); //TODO: Tfor legacy reasons
         }
       }
-      let sortKey = this.series.sortby == null || this.series.sortby == 'name' ? 'name' : 'value';
+      let sortKey = this.series.sortby == null || this.series.sortby == 'name' ? 'label' : 'value';
       let sortDir = this.series.sortdir != null ? this.series.sortdir : 1;
       series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir));
       if(this.series.top != null) {
