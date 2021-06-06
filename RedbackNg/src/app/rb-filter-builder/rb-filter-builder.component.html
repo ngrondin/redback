@@ -1,14 +1,21 @@
 <div
     class="rb-filter-builder-container">
     <rb-tab-section
-        #fbts>
+        #fbts
+        [grow]="0"
+        [shrink]="0">
         <rb-tab
             [tabsection]="fbts"
             [label]="'Filter'"
-            [isdefault]="true">
-            <rb-vsection>
+            [isdefault]="true"                
+            [grow]="0"
+            [shrink]="0">
+            <rb-vsection
+                [grow]="0"
+                [shrink]="0">
                 <rb-hsection
-                    style="flex-grow:0">
+                    [grow]="0"
+                    [shrink]="0">
                     <table>
                         <tr>
                             <td
@@ -112,10 +119,15 @@
             *ngIf="sortConfig != null"
             [tabsection]="fbts"
             [label]="'Sort'"
-            [isdefault]="false">
-            <rb-vsection>
+            [isdefault]="false"
+            [grow]="0"
+            [shrink]="0">
+            <rb-vsection
+                [grow]="0"
+                [shrink]="0">
                 <rb-hsection
-                    style="flex-grow:0">
+                    [grow]="0"
+                    [shrink]="0">
                     <table>
                         <tr>
                             <td
