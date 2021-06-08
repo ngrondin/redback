@@ -167,7 +167,7 @@ export class Evaluator {
         if(!((expr.indexOf("object.") > -1 && object == null) || (expr.indexOf("relatedObject.") > -1 && relatedObject == null))) {
             return eval(expr);            
         } else {
-            return "";
+            return null;
         }
     }
 }

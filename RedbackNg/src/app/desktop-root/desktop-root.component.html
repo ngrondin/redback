@@ -82,7 +82,6 @@
             </rb-breadcrumb>
             <rb-view-header
                 *ngIf="userprefService.selecteduialt == 'base'"
-                [title]="currentTitle"
                 [targetStack]="viewTargetStack"
                 (backTo)="backTo($event)">
             </rb-view-header>

@@ -89,6 +89,10 @@ export abstract class RbDataObserverComponent extends RbComponent {
         return this.dataset != null ? this.dataset.selectedObject : null;
     }
 
+    get relatedObject() : RbObject {
+        return this.dataset != null ? this.dataset.relatedObject : null;
+    }
+
     get isLoading() : boolean {
         return this.dataset != null ? this.dataset.isLoading : false;
     }

@@ -8,6 +8,7 @@ import { RbActivatorComponent } from "./rb-activator";
 export abstract class RbComponent implements OnInit/*, AfterViewInit*/ {
     @Input('activator') activator: RbActivatorComponent;
 
+    public initiated: boolean = false;
     public active: boolean;
     private activatorSubscription: Subscription;
     private start: number;
@@ -24,6 +25,7 @@ export abstract class RbComponent implements OnInit/*, AfterViewInit*/ {
         this.active = true;
       }
       this.componentInit();
+      this.initiated = true;
     }
 
     /*ngAfterViewInit(): void {

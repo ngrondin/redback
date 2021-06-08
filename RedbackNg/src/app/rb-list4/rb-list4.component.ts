@@ -33,7 +33,9 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: string) {
-    this.redraw();
+    if(event == 'load' || event == 'clear' || event == 'update') {
+      this.redraw();
+    }
   }
 
   onActivationEvent(state: boolean) {

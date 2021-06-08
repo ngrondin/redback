@@ -19,21 +19,38 @@ import { RbSetComponent } from 'app/abstract/rb-set';
 import { HttpClient } from '@angular/common/http';
 
 
-export class LoadedView {
+export class LoadedView extends RbActivatorComponent {
   title: string;
   rootComponentRefs: ComponentRef<Component>[] = [];
   topSets: RbSetComponent[] = [];
+
+  constructor(t: string) {
+    super();
+    this.title = t;
+    this.active = true;
+  }
+
+  activatorInit() {}
+
+  activatorDestroy() {}
+  
+  onDatasetEvent(event: string) {}
+
+  onActivationEvent(state: boolean) {}
 
   attachTo(container: ViewContainerRef) {
     for(let item of this.rootComponentRefs) {
       container.insert(item.hostView);
     }
+    this.activate();
   }
+
 
   detachFrom(container: ViewContainerRef) {
     this.rootComponentRefs.forEach(item => {
       container.detach(container.indexOf(item.hostView))
     });
+    this.deactivate();
   }
 
   clearData() {
@@ -45,11 +62,8 @@ export class LoadedView {
   setTarget(dataTarget: DataTarget) {
     if(dataTarget != null) {
       for(let dataset of this.topSets) {
-        if(dataset.ignoretarget == false && (dataTarget.objectname == null || (dataTarget.objectname == dataset.object))) {
-          if(dataset.dataTarget != dataTarget) {
-            dataset.dataTarget = dataTarget;
-            setTimeout(() => dataset.reset(), 1);
-          }
+        if(dataset.ignoretarget == false && dataTarget.objectname != null && dataTarget.objectname == dataset.object) {
+          dataset.setDataTarget(dataTarget);
         }
       }
     }
@@ -110,12 +124,11 @@ export class RbViewLoaderComponent implements OnInit {
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
       console.time('build');
-      entry = new LoadedView();
-      entry.title = config.label;
-      entry.topSets = [];
+      entry = new LoadedView(config.label);
       if(config['content'] != null) {
         for(let item of config['content']) {
-          entry.rootComponentRefs.push(this.buildConfigRecursive(null, item, {}, entry.topSets));
+          let context: any = {activator: entry};
+          entry.rootComponentRefs.push(this.buildConfigRecursive(null, item, context, entry));
         }
       }
       this.viewCache[hash] = entry;
@@ -123,12 +136,12 @@ export class RbViewLoaderComponent implements OnInit {
     }
     if(entry != null) {
       this.currentLoadedView = entry;
-      entry.attachTo(this.container);
       entry.setTarget(this.target.dataTarget);
+      entry.attachTo(this.container);
     }
   }
 
-  buildConfigRecursive(parent: ViewContainerRef, config: any, context: any, topSets: RbSetComponent[]) {
+  buildConfigRecursive(parent: ViewContainerRef, config: any, context: any, loadedView: LoadedView) {
     let newComponentRef: ComponentRef<Component> = null;
     let factory = this.factoryRegistry[config.type]; 
     if(factory != null) {
@@ -161,7 +174,7 @@ export class RbViewLoaderComponent implements OnInit {
         }
       };
       if(newInstance instanceof RbSetComponent && newInstance['master'] == null) {
-        topSets.push(newInstance);
+        loadedView.topSets.push(newInstance);
       }
       var outputs: any = factory['componentDef']['outputs'];
       if(outputs['navigate'] != null && newInstance['navigate'] != null && newInstance['navigate'].subscribe != null) {
@@ -185,7 +198,7 @@ export class RbViewLoaderComponent implements OnInit {
           }
           let newContainer: RbContainerComponent = <RbContainerComponent>newInstance;
           for(let childConfig of config['content']) {
-            this.buildConfigRecursive(newContainer.container, childConfig, newContext, topSets);
+            this.buildConfigRecursive(newContainer.container, childConfig, newContext, loadedView);
           };
         } else {
           console.log('Type ' + config.type + ' has contents but is not a RbContainerComponent');

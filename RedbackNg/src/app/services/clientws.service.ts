@@ -71,6 +71,7 @@ export class ClientWSService {
   public uploads: any = {};
   public uniqueObjectSubscriptions: any[] = [];
   public filterObjectSubscriptions: any = {};
+  public subscriptionRequestPending: boolean = false;
   public connected: boolean = false;
   public heartbeatFreq: number = 0;
 
@@ -109,10 +110,7 @@ export class ClientWSService {
       if(this.connected == false) {
         this.connected = true;
         console.log("WS Connection Open");
-        let resubscribe = {type: "subscribe", list: []};
-        this.uniqueObjectSubscriptions.forEach(item => resubscribe.list.push({"objectname": item.objectname, "uid": item.uid}));
-        Object.keys(this.filterObjectSubscriptions).forEach(key => resubscribe.list.push({"objectname": this.filterObjectSubscriptions[key].objectname, "filter": this.filterObjectSubscriptions[key].filter, "id": key}));
-        this.websocket.next(resubscribe);
+        this.sendSubscriptionRequests();
         this.heartbeatFreq = 10000;
         this.stateObservers.forEach((observer) => observer.next(true));
       }
@@ -156,6 +154,8 @@ export class ClientWSService {
     if(this.connected) {
       this.heartbeatFreq = 0;
       this.connected = false;
+      this.uniqueObjectSubscriptions.forEach(item => item.sent = false);
+      Object.keys(this.filterObjectSubscriptions).forEach(key => this.filterObjectSubscriptions[key].sent = false);
       console.log("WSS Connection closed");
       this.stateObservers.forEach((observer) => observer.next(false));
     }
@@ -166,6 +166,19 @@ export class ClientWSService {
     if(this.heartbeatFreq > 0) {
       this.websocket.next({type:"heartbeat"});
       setTimeout(() => {this.heartbeat()}, this.heartbeatFreq);
+    }
+  }
+
+  sendSubscriptionRequests() {
+    if(this.subscriptionRequestPending == false) {
+      this.subscriptionRequestPending = true;
+      setTimeout(() => {
+        let subreq = {type: "subscribe", list: []};
+        this.uniqueObjectSubscriptions.filter(item => item.sent == false).forEach(item => subreq.list.push({"objectname": item.objectname, "uid": item.uid}));
+        Object.keys(this.filterObjectSubscriptions).filter(key => this.filterObjectSubscriptions[key].sent == false).forEach(key => subreq.list.push({"objectname": this.filterObjectSubscriptions[key].objectname, "filter": this.filterObjectSubscriptions[key].filter, "id": key}));
+        this.websocket.next(subreq);    
+        this.subscriptionRequestPending = false;
+      }, 500);
     }
   }
 
@@ -192,26 +205,13 @@ export class ClientWSService {
   }
 
   subscribeToUniqueObjectUpdate(objectname: string, uid: string) {
-    this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid});
-    if(this.connected) {
-      this.websocket.next({
-        type: "subscribe",
-        objectname: objectname,
-        uid: uid
-      });
-    }
+    this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
+    this.sendSubscriptionRequests();
   }
 
   subscribeToFilterObjectUpdate(objectname: String, filter: any, id: string) {
-    this.filterObjectSubscriptions[id] = {objectname: objectname, filter: filter};
-    if(this.connected) {
-      this.websocket.next({
-        type: "subscribe",
-        objectname: objectname,
-        filter: filter,
-        id: id
-      });
-    }
+    this.filterObjectSubscriptions[id] = {objectname: objectname, filter: filter, sent:false};
+    this.sendSubscriptionRequests();
   }
 
   clearSubscriptions() {

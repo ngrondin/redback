@@ -151,6 +151,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
       let target = {
         object: this.aggregateset.object,
         filter: filter,
+        label: event.name,
         reset: true
       };
       this.navigate.emit(target);

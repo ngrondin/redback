@@ -9,9 +9,10 @@ export abstract class RbSetComponent extends RbContainerComponent {
     @Input('basefilter') baseFilter: any;
     @Input('master') master: any;
     @Input('requiresuserfilter') requiresuserfilter: boolean = false;
-    @Input('datatarget') dataTarget: DataTarget;
     @Input('ignoretarget') ignoretarget: boolean = false;
   
+    dataTarget: DataTarget;
+    
     constructor() {
         super();
     }
@@ -28,8 +29,14 @@ export abstract class RbSetComponent extends RbContainerComponent {
 
     abstract setDestroy();
 
-    public abstract reset();
+    abstract onDataTargetEvent(dt: DataTarget);
 
     public abstract clear();
 
+    setDataTarget(dt: DataTarget) {
+        if(this.ignoretarget == false && dt != this.dataTarget) {
+            this.dataTarget = dt;
+            this.onDataTargetEvent(dt);
+        }
+    };
 }

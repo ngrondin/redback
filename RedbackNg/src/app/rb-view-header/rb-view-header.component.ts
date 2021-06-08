@@ -13,7 +13,6 @@ import { UserprefService } from 'app/services/userpref.service';
   styleUrls: ['./rb-view-header.component.css']
 })
 export class RbViewHeaderComponent implements OnInit {
-  @Input('title') title: string;
   @Input('targetStack') targetStack : ViewTarget[];
   @Output('backTo') back: EventEmitter<any> = new EventEmitter();
   @HostBinding('style.color') get foreColor() { return this.color != null ? this.color.fore : "darkblue";}
@@ -56,6 +55,14 @@ export class RbViewHeaderComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     this.getPreferredColor();
     this.getPreferredPattern();
+  }
+
+  get title() : string {
+    if(this.targetStack.length > 0) {
+      return this.targetStack[this.targetStack.length - 1].fulltitle;
+    } else {
+      return "";
+    }
   }
 
   backTo(event) {

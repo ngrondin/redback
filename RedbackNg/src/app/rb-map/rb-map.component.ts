@@ -205,7 +205,7 @@ export class RbMapComponent extends RbDataObserverComponent {
 
   calcAll() {
     if(this.active) {
-      //console.log("calc all");
+      //console.log("map calc all");
       this.minLat = 90;
       this.maxLat = -90;
       this.minLon = 180;

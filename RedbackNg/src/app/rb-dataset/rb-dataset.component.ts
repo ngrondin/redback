@@ -5,7 +5,6 @@ import { FilterService } from 'app/services/filter.service';
 import { Observable, Subscription } from 'rxjs';
 import { ApiService } from 'app/services/api.service';
 import { ReportService } from 'app/services/report.service';
-import { RbContainerComponent } from 'app/abstract/rb-container';
 import { Observer } from 'rxjs';
 import { ModalService } from 'app/services/modal.service';
 import { ObserverProxy, ValueComparator } from 'app/helpers';
@@ -40,6 +39,7 @@ export class RbDatasetComponent extends RbSetComponent  {
   public hasMorePages: boolean = true;
   public fetchThreads: number = 0;
   private observers: Observer<string>[] = [];
+  public refreshOnActivate: boolean = true;
 
 
   constructor(
@@ -62,6 +62,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     if(this.datasetgroup != null) {
       this.datasetgroup.register(this.name, this);
     }
+    this.refreshData();
   }
 
   setDestroy() {
@@ -73,16 +74,28 @@ export class RbDatasetComponent extends RbSetComponent  {
     if(this.active == true) {
       if(event == 'select') {
         this.refreshData();
-      } else if(event == 'loaded') {
+      } else if(event == 'load') {
 
-      } else if(event == 'cleared') {
+      } else if(event == 'clear') {
         this.clear();
       }
     }
   }
 
   onActivationEvent(state: any) {
-    state == true ? this.refreshData() : this.clear();
+    if(state == true && this.refreshOnActivate) {
+      this.refreshData();
+    }
+  }
+
+  onDataTargetEvent(dt: DataTarget) {
+    if(this.dataTarget != null 
+      && (this.dataTarget.filter != null || this.dataTarget.search != null)
+      && (ValueComparator.notEqual(this.dataTarget.filter, this.userFilter) || (this.dataTarget.search != this.searchString))) {
+        this.searchString = this.dataTarget.search || null;
+        this.userFilter = this.dataTarget.filter || null;
+        this.refreshData();
+    }
   }
 
   public get list() : RbObject[] {
@@ -117,22 +130,6 @@ export class RbDatasetComponent extends RbSetComponent  {
     });
   }
 
-  public reset() {
-    if(this.dataTarget != null && (this.dataTarget.filter != null || this.dataTarget.search != null)) {
-      if(ValueComparator.notEqual(this.dataTarget.filter, this.userFilter) || (this.dataTarget.search != this.searchString)) {
-        this.searchString = this.dataTarget.search || null;
-        this.userFilter = this.dataTarget.filter || null;
-        this.userSort = null;
-        this.refreshData();
-        this.publishEvent('reset');
-      }
-    } else {
-      this.searchString = null;
-      this.userFilter = null;
-      this.userSort = null;
-    }
-  }
-
   public refreshData() {
     if(this.canLoadData) {
       this.clear();
@@ -143,6 +140,9 @@ export class RbDatasetComponent extends RbSetComponent  {
       } else {
         this.fetchNextPage();
       }
+      this.refreshOnActivate = false;
+    } else {
+      this.refreshOnActivate = true;
     }
   }
 
@@ -155,7 +155,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     }
     this._list = [];
     this._selectedObject = null;
-    this.publishEvent('cleared');
+    this.publishEvent('clear');
   }
 
   public fetchNextPage() {
@@ -214,7 +214,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     if(this.fetchThreads == 0) {
       this.firstLoad = false;
       //console.log("dataset " + this.object + " finished loading (" + this._list.length + ")");
-      this.publishEvent('loaded');
+      this.publishEvent('load');
       if(this._list.length == 0) {
         this._selectedObject = null;
       } else if(this._list.length == 1) {
@@ -239,7 +239,7 @@ export class RbDatasetComponent extends RbSetComponent  {
       if(this.filterService.applies(this.filter, object)) {
         this._list.push(object);
         object.addSet(this);
-        this.publishEvent('loaded');
+        this.publishEvent('load');
         if(this._list.length == 1) {
           this._selectedObject = this._list[0];
         }  
@@ -260,19 +260,23 @@ export class RbDatasetComponent extends RbSetComponent  {
   }
 
   public search(str: string) {
-    this.searchString = str;
-    this.refreshData();
-    if(this.dataTarget != null) {
-      this.dataTarget.search = str;
+    if(str != this.searchString) {
+      this.searchString = str;
+      this.refreshData();
+      if(this.dataTarget != null) {
+        this.dataTarget.search = str;
+      }
     }
   }
 
   public filterSort(event: any) {
-    this.userFilter = event.filter;
-    this.userSort = event.sort;
-    this.refreshData();
-    if(this.dataTarget != null) {
-      this.dataTarget.filter = event.filter;
+    if(ValueComparator.notEqual(event.filter, this.userFilter) || ValueComparator.notEqual(event.sort, this.userSort)) {
+      this.userFilter = event.filter;
+      this.userSort = event.sort;
+      this.refreshData();
+      if(this.dataTarget != null && this.ignoretarget == false) {
+        this.dataTarget.filter = event.filter;
+      }
     }
   } 
 
@@ -285,11 +289,12 @@ export class RbDatasetComponent extends RbSetComponent  {
   }
 
   private addObjectAndSelect(obj: RbObject) {
-    if(this._list.indexOf(obj) > -1) {
-      this._list.splice(this._list.indexOf(obj));
+    if(this._list.indexOf(obj) == -1) {
+      //this._list.splice(this._list.indexOf(obj));
+      this._list.unshift(obj);
+      obj.addSet(this);
+      this.publishEvent("load");
     }
-    this._list.unshift(obj);
-    obj.addSet(this);
     this.select(obj);
   }
 

@@ -19,7 +19,6 @@ export class RbAggregatesetComponent extends RbSetComponent {
   public aggregates: RbAggregate[] = [];
   public searchString: string;
   public userFilter: any;
-  public initiated: boolean = false;
   public firstLoad: boolean = true;
   public _isLoading: boolean = false;
   private observers: Observer<string>[] = [];
@@ -36,7 +35,7 @@ export class RbAggregatesetComponent extends RbSetComponent {
 
 
   setInit() {
-
+    this.refreshData();
   }
 
   setDestroy() {
@@ -46,9 +45,13 @@ export class RbAggregatesetComponent extends RbSetComponent {
   }
 
   onActivationEvent(state: any) {
-    if(state == true && this.initiated == false) {
+    if(state == true) {
       this.refreshData();
     }
+  }
+
+  onDataTargetEvent(dt: DataTarget) {
+    
   }
 
   get relatedObject() : RbObject {
@@ -65,15 +68,11 @@ export class RbAggregatesetComponent extends RbSetComponent {
     });
   }
 
-  public reset() {
-    if(this.active == true) {
-      this.refreshData();
-    }
-  }
-
   public refreshData() {
-    this.clear();
-    this.fetchNextPage();
+    if(this.active) {
+      this.clear();
+      this.fetchNextPage();  
+    }
   }
 
   public clear() {
@@ -113,9 +112,8 @@ export class RbAggregatesetComponent extends RbSetComponent {
       this.nextPage = this.nextPage + 1;
       this.fetchNextPage();
     } else {
-      this.initiated = true;
       this._isLoading = false;
-      this.publishEvent('loaded');
+      this.publishEvent('load');
     }
   }
 

@@ -6,6 +6,7 @@ import { NotificationService } from 'app/services/notification.service';
 import { Subscription } from 'rxjs';
 import { RbNotification, RbObject } from 'app/datamodel';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { Evaluator } from 'app/helpers';
 
 export class RbActiongroupAction {
   action: string;
@@ -134,6 +135,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   private calcActionData() {
     this.actionData = [];
     let object = this.rbObject;
+    let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
     if(this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
         this.actionData.push(new RbActiongroupAction("processaction", action.action, action.description, action.main))
@@ -141,7 +143,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
     }
     if(this.actions != null) {
       this.actions.forEach(item => {
-        if(item.show == null || item.show == true || (typeof item.show == 'string' && (item.show.indexOf('object.') == -1 || object != null) && eval(item.show))) {
+        if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject) == true))) {
           let swtch = this.userpref.getUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
             this.actionData.push(new RbActiongroupAction(item.action, item.param, item.label, false));

@@ -427,8 +427,6 @@ export class DataTarget {
     filter: any;
     sort: any;
     search: string;
-    //userFilter: any;
-    //userSearch: string;
     selectedObject: RbObject;
   
     constructor(o: string, f: any) {
@@ -441,6 +439,7 @@ export class DataTarget {
     view: string;
     version: string;
     title: string;
+    additionalTitle: string;
     _breadcrumbLabel: string;
     mode: string;
     dataTarget: DataTarget;
@@ -452,6 +451,10 @@ export class DataTarget {
       if(f != null) {
         this.dataTarget = new DataTarget(o, f);
       }
+    }
+
+    get fulltitle() : string {
+        return (this.title != null ? this.title : '') + (this.additionalTitle != null ? (this.title != null ? " - " : "") + this.additionalTitle : "");
     }
   
     get breadcrumbLabel(): string {

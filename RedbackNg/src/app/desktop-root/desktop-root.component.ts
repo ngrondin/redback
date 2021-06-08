@@ -77,6 +77,9 @@ export class DesktopRootComponent implements OnInit {
       if(objectConfig != null && $event.filter != null && $event.filter[objectConfig.labelattribute] != null) {
         target.breadcrumbLabel = eval($event.filter[objectConfig.labelattribute]);
       }
+      if($event.label != null) {
+        target.additionalTitle = $event.label;
+      }
       this.pushViewTarget(target, $event.reset);
     }
   }

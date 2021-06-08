@@ -13,9 +13,7 @@ import { RbSetComponent } from 'app/abstract/rb-set';
 export class RbFilesetComponent extends RbSetComponent {
   public fileList: RbFile[] = [];
   public selectedFile: RbFile;
-  //public uploader: FileUploader;
   public filesLoading: boolean;
-  public initiated: boolean = false;
   public uploadProgress: number = -1;
   public overrideRbObject: RbObject;
 
@@ -24,12 +22,10 @@ export class RbFilesetComponent extends RbSetComponent {
     private apiService: ApiService
   ) {
     super();
-    //this.uploader = new FileUploader({});
-    //this.uploader.response.subscribe( (res: any) => this.afterUpload(res) );
    }
 
   setInit() {
-    this.initiated = true;
+    this.refresh();
   }
 
   setDestroy() {
@@ -37,9 +33,9 @@ export class RbFilesetComponent extends RbSetComponent {
 
   onDatasetEvent(event: any) {
     if(this.active == true) {
-      if(event == 'select' || event == 'loaded') {
+      if(event == 'select' || event == 'load') {
         this.refresh();
-      } else if(event == 'cleared') {
+      } else if(event == 'clear') {
         this.clear();
       }
     }
@@ -47,6 +43,10 @@ export class RbFilesetComponent extends RbSetComponent {
 
   onActivationEvent(state: any) {
     state == true ? this.refresh() : this.clear();
+  }
+
+  onDataTargetEvent(dt: any) {
+    
   }
 
   @Input('overrideobject') set overrideobject(o : RbObject) {
@@ -59,18 +59,12 @@ export class RbFilesetComponent extends RbSetComponent {
     return this.overrideRbObject != null ? this.overrideRbObject : this.rbObject;
   }
 
-  public reset() {
-    if(this.active) {
-      this.refresh()
-    }
-  }
-
   public clear() {
     this.fileList = [];
   }
 
   public refresh() {
-    if(this.relatedObject != null) {
+    if(this.active && this.relatedObject != null) {
       this.dataService.listFiles(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
         data => this.setData(data)
       );
@@ -81,9 +75,6 @@ export class RbFilesetComponent extends RbSetComponent {
   private setData(data: RbFile[]) {
     this.fileList = data;
     this.filesLoading = false;
-    /*if(this.fileList.length == 1) {
-      this.selectedFile = this.fileList[0];
-    }*/
   }
 
   public uploadFile(file: File) {
