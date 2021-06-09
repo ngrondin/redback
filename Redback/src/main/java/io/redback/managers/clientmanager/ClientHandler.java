@@ -43,7 +43,10 @@ public class ClientHandler extends ClientStreamHandler {
 		this.deviceId = deviceId;
 		clientManager.registerDevice(deviceId, deviceModel, os, appVersion, locationPermissions, session.getUserProfile().getUsername());
 		DataMap flags = clientManager.getFlagsForDevice(deviceId);
-		
+		if(flags != null ) {
+			if(flags.getBoolean("sendlog") == true) sendLogRequest();
+			clientManager.clearFlagsForDevice(deviceId);
+		}
 	}
 	
 	public void subscribeFilter(String objectname, DataMap filter, String id) throws RedbackException {

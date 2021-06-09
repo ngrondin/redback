@@ -126,6 +126,14 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		sendClientData(msg);		
 	}
 	
+	public void sendLogRequest() {
+		DataMap msg = new DataMap();
+		msg.put("type", "log");
+		msg.put("action", "send");
+		msg.put("filename", "log_" + session.getUserProfile().getUsername() + ".json");
+		sendClientData(msg);		
+	}
+	
 	public abstract void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions) throws RedbackException;
 	
 	public abstract void subscribeObject(String objectname, String uid) throws RedbackException;

@@ -105,8 +105,17 @@ public class ClientManager {
 	
 	public DataMap getFlagsForDevice(String deviceId) throws RedbackException {
 		DataMap key = new DataMap("_id", deviceId);
-		DataMap flags = deviceCollection.convertObjectToCanonical(dataClient.getData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key)));
-		return flags;
+		DataMap resp = deviceCollection.convertObjectToCanonical(dataClient.getData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key)));
+		if(resp != null && resp.getList("result").size() > 0)
+			return resp.getList("result").getObject(0).getObject("flags");
+		else
+			return null;
+	}
+	
+	public void clearFlagsForDevice(String deviceId) throws RedbackException {
+		DataMap key = new DataMap("_id", deviceId);
+		DataMap data = new DataMap("flags", new DataMap());
+		dataClient.putData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key), deviceCollection.convertObjectToSpecific(data));
 	}
 	
 	public void onObjectUpdate(DataMap data) throws RedbackException {
