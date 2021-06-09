@@ -31,14 +31,14 @@ public class ObjectClient extends Client
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter) throws RedbackException  {
-		return listObjects(session, objectname, filter, null, true, 0);
+		return listObjects(session, objectname, filter, null, true, 0, 50);
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort) throws RedbackException  {
-		return listObjects(session, objectname, filter, sort, true, 0);
+		return listObjects(session, objectname, filter, sort, true, 0, 50);
 	}
 
-	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int page) throws RedbackException  {
+	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException  {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "list");
@@ -47,7 +47,7 @@ public class ObjectClient extends Client
 			if(sort != null)
 				req.put("sort", sort);
 			req.put("page", page);
-			req.put("pagesize", 50);
+			req.put("pagesize", pageSize);
 			if(addRelated)
 				req.put("options", new DataMap("addrelated", true));
 			DataMap resp = request(session, req);
@@ -65,12 +65,13 @@ public class ObjectClient extends Client
 	public List<RedbackObjectRemote> listAllObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
 		List<RedbackObjectRemote> list = new ArrayList<RedbackObjectRemote>();
 		int page = 0;
+		int pageSize = 250;
 		boolean more = true;
 		while(more) 
 		{
-			List<RedbackObjectRemote> sublist = listObjects(session, objectname, filter, sort, addRelated, page++);
+			List<RedbackObjectRemote> sublist = listObjects(session, objectname, filter, sort, addRelated, page++, pageSize);
 			list.addAll(sublist);
-			if(sublist.size() != 50)
+			if(sublist.size() != pageSize)
 				more = false;
 		}
 		return list;

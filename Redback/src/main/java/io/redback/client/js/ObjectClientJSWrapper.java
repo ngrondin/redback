@@ -80,11 +80,12 @@ public class ObjectClientJSWrapper implements ProxyObject {
 					String objectname = arguments[0].asString();
 					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
 					DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
+					boolean addRelated = arguments.length > 3 ? arguments[3].asBoolean() : true;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
 					try
 					{
-						Object o = objectClient.listAllObjects(session, objectname, filter, sort, true);
+						Object o = objectClient.listAllObjects(session, objectname, filter, sort, addRelated);
 						return JSConverter.toJS(o);
 					}
 					catch(Exception e)
