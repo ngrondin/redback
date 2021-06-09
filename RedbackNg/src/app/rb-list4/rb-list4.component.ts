@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { Evaluator } from 'app/helpers';
+import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -15,13 +16,15 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('subattribute') subattribute: string;
   @Input('meta1attribute') meta1attribute: string;
   @Input('meta2attribute') meta2attribute: string;
+  @Input('modal') modal: string;
 
   enhancedList: any[];
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
   reachedBottom: boolean = false;
 
   constructor(
-    public userpref: UserprefService
+    public userpref: UserprefService,
+    public modalService: ModalService
   ) {
     super();
   }
@@ -110,6 +113,9 @@ export class RbList4Component extends RbDataObserverComponent {
 
   itemClicked(item: RbObject) {
     this.dataset.select(item);
+    if(this.modal != null) {
+      this.modalService.open(this.modal);
+    }
   }
 
   refresh() {

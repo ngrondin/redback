@@ -103,6 +103,12 @@ public class ClientManager {
 		}
 	}
 	
+	public DataMap getFlagsForDevice(String deviceId) throws RedbackException {
+		DataMap key = new DataMap("_id", deviceId);
+		DataMap flags = deviceCollection.convertObjectToCanonical(dataClient.getData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key)));
+		return flags;
+	}
+	
 	public void onObjectUpdate(DataMap data) throws RedbackException {
 		List<ClientHandler> subscribers = subsManager.getSubscribersFor(data);
 		for(ClientHandler ch : subscribers) {

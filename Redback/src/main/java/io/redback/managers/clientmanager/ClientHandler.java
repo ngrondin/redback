@@ -42,6 +42,8 @@ public class ClientHandler extends ClientStreamHandler {
 	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions) throws RedbackException {
 		this.deviceId = deviceId;
 		clientManager.registerDevice(deviceId, deviceModel, os, appVersion, locationPermissions, session.getUserProfile().getUsername());
+		DataMap flags = clientManager.getFlagsForDevice(deviceId);
+		
 	}
 	
 	public void subscribeFilter(String objectname, DataMap filter, String id) throws RedbackException {

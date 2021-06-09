@@ -149,6 +149,7 @@ export class RbCalendarComponent extends RbDataObserverComponent {
         cfg.active = false;
       }
     }
+    this.redraw();
     this.filterDataset();
   }
 
