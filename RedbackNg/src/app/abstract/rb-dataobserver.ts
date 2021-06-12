@@ -94,7 +94,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     get isLoading() : boolean {
-        return this.dataset != null ? this.dataset.isLoading : false;
+        return this.dataset != null ? this.dataset.isLoading : this.datasetgroup != null ? this.datasetgroup.isLoading : this.aggregateset != null ? this.aggregateset.isLoading : false;
     }
 
     evalShow() {

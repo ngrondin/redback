@@ -5,3 +5,10 @@
     [colormap]="colormap"
     (selectitem)="onClick($event)">
 </rb-graphs-tiles>
+<div
+    class="rb-chart-loadoverlay"
+    *ngIf="isLoading">
+    <mat-spinner
+        diameter="50">
+    </mat-spinner>
+</div>

@@ -101,3 +101,10 @@
         (select)="onClick($event)">
     </ngx-charts-line-chart>    
 </div>
+<div
+    class="rb-chart-loadoverlay"
+    *ngIf="isLoading">
+    <mat-spinner
+        diameter="50">
+    </mat-spinner>
+</div>

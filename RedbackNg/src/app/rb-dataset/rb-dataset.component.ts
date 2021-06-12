@@ -71,14 +71,12 @@ export class RbDatasetComponent extends RbSetComponent  {
   }
 
   onDatasetEvent(event: string) {
-    if(this.active == true) {
-      if(event == 'select') {
-        this.refreshData();
-      } else if(event == 'load') {
+    if(event == 'select') {
+      this.refreshData();
+    } else if(event == 'load') {
 
-      } else if(event == 'clear') {
-        this.clear();
-      }
+    } else if(event == 'clear') {
+      this.clear();
     }
   }
 
@@ -289,12 +287,12 @@ export class RbDatasetComponent extends RbSetComponent  {
   }
 
   private addObjectAndSelect(obj: RbObject) {
-    if(this._list.indexOf(obj) == -1) {
-      //this._list.splice(this._list.indexOf(obj));
-      this._list.unshift(obj);
-      obj.addSet(this);
-      this.publishEvent("load");
+    if(this._list.indexOf(obj) > -1) {
+      this._list.splice(this._list.indexOf(obj));
     }
+    this._list.unshift(obj);
+    obj.addSet(this);
+    this.publishEvent("load");
     this.select(obj);
   }
 
@@ -307,6 +305,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     if(this._list.indexOf(obj) > -1) {
       this._list.splice(this._list.indexOf(obj), 1);
       obj.removeSet(this);
+      this.publishEvent("removed");
     }
   }
 
