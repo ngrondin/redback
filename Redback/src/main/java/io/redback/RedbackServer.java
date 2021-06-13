@@ -45,7 +45,8 @@ public class RedbackServer implements Consumer
 				{
 					DataMap loggerConfig = loggerConfigs.getObject(i);
 					Logger logger = Logger.getLogger(loggerConfig.getString("name"));
-					Formatter formatter = (Formatter)Class.forName(loggerConfig.getString("formatter")).newInstance();
+					Constructor<?> formatterConsuctor = Class.forName(loggerConfig.getString("formatter")).getDeclaredConstructor();
+					Formatter formatter = (Formatter)formatterConsuctor.newInstance();
 					Handler handler = null;
 					if(loggerConfig.containsKey("filename")) 
 						handler = new FileHandler(loggerConfig.getString("filename"));
@@ -95,7 +96,10 @@ public class RedbackServer implements Consumer
 				{
 					logger.fine("Instantiating discovery agent " + className);
 					Class<?> c = Class.forName(className);
-					DiscoveryAgent agent = (DiscoveryAgent)c.newInstance();
+					Constructor<?> agentConstructor = c.getDeclaredConstructor();
+					DiscoveryAgent agent = (DiscoveryAgent)agentConstructor.newInstance();
+					if(discoveryAgent.containsKey("config")) 
+						agent.setConfig(discoveryAgent.getObject("config"));
 					firebus.addDiscoveryAgent(agent);
 				} 
 				catch (Exception e) 
