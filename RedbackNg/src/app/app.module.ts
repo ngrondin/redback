@@ -26,6 +26,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -113,7 +114,7 @@ import { RbViewHeaderComponent } from './rb-view-header/rb-view-header.component
 import { DragService } from './services/drag.service';
 import { RbDialogComponent } from './rb-dialog/rb-dialog.component';
 import { RbTileComponent } from './rb-tile/rb-tile.component';
-import { RbGraphsTileComponent, RbGraphsTilesComponent, RedbackgraphsModule } from 'redbackgraphs';
+import { RedbackgraphsModule } from 'redbackgraphs';
 import { RbTimesliderComponent } from './rb-timeslider/rb-timeslider.component';
 import { RbNumberTilesComponent } from './graphs/rb-number-tiles/rb-number-tiles.component';
 
@@ -145,6 +146,7 @@ export let AppInjector: Injector;
     MatDialogModule,
     MatDividerModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MatMenuModule,
     MatSlideToggleModule,
     MatSliderModule,

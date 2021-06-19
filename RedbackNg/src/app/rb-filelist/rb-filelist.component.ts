@@ -17,6 +17,7 @@ export class RbFilelistComponent extends RbComponent {
   @Input('details') showDetails: boolean = true;
 
   hasFileOver: boolean = false;
+  hovering: RbFile = null;
 
   constructor(
     private apiService: ApiService,
@@ -36,6 +37,10 @@ export class RbFilelistComponent extends RbComponent {
 
   get isLoading(): boolean {
     return this.fileset != null ? this.fileset.filesLoading : false;
+  }
+
+  get uploadProgress(): number {
+    return this.fileset != null ? this.fileset.uploadProgress : -1;
   }
 
   componentInit() {
@@ -64,5 +69,17 @@ export class RbFilelistComponent extends RbComponent {
 
   getBase64Thumbnail(file: RbFile) {
     return this.domSanitizer.bypassSecurityTrustResourceUrl(file.thumbnail);
+  }
+
+  startHovering(file) {
+    this.hovering = file;
+  }
+
+  endHovering(file) {
+    if(this.hovering == file) this.hovering = null;
+  }
+
+  delete(file) {
+    this.fileset.delete(file);
   }
 }

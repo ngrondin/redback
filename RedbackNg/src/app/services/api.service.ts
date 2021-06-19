@@ -224,6 +224,17 @@ export class ApiService {
     }
   }
 
+  unlinkFile(fileuid: string, objectname: string, uid: string) : Observable<any> {
+    const req = {
+      action: 'unlink',
+      fileuid: fileuid,
+      object: objectname,
+      uid: uid
+    };
+    const headers = new HttpHeaders().set('Content-Type', 'text/plain; charset=utf-8');
+    return this.requestService(this.fileService, req);
+  }
+
   listFiles(object: string, uid: string): Observable<any> {
     return this.requestService(this.fileService, {
       action: "list",

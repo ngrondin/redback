@@ -60,6 +60,11 @@
     cursor: pointer;
 }
 
+.rb-cal-day-header-light {
+    background-color: #e8e8e8;
+    color:#999;
+}
+
 .rb-cal-day-content {
     display: flex;
     flex-direction: column;

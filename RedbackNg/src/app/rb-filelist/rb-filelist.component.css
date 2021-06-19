@@ -1,18 +1,26 @@
 .rb-file-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     min-width: 300px;
     min-height: 40px;
+    flex-wrap: wrap;
+}
+
+.rb-file-item-wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 18vw;
+    cursor: pointer;
 }
 
 .rb-files-item {
     display: flex;
     flex-direction: row;
     align-items: center;
-    cursor: pointer;
-    max-width: 18vw;
     overflow:hidden;
+    flex: 1 1 auto;
 }
+
 
 .rb-files-item-active {
 	border-left: 4px Solid #7985cb;
@@ -71,3 +79,32 @@
     color: lightgray;
 }
 
+.rb-files-delete {
+    display: flex;
+    flex-direction: column;
+    width: 40px;
+    justify-content: center;
+    align-items: flex-start;
+    color: grey;
+}
+
+.rb-files-nofiles {
+    display: flex;
+    min-width: 250px;
+    min-height: 80px;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.rb-files-uploading {
+    display: flex;
+    flex-direction: column;
+    min-width: 280px;
+    min-height: 50px;
+    padding: 10px;
+}
+
+.rb-files-uploading > span {
+    padding-bottom: 5px;
+}

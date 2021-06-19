@@ -6,8 +6,6 @@
 .rb-file-drop {
     display: flex;
     flex: 1 1 auto;
-    color: lightgrey;
-    font-style: italic;
     cursor: default;
 }
 

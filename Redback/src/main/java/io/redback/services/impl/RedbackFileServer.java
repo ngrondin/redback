@@ -295,6 +295,27 @@ public class RedbackFileServer extends FileServer
 		}
 	}
 	
+	public void unlinkFileFrom(String fileUid, String object, String uid) throws RedbackException {
+		try {
+			if(linkCollection != null) {
+				DataMap key = new DataMap();
+				key.put(linkCollection.getField("fileuid"), fileUid);
+				key.put(linkCollection.getField("object"), object);
+				key.put(linkCollection.getField("objectuid"), uid);
+				dataClient.deleteData(linkCollection.getName(), key);
+			} else {
+				DataMap key = new DataMap(fileCollection.getField("fileuid"), fileUid);
+				DataMap data = new DataMap();
+				data.put(fileCollection.getField("object"), null);
+				data.put(fileCollection.getField("objectuid"), null);
+				dataClient.putData(fileCollection.getName(), key, data);
+			}
+		} catch(Exception e) {
+			throw new RedbackException("Error unlinking file");
+		}
+		
+	}
+	
 	public String getMimeType(String filename)
 	{
 		String type = "";

@@ -46,17 +46,16 @@
         *ngFor="let day of week"
         class="rb-cal-day-container">
         <div
-            *ngIf="day != null"
             [class]="'rb-cal-day' + (day == '1' ? ' rb-cal-firstday' : '')">
             <div
-                class="rb-cal-day-header"
+                [class]="'rb-cal-day-header' + (day.mainMonth ? '' : ' rb-cal-day-header-light')"
                 (click)="clickDay(day)">
-                {{day}}
+                {{day.label}}
             </div>
             <div
                 class="rb-cal-day-content">
                 <div
-                    *ngFor="let item of data[day]"
+                    *ngFor="let item of data[day.id]"
                     class="rb-cal-item"
                     [style.backgroundColor]="item.color"
                     (click)="clickItem(item)">
@@ -64,9 +63,9 @@
                 </div>
             </div>        
             <div
-                *ngIf="data[day].length > 3"
+                *ngIf="data[day.id] != null && data[day.id].length > 3"
                 class="rb-cal-count">
-                {{data[day].length}}
+                {{data[day.id].length}}
             </div>
         </div>
         <div

@@ -1,11 +1,13 @@
 <div
     class="rb-file-container">
     <div
-        *ngFor="let file of list" 
-        [ngClass]="selectedFile == file ? userpref.getAtlClassFor('rb-files-item-active') : ''"
-        (click)="select(file)">
+        class="rb-file-item-wrapper"
+        *ngFor="let file of list"
+        (mouseenter)="startHovering(file)"
+        (mouseleave)="endHovering(file)" >
         <div
-            class="rb-files-item">
+            class="rb-files-item"
+            (click)="select(file)">
             <div
                 class="rb-files-imgbox">
                 <mat-icon
@@ -32,12 +34,20 @@
                     class="rb-files-date">
                     {{file.username}}
                 </div>
-            </div>         
+            </div>
         </div>
+        <div
+            class="rb-files-delete">
+            <mat-icon
+                *ngIf="hovering == file"
+                (click)="delete(file)">
+                delete
+            </mat-icon>
+        </div>          
     </div>
     <div
-        class="rb-files-item"
-        *ngIf="list.length == 0">
+        class="rb-files-nofiles"
+        *ngIf="list.length == 0 && uploadProgress == -1">
         No Files
     </div>  
     <div
@@ -46,5 +56,11 @@
         <mat-spinner
             diameter="20">
         </mat-spinner>
-    </div>    
+    </div>
+    <div
+        class="rb-files-uploading"
+        *ngIf="uploadProgress != -1">
+        <span>Uploading...</span>
+        <mat-progress-bar [mode]="'determinate'" [value]="uploadProgress"></mat-progress-bar>
+    </div>           
 </div>

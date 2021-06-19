@@ -32,7 +32,8 @@ export class RbDatasetComponent extends RbSetComponent  {
   public searchString: string;
   public userFilter: any = null;
   public userSort: any = null;
-  public filter: any;
+  public mergedFilter: any;
+  public resolvedFilter: any;
   public firstLoad: boolean = true;
   public nextPage: number;
   public pageSize: number;
@@ -51,10 +52,10 @@ export class RbDatasetComponent extends RbSetComponent  {
     private errorService: ErrorService
   ) {
     super();
+    this.id = "" + Math.floor(Math.random() * 10000);
   }
 
   setInit() {
-    this.id = "" + Math.floor(Math.random() * 10000);
     this.dataSubscription = this.dataService.getObjectCreateObservable().subscribe(object => this.receiveNewlyCreatedData(object));
     this.pageSize = this.fetchAll == true ? 250 : 50;
     this.fetchThreads = 0;
@@ -160,7 +161,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     if(this.hasMorePages) {
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
       const search = this.searchString;
-      this.dataService.listObjects(this.object, this.filter, search, sort, this.nextPage, this.pageSize, this.addrelated).subscribe({
+      this.dataService.listObjects(this.object, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, this.addrelated).subscribe({
         next: (data) => {
           this.fetchThreads--;
           this.setData(data);
@@ -189,9 +190,9 @@ export class RbDatasetComponent extends RbSetComponent  {
         filter = this.filterService.mergeFilters(filter, this.userFilter);
       }  
     }
-    filter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
-    this.filter = filter;
-    this.dataService.subscribeObjectCreation(this.id, this.object, this.filter);
+    this.mergedFilter = filter;
+    this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
+    this.dataService.subscribeObjectCreation(this.id, this.object, this.resolvedFilter);
   }
 
   private setData(data: RbObject[]) {
@@ -224,7 +225,7 @@ export class RbDatasetComponent extends RbSetComponent  {
       }
       if(this.nextPage == 1) { 
         if(this.fetchAll == false && this._list.length > 10) {
-          this.apiService.aggregateObjects(this.object, this.filter, this.searchString, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
+          this.apiService.aggregateObjects(this.object, this.resolvedFilter, this.searchString, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
         } else {
           this.totalCount = this._list.length;
         }
@@ -234,7 +235,7 @@ export class RbDatasetComponent extends RbSetComponent  {
   
   private receiveNewlyCreatedData(object: RbObject) {
     if(object.objectname == this.object && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
-      if(this.filterService.applies(this.filter, object)) {
+      if(this.filterService.applies(this.resolvedFilter, object)) {
         this._list.push(object);
         object.addSet(this);
         this.publishEvent('load');
@@ -279,7 +280,7 @@ export class RbDatasetComponent extends RbSetComponent  {
   } 
 
   public create() {
-    this.dataService.createObject(this.object, null, this.filter).subscribe(newObject => this.addObjectAndSelect(newObject));
+    this.dataService.createObject(this.object, null, this.resolvedFilter).subscribe(newObject => this.addObjectAndSelect(newObject));
   }
 
   public delete(obj: RbObject) {
@@ -322,9 +323,9 @@ export class RbDatasetComponent extends RbSetComponent  {
     return new Observable((observer) => {
       let _name: string = name.toLowerCase();
       if(_name == 'create' || _name == 'createinmemory') {
-        let data = this.filter;
+        let data = this.resolvedFilter;
         if(param != null) {
-          data = this.filterService.mergeFilters(this.filter, this.filterService.resolveFilter(param, this.selectedObject, this.selectedObject, this.relatedObject))
+          data = this.filterService.mergeFilters(this.resolvedFilter, this.filterService.resolveFilter(param, this.selectedObject, this.selectedObject, this.relatedObject))
         }
         if(_name == 'create') {
           this.dataService.createObject(this.object, null, data).subscribe(new ObserverProxy(observer, newObject => this.addObjectAndSelect(newObject)));
@@ -336,7 +337,7 @@ export class RbDatasetComponent extends RbSetComponent  {
           this.dataService.deleteObject(this.selectedObject).subscribe(new ObserverProxy(observer, () => this.removeSelected()));
         }
       } else if(_name == 'exportall') {
-        this.dataService.exportObjects(this.object, this.filter, this.searchString).subscribe(new ObserverProxy(observer));
+        this.dataService.exportObjects(this.object, this.resolvedFilter, this.searchString).subscribe(new ObserverProxy(observer));
       } else if(_name == 'report') {
         if(this.selectedObject != null) {
           this.reportService.launchReport(param, null, {"uid": this.selectedObject.uid});
@@ -344,12 +345,12 @@ export class RbDatasetComponent extends RbSetComponent  {
         observer.next();
         observer.complete();        
       } else if(_name == 'reportall') {
-        this.reportService.launchReport(param, null, this.filter);
+        this.reportService.launchReport(param, null, this.resolvedFilter);
         observer.next();
         observer.complete();        
       } else if(_name == 'reportlist') {
         const selectedFilter = this.selectedObject != null ? {"uid": this.selectedObject.uid} : null;
-        this.reportService.popupReportList(param, selectedFilter, this.filter);
+        this.reportService.popupReportList(param, selectedFilter, this.resolvedFilter);
         observer.next();
         observer.complete();
       } else if(_name == 'execute') {
@@ -379,7 +380,7 @@ export class RbDatasetComponent extends RbSetComponent  {
         }
       } else if(_name == 'executeglobal') {
         let funcParam = {
-          "filter": this.filter,
+          "filter": this.resolvedFilter,
           "selecteduid": (this.selectedObject != null ? this.selectedObject.uid : null)
         }
         this.dataService.executeGlobal(param, funcParam).subscribe(new ObserverProxy(observer));

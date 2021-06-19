@@ -16,6 +16,11 @@
     flex-grow: 1;
 }
 
+.rb-filter-builder-content {
+    overflow: auto;
+    max-height: 30vw;
+}
+
 .rb-fb-labelcol {
     text-align: end;
     vertical-align: top;
@@ -32,8 +37,8 @@
 }
 
 .rb-fb-buttoncol {
-    /*width: 66px;
-    white-space: nowrap;*/
+    vertical-align: top;
+    padding-top: var(--v24px);
 }
 
 .rb-filter-builder-label {
@@ -50,4 +55,11 @@
 
 .rb-filter-builder-multiselect-tablecell {
     padding: 0px 10px 0px 0px;
+}
+
+.rb-filter-builder-bottom {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: end;
 }

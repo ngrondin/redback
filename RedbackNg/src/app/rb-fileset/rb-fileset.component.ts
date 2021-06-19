@@ -79,13 +79,14 @@ export class RbFilesetComponent extends RbSetComponent {
 
   public uploadFile(file: File) {
     this.apiService.uploadFile(file, this.relatedObject.objectname, this.relatedObject.uid).subscribe(
-      (prog) => this.uploadProgress = prog,
+      (prog) => this.uploadProgress = prog.value,
       (error) => { },
       () => this.afterUpload(null)
     );
   }
   
   public afterUpload(resp: any) {
+    this.uploadProgress = -1;
     this.refresh();
   }
   
@@ -93,4 +94,7 @@ export class RbFilesetComponent extends RbSetComponent {
     this.selectedFile = file;
   }
 
+  public delete(file: RbFile) {
+    this.apiService.unlinkFile(file.fileUid, this.relatedObject.objectname, this.relatedObject.uid).subscribe(next => this.refresh());
+  }
 }

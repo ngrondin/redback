@@ -95,6 +95,14 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						linkFileTo(fileUid, object, uid);
 						response = new Payload((new DataMap("result", "ok")).toString());
 					}
+					else if(action.equals("unlink")) 
+					{
+						String object = request.getString("object");
+						String uid = request.getString("uid");
+						String fileUid = request.getString("fileuid");
+						unlinkFileFrom(fileUid, object, uid);
+						response = new Payload((new DataMap("result", "ok")).toString());
+					}					
 					else if(action.equals("list"))
 					{
 						String object = request.getString("object");
@@ -180,6 +188,8 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 	public abstract List<RedbackFileMetaData> listFilesFor(String object, String uid) throws RedbackException;
 
 	public abstract void linkFileTo(String fileUid, String object, String uid) throws RedbackException;
+	
+	public abstract void unlinkFileFrom(String fileUid, String object, String uid) throws RedbackException;
 
 	public abstract RedbackFileMetaData putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException;
 	

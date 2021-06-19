@@ -111,7 +111,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 			DataMap resp = dataClient.getData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(filter), null);
 			if(resp != null && resp.getList("result") != null && resp.getList("result").size() > 0) {
 				clientData = resp.getList("result").getObject(0);
-				cachedClientData.put(cacheKey, clientData);
+				//cachedClientData.put(cacheKey, clientData); //Commented this out until multinode firebus comm works
 			}			
 		}
 		

@@ -1,7 +1,10 @@
 import { EventEmitter, Input, Output } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
+import { LegendEntryComponent } from '@swimlane/ngx-charts';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { FilterService } from 'app/services/filter.service';
 
 
 class CalendarSeriesConfig {
@@ -67,6 +70,9 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   _year: number;
   _month: number;
   firstDay: number;
+  startDate: Date;
+  endDate: Date;
+
   days: any = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   months: any = [
     {display: "January", value: 0},
@@ -86,7 +92,9 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   layerOptions: any = null;
   _activeDatasets: any[] = [];
 
-  constructor() {
+  constructor(
+    private filterService: FilterService
+  ) {
     super();
   }
 
@@ -95,6 +103,7 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     dt.setDate(1);
     this._year = dt.getFullYear();
     this._month = dt.getMonth();
+    this.calcParams();
     if(this.series != null) {
       this.seriesConfigs = [];
       for(let item of this.series) {
@@ -159,6 +168,7 @@ export class RbCalendarComponent extends RbDataObserverComponent {
 
   set year(val: number) {
     this._year = val;
+    this.calcParams();
     this.filterDataset();
   }
 
@@ -168,18 +178,46 @@ export class RbCalendarComponent extends RbDataObserverComponent {
 
   set month(val: number) {
     this._month = val;
+    this.calcParams();
     this.filterDataset();
   }
 
+  calcParams() {
+    let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
+    this.firstDay = firstOfMonth.getDay();
+    this.startDate = new Date(firstOfMonth.getTime() - (this.firstDay * 86400000));
+    let firstofNextMonth = new Date((new Date(firstOfMonth.getTime()).setMonth(this.month + 1)));
+    this.endDate = new Date(firstofNextMonth.getTime() + ((7 - firstofNextMonth.getDay()) * 86400000));
+    let dayCount = (this.endDate.getTime() - this.startDate.getTime()) / 86400000;
+    let weekCount = Math.ceil(dayCount / 7);
+    this.weeks = [];
+    this.data = {};
+    let dt = new Date(this.startDate.getTime());
+    for(var w = 0; w < weekCount; w++) {
+      let days = [];
+      for(var day of this.days) {
+        let dateId = dt.getFullYear() + "-" + (dt.getMonth() + 1) + "-" + dt.getDate();
+        days.push({
+          id: dateId,
+          label: dt.getDate().toString(), 
+          mainMonth: dt.getMonth() == this._month ? true : false,
+          filter:{
+            $gt:"'" + dt.toISOString() + "'", 
+            $lt:"'" + (new Date(dt.getTime() + 86400000)).toISOString() + "'"
+          }
+        });
+        dt.setDate(dt.getDate() + 1);
+      }
+      this.weeks.push(days);
+    }
+  }
 
   filterDataset() {
-    let startDate = new Date(this.year, this.month, 1, 0, 0, 0, 0);
-    let endDate = new Date((new Date(startDate.getTime())).setMonth(startDate.getMonth() + 1));
     for(let cfg of this.activeSeries) {
       let filter = {};
       filter[cfg.dateAttribute] = {
-        $gt: "'" + startDate.toISOString() + "'",
-        $lt: "'" + endDate.toISOString() + "'"
+        $gt: "'" + this.startDate.toISOString() + "'",
+        $lt: "'" + this.endDate.toISOString() + "'"
       }
       if(this.datasetgroup != null) {
         this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
@@ -190,36 +228,12 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   }
   
   redraw() {
-    this.calcParams();
     this.calcLists();
   }
 
-  calcParams() {
-    let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
-    let firstofNextMonth = new Date((new Date(firstOfMonth.getTime()).setMonth(this.month + 1)));
-    this.firstDay = firstOfMonth.getDay();
-    let dayCount = Math.ceil(((firstofNextMonth.getTime() - firstOfMonth.getTime()) / 86400000) - 0.1);
-    let weekCount = Math.ceil((dayCount + this.firstDay) / 7);
-    this.weeks = [];
-    this.data = {};
-    let i = 1 - this.firstDay;
-    for(var w = 0; w < weekCount; w++) {
-      let days = [];
-      for(var day of this.days) {
-        if(i > 0 && i <= dayCount) {
-          let dayOfMonthStr = i.toString();
-          days.push(dayOfMonthStr);
-          this.data[dayOfMonthStr] = [];
-        } else {
-          days.push(null);
-        }
-        i++;
-      }
-      this.weeks.push(days);
-    }
-  }
 
   calcLists() {
+    this.data = {};
     for(let cfg of this.activeSeries) {
       let list: RbObject[] = this.lists != null ? this.lists[cfg.dataset] : this.list;
       for(var i in list) {
@@ -243,35 +257,23 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   }
   
   putEntryInData(entry: CalendarEntry) {
-    if(entry.date.getFullYear() == this.year && entry.date.getMonth() == this.month) {
-      let dayOfMonth = entry.date.getDate();
-      if(this.data[dayOfMonth] != null) {
-        this.data[dayOfMonth].push(entry);
-      } else {
-        alert('boom');
-      }
+    if(entry.date.getTime() >= this.startDate.getTime() && entry.date.getTime() <= this.endDate.getTime()) {
+      let dateId = entry.date.getFullYear() + "-" + (entry.date.getMonth() + 1) + "-" + entry.date.getDate();
+      if(this.data[dateId] == null) this.data[dateId] = [];
+      this.data[dateId].push(entry);
      }
   }
 
   clickDay(day: any) {
-    let startDate = new Date(this.year, this.month, day, 0, 0, 0, 0);
-    let endDate = new Date((new Date(startDate.getTime())).setDate(startDate.getDate() + 1));
-    if(this.seriesConfigs.length > 0) {
-      let cfg = this.seriesConfigs[0];
-      let filter = {};
-      filter[cfg.dateAttribute] = {
-        $gt: "'" + startDate.toISOString() + "'",
-        $lt: "'" + endDate.toISOString() + "'"
-      }      
-      let objectname = null;
-      if(this.datasetgroup != null) {
-        objectname = this.datasetgroup.datasets[cfg.dataset].object;
-      } else {
-        objectname = this.dataset.object;
-      }
+    if(this.activeSeries.length > 0) {
+      let cfg = this.activeSeries[0];
+      let ds: RbDatasetComponent = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
+      let filter = Object.assign({}, ds.mergedFilter);
+      filter[cfg.dateAttribute] = day.filter;
       let target = {
-        object: objectname,
-        filter: filter
+        object: ds.object,
+        filter: filter,
+        search: ds.searchString
       };
       this.navigate.emit(target);
     }

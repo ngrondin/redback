@@ -33,7 +33,9 @@ export class Upload {
             data: reader.result
           });
           this.chunkSeq++;  
-          this.observer.next({type:"progress", value: (100 * start / this.file.size)});
+          const prog = Math.round(100 * start / this.file.size);
+          console.log("File upload progress " + prog);
+          this.observer.next({type:"progress", value: prog});
         }
         reader.readAsDataURL(chunk);
       } else {

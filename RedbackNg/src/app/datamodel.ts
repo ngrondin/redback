@@ -429,9 +429,10 @@ export class DataTarget {
     search: string;
     selectedObject: RbObject;
   
-    constructor(o: string, f: any) {
+    constructor(o: string, f: any, s: string) {
       this.objectname = o
       this.filter = f;
+      this.search = s;
     }
   }
   
@@ -444,12 +445,12 @@ export class DataTarget {
     mode: string;
     dataTarget: DataTarget;
   
-    constructor(vs: string, v: string, o: string, f: any) {
+    constructor(vs: string, v: string, o: string, f: any, s: string) {
       this.version = vs;
       this.view = v;
       this.title = null;
       if(f != null) {
-        this.dataTarget = new DataTarget(o, f);
+        this.dataTarget = new DataTarget(o, f, s);
       }
     }
 
