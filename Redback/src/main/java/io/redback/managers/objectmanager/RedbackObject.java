@@ -20,7 +20,7 @@ import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
-import io.redback.security.js.SessionJSWrapper;
+import io.redback.utils.StringUtils;
 import io.redback.utils.js.JSConverter;
 
 public class RedbackObject extends RedbackElement
@@ -483,24 +483,21 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 	
-	public void afterSave() throws ScriptException, RedbackException
+	public void afterSave() 
 	{
-		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true))
+		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true) && canWrite)
 		{
-			if(canWrite)
-			{
+			try {
 				executeScriptsForEvent("aftersave");
 				if(isNewObject)
 				{
 					executeScriptsForEvent("aftercreate");
 					isNewObject = false;
 				}
-				updatedAttributes.clear();
-			}
-			else
-			{
-				throw new RedbackException("User does not have the right to update object " + config.getName());
-			}
+			} catch(Exception e) {
+				logger.severe(StringUtils.getStackTrace(e));
+			}				
+			updatedAttributes.clear();
 		}		
 	}
 	

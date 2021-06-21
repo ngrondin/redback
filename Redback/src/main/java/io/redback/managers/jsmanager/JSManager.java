@@ -1,6 +1,9 @@
 package io.redback.managers.jsmanager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -20,18 +23,26 @@ import io.redback.utils.js.RedbackUtilsJSWrapper;
 public class JSManager {
 	
 	protected class SourceEntry {
+		public String id;
 		public String src;
 		public long lastUpdated;
-		public SourceEntry(String s, long lu) {
+		public SourceEntry(String i, String s, long lu) {
+			id = i;
 			src = s;
 			lastUpdated = lu;
+		}
+		
+		public SourceEntry copy() {
+			return new SourceEntry(id, src, lastUpdated);
 		}
 	}
 	
 	protected class EngineEntry {
+		public long id;
 		public ScriptEngine engine;
 		public long lastCompiled;
-		public EngineEntry(ScriptEngine e, long lc) {
+		public EngineEntry(ScriptEngine e, long i, long lc) {
+			id = i;
 			engine = e;
 			lastCompiled = lc;
 		}
@@ -69,9 +80,17 @@ public class JSManager {
 				fe.src = src;
 				fe.lastUpdated = now;
 			} else {
-				sourceEntries.put(id, new SourceEntry(src, now));	
+				sourceEntries.put(id, new SourceEntry(id, src, now));	
 			}	
 			lastUpdated = now;
+		}
+	}
+	
+	public void removeSource(String id) {
+		synchronized(sourceEntries) {
+			if(sourceEntries.containsKey(id)) {
+				sourceEntries.remove(id);
+			}
 		}
 	}
 	
@@ -83,7 +102,7 @@ public class JSManager {
 			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("log", new LoggerJSFunction());
 			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("global", JSConverter.toJS(globalVariables));
 			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("rbutils", new RedbackUtilsJSWrapper());
-			ee = new EngineEntry(engine, 0);
+			ee = new EngineEntry(engine, l, 0);
 			engines.put(l, ee);
 		}
 		return ee;
@@ -98,28 +117,40 @@ public class JSManager {
 	}
 
 	protected void compileEngine(EngineEntry engineEntry) throws RedbackException {
+		long start = System.currentTimeMillis();
+		List<SourceEntry> copiesToCompile = new ArrayList<SourceEntry>();
 		try {
-			synchronized(sourceEntries) {
-				long now = System.currentTimeMillis();
-				String[] functionIds = sourceEntries.keySet().toArray(new String[0]); // Done so the map can be modified during recompilation
-				for(int i = 0; i < functionIds.length; i++) {
-					String functionId = functionIds[i];
-					SourceEntry sourceEntry = sourceEntries.get(functionId);
-					if(sourceEntry.lastUpdated >= engineEntry.lastCompiled) {
-						try {
-							engineEntry.engine.eval(sourceEntry.src);
-						} catch(Exception e) {
-							if(_dropCompilationErrors) {
-								logger.severe("Problem recompiling script [" + functionId + "]: " + e.getMessage());
-								sourceEntries.remove(functionId);
-							} else {
-								throw new RedbackException("Problem recompiling script [" + functionId + "]", e);
-							}
-						}
+			long copystart = 0;
+			synchronized(sourceEntries) { // Copy the source to a local variable first so as to release the lock on sourceEntries
+				copystart = System.currentTimeMillis();
+				Iterator<String> it = sourceEntries.keySet().iterator();
+				while(it.hasNext()) {
+					SourceEntry sourceEntry = sourceEntries.get(it.next());
+					if(sourceEntry.lastUpdated >= engineEntry.lastCompiled)
+						copiesToCompile.add(sourceEntry.copy());
+				}
+			}
+			
+			long compilestart = System.currentTimeMillis();
+			for(SourceEntry copyToCompile: copiesToCompile) {
+				try {
+					engineEntry.engine.eval(copyToCompile.src);
+				} catch(Exception e) {
+					if(_dropCompilationErrors) {
+						logger.severe("Problem recompiling script [" + copyToCompile.id + "]: " + e.getMessage());
+						removeSource(copyToCompile.id);
+					} else {
+						throw new RedbackException("Problem recompiling script [" + copyToCompile.id + "]", e);
 					}
 				}
-				engineEntry.lastCompiled = now;
 			}
+
+			engineEntry.lastCompiled = copystart;
+			long end = System.currentTimeMillis();
+			long totalDuration = end - start;
+			long compileDuration = end - compilestart;
+			logger.info("Compiled " + copiesToCompile.size() + " new functions into engine " + name + "_" + engineEntry.id + " in " + totalDuration + "ms (" + compileDuration + "ms)");
+			
 		} catch(Exception e) {
 			throw new RedbackException("Problem recompiling engine", e);
 		}

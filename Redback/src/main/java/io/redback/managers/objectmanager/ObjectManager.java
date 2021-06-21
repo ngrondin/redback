@@ -32,17 +32,18 @@ import io.redback.client.FileClient;
 import io.redback.client.GeoClient;
 import io.redback.client.IntegrationClient;
 import io.redback.client.NotificationClient;
+import io.redback.client.ProcessClient;
 import io.redback.client.ReportClient;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
+import io.redback.client.js.ProcessClientJSWrapper;
 import io.redback.client.js.ReportClientJSWrapper;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
-import io.redback.managers.objectmanager.js.ProcessManagerProxyJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 import io.redback.security.js.SessionJSWrapper;
@@ -80,6 +81,7 @@ public class ObjectManager
 	protected AccessManagementClient accessManagementClient;
 	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
+	protected ProcessClient processClient;
 	protected GeoClient geoClient;
 	protected FileClient fileClient;
 	protected ReportClient reportClient;
@@ -114,6 +116,7 @@ public class ObjectManager
 		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
+		processClient = new ProcessClient(firebus, processServiceName);
 		geoClient = new GeoClient(firebus, geoServiceName);
 		fileClient = new FileClient(firebus, fileServiceName);
 		reportClient = new ReportClient(firebus, reportServiceName);
@@ -143,6 +146,11 @@ public class ObjectManager
 	public DataClient getDataClient()
 	{
 		return dataClient;
+	}
+	
+	public ProcessClient getProcessClient()
+	{
+		return processClient;
 	}
 
 	public GeoClient getGeoClient()
@@ -247,7 +255,8 @@ public class ObjectManager
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("firebus", new FirebusJSWrapper(firebus, session));
 		context.put("om", new ObjectManagerJSWrapper(this, session));
-		context.put("pm", new ProcessManagerProxyJSWrapper(getFirebus(), processServiceName, session));
+		context.put("pm", new ProcessClientJSWrapper(getProcessClient(), session));
+		context.put("pc", new ProcessClientJSWrapper(getProcessClient(), session));
 		context.put("geo", new GeoClientJSWrapper(geoClient));
 		context.put("fc", new FileClientJSWrapper(getFileClient(), session));
 		context.put("rc", new ReportClientJSWrapper(getReportClient(), session));
@@ -371,7 +380,7 @@ public class ObjectManager
 								}
 								if(relatedObject == null) // Because of a broken link in the DB
 								{
-									logger.severe("Broken data link for object '" + objectConfig.getName() + (element instanceof RedbackObject ? ":" + ((RedbackObject)element).getUID().getString() : "") + "." + attributeName);
+									logger.warning("Broken data link for object '" + objectConfig.getName() + (element instanceof RedbackObject ? ":" + ((RedbackObject)element).getUID().getString() : "") + "." + attributeName);
 									ObjectConfig zombieObjectConfig = getObjectConfig(session, relatedObjectConfig.getObjectName());
 									String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
 									relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));

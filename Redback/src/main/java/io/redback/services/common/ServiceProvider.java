@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
+import io.firebus.threads.FirebusThread;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
@@ -24,16 +25,20 @@ public abstract class ServiceProvider extends Service implements io.firebus.inte
 		try {
 			Session session = new Session(payload.metadata.get("session"));
 			session.setTimezone(payload.metadata.get("timezone"));
+			if(Thread.currentThread() instanceof FirebusThread) 
+				((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
 			timer = new Timer(serviceName, session.getId(), getLogline(payload));
 			logger.finer("Service '" + serviceName + "' started");
 			Payload response = redbackService(session, payload);
 			logger.finer("Service '" + this.serviceName + "' finished");
-			timer.mark();
 			return response;
 		} catch(Exception e) {
 			logger.severe(StringUtils.getStackTrace(e));
-			if(timer != null) timer.mark();
 			throw new FunctionErrorException("Exception in redback service '" + serviceName + "'", e);
+		} finally {
+			if(timer != null) timer.mark();
+			if(Thread.currentThread() instanceof FirebusThread) 
+				((FirebusThread)Thread.currentThread()).setTrackingId(null);			
 		}
 	}
 	

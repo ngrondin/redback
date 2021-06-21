@@ -27,7 +27,8 @@ public class ScriptConfig
 		scriptVars.add("userprofile");
 		scriptVars.add("firebus");
 		scriptVars.add("om");
-		scriptVars.add("pm");
+		scriptVars.add("pm"); //Deprecated
+		scriptVars.add("pc");
 		scriptVars.add("geo");
 		scriptVars.add("fc");
 		scriptVars.add("rc");

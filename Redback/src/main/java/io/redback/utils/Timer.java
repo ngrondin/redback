@@ -1,6 +1,10 @@
 package io.redback.utils;
 
+import java.util.logging.Logger;
+
 public class Timer {
+	private Logger logger = Logger.getLogger("io.redback");
+	
 	protected String name;
 	protected String data;
 	protected String session;
@@ -15,7 +19,7 @@ public class Timer {
 	
 	public void mark(String l) {
 		long end = System.currentTimeMillis();
-		System.out.println("timer:" + name + (l != null ? "." + l : "") + ":" + (session != null ? session : "") + ":" + end + ":" + (end - start) + "ms" + (data != null ? ":" + data : ""));
+		logger.info((end - start) + "ms" + (data != null ? ":" + data : ""));
 	}
 	
 	public void mark() {

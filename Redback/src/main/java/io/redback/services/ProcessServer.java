@@ -125,8 +125,9 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 			else
 			{
 				throw new RedbackException("Requests must have at least an 'action' attribute");
-			}					
-			response.setData(responseData.toString());
+			}
+			if(responseData != null)
+				response.setData(responseData.toString());
 		}
 		catch(DataException e)
 		{

@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -22,6 +21,7 @@ import io.firebus.interfaces.BusFunction;
 import io.firebus.interfaces.Consumer;
 import io.firebus.interfaces.ServiceProvider;
 import io.firebus.interfaces.StreamProvider;
+import io.firebus.logging.FirebusConsoleHandler;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.services.common.Service;
@@ -50,8 +50,9 @@ public class RedbackServer implements Consumer
 					Handler handler = null;
 					if(loggerConfig.containsKey("filename")) 
 						handler = new FileHandler(loggerConfig.getString("filename"));
-					else
-						handler = new ConsoleHandler();
+					else 
+						handler = new FirebusConsoleHandler();
+					
 					handler.setFormatter(formatter);
 					handler.setLevel(Level.parse(loggerConfig.getString("level")));
 					logger.addHandler(handler);
@@ -254,11 +255,11 @@ public class RedbackServer implements Consumer
 					}
 					config = new DataMap(configString);
 					new RedbackServer(config);
-					System.out.println("Redback server started");
+					Logger.getLogger("io.redback").info("Redback server started");
 				}
 				else
 				{
-					System.out.println("No config file provided");
+					Logger.getLogger("io.redback").severe("No config file provided");
 				}
 			} 
 			catch (Exception e)

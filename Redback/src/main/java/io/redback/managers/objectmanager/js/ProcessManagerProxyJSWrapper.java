@@ -15,6 +15,7 @@ import io.firebus.utils.DataMap;
 import io.redback.security.Session;
 import io.redback.utils.js.JSConverter;
 
+@Deprecated
 public class ProcessManagerProxyJSWrapper implements ProxyObject
 {
 	private Logger logger = Logger.getLogger("io.redback");
@@ -50,7 +51,8 @@ public class ProcessManagerProxyJSWrapper implements ProxyObject
 					try
 					{
 						Payload requestPayload = new Payload(request.toString());
-						requestPayload.metadata.put("token", session.getToken());
+						requestPayload.metadata.put("session", session.getId());
+						requestPayload.metadata.put("token", session.getToken());						
 						firebus.requestService(processServiceName, requestPayload);
 					}
 					catch(Exception e) 
@@ -74,6 +76,7 @@ public class ProcessManagerProxyJSWrapper implements ProxyObject
 					try
 					{
 						Payload requestPayload = new Payload(request.toString());
+						requestPayload.metadata.put("session", session.getId());
 						requestPayload.metadata.put("token", session.getToken());
 						Payload resp = firebus.requestService(processServiceName, requestPayload);
 						DataMap response = new DataMap(resp.getString());
@@ -102,6 +105,7 @@ public class ProcessManagerProxyJSWrapper implements ProxyObject
 					try
 					{
 						Payload requestPayload = new Payload(request.toString());
+						requestPayload.metadata.put("session", session.getId());
 						requestPayload.metadata.put("token", session.getToken());
 						firebus.requestService(processServiceName, requestPayload);
 					}
@@ -126,6 +130,7 @@ public class ProcessManagerProxyJSWrapper implements ProxyObject
 					try
 					{
 						Payload requestPayload = new Payload(request.toString());
+						requestPayload.metadata.put("session", session.getId());						
 						requestPayload.metadata.put("token", session.getToken());
 						firebus.requestService(processServiceName, requestPayload);
 					}

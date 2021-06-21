@@ -26,10 +26,12 @@ public abstract class Service
 		if(mime != null && mime.equals("application/json")) {
 			body = payload.getString().replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "");
 			return body;
+		} else if(mime != null && mime.equals("text/plain")) {
+			body = payload.getString();
 		} else {
-			return "";
+			body = "";
 		}
-		
+		return body;
 	}
 
 	public abstract void clearCaches();
