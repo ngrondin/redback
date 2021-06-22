@@ -59,6 +59,8 @@ public class ObjectManager
 	protected String name;
 	protected Firebus firebus;
 	protected JSManager jsManager;
+	protected boolean loadAllOnInit;
+	protected int preCompile;
 	protected boolean includeLoaded;
 	protected String configServiceName;
 	protected String accessManagerServiceName;
@@ -99,6 +101,8 @@ public class ObjectManager
 		name = n;
 		firebus = fb;
 		includeLoaded = false;
+		loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
+		preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
 		jsManager = new JSManager("object");
 		configServiceName = config.getString("configservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
@@ -187,34 +191,6 @@ public class ObjectManager
 	{
 		return globalVariables;
 	}
-	/*
-	public Session getElevatedUserSession(String sessionId) throws RedbackException 
-	{
-		Session session = new Session(sessionId);
-		if(elevatedUserProfile != null  &&  elevatedUserProfile.getExpiry() < System.currentTimeMillis())
-			elevatedUserProfile = null;
-
-		if(elevatedUserProfile == null)
-		{
-			try
-			{
-				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
-				elevatedUserToken = JWT.create()
-						.withIssuer(jwtIssuer)
-						.withClaim("email", elevatedUserName)
-						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
-						.sign(algorithm);
-				elevatedUserProfile = accessManagementClient.validate(session, elevatedUserToken);
-			}
-			catch(Exception e)
-			{
-				throw new RedbackException("Error authenticating sys user", e);
-			}
-		}
-		session.setUserProfile(elevatedUserProfile);
-		session.setToken(elevatedUserToken);
-		return session;
-	}	*/
 	
 	public UserProfile getElevatedUserProfile(Session session) throws RedbackException 
 	{
@@ -242,10 +218,22 @@ public class ObjectManager
 	}		
 	
 	public void refreshAllConfigs()
-	{
+	{	
+		includeLoaded = false;
 		objectConfigs.clear();
 		globalScripts.clear();
 		readRightsFilters.clear();
+		if(loadAllOnInit) {
+			Session session = new Session();
+			try {
+				loadAllIncludeScripts(session);
+				loadAllGlobalScripts(session);
+				loadAllObjectConfigs(session);
+				jsManager.precompile(preCompile);
+			} catch(Exception e) {
+				logger.severe(StringUtils.rollUpExceptions(e));
+			}
+		}
 	}
 	
 	public Map<String, Object> createScriptContext(Session session) throws RedbackException
@@ -267,22 +255,40 @@ public class ObjectManager
 		return context;
 	}
 	
-	protected void loadIncludeScripts(Session session) throws RedbackException
+	protected void loadAllIncludeScripts(Session session) throws RedbackException
 	{
 		DataMap result = configClient.listConfigs(session, "rbo", "include");
 		DataList resultList = result.getList("result");
 		for(int i = 0; i < resultList.size(); i++)
 		{
-			try 
-			{
-				jsManager.addSource("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
-			}
-			catch(Exception e) 
-			{
-				throw new RedbackException("Problem compiling include scripts", e);
-			}
+			DataMap cfg = resultList.getObject(i);
+			jsManager.addSource("include_" + cfg.getString("name"), cfg.getString("script"));
 		}
 		includeLoaded = true;
+	}
+	
+	protected void loadAllGlobalScripts(Session session)  throws RedbackException
+	{
+		DataMap result = configClient.listConfigs(session, "rbo", "script");
+		DataList resultList = result.getList("result");
+		for(int i = 0; i < resultList.size(); i++)
+		{
+			DataMap cfg = resultList.getObject(i);
+			ScriptConfig scriptConfig = new ScriptConfig(jsManager, cfg);
+			globalScripts.put(cfg.getString("name"), scriptConfig);
+		}		
+	}
+	
+	protected void loadAllObjectConfigs(Session session)  throws RedbackException
+	{
+		DataMap result = configClient.listConfigs(session, "rbo", "object");
+		DataList resultList = result.getList("result");
+		for(int i = 0; i < resultList.size(); i++)
+		{
+			DataMap cfg = resultList.getObject(i);
+			ObjectConfig objectConfig = new ObjectConfig(this, cfg);
+			objectConfigs.put(cfg.getString("name"), objectConfig);
+		}		
 	}
 
 	protected ScriptConfig getGlobalScript(Session session, String name) throws RedbackException
@@ -293,7 +299,7 @@ public class ObjectManager
 			try
 			{
 				if(!includeLoaded)
-					loadIncludeScripts(session);
+					loadAllIncludeScripts(session);
 				scriptConfig = new ScriptConfig(jsManager, configClient.getConfig(session, "rbo", "script", name));
 				globalScripts.put(name, scriptConfig);
 			}
@@ -314,7 +320,7 @@ public class ObjectManager
 			try
 			{
 				if(!includeLoaded)
-					loadIncludeScripts(session);
+					loadAllIncludeScripts(session);
 				DataMap cfg = configClient.getConfig(session, "rbo", "object", object);
 				if(cfg != null) {
 					objectConfig = new ObjectConfig(this, cfg);

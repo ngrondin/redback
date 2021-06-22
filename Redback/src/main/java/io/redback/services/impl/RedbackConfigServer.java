@@ -173,9 +173,12 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 	}
 
 
-	public void clearCaches() {
-		
+	public void configure() {
+
 	}
 
+	public void start() {
+		
+	}	
 	
 }

@@ -13,9 +13,13 @@ public class RedbackCronServer extends CronServer
 		super(n, c, f);
 		cronTaskManager = new CronTaskManager(firebus, config);		
 	}
-
-	public void clearCaches() {
+	
+	public void configure() {
 		cronTaskManager.clearCaches();
 	}
+
+	public void start() {
+		cronTaskManager.start();
+	}	
 
 }

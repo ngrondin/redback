@@ -34,6 +34,9 @@ public abstract class Service
 		return body;
 	}
 
-	public abstract void clearCaches();
+
+	public abstract void configure();
+	
+	public abstract void start();
 
 }

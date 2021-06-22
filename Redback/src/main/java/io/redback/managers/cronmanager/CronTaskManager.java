@@ -73,7 +73,6 @@ public class CronTaskManager extends Thread {
 		taskConfigs = new HashMap<String, CronTaskConfig>();
 		randomDelay = (new Random()).nextInt(5000);
 		setName("rbCronTaskManager");
-		start();
 	}
 	
 	public ScriptEngine getScriptEngine()

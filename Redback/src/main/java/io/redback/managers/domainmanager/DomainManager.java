@@ -338,17 +338,7 @@ public class DomainManager implements Consumer {
 		}
 		return result;
 	}
-	
-	/*protected void executeAsync(Session session, DomainFunction df, DataMap param) {
-		Thread worker = new Thread() {
-			public void run() {
-				try {
-					execute(session, df, param);
-				} catch(Exception e) {}
-			}
-		};
-		worker.start();	
-	}*/
+
 	
 	public Object executeFunction(Session session, String domain, String name, DataMap param, boolean async) throws RedbackException {
 		Object result = null;

@@ -20,6 +20,14 @@ public class RedbackUserPreferenceServer extends UserPreferenceServer {
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
 	}
 	
+	public void configure() {
+
+	}
+
+	public void start() {
+		
+	}
+	
 	protected String getUsername(Session session) {
 		return session.getUserProfile().getUsername();
 	}

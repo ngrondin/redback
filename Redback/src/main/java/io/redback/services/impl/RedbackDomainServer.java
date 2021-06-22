@@ -44,13 +44,15 @@ public class RedbackDomainServer extends DomainServer {
 		domainManager.executeFunctionInAllDomains(session, name, param);
 	}
 
-	public void clearCaches() {
-
-	}
-
 	public void clearCache(Session session, String domain, String name) throws RedbackException {
 		domainManager.clearCache(session, domain, name);
 	}
 
+	public void configure() {
+		
+	}
 
+	public void start() {
+		
+	}	
 }

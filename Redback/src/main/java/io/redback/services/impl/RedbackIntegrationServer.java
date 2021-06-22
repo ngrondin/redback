@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.utils.DataEntity;
@@ -21,6 +22,7 @@ import io.redback.security.Session;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.services.IntegrationServer;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.StringUtils;
 import io.redback.utils.js.JSConverter;
 
 public class RedbackIntegrationServer extends IntegrationServer {
@@ -56,7 +58,10 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		}
 	};
 	
+	private Logger logger = Logger.getLogger("io.redback");
 	protected JSManager jsManager;
+	protected boolean loadAllOnInit;
+	protected int preCompile;
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String gatewayServiceName;
@@ -71,6 +76,8 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	public RedbackIntegrationServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 		jsManager = new JSManager("integration");
+		loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
+		preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		gatewayServiceName = config.getString("gatewayservice");
@@ -83,8 +90,38 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		publicUrl = config.getString("publicurl");
 	}
 	
+	
+	public void configure() {
+		clientConfigs.clear();
+		cachedClientData.clear();
+		if(loadAllOnInit) {
+			Session session = new Session();
+			try {
+				loadAllClientConfigs(session);
+				jsManager.precompile(preCompile);
+			} catch(Exception e) {
+				logger.severe(StringUtils.rollUpExceptions(e));
+			}
+		}
+	}
+
+	public void start() {
+		
+	}	
+	
 	protected String getRedirectUri(String client) {
 		return publicUrl + "/" + client;
+	}
+	
+	protected void loadAllClientConfigs(Session session) throws RedbackException {
+		DataMap result = configClient.listConfigs(session, "rbin", "client");
+		DataList resultList = result.getList("result");
+		for(int i = 0; i < resultList.size(); i++)
+		{
+			DataMap cfg = resultList.getObject(i);
+			ClientConfig config = new ClientConfig(cfg);
+			clientConfigs.put(cfg.getString("name"), config);
+		}			
 	}
 	
 	protected ClientConfig getClientConfig(Session session, String client) throws RedbackException {
@@ -259,12 +296,5 @@ public class RedbackIntegrationServer extends IntegrationServer {
 			cachedClientData.remove(key);
 		}
 	}
-
-	
-	public void clearCaches() {
-		clientConfigs.clear();
-		cachedClientData.clear();
-	}
-
 
 }

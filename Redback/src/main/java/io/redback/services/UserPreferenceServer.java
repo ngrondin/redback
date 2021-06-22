@@ -7,7 +7,6 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
-import io.redback.utils.CollectionConfig;
 
 public abstract class UserPreferenceServer extends AuthenticatedServiceProvider {
 	
@@ -63,10 +62,6 @@ public abstract class UserPreferenceServer extends AuthenticatedServiceProvider 
 		throw new RedbackException("All user preference requests need to be authenticated");
 	}
 
-	public void clearCaches() {
-		
-	}
-	
 	public abstract DataMap getUserPreference(Session session, String name) throws RedbackException;
 	
 	public abstract DataMap getRolePreference(Session session, String name) throws RedbackException;

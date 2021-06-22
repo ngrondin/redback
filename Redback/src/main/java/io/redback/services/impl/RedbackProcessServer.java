@@ -25,6 +25,14 @@ public class RedbackProcessServer extends ProcessServer
 		processManager = new ProcessManager(firebus, config);
 	}
 	
+	public void configure() {
+		processManager.refreshAllConfigs();		
+	}
+
+	public void start() {
+		
+	}	
+	
 	protected ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
@@ -76,11 +84,5 @@ public class RedbackProcessServer extends ProcessServer
 		processManager.commitCurrentTransaction();
 		return count;
 	}
-
-	public void clearCaches()
-	{
-		processManager.refreshAllConfigs();			
-	}
-
 
 }

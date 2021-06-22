@@ -26,6 +26,7 @@ import io.redback.security.Session;
 import io.redback.security.UserProfile;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.Notification;
+import io.redback.utils.StringUtils;
 
 
 
@@ -34,6 +35,8 @@ public class ProcessManager
 	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected Firebus firebus;
 	protected JSManager jsManager;
+	protected boolean loadAllOnInit;
+	protected int preCompile;
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String accessManagerServiceName;
@@ -60,6 +63,8 @@ public class ProcessManager
 	{
 		firebus = fb;
 		jsManager = new JSManager("process");
+		loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
+		preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
 		configServiceName = config.getString("configservice");
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		dataServiceName = config.getString("dataservice");
@@ -113,8 +118,35 @@ public class ProcessManager
 	public void refreshAllConfigs()
 	{
 		processes.clear();
+		if(loadAllOnInit) {
+			Session session = new Session();
+			try {
+				loadAppProcesses(session);
+				jsManager.precompile(preCompile);
+			} catch(Exception e) {
+				logger.severe(StringUtils.rollUpExceptions(e));
+			}
+		}
 	}
 	
+	protected void loadAppProcesses(Session session) throws RedbackException
+	{
+		DataMap result = configClient.listConfigs(session, "rbpm", "process");
+		DataList resultList = result.getList("result");
+		for(int i = 0; i < resultList.size(); i++)
+		{
+			DataMap cfg = resultList.getObject(i);
+			Process process = new Process(this, cfg);
+			String name = cfg.getString("name");
+			int version = cfg.getNumber("version").intValue();
+			HashMap<Integer, Process> versions = processes.get(name);
+			if(versions == null) {
+				versions = new HashMap<Integer, Process>(); 
+				processes.put(name, versions);
+			}
+			versions.put(version, process);
+		}	
+	}
 
 	protected void loadProcess(Session session, String name) throws RedbackException
 	{

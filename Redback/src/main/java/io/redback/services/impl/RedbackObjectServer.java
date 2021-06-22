@@ -25,6 +25,14 @@ public class RedbackObjectServer extends ObjectServer
 		super(n, c, f);
 		objectManager = new ObjectManager(n, config, firebus);
 	}
+	
+	public void configure() {
+		objectManager.refreshAllConfigs();
+	}
+
+	public void start() {
+		
+	}	
 
 	protected RedbackObject get(Session session, String objectName, String uid) throws RedbackException
 	{
@@ -135,11 +143,6 @@ public class RedbackObjectServer extends ObjectServer
 		}
 
 		return null;
-	}
-
-	public void clearCaches()
-	{
-		objectManager.refreshAllConfigs();
 	}
 
 	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException {

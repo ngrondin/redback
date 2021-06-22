@@ -84,16 +84,9 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 		}
 	}
 
-	public void clearCaches() {
-		
-	}
-
 	protected abstract void onObjectUpdate(DataMap data) throws RedbackException;
 	
 	protected abstract void onNotification(DataMap data) throws RedbackException;
 	
 	protected abstract void onChatMessage(DataMap data) throws RedbackException;
-
-
-
 }

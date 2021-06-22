@@ -33,5 +33,11 @@ public class RedbackClientServer extends ClientServer {
 		clientManager.onChatMessage(data);
 	}
 
+	public void configure() {
 
+	}
+
+	public void start() {
+		
+	}	
 }

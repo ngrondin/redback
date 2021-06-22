@@ -294,11 +294,12 @@ public class RedbackAccessManager extends AccessManager
 		} 
 	}
 	
-	
-	public void clearCaches()
-	{
-		//this.cachedSessions.clear();
+	public void configure() {
 		this.cachedUserProfiles.clear();
 		this.roles.clear();
+	}
+
+	public void start() {
+		
 	}	
 }

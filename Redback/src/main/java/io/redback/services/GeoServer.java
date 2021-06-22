@@ -113,11 +113,6 @@ public abstract class GeoServer extends ServiceProvider
 		return response;			
 		
 	}
-
-
-	public void clearCaches() {
-		
-	}
 	
 	protected abstract Geometry geocode(String address) throws RedbackException;
 	

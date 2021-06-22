@@ -156,6 +156,16 @@ public class JSManager {
 		}
 	}
 	
+	public void precompile(int c) throws RedbackException {
+		for(long i = 0; i < c; i++) {
+			EngineEntry engineEntry = getEngine(i);
+			if(engineEntry == null)
+				engineEntry = addEngine(i);
+			if(engineEntry.lastCompiled < lastUpdated)
+				compileEngine(engineEntry);
+		}
+	}
+	
 	protected Object execute(String function, Object[] params) throws RedbackException, NoSuchMethodException, ScriptException {
 		Long id = ((FirebusThread)Thread.currentThread()).getFunctionExecutionId();
 		EngineEntry engineEntry = getEngine(id);

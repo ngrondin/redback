@@ -86,12 +86,13 @@ public class RedbackIDGenerator extends IDGenerator
 			throw new RedbackException("Error getting next id", e);
 		}
 	}
+
 	
-	
-	public void clearCaches()
-	{
+	public void configure() {
 		configCache.clear();
 	}
 
-
+	public void start() {
+		
+	}	
 }

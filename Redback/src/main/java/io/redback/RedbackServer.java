@@ -36,6 +36,7 @@ public class RedbackServer implements Consumer
 	
 	public RedbackServer(DataMap config)
 	{
+		long start = System.currentTimeMillis();
 		List<Logger> loggers = new ArrayList<Logger>();
 		DataList loggerConfigs = config.getList("loggers");
 		if(loggerConfigs != null) {
@@ -207,17 +208,32 @@ public class RedbackServer implements Consumer
 			}
 		}
 		
+		configureAllServices();
+		startAllServices();
 		new Watchdog(firebus);
+		long end = System.currentTimeMillis();
+		Logger.getLogger("io.redback").info("Redback server started in " + (end - start) + "ms");
 	}
 
 	public void consume(Payload payload) {
+		configureAllServices();
+	}
+	
+	protected void configureAllServices() {
 		for(int i = 0; i < services.size(); i++) {
 			BusFunction service = services.get(i);
 			if(service instanceof Service)
-				((Service)service).clearCaches();
+				((Service)service).configure();
 		}		
 	}
 
+	protected void startAllServices() {
+		for(int i = 0; i < services.size(); i++) {
+			BusFunction service = services.get(i);
+			if(service instanceof Service)
+				((Service)service).start();
+		}		
+	}
 	
 	public static void main(String[] args)
 	{
@@ -255,7 +271,6 @@ public class RedbackServer implements Consumer
 					}
 					config = new DataMap(configString);
 					new RedbackServer(config);
-					Logger.getLogger("io.redback").info("Redback server started");
 				}
 				else
 				{

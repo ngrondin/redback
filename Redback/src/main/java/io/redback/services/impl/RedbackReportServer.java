@@ -19,6 +19,14 @@ public class RedbackReportServer extends ReportServer {
 		super(n, c, f);
 		reportManager = new ReportManager(f, c);
 	}
+	
+	public void configure() {
+		reportManager.clearCaches();	
+	}
+
+	public void start() {
+		
+	}
 
 	protected Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException {
 		return reportManager.produce(session, domain, name, filter);
@@ -35,10 +43,5 @@ public class RedbackReportServer extends ReportServer {
 	protected void clearDomainCache(Session session, String domain, String name) throws RedbackException {
 		reportManager.clearDomainCache(session, domain, name);
 	}
-	
-	public void clearCaches() {
-		reportManager.clearCaches();
-	}
-
 
 }

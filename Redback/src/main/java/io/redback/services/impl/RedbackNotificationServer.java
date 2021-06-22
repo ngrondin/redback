@@ -89,9 +89,13 @@ public class RedbackNotificationServer extends NotificationServer {
 
 	}
 
-	public void clearCaches() {
-		
+	public void configure() {
+
 	}
+
+	public void start() {
+		
+	}	
 
 	@Override
 	protected void sendEmail(Session session, Email email) throws RedbackException {

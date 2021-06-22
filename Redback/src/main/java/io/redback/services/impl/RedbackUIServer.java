@@ -49,7 +49,14 @@ public class RedbackUIServer extends UIServer
 		viewConfigs = new HashMap<String, DataMap>();
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
 	}
+	
+	public void configure() {
+		viewConfigs.clear();
+	}
 
+	public void start() {
+		
+	}
 
 	protected HTML getApp(Session session, String name, String version) throws RedbackException
 	{
@@ -532,12 +539,6 @@ public class RedbackUIServer extends UIServer
 				out.put(outKey, in.get(inKey));				
 		}
 		return out;
-	}
-
-	
-	public void clearCaches()
-	{
-		viewConfigs.clear();
 	}
 
 }
