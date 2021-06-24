@@ -5,7 +5,7 @@ import { RbContainerComponent } from "./rb-container";
 
 @Component({template: ''})
 export abstract class RbActivatorComponent extends RbContainerComponent implements OnInit {
-  activatorOn: boolean;
+  activatorOn: boolean = false;
   private activationObservers: Observer<boolean>[] = [];
 
   containerInit() {

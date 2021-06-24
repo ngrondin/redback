@@ -56,12 +56,12 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
       this.tabs.push(tab);
       if(tab.isdefault == true) {
         this.selectTab(tab);
-      } else {
+      } /*else {
         tab.active = false;
-      }
-    } else {
+      }*/
+    } /*else {
       tab.active = false;
-    }
+    }*/
   }
 
 

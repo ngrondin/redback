@@ -40,6 +40,7 @@ import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.compone
 import { RbTabComponent } from "app/rb-tab/rb-tab.component";
 import { RbTableComponent } from "app/rb-table/rb-table.component";
 import { RbTileComponent } from "app/rb-tile/rb-tile.component";
+import { RbTimelineComponent } from "app/rb-timeline/rb-timeline.component";
 import { RbVcollapseComponent } from "app/rb-vcollapse/rb-vcollapse.component";
 import { RbVsectionComponent } from "app/rb-vsection/rb-vsection.component";
 
@@ -88,5 +89,6 @@ export const componentRegistry = {
     "graph": RbDynamicGraphComponent,
     "calendar": RbCalendarComponent,
     "tile": RbTileComponent,
-    "numbertiles": RbNumberTilesComponent
+    "numbertiles": RbNumberTilesComponent,
+    "timeline": RbTimelineComponent
   }

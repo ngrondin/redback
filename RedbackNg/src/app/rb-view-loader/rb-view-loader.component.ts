@@ -17,6 +17,7 @@ import { DataTarget, ViewTarget } from 'app/datamodel';
 import { componentRegistry } from './rb-view-loader-registry';
 import { RbSetComponent } from 'app/abstract/rb-set';
 import { HttpClient } from '@angular/common/http';
+import { RbModalComponent } from 'app/rb-modal/rb-modal.component';
 
 
 export class LoadedView extends RbActivatorComponent {
@@ -27,7 +28,7 @@ export class LoadedView extends RbActivatorComponent {
   constructor(t: string) {
     super();
     this.title = t;
-    this.active = true;
+    //this.active = true;
   }
 
   activatorInit() {}
@@ -192,6 +193,8 @@ export class RbViewLoaderComponent implements OnInit {
           } else if(newInstance instanceof RbAggregatesetComponent) {
             newContext['aggregateset'] = newInstance;
           } else if(newInstance instanceof RbTabComponent) {
+            newContext['activator'] = newInstance;
+          } else if(newInstance instanceof RbModalComponent) {
             newContext['activator'] = newInstance;
           } else if(newInstance instanceof RbTabSectionComponent) {
             newContext['tabsection'] = newInstance;

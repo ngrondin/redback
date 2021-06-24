@@ -309,8 +309,8 @@ rb-fileset {
 
 ::-webkit-scrollbar
 {
-	width: var(--v8px);
-	height: var(--v8px);
+	width: 0.35vw;
+	height: 0.35vw;
 	background-color: transparent;
 }
 
@@ -352,7 +352,7 @@ rb-fileset {
 	overflow-y: auto;
 	overflow-y: overlay;
 	scrollbar-color: #bcbcf6 transparent;
-	scrollbar-width: thin;
+	scrollbar-width: auto;
 }
 
 .hscroll-nobar {

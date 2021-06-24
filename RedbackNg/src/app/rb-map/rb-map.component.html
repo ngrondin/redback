@@ -1,31 +1,59 @@
 <agm-map 
     #map
-    [latitude]="mapLatitude" 
-    [longitude]="mapLongitude"
-    [zoom]="zoomOfMap"    [styles]="defaultStyles"
+    [latitude]="desiredMapCenter.latitude" 
+    [longitude]="desiredMapCenter.longitude"
+    [zoom]="desiredZoom"
+    [styles]="defaultStyles"
+    (boundsChange)="onBoundsChange($event)"
+    (zoomChange)="onZoomChange($event)"
     (mapRightClick)="mapRightClick($event)"
     (mapClick)="mapClick($event)"
     (mousemove)="mouseMove($event)"
-    (zoomChange)="zoomChange($event)"
     (mapReady)="onMapReady($event)">
     <agm-overlay
-        *ngFor="let mapPoint of mapPoints"
-        [latitude]="mapPoint.latitude"
-        [longitude]="mapPoint.longitude"
-        [zIndex]="mapPoint.zindex"
-        (markerClick)="objectClick(mapPoint)"
-        (markerRightClick)="objectRightClick(mapPoint)">
+        *ngFor="let mapPin of mapPins"
+        [latitude]="mapPin.latLon.latitude"
+        [longitude]="mapPin.latLon.longitude"
+        [zIndex]="mapPin.zindex"
+        (markerClick)="objectClick(mapPin)"
+        (markerRightClick)="objectRightClick(mapPin)">
         <div
-            [class]="'rb-mapicon-' + mapPoint.icon + (mapPoint.animate != null ? ' rb-mapicon-' + mapPoint.icon + '-animate-' + mapPoint.animate : '')"
-            [style.border-color]="mapPoint.color"
-            [style.z-index]="mapPoint.zindex">
-            <span
-                class="rb-map-initial"
-                *ngIf="mapPoint.initials != null">
-                {{mapPoint.initials}}
-            </span>
+            [class]="'rb-mapicon-pin' + (mapPin.animate != null ? ' rb-mapicon-pin-animate-' + mapPin.animate : '')"
+            [style.border-color]="mapPin.color"
+            [style.z-index]="mapPin.zindex">
         </div>
     </agm-overlay> 
+    <agm-overlay
+        *ngFor="let mapDot of mapDots"
+        [latitude]="mapDot.latLon.latitude"
+        [longitude]="mapDot.latLon.longitude"
+        [zIndex]="mapDot.zindex"
+        (markerClick)="objectClick(mapDot)"
+        (markerRightClick)="objectRightClick(mapDot)">
+        <div
+            [class]="'rb-mapicon-dot' + (mapDot.animate != null ? ' rb-mapicon-dot-animate-' + mapDot.animate: '')"
+            [style.border-color]="mapDot.color"
+            [style.z-index]="mapDot.zindex">
+            <span
+                class="rb-map-initial"
+                *ngIf="mapDot.initials != null">
+                {{mapDot.initials}}
+            </span>
+        </div>
+    </agm-overlay>     
+    <agm-circle
+        *ngFor="let mapCircle of mapCircles"
+        [latitude]="mapCircle.latLon.latitude"
+        [longitude]="mapCircle.latLon.longitude"
+        [radius]="mapCircle.radius"
+        [zIndex]="mapCircle.zindex"
+        [fillColor]="mapCircle.color"
+        [fillOpacity]="0.2"
+        [strokeColor]="mapCircle.color"
+        [strokeOpacity]="0.7"
+        [strokeWeight]="2"
+        (circleClick)="objectClick(mapCircle)">
+    </agm-circle>
     <agm-polyline
         *ngFor="let mapPolygon of mapPolygons"
         [strokeColor]="'red'">
@@ -36,14 +64,14 @@
         </agm-polyline-point>
     </agm-polyline>
     <agm-overlay
-        *ngIf="mapCurrentDatePoint != null"
-        [latitude]="mapCurrentDatePoint.latitude"
-        [longitude]="mapCurrentDatePoint.longitude"
-        [zIndex]="mapCurrentDatePoint.zindex">
+        *ngIf="mapCurrentDatePin != null"
+        [latitude]="mapCurrentDatePin.latLon.latitude"
+        [longitude]="mapCurrentDatePin.latLon.longitude"
+        [zIndex]="mapCurrentDatePin.zindex">
         <div
             [class]="'rb-mapicon-pin'"
-            [style.border-color]="mapCurrentDatePoint.color"
-            [style.z-index]="mapCurrentDatePoint.zindex">
+            [style.border-color]="mapCurrentDatePin.color"
+            [style.z-index]="mapCurrentDatePin.zindex">
         </div>
     </agm-overlay>     
     <agm-overlay

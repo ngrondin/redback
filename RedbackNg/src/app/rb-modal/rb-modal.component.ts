@@ -1,5 +1,6 @@
 import { HostBinding } from '@angular/core';
 import { Component, OnInit, HostListener, Output, EventEmitter, Input } from '@angular/core';
+import { RbActivatorComponent } from 'app/abstract/rb-activator';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { ModalService } from 'app/services/modal.service';
 
@@ -9,7 +10,8 @@ import { ModalService } from 'app/services/modal.service';
   templateUrl: './rb-modal.component.html',
   styleUrls: ['./rb-modal.component.css']
 })
-export class RbModalComponent extends RbContainerComponent {
+export class RbModalComponent extends RbActivatorComponent {
+
   @Input('name') name: string;
   @HostBinding('style.display') get visitility() {return this.isOpen ? 'flex' : 'none'; }
   @HostListener('click', ['$event']) onMouseMove($event) {this.close() }
@@ -22,12 +24,12 @@ export class RbModalComponent extends RbContainerComponent {
     super();
   }
 
-  containerInit() {
+  activatorInit() {
     this.isOpen = false;
     this.modalService.register(this.name, this);
   }
 
-  containerDestroy() {
+  activatorDestroy() {
   }
 
   onDatasetEvent(event: string) {
@@ -38,10 +40,12 @@ export class RbModalComponent extends RbContainerComponent {
 
   public open() {
     this.isOpen = true;
+    this.activate();
   }
 
   public close() {
     this.isOpen = false;
+    this.deactivate();
   }
 
 

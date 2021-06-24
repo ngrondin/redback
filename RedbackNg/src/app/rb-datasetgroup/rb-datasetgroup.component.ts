@@ -58,9 +58,9 @@ export class RbDatasetGroupComponent extends RbContainerComponent {
     this.datasets[name] = dataset;
   }
 
-  setActive(state: boolean) {
+  /*setActive(state: boolean) {
     this.active = state;
-  }
+  }*/
 
   public refreshAllData() {
     for(let name of Object.keys(this.datasets)) {

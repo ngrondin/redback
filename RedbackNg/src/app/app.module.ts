@@ -117,6 +117,8 @@ import { RbTileComponent } from './rb-tile/rb-tile.component';
 import { RedbackgraphsModule } from 'redbackgraphs';
 import { RbTimesliderComponent } from './rb-timeslider/rb-timeslider.component';
 import { RbNumberTilesComponent } from './graphs/rb-number-tiles/rb-number-tiles.component';
+import { RbTimelineComponent } from './rb-timeline/rb-timeline.component';
+import { RbDatePipe, RbTimePipe } from './helpers';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -234,7 +236,10 @@ export let AppInjector: Injector;
     RbDialogComponent,
     RbTileComponent,
     RbTimesliderComponent,
-    RbNumberTilesComponent
+    RbNumberTilesComponent,
+    RbTimelineComponent,
+    RbDatePipe,
+    RbTimePipe
   ],
   providers: [
     {provide: COMPILER_OPTIONS, useValue: {}, multi: true},

@@ -9,20 +9,20 @@ export abstract class RbComponent implements OnInit/*, AfterViewInit*/ {
     @Input('activator') activator: RbActivatorComponent;
 
     public initiated: boolean = false;
-    public active: boolean;
+    //public active: boolean;
     private activatorSubscription: Subscription;
-    private start: number;
+    //private start: number;
 
     constructor() { 
-      this.start = (new Date()).getTime();
+      //this.start = (new Date()).getTime();
     }
   
     ngOnInit(): void {
       if(this.activator != null) {
-        this.active = this.activator.active;
-        this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => this.setActive(state));
+        //this.active = this.activator.activatorOn;
+        this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => this.onActivationEvent(state));
       } else {
-        this.active = true;
+        //this.active = true;
       }
       this.componentInit();
       this.initiated = true;
@@ -40,14 +40,18 @@ export abstract class RbComponent implements OnInit/*, AfterViewInit*/ {
         this.componentDestroy();
     }
 
+    get active() : boolean {
+      return this.activator != null ? this.activator.activatorOn : true;
+    }
+
     abstract componentInit();
 
     abstract componentDestroy();
 
     abstract onActivationEvent(state: boolean);
 
-    setActive(state: boolean) {
+    /*setActive(state: boolean) {
         this.active = state;
         this.onActivationEvent(state);
-    }
+    }*/
 }

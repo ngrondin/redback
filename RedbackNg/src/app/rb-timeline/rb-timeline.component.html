@@ -1,0 +1,51 @@
+<div
+    class="rb-tl-container hscroll">
+    <div
+        class="rb-tl-entry"
+        *ngFor="let entry of entries">
+        <div
+            *ngIf="entry.showDatePart"
+            class="rb-tl-daterow">
+            <div
+                class="rb-tl-date">
+                {{entry.date | rbDate}}
+            </div>
+            <div
+                class="rb-tl-line">
+                <div
+                    [class]="'rb-tl-lineendtop' + (entry.showTopLine ? ' rb-tl-linecolor' : ' rb-tl-linenocolor')">
+                </div>            
+            </div>
+        </div>
+        <div
+            class="rb-tl-timerow">
+            <div
+                class="rb-tl-time">
+                {{entry.date | rbTime}}
+            </div>
+            <div
+                class="rb-tl-line">
+                <div
+                    [class]="'rb-tl-lineendtop' + (entry.showTopLine ? ' rb-tl-linecolor' : ' rb-tl-linenocolor')">
+                </div>
+                <div
+                    class="rb-tl-linecircle">
+                </div>
+                <div
+                    [class]="'rb-tl-lineendbottom' + (entry.showBottomLine ? ' rb-tl-linecolor' : ' rb-tl-linenocolor')">
+                </div>
+            </div>     
+            <div
+                class="rb-tl-detail">
+                <div
+                    class="rb-tl-main">
+                    {{entry.main}}
+                </div>
+                <div
+                    class="rb-tl-sub">
+                    {{entry.sub}}
+                </div>
+            </div>              
+        </div>
+    </div>
+</div>

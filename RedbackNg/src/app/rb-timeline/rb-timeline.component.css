@@ -1,0 +1,111 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    max-height: 30vw;
+}
+
+.rb-tl-container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 16px;
+}
+
+.rb-tl-entry {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-tl-daterow {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-tl-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;    
+    flex: 0 0 auto;
+    width: 100px;
+    margin: 0px 16px 0px 0px;
+    font-size: 0.75rem;
+    color:#999;
+}
+
+
+.rb-tl-timerow {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-tl-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 100px;
+    margin: 0px 16px 20px 0px;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.rb-tl-line {
+    display: flex;
+    flex-direction: column;
+    width: 20px;
+    align-items: center;
+}
+
+.rb-tl-lineendtop {
+    display: flex;
+    flex: 1 1 0;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.rb-tl-lineendbottom {
+    display: flex;
+    flex: 1 1 16px;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.rb-tl-linecolor {
+    border-color: #3f51b5;
+}
+
+.rb-tl-linenocolor {
+    border-color: transparent;
+}
+
+.rb-tl-linecircle {
+    display: flex;
+    flex: 0 0 auto;
+    border: 3px solid #3f51b5;
+    border-radius: 8px;
+    width: 12px;
+    height: 12px;
+}
+
+.rb-tl-detail {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    margin: 0px 16px 20px 16px;
+    min-width: 100px;
+}
+
+.rb-tl-main {
+    display: flex;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.rb-tl-sub {
+    display: flex;
+    color: grey;
+    font-size: 0.80rem;
+}

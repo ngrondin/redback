@@ -81,7 +81,7 @@ agm-map {
 	z-index: 1;
 }
 
-.rb-mapicon-circle {
+.rb-mapicon-dot {
 	position: absolute;
 	border-radius: 50%;
 	border-width: 13px;
@@ -95,7 +95,7 @@ agm-map {
 }
 
 
-.rb-mapicon-circle-animate-pulse::before {
+.rb-mapicon-dot-animate-pulse::before {
 	position: absolute;
 	content: '';
 	width: 36px;

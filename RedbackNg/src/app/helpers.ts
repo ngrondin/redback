@@ -1,3 +1,4 @@
+import { Pipe, PipeTransform } from "@angular/core";
 import { Observer } from "rxjs";
 import { RbObject } from "./datamodel";
 
@@ -91,6 +92,42 @@ export class Formatter {
             return "";
         }
     }
+
+    static formatDate(value: Date) : string {
+        let str = "";
+        if(value != null) {
+            str = str + value.getFullYear().toString();
+            str = str + "-";
+            str = str + (value.getMonth() + 1).toString().padStart(2, "0");
+            str = str + "-";
+            str = str + value.getDate().toString().padStart(2, "0");
+        }
+        return str;
+    }
+
+    static formatTime(value: Date) : string {
+        let str = "";
+        if(value != null) {
+            str = str + value.getHours().toString().padStart(2, "0");
+            str = str + ":";
+            str = str + value.getMinutes().toString().padStart(2, "0");
+        }
+        return str;
+    }
+}
+
+@Pipe({name: 'rbDate'})
+export class RbDatePipe implements PipeTransform {
+  transform(value: Date): string {
+    return Formatter.formatDate(value);
+  }
+}
+
+@Pipe({name: 'rbTime'})
+export class RbTimePipe implements PipeTransform {
+  transform(value: Date): string {
+    return Formatter.formatTime(value);
+  }
 }
 
 export class Converter {

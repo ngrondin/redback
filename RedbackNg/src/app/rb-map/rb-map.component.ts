@@ -1,87 +1,12 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ViewContainerRef, SimpleChange } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { RbObject } from 'app/datamodel';
-
-import { AgmMap } from '@agm/core';
-import { Translator, InitialsMaker } from 'app/helpers';
+import { LatLon, MapCircle, MapDot, MapObject, MapPin, MapPolygon, MapSeriesConfig } from './rb-map-models';
+import { InitialsMaker } from 'app/helpers';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { ElementRef } from '@angular/core';
+import { RbDataCalcComponent, SeriesConfig } from 'app/abstract/rb-datacalc';
 
 
-class MapSeriesConfig {
-  dataset: string;
-  geometryAttribute: string;
-  labelAttribute: string;
-  initialsAttribute: string;
-  icon: string;
-  iconAttribute: string;
-  iconMap: Translator;
-  colorAttribute: string;
-  colorMap: Translator;
-  animateAttribute: string;
-  animateMap: Translator;
-  visibleAttribute: string;
-  linkAttribute: string;
-  dateAttribute: string;
-
-  constructor(json: any) {
-    this.dataset = json.dataset;
-    this.geometryAttribute = json.geometryattribute;
-    this.labelAttribute = json.labelattribute;
-    this.initialsAttribute = json.initialsattribute;
-    this.iconAttribute = json.iconattribute;
-    this.icon = json.icon;
-    this.iconMap = new Translator(json.iconmap);
-    this.colorAttribute = json.colorattribute;
-    this.colorMap = new Translator(json.colormap);
-    this.animateAttribute = json.animateattribute;
-    this.animateMap = new Translator(json.animatemap);
-    this.visibleAttribute = json.visibleattribute;
-    this.linkAttribute = json.linkattribute;
-    this.dateAttribute = json.dateattribute;
-  }
-}
-
-class MapPoint {
-  object: RbObject;
-  latitude: number;
-  longitude: number;
-  label: string;
-  initials: string;
-  icon: string;
-  color: string;
-  animate: string;
-  link: any;
-  zindex: number;
-
-  constructor(obj: RbObject, lat: number, lon: number, lbl: string, i: string, ic: string, c: string, a: string, l: any, z: number) {
-    this.object = obj;
-    this.latitude = lat;
-    this.longitude = lon;
-    this.label = lbl;
-    this.initials = i;
-    this.icon = ic;
-    this.color = c;
-    this.animate = a;
-    this.link = l;
-    this.zindex = z;
-  }
-}
-
-class MapPolygon {
-  objects: RbObject[];
-  path: any[];
-  zindex: number;
-
-  constructor() {
-    this.objects = [];
-    this.path = [];
-  }
-
-  public addObject(object: RbObject, lat: number, lng: number) {
-    this.objects.push(object);
-    this.path.push({lat: lat, lng: lng});
-  }
-}
 
 @Component({
   selector: 'rb-map',
@@ -89,37 +14,42 @@ class MapPolygon {
   styleUrls: ['./rb-map.component.css'],
   exportAs: 'rbMap'
 })
-export class RbMapComponent extends RbDataObserverComponent {
-  @Input('series') series: any[];
+export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
+
   @Input('geoattribute') geoattribute: string;
   @Input('labelattribute') labelattribute: string;
   @Input('descriptionattribute') descriptionattribute: string;
   @Input('dateattribute') dateattribute: string;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
-  //@ViewChild('map', { read: AgmMap }) map: AgmMap;
   @ViewChild('map', {static: true}) map: ElementRef;
 
-  seriesConfigs: MapSeriesConfig[] = [];
-  mapPoints: MapPoint[] = [];
+  
+  mapPins: MapPin[] = [];
+  mapDots: MapDot[] = [];
+  mapCircles: MapCircle[] = [];
   mapPolygons: MapPolygon[] = [];
-  mapCurrentDatePoint: MapPoint = null;
-  selectedMapPoint: MapPoint;
+  mapCurrentDatePin: MapPin = null;
+  //selectedLatLon: LatLon;
+  //selectedMapObject: MapObject;
 
   minLat: number;
   maxLat: number;
   minLon: number;
   maxLon: number;
-  zoomOfMap: number;
-  mapLatitude: number;
-  mapLongitude: number;
-  userMovedOrZoomed: boolean = false;
-  preventNextMoveOrZoom: boolean = false;
+  desiredZoom: number;
+  desiredMapCenter: LatLon = new LatLon(0, 0);
+  actualZoom: number;
+  actualMapCenter: LatLon = new LatLon(0, 0);
+  actualMperPX: number;
+  preventReframe: boolean = false;
+  //userMovedOrZoomed: boolean = false;
+  //preventNextMoveOrZoom: boolean = false;
   
   showContextMenu: boolean = false;
   contextMenuPosition: any = {x: 0, y: 0};
   showLabel: boolean = false;
-  labellatLon: any = {latitude: 0, longitude: 0};
+  labellatLon: LatLon = new LatLon(0, 0);
   labelText: string = "";
   labelLink: any = null;
   mousePosition: any = {x: 0, y: 0};
@@ -148,36 +78,33 @@ export class RbMapComponent extends RbDataObserverComponent {
     super();
   }
 
-  dataObserverInit() {
-    this.zoomOfMap = 2;
-    if(this.series != null) {
-      this.seriesConfigs = [];
-      for(let item of this.series) {
-        this.seriesConfigs.push(new MapSeriesConfig(item));
-      }
-    } else if(this.geoattribute != null) {
-      if(this.seriesConfigs.length == 0) {
-        this.seriesConfigs.push(new MapSeriesConfig({}));
-      }
-      this.seriesConfigs[0].geometryAttribute = this.geoattribute;
-      this.seriesConfigs[0].labelAttribute = this.labelattribute;
-      this.seriesConfigs[0].dateAttribute = this.dateattribute;
+  dataCalcInit() {
+    if(this.series == null && this.geoattribute != null) {
+      this.seriesConfigs.push(new MapSeriesConfig({
+        geometryattribute: this.geoattribute,
+        labelattribute: this.labelattribute,
+        dateattribute: this.dateattribute
+      }));
     }
   }
 
-  dataObserverDestroy() {
-  }
-
-  onActivationEvent(event: any) {
-    setTimeout(() => this.calcAll(), 300);
-  }
-
-  onDatasetEvent(event: any) {
-    this.calcAll();
+  dataCalcDestroy() {
   }
 
   onMapReady(event: any) {
+
   }
+
+  onBoundsChange(event: any) {
+    //console.log("bounds change");
+  }
+
+  onZoomChange(event: any) {
+    this.actualMperPX = 156543.03392 * Math.cos(this.desiredMapCenter.latitude * Math.PI / 180) / Math.pow(2, event);
+    //console.log("zoom change, mperpx=" + mperpx);
+    this.redraw();
+  }
+
 
   public get currentDate() : Date {
     return this._currentDate;
@@ -198,76 +125,91 @@ export class RbMapComponent extends RbDataObserverComponent {
       }
       if(closestObject != null) {
         let latLon = this.getObjectLatLon(closestObject, this.seriesConfigs[0]);
-        this.mapCurrentDatePoint = new MapPoint(closestObject, latLon.latitude, latLon.longitude, null, null, null, "darkred", null, null, 10);
+        this.mapCurrentDatePin = new MapPin(closestObject, latLon, "darkred", null, null, null, 10);
       }
     }
   }
 
-  calcAll() {
+  calcParams() {
+    //console.log("calcData");
     if(this.active) {
-      //console.log("map calc all");
-      this.minLat = 90;
-      this.maxLat = -90;
-      this.minLon = 180;
-      this.maxLon = -180;
-      this.mapPoints = [];
-      this.mapPolygons = [];
-      this.selectedMapPoint = null;
-      this.mapCurrentDatePoint = null;
-  
-      if(this.list != null && this.seriesConfigs[0] != null) {
-        this.calcList(this.list, this.seriesConfigs[0]);
-      } else if(this.lists != null && this.seriesConfigs.length > 0) {
-        for(let seriesConfig of this.seriesConfigs) {
-          let list = this.lists[seriesConfig.dataset];
-          if(list != null) {
-            this.calcList(list, seriesConfig);
+      this.reframe();
+    }
+  }
+
+  reframe() {
+    //console.log("recalc");
+    if(!this.preventReframe) {
+      let selectedLatLon = this.selectedObject != null ? this.getObjectLatLon(this.selectedObject, this.getSeriesConfigForObject(this.selectedObject)) : null;
+      if(selectedLatLon != null) {
+        this.desiredMapCenter = selectedLatLon;
+        this.minLat = selectedLatLon.latitude - 0.01;
+        this.maxLat = selectedLatLon.latitude + 0.01;
+        this.minLon = selectedLatLon.longitude - 0.01;
+        this.maxLon = selectedLatLon.longitude + 0.01;
+      } else {
+        this.minLat = 90;
+        this.maxLat = -90;
+        this.minLon = 180;
+        this.maxLon = -180;
+        this.iterateAllLists((object, config) => {
+          let latLon = this.getObjectLatLon(object, config);
+          if(latLon != null) {
+            if(latLon.latitude < this.minLat) this.minLat = latLon.latitude;
+            if(latLon.latitude > this.maxLat) this.maxLat = latLon.latitude;
+            if(latLon.longitude < this.minLon) this.minLon = latLon.longitude;
+            if(latLon.longitude > this.maxLon) this.maxLon = latLon.longitude;
           }
+        });  
+        if(this.minLat > this.maxLat || this.minLon > this.maxLon) {
+          this.minLat = -90;
+          this.maxLat = 90;
+          this.minLon = -180;
+          this.maxLon = 180;
         }
+        this.desiredMapCenter = new LatLon(((this.maxLat + this.minLat) / 2), ((this.maxLon + this.minLon) / 2));
       }
-      this.calcMapCoords();
-    }
-  }
 
-  calcList(list: RbObject[], cfg: MapSeriesConfig) {
-    if(cfg.dateAttribute == null) {
-      this.calcMapPoints(list, cfg);
+      let pxWidth = this.map['_elem'].nativeElement.clientWidth;
+      let pxHeight = this.map['_elem'].nativeElement.clientHeight;
+      let mWidth = Math.floor(this.distance(this.desiredMapCenter.latitude, this.minLon, this.desiredMapCenter.latitude, this.maxLon));
+      let mHeight = Math.floor(this.distance(this.minLat, this.desiredMapCenter.longitude, this.maxLat, this.desiredMapCenter.longitude));
+      let vertmperpx = (mHeight / pxHeight);
+      let horimperpx = (mWidth / pxWidth);
+      this.desiredZoom = Math.floor(Math.log2(156543.03392 * Math.cos(this.desiredMapCenter.latitude * Math.PI / 180) / Math.max(vertmperpx, horimperpx)));
     } else {
-      this.calcPolygon(list, cfg);
+      this.preventReframe = false;
     }
   }
 
-  calcMapPoints(list: RbObject[], cfg: MapSeriesConfig) {
-    for(let object of list) {
-      let latLon = this.getObjectLatLon(object, cfg);
-      if(latLon != null) {
-        let label = null;
-        if(cfg.labelAttribute != null) {
-          label = object.get(cfg.labelAttribute);
-        }
-  
-        let initials = null;
-        if(cfg.initialsAttribute != null) {
-          initials = new InitialsMaker().get(object.get(cfg.initialsAttribute));
-        }
-  
-        let icon = "pin";
-        if(cfg.icon != null) {
-          icon = cfg.icon;
-        } else if(cfg.iconAttribute != null) {
-          icon = cfg.iconMap.get(object.get(cfg.iconAttribute), object == this.selectedObject);
-        } 
-  
-        let color = (object == this.selectedObject ? 'red' : '#3f51b5');
-        if(cfg.colorAttribute != null) {
-          color = cfg.colorMap.get(object.get(cfg.colorAttribute), object == this.selectedObject);
-        } 
-  
-        let animate: string = null;
-        if(cfg.animateAttribute != null) {
-          animate = cfg.animateMap.get(object.get(cfg.animateAttribute), object == this.selectedObject);
-        }
-  
+  redraw() {
+    //console.log("redraw");
+    this.mapPins = [];
+    this.mapDots = [];
+    this.mapCircles = [];
+    this.mapPolygons = [];
+    this.mapCurrentDatePin = null;
+
+    for(let config of this.seriesConfigs) {
+      if(config.dateAttribute == null) {
+        this.iterateList(config, (object, config) => this.calcMapObject(object, config));
+      } else {
+        this.calcPolygon(config);
+      }
+    }
+    //console.log("pins " + this.mapPins.length + " dots " + this.mapDots.length + " circles " + this.mapCircles.length + " poly " + this.mapPolygons.length);
+  }
+
+  calcMapObject(object: RbObject, cfg: MapSeriesConfig) {
+    let latLon = this.getObjectLatLon(object, cfg);
+    if(latLon != null) { 
+      let geometry: any = object.get(cfg.geometryAttribute);
+      let visible: boolean = cfg.visibleAttribute != null ? object.get(cfg.visibleAttribute) : true;
+      if(visible) {
+        let selected = object == this.selectedObject;
+        let color = cfg.colorAttribute != null ? cfg.colorMap.get(object.get(cfg.colorAttribute), selected) : (selected ? 'red' : '#3f51b5');
+        let animate = cfg.animateAttribute != null ? cfg.animateMap.get(object.get(cfg.animateAttribute), selected) : null;
+        let label = cfg.labelAttribute != null ? object.get(cfg.labelAttribute) : null;
         let link = null;
         if(cfg.linkAttribute != null) {
           link = {
@@ -275,39 +217,46 @@ export class RbMapComponent extends RbDataObserverComponent {
             filter: {uid: "'" + (cfg.linkAttribute == 'uid' ? object.uid : object.get(cfg.linkAttribute)) + "'"}
           };
         }
-  
-        let visible: boolean = true;
-        if(cfg.visibleAttribute != null) {
-          visible = object.get(cfg.visibleAttribute);
-        }
-  
-        if(visible) {
-          this.calcMinMaxLatLon(latLon);
-          let mapPoint = new MapPoint(object, latLon.latitude, latLon.longitude, label, initials, icon, color, animate, link, object == this.selectedObject ? 10 : 5);
-          this.mapPoints.push(mapPoint);
-          if(object == this.selectedObject) {
-            this.selectedMapPoint = mapPoint;
+        let zIndex = object == this.selectedObject ? 10 : 5;
+
+        if(geometry["type"] == "point") {
+          let icon = cfg.icon != null ? cfg.icon : cfg.iconAttribute != null ? cfg.iconMap.get(object.get(cfg.iconAttribute), selected) : 'pin';
+          if(icon == "pin") {
+            this.mapPins.push(new MapPin(object, latLon, color, animate, label, link, zIndex));
+          } else if(icon == "dot") {
+            let initials = null;
+            if(cfg.initialsAttribute != null) {
+              initials = new InitialsMaker().get(object.get(cfg.initialsAttribute));
+            }
+            this.mapDots.push(new MapDot(object, latLon, color, initials, animate, label, link, zIndex));
           }
-        }        
+        } else if(geometry["type"] == "circle") {
+          let radius = parseInt(geometry["radius"].toString());
+          let radiusPx = radius / this.actualMperPX;
+          if(radiusPx < 10) {
+            this.mapPins.push(new MapPin(object, latLon, color, animate, label, link, zIndex));
+          } else {
+            this.mapCircles.push(new MapCircle(object, latLon, radius, color, animate, label, link, zIndex));
+          }
+        }
       }
     }
   }
 
-  calcPolygon(list: RbObject[], cfg: MapSeriesConfig) {
-    let mapPolygon = new MapPolygon();
-    let sortedList = list.sort((a: RbObject, b: RbObject) => (new Date(a.get(cfg.dateAttribute))).getTime() - (new Date(b.get(cfg.dateAttribute))).getTime());
+  calcPolygon(cfg: MapSeriesConfig) {
+    let mapPolygon = new MapPolygon("red", null, null);
+    let sortedList = this.getList(cfg).sort((a: RbObject, b: RbObject) => (new Date(a.get(cfg.dateAttribute))).getTime() - (new Date(b.get(cfg.dateAttribute))).getTime());
     if(sortedList.length > 0) {
       this.minDate = new Date(sortedList[0].get(cfg.dateAttribute));
       this.maxDate = new Date(sortedList[sortedList.length - 1].get(cfg.dateAttribute));
       if(sortedList.length == 1) {
         let latLon = this.getObjectLatLon(sortedList[0], cfg);
-        this.mapCurrentDatePoint = new MapPoint(sortedList[0], latLon.latitude, latLon.longitude, null, null, null, "darkred", null, null, 10);
+        this.mapCurrentDatePin = new MapPin(sortedList[0], latLon, "darkred", null, null, null, 10);
       } else {
         for(let object of sortedList) {
           let latLon = this.getObjectLatLon(object, cfg);
           if(latLon != null) {
-            this.calcMinMaxLatLon(latLon);
-            mapPolygon.addObject(object, latLon.latitude, latLon.longitude);
+            mapPolygon.addObject(object, latLon);
           }
         }
         this.mapPolygons.push(mapPolygon);
@@ -316,49 +265,11 @@ export class RbMapComponent extends RbDataObserverComponent {
 
   }
 
-  calcMinMaxLatLon(latLon: any) {
-    if(latLon.latitude < this.minLat) this.minLat = latLon.latitude;
-    if(latLon.latitude > this.maxLat) this.maxLat = latLon.latitude;
-    if(latLon.longitude < this.minLon) this.minLon = latLon.longitude;
-    if(latLon.longitude > this.maxLon) this.maxLon = latLon.longitude;
-
-  }
-
-  calcMapCoords() : any {
-    if(this.preventNextMoveOrZoom == false) {
-      if(this.selectedMapPoint != null) {
-        this.zoomOfMap = 12;
-        this.mapLatitude = this.selectedMapPoint.latitude;
-        this.mapLongitude = this.selectedMapPoint.longitude;
-      } else if(this.mapPoints.length > 0 || this.mapPolygons.length > 0) {
-        this.mapLatitude = ((this.maxLat + this.minLat) / 2);
-        this.mapLongitude = ((this.maxLon + this.minLon) / 2);
-        if(this.maxLat - this.minLat < 0 || this.maxLon - this.minLon < 0) {
-          this.zoomOfMap = 2;
-        } else {
-          let pxWidth = this.map['_elem'].nativeElement.clientWidth;
-          let pxHeight = this.map['_elem'].nativeElement.clientHeight;
-          let mWidth = Math.floor(this.distance(this.mapLatitude, this.minLon, this.mapLatitude, this.maxLon));
-          let mHeight = Math.floor(this.distance(this.minLat, this.mapLongitude, this.maxLat, this.mapLongitude));
-          let vertmperpx = (mHeight / pxHeight);
-          let horimperpx = (mWidth / pxWidth);
-          //console.log(pxWidth + "x" + pxHeight + "  " + mWidth + "x" + mHeight + "  " + horimperpx + "x" + vertmperpx);
-          this.zoomOfMap = Math.floor(Math.log2(156543.03392 * Math.cos(this.mapLatitude * Math.PI / 180) / Math.max(vertmperpx, horimperpx)));
-          //console.log('zoom is ' + this.zoomOfMap);
-        }
-      } else {
-        this.zoomOfMap = 2;
-      }
-    } else {
-      this.preventNextMoveOrZoom = false;
-    }
-  }
-
   private getObjectLatLon(object: RbObject, cfg: MapSeriesConfig) {
     if(cfg.geometryAttribute != null ) {
       let geometry: any = object.get(cfg.geometryAttribute);
       if(geometry != null) {
-        if(geometry.type == 'point' && geometry.coords != null) {
+        if(geometry.coords != null) {
           if(!isNaN(geometry.coords.latitude) && !isNaN(geometry.coords.longitude)) {
             return {
               latitude: geometry.coords.latitude,
@@ -388,23 +299,22 @@ export class RbMapComponent extends RbDataObserverComponent {
   }
   
 
-  objectClick(mapPoint: MapPoint) {
-    this.preventNextMoveOrZoom = true;
+  objectClick(mapObject: MapObject) {
+    this.preventReframe = true;
     if(this.dataset != null) {
-      this.dataset.select(mapPoint.object);
+      this.dataset.select(mapObject.getRbObject());
     } else if (this.datasetgroup != null) {
-      this.datasetgroup.select(mapPoint.object);
+      this.datasetgroup.select(mapObject.getRbObject());
     }
-    if(mapPoint.label != null) {
-      this.labellatLon.latitude = mapPoint.latitude;
-      this.labellatLon.longitude = mapPoint.longitude;
-      this.labelText = mapPoint.label;
-      this.labelLink = mapPoint.link;
+    if(mapObject.label != null) {
+      this.labellatLon = mapObject.getLatLon();
+      this.labelText = mapObject.label;
+      this.labelLink = mapObject.link;
       this.showLabel = true;
     }
   }
 
-  objectRightClick(mapPoint: MapPoint) {
+  objectRightClick(mapPoint: MapPin) {
   }
 
   mapClick(event: any) {
@@ -422,9 +332,9 @@ export class RbMapComponent extends RbDataObserverComponent {
     }
   }
 
-  zoomChange(event: any) {
+  /*zoomChange(event: any) {
     this.userMovedOrZoomed = true;
-  }
+  }*/
 
   labelClick() {
     if(this.labelLink != null) {
@@ -450,6 +360,7 @@ export class RbMapComponent extends RbDataObserverComponent {
     return d;
   }
 
-
-
+  createSeriesConfig(json: any): MapSeriesConfig {
+    return new MapSeriesConfig(json);
+  }
 }
