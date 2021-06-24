@@ -1,6 +1,6 @@
 <div
     class="rb-timeslider-datetime">
-    {{minDate | date : 'dd/MM/yy'}}<br>{{minDate | date : 'hh:mm:ss'}}
+    <span>{{minDate | rbDate}}</span><span>{{minDate | rbTime}}</span>
 </div>
 <div
     class="rb-timeslider-slider">
@@ -23,10 +23,10 @@
         (mousedown)="mousedown($event)"
         (mouseup)="mouseup($event)"
         (mousemove)="mousemove($event)">
-        {{currentDate | date : 'dd/MM/yy'}}<br>{{currentDate | date : 'hh:mm:ss'}}
+        <span>{{currentDate | rbDate}}</span><span>{{currentDate | rbTime}}</span>
     </div>
 </div>
 <div
     class="rb-timeslider-datetime">
-    {{maxDate | date : 'dd/MM/yy'}}<br>{{maxDate | date : 'hh:mm:ss'}}
+    {{maxDate | rbDate}}<br>{{maxDate | rbTime}}
 </div>

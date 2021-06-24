@@ -59,8 +59,8 @@
         [strokeColor]="'red'">
         <agm-polyline-point
             *ngFor="let point of mapPolygon.path"
-            [latitude]="point.lat"
-            [longitude]="point.lng">
+            [latitude]="point.latitude"
+            [longitude]="point.longitude">
         </agm-polyline-point>
     </agm-polyline>
     <agm-overlay
