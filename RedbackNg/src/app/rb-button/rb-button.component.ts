@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { ActionService } from 'app/services/action.service';
 
 @Component({
   selector: 'rb-button',
@@ -13,7 +14,9 @@ export class RbButtonComponent extends RbDataObserverComponent {
   @Input('action') action: string;
   @Input('param') param: string;
 
-  constructor() {
+  constructor(
+    private actionService: ActionService
+  ) {
     super();
   }
 
@@ -31,7 +34,7 @@ export class RbButtonComponent extends RbDataObserverComponent {
 
   public click() {
     if(this.dataset != null) {
-      this.dataset.action(this.action, this.param).subscribe((rbObject) => {
+      this.actionService.action(this.dataset, this.action, this.param).subscribe((rbObject) => {
       })
     }
   }

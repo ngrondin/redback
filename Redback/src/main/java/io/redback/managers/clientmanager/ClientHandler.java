@@ -57,7 +57,7 @@ public class ClientHandler extends ClientStreamHandler {
 		clientManager.subsManager.subscribe(this, objectname, uid);
 	}
 
-	public void requestService(String reqUid, String serviceName, DataMap request) throws RedbackException {
+	public void requestService(String reqUid, String serviceName, DataMap request, int timeout) throws RedbackException {
 		try {
 			Payload payload = new Payload();
 			payload.metadata.put("token", session.getToken());
@@ -67,11 +67,14 @@ public class ClientHandler extends ClientStreamHandler {
 			clientManager.firebus.requestService(serviceName, payload, new ServiceRequestor() {
 				public void response(Payload payload) {
 					try {
-						DataMap resp = new DataMap(payload.getString());
+						String mime = payload.metadata.get("mime");
 						DataMap respWrapper = new DataMap();
 						respWrapper.put("type", "serviceresponse");
 						respWrapper.put("requid", reqUid);
-						respWrapper.put("response", resp);
+						if(mime == null || (mime != null && mime.equals("application/json")))
+							respWrapper.put("response", new DataMap(payload.getString()));
+						else if(mime.startsWith("text/"))
+							respWrapper.put("response", payload.getString());
 						sendClientData(respWrapper);
 					} catch(Exception e2) {
 					}
@@ -92,7 +95,7 @@ public class ClientHandler extends ClientStreamHandler {
 					respWrapper.put("error", "service request timed out");
 					sendClientData(respWrapper);						
 				}	
-			}, 10000);
+			}, timeout > -1 ? timeout : 10000);
 		} catch(Exception e) {
 			throw new RedbackException("Error requesting service for client", e);
 		}

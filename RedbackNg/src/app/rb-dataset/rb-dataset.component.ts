@@ -47,9 +47,6 @@ export class RbDatasetComponent extends RbSetComponent  {
     private dataService: DataService,
     private apiService: ApiService,
     private filterService: FilterService,
-    private reportService: ReportService,
-    private modalService: ModalService,
-    private errorService: ErrorService
   ) {
     super();
     this.id = "" + Math.floor(Math.random() * 10000);
@@ -287,7 +284,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     this.dataService.deleteObject(obj).subscribe(result => this.remove(obj));
   }
 
-  private addObjectAndSelect(obj: RbObject) {
+  public addObjectAndSelect(obj: RbObject) {
     if(this._list.indexOf(obj) > -1) {
       this._list.splice(this._list.indexOf(obj));
     }
@@ -297,12 +294,12 @@ export class RbDatasetComponent extends RbSetComponent  {
     this.select(obj);
   }
 
-  private removeSelected() {
+  public removeSelected() {
     this.remove(this.selectedObject);
     this.selectedObject = null;
   }
 
-  private remove(obj: RbObject) {
+  public remove(obj: RbObject) {
     if(this._list.indexOf(obj) > -1) {
       this._list.splice(this._list.indexOf(obj), 1);
       obj.removeSet(this);
@@ -318,94 +315,4 @@ export class RbDatasetComponent extends RbSetComponent  {
       this.datasetgroup.groupMemberEvent(this.name, event);
     }
   }
-
-  public action(name: string, param: string) : Observable<null> {
-    return new Observable((observer) => {
-      let _name: string = name.toLowerCase();
-      if(_name == 'create' || _name == 'createinmemory') {
-        let data = this.resolvedFilter;
-        if(param != null) {
-          data = this.filterService.mergeFilters(this.resolvedFilter, this.filterService.resolveFilter(param, this.selectedObject, this.selectedObject, this.relatedObject))
-        }
-        if(_name == 'create') {
-          this.dataService.createObject(this.object, null, data).subscribe(new ObserverProxy(observer, newObject => this.addObjectAndSelect(newObject)));
-        } else if(_name == 'createinmemory') {
-          this.dataService.createObjectInMemory(this.object, null, data).subscribe(new ObserverProxy(observer, newObject => this.addObjectAndSelect(newObject)));
-        }
-      } else if(_name == 'delete') {
-        if(this.selectedObject != null) {
-          this.dataService.deleteObject(this.selectedObject).subscribe(new ObserverProxy(observer, () => this.removeSelected()));
-        }
-      } else if(_name == 'exportall') {
-        this.dataService.exportObjects(this.object, this.resolvedFilter, this.searchString).subscribe(new ObserverProxy(observer));
-      } else if(_name == 'report') {
-        if(this.selectedObject != null) {
-          this.reportService.launchReport(param, null, {"uid": this.selectedObject.uid});
-        }
-        observer.next();
-        observer.complete();        
-      } else if(_name == 'reportall') {
-        this.reportService.launchReport(param, null, this.resolvedFilter);
-        observer.next();
-        observer.complete();        
-      } else if(_name == 'reportlist') {
-        const selectedFilter = this.selectedObject != null ? {"uid": this.selectedObject.uid} : null;
-        this.reportService.popupReportList(param, selectedFilter, this.resolvedFilter);
-        observer.next();
-        observer.complete();
-      } else if(_name == 'execute') {
-        this.dataService.executeObject(this.selectedObject, param, null).subscribe(new ObserverProxy(observer));
-      } else if(_name == 'executeall') {
-        let delay: number = 0;
-        let doneCount: number = 0;
-        this._list.forEach((object) => {
-          setTimeout(() => {
-            this.dataService.executeObject(object, param, null).subscribe(
-              resp => {
-                doneCount++;
-                if(doneCount == this._list.length) {
-                  observer.next();
-                  observer.complete();
-                }
-              },
-              error => {
-                observer.error(error);
-              })
-          }, delay);
-          delay += 50;
-        });
-      } else if(_name == 'executemaster') {
-        if(this.relatedObject != null) {
-          this.dataService.executeObject(this.relatedObject, param, null).subscribe(new ObserverProxy(observer));
-        }
-      } else if(_name == 'executeglobal') {
-        let funcParam = {
-          "filter": this.resolvedFilter,
-          "selecteduid": (this.selectedObject != null ? this.selectedObject.uid : null)
-        }
-        this.dataService.executeGlobal(param, funcParam).subscribe(new ObserverProxy(observer));
-      } else if(_name == 'executedomain') {
-        if(this.selectedObject != null) {
-          this.apiService.executeDomain(param, this.selectedObject.domain, {"uid": this.selectedObject.uid}).subscribe(new ObserverProxy(observer, null, error => this.errorService.receiveHttpError(error)));
-        } else {
-          observer.error("No object selected");
-        }
-      } else if(_name == 'modal') {
-        this.modalService.open(param);
-        observer.next();
-        observer.complete();              
-      } else if(_name == 'externallink') {
-        let object = this.selectedObject;
-        let url = eval(param);
-        window.open(url);
-        observer.next();
-        observer.complete();   
-      } else if(this.selectedObject != null) {
-        this.dataService.executeObject(this.selectedObject, name, param).subscribe(new ObserverProxy(observer));
-      }
-    });
-  }
-
-
-
 }

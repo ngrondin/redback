@@ -43,6 +43,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 						DataMap map = new DataMap();
 						map.put("name", dfi.name);
 						map.put("description", dfi.description);
+						if(dfi.timeout > -1) map.put("timeout", dfi.timeout);
 						result.add(map);
 					}
 					resp.put("result", result);

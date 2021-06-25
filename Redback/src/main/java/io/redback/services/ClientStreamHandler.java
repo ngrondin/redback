@@ -47,7 +47,8 @@ public abstract class ClientStreamHandler extends StreamHandler {
 					String reqUid = data.getString("requid");
 					String serviceName = data.getString("servicename");
 					DataMap request = data.getObject("request");
-					requestService(reqUid, serviceName, request);
+					int timeout = data.containsKey("timeout") ? data.getNumber("timeout").intValue() : -1;
+					requestService(reqUid, serviceName, request, timeout);
 				} else if(type.equals("upload")) {
 					String uploadUid = data.getString("uploaduid");
 					try {
@@ -140,7 +141,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	public abstract void subscribeFilter(String objectname, DataMap filter, String id) throws RedbackException;
 	
-	public abstract void requestService(String requid, String service, DataMap data) throws RedbackException;
+	public abstract void requestService(String requid, String service, DataMap data, int timeout) throws RedbackException;
 	
 	public abstract void startUpload(String uploaduid, String filename, int filesize, String mime, String object, String uid) throws RedbackException;
 

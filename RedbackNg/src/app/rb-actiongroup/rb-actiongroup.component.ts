@@ -7,16 +7,19 @@ import { Subscription } from 'rxjs';
 import { RbNotification, RbObject } from 'app/datamodel';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { Evaluator } from 'app/helpers';
+import { ActionService } from 'app/services/action.service';
 
 export class RbActiongroupAction {
   action: string;
   param: string;
+  timeout: number;
   label: string;
   focus: boolean;
 
-  constructor(a: string, p: string, l: string, f: boolean) {
+  constructor(a: string, p: string, t:number, l: string, f: boolean) {
     this.action = a;
     this.param = p;
+    this.timeout = t;
     this.label = l;
     this.focus = f;
   }
@@ -45,6 +48,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
 
   constructor(
     private apiService: ApiService,
+    private actionService: ActionService,
     private notificationService: NotificationService,
     public userpref: UserprefService
   ) {
@@ -60,7 +64,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
       this.apiService.listDomainFunctions(this.domaincategory).subscribe(json => {
         this.domainActions = [];
         json.result.forEach(item => {
-          this.domainActions.push(new RbActiongroupAction('executedomain', item.name,item.description, false));
+          this.domainActions.push(new RbActiongroupAction('executedomain', item.name, item.timeout, item.description, false));
         });
         this.calcActionData();
       });
@@ -138,7 +142,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
     let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
     if(this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
-        this.actionData.push(new RbActiongroupAction("processaction", action.action, action.description, action.main))
+        this.actionData.push(new RbActiongroupAction("processaction", action.action, null, action.description, action.main))
       }
     }
     if(this.actions != null) {
@@ -146,7 +150,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
         if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject) == true))) {
           let swtch = this.userpref.getUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
-            this.actionData.push(new RbActiongroupAction(item.action, item.param, item.label, false));
+            this.actionData.push(new RbActiongroupAction(item.action, item.param, item.timeout, item.label, false));
           }
         }
       });
@@ -181,7 +185,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
         });
     } else {
       this.actionning = true;
-      this.dataset.action(action.action, action.param).subscribe().add(() => {
+      this.actionService.action(this.dataset, action.action, action.param, action.timeout).subscribe().add(() => {
         this.actionning = false;
       });
     }

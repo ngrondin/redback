@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { ActionService } from 'app/services/action.service';
 
 @Component({
   selector: 'rb-log',
@@ -23,7 +24,9 @@ export class RbLogComponent extends RbDataObserverComponent {
   public value: string; 
   public isEditable: boolean = true;
 
-  constructor() {
+  constructor(
+    private actionService: ActionService
+  ) {
     super();
   }
 
@@ -91,7 +94,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   post() {
     let msg: any = {};
     msg[this.entryattribute] = "'" + this.value.replace("'", "\\'") + "'";
-    this.dataset.action('create', msg).subscribe();
+    this.actionService.action(this.dataset, 'create', msg).subscribe();
     this.value = "";
   }
 

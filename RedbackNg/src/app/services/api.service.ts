@@ -43,11 +43,15 @@ export class ApiService {
     this.placesAutocompleteService = new google.maps.places.AutocompleteService();
   }
 
-  private requestService(service: string, request: any) {
+  private requestService(service: string, request: any, timeout?: number) {
     if(this.clientWSService.isConnected() && this.useCSForAPI) {
-      return this.clientWSService.request(service, request);
+      return this.clientWSService.request(service, request, timeout);
     } else {
-      return this.http.post<any>(this.baseUrl + '/' + service, request, httpJSONOptions);
+      let headers = new HttpHeaders()
+        .set("Content-Type", "application/json")
+        .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+      if(timeout != null) headers.set("firebus-timeout", timeout.toString());
+      return this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true});
     }
   }
 
@@ -62,7 +66,6 @@ export class ApiService {
       }
     };
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean): Observable<any> {
@@ -80,7 +83,6 @@ export class ApiService {
     };
     if(search != null) req['search'] = search;
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean): Observable<any> {
@@ -98,7 +100,6 @@ export class ApiService {
     };
     if(search != null) req['search'] = search;
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   updateObject(name: string, uid: string, data: any) {
@@ -113,7 +114,6 @@ export class ApiService {
       }
     };
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   createObject(name: string, uid: string, data: any) {
@@ -130,7 +130,6 @@ export class ApiService {
       req['uid'] = uid;
     }
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   deleteObject(name: string, uid: string) {
@@ -140,7 +139,6 @@ export class ApiService {
       uid: uid
     };
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   executeObject(name: string, uid: string, func: string) {
@@ -155,7 +153,6 @@ export class ApiService {
       }
     };
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
   
   executeGlobal(func: string, param: any) {
@@ -165,7 +162,6 @@ export class ApiService {
       param: param
     };
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, page: number = 0, pageSize: number = 50): Observable<any> {
@@ -183,7 +179,6 @@ export class ApiService {
       }
     };
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, httpOptions);
   }
 
   exportObjects(name: string, filter: any, search: string): Observable<any> {
@@ -203,7 +198,6 @@ export class ApiService {
       req['search'] = search;
     const headers = new HttpHeaders().set('Content-Type', 'text/plain; charset=utf-8');
     return this.requestService(this.objectService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.objectService, req, { headers, withCredentials: true, responseType: 'text' as 'json'});
   }
 
   /******* Files *********/
@@ -241,7 +235,6 @@ export class ApiService {
       object: object,
       uid: uid
     });
-    //return this.http.get<any>(this.baseUrl + '/' + this.fileService + '?action=list&object=' + object + '&uid=' + uid, httpOptions);
   }
 
   /******* Domain *********/
@@ -252,18 +245,16 @@ export class ApiService {
       category: category
     };
     return this.requestService(this.domainService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.domainService, req, httpOptions);
   }
 
-  executeDomain(func: string, domain: string, param: any) {
+  executeDomain(func: string, domain: string, param: any, timeout?: number) {
     const req = {
       action: 'execute',
       name: func,
       domain: domain,
-      param: param
+      param: param,
     };
-    return this.requestService(this.domainService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.domainService, req, httpOptions);
+    return this.requestService(this.domainService, req, timeout);
   }
 
   /******* Reporting Service *********/
@@ -282,7 +273,6 @@ export class ApiService {
       name: name
     };
     return this.requestService(this.userprefService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.userprefService, req, httpOptions);
   }
 
   putUserPreference(type: string, name: string, value: any): Observable<any> {
@@ -293,7 +283,6 @@ export class ApiService {
       value: value
     };
     return this.requestService(this.userprefService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.userprefService, req, httpOptions);
   }
 
 
@@ -308,7 +297,6 @@ export class ApiService {
       pageSize: pageSize
     };
     return this.requestService(this.processService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }
 
   getAssignmentCount(filter: any): Observable<any> {
@@ -317,7 +305,6 @@ export class ApiService {
       filter: filter
     };
     return this.requestService(this.processService, req);
-    //return this.http.post<any>(this.baseUrl + '/' + this.processService, req, httpOptions);
   }
 
   actionAssignment(pid: string, action: string): Observable<any> {

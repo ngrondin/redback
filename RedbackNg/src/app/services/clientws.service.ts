@@ -226,7 +226,7 @@ export class ClientWSService {
     }
   }
 
-  request(service: string, request: any) : Observable<any> {
+  request(service: string, request: any, timeout: number) : Observable<any> {
     if(this.connected) {
       return new Observable((observer) => {
         let ruid = UUID.UUID();
@@ -235,7 +235,8 @@ export class ClientWSService {
           type:"servicerequest",
           servicename: service,
           requid: ruid,
-          request: request
+          request: request,
+          timeout: timeout
         });
       });
     } else {

@@ -13,6 +13,7 @@ public class DomainFunction extends DomainEntry {
 	protected JSManager jsManager;
 	protected DomainManager domainManager;
 	protected Function function;
+	protected long timeout;
 	
 	public DomainFunction(DomainManager dm, JSManager jsm, DataMap c) throws RedbackException {
 		super(c);
@@ -21,9 +22,14 @@ public class DomainFunction extends DomainEntry {
 		String funcName = "domain_" + config.getString("domain") + "_" + config.getString("name");
 		List<String> params = Arrays.asList(new String[] {"log", "session", "dm", "oc", "pc", "fc", "nc", "rc", "gc", "geo", "ic", "domain", "param"});
 		function = new Function(jsManager, funcName, params, config.getString("source"));
+		timeout = config.containsKey("timeout") && !config.getString("timeout").equals("") ? config.getNumber("timeout").longValue() : -1;
 	}
 
 	public Object execute(Map<String, Object> context) throws RedbackException {
 		return function.execute(context);
+	}
+	
+	public DomainFunctionInfo getInfo() {
+		return new DomainFunctionInfo(this.name, this.description, timeout);
 	}
 }

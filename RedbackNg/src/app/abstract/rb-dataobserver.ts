@@ -82,11 +82,11 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     get rbObject() : RbObject {
-        return this.dataset != null ? this.dataset.selectedObject : null;
+        return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
     }
 
     get selectedObject() : RbObject {
-        return this.dataset != null ? this.dataset.selectedObject : null;
+        return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
     }
 
     get relatedObject() : RbObject {

@@ -302,7 +302,7 @@ public class DomainManager implements Consumer {
 		List<DomainFunctionInfo> retList = new ArrayList<DomainFunctionInfo>();
 		for(DomainEntry de: list) {
 			if(de instanceof DomainFunction)
-				retList.add(new DomainFunctionInfo(de.getName(), de.getDescription()));
+				retList.add(((DomainFunction)de).getInfo());
 		}
 		return retList;
 	}
