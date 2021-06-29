@@ -1,138 +1,12 @@
 import { Component, OnInit, Input, SimpleChange, Output, EventEmitter } from '@angular/core';
-import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { RbObject } from 'app/datamodel';
-import { FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
 import { DragService } from 'app/services/drag.service';
 import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
+import { UserprefService } from 'app/services/userpref.service';
 import { Subscription } from 'rxjs';
-
-let ganttLaneHeight: number = 42;
-
-class GanttLaneConfig {
-  dataset: string;
-  labelAttribute: string;
-  iconAttribute: string;
-  iconMap: any;
-  modal: string;
-  dragfilter: any;
-
-  constructor(json: any) {
-    this.dataset = json.dataset;
-    this.labelAttribute = json.labelattribute;
-    this.iconAttribute = json.iconattribute;
-    this.iconMap = json.iconmap;
-    this.modal = json.modal;
-    this.dragfilter = json.dragfilter;
-  }
-}
-
-class GanttSeriesConfig {
-  dataset: string;
-  startAttribute: string;
-  durationAttribute: string;
-  endAttribute: string;
-  labelAttribute: string;
-  laneAttribute: string;
-  laneLabelAttribute: string;
-  laneIconAttribute: string;
-  laneIconMap: any;
-  colorAttribute: string;
-  colorMap: any;
-  isBackground: boolean;
-  modal: string;
-  canEdit: boolean;
-
-  constructor(json: any) {
-    this.dataset = json.dataset;
-    this.startAttribute = json.startattribute;
-    this.durationAttribute = json.durationattribute;
-    this.endAttribute = json.endattribute;
-    this.labelAttribute = json.labelattribute;
-    this.laneAttribute = json.laneattribute;
-    this.laneLabelAttribute = json.lanelabelattribute;
-    this.laneIconAttribute = json.laneliconattribute;
-    this.laneIconMap = json.laneiconmap;
-    this.isBackground = json.isbackground;
-    this.canEdit = json.canedit;
-    this.colorAttribute = json.colorattribute;
-    this.colorMap = json.colormap;
-    this.modal = json.modal;
-  }
-}
-
-class GanttLane {
-  id: string;
-  label: string;
-  icon: string;
-  height: number;
-  spreads: GanttSpread[];
-  object: RbObject;
-
-  constructor(i: string, l: string, ic: string, o: RbObject) {
-    this.id = i;
-    this.label = l != null ? l : "";
-    this.icon = ic;
-    this.object = o;
-    this.height = ganttLaneHeight;
-  }
-
-  setSpreads(s: GanttSpread[]) {
-    this.spreads = s;
-    let max: number = 0;
-    for(let i = 0; i < this.spreads.length; i++) {
-      if(this.spreads[i].sublane > max) {
-        max = this.spreads[i].sublane;
-      }
-    }
-    this.height = ganttLaneHeight * (max + 1);
-  }
-}
-
-class GanttSpread {
-  id: string;
-  label: string;
-  start: number;
-  width: number;
-  top: number;
-  height: number;
-  sublane: number;
-  lane: string;
-  color: string;
-  canEdit: Boolean;
-  object: RbObject;
-  config: GanttSeriesConfig;
-
-  constructor(i: string, l: string, s: number, w: number, h: number, ln: string, c: string, ce: Boolean, o: RbObject, cfg: GanttSeriesConfig) {
-    this.id = i;
-    this.label = l;
-    this.start = s;
-    this.width = w;
-    this.height = h;
-    this.sublane = 0;
-    this.lane = ln;
-    this.color = c;
-    this.canEdit = ce;
-    this.object = o;
-    this.config = cfg;
-    this.setSubLane(0);
-  }
-
-  setSubLane(sl: number) {
-    this.sublane = sl;
-    this.top = (this.sublane * ganttLaneHeight) + (ganttLaneHeight - this.height) / 2;
-  }
-}
-
-class GanttMark {
-  px: number;
-  label: string;
-
-  constructor(p: number, l: string) {
-    this.px = p;
-    this.label = l;
-  }
-}
+import { GanttLane, GanttLaneConfig, GanttMark, GanttSeriesConfig, GanttSpread } from './rb-gantt-models';
 
 
 @Component({
@@ -140,12 +14,10 @@ class GanttMark {
   templateUrl: './rb-gantt.component.html',
   styleUrls: ['./rb-gantt.component.css']
 })
-export class RbGanttComponent extends RbDataObserverComponent {
+export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('lanes') lanes : any;
-  @Input('series') series: any[];
   @Input('locktonow') locktonow: boolean = false;
-  @Input('dofilter') dofilter: boolean = true;
-
+  
   lanesConfig: GanttLaneConfig;
   seriesConfigs: GanttSeriesConfig[];
   _startDate: Date = new Date();
@@ -169,59 +41,53 @@ export class RbGanttComponent extends RbDataObserverComponent {
   lastObjectUpdate: number = 0;
   lastHash: string | Int32Array;
 
-  recalcPlanned: boolean = false;
   public getSizeForObjectCallback: Function;
   dragSubscription: Subscription;
   
   constructor(
     private modalService: ModalService,
     private dragService: DragService,
-    private filterService: FilterService
+    private filterService: FilterService,
+    private userprefService: UserprefService
   ) {
     super();
   }
 
-  dataObserverInit() {
+  dataCalcInit() {
     this.dragSubscription = this.dragService.getObservable().subscribe(event => this.onDragEvent(event));
     this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
     this.spanMS = 259200000;
     this.zoomMS = 259200000;
     if(this.lanes != null) {
-      this.lanesConfig = new GanttLaneConfig(this.lanes);
-    }
-    if(this.series != null) {
-      this.seriesConfigs = [];
-      for(let item of this.series) {
-        this.seriesConfigs.push(new GanttSeriesConfig(item));
-      }
+      this.lanesConfig = new GanttLaneConfig(this.lanes, this.userPref);
     }
     if(this.dofilter && this.active) {
       this.filterDataset();
     }
   }
 
-  dataObserverDestroy() {
-    this.dragSubscription.unsubscribe();
+  dataCalcDestroy() {
+
   }
 
-  onDatasetEvent(event: any) {
-    if(this.haveListsChanged()) {
-      this.redraw();
-    }
+  createSeriesConfig(json: any): GanttSeriesConfig {
+    return new GanttSeriesConfig(json, this.userPref);
   }
 
   onActivationEvent(event: any) {
-    this.scrollLeft = 0;
     this.scrollTop = 0;
-    if(this.dofilter && this.active) {
-      this.filterDataset();
-    }
+    this.scrollLeft = 0;
+    super.onActivationEvent(event);
   }
 
   onDragEvent(event: any) {
     if(this.lanesConfig.dragfilter != null) {
       this.redraw();
     }
+  }
+
+  get userPref() : any {
+    return this.id != null ? this.userprefService.getUISwitch("gantt", this.id) : null;
   }
 
   get selectedObject() : RbObject {
@@ -242,44 +108,11 @@ export class RbGanttComponent extends RbDataObserverComponent {
   }
 
   get laneHeight() : number {
-    return ganttLaneHeight;
+    return GanttLane.ganttLaneHeight;
   }
 
   get isLoading() : boolean {
     return this.dataset != null ? this.dataset.isLoading : this.datasetgroup != null ? this.datasetgroup.isLoading : false;
-  }
-
-  haveListsChanged(): Boolean {
-    let str: string = "";
-    let cnt = 0;
-    let lu = 0;
-    if(this.list != null) {
-      for(let obj of this.list) {
-        cnt = cnt + 1;
-        let u = obj.lastUpdated;
-        if(u > lu) {
-          lu = u;
-        }
-      }
-    }
-    if(this.lists != null) {
-      for(let ser in this.lists) {
-        for(let obj of this.lists[ser]) {
-          cnt = cnt + 1;
-          let u = obj.lastUpdated;
-          if(u > lu) {
-            lu = u;
-          }
-        }
-      }
-    }
-    if(cnt != this.lastObjectCount || lu > this.lastObjectUpdate) {
-      this.lastObjectCount = cnt;
-      this.lastObjectUpdate = lu;
-      return true;
-    } else { 
-      return false;
-    }
   }
 
   setZoom(ms: number) {
@@ -337,14 +170,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
     }
   }
 
-  redraw() {
-    if(this.recalcPlanned == false) {
-      this.recalcPlanned = true;
-      setTimeout(() => this.calcAll(), 250);
-    }
-  }
-
-  calcAll() {
+  calc() {
     this.calcParams();
     this.ganttData = this.getLanes();
     this.dayMarks = this.getDayMarks();
@@ -418,7 +244,7 @@ export class RbGanttComponent extends RbDataObserverComponent {
                 widthPX = widthPX + startPX;
                 startPX = 0;
               }
-              let height = cfg.isBackground ? ganttLaneHeight : 28;
+              let height = cfg.isBackground ? GanttLane.ganttLaneHeight : 28;
               let label = cfg.isBackground ? "" : obj.get(cfg.labelAttribute);
               let color = 'white';
               if(cfg.colorAttribute != null) {

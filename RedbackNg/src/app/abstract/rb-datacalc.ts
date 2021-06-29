@@ -13,7 +13,11 @@ export class SeriesConfig {
 @Component({template: ''})
 export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbDataObserverComponent {
     @Input('series') series: any[];
+    @Input('dofilter') dofilter: boolean = true;
+
     seriesConfigs: T[] = [];
+    recalcPlanned: boolean = false;
+
     
     constructor(
     ) {
@@ -35,19 +39,29 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     
     onActivationEvent(event: any) {
         if(this.active) {
-            setTimeout(() => {
-                this.calcParams();
+            if(this.dofilter) {
+                this.filterDataset();
+            } else {
                 this.redraw();
-            }, 300);    
+            } 
         }
     }
     
     onDatasetEvent(event: any) {
         if(this.active) {
-            this.calcParams();
             this.redraw()
         }
     }
+
+    redraw() {
+        if(this.recalcPlanned == false) {
+          this.recalcPlanned = true;
+          setTimeout(() => {
+              this.calc();
+              this.recalcPlanned = false;
+          }, 250);
+        }
+      }
 
     iterateAllLists(callback: (object: RbObject, config: T) => void) {
         for(let seriesConfig of this.seriesConfigs) {
@@ -87,8 +101,8 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     abstract createSeriesConfig(json: any) : T;
 
-    abstract calcParams();
+    abstract filterDataset();
 
-    abstract redraw();
+    abstract calc();
     
 }

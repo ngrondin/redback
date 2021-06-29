@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -163,6 +162,16 @@ public class StringUtils
 			r = s.replaceAll(" ", "%20").replaceAll("\"", "%22").replaceAll("'", "%27");
 		}
 		return r;
+	}
+	
+	public static String escapeRegex(String s) {
+		String chars = "\\<([{^-=$!|]})?*+.>";
+		String ret = s;
+		for(int i = 0; i < chars.length(); i++) {
+			String c = chars.substring(i, i + 1);
+			ret = ret.replace(c, "\\" + c);
+		}
+		return ret;		
 	}
 		
 	

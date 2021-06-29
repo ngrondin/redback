@@ -1,71 +1,20 @@
 import { EventEmitter, Input, Output } from '@angular/core';
-import { Component, OnInit } from '@angular/core';
-import { LegendEntryComponent } from '@swimlane/ngx-charts';
-import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { Component } from '@angular/core';
+import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
-import { FilterService } from 'app/services/filter.service';
-
-
-class CalendarSeriesConfig {
-  dataset: string;
-  dateAttribute: string;
-  durationAttribute: string;
-  labelAttribute: string;
-  colorAttribute: string;
-  colorMap: any;
-  color: string;
-  linkAttribute: string;
-  linkView: string;
-  modal: string;
-  canEdit: boolean;
-  active: boolean = true;
-
-  constructor(json: any) {
-    this.dataset = json.dataset;
-    this.dateAttribute = json.dateattribute;
-    this.durationAttribute = json.durationattribute;
-    this.labelAttribute = json.labelattribute;
-    this.colorAttribute = json.colorattribute;
-    this.colorMap = json.colormap;
-    this.color = json.color;
-    this.linkAttribute = json.linkattribute;
-    this.linkView = json.linkview;
-    this.modal = json.modal;
-  }
-}
-
-class CalendarEntry {
-  id: string;
-  label: string;
-  date: Date;
-  color: string;
-  object: RbObject;
-  config: CalendarSeriesConfig;
-
-  constructor(i: string, l: string, d: Date, c: string, o: RbObject, cfg: CalendarSeriesConfig) {
-    this.id = i;
-    this.label = l;
-    this.date = d;
-    this.color = c;
-    this.object = o;
-    this.config = cfg;
-  }
-
-}
-
+import { UserprefService } from 'app/services/userpref.service';
+import { CalendarSeriesConfig, CalendarEntry } from './rb-calendar-models';
 
 @Component({
   selector: 'rb-calendar',
   templateUrl: './rb-calendar.component.html',
   styleUrls: ['./rb-calendar.component.css']
 })
-export class RbCalendarComponent extends RbDataObserverComponent {
-  @Input('series') series: any[];
+export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfig> {
   @Input('layers') layers: any[];
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
-  seriesConfigs: CalendarSeriesConfig[];
   data: any = {};
   _year: number;
   _month: number;
@@ -93,23 +42,17 @@ export class RbCalendarComponent extends RbDataObserverComponent {
   _activeDatasets: any[] = [];
 
   constructor(
-    private filterService: FilterService
+    private userprefService: UserprefService
   ) {
     super();
   }
 
-  dataObserverInit() {
+  dataCalcInit() {
     let dt = new Date();
     dt.setDate(1);
     this._year = dt.getFullYear();
     this._month = dt.getMonth();
-    this.calcParams();
-    if(this.series != null) {
-      this.seriesConfigs = [];
-      for(let item of this.series) {
-        this.seriesConfigs.push(new CalendarSeriesConfig(item));
-      }
-    }  
+    this.calcParams(); 
     if(this.layers != null && this.layers.length > 0) {
       this.layerOptions = [];
       for(let item of this.layers) {
@@ -121,24 +64,16 @@ export class RbCalendarComponent extends RbDataObserverComponent {
     }
   }
 
-  dataObserverDestroy() {
-    
+  dataCalcDestroy() {
+
   }
 
-  onDatasetEvent(event: string) {
-    this.redraw();
+  createSeriesConfig(json: any): CalendarSeriesConfig {
+    return new CalendarSeriesConfig(json, this.userPref);
   }
 
-  onActivationEvent(state: boolean) {
-    this.redraw();
-  }
-
-  get selectedObject() : RbObject {
-    return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
-  }
-
-  get isLoading() : boolean {
-    return this.dataset != null ? this.dataset.isLoading : this.datasetgroup != null ? this.datasetgroup.isLoading : false;
+  get userPref() : any {
+    return this.id != null ? this.userprefService.getUISwitch("calendar", this.id) : null;
   }
 
   get activeSeries() : CalendarSeriesConfig[] {
@@ -226,13 +161,8 @@ export class RbCalendarComponent extends RbDataObserverComponent {
       }
     }
   }
-  
-  redraw() {
-    this.calcLists();
-  }
 
-
-  calcLists() {
+  calc() {
     this.data = {};
     for(let cfg of this.activeSeries) {
       let list: RbObject[] = this.lists != null ? this.lists[cfg.dataset] : this.list;

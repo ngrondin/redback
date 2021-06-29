@@ -6,6 +6,7 @@ import { RbActivatorComponent } from "./rb-activator";
 
 @Component({template: ''})
 export abstract class RbComponent implements OnInit/*, AfterViewInit*/ {
+    @Input('id') id: string;
     @Input('activator') activator: RbActivatorComponent;
 
     public initiated: boolean = false;

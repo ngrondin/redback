@@ -960,7 +960,7 @@ public class ObjectManager
 	
 	protected DataMap generateSearchFilter(Session session, String objectName, String searchText) throws RedbackException
 	{
-		String regexExpr = "(?i)" + searchText + "";
+		String regexExpr = "(?i)" + StringUtils.escapeRegex(searchText) + "";
 		DataMap filter = new DataMap();
 		DataList orList = new DataList();
 		ObjectConfig config = getObjectConfig(session, objectName);

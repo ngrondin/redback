@@ -15,6 +15,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
 
   constructor() { 
     super();
+    this.dofilter = false;
   }
 
   dataCalcInit() {
@@ -27,10 +28,11 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
     return new TimelineSeriesConfig(json);
   }
 
-  calcParams() {
+  filterDataset() {
+    
   }
 
-  redraw() {
+  calc() {
     this.entries = [];
     this.iterateAllLists((object, config) => {
       let main = object.get(config.mainAttribute);
