@@ -26,7 +26,7 @@ export class ActionService {
   ) { }
 
 
-  public action(dataset: RbDatasetComponent, actionName: string, param: string, timeout?: number) : Observable<null> {
+  public action(dataset: RbDatasetComponent, actionName: string, param: any, timeout?: number) : Observable<null> {
     let _name: string = actionName.toLowerCase();
     if(_name == 'create') {
       return this.create(dataset, param);
@@ -61,22 +61,26 @@ export class ActionService {
     }
   }
 
-  public create(dataset: RbDatasetComponent, param: string) : Observable<null> {
+  private calcCreateData(dataset: RbDatasetComponent, param: any) : any {
+    let data = dataset.resolvedFilter;
+    if(param != null) {
+      let paramResolvedFilter: any = this.filterService.resolveFilter(param, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);
+      data = this.filterService.mergeFilters(data, paramResolvedFilter)
+    }
+    data = this.filterService.convertToData(data);
+    return data;
+  }
+
+  public create(dataset: RbDatasetComponent, param: any) : Observable<null> {
     return new Observable((observer) => {
-      let data = dataset.resolvedFilter;
-      if(param != null) {
-        data = this.filterService.mergeFilters(dataset.resolvedFilter, this.filterService.resolveFilter(param, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject))
-      }
+      let data = this.calcCreateData(dataset, param);
       this.dataService.createObject(dataset.object, null, data).subscribe(new ObserverProxy(observer, newObject => dataset.addObjectAndSelect(newObject)));
     });
   }
 
-  public createInMemory(dataset: RbDatasetComponent, param: string) : Observable<null> {
+  public createInMemory(dataset: RbDatasetComponent, param: any) : Observable<null> {
     return new Observable((observer) => {
-      let data = dataset.resolvedFilter;
-      if(param != null) {
-        data = this.filterService.mergeFilters(dataset.resolvedFilter, this.filterService.resolveFilter(param, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject))
-      }
+      let data = this.calcCreateData(dataset, param);
       this.dataService.createObjectInMemory(dataset.object, null, data).subscribe(new ObserverProxy(observer, newObject => dataset.addObjectAndSelect(newObject)));
     });
   }

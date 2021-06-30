@@ -151,5 +151,19 @@ export class FilterService {
       return v1 == v2;
     }
   }
+
+  convertToData(filter: any) {
+    let data: any = {};
+    for(let key in filter) {
+      if(!key.startsWith("$") && key != "uid") {
+        let val: any = filter[key];
+        let dataval = (val !== null && typeof val == 'object' ? this.convertToData(val) : val);
+        if(!(dataval !== null && typeof dataval == 'object' && Object.keys(dataval).length == 0)) {
+          data[key] = dataval;
+        } 
+      }
+    }
+    return data;
+  }
   
 }
