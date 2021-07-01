@@ -33,11 +33,12 @@ public class CSVReport extends Report {
 	protected ExpressionMap filterExpMap;
 	protected Expression sortExp;
 	protected ExpressionMap sortExpMap;
+	protected DataList columns;
 	protected byte[] bytes;
 	
 	public CSVReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
 		super(s, rm, rc);
-		DataMap c = rc.getData();
+		DataMap c = rc.getData().getObject("content");
 		jsParams = Arrays.asList(new String[] {"filter", "object"});
 		object = c.getString("object");
 		if(c.containsKey("filter")) {
@@ -53,7 +54,10 @@ public class CSVReport extends Report {
 				sortExpMap = new ExpressionMap(reportManager.getJSManager(), "sort", jsParams, ((DataMap)sort));
 			else if(sort instanceof DataLiteral)
 				sortExp = new Expression(reportManager.getJSManager(), "sort", jsParams, ((DataLiteral)sort).getString());	
-		}			
+		}	
+		if(c.containsKey("columns")) {
+			columns = c.getList("columns");
+		}
 	}
 
 	public void produce(DataMap filter) throws RedbackException {
@@ -63,7 +67,6 @@ public class CSVReport extends Report {
 		DataMap localFilter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
 		DataMap localSort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);
 		List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, localFilter, localSort, true);
-		DataList columns = this.reportConfig.getData().getList("columns");
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i < columns.size(); i++) {
 			if(i > 0) sb.append(",");
