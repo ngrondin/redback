@@ -255,9 +255,19 @@ public class RedbackObject extends RedbackElement
 						}
 						else
 						{
-							List<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0, 1);
-							if(resultList.size() > 0)
-								related.put(name, resultList.get(0));
+							List<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0, 50);
+							RedbackObject selected = null;
+							int selectedPoints = 0;
+							for(RedbackObject o : resultList) {
+								int points = o.getDomain().equals(this.getDomain()) ? 2 : o.getDomain().equals("root") ? 1 : 0;
+								if(points > selectedPoints) {
+									selectedPoints = points;
+									selected = o;
+								}
+							}
+							if(selected == null && resultList.size() > 0)
+								selected = resultList.get(0);
+							return selected;
 						}
 					}
 					catch(RedbackException e)
