@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -15,9 +16,12 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
+import io.redback.security.Session;
+import io.redback.utils.StringUtils;
 
 public class ImportData extends Thread
 {
+	private Logger logger = Logger.getLogger("io.redback");
 	
 	protected Firebus firebus;
 	protected String token;
@@ -49,11 +53,12 @@ public class ImportData extends Thread
 	
 	public void run()
 	{
+		Session session = new Session();
 		Map<String, String> keyMap = new HashMap<String, String>();
 		try
 		{
 			InputStream is = null;
-			System.out.println("Starting to import " + fileurl);
+			logger.info("Starting to import " + fileurl);
 			if(fileurl.startsWith("classpath:")) {
 				URL url = this.getClass().getClassLoader().getResource(fileurl.substring(11));
 				is = url.openStream();
@@ -120,6 +125,8 @@ public class ImportData extends Thread
 									fbReqmap.put("filter", filter);
 									Payload request = new Payload(fbReqmap.toString());
 									request.metadata.put("token", token);
+									request.metadata.put("session", session.getId());
+									request.metadata.put("mime", "application/json");
 									Payload response = firebus.requestService(objectService, request);
 									DataMap fbRespmap = new DataMap(response.getString());
 									DataList list = fbRespmap.getList("list");
@@ -128,7 +135,7 @@ public class ImportData extends Thread
 									{
 										DataMap existing = list.getObject(0);
 										newUid = existing.getString("uid");
-										System.out.println("Found existing object " + objectname + "." + newUid);
+										logger.fine("Found existing object " + objectname + "." + newUid);
 									}
 									else
 									{
@@ -142,7 +149,7 @@ public class ImportData extends Thread
 										response = firebus.requestService(objectService, request);
 										fbRespmap = new DataMap(response.getString());
 										newUid = fbRespmap.getString("uid");
-										System.out.println("Imported object " + objectname + "." + newUid);
+										logger.info("Imported object " + objectname + "." + newUid);
 									}
 									String oldKey = objectname + "." + oldUid;
 									keyMap.put(oldKey, newUid);
@@ -156,21 +163,21 @@ public class ImportData extends Thread
 							else
 							{
 								skippedAtLeastOne = true;
-								System.out.println("Skipping object " + objectname + "." + oldUid + " for the moment");
+								logger.fine("Skipping object " + objectname + "." + oldUid + " for the moment");
 							}
 						}				
 					}
 				} while(skippedAtLeastOne);
-				System.out.println("Finished importing " + fileurl);
+				logger.info("Finished importing " + fileurl);
 			}
 			else
 			{
-				System.err.println("File was not found : " + fileurl);
+				logger.severe("File was not found : " + fileurl);
 			}
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			logger.severe(StringUtils.rollUpExceptions(e));
 		}
 	}
 

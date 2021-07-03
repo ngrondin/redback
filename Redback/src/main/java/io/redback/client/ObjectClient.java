@@ -43,7 +43,7 @@ public class ObjectClient extends Client
 			DataMap req = new DataMap();
 			req.put("action", "list");
 			req.put("object", objectname);
-			req.put("filter", filter);
+			req.put("filter", filter != null ? filter : new DataMap());
 			if(sort != null)
 				req.put("sort", sort);
 			req.put("page", page);

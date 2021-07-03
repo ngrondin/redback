@@ -8,10 +8,12 @@ import io.redback.services.CronServer;
 public class RedbackCronServer extends CronServer 
 {
 	protected CronTaskManager cronTaskManager;
+	protected boolean enableCron;
 	
 	public RedbackCronServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 		cronTaskManager = new CronTaskManager(firebus, config);		
+		enableCron = config.containsKey("enable") && !config.getString("enable").equals("") ? config.getBoolean("enable") : true;
 	}
 	
 	public void configure() {
@@ -19,7 +21,8 @@ public class RedbackCronServer extends CronServer
 	}
 
 	public void start() {
-		cronTaskManager.start();
+		if(enableCron)
+			cronTaskManager.start();
 	}	
 
 }
