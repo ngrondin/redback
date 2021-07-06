@@ -42,6 +42,9 @@ export class RbAggregatesetComponent extends RbSetComponent {
   }
 
   onDatasetEvent(event: any) {
+    if(this.active) {
+      this.refreshData();
+    }
   }
 
   onActivationEvent(state: any) {

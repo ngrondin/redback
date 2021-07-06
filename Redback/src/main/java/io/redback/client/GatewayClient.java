@@ -10,6 +10,7 @@ public class GatewayClient extends Client
 	public GatewayClient(Firebus fb, String sn) 
 	{
 		super(fb, sn);
+		setTimeout(60000);
 	}
 	
 	public DataMap get(String url) throws RedbackException {

@@ -9,6 +9,7 @@ public class IntegrationClient extends Client {
 
 	public IntegrationClient(Firebus fb, String sn) {
 		super(fb, sn);
+		setTimeout(60000);
 	} 
 
 	public DataMap get(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException {
