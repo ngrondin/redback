@@ -33,6 +33,8 @@ public abstract class Unit {
 		String type = c.getString("type"); 
 		if(type.equals("dataset"))
 			newUnit = new DataSet(rm, rc, c);
+		else if(type.equals("transformer"))
+			newUnit = new DataSetTransformer(rm, rc, c);
 		else if(type.equals("text"))
 			newUnit = new Text(rm, rc, c);
 		else if(type.equals("multilinetext"))

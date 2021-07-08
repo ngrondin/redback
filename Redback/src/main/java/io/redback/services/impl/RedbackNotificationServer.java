@@ -50,6 +50,7 @@ import io.redback.security.Session;
 import io.redback.services.NotificationServer;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.Email;
+import io.redback.utils.EmailAttachment;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
 
@@ -132,15 +133,21 @@ public class RedbackNotificationServer extends NotificationServer {
 			            messageBodyPart.setText(email.body);
 			            multipart.addBodyPart(messageBodyPart);
 
-			            for(String fileUid: email.attachments) {
-			            	RedbackFile file = fileClient.getFile(session, fileUid);
+			            for(EmailAttachment att: email.attachments) {
 				            BodyPart fileBodyPart = new MimeBodyPart();
-				            DataSource source = new ByteArrayDataSource(file.bytes, file.metadata.mime);
-				            fileBodyPart.setDataHandler(new DataHandler(source));
-				            fileBodyPart.setFileName(file.metadata.fileName);
-				            multipart.addBodyPart(fileBodyPart);
+			            	if(att.fileUid != null) {
+			            		RedbackFile file = fileClient.getFile(session, att.fileUid);
+					            DataSource source = new ByteArrayDataSource(file.bytes, file.metadata.mime);
+					            fileBodyPart.setDataHandler(new DataHandler(source));
+					            fileBodyPart.setFileName(file.metadata.fileName);
+			            	} else {
+			            		byte[] bytes = Base64.getDecoder().decode(att.base64Content);
+					            DataSource source = new ByteArrayDataSource(bytes, att.mime);
+					            fileBodyPart.setDataHandler(new DataHandler(source));
+					            fileBodyPart.setFileName(att.filename);
+			            	}
+				            multipart.addBodyPart(fileBodyPart);			            		
 			            }
-			            
 			            msg.setContent(multipart);
 			        }
 			        msg.setSentDate(new Date());
@@ -172,12 +179,12 @@ public class RedbackNotificationServer extends NotificationServer {
 			{
 				Message msg =  messages[i];
 				String body = null;
-				List<String> attachments = null;
+				List<EmailAttachment> attachments = null;
 				Object content = msg.getContent();
 				if(content instanceof String) {
 					body = (String)content;
 				} else if(content instanceof MimeMultipart) {
-					attachments = new ArrayList<String>();
+					attachments = new ArrayList<EmailAttachment>();
 					MimeMultipart mmp = (MimeMultipart)content;
 					for(int j = 0; j < mmp.getCount(); j++) {
 						BodyPart bp = mmp.getBodyPart(j);
@@ -194,7 +201,8 @@ public class RedbackNotificationServer extends NotificationServer {
 						    while((read = is.read()) != -1)
 						    	buffer.write(read);
 						    RedbackFileMetaData filemd = fileClient.putFile(session, bp.getFileName(), bp.getContentType(), session.getUserProfile().getUsername(), buffer.toByteArray());
-						    attachments.add(filemd.fileuid);
+						    EmailAttachment att = new EmailAttachment(filemd.fileuid);
+						    attachments.add(att);
 						}
 					}
 				}

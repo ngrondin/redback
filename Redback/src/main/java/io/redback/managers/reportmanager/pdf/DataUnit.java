@@ -17,15 +17,15 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.client.RedbackObjectRemote;
-import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
+import io.redback.utils.js.JSConverter;
 
 public abstract class DataUnit extends Unit {
 	protected Expression valueExpr;
 	protected PDFont font;
+	protected PDFont boldFont;
 	protected float fontSize;
 	protected Color color;
 	protected float height;
@@ -39,6 +39,7 @@ public abstract class DataUnit extends Unit {
 		valueExpr = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_text_value", jsParams, c.getString("value"));
 		width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
 		font = PDType1Font.HELVETICA;
+		boldFont = PDType1Font.HELVETICA_BOLD;
 		fontSize = config.containsKey("fontsize") ? config.getNumber("fontsize").floatValue() : 12f;
 		height = config.containsKey("height") ? config.getNumber("height").floatValue() : 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize;
 		color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
@@ -87,8 +88,7 @@ public abstract class DataUnit extends Unit {
 	
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		RedbackObjectRemote object = (RedbackObjectRemote)context.get("object");
-		jsContext.put("object", new RedbackObjectRemoteJSWrapper(object));
+		jsContext.put("object", JSConverter.toJS(context.get("object")));
 		jsContext.put("page", context.get("page"));
 		Object value = null;
 		try {
@@ -138,7 +138,7 @@ public abstract class DataUnit extends Unit {
 				} catch(Exception e) {
 					valueStr = "Bad data for datetime";
 				}
-			}
+			} 
 		}
 		return valueStr;
 	}

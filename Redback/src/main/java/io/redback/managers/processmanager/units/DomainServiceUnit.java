@@ -13,6 +13,7 @@ import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.processmanager.Process;
 import io.redback.security.Session;
+import io.redback.utils.StringUtils;
 import io.redback.utils.js.JSConverter;
 
 public class DomainServiceUnit extends ProcessUnit 
@@ -68,7 +69,7 @@ public class DomainServiceUnit extends ProcessUnit
 			} 
 			catch (Exception e)
 			{
-				error("Error executing domain service call ",  e);
+				logger.warning(StringUtils.rollUpExceptions(e));
 			}
 			logger.finer("Finished domain service call node");
 		}

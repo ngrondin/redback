@@ -15,9 +15,9 @@ public class Email {
 	public InternetAddress from;
 	public String subject;
 	public String body;
-	public List<String> attachments;
+	public List<EmailAttachment> attachments;
 	
-	public Email(InternetAddress[] t, InternetAddress fr, String s, String b, List<String> f) {
+	public Email(InternetAddress[] t, InternetAddress fr, String s, String b, List<EmailAttachment> f) {
 		to = t;
 		from = fr;
 		subject = s;
@@ -32,7 +32,7 @@ public class Email {
 			for(int i = 0; i < toList.size(); i++) {
 				to[i] = toInternetAddress(toList.get(i));
 			}
-		} else if(map.get("to") instanceof DataLiteral) {
+		} else if(map.get("to") instanceof DataEntity) {
 			to = new InternetAddress[1];
 			to[0] = toInternetAddress(map.get("to"));
 		}
@@ -41,9 +41,14 @@ public class Email {
 		body = map.getString("body");					
 		DataList attList = map.getList("attachments");
 		if(attList != null) {
-			attachments = new ArrayList<String>();
+			attachments = new ArrayList<EmailAttachment>();
 			for(int i = 0; i < attList.size(); i++) {
-				attachments.add(attList.getString(i));
+				if(attList.get(i) instanceof DataLiteral) {
+					attachments.add(new EmailAttachment(attList.getString(i)));	
+				} else if(attList.get(i) instanceof DataMap) {
+					DataMap attMap = attList.getObject(i);
+					attachments.add(new EmailAttachment(attMap.getString("base64"), attMap.getString("filename"), attMap.getString("mime")));	
+				}
 			}
 		}
 	}
@@ -82,8 +87,17 @@ public class Email {
 		map.put("body", body);
 		if(attachments != null && attachments.size() > 0) {
 			DataList attList = new DataList();
-			for(String fileUid: attachments)
-				attList.add(fileUid);
+			for(EmailAttachment att: attachments) {
+				if(att.fileUid != null) {
+					attList.add(att.fileUid);	
+				} else {
+					DataMap attMap = new DataMap();
+					attMap.put("base64", att.base64Content);
+					attMap.put("filename", att.filename);
+					attMap.put("mime", att.mime);
+					attList.add(attMap);
+				}	
+			}
 			map.put("attachments", attList);
 		}
 		return map;

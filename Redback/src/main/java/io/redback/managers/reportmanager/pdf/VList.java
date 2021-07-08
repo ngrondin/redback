@@ -6,7 +6,6 @@ import java.util.Map;
 
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
-import io.redback.client.RedbackObjectRemote;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 
@@ -19,10 +18,10 @@ public class VList extends ContainerUnit {
 	}
 	
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
-		List<?> rors = (List<?>)context.get("dataset");
+		List<?> dataset = (List<?>)context.get("dataset");
 		Box c = Box.VContainer(true);
-		for(Object ror: rors) {
-			context.put("object", (RedbackObjectRemote)ror);
+		for(Object object: dataset) {
+			context.put("object", object);
 			for(Unit unit: contentUnits) {
 				c.addChild(unit.produce(context));
 			}

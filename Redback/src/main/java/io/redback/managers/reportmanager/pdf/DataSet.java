@@ -12,7 +12,6 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
-import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.reportmanager.ReportConfig;
@@ -49,11 +48,11 @@ public class DataSet extends ContainerUnit {
 	}
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
-		RedbackObjectRemote currentObject = (RedbackObjectRemote)context.get("object");
+		Object currentObject = context.get("object");
 		List<?> currentDataSet = (List<?>)context.get("dataset");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
 		jsContext.put("filter", JSConverter.toJS(context.get("filter")));
-		jsContext.put("object", new RedbackObjectRemoteJSWrapper(currentObject));
+		jsContext.put("object", JSConverter.toJS(currentObject));
 		ObjectClient oc = reportManager.getObjectClient();
 		DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
 		DataMap sort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);
@@ -62,7 +61,6 @@ public class DataSet extends ContainerUnit {
 		context.put("dataset", rors);
 
 		Box c = Box.VContainer(true);
-
 		for(Unit unit: contentUnits) {
 			c.addChild(unit.produce(context));
 		}

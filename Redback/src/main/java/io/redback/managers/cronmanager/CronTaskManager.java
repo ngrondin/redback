@@ -27,6 +27,7 @@ import io.redback.security.Session;
 import io.redback.security.UserProfile;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.LoggerJSFunction;
 
@@ -126,7 +127,7 @@ public class CronTaskManager extends Thread {
 								try {
 									runTask(ctc);
 								} catch(Exception e) {
-									logger.severe("Error executing cron task : " + e.getMessage());
+									logger.severe(StringUtils.rollUpExceptions(e));
 								}
 								if(ctc.getPeriod() > 0) {
 									ctc.setNextRun(current + ctc.getPeriod());
@@ -145,11 +146,11 @@ public class CronTaskManager extends Thread {
 					sleep += randomDelay;
 					Thread.sleep(sleep);
 				} catch(Exception e) {
-					logger.severe("General error in CronTaskManager thread : " + e.getMessage());
+					logger.severe("General error in CronTaskManager thread : " + StringUtils.rollUpExceptions(e));
 				}
 			}
 		} catch(Exception e) {
-			logger.severe("Cron task manager cannot load configured tasks : " + e.getMessage());
+			logger.severe("Cron task manager cannot load configured tasks : " + StringUtils.rollUpExceptions(e));
 		}
 	}
 	

@@ -13,6 +13,7 @@ public class Text extends DataUnit {
 	public static int ALIGN_RIGHT = 1;
 	public static int ALIGN_CENTER = 2;
 	protected int align = 0;
+	protected boolean bold = false;
 	
 	public Text(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
@@ -23,11 +24,12 @@ public class Text extends DataUnit {
 			else if(a.equalsIgnoreCase("center"))
 				align = ALIGN_CENTER;
 		}
+		if(config.containsKey("bold")) bold = config.getBoolean("bold");
 	}
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
 		String valueStr = getSringValue(context);
-		Box rb = Box.Text(valueStr, font, fontSize);
+		Box rb = Box.Text(valueStr, bold ? boldFont : font, fontSize);
 		rb.height = height;
 		rb.color = color;
 		if(width > -1) {

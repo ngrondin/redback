@@ -12,6 +12,7 @@ import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.Email;
+import io.redback.utils.EmailAttachment;
 
 public class NotificationClient extends Client {
 
@@ -19,7 +20,13 @@ public class NotificationClient extends Client {
 		super(fb, sn);
 	}
 	
-	public void sendEmail(Session session, InternetAddress[] to, InternetAddress from, String subject, String body, List<String> attachments) throws RedbackException {
+	public void sendEmail(Session session, InternetAddress[] to, InternetAddress from, String subject, String body, List<String> att) throws RedbackException {
+		List<EmailAttachment> attachments = null;
+		if(att != null) {
+			attachments = new ArrayList<EmailAttachment>();
+			for(String fileuid: att) 
+				attachments.add(new EmailAttachment(fileuid));
+		}
 		Email email = new Email(to, from, subject, body, attachments);
 		sendEmail(session, email);
 	}

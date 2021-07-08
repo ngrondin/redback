@@ -2,6 +2,7 @@ package io.redback.client.js;
 
 import java.util.Arrays;
 //import java.util.logging.Logger;
+import java.util.Base64;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -46,7 +47,8 @@ public class ReportClientJSWrapper implements ProxyObject {
 					try
 					{
 						byte[] bytes = reportClient.produce(session, domain, name, filter);
-						return bytes;
+						String base64 = Base64.getEncoder().encodeToString(bytes);
+						return base64;
 					}
 					catch(Exception e)
 					{
