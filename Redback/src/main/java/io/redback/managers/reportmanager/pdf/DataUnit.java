@@ -2,8 +2,10 @@ package io.redback.managers.reportmanager.pdf;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -20,6 +22,7 @@ import io.redback.RedbackException;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
+import io.redback.security.Session;
 import io.redback.utils.js.JSConverter;
 
 public abstract class DataUnit extends Unit {
@@ -35,7 +38,7 @@ public abstract class DataUnit extends Unit {
 
 	public DataUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		jsParams = Arrays.asList(new String[] {"params", "object", "page"});
+		jsParams = Arrays.asList(new String[] {"dataset", "object", "page"});
 		valueExpr = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_text_value", jsParams, c.getString("value"));
 		width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
 		font = PDType1Font.HELVETICA;
@@ -87,7 +90,9 @@ public abstract class DataUnit extends Unit {
 	}
 	
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
+		Session session = (Session)context.get("session");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
+		jsContext.put("dataset", JSConverter.toJS(context.get("dataset")));
 		jsContext.put("object", JSConverter.toJS(context.get("object")));
 		jsContext.put("page", context.get("page"));
 		Object value = null;
@@ -124,17 +129,24 @@ public abstract class DataUnit extends Unit {
 				} catch(Exception e) {
 					valueStr = "Bad data for duration";
 				}
+			} else if(format.equals("shortdate") && value != null && value instanceof Date) {
+				try {
+					ZonedDateTime zdt = ZonedDateTime.ofInstant(((Date)value).toInstant(), session.getTimezone() != null ? ZoneId.of(session.getTimezone()) : ZoneId.systemDefault());
+					valueStr = zdt.format(DateTimeFormatter.ofPattern("d MMM"));
+				} catch(Exception e) {
+					valueStr = "Bad data for date";
+				}
 			} else if(format.equals("date") && value != null && value instanceof Date) {
 				try {
-					DateFormat formatter = DateFormat.getDateInstance();
-					valueStr = formatter.format(value);
+					ZonedDateTime zdt = ZonedDateTime.ofInstant(((Date)value).toInstant(), session.getTimezone() != null ? ZoneId.of(session.getTimezone()) : ZoneId.systemDefault());
+					valueStr = zdt.format(DateTimeFormatter.ofPattern("d MMM yy"));
 				} catch(Exception e) {
 					valueStr = "Bad data for date";
 				}
 			} else if(format.equals("datetime") && value != null && value instanceof Date) {
 				try {
-					DateFormat formatter = DateFormat.getDateTimeInstance();
-					valueStr = formatter.format(value);
+					ZonedDateTime zdt = ZonedDateTime.ofInstant(((Date)value).toInstant(), session.getTimezone() != null ? ZoneId.of(session.getTimezone()) : ZoneId.systemDefault());
+					valueStr = zdt.format(DateTimeFormatter.ofPattern("d MMM yy HH:mm a"));
 				} catch(Exception e) {
 					valueStr = "Bad data for datetime";
 				}

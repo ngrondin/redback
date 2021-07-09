@@ -35,6 +35,7 @@ public class ReportManager {
 	protected DataClient dataClient;
 	protected FileClient fileClient;
 	protected CollectionConfig collection;
+	protected boolean includeLoaded;
 	protected Map<String, ReportConfig> configs;
 	protected Map<String, Map<String, ReportConfig>> domainConfigs;
 	protected Map<Integer, List<ReportConfig>> listsQueried;
@@ -42,6 +43,7 @@ public class ReportManager {
 	public ReportManager(Firebus fb, DataMap config) {
 		firebus = fb;
 		jsManager = new JSManager("report");
+		includeLoaded = false;
 		configServiceName = config.getString("configservice");
 		objectServiceName = config.getString("objectservice");
 		dataServiceName = config.getString("dataservice");
@@ -54,6 +56,24 @@ public class ReportManager {
 		configs = new HashMap<String, ReportConfig>();
 		domainConfigs = new HashMap<String, Map<String, ReportConfig>>();
 		listsQueried = new HashMap<Integer, List<ReportConfig>>();
+	}
+	
+	protected void loadIncludeScripts(Session session) throws RedbackException
+	{
+		DataMap result = configClient.listConfigs(session, "rbrs", "include");
+		DataList resultList = result.getList("result");
+		for(int i = 0; i < resultList.size(); i++)
+		{
+			try 
+			{
+				jsManager.addSource("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
+			}
+			catch(Exception e) 
+			{
+				throw new RedbackException("Problem compiling include scripts", e);
+			}
+		}
+		includeLoaded = true;
 	}
 	
 	protected ReportConfig getConfig(Session session, String domain, String name) throws RedbackException {
@@ -136,6 +156,8 @@ public class ReportManager {
 
 	public Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException {
 		ReportConfig config = getConfig(session, domain, name);
+		if(!includeLoaded)
+			loadIncludeScripts(session);		
 		Report report = null;
 		if(config != null) {
 			if(config.getType().equals("pdf"))
