@@ -12,7 +12,7 @@ import io.redback.client.ProcessAssignmentRemote;
 public class ProcessAssignmentRemoteJSWrapper implements ProxyObject {
 
 	protected ProcessAssignmentRemote processAssignmentRemote;
-	protected String[] members = {"action"};
+	protected String[] members = {"action", "hasAction"};
 	
 	public ProcessAssignmentRemoteJSWrapper(ProcessAssignmentRemote o)
 	{
@@ -28,6 +28,14 @@ public class ProcessAssignmentRemoteJSWrapper implements ProxyObject {
 					String action = arguments[0].asString();
 					processAssignmentRemote.action(action);
 					return null;
+				}
+			};				
+		} else if(name.equals("hasAction"))
+		{
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String action = arguments[0].asString();
+					return processAssignmentRemote.hasAction(action);
 				}
 			};				
 		} else {
