@@ -281,7 +281,7 @@ public class ProcessManager
 				domain = actionner.getUserProfile().getAttribute("rb.defaultdomain");
 			pi = process.createInstance(actionner, domain, data);
 			putInCurrentTransaction(pi);
-			//commitInstance(pi);
+			commitInstance(pi); //This is necessary to allow dependent processes created afterward to interact with this instance before its first segment is committed.
 			process.startInstance(actionner, pi);
 			logger.finer("Initiated instance '" + pi.getId() + "' for process '" + processName + "'");
 		}
@@ -290,6 +290,28 @@ public class ProcessManager
 			throw new RedbackException("No process found for name '" + processName + "'");
 		}
 		return pi;
+	}
+	
+	public void restartProcess(Actionner actionner, String pid) throws RedbackException 
+	{
+		ProcessInstance pi = getProcessInstance(actionner, pid);
+		if(pi != null)
+		{
+			logger.finer("Restarting process " + pi.getProcessName() + ":" + pid);
+			Process process = getProcess(actionner.getSession(), pi.getProcessName(), pi.getProcessVersion());
+			if(!pi.isComplete()) 
+			{
+				if(pi.getCurrentNode() == null) 
+				{
+					process.startInstance(actionner, pi);
+				}
+				else 
+				{
+					process.continueInstance(pi);
+				}
+			}
+		}
+		logger.finer("Finished processing action");
 	}
 
 	public List<Notification> getNotifications(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException

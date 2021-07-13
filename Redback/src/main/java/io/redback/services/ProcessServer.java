@@ -147,6 +147,8 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 
 	protected abstract ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException;
 	
+	protected abstract void restartProcess(Session session, String pid) throws RedbackException;
+	
 	protected abstract void actionProcess(Session session, String pid, String processAction, Date date, DataMap data) throws RedbackException;
 	
 	protected abstract void interruptProcess(Session session, String pid) throws RedbackException;

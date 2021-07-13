@@ -60,7 +60,7 @@ public class ProcessInstance
 		domain = c.getString("domain");
 		id = UUID.fromString(c.getString("_id"));
 		currentNode = c.getString("currentnode");
-		complete = c.getBoolean("compelte");
+		complete = c.getBoolean("complete");
 		data = c.getObject("data");
 		if(c.containsKey("interaction"))
 			interactionDetails = c.getObject("interaction");
@@ -236,6 +236,7 @@ public class ProcessInstance
 		retVal.put("process", processName);
 		retVal.put("version", processVersion);
 		retVal.put("domain", domain);
+		retVal.put("complete", complete);
 		retVal.put("currentnode", currentNode);
 		retVal.put("lastupdate", new Date());
 		if(interactionDetails != null)
