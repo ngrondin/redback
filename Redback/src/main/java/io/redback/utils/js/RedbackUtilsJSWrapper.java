@@ -87,6 +87,8 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String tzName = arguments[0].asString();
+					if(tzName == null || (tzName != null && tzName.equals("")))
+						tzName = "UTC";
 					ZoneId here = ZoneId.of(tzName);
 					ZonedDateTime hereAndNow = Instant.now().atZone(here);
 					return -1 * hereAndNow.getOffset().getTotalSeconds() * 1000;

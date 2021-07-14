@@ -25,13 +25,15 @@ export abstract class RbPopupInputComponent extends RbFieldInputComponent {
   public onFocus(event: any) {
     if(this.overlayRef == null) {
       this.startEditing();
-      let position: any = this.getPositionOf(event.target);
-      if(position.top > (window.innerHeight / 2)) {
-        this.openPopup('up', position.top);
-      } else {
-        this.openPopup('down', (window.innerHeight - position.top - event.target.clientHeight - 40));
+      if(this.isEditing) {
+        let position: any = this.getPositionOf(event.target);
+        if(position.top > (window.innerHeight / 2)) {
+          this.openPopup('up', position.top);
+        } else {
+          this.openPopup('down', (window.innerHeight - position.top - event.target.clientHeight - 40));
+        }
+        event.target.select();
       }
-      event.target.select();
     }
   }
   

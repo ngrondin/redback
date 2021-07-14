@@ -89,7 +89,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
 
   onFocus(event: any) {
     super.onFocus(event);
-    event.target.select();
+    if(this.isEditing) event.target.select();
   }
 
   startEditing() {

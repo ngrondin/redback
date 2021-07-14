@@ -42,7 +42,7 @@ export class RbCurrencyInputComponent extends RbFieldInputComponent  {
 
   public onFocus(event: any) {
     super.onFocus(event);
-    event.target.select();
+    if(this.isEditing) event.target.select();
   }
 
   public startEditing() {

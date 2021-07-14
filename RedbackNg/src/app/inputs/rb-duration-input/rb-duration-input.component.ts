@@ -61,7 +61,7 @@ export class RbDurationInputComponent extends RbFieldInputComponent implements O
 
   public onFocus(event: any) {
     super.onFocus(event);
-    event.target.select();
+    if(this.isEditing) event.target.select();
   }
 
   public startEditing() {

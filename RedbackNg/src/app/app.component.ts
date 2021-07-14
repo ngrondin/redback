@@ -90,17 +90,20 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.clientWSService.initWebsocket().subscribe(connected => {
-      if(this.firstConnected == false) {
-        this.firstConnected = true;
-        this.menuService.load().subscribe(() => {
-          this.userprefService.load().subscribe(() => {
-            this.notificationService.load().subscribe(() => {
-              this.events.next("init");
-            })
+    this.clientWSService.initWebsocket().subscribe(connected => this.firstLoad());
+    setTimeout(() => this.firstLoad(), 5000); //If the client websocket doesn't connect in 5s, fallback on http
+  }
+
+  firstLoad() {
+    if(this.firstConnected == false) {
+      this.firstConnected = true;
+      this.menuService.load().subscribe(() => {
+        this.userprefService.load().subscribe(() => {
+          this.notificationService.load().subscribe(() => {
+            this.events.next("init");
           })
         })
-      }
-    });
+      })
+    }
   }
 }
