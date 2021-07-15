@@ -619,7 +619,8 @@ public class ObjectManager
 		Payload reqP = new Payload(request.toString());
 		reqP.metadata.put("session", session.id);
 		reqP.metadata.put("token", session.token);
-		reqP.metadata.put("timezone", session.getTimezone());
+		if(session.getTimezone() != null)
+			reqP.metadata.put("timezone", session.getTimezone());
 		try {
 			firebus.requestServiceAndForget(name, reqP);
 		} catch(Exception e) {

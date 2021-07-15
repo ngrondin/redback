@@ -61,7 +61,8 @@ public class ClientHandler extends ClientStreamHandler {
 		try {
 			Payload payload = new Payload();
 			payload.metadata.put("token", session.getToken());
-			payload.metadata.put("timezone", session.getTimezone());
+			if(session.getTimezone() != null)
+				payload.metadata.put("timezone", session.getTimezone());
 			payload.metadata.put("mime", "application/json");
 			payload.setData(request.toString());
 			clientManager.firebus.requestService(serviceName, payload, new ServiceRequestor() {

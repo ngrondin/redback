@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -17,6 +18,8 @@ import io.redback.utils.StringUtils;
 
 public class RedbackUtilsJSWrapper implements ProxyObject
 {
+	private Logger logger = Logger.getLogger("io.redback");
+	
 	protected String[] members = {
 			"convertDataEntityToAttributeString", 
 			"convertDataMapToAttributeString", 
@@ -87,8 +90,10 @@ public class RedbackUtilsJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String tzName = arguments[0].asString();
-					if(tzName == null || (tzName != null && tzName.equals("")))
+					if(tzName == null || (tzName != null && (tzName.equals("") || tzName.equals("null")))) {
+						logger.warning("Problem in getTImezoneOffset, timezone argument was '" + tzName + "'");
 						tzName = "UTC";
+					}
 					ZoneId here = ZoneId.of(tzName);
 					ZonedDateTime hereAndNow = Instant.now().atZone(here);
 					return -1 * hereAndNow.getOffset().getTotalSeconds() * 1000;
