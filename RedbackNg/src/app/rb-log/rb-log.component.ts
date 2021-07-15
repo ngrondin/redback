@@ -14,7 +14,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('dateattribute') dateattribute: string;
   @Input('entryattribute') entryattribute: string;
   @Input('categoryattribute') categoryattribute: string;
-  @Input('editable') editable: string;
+  @Input('editable') editable: any;
   @Input('linkobjectattribute') linkobjectattribute: string;
   @Input('linkuidattribute') linkuidattribute: string;
   
@@ -22,7 +22,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   public value: string; 
-  public isEditable: boolean = true;
+  public isEditable: boolean = false;
 
   constructor(
     private actionService: ActionService
@@ -109,13 +109,11 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   public evalEditable() {
-    if(this.editable == null) {
+    if(this.editable == null || this.editable == true || this.editable == 'true') {
       this.isEditable = true;
-    } else if(this.editable == 'true') {
-      this.isEditable = true;
-    } else if(this.editable == 'false') {
-        this.isEditable = false;
-    } else {
+    } else if(this.editable == false || this.editable == 'false') {
+      this.isEditable = false;
+    } else if(typeof this.editable == 'string') {
         let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
         if(!(this.editable.indexOf("relatedObject.") > -1 && relatedObject == null)) {
             this.isEditable = eval(this.editable);            
