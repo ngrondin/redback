@@ -67,9 +67,9 @@ public class Client {
 				if(session != null) {
 					reqP.metadata.put("session", session.id);
 					reqP.metadata.put("token", session.token);
+					if(session.getTimezone() != null) 
+						reqP.metadata.put("timezone", session.getTimezone());
 				}
-				if(session.getTimezone() != null) 
-					reqP.metadata.put("timezone", session.getTimezone());
 				Payload respP = null;
 				if(async)
 					firebus.requestServiceAndForget(serviceName, reqP);
@@ -112,9 +112,9 @@ public class Client {
 				if(session != null) {
 					reqP.metadata.put("session", session.id);
 					reqP.metadata.put("token", session.token);
+					if(session.getTimezone() != null) 
+						reqP.metadata.put("timezone", session.getTimezone());
 				}
-				if(session.getTimezone() != null) 
-					reqP.metadata.put("timezone", session.getTimezone());				
 				StreamEndpoint sep = firebus.requestStream(serviceName, reqP, 5000);
 				return sep;
 			}
@@ -145,9 +145,9 @@ public class Client {
 				if(session != null) {
 					reqP.metadata.put("session", session.id);
 					reqP.metadata.put("token", session.token);
+					if(session.getTimezone() != null) 
+						reqP.metadata.put("timezone", session.getTimezone());
 				}
-				if(session.getTimezone() != null) 
-					reqP.metadata.put("timezone", session.getTimezone());
 				reqP.metadata.put("mime", "application/json");
 				firebus.publish(serviceName, reqP);
 			}

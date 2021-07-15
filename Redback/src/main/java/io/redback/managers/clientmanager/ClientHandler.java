@@ -61,7 +61,7 @@ public class ClientHandler extends ClientStreamHandler {
 		try {
 			Payload payload = new Payload();
 			payload.metadata.put("token", session.getToken());
-			if(session.getTimezone() != null)
+			if(session != null && session.getTimezone() != null)
 				payload.metadata.put("timezone", session.getTimezone());
 			payload.metadata.put("mime", "application/json");
 			payload.setData(request.toString());
