@@ -33,15 +33,16 @@ public class RedbackFileMetaData {
 		hash = config.getString("hash");
 	}
 	
-	public DataMap getDataMap() {
+	public DataMap getDataMap(boolean addThumbnail) {
 		DataMap fileInfo = new DataMap();
 		fileInfo.put("fileuid", fileuid);
 		fileInfo.put("filename", fileName);
 		fileInfo.put("mime", mime);
-		fileInfo.put("thumbnail", thumbnail);
 		fileInfo.put("username", username);
 		fileInfo.put("date", date != null ? date.toInstant().toString() : null);
 		fileInfo.put("hash", hash);
+		if(addThumbnail) 
+			fileInfo.put("thumbnail", thumbnail);
 		return fileInfo;
 	}
 }

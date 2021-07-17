@@ -96,7 +96,7 @@ public class ClientHandler extends ClientStreamHandler {
 					respWrapper.put("error", "service request timed out");
 					sendClientData(respWrapper);						
 				}	
-			}, timeout > -1 ? timeout : 10000);
+			}, clientManager.name, timeout > -1 ? timeout : 10000);
 		} catch(Exception e) {
 			throw new RedbackException("Error requesting service for client", e);
 		}
@@ -116,11 +116,15 @@ public class ClientHandler extends ClientStreamHandler {
 							sendUploadNext(uploaduid);
 						} else if(ctl.equals("error")){
 							sendUploadError(uploaduid, payload.metadata.get("error"));
-						} else {
+						} else if(ctl.equals("complete")) {
+							
+						} else if(ctl.equals("chunk")) { //This is the response after upload
 							DataMap result = new DataMap(payload.getString());
 							if(object != null && uid != null)
 								clientManager.getFileClient().linkFileTo(session, result.getString("fileuid"), object, uid);
 							sendUploadResult(uploaduid, result);
+						} else {
+							throw new RedbackException("Error in client upload, unexpected response");
 						}
 					} catch(Exception e) {
 						sendUploadError(uploaduid, e.getMessage());

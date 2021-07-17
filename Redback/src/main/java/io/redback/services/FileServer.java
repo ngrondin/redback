@@ -70,8 +70,16 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 					else if(request.containsKey("object") && request.containsKey("uid"))
 						action = "list";
 				}
+				DataMap options = request.getObject("options");
+				boolean addThumbnail = true;
+				
 				if(action != null) 
 				{
+					if(options != null)
+					{
+						addThumbnail = options.getBoolean("addthumbnail");
+					}
+					
 					if(action.equals("get"))
 					{
 						RedbackFile file = getFile(request.getString("fileuid"));
@@ -85,7 +93,8 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 					else if(action.equals("getmetadata")) 
 					{
 						RedbackFileMetaData filemd = this.getMetadata(request.getString("fileuid"));
-						response = new Payload(filemd.getDataMap().toString());
+						response = new Payload(filemd.getDataMap(addThumbnail).toString());
+						response.metadata.put("mime", "application/json");
 					} 
 					else if(action.equals("link")) 
 					{
@@ -94,6 +103,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						String fileUid = request.getString("fileuid");
 						linkFileTo(fileUid, object, uid);
 						response = new Payload((new DataMap("result", "ok")).toString());
+						response.metadata.put("mime", "application/json");
 					}
 					else if(action.equals("unlink")) 
 					{
@@ -102,6 +112,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						String fileUid = request.getString("fileuid");
 						unlinkFileFrom(fileUid, object, uid);
 						response = new Payload((new DataMap("result", "ok")).toString());
+						response.metadata.put("mime", "application/json");
 					}					
 					else if(action.equals("list"))
 					{
@@ -109,12 +120,38 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						String uid = request.getString("uid");
 						List<RedbackFileMetaData> fileData = listFilesFor(object, uid);
 						DataMap resp = new DataMap();
-						DataList list = new DataList();
+						DataList respList = new DataList();
 						for(RedbackFileMetaData filemd : fileData) 
-							list.add(filemd.getDataMap());
-						resp.put("list", list);
+							respList.add(filemd.getDataMap(addThumbnail));
+						resp.put("list", respList);
 						response = new Payload(resp.toString());
+						response.metadata.put("mime", "application/json");
 					}
+					else if(action.equals("listmulti"))
+					{
+						DataMap resp = new DataMap();
+						DataList itemList = new DataList();
+						DataList list = request.getList("objects");
+						if(list != null) {
+							for(int i = 0; i < list.size(); i++) {
+								DataMap item = list.getObject(i);
+								String object = item.getString("object");
+								String uid = item.getString("uid");
+								List<RedbackFileMetaData> fileData = listFilesFor(object, uid);
+								DataMap itemResp = new DataMap();
+								itemResp.put("object", object);
+								itemResp.put("uid", uid);
+								DataList fileList = new DataList();
+								for(RedbackFileMetaData filemd : fileData) 
+									fileList.add(filemd.getDataMap(addThumbnail));
+								itemResp.put("list", fileList);
+								itemList.add(itemResp);
+							}
+						}
+						resp.put("list", itemList);
+						response = new Payload(resp.toString());
+						response.metadata.put("mime", "application/json");
+					}					
 				}
 			}
 			if(response == null)

@@ -225,7 +225,7 @@ public class RedbackFileServer extends FileServer
 				filemd.mime = mime;
 				filemd.username = username;
 				filemd.date = new Date();
-				dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), filemd.fileuid), fileCollection.convertObjectToSpecific(filemd.getDataMap()));
+				dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), filemd.fileuid), fileCollection.convertObjectToSpecific(filemd.getDataMap(true)));
 	
 				storeFile(filemd.fileuid, file);
 				return filemd; 
@@ -372,7 +372,7 @@ public class RedbackFileServer extends FileServer
 			DataMap resp = new DataMap();
 			DataList list = new DataList();
 			for(RedbackFileMetaData filemd : fileData) 
-				list.add(filemd.getDataMap());
+				list.add(filemd.getDataMap(true));
 			resp.put("list", list);
 			ByteArrayInputStream bais = new ByteArrayInputStream(resp.toString().getBytes());
 			new StreamSender(bais, streamEndpoint);
