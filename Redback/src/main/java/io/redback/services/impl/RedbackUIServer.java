@@ -11,19 +11,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
 import io.firebus.Firebus;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.RedbackException;
 import io.redback.client.ConfigurationClient;
+import io.redback.client.DataClient;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.services.UIServer;
+import io.redback.utils.CollectionConfig;
 import io.redback.utils.HTML;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.HTMLJSWrapper;
@@ -38,6 +37,8 @@ public class RedbackUIServer extends UIServer
 	protected HashMap<String, Function> jspScripts;
 	protected HashMap<String, DataMap> viewConfigs;
 	protected ConfigurationClient configClient;
+	protected DataClient dataClient;
+	protected CollectionConfig viewCollection;
 
 	
 	public RedbackUIServer(String n, DataMap c, Firebus f) 
@@ -48,6 +49,10 @@ public class RedbackUIServer extends UIServer
 		jspScripts = new HashMap<String, Function>();
 		viewConfigs = new HashMap<String, DataMap>();
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
+		if(config.containsKey("dataservice")) {
+			dataClient = new DataClient(firebus, config.getString("dataservice"));
+		}
+		viewCollection = new CollectionConfig(config.getObject("collection"), "rbui_view");
 	}
 	
 	public void configure() {
@@ -156,20 +161,12 @@ public class RedbackUIServer extends UIServer
 			}
 			menu.getList("content").sort("order");
 			return menu;
-			/*
-			Map<String, Object> context = new HashMap<String, Object>();
-			context.put("session", new SessionJSWrapper(session));
-			context.put("utils", new RedbackUtilsJSWrapper());
-			context.put("parents", JSConverter.toJS(new DataMap()));
-			context.put("nextid", 1000);
-			return generateHTMLFromComponentConfig(session, menu, version, context);
-			*/
 		} catch(Exception e) {
 			throw new RedbackException("Error getting menu", e);
 		}
 	}
 	
-	protected HTML getHTMLView(Session session, String viewName, String version)
+	/*protected HTML getHTMLView(Session session, String viewName, String version)
 	{
 		return getHTMLView(session, viewName, version, null);
 	}
@@ -234,14 +231,14 @@ public class RedbackUIServer extends UIServer
 			viewHTML.append("Not logged in");
 		}
 		return viewHTML;
-	}
+	}*/
 
-	protected DataMap getViewConfig(Session session, String viewName, String version)
+	protected DataMap getView(Session session, String domain, String viewName)
 	{
-		return getViewConfig(session, viewName, version, null);
+		return getView(session, domain, viewName, null);
 	}
 
-	protected DataMap getViewConfig(Session session, String viewName, String version, Map<String, Object> context) 
+	protected DataMap getView(Session session, String domain, String viewName, Map<String, Object> context) 
 	{
 		DataMap clientConfig = new DataMap();
 		if(session != null)
@@ -250,10 +247,10 @@ public class RedbackUIServer extends UIServer
 			{
 				try
 				{
-					DataMap viewConfig = getViewConfig(session, viewName);
+					DataMap viewConfig = getViewConfig(session, domain, viewName);
 					if(viewConfig != null) {
 						clientConfig.put("label", viewConfig.getString("label"));
-						clientConfig.put("content", getClientConfigViewContent(session, viewName, version, context));						
+						clientConfig.put("content", getViewContent(session, domain, viewName, context));						
 					} else {
 						clientConfig.put("error", "View " + viewName + " does not exist");
 					}
@@ -272,7 +269,12 @@ public class RedbackUIServer extends UIServer
 		return clientConfig;
 	}
 	
-	protected HTML generateHTMLFromComponentConfig(Session session, DataMap componentConfig, String version, Map<String, Object> context) throws RedbackException
+	protected DataMap getDomainView(Session session, String domain, String viewName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/*protected HTML generateHTMLFromComponentConfig(Session session, DataMap componentConfig, String version, Map<String, Object> context) throws RedbackException
 	{
 		String type = componentConfig.getString("type");
 		HTML componentHTML = new HTML();
@@ -320,21 +322,21 @@ public class RedbackUIServer extends UIServer
 			}
 		}
 		return componentHTML;
-	}
+	}*/
 
-	protected DataList getClientConfigViewContent(Session session, String viewName, String version, Map<String, Object> context) throws RedbackException 
+	protected DataList getViewContent(Session session, String domain, String viewName, Map<String, Object> context) throws RedbackException 
 	{
 		DataList ccContent = new DataList();
-		DataMap viewConfig = getViewConfig(session, viewName);
+		DataMap viewConfig = getViewConfig(session, domain, viewName);
 		if(viewConfig != null) {
 			DataList viewContent = viewConfig.getList("content");
 			for(int i = 0; i < viewContent.size(); i++) 
-				ccContent.add(generateClientConfigFromComponentConfig(session, viewContent.getObject(i), version, context));
+				ccContent.add(generateViewFromComponentConfig(session, domain, viewContent.getObject(i), context));
 		}
 		return ccContent;
 	}
 
-	protected DataMap generateClientConfigFromComponentConfig(Session session, DataMap componentConfig, String version, Map<String, Object> context) throws RedbackException
+	protected DataMap generateViewFromComponentConfig(Session session, String domain, DataMap componentConfig, Map<String, Object> context) throws RedbackException
 	{
 		DataMap clientConfig = new DataMap();
 		String type = componentConfig.getString("type");
@@ -358,12 +360,12 @@ public class RedbackUIServer extends UIServer
 					DataMap childComponentConfig = componentContent.getObject(i);
 					String childType = childComponentConfig.getString("type");
 					if(childType.equals("view")) {
-						DataList childViewContent = getClientConfigViewContent(session, childComponentConfig.getString("name"), version, context);
+						DataList childViewContent = getViewContent(session, domain, childComponentConfig.getString("name"), context);
 						for(int j = 0; j < childViewContent.size(); j++)
 							clientConfigContent.add(childViewContent.getObject(j));
 						
 					} else {
-						clientConfigContent.add(generateClientConfigFromComponentConfig(session, childComponentConfig, version, context));
+						clientConfigContent.add(generateViewFromComponentConfig(session, domain, childComponentConfig, context));
 					}
 				}
 				clientConfig.put("content", clientConfigContent);
@@ -379,7 +381,7 @@ public class RedbackUIServer extends UIServer
 		Function script = getCompiledJSP(name, version);
 		script.execute(context);
 		return html;
-	}	
+	}
 	
 	
 	protected Function getCompiledJSP(String name, String version) throws RedbackException
@@ -447,13 +449,27 @@ public class RedbackUIServer extends UIServer
 	}	
 
 	
-	protected DataMap getViewConfig(Session session, String viewName) throws RedbackException
+	protected DataMap getViewConfig(Session session, String domain, String viewName) throws RedbackException
 	{
-		DataMap viewConfig = viewConfigs.get(viewName);
+		String viewKey = (domain != null ? domain : "root") + "." + viewName;
+		DataMap viewConfig = viewConfigs.get(viewKey);
 		if(viewConfig == null)
 		{
-			viewConfig = configClient.getConfig(session, "rbui", "view", viewName);
-			viewConfigs.put(viewName, viewConfig);
+			if(domain != null) {
+				if(viewCollection != null && dataClient != null) {
+					DataMap key = new DataMap();
+					key.put("domain", domain);
+					key.put("name", viewName);
+					DataMap resp = dataClient.getData(viewCollection.getName(), viewCollection.convertObjectToSpecific(key));
+					if(resp != null && resp.getList("result") != null && resp.getList("result").size() > 0) {
+						viewConfig = viewCollection.convertObjectToCanonical(resp.getList("result").getObject(0));
+						viewConfigs.put(viewKey, viewConfig);
+					}
+				}
+			} else {
+				viewConfig = configClient.getConfig(session, "rbui", "view", viewName);
+				viewConfigs.put(viewKey, viewConfig);				
+			}
 		}
 		return viewConfig;
 	}
@@ -540,5 +556,6 @@ public class RedbackUIServer extends UIServer
 		}
 		return out;
 	}
+
 
 }

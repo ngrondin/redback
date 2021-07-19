@@ -153,11 +153,12 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						DataList tuple = request.getList("tuple");
 						DataList metrics = request.getList("metrics");
 						DataMap sort = request.getObject("sort");
+						DataList base = request.getList("base");
 						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
 						int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
 						if(tuple != null && metrics != null)
 						{
-							List<RedbackAggregate> aggregates = aggregate(session, objectName, filter, searchText, tuple, metrics, sort, addRelated, page, pageSize);
+							List<RedbackAggregate> aggregates = aggregate(session, objectName, filter, searchText, tuple, metrics, sort, base, addRelated, page, pageSize);
 							response = formatResponse(aggregates, format, addValidation, addRelated);							
 						}
 						else
@@ -341,6 +342,6 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 
 	protected abstract RedbackObject execute(Session session, String function, DataMap param) throws RedbackException;
 
-	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
+	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException;
 
 }

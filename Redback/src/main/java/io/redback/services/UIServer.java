@@ -85,12 +85,12 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 			{
 				String[] parts = get.split("/");
 				String category = null;
-				String name = null;
-				String version = null;
+				String specifier = null;
+				String name = null;			
 				if(parts.length >= 3)
 				{
 					category = parts[0];
-					version = parts[1];
+					specifier = parts[1];
 					name = parts[2];
 				}
 				if(parts.length == 2)
@@ -108,32 +108,32 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				if(category.equals("resource"))
 				{
 					logger.finer("Get resource " + name);
-					response.setData(getResource(session, name, version));
+					response.setData(getResource(session, name, specifier));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
 				else if(category.equals("app"))
 				{
 					logger.finer("Get app " + (name != null ? name : "?"));
-					response.setData(getApp(session, name, version).toString());
+					response.setData(getApp(session, name, specifier).toString());
 					response.metadata.put("mime", "text/html");
 				}
 				else if(category.equals("menu"))
 				{
 					logger.finer("Get menu " + name);
-					response.setData(getMenu(session, version).toString());
+					response.setData(getMenu(session, name).toString());
 					response.metadata.put("mime", "text/html");
 				}
-				else if(category.equals("view"))
+				/*else if(category.equals("view"))
 				{
 					logger.finer("Get view " + name);
 					response.setData(getHTMLView(session, name, version).toString());
 					response.metadata.put("mime", "text/html");
-				}
-				else if(category.equals("viewcc"))
+				}*/
+				else if(category.equals("view"))
 				{
-					logger.finer("Get viewcc " + name);
-					response.setData(getViewConfig(session, name, version).toString());
-					response.metadata.put("mime", "application/json");
+					logger.finer("Get view " + (specifier != null ? specifier + ":" : "") + name);
+					response.setData(getView(session, specifier, name).toString());
+					response.metadata.put("mime", "application/json");						
 				}
 			}
 			return response;
@@ -168,9 +168,9 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	
 	protected abstract DataMap getMenu(Session session, String version) throws RedbackException;
 	
-	protected abstract HTML getHTMLView(Session session, String viewName, String version);
+	//protected abstract HTML getHTMLView(Session session, String viewName, String version);
 
-	protected abstract DataMap getViewConfig(Session session, String viewName, String version);
+	protected abstract DataMap getView(Session session, String domain, String viewName);
 
 	protected abstract byte[] getResource(Session session, String name, String version) throws RedbackException;
 

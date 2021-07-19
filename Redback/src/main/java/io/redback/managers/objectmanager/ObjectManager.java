@@ -638,7 +638,7 @@ public class ObjectManager
 	
 	
 	@SuppressWarnings("unchecked")
-	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
+	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
 		if(session.getUserProfile().canRead("rb.objects." + objectName))
 		{
@@ -653,6 +653,8 @@ public class ObjectManager
 						objectFilter.merge(filter);
 					if(searchText != null  &&  searchText.length() > 0)
 						objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
+					if(base != null)
+						objectFilter.merge(new DataMap("$or", base));
 					DataList dbResultList = null;
 					
 					if(objectConfig.isPersistent()) 
@@ -719,7 +721,41 @@ public class ObjectManager
 							else
 								dbResultList = new DataList();
 						}
-					}					
+					}		
+					
+					if(base != null) {
+						DataList baseDb = new DataList();
+						for(int i = 0; i < base.size(); i++) {
+							DataMap baseItem = base.getObject(i);
+							DataMap baseDbItem = new DataMap();
+							for(String baseAttr: baseItem.keySet()) {
+								String baseDbAttr = objectConfig.getAttributeConfig(baseAttr).getDBKey();
+								baseDbItem.put(baseDbAttr, baseItem.getString(baseAttr));
+							}
+							DataMap dbDataMatch = null;
+							for(int j = 0; j < dbResultList.size(); j++) {
+								DataMap dbData = dbResultList.getObject(j);
+								boolean match = true;
+								for(String baseDbAttr: baseDbItem.keySet()) {
+									if(!baseDbItem.getString(baseDbAttr).equals(dbData.getString(baseDbAttr)))
+										match = false;
+								}
+								if(match) {
+									dbDataMatch = dbData;
+									break;
+								}
+							}
+							
+							for(int j = 0; j < metrics.size(); j++)
+							{
+								DataMap metric = metrics.getObject(j);
+								String metricName = metric.getString("name");
+								baseDbItem.put(metricName, dbDataMatch != null ? dbDataMatch.getNumber(metricName) : 0);
+							}
+							baseDb.add(baseDbItem);
+						}
+						dbResultList = baseDb;
+					}
 										
 					for(int i = 0; i < dbResultList.size(); i++)
 					{
@@ -733,7 +769,7 @@ public class ObjectManager
 				}
 				catch(Exception e)
 				{
-					logger.severe(e.getMessage());
+					//logger.severe(e.getMessage());
 					throw new RedbackException("Error aggregating objects", e);
 				}
 			}
