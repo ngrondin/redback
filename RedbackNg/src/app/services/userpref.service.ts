@@ -88,6 +88,10 @@ export class UserprefService {
     }
   }
 
+  public getInitialView() : any {
+    return this.getUISwitchGeneral("initialview");
+  }
+
   public setCurrentView(view: string) {
     this.currentView = view;
   }
@@ -121,6 +125,34 @@ export class UserprefService {
     }
     return null;
   }
+
+  public getUISwitchGeneral(name: string) : any {
+    let val = this.getUISwitchGeneralValue(this.userUISwitches, name);
+    if(val != null) {
+      return val;
+    } else {
+      val = this.getUISwitchGeneralValue(this.roleUISwitches, name);
+      if(val != null) {
+        return val;
+      } else {
+        val = this.getUISwitchGeneralValue(this.domainUISwitches, name);
+        if(val != null) {
+          return val;
+        } else {
+          return null;
+        }
+      }
+    }
+  }
+
+  private getUISwitchGeneralValue(cfg: any, name: string) : any {
+    if(cfg["_general"] != null) {
+      if(cfg["_general"][name] != null) {
+         return cfg["_general"][name];
+      } 
+    }
+    return null;
+  }  
 
   public setUISwitch(level: string, comp: string, name: string, val: any) {
     let map = level == 'domain' ? this.domainUISwitches : level == 'role' ? this.roleUISwitches : level == 'user' ? this.userUISwitches : null;

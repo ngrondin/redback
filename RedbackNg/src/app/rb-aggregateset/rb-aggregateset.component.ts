@@ -15,6 +15,7 @@ import { RbSetComponent } from 'app/abstract/rb-set';
 export class RbAggregatesetComponent extends RbSetComponent {
   @Input('tuple') tuple: any;
   @Input('metrics') metrics: any;
+  @Input('base') base: any;
   
   public aggregates: RbAggregate[] = [];
   public searchString: string;
@@ -100,7 +101,7 @@ export class RbAggregatesetComponent extends RbSetComponent {
   public fetchNextPage() {
     if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
       const filter = this.filterService.resolveFilter(this.mergeFilters(), this.relatedObject, null, this.relatedObject);
-      this.dataService.aggregateObjects(this.object, filter, null, this.tuple, this.metrics, this.nextPage).subscribe(
+      this.dataService.aggregateObjects(this.object, filter, null, this.tuple, this.metrics, this.base, this.nextPage).subscribe(
         data => this.setAggregates(data)
       );
       this._isLoading = true;

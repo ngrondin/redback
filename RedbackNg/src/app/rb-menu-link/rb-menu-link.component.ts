@@ -28,7 +28,7 @@ export class RbMenuLinkComponent implements OnInit {
   }
 
   click() {
-    this.navigate.emit({view:this.config.view, filter:{}, reset:true});
+    this.navigate.emit({view: this.config.view, domain: this.config.domain, filter: {}, reset:true});
   }
 
   rightclick(event: any) {

@@ -206,8 +206,8 @@ export class DataService {
     });
   }
 
-  aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, page: number = 0, pageSize: number = 50) : Observable<RbAggregate[]> {
-    const apiObservable = this.apiService.aggregateObjects(name, filter, search, tuple, metrics, page, pageSize);
+  aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, base: any, page: number = 0, pageSize: number = 50) : Observable<RbAggregate[]> {
+    const apiObservable = this.apiService.aggregateObjects(name, filter, search, tuple, metrics, base, page, pageSize);
     const dataObservable = new Observable<RbAggregate[]>((observer) => {
       apiObservable.subscribe(
         resp => {

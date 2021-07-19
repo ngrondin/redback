@@ -222,7 +222,7 @@ export class RbDatasetComponent extends RbSetComponent  {
       }
       if(this.nextPage == 1) { 
         if(this.fetchAll == false && this._list.length > 10) {
-          this.apiService.aggregateObjects(this.object, this.resolvedFilter, this.searchString, [], [{function:'count', name:'count'}]).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
+          this.apiService.aggregateObjects(this.object, this.resolvedFilter, this.searchString, [], [{function:'count', name:'count'}], null).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
         } else {
           this.totalCount = this._list.length;
         }

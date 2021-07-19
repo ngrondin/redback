@@ -106,7 +106,7 @@ export class RbViewLoaderComponent implements OnInit {
 
   ngOnChanges(changes : SimpleChange) {
     if("target" in changes && this.target != null) {
-      let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/viewcc/' + this.target.version + '/' + this.target.view;
+      let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/view/' + (this.target.domain != null ? this.target.domain + '/' : '') + this.target.view;
       this.http.get(url, { withCredentials: true, responseType: 'json' }).subscribe(
         resp => {
           this.showView(resp)

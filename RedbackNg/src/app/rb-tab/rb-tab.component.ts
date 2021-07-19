@@ -12,7 +12,9 @@ export class RbTabComponent extends RbActivatorComponent implements OnInit {
   @Input('tabsection') tabsection : RbTabSectionComponent;
   @Input('label') label : string;
   @Input('isdefault') isdefault : boolean = false;
+  @HostBinding('style.display') get visitility() {return this.activatorOn && this.showResult ? 'flex' : 'none';}
 
+  
   constructor(
   ) {
     super();
@@ -31,9 +33,7 @@ export class RbTabComponent extends RbActivatorComponent implements OnInit {
   onActivationEvent(state: boolean) {
   }
 
-  @HostBinding('style.display') get visitility() {
-    return this.activatorOn ? 'flex' : 'none';
-  }
+ 
 
 
 }

@@ -1,10 +1,8 @@
-import { Input, ViewContainerRef } from '@angular/core';
+import { ViewContainerRef } from '@angular/core';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { RbActivatorComponent } from 'app/abstract/rb-activator';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { RbTabComponent } from 'app/rb-tab/rb-tab.component';
 import { UserprefService } from 'app/services/userpref.service';
-import { Subscription } from 'rxjs/internal/Subscription';
 
 @Component({
   selector: 'rb-tab-section',
@@ -56,12 +54,8 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
       this.tabs.push(tab);
       if(tab.isdefault == true) {
         this.selectTab(tab);
-      } /*else {
-        tab.active = false;
-      }*/
-    } /*else {
-      tab.active = false;
-    }*/
+      }
+    }
   }
 
 

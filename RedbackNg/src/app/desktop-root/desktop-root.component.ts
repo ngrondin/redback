@@ -44,7 +44,12 @@ export class DesktopRootComponent implements OnInit {
   ngOnInit() {
     this.subscription = this.events.subscribe((event) => {
       if(event == 'init' && this.initialView != null) {
-        this.pushViewTarget(new ViewTarget(this.version, this.initialView, null, {}, null), true);
+        let iv = this.userprefService.getInitialView();
+        if(iv != null) {
+          this.pushViewTarget(new ViewTarget(iv.domain, iv.view, null, {}, null), true);
+        } else {
+          this.pushViewTarget(new ViewTarget(null, this.initialView, null, {}, null), true);
+        }
       }
     });
   }
@@ -73,7 +78,7 @@ export class DesktopRootComponent implements OnInit {
     let objectConfig: any = this.configService.objectsConfig[$event.object];
     let view: string = ($event.view != null ? $event.view : (objectConfig != null ? objectConfig.view : null));
     if(view != null) {
-      let target = new ViewTarget(this.version, view, $event.object, $event.filter, $event.search); 
+      let target = new ViewTarget($event.domain, view, $event.object, $event.filter, $event.search); 
       if(objectConfig != null && $event.filter != null && $event.filter[objectConfig.labelattribute] != null) {
         target.breadcrumbLabel = eval($event.filter[objectConfig.labelattribute]);
       }

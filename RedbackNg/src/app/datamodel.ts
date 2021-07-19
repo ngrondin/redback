@@ -437,16 +437,16 @@ export class DataTarget {
   }
   
   export class ViewTarget {
+    domain: string;
     view: string;
-    version: string;
     title: string;
     additionalTitle: string;
     _breadcrumbLabel: string;
     mode: string;
     dataTarget: DataTarget;
   
-    constructor(vs: string, v: string, o: string, f: any, s: string) {
-      this.version = vs;
+    constructor(dom: string, v: string, o: string, f: any, s: string) {
+      this.domain = dom;
       this.view = v;
       this.title = null;
       if(f != null) {

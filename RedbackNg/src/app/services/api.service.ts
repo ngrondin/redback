@@ -164,7 +164,7 @@ export class ApiService {
     return this.requestService(this.objectService, req);
   }
 
-  aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, page: number = 0, pageSize: number = 50): Observable<any> {
+  aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, base: any, page: number = 0, pageSize: number = 50): Observable<any> {
     const req = {
       action: 'aggregate',
       object: name,
@@ -178,6 +178,7 @@ export class ApiService {
         addrelated: true
       }
     };
+    if(base != null) req["base"] = base;
     return this.requestService(this.objectService, req);
   }
 
