@@ -66,15 +66,15 @@ export class RbList4Component extends RbDataObserverComponent {
       } else if(this.mainexpression != null) {
         data["main"] = Evaluator.eval(this.mainexpression, obj, null);
       }
-      if(this.subattribute != null) {
+      if(this.subattribute !== null) {
         data["sub"] = this.formatText(obj.get(this.subattribute));
       }
-      if(this.meta1attribute != null) {
+      if(this.meta1attribute !== null) {
         data["meta1"] = this.formatText(obj.get(this.meta1attribute));
       }
-      if(this.meta2attribute != null) {
+      if(this.meta2attribute !== null) {
         data["meta2"] = this.formatText(obj.get(this.meta2attribute));
-        data["meta2isabadge"] = data["meta2"] != "" && !isNaN(Number(data["meta2"]))
+        data["meta2isabadge"] = data["meta2"] !== "" && !isNaN(Number(data["meta2"]))
       }
       if(data["main"] == null || data["main"] == "") {
         if(data["sub"] != null && data["sub"] != "") {
