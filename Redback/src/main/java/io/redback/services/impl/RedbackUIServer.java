@@ -24,6 +24,7 @@ import io.redback.security.js.SessionJSWrapper;
 import io.redback.services.UIServer;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.HTML;
+import io.redback.utils.KeyEscaper;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.HTMLJSWrapper;
 import io.redback.utils.js.JSConverter;
@@ -463,6 +464,7 @@ public class RedbackUIServer extends UIServer
 					DataMap resp = dataClient.getData(viewCollection.getName(), viewCollection.convertObjectToSpecific(key));
 					if(resp != null && resp.getList("result") != null && resp.getList("result").size() > 0) {
 						viewConfig = viewCollection.convertObjectToCanonical(resp.getList("result").getObject(0));
+						viewConfig = KeyEscaper.escape(viewConfig);
 						viewConfigs.put(viewKey, viewConfig);
 					}
 				}
