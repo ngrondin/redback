@@ -28,7 +28,7 @@
     mat-button
     *ngIf="filterconfig != null"
     style="margin-top:var(--v10px)!important;"
-    class="rb-grey-icon rb-icon-button"
+    [class]="(hasFilter ? 'rb-active-icon' : 'rb-grey-icon') + ' rb-icon-button'"
     (click)="openFilterBuilder()">
     <mat-icon>filter_list</mat-icon>
 </button>

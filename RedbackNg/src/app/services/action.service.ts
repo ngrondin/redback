@@ -74,14 +74,14 @@ export class ActionService {
   public create(dataset: RbDatasetComponent, param: any) : Observable<null> {
     return new Observable((observer) => {
       let data = this.calcCreateData(dataset, param);
-      this.dataService.createObject(dataset.object, null, data).subscribe(new ObserverProxy(observer, newObject => dataset.addObjectAndSelect(newObject)));
+      this.dataService.createObject(dataset.objectname, null, data).subscribe(new ObserverProxy(observer, newObject => dataset.addObjectAndSelect(newObject)));
     });
   }
 
   public createInMemory(dataset: RbDatasetComponent, param: any) : Observable<null> {
     return new Observable((observer) => {
       let data = this.calcCreateData(dataset, param);
-      this.dataService.createObjectInMemory(dataset.object, null, data).subscribe(new ObserverProxy(observer, newObject => dataset.addObjectAndSelect(newObject)));
+      this.dataService.createObjectInMemory(dataset.objectname, null, data).subscribe(new ObserverProxy(observer, newObject => dataset.addObjectAndSelect(newObject)));
     });
   }
 
@@ -113,7 +113,7 @@ export class ActionService {
 
   public exportAll(dataset: RbDatasetComponent) : Observable<null> {
     return new Observable((observer) => {
-      this.dataService.exportObjects(dataset.object, dataset.resolvedFilter, dataset.searchString).subscribe(new ObserverProxy(observer));
+      this.dataService.exportObjects(dataset.objectname, dataset.resolvedFilter, dataset.searchString).subscribe(new ObserverProxy(observer));
     });
   }
 

@@ -4,7 +4,7 @@ import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { RbFilterBuilderComponent, FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
 import { RbFieldInputComponent } from 'app/inputs/abstract/rb-field-input';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { RbSearchTarget } from './rb-search-target';
 
 @Component({
   selector: 'rb-search',
@@ -14,6 +14,7 @@ import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 export class RbSearchComponent extends RbFieldInputComponent {
   @Input('filter') filterconfig: any;
   @Input('sort') sortconfig: any;
+  @Input('target') searchTarget: RbSearchTarget;
   
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;
@@ -35,21 +36,26 @@ export class RbSearchComponent extends RbFieldInputComponent {
     this.margin = false;
   }
 
-  dataObserverInit() {
-  }
-
-  dataObserverDestroy() {
-  }
-
-  onDatasetEvent(event: string) {
-    if(event == 'reset') {
-      this._value = null;
-      this.filterValue = null;
-      this.sortValue = null;
+  inputInit() {
+    if(this.searchTarget == null) {
+      if(this.dataset != null) {
+        this.searchTarget = this.dataset;
+      } else if(this.datasetgroup != null) {
+        this.searchTarget = this.datasetgroup;
+      }
     }
   }
 
+  onDatasetEvent(event: string) {
+
+  }
+
   onActivationEvent(state: boolean) {
+    if(this.active == true && this.dataset != null) {
+      this._value = this.dataset.searchString;
+      this.filterValue = this.dataset.userFilter;
+      this.sortValue = this.dataset.userSort;    
+    }
   }
 
   public get displayvalue(): any {
@@ -74,16 +80,12 @@ export class RbSearchComponent extends RbFieldInputComponent {
     }
   }
 
+  public get hasFilter() {
+    return this.filterValue != null || this.sortValue != null;
+  }
+
   search() {
-    if(this.dataset != null) {
-      this.dataset.search(this.editedValue);
-    } else if(this.datasetgroup != null) {
-      for(let dsname of Object.keys(this.datasetgroup.datasets)) {
-        let ds: RbDatasetComponent = this.datasetgroup.datasets[dsname];
-        ds.search(this.editedValue);
-      }
-      this.datasetgroup
-    }
+    this.searchTarget.filterSort({search: this.editedValue});
     this.queuedSearch = null;
   }
 
@@ -120,7 +122,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     config.initialFilter = this.filterValue;
     config.sortConfig = this.sortconfig;
     config.initialSort = this.sortValue;
-    config.objectname = this.dataset.object;
+    config.objectname = this.searchTarget.objectname;
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);
@@ -138,7 +140,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     this.overlayRef = null;
     this.filterValue = event.filter;
     this.sortValue = event.sort;
-    this.dataset.filterSort({filter: this.filterValue, sort: this.sortValue});
+    this.searchTarget.filterSort({filter: this.filterValue, sort: this.sortValue});
   }
 
   cancelFilterBuilder() {

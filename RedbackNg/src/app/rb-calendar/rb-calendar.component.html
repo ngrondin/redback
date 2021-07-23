@@ -1,8 +1,8 @@
 <div
     class="rb-cal-toolbar">
     <rb-search
-        [dataset]="dataset"
-        [datasetgroup]="datasetgroup"
+        [target]="this"
+        [filter]="filterConfig"
         [size]="15"
         [grow]="0"
         [margin]="true">
@@ -18,7 +18,22 @@
     </rb-choice-input>
     <rb-spacer></rb-spacer>
     <rb-choice-input
-        [choicelist]="months"
+        [choicelist]="modes"
+        [label]="'Display'"
+        [showicon]="false"
+        [size]="5"
+        [(value)]="mode">
+    </rb-choice-input>
+    <rb-choice-input
+        *ngIf="mode == 'week'"
+        [choicelist]="weeksOfThisMonth"
+        [label]="'Week Starting'"
+        [showicon]="false"
+        [size]="6"
+        [(value)]="weekStarting">
+    </rb-choice-input>      
+    <rb-choice-input
+        [choicelist]="monthOptions"
         [label]="'Month'"
         [showicon]="false"
         [size]="6"

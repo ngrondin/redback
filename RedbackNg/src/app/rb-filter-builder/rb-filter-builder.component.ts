@@ -337,13 +337,21 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   clickOk() {
-    this.filter = {};
-    for(let fic of this.filterConstructs) {
-      this.filter[fic.config.attribute] = fic.getFilterValue();
+    if(this.filterConstructs.length > 0) {
+      this.filter = {};
+      for(let fic of this.filterConstructs) {
+        this.filter[fic.config.attribute] = fic.getFilterValue();
+      }  
+    } else {
+      this.filter = null;
     }
-    this.sort = {};
-    for(let sic of this.sortConstructs) {
-      this.sort[sic.order] = sic.getSortValue();
+    if(this.sortConstructs.length > 0) {
+      this.sort = {};
+      for(let sic of this.sortConstructs) {
+        this.sort[sic.order] = sic.getSortValue();
+      }  
+    } else {
+      this.sort = null;
     }
     this.done.emit({filter: this.filter, sort: this.sort});
   }

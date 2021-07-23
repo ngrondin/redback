@@ -2,7 +2,10 @@ import { EventEmitter, Input, Output } from '@angular/core';
 import { Component } from '@angular/core';
 import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { RbObject } from 'app/datamodel';
+import { ValueComparator } from 'app/helpers';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { RbSearchTarget } from 'app/rb-search/rb-search-target';
+import { FilterService } from 'app/services/filter.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { CalendarSeriesConfig, CalendarEntry } from './rb-calendar-models';
 
@@ -11,38 +14,38 @@ import { CalendarSeriesConfig, CalendarEntry } from './rb-calendar-models';
   templateUrl: './rb-calendar.component.html',
   styleUrls: ['./rb-calendar.component.css']
 })
-export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfig> {
+export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfig>  implements RbSearchTarget {
   @Input('layers') layers: any[];
+  @Input('filter') filterConfig: any;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
+  _mode: string;
   data: any = {};
   _year: number;
   _month: number;
-  firstDay: number;
+  //firstDay: number;
+  //_weekStarting: Date;
   startDate: Date;
   endDate: Date;
 
-  days: any = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  months: any = [
-    {display: "January", value: 0},
-    {display: "Febuary", value: 1},
-    {display: "March", value: 2},
-    {display: "April", value: 3},
-    {display: "May", value: 4},
-    {display: "June", value: 5},
-    {display: "July", value: 6},
-    {display: "August", value: 7},
-    {display: "September", value: 8},
-    {display: "October", value: 9},
-    {display: "November", value: 10},
-    {display: "December", value: 11}
+  modes: any[] = [
+    {display: "Month", value: "month"},
+    {display: "Week", value: "week"}
   ];
+  months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  days: any = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  monthOptions: any = this.months.map((item, i) => ({display: item, value: i}));
+  weeksOfThisMonth: any = [];
   weeks: any = [];
   layerOptions: any = null;
   _activeDatasets: any[] = [];
 
+  userFilter: any = {};
+  userSearchString: string;
+
   constructor(
-    private userprefService: UserprefService
+    private userprefService: UserprefService,
+    private filterService: FilterService
   ) {
     super();
   }
@@ -50,9 +53,10 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   dataCalcInit() {
     let dt = new Date();
     dt.setDate(1);
+    this._mode = 'month';
     this._year = dt.getFullYear();
     this._month = dt.getMonth();
-    this.calcParams(); 
+    this.calcDays(); 
     if(this.layers != null && this.layers.length > 0) {
       this.layerOptions = [];
       for(let item of this.layers) {
@@ -76,6 +80,10 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     return this.id != null ? this.userprefService.getUISwitch("calendar", this.id) : null;
   }
 
+  get objectname() : string {
+    return this.dataset != null ? this.dataset.objectname : this.datasetgroup != null && this.activeSeries.length > 0 ? this.datasetgroup.datasets[this.activeSeries[0].dataset].objectname : null;
+  }
+
   get activeSeries() : CalendarSeriesConfig[] {
     return this.seriesConfigs.filter(item => item.active);
   }
@@ -93,7 +101,18 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
         cfg.active = false;
       }
     }
-    this.redraw();
+    this.redraw(); // This is an optimistic redraw in the case where the filterDataset will not update the dataset because the filter is identical
+    this.filterDataset();
+  }
+
+  get mode(): string {
+    return this._mode;
+  }
+
+  set mode(m: string) {
+    this._mode = m;
+    if(this._mode == 'week') this.calcWeeksOfThisMonth();
+    this.calcDays();
     this.filterDataset();
   }
 
@@ -103,7 +122,8 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
 
   set year(val: number) {
     this._year = val;
-    this.calcParams();
+    if(this._mode == 'week') this.calcWeeksOfThisMonth();
+    this.calcDays();
     this.filterDataset();
   }
 
@@ -113,16 +133,43 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
 
   set month(val: number) {
     this._month = val;
-    this.calcParams();
+    if(this._mode == 'week') this.calcWeeksOfThisMonth();
+    this.calcDays();
     this.filterDataset();
   }
 
-  calcParams() {
+  get weekStarting() : Date {
+    return this.startDate;
+  }
+
+  set weekStarting(val: Date) {
+    this.startDate = val;
+    this.calcDays();
+    this.filterDataset();
+  }
+
+  calcWeeksOfThisMonth() {
     let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
-    this.firstDay = firstOfMonth.getDay();
-    this.startDate = new Date(firstOfMonth.getTime() - (this.firstDay * 86400000));
-    let firstofNextMonth = new Date((new Date(firstOfMonth.getTime()).setMonth(this.month + 1)));
-    this.endDate = new Date(firstofNextMonth.getTime() + ((7 - firstofNextMonth.getDay()) * 86400000));
+    let dt = new Date(firstOfMonth.getTime() - (firstOfMonth.getDay() * 86400000));
+    this.startDate = dt;
+    this.weeksOfThisMonth = [];
+    while(dt.getMonth() <= this.month) {
+      this.weeksOfThisMonth.push({display: dt.getDate() + " " + this.months[dt.getMonth()], value: dt});
+      if(dt.getTime() < (new Date()).getTime()) this.startDate = dt;
+      dt = new Date(dt.getTime() + (7 * 86400000));
+    }
+  }
+
+  calcDays() {
+    if(this.mode == 'month') {
+      let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
+      let firstDay = firstOfMonth.getDay();
+      this.startDate = new Date(firstOfMonth.getTime() - (firstDay * 86400000));
+      let firstofNextMonth = new Date((new Date(firstOfMonth.getTime()).setMonth(this.month + 1)));
+      this.endDate = new Date(firstofNextMonth.getTime() + (((7 - firstofNextMonth.getDay()) % 7) * 86400000));  
+    } else if(this.mode == 'week') {
+      this.endDate = new Date(this.startDate.getTime() + (7 * 86400000));
+    }
     let dayCount = (this.endDate.getTime() - this.startDate.getTime()) / 86400000;
     let weekCount = Math.ceil(dayCount / 7);
     this.weeks = [];
@@ -150,14 +197,16 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   filterDataset() {
     for(let cfg of this.activeSeries) {
       let filter = {};
+      filter = this.filterService.mergeFilters(filter, this.userFilter);
       filter[cfg.dateAttribute] = {
         $gt: "'" + this.startDate.toISOString() + "'",
         $lt: "'" + this.endDate.toISOString() + "'"
       }
+      let event = {filter: filter, search: this.userSearchString};
       if(this.datasetgroup != null) {
-        this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
+        this.datasetgroup.datasets[cfg.dataset].filterSort(event);
       } else {
-        this.dataset.filterSort({filter: filter});
+        this.dataset.filterSort(event);
       }
     }
   }
@@ -201,7 +250,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       let filter = Object.assign({}, ds.mergedFilter);
       filter[cfg.dateAttribute] = day.filter;
       let target = {
-        object: ds.object,
+        object: ds.objectname,
         filter: filter,
         search: ds.searchString
       };
@@ -227,6 +276,14 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     }
   }
 
+  filterSort(event: any) {
+    if(('filter' in event && ValueComparator.notEqual(event.filter, this.userFilter))
+     || ('search' in event && event.search != this.userSearchString)) {
+      if('filter' in event) this.userFilter = event.filter;
+      if('search' in event) this.userSearchString = event.search;
+      this.filterDataset();
+    }
+  }
 
 }
 

@@ -63,7 +63,7 @@ export class LoadedView extends RbActivatorComponent {
   setTarget(dataTarget: DataTarget) {
     if(dataTarget != null) {
       for(let dataset of this.topSets) {
-        if(dataset.ignoretarget == false && (dataTarget.objectname == null || (dataTarget.objectname != null && dataTarget.objectname == dataset.object))) {
+        if(dataset.ignoretarget == false && (dataTarget.objectname == null || (dataTarget.objectname != null && dataTarget.objectname == dataset.objectname))) {
           dataset.setDataTarget(dataTarget);
         }
       }

@@ -87,6 +87,13 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   dataCalcDestroy() {
   }
 
+  onActivationEvent(event: any) {
+    if(this.active) {
+      setTimeout(() => this.reframe(), 100); //The timeout is to ensure the mapbox is rendered in order to know the size in pixels which is used to calculate the zoom
+    }
+    super.onActivationEvent(event);
+  }
+
   onDatasetEvent(event: string) {
     if(this.active && event.endsWith('select')) {
       let selectedLatLon = this.selectedObject != null ? this.getObjectLatLon(this.selectedObject, this.getSeriesConfigForObject(this.selectedObject)) : null;

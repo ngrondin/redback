@@ -5,16 +5,19 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { Observable, Subscription } from 'rxjs';
 import { Observer } from 'rxjs';
+import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 
 @Component({
   selector: 'rb-datasetgroup',
   templateUrl: './rb-datasetgroup.component.html',
   styleUrls: ['./rb-datasetgroup.component.css']
 })
-export class RbDatasetGroupComponent extends RbContainerComponent {
+export class RbDatasetGroupComponent extends RbContainerComponent implements RbSearchTarget {
   datasets: any = {};
   _selectedObject: RbObject;
   private observers: Observer<string>[] = [];
+
+  objectname: string = null;
   
   constructor() {
     super();
@@ -48,38 +51,52 @@ export class RbDatasetGroupComponent extends RbContainerComponent {
     this.select(obj);
   }
   
+
+  public get isLoading(): boolean {
+    let l: boolean = false;
+    for(let key of Object.keys(this.datasets)) {
+      if(this.datasets[key].isLoading) {
+        l = true;
+      }
+    }
+    return l;
+  }
+
   getObservable() : Observable<string>  {
     return new Observable<string>((observer) => {
       this.observers.push(observer);
     });
   }
 
-  public register(name: string, dataset: RbDatasetComponent) {
-    this.datasets[name] = dataset;
+  public register(id: string, dataset: RbDatasetComponent) {
+    this.datasets[id] = dataset;
   }
 
-  /*setActive(state: boolean) {
-    this.active = state;
-  }*/
-
   public refreshAllData() {
-    for(let name of Object.keys(this.datasets)) {
-      let ds: RbDatasetComponent = this.datasets[name];
+    for(let id of Object.keys(this.datasets)) {
+      let ds: RbDatasetComponent = this.datasets[id];
       ds.refreshData();
     }
   }
 
   public select(obj: RbObject) {
     this._selectedObject = obj;
-    for(let name of Object.keys(this.datasets)) {
-      let ds: RbDatasetComponent = this.datasets[name];
-      if(ds.object == obj.objectname) {
+    for(let id of Object.keys(this.datasets)) {
+      let ds: RbDatasetComponent = this.datasets[id];
+      if(ds.objectname == obj.objectname) {
         ds.select(obj);
       } else {
         ds.select(null);
       }
     }
     this.publishEvent('groupselect');
+  }
+
+  public filterSort(event: any) {
+    for(let id of Object.keys(this.datasets)) {
+      let ds: RbDatasetComponent = this.datasets[id];
+      ds.filterSort(event);
+    }
   }
 
   public groupMemberEvent(name: string, event: string) {
@@ -92,14 +109,12 @@ export class RbDatasetGroupComponent extends RbContainerComponent {
     });     
   }
 
-  public get isLoading(): boolean {
-    let l: boolean = false;
-    for(let key of Object.keys(this.datasets)) {
-      if(this.datasets[key].isLoading) {
-        l = true;
-      }
+  public getFirstDataset() : RbDatasetComponent {
+    let ids = Object.keys(this.datasets);
+    if(ids.length > 0) {
+      return this.datasets[ids[0]];
+    } else {
+      return null;
     }
-    //console.log("loading is " + l);
-    return l;
   }
 }

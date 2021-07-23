@@ -4,12 +4,10 @@ import { DataService } from '../services/data.service';
 import { FilterService } from 'app/services/filter.service';
 import { Observable, Subscription } from 'rxjs';
 import { ApiService } from 'app/services/api.service';
-import { ReportService } from 'app/services/report.service';
 import { Observer } from 'rxjs';
-import { ModalService } from 'app/services/modal.service';
-import { ObserverProxy, ValueComparator } from 'app/helpers';
-import { ErrorService } from 'app/services/error.service';
+import { ValueComparator } from 'app/helpers';
 import { RbSetComponent } from 'app/abstract/rb-set';
+import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 
 
 @Component({
@@ -17,14 +15,14 @@ import { RbSetComponent } from 'app/abstract/rb-set';
   templateUrl: './rb-dataset.component.html',
   styleUrls: ['./rb-dataset.component.css']
 })
-export class RbDatasetComponent extends RbSetComponent  {
+export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget  {
   @Input('basesort') baseSort: any;
-  @Input('name') name: string;
+  @Input('name') name: string; //To be deprecated
   @Input('fetchall') fetchAll: boolean = false;
   @Input('addrelated') addrelated: boolean = true;
 
 
-  public id: string;
+  public uid: string;
   private dataSubscription: Subscription;
   private _list: RbObject[] = [];
   private _selectedObject: RbObject;
@@ -49,7 +47,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     private filterService: FilterService,
   ) {
     super();
-    this.id = "" + Math.floor(Math.random() * 10000);
+    this.uid = "" + Math.floor(Math.random() * 10000);
   }
 
   setInit() {
@@ -58,7 +56,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     this.fetchThreads = 0;
     this.hasMorePages = true;
     if(this.datasetgroup != null) {
-      this.datasetgroup.register(this.name, this);
+      this.datasetgroup.register((this.id || this.name), this);
     }
     this.refreshData();
   }
@@ -158,7 +156,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     if(this.hasMorePages) {
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
       const search = this.searchString;
-      this.dataService.listObjects(this.object, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, this.addrelated).subscribe({
+      this.dataService.listObjects(this.objectname, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, this.addrelated).subscribe({
         next: (data) => {
           this.fetchThreads--;
           this.setData(data);
@@ -189,7 +187,7 @@ export class RbDatasetComponent extends RbSetComponent  {
     }
     this.mergedFilter = filter;
     this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
-    this.dataService.subscribeObjectCreation(this.id, this.object, this.resolvedFilter);
+    this.dataService.subscribeObjectCreation(this.uid, this.objectname, this.resolvedFilter);
   }
 
   private setData(data: RbObject[]) {
@@ -222,7 +220,7 @@ export class RbDatasetComponent extends RbSetComponent  {
       }
       if(this.nextPage == 1) { 
         if(this.fetchAll == false && this._list.length > 10) {
-          this.apiService.aggregateObjects(this.object, this.resolvedFilter, this.searchString, [], [{function:'count', name:'count'}], null).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
+          this.apiService.aggregateObjects(this.objectname, this.resolvedFilter, this.searchString, [], [{function:'count', name:'count'}], null).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
         } else {
           this.totalCount = this._list.length;
         }
@@ -231,7 +229,7 @@ export class RbDatasetComponent extends RbSetComponent  {
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
-    if(object.objectname == this.object && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
+    if(object.objectname == this.objectname && this.isLoading == false && this._list.includes(object) == false && (this.searchString == null || this.searchString == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
       if(this.filterService.applies(this.resolvedFilter, object)) {
         this._list.push(object);
         object.addSet(this);
@@ -255,20 +253,13 @@ export class RbDatasetComponent extends RbSetComponent  {
     this.publishEvent('select');
   }
 
-  public search(str: string) {
-    if(str != this.searchString) {
-      this.searchString = str;
-      this.refreshData();
-      if(this.dataTarget != null) {
-        this.dataTarget.search = str;
-      }
-    }
-  }
-
   public filterSort(event: any) {
-    if(ValueComparator.notEqual(event.filter, this.userFilter) || ValueComparator.notEqual(event.sort, this.userSort)) {
-      this.userFilter = event.filter;
-      this.userSort = event.sort;
+    if(('filter' in event && ValueComparator.notEqual(event.filter, this.userFilter))
+     || ('sort' in event && ValueComparator.notEqual(event.sort, this.userSort))
+     || ('search' in event && event.search != this.searchString)) {
+      if('filter' in event) this.userFilter = event.filter;
+      if('sort' in event) this.userSort = event.sort;
+      if('search' in event) this.searchString = event.search;
       this.refreshData();
       if(this.dataTarget != null && this.ignoretarget == false) {
         this.dataTarget.filter = event.filter;
@@ -277,7 +268,7 @@ export class RbDatasetComponent extends RbSetComponent  {
   } 
 
   public create() {
-    this.dataService.createObject(this.object, null, this.resolvedFilter).subscribe(newObject => this.addObjectAndSelect(newObject));
+    this.dataService.createObject(this.objectname, null, this.resolvedFilter).subscribe(newObject => this.addObjectAndSelect(newObject));
   }
 
   public delete(obj: RbObject) {
@@ -312,7 +303,7 @@ export class RbDatasetComponent extends RbSetComponent  {
       observer.next(event);
     }); 
     if(this.datasetgroup != null) {
-      this.datasetgroup.groupMemberEvent(this.name, event);
+      this.datasetgroup.groupMemberEvent((this.id || this.name), event);
     }
   }
 }

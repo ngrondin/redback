@@ -21,15 +21,10 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
     this.defaultIcon = "description";
   }
 
-  inputInit() {
-    
-  }
-
   public onFocus(event: any) {
     this.startEditing();
   }
 
-  
   public onBlur(event: any) {
     this.finishEditing();
   }

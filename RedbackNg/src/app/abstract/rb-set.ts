@@ -5,7 +5,7 @@ import { RbContainerComponent } from "./rb-container";
 
 @Component({template: ''})
 export abstract class RbSetComponent extends RbContainerComponent {
-    @Input('object') object: string;
+    @Input('object') objectname: string;
     @Input('basefilter') baseFilter: any;
     @Input('master') master: any;
     @Input('requiresuserfilter') requiresuserfilter: boolean = false;

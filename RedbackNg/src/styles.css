@@ -247,8 +247,12 @@ rb-tab {
 
 .rb-grey-icon {
 	color: grey;
-	margin-right: 5px;
-	font-size: 1.4vw;
+	/*margin-right: 5px;
+	font-size: 1.4vw;*/
+}
+
+.rb-active-icon {
+	color: var(--main-color);
 }
 
 .rb-icon-button {
