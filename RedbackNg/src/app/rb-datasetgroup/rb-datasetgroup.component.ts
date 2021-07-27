@@ -7,13 +7,17 @@ import { Observable, Subscription } from 'rxjs';
 import { Observer } from 'rxjs';
 import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 
+type DataSetMap = {
+  [key: string]: RbDatasetComponent;
+};
+
 @Component({
   selector: 'rb-datasetgroup',
   templateUrl: './rb-datasetgroup.component.html',
   styleUrls: ['./rb-datasetgroup.component.css']
 })
 export class RbDatasetGroupComponent extends RbContainerComponent implements RbSearchTarget {
-  datasets: any = {};
+  datasets: DataSetMap = {};
   _selectedObject: RbObject;
   private observers: Observer<string>[] = [];
 

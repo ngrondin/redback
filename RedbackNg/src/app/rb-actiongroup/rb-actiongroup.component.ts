@@ -86,6 +86,8 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
       } else {
         this.calcActionData();
       }
+    } else if(event == 'update') {
+      this.calcActionData();
     }
   }
 

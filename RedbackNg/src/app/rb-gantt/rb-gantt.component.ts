@@ -339,7 +339,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   public getSeriesConfigForObject(object: RbObject) : GanttSeriesConfig {
     if(this.datasetgroup != null) {
       for(let cfg of this.seriesConfigs) {
-        if(this.datasetgroup.datasets[cfg.dataset].object == object.objectname) {
+        if(this.datasetgroup.datasets[cfg.dataset].objectname == object.objectname) {
           return cfg
         }
       }
