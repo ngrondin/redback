@@ -73,6 +73,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
     } else if(event == 'clear') {
       this.clear();
+    } else if(event == 'update') {
+      this.publishEvent('update');
     }
   }
 
