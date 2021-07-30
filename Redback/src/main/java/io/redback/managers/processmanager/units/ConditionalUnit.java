@@ -1,10 +1,10 @@
 package io.redback.managers.processmanager.units;
 
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.processmanager.Process;
 
@@ -38,7 +38,7 @@ public class ConditionalUnit extends ProcessUnit
 		} 
 		catch (RedbackException e)
 		{
-			error("Problem occurred executing a condition", e);
+			throw new RedbackException("Problem occurred executing a condition", e);
 		}		
 		logger.finer("Finish executing condition");		
 	}

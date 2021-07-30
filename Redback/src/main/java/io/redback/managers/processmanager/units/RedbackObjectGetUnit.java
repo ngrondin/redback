@@ -7,10 +7,10 @@ import java.util.logging.Logger;
 
 import io.firebus.Payload;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.processmanager.Process;
@@ -66,7 +66,7 @@ public class RedbackObjectGetUnit extends ProcessUnit
 			} 
 			catch (Exception e)
 			{
-				error("Error getting Redback object '" + objectName + "'",  e);
+				throw new RedbackException("Error getting Redback object '" + objectName + "'",  e);
 			}
 			logger.finer("Finished redback object get node");
 		}

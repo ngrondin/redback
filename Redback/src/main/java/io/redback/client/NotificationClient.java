@@ -9,7 +9,7 @@ import javax.mail.internet.InternetAddress;
 import io.firebus.Firebus;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.Email;
 import io.redback.utils.EmailAttachment;

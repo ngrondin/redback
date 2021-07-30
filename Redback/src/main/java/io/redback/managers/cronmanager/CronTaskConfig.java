@@ -5,7 +5,7 @@ import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 
 public class CronTaskConfig {
 	protected CronTaskManager cronTaskManager;

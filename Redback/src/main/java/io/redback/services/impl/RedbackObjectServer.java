@@ -8,7 +8,7 @@ import javax.script.ScriptException;
 import io.firebus.Firebus;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.ObjectConfig;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackAggregate;

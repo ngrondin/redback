@@ -15,11 +15,12 @@ import io.firebus.Payload;
 import io.firebus.utils.DataFilter;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.ObjectClient;
+import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
@@ -382,7 +383,7 @@ public class ProcessManager
 		}
 		else
 		{
-			throw new RedbackException("The process " + pid + " is not on an interaction node to process action " + action);
+			throw new RedbackInvalidRequestException("The process " + pid + " is not on an interaction node to process action " + action);
 		}
 		logger.finer("Finished processing action");
 	}
@@ -399,7 +400,7 @@ public class ProcessManager
 		}
 		else
 		{
-			throw new RedbackException("The process " + pid + " is not on an interaction node");
+			throw new RedbackInvalidRequestException("The process " + pid + " is not on an interaction node");
 		}
 		logger.finer("Finished processing action");
 	}

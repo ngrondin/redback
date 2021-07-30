@@ -2,7 +2,7 @@ package io.redback.client;
 
 import io.firebus.Firebus;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 
 public class GatewayClient extends Client
 {

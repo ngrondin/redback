@@ -7,9 +7,8 @@ import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.threads.FirebusThread;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
-import io.redback.utils.StringUtils;
 import io.redback.utils.Timer;
 
 public abstract class ServiceProvider extends Service implements io.firebus.interfaces.ServiceProvider {
@@ -33,8 +32,7 @@ public abstract class ServiceProvider extends Service implements io.firebus.inte
 			logger.finer("Service '" + this.serviceName + "' finished");
 			return response;
 		} catch(Exception e) {
-			logger.severe(StringUtils.getStackTrace(e));
-			throw new FunctionErrorException("Exception in redback service '" + serviceName + "'", e);
+			throw handleException(e, "Exception in redback service '" + serviceName + "'");
 		} finally {
 			if(timer != null) timer.mark();
 			if(Thread.currentThread() instanceof FirebusThread) 

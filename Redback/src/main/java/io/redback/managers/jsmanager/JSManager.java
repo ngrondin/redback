@@ -15,7 +15,7 @@ import javax.script.ScriptException;
 
 import io.firebus.threads.FirebusThread;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.LoggerJSFunction;
 import io.redback.utils.js.RedbackUtilsJSWrapper;

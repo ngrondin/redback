@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
 

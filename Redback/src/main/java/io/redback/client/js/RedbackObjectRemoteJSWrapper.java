@@ -10,8 +10,8 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 import io.redback.client.RedbackObjectRemote;
+import io.redback.exceptions.RedbackException;
 import io.redback.utils.js.JSConverter;
 
 public class RedbackObjectRemoteJSWrapper implements ProxyObject

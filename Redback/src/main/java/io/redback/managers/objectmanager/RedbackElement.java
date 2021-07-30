@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 
 public abstract class RedbackElement 

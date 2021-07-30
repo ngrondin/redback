@@ -1,14 +1,19 @@
 package io.redback.services.common;
 
+import java.util.logging.Logger;
+
 //import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.utils.DataMap;
+import io.redback.exceptions.RedbackException;
+import io.redback.utils.StringUtils;
 
 public abstract class Service 
 {
-	//private Logger logger = Logger.getLogger("io.redback");
+	private Logger logger = Logger.getLogger("io.redback");
 	protected String serviceName;
 	protected Firebus firebus;
 	protected DataMap config;
@@ -32,6 +37,21 @@ public abstract class Service
 			body = "";
 		}
 		return body;
+	}
+	
+	protected FunctionErrorException handleException(Exception e, String msg) {
+		int errorCode = 0;
+		if(e instanceof RedbackException) {
+			RedbackException rbe = (RedbackException)e;
+			errorCode = rbe.getErrorCode();
+		} else {
+			
+		}
+		if(errorCode == 0 || errorCode >= 500)
+			logger.severe(StringUtils.getStackTrace(e));
+		else 
+			logger.info("Invalid request: " + StringUtils.rollUpExceptions(e));
+		return new FunctionErrorException(msg, e, errorCode);
 	}
 
 

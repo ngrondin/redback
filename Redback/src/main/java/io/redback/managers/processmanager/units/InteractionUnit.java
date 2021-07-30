@@ -7,7 +7,8 @@ import java.util.Map;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.processmanager.ActionConfig;
 import io.redback.managers.processmanager.Actionner;
@@ -108,12 +109,12 @@ public class InteractionUnit extends ProcessUnit
 
 			if(!foundAction)
 			{
-				error("No such action (" + action + ") available for process " + pi.getId());
+				throw new RedbackInvalidRequestException("No such action (" + action + ") available for process " + pi.getId());
 			}
 		}
 		else
 		{
-			error("Actionning user or process is not a current assignee");
+			throw new RedbackInvalidRequestException("Actionning user or process is not a current assignee");
 		}		
 		logger.finer("Finished interaction node action");
 	}

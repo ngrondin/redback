@@ -10,7 +10,7 @@ import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.interfaces.ServiceRequestor;
 import io.firebus.interfaces.StreamHandler;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.ClientStreamHandler;
 import io.redback.utils.StringUtils;

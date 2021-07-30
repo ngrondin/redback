@@ -8,7 +8,7 @@ import javax.script.ScriptException;
 
 import org.graalvm.polyglot.Value;
 
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.utils.js.JSConverter;
 
 public abstract class Executor {

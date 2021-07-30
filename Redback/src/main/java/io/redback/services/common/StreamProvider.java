@@ -9,9 +9,8 @@ import io.firebus.StreamEndpoint;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.threads.FirebusThread;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
-import io.redback.utils.StringUtils;
 import io.redback.utils.Timer;
 
 public abstract class StreamProvider extends Service implements io.firebus.interfaces.StreamProvider {
@@ -41,8 +40,7 @@ public abstract class StreamProvider extends Service implements io.firebus.inter
 			logger.finer("Stream '" + this.serviceName + "' finished");
 			return acceptPayload;
 		} catch(Exception e) {
-			logger.severe(StringUtils.getStackTrace(e));
-			throw new FunctionErrorException("Exception in redback stream '" + serviceName + "'", e);
+			throw handleException(e, "Exception in redback stream '" + serviceName + "'");
 		} finally {
 			if(timer != null) timer.mark();
 			if(Thread.currentThread() instanceof FirebusThread) 

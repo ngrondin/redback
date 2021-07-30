@@ -10,7 +10,7 @@ import io.firebus.Payload;
 import io.firebus.utils.DataEntity;
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 
 public class RedbackObjectRemote {
 	public DataMap data;

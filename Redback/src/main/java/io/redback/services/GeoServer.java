@@ -5,11 +5,10 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.ServiceProvider;
 import io.redback.utils.GeoRoute;
@@ -53,7 +52,7 @@ public abstract class GeoServer extends ServiceProvider
 					}
 					else
 					{
-						throw new FunctionErrorException("A 'geocode' action requires an 'address' attribute");
+						throw new RedbackException("A 'geocode' action requires an 'address' attribute");
 					}
 				}
 				else if(action.equals("address"))
@@ -71,7 +70,7 @@ public abstract class GeoServer extends ServiceProvider
 					}
 					else
 					{
-						throw new FunctionErrorException("An 'address' action requires an 'address' attribute");
+						throw new RedbackException("An 'address' action requires an 'address' attribute");
 					}					
 				}
 				else if(action.equals("timezone"))
@@ -83,7 +82,7 @@ public abstract class GeoServer extends ServiceProvider
 					}
 					else
 					{
-						throw new FunctionErrorException("A 'timezone' action requires a 'geometry' attribute");
+						throw new RedbackException("A 'timezone' action requires a 'geometry' attribute");
 					}
 				}
 				else if(action.equals("travel")) 
@@ -98,7 +97,7 @@ public abstract class GeoServer extends ServiceProvider
 				}
 				else
 				{
-					throw new FunctionErrorException("Valid actions are 'address', 'geocode', 'timezone' and 'travel'");
+					throw new RedbackException("Valid actions are 'address', 'geocode', 'timezone' and 'travel'");
 				}
 			}
 			response.setData(responseData.toString());

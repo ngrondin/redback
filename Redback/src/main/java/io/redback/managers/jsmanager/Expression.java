@@ -3,7 +3,7 @@ package io.redback.managers.jsmanager;
 import java.util.List;
 import java.util.Map;
 
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 
 public class Expression extends Executor
 {

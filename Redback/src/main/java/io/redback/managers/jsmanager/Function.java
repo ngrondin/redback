@@ -2,7 +2,7 @@ package io.redback.managers.jsmanager;
 
 import java.util.List;
 
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 
 public class Function extends Executor {
 

@@ -7,7 +7,7 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.security.Session;
 

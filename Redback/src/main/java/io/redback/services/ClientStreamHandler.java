@@ -6,7 +6,7 @@ import org.apache.commons.codec.binary.Base64;
 import io.firebus.Payload;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.StreamHandler;
 import io.redback.utils.StringUtils;

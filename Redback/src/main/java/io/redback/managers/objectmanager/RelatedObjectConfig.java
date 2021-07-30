@@ -2,7 +2,7 @@ package io.redback.managers.objectmanager;
 
 import io.firebus.utils.DataLiteral;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.ExpressionMap;
 

@@ -5,7 +5,7 @@ import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 

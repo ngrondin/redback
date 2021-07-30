@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.units.ActionUnit;
 import io.redback.managers.processmanager.units.ConditionalUnit;
 import io.redback.managers.processmanager.units.DomainServiceUnit;

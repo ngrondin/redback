@@ -10,8 +10,8 @@ import java.util.UUID;
 
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 import io.redback.client.js.ObjectClientJSWrapper;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;

@@ -5,8 +5,8 @@ import java.util.logging.Logger;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 import io.redback.client.AccessManagementClient;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 

@@ -2,7 +2,7 @@ package io.redback.managers.reportmanager;
 
 
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 
 
 public class ReportConfig {

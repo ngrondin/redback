@@ -4,10 +4,10 @@ import java.util.Map;
 
 
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.processmanager.Process;
 import io.redback.utils.StringUtils;
@@ -29,7 +29,7 @@ public class ScriptUnit extends ProcessUnit
 		}
 		catch(RedbackException e)
 		{
-			error("Error creating script unit id '" + getId() + "'", e);
+			throw new RedbackException("Error creating script unit id '" + getId() + "'", e);
 		}
 	}
 
@@ -45,7 +45,7 @@ public class ScriptUnit extends ProcessUnit
 		} 
 		catch (RedbackException e)
 		{
-			error("Problem occurred executing script of node '" + name + "'", e);
+			throw new RedbackException("Problem occurred executing script of node '" + name + "'", e);
 		}		
 		logger.finer("Finish executing script ");		
 	}

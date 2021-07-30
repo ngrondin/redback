@@ -3,7 +3,7 @@ package io.redback.managers.processmanager;
 import java.util.logging.Logger;
 
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.utils.StringUtils;
 
 public abstract class ProcessUnit 
@@ -36,7 +36,7 @@ public abstract class ProcessUnit
 	{
 		pi.setCurrentNode(null);
 	}
-
+/*
 	protected void error(String msg) throws RedbackException
 	{
 		error(msg, null);
@@ -58,6 +58,6 @@ public abstract class ProcessUnit
 			throw new RedbackException(msg, cause);
 		else
 			throw new RedbackException(msg);
-	}
+	}*/
 
 }

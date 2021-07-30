@@ -19,7 +19,7 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 
 public class ImageUtils {
 

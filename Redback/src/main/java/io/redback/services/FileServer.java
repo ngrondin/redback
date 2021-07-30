@@ -13,7 +13,7 @@ import io.firebus.interfaces.StreamProvider;
 import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
 import io.redback.utils.RedbackFile;
@@ -201,7 +201,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 				}
 				return null;
 			} else {
-				throw new FunctionErrorException("All stream requests need to be authenticated");
+				throw new FunctionErrorException("All stream requests need to be authenticated", 401);
 			}
 		} catch(Exception e) {
 			throw new FunctionErrorException("Cannot accept stream", e);

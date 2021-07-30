@@ -24,11 +24,11 @@ import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.interfaces.ServiceProvider;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
 import io.redback.client.ObjectClient;
 import io.redback.client.ProcessAssignmentRemote;
 import io.redback.client.ProcessClient;
 import io.redback.client.RedbackObjectRemote;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 public class TestClient {
 	

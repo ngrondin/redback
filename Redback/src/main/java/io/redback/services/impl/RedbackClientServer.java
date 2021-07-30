@@ -3,7 +3,7 @@ package io.redback.services.impl;
 
 import io.firebus.Firebus;
 import io.firebus.utils.DataMap;
-import io.redback.RedbackException;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.clientmanager.ClientManager;
 import io.redback.security.Session;
 import io.redback.services.ClientServer;
