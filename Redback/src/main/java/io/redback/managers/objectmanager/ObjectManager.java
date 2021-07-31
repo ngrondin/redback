@@ -1076,7 +1076,7 @@ public class ObjectManager
 			}
 			catch(Exception e) 
 			{
-				logger.severe("Cannot send out signal : " + e.getMessage());
+				logger.severe("Cannot send out signal : " + StringUtils.rollUpExceptions(e));
 			}
 		}		
 	}
