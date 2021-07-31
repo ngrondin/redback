@@ -975,7 +975,7 @@ public class ObjectManager
 		DataMap dbSort = null;
 		if(objectSort != null) {
 			dbSort = new DataMap();
-			for(int i = 0; objectSort.containsKey("" + i); i++) {
+			for(int i = 0; objectSort.containsKey(String.valueOf(i)); i++) {
 				DataMap sortItem = new DataMap();
 				String attribute = objectSort.getObject("" + i).getString("attribute");
 				String dbKey = null;

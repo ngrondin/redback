@@ -55,7 +55,7 @@ export class ActionService {
     } else if(_name == 'modal') {
       return this.showModal(param);
     } else if(_name == 'externallink') {
-      return this.launchExternalLink(param);
+      return this.launchExternalLink(dataset, param);
     } else if(dataset.selectedObject != null) {
       return this.execute(dataset, actionName, param);
     }
@@ -209,8 +209,9 @@ export class ActionService {
     });
   }
 
-  public launchExternalLink(linkExpression: string) : Observable<null> {
+  public launchExternalLink(dataset: RbDatasetComponent, linkExpression: string) : Observable<null> {
     return new Observable((observer) => {
+      let object = dataset.selectedObject;
       let url = eval(linkExpression);
       window.open(url);
       observer.next();
