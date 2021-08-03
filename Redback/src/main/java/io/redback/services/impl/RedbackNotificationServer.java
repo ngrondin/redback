@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -122,6 +123,8 @@ public class RedbackNotificationServer extends NotificationServer {
 			        logger.fine("Sending email");
 			        Message msg = new MimeMessage(mailSession);
 			        msg.setFrom(email.from);
+			        if(email.reply != null)
+			        	msg.setReplyTo(new Address[] {email.reply});
 			        msg.setRecipients(Message.RecipientType.TO, email.to);
 			        msg.setSubject(email.subject);
 			        if(email.attachments == null) {

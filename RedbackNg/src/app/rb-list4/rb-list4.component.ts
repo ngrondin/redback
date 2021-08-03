@@ -23,7 +23,7 @@ export class RbList4Component extends RbDataObserverComponent {
   reachedBottom: boolean = false;
 
   constructor(
-    public userpref: UserprefService,
+    public userprefService: UserprefService,
     public modalService: ModalService
   ) {
     super();
@@ -45,6 +45,10 @@ export class RbList4Component extends RbDataObserverComponent {
     this.redraw();
   }
 
+  get userPref() : any {
+    return this.id != null ? this.userprefService.getUISwitch("list4", this.id) : null;
+  }
+
   public hasMainLine() : boolean {
     return this.mainattribute != null || this.mainexpression != null;
   }
@@ -61,21 +65,29 @@ export class RbList4Component extends RbDataObserverComponent {
     this.enhancedList = [];
     for(let obj of this.list) {
       let data = {};
-      if(this.mainattribute != null) {
+      if(this.userPref != null && this.userPref.mainattribute != null) {
+        data["main"] = this.formatText(obj.get(this.userPref.mainattribute));
+      } else if(this.mainattribute != null) {
         data["main"] = this.formatText(obj.get(this.mainattribute));
       } else if(this.mainexpression != null) {
         data["main"] = Evaluator.eval(this.mainexpression, obj, null);
       }
-      if(this.subattribute !== null) {
+
+      if(this.userPref != null && this.userPref.subattribute != null) {
+        data["sub"] = this.formatText(obj.get(this.userPref.subattribute));
+      } else if(this.subattribute !== null) {
         data["sub"] = this.formatText(obj.get(this.subattribute));
       }
+
       if(this.meta1attribute !== null) {
         data["meta1"] = this.formatText(obj.get(this.meta1attribute));
       }
+
       if(this.meta2attribute !== null) {
         data["meta2"] = this.formatText(obj.get(this.meta2attribute));
         data["meta2isabadge"] = data["meta2"] !== "" && !isNaN(Number(data["meta2"]))
       }
+      
       if(data["main"] == null || data["main"] == "") {
         if(data["sub"] != null && data["sub"] != "") {
           data["main"] = data["sub"];

@@ -13,6 +13,7 @@ import io.firebus.utils.DataMap;
 public class Email {
 	public InternetAddress[] to;
 	public InternetAddress from;
+	public InternetAddress reply;
 	public String subject;
 	public String body;
 	public List<EmailAttachment> attachments;
@@ -20,6 +21,15 @@ public class Email {
 	public Email(InternetAddress[] t, InternetAddress fr, String s, String b, List<EmailAttachment> f) {
 		to = t;
 		from = fr;
+		subject = s;
+		body = b;
+		attachments = f;
+	}
+	
+	public Email(InternetAddress[] t, InternetAddress fr, InternetAddress r, String s, String b, List<EmailAttachment> f) {
+		to = t;
+		from = fr;
+		reply = r;
 		subject = s;
 		body = b;
 		attachments = f;
@@ -37,6 +47,7 @@ public class Email {
 			to[0] = toInternetAddress(map.get("to"));
 		}
 		from = toInternetAddress(map.get("from"));
+		reply = toInternetAddress(map.get("reply"));
 		subject = map.getString("subject");
 		body = map.getString("body");					
 		DataList attList = map.getList("attachments");
@@ -82,6 +93,12 @@ public class Email {
 			fromMap.put("address", from.getAddress());
 			fromMap.put("name", from.getPersonal());
 			map.put("from", fromMap);
+		}
+		if(reply != null) {
+			DataMap replyMap = new DataMap();
+			replyMap.put("address", reply.getAddress());
+			replyMap.put("name", reply.getPersonal());
+			map.put("reply", replyMap);			
 		}
 		map.put("subject", subject);
 		map.put("body", body);

@@ -14,6 +14,7 @@ export class NotificationService {
   notifications: RbNotification[] = [];
   page: number;
   pageSize: number = 500;
+  lastDisconnected: Date;
   private observers: Observer<any>[] = [];
   private loadObsever: Observer<null>;
 
@@ -32,6 +33,26 @@ export class NotificationService {
         }
       }
     );
+    this.clientWSService.getStateObservable().subscribe(state => this.onClientConnection(state));
+  }
+
+  onClientConnection(state: boolean) {
+    if(state == true) {
+      if(this.lastDisconnected != null) {
+        var timeSinceLastDisonnected = (new Date()).getTime() - this.lastDisconnected.getTime();
+        if(timeSinceLastDisonnected > 60000) {
+          this.load();
+        }
+      }
+    } else {
+      this.lastDisconnected = new Date();
+    }
+  }
+
+  public getObservable() : Observable<any>  {
+    return new Observable<any>((observer) => {
+      this.observers.push(observer);
+    });
   }
 
   public load() {
@@ -39,12 +60,6 @@ export class NotificationService {
     this.page = 0;
     this.fetchNextPage();
     return new Observable<null>((observer) => this.loadObsever = observer);
-  }
-
-  public getObservable() : Observable<any>  {
-    return new Observable<any>((observer) => {
-      this.observers.push(observer);
-    });
   }
 
   private fetchNextPage() {

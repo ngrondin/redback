@@ -90,9 +90,7 @@ export class ClientWSService {
       });
       this.initWebsocketSubscribe();
     }
-    return new Observable<boolean>((observer) => {
-      this.stateObservers.push(observer);
-    })
+    return this.getStateObservable();
   }
 
   initWebsocketSubscribe() {
@@ -182,6 +180,12 @@ export class ClientWSService {
         this.subscriptionRequestPending = false;
       }, 500);
     }
+  }
+
+  getStateObservable() : Observable<any>  {
+    return new Observable<any>((observer) => {
+      this.stateObservers.push(observer);
+    });
   }
 
   getObjectUpdateObservable() : Observable<any>  {
