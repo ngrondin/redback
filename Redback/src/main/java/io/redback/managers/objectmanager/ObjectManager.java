@@ -305,7 +305,7 @@ public class ObjectManager
 			}
 			catch(Exception e)
 			{
-				logger.severe(e.getMessage());
+				//logger.severe(e.getMessage());
 				throw new RedbackException("Exception getting global script config", e);
 			}
 		}
@@ -331,7 +331,7 @@ public class ObjectManager
 			}
 			catch(Exception e)
 			{
-				logger.severe(e.getMessage());
+				//logger.severe(e.getMessage());
 				throw new RedbackException("Exception getting object config", e);
 			}
 		}
@@ -507,7 +507,6 @@ public class ObjectManager
 				}
 				catch(Exception e)
 				{
-					logger.severe(e.getMessage());
 					throw new RedbackException("Error getting object list", e);
 				}
 			}

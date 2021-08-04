@@ -3,6 +3,7 @@ package io.redback.client;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
+import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
@@ -47,7 +48,7 @@ public class Client {
 				return null;
 			}
 		}
-		catch(Exception e)
+		catch(DataException e)
 		{
 			throw new RedbackException("Error requesting " + serviceName, e);
 		}
@@ -90,17 +91,10 @@ public class Client {
 	
 	protected StreamEndpoint requestStream(Session session, DataMap req) throws RedbackException
 	{
-		try
-		{
-			Payload reqP = new Payload(req.toString());
-			reqP.metadata.put("mime", "application/json");
-			StreamEndpoint sep = requestStream(session, reqP);
-			return sep;
-		}
-		catch(Exception e)
-		{
-			throw new RedbackException("Error requesting " + serviceName, e);
-		}
+		Payload reqP = new Payload(req.toString());
+		reqP.metadata.put("mime", "application/json");
+		StreamEndpoint sep = requestStream(session, reqP);
+		return sep;
 	}
 	
 	protected StreamEndpoint requestStream(Session session, Payload reqP) throws RedbackException 
