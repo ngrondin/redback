@@ -29,7 +29,7 @@ public abstract class StreamProvider extends Service implements io.firebus.inter
 				((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
 			timer = new Timer(serviceName, session.getId(), getLogline(payload));
 			logger.finer("Stream '" + serviceName + "' started");
-			StreamHandler streamHandler = redbackStream(session, payload);
+			StreamHandler streamHandler = redbackAcceptStream(session, payload);
 			Payload acceptPayload = null;
 			if(streamHandler != null) {
 				streamHandler.setStreamEndpoint(streamEndpoint);
@@ -49,5 +49,5 @@ public abstract class StreamProvider extends Service implements io.firebus.inter
 	}
 
 
-	public abstract StreamHandler redbackStream(Session session, Payload payload) throws RedbackException;
+	public abstract StreamHandler redbackAcceptStream(Session session, Payload payload) throws RedbackException;
 }

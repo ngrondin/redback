@@ -9,6 +9,7 @@ import io.firebus.StreamEndpoint;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.interfaces.ServiceRequestor;
 import io.firebus.interfaces.StreamHandler;
+import io.firebus.utils.DataException;
 import io.firebus.utils.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
@@ -27,15 +28,14 @@ public class ClientHandler extends ClientStreamHandler {
 		clientManager = cm;
 		session = s;
 		uploads = new HashMap<String, StreamEndpoint>();
-		logger.info("Client connected for " + session.getUserProfile().getUsername());
 	}
 	
 	public void clientStreamClosed() throws RedbackException {
 		try {
 			clientManager.onClientLeave(this);
-			logger.info("Client disconnected for " + session.getUserProfile().getUsername() + " (hb:" + heartbeatCount + " last " + (System.currentTimeMillis() - lastHeartbeat) + "ms)");
+			logger.info("Client disconnected for " + session.getUserProfile().getUsername() + " (" + getStatString() + ")");
 		} catch(Exception e) {
-			logger.severe("Error closing stream : " + e.getMessage());
+			logger.severe("Error closing client handler : " + e.getMessage());
 		}
 	}
 	
@@ -69,32 +69,21 @@ public class ClientHandler extends ClientStreamHandler {
 				public void response(Payload payload) {
 					try {
 						String mime = payload.metadata.get("mime");
-						DataMap respWrapper = new DataMap();
-						respWrapper.put("type", "serviceresponse");
-						respWrapper.put("requid", reqUid);
 						if(mime == null || (mime != null && mime.equals("application/json")))
-							respWrapper.put("response", new DataMap(payload.getString()));
+							sendRequestResultData(reqUid, new DataMap(payload.getString()));
 						else if(mime.startsWith("text/"))
-							respWrapper.put("response", payload.getString());
-						sendClientData(respWrapper);
-					} catch(Exception e2) {
+							sendRequestResultText(reqUid, payload.getString());
+					} catch(DataException e2) {
+						logger.severe("Client service request error while parsing response json: " + StringUtils.rollUpExceptions(e2));
 					}
 				}
 
 				public void error(FunctionErrorException e) { 
-					DataMap respWrapper = new DataMap();
-					respWrapper.put("type", "serviceerror");
-					respWrapper.put("requid", reqUid);
-					respWrapper.put("error", StringUtils.rollUpExceptions(e));
-					sendClientData(respWrapper);					
+					sendRequestError(reqUid, StringUtils.rollUpExceptions(e));
 				}
 
 				public void timeout() {
-					DataMap respWrapper = new DataMap();
-					respWrapper.put("type", "serviceerror");
-					respWrapper.put("requid", reqUid);
-					respWrapper.put("error", "service request timed out");
-					sendClientData(respWrapper);						
+					sendRequestTimeout(reqUid);
 				}	
 			}, clientManager.name, timeout > -1 ? timeout : 10000);
 		} catch(Exception e) {

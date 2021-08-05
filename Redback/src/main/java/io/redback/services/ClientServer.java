@@ -21,31 +21,43 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 		if(c.containsKey("objectupdatechannel")) {
 			f.registerConsumer(c.getString("objectupdatechannel"), new Consumer() {
 				public void consume(Payload payload) {
-					_onOjectUpdate(payload);
+					try {
+						onObjectUpdate(new DataMap(payload.getString()));
+					} catch(Exception e) {
+						logger.severe(StringUtils.getStackTrace(e));
+					}					
 				}
 			}, 10);			
 		}
 		if(c.containsKey("processnotificationchannel")) {
 			f.registerConsumer(c.getString("processnotificationchannel"), new Consumer() {
 				public void consume(Payload payload) {
-					_onNotification(payload);
+					try {
+						onNotification(new DataMap(payload.getString()));
+					} catch(Exception e) {
+						logger.severe(StringUtils.getStackTrace(e));
+					}
 				}
 			}, 10);			
 		}
 		if(c.containsKey("chatchannel")) {
 			f.registerConsumer(c.getString("chatchannel"), new Consumer() {
 				public void consume(Payload payload) {
-					_onChatMessage(payload);
+					try {
+						onChatMessage(new DataMap(payload.getString()));
+					} catch(Exception e) {
+						logger.severe(StringUtils.getStackTrace(e));
+					}
 				}
 			}, 10);			
 		}		
 	}
 
-	public StreamHandler redbackAuthenticatedStream(Session session, Payload payload) throws RedbackException {
-		return clientStream(session);
+	public StreamHandler redbackAcceptAuthenticatedStream(Session session, Payload payload) throws RedbackException {
+		return acceptClientStream(session, payload);
 	}
 
-	public StreamHandler redbackUnauthenticatedStream(Session session, Payload payload) throws RedbackException {
+	public StreamHandler redbackAcceptUnauthenticatedStream(Session session, Payload payload) throws RedbackException {
 		throw new RedbackException("All client streams need to be authenticated");
 	}
 	
@@ -53,36 +65,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 		return null;
 	}
 	
-	public int getStreamIdleTimeout() {
-		return 300000;
-	}
-	
-	public abstract StreamHandler clientStream(Session session) throws RedbackException;
-
-
-	private void _onOjectUpdate(Payload payload) {
-		try {
-			onObjectUpdate(new DataMap(payload.getString()));
-		} catch(Exception e) {
-			logger.severe(StringUtils.getStackTrace(e));
-		}
-	}
-	
-	private void _onNotification(Payload payload) {
-		try {
-			onNotification(new DataMap(payload.getString()));
-		} catch(Exception e) {
-			logger.severe(StringUtils.getStackTrace(e));
-		}
-	}
-	
-	private void _onChatMessage(Payload payload) {
-		try {
-			onChatMessage(new DataMap(payload.getString()));
-		} catch(Exception e) {
-			logger.severe(StringUtils.getStackTrace(e));
-		}
-	}
+	public abstract StreamHandler acceptClientStream(Session session, Payload payload) throws RedbackException;
 
 	protected abstract void onObjectUpdate(DataMap data) throws RedbackException;
 	

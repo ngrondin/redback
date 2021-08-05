@@ -2,6 +2,7 @@ package io.redback.services.impl;
 
 
 import io.firebus.Firebus;
+import io.firebus.Payload;
 import io.firebus.utils.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.clientmanager.ClientManager;
@@ -17,8 +18,12 @@ public class RedbackClientServer extends ClientServer {
 		clientManager = new ClientManager(n, c, f);
 	}
 	
-	public StreamHandler clientStream(Session session) throws RedbackException {
-		return clientManager.onClientConnect(session);
+	public StreamHandler acceptClientStream(Session session, Payload payload) throws RedbackException {
+		return clientManager.acceptClientConnection(session, payload);
+	}
+	
+	public int getStreamIdleTimeout() {
+		return 15000;
 	}
 
 	protected void onObjectUpdate(DataMap data) throws RedbackException {

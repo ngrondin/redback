@@ -12,15 +12,20 @@ import io.redback.services.common.StreamHandler;
 import io.redback.utils.StringUtils;
 
 public abstract class ClientStreamHandler extends StreamHandler {
+	protected long start = 0;
 	protected int heartbeatCount = 0;
 	protected long lastHeartbeat = 0;
-
+	protected long lastIn = 0;
+	protected long lastOut = 0;
+	
 	public ClientStreamHandler(Session s) {
 		super(s);
+		start = System.currentTimeMillis();
 	}
 
 	public void receiveData(Payload payload) throws RedbackException {
 		try {
+			lastIn = System.currentTimeMillis();
 			DataMap data = new DataMap(payload.getString());
 			String type = data.getString("type");
 			if(type != null) {
@@ -99,7 +104,40 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	public void sendClientData(DataMap data) {
 		this.sendStreamData(new Payload(data.toString()));
+		lastOut = System.currentTimeMillis();
 	}
+	
+	public void sendRequestResultData(String reqUid, DataMap data) {
+		DataMap respWrapper = new DataMap();
+		respWrapper.put("type", "serviceresponse");
+		respWrapper.put("requid", reqUid);
+		respWrapper.put("response", data);
+		sendClientData(respWrapper);
+	}
+	
+	public void sendRequestResultText(String reqUid, String text) {
+		DataMap respWrapper = new DataMap();
+		respWrapper.put("type", "serviceresponse");
+		respWrapper.put("requid", reqUid);
+		respWrapper.put("response", text);
+		sendClientData(respWrapper);
+	}
+	
+	public void sendRequestError(String reqUid, String error) { 
+		DataMap respWrapper = new DataMap();
+		respWrapper.put("type", "serviceerror");
+		respWrapper.put("requid", reqUid);
+		respWrapper.put("error", error);
+		sendClientData(respWrapper);					
+	}
+
+	public void sendRequestTimeout(String reqUid) { 
+		DataMap respWrapper = new DataMap();
+		respWrapper.put("type", "serviceerror");
+		respWrapper.put("requid", reqUid);
+		respWrapper.put("error", "service request timed out");
+		sendClientData(respWrapper);						
+	}	
 	
 	public void sendUploadNext(String uploaduid) {
 		DataMap msg = new DataMap();
@@ -156,4 +194,9 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	public abstract void receiveChat(DataMap data) throws RedbackException;
 	
 	public abstract void clientStreamClosed() throws RedbackException;
+	
+	protected String getStatString() {
+		long now = System.currentTimeMillis();
+		return "life: " + (now - start) + "ms  last_in: " + (now - lastIn) + "ms  last_out: " + (now - lastOut) + "ms  hb_count: " + heartbeatCount + "  last_hb: " + (now - lastHeartbeat) + "ms";
+	}
 }

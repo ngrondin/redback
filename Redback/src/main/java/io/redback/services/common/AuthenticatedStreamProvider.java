@@ -21,7 +21,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 		accessManagementClient = new AccessManagementClient(firebus, accessManagementService);
 	}
 
-	public StreamHandler redbackStream(Session session, Payload payload) throws RedbackException {
+	public StreamHandler redbackAcceptStream(Session session, Payload payload) throws RedbackException {
 		StreamHandler response = null;
 		String token = payload.metadata.get("token");
 		UserProfile up = null;
@@ -35,19 +35,19 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 		{			
 			session.setUserProfile(up);
 			session.setToken(token);
-			response = redbackAuthenticatedStream(session, payload);
+			response = redbackAcceptAuthenticatedStream(session, payload);
 		}
 		else
 		{
-			response = redbackUnauthenticatedStream(session, payload);
+			response = redbackAcceptUnauthenticatedStream(session, payload);
 		}
 		logger.finer("Authenticated stream request finish");
 		return response;
 	}
 
-	public abstract StreamHandler redbackAuthenticatedStream(Session session, Payload payload) throws RedbackException;
+	public abstract StreamHandler redbackAcceptAuthenticatedStream(Session session, Payload payload) throws RedbackException;
 
-	public abstract StreamHandler redbackUnauthenticatedStream(Session session, Payload payload) throws RedbackException;
+	public abstract StreamHandler redbackAcceptUnauthenticatedStream(Session session, Payload payload) throws RedbackException;
 
 	
 }
