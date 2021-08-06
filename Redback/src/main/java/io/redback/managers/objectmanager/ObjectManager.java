@@ -49,6 +49,7 @@ import io.redback.security.UserProfile;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
+import io.redback.utils.Cache;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
@@ -95,6 +96,7 @@ public class ObjectManager
 	protected String jwtIssuer;
 	protected String elevatedUserToken;	
 	protected UserProfile elevatedUserProfile;
+	protected Cache<DataMap> searchCache;
 
 	public ObjectManager(String n, DataMap config, Firebus fb)
 	{
@@ -135,6 +137,7 @@ public class ObjectManager
 		readRightsFilters = new HashMap<String, ExpressionMap>();
 		transactions = new HashMap<Long, List<RedbackObject>>();
 		jsManager.setGlobalVariables(globalVariables);
+		searchCache = new Cache<DataMap>(5000);
 	}
 	
 	public Firebus getFirebus()
@@ -996,68 +999,75 @@ public class ObjectManager
 	
 	protected DataMap generateSearchFilter(Session session, String objectName, String searchText) throws RedbackException
 	{
-		String regexExpr = "(?i)" + StringUtils.escapeRegex(searchText) + "";
-		DataMap filter = new DataMap();
-		DataList orList = new DataList();
-		ObjectConfig config = getObjectConfig(session, objectName);
-		orList.add(new DataMap("uid", new DataMap("$regex", regexExpr)));
-		Iterator<String> it = config.getAttributeNames().iterator();
-		while(it.hasNext())
-		{
-			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-			if(attributeConfig.getDBKey() != null)
+		String key = session.getUserProfile().getUsername() + ":" + objectName + ":" + searchText;
+		DataMap filter = searchCache.get(key);
+		if(filter == null) {
+			String regexExpr = "(?i)" + StringUtils.escapeRegex(searchText) + "";
+			filter = new DataMap();
+			DataList orList = new DataList();
+			ObjectConfig config = getObjectConfig(session, objectName);
+			orList.add(new DataMap("uid", new DataMap("$regex", regexExpr)));
+			Iterator<String> it = config.getAttributeNames().iterator();
+			while(it.hasNext())
 			{
-				if(attributeConfig.canBeSearched())
-				{
-					DataMap orTerm = new DataMap();
-					orTerm.put(attributeConfig.getName(), new DataMap("$regex", regexExpr));
-					orList.add(orTerm);
-				}
-				if(attributeConfig.hasRelatedObject())
+				AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+				if(attributeConfig.getDBKey() != null && attributeConfig.canBeSearched())
 				{
 					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-					String relatedObejctName = roc.getObjectName();
-					ObjectConfig relatedConfig = getObjectConfig(session, relatedObejctName);
-					if(relatedConfig != null)
+					if(roc == null)
 					{
-						DataList relatedOrList = new DataList();
-						Iterator<String> it2 = relatedConfig.getAttributeNames().iterator();
-						while(it2.hasNext())
+						DataMap orTerm = new DataMap();
+						orTerm.put(attributeConfig.getName(), new DataMap("$regex", regexExpr));
+						orList.add(orTerm);
+					}
+					else
+					{
+						String relatedObjectName = roc.getObjectName();
+						ObjectConfig relatedConfig = getObjectConfig(session, relatedObjectName);
+						if(relatedConfig != null)
 						{
-							AttributeConfig relatedAttributeConfig = relatedConfig.getAttributeConfig(it2.next());
-							if(relatedAttributeConfig.getDBKey() != null  &&  !relatedAttributeConfig.hasRelatedObject() && relatedAttributeConfig.canBeSearched())
+							DataList relatedOrList = new DataList();
+							Iterator<String> it2 = relatedConfig.getAttributeNames().iterator();
+							while(it2.hasNext())
 							{
-								DataMap orTerm = new DataMap();
-								orTerm.put(relatedAttributeConfig.getName(), new DataMap("$regex", regexExpr));
-								relatedOrList.add(orTerm);
-							}
-						}
-						if(relatedOrList.size() > 0)
-						{
-							DataMap relatedFilter = new DataMap("$or", relatedOrList);
-							List<RedbackObject> result = listObjects(session, relatedObejctName, relatedFilter, null, null, false, 0, 1000);
-							if(result.size() > 0)
-							{
-								DataMap orTerm = new DataMap();
-								DataList inList = new DataList();
-								for(int k = 0; k < result.size(); k++)
+								AttributeConfig relatedAttributeConfig = relatedConfig.getAttributeConfig(it2.next());
+								if(relatedAttributeConfig.getDBKey() != null  &&  !relatedAttributeConfig.hasRelatedObject() && relatedAttributeConfig.canBeSearched())
 								{
-									RedbackObject resultObject = result.get(k);
-									Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
-									inList.add(resultObjectLinkValue.getObject());
+									DataMap orTerm = new DataMap();
+									orTerm.put(relatedAttributeConfig.getName(), new DataMap("$regex", regexExpr));
+									relatedOrList.add(orTerm);
 								}
-								orTerm.put(attributeConfig.getName(), new DataMap("$in", inList));
-								orList.add(orTerm);
+							}
+							if(relatedOrList.size() > 0)
+							{
+								DataMap relatedFilter = new DataMap("$or", relatedOrList);
+								List<RedbackObject> result = listObjects(session, relatedObjectName, relatedFilter, null, null, false, 0, 1000);
+								if(result.size() > 0)
+								{
+									DataMap orTerm = new DataMap();
+									DataList inList = new DataList();
+									for(int k = 0; k < result.size(); k++)
+									{
+										RedbackObject resultObject = result.get(k);
+										Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
+										inList.add(resultObjectLinkValue.getObject());
+									}
+									orTerm.put(attributeConfig.getName(), new DataMap("$in", inList));
+									orList.add(orTerm);
+								}
 							}
 						}
 					}
 				}
 			}
+			if(orList.size() == 1)
+				filter = orList.getObject(0);
+			if(orList.size() > 1)
+				filter.put("$or", orList);
+			searchCache.put(key, filter);
+		} else {
+			logger.info("Search Filter already found");
 		}
-		if(orList.size() == 1)
-			filter = orList.getObject(0);
-		if(orList.size() > 1)
-			filter.put("$or", orList);
 		return filter;
 	}
 
