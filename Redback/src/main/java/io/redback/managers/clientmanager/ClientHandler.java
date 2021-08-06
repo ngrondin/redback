@@ -22,18 +22,23 @@ public class ClientHandler extends ClientStreamHandler {
 	protected ClientManager clientManager;
 	protected Map<String, StreamEndpoint> uploads;
 	protected String deviceId;
+	protected String gatewayConnectionId;
 	
-	public ClientHandler(ClientManager cm, Session s) {
+	public ClientHandler(ClientManager cm, Session s, Payload payload) {
 		super(s);
 		clientManager = cm;
 		session = s;
 		uploads = new HashMap<String, StreamEndpoint>();
+		String gatewayNode = payload.metadata.get("streamgwnode");
+		gatewayConnectionId = payload.metadata.get("streamgwid");
+		logger.info("Client connected for " + session.getUserProfile().getUsername() + " (client_node: " + clientManager.firebus.getNodeId() + (gatewayNode != null ? " gateway_node: " + gatewayNode : "") + " gateway_conn_id: " + gatewayConnectionId + ")");
+
 	}
 	
 	public void clientStreamClosed() throws RedbackException {
 		try {
 			clientManager.onClientLeave(this);
-			logger.info("Client disconnected for " + session.getUserProfile().getUsername() + " (" + getStatString() + ")");
+			logger.info("Client disconnected for " + session.getUserProfile().getUsername() + " (" + " gateway_conn_id: " + gatewayConnectionId + getStatString() + ")");
 		} catch(Exception e) {
 			logger.severe("Error closing client handler : " + e.getMessage());
 		}

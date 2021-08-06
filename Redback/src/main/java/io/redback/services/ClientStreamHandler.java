@@ -197,6 +197,6 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	protected String getStatString() {
 		long now = System.currentTimeMillis();
-		return "life: " + (now - start) + "ms  last_in: " + (now - lastIn) + "ms  last_out: " + (now - lastOut) + "ms  hb_count: " + heartbeatCount + "  last_hb: " + (now - lastHeartbeat) + "ms";
+		return "life: " + (now - start) + "ms  last_in: " + (lastIn > 0 ? (now - lastIn) + "ms" : "-") + "  last_out: " + (lastOut > 0 ? (now - lastOut) + "ms" : "-") + "  hb_count: " + heartbeatCount + "  last_hb: " + (now - lastHeartbeat) + "ms";
 	}
 }

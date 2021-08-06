@@ -3,7 +3,6 @@ package io.redback.managers.clientmanager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -16,8 +15,6 @@ import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
 
 public class ClientManager {
-	private Logger logger = Logger.getLogger("io.redback");
-	
 	protected String name;
 	protected DataMap config;
 	protected Firebus firebus;
@@ -64,7 +61,7 @@ public class ClientManager {
 	}
 	
 	public ClientHandler acceptClientConnection(Session session, Payload payload) throws RedbackException {
-		ClientHandler ch = new ClientHandler(this, session);
+		ClientHandler ch = new ClientHandler(this, session, payload);
 		clientHandlers.add(ch);
 		if(userCollection != null && dataClient != null) {
 			DataMap key = new DataMap("_id", session.getUserProfile().getUsername());
@@ -72,9 +69,6 @@ public class ClientManager {
 			data.put("lastlogin", new Date());
 			dataClient.putData(userCollection.getName(), userCollection.convertObjectToSpecific(key), userCollection.convertObjectToSpecific(data));
 		}
-		String gatewayNode = payload.metadata.get("streamgwnode");
-		String gatewayId = payload.metadata.get("streamgwid");
-		logger.info("Client connected for " + session.getUserProfile().getUsername() + " (client node: " + this.firebus.getNodeId() + (gatewayNode != null ? " gateway node: " + gatewayNode : "") + " gateway id: " + gatewayId + ")");
 		return ch;
 	}
 	
