@@ -19,7 +19,7 @@ public class ProcessClientJSWrapper implements ProxyObject
 	protected ProcessClient processClient;
 	protected Session session;
 	protected String domainLock;
-	protected String[] members = {"initiate", "getAssignment", "actionProcess", "interruptProcess", "interruptProcesses"};
+	protected String[] members = {"initiate", "getAssignment", "actionProcess", "continueProcess", "interruptProcess", "interruptProcesses"};
 	
 	public ProcessClientJSWrapper(ProcessClient pc, Session s)
 	{
@@ -53,7 +53,22 @@ public class ProcessClientJSWrapper implements ProxyObject
 					}
 					return null;
 				}
-			};			
+			};	
+		} else if(key.equals("continueProcess")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String pid = arguments[0].asString();
+					try
+					{
+						processClient.continueProcess(session, pid);
+					}
+					catch(Exception e) 
+					{
+						throw new RuntimeException("Error continuing process", e);						
+					}	
+					return null;
+				}
+			};				
 		} else if(key.equals("getAssignment")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {

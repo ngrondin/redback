@@ -212,8 +212,13 @@ public class ProcessManager
 			try 
 			{
 				DataMap response = dataClient.getData(piCollectionConfig.getName(), new DataMap(piCollectionConfig.getField("_id"), pid));
-				pi = new ProcessInstance(actionner, this, piCollectionConfig.convertObjectToCanonical(response.getObject("result.0")));
-				putInCurrentTransaction(pi);
+				DataList result = response.getList("result");
+				if(result.size() > 0) {
+					pi = new ProcessInstance(actionner, this, piCollectionConfig.convertObjectToCanonical(result.getObject(0)));
+					putInCurrentTransaction(pi);
+				} else {
+					throw new RedbackInvalidRequestException("Process instance does not exist");
+				}
 			} 
 			catch (Exception e) 
 			{
@@ -293,7 +298,7 @@ public class ProcessManager
 		return pi;
 	}
 	
-	public void restartProcess(Actionner actionner, String pid) throws RedbackException 
+	public void continueProcess(Actionner actionner, String pid) throws RedbackException 
 	{
 		ProcessInstance pi = getProcessInstance(actionner, pid);
 		if(pi != null)

@@ -23,6 +23,14 @@ public class ProcessClient extends Client
 		request(session, request);
 	}
 	
+	public void continueProcess(Session session, String pid) throws RedbackException
+	{
+		DataMap request = new DataMap();
+		request.put("action", "continueprocess");
+		request.put("pid", pid);
+		request(session, request);
+	}
+	
 	public void actionProcess(Session session, String pid, String action) throws RedbackException
 	{
 		DataMap request = new DataMap();

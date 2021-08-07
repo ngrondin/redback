@@ -42,11 +42,11 @@ public class RedbackProcessServer extends ProcessServer
 		return pi;
 	}
 	
-	protected void restartProcess(Session session, String pid) throws RedbackException
+	protected void continueProcess(Session session, String pid) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
 		processManager.initiateCurrentTransaction();
-		processManager.restartProcess(actionner, pid);
+		processManager.continueProcess(actionner, pid);
 		processManager.commitCurrentTransaction();
 	}
 	

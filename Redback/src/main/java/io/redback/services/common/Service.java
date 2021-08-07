@@ -50,7 +50,7 @@ public abstract class Service
 		if(errorCode == 0 || errorCode >= 500)
 			logger.severe(StringUtils.getStackTrace(e));
 		else 
-			logger.info("Invalid request: " + StringUtils.rollUpExceptions(e));
+			logger.warning("Invalid request: " + StringUtils.rollUpExceptions(e));
 		return new FunctionErrorException(msg, e, errorCode);
 	}
 
