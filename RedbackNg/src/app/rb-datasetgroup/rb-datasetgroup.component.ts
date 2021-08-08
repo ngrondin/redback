@@ -96,11 +96,13 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
     this.publishEvent('groupselect');
   }
 
-  public filterSort(event: any) {
+  public filterSort(event: any) : boolean {
+    let fetched = true;
     for(let id of Object.keys(this.datasets)) {
       let ds: RbDatasetComponent = this.datasets[id];
-      ds.filterSort(event);
+      fetched = fetched && ds.filterSort(event);
     }
+    return fetched;
   }
 
   public groupMemberEvent(name: string, event: string) {

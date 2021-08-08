@@ -194,7 +194,8 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     }
   }
 
-  filterDataset() {
+  filterDataset() : boolean {
+    let fetched = true;
     for(let cfg of this.activeSeries) {
       let filter = {};
       filter = this.filterService.mergeFilters(filter, this.userFilter);
@@ -204,11 +205,12 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       }
       let event = {filter: filter, search: this.userSearchString};
       if(this.datasetgroup != null) {
-        this.datasetgroup.datasets[cfg.dataset].filterSort(event);
+        fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(event);
       } else {
-        this.dataset.filterSort(event);
+        fetched = fetched && this.dataset.filterSort(event);
       }
     }
+    return fetched;
   }
 
   calc() {
@@ -276,12 +278,14 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     }
   }
 
-  filterSort(event: any) {
+  filterSort(event: any) : boolean {
     if(('filter' in event && ValueComparator.notEqual(event.filter, this.userFilter))
      || ('search' in event && event.search != this.userSearchString)) {
       if('filter' in event) this.userFilter = event.filter;
       if('search' in event) this.userSearchString = event.search;
-      this.filterDataset();
+      return this.filterDataset();
+    } else {
+      return false;
     }
   }
 

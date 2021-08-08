@@ -9,8 +9,8 @@ import { Subscription } from 'rxjs';
 })
 export class RbMenuComponent implements OnInit {
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
-  _type: string;
-  _mode: string;
+  _type: string = 'full';
+  _mode: string = 'large';
   content: any;
   subscription: Subscription;
 

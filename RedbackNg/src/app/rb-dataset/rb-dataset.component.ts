@@ -117,7 +117,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public get canLoadData() : boolean {
     return this.active 
       && (this.master == null || (this.master != null && this.relatedObject != null))
-      && (this.requiresuserfilter == false || this.userFilter != null);
+      && (this.requiresuserfilter == false || this.userFilter != null)
+      && this.fetchThreads == 0;
   }
 
   getObservable() : Observable<string>  {
@@ -126,7 +127,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     });
   }
 
-  public refreshData() {
+  public refreshData() : boolean {
     if(this.canLoadData) {
       this.clear();
       this.calcFilter();
@@ -137,8 +138,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         this.fetchNextPage();
       }
       this.refreshOnActivate = false;
+      return true;
     } else {
       this.refreshOnActivate = true;
+      return false;
     }
   }
 
@@ -209,7 +212,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     }
     if(this.fetchThreads == 0) {
       this.firstLoad = false;
-      //console.log("dataset " + this.object + " finished loading (" + this._list.length + ")");
       this.publishEvent('load');
       if(this._list.length == 0) {
         this._selectedObject = null;
@@ -255,18 +257,20 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.publishEvent('select');
   }
 
-  public filterSort(event: any) {
+  public filterSort(event: any) : boolean {
+    let fetched = false;
     if(('filter' in event && ValueComparator.notEqual(event.filter, this.userFilter))
      || ('sort' in event && ValueComparator.notEqual(event.sort, this.userSort))
      || ('search' in event && event.search != this.searchString)) {
       if('filter' in event) this.userFilter = event.filter;
       if('sort' in event) this.userSort = event.sort;
       if('search' in event) this.searchString = event.search;
-      this.refreshData();
+      fetched = this.refreshData();
       if(this.dataTarget != null && this.ignoretarget == false) {
         this.dataTarget.filter = event.filter;
       }
     }
+    return fetched;
   } 
 
   public create() {
