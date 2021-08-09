@@ -3,6 +3,7 @@ package io.redback.managers.clientmanager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -14,28 +15,33 @@ import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
 
-public class ClientManager {
+public class ClientManager extends Thread {
+	private Logger logger = Logger.getLogger("io.redback");
 	protected String name;
 	protected DataMap config;
 	protected Firebus firebus;
 	protected SubscriptionManager subsManager;
-	protected List<ClientHandler> clientHandlers;
 	protected FileClient fileClient;
 	protected DataClient dataClient;
 	protected CollectionConfig deviceCollection;
 	protected CollectionConfig userCollection;
+	protected List<ClientHandler> clientHandlers;
+	protected boolean quit;
 
 	
 	public ClientManager(String n, DataMap c, Firebus f) {
 		name = n;
 		config = c;
 		firebus = f;
+		quit = false;
 		subsManager = new SubscriptionManager();
 		clientHandlers = new ArrayList<ClientHandler>();
 		if(config.containsKey("fileservice")) fileClient = new FileClient(firebus, config.getString("fileservice"));
 		if(config.containsKey("dataservice")) dataClient = new DataClient(firebus, config.getString("dataservice")); 
 		deviceCollection = new CollectionConfig(config.getObject("devicecollection"), "rbcs_device");
 		userCollection = new CollectionConfig(config.getObject("usercollection"), "rbcs_user");
+		setName("rbClientHB");
+		start();
 	}
 
 	public FileClient getFileClient() throws RedbackException {
@@ -62,7 +68,9 @@ public class ClientManager {
 	
 	public ClientHandler acceptClientConnection(Session session, Payload payload) throws RedbackException {
 		ClientHandler ch = new ClientHandler(this, session, payload);
-		clientHandlers.add(ch);
+		synchronized(clientHandlers) {
+			clientHandlers.add(ch);
+		}
 		if(userCollection != null && dataClient != null) {
 			DataMap key = new DataMap("_id", session.getUserProfile().getUsername());
 			DataMap data = new DataMap();
@@ -74,7 +82,9 @@ public class ClientManager {
 	
 	protected void onClientLeave(ClientHandler clientHandler) throws RedbackException {
 		subsManager.unsubscribe(clientHandler);
-		clientHandlers.remove(clientHandler);
+		synchronized(clientHandlers) {
+			clientHandlers.remove(clientHandler);
+		}
 		if(deviceCollection != null && dataClient != null && clientHandler.deviceId != null) {
 			DataMap key = new DataMap("_id", clientHandler.deviceId);
 			DataMap data = new DataMap();
@@ -127,13 +137,33 @@ public class ClientManager {
 	
 	public void onNotification(DataMap data) throws RedbackException {
 		DataList to = data.getList("to"); 
-		for(ClientHandler ch: clientHandlers)
-			for(int i = 0; i < to.size(); i++) 
-				if(ch.getSession().getUserProfile().getUsername().equals(to.getString(i)))
-					ch.receiveNotification(data);
+		List<ClientHandler> subscribers = new ArrayList<ClientHandler>();
+		synchronized(clientHandlers) {
+			for(ClientHandler ch: clientHandlers)
+				for(int i = 0; i < to.size(); i++) 
+					if(ch.getSession().getUserProfile().getUsername().equals(to.getString(i)))
+						subscribers.add(ch);			
+		}
+		for(ClientHandler ch : subscribers) {
+			ch.receiveNotification(data);
+		}		
 	}
 	
 	public void onChatMessage(DataMap data) throws RedbackException {
 		
+	}
+	
+	public void run() {
+		while(!quit) {
+			try {
+				synchronized(clientHandlers) {
+					for(ClientHandler ch: clientHandlers)
+						ch.sendClientData(new DataMap("type", "heartbeat"));
+				}
+				Thread.sleep(10000);
+			} catch(Exception e) {
+				logger.severe("Error during client service heartbeat: " + e.getMessage());
+			}
+		}
 	}
 }
