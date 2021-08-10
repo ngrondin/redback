@@ -136,6 +136,8 @@ export class ClientWSService {
           let done = upload.receiveCtl(msg);
           if(done) delete this.uploads[msg.uploaduid];
         }
+      } else if(msg.type == 'serverkeepalive') {
+        this.websocket.next({type:"clientisalive"});
       } else if(msg.type == 'chatmessage') {
         this.chatObservers.forEach((observer) => observer.next(msg.message))
       } else if(msg.type == 'clientpong') {

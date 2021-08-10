@@ -158,7 +158,7 @@ public class ClientManager extends Thread {
 			try {
 				synchronized(clientHandlers) {
 					for(ClientHandler ch: clientHandlers)
-						ch.sendClientData(new DataMap("type", "heartbeat"));
+						ch.sendClientData(new DataMap("type", "serverkeepalive"));
 				}
 				Thread.sleep(10000);
 			} catch(Exception e) {
