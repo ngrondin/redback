@@ -38,7 +38,7 @@ public class ClientHandler extends ClientStreamHandler {
 	public void clientStreamClosed() throws RedbackException {
 		try {
 			clientManager.onClientLeave(this);
-			logger.info("Client disconnected for " + session.getUserProfile().getUsername() + " (" + "gateway_conn_id: " + gatewayConnectionId + getStatString() + ")");
+			logger.info("Client disconnected for " + session.getUserProfile().getUsername() + " (" + "gateway_conn_id: " + gatewayConnectionId + " " + getStatString() + ")");
 		} catch(Exception e) {
 			logger.severe("Error closing client handler : " + e.getMessage());
 		}
