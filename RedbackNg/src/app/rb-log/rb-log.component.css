@@ -45,19 +45,23 @@
 }
 
 .rb-log-name {
-    display: flex;
+    display: inline-block;
     height:24px;
     color: #aaa;
     font-size: 0.8rem;
     flex: 1 1 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .rb-log-date {
-    display: flex;
+    display: inline-block;
     height:24px;
     color: #aaa;
     font-size: 0.8rem;
     flex: 0 0 auto;
+    margin-left: 10px;
 }
 
 .rb-log-entry {

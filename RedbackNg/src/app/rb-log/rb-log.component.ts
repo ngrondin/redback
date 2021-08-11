@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { Formatter } from 'app/helpers';
 import { ActionService } from 'app/services/action.service';
 
 @Component({
@@ -69,7 +70,7 @@ export class RbLogComponent extends RbDataObserverComponent {
     if(str == null || (str != null && str.length == 0)) {
       str = "Unknown date";
     } else {
-      str = new Date(str).toLocaleString();
+      str = Formatter.formatDateTime(new Date(str));
     }
     return str;
   }
@@ -114,8 +115,9 @@ export class RbLogComponent extends RbDataObserverComponent {
     } else if(this.editable == false || this.editable == 'false') {
       this.isEditable = false;
     } else if(typeof this.editable == 'string') {
+        let object = this.dataset != null ? this.dataset.selectedObject : null;
         let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
-        if(!(this.editable.indexOf("relatedObject.") > -1 && relatedObject == null)) {
+        if(!(this.editable.indexOf("relatedObject.") > -1 && relatedObject == null) && !(this.editable.indexOf("object.") > -1 && object == null)) {
             this.isEditable = eval(this.editable);            
         } else {
             this.isEditable = false;

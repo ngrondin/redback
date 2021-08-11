@@ -93,6 +93,13 @@ export class Formatter {
         }
     }
 
+    static formatDateTime(value: Date) : string {
+        let str = Formatter.formatDate(value);
+        if(str != "") str = str + " ";
+        str = str + Formatter.formatTime(value); 
+        return str;
+    }
+
     static formatDate(value: Date) : string {
         let str = "";
         if(value != null) {
