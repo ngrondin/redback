@@ -4,6 +4,7 @@ package io.redback.services;
 import org.apache.commons.codec.binary.Base64;
 
 import io.firebus.Payload;
+import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.exceptions.RedbackException;
@@ -123,11 +124,12 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		sendClientData(respWrapper);
 	}
 	
-	public void sendRequestError(String reqUid, String error) { 
+	public void sendRequestError(String reqUid, FunctionErrorException e) { 
 		DataMap respWrapper = new DataMap();
 		respWrapper.put("type", "serviceerror");
 		respWrapper.put("requid", reqUid);
-		respWrapper.put("error", error);
+		respWrapper.put("error", StringUtils.rollUpExceptions(e));
+		respWrapper.put("code", e.getErrorCode());
 		sendClientData(respWrapper);					
 	}
 

@@ -40,7 +40,7 @@ export class NotificationService {
     if(state == true) {
       if(this.lastDisconnected != null) {
         var timeSinceLastDisonnected = (new Date()).getTime() - this.lastDisconnected.getTime();
-        if(timeSinceLastDisonnected > 60000) {
+        if(timeSinceLastDisonnected > 5000) {
           this.load();
         }
       }
@@ -56,6 +56,7 @@ export class NotificationService {
   }
 
   public load() {
+    console.log("Loading notifications");
     this.notifications = [];
     this.page = 0;
     this.fetchNextPage();

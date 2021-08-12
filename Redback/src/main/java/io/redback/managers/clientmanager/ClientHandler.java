@@ -84,7 +84,7 @@ public class ClientHandler extends ClientStreamHandler {
 				}
 
 				public void error(FunctionErrorException e) { 
-					sendRequestError(reqUid, StringUtils.rollUpExceptions(e));
+					sendRequestError(reqUid, e);
 				}
 
 				public void timeout() {
