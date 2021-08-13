@@ -58,7 +58,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   getUserForItem(object: RbObject) : string {
-    let str: string = object.data[this.userattribute];
+    let str: string = object.get(this.userattribute); 
     if(str == null || (str != null && str.length == 0)) {
       str = "Unknown user";
     }
@@ -66,7 +66,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   getDateForItem(object: RbObject) : string {
-    let str : string = object.data[this.dateattribute];
+    let str : string = object.get(this.dateattribute);
     if(str == null || (str != null && str.length == 0)) {
       str = "Unknown date";
     } else {
@@ -76,7 +76,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   getEntryForItem(object: RbObject) : string {
-    let str : string = object.data[this.entryattribute];
+    let str : string = object.get(this.entryattribute);
     if(str == null) {
       str = "";
     } else {

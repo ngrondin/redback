@@ -9,8 +9,10 @@ import { Observer } from 'rxjs';
 export class DragService {
   dragObservers: Observer<any>[] = [];
   isDragging: boolean = false;
-  sourceElement: ElementRef;
+  draggingElement: ElementRef;
+  innerHTML: String;
   object: RbObject;
+  droppedOnElement: ElementRef;
   mouseOrigin: XY;
   offset: XY;
   position: XY;
@@ -19,7 +21,7 @@ export class DragService {
   constructor() { }
 
   public prepareDrag(el: ElementRef, o: RbObject, event: any) {
-    this.sourceElement = el;
+    this.draggingElement = el;
     this.object = o;
     this.mouseOrigin = new XY(event.clientX, event.clientY);
     this.offset = new XY(event.offsetX, event.offsetY);
@@ -27,35 +29,46 @@ export class DragService {
     this.size = new XY(el.nativeElement.clientWidth, el.nativeElement.clientHeight); 
   }
 
+  public startDragging() {
+    if(this.isDragging == false && this.object != null) {
+      this.isDragging = true;
+      this.draggingElement.nativeElement.style.opacity = "15%";
+      this.innerHTML = "";
+      this.publishEvent({type:"start", object: this.object});
+    }
+  }
+
   public move(event: any) {
     if(this.object != null) {
       this.position = new XY(event.clientX - this.offset.x, event.clientY - this.offset.y);
       if(this.isDragging == false && this.object != null && (Math.abs(event.clientX - this.mouseOrigin.x) > 5 || Math.abs(event.clientY - this.mouseOrigin.y) > 5)) {
-        this.isDragging = true;
-        this.sourceElement.nativeElement.style.visibility = "hidden";
-        this.publishEvent({type:"start", object: this.object});
+        this.startDragging();
       }
     }
   }
 
   public drop(el: ElementRef) {
-    
+    if(this.isDragging == true) {
+      this.droppedOnElement = el;
+    }
   }
 
   public endDrag() {
+    if(this.isDragging) {
+      this.isDragging = false;
+      if(this.draggingElement != null && this.draggingElement.nativeElement != null) {
+        this.draggingElement.nativeElement.style.opacity = "";
+      }
+      this.publishEvent({type:"end"});
+    }
+    this.droppedOnElement = null;
+    this.draggingElement = null;
+    this.innerHTML = null;
     this.object = null;
     this.mouseOrigin = null;
     this.offset = null;
     this.position = null;
-    this.size = null;
-    if(this.isDragging) {
-      this.isDragging = false;
-      if(this.sourceElement != null && this.sourceElement.nativeElement != null) {
-        this.sourceElement.nativeElement.style.visibility = "";
-      }
-      this.publishEvent({type:"end"});
-    }
-    this.sourceElement = null;
+    this.size = null;    
   }
 
   getObservable() : Observable<any>  {

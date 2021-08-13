@@ -58,8 +58,12 @@ export class RbObject {
         if(isChanged) {
             this.changed = [];
             this.lastUpdated = (new Date()).getTime();
-            this.adviseSetsOfChange();
+            this._adviseSetsOfChange();
         }
+    }
+
+    refresh() {
+        this.dataService.getServerObject(this.objectname, this.uid).subscribe((obj) => {});
     }
 
     get(attr: string) : any {
@@ -98,27 +102,25 @@ export class RbObject {
 
     setValue(attribute: string, value: any) {
         let ret = this._setValueAndRelated(attribute, value, null);
-        if(ret == true && this.dataService.saveImmediatly) {
-            this.dataService.updateObjectToServer(this);
-        }
+        this._afterSetValue(ret);
     }
 
     setValues(map: any) {
-        let ret: boolean = false;
-        for(let key of Object.keys(map)) {
-            ret = this._setValueAndRelated(key, map[key], null) || ret;
-        }
-        if(ret == true && this.dataService.saveImmediatly) {
-            this.dataService.updateObjectToServer(this);
-        }
+        this.setValuesAndRelated(map, null);
     }
 
     setValueAndRelated(attribute: string, value: any, related: RbObject) {
         let ret = this._setValueAndRelated(attribute, value, related);
-        if(ret == true && this.dataService.saveImmediatly) {
-            this.dataService.updateObjectToServer(this);
-        }
+        this._afterSetValue(ret);        
     }
+
+    setValuesAndRelated(valueMap: any, relatedMap: any) {
+        let ret: boolean = false;
+        for(let key of Object.keys(valueMap)) {
+            ret = this._setValueAndRelated(key, valueMap[key], relatedMap[key]) || ret;
+        }
+        this._afterSetValue(ret);
+    }    
 
     _setValueAndRelated(attribute: string, value: any, related: RbObject) : boolean {
         if(attribute == 'uid') {
@@ -129,13 +131,27 @@ export class RbObject {
         } else if(this.validation[attribute].editable == true) {
             this.data[attribute] = value;
             this.related[attribute] = related;
-            this.changed.push(attribute);
-            this.lastUpdated = (new Date()).getTime();
-            this.adviseSetsOfChange();
+            if(this.changed.indexOf(attribute) == -1) this.changed.push(attribute);
             return true;
         }
         return false;
     }
+
+    _afterSetValue(updated: boolean) {
+        if(updated) {
+            this.lastUpdated = (new Date()).getTime();
+            this._adviseSetsOfChange();
+            if(this.dataService.saveImmediatly) {
+                this.dataService.updateObjectToServer(this);
+            }            
+        }
+    }
+
+    _adviseSetsOfChange() {
+        for(let set of this.datasets) {
+            set.objectUpdated(this);
+        }
+    }    
 
     simplify() : string {
         let str: string = "";
@@ -164,15 +180,6 @@ export class RbObject {
         }
     }
 
-    adviseSetsOfChange() {
-        for(let set of this.datasets) {
-            set.objectUpdated(this);
-        }
-    }
-
-    refresh() {
-        this.dataService.getServerObject(this.objectname, this.uid).subscribe((obj) => {});
-    }
 }
 
 

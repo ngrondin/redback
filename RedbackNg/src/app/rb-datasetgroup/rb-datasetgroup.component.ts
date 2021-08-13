@@ -7,8 +7,12 @@ import { Observable, Subscription } from 'rxjs';
 import { Observer } from 'rxjs';
 import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 
-type DataSetMap = {
+export type DatasetMap = {
   [key: string]: RbDatasetComponent;
+};
+
+export type DatasetListMap = {
+  [key: string]: RbObject[];
 };
 
 @Component({
@@ -17,7 +21,7 @@ type DataSetMap = {
   styleUrls: ['./rb-datasetgroup.component.css']
 })
 export class RbDatasetGroupComponent extends RbContainerComponent implements RbSearchTarget {
-  datasets: DataSetMap = {};
+  datasets: DatasetMap = {};
   _selectedObject: RbObject;
   private observers: Observer<string>[] = [];
 
@@ -39,8 +43,8 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
   onActivationEvent(state: any) {
   }
 
-  public get lists() : any {
-    let l = {};
+  public get lists() : DatasetListMap {
+    let l: DatasetListMap = {};
     for(let key of Object.keys(this.datasets)) {
       l[key] = this.datasets[key].list;
     }

@@ -4,9 +4,11 @@ import { Input } from "@angular/core";
 import { RbObject } from "app/datamodel";
 import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
-import { RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
+import { DatasetListMap, DatasetMap, RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
 import { Subscription } from "rxjs";
 import { RbComponent } from "./rb-component";
+
+
 
 @Component({template: ''})
 export abstract class RbDataObserverComponent extends RbComponent {
@@ -73,7 +75,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
         return this.dataset != null ? this.dataset.list : null;
     }
 
-    get lists(): any {
+    get lists(): DatasetListMap {
         return this.datasetgroup != null ? this.datasetgroup.lists : null;
     }
 

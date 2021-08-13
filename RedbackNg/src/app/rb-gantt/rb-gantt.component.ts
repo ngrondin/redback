@@ -43,6 +43,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   public getSizeForObjectCallback: Function;
   dragSubscription: Subscription;
+  laneFilterObject: RbObject;
   
   constructor(
     private modalService: ModalService,
@@ -81,8 +82,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onDragEvent(event: any) {
-    if(this.lanesConfig.dragfilter != null) {
-      this.redraw();
+    if(this.lanesConfig.dragfilter != null && this.doDragFilter) {
+      if(event.type == 'start' && this.containsObject(event.object)) {
+        this.laneFilterObject = event.object;
+        this.redraw();
+      } else if(event.type == 'end' && this.laneFilterObject != null) {
+        this.laneFilterObject = null;
+        this.redraw();
+      }
     }
   }
 
@@ -171,6 +178,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   calc() {
+    //console.log("Gantt calc - " + (new Date()).getTime());
     this.calcParams();
     this.ganttData = this.getLanes();
     this.dayMarks = this.getDayMarks();
@@ -195,8 +203,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   private getLanes() {
     let lanes : GanttLane[] = [];
     let laneFilter: any = null;
-    if(this.doDragFilter && this.dragService.object != null && this.lanesConfig.dragfilter != null) {
-      laneFilter =  this.filterService.resolveFilter(this.lanesConfig.dragfilter, this.dragService.object, null, null);
+    if(this.doDragFilter && this.laneFilterObject != null && this.lanesConfig.dragfilter != null) {
+      laneFilter =  this.filterService.resolveFilter(this.lanesConfig.dragfilter, this.laneFilterObject, null, null);
     };
     let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
     for(let obj of list) {
@@ -373,6 +381,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   public dropped(event: any, lane: GanttLane, ignoreTime: boolean = false) {
     let update: any = {};
+    let related: any = {}
     let object: RbObject = event.object;
     let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
 
@@ -399,15 +408,18 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let previousLaneId = object.get(config.laneAttribute);
     if(previousLaneId != lane.id) {
       update[config.laneAttribute] = lane.id;
+      related[config.laneAttribute] = lane.object;
     }
     
     if(Object.keys(update).length > 0) {
-      event.object.setValues(update);
+      event.object.setValuesAndRelated(update, related);
     }
 
     if(this.datasetgroup.datasets[config.dataset].list.indexOf(object) == -1) {
       this.datasetgroup.datasets[config.dataset].addObjectAndSelect(object);
     }
+
+    this.calc();
   }
 
   public scroll(event) {

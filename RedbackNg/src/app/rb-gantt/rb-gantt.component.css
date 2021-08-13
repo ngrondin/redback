@@ -149,6 +149,10 @@
     z-index: 30;
 }
 
+.rb-gantt-spreadbox-editable {
+    cursor: grab;
+}
+
 .rb-gantt-spreadbackground {
     height: 2.5vw;
     z-index: 10;

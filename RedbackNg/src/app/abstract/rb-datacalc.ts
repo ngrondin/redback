@@ -49,17 +49,20 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     
     onDatasetEvent(event: any) {
         if(this.active) {
+            //console.log(event + " " + this.id + "  " + (new Date()).getTime());
             this.redraw()
         }
     }
 
     redraw() {
+        //console.log("redraw " + this.id + " " + (!this.recalcPlanned) + " - " + (new Date()).getTime());
         if(this.recalcPlanned == false) {
           this.recalcPlanned = true;
           setTimeout(() => {
+              //console.log("redraw after timeout - " + (new Date()).getTime());
               this.calc();
               this.recalcPlanned = false;
-          }, 250);
+          }, 50);
         }
       }
 
@@ -83,9 +86,9 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
 
     getSeriesConfigForObject(object: RbObject) : T {
-        if(this.lists != null) {
+        if(this.datasetgroup != null) {
             for(let cfg of this.seriesConfigs) {
-                if(this.lists[cfg.dataset].object == object.objectname) {
+                if(this.datasetgroup.datasets[cfg.dataset].objectname == object.objectname) {
                     return cfg;
                 }
             }
@@ -93,6 +96,24 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             return this.seriesConfigs[0];
         }
         return null;
+    }
+
+    containsObject(object: RbObject) : boolean {
+        let ret: boolean = false;
+        if(this.datasetgroup != null) {
+            for(let cfg of this.seriesConfigs) {
+                if(this.datasetgroup.datasets[cfg.dataset].objectname == object.objectname) {
+                    if(this.datasetgroup.datasets[cfg.dataset].list.indexOf(object) > -1) {
+                        return true;
+                    }
+                }
+            }
+        } else if(this.dataset != null) {
+            if(this.dataset.list.indexOf(object) > -1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     abstract dataCalcInit();

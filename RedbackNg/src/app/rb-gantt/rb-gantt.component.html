@@ -120,7 +120,7 @@
                 [rb-drag-changeform]="getSizeForObjectCallback">
                 <div
                     *ngFor="let spread of lane.spreads"
-                    [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox')"
+                    [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox') + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '')"
                     [rb-drag-object]="spread.canEdit ? spread.object : null"
                     (click)="clickSpread(spread)"
                     [style.width.px]="spread.width"
