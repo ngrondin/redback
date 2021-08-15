@@ -129,7 +129,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		respWrapper.put("type", "serviceerror");
 		respWrapper.put("requid", reqUid);
 		respWrapper.put("error", StringUtils.rollUpExceptions(e));
-		respWrapper.put("code", e.getErrorCode());
+		respWrapper.put("code", String.valueOf(e.getErrorCode())); //TODO: Change back to int when the mobile bug is fixed
 		sendClientData(respWrapper);					
 	}
 
