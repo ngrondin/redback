@@ -111,13 +111,14 @@ public class ClientHandler extends ClientStreamHandler {
 						} else if(ctl.equals("error")){
 							sendUploadError(uploaduid, payload.metadata.get("error"));
 						} else if(ctl.equals("complete")) {
-							sep.close();
-							uploads.remove(uploaduid);
-						} else if(ctl.equals("chunk")) { //This is the response after upload
+							// Don't close yet as we're waiting for a response with the file meta
+						} else if(ctl.equals("chunk")) { //This is the meta response after upload
 							DataMap result = new DataMap(payload.getString());
 							if(object != null && uid != null)
 								clientManager.getFileClient().linkFileTo(session, result.getString("fileuid"), object, uid);
 							sendUploadResult(uploaduid, result);
+							sep.close();
+							uploads.remove(uploaduid);
 						} else {
 							throw new RedbackException("Error in client upload, unexpected response");
 						}
