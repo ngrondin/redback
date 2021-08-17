@@ -1,0 +1,10 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    height: 42px;
+    align-items: center;
+}
+
+.rb-stars-block {
+    cursor: pointer;
+}

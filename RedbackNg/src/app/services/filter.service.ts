@@ -94,7 +94,7 @@ export class FilterService {
         }
       } else {
         let oVal = object.get(key);
-        if(typeof fVal == 'object') {
+        if(typeof fVal == 'object' && fVal !== null) {
           if(fVal["$in"] != null) {
             let fSubVal = fVal["$in"];
             let subRet = false;

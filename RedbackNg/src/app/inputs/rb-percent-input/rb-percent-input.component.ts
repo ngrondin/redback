@@ -1,32 +1,39 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
 
 @Component({
-  selector: 'rb-number-input',
+  selector: 'rb-percent-input',
   templateUrl: '../abstract/rb-field-input.html',
   styleUrls: ['../abstract/rb-field-input.css']
 })
-export class RbNumberInputComponent extends RbFieldInputComponent {
+export class RbPercentInputComponent  extends RbFieldInputComponent  {
+  @Input('capped') capped = true;
 
   constructor() {
     super();
-    this.defaultIcon = "dialpad";
+    this.defaultSize = 6;
+    this.defaultIcon = "trending_up";
   }
 
-    
+
   public get displayvalue(): any {
     if(this.isEditing) {
       return this.editedValue;
     } else {
-      return this.value;
+      if(this.value != null)
+        return this.value + " %";
+      else 
+        return null;
     }
   }
   
   public set displayvalue(val: any) {
     if(this.isEditing) {
       if(isNaN(val) && val != '-' && !isNaN(this.editedValue)) {
-        var curVal = this.editedValue;
-        setTimeout(() => {this.editedValue = curVal}, 50);
+        if(this.capped && val <= 100 && val >= -100) {
+          var curVal = this.editedValue;
+          setTimeout(() => {this.editedValue = curVal}, 50);
+        }
       }
       this.editedValue = val;
     } 
@@ -55,6 +62,5 @@ export class RbNumberInputComponent extends RbFieldInputComponent {
     this.commit(this.editedValue);
     super.finishEditing();
   }
-
 
 }

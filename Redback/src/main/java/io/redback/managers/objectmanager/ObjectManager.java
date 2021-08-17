@@ -451,13 +451,20 @@ public class ObjectManager
 				try
 				{
 					DataMap objectFilter = new DataMap();
+					DataList objectFilterAndList = new DataList();
 					if(filter != null)
-						objectFilter.merge(filter);
+						objectFilterAndList.add(filter);
 					if(searchText != null  &&  searchText.length() > 0)
-						objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
+						objectFilterAndList.add(generateSearchFilter(session, objectName, searchText.trim()));
 					DataMap rightsReadFilter = generateRightsReadFilter(session, objectName);
 					if(rightsReadFilter != null)
-						objectFilter.merge(rightsReadFilter);
+						objectFilterAndList.add(rightsReadFilter);
+					if(objectFilterAndList.size() == 0) 
+						objectFilter = new DataMap();
+					else if(objectFilterAndList.size() == 1)
+						objectFilter = objectFilterAndList.getObject(0);
+					else if(objectFilterAndList.size() > 1)
+						objectFilter = new DataMap("$and", objectFilterAndList);
 					List<RedbackObject> objectList = this.listFromCurrentTransaction(objectName, objectFilter);
 					DataList dbResultList = null;
 					if(objectConfig.isPersistent()) 
@@ -884,7 +891,7 @@ public class ObjectManager
 			}
 			return em.eval(createScriptContext(session));
 		} else {
-			return new DataMap();
+			return null;
 		}
 	}
 	

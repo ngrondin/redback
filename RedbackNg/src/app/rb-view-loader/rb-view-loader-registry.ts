@@ -8,7 +8,9 @@ import { RbDatetimeInputComponent } from "app/inputs/rb-datetime-input/rb-dateti
 import { RbDurationInputComponent } from "app/inputs/rb-duration-input/rb-duration-input.component";
 import { RbFileInputComponent } from "app/inputs/rb-file-input/rb-file-input.component";
 import { RbNumberInputComponent } from "app/inputs/rb-number-input/rb-number-input.component";
+import { RbPercentInputComponent } from "app/inputs/rb-percent-input/rb-percent-input.component";
 import { RbRelatedInputComponent } from "app/inputs/rb-related-input/rb-related-input.component";
+import { RbStarsInputComponent } from "app/inputs/rb-stars-input/rb-stars-input.component";
 import { RbStringInputComponent } from "app/inputs/rb-string-input/rb-string-input.component";
 import { RbSwitchInputComponent } from "app/inputs/rb-switch-input/rb-switch-input.component";
 import { RbTextareaInputComponent } from "app/inputs/rb-textarea-input/rb-textarea-input.component";
@@ -90,5 +92,7 @@ export const componentRegistry = {
     "calendar": RbCalendarComponent,
     "tile": RbTileComponent,
     "numbertiles": RbNumberTilesComponent,
-    "timeline": RbTimelineComponent
+    "timeline": RbTimelineComponent,
+    "stars": RbStarsInputComponent,
+    "percentinput": RbPercentInputComponent
   }

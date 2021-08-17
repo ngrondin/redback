@@ -36,7 +36,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: string) {
-    console.log("list4 " + this.id + " " + event);
+    //console.log("list4 " + this.id + " " + event);
     if(event == 'load' || event == 'removed' || event == 'clear' || event == 'update') {
       this.redraw();
     }
@@ -63,7 +63,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public redraw() {
-    console.log("list4 " + this.id + " redraw");
+    //console.log("list4 " + this.id + " redraw");
     this.enhancedList = [];
     for(let obj of this.list) {
       let data = {};

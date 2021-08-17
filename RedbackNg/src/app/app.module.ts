@@ -119,6 +119,8 @@ import { RbTimesliderComponent } from './rb-timeslider/rb-timeslider.component';
 import { RbNumberTilesComponent } from './graphs/rb-number-tiles/rb-number-tiles.component';
 import { RbTimelineComponent } from './rb-timeline/rb-timeline.component';
 import { RbDatePipe, RbTimePipe } from './helpers';
+import { RbStarsInputComponent } from './inputs/rb-stars-input/rb-stars-input.component';
+import { RbPercentInputComponent } from './inputs/rb-percent-input/rb-percent-input.component';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -239,7 +241,9 @@ export let AppInjector: Injector;
     RbNumberTilesComponent,
     RbTimelineComponent,
     RbDatePipe,
-    RbTimePipe
+    RbTimePipe,
+    RbStarsInputComponent,
+    RbPercentInputComponent
   ],
   providers: [
     {provide: COMPILER_OPTIONS, useValue: {}, multi: true},

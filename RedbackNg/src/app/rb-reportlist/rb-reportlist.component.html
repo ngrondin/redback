@@ -1,11 +1,15 @@
 <div
     class="rb-reportlist-container">
     <rb-tab-section
-        #rlts>
+        #rlts
+        [grow]="0"
+        [shrink]="0">
         <rb-tab
             [tabsection]="rlts"
             [label]="'Reports'"
-            [isdefault]="true">
+            [isdefault]="true"
+            [grow]="0"
+            [shrink]="0">
             <div
                 class="rb-reportlist-list">
                 <div
@@ -14,7 +18,7 @@
                     <button
                         mat-button
                         (click)="launch(report)">
-                        <mat-icon class="rb-reportlist-icon">insert_drive_file</mat-icon>
+                        <img class="rb-reportlist-icon" [src]="getIcon(report.type)">
                         {{report.description || report.name}}                     
                     </button>
                 </div>            

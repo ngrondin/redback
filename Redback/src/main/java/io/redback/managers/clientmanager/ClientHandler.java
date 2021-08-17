@@ -111,7 +111,8 @@ public class ClientHandler extends ClientStreamHandler {
 						} else if(ctl.equals("error")){
 							sendUploadError(uploaduid, payload.metadata.get("error"));
 						} else if(ctl.equals("complete")) {
-							
+							sep.close();
+							uploads.remove(uploaduid);
 						} else if(ctl.equals("chunk")) { //This is the response after upload
 							DataMap result = new DataMap(payload.getString());
 							if(object != null && uid != null)

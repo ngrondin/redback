@@ -188,7 +188,7 @@ public class ReportManager {
 		List<ReportConfig> configs = listConfigs(session, category);
 		List<ReportInfo> infos = new ArrayList<ReportInfo>();
 		for(ReportConfig rc: configs) {
-			infos.add(new ReportInfo(rc.getName(), rc.getDescription(), rc.getDomain()));
+			infos.add(new ReportInfo(rc.getName(), rc.getDescription(), rc.getType(), rc.getDomain()));
 		}
 		return infos;		
 	}

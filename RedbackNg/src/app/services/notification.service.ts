@@ -12,6 +12,8 @@ import { ErrorService } from './error.service';
 })
 export class NotificationService {
   notifications: RbNotification[] = [];
+  exceptionCount: number;
+  topExceptions: RbNotification[] = [];
   page: number;
   pageSize: number = 500;
   lastDisconnected: Date;
@@ -31,6 +33,7 @@ export class NotificationService {
         } else {
           this.receiveNotification(json);
         }
+        this.calcStats();
       }
     );
     this.clientWSService.getStateObservable().subscribe(state => this.onClientConnection(state));
@@ -56,7 +59,7 @@ export class NotificationService {
   }
 
   public load() {
-    console.log("Loading notifications");
+    //console.log("Loading notifications");
     this.notifications = [];
     this.page = 0;
     this.fetchNextPage();
@@ -74,6 +77,7 @@ export class NotificationService {
         } else {
           this.loadObsever.next(null);
           this.loadObsever.complete();
+          this.calcStats();
         }
       },
       error => {
@@ -92,6 +96,7 @@ export class NotificationService {
       }
     }
     this.notifications.push(notif);
+    //console.log('notification: ' + notif.process + ' ' + notif.code + ' ' + notif.type);
     this.observers.forEach((observer) => {
       observer.next({type:'notification', notification: notif});
     }); 
@@ -108,12 +113,9 @@ export class NotificationService {
     }
   }
 
-  public get exceptionCount(): number {
-    return this.notifications.filter(item => item.type == 'exception').length;
-  }
-
-  public get topExceptions(): RbNotification[] {
-    return this.notifications.filter(item => item.type == 'exception').slice(0, 100);
+  private calcStats() {
+    this.topExceptions = this.notifications.filter(item => item.type == 'exception').slice(0, 100);
+    this.exceptionCount = this.notifications.filter(item => item.type == 'exception').length;
   }
 
   public getNotificationFor(objectname: string, uid: string) : Observable<RbNotification> {
@@ -126,6 +128,7 @@ export class NotificationService {
         this.apiService.listAssignments({"data.objectname": objectname, "data.uid": uid}, 0, 50).subscribe(resp => {
           if(resp.result.length > 0) {
             let notif = this.receiveNotification(resp.result[0]);
+            this.calcStats();
             observer.next(notif);
             observer.complete();
           } else {
