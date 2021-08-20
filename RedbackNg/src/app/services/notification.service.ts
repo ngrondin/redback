@@ -16,7 +16,7 @@ export class NotificationService {
   topExceptions: RbNotification[] = [];
   page: number;
   pageSize: number = 500;
-  lastDisconnected: Date;
+  lastReceived: Date;
   private observers: Observer<any>[] = [];
   private loadObsever: Observer<null>;
 
@@ -41,14 +41,12 @@ export class NotificationService {
 
   onClientConnection(state: boolean) {
     if(state == true) {
-      if(this.lastDisconnected != null) {
-        var timeSinceLastDisonnected = (new Date()).getTime() - this.lastDisconnected.getTime();
-        if(timeSinceLastDisonnected > 5000) {
+      if(this.lastReceived != null) {
+        var timeSinceLastReceived = (new Date()).getTime() - this.lastReceived.getTime();
+        if(timeSinceLastReceived > 5000) {
           this.load();
         }
       }
-    } else {
-      this.lastDisconnected = new Date();
     }
   }
 
@@ -58,8 +56,7 @@ export class NotificationService {
     });
   }
 
-  public load() {
-    //console.log("Loading notifications");
+  public load() : Observable<null> {
     this.notifications = [];
     this.page = 0;
     this.fetchNextPage();
@@ -89,33 +86,44 @@ export class NotificationService {
 
   private receiveNotification(json: any) : RbNotification {
     let notif: RbNotification = new RbNotification(json, this);
-    for(let i = 0; i < this.notifications.length; i++) {
-      if(this.notifications[i].pid == notif.pid) {
-        this.notifications.splice(i, 1);
-        i--;
-      }
-    }
+    this.removeAllProcessNotifications(notif.pid);
     this.notifications.push(notif);
-    //console.log('notification: ' + notif.process + ' ' + notif.code + ' ' + notif.type);
-    this.observers.forEach((observer) => {
-      observer.next({type:'notification', notification: notif});
-    }); 
+    //console.log('new notification: ' + notif.code + " " + notif.pid);
+    this.publish("notification", notif);
+    this.lastReceived = new Date();
     return notif;
   }
 
   private receiveCompletion(json: any) {
     let sub = this.notifications.filter(item => item.process == json.process && item.pid == json.pid && item.code == json.code);
     for(let notif of sub) {
-      this.observers.forEach((observer) => {
-        observer.next({type:'completion', notification: notif});
-      }); 
-      this.notifications.splice(this.notifications.indexOf(notif), 1);
+      //console.log('comp notification: ' + notif.code + " " + notif.pid);
+      this.publish("completion", notif);
+      this.lastReceived = new Date();
     }
   }
 
   private calcStats() {
     this.topExceptions = this.notifications.filter(item => item.type == 'exception').slice(0, 100);
     this.exceptionCount = this.notifications.filter(item => item.type == 'exception').length;
+  }
+
+  private publish(type: string, notif: RbNotification) {
+    this.observers.forEach((observer) => {
+      observer.next({type:type, notification: notif});
+    }); 
+  }
+
+  private removeAllProcessNotifications(pid: string) {
+    this.notifications.filter(notif => notif.pid == pid).forEach(notif => this.removeNotification(notif));
+  }
+
+  private removeNotification(notif: RbNotification) {
+    var i = this.notifications.indexOf(notif);
+    if(i > -1) {
+      //console.log("remove notification: " + notif.code + " " + notif.pid);
+      this.notifications.splice(i, 1);
+    }
   }
 
   public getNotificationFor(objectname: string, uid: string) : Observable<RbNotification> {
@@ -150,7 +158,8 @@ export class NotificationService {
               this.dataService.getServerObject(row.objectname, row.uid).subscribe(resp => {});
             }
           }
-          this.notifications.splice(this.notifications.indexOf(notification), 1);
+          this.removeNotification(notification);
+          this.calcStats();
           observer.next(null);
           observer.complete();
         },
