@@ -1,0 +1,32 @@
+:host {
+    padding-left: 3px;
+    padding-right: 3px;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;    
+}
+
+:host button {
+    /*font-size: 1.5rem!important;*/
+    width: var(--v36px);
+    height: var(--v36px);
+    margin: 0px !important;
+    line-height: 1.2rem;    
+}
+
+.rb-notification-badge {
+    position: absolute;
+    top: 0px;
+    right: 45%;
+    height: 1.4vw;
+    min-width: 1.1vw;
+    border-radius: 0.7vw;
+    background-color: red;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 200%;
+    padding-left: 3px;
+    padding-right: 3px;
+    pointer-events: none;
+}

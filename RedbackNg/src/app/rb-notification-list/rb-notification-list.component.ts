@@ -1,30 +1,30 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { RbNotification } from 'app/datamodel';
 import { NotificationService } from 'app/services/notification.service';
 
 @Component({
-  selector: 'rb-notification',
-  templateUrl: './rb-notification.component.html',
-  styleUrls: ['./rb-notification.component.css']
+  selector: 'rb-notification-list',
+  templateUrl: './rb-notification-list.component.html',
+  styleUrls: ['./rb-notification-list.component.css']
 })
-export class RbNotificationComponent implements OnInit {
-
+export class RbNotificationListComponent implements OnInit {
   @Output() navigate: EventEmitter<any> = new EventEmitter();
-
+  @Output() close: EventEmitter<any> = new EventEmitter();
+  
   constructor(
     private notificationService: NotificationService
   ) { 
   }
-
-  ngOnInit() {
+  
+  ngOnInit(): void {
   }
 
   public get list() : RbNotification[] {
     return this.notificationService.topExceptions;
   }
 
-  public get count() : number {
-    return this.notificationService.exceptionCount;
+  public closeNotifications() {
+    this.close.emit();
   }
 
   public selectNotification(notification: RbNotification) {

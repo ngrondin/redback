@@ -1,0 +1,44 @@
+<div
+    class="rb-notification-header">
+    <div
+        class="rb-notification-title">
+        Notifications
+    </div>
+    <button
+        mat-icon-button
+        (click)="closeNotifications()">
+        <mat-icon>navigate_next</mat-icon>
+    </button>         
+</div> 
+<div
+    class="rb-notification-listcontainer hscroll">
+    <mat-action-list>
+        <div
+            *ngFor="let notification of list"
+            class="rb-notification-listitem">
+            <button 
+                mat-menu-item
+                style="height: auto"
+                (click)="selectNotification(notification)">
+                <div
+                    class="rb-notification-listitemcontent">
+                    <div
+                        class="rb-notification-listheader">
+                        {{notification.label}}
+                    </div>
+                    <div
+                        class="rb-notification-listsub">
+                        {{notification.message}}
+                    </div>
+                </div>        
+            </button>
+            <div
+                class="rb-notification-divider">
+                <div
+                    class="rb-notification-divider-line">
+                </div>
+            </div>            
+        </div>
+
+    </mat-action-list>
+</div>

@@ -53,7 +53,6 @@ import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.compon
 import { RbLogComponent } from './rb-log/rb-log.component';
 import { RbFilelistComponent } from './rb-filelist/rb-filelist.component';
 import { RbFiledropComponent } from './rb-filedrop/rb-filedrop.component';
-import { RbNotificationComponent } from './rb-notification/rb-notification.component';
 import { RbLinkComponent } from './rb-link/rb-link.component';
 import { RbDynamicformComponent } from './rb-dynamicform/rb-dynamicform.component';
 import { RbChoiceInputComponent } from './inputs/rb-choice-input/rb-choice-input.component';
@@ -121,6 +120,8 @@ import { RbTimelineComponent } from './rb-timeline/rb-timeline.component';
 import { RbDatePipe, RbTimePipe } from './helpers';
 import { RbStarsInputComponent } from './inputs/rb-stars-input/rb-stars-input.component';
 import { RbPercentInputComponent } from './inputs/rb-percent-input/rb-percent-input.component';
+import { RbNotificationBellComponent } from './rb-notification-bell/rb-notification-bell.component';
+import { RbNotificationListComponent } from './rb-notification-list/rb-notification-list.component';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -207,7 +208,6 @@ export let AppInjector: Injector;
     RbFilelistComponent,
     RbFiledropComponent,
     RbFileInputComponent,
-    RbNotificationComponent,
     RbLinkComponent,
     RbModalComponent,
     RbDynamicformComponent,
@@ -243,7 +243,9 @@ export let AppInjector: Injector;
     RbDatePipe,
     RbTimePipe,
     RbStarsInputComponent,
-    RbPercentInputComponent
+    RbPercentInputComponent,
+    RbNotificationBellComponent,
+    RbNotificationListComponent
   ],
   providers: [
     {provide: COMPILER_OPTIONS, useValue: {}, multi: true},

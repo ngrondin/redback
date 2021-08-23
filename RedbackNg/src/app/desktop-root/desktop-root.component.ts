@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, SimpleChanges, HostListener } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, HostListener, TemplateRef, ViewChild } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ViewTarget } from 'app/datamodel';
@@ -10,6 +10,7 @@ import { ClientWSService } from 'app/services/clientws.service';
 import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { DialogService } from 'app/services/dialog.service';
+import { MatSidenav } from '@angular/material/sidenav';
 
 
 
@@ -26,9 +27,13 @@ export class DesktopRootComponent implements OnInit {
   @Input() initialView : string;
   @Input() version : string = 'default';
   @Input() events : Observable<string>;
+  @ViewChild("rightdrawer") rightdrawer: MatSidenav;
+  
   subscription: Subscription;
   viewTargetStack: ViewTarget[] = [];
   title: string = "Welcome";
+  //rightDrawerIsOpen: boolean = false;
+  rightDrawerShowing: string = null;
  
   constructor(
     private configService : ConfigService,
@@ -86,6 +91,9 @@ export class DesktopRootComponent implements OnInit {
         target.additionalTitle = $event.label;
       }
       this.pushViewTarget(target, $event.reset);
+      if(this.rightdrawer.opened) {
+        this.rightdrawer.close();
+      }
     }
   }
 
@@ -113,6 +121,22 @@ export class DesktopRootComponent implements OnInit {
   logout() {
     this.cookieService.deleteAll('/');
     window.location.href = "/logout";
+  }
+
+  toggleNotifications() {
+    if(this.rightdrawer.opened) {
+      this.rightdrawer.close();
+      if(this.rightDrawerShowing != 'notifications') {
+        setTimeout(() => this.toggleNotifications(), 500);
+      } 
+    } else {
+      this.rightDrawerShowing = 'notifications';
+      this.rightdrawer.open();
+    }
+  }
+
+  closeRightDrawer() {
+    this.rightdrawer.close();
   }
 
   @HostListener('mouseup', ['$event']) onMouseUp($event) {

@@ -24,9 +24,9 @@
             *ngIf="apiService.chatService != null && apiService.chatService != ''"
             (navigate)="navigateTo($event)">
         </rb-chat>
-        <rb-notification
-            (navigate)="navigateTo($event)">
-        </rb-notification>
+        <rb-notification-bell
+            (click)="toggleNotifications()">
+        </rb-notification-bell>
         <button
             mat-button
             [matMenuTriggerFor]="usermenu">
@@ -65,14 +65,27 @@
     </mat-toolbar-row>
 </mat-toolbar>
 <mat-sidenav-container
+    [hasBackdrop]="false"
     autosize>
     <mat-sidenav 
         mode="side" 
+        position="start"
+        disableClose="true"
         opened>
         <rb-menu
             (navigate)="navigateTo($event)">
         </rb-menu>
     </mat-sidenav>
+    <mat-sidenav 
+        #rightdrawer
+        mode="over" 
+        position="end"> 
+        <rb-notification-list
+            *ngIf="rightDrawerShowing == 'notifications'"
+            (navigate)="navigateTo($event)"
+            (close)="closeRightDrawer()">
+        </rb-notification-list>
+    </mat-sidenav>    
     <mat-sidenav-content>
         <rb-vsection>
             <rb-breadcrumb
