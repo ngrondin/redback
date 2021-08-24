@@ -34,7 +34,7 @@ export class RbMenuComponent implements OnInit {
 }
 
   public get mode(): string {
-    return this._mode;
+    return this._mode || 'large';
   }
 
   public toggleMenuMode() {
