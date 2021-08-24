@@ -73,9 +73,10 @@ public class NotificationClientJSWrapper implements ProxyObject {
 					String username = arguments[0].asString();
 					String subject = arguments[1].asString();
 					String message = arguments[2].asString();
+					DataMap data = arguments.length >= 4 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
 					try
 					{
-						notificationClient.sendFCMMessage(session, username, subject, message);
+						notificationClient.sendFCMMessage(session, username, subject, message, data);
 						return null;
 					}
 					catch(Exception e)

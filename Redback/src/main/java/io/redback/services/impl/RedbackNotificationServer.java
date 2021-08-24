@@ -276,7 +276,7 @@ public class RedbackNotificationServer extends NotificationServer {
 		}
 	}
 
-	protected void sendFCMMessage(Session session, String username, String subject, String message) throws RedbackException {
+	protected void sendFCMMessage(Session session, String username, String subject, String message, DataMap data) throws RedbackException {
 		if(gatewayClient != null && dataClient != null) {
 			try {
 				String accessToken = getFCMAccessToken();	
@@ -287,21 +287,27 @@ public class RedbackNotificationServer extends NotificationServer {
 					for(int i = 0; i < list.size(); i++) {
 						String fcmToken = list.getObject(i).getString(collectionConfig.getField("fcmtoken"));
 						if(fcmToken != null) {
-							DataMap fcmDataPart = new DataMap();
+							DataMap fcmDataPart = data != null ? data : new DataMap();
 							fcmDataPart.put("sound", "default");
 							DataMap fcmNotificationPart = new DataMap();
 							fcmNotificationPart.put("title", subject);
 							fcmNotificationPart.put("body", message);
+							DataMap fcmAndroidPart = new DataMap();
+							fcmAndroidPart.put("priority", "high");
+							DataMap fcmAPNSPart = new DataMap();
+							fcmAPNSPart.put("headers", new DataMap("apns-priority", "5"));
 							DataMap fcmMessage = new DataMap();
 							fcmMessage.put("token", fcmToken);
 							fcmMessage.put("data", fcmDataPart);
 							fcmMessage.put("notification", fcmNotificationPart);
+							fcmMessage.put("android", fcmAndroidPart);
+							fcmMessage.put("apns", fcmAPNSPart);
 							DataMap body = new DataMap("message", fcmMessage);
 							DataMap headers = new DataMap();
 							headers.put("Content-Type", "application/json");
 							headers.put("Authorization", "Bearer " + accessToken);
 							try {
-								gatewayClient.post("https://fcm.googleapis.com/v1/projects/redback-1517221886624/messages:send", body, headers, null);
+								gatewayClient.post("https://fcm.googleapis.com/v1/projects/" + fcmAccountKey.getString("project_id") + "/messages:send", body, headers, null);
 							} catch(Exception e) {
 								Throwable t = e;
 								while(t != null && !(t instanceof FunctionErrorException)) t = t.getCause();

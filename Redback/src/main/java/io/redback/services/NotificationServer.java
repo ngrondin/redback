@@ -59,7 +59,8 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 					String username = request.getString("username");
 					String message = request.getString("message");
 					String subject = request.getString("subject");
-					sendFCMMessage(session, username, subject, message);
+					DataMap data = request.getObject("data");
+					sendFCMMessage(session, username, subject, message, data);
 					response = new Payload(new DataMap("result", "ok").toString());
 				}
 			} else {
@@ -83,5 +84,5 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 
 	protected abstract void registerFCMToken(Session session, String token) throws RedbackException;
 	
-	protected abstract void sendFCMMessage(Session session, String username, String subject, String message) throws RedbackException;
+	protected abstract void sendFCMMessage(Session session, String username, String subject, String message, DataMap data) throws RedbackException;
 }
