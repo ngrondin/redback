@@ -29,7 +29,7 @@ public class DataSet extends ContainerUnit {
 	
 	public DataSet(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		jsParams = Arrays.asList(new String[] {"filter", "object"});
+		jsParams = Arrays.asList(new String[] {"filter", "master"});
 		object = c.getString("object");
 		if(c.containsKey("filter")) {
 			DataEntity filter = c.get("filter");
@@ -49,23 +49,28 @@ public class DataSet extends ContainerUnit {
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
 		Object currentObject = context.get("object");
-		List<?> currentDataSet = (List<?>)context.get("dataset");
+		Object currentMasterObject = context.get("master");
+		List<?> currentMasterDataset = (List<?>)context.get("dataset");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
+		jsContext.put("master", JSConverter.toJS(currentObject));
 		jsContext.put("filter", JSConverter.toJS(context.get("filter")));
-		jsContext.put("object", JSConverter.toJS(currentObject));
 		ObjectClient oc = reportManager.getObjectClient();
 		DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
 		DataMap sort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);
 		Session session = (Session)context.get("session");
 		List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, filter, sort, true);
+		context.put("master", currentObject);
+		context.put("object", null);
 		context.put("dataset", rors);
 
 		Box c = Box.VContainer(true);
+		c.breakBefore = pagebreak;
 		for(Unit unit: contentUnits) {
 			c.addChild(unit.produce(context));
 		}
+		context.put("master", currentMasterObject);
 		context.put("object", currentObject);
-		context.put("dataset", currentDataSet);
+		context.put("dataset", currentMasterDataset);
 		return c;
 	}
 

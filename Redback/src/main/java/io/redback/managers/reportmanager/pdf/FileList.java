@@ -9,20 +9,20 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 
-public class VList extends ContainerUnit {
+public class FileList extends ContainerUnit {
 	protected float width;
 
-	public VList(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
+	public FileList(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
 		width = c.containsKey("width") ? c.getNumber("width").floatValue() : -1;
 	}
 	
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
-		List<?> dataset = (List<?>)context.get("dataset");
+		List<?> fileset = (List<?>)context.get("fileset");
 		Box c = Box.VContainer(true);
 		c.breakBefore = pagebreak;
-		for(Object object: dataset) {
-			context.put("object", object);
+		for(Object file: fileset) {
+			context.put("file", file);
 			for(Unit unit: contentUnits) {
 				c.addChild(unit.produce(context));
 			}

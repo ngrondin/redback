@@ -22,6 +22,7 @@ public class HLine extends Unit {
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
 		Box rb = Box.HLine(width, 10);
 		rb.color = color;
+		rb.breakBefore = pagebreak;
 		return rb;
 	}
 

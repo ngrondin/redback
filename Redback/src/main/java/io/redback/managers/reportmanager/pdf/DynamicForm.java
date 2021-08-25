@@ -84,11 +84,12 @@ public class DynamicForm extends DataUnit {
 		Map<String, RedbackObjectRemote> orderMap = new HashMap<String, RedbackObjectRemote>();
 
 		Box container = Box.VContainer(true);
+		container.breakBefore = pagebreak;
 		String lastCatOrder = "";
 		for(RedbackObjectRemote ror: rors) {
-			String cat = ror.getString(catAttribute);
-			String catOrder = ror.getString(catOrderAttribute);
-			String order = ror.getString(orderAttribute);
+			String cat = catAttribute != null ? ror.getString(catAttribute) : null;
+			String catOrder = catOrderAttribute != null ? ror.getString(catOrderAttribute) : null;
+			String order = orderAttribute != null ? ror.getString(orderAttribute) : "";
 			orderMap.put(order, ror);
 			if(cat == null) cat = "";
 			if(catOrder == null) catOrder = "";
@@ -225,7 +226,7 @@ public class DynamicForm extends DataUnit {
 					detailRb.color = Color.lightGray;
 					formItemRb.addChild(detailRb);
 				}
-				if(type.equals("files")) {
+				if(type.equals("files") || type.equals("photos")) {
 					FileClient fc = reportManager.getFileClient();
 					List<RedbackFile> files = fc.listFilesFor(session, "formitem", ror.getUid());
 					for(RedbackFile file: files) {

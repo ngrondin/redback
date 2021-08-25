@@ -25,6 +25,7 @@ import io.redback.security.Session;
 public class PDFReport extends Report {
 	protected PDDocument document;
 	protected List<Unit> rootUnits;
+	protected List<Unit> headerUnits;	
 	protected List<Unit> footerUnits;	
 		
 	public PDFReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
@@ -35,6 +36,13 @@ public class PDFReport extends Report {
 		for(int i = 0; i < content.size(); i++) {
 			rootUnits.add(Unit.fromConfig(reportManager, rc, content.getObject(i)));
 		}
+		DataList header = rc.getData().getList("header");
+		if(header != null) {
+			headerUnits = new ArrayList<Unit>();
+			for(int i = 0; i < header.size(); i++) {
+				headerUnits.add(Unit.fromConfig(reportManager, rc, header.getObject(i)));
+			}		
+		}			
 		DataList footer = rc.getData().getList("footer");
 		if(footer != null) {
 			footerUnits = new ArrayList<Unit>();
@@ -57,28 +65,24 @@ public class PDFReport extends Report {
 			List<Box> pages = paginate(root, 667);
 			for(int i = 0; i < pages.size(); i++) {
 				context.put("page", (i + 1));
+				Box header = Box.VContainer(true);
+				if(headerUnits != null) {
+					for(int j = 0; j < headerUnits.size(); j++) {
+						header.addChild(headerUnits.get(j).produce(context));
+					}				
+				}				
 				Box footer = Box.VContainer(true);
 				if(footerUnits != null) {
 					for(int j = 0; j < footerUnits.size(); j++) {
 						footer.addChild(footerUnits.get(j).produce(context));
 					}				
 				}
-				renderPage(pages.get(i), footer, i);
+				renderPage(pages.get(i), header, footer, i);
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
 			throw new RedbackException("Error producing report", e);
 		}
-	}
-	
-	public Box produceFooter(Map<String, Object> context) throws IOException, RedbackException {
-		Box footer = Box.VContainer(false);
-		if(footerUnits != null) {
-			for(int i = 0; i < footerUnits.size(); i++) {
-				footer.addChild(footerUnits.get(i).produce(context));
-			}
-		}
-		return footer;
 	}
 	
 	protected List<Box> paginate(Box root, float maxHeight) {
@@ -93,6 +97,8 @@ public class PDFReport extends Report {
 				else 
 					pages.add(root);
 			}
+			if(root.children.size() > 0)
+				pages.add(0, root);
 		} else {
 			pages.add(root);
 		}
@@ -115,13 +121,13 @@ public class PDFReport extends Report {
 		return pages;
 	}
 	
-	protected void renderPage(Box content, Box footer, int pageNumber) throws IOException {
+	protected void renderPage(Box content, Box header, Box footer, int pageNumber) throws IOException {
 		PDPage pdPage = new PDPage();
 		document.addPage(pdPage);
 		PDPageContentStream contentStream = new PDPageContentStream(document, pdPage);
+		renderReportBox(pdPage, contentStream, header, 50, 20);
 		renderReportBox(pdPage, contentStream, content, 50, 50);
 		renderReportBox(pdPage, contentStream, footer, 50, 730);
-		//renderFooter(pdPage, contentStream, pageNumber);
 		contentStream.close();			
 	}
 	
@@ -139,9 +145,9 @@ public class PDFReport extends Report {
 			}
 		} else if(reportBox.type.equals("hline")) {
 			stream.setLineWidth(0.3f);
-			stream.setStrokingColor(Color.BLACK);
 			float y = pageTop - offsety - (reportBox.height / 2);// - 4;
 			stream.moveTo(offsetx, y);//(reportBox.height / 2) + 2);
+			stream.setStrokingColor(reportBox.color);
 			stream.lineTo(offsetx + reportBox.width, y);//(reportBox.height / 2) + 2);
 			stream.stroke();
 

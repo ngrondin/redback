@@ -33,6 +33,7 @@ public class Field extends DataUnit {
 		c.addChild(rb1);
 		c.addChild(rb2);
 		c.height += 10;
+		c.breakBefore = pagebreak;
 		return c;
 	}
 

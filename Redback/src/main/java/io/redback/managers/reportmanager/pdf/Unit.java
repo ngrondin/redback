@@ -55,6 +55,10 @@ public abstract class Unit {
 			newUnit = new HLine(rm, rc, c);
 		else if(type.equals("image"))
 			newUnit = new Image(rm, rc, c);		
+		else if(type.equals("fileset"))
+			newUnit = new FileSet(rm, rc, c);		
+		else if(type.equals("filelist"))
+			newUnit = new FileList(rm, rc, c);				
 		return newUnit;
 	}
 	/*
@@ -64,15 +68,19 @@ public abstract class Unit {
 	*/
 	
 	protected Color getColor(String c) {
-		try {
-			final java.lang.reflect.Field f = Color.class.getField(c);
-			if(f != null)
-				return (Color)f.get(null);
-			else
-				return Color.DARK_GRAY;
-		} catch(Exception e) {
-			return Color.DARK_GRAY;
+		if(c.startsWith("#")) {
+			return new Color(
+	            Integer.valueOf( c.substring( 1, 3 ), 16 ),
+	            Integer.valueOf( c.substring( 3, 5 ), 16 ),
+	            Integer.valueOf( c.substring( 5, 7 ), 16 ) );
+		} else {		
+			try {
+				final java.lang.reflect.Field f = Color.class.getField(c);
+				if(f != null)
+					return (Color)f.get(null);	
+			} catch(Exception e) {}
 		}
+		return Color.DARK_GRAY;
 	}
 	
 

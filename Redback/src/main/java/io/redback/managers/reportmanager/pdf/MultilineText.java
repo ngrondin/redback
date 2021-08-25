@@ -22,6 +22,7 @@ public class MultilineText extends DataUnit {
 		valueStr = valueStr.replace("\r", "");
 		String[] lines = valueStr.split("\n");
 		Box c = Box.VContainer(canBreak);
+		c.breakBefore = pagebreak;
 		if(width > -1) 
 			c.width = width;	
 		for(int i = 0; i < lines.length; i++) {

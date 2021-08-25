@@ -38,7 +38,7 @@ public abstract class DataUnit extends Unit {
 
 	public DataUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		jsParams = Arrays.asList(new String[] {"dataset", "object", "page"});
+		jsParams = Arrays.asList(new String[] {"dataset", "object", "master", "page"});
 		valueExpr = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_text_value", jsParams, c.getString("value"));
 		width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
 		font = PDType1Font.HELVETICA;
@@ -94,6 +94,7 @@ public abstract class DataUnit extends Unit {
 		Map<String, Object> jsContext = new HashMap<String, Object>();
 		jsContext.put("dataset", JSConverter.toJS(context.get("dataset")));
 		jsContext.put("object", JSConverter.toJS(context.get("object")));
+		jsContext.put("master", JSConverter.toJS(context.get("master")));
 		jsContext.put("page", context.get("page"));
 		Object value = null;
 		try {

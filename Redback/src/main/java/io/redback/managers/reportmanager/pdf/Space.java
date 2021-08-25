@@ -19,7 +19,9 @@ public class Space extends Unit {
 	}
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
-		return Box.Empty(width, height);
+		Box c = Box.Empty(width, height);
+		c.breakBefore = pagebreak;
+		return c;
 	}
 
 }

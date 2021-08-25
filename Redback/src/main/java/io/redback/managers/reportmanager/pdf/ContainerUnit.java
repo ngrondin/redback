@@ -24,7 +24,9 @@ public abstract class ContainerUnit extends Unit {
 		DataList content = config.getList("content");
 		contentUnits = new ArrayList<Unit>();
 		for(int i = 0; i < content.size(); i++) {
-			contentUnits.add(Unit.fromConfig(reportManager, reportConfig, content.getObject(i)));
+			Unit unit = Unit.fromConfig(reportManager, reportConfig, content.getObject(i));
+			if(unit != null)
+				contentUnits.add(unit);
 		}
 		canBreak = config.containsKey("canbreak") ? config.getBoolean("canbreak") : true;
 		jsParams = Arrays.asList(new String[] {"params", "object", "page"});

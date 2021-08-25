@@ -32,6 +32,7 @@ public class Text extends DataUnit {
 		Box rb = Box.Text(valueStr, bold ? boldFont : font, fontSize);
 		rb.height = height;
 		rb.color = color;
+		rb.breakBefore = pagebreak;
 		if(width > -1) {
 			Box text = rb;
 			rb = Box.HContainer(false);
