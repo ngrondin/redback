@@ -145,8 +145,8 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
     }
   }
 
-  filterDataset() {
-
+  getFilterSortForSeries(config: MapSeriesConfig) : any {
+    return null;
   }
 
   reframe(selectedLatLon?: LatLon) {

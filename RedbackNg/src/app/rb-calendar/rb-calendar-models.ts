@@ -13,7 +13,6 @@ export class CalendarSeriesConfig extends SeriesConfig {
     linkView: string;
     modal: string;
     canEdit: boolean;
-    active: boolean = true;
   
     constructor(json: any, userpref: any) {
       super(json);

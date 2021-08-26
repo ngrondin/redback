@@ -62,9 +62,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(this.lanes != null) {
       this.lanesConfig = new GanttLaneConfig(this.lanes, this.userPref);
     }
-    if(this.dofilter && this.active) {
-      this.filterDataset();
-    }
   }
 
   dataCalcDestroy() {
@@ -107,11 +104,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   set startDate(dt: Date) {
     this._startDate = new Date(dt);
-    if(this.dofilter) {
-      this.filterDataset();
-    } else {
-      this.redraw();
-    }
+    this.updateData(true);
   }
 
   get laneHeight() : number {
@@ -124,57 +117,38 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   setZoom(ms: number) {
     this.zoomMS = ms;
-    this.redraw();
+    this.updateData(false);
   }
 
   setSpan(ms: number) {
     this.spanMS = ms;
-    if(this.dofilter) {
-      this.filterDataset();
-    } else {
-      this.redraw();
-    }
-  }
-
-  refresh() {
-    if(this.dataset != null) {
-      this.dataset.refreshData();
-    }
-    if(this.datasetgroup != null) {
-      this.datasetgroup.refreshAllData();
-    }
+    this.updateData(true);
   }
 
   toggleDragFilter() {
     this.doDragFilter = !this.doDragFilter;
   }
 
-  filterDataset() {
+  getFilterSortForSeries(cfg: GanttSeriesConfig) : any {
     let startDate = this.startDate;
     let endDate = new Date(this.startDate.getTime() + this.spanMS);
-    for(let cfg of this.seriesConfigs) {
-      let filter = {};
-      filter[cfg.startAttribute] = {
+    let filter = {};
+    filter[cfg.startAttribute] = {
+      $gt: "'" + startDate.toISOString() + "'",
+      $lt: "'" + endDate.toISOString() + "'"
+    }
+    if(cfg.endAttribute != null) {
+      let sFilter = filter;
+      let eFilter = {}
+      eFilter[cfg.endAttribute] = {
         $gt: "'" + startDate.toISOString() + "'",
-        $lt: "'" + endDate.toISOString() + "'"
-      }
-      if(cfg.endAttribute != null) {
-        let sFilter = filter;
-        let eFilter = {}
-        eFilter[cfg.endAttribute] = {
-          $gt: "'" + startDate.toISOString() + "'",
-          $lt: "'" + endDate.toISOString() + "'"          
-        };
-        filter = {
-          $or:[sFilter, eFilter]
-        }
-      }
-      if(this.datasetgroup != null) {
-        this.datasetgroup.datasets[cfg.dataset].filterSort({filter: filter});
-      } else {
-        this.dataset.filterSort({filter: filter});
+        $lt: "'" + endDate.toISOString() + "'"          
+      };
+      filter = {
+        $or:[sFilter, eFilter]
       }
     }
+    return {filter:filter};
   }
 
   calc() {
@@ -344,18 +318,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return marks;
   }
 
-  public getSeriesConfigForObject(object: RbObject) : GanttSeriesConfig {
-    if(this.datasetgroup != null) {
-      for(let cfg of this.seriesConfigs) {
-        if(this.datasetgroup.datasets[cfg.dataset].objectname == object.objectname) {
-          return cfg
-        }
-      }
-    } else if(this.dataset != null) {
-      return this.seriesConfigs[0];
-    }
-    return null;
-  }
 
   public select(object: RbObject) {
     if(this.dataset != null) {

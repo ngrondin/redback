@@ -500,7 +500,7 @@ public class ObjectManager
 							RedbackObject object = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
 							if(object != null && !objectList.contains(object)) 
 							{
-								logger.severe("Memory filter missed " + objectName + ":" + object.getUID().stringValue + " with filter: " + objectFilter.toString(0, true));
+								logger.warning("Memory filter missed " + objectName + ":" + object.getUID().stringValue + " with filter: " + objectFilter.toString(0, true));
 								objectList.add(object);
 							}
 							if(object == null)

@@ -1,8 +1,10 @@
+import { ThisReceiver } from "@angular/compiler";
 import { Component, Input } from "@angular/core";
 import { RbObject } from "app/datamodel";
 import { RbDataObserverComponent } from "./rb-dataobserver";
 
 export class SeriesConfig {
+    active: boolean = true;
     dataset: string;
 
     constructor(json: any) {
@@ -16,6 +18,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     @Input('dofilter') dofilter: boolean = true;
 
     seriesConfigs: T[] = [];
+    filterDone: boolean = false;
     recalcPlanned: boolean = false;
 
     
@@ -32,6 +35,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             }
         }        
         this.dataCalcInit();
+        this.updateData();
     }
     
     dataObserverDestroy() {
@@ -39,11 +43,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     
     onActivationEvent(event: any) {
         if(this.active) {
-            if(this.dofilter) {
-                this.filterDataset();
-            } else {
-                this.redraw();
-            } 
+            this.updateData();
         }
     }
     
@@ -51,6 +51,43 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
         if(this.active) {
             //console.log(event + " " + this.id + "  " + (new Date()).getTime());
             this.redraw()
+        }
+    }
+
+
+    get activeSeries() : T[] {
+        return this.seriesConfigs.filter(item => item.active);
+    }
+
+
+    updateData(forceFilter: boolean = false) : boolean {
+        if(this.dofilter && (!this.filterDone || forceFilter)) {
+            this.filterDone = true;
+            let fetched = true;
+            for(let cfg of this.activeSeries) {
+              let filterSort = this.getFilterSortForSeries(cfg);
+              if(this.datasetgroup != null) {
+                fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort);
+              } else {
+                fetched = fetched && this.dataset.filterSort(filterSort);
+              }
+            }
+            if(!fetched) {
+                this.redraw();
+            }
+            return fetched;
+        } else {
+            this.redraw();
+            return false;
+        }        
+    }
+
+    forceDatasetReload() {
+        if(this.dataset != null) {
+          this.dataset.refreshData();
+        }
+        if(this.datasetgroup != null) {
+          this.datasetgroup.refreshAllData();
         }
     }
 
@@ -122,7 +159,9 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     abstract createSeriesConfig(json: any) : T;
 
-    abstract filterDataset();
+    abstract getFilterSortForSeries(config: T) : any;
+
+    //abstract filterDataset();
 
     abstract calc();
     

@@ -13,6 +13,7 @@ import io.redback.services.GeoServer;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
+import io.redback.utils.StringUtils;
 
 public class RedbackGeoServer extends GeoServer
 {
@@ -58,7 +59,7 @@ public class RedbackGeoServer extends GeoServer
 		{
 			DataMap request = new DataMap();
 			request.put("method", "get");
-			request.put("url", geocodeUrl + "?address=" + address.replaceAll(" ", "%20") + "&key=" + apiKey);
+			request.put("url", geocodeUrl + "?address=" + StringUtils.urlencode(address) + "&key=" + apiKey);
 			DataMap resp = requestService(request);
 			if(resp.getList("results").size() > 0) {
 				DataMap geoData = new DataMap();

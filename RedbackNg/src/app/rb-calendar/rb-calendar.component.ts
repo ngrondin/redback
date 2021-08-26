@@ -23,8 +23,6 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   data: any = {};
   _year: number;
   _month: number;
-  //firstDay: number;
-  //_weekStarting: Date;
   startDate: Date;
   endDate: Date;
 
@@ -64,7 +62,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       }
       this.activeDatasets = this.layerOptions[0].value;
     } else {
-      this.filterDataset();
+      this.updateData();
     }
   }
 
@@ -84,26 +82,6 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     return this.dataset != null ? this.dataset.objectname : this.datasetgroup != null && this.activeSeries.length > 0 ? this.datasetgroup.datasets[this.activeSeries[0].dataset].objectname : null;
   }
 
-  get activeSeries() : CalendarSeriesConfig[] {
-    return this.seriesConfigs.filter(item => item.active);
-  }
-
-  get activeDatasets() : any {
-    return this._activeDatasets;
-  }
-
-  set activeDatasets(val: any) {
-    this._activeDatasets = val;
-    for(let cfg of this.seriesConfigs) {
-      if(val.indexOf(cfg.dataset) > -1) {
-        cfg.active = true;
-      } else {
-        cfg.active = false;
-      }
-    }
-    this.redraw(); // This is an optimistic redraw in the case where the filterDataset will not update the dataset because the filter is identical
-    this.filterDataset();
-  }
 
   get mode(): string {
     return this._mode;
@@ -113,7 +91,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     this._mode = m;
     if(this._mode == 'week') this.calcWeeksOfThisMonth();
     this.calcDays();
-    this.filterDataset();
+    this.updateData(true);
   }
 
   get year():  number {
@@ -124,7 +102,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     this._year = val;
     if(this._mode == 'week') this.calcWeeksOfThisMonth();
     this.calcDays();
-    this.filterDataset();
+    this.updateData(true);
   }
 
   get month() : number {
@@ -135,7 +113,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     this._month = val;
     if(this._mode == 'week') this.calcWeeksOfThisMonth();
     this.calcDays();
-    this.filterDataset();
+    this.updateData(true);
   }
 
   get weekStarting() : Date {
@@ -145,7 +123,25 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   set weekStarting(val: Date) {
     this.startDate = val;
     this.calcDays();
-    this.filterDataset();
+    this.updateData(true);
+  }
+
+  
+  get activeDatasets() : any {
+      return this._activeDatasets;
+  }
+
+  set activeDatasets(val: any) {
+    this._activeDatasets = val;
+    for(let cfg of this.seriesConfigs) {
+      if(val.indexOf(cfg.dataset) > -1) {
+          cfg.active = true;
+      } else {
+          cfg.active = false;
+      }
+    }
+    //this.redraw(); // This is an optimistic redraw in the case where the filterDataset will not update the dataset because the filter is identical
+    this.updateData(true);
   }
 
   calcWeeksOfThisMonth() {
@@ -194,23 +190,14 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     }
   }
 
-  filterDataset() : boolean {
-    let fetched = true;
-    for(let cfg of this.activeSeries) {
-      let filter = {};
-      filter = this.filterService.mergeFilters(filter, this.userFilter);
-      filter[cfg.dateAttribute] = {
-        $gt: "'" + this.startDate.toISOString() + "'",
-        $lt: "'" + this.endDate.toISOString() + "'"
-      }
-      let event = {filter: filter, search: this.userSearchString};
-      if(this.datasetgroup != null) {
-        fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(event);
-      } else {
-        fetched = fetched && this.dataset.filterSort(event);
-      }
+  getFilterSortForSeries(config: CalendarSeriesConfig) : any {
+    let filter = {};
+    filter = this.filterService.mergeFilters(filter, this.userFilter);
+    filter[config.dateAttribute] = {
+      $gt: "'" + this.startDate.toISOString() + "'",
+      $lt: "'" + this.endDate.toISOString() + "'"
     }
-    return fetched;
+    return {filter: filter, search: this.userSearchString};
   }
 
   calc() {
@@ -283,7 +270,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
      || ('search' in event && event.search != this.userSearchString)) {
       if('filter' in event) this.userFilter = event.filter;
       if('search' in event) this.userSearchString = event.search;
-      return this.filterDataset();
+      return this.updateData(true);
     } else {
       return false;
     }

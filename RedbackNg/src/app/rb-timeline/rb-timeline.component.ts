@@ -28,7 +28,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
     return new TimelineSeriesConfig(json);
   }
 
-  filterDataset() {
+  getFilterSortForSeries(cfg: TimelineSeriesConfig) : any {
     
   }
 
