@@ -109,15 +109,17 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   }
 
   onBoundsChange(event: any) {
-    //console.log("bounds change");
+
   }
 
   onZoomChange(event: any) {
     this.actualMperPX = 156543.03392 * Math.cos(this.desiredMapCenter.latitude * Math.PI / 180) / Math.pow(2, event);
-    //console.log("zoom change, mperpx=" + mperpx);
     this.redraw();
   }
 
+  get mapElement() : any {
+    return this.map['_elem'].nativeElement;
+  }
 
   public get currentDate() : Date {
     return this._currentDate;
@@ -149,7 +151,6 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
 
   reframe(selectedLatLon?: LatLon) {
     if(!this.preventReframe) {
-      //console.log("reframe");
       if(selectedLatLon != null) {
         this.desiredMapCenter = selectedLatLon;
         this.minLat = selectedLatLon.latitude - 0.01;
@@ -181,20 +182,17 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
         this.desiredMapCenter = new LatLon(((this.maxLat + this.minLat) / 2), ((this.maxLon + this.minLon) / 2));
       }
   
-      let pxWidth = this.map['_elem'].nativeElement.clientWidth;
-      let pxHeight = this.map['_elem'].nativeElement.clientHeight;
-      let mWidth = Math.floor(this.distance(this.desiredMapCenter.latitude, this.minLon, this.desiredMapCenter.latitude, this.maxLon));
-      let mHeight = Math.floor(this.distance(this.minLat, this.desiredMapCenter.longitude, this.maxLat, this.desiredMapCenter.longitude));
+      let pxWidth = this.mapElement.clientWidth;
+      let pxHeight = this.mapElement.clientHeight;
+      let mWidth = Math.max(500, Math.floor(this.distance(this.desiredMapCenter.latitude, this.minLon, this.desiredMapCenter.latitude, this.maxLon)));
+      let mHeight = Math.max(500, Math.floor(this.distance(this.minLat, this.desiredMapCenter.longitude, this.maxLat, this.desiredMapCenter.longitude)));
       let vertmperpx = (mHeight / pxHeight);
       let horimperpx = (mWidth / pxWidth);
       this.desiredZoom = Math.floor(Math.log2(156543.03392 * Math.cos(this.desiredMapCenter.latitude * Math.PI / 180) / Math.max(vertmperpx, horimperpx)));  
-    } else {
-      this.preventReframe = false;
     }
   }
 
   calc() {
-    //console.log("redraw");
     this.mapPins = [];
     this.mapDots = [];
     this.mapCircles = [];
@@ -243,9 +241,9 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
         } else if(geometry["type"] == "circle") {
           let radius = parseInt(geometry["radius"].toString());
           let radiusPx = radius / this.actualMperPX;
-          if(radiusPx < 10) {
+          if(radiusPx < 20) {
             this.mapPins.push(new MapPin(object, latLon, color, animate, label, link, zIndex));
-          } else {
+          } else if(radiusPx < this.mapElement.clientWidth) {
             this.mapCircles.push(new MapCircle(object, latLon, radius, color, animate, label, link, zIndex));
           }
         }
@@ -311,6 +309,7 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
 
   objectClick(mapObject: MapObject) {
     this.preventReframe = true;
+    setTimeout(() => this.preventReframe = false, 500);
     if(this.dataset != null) {
       this.dataset.select(mapObject.getRbObject());
     } else if (this.datasetgroup != null) {
@@ -341,10 +340,6 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
       }
     }
   }
-
-  /*zoomChange(event: any) {
-    this.userMovedOrZoomed = true;
-  }*/
 
   labelClick() {
     if(this.labelLink != null) {
