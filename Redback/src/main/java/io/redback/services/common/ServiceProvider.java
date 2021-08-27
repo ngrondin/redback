@@ -11,7 +11,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.Timer;
 
-public abstract class ServiceProvider extends Service implements io.firebus.interfaces.ServiceProvider {
+public abstract class ServiceProvider extends Provider implements io.firebus.interfaces.ServiceProvider {
 	private Logger logger = Logger.getLogger("io.redback");
 	
 	public ServiceProvider(String n, DataMap c, Firebus f) {

@@ -24,10 +24,10 @@ import io.firebus.interfaces.StreamProvider;
 import io.firebus.logging.FirebusConsoleHandler;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
-import io.redback.services.common.Service;
+import io.redback.services.common.Provider;
 import io.redback.utils.Watchdog;
 
-public class RedbackServer implements Consumer
+public class RedbackServer 
 {
 	private Logger logger = Logger.getLogger("io.redback.RedbackServer");
 	protected ArrayList<BusFunction> services;
@@ -71,7 +71,12 @@ public class RedbackServer implements Consumer
 		firebus = new Firebus(config.getString("network"), config.getString("password"));
 		if(config.containsKey("threads"))
 			firebus.setThreadCount(config.getNumber("threads").intValue());
-		firebus.registerConsumer("_rb_config_cache_clear", this, 1);
+		
+		firebus.registerConsumer("_rb_config_cache_clear", new Consumer() {
+			public void consume(Payload payload) {
+				configureAllServices();
+			}
+		}, 1);
 		
 		DataList knownAddresses = config.getList("knownaddresses");
 		if(knownAddresses != null)
@@ -214,24 +219,20 @@ public class RedbackServer implements Consumer
 		long end = System.currentTimeMillis();
 		Logger.getLogger("io.redback").info("Redback server started in " + (end - start) + "ms");
 	}
-
-	public void consume(Payload payload) {
-		configureAllServices();
-	}
 	
 	protected void configureAllServices() {
 		for(int i = 0; i < services.size(); i++) {
-			BusFunction service = services.get(i);
-			if(service instanceof Service)
-				((Service)service).configure();
+			BusFunction func = services.get(i);
+			if(func instanceof Provider)
+				((Provider)func).configure();
 		}		
 	}
 
 	protected void startAllServices() {
 		for(int i = 0; i < services.size(); i++) {
-			BusFunction service = services.get(i);
-			if(service instanceof Service)
-				((Service)service).start();
+			BusFunction func = services.get(i);
+			if(func instanceof Provider)
+				((Provider)func).start();
 		}		
 	}
 	

@@ -11,14 +11,14 @@ import io.firebus.utils.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.utils.StringUtils;
 
-public abstract class Service 
+public abstract class Provider 
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String serviceName;
 	protected Firebus firebus;
 	protected DataMap config;
 	
-	public Service(String n, DataMap c, Firebus f)
+	public Provider(String n, DataMap c, Firebus f)
 	{
 		serviceName = n;
 		config = c;
