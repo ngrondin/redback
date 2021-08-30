@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.script.ScriptException;
@@ -50,6 +51,7 @@ import io.redback.security.js.SessionJSWrapper;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.Cache;
+import io.redback.utils.CollectionConfig;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.JSConverter;
@@ -80,6 +82,7 @@ public class ObjectManager
 	protected HashMap<String, ScriptConfig> globalScripts;
 	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters;
+	protected CollectionConfig traceCollection;
 	protected HashMap<Long, List<RedbackObject>> transactions;
 	protected AccessManagementClient accessManagementClient;
 	protected DataClient dataClient;
@@ -119,6 +122,7 @@ public class ObjectManager
 		integrationServiceName = config.getString("integrationservice");
 		objectUpdateChannel = config.getString("objectupdatechannel");
 		globalVariables = config.getObject("globalvariables");
+		traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
 		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
@@ -394,7 +398,7 @@ public class ObjectManager
 									String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
 									relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));
 								}
-								element.put(attributeName, relatedObject);							
+								element.setRelated(attributeName, relatedObject);							
 							}
 						}
 					}
@@ -550,11 +554,12 @@ public class ObjectManager
 		RedbackObject object = getObject(session, objectName, id);
 		if(object != null)
 		{
+			boolean isAutomated = session.getUserProfile().getUsername().equals(elevatedUserName);
 			Iterator<String> it = updateData.keySet().iterator();
 			while(it.hasNext())
 			{
 				String attributeName = it.next();
-				object.put(attributeName, new Value(updateData.get(attributeName)));
+				object.put(attributeName, new Value(updateData.get(attributeName)), isAutomated);
 			}
 		}
 		return object;
@@ -567,6 +572,7 @@ public class ObjectManager
 		putInCurrentTransaction(object);
 		if(initialData != null)
 		{
+			boolean isAutomated = session.getUserProfile().getUsername().equals(elevatedUserName);
 			for(String attributeName: initialData.keySet())
 			{
 				boolean isFilter = false;
@@ -578,7 +584,7 @@ public class ObjectManager
 						if(key.startsWith("$"))
 							isFilter = true;
 				if(!isFilter)
-					object.put(attributeName, new Value(value));
+					object.put(attributeName, new Value(value), isAutomated);
 			}
 			logger.fine("Created object " + object.getObjectConfig().getName() + ":" + object.getUID().getString());
 		}
@@ -1089,6 +1095,31 @@ public class ObjectManager
 				logger.finest("Publishing object update");
 				firebus.publish(objectUpdateChannel, payload);
 				logger.finest("Published object update");
+			}
+			catch(Exception e) 
+			{
+				logger.severe("Cannot send out signal : " + StringUtils.rollUpExceptions(e));
+			}
+		}		
+	}
+	
+	protected void trace(String objectname, String uid, String domain, String attribute, DataEntity value, String username)
+	{
+		if(traceCollection != null && dataClient != null) 
+		{
+			try 
+			{
+				DataMap key = new DataMap();
+				key.put("_id", UUID.randomUUID().toString());
+				DataMap data = new DataMap();
+				data.put("object", objectname);
+				data.put("uid", uid);
+				data.put("domain", domain);
+				data.put("attribute", attribute);
+				data.put("value", value);
+				data.put("username", username);
+				data.put("date", new Date());
+				dataClient.publishData(traceCollection.getName(), traceCollection.convertObjectToSpecific(key), traceCollection.convertObjectToSpecific(data));
 			}
 			catch(Exception e) 
 			{

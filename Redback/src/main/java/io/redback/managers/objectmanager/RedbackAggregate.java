@@ -177,7 +177,7 @@ public class RedbackAggregate extends RedbackElement
 		 return null;
 	}
 	
-	public void put(String name, RedbackObject relatedObject) throws RedbackException
+	public void setRelated(String name, RedbackObject relatedObject) throws RedbackException
 	{
 		if(config.getAttributeConfig(name).hasRelatedObject())
 		{

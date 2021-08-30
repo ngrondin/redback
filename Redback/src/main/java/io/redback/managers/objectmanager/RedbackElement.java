@@ -40,5 +40,5 @@ public abstract class RedbackElement
 	
 	public abstract DataMap getRelatedFindFilter(String attributeName) throws RedbackException;
 	
-	public abstract void put(String name, RedbackObject relatedObject) throws RedbackException;
+	public abstract void setRelated(String name, RedbackObject relatedObject) throws RedbackException;
 }

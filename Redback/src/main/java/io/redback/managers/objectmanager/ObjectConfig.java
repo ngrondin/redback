@@ -135,6 +135,14 @@ public class ObjectConfig
 		else 
 			return false;
 	}
+	
+	public boolean traceUpdates()
+	{
+		if(config.containsKey("trace"))
+			return config.getBoolean("trace");
+		else 
+			return false;
+	}
 
 	public Set<String> getAttributeNames()
 	{

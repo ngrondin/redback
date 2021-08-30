@@ -68,7 +68,7 @@ public class RedbackNotificationServer extends NotificationServer {
 	protected FileClient fileClient;
 	protected String gatewayServiceName;
 	protected GatewayClient gatewayClient;
-	protected DataMap fcmAccountKey;
+	protected DataMap fcmConfig;
 	protected String fcmAccessToken;
 	protected long fcmAccessTokenExpiry;
 
@@ -84,7 +84,7 @@ public class RedbackNotificationServer extends NotificationServer {
 		fileClient = new FileClient(firebus, fileServiceName);
 		gatewayServiceName = config.getString("gatewayservice");
 		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
-		fcmAccountKey = config.getObject("fcmaccountkey");
+		fcmConfig = config.getObject("fcmconfig");
 	}
 
 	protected void email(Session session, List<String> addresses, String fromAddress, String fromName, String subject, String body, List<String> attachments) throws RedbackException {
@@ -245,20 +245,20 @@ public class RedbackNotificationServer extends NotificationServer {
 		try {
 			long now = System.currentTimeMillis();
 			if(fcmAccessToken == null || fcmAccessTokenExpiry < now) {
-				String keyStr = fcmAccountKey.getString("private_key");
+				String keyStr = fcmConfig.getString("private_key");
 				keyStr = keyStr.replaceAll("\\n", "").replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "");
 				byte[] pkcs8EncodedKey = Base64.getDecoder().decode(keyStr);
 				KeyFactory factory = KeyFactory.getInstance("RSA");
 				KeySpec ks = new PKCS8EncodedKeySpec(pkcs8EncodedKey);//fcmAccountKey.getString("private_key").getBytes());
 				final RSAPrivateKey privateKey = (RSAPrivateKey)factory.generatePrivate(ks);
 				Algorithm algorithm = Algorithm.RSA256(new RSAKeyProvider() {
-					public String getPrivateKeyId() {return fcmAccountKey.getString("private_key_id");}
+					public String getPrivateKeyId() {return fcmConfig.getString("private_key_id");}
 					public RSAPublicKey getPublicKeyById(String keyId) {return null;}
 					public RSAPrivateKey getPrivateKey() { return privateKey; }
 				});
 			    String token = JWT.create()
-			    		.withIssuer(fcmAccountKey.getString("client_email"))
-			    		.withAudience(fcmAccountKey.getString("token_uri"))
+			    		.withIssuer(fcmConfig.getString("client_email"))
+			    		.withAudience(fcmConfig.getString("token_uri"))
 			    		.withExpiresAt(new Date((new Date()).getTime() + 1800000))
 			    		.withClaim("scope", "https://www.googleapis.com/auth/cloud-platform")
 			    		.withClaim("iat", ((new Date()).getTime() / 1000))
@@ -266,7 +266,7 @@ public class RedbackNotificationServer extends NotificationServer {
 			    DataMap form = new DataMap();
 			    form.put("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
 			    form.put("assertion", token);
-			    DataMap resp = gatewayClient.postForm(fcmAccountKey.getString("token_uri"), form, null, null);
+			    DataMap resp = gatewayClient.postForm(fcmConfig.getString("token_uri"), form, null, null);
 			    fcmAccessToken = resp.getString("access_token");
 			    fcmAccessTokenExpiry = now + (resp.getNumber("expires_in").longValue() * 1000);
 			} 
@@ -307,7 +307,7 @@ public class RedbackNotificationServer extends NotificationServer {
 							headers.put("Content-Type", "application/json");
 							headers.put("Authorization", "Bearer " + accessToken);
 							try {
-								gatewayClient.post("https://fcm.googleapis.com/v1/projects/" + fcmAccountKey.getString("project_id") + "/messages:send", body, headers, null);
+								gatewayClient.post("https://fcm.googleapis.com/v1/projects/" + fcmConfig.getString("project_id") + "/messages:send", body, headers, null);
 							} catch(Exception e) {
 								Throwable t = e;
 								while(t != null && !(t instanceof FunctionErrorException)) t = t.getCause();

@@ -162,7 +162,7 @@ public class RedbackObjectJSWrapper implements ProxyObject
 	public void putMember(String key, Value value) {
 		try
 		{
-			rbObject.put(key, new io.redback.managers.objectmanager.Value(JSConverter.toJava(value)));
+			rbObject.put(key, new io.redback.managers.objectmanager.Value(JSConverter.toJava(value)), true);
 		} 
 		catch (RedbackException e)
 		{

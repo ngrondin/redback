@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -31,9 +32,9 @@ public class RedbackObject extends RedbackElement
 	protected boolean canRead;
 	protected boolean canWrite;
 	protected boolean canExecute;
-	protected HashMap<String, Value> data;
-	protected HashMap<String, RedbackObject> related;
-	protected ArrayList<String> updatedAttributes;
+	protected Map<String, Value> data;
+	protected Map<String, RedbackObject> related;
+	protected Map<String, Boolean> updatedAttributes;
 	protected boolean isNewObject;
 	protected boolean isDeleted;
 
@@ -133,7 +134,7 @@ public class RedbackObject extends RedbackElement
 						value = new Value(defaultValue.eval(scriptContext));
 					if(value != null) {
 						data.put(attributeName, value);
-						updatedAttributes.add(attributeName);	
+						updatedAttributes.put(attributeName, true);	
 						executeAttributeScriptsForEvent(attributeName, "onupdate");
 					}
 				}
@@ -161,7 +162,7 @@ public class RedbackObject extends RedbackElement
 		canExecute = session.getUserProfile().canExecute("rb.objects." + config.getName());
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
-		updatedAttributes = new ArrayList<String>();
+		updatedAttributes = new HashMap<String, Boolean>();
 		scriptContext = objectManager.createScriptContext(session);
 		scriptContext.put("self", new RedbackObjectJSWrapper(this));
 	}
@@ -333,7 +334,7 @@ public class RedbackObject extends RedbackElement
 		return filter;
 	}
 	
-	public void put(String name, Value value) throws RedbackException
+	public void put(String name, Value value, boolean isAutomated) throws RedbackException
 	{
 		AttributeConfig attributeConfig = getObjectConfig().getAttributeConfig(name);
 		if(attributeConfig != null)
@@ -354,8 +355,7 @@ public class RedbackObject extends RedbackElement
 				if(canWrite  &&  (isEditable(name) || isNewObject))
 				{
 					data.put(name, actualValue);
-					updatedAttributes.add(name);	
-					//updateScriptContext();
+					updatedAttributes.put(name, isAutomated);	
 					if(attributeConfig.getExpression() == null) 
 						scriptContext.put(name, JSConverter.toJS(actualValue.getObject()));
 					scriptContext.put("previousValue", currentValue.getObject());
@@ -377,12 +377,12 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 
-	public void put(String name, String value) throws RedbackException
+	public void put(String name, String value, boolean isAutomated) throws RedbackException
 	{
-		put(name, new Value(value));
+		put(name, new Value(value), isAutomated);
 	}
 	
-	public void put(String name, RedbackObject relatedObject) throws RedbackException
+	public void put(String name, RedbackObject relatedObject, boolean isAutomated) throws RedbackException
 	{
 		if(config.getAttributeConfig(name).hasRelatedObject())
 		{
@@ -391,15 +391,25 @@ public class RedbackObject extends RedbackElement
 			{
 				String relatedObjectLinkAttribute = roc.getLinkAttributeName();
 				Value linkValue = relatedObject.get(relatedObjectLinkAttribute);
-				put(name, linkValue);
+				put(name, linkValue, isAutomated);
 				related.put(name, relatedObject);
 			}			
 		}
 	}
 	
-	public void clear(String name) throws ScriptException, RedbackException
+	public void setRelated(String name, RedbackObject relatedObject) throws RedbackException
 	{
-		put(name, new Value(null));
+		if(config.getAttributeConfig(name).hasRelatedObject())
+		{
+			RelatedObjectConfig roc = config.getAttributeConfig(name).getRelatedObjectConfig();
+			if(relatedObject.getObjectConfig().getName().equals(roc.getObjectName()))
+				related.put(name, relatedObject);
+		}
+	}
+	
+	public void clear(String name, boolean isAutomated) throws ScriptException, RedbackException
+	{
+		put(name, new Value(null), isAutomated);
 	}
 	
 	public boolean isEditable(String name) throws RedbackException
@@ -450,7 +460,7 @@ public class RedbackObject extends RedbackElement
 	
 	public List<String> getUpdatedAttributes() 
 	{
-		return updatedAttributes;
+		return new ArrayList<String>(updatedAttributes.keySet());
 	}
 	
 	public void save() throws ScriptException, RedbackException
@@ -469,22 +479,28 @@ public class RedbackObject extends RedbackElement
 				DataMap key = new DataMap();
 				key.put(config.getUIDDBKey(), getUID().getObject());
 
+				DataMap traceData = new DataMap();
 				DataMap dbData = new DataMap();
 				if(isNewObject && config.isDomainManaged())
 					dbData.put(config.getDomainDBKey(), domain.getObject());
 				
-				for(int i = 0; i < updatedAttributes.size(); i++)
+				
+				for(String attributeName: updatedAttributes.keySet())
 				{
-					AttributeConfig attributeConfig = config.getAttributeConfig(updatedAttributes.get(i));
-					String attributeName = attributeConfig.getName();
+					AttributeConfig attributeConfig = config.getAttributeConfig(attributeName);
 					String attributeDBKey = attributeConfig.getDBKey();
 					if(attributeDBKey != null)
 					{
-						dbData.put(attributeDBKey, get(attributeName).getObject());
+						Object val = get(attributeName).getObject();
+						dbData.put(attributeDBKey, val);
+						if(updatedAttributes.get(attributeName) == false && config.traceUpdates())
+							traceData.put(attributeName, val);
 					}
 				}
 				objectManager.getDataClient().putData(config.getCollection(), key, dbData);
 				objectManager.signal(this);
+				for(String attributeName: traceData.keySet()) 
+					objectManager.trace(config.getName(), uid.getString(), getDomain().getString(), attributeName, traceData.get(attributeName), session.getUserProfile().getUsername());
 			}
 			else
 			{
