@@ -167,72 +167,6 @@ public class RedbackUIServer extends UIServer
 		}
 	}
 	
-	/*protected HTML getHTMLView(Session session, String viewName, String version)
-	{
-		return getHTMLView(session, viewName, version, null);
-	}
-
-	protected HTML getHTMLView(Session session, String viewName, String version, Map<String, Object> context) 
-	{
-		HTML viewHTML = new HTML();
-		if(session != null)
-		{
-			if(session.getUserProfile().canRead("rb.views." + viewName))
-			{
-				try
-				{
-					DataMap viewConfig = viewConfigs.get(viewName);
-					if(viewConfig == null)
-					{
-						viewConfig = configClient.getConfig(session, "rbui", "view", viewName);
-						viewConfigs.put(viewName, viewConfig);
-					}
-					if(viewConfig != null)
-					{
-						if(context == null)
-						{
-							context = new HashMap<String, Object>();
-							context.put("session", new SessionJSWrapper(session));
-							context.put("utils", new RedbackUtilsJSWrapper());
-							context.put("parents", JSConverter.toJS(new DataMap()));
-							context.put("nextid", 1000);
-							context.put("canWrite", true);
-							context.put("canExecute", true);
-							viewHTML.append("<rb-view\r\n\t(afterload)=\"setTitle('" + viewConfig.getString("label") + "')\">\r\n\t#content#\r\n</rb-view>");
-						}
-						context.put("canWrite", session.getUserProfile().canWrite("rb.views." + viewName) & (boolean)context.get("canWrite"));
-						context.put("canExecute", session.getUserProfile().canExecute("rb.views." + viewName) & (boolean)context.get("canExecute"));
-
-						DataList contentList = viewConfig.getList("content");
-						HTML contentHTML = new HTML();
-						for(int i = 0; i < contentList.size(); i++)
-							contentHTML.append(generateHTMLFromComponentConfig(session, contentList.getObject(i), version, context));
-						if(viewHTML.hasTag("content"))
-							viewHTML.inject("content", contentHTML);
-						else
-							viewHTML = contentHTML;
-					}
-					else
-					{
-						viewHTML.append("<div>View name does not exist</div>");
-					}
-				}
-				catch(Exception e)
-				{
-					viewHTML = formatErrorMessage("Error retrieving view " + viewName, e);
-				}
-			}
-			else
-			{
-				// Intentionnaly leaving the view blank when no right to read it
-			}
-		}
-		else
-		{
-			viewHTML.append("Not logged in");
-		}
-		return viewHTML;
-	}*/
 
 	protected DataMap getView(Session session, String domain, String viewName)
 	{
@@ -251,6 +185,7 @@ public class RedbackUIServer extends UIServer
 					DataMap viewConfig = getViewConfig(session, domain, viewName);
 					if(viewConfig != null) {
 						clientConfig.put("label", viewConfig.getString("label"));
+						clientConfig.put("onload", viewConfig.getString("onload"));
 						clientConfig.put("content", getViewContent(session, domain, viewName, context));						
 					} else {
 						clientConfig.put("error", "View " + viewName + " does not exist");
@@ -269,61 +204,7 @@ public class RedbackUIServer extends UIServer
 		}
 		return clientConfig;
 	}
-	
-	protected DataMap getDomainView(Session session, String domain, String viewName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	/*protected HTML generateHTMLFromComponentConfig(Session session, DataMap componentConfig, String version, Map<String, Object> context) throws RedbackException
-	{
-		String type = componentConfig.getString("type");
-		HTML componentHTML = new HTML();
-		if(type != null)
-		{
-			if(type.equals("view"))
-			{
-				String viewName = componentConfig.getString("name");
-				componentHTML = getHTMLView(session, viewName, version, context);
-			}
-			else
-			{
-				String id = type + ((int)context.get("nextid"));
-				context.put("nextid", ((int)context.get("nextid")) + 1);
-				String inlineStyle = "";
-				String grow = componentConfig.getString("grow");
-				String shrink = componentConfig.getString("shrink");
-				if(grow != null)
-					inlineStyle += "flex-grow:" + ((int)Double.parseDouble(grow)) + ";";
-				if(shrink != null)
-					inlineStyle += "flex-shrink:" + ((int)Double.parseDouble(shrink)) + ";";
 
-				if(inlineStyle.length() > 0)
-					componentConfig.put("inlineStyle", inlineStyle);
-				if(componentConfig.get("show") == null)
-					componentConfig.put("show", "true");
-				context.put("config", JSConverter.toJS(componentConfig));
-				context.put("id", id);
-
-				componentHTML = executeJSP("fragments/" + type, version, context);
-				if(componentHTML.hasTag("content") && componentConfig.containsKey("content"))
-				{
-					Value parentSameType = (Value)((ProxyObject)context.get("parents")).getMember(type);
-					((ProxyObject)context.get("parents")).putMember(type, Value.asValue(id));
-					HTML contentHTML = new HTML();
-					DataList content = componentConfig.getList("content");
-					for(int i = 0; i < content.size(); i++)
-						contentHTML.append(generateHTMLFromComponentConfig(session, content.getObject(i), version, context));
-					componentHTML.inject("content", contentHTML);
-					if(parentSameType != null)
-						((ProxyObject)context.get("parents")).putMember(type, parentSameType);
-					else
-						((ProxyObject)context.get("parents")).removeMember(type);
-				}
-			}
-		}
-		return componentHTML;
-	}*/
 
 	protected DataList getViewContent(Session session, String domain, String viewName, Map<String, Object> context) throws RedbackException 
 	{

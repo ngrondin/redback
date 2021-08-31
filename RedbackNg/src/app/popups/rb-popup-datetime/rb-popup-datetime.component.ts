@@ -26,6 +26,7 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
   day: number;
   hour: number;
   minute: number;
+  daysInMonth: number;
   firstDayOfMonth: number;
   numberOfWeeks: number;
   calendar: any[];
@@ -69,29 +70,35 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
   }
 
   public getOutput() : any {
-    let newDate = new Date();
-    newDate.setFullYear(this.year);
-    newDate.setMonth(this.month);
-    newDate.setDate(this.day);
-    newDate.setHours(this.config.hourPart == true ? this.hour : 0);
-    newDate.setMinutes(this.config.minutePart == true ? this.minute : 0);
-    newDate.setSeconds(0);
-    newDate.setMilliseconds(0);
-    return newDate;
+    return new Date(this.year, this.month, this.day, this.config.hourPart == true ? this.hour : 0, this.config.minutePart == true ? this.minute : 0, 0, 0);
+  }
+
+  public validate() {
+    if(this.month > 11) {
+      this.year++;
+      this.month = 0;
+    }
+    if(this.month < 0) {
+      this.year--;
+      this.month = 11;
+    }
+    let daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
+    while(this.day > daysInMonth) {
+      this.day--;
+    }
   }
 
   public calcCalendarSettings() {
     let firstOfTheMonth = new Date(this.getOutput().setDate(1));
-    let firstOfNextMonth = new Date((new Date(firstOfTheMonth.getTime() + 2678400000)).setDate(1));
-    let daysInMonth = (firstOfNextMonth.getTime() - firstOfTheMonth.getTime()) / 86400000;
+    this.daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
     this.firstDayOfMonth = firstOfTheMonth.getDay() - 1;
-    this.numberOfWeeks = (daysInMonth + this.firstDayOfMonth + 1 ) / 7;
+    this.numberOfWeeks = (this.daysInMonth + this.firstDayOfMonth + 1 ) / 7;
     let day : number = -this.firstDayOfMonth;
     this.calendar = [];
     for(let w = 0; w < this.numberOfWeeks; w++) {
       let week = [];
       for(let d = 0; d < 7; d++) {
-        if(day < 1 || day > daysInMonth)
+        if(day < 1 || day > this.daysInMonth)
           week.push("");
         else
           week.push(day);
@@ -103,19 +110,13 @@ export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit
 
   public nextMonth() {
     this.month++;
-    if(this.month > 11) {
-      this.year++;
-      this.month = 0;
-    }
+    this.validate();
     this.calcCalendarSettings();
   }
 
   public previousMonth() {
     this.month--;
-    if(this.month < 0) {
-      this.year--;
-      this.month = 11;
-    }
+    this.validate();
     this.calcCalendarSettings();
   }
 

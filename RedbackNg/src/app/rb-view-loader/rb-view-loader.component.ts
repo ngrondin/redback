@@ -28,7 +28,6 @@ export class LoadedView extends RbActivatorComponent {
   constructor(t: string) {
     super();
     this.title = t;
-    //this.active = true;
   }
 
   activatorInit() {}
@@ -94,7 +93,9 @@ export class RbViewLoaderComponent implements OnInit {
     private apiService: ApiService,
     private dataService: DataService,
     private componentFactoryResolver:ComponentFactoryResolver
-  ) { }
+  ) { 
+    window.redback.api = apiService;
+  }
 
   ngOnInit() {
     for(let key of Object.keys(componentRegistry)) {
@@ -131,6 +132,9 @@ export class RbViewLoaderComponent implements OnInit {
           let context: any = {activator: entry};
           entry.rootComponentRefs.push(this.buildConfigRecursive(null, item, context, entry));
         }
+      }
+      if(config.onload != null) {
+        Function(config.onload).call(window.redback);
       }
       this.viewCache[hash] = entry;
       console.timeEnd('build');
@@ -210,5 +214,4 @@ export class RbViewLoaderComponent implements OnInit {
     }
     return newComponentRef;
   }
-
 }
