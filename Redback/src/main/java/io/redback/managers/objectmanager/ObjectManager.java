@@ -1119,7 +1119,7 @@ public class ObjectManager
 				data.put("value", value);
 				data.put("username", username);
 				data.put("date", new Date());
-				dataClient.publishData(traceCollection.getName(), traceCollection.convertObjectToSpecific(key), traceCollection.convertObjectToSpecific(data));
+				dataClient.putData(traceCollection.getName(), traceCollection.convertObjectToSpecific(key), traceCollection.convertObjectToSpecific(data));
 			}
 			catch(Exception e) 
 			{
