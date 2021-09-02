@@ -19,6 +19,13 @@ public class Actionner
 	public static int PROCESS = 3;
 
 
+	public Actionner(String i)
+	{
+		id = i;
+		type = USER;
+		groups = new ArrayList<String>();
+	}
+	
 	public Actionner(Session s) 
 	{
 		session = s;

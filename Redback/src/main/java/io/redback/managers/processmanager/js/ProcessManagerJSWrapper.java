@@ -12,9 +12,9 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.managers.processmanager.Actionner;
+import io.redback.managers.processmanager.Notification;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
-import io.redback.utils.Notification;
 import io.redback.utils.js.JSConverter;
 
 public class ProcessManagerJSWrapper implements ProxyObject

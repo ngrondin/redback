@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
@@ -26,7 +27,6 @@ import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 import io.redback.utils.CollectionConfig;
-import io.redback.utils.Notification;
 import io.redback.utils.StringUtils;
 
 
@@ -496,12 +496,15 @@ public class ProcessManager
 		return users;
 	}
 	
-	public void sendNotification(Notification notification)
+	public void sendNotification(Map<String, Notification> sendMap)
 	{
 		if(processNotificationChannel != null) {
 			try 
 			{
-				Payload payload = new Payload(notification.getDataMap().toString());
+				DataMap data = new DataMap();
+				for(String username: sendMap.keySet()) 
+					data.put(username, sendMap.get(username).getDataMap());
+				Payload payload = new Payload(data.toString());
 				logger.finest("Publishing process notification");
 				firebus.publish(processNotificationChannel, payload);
 				logger.finest("Published process notification");
@@ -522,16 +525,15 @@ public class ProcessManager
 				intcomp.put("process", processName);
 				intcomp.put("pid", pid);
 				intcomp.put("code", code);
-				DataList toList = new DataList();
-				for(String username: to)
-					toList.add(username);
-				intcomp.put("to", toList);
 				intcomp.put("completed", true);
-				Payload payload = new Payload(intcomp.toString());
+				DataMap sendMap = new DataMap();
+				for(String username: to) {
+					sendMap.put(username, intcomp);
+				}
+				Payload payload = new Payload(sendMap.toString());
 				logger.finest("Publishing process notification completion");
 				firebus.publish(processNotificationChannel, payload);
 				logger.finest("Published process notification completion");
-
 			}
 			catch(Exception e) 
 			{

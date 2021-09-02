@@ -99,6 +99,7 @@ export class NotificationService {
     for(let notif of sub) {
       //console.log('comp notification: ' + notif.code + " " + notif.pid);
       this.publish("completion", notif);
+      this.removeAllProcessNotifications(notif.pid);
       this.lastReceived = new Date();
     }
   }

@@ -2,7 +2,9 @@ package io.redback.managers.clientmanager;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import io.firebus.Firebus;
@@ -136,17 +138,17 @@ public class ClientManager extends Thread {
 	}
 	
 	public void onNotification(DataMap data) throws RedbackException {
-		DataList to = data.getList("to"); 
-		List<ClientHandler> subscribers = new ArrayList<ClientHandler>();
+		Map<String, ClientHandler> handlers = new HashMap<String, ClientHandler>();
 		synchronized(clientHandlers) {
-			for(ClientHandler ch: clientHandlers)
-				for(int i = 0; i < to.size(); i++) 
-					if(ch.getSession().getUserProfile().getUsername().equals(to.getString(i)))
-						subscribers.add(ch);			
+			for(String username: data.keySet()) {
+				for(ClientHandler ch: clientHandlers)
+					if(ch.getSession().getUserProfile().getUsername().equals(username))
+						handlers.put(username, ch);
+			}
 		}
-		for(ClientHandler ch : subscribers) {
-			ch.receiveNotification(data);
-		}		
+		for(String username: data.keySet()) {
+			handlers.get(username).receiveNotification(data.getObject(username));
+		}	
 	}
 	
 	public void onChatMessage(DataMap data) throws RedbackException {

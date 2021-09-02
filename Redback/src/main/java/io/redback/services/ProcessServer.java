@@ -10,10 +10,10 @@ import io.firebus.utils.DataException;
 import io.firebus.utils.DataList;
 import io.firebus.utils.DataMap;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.processmanager.Notification;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
-import io.redback.utils.Notification;
 
 public abstract class ProcessServer extends AuthenticatedServiceProvider
 {

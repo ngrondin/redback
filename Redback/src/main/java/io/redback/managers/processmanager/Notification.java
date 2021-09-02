@@ -1,4 +1,4 @@
-package io.redback.utils;
+package io.redback.managers.processmanager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +28,11 @@ public class Notification {
 	public String label;
 	public String message;
 	public List<Action> actions;
-	public List<String> to;
+	//public List<String> to;
 	public DataMap data;
 	
 	
-	public Notification(String pn, String p, String c, String t, String l, String m) {
+	public Notification(String pn, String p, String c, String t, String l, String m, DataMap d) {
 		processName = pn;
 		pid = p;
 		code = c;
@@ -40,10 +40,11 @@ public class Notification {
 		label = l;
 		message = m;
 		actions = new ArrayList<Action>();
-		to = new ArrayList<String>();
+		data = d;
+		//to = new ArrayList<String>();
 	}
 	
-	public Notification(DataMap c) {
+	/*public Notification(DataMap c) {
 		processName = c.getString("process");
 		pid = c.getString("pid");
 		code = c.getString("code");
@@ -68,7 +69,7 @@ public class Notification {
 		if(c.containsKey("data")) {
 			data = c.getObject("data");
 		}
-	}
+	}*/
 	
 	public void addAction(String action, String desc, boolean m)
 	{
@@ -76,9 +77,9 @@ public class Notification {
 		actions.add(a);
 	}
 	
-	public void addTo(String username) {
+	/*public void addTo(String username) {
 		to.add(username);
-	}
+	}*/
 	
 	public void addData(String key, Object val)
 	{
@@ -133,21 +134,15 @@ public class Notification {
 		map.put("message", message);
 		if(actions.size() > 0) {
 			DataList actionList = new DataList();
-			for(int i = 0; i < actions.size(); i++)
-			{
-				DataMap action = new DataMap();
-				action.put("action", actions.get(i).action);
-				action.put("description", actions.get(i).description);
-				action.put("main", actions.get(i).main);
-				actionList.add(action);
+			for(Action action: actions) {
+				DataMap actionMap = new DataMap();
+				actionMap.put("action", action.action);
+				actionMap.put("description", action.description);
+				actionMap.put("main", action.main);
+				actionList.add(actionMap);					
+				
 			}
 			map.put("actions", actionList);
-		}
-		if(to.size() > 0) {
-			DataList toList = new DataList();
-			for(int i = 0; i < to.size(); i++)
-				toList.add(to.get(i));
-			map.put("to", toList);
 		}
 		if(data != null)
 			map.put("data", data);		

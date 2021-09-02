@@ -6,11 +6,11 @@ import java.util.List;
 import io.firebus.utils.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.Actionner;
+import io.redback.managers.processmanager.Notification;
 import io.redback.managers.processmanager.Process;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.utils.Notification;
 
 public class ActionUnit extends ProcessUnit 
 {

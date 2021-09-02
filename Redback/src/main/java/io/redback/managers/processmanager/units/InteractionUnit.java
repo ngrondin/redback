@@ -2,6 +2,7 @@ package io.redback.managers.processmanager.units;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,10 +15,11 @@ import io.redback.managers.processmanager.ActionConfig;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignee;
 import io.redback.managers.processmanager.AssigneeConfig;
+import io.redback.managers.processmanager.Notification;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.utils.Notification;
+import io.redback.managers.processmanager.RawNotification;
 import io.redback.managers.processmanager.Process;
 
 public class InteractionUnit extends ProcessUnit 
@@ -63,13 +65,14 @@ public class InteractionUnit extends ProcessUnit
 		List<Assignee> assignees = getAssignes(pi);
 		for(Assignee assignee : assignees)
 			pi.addAssignee(assignee);
-		Notification notification = getNotification(pi);
+		RawNotification rn = getRawNotification(pi);
 		List<String> usernames = getAssigneeUsernames(pi, assignees);
+		Map<String, Notification> sendMap = new HashMap<String, Notification>();
 		if(usernames.size() > 0) 
 		{
 			for(String username: usernames)
-				notification.addTo(username);
-			pi.getProcessManager().sendNotification(notification);
+				sendMap.put(username, rn.getNotificationForActionner(new Actionner(username)));
+			pi.getProcessManager().sendNotification(sendMap);
 		}
 		logger.finer("Finished interaction node execution");
 	}
@@ -123,9 +126,8 @@ public class InteractionUnit extends ProcessUnit
 	{
 		if(isAssignee(actionner, pi)) 
 		{
-			Notification notification = getNotification(pi);
-			notification.addTo(actionner.getId());
-			return notification;
+			RawNotification rn = getRawNotification(pi);
+			return rn.getNotificationForActionner(actionner);
 		}
 		else
 		{
@@ -182,18 +184,31 @@ public class InteractionUnit extends ProcessUnit
 	
 
 	
-	private Notification getNotification(ProcessInstance pi) throws RedbackException 
+	private RawNotification getRawNotification(ProcessInstance pi) throws RedbackException 
 	{
 		Map<String, Object> context = pi.getScriptContext();
 		String code = notificationConfig.getString("code");
 		String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
 		String label = (String)labelExpression.eval(context);
 		String message = (String)messageExpression.eval(context);
-		Notification notification = new Notification(pi.getProcessName(), pi.getId(), code, type, label, message);
+		RawNotification notification = new RawNotification(pi.getProcessName(), pi.getId(), code, type, label, message);
 		for(ActionConfig actionConfig: actionConfigs)
 		{
-			//if(!actionConfig.isExclusive() || (actionConfig.isExclusive() && assigneeMatch(actionner, pi.getAssigneeById((String)actionConfig.evaluateExclusiveId(pi)))))
-			notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain());
+			String[] exclusiveAppliesTo = null;
+			if(actionConfig.isExclusive()) {
+				Object exclusiveValue = actionConfig.evaluateExclusiveId(pi);
+				if(exclusiveValue instanceof String) {
+					exclusiveAppliesTo = new String[1];
+					exclusiveAppliesTo[0] = (String)exclusiveValue;
+				} else if(exclusiveValue instanceof DataList) {
+					DataList list = (DataList)exclusiveValue;
+					exclusiveAppliesTo = new String[list.size()];
+					for(int i = 0; i < list.size(); i++) {
+						exclusiveAppliesTo[i] = list.getString(i);
+					}
+				}
+			}
+			notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain(), exclusiveAppliesTo);
 		}
 		if(pi.getData() != null && pi.getData().containsKey("objectname") && pi.getData().containsKey("uid")) {
 			notification.addData("objectname", pi.getData().getString("objectname"));

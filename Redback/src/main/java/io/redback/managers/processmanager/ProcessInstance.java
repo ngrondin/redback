@@ -123,6 +123,10 @@ public class ProcessInstance
 		return outboundActionner;
 	}
 	
+	public Actionner getInboundActionner()
+	{
+		return inboundActionner;
+	}	
 	
 	public DataMap getData()
 	{
