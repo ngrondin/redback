@@ -147,7 +147,8 @@ public class ClientManager extends Thread {
 			}
 		}
 		for(String username: data.keySet()) {
-			handlers.get(username).receiveNotification(data.getObject(username));
+			if(handlers.containsKey(username))
+				handlers.get(username).receiveNotification(data.getObject(username));
 		}	
 	}
 	
