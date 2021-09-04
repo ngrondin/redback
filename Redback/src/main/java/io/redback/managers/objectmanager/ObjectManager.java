@@ -41,6 +41,8 @@ import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.client.js.ProcessClientJSWrapper;
 import io.redback.client.js.ReportClientJSWrapper;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackResourceNotFoundException;
+import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.jsmanager.JSManager;
@@ -435,12 +437,12 @@ public class ObjectManager
 				}		
 			}
 			if(object == null)
-				throw new RedbackException("No " + objectName + " object exists with uid " + id);
+				throw new RedbackResourceNotFoundException("No " + objectName + " object exists with uid " + id);
 			return object;
 		}
 		else
 		{
-			throw new RedbackException("User does not have the right to read object " + objectName);
+			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
 		}
 	}
 	
@@ -526,12 +528,12 @@ public class ObjectManager
 			}
 			else
 			{
-				throw new RedbackException("No object config is available for '" + objectName + "'");	
+				throw new RedbackResourceNotFoundException("No object config is available for '" + objectName + "'");	
 			}
 		}
 		else 
 		{
-			throw new RedbackException("User does not have the right to read object " + objectName);
+			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
 		}
 	}
 	
@@ -794,7 +796,7 @@ public class ObjectManager
 			}
 			return list;	
 		} else {
-			throw new RedbackException("User does not have the right to read object " + objectName);
+			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
 		}
 	}
 	
