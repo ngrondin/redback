@@ -1,6 +1,6 @@
 package io.redback.managers.domainmanager;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class DomainReport extends DomainEntry {
 

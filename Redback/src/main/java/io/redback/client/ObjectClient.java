@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.Firebus;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 

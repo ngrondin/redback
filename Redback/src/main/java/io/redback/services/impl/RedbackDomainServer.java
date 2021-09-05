@@ -3,8 +3,8 @@ package io.redback.services.impl;
 import java.util.List;
 
 import io.firebus.Firebus;
-import io.firebus.utils.DataEntity;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataEntity;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.domainmanager.DomainFunctionInfo;
 import io.redback.managers.domainmanager.DomainManager;

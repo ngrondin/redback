@@ -1,6 +1,6 @@
 package io.redback.managers.reportmanager;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class ReportInfo {
 	public String name;

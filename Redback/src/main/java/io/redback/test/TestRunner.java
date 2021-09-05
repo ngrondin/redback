@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 
 public class TestRunner {

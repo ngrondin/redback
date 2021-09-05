@@ -11,8 +11,8 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.utils.DataException;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataException;
+import io.firebus.data.DataMap;
 import io.redback.security.Session;
 
 public class FirebusJSWrapper implements ProxyObject

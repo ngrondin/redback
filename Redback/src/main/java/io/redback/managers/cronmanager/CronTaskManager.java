@@ -17,8 +17,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;

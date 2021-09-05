@@ -3,7 +3,7 @@ package io.redback.managers.reportmanager.pdf;
 import java.io.IOException;
 import java.util.Map;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;

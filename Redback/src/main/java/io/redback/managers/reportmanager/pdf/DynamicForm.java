@@ -18,9 +18,9 @@ import javax.imageio.ImageIO;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
-import io.firebus.utils.DataEntity;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataEntity;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.redback.client.FileClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;

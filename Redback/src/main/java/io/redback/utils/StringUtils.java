@@ -21,9 +21,9 @@ import org.bson.internal.Base64;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.SourceSection;
 
-import io.firebus.utils.DataEntity;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataEntity;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 
 public class StringUtils
 {

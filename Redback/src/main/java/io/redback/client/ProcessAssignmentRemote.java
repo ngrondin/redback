@@ -2,7 +2,7 @@ package io.redback.client;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class ProcessAssignmentRemote {
 	public DataMap data;

@@ -9,7 +9,7 @@ import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.client.GeoClient;
 import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;

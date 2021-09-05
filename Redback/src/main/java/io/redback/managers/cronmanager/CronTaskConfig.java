@@ -4,7 +4,7 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 
 public class CronTaskConfig {

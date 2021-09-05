@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class CollectionConfig {
 	

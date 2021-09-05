@@ -2,10 +2,10 @@ package io.redback.utils;
 
 import java.util.Iterator;
 
-import io.firebus.utils.DataEntity;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataLiteral;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataEntity;
+import io.firebus.data.DataList;
+import io.firebus.data.DataLiteral;
+import io.firebus.data.DataMap;
 
 public class FilterProcessor {
 	

@@ -38,6 +38,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.firebus</groupId>
+			<artifactId>firebus-data</artifactId>
+			<version>${io.firebus.version}</version>
+		</dependency>	
+		<dependency>
+			<groupId>io.firebus</groupId>
 			<artifactId>firebus-core</artifactId>
 			<version>${io.firebus.version}</version>
 		</dependency>

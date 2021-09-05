@@ -4,8 +4,8 @@ import java.util.Date;
 import java.util.List;
 
 import io.firebus.Firebus;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Notification;

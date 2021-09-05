@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.firebus.utils.DataEntity;
-import io.firebus.utils.DataLiteral;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataEntity;
+import io.firebus.data.DataLiteral;
+import io.firebus.data.DataMap;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;

@@ -12,8 +12,8 @@ import javax.script.ScriptException;
 
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
-import io.firebus.utils.DataFilter;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataFilter;
+import io.firebus.data.DataMap;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.exceptions.RedbackException;

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.firebus.Payload;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;

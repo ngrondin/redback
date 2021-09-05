@@ -1,6 +1,6 @@
 package io.redback.utils;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class Geometry {
 	protected DataMap config;

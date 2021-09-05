@@ -9,8 +9,8 @@ import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Notification;
 import io.redback.managers.processmanager.ProcessInstance;

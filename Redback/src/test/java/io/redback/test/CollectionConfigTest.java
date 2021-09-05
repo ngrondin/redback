@@ -1,6 +1,6 @@
 package io.redback.test;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.utils.CollectionConfig;
 
 public class CollectionConfigTest {

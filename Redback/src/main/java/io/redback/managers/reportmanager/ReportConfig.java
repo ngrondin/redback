@@ -1,7 +1,7 @@
 package io.redback.managers.reportmanager;
 
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 
 

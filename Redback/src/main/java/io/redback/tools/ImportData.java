@@ -14,8 +14,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
 

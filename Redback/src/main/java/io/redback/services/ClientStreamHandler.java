@@ -5,8 +5,8 @@ import org.apache.commons.codec.binary.Base64;
 
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.StreamHandler;

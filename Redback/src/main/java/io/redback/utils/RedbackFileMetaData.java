@@ -2,7 +2,7 @@ package io.redback.utils;
 
 import java.util.Date;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class RedbackFileMetaData {
 	public String fileuid;

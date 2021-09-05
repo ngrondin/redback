@@ -7,9 +7,9 @@ import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.utils.DataEntity;
-import io.firebus.utils.DataLiteral;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataEntity;
+import io.firebus.data.DataLiteral;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 
 public class RedbackObjectRemote {

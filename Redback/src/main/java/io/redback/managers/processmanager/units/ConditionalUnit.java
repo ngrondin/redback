@@ -1,6 +1,6 @@
 package io.redback.managers.processmanager.units;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;

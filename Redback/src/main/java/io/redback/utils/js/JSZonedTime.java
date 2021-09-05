@@ -11,7 +11,7 @@ import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-import io.firebus.utils.ZonedTime;
+import io.firebus.data.ZonedTime;
 
 public class JSZonedTime implements ProxyObject {
 	protected String[] members = {"atDate", "toString"};

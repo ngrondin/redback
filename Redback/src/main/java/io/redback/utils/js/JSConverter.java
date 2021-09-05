@@ -13,11 +13,11 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-import io.firebus.utils.DataEntity;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataLiteral;
-import io.firebus.utils.DataMap;
-import io.firebus.utils.ZonedTime;
+import io.firebus.data.DataEntity;
+import io.firebus.data.DataList;
+import io.firebus.data.DataLiteral;
+import io.firebus.data.DataMap;
+import io.firebus.data.ZonedTime;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.managers.objectmanager.RedbackObject;

@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 import javax.script.ScriptException;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
 import io.redback.managers.objectmanager.js.RedbackAggregateJSWrapper;

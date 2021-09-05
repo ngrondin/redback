@@ -1,7 +1,7 @@
 package io.redback.services.impl;
 
 import io.firebus.Firebus;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.managers.cronmanager.CronTaskManager;
 import io.redback.services.CronServer;
 

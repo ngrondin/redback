@@ -7,7 +7,7 @@ import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.client.FileClient;
 import io.redback.security.Session;
 import io.redback.utils.js.JSConverter;

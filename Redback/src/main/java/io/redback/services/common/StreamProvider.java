@@ -8,7 +8,7 @@ import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.threads.FirebusThread;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.Timer;

@@ -3,7 +3,7 @@ package io.redback.managers.processmanager.units;
 import java.util.List;
 
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Notification;

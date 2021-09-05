@@ -22,8 +22,8 @@ import io.firebus.interfaces.Consumer;
 import io.firebus.interfaces.ServiceProvider;
 import io.firebus.interfaces.StreamProvider;
 import io.firebus.logging.FirebusConsoleHandler;
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.redback.services.common.Provider;
 import io.redback.utils.Watchdog;
 

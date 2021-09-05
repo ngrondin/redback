@@ -2,7 +2,7 @@ package io.redback.managers.reportmanager;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 

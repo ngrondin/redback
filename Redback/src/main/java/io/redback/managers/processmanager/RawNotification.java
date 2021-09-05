@@ -3,7 +3,7 @@ package io.redback.managers.processmanager;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class RawNotification {
 	public class Action {

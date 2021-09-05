@@ -17,7 +17,7 @@ import java.util.Map;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.reportmanager.ReportConfig;

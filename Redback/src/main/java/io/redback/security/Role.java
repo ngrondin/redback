@@ -1,6 +1,6 @@
 package io.redback.security;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class Role
 {
