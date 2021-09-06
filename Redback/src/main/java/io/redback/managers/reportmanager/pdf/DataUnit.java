@@ -59,33 +59,37 @@ public abstract class DataUnit extends Unit {
 	
 	protected List<String> cutToLines(String text, float width) throws IOException {
 		List<String> lines = new ArrayList<String>();
-	    int lastSpace = -1;
-	    while (text.length() > 0)
-	    {
-	        int spaceIndex = text.indexOf(' ', lastSpace + 1);
-	        if (spaceIndex < 0)
-	            spaceIndex = text.length();
-	        String subString = text.substring(0, spaceIndex);
-	        float size = getStringWidth(subString);
-	        if (size > width)
-	        {
-	            if (lastSpace < 0)
-	                lastSpace = spaceIndex;
-	            subString = text.substring(0, lastSpace);
-	            lines.add(subString);
-	            text = text.substring(lastSpace).trim();
-	            lastSpace = -1;
-	        }
-	        else if (spaceIndex == text.length())
-	        {
-	            lines.add(text);
-	            text = "";
-	        }
-	        else
-	        {
-	            lastSpace = spaceIndex;
-	        }
-	    }
+		if(text.length() > 0) {
+		    int lastSpace = -1;
+		    while (text.length() > 0)
+		    {
+		        int spaceIndex = text.indexOf(' ', lastSpace + 1);
+		        if (spaceIndex < 0)
+		            spaceIndex = text.length();
+		        String subString = text.substring(0, spaceIndex);
+		        float size = getStringWidth(subString);
+		        if (size > width)
+		        {
+		            if (lastSpace < 0)
+		                lastSpace = spaceIndex;
+		            subString = text.substring(0, lastSpace);
+		            lines.add(subString);
+		            text = text.substring(lastSpace).trim();
+		            lastSpace = -1;
+		        }
+		        else if (spaceIndex == text.length())
+		        {
+		            lines.add(text);
+		            text = "";
+		        }
+		        else
+		        {
+		            lastSpace = spaceIndex;
+		        }
+		    }			
+		} else {
+			lines.add("");
+		}
 	    return lines;
 	}
 	

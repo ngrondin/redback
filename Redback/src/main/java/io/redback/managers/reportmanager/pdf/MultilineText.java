@@ -19,7 +19,7 @@ public class MultilineText extends DataUnit {
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
 		String valueStr = getSringValue(context);
-		valueStr = valueStr.replace("\r", "");
+		valueStr = valueStr.replace("\r", "").replace("\t", "   ");
 		String[] lines = valueStr.split("\n");
 		Box c = Box.VContainer(canBreak);
 		c.breakBefore = pagebreak;

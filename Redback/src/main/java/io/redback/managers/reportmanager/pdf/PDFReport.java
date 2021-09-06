@@ -58,25 +58,23 @@ public class PDFReport extends Report {
 			context.put("session", session);
 			context.put("filter", filter);
 			context.put("document", document);
+			Box header = Box.VContainer(true);
+			if(headerUnits != null) {
+				for(int j = 0; j < headerUnits.size(); j++) 
+					header.addChild(headerUnits.get(j).produce(context));			
+			}				
+			Box footer = Box.VContainer(true);
+			if(footerUnits != null) {
+				for(int j = 0; j < footerUnits.size(); j++) 
+					footer.addChild(footerUnits.get(j).produce(context));		
+			}
 			Box root = Box.VContainer(true);
-			for(int i = 0; i < rootUnits.size(); i++) {
+			for(int i = 0; i < rootUnits.size(); i++) 
 				root.addChild(rootUnits.get(i).produce(context));
-			}			
-			List<Box> pages = paginate(root, 667);
+			float maxHeight = 667 - header.height;
+			List<Box> pages = paginate(root, maxHeight);
 			for(int i = 0; i < pages.size(); i++) {
 				context.put("page", (i + 1));
-				Box header = Box.VContainer(true);
-				if(headerUnits != null) {
-					for(int j = 0; j < headerUnits.size(); j++) {
-						header.addChild(headerUnits.get(j).produce(context));
-					}				
-				}				
-				Box footer = Box.VContainer(true);
-				if(footerUnits != null) {
-					for(int j = 0; j < footerUnits.size(); j++) {
-						footer.addChild(footerUnits.get(j).produce(context));
-					}				
-				}
 				renderPage(pages.get(i), header, footer, i);
 			}
 		} catch(Exception e) {
@@ -126,7 +124,7 @@ public class PDFReport extends Report {
 		document.addPage(pdPage);
 		PDPageContentStream contentStream = new PDPageContentStream(document, pdPage);
 		renderReportBox(pdPage, contentStream, header, 50, 20);
-		renderReportBox(pdPage, contentStream, content, 50, 50);
+		renderReportBox(pdPage, contentStream, content, 50, 50 + header.height);
 		renderReportBox(pdPage, contentStream, footer, 50, 730);
 		contentStream.close();			
 	}
