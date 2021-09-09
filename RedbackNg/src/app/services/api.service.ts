@@ -55,6 +55,10 @@ export class ApiService {
     }
   }
 
+  getAppConfig(name: string) {
+    return this.http.get<any>(this.baseUrl + "/" + this.uiService + "/config/" + name, httpJSONOptions);
+  }
+
   getObject(name: string, uid: string): Observable<any> {
     const req = {
       action: 'get',

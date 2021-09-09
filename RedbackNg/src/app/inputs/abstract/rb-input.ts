@@ -14,6 +14,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('attribute') attribute: string;    
   @Input('object') _rbObject: RbObject;
   @Input('value') _value: any;
+  @Input('variable') variable: any;
   @Input('label') label: string;
   @Input('tip') tip: string;
   @Input('icon') _icon: string;
@@ -82,17 +83,19 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   get value() : any {
     let val = null;
     if(this.attribute != null) {
-        if(this.rbObject != null) {
-            if(this.attribute == 'uid') {
-                val = this.rbObject.uid;
-            } else {
-                val = this.rbObject.get(this.attribute);
-            } 
-        } else {
-            val = null;
-        }
+      if(this.rbObject != null) {
+          if(this.attribute == 'uid') {
+              val = this.rbObject.uid;
+          } else {
+              val = this.rbObject.get(this.attribute);
+          } 
+      } else {
+          val = null;
+      }
+    } else if(this.variable != null) {
+      val = window.redback[this.variable];
     } else {
-        val = this._value;
+      val = this._value;
     }
     if(val != null && this.previousValue != val && (this.rbObject == null || (this.rbObject != null && this.previousObject != null && this.previousObject == this.rbObject))) {
         this.flash();
@@ -157,14 +160,16 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
 
   public commit(val: any, related: RbObject = null) {
     if(this.attribute != null) {
-        if(this.rbObject != null) {
-            this.rbObject.setValueAndRelated
-            if(related != null) {
-                return this.rbObject.setValueAndRelated(this.attribute, val, related)
-            } else {
-                return this.rbObject.setValue(this.attribute, val);
-            } 
-        } 
+      if(this.rbObject != null) {
+          this.rbObject.setValueAndRelated
+          if(related != null) {
+              return this.rbObject.setValueAndRelated(this.attribute, val, related)
+          } else {
+              return this.rbObject.setValue(this.attribute, val);
+          } 
+      }
+    } else if(this.variable != null) {
+      window.redback[this.variable] = val;
     } else {
         this._value = val;
     }      

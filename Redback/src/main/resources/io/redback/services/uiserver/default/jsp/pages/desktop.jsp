@@ -15,16 +15,10 @@ var versionOrDefault = version != null ? version : 'default';
 </head>
 <body oncontextmenu="return false;">
   <app-root 
-    type="<%=config.page%>"
-    apptitle="<%=config.label%>"
-    logo="<%=config.logo%>"
+  	name="<%=config.name%>"
     version="<%=versionOrDefault%>"
     username="<%=session.getUserProfile().getUsername()%>"
     userdisplay="<%=session.getUserProfile().getAttribute('fullname')%>"
-    objects="<%=utils.convertDataMapToAttributeString(config.objects)%>"
-    initialview="<%=config.defaultview%>"
-    menuview="<%=config.name%>"
-    iconsets="<%=utils.convertDataEntityToAttributeString(config.iconsets)%>"
     uiservice="<%=deployment.uiservicepath%>"
     objectservice="<%=deployment.objectservicepath%>"
     fileservice="<%=deployment.fileservicepath%>"

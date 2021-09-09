@@ -31,6 +31,8 @@ export abstract class RbSetComponent extends RbContainerComponent {
 
     abstract onDataTargetEvent(dt: DataTarget);
 
+    public abstract refreshData();
+
     public abstract clear();
 
     setDataTarget(dt: DataTarget) {

@@ -1,33 +1,25 @@
-import { Component, ViewChild, ViewContainerRef, ComponentRef, Compiler, ComponentFactory, NgModule, ModuleWithComponentFactories, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange, TypeDecorator } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef, ComponentRef, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange, TypeDecorator } from '@angular/core';
 import { __asyncDelegator } from 'tslib';
 import { ApiService } from 'app/services/api.service';
 import { DataService } from 'app/services/data.service';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
-import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
-import { RbTabComponent } from 'app/rb-tab/rb-tab.component';
-import { RbContainerComponent } from 'app/abstract/rb-container';
-import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
 import { RbActivatorComponent } from 'app/abstract/rb-activator';
 import { Injector } from '@angular/core';
-import { RbAggregatesetComponent } from 'app/rb-aggregateset/rb-aggregateset.component';
-
-import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
-
 import { DataTarget, ViewTarget } from 'app/datamodel';
 import { componentRegistry } from './rb-view-loader-registry';
 import { RbSetComponent } from 'app/abstract/rb-set';
-import { HttpClient } from '@angular/common/http';
-import { RbModalComponent } from 'app/rb-modal/rb-modal.component';
+import { HttpClient } from '@angular/common/http';7
+import { BuildService } from 'app/services/build.service';
 
 
 export class LoadedView extends RbActivatorComponent {
-  title: string;
   rootComponentRefs: ComponentRef<Component>[] = [];
   topSets: RbSetComponent[] = [];
 
-  constructor(t: string) {
+  constructor(
+    public title: string,
+    public navigate: EventEmitter<any>
+  ) {
     super();
-    this.title = t;
   }
 
   activatorInit() {}
@@ -68,6 +60,13 @@ export class LoadedView extends RbActivatorComponent {
       }
     }
   }
+
+  forceRefresh() {
+    for(let dataset of this.topSets) {
+      dataset.refreshData();
+    }    
+  }
+
 }
 
 
@@ -92,7 +91,8 @@ export class RbViewLoaderComponent implements OnInit {
     private http: HttpClient,
     private apiService: ApiService,
     private dataService: DataService,
-    private componentFactoryResolver:ComponentFactoryResolver
+    private componentFactoryResolver:ComponentFactoryResolver,
+    private buildService: BuildService
   ) { 
     window.redback.api = apiService;
   }
@@ -126,11 +126,11 @@ export class RbViewLoaderComponent implements OnInit {
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
       console.time('build');
-      entry = new LoadedView(config.label);
+      entry = new LoadedView(config.label, this.navigate);
       if(config['content'] != null) {
         for(let item of config['content']) {
           let context: any = {activator: entry};
-          entry.rootComponentRefs.push(this.buildConfigRecursive(null, item, context, entry));
+          entry.rootComponentRefs.push(this.buildService.buildConfigRecursive(null, item, context, entry));
         }
       }
       if(config.onload != null) {
@@ -141,77 +141,11 @@ export class RbViewLoaderComponent implements OnInit {
     }
     if(entry != null) {
       this.currentLoadedView = entry;
+      window.redback.currentLoadedView = entry;
       entry.setTarget(this.target.dataTarget);
       entry.attachTo(this.container);
     }
   }
 
-  buildConfigRecursive(parent: ViewContainerRef, config: any, context: any, loadedView: LoadedView) {
-    let newComponentRef: ComponentRef<Component> = null;
-    let factory = this.factoryRegistry[config.type]; 
-    if(factory != null) {
-      if(parent != null) {
-        newComponentRef = parent.createComponent(factory);
-      } else {
-        newComponentRef = factory.create(this.injector); 
-      }
-      let newInstance = newComponentRef.instance;
-      var inputs = factory['componentDef']['declaredInputs'];
-      for(var input of Object.keys(inputs)) {
-        let val: any = null;
-        if(input == 'dataset' && context['dataset'] != null && context['dataset'] instanceof RbDatasetComponent) {
-          val = context['dataset'];
-        } else if(input == 'datasetgroup' && context['datasetgroup'] != null && context['datasetgroup'] instanceof RbDatasetGroupComponent) {
-          val = context['datasetgroup'];
-        } else if(input == 'fileset' && context['fileset'] != null && context['fileset'] instanceof RbFilesetComponent) {
-          val = context['fileset'];
-        } else if(input == 'aggregateset' && context['aggregateset'] != null && context['aggregateset'] instanceof RbAggregatesetComponent) {
-          val = context['aggregateset'];
-        } else if(input == 'activator' && context['activator'] != null && context['activator'] instanceof RbActivatorComponent) {
-          val = context['activator'];
-        } else if(input == 'tabsection' && context['tabsection'] != null && context['tabsection'] instanceof RbTabSectionComponent) {
-          val = context['tabsection'];
-        } else if(config[input] != null) {
-          val = config[input];
-        }
-        if(val != null) {
-          newInstance[inputs[input]] = val;
-        }
-      };
-      if(newInstance instanceof RbSetComponent && newInstance['master'] == null) {
-        loadedView.topSets.push(newInstance);
-      }
-      var outputs: any = factory['componentDef']['outputs'];
-      if(outputs['navigate'] != null && newInstance['navigate'] != null && newInstance['navigate'].subscribe != null) {
-        newInstance['navigate'].subscribe(e => this.navigate.emit(e))
-      }
-      if(config['content'] != null) {
-        if(newInstance instanceof RbContainerComponent && newInstance.container != null) {
-          let newContext = Object.assign({}, context);
-          if(newInstance instanceof RbDatasetComponent) {
-            newContext['dataset'] = newInstance;
-          } else if(newInstance instanceof RbDatasetGroupComponent) {
-            newContext['datasetgroup'] = newInstance;
-          } else if(newInstance instanceof RbFilesetComponent) {
-            newContext['fileset'] = newInstance;
-          } else if(newInstance instanceof RbAggregatesetComponent) {
-            newContext['aggregateset'] = newInstance;
-          } else if(newInstance instanceof RbTabComponent) {
-            newContext['activator'] = newInstance;
-          } else if(newInstance instanceof RbModalComponent) {
-            newContext['activator'] = newInstance;
-          } else if(newInstance instanceof RbTabSectionComponent) {
-            newContext['tabsection'] = newInstance;
-          }
-          let newContainer: RbContainerComponent = <RbContainerComponent>newInstance;
-          for(let childConfig of config['content']) {
-            this.buildConfigRecursive(newContainer.container, childConfig, newContext, loadedView);
-          };
-        } else {
-          console.log('Type ' + config.type + ' has contents but is not a RbContainerComponent');
-        }
-      }
-    }
-    return newComponentRef;
-  }
+  
 }

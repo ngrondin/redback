@@ -45,7 +45,7 @@ export class FilterService {
 
       function evalValue(__value) {
         var ret = null;
-        try { ret = eval(__varString + __value); } catch(err) {}
+        try { ret = eval(__varString + " (" + __value + ")"); } catch(err) {}
         return ret;
       }
 

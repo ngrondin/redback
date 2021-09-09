@@ -113,22 +113,22 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				}
 				else if(category.equals("app"))
 				{
-					logger.finer("Get app " + (name != null ? name : "?"));
-					response.setData(getApp(session, name, specifier).toString());
+					logger.finer("Get app client " + (name != null ? name : "?"));
+					response.setData(getAppClient(session, name, specifier).toString());
 					response.metadata.put("mime", "text/html");
 				}
+				else if(category.equals("config"))
+				{
+					logger.finer("Get app config " + (name != null ? name : "?"));
+					response.setData(getAppConfig(session, name).toString());
+					response.metadata.put("mime", "application/json");
+				}				
 				else if(category.equals("menu"))
 				{
 					logger.finer("Get menu " + name);
 					response.setData(getMenu(session, name).toString());
 					response.metadata.put("mime", "text/html");
 				}
-				/*else if(category.equals("view"))
-				{
-					logger.finer("Get view " + name);
-					response.setData(getHTMLView(session, name, version).toString());
-					response.metadata.put("mime", "text/html");
-				}*/
 				else if(category.equals("view"))
 				{
 					logger.finer("Get view " + (specifier != null ? specifier + ":" : "") + name);
@@ -164,12 +164,12 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 		return get;
 	}
 	
-	protected abstract HTML getApp(Session session, String name, String version) throws RedbackException;
-	
+	protected abstract HTML getAppClient(Session session, String name, String version) throws RedbackException;
+
+	protected abstract DataMap getAppConfig(Session session, String name) throws RedbackException;
+
 	protected abstract DataMap getMenu(Session session, String version) throws RedbackException;
 	
-	//protected abstract HTML getHTMLView(Session session, String viewName, String version);
-
 	protected abstract DataMap getView(Session session, String domain, String viewName);
 
 	protected abstract byte[] getResource(Session session, String name, String version) throws RedbackException;
@@ -196,7 +196,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 		return mime;
 	}
 	
-	protected HTML formatErrorMessage(String msg, Exception e)
+	protected HTML formatErrorMessage(String msg, Throwable e)
 	{
 		HTML html = new HTML();
 		html.append("<div>" + msg + "<br/>");
@@ -207,10 +207,10 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				emsg += " (" + elems[0].getFileName() + "  " + elems[0].getLineNumber() + ")";
 			}
 			html.append(emsg);
+			Throwable t = e;
+			while((t = t.getCause()) != null)
+				html.append("<br/>" + t.getMessage());
 		}
-		Throwable t = e;
-		while((t = t.getCause()) != null)
-			html.append("<br/>" + t.getMessage());
 		html.append("</div>");
 		return html;
 	}

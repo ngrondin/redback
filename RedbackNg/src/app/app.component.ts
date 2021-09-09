@@ -1,5 +1,4 @@
 import { Component, Input, ElementRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { Router } from '@angular/router';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ApiService } from './services/api.service';
@@ -17,16 +16,21 @@ import { Subject } from 'rxjs';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  apptitle: string; 
-  logo: string;
-  type: string;
+  appname: string;
   version: string;
   username: string;
   userdisplay: string;
+
+  apptitle: string; 
+  logo: string;
+  type: string;
   initialView: string;
   initialViewTitle: string;
   menuView: string;
   iconsets: string[];
+
+  onloadFunction: Function;
+
   events: Subject<string> = new Subject<string>();
   firstConnected: boolean = false;
   
@@ -43,15 +47,12 @@ export class AppComponent implements OnInit {
       private menuService: MenuService
    ) {
     var native = this.elementRef.nativeElement;
-    this.type = native.getAttribute("type");
-    this.apptitle = native.getAttribute("apptitle");
-    this.logo = native.getAttribute("logo");
+
+    this.appname = native.getAttribute("name");
     this.version = native.getAttribute("version");
     this.username = native.getAttribute("username");
     this.userdisplay = native.getAttribute("userdisplay");
-    this.initialView = native.getAttribute("initialview");
-    this.initialViewTitle = native.getAttribute("initialviewtitle");
-    this.menuView = native.getAttribute("menuview");
+
     this.apiService.uiService = native.getAttribute("uiservice");
     this.apiService.objectService = native.getAttribute("objectservice");
     this.apiService.fileService = native.getAttribute("fileservice");
@@ -62,10 +63,6 @@ export class AppComponent implements OnInit {
     this.apiService.chatService = native.getAttribute("chatservice");
     this.clientWSService.path = native.getAttribute("clientservice");
     this.apiService.useCSForAPI = native.getAttribute("usecsforapi") == "true" ? true : false;
-    let objectsString: string = native.getAttribute("objects");
-    if(objectsString.length > 0) {
-      this.configService.setObjectsConfig(JSON.parse(objectsString.replace(/'/g, '"')));
-    } 
 
     let currentUrl = window.location.href;
     let pos = currentUrl.indexOf(this.apiService.uiService);
@@ -80,16 +77,28 @@ export class AppComponent implements OnInit {
     }
     this.apiService.baseUrl = currentUrl;
     this.clientWSService.baseUrl = currentUrl;
-
-    this.iconsets = JSON.parse(native.getAttribute("iconsets").replace(/'/g, '"'))
-    for(const set of this.iconsets) {
-      this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'), {viewBox: "0 0 24 24"});
-    }
     window.redback.username = this.username;
-
   }
 
   ngOnInit(): void {
+    this.apiService.getAppConfig(this.appname).subscribe(cfg => this.onAppConfig(cfg));
+  }  
+
+  onAppConfig(config: any) {
+    this.type = config['page'];
+    this.apptitle = config['label'];
+    this.logo = config['logo'];
+    this.initialView = config['defaultview'];
+    this.menuView = this.appname; //TODO: Fix this
+    this.configService.setObjectsConfig(config['objects']);
+    this.iconsets = config["iconsets"];
+    for(const set of this.iconsets) {
+      this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'), {viewBox: "0 0 24 24"});
+    }
+    if(config['onload'] != null) {
+      this.onloadFunction = Function(config['onload']);
+    }
+
     this.clientWSService.initWebsocket().subscribe(connected => this.firstLoad());
     setTimeout(() => this.firstLoad(), 5000); //If the client websocket doesn't connect in 5s, fallback on http
   }
@@ -100,6 +109,9 @@ export class AppComponent implements OnInit {
       this.menuService.load().subscribe(() => {
         this.userprefService.load().subscribe(() => {
           this.notificationService.load().subscribe(() => {
+            if(this.onloadFunction != null) {
+              this.onloadFunction.call(window.redback);
+            }
             this.events.next("init");
           })
         })

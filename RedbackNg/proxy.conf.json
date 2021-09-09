@@ -3,6 +3,10 @@
     "target": "http://localhost:8000",
     "secure": false
   },
+  "/rbui/config/*": {
+    "target": "http://localhost:8000",
+    "secure": false
+  },
   "/rbui/resource/*": {
     "target": "http://localhost:8000",
     "secure": false

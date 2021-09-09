@@ -25,7 +25,7 @@ export class RbFilesetComponent extends RbSetComponent {
    }
 
   setInit() {
-    this.refresh();
+    this.refreshData();
   }
 
   setDestroy() {
@@ -34,7 +34,7 @@ export class RbFilesetComponent extends RbSetComponent {
   onDatasetEvent(event: any) {
     if(this.active == true) {
       if(event == 'select' || event == 'load') {
-        this.refresh();
+        this.refreshData();
       } else if(event == 'clear') {
         this.clear();
       }
@@ -42,7 +42,7 @@ export class RbFilesetComponent extends RbSetComponent {
   }
 
   onActivationEvent(state: any) {
-    state == true ? this.refresh() : this.clear();
+    state == true ? this.refreshData() : this.clear();
   }
 
   onDataTargetEvent(dt: any) {
@@ -51,7 +51,7 @@ export class RbFilesetComponent extends RbSetComponent {
 
   @Input('overrideobject') set overrideobject(o : RbObject) {
     this.overrideRbObject = o;
-    this.refresh();
+    this.refreshData();
   }
   
 
@@ -63,7 +63,7 @@ export class RbFilesetComponent extends RbSetComponent {
     this.fileList = [];
   }
 
-  public refresh() {
+  public refreshData() {
     if(this.active && this.relatedObject != null) {
       this.dataService.listFiles(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
         data => this.setData(data)
@@ -87,7 +87,7 @@ export class RbFilesetComponent extends RbSetComponent {
   
   public afterUpload(resp: any) {
     this.uploadProgress = -1;
-    this.refresh();
+    this.refreshData();
   }
   
   public select(file: RbFile) {
@@ -95,6 +95,6 @@ export class RbFilesetComponent extends RbSetComponent {
   }
 
   public delete(file: RbFile) {
-    this.apiService.unlinkFile(file.fileUid, this.relatedObject.objectname, this.relatedObject.uid).subscribe(next => this.refresh());
+    this.apiService.unlinkFile(file.fileUid, this.relatedObject.objectname, this.relatedObject.uid).subscribe(next => this.refreshData());
   }
 }

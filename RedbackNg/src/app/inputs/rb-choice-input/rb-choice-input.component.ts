@@ -11,7 +11,8 @@ import { RbPopupInputComponent } from '../abstract/rb-popup-input';
   styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbChoiceInputComponent extends RbPopupInputComponent {
-  @Input('choicelist') choicelist: any;
+  @Input('choicelist') _choicelist: any;
+  @Input('choicelistvariable') choicelistvar: any;
   
   public editedValue: string; 
   defaultIcon: string = 'description';
@@ -22,6 +23,16 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
     public viewContainerRef: ViewContainerRef
   ) {
     super(injector, overlay, viewContainerRef);
+  }
+
+  public get choicelist(): any {
+    let list = null;
+    if(this._choicelist != null) {
+      list = this._choicelist;
+    } else if(this.choicelistvar != null) {
+      list = window.redback[this.choicelistvar];
+    } 
+    return list || [];
   }
 
   public get selectedItem(): any {

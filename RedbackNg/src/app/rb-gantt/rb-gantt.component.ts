@@ -1,6 +1,7 @@
-import { Component, OnInit, Input, SimpleChange, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, SimpleChange, Output, EventEmitter, ViewChild, ViewContainerRef, Injector } from '@angular/core';
 import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { RbObject } from 'app/datamodel';
+import { BuildService } from 'app/services/build.service';
 import { DragService } from 'app/services/drag.service';
 import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
@@ -16,7 +17,10 @@ import { GanttLane, GanttLaneConfig, GanttMark, GanttSeriesConfig, GanttSpread }
 })
 export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('lanes') lanes : any;
+  @Input('toolbar') toolbarConfig : any;
   @Input('locktonow') locktonow: boolean = false;
+  @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar: ViewContainerRef;
+    
   
   lanesConfig: GanttLaneConfig;
   seriesConfigs: GanttSeriesConfig[];
@@ -44,12 +48,16 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   public getSizeForObjectCallback: Function;
   dragSubscription: Subscription;
   laneFilterObject: RbObject;
+
+  //buildService: BuildService;
   
   constructor(
     private modalService: ModalService,
     private dragService: DragService,
     private filterService: FilterService,
-    private userprefService: UserprefService
+    private userprefService: UserprefService,
+    private injector: Injector,    
+    private buildService: BuildService
   ) {
     super();
   }
@@ -61,6 +69,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.zoomMS = 259200000;
     if(this.lanes != null) {
       this.lanesConfig = new GanttLaneConfig(this.lanes, this.userPref);
+    }
+    //this.buildService = this.injector.get<any>(BuildService);
+    if(this.toolbarConfig != null) {
+      for(var item of this.toolbarConfig) {
+        var context: any = {};
+        this.buildService.buildConfigRecursive(this.toolbar, item, context);
+      }
     }
   }
 

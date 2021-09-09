@@ -43,8 +43,8 @@ public abstract class StreamProvider extends Provider implements io.firebus.inte
 			throw handleException(e, "Exception in redback stream '" + serviceName + "'");
 		} finally {
 			if(timer != null) timer.mark();
-			if(Thread.currentThread() instanceof FirebusThread) 
-				((FirebusThread)Thread.currentThread()).setTrackingId(null);			
+			/*if(Thread.currentThread() instanceof FirebusThread) 
+				((FirebusThread)Thread.currentThread()).setTrackingId(null);	*/		
 		}
 	}
 

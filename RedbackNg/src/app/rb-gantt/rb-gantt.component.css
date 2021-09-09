@@ -13,6 +13,13 @@
     padding: 4px;
 }
 
+.rb-gantt-custom-toolbar {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+}
+
 .rb-gantt-header {
     display: flex;
     flex-direction: row;

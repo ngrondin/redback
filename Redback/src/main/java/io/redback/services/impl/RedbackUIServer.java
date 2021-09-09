@@ -17,6 +17,8 @@ import io.firebus.data.DataMap;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidRequestException;
+import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
@@ -64,7 +66,7 @@ public class RedbackUIServer extends UIServer
 		
 	}
 
-	protected HTML getApp(Session session, String name, String version) throws RedbackException
+	protected HTML getAppClient(Session session, String name, String version) throws RedbackException
 	{
 		HTML html = null;
 		Map<String, Object> context = new HashMap<String, Object>();
@@ -72,6 +74,22 @@ public class RedbackUIServer extends UIServer
 		context.put("version", version);
 		context.put("deployment",  JSConverter.toJS(config));
 		context.put("utils", new RedbackUtilsJSWrapper());
+		try {
+			DataMap appConfig = getAppConfig(session, name);
+			context.put("session", new SessionJSWrapper(session));
+			String page = appConfig.getString("page");
+			context.put("config", JSConverter.toJS(appConfig));
+			html = executeJSP("pages/" + page, version, context);			
+		} catch(Exception e) {
+			logger.warning(e.getMessage());
+			html = executeJSP("pages/error", version, context).inject("errormessage", formatErrorMessage(e.getMessage(), e.getCause()));
+		}
+		return html;
+	}
+	
+	
+	protected DataMap getAppConfig(Session session, String name) throws RedbackException
+	{
 		if(session != null)
 		{
 			DataMap appConfig = null;
@@ -88,37 +106,22 @@ public class RedbackUIServer extends UIServer
 				String appName = appConfig.getString("name");
 				if(session.getUserProfile().canRead("rb.apps." + appName))
 				{
-					context.put("session", new SessionJSWrapper(session));
-					try
-					{
-						String page = appConfig.getString("page");
-						context.put("config", JSConverter.toJS(appConfig));
-						html = executeJSP("pages/" + page, version, context);
-					}
-					catch(Exception e)
-					{
-						logger.warning("Error retrieving application " + appName + " : " + e.getMessage());
-						html = executeJSP("pages/error", version, context).inject("errormessage", formatErrorMessage("Error retrieving application " + appName, e));
-					}
+					return appConfig;
 				}
-				else
+				else 
 				{
-					logger.warning("No access to application " + appName + " for user " + session.getUserProfile().getUsername());
-					html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("No access to application " + appName + ""));
+					throw new RedbackUnauthorisedException("Unauthorised to access application '" + name + "'");
 				}
 			}
 			else 
 			{
-				logger.warning("No application name provided and no default configured");
-				html = executeJSP("pages/error", version, context).inject("errormessage", new HTML("No application name provided and no default configured"));
+				throw new RedbackInvalidRequestException("Application '" + name + "' does not exist");
 			}
 		}
 		else
 		{
-			context.put("get", "app/" + name);
-			html = executeJSP(("pages/login"), version, context);
+			throw new RedbackInvalidRequestException("Session is required to retrieve app config");
 		}
-		return html;
 	}
 	
 	
