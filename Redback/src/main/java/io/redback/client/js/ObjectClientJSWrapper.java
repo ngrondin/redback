@@ -1,151 +1,92 @@
 package io.redback.client.js;
 
-import java.util.Arrays;
-//import java.util.logging.Logger;
-
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
 import io.firebus.data.DataMap;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.ObjectJSWrapper;
 
-public class ObjectClientJSWrapper implements ProxyObject {
-	
-	//private Logger logger = Logger.getLogger("io.redback");
+public class ObjectClientJSWrapper extends ObjectJSWrapper {
 	protected ObjectClient objectClient;
 	protected Session session;
 	protected String domainLock;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "execute"};
 
 	public ObjectClientJSWrapper(ObjectClient oc, Session s)
 	{
+		super(new String[] {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "execute"});
 		objectClient = oc;
 		session = s;
 	}
 	
 	public ObjectClientJSWrapper(ObjectClient oc, Session s, String dl)
 	{
+		super(new String[] {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "execute"});
 		objectClient = oc;
 		session = s;
 		domainLock = dl;
 	}
 	
-	public Object getMember(String key) {
+	public Object get(String key) {
 		if(key.equals("getObject")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String objectname = arguments[0].asString();
-					String uid = arguments[1].asString();
-					try
-					{
-						RedbackObjectRemote ror = objectClient.getObject(session, objectname, uid);
-						if(domainLock == null || (domainLock != null && ror.getDomain().equals(domainLock)))
-							return new RedbackObjectRemoteJSWrapper(ror);
-						else
-							return null;
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error getting remote object", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					String uid = (String)arguments[1];
+					RedbackObjectRemote ror = objectClient.getObject(session, objectname, uid);
+					if(domainLock == null || (domainLock != null && ror.getDomain().equals(domainLock)))
+						return new RedbackObjectRemoteJSWrapper(ror);
+					else
+						return null;
 				}
 			};
 		} else if(key.equals("listObjects")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String objectname = arguments[0].asString();
-					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
-					DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)(arguments[1]);
+					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					try
-					{
-						Object o = objectClient.listObjects(session, objectname, filter, sort);
-						return JSConverter.toJS(o);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error listing remote object", e);
-					}
+					return objectClient.listObjects(session, objectname, filter, sort);
 				}
 			};
 		} else if(key.equals("listAllObjects")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String objectname = arguments[0].asString();
-					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
-					DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-					boolean addRelated = arguments.length > 3 ? arguments[3].asBoolean() : true;
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)(arguments[1]);
+					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
+					boolean addRelated = arguments.length > 3 ? (Boolean)arguments[3] : true;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					try
-					{
-						Object o = objectClient.listAllObjects(session, objectname, filter, sort, addRelated);
-						return JSConverter.toJS(o);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error listing remote object", e);
-					}
+					return objectClient.listAllObjects(session, objectname, filter, sort, addRelated);
 				}
 			};
 		} else if(key.equals("createObject")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String objectname = arguments[0].asString();
-					String domain = arguments.length == 2 ? null : arguments[1].asString(); 
-					DataMap data = (DataMap)JSConverter.toJava(arguments.length == 2 ? arguments[1] : arguments[2]);
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					String domain = arguments.length == 2 ? null : (String)arguments[1]; 
+					DataMap data = (DataMap)(arguments.length == 2 ? arguments[1] : arguments[2]);
 					if(domainLock != null)
 						domain = domainLock;
-					try
-					{
-						Object o = objectClient.createObject(session, objectname, domain, data, true);
-						return JSConverter.toJS(o);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error listing remote object", e);
-					}
+					return objectClient.createObject(session, objectname, domain, data, true);
 				}
 			};
 		} else if(key.equals("execute")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String objectname = arguments[0].asString();
-					String uid = arguments[1].asString();
-					String function = arguments[2].asString();
-					DataMap data = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
-					try
-					{
-						objectClient.execute(session, objectname, uid, function, data);
-						return null;
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error executing function on remote object", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					String uid = (String)arguments[1];
+					String function = (String)arguments[2];
+					DataMap data = arguments.length > 3 ? (DataMap)(arguments[3]) : null;
+					objectClient.execute(session, objectname, uid, function, data);
+					return null;
 				}
 			};		} else {
 			return null;
 		}
-	}
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));
-	}
-	
-	public boolean hasMember(String key) {
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
-	}
-	
-	
+	}	
 }

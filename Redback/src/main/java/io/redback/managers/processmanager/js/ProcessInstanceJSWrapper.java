@@ -1,28 +1,20 @@
 package io.redback.managers.processmanager.js;
 
-import java.util.Arrays;
-
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.ProcessInstance;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.ObjectJSWrapper;
 
 
-public class ProcessInstanceJSWrapper implements ProxyObject
-{
+public class ProcessInstanceJSWrapper extends ObjectJSWrapper {
 	protected ProcessInstance processInstance;
-	protected String[] members = {"pid", "data"};
 	
 	public ProcessInstanceJSWrapper(ProcessInstance pi)
 	{
+		super(new String[] {"pid", "data"});
 		processInstance = pi;
 	}
 	
-
-
-	public Object getMember(String name)
+	public Object get(String name) throws RedbackException
 	{
 		if(name.equals("pid"))
 		{
@@ -30,25 +22,12 @@ public class ProcessInstanceJSWrapper implements ProxyObject
 		}
 		else if(name.equals("data"))
 		{
-			return JSConverter.toJS(processInstance.getData());
+			return processInstance.getData();
 		}
 		else
 		{
 			return null;
 		}
-	}
-
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));
-	}
-
-	public boolean hasMember(String key) {
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
 	}
 
 }

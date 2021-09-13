@@ -1,36 +1,34 @@
 package io.redback.client.js;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.data.DataMap;
+import io.firebus.script.Converter;
+import io.firebus.script.values.abs.SDynamicObject;
+import io.firebus.script.values.abs.SValue;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.CallableJSWrapper;
 
-public class RedbackObjectRemoteJSWrapper implements ProxyObject
-{
+public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 	protected RedbackObjectRemote rbObjectRemote;
-	protected String[] members = {"getRelated", "execute"};
+	protected List<String> members;
 	
 	public RedbackObjectRemoteJSWrapper(RedbackObjectRemote o)
 	{
+		super();
 		rbObjectRemote = o;
 	}
 	
-	public Object getMember(String name)
+	public SValue getMember(String name)
 	{
 		if(name.equals("getRelated"))
 		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					RedbackObjectRemote ror = rbObjectRemote.getRelated(arguments[0].asString());
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					RedbackObjectRemote ror = rbObjectRemote.getRelated((String)arguments[0]);
 					if(ror != null)
 						return new RedbackObjectRemoteJSWrapper(ror);
 					return null;
@@ -39,43 +37,39 @@ public class RedbackObjectRemoteJSWrapper implements ProxyObject
 		}
 		else if(name.equals("execute"))
 		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String function = arguments[0].asString();
-					DataMap data = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
-					try {
-						rbObjectRemote.execute(function, data);
-						return null;
-					} catch(Exception e) {
-						throw new RuntimeException("Error executing function on object", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String function = (String)arguments[0];
+					DataMap data = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
+					rbObjectRemote.execute(function, data);
+					return null;
 				}
 			};				
 		}
 		else if(name.equals("uid"))
 		{
-			return rbObjectRemote.getUid();
+			return Converter.tryConvertIn(rbObjectRemote.getUid());
 		}
 		else
 		{
 			Object obj = rbObjectRemote.get(name);
-			return JSConverter.toJS(obj);
+			return Converter.tryConvertIn(obj);
 		}
 	}
 
-	public Object getMemberKeys() {
+	public String[] getMemberKeys() {
 		List<Object> list = new ArrayList<Object>();
-		for(int i = 0; i < members.length; i++)
-			list.add(members[i]);
 		list.add("objectname");
 		list.add("uid");
 		list.add("domain");
 		list.addAll(rbObjectRemote.getAttributeNames());
-		return ProxyArray.fromList(list);
+		list.add("getRelated");
+		list.add("execute");
+		return list.toArray(new String[] {});
 	}
 
 	public boolean hasMember(String key) {
-		if(Arrays.asList(members).contains(key)) {
+		if(key.equals("execute") || key.equals("getRelated")) {
 			return true;
 		} else if(rbObjectRemote.get(key) != null) {
 			return true;
@@ -86,30 +80,20 @@ public class RedbackObjectRemoteJSWrapper implements ProxyObject
 		}
 	}
 
-	public void putMember(String key, Value value) {
+	public void putMember(String key, SValue value) {
 		try
 		{
-			rbObjectRemote.set(key, JSConverter.toJava(value));
+			rbObjectRemote.set(key, Converter.convertOut(value));
 		} 
-		catch (RedbackException e)
+		catch (Exception e)
 		{
 			String errMsg = "Error setting the Redback Object attribute '" + key + "'";
 			throw new RuntimeException(errMsg, e);		
 		}		
 	}
-
-	/*
-	protected String constructErrorString(Throwable e) 
-	{
-		String ret = "";
-		Throwable t = e;
-		while(t != null) {
-			if(ret.length() > 0)
-				ret = ret + " : ";
-			ret = ret + t.getMessage();
-			t = t.getCause();
-		}
-		return ret;
+	
+	public void removeMember(String key) {
+		
 	}
-	 */
+
 }

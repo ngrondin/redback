@@ -5,16 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
+import io.firebus.script.Converter;
+import io.firebus.script.exceptions.ScriptException;
+import io.firebus.script.values.abs.SDynamicObject;
+import io.firebus.script.values.abs.SValue;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.RedbackObject;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.CallableJSWrapper;
 
-public class RedbackObjectJSWrapper implements ProxyObject
+public class RedbackObjectJSWrapper extends SDynamicObject
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected RedbackObject rbObject;
@@ -25,116 +24,90 @@ public class RedbackObjectJSWrapper implements ProxyObject
 		rbObject = o;
 	}
 	
-	public Object getMember(String name)
+	public RedbackObject getRedbackObject()
 	{
-		try
+		return rbObject;
+	}
+	
+	public SValue getMember(String name) throws ScriptException
+	{
+		if(name.equals("getRelated"))
 		{
-			if(name.equals("getRelated"))
-			{
-				return new ProxyExecutable() {
-					public Object execute(Value... arguments) {
-						RedbackObject rbo = rbObject.getRelated(arguments[0].asString());
-						if(rbo != null)
-							return new RedbackObjectJSWrapper(rbo);
-						return null;
-					}
-				};				
-			}
-			else if(name.equals("save"))
-			{
-				return new ProxyExecutable() {
-					public Object execute(Value... arguments) {
-						try {
-							rbObject.save();
-						} catch(Exception e) {
-							String errMsg = "Error saving objects : " + constructErrorString(e);
-							logger.severe(errMsg);
-							throw new RuntimeException(errMsg);
-						}
-						return null;
-					}
-				};				
-			}
-			else if(name.equals("getUpdatedAttributes"))
-			{
-				return new ProxyExecutable() {
-					public Object execute(Value... arguments) {
-						List<Object> list = new ArrayList<Object>(rbObject.getUpdatedAttributes());
-						ProxyArray pa = ProxyArray.fromList(list); 
-						return pa;
-					}
-				};				
-			}
-			else if(name.equals("isAttributeUpdated"))
-			{
-				return new ProxyExecutable() {
-					public Object execute(Value... arguments) {
-						String attribute = arguments[0].asString();
-						Boolean ret = false;
-						if(rbObject.getUpdatedAttributes().contains(attribute))
-							ret = true;
-						return JSConverter.toJS(ret);
-					}
-				};				
-			}			
-			else if(name.equals("delete"))
-			{
-				return new ProxyExecutable() {
-					public Object execute(Value... arguments) {
-						try {
-							rbObject.delete();
-							return null;
-						} catch(Exception e) {
-							String errMsg = "Error deleting object : " + constructErrorString(e);
-							logger.severe(errMsg);
-							throw new RuntimeException(errMsg);
-						}	
-					}
-				};				
-			}			
-			else if(rbObject.getObjectConfig().getScriptForEvent(name) != null)
-			{
-				return new ProxyExecutable() {
-					public Object execute(Value... arguments) {
-						try {
-							return JSConverter.toJS(rbObject.execute(name));
-						} catch(Exception e) {
-							String errMsg = "Error executing object script : " + constructErrorString(e);
-							logger.severe(errMsg);
-							throw new RuntimeException(errMsg);
-						}
-					}
-				};				
-			}
-			else if(name.equals("objectname"))
-			{
-				return rbObject.getObjectConfig().getName();
-			}
-			else if(name.equals("uid"))
-			{
-				return rbObject.getUID().getObject();
-			}
-			else if(name.equals("domain"))
-			{
-				return rbObject.getDomain().getObject();
-			}
-			else if(name.equals("isNew"))
-			{
-				return rbObject.isNew();
-			}
-			else
-			{
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					RedbackObject rbo = rbObject.getRelated((String)arguments[0]);
+					if(rbo != null)
+						return new RedbackObjectJSWrapper(rbo);
+					return null;
+				}
+			};				
+		}
+		else if(name.equals("getUpdatedAttributes"))
+		{
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					List<Object> list = new ArrayList<Object>(rbObject.getUpdatedAttributes());
+					return list;
+				}
+			};				
+		}
+		else if(name.equals("isAttributeUpdated"))
+		{
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String attribute = (String)arguments[0];
+					Boolean ret = false;
+					if(rbObject.getUpdatedAttributes().contains(attribute))
+						ret = true;
+					return ret;
+				}
+			};				
+		}			
+		else if(name.equals("delete"))
+		{
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					rbObject.delete();
+					return null;
+				}
+			};				
+		}			
+		else if(rbObject.getObjectConfig().getScriptForEvent(name) != null)
+		{
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return rbObject.execute(name);
+				}
+			};				
+		}
+		else if(name.equals("objectname"))
+		{
+			return Converter.tryConvertIn(rbObject.getObjectConfig().getName());
+		}
+		else if(name.equals("uid"))
+		{
+			return Converter.tryConvertIn(rbObject.getUID().getObject());
+		}
+		else if(name.equals("domain"))
+		{
+			return Converter.tryConvertIn(rbObject.getDomain().getObject());
+		}
+		else if(name.equals("isNew"))
+		{
+			return Converter.tryConvertIn(rbObject.isNew());
+		}
+		else
+		{
+			try {
 				Object obj = rbObject.get(name).getObject();
-				return JSConverter.toJS(obj);
+				return Converter.convertIn(obj);
+			} catch(Exception e) {
+				throw new ScriptException("Error getting attribute", e);
 			}
-		} 
-		catch (RedbackException e)
-		{
-			throw new RuntimeException("Error getting the Redback Object attribute '" + name + "'", e);
 		}
 	}
 
-	public Object getMemberKeys() {
+	public String[] getMemberKeys() {
 		List<Object> list = new ArrayList<Object>();
 		for(int i = 0; i < members.length; i++)
 			list.add(members[i]);
@@ -142,7 +115,7 @@ public class RedbackObjectJSWrapper implements ProxyObject
 		list.add("uid");
 		list.add("domain");
 		list.addAll(rbObject.getObjectConfig().getAttributeNames());
-		return ProxyArray.fromList(list);
+		return list.toArray(new String[] {});
 	}
 
 	public boolean hasMember(String key) {
@@ -159,12 +132,12 @@ public class RedbackObjectJSWrapper implements ProxyObject
 		}
 	}
 
-	public void putMember(String key, Value value) {
+	public void putMember(String key, SValue value) throws ScriptException {
 		try
 		{
-			rbObject.put(key, new io.redback.managers.objectmanager.Value(JSConverter.toJava(value)), true);
+			rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)), true);
 		} 
-		catch (RedbackException e)
+		catch (Exception e)
 		{
 			String errMsg = "Error setting the Redback Object attribute '" + key + "' : " + constructErrorString(e);
 			logger.severe(errMsg);

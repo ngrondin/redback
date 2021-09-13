@@ -1,83 +1,54 @@
 package io.redback.managers.domainmanager.js;
 
-import java.util.Arrays;
-import java.util.logging.Logger;
-
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.domainmanager.DomainManager;
 import io.redback.security.Session;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.ObjectJSWrapper;
 
-public class DomainManagerJSWrapper implements ProxyObject {
+public class DomainManagerJSWrapper extends ObjectJSWrapper {
 	
-	private Logger logger = Logger.getLogger("io.redback");
 	protected DomainManager domainManager;
 	protected Session session;
 	protected String domain;
-	protected String[] members = {"putVariable", "getVariable", "executeFunction"};
 
 	public DomainManagerJSWrapper(DomainManager dm, Session s, String d)
 	{
+		super(new String[] {"putVariable", "getVariable", "executeFunction"});
 		domainManager = dm;
 		session = s;
 		domain = d;
 	}
 	
-	public Object getMember(String key) {
+	public Object get(String key) {
 		if(key.equals("putVariable")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String name = arguments[0].asString();
-					Object val = JSConverter.toJava(arguments[1]);
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String name = (String)arguments[0];
+					Object val = arguments[1];
 					if(!(val instanceof DataEntity))
 						val = new DataLiteral(val);
-					try
-					{
-						domainManager.putVariable(session, domain, name, (DataEntity)val);
-					}
-					catch(Exception e)
-					{
-						logger.severe("Error putting report :" + e);
-					}
+					domainManager.putVariable(session, domain, name, (DataEntity)val);
 					return null;
 				}
 			};
 		} else if(key.equals("getVariable")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String name = arguments[0].asString();
-					try
-					{
-						Object o = domainManager.getVariable(session, domain, name);
-						return JSConverter.toJS(o);
-					}
-					catch(Exception e)
-					{
-						logger.severe("Error putting report :" + e);
-					}
-					return null;
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String name = (String)arguments[0];
+					return domainManager.getVariable(session, domain, name);
 				}
 			};
 		} else if(key.equals("executeFunction")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String name = arguments[0].asString();
-					DataMap param = (DataMap)JSConverter.toJava(arguments[1]);
-					try
-					{
-						domainManager.executeFunction(session, domain, name, param, false);
-					}
-					catch(Exception e)
-					{
-						logger.severe("Error putting report :" + e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String name = (String)arguments[0];
+					DataMap param = (DataMap)(arguments[1]);
+					domainManager.executeFunction(session, domain, name, param, false);
 					return null;
 				}
 			};
@@ -85,18 +56,4 @@ public class DomainManagerJSWrapper implements ProxyObject {
 			return null;
 		}
 	}
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));
-	}
-	
-	public boolean hasMember(String key) {
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
-	}
-	
-	
 }

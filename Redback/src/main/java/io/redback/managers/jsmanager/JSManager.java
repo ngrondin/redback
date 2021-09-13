@@ -100,7 +100,7 @@ public class JSManager {
 		synchronized(engines) {
 			ScriptEngine engine = engineManager.getEngineByName("graal.js");
 			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("log", new LoggerJSFunction());
-			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("global", JSConverter.toJS(globalVariables));
+			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("global", Converter.convertIn(globalVariables));
 			engine.getBindings(ScriptContext.ENGINE_SCOPE).put("rbutils", new RedbackUtilsJSWrapper());
 			ee = new EngineEntry(engine, l, 0);
 			engines.put(l, ee);

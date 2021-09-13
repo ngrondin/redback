@@ -1,40 +1,34 @@
 package io.redback.client.js;
 
-import java.util.Arrays;
-
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
 import io.redback.client.ProcessAssignmentRemote;
+import io.redback.exceptions.RedbackException;
+import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.ObjectJSWrapper;
 
-public class ProcessAssignmentRemoteJSWrapper implements ProxyObject {
+public class ProcessAssignmentRemoteJSWrapper extends ObjectJSWrapper {
 
 	protected ProcessAssignmentRemote processAssignmentRemote;
-	protected String[] members = {"action", "hasAction"};
 	
 	public ProcessAssignmentRemoteJSWrapper(ProcessAssignmentRemote o)
 	{
+		super(new String[] {"action", "hasAction"});
 		processAssignmentRemote = o;
 	}
 	
-	public Object getMember(String name)
-	{
+	public Object get(String name) {
 		if(name.equals("action"))
 		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String action = arguments[0].asString();
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String action = (String)arguments[0];
 					processAssignmentRemote.action(action);
 					return null;
 				}
 			};				
-		} else if(name.equals("hasAction"))
-		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String action = arguments[0].asString();
+		} else if(name.equals("hasAction")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String action = (String)arguments[0];
 					return processAssignmentRemote.hasAction(action);
 				}
 			};				
@@ -42,19 +36,4 @@ public class ProcessAssignmentRemoteJSWrapper implements ProxyObject {
 			return null;
 		}
 	}
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));
-	}
-
-	public boolean hasMember(String key) {
-		
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
-		
-	}
-	
 }

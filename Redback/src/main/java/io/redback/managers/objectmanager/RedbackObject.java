@@ -22,7 +22,6 @@ import io.redback.managers.jsmanager.Function;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
-import io.redback.utils.js.JSConverter;
 
 public class RedbackObject extends RedbackElement
 {
@@ -181,7 +180,7 @@ public class RedbackObject extends RedbackElement
 		{	
 			String key = it.next();
 			if(getObjectConfig().getAttributeConfig(key).getExpression() == null)
-				scriptContext.put(key, JSConverter.toJS(get(key).getObject()));
+				scriptContext.put(key, get(key).getObject());
 		}
 	}
 
@@ -357,7 +356,7 @@ public class RedbackObject extends RedbackElement
 					data.put(name, actualValue);
 					updatedAttributes.put(name, isAutomated);	
 					if(attributeConfig.getExpression() == null) 
-						scriptContext.put(name, JSConverter.toJS(actualValue.getObject()));
+						scriptContext.put(name, actualValue.getObject());
 					scriptContext.put("previousValue", currentValue.getObject());
 					executeAttributeScriptsForEvent(name, "onupdate");
 					scriptContext.remove("previousValue");
@@ -527,7 +526,7 @@ public class RedbackObject extends RedbackElement
 		}		
 	}
 	
-	public Object execute(String eventName) throws ScriptException, RedbackException
+	public Object execute(String eventName) throws RedbackException
 	{
 		if(canExecute)
 		{

@@ -17,7 +17,6 @@ import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
-import io.redback.utils.js.JSConverter;
 
 
 public class DataSet extends ContainerUnit {
@@ -52,8 +51,8 @@ public class DataSet extends ContainerUnit {
 		Object currentMasterObject = context.get("master");
 		List<?> currentMasterDataset = (List<?>)context.get("dataset");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		jsContext.put("master", JSConverter.toJS(currentObject));
-		jsContext.put("filter", JSConverter.toJS(context.get("filter")));
+		jsContext.put("master", currentObject);
+		jsContext.put("filter", context.get("filter"));
 		ObjectClient oc = reportManager.getObjectClient();
 		DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
 		DataMap sort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);

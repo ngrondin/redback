@@ -94,8 +94,8 @@ public class ProcessInstance
 	
 	public void updateScriptBindings()
 	{
-		scriptContext.put("data", JSConverter.toJS(data));
-		scriptContext.put("lastactioned", JSConverter.toJS(lastActioned));
+		scriptContext.put("data", Converter.convertIn(data));
+		scriptContext.put("lastactioned", Converter.convertIn(lastActioned));
 	}
 	
 	public String getId()

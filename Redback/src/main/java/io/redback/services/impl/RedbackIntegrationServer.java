@@ -23,7 +23,6 @@ import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.services.IntegrationServer;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.StringUtils;
-import io.redback.utils.js.JSConverter;
 
 public class RedbackIntegrationServer extends IntegrationServer {
 	
@@ -196,13 +195,13 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		context.put("clientid", config.clientId);
 		context.put("clientsecret", config.clientSecrect);
-		context.put("clientdata", JSConverter.toJS(getClientData(session, config, domain)));
+		context.put("clientdata", getClientData(session, config, domain));
 		context.put("action", action);
 		context.put("object", objectName);
 		context.put("uid", uid);
-		context.put("filter", JSConverter.toJS(filter));
-		context.put("data", JSConverter.toJS(data));
-		context.put("options", JSConverter.toJS(options));
+		context.put("filter", filter);
+		context.put("data", data);
+		context.put("options", options);
 		return context;
 	}
 	
@@ -213,7 +212,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 				config.bodyExpr.eval(context), 
 				(DataMap)config.headerExpr.eval(context), 
 				null);
-		context.put("response", JSConverter.toJS(resp));
+		context.put("response", resp);
 		return (DataMap)config.respExpr.eval(context);
 	}
 

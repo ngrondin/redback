@@ -56,7 +56,6 @@ import io.redback.utils.Cache;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
-import io.redback.utils.js.JSConverter;
 
 public class ObjectManager
 {
@@ -486,8 +485,8 @@ public class ObjectManager
 						if(gs != null) {
 							Map<String, Object> context = createScriptContext(session);
 							context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
-							context.put("filter", JSConverter.toJS(filter));
-							context.put("sort", JSConverter.toJS(sort));
+							context.put("filter", filter);
+							context.put("sort", sort);
 							context.put("search", searchText);
 							context.put("action", "list");
 							context.put("page", page);
@@ -567,7 +566,7 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject createObject(Session session, String objectName, String uid, String domain, DataMap initialData) throws RedbackException, ScriptException
+	public RedbackObject createObject(Session session, String objectName, String uid, String domain, DataMap initialData) throws RedbackException
 	{
 		ObjectConfig objectConfig = getObjectConfig(session, objectName);
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
@@ -593,32 +592,31 @@ public class ObjectManager
 		return object;
 	}
 	
-	public void deleteObject(Session session, String objectName, String uid) throws RedbackException, ScriptException
+	public void deleteObject(Session session, String objectName, String uid) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
 			object.delete();
 	}	
 	
-	public RedbackObject executeFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException, ScriptException
+	public RedbackObject executeFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
 		if(object != null)
 		{
 			object.execute(function);
-			//object.save();
 		}
 		return object;
 	}
 	
-	public void executeFunction(Session session, String function, DataMap param) throws RedbackException, ScriptException
+	public void executeFunction(Session session, String function, DataMap param) throws RedbackException
 	{
 		ScriptConfig scriptCfg = getGlobalScript(session, function);
 		if(scriptCfg != null)
 		{
 			if(session.getUserProfile().canExecute("rb.scripts." + function)) {
 				Map<String, Object> context = this.createScriptContext(session);
-				context.put("param", JSConverter.toJS(param));
+				context.put("param", param);
 				scriptCfg.execute(context);
 			} else {
 				throw new RedbackException("No rights to execute global function " + function);
@@ -626,7 +624,7 @@ public class ObjectManager
 		}
 	}	
 	
-	public void fork(Session session, String objectName, String id, String function) throws RedbackException, ScriptException
+	public void fork(Session session, String objectName, String id, String function) throws RedbackException
 	{
 		DataMap request = new DataMap();
 		request.put("action", "execute");
@@ -728,9 +726,9 @@ public class ObjectManager
 						Function gs = objectConfig.getGenerationScript();
 						if(gs != null) {
 							Map<String, Object> context = createScriptContext(session);
-							context.put("filter", JSConverter.toJS(filter));
-							context.put("tuple", JSConverter.toJS(tuple));
-							context.put("metrics", JSConverter.toJS(metrics));
+							context.put("filter", filter);
+							context.put("tuple", tuple);
+							context.put("metrics", metrics);
 							context.put("action", "aggregate");
 							Object o = gs.execute(context);
 							if(o instanceof DataList)

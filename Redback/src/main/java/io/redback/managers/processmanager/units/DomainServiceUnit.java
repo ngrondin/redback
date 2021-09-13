@@ -14,7 +14,6 @@ import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.processmanager.Process;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
-import io.redback.utils.js.JSConverter;
 
 public class DomainServiceUnit extends ProcessUnit 
 {
@@ -62,7 +61,7 @@ public class DomainServiceUnit extends ProcessUnit
 				logger.finest("Calling " + processManager.getDomainServiceName() + " " + payload.getString());
 				Payload response = processManager.getFirebus().requestService(processManager.getDomainServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
-				context.put("result", JSConverter.toJS(respData));
+				context.put("result", respData);
 				DataMap respOutput = outputExpressionMap.eval(context);
 				logger.finest("Output data was: " + respOutput);
 				pi.setData(respOutput);

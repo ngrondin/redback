@@ -40,7 +40,7 @@ public abstract class Executor {
 			for(int i = 0; i < paramNames.size(); i++)
 				args[i] = context.get(paramNames.get(i));
 			Object obj = jsManager.execute(functionName, args);
-			obj = JSConverter.toJava(Value.asValue(obj));
+			obj = Converter.convertOut(Value.asValue(obj));
 			return obj;
 		} 
 		catch (ScriptException e)

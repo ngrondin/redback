@@ -15,7 +15,6 @@ import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.managers.reportmanager.excel.js.ExcelWorkbookJSWrapper;
 import io.redback.security.Session;
-import io.redback.utils.js.JSConverter;
 import jxl.Workbook;
 import jxl.write.WritableWorkbook;
 
@@ -36,7 +35,7 @@ public class ExcelReport extends Report {
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("wb", new ExcelWorkbookJSWrapper(workbook));
 			context.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));
-			context.put("filter", JSConverter.toJS(filter));
+			context.put("filter", filter);
 			script.execute(context);
 			workbook.write();
 			workbook.close();

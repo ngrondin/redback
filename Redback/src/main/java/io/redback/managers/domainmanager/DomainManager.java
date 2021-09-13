@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.interfaces.Consumer;
+import io.firebus.script.ScriptFactory;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -34,17 +35,15 @@ import io.redback.client.js.ReportClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.domainmanager.js.DomainLoggerJS;
 import io.redback.managers.domainmanager.js.DomainManagerJSWrapper;
-import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.StringUtils;
-import io.redback.utils.js.JSConverter;
 
 public class DomainManager implements Consumer {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
-	protected JSManager jsManager;
+	protected ScriptFactory scriptFactory;
 	protected boolean includeLoaded;
 	protected String configServiceName;
 	protected String objectServiceName;
@@ -72,8 +71,7 @@ public class DomainManager implements Consumer {
 
 	public DomainManager(Firebus fb, DataMap config) {
 		firebus = fb;
-		jsManager = new JSManager("domain");
-		jsManager.dropCompilationErrors(true);
+		scriptFactory = new ScriptFactory();
 		includeLoaded = false;
 		configServiceName = config.getString("configservice");
 		objectServiceName = config.getString("objectservice");
@@ -109,7 +107,7 @@ public class DomainManager implements Consumer {
 		{
 			try 
 			{
-				jsManager.addSource("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
+				scriptFactory.executeInRootScope("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
 			}
 			catch(Exception e) 
 			{
@@ -133,7 +131,7 @@ public class DomainManager implements Consumer {
 				if(result.size() > 0) {
 					DataMap entryMap = entryCollection.convertObjectToCanonical(result.getObject(0));
 					if(entryMap.getString("type").equals("function")) {
-						entry = new DomainFunction(this, jsManager, entryMap);
+						entry = new DomainFunction(this, scriptFactory, entryMap);
 					} else if(entryMap.getString("type").equals("report")) {
 						entry = new DomainReport(entryMap);
 					} else if(entryMap.getString("type").equals("variable")) {
@@ -166,7 +164,7 @@ public class DomainManager implements Consumer {
 				DataMap entryMap = entryCollection.convertObjectToCanonical(result.getObject(i));
 				DomainEntry entry = null;
 				if(entryMap.getString("type").equals("function")) {
-					entry = new DomainFunction(this, jsManager, entryMap);
+					entry = new DomainFunction(this, scriptFactory, entryMap);
 				} else if(entryMap.getString("type").equals("report")) {
 					entry = new DomainReport(entryMap);
 				} else if(entryMap.getString("type").equals("variable")) {
@@ -199,7 +197,7 @@ public class DomainManager implements Consumer {
 				String domain = entryMap.getString("domain");
 				DomainEntry entry = null;
 				if(entryMap.getString("type").equals("function")) {
-					entry = new DomainFunction(this, jsManager, entryMap);
+					entry = new DomainFunction(this, scriptFactory, entryMap);
 				} else if(entryMap.getString("type").equals("report")) {
 					entry = new DomainReport(entryMap);
 				} else if(entryMap.getString("type").equals("variable")) {
@@ -283,7 +281,7 @@ public class DomainManager implements Consumer {
 		entryMap.put("name", name);
 		entryMap.put("roles", new DataList());
 		entryMap.put("source", function);
-		DomainFunction df = new DomainFunction(this, jsManager, entryMap);
+		DomainFunction df = new DomainFunction(this, scriptFactory, entryMap);
 		putEntry(domain, name, df);
 	}
 	
@@ -309,7 +307,8 @@ public class DomainManager implements Consumer {
 		
 	protected Object execute(Session session, DomainFunction df, DataMap param) throws RedbackException {
 		Object result = null;
-		DomainLoggerJS dl = new DomainLoggerJS(session, this, df);
+		DomainLogger dl = new DomainLogger(session, this, df);
+		DomainLoggerJS dljs = new DomainLoggerJS(dl);
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("session", new SessionJSWrapper(session));
 		context.put("oc", new ObjectClientJSWrapper(objectClient, session, df.getDomain()));
@@ -320,10 +319,10 @@ public class DomainManager implements Consumer {
 		context.put("gc", new GatewayClientJSWrapper(gatewayClient));
 		context.put("geo", new GeoClientJSWrapper(geoClient));
 		context.put("ic", new IntegrationClientJSWrapper(integrationClient, session, df.getDomain()));
-		context.put("param", JSConverter.toJS(param));
+		context.put("param", param);
 		context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
 		context.put("domain", df.getDomain());
-		context.put("log", dl);
+		context.put("log", dljs);
 
 		if(!includeLoaded)
 			loadIncludeScripts(session);

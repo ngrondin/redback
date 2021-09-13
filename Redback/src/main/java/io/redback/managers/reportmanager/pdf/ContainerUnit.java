@@ -12,7 +12,6 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
-import io.redback.utils.js.JSConverter;
 
 public abstract class ContainerUnit extends Unit {
 	protected List<Unit> contentUnits;
@@ -38,7 +37,7 @@ public abstract class ContainerUnit extends Unit {
 	protected boolean show(Map<String, Object> context) throws RedbackException {
 		if(showExpr != null) {
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("object", JSConverter.toJS(context.get("object")));
+			jsContext.put("object", context.get("object"));
 			jsContext.put("page", context.get("page"));
 			Object value = null;
 			try {

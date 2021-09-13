@@ -14,7 +14,6 @@ import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
 import io.redback.utils.RedbackFile;
-import io.redback.utils.js.JSConverter;
 
 public class FileSet extends ContainerUnit {
 	protected String object;
@@ -32,8 +31,8 @@ public class FileSet extends ContainerUnit {
 		Object currentMasterObject = context.get("master");
 		List<?> currentMasterDataset = (List<?>)context.get("dataset");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		jsContext.put("master", JSConverter.toJS(JSConverter.toJS(currentObject)));
-		jsContext.put("filter", JSConverter.toJS(context.get("filter")));
+		jsContext.put("master", currentObject);
+		jsContext.put("filter", context.get("filter"));
 		FileClient fc = reportManager.getFileClient();
 		Session session = (Session)context.get("session");
 		String uid = (String)uidExpr.eval(jsContext);

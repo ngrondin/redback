@@ -1,35 +1,28 @@
 package io.redback.utils.js;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
+import io.redback.exceptions.RedbackException;
 import io.redback.utils.HTML;
 
-public class HTMLJSWrapper implements ProxyObject
+public class HTMLJSWrapper extends ObjectJSWrapper
 {
 	protected HTML html;
-	protected String[] members = {"append", "toString"};
 	
 	public HTMLJSWrapper(HTML h) {
+		super(new String[] {"append", "toString"});
 		html = h;
 	}
 	
-	public Object getMember(String key) {
+	public Object get(String key) {
 		if(key.equals("append")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					html.append(JSConverter.toJava(arguments[0]));
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					html.append(arguments[0]);
 					return null;
 				}
 			};
 		} else if(key.equals("toString")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
 					return html.toString();
 				}
 			};
@@ -38,16 +31,4 @@ public class HTMLJSWrapper implements ProxyObject
 		}
 	}
 
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));		
-	}
-
-	public boolean hasMember(String key) {
-		
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
-	}
 }
