@@ -16,13 +16,13 @@ import io.firebus.Payload;
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.ScriptFactory;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.ObjectClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
-import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
@@ -35,7 +35,7 @@ public class ProcessManager
 {
 	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected Firebus firebus;
-	protected JSManager jsManager;
+	protected ScriptFactory scriptFactory;
 	protected boolean loadAllOnInit;
 	protected int preCompile;
 	protected String configServiceName;
@@ -60,39 +60,43 @@ public class ProcessManager
 	protected DataMap globalVariables;
 	protected List<String> scriptVars;
 	
-	public ProcessManager(Firebus fb, DataMap config)
+	public ProcessManager(Firebus fb, DataMap config) throws RedbackException
 	{
-		firebus = fb;
-		jsManager = new JSManager("process");
-		loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
-		preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
-		configServiceName = config.getString("configservice");
-		configClient = new ConfigurationClient(firebus, configServiceName);
-		dataServiceName = config.getString("dataservice");
-		dataClient = new DataClient(firebus, dataServiceName);
-		accessManagerServiceName = config.getString("accessmanagementservice");
-		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
-		objectServiceName = config.getString("objectservice");
-		objectClient = new ObjectClient(firebus, objectServiceName);
-		domainServiceName = config.getString("domainservice");
-		processNotificationChannel = config.getString("processnotificationchannel");
-		processUserName = config.getString("processuser");
-		jwtSecret = config.getString("jwtsecret");
-		jwtIssuer = config.getString("jwtissuer");
-		processes = new HashMap<String, HashMap<Integer, Process>>();
-		transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
-		globalVariables = config.getObject("globalvariables");
-		piCollectionConfig = config.containsKey("processinstancecollection") ? new CollectionConfig(config.getObject("processinstancecollection")) : new CollectionConfig("rbpm_instance");
-		gmCollectionConfig = config.containsKey("groupmembercollection") ? new CollectionConfig(config.getObject("groupmembercollection")) : new CollectionConfig("rbam_groupmember");
-		jsManager.setGlobalVariables(globalVariables);
-		scriptVars = new ArrayList<String>();
-		scriptVars.add("pid");
-		scriptVars.add("pm");
-		scriptVars.add("firebus");
-		scriptVars.add("oc");
-		scriptVars.add("data");
-		scriptVars.add("processuser");
-		scriptVars.add("lastactioned");
+		try {
+			firebus = fb;
+			scriptFactory = new ScriptFactory();
+			loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
+			preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
+			configServiceName = config.getString("configservice");
+			configClient = new ConfigurationClient(firebus, configServiceName);
+			dataServiceName = config.getString("dataservice");
+			dataClient = new DataClient(firebus, dataServiceName);
+			accessManagerServiceName = config.getString("accessmanagementservice");
+			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
+			objectServiceName = config.getString("objectservice");
+			objectClient = new ObjectClient(firebus, objectServiceName);
+			domainServiceName = config.getString("domainservice");
+			processNotificationChannel = config.getString("processnotificationchannel");
+			processUserName = config.getString("processuser");
+			jwtSecret = config.getString("jwtsecret");
+			jwtIssuer = config.getString("jwtissuer");
+			processes = new HashMap<String, HashMap<Integer, Process>>();
+			transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
+			globalVariables = config.getObject("globalvariables");
+			piCollectionConfig = config.containsKey("processinstancecollection") ? new CollectionConfig(config.getObject("processinstancecollection")) : new CollectionConfig("rbpm_instance");
+			gmCollectionConfig = config.containsKey("groupmembercollection") ? new CollectionConfig(config.getObject("groupmembercollection")) : new CollectionConfig("rbam_groupmember");
+			scriptFactory.setGlobals(globalVariables);
+			scriptVars = new ArrayList<String>();
+			scriptVars.add("pid");
+			scriptVars.add("pm");
+			scriptVars.add("firebus");
+			scriptVars.add("oc");
+			scriptVars.add("data");
+			scriptVars.add("processuser");
+			scriptVars.add("lastactioned");
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising process manager", e);
+		}
 	}
 
 	
@@ -101,9 +105,9 @@ public class ProcessManager
 		return firebus;
 	}
 	
-	public JSManager getJSManager()
+	public ScriptFactory getScriptFactory()
 	{
-		return jsManager;
+		return scriptFactory;
 	}
 	
 	public ObjectClient getObjectClient()
@@ -123,7 +127,7 @@ public class ProcessManager
 			Session session = new Session();
 			try {
 				loadAppProcesses(session);
-				jsManager.precompile(preCompile);
+				//jsManager.precompile(preCompile);
 			} catch(Exception e) {
 				logger.severe(StringUtils.rollUpExceptions(e));
 			}

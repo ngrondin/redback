@@ -8,8 +8,8 @@ import java.util.Map;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.Expression;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 
@@ -20,17 +20,20 @@ public abstract class ContainerUnit extends Unit {
 	
 	public ContainerUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		DataList content = config.getList("content");
-		contentUnits = new ArrayList<Unit>();
-		for(int i = 0; i < content.size(); i++) {
-			Unit unit = Unit.fromConfig(reportManager, reportConfig, content.getObject(i));
-			if(unit != null)
-				contentUnits.add(unit);
+		try {
+			DataList content = config.getList("content");
+			contentUnits = new ArrayList<Unit>();
+			for(int i = 0; i < content.size(); i++) {
+				Unit unit = Unit.fromConfig(reportManager, reportConfig, content.getObject(i));
+				if(unit != null)
+					contentUnits.add(unit);
+			}
+			canBreak = config.containsKey("canbreak") ? config.getBoolean("canbreak") : true;
+			jsParams = Arrays.asList(new String[] {"params", "object", "page"});
+			showExpr = config.containsKey("show") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_container_show", config.getString("show")) : null;
+		} catch(Exception e) {
+			throw new RedbackException("Error intialising container unit", e);
 		}
-		canBreak = config.containsKey("canbreak") ? config.getBoolean("canbreak") : true;
-		jsParams = Arrays.asList(new String[] {"params", "object", "page"});
-		showExpr = config.containsKey("show") ? new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_container_show", jsParams, config.getString("show")) : null;
-		
 	}
 	
 	

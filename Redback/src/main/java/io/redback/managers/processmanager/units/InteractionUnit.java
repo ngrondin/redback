@@ -8,9 +8,10 @@ import java.util.Map;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.Expression;
+import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
-import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.processmanager.ActionConfig;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Assignee;
@@ -35,24 +36,28 @@ public class InteractionUnit extends ProcessUnit
 	public InteractionUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
 		super(pm, p, config);
-		assigneeConfigs = new ArrayList<AssigneeConfig>();
-		if(config.containsKey("assignees")  &&  config.get("assignees") instanceof DataList)
-		{
-			DataList list = config.getList("assignees");
-			for(int i = 0; i < list.size(); i++)
-				assigneeConfigs.add(new AssigneeConfig(processManager, list.getObject(i)));
+		try {
+			assigneeConfigs = new ArrayList<AssigneeConfig>();
+			if(config.containsKey("assignees")  &&  config.get("assignees") instanceof DataList)
+			{
+				DataList list = config.getList("assignees");
+				for(int i = 0; i < list.size(); i++)
+					assigneeConfigs.add(new AssigneeConfig(processManager, list.getObject(i)));
+			}
+			actionConfigs = new ArrayList<ActionConfig>();
+			if(config.containsKey("actions")  &&  config.get("actions") instanceof DataList)
+			{
+				DataList list = config.getList("actions");
+				for(int i = 0; i < list.size(); i++)
+					actionConfigs.add(new ActionConfig(processManager, p, this, list.getObject(i)));
+			}
+			notificationConfig = config.getObject("notification");
+			labelExpression = pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_labelexpr", notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
+			messageExpression = pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_msgexpr", notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
+			nextNodeInterruption = config.getString("interruption");
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising interaction unit", e);
 		}
-		actionConfigs = new ArrayList<ActionConfig>();
-		if(config.containsKey("actions")  &&  config.get("actions") instanceof DataList)
-		{
-			DataList list = config.getList("actions");
-			for(int i = 0; i < list.size(); i++)
-				actionConfigs.add(new ActionConfig(processManager, p, this, list.getObject(i)));
-		}
-		notificationConfig = config.getObject("notification");
-		labelExpression = new Expression(pm.getJSManager(), jsFunctionNameRoot + "_labelexpr", pm.getScriptVariableNames(), notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
-		messageExpression = new Expression(pm.getJSManager(), jsFunctionNameRoot + "_msgexpr", pm.getScriptVariableNames(), notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
-		nextNodeInterruption = config.getString("interruption");
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException
@@ -186,35 +191,39 @@ public class InteractionUnit extends ProcessUnit
 	
 	private RawNotification getRawNotification(ProcessInstance pi) throws RedbackException 
 	{
-		Map<String, Object> context = pi.getScriptContext();
-		String code = notificationConfig.getString("code");
-		String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
-		String label = (String)labelExpression.eval(context);
-		String message = (String)messageExpression.eval(context);
-		RawNotification notification = new RawNotification(pi.getProcessName(), pi.getId(), code, type, label, message);
-		for(ActionConfig actionConfig: actionConfigs)
-		{
-			String[] exclusiveAppliesTo = null;
-			if(actionConfig.isExclusive()) {
-				Object exclusiveValue = actionConfig.evaluateExclusiveId(pi);
-				if(exclusiveValue instanceof String) {
-					exclusiveAppliesTo = new String[1];
-					exclusiveAppliesTo[0] = (String)exclusiveValue;
-				} else if(exclusiveValue instanceof DataList) {
-					DataList list = (DataList)exclusiveValue;
-					exclusiveAppliesTo = new String[list.size()];
-					for(int i = 0; i < list.size(); i++) {
-						exclusiveAppliesTo[i] = list.getString(i);
+		try {
+			Map<String, Object> context = pi.getScriptContext();
+			String code = notificationConfig.getString("code");
+			String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
+			String label = (String)labelExpression.eval(context);
+			String message = (String)messageExpression.eval(context);
+			RawNotification notification = new RawNotification(pi.getProcessName(), pi.getId(), code, type, label, message);
+			for(ActionConfig actionConfig: actionConfigs)
+			{
+				String[] exclusiveAppliesTo = null;
+				if(actionConfig.isExclusive()) {
+					Object exclusiveValue = actionConfig.evaluateExclusiveId(pi);
+					if(exclusiveValue instanceof String) {
+						exclusiveAppliesTo = new String[1];
+						exclusiveAppliesTo[0] = (String)exclusiveValue;
+					} else if(exclusiveValue instanceof DataList) {
+						DataList list = (DataList)exclusiveValue;
+						exclusiveAppliesTo = new String[list.size()];
+						for(int i = 0; i < list.size(); i++) {
+							exclusiveAppliesTo[i] = list.getString(i);
+						}
 					}
 				}
+				notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain(), exclusiveAppliesTo);
 			}
-			notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain(), exclusiveAppliesTo);
+			if(pi.getData() != null && pi.getData().containsKey("objectname") && pi.getData().containsKey("uid")) {
+				notification.addData("objectname", pi.getData().getString("objectname"));
+				notification.addData("uid", pi.getData().getString("uid"));
+			}
+			return notification;
+		} catch(ScriptException e) {
+			throw new RedbackException("Error generating raw notification", e);
 		}
-		if(pi.getData() != null && pi.getData().containsKey("objectname") && pi.getData().containsKey("uid")) {
-			notification.addData("objectname", pi.getData().getString("objectname"));
-			notification.addData("uid", pi.getData().getString("uid"));
-		}
-		return notification;
 	}
 	
 	private boolean isAssignee(Actionner actionner, ProcessInstance pi)

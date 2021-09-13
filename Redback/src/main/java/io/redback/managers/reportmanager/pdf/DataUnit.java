@@ -18,8 +18,8 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import io.firebus.data.DataMap;
+import io.firebus.script.Expression;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
@@ -37,16 +37,20 @@ public abstract class DataUnit extends Unit {
 
 	public DataUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		jsParams = Arrays.asList(new String[] {"dataset", "object", "master", "page"});
-		valueExpr = new Expression(reportManager.getJSManager(), jsFunctionNameRoot + "_text_value", jsParams, c.getString("value"));
-		width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
-		font = PDType1Font.HELVETICA;
-		boldFont = PDType1Font.HELVETICA_BOLD;
-		fontSize = config.containsKey("fontsize") ? config.getNumber("fontsize").floatValue() : 12f;
-		height = config.containsKey("height") ? config.getNumber("height").floatValue() : 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize;
-		color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
-		format = config.getString("format");
-		commaToLine = config.containsKey("commatoline") ? config.getBoolean("commatoline") : false;
+		try {
+			jsParams = Arrays.asList(new String[] {"dataset", "object", "master", "page"});
+			valueExpr = reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_text_value", c.getString("value"));
+			width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
+			font = PDType1Font.HELVETICA;
+			boldFont = PDType1Font.HELVETICA_BOLD;
+			fontSize = config.containsKey("fontsize") ? config.getNumber("fontsize").floatValue() : 12f;
+			height = config.containsKey("height") ? config.getNumber("height").floatValue() : 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize;
+			color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
+			format = config.getString("format");
+			commaToLine = config.containsKey("commatoline") ? config.getBoolean("commatoline") : false;
+		} catch(Exception e) {
+			throw new RedbackException("Error intialising container unit", e);
+		}
 	}
 
 

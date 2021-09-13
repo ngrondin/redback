@@ -1,15 +1,13 @@
 package io.redback.managers.reportmanager.excel;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.firebus.data.DataMap;
+import io.firebus.script.Function;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Function;
 import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -24,8 +22,11 @@ public class ExcelReport extends Report {
 
 	public ExcelReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
 		super(s, rm, rc);
-		List<String> jsParams = Arrays.asList(new String[] {"oc", "wb", "filter"});
-		script = new Function(rm.getJSManager(), rc.getName(), jsParams, rc.getData().getString("content"));
+		try	{
+			script = rm.getScriptFactory().createFunction(rc.getName(), new String[] {"oc", "wb", "filter"}, rc.getData().getString("content"));
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising excel report", e);
+		}
 	}
 
 	public void produce(DataMap filter) throws RedbackException {
@@ -36,7 +37,7 @@ public class ExcelReport extends Report {
 			context.put("wb", new ExcelWorkbookJSWrapper(workbook));
 			context.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));
 			context.put("filter", filter);
-			script.execute(context);
+			script.call(context);
 			workbook.write();
 			workbook.close();
 		} catch(Exception e) {

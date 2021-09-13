@@ -8,17 +8,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.script.ScriptException;
-
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.script.Expression;
+import io.firebus.script.Function;
+import io.firebus.script.exceptions.ScriptException;
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataMap;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Expression;
-import io.redback.managers.jsmanager.Function;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
@@ -38,7 +37,7 @@ public class RedbackObject extends RedbackElement
 	protected boolean isDeleted;
 
 	// Initiate existing object from pre-loaded data
-	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, DataMap dbData) throws RedbackException, ScriptException
+	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, DataMap dbData) throws RedbackException
 	{
 		init(s, om, cfg);	
 		isNewObject = false;
@@ -59,7 +58,7 @@ public class RedbackObject extends RedbackElement
 			}
 			postInitScriptContextUpdate();
 			updateScriptContext();
-			executeScriptsForEvent("onload");
+			executeFunctionForEvent("onload");
 		}
 		else
 		{
@@ -134,13 +133,13 @@ public class RedbackObject extends RedbackElement
 					if(value != null) {
 						data.put(attributeName, value);
 						updatedAttributes.put(attributeName, true);	
-						executeAttributeScriptsForEvent(attributeName, "onupdate");
+						executeAttributeFunctionForEvent(attributeName, "onupdate");
 					}
 				}
 				updateScriptContext();				
-				executeScriptsForEvent("oncreate");
+				executeFunctionForEvent("oncreate");
 			}
-			catch(FunctionTimeoutException | FunctionErrorException e)
+			catch(FunctionTimeoutException | FunctionErrorException | ScriptException e)
 			{
 				throw new RedbackException("Problem initiating object " + config.getName(), e);
 			}
@@ -221,11 +220,13 @@ public class RedbackObject extends RedbackElement
 			if(data.containsKey(name))
 				return data.get(name);
 			else if(expression != null) {
-				//Timer t = new Timer("expr");
-				Object o = expression.eval(scriptContext);
-				//t.mark();
-				Value val = new Value(o);
-				return val;
+				try {
+					Object o = expression.eval(scriptContext);
+					Value val = new Value(o);
+					return val;
+				} catch(ScriptException e) {
+					throw new RedbackException("Error getting expression attribute", e);
+				}
 			} else 
 				return new Value(null);
 		}		
@@ -358,7 +359,7 @@ public class RedbackObject extends RedbackElement
 					if(attributeConfig.getExpression() == null) 
 						scriptContext.put(name, actualValue.getObject());
 					scriptContext.put("previousValue", currentValue.getObject());
-					executeAttributeScriptsForEvent(name, "onupdate");
+					executeAttributeFunctionForEvent(name, "onupdate");
 					scriptContext.remove("previousValue");
 				}
 				else
@@ -417,41 +418,53 @@ public class RedbackObject extends RedbackElement
 			return false;
 		else
 		{
-			Expression expression = config.getAttributeConfig(name).getEditableExpression(); 
-			Object o = expression.eval(scriptContext);
-			if(o instanceof Boolean)
-				return (Boolean)o;
-			else
-				return false;
+			try {
+				Expression expression = config.getAttributeConfig(name).getEditableExpression(); 
+				Object o = expression.eval(scriptContext);
+				if(o instanceof Boolean)
+					return (Boolean)o;
+				else
+					return false;
+			} catch(ScriptException e) {
+				throw new RedbackException("Error evaluation isEditable expression", e);
+			}
 		}
 	}
 	
 	public boolean isMandatory(String name) throws RedbackException
 	{
-		Expression expression = config.getAttributeConfig(name).getMandatoryExpression(); 
-		Object o = expression.eval(scriptContext);
-		if(o instanceof Boolean)
-			return (Boolean)o;
-		else
-			return false;
+		try {
+			Expression expression = config.getAttributeConfig(name).getMandatoryExpression(); 
+			Object o = expression.eval(scriptContext);
+			if(o instanceof Boolean)
+				return (Boolean)o;
+			else
+				return false;
+		} catch(ScriptException e) {
+			throw new RedbackException("Error evaluation isMandatory expression", e);
+		}		
 	}
 		
 	
 	public boolean canDelete() throws RedbackException
 	{
-		Expression expression = config.getCanDeleteExpression();
-		Object o = expression.eval(scriptContext);
-		if(o instanceof Boolean)
-			return (Boolean)o;
-		else
-			return false;
+		try {
+			Expression expression = config.getCanDeleteExpression();
+			Object o = expression.eval(scriptContext);
+			if(o instanceof Boolean)
+				return (Boolean)o;
+			else
+				return false;
+		} catch(ScriptException e) {
+			throw new RedbackException("Error evaluation canDelete expression", e);
+		}		
 	}
 	
 	public void delete() throws RedbackException
 	{
 		if(canDelete()) {
 			isDeleted = true;
-			executeScriptsForEvent("ondelete");
+			executeFunctionForEvent("ondelete");
 		} else {
 			throw new RedbackException("The object '" + config.getName() + ":" + getUID().getString() + "' cannot be deleted");
 		}
@@ -462,7 +475,7 @@ public class RedbackObject extends RedbackElement
 		return new ArrayList<String>(updatedAttributes.keySet());
 	}
 	
-	public void save() throws ScriptException, RedbackException
+	public void save() throws RedbackException
 	{
 		if(isDeleted)
 		{
@@ -474,7 +487,7 @@ public class RedbackObject extends RedbackElement
 		{
 			if(canWrite)
 			{
-				executeScriptsForEvent("onsave");
+				executeFunctionForEvent("onsave");
 				DataMap key = new DataMap();
 				key.put(config.getUIDDBKey(), getUID().getObject());
 
@@ -513,10 +526,10 @@ public class RedbackObject extends RedbackElement
 		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true) && canWrite)
 		{
 			try {
-				executeScriptsForEvent("aftersave");
+				executeFunctionForEvent("aftersave");
 				if(isNewObject)
 				{
-					executeScriptsForEvent("aftercreate");
+					executeFunctionForEvent("aftercreate");
 					isNewObject = false;
 				}
 			} catch(Exception e) {
@@ -530,7 +543,7 @@ public class RedbackObject extends RedbackElement
 	{
 		if(canExecute)
 		{
-			return executeScriptsForEvent(eventName);
+			return executeFunctionForEvent(eventName);
 		}
 		else
 		{
@@ -594,31 +607,31 @@ public class RedbackObject extends RedbackElement
 	}
 	
 
-	protected Object executeScriptsForEvent(String event) throws RedbackException
+	protected Object executeFunctionForEvent(String event) throws RedbackException
 	{
-		Function script  = config.getScriptForEvent(event);
-		if(script != null)
-			return executeScript(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + event);
+		Function function  = config.getScriptForEvent(event);
+		if(function != null)
+			return executeFunction(function, getObjectConfig().getName() + ":" + getUID().getString() + "." + event);
 		else
 			return null;
 	}
 
-	protected void executeAttributeScriptsForEvent(String attributeName, String event) throws RedbackException
+	protected void executeAttributeFunctionForEvent(String attributeName, String event) throws RedbackException
 	{
 		Function script  = config.getAttributeConfig(attributeName).getScriptForEvent(event);
 		if(script != null)
-				executeScript(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + attributeName + "." + event);
+			executeFunction(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + attributeName + "." + event);
 	}
 	
-	protected Object executeScript(Function script, String name) throws RedbackException
+	protected Object executeFunction(Function function, String name) throws RedbackException
 	{
 		Object retVal = null;
 		logger.finer("Start executing script : " + name);
 		try
 		{
-			retVal = script.execute(scriptContext);
+			retVal = function.call(scriptContext);
 		} 
-		catch (RedbackException e)
+		catch (ScriptException e)
 		{
 			throw new RedbackException("Problem occurred executing script " + name, e);
 		}		

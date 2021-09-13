@@ -3,25 +3,17 @@ package io.redback.managers.reportmanager.pdf;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import io.firebus.data.DataEntity;
-import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Expression;
-import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
-import io.redback.security.Session;
 import io.redback.utils.ImageUtils;
 import io.redback.utils.RedbackFile;
-import io.redback.utils.js.JSConverter;
 
 public class Image extends Unit {
 	protected String base64;

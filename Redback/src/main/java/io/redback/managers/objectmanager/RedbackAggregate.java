@@ -18,7 +18,6 @@ import io.redback.security.Session;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.js.FirebusJSWrapper;
-import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.LoggerJSFunction;
 
 public class RedbackAggregate extends RedbackElement
@@ -81,7 +80,7 @@ public class RedbackAggregate extends RedbackElement
 		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
 		scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		scriptContext.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
-		scriptContext.put("global", Converter.convertIn(objectManager.getGlobalVariables()));
+		//scriptContext.put("global", objectManager.getGlobalVariables());
 		scriptContext.put("log", new LoggerJSFunction());
 		scriptContext.put("canRead", new SessionRightsJSFunction(session, "read"));
 		scriptContext.put("canWrite", new SessionRightsJSFunction(session, "write"));
@@ -95,7 +94,7 @@ public class RedbackAggregate extends RedbackElement
 		{	
 			String key = it.next();
 			if(getObjectConfig().getAttributeConfig(key).getExpression() == null)
-				scriptContext.put(key, Converter.convertIn(get(key).getObject()));
+				scriptContext.put(key, get(key).getObject());
 		}
 	}	
 	

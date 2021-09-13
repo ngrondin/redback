@@ -1,7 +1,6 @@
 package io.redback.managers.objectmanager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,6 +16,7 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.script.Function;
 import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
 import io.firebus.data.DataEntity;
@@ -197,10 +197,10 @@ public class ObjectManager
 		return integrationClient;
 	}
 	
-	public DataMap getGlobalVariables()
+	/*public DataMap getGlobalVariables()
 	{
 		return globalVariables;
-	}
+	}*/
 	
 	public UserProfile getElevatedUserProfile(Session session) throws RedbackException 
 	{
@@ -310,18 +310,10 @@ public class ObjectManager
 		ScriptConfig scriptConfig = globalScripts.get(name);
 		if(scriptConfig == null)
 		{
-			try
-			{
-				if(!includeLoaded)
-					loadAllIncludeScripts(session);
-				scriptConfig = new ScriptConfig(jsManager, configClient.getConfig(session, "rbo", "script", name));
-				globalScripts.put(name, scriptConfig);
-			}
-			catch(Exception e)
-			{
-				//logger.severe(e.getMessage());
-				throw new RedbackException("Exception getting global script config", e);
-			}
+			if(!includeLoaded)
+				loadAllIncludeScripts(session);
+			scriptConfig = new ScriptConfig(scriptFactory, configClient.getConfig(session, "rbo", "script", name));
+			globalScripts.put(name, scriptConfig);
 		}
 		return scriptConfig;
 	}
@@ -497,7 +489,7 @@ public class ObjectManager
 							context.put("action", "list");
 							context.put("page", page);
 							context.put("pageSize", pageSize);
-							Object o = gs.execute(context);
+							Object o = gs.call(context);
 							if(o instanceof DataList)
 								dbResultList = (DataList)o;
 						}
@@ -556,7 +548,7 @@ public class ObjectManager
 			return new ArrayList<RedbackObject>();
 	}
 	
-	public RedbackObject updateObject(Session session, String objectName, String id, DataMap updateData) throws RedbackException, ScriptException
+	public RedbackObject updateObject(Session session, String objectName, String id, DataMap updateData) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
 		if(object != null)
@@ -736,7 +728,7 @@ public class ObjectManager
 							context.put("tuple", tuple);
 							context.put("metrics", metrics);
 							context.put("action", "aggregate");
-							Object o = gs.execute(context);
+							Object o = gs.call(context);
 							if(o instanceof DataList)
 								dbResultList = (DataList)o;
 							else
@@ -867,7 +859,7 @@ public class ObjectManager
 		transactions.get(txId).add(obj);
 	}
 	
-	public void commitCurrentTransaction() throws ScriptException, RedbackException
+	public void commitCurrentTransaction() throws RedbackException
 	{
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))
@@ -897,8 +889,7 @@ public class ObjectManager
 			ExpressionMap em = readRightsFilters.get(s);
 			if(em == null) {
 				String funcName = objectName + "_readrightsfilter_" + StringUtils.base16(filter.hashCode());
-				String[] vars = new String[] {"userprofile", "om"};
-				em = new ExpressionMap(jsManager, funcName, Arrays.asList(vars), filter);
+				em = new ExpressionMap(scriptFactory, funcName, filter);
 				readRightsFilters.put(s, em);
 			}
 			return em.eval(createScriptContext(session));
