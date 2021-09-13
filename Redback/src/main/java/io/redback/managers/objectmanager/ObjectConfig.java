@@ -73,21 +73,14 @@ public class ObjectConfig
 				while(events.hasNext())
 				{
 					String event = events.next();
-					try
-					{
-						Function func = objectManager.getScriptFactory().createFunction(getName() + "_event_" + event, vars, scriptsCfg.getString(event));
-						scripts.put(event, func);
-					} 
-					catch(Exception e)
-					{
-						throw new RedbackException("Problem compiling script", e);
-					}
+					Function func = objectManager.getScriptFactory().createFunction(getName() + "_event_" + event, vars, scriptsCfg.getString(event));
+					scripts.put(event, func);
 				}			
 			}
 			
 			canDeleteExpr = objectManager.getScriptFactory().createExpression(getName() + "_candelete", (config.getString("candelete") != null ? config.getString("candelete") : "false"));
 		} catch(Exception e) {
-			throw new RedbackException("Error intialising object config");
+			throw new RedbackException("Error intialising object config", e);
 		}
 	}
 

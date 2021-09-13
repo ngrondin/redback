@@ -2,8 +2,9 @@ package io.redback.managers.objectmanager;
 
 import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
+import io.firebus.script.Expression;
+import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.jsmanager.ExpressionMap;
 
 public class RelatedObjectConfig
@@ -16,25 +17,29 @@ public class RelatedObjectConfig
 	
 	public RelatedObjectConfig(ObjectManager om, ObjectConfig oc, AttributeConfig ac, DataMap cfg) throws RedbackException
 	{
-		objectManager = om;
-		config = cfg;
-		String fn = oc.getName() + "_" + ac.getName() + "_relatedlistfilter";
-		if(config.containsKey("listfilter"))
-		{
-			Object f = config.get("listfilter");
-			if(f instanceof DataMap)
+		try {
+			objectManager = om;
+			config = cfg;
+			String fn = oc.getName() + "_" + ac.getName() + "_relatedlistfilter";
+			if(config.containsKey("listfilter"))
 			{
-				listFilterExpressionMap = new ExpressionMap(objectManager.getJSManager(), fn, oc.getScriptVariables(), (DataMap)f);
+				Object f = config.get("listfilter");
+				if(f instanceof DataMap)
+				{
+					listFilterExpressionMap = new ExpressionMap(objectManager.getScriptFactory(), fn, (DataMap)f);
+				}
+				else if(f instanceof DataLiteral)
+				{
+					String scriptSrc = ((DataLiteral)f).getString();
+					listFilterExpression = objectManager.getScriptFactory().createExpression(fn, scriptSrc); 
+				}
 			}
-			else if(f instanceof DataLiteral)
+			else
 			{
-				String scriptSrc = ((DataLiteral)f).getString();
-				listFilterExpression = new Expression(objectManager.getJSManager(), fn, oc.getScriptVariables(), scriptSrc); 
+				listFilterExpressionMap = new ExpressionMap(objectManager.getScriptFactory(), fn, new DataMap());
 			}
-		}
-		else
-		{
-			listFilterExpressionMap = new ExpressionMap(objectManager.getJSManager(), fn, oc.getScriptVariables(), new DataMap());
+		} catch(ScriptException e) {
+			throw new RedbackException("Error initialising related object config", e);
 		}
 	}
 	
@@ -68,7 +73,7 @@ public class RelatedObjectConfig
 			{
 				throw new RedbackException("Null pointer exception in list filter script", e);
 			}
-			catch(RuntimeException e)
+			catch(ScriptException e)
 			{
 				throw new RedbackException("Problem occurred executing a list filter script", e);
 			}

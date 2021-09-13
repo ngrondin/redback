@@ -14,7 +14,6 @@ import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
 import io.redback.utils.js.FirebusJSWrapper;
-import io.redback.utils.js.JSConverter;
 
 public class ProcessInstance 
 {
@@ -94,8 +93,8 @@ public class ProcessInstance
 	
 	public void updateScriptBindings()
 	{
-		scriptContext.put("data", Converter.convertIn(data));
-		scriptContext.put("lastactioned", Converter.convertIn(lastActioned));
+		scriptContext.put("data", data);
+		scriptContext.put("lastactioned", lastActioned);
 	}
 	
 	public String getId()

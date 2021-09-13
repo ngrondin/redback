@@ -14,13 +14,14 @@ import java.util.logging.Logger;
 import io.firebus.Firebus;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.Function;
+import io.firebus.script.ScriptFactory;
+import io.firebus.script.exceptions.ScriptException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.exceptions.RedbackUnauthorisedException;
-import io.redback.managers.jsmanager.Function;
-import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.services.UIServer;
@@ -35,7 +36,7 @@ public class RedbackUIServer extends UIServer
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String devpath;
-	protected JSManager jsManager;
+	protected ScriptFactory scriptFactory;
 	protected HashMap<String, Function> jspScripts;
 	protected HashMap<String, DataMap> viewConfigs;
 	protected ConfigurationClient configClient;
@@ -47,7 +48,7 @@ public class RedbackUIServer extends UIServer
 	{
 		super(n, c, f);
 		devpath = config.getString("devpath");
-		jsManager = new JSManager("ui"); 
+		scriptFactory = new ScriptFactory(); 
 		jspScripts = new HashMap<String, Function>();
 		viewConfigs = new HashMap<String, DataMap>();
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
@@ -263,8 +264,12 @@ public class RedbackUIServer extends UIServer
 		HTML html = new HTML();
 		context.put("sb", new HTMLJSWrapper(html));
 		Function script = getCompiledJSP(name, version);
-		script.execute(context);
-		return html;
+		try {
+			script.call(context);
+			return html;
+		} catch(ScriptException e) {
+			throw new RedbackException("Error executing jsp", e);
+		}
 	}
 	
 	
@@ -318,7 +323,7 @@ public class RedbackUIServer extends UIServer
 					varNames.add("id");
 					varNames.add("parents");
 					varNames.add("sb");
-					script = new Function(jsManager, "jsp_" + version + "_" + name.replace("/", "_"), varNames, jsp);
+					script = scriptFactory.createFunction("jsp_" + version + "_" + name.replace("/", "_"), varNames.toArray(new String[] {}), jsp);
 					jspScripts.put(version + "/" + name,  script);
 				}
 			}

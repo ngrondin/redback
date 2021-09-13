@@ -16,7 +16,6 @@ import io.redback.security.Session;
 
 public class FirebusRequestUnit extends ProcessUnit 
 {
-	//private Logger logger = Logger.getLogger("io.redback");
 	protected String firebusServiceName;
 	protected ExpressionMap inputExpressionMap;
 	protected ExpressionMap outputExpressionMap;
@@ -25,13 +24,17 @@ public class FirebusRequestUnit extends ProcessUnit
 	public FirebusRequestUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
 		super(pm, p, config);
-		processManager = pm;
-		firebusServiceName = config.getString("service");
-		inputExpressionMap = new ExpressionMap(processManager.getJSManager(), jsFunctionNameRoot + "_inexpr", pm.getScriptVariableNames(), config.get("data") != null ? config.getObject("data") : new DataMap());
-		List<String> outVars = new ArrayList<String>(pm.getScriptVariableNames());
-		outVars.add("result");
-		outputExpressionMap = new ExpressionMap(processManager.getJSManager(), jsFunctionNameRoot + "_outexpr", outVars, config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
-		nextNode = config.getString("nextnode");
+		try {
+			processManager = pm;
+			firebusServiceName = config.getString("service");
+			inputExpressionMap = new ExpressionMap(processManager.getScriptFactory(), jsFunctionNameRoot + "_inexpr", config.get("data") != null ? config.getObject("data") : new DataMap());
+			List<String> outVars = new ArrayList<String>(pm.getScriptVariableNames());
+			outVars.add("result");
+			outputExpressionMap = new ExpressionMap(processManager.getScriptFactory(), jsFunctionNameRoot + "_outexpr", config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
+			nextNode = config.getString("nextnode");
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising firebus request unit", e);
+		}
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException

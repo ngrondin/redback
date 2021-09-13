@@ -1,7 +1,6 @@
 package io.redback.services.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +11,13 @@ import io.firebus.Firebus;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.Expression;
+import io.firebus.script.ScriptFactory;
+import io.firebus.script.exceptions.ScriptException;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.GatewayClient;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Expression;
-import io.redback.managers.jsmanager.JSManager;
 import io.redback.security.Session;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.services.IntegrationServer;
@@ -41,24 +41,27 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		public Expression respExpr;
 		
 		public ClientConfig(DataMap cfg) throws RedbackException {
-			name = cfg.getString("name");
-			clientId = cfg.getString("clientid");
-			clientSecrect = cfg.getString("clientsecret");
-			scope = cfg.getString("scope");
-			extraLoginParams = cfg.getString("extraloginparams");
-			loginUrl = cfg.getString("loginurl");
-			tokenUrl = cfg.getString("tokenurl");
-			List<String> params = Arrays.asList(new String[] {"userprofile", "clientid", "clientsecret", "action", "object", "uid", "filter", "data", "options", "clientdata", "response"});
-			headerExpr = new Expression(jsManager, "client_" + name + "_header", params, cfg.getString("header"));
-			urlExpr = new Expression(jsManager, "client_" + name + "_url", params, cfg.getString("url"));
-			methodExpr = new Expression(jsManager, "client_" + name + "_method", params, cfg.getString("method"));
-			bodyExpr = new Expression(jsManager, "client_" + name + "_body", params, cfg.getString("body"));
-			respExpr = new Expression(jsManager, "client_" + name + "_response", params, cfg.getString("response"));
+			try {
+				name = cfg.getString("name");
+				clientId = cfg.getString("clientid");
+				clientSecrect = cfg.getString("clientsecret");
+				scope = cfg.getString("scope");
+				extraLoginParams = cfg.getString("extraloginparams");
+				loginUrl = cfg.getString("loginurl");
+				tokenUrl = cfg.getString("tokenurl");
+				headerExpr = scriptFactory.createExpression("client_" + name + "_header", "(" + cfg.getString("header") + ")");
+				urlExpr = scriptFactory.createExpression("client_" + name + "_url", "(" + cfg.getString("url") + ")");
+				methodExpr = scriptFactory.createExpression("client_" + name + "_method", "(" + cfg.getString("method") + ")");
+				bodyExpr = scriptFactory.createExpression("client_" + name + "_body", "(" + cfg.getString("body") + ")");
+				respExpr = scriptFactory.createExpression("client_" + name + "_response", "(" + cfg.getString("response") + ")");
+			} catch(Exception e) {
+				throw new RedbackException("Error initialising integration client config", e);
+			}
 		}
 	};
 	
 	private Logger logger = Logger.getLogger("io.redback");
-	protected JSManager jsManager;
+	protected ScriptFactory scriptFactory;
 	protected boolean loadAllOnInit;
 	protected int preCompile;
 	protected String configServiceName;
@@ -74,7 +77,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 
 	public RedbackIntegrationServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
-		jsManager = new JSManager("integration");
+		scriptFactory = new ScriptFactory();
 		loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
 		preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
 		configServiceName = config.getString("configservice");
@@ -97,7 +100,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 			Session session = new Session();
 			try {
 				loadAllClientConfigs(session);
-				jsManager.precompile(preCompile);
+				//jsManager.precompile(preCompile);
 			} catch(Exception e) {
 				logger.severe(StringUtils.rollUpExceptions(e));
 			}
@@ -206,14 +209,18 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	}
 	
 	protected DataMap gatewayRequest(ClientConfig config, Map<String, Object> context) throws RedbackException {
-		DataMap resp = gatewayClient.call(
-				(String)config.methodExpr.eval(context), 
-				(String)config.urlExpr.eval(context), 
-				config.bodyExpr.eval(context), 
-				(DataMap)config.headerExpr.eval(context), 
-				null);
-		context.put("response", resp);
-		return (DataMap)config.respExpr.eval(context);
+		try {
+			DataMap resp = gatewayClient.call(
+					(String)config.methodExpr.eval(context), 
+					(String)config.urlExpr.eval(context), 
+					config.bodyExpr.eval(context), 
+					(DataMap)config.headerExpr.eval(context), 
+					null);
+			context.put("response", resp);
+			return (DataMap)config.respExpr.eval(context);
+		} catch(ScriptException e) {
+			throw new RedbackException("Error executing gateway request", e);
+		}
 	}
 
 	protected DataMap get(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException {

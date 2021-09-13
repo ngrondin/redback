@@ -43,7 +43,8 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
-					return objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 50);
+					List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 50);
+					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};
 		} else if(key.equals("listAllObjects")) {
@@ -53,7 +54,8 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
-					return objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 5000);
+					List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 5000);
+					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};
 		} else if(key.equals("getRelatedObjectList")) {
@@ -63,8 +65,8 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					String uid = (String)arguments[1];
 					String attributeName = (String)arguments[2];
 					DataMap filter = (DataMap)arguments[3];
-					return objectManager.listRelatedObjects(session, objectName, uid, attributeName, filter, null, null, false);
-					
+					List<RedbackObject> list = objectManager.listRelatedObjects(session, objectName, uid, attributeName, filter, null, null, false);
+					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};
 		} else if(key.equals("updateObject")) {
@@ -182,5 +184,4 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 		}		
 		return null;
 	}
-
 }

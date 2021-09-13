@@ -9,12 +9,12 @@ import java.util.Map;
 import io.firebus.Firebus;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.ScriptFactory;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.ObjectClient;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.reportmanager.csv.CSVReport;
 import io.redback.managers.reportmanager.excel.ExcelReport;
 import io.redback.managers.reportmanager.pdf.PDFReport;
@@ -25,7 +25,7 @@ import io.redback.utils.RedbackFileMetaData;
 public class ReportManager {
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
-	protected JSManager jsManager;
+	protected ScriptFactory scriptFactory;
 	protected String configServiceName;
 	protected String objectServiceName;
 	protected String dataServiceName;
@@ -42,7 +42,7 @@ public class ReportManager {
 
 	public ReportManager(Firebus fb, DataMap config) {
 		firebus = fb;
-		jsManager = new JSManager("report");
+		scriptFactory = new ScriptFactory();
 		includeLoaded = false;
 		configServiceName = config.getString("configservice");
 		objectServiceName = config.getString("objectservice");
@@ -66,7 +66,7 @@ public class ReportManager {
 		{
 			try 
 			{
-				jsManager.addSource("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
+				scriptFactory.executeInRootScope("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
 			}
 			catch(Exception e) 
 			{
@@ -150,8 +150,8 @@ public class ReportManager {
 		return fileClient;
 	}
 	
-	public JSManager getJSManager() {
-		return jsManager;
+	public ScriptFactory getScriptFactory() {
+		return scriptFactory;
 	}
 
 	public Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException {

@@ -1,11 +1,11 @@
 package io.redback.managers.processmanager.units;
 
 import io.firebus.data.DataMap;
+import io.firebus.script.Expression;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Expression;
 import io.redback.managers.processmanager.Process;
 
 public class ConditionalUnit extends ProcessUnit 
@@ -18,11 +18,15 @@ public class ConditionalUnit extends ProcessUnit
 	public ConditionalUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
 		super(pm, p, config);
-		processManager = pm;
-		trueNode = config.getString("truenode");
-		falseNode = config.getString("falsenode");
-		expressionStr = config.getString("condition");
-		expression = new Expression(pm.getJSManager(), jsFunctionNameRoot, pm.getScriptVariableNames(), expressionStr);
+		try {
+			processManager = pm;
+			trueNode = config.getString("truenode");
+			falseNode = config.getString("falsenode");
+			expressionStr = config.getString("condition");
+			expression = pm.getScriptFactory().createExpression(jsFunctionNameRoot, expressionStr);
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising conditional unit", e);
+		}
 	}
 
 	public void execute(ProcessInstance pi) throws RedbackException
@@ -36,9 +40,9 @@ public class ConditionalUnit extends ProcessUnit
 			else
 				pi.setCurrentNode(falseNode);
 		} 
-		catch (RedbackException e)
+		catch (Exception e)
 		{
-			throw new RedbackException("Problem occurred executing a condition", e);
+			throw new RedbackException("Error executing a process condition", e);
 		}		
 		logger.finer("Finish executing condition");		
 	}
