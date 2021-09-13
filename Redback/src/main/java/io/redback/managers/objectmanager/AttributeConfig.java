@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.firebus.data.DataMap;
+import io.firebus.script.Expression;
+import io.firebus.script.Function;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Expression;
-import io.redback.managers.jsmanager.Function;
 
 public class AttributeConfig 
 {
@@ -29,45 +29,43 @@ public class AttributeConfig
 		config = cfg;
 		scripts = new HashMap<String, Function>();
 
-		if(config.get("relatedobject") != null)
-			relatedObjectConfig = new RelatedObjectConfig(objectManager, objectConfig, this, config.getObject("relatedobject"));
-		
-		if(config.get("editable") != null && config.getString("editable").length() > 0)
-			editable = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_editable", objectConfig.getScriptVariables(), config.getString("editable"));
-		else 
-			editable = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_editable", objectConfig.getScriptVariables(), "true");
-
-		if(config.get("mandatory") != null && config.getString("mandatory").length() > 0)
-			mandatory = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_mandatory", objectConfig.getScriptVariables(), config.getString("mandatory"));
-		else 
-			mandatory = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_mandatory", objectConfig.getScriptVariables(), "false");
-
-		if(config.get("expression") != null && config.getString("expression").length() > 0)
-			expression = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_expression", objectConfig.getScriptVariables(), config.getString("expression"));
-
-		if(config.get("default") != null && config.getString("default").length() > 0)
-			defaultValue = new Expression(objectManager.getJSManager(), oc.getName() + "_attr_" + getName() + "_default", objectConfig.getScriptVariables(), config.getString("default"));
-		
-		DataMap scriptsCfg = config.getObject("scripts");
-		List<String> scriptVars = new ArrayList<String>(objectConfig.getScriptVariables());
-		scriptVars.add("previousValue");
-		if(scriptsCfg != null)
-		{
-			Iterator<String> events = scriptsCfg.keySet().iterator();
-			while(events.hasNext())
+		try {
+			if(config.get("relatedobject") != null)
+				relatedObjectConfig = new RelatedObjectConfig(objectManager, objectConfig, this, config.getObject("relatedobject"));
+			
+			if(config.get("editable") != null && config.getString("editable").length() > 0)
+				editable = objectManager.getScriptFactory().createExpression(oc.getName() + "_attr_" + getName() + "_editable", config.getString("editable"));
+			else 
+				editable = objectManager.getScriptFactory().createExpression(oc.getName() + "_attr_" + getName() + "_editable", "true");
+	
+			if(config.get("mandatory") != null && config.getString("mandatory").length() > 0)
+				mandatory = objectManager.getScriptFactory().createExpression(oc.getName() + "_attr_" + getName() + "_mandatory", config.getString("mandatory"));
+			else 
+				mandatory = objectManager.getScriptFactory().createExpression(oc.getName() + "_attr_" + getName() + "_mandatory", "false");
+	
+			if(config.get("expression") != null && config.getString("expression").length() > 0)
+				expression = objectManager.getScriptFactory().createExpression(oc.getName() + "_attr_" + getName() + "_expression", config.getString("expression"));
+	
+			if(config.get("default") != null && config.getString("default").length() > 0)
+				defaultValue = objectManager.getScriptFactory().createExpression(oc.getName() + "_attr_" + getName() + "_default", config.getString("default"));
+			
+			DataMap scriptsCfg = config.getObject("scripts");
+			List<String> scriptVars = new ArrayList<String>(objectConfig.getScriptVariables());
+			scriptVars.add("previousValue");
+			if(scriptsCfg != null)
 			{
-				String event = events.next();
-				try
+				Iterator<String> events = scriptsCfg.keySet().iterator();
+				while(events.hasNext())
 				{
+					String event = events.next();
 					String name = oc.getName() + "_" + getName() + "_event_" + event;
-					Function function = new Function(objectManager.getJSManager(), name, scriptVars, scriptsCfg.getString(event));
+					Function function = objectManager.getScriptFactory().createFunction(name, scriptVars.toArray(new String[] {}), scriptsCfg.getString(event));
 					scripts.put(event, function);
-				} 
-				catch(RedbackException e)
-				{
-					throw new RedbackException("Problem compiling script", e);
-				}
-			}			
+
+				}			
+			}
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising attribute config", e);
 		}
 	}
 	

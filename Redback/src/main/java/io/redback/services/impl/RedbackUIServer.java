@@ -29,7 +29,6 @@ import io.redback.utils.HTML;
 import io.redback.utils.KeyEscaper;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.HTMLJSWrapper;
-import io.redback.utils.js.JSConverter;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class RedbackUIServer extends UIServer 
@@ -70,15 +69,15 @@ public class RedbackUIServer extends UIServer
 	{
 		HTML html = null;
 		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("global", JSConverter.toJS(config.getObject("globalvariables")));
+		context.put("global", config.getObject("globalvariables"));
 		context.put("version", version);
-		context.put("deployment",  JSConverter.toJS(config));
+		context.put("deployment",  config);
 		context.put("utils", new RedbackUtilsJSWrapper());
 		try {
 			DataMap appConfig = getAppConfig(session, name);
 			context.put("session", new SessionJSWrapper(session));
 			String page = appConfig.getString("page");
-			context.put("config", JSConverter.toJS(appConfig));
+			context.put("config", appConfig);
 			html = executeJSP("pages/" + page, version, context);			
 		} catch(Exception e) {
 			logger.warning(e.getMessage());

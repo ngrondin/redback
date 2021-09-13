@@ -13,7 +13,6 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.Function;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
-import io.redback.utils.js.JSConverter;
 
 public class DataSetTransformer extends ContainerUnit {
 	protected Function function;
@@ -30,8 +29,8 @@ public class DataSetTransformer extends ContainerUnit {
 		Object currentObject = context.get("object");
 		List<?> currentDataSet = (List<?>)context.get("dataset");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		jsContext.put("dataset", JSConverter.toJS(currentDataSet));
-		jsContext.put("object", JSConverter.toJS(currentObject));
+		jsContext.put("dataset", currentDataSet);
+		jsContext.put("object", currentObject);
 		Object newDataSet = function.execute(jsContext);
 		if(newDataSet instanceof DataList) {
 			List<Object> list = new ArrayList<Object>();

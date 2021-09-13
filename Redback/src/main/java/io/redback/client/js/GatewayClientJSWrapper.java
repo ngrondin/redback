@@ -1,169 +1,99 @@
 package io.redback.client.js;
 
-import java.util.Arrays;
-
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
 import io.firebus.data.DataMap;
 import io.redback.client.GatewayClient;
-import io.redback.utils.js.JSConverter;
+import io.redback.exceptions.RedbackException;
+import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.ObjectJSWrapper;
 
-public class GatewayClientJSWrapper implements ProxyObject {
+public class GatewayClientJSWrapper extends ObjectJSWrapper {
 	
-	//private Logger logger = Logger.getLogger("io.redback");
 	protected GatewayClient gatewayClient;
-	protected String[] members = {"get", "post", "postform", "put", "putform", "patch", "patchform"};
 
 	public GatewayClientJSWrapper(GatewayClient gc)
 	{
+		super(new String[] {"get", "post", "postform", "put", "putform", "patch", "patchform"});
 		gatewayClient = gc;
 	}
 	
-	public Object getMember(String key) {
+	public Object get(String key) {
 		if(key.equals("get")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String url = arguments[0].asString();
-					DataMap headers = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
-					DataMap cookie = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-					try
-					{
-						DataMap ret = gatewayClient.get(url, headers, cookie);
-						return JSConverter.toJS(ret);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error on gateway get", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String url = (String)arguments[0];
+					DataMap headers = arguments.length > 1 ? (DataMap)arguments[1] : null;
+					DataMap cookie = arguments.length > 2 ? (DataMap)arguments[2] : null;
+					return gatewayClient.get(url, headers, cookie);
+
 				}
 			};
 		} else if(key.equals("post")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String url = arguments[0].asString();
-					Object body = JSConverter.toJava(arguments[1]);
-					DataMap headers = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-					DataMap cookie = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
-					try
-					{
-						DataMap ret = gatewayClient.post(url, body, headers, cookie);
-						return JSConverter.toJS(ret);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error on gateway post", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String url = (String)arguments[0];
+					Object body = arguments[1];
+					DataMap headers = arguments.length > 2 ? (DataMap)arguments[2] : null;
+					DataMap cookie = arguments.length > 3 ? (DataMap)arguments[3] : null;
+					return gatewayClient.post(url, body, headers, cookie);
+
 				}
 			};
 		} else if(key.equals("postform")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String url = arguments[0].asString();
-					DataMap form = (DataMap)JSConverter.toJava(arguments[1]);
-					DataMap headers = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-					DataMap cookie = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
-					try
-					{
-						DataMap ret = gatewayClient.postForm(url, form, headers, cookie);
-						return JSConverter.toJS(ret);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error on gateway post", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String url = (String)arguments[0];
+					DataMap form = (DataMap)arguments[1];
+					DataMap headers = arguments.length > 2 ? (DataMap)arguments[2] : null;
+					DataMap cookie = arguments.length > 3 ? (DataMap)arguments[3] : null;
+					return gatewayClient.postForm(url, form, headers, cookie);
+
 				}
 			};
 		} else if(key.equals("put")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String url = arguments[0].asString();
-					Object body = JSConverter.toJava(arguments[1]);
-					DataMap headers = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-					DataMap cookie = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
-					try
-					{
-						DataMap ret = gatewayClient.put(url, body, headers, cookie);
-						return JSConverter.toJS(ret);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error on gateway put", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String url = (String)arguments[0];
+					Object body = arguments[1];
+					DataMap headers = arguments.length > 2 ? (DataMap)arguments[2] : null;
+					DataMap cookie = arguments.length > 3 ? (DataMap)arguments[3] : null;
+					return gatewayClient.put(url, body, headers, cookie);
+
 				}
 			};
 		} else if(key.equals("putform")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String url = arguments[0].asString();
-					DataMap form = (DataMap)JSConverter.toJava(arguments[1]);
-					DataMap headers = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-					DataMap cookie = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
-					try
-					{
-						DataMap ret = gatewayClient.putForm(url, form, headers, cookie);
-						return JSConverter.toJS(ret);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error on gateway post", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String url = (String)arguments[0];
+					DataMap form = (DataMap)arguments[1];
+					DataMap headers = arguments.length > 2 ? (DataMap)arguments[2] : null;
+					DataMap cookie = arguments.length > 3 ? (DataMap)arguments[3] : null;
+					return gatewayClient.putForm(url, form, headers, cookie);
+
 				}
 			};
 		} else if(key.equals("patch")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String url = arguments[0].asString();
-					Object body = JSConverter.toJava(arguments[1]);
-					DataMap headers = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-					DataMap cookie = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
-					try
-					{
-						DataMap ret = gatewayClient.patch(url, body, headers, cookie);
-						return JSConverter.toJS(ret);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error on gateway patch", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String url = (String)arguments[0];
+					Object body = arguments[1];
+					DataMap headers = arguments.length > 2 ? (DataMap)arguments[2] : null;
+					DataMap cookie = arguments.length > 3 ? (DataMap)arguments[3] : null;
+					return gatewayClient.patch(url, body, headers, cookie);
+
 				}
 			};
 		} else if(key.equals("patchform")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String url = arguments[0].asString();
-					DataMap form = (DataMap)JSConverter.toJava(arguments[1]);
-					DataMap headers = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-					DataMap cookie = arguments.length > 3 ? (DataMap)JSConverter.toJava(arguments[3]) : null;
-					try
-					{
-						DataMap ret = gatewayClient.patchForm(url, form, headers, cookie);
-						return JSConverter.toJS(ret);
-					}
-					catch(Exception e)
-					{
-						throw new RuntimeException("Error on gateway patch", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String url = (String)arguments[0];
+					DataMap form = (DataMap)arguments[1];
+					DataMap headers = arguments.length > 2 ? (DataMap)arguments[2] : null;
+					DataMap cookie = arguments.length > 3 ? (DataMap)arguments[3] : null;
+					return gatewayClient.patchForm(url, form, headers, cookie);
 				}
 			};			
 		} else {
 			return null;
 		}
 	}
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));
-	}
-	
-	public boolean hasMember(String key) {
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
-	}
-	
-	
 }

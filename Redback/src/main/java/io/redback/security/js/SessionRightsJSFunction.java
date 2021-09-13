@@ -1,12 +1,12 @@
 package io.redback.security.js;
 
 
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
 
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
+import io.redback.utils.js.CallableJSWrapper;
 
-public class SessionRightsJSFunction implements ProxyExecutable
+public class SessionRightsJSFunction extends CallableJSWrapper
 {
 	protected Session session;
 	protected String right;
@@ -17,9 +17,9 @@ public class SessionRightsJSFunction implements ProxyExecutable
 		right = r;
 	}
 
-	public Object execute(Value... arguments) {
+	public Object call(Object... arguments) throws RedbackException {
 		boolean val = false;
-		String name = arguments[0].asString();
+		String name = (String)arguments[0];
 		if(right.equals("read"))
 			val = session.getUserProfile().canRead(name);
 		else if(right.equals("write"))

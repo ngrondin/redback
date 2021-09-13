@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import io.firebus.data.DataMap;
+import io.firebus.script.Function;
+import io.firebus.script.ScriptFactory;
+import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.jsmanager.Function;
-import io.redback.managers.jsmanager.JSManager;
 import io.redback.utils.StringUtils;
 
 public class ScriptConfig 
@@ -17,7 +18,7 @@ public class ScriptConfig
 	protected String source;
 	protected Function function;
 
-	public ScriptConfig(JSManager jsm, DataMap cfg) throws RedbackException
+	public ScriptConfig(ScriptFactory sf, DataMap cfg) throws RedbackException
 	{
 		config = cfg;
 		name = config.getString("name");
@@ -34,7 +35,11 @@ public class ScriptConfig
 		scriptVars.add("rc");
 		scriptVars.add("nc");
 		scriptVars.add("param");
-		function = new Function(jsm, name, scriptVars, source);
+		try {
+			function = sf.createFunction(name, scriptVars.toArray(new String[] {}), source);
+		} catch(ScriptException e) {
+			throw new RedbackException("Error compiling script", e);
+		}
 	}
 	
 	public String getName()
@@ -50,6 +55,10 @@ public class ScriptConfig
 	
 	public void execute(Map<String, Object> context) throws RedbackException
 	{
-		function.execute(context);	
+		try {
+			function.call(context);
+		} catch(ScriptException e) {
+			throw new RedbackException("Error running script", e);
+		}
 	}	
 }

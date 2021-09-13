@@ -2,45 +2,50 @@ package io.redback.managers.jsmanager;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import io.firebus.data.DataMap;
+import io.firebus.script.ScriptFactory;
+import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
+import io.firebus.script.Expression;
 
 public class ExpressionMap {
 	
 	protected Map<String, Expression> map;
 	
-	public ExpressionMap(JSManager jsm, String n, List<String> pn, DataMap m) throws RedbackException
+	public ExpressionMap(ScriptFactory sf, String n, DataMap m) throws RedbackException
 	{
-		map = new HashMap<String, Expression>();
-		if(m != null) 
-		{
-			Iterator<String> it = m.keySet().iterator();
-			while(it.hasNext()) 
+		try {
+			map = new HashMap<String, Expression>();
+			if(m != null) 
 			{
-				String key = it.next();
-				map.put(key, new Expression(jsm, n + "_" + key, pn, m.getString(key)));
+				Iterator<String> it = m.keySet().iterator();
+				while(it.hasNext()) 
+				{
+					String key = it.next();
+					map.put(key, sf.createExpression(n + "_" + key, m.getString(key)));
+				}
 			}
+		} catch(ScriptException e) {
+			throw new RedbackException("Error compiling expression map", e);
 		}
 	}
 	
 	public DataMap eval(Map<String, Object> context) throws RedbackException
 	{
-		return eval(context, null);
-	}
-	
-	public DataMap eval(Map<String, Object> context, String contextDescriptor) throws RedbackException
-	{
-		DataMap out = new DataMap();
-		Iterator<String> it = map.keySet().iterator();
-		while(it.hasNext()) 
-		{
-			String key = it.next();
-			out.put(key, map.get(key).eval(context, contextDescriptor));
+		try {
+			DataMap out = new DataMap();
+			Iterator<String> it = map.keySet().iterator();
+			while(it.hasNext()) 
+			{
+				String key = it.next();
+				out.put(key, map.get(key).eval(context));
+			}
+			return out;
+		} catch(ScriptException e) {
+			throw new RedbackException("Error evaluating expression map", e);
 		}
-		return out;
 	}
 
 }

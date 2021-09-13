@@ -3,13 +3,11 @@ package io.redback.utils.js;
 
 import java.util.logging.Logger;
 
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 
 
-public class LoggerJSFunction implements ProxyExecutable
+public class LoggerJSFunction extends CallableJSWrapper
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected Session session;
@@ -20,10 +18,9 @@ public class LoggerJSFunction implements ProxyExecutable
 	}
 
 
-	@Override
-	public Object execute(Value... arguments) {
-		String level = arguments[0].asString();
-		String msg = arguments[1].asString();
+	public Object call(Object... arguments) throws RedbackException {
+		String level = (String)arguments[0];
+		String msg = (String)arguments[1];
 		if(level.equals("info"))
 			logger.info((String)msg);
 		if(level.equals("fine"))

@@ -1,111 +1,86 @@
 package io.redback.managers.processmanager.js;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Notification;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.ObjectJSWrapper;
 
-public class ProcessManagerJSWrapper implements ProxyObject
+public class ProcessManagerJSWrapper extends ObjectJSWrapper
 {
 	protected ProcessManager processManager;
-	//protected ProcessInstance processInstance;
 	protected Actionner actionner;
-	protected String[] members = {"initiateProcess", "getNotifications", "processAction", "actionProcess", "interruptProcess", "findProcesses"};
 	
 	public ProcessManagerJSWrapper(Actionner a, ProcessManager pm)
 	{
+		super(new String[] {"initiateProcess", "getNotifications", "processAction", "actionProcess", "interruptProcess", "findProcesses"});
 		actionner = a;
 		processManager = pm;
-		//processInstance = pi;
-		//actionner = new Actionner(pi);
 	}
 	
-	public Object getMember(String name)
-	{
+	public Object get(String name) throws RedbackException {
 		if(name.equals("initiateProcess"))
 		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						String name = arguments[0].asString();
-						String domain = arguments[1].asString();
-						DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
-						ProcessInstance pi = processManager.initiateProcess(actionner, name, domain, data);
-						return new ProcessInstanceJSWrapper(pi);
-					} catch (Exception e) {
-						throw new RuntimeException("Error in initiateProcess", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String name = (String)arguments[0];
+					String domain = (String)arguments[1];
+					DataMap data = (DataMap)(arguments[2]);
+					ProcessInstance pi = processManager.initiateProcess(actionner, name, domain, data);
+					return new ProcessInstanceJSWrapper(pi);
 				}
 			};
 		}
 		else if(name.equals("getNotifications"))
 		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						DataMap filter = (DataMap)JSConverter.toJava(arguments[0]);
-						DataList viewData = (DataList)JSConverter.toJava(arguments[1]);
-						List<Notification> list = processManager.getNotifications(actionner, filter, viewData);
-						return JSConverter.toJS(list);
-					} catch (Exception e) {
-						throw new RuntimeException("Error in getNotifications", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					DataMap filter = (DataMap)(arguments[0]);
+					DataList viewData = (DataList)arguments[1];
+					List<Notification> list = processManager.getNotifications(actionner, filter, viewData);
+					return list;
 				}
 			};
 		}
 		else if(name.equals("processAction") || name.equals("actionProcess"))
 		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						String pid = arguments[0].asString();
-						String event = arguments[1].asString();
-						DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
-						processManager.actionProcess(actionner, pid, event, null, data);
-						return null;
-					} catch (Exception e) {
-						throw new RuntimeException("Error in processAction", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String pid = (String)arguments[0];
+					String event = (String)arguments[1];
+					DataMap data = (DataMap)(arguments[2]);
+					processManager.actionProcess(actionner, pid, event, null, data);
+					return null;
 				}
 			};
 		}
 		else if(name.equals("interruptProcess"))
 		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						String pid = arguments[0].asString();
-						processManager.interruptProcess(actionner, pid);
-						return null;
-					} catch (Exception e) {
-						throw new RuntimeException("Error in processAction", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String pid = (String)arguments[0];
+					processManager.interruptProcess(actionner, pid);
+					return null;
 				}
 			};
 		}
 		else if(name.equals("findProcesses"))
 		{
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						DataMap filter = (DataMap)JSConverter.toJava(arguments[0]);
-						ArrayList<ProcessInstance> list = processManager.findProcesses(actionner, filter, 0, 50);
-						return JSConverter.toJS(list);
-					} catch (Exception e) {
-						throw new RuntimeException("Error in findProcesses", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					DataMap filter = (DataMap)(arguments[0]);
+					List<ProcessInstance> list = processManager.findProcesses(actionner, filter, 0, 50);
+					List<ProcessInstanceJSWrapper> jsList = new ArrayList<ProcessInstanceJSWrapper>();
+					for(ProcessInstance pi: list)
+						jsList.add(new ProcessInstanceJSWrapper(pi));
+					return jsList;
 				}
 			};
 		}
@@ -114,18 +89,4 @@ public class ProcessManagerJSWrapper implements ProxyObject
 			return null;
 		}
 	}
-
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));
-	}
-
-	public boolean hasMember(String key) {
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
-	}
-	
 }

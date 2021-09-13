@@ -18,8 +18,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.bson.internal.Base64;
-import org.graalvm.polyglot.PolyglotException;
-import org.graalvm.polyglot.SourceSection;
 
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
@@ -210,7 +208,7 @@ public class StringUtils
 			if(msg.length() > 0)
 				msg = msg + ": ";
 			msg = msg + t.getMessage();
-			if(t instanceof PolyglotException) {
+			/*if(t instanceof PolyglotException) {
 				PolyglotException pge = (PolyglotException)t;
 				SourceSection ss = pge.getSourceLocation();
 				if(ss != null) {
@@ -218,7 +216,7 @@ public class StringUtils
 				}
 				if(pge.isHostException())
 					t = pge.asHostException();
-			} 
+			} */
 			t = t.getCause();
 		}
 		return msg;

@@ -24,7 +24,6 @@ import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
-import io.redback.utils.js.JSConverter;
 
 public class CSVReport extends Report {
 	protected String object;
@@ -62,7 +61,7 @@ public class CSVReport extends Report {
 
 	public void produce(DataMap filter) throws RedbackException {
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		jsContext.put("filter", JSConverter.toJS(filter));
+		jsContext.put("filter", filter);
 		ObjectClient oc = reportManager.getObjectClient();
 		DataMap localFilter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
 		DataMap localSort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);

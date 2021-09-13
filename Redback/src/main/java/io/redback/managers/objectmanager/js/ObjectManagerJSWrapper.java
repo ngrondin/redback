@@ -1,89 +1,80 @@
 package io.redback.managers.objectmanager.js;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
 import io.firebus.data.DataMap;
+import io.firebus.script.Converter;
+import io.firebus.script.exceptions.ScriptException;
+import io.firebus.script.values.abs.SCallable;
+import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.ObjectJSWrapper;
 
-public class ObjectManagerJSWrapper implements ProxyObject
+public class ObjectManagerJSWrapper extends ObjectJSWrapper
 {
 	protected ObjectManager objectManager;
 	protected Session session;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute", "fork", "elevate", "iterate"};
 	
 	public ObjectManagerJSWrapper(ObjectManager om, Session s)
 	{
+		super(new String[] {"getObject", "listObjects", "listAllObjects", "getObjectList", "getRelatedObjectList", "updateObject", "createObject", "deleteObject", "execute", "fork", "elevate", "iterate"});
 		objectManager = om;
 		session = s;
 	}
 
-	public Object getMember(String key) {
+	public Object get(String key) {
 		if(key.equals("getObject")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						RedbackObject rbo = objectManager.getObject(session, arguments[0].asString(), arguments[1].asString());
-						if(rbo != null)
-							return new RedbackObjectJSWrapper(rbo);
-						else
-							return null;
-					} catch (Exception e) {
-						throw new RuntimeException("Error in getObject", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					RedbackObject rbo = objectManager.getObject(session, (String)arguments[0], (String)arguments[1]);
+					if(rbo != null)
+						return new RedbackObjectJSWrapper(rbo);
+					else
+						return null;
 				}
 			};
 		} else if(key.equals("getObjectList") || key.equals("listObjects")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						String objectName = arguments[0].asString();
-						DataMap filter = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
-						DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-						String search = arguments.length > 3 ? arguments[3].asString() : null;
-						return JSConverter.toJS(objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 50));
-					} catch (Exception e) {
-						throw new RuntimeException("Error in listObjects", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0];
+					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
+					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
+					String search = arguments.length > 3 ? (String)arguments[3] : null;
+					return objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 50);
 				}
 			};
 		} else if(key.equals("listAllObjects")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						String objectName = arguments[0].asString();
-						DataMap filter = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
-						DataMap sort = arguments.length > 2 ? (DataMap)JSConverter.toJava(arguments[2]) : null;
-						String search = arguments.length > 3 ? arguments[3].asString() : null;
-						return JSConverter.toJS(objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 5000));
-					} catch (Exception e) {
-						throw new RuntimeException("Error in listObjects", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0];
+					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
+					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
+					String search = arguments.length > 3 ? (String)arguments[3] : null;
+					return objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 5000);
 				}
 			};
 		} else if(key.equals("getRelatedObjectList")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					try {
-						return JSConverter.toJS(objectManager.listRelatedObjects(session, arguments[0].asString(), arguments[1].asString(), arguments[2].asString(), (DataMap)JSConverter.toJava(arguments[3]), null, null, false));
-					} catch (Exception e) {
-						throw new RuntimeException("Error in getRelatedObjectList", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0];
+					String uid = (String)arguments[1];
+					String attributeName = (String)arguments[2];
+					DataMap filter = (DataMap)arguments[3];
+					return objectManager.listRelatedObjects(session, objectName, uid, attributeName, filter, null, null, false);
+					
 				}
 			};
 		} else if(key.equals("updateObject")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
 					try {
-						RedbackObject rbo = objectManager.updateObject(session, arguments[0].asString(), arguments[1].asString(), (DataMap)JSConverter.toJava(arguments[2]));
+						String objectName = (String)arguments[0];
+						String uid = (String)arguments[1];
+						DataMap data = (DataMap)arguments[2];
+						RedbackObject rbo = objectManager.updateObject(session, objectName, uid, data);
 						if(rbo != null)
 							return new RedbackObjectJSWrapper(rbo);
 						else
@@ -94,92 +85,83 @@ public class ObjectManagerJSWrapper implements ProxyObject
 				}
 			};
 		} else if(key.equals("createObject")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String objectName = arguments[0].asString(); 
-					String domain = arguments.length == 2 ? null : arguments[1].asString(); 
-					DataMap data = (DataMap)JSConverter.toJava(arguments.length == 2 ? arguments[1] : arguments[2]); 
-					try {
-						RedbackObject rbo = objectManager.createObject(session, objectName, null, domain, data);
-						if(rbo != null)
-							return new RedbackObjectJSWrapper(rbo);
-						else
-							return null;
-					} catch (Exception e) {
-						throw new RuntimeException("Error in createObject", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0]; 
+					String domain = arguments.length == 2 ? null : (String)arguments[1]; 
+					DataMap data = (DataMap)(arguments.length == 2 ? arguments[1] : arguments[2]); 
+					RedbackObject rbo = objectManager.createObject(session, objectName, null, domain, data);
+					if(rbo != null)
+						return new RedbackObjectJSWrapper(rbo);
+					else
+						return null;
 				}
 			};
 		} else if(key.equals("deleteObject")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String objectName = arguments[0].asString(); 
-					String uid = arguments[1].asString(); 
-					try {
-						objectManager.deleteObject(session, objectName, uid);
-						return null;
-					} catch (Exception e) {
-						throw new RuntimeException("Error in deleteObject", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0]; 
+					String uid = (String)arguments[1]; 
+					objectManager.deleteObject(session, objectName, uid);
+					return null;
 				}
 			};		
 		} else if(key.equals("execute")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String functionName = arguments[0].asString(); 
-					DataMap param = arguments.length > 1 ? (DataMap)JSConverter.toJava(arguments[1]) : null;
-					try {
-						objectManager.executeFunction(session, functionName, param);
-						return null;
-					} catch (Exception e) {
-						throw new RuntimeException("Error in execute", e);
-					}
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String functionName = (String)arguments[0]; 
+					DataMap param = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
+					objectManager.executeFunction(session, functionName, param);
+					return null;
 				}
 			};
 		} else if(key.equals("fork")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					RedbackObjectJSWrapper obj = arguments[0].asProxyObject();
-					String function = arguments[1].asString(); 
-					try {
-						objectManager.fork(session, obj.getMember("objectname").toString(), obj.getMember("uid").toString(), function);
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					RedbackObjectJSWrapper obj = (RedbackObjectJSWrapper)arguments[0];
+					if(obj != null) {
+						RedbackObject o = obj.getRedbackObject();
+						String function = (String)arguments[1]; 
+						objectManager.fork(session, o.getObjectConfig().getName(), o.getUID().getString(), function);
 						return null;
-					} catch (Exception e) {
-						throw new RuntimeException("Error in fork", e);
+					} else {
+						throw new RedbackException("Fork argument must be an object");
 					}
 				}
 			};
 		} else if(key.equals("elevate")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					if(arguments.length > 0 && arguments[0].canExecute()) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					if(arguments.length > 0 && arguments[0] instanceof SCallable) {
+						SCallable callable = (SCallable)arguments[0];
 						try {
 							objectManager.elevateSession(session);
-							arguments[0].execute();
+							callable.call();
 							objectManager.demoteSession(session);
-							return null;
-						} catch(Exception e) {
-							throw new RuntimeException("Error executing elevated script");
+						} catch(ScriptException e) {
+							throw new RedbackException("Error in elevate", e);
 						}
+						return null;
 					} else {
-						throw new RuntimeException("Requires an executable argument");
+						throw new RedbackException("Requires an executable argument");
 					}
 				}
 			};
 		}
 		else if(key.equals("iterate")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					String objectName = arguments[0].asString();
-					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
-					if(arguments.length >=3 && arguments[2].canExecute()) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0];
+					DataMap filter = (DataMap)(arguments[1]);
+					if(arguments.length >= 3 && arguments[2] instanceof SCallable) {
+						SCallable callable = (SCallable)arguments[2];
 						try {
 							boolean hasMore = true;
 							int page = 0;
 							while(hasMore) {
 								List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, null, null, false, page, 50);
 								for(RedbackObject object: list) {
-									arguments[2].execute(JSConverter.toJS(object));
+									callable.call(Converter.convertIn(object));
 								}
 								if(list.size() < 50) {
 									hasMore = false;
@@ -199,19 +181,6 @@ public class ObjectManagerJSWrapper implements ProxyObject
 			};
 		}		
 		return null;
-	}
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));
-	}
-
-	public boolean hasMember(String key) {
-		
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
 	}
 
 }

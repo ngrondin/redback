@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;

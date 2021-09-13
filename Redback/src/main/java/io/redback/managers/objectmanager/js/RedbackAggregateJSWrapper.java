@@ -1,22 +1,16 @@
 package io.redback.managers.objectmanager.js;
 
-import java.util.Arrays;
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyObject;
 
-import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.ObjectJSWrapper;
 
-public class RedbackAggregateJSWrapper implements ProxyObject
+public class RedbackAggregateJSWrapper extends ObjectJSWrapper
 {
-	//private Logger logger = Logger.getLogger("io.redback");
 	protected RedbackAggregate rbAggregate;
-	protected String[] members = {"objectname"};
 	
 	public RedbackAggregateJSWrapper(RedbackAggregate o)
 	{
+		super(o.getAttributeNames().toArray(new String[] {}));
 		rbAggregate = o;
 	}
 	
@@ -26,47 +20,24 @@ public class RedbackAggregateJSWrapper implements ProxyObject
 	}
 
 
-	public Object getMember(String name)
+	public Object get(String name)
 	{
-		try
+
+		if(name.equals("objectname"))
 		{
-			if(name.equals("objectname"))
+			return rbAggregate.getObjectConfig().getName();
+		}
+		else
+		{
+			Object obj = rbAggregate.get(name).getObject();
+			if(obj == null)
 			{
-				return rbAggregate.getObjectConfig().getName();
-			}
-			else
-			{
-				Object obj = rbAggregate.get(name).getObject();
-				if(obj == null)
-				{
+				try {
 					obj = rbAggregate.getMetric(name).getObject();
-				}
-				return JSConverter.toJS(obj);
+				} catch(Exception e) {}
 			}
-		} 
-		catch (RedbackException e)
-		{
-			throw new RuntimeException("Error getting the Redback Object attribute '" + name + "'", e);
+			return obj;
 		}
-	}
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));
-	}
-
-	public boolean hasMember(String key) {
-		if(Arrays.asList(members).contains(key)) {
-			return true;
-		} else if(rbAggregate.getAttributeNames().contains(key)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public void putMember(String key, Value value) {
-		
 	}
 
 }

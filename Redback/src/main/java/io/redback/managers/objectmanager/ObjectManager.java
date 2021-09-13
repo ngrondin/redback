@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import javax.script.ScriptException;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -19,6 +17,8 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.script.ScriptFactory;
+import io.firebus.script.exceptions.ScriptException;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
@@ -44,8 +44,6 @@ import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackResourceNotFoundException;
 import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.managers.jsmanager.ExpressionMap;
-import io.redback.managers.jsmanager.Function;
-import io.redback.managers.jsmanager.JSManager;
 import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
@@ -56,14 +54,13 @@ import io.redback.utils.Cache;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
-import io.redback.utils.js.JSConverter;
 
 public class ObjectManager
 {
 	private Logger logger = Logger.getLogger("io.redback");
 	protected String name;
 	protected Firebus firebus;
-	protected JSManager jsManager;
+	protected ScriptFactory scriptFactory;
 	protected boolean loadAllOnInit;
 	protected int preCompile;
 	protected boolean includeLoaded;
@@ -103,47 +100,51 @@ public class ObjectManager
 	protected UserProfile elevatedUserProfile;
 	protected Cache<DataMap> searchCache;
 
-	public ObjectManager(String n, DataMap config, Firebus fb)
+	public ObjectManager(String n, DataMap config, Firebus fb) throws RedbackException
 	{
-		name = n;
-		firebus = fb;
-		includeLoaded = false;
-		loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
-		preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
-		jsManager = new JSManager("object");
-		configServiceName = config.getString("configservice");
-		accessManagerServiceName = config.getString("accessmanagementservice");
-		dataServiceName = config.getString("dataservice");
-		idGeneratorServiceName = config.getString("idgeneratorservice");
-		processServiceName = config.getString("processservice");
-		geoServiceName = config.getString("geoservice");
-		fileServiceName = config.getString("fileservice");
-		reportServiceName = config.getString("reportservice");
-		notificationServiceName = config.getString("notificationservice");
-		domainServiceName = config.getString("domainservice");
-		integrationServiceName = config.getString("integrationservice");
-		objectUpdateChannel = config.getString("objectupdatechannel");
-		globalVariables = config.getObject("globalvariables");
-		traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
-		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
-		dataClient = new DataClient(firebus, dataServiceName);
-		configClient = new ConfigurationClient(firebus, configServiceName);
-		processClient = new ProcessClient(firebus, processServiceName);
-		geoClient = new GeoClient(firebus, geoServiceName);
-		fileClient = new FileClient(firebus, fileServiceName);
-		reportClient = new ReportClient(firebus, reportServiceName);
-		notificationClient = new NotificationClient(firebus, notificationServiceName);
-		domainClient = new DomainClient(firebus, domainServiceName);
-		integrationClient = new IntegrationClient(firebus, integrationServiceName);
-		elevatedUserName = config.getString("elevateduser");
-		jwtSecret = config.getString("jwtsecret");
-		jwtIssuer = config.getString("jwtissuer");
-		objectConfigs = new HashMap<String, ObjectConfig>();
-		globalScripts = new HashMap<String, ScriptConfig>();
-		readRightsFilters = new HashMap<String, ExpressionMap>();
-		transactions = new HashMap<Long, List<RedbackObject>>();
-		jsManager.setGlobalVariables(globalVariables);
-		searchCache = new Cache<DataMap>(5000);
+		try {
+			name = n;
+			firebus = fb;
+			includeLoaded = false;
+			loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
+			preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
+			scriptFactory = new ScriptFactory();
+			configServiceName = config.getString("configservice");
+			accessManagerServiceName = config.getString("accessmanagementservice");
+			dataServiceName = config.getString("dataservice");
+			idGeneratorServiceName = config.getString("idgeneratorservice");
+			processServiceName = config.getString("processservice");
+			geoServiceName = config.getString("geoservice");
+			fileServiceName = config.getString("fileservice");
+			reportServiceName = config.getString("reportservice");
+			notificationServiceName = config.getString("notificationservice");
+			domainServiceName = config.getString("domainservice");
+			integrationServiceName = config.getString("integrationservice");
+			objectUpdateChannel = config.getString("objectupdatechannel");
+			globalVariables = config.getObject("globalvariables");
+			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
+			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
+			dataClient = new DataClient(firebus, dataServiceName);
+			configClient = new ConfigurationClient(firebus, configServiceName);
+			processClient = new ProcessClient(firebus, processServiceName);
+			geoClient = new GeoClient(firebus, geoServiceName);
+			fileClient = new FileClient(firebus, fileServiceName);
+			reportClient = new ReportClient(firebus, reportServiceName);
+			notificationClient = new NotificationClient(firebus, notificationServiceName);
+			domainClient = new DomainClient(firebus, domainServiceName);
+			integrationClient = new IntegrationClient(firebus, integrationServiceName);
+			elevatedUserName = config.getString("elevateduser");
+			jwtSecret = config.getString("jwtsecret");
+			jwtIssuer = config.getString("jwtissuer");
+			objectConfigs = new HashMap<String, ObjectConfig>();
+			globalScripts = new HashMap<String, ScriptConfig>();
+			readRightsFilters = new HashMap<String, ExpressionMap>();
+			transactions = new HashMap<Long, List<RedbackObject>>();
+			searchCache = new Cache<DataMap>(5000);			
+			scriptFactory.setGlobals(globalVariables);
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising Object Manager", e);
+		}
 	}
 	
 	public Firebus getFirebus()
@@ -151,9 +152,9 @@ public class ObjectManager
 		return firebus;
 	}
 	
-	public JSManager getJSManager()
+	public ScriptFactory getScriptFactory()
 	{
-		return jsManager;
+		return scriptFactory;
 	}
 	
 	public DataClient getDataClient()
@@ -238,7 +239,7 @@ public class ObjectManager
 				loadAllIncludeScripts(session);
 				loadAllGlobalScripts(session);
 				loadAllObjectConfigs(session);
-				jsManager.precompile(preCompile);
+				//jsManager.precompile(preCompile);
 			} catch(Exception e) {
 				logger.severe(StringUtils.rollUpExceptions(e));
 			}
@@ -271,7 +272,11 @@ public class ObjectManager
 		for(int i = 0; i < resultList.size(); i++)
 		{
 			DataMap cfg = resultList.getObject(i);
-			jsManager.addSource("include_" + cfg.getString("name"), cfg.getString("script"));
+			try {
+				scriptFactory.executeInRootScope("include_" + cfg.getString("name"), cfg.getString("script"));
+			} catch(ScriptException e) {
+				throw new RedbackException("Error loading include scripts");
+			}
 		}
 		includeLoaded = true;
 	}
@@ -283,7 +288,7 @@ public class ObjectManager
 		for(int i = 0; i < resultList.size(); i++)
 		{
 			DataMap cfg = resultList.getObject(i);
-			ScriptConfig scriptConfig = new ScriptConfig(jsManager, cfg);
+			ScriptConfig scriptConfig = new ScriptConfig(scriptFactory, cfg);
 			globalScripts.put(cfg.getString("name"), scriptConfig);
 		}		
 	}
@@ -486,8 +491,8 @@ public class ObjectManager
 						if(gs != null) {
 							Map<String, Object> context = createScriptContext(session);
 							context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
-							context.put("filter", JSConverter.toJS(filter));
-							context.put("sort", JSConverter.toJS(sort));
+							context.put("filter", filter);
+							context.put("sort", sort);
 							context.put("search", searchText);
 							context.put("action", "list");
 							context.put("page", page);
@@ -567,7 +572,7 @@ public class ObjectManager
 		return object;
 	}
 	
-	public RedbackObject createObject(Session session, String objectName, String uid, String domain, DataMap initialData) throws RedbackException, ScriptException
+	public RedbackObject createObject(Session session, String objectName, String uid, String domain, DataMap initialData) throws RedbackException
 	{
 		ObjectConfig objectConfig = getObjectConfig(session, objectName);
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
@@ -593,32 +598,31 @@ public class ObjectManager
 		return object;
 	}
 	
-	public void deleteObject(Session session, String objectName, String uid) throws RedbackException, ScriptException
+	public void deleteObject(Session session, String objectName, String uid) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
 		if(object != null)
 			object.delete();
 	}	
 	
-	public RedbackObject executeFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException, ScriptException
+	public RedbackObject executeFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
 		if(object != null)
 		{
 			object.execute(function);
-			//object.save();
 		}
 		return object;
 	}
 	
-	public void executeFunction(Session session, String function, DataMap param) throws RedbackException, ScriptException
+	public void executeFunction(Session session, String function, DataMap param) throws RedbackException
 	{
 		ScriptConfig scriptCfg = getGlobalScript(session, function);
 		if(scriptCfg != null)
 		{
 			if(session.getUserProfile().canExecute("rb.scripts." + function)) {
 				Map<String, Object> context = this.createScriptContext(session);
-				context.put("param", JSConverter.toJS(param));
+				context.put("param", param);
 				scriptCfg.execute(context);
 			} else {
 				throw new RedbackException("No rights to execute global function " + function);
@@ -626,7 +630,7 @@ public class ObjectManager
 		}
 	}	
 	
-	public void fork(Session session, String objectName, String id, String function) throws RedbackException, ScriptException
+	public void fork(Session session, String objectName, String id, String function) throws RedbackException
 	{
 		DataMap request = new DataMap();
 		request.put("action", "execute");
@@ -728,9 +732,9 @@ public class ObjectManager
 						Function gs = objectConfig.getGenerationScript();
 						if(gs != null) {
 							Map<String, Object> context = createScriptContext(session);
-							context.put("filter", JSConverter.toJS(filter));
-							context.put("tuple", JSConverter.toJS(tuple));
-							context.put("metrics", JSConverter.toJS(metrics));
+							context.put("filter", filter);
+							context.put("tuple", tuple);
+							context.put("metrics", metrics);
 							context.put("action", "aggregate");
 							Object o = gs.execute(context);
 							if(o instanceof DataList)

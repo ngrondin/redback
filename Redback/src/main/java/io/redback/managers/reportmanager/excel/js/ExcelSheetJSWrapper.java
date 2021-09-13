@@ -1,44 +1,40 @@
 package io.redback.managers.reportmanager.excel.js;
 
-import java.util.Arrays;
 import java.util.Date;
 
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
 
+import io.redback.exceptions.RedbackException;
+import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.ObjectJSWrapper;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.DateTime;
 import jxl.write.WritableSheet;
 
 
-public class ExcelSheetJSWrapper implements ProxyObject {
-	protected String[] members = {
-			"setCell"
-		};
+public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 	protected WritableSheet sheet;
 	
 	public ExcelSheetJSWrapper(WritableSheet s) {
+		super(new String[] {"setCell"});
 		sheet = s;
 	}
 	
-	public Object getMember(String key) {
+	public Object get(String key) {
 		if(key.equals("setCell")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
 					try {
-						int col = arguments[0].asInt();
-						int row = arguments[1].asInt();
-						if(arguments[2].isNumber()) {
-							Number num = new Number(col, row, arguments[2].asDouble());
+						int col = (Integer)arguments[0];
+						int row = (Integer)arguments[1];
+						if(arguments[2] instanceof java.lang.Number) {
+							Number num = new Number(col, row, ((java.lang.Number)arguments[2]).doubleValue());
 							sheet.addCell(num);
-						} else if(arguments[2].isString()) {
-							Label lbl = new Label(col, row, arguments[2].asString());	
+						} else if(arguments[2] instanceof String) {
+							Label lbl = new Label(col, row, ((String)arguments[2]));	
 							sheet.addCell(lbl);
-						} else if(arguments[2].isDate()) {
-							DateTime dt = new DateTime(col, row, Date.from(arguments[2].asInstant()));
+						} else if(arguments[2] instanceof Date) {
+							DateTime dt = new DateTime(col, row, ((Date)arguments[2]));
 							sheet.addCell(dt);
 						}
 						
@@ -52,17 +48,4 @@ public class ExcelSheetJSWrapper implements ProxyObject {
 			return null;
 		}
 	}
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));		
-	}
-
-	public boolean hasMember(String key) {
-		
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-		
-	}	
 }

@@ -1,62 +1,56 @@
 package io.redback.security.js;
 
-import java.util.Arrays;
-
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyArray;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
-import org.graalvm.polyglot.proxy.ProxyObject;
-
 import io.firebus.data.DataMap;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.UserProfile;
-import io.redback.utils.js.JSConverter;
+import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.ObjectJSWrapper;
 
-public class UserProfileJSWrapper implements ProxyObject
+public class UserProfileJSWrapper extends ObjectJSWrapper
 {
 	protected UserProfile userProfile;
-	protected String[] members = {"username", "getAttribute", "getRights", "canRead", "canWrite", "canExecute", "getUsername"};
-	
 	
 	public UserProfileJSWrapper(UserProfile up)
 	{
+		super(new String[] {"username", "getAttribute", "getRights", "canRead", "canWrite", "canExecute", "getUsername"});
 		userProfile = up;
 	}
 
-	public Object getMember(String key) {
+	public Object get(String key) {
 		if(key.equals("getUsername")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
 					return userProfile.getUsername();
 				}
 			};
 		} else if(key.equals("getAttribute")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					return userProfile.getAttribute(arguments[0].asString());
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return userProfile.getAttribute((String)arguments[0]);
 				}
 			};
 		} else if(key.equals("getRights")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					return userProfile.getRights(arguments[0].asString(), arguments[1].asString(), (DataMap)JSConverter.toJava(arguments[2]));
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return userProfile.getRights((String)arguments[0], (String)arguments[1], (DataMap)(arguments[2]));
 				}
 			};
 		} else if(key.equals("canRead")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					return userProfile.canRead(arguments[0].asString());
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return userProfile.canRead((String)arguments[0]);
 				}
 			};
 		} else if(key.equals("canWrite")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					return userProfile.canWrite(arguments[0].asString());
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return userProfile.canWrite((String)arguments[0]);
 				}
 			};
 		} else if(key.equals("canExecute")) {
-			return new ProxyExecutable() {
-				public Object execute(Value... arguments) {
-					return userProfile.canExecute(arguments[0].asString());
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return userProfile.canExecute((String)arguments[0]);
 				}
 			};
 		} else if(key.equals("username")) {
@@ -64,19 +58,6 @@ public class UserProfileJSWrapper implements ProxyObject
 		} else {
 			return null;
 		}
-	}
-
-	public Object getMemberKeys() {
-		return ProxyArray.fromArray(((Object[])members));		
-	}
-
-	public boolean hasMember(String key) {
-		
-		return Arrays.asList(members).contains(key);
-	}
-
-	public void putMember(String key, Value value) {
-	
 	}
 
 }
