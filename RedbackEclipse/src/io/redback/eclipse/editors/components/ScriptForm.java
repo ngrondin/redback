@@ -4,7 +4,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class ScriptForm extends Form {
 

@@ -22,8 +22,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 
 public class ListField extends Field implements SelectionListener, ModifyListener, FocusListener, MouseListener {
 

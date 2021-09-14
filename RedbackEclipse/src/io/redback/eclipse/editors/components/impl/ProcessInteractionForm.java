@@ -12,8 +12,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.NavigatorAction;

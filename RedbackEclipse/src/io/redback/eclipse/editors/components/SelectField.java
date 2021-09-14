@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class SelectField extends Field implements SelectionListener {
 	

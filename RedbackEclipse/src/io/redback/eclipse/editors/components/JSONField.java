@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class JSONField extends Field implements ModifyListener {
 	

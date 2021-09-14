@@ -7,7 +7,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.Navigator;
