@@ -138,7 +138,7 @@ public class Process
 			if(currentNode instanceof InteractionUnit)
 			{
 				((InteractionUnit)currentNode).interrupt(actionner,  pi);
-				if(pi.getCurrentNode() != null)
+				if(pi.getCurrentNode() != null && pi.getCurrentNode() != currentNodeId)
 					execute(pi);
 			}
 			else
