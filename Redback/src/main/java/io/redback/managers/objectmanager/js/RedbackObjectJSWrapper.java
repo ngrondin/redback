@@ -45,7 +45,7 @@ public class RedbackObjectJSWrapper implements ProxyObject
 				return new ProxyExecutable() {
 					public Object execute(Value... arguments) {
 						try {
-							rbObject.save();
+							rbObject.getObjectManager().commitCurrentTransaction();
 						} catch(Exception e) {
 							String errMsg = "Error saving objects : " + constructErrorString(e);
 							logger.severe(errMsg);
