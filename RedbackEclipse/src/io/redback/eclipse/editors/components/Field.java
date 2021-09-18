@@ -2,7 +2,7 @@ package io.redback.eclipse.editors.components;
 
 import org.eclipse.swt.widgets.Composite;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public abstract class Field extends Composite {
 

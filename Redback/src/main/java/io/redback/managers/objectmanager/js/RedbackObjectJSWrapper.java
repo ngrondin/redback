@@ -99,6 +99,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		else
 		{
 			try {
+
 				Object obj = rbObject.get(name).getObject();
 				return Converter.convertIn(obj);
 			} catch(Exception e) {

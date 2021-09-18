@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class MapField extends Field implements SelectionListener, ModifyListener, FocusListener, MouseListener {
 

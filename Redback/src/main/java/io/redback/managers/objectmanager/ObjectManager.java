@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
@@ -27,6 +26,7 @@ import io.firebus.data.DataMap;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
+import io.redback.client.DataClient.DataTransaction;
 import io.redback.client.DomainClient;
 import io.redback.client.FileClient;
 import io.redback.client.GeoClient;
@@ -100,6 +100,7 @@ public class ObjectManager
 	protected String jwtIssuer;
 	protected String elevatedUserToken;	
 	protected UserProfile elevatedUserProfile;
+	protected boolean useMultiDBTransactions;
 	protected Cache<DataMap> searchCache;
 
 	public ObjectManager(String n, DataMap config, Firebus fb) throws RedbackException
@@ -125,6 +126,7 @@ public class ObjectManager
 			objectUpdateChannel = config.getString("objectupdatechannel");
 			globalVariables = config.getObject("globalvariables");
 			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
+			useMultiDBTransactions = config.containsKey("multidbtransactions") ? config.getBoolean("multidbtransactions") : false;
 			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 			dataClient = new DataClient(firebus, dataServiceName);
 			configClient = new ConfigurationClient(firebus, configServiceName);
@@ -868,20 +870,51 @@ public class ObjectManager
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))
 		{
-			RedbackObject[] arr = null; 
+			List<RedbackObject> list = new ArrayList<RedbackObject>();
 			synchronized(transactions)
 			{
-				List<RedbackObject> objects = transactions.get(txId);
-				arr = new RedbackObject[objects.size()];
-				int i = 0;
-				for(RedbackObject object: objects)
-					arr[i++] = object;
+				List<RedbackObject> txObjects = transactions.get(txId);
+				for(RedbackObject object: txObjects)
+					list.add(object);
+			}
+			
+			List<DataTransaction> txs = new ArrayList<DataTransaction>();
+			for(RedbackObject object: list) {
+				if(object.isDeleted) {
+					txs.add(object.getDBDeleteTransaction());
+				} else if(object.isUpdated()) {
+					object.onSave();
+					txs.add(object.getDBUpdateTransaction());
+					List<DataTransaction> traceTxs = object.getDBTraceTransactions();
+					if(traceTxs != null) 
+						for(DataTransaction ttx: traceTxs)
+							txs.add(ttx);
+				}
+			}
+			
+			if(txs.size() > 0) {
+				if(this.useMultiDBTransactions) {
+					dataClient.multi(txs);
+				} else {
+					for(DataTransaction tx: txs) {
+						dataClient.runTransaction(tx);
+					}
+				}
+			}
+			
+			for(RedbackObject object: list) {
+				if(object.isDeleted) {
+					object.afterDelete();
+				} else if(object.isUpdated()) {
+					object.afterSave();
+					signal(object);
+				}
+			}
+							
+			synchronized(transactions)
+			{
 				transactions.remove(txId);
 			}
-			for(int i = 0; i < arr.length; i++)
-				arr[i].save();
-			for(int i = 0; i < arr.length; i++)
-				arr[i].afterSave();
 		}		
 	}
 	
@@ -1103,7 +1136,7 @@ public class ObjectManager
 			}
 		}		
 	}
-	
+	/*
 	protected void trace(String objectname, String uid, String domain, String attribute, DataEntity value, String username)
 	{
 		if(traceCollection != null && dataClient != null) 
@@ -1127,7 +1160,7 @@ public class ObjectManager
 				logger.severe("Cannot send out signal : " + StringUtils.rollUpExceptions(e));
 			}
 		}		
-	}
+	}*/
 
 }
 

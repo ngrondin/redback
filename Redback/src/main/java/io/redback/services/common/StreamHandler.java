@@ -43,7 +43,8 @@ public abstract class StreamHandler implements io.firebus.interfaces.StreamHandl
 	}
 	
 	public void sendStreamData(Payload payload) {
-		streamEndpoint.send(payload);
+		if(streamEndpoint != null)
+			streamEndpoint.send(payload);
 	}
 
 	public abstract void receiveData(Payload payload) throws RedbackException;

@@ -178,7 +178,7 @@ public class RedbackUIServer extends UIServer
 
 	protected DataMap getView(Session session, String domain, String viewName, Map<String, Object> context) 
 	{
-		DataMap clientConfig = new DataMap();
+		DataMap view = new DataMap();
 		if(session != null)
 		{
 			if(session.getUserProfile().canRead("rb.views." + viewName))
@@ -187,76 +187,82 @@ public class RedbackUIServer extends UIServer
 				{
 					DataMap viewConfig = getViewConfig(session, domain, viewName);
 					if(viewConfig != null) {
-						clientConfig.put("label", viewConfig.getString("label"));
-						clientConfig.put("onload", viewConfig.getString("onload"));
-						clientConfig.put("content", getViewContent(session, domain, viewName, context));						
+						view.put("label", viewConfig.getString("label"));
+						view.put("onload", viewConfig.getString("onload"));
+						view.put("content", getViewContent(session, domain, viewName, context));						
 					} else {
-						clientConfig.put("error", "View " + viewName + " does not exist");
+						view.put("error", "View " + viewName + " does not exist");
 					}
 				}
 				catch(Exception e)
 				{
 					e.printStackTrace();
-					clientConfig.put("error", "Error retrieving view " + viewName + ": " + e.getMessage());
+					view.put("error", "Error retrieving view " + viewName + ": " + e.getMessage());
 				}
 			}
 		}
 		else
 		{
-			clientConfig.put("error", "Not logged in");
+			view.put("error", "Not logged in");
 		}
-		return clientConfig;
+		return view;
 	}
 
 
 	protected DataList getViewContent(Session session, String domain, String viewName, Map<String, Object> context) throws RedbackException 
 	{
-		DataList ccContent = new DataList();
+		DataList viewContent = new DataList();
 		DataMap viewConfig = getViewConfig(session, domain, viewName);
 		if(viewConfig != null) {
-			DataList viewContent = viewConfig.getList("content");
-			for(int i = 0; i < viewContent.size(); i++) 
-				ccContent.add(generateViewFromComponentConfig(session, domain, viewContent.getObject(i), context));
+			DataList contentList = viewConfig.getList("content");
+			for(int i = 0; i < contentList.size(); i++) {
+				DataMap viewPart = generateViewPartFromComponentConfig(session, domain, contentList.getObject(i), context); 
+				if(viewPart != null)
+					viewContent.add(viewPart);
+			}
 		}
-		return ccContent;
+		return viewContent;
 	}
 
-	protected DataMap generateViewFromComponentConfig(Session session, String domain, DataMap componentConfig, Map<String, Object> context) throws RedbackException
+	protected DataMap generateViewPartFromComponentConfig(Session session, String domain, DataMap componentConfig, Map<String, Object> context) throws RedbackException
 	{
-		DataMap clientConfig = new DataMap();
+		DataMap viewPart = new DataMap();
 		String type = componentConfig.getString("type");
-		if(type != null && !type.equals("view"))
+		String accessCat = componentConfig.getString("accesscat");
+		if(type != null && !type.equals("view") && (accessCat == null || (accessCat != null && session.getUserProfile().canRead("rb.accesscat." + accessCat))))
 		{
 			Iterator<String> it = componentConfig.keySet().iterator();
 			while(it.hasNext()) {
 				String key = it.next();
 				if(!key.equals("content")) {
-					clientConfig.put(key, componentConfig.get(key));
+					viewPart.put(key, componentConfig.get(key));
 				}
 			}
 			if(componentConfig.get("show") == null)
-				clientConfig.put("show", "true");
+				viewPart.put("show", "true");
 			
 			if(componentConfig.containsKey("content"))
 			{
-				DataList componentContent = componentConfig.getList("content");
-				DataList clientConfigContent = new DataList();
-				for(int i = 0; i < componentContent.size(); i++) {
-					DataMap childComponentConfig = componentContent.getObject(i);
+				DataList componentContentList = componentConfig.getList("content");
+				DataList viewPartContentList = new DataList();
+				for(int i = 0; i < componentContentList.size(); i++) {
+					DataMap childComponentConfig = componentContentList.getObject(i);
 					String childType = childComponentConfig.getString("type");
 					if(childType.equals("view")) {
 						DataList childViewContent = getViewContent(session, domain, childComponentConfig.getString("name"), context);
 						for(int j = 0; j < childViewContent.size(); j++)
-							clientConfigContent.add(childViewContent.getObject(j));
+							viewPartContentList.add(childViewContent.getObject(j));
 						
 					} else {
-						clientConfigContent.add(generateViewFromComponentConfig(session, domain, childComponentConfig, context));
+						DataMap childViewPart = generateViewPartFromComponentConfig(session, domain, childComponentConfig, context);
+						if(childViewPart != null)
+							viewPartContentList.add(childViewPart);
 					}
 				}
-				clientConfig.put("content", clientConfigContent);
+				viewPart.put("content", viewPartContentList);
 			}
 		}
-		return clientConfig;
+		return viewPart;
 	}
 	
 	protected HTML executeJSP(String name, String version, Map<String, Object> context) throws RedbackException

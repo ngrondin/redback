@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public abstract class Navigator extends Composite implements MenuDetectListener, SelectionListener, MenuListener {
 

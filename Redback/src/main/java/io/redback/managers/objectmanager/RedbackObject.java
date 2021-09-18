@@ -1,11 +1,13 @@
 package io.redback.managers.objectmanager;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import io.firebus.exceptions.FunctionErrorException;
@@ -15,6 +17,7 @@ import io.firebus.script.Function;
 import io.firebus.script.exceptions.ScriptException;
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataMap;
+import io.redback.client.DataClient.DataTransaction;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.exceptions.RedbackException;
@@ -334,7 +337,7 @@ public class RedbackObject extends RedbackElement
 		return filter;
 	}
 	
-	public void put(String name, Value value, boolean isAutomated) throws RedbackException
+	public void put(String name, Value value, boolean trace) throws RedbackException
 	{
 		AttributeConfig attributeConfig = getObjectConfig().getAttributeConfig(name);
 		if(attributeConfig != null)
@@ -355,7 +358,7 @@ public class RedbackObject extends RedbackElement
 				if(canWrite  &&  (isEditable(name) || isNewObject))
 				{
 					data.put(name, actualValue);
-					updatedAttributes.put(name, isAutomated);	
+					updatedAttributes.put(name, trace);	
 					if(attributeConfig.getExpression() == null) 
 						scriptContext.put(name, actualValue.getObject());
 					scriptContext.put("previousValue", currentValue.getObject());
@@ -377,12 +380,12 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 
-	public void put(String name, String value, boolean isAutomated) throws RedbackException
+	public void put(String name, String value, boolean trace) throws RedbackException
 	{
-		put(name, new Value(value), isAutomated);
+		put(name, new Value(value), trace);
 	}
 	
-	public void put(String name, RedbackObject relatedObject, boolean isAutomated) throws RedbackException
+	public void put(String name, RedbackObject relatedObject, boolean trace) throws RedbackException
 	{
 		if(config.getAttributeConfig(name).hasRelatedObject())
 		{
@@ -391,7 +394,7 @@ public class RedbackObject extends RedbackElement
 			{
 				String relatedObjectLinkAttribute = roc.getLinkAttributeName();
 				Value linkValue = relatedObject.get(relatedObjectLinkAttribute);
-				put(name, linkValue, isAutomated);
+				put(name, linkValue, trace);
 				related.put(name, relatedObject);
 			}			
 		}
@@ -444,7 +447,16 @@ public class RedbackObject extends RedbackElement
 			throw new RedbackException("Error evaluating isMandatory expression", e);
 		}		
 	}
+	
+	public boolean isDeleted() 
+	{
+		return isDeleted;
+	}
 		
+	public boolean isUpdated() 
+	{
+		return canWrite && (updatedAttributes.size() > 0  ||  isNewObject == true);
+	}
 	
 	public boolean canDelete() throws RedbackException
 	{
@@ -475,49 +487,71 @@ public class RedbackObject extends RedbackElement
 		return new ArrayList<String>(updatedAttributes.keySet());
 	}
 	
-	public void save() throws RedbackException
+	public DataTransaction getDBDeleteTransaction()
 	{
-		if(isDeleted)
-		{
-			DataMap key = new DataMap();
-			key.put(config.getUIDDBKey(), getUID().getObject());
-			objectManager.getDataClient().deleteData(config.getCollection(), key);
+		if(isDeleted()) {
+			return objectManager.getDataClient().createDelete(config.getCollection(), new DataMap(config.getUIDDBKey(), getUID().getObject()));
+		} else {
+			return null;
 		}
-		else if(updatedAttributes.size() > 0  ||  isNewObject == true)
-		{
-			if(canWrite)
+	}
+	
+	public DataTransaction getDBUpdateTransaction() throws RedbackException 
+	{
+		if(isUpdated()) {
+			DataMap key = new DataMap(config.getUIDDBKey(), getUID().getObject());
+			DataMap dbData = new DataMap();
+			if(isNewObject && config.isDomainManaged())
+				dbData.put(config.getDomainDBKey(), domain.getObject());
+			for(String attributeName: updatedAttributes.keySet())
 			{
-				executeFunctionForEvent("onsave");
-				DataMap key = new DataMap();
-				key.put(config.getUIDDBKey(), getUID().getObject());
-
-				DataMap traceData = new DataMap();
-				DataMap dbData = new DataMap();
-				if(isNewObject && config.isDomainManaged())
-					dbData.put(config.getDomainDBKey(), domain.getObject());
-				
-				
-				for(String attributeName: updatedAttributes.keySet())
+				AttributeConfig attributeConfig = config.getAttributeConfig(attributeName);
+				String attributeDBKey = attributeConfig.getDBKey();
+				if(attributeDBKey != null)
 				{
-					AttributeConfig attributeConfig = config.getAttributeConfig(attributeName);
-					String attributeDBKey = attributeConfig.getDBKey();
-					if(attributeDBKey != null)
-					{
-						Object val = get(attributeName).getObject();
-						dbData.put(attributeDBKey, val);
-						if(updatedAttributes.get(attributeName) == false && config.traceUpdates())
-							traceData.put(attributeName, val);
-					}
+					Object val = get(attributeName).getObject();
+					dbData.put(attributeDBKey, val);
 				}
-				objectManager.getDataClient().putData(config.getCollection(), key, dbData);
-				objectManager.signal(this);
-				for(String attributeName: traceData.keySet()) 
-					objectManager.trace(config.getName(), uid.getString(), getDomain().getString(), attributeName, traceData.get(attributeName), session.getUserProfile().getUsername());
 			}
-			else
+			return objectManager.getDataClient().createPut(config.getCollection(), key, dbData, false);
+		} else {
+			return null;
+		}
+	}
+	
+	public List<DataTransaction> getDBTraceTransactions() throws RedbackException 
+	{
+		if(isUpdated() && config.traceUpdates()) {
+			List<DataTransaction> traceTxs = new ArrayList<DataTransaction>();
+			for(String attributeName: updatedAttributes.keySet())
 			{
-				throw new RedbackException("User does not have the right to update object " + config.getName());
+				if(updatedAttributes.get(attributeName) == true) {
+					DataMap data = new DataMap();
+					data.put("object", config.getName());
+					data.put("uid", uid.getString());
+					data.put("domain", getDomain().getString());
+					data.put("attribute", attributeName);
+					data.put("value", get(attributeName).getObject());
+					data.put("username", session.getUserProfile().getUsername());
+					data.put("date", new Date());
+					traceTxs.add(objectManager.getDataClient().createPut(
+							objectManager.traceCollection.getName(), 
+							objectManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
+							 objectManager.traceCollection.convertObjectToSpecific(data), 
+							false));
+				}
 			}
+			return traceTxs;
+		} else {
+			return null;
+		}
+	}
+	
+	public void onSave() throws RedbackException
+	{
+		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true) && canWrite)
+		{
+			executeFunctionForEvent("onsave");
 		}
 	}
 	
@@ -537,6 +571,11 @@ public class RedbackObject extends RedbackElement
 			}				
 			updatedAttributes.clear();
 		}		
+	}
+	
+	public void afterDelete()
+	{
+		
 	}
 	
 	public Object execute(String eventName) throws RedbackException

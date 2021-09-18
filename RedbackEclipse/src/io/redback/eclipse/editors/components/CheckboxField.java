@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 public class CheckboxField extends Field implements SelectionListener {
 	

@@ -4,7 +4,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Composite;
 
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataMap;
 
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;

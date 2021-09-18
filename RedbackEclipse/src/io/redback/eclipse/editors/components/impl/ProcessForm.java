@@ -2,8 +2,8 @@ package io.redback.eclipse.editors.components.impl;
 
 import org.eclipse.swt.widgets.Composite;
 
-import io.firebus.utils.DataList;
-import io.firebus.utils.DataMap;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
