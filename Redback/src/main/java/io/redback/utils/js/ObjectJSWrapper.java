@@ -3,7 +3,6 @@ package io.redback.utils.js;
 import java.util.Arrays;
 
 import io.firebus.script.Converter;
-import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.values.abs.SObject;
 import io.firebus.script.values.abs.SValue;
 import io.redback.exceptions.RedbackException;
@@ -15,12 +14,12 @@ public abstract class ObjectJSWrapper extends SObject {
 		members = m;
 	}
 	
-	public SValue getMember(String key) throws ScriptException {
+	public SValue getMember(String key)  {
 		try {
 			Object o = get(key);
 			return Converter.tryConvertIn(o);
 		} catch(RedbackException e) {
-			throw new ScriptException("Error in getting member", e);
+			throw new RuntimeException("Error in getting member", e);
 		}
 	}
 	

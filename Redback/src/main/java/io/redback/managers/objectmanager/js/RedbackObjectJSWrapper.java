@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import io.firebus.script.Converter;
-import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.values.abs.SDynamicObject;
 import io.firebus.script.values.abs.SValue;
 import io.redback.exceptions.RedbackException;
@@ -29,7 +28,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		return rbObject;
 	}
 	
-	public SValue getMember(String name) throws ScriptException
+	public SValue getMember(String name)
 	{
 		if(name.equals("getRelated"))
 		{
@@ -103,7 +102,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 				Object obj = rbObject.get(name).getObject();
 				return Converter.convertIn(obj);
 			} catch(Exception e) {
-				throw new ScriptException("Error getting attribute", e);
+				throw new RuntimeException("Error converting attribute", e);
 			}
 		}
 	}
@@ -133,7 +132,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		}
 	}
 
-	public void putMember(String key, SValue value) throws ScriptException {
+	public void putMember(String key, SValue value) {
 		try
 		{
 			rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)), true);
