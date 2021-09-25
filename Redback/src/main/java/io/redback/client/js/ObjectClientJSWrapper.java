@@ -8,9 +8,12 @@ import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
+import io.redback.managers.objectmanager.requests.MultiRequest;
+import io.redback.managers.objectmanager.requests.MultiResponse;
 import io.redback.security.Session;
 import io.redback.utils.js.JSConverter;
 
@@ -20,7 +23,7 @@ public class ObjectClientJSWrapper implements ProxyObject {
 	protected ObjectClient objectClient;
 	protected Session session;
 	protected String domainLock;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "execute"};
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "execute", "multi"};
 
 	public ObjectClientJSWrapper(ObjectClient oc, Session s)
 	{
@@ -130,7 +133,23 @@ public class ObjectClientJSWrapper implements ProxyObject {
 						throw new RuntimeException("Error executing function on remote object", e);
 					}
 				}
-			};		} else {
+			};		
+		} else if(key.equals("multi")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					DataList list = (DataList)JSConverter.toJava(arguments[0]);
+					try
+					{
+						MultiResponse mr = objectClient.multi(session, new MultiRequest(list));
+						return null;//TODO Return a response for multi gets and lists
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error executing function on remote object", e);
+					}
+				}
+			};		
+		} else {
 			return null;
 		}
 	}

@@ -12,6 +12,18 @@ import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
+import io.redback.managers.objectmanager.requests.AggregateRequest;
+import io.redback.managers.objectmanager.requests.CreateRequest;
+import io.redback.managers.objectmanager.requests.DeleteRequest;
+import io.redback.managers.objectmanager.requests.ExecuteGlobalRequest;
+import io.redback.managers.objectmanager.requests.ExecuteRequest;
+import io.redback.managers.objectmanager.requests.GetRequest;
+import io.redback.managers.objectmanager.requests.ListRelatedRequest;
+import io.redback.managers.objectmanager.requests.ListRequest;
+import io.redback.managers.objectmanager.requests.MultiRequest;
+import io.redback.managers.objectmanager.requests.MultiResponse;
+import io.redback.managers.objectmanager.requests.ObjectRequest;
+import io.redback.managers.objectmanager.requests.UpdateRequest;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
 import io.redback.utils.StringUtils;
@@ -28,169 +40,90 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	{
 		try {
 			Payload response = null;
-			DataMap request = new DataMap(payload.getString());
-			String action = request.getString("action");
-			String objectName = request.getString("object");
-			DataMap options = request.getObject("options");
-			boolean addValidation = false;
-			boolean addRelated = false;
+			DataMap requestData = new DataMap(payload.getString());
+			String action = requestData.getString("action");
+			DataMap options = requestData.getObject("options");
 			String format = "json";
 			
 			if(action != null)
 			{
-				if(objectName != null)
+				if(options != null)
+					format = options.containsKey("format") ? options.getString("format") : "json";
+				
+				if(action.equals("get"))
 				{
-					if(options != null)
-					{
-						addValidation = options.getBoolean("addvalidation");
-						addRelated = options.getBoolean("addrelated");
-						format = options.containsKey("format") ? options.getString("format") : "json";
+					GetRequest request = new GetRequest(requestData);
+					RedbackObject object = get(session, request.objectName, request.uid);
+					response = formatResponse(object, format, request.addValidation, request.addRelated);
+				}
+				else if(action.equals("list") && !requestData.containsKey("uid"))
+				{
+					ListRequest request = new ListRequest(requestData);
+					List<RedbackObject> objects = list(session, request.objectName, request.filter, request.searchText, request.sort, request.addRelated, request.page, request.pageSize);
+					response = formatResponse(objects, format, request.addValidation, request.addRelated);
+				}
+				else if(action.equals("listrelated") || (action.equals("list") && requestData.containsKey("uid")))
+				{
+					ListRelatedRequest request = new ListRelatedRequest(requestData);
+					List<RedbackObject> objects = listRelated(session, request.objectName, request.uid, request.attribute, request.filter, request.searchText, request.sort, request.addRelated, request.page, request.pageSize);
+					response = formatResponse(objects, format, request.addValidation, request.addRelated);
+				}					
+				else if(action.equals("update"))
+				{
+					UpdateRequest request = new UpdateRequest(requestData);
+					RedbackObject object = update(session, request.objectName, request.uid, request.updateData);
+					response = formatResponse(object, format, request.addValidation, request.addRelated);
+				}
+				else if(action.equals("create"))
+				{
+					CreateRequest request = new CreateRequest(requestData);
+					RedbackObject object = create(session, request.objectName, request.uid, request.domain, request.initialData);
+					response = formatResponse(object, format, request.addValidation, request.addRelated);
+				}
+				else if(action.equals("delete"))
+				{
+					DeleteRequest request = new DeleteRequest(requestData);
+					delete(session, request.objectName, request.uid);
+					response = formatResponse(new DataMap("result", "ok"), format, false, false);
+				}					
+				else if(action.equals("execute"))
+				{
+					if(requestData.containsKey("object")) {
+						ExecuteRequest request = new ExecuteRequest(requestData);
+						RedbackObject object = execute(session, request.objectName, request.uid, request.function, request.param);
+						response = formatResponse(object, format, request.addValidation, request.addRelated);
+					} else {
+						ExecuteGlobalRequest request = new ExecuteGlobalRequest(requestData);
+						RedbackObject object = execute(session, request.function, request.param);
+						response = formatResponse(object, format, request.addValidation, request.addRelated);
 					}
-					
-					if(action.equals("get"))
-					{
-						String uid = request.getString("uid");
-						if(uid != null)
-						{
-							RedbackObject object = get(session, objectName, uid);
-							response = formatResponse(object, format, addValidation, addRelated);
+				}
+				else if(action.equals("aggregate"))
+				{
+					AggregateRequest request = new AggregateRequest(requestData);
+					List<RedbackAggregate> aggregates = aggregate(session, request.objectName, request.filter, request.searchText, request.tuple, request.metrics, request.sort, request.base, request.addRelated, request.page, request.pageSize);
+					response = formatResponse(aggregates, format, request.addValidation, request.addRelated);							
+				}
+				else if(action.equals("multi")) 
+				{
+					if(format.equals("json")) {
+						MultiRequest request = new MultiRequest(requestData);
+						MultiResponse mr = multi(session, request);
+						DataMap respMap = new DataMap();
+						for(String key: mr.getKeys()) {
+							ObjectRequest originalRequest = request.getRequest(key);
+							Payload resp = formatResponse(mr.getResponse(key), format, originalRequest.addRelated, originalRequest.addValidation);
+							respMap.put(key, new DataMap(resp.getString())); //TODO: This is not ideal, should clean this up.
 						}
-						else
-						{
-							throw new RedbackException("A 'get' action requires a 'uid' attribute");
-						}
-					}
-					else if(action.equals("list"))
-					{
-						DataMap filter = request.getObject("filter");
-						String attribute = request.getString("attribute");
-						String uid = request.getString("uid");
-						String search = request.getString("search");
-						DataMap sort = request.getObject("sort");
-						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
-						int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
-						if(filter != null || search != null || (uid != null && attribute != null))
-						{
-							List<RedbackObject> objects = null;
-							if(uid != null && attribute != null)
-								objects = listRelated(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
-							else
-								objects = list(session, objectName, filter, search, sort, addRelated, page, pageSize);
-							response = formatResponse(objects, format, addValidation, addRelated);
-						}
-						else
-						{
-							throw new RedbackException("A 'list' action requires either a filter, a search or a uid-attribute pair");
-						}
-					}
-					else if(action.equals("listrelated"))
-					{
-						DataMap filter = request.getObject("filter");
-						String attribute = request.getString("attribute");
-						String uid = request.getString("uid");
-						String search = request.getString("search");
-						DataMap sort = request.getObject("sort");
-						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
-						int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
-						if(uid != null && attribute != null)
-						{
-							List<RedbackObject> objects = null;
-							objects = listRelated(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
-							response = formatResponse(objects, format, addValidation, addRelated);
-						}
-						else
-						{
-							throw new RedbackException("A 'listrelated' action requires either a uid-attribute pair");
-						}
-					}					
-					else if(action.equals("update"))
-					{
-						String uid = request.getString("uid");
-						DataMap data = request.getObject("data");
-						if(uid != null  &&  data != null)
-						{
-							RedbackObject object = update(session, objectName, uid, data);
-							response = formatResponse(object, format, addValidation, addRelated);
-						}
-						else
-						{
-							throw new RedbackException("An 'update' action requires a 'uid' and a 'data' attribute");
-						}
-					}
-					else if(action.equals("create"))
-					{
-						String uid = request.getString("uid");
-						String domain = request.getString("domain");
-						DataMap data = request.getObject("data");
-						RedbackObject object = create(session, objectName, uid, domain, data);
-						response = formatResponse(object, format, addValidation, addRelated);
-					}
-					else if(action.equals("delete"))
-					{
-						String uid = request.getString("uid");
-						delete(session, objectName, uid);
-						response = formatResponse(new DataMap("result", "ok"), format, addValidation, addRelated);
-					}					
-					else if(action.equals("execute"))
-					{
-						String uid = request.getString("uid");
-						String function = request.getString("function");
-						DataMap param = request.containsKey("param") ? request.getObject("param") : request.containsKey("data") ? request.getObject("data") : null;
-						if(uid != null)
-						{
-							RedbackObject object = execute(session, objectName, uid, function, param);
-							response = formatResponse(object, format, addValidation, addRelated);
-						}
-						else
-						{
-							throw new RedbackException("A 'create' action requires a 'uid' and a 'function' attribute");
-						}
-					}
-					else if(action.equals("aggregate"))
-					{
-						DataMap filter = request.getObject("filter");
-						String searchText = request.getString("search");
-						DataList tuple = request.getList("tuple");
-						DataList metrics = request.getList("metrics");
-						DataMap sort = request.getObject("sort");
-						DataList base = request.getList("base");
-						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
-						int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
-						if(tuple != null && metrics != null)
-						{
-							List<RedbackAggregate> aggregates = aggregate(session, objectName, filter, searchText, tuple, metrics, sort, base, addRelated, page, pageSize);
-							response = formatResponse(aggregates, format, addValidation, addRelated);							
-						}
-						else
-						{
-							throw new RedbackException("A 'aggregate' action requires a filter, a tuple and a metric");
-						}
-					}					
-					else
-					{
-						throw new RedbackException("The '" + action + "' action is not valid as an object request");
+						response = new Payload(respMap.toString());
+						response.metadata.put("mime", "application/json");
+					} else {
+						throw new RedbackException("Multi requests can only produce JSON responses");
 					}
 				}
 				else
 				{
-					if(action.equals("execute"))
-					{
-						String function = request.getString("function");
-						DataMap param = request.getObject("param");
-						if(function != null)
-						{
-							execute(session, function, param);
-							response = formatResponse(new DataMap("result", "ok"), format, addValidation, addRelated);
-						}
-						else
-						{
-							throw new RedbackException("A global 'execute' action requires a 'function' attribute");
-						}
-					}
-					else
-					{
-						throw new RedbackException("No object was provided");
-					}
+					throw new RedbackException("The '" + action + "' action is not valid as an object request");
 				}
 			}
 			else
@@ -343,5 +276,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	protected abstract RedbackObject execute(Session session, String function, DataMap param) throws RedbackException;
 
 	protected abstract List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException;
+
+	protected abstract MultiResponse multi(Session session, MultiRequest request) throws RedbackException;
 
 }
