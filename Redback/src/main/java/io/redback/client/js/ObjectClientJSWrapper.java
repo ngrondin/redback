@@ -1,9 +1,13 @@
 package io.redback.client.js;
 
+
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.objectmanager.requests.MultiRequest;
+import io.redback.managers.objectmanager.requests.MultiResponse;
 import io.redback.security.Session;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
@@ -12,6 +16,7 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 	protected ObjectClient objectClient;
 	protected Session session;
 	protected String domainLock;
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "updateObject", "execute", "multi"};
 
 	public ObjectClientJSWrapper(ObjectClient oc, Session s)
 	{
@@ -75,6 +80,23 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					return objectClient.createObject(session, objectname, domain, data, true);
 				}
 			};
+		} else if(key.equals("updateObject")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) {
+					String objectname = (String)arguments[0];
+					String uid = (String)arguments[1]; 
+					DataMap data = (DataMap)arguments[2];
+					try
+					{
+						Object o = objectClient.updateObject(session, objectname, uid, data, true);
+						return o;
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error updating remote object", e);
+					}
+				}
+			};			
 		} else if(key.equals("execute")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
@@ -85,7 +107,23 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					objectClient.execute(session, objectname, uid, function, data);
 					return null;
 				}
-			};		} else {
+			};		
+		} else if(key.equals("multi")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					DataList list = (DataList)arguments[0];
+					try
+					{
+						MultiResponse mr = objectClient.multi(session, new MultiRequest(list));
+						return null;//TODO Return a response for multi gets and lists
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error executing function on remote object", e);
+					}
+				}
+			};		
+		} else {
 			return null;
 		}
 	}	

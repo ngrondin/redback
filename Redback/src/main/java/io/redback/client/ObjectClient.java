@@ -6,6 +6,9 @@ import java.util.List;
 import io.firebus.Firebus;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.objectmanager.requests.MultiRequest;
+import io.redback.managers.objectmanager.requests.MultiResponse;
+import io.redback.managers.objectmanager.requests.UpdateRequest;
 import io.redback.security.Session;
 
 public class ObjectClient extends Client
@@ -17,7 +20,6 @@ public class ObjectClient extends Client
 
 	
 	public RedbackObjectRemote getObject(Session session, String objectname, String uid) throws RedbackException  {
-		try {
 			DataMap req = new DataMap();
 			req.put("action", "get");
 			req.put("object", objectname);
@@ -25,9 +27,6 @@ public class ObjectClient extends Client
 			req.put("options", new DataMap("addrelated", true));
 			DataMap resp = request(session, req);
 			return new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
-		} catch(Exception e) {
-			throw new RedbackException("Error getting object", e);
-		}
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter) throws RedbackException  {
@@ -39,27 +38,24 @@ public class ObjectClient extends Client
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException  {
-		try {
-			DataMap req = new DataMap();
-			req.put("action", "list");
-			req.put("object", objectname);
-			req.put("filter", filter != null ? filter : new DataMap());
-			if(sort != null)
-				req.put("sort", sort);
-			req.put("page", page);
-			req.put("pagesize", pageSize);
-			if(addRelated)
-				req.put("options", new DataMap("addrelated", true));
-			DataMap resp = request(session, req);
-			List<RedbackObjectRemote> list = new ArrayList<RedbackObjectRemote>();
-			for(int i = 0; i < resp.getList("list").size(); i++) {
-				DataMap item = resp.getList("list").getObject(i);
-				list.add(new RedbackObjectRemote(firebus, serviceName, session.getToken(), item));
-			}
-			return list;
-		} catch(Exception e) {
-			throw new RedbackException("Error listing objects", e);
+		DataMap req = new DataMap();
+		req.put("action", "list");
+		req.put("object", objectname);
+		req.put("filter", filter != null ? filter : new DataMap());
+		if(sort != null)
+			req.put("sort", sort);
+		req.put("page", page);
+		req.put("pagesize", pageSize);
+		if(addRelated)
+			req.put("options", new DataMap("addrelated", true));
+		DataMap resp = request(session, req);
+		List<RedbackObjectRemote> list = new ArrayList<RedbackObjectRemote>();
+		for(int i = 0; i < resp.getList("list").size(); i++) {
+			DataMap item = resp.getList("list").getObject(i);
+			list.add(new RedbackObjectRemote(firebus, serviceName, session.getToken(), item));
 		}
+		return list;
+
 	}
 	
 	public List<RedbackObjectRemote> listAllObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
@@ -82,35 +78,39 @@ public class ObjectClient extends Client
 	}
 	
 	public RedbackObjectRemote createObject(Session session, String objectname, String domain, DataMap data, boolean addRelated) throws RedbackException  {
-		try {
-			DataMap req = new DataMap();
-			req.put("action", "create");
-			req.put("object", objectname);
-			req.put("data", data);
-			if(domain != null) 
-				req.put("domain", domain);
-			if(addRelated)
-				req.put("options", new DataMap("addrelated", true));
-			DataMap resp = request(session, req);
-			RedbackObjectRemote ror = new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
-			return ror;
-		} catch(Exception e) {
-			throw new RedbackException("Error listing objects", e);
-		}
+		DataMap req = new DataMap();
+		req.put("action", "create");
+		req.put("object", objectname);
+		req.put("data", data);
+		if(domain != null) 
+			req.put("domain", domain);
+		if(addRelated)
+			req.put("options", new DataMap("addrelated", true));
+		DataMap resp = request(session, req);
+		RedbackObjectRemote ror = new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
+		return ror;
+	}
+	
+	public RedbackObjectRemote updateObject(Session session, String objectname, String uid, DataMap data, boolean addRelated) throws RedbackException  {
+		UpdateRequest req = new UpdateRequest(objectname, uid, data, addRelated, false);
+		DataMap resp = request(session, req.getDataMap());
+		RedbackObjectRemote ror = new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
+		return ror;
 	}
 	
 	public RedbackObjectRemote execute(Session session, String objectname, String uid, String function, DataMap data) throws RedbackException  {
-		try {
-			DataMap req = new DataMap();
-			req.put("action", "execute");
-			req.put("object", objectname);
-			req.put("uid", uid);
-			req.put("function", function);
-			req.put("data", data);
-			DataMap resp = request(session, req);
-			return new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
-		} catch(Exception e) {
-			throw new RedbackException("Error getting object", e);
-		}
+		DataMap req = new DataMap();
+		req.put("action", "execute");
+		req.put("object", objectname);
+		req.put("uid", uid);
+		req.put("function", function);
+		req.put("data", data);
+		DataMap resp = request(session, req);
+		return new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
+	}
+	
+	public MultiResponse multi(Session session, MultiRequest multiRequest) throws RedbackException {
+		DataMap resp = request(session, multiRequest.getDataMap());
+		return new MultiResponse(resp);
 	}
 }
