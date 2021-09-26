@@ -23,7 +23,7 @@ public class ObjectClientJSWrapper implements ProxyObject {
 	protected ObjectClient objectClient;
 	protected Session session;
 	protected String domainLock;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "execute", "multi"};
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "updateObject", "execute", "multi"};
 
 	public ObjectClientJSWrapper(ObjectClient oc, Session s)
 	{
@@ -116,6 +116,23 @@ public class ObjectClientJSWrapper implements ProxyObject {
 					}
 				}
 			};
+		} else if(key.equals("updateObject")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String objectname = arguments[0].asString();
+					String uid = arguments[1].asString(); 
+					DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
+					try
+					{
+						Object o = objectClient.updateObject(session, objectname, uid, data, true);
+						return JSConverter.toJS(o);
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error updating remote object", e);
+					}
+				}
+			};			
 		} else if(key.equals("execute")) {
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {

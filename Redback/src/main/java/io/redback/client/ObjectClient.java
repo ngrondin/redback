@@ -8,6 +8,7 @@ import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.managers.objectmanager.requests.MultiResponse;
+import io.redback.managers.objectmanager.requests.UpdateRequest;
 import io.redback.security.Session;
 
 public class ObjectClient extends Client
@@ -86,6 +87,13 @@ public class ObjectClient extends Client
 		if(addRelated)
 			req.put("options", new DataMap("addrelated", true));
 		DataMap resp = request(session, req);
+		RedbackObjectRemote ror = new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
+		return ror;
+	}
+	
+	public RedbackObjectRemote updateObject(Session session, String objectname, String uid, DataMap data, boolean addRelated) throws RedbackException  {
+		UpdateRequest req = new UpdateRequest(objectname, uid, data, addRelated, false);
+		DataMap resp = request(session, req.getDataMap());
 		RedbackObjectRemote ror = new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
 		return ror;
 	}
