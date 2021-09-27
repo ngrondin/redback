@@ -166,4 +166,8 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 			ret.add(new RedbackObjectJSWrapper(rbo));
 		return ret;
 	}
+	
+	public String toString() {
+		return rbObject.getObjectConfig().getName() + ":" + rbObject.getUID();
+	}
 }
