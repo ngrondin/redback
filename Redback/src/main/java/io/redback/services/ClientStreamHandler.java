@@ -18,6 +18,10 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	protected long lastHeartbeat = 0;
 	protected long lastIn = 0;
 	protected long lastOut = 0;
+	protected long bytesIn = 0;
+	protected long bytesOut = 0;
+	protected long countIn = 0;
+	protected long countOut = 0;
 	
 	public ClientStreamHandler(Session s) {
 		super(s);
@@ -26,8 +30,11 @@ public abstract class ClientStreamHandler extends StreamHandler {
 
 	public void receiveData(Payload payload) throws RedbackException {
 		try {
+			String payloadStr = payload.getString();
 			lastIn = System.currentTimeMillis();
-			DataMap data = new DataMap(payload.getString());
+			bytesIn += payloadStr.length();
+			countIn++;
+			DataMap data = new DataMap(payloadStr);
 			String type = data.getString("type");
 			if(type != null) {
 				if(type.equals("clientinfo")) {
@@ -104,8 +111,11 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	}
 	
 	public void sendClientData(DataMap data) {
-		this.sendStreamData(new Payload(data.toString()));
+		String payloadStr = data.toString();
+		sendStreamData(new Payload(payloadStr));
 		lastOut = System.currentTimeMillis();
+		bytesOut += payloadStr.length();
+		countOut++;
 	}
 	
 	public void sendRequestResultData(String reqUid, DataMap data) {
@@ -199,6 +209,26 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	protected String getStatString() {
 		long now = System.currentTimeMillis();
-		return "life: " + (now - start) + "ms  last_in: " + (lastIn > 0 ? (now - lastIn) + "ms" : "-") + "  last_out: " + (lastOut > 0 ? (now - lastOut) + "ms" : "-") + "  hb_count: " + heartbeatCount + "  last_hb: " + (lastHeartbeat > 0 ? (now - lastHeartbeat) + "ms" : "-");
+		StringBuilder sb = new StringBuilder();
+		sb.append("life: ");
+		sb.append(now - start);
+		sb.append("ms");
+		sb.append("  in: ");
+		sb.append(bytesIn);
+		sb.append("b/");
+		sb.append(countIn);
+		sb.append("/");
+		sb.append(lastIn > 0 ? (now - lastIn) + "ms" : "-");
+		sb.append("  out: ");
+		sb.append(bytesOut);
+		sb.append("b/");
+		sb.append(countOut);
+		sb.append("/");
+		sb.append(lastOut > 0 ? (now - lastOut) + "ms" : "-");
+		sb.append("  hb_count: ");
+		sb.append(heartbeatCount);
+		sb.append("  last_hb: ");
+		sb.append(lastHeartbeat > 0 ? (now - lastHeartbeat) + "ms" : "-");
+		return sb.toString();
 	}
 }
