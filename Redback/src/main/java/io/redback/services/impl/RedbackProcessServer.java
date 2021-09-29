@@ -27,10 +27,6 @@ public class RedbackProcessServer extends ProcessServer
 	
 	public void configure() {
 		processManager.refreshAllConfigs();		
-	}
-
-	public void start() {
-		
 	}	
 	
 	protected ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException

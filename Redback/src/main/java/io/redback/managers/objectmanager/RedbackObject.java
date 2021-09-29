@@ -521,7 +521,7 @@ public class RedbackObject extends RedbackElement
 	
 	public List<DataTransaction> getDBTraceTransactions() throws RedbackException 
 	{
-		if(isUpdated() && config.traceUpdates()) {
+		if(isUpdated() && config.traceUpdates() && objectManager.traceCollection != null) {
 			List<DataTransaction> traceTxs = new ArrayList<DataTransaction>();
 			for(String attributeName: updatedAttributes.keySet())
 			{

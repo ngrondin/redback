@@ -55,8 +55,16 @@ public abstract class Provider
 	}
 
 
-	public abstract void configure();
+	public void configure() {
+		
+	}
 	
-	public abstract void start();
+	public void start() {
+		
+	}
+	
+	public DataMap getStatus() {
+		return null;
+	}
 
 }

@@ -20,7 +20,7 @@ public class LoggerJSFunction extends CallableJSWrapper
 
 	public Object call(Object... arguments) throws RedbackException {
 		String level = (String)arguments[0];
-		String msg = (String)arguments[1];
+		String msg = arguments[1] instanceof String ? (String)arguments[1] : arguments[1].toString();
 		if(level.equals("info"))
 			logger.info((String)msg);
 		if(level.equals("fine"))

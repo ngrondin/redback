@@ -299,7 +299,4 @@ public class RedbackAccessManager extends AccessManager
 		this.roles.clear();
 	}
 
-	public void start() {
-		
-	}	
 }

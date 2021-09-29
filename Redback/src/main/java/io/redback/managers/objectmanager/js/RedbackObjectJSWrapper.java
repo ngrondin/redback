@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import io.firebus.script.Converter;
+import io.firebus.script.exceptions.ScriptValueException;
+import io.firebus.script.values.SNull;
 import io.firebus.script.values.abs.SDynamicObject;
 import io.firebus.script.values.abs.SValue;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.RedbackObject;
+import io.redback.managers.objectmanager.Value;
 import io.redback.utils.js.CallableJSWrapper;
 
 public class RedbackObjectJSWrapper extends SDynamicObject
@@ -98,9 +101,12 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		else
 		{
 			try {
-
-				Object obj = rbObject.get(name).getObject();
-				return Converter.convertIn(obj);
+				Value val = rbObject.get(name);
+				if(val != null) {
+					return Converter.convertIn(val.getObject());
+				} else {
+					return SNull.get();
+				}				
 			} catch(Exception e) {
 				throw new RuntimeException("Error converting attribute", e);
 			}
@@ -132,7 +138,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		}
 	}
 
-	public void putMember(String key, SValue value) {
+	public void putMember(String key, SValue value) throws ScriptValueException {
 		try
 		{
 			rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)), true);
@@ -141,7 +147,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		{
 			String errMsg = "Error setting the Redback Object attribute '" + key + "' : " + constructErrorString(e);
 			logger.severe(errMsg);
-			throw new RuntimeException(errMsg);		
+			throw new ScriptValueException(errMsg, e);		
 		}		
 	}
 

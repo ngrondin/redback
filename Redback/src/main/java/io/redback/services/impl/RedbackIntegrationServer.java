@@ -106,10 +106,6 @@ public class RedbackIntegrationServer extends IntegrationServer {
 			}
 		}
 	}
-
-	public void start() {
-		
-	}	
 	
 	protected String getRedirectUri(String client) {
 		return publicUrl + "/" + client;

@@ -40,10 +40,6 @@ public class RedbackObjectServer extends ObjectServer
 	
 	public void configure() {
 		objectManager.refreshAllConfigs();
-	}
-
-	public void start() {
-		
 	}	
 
 	protected RedbackObject get(Session session, String objectName, String uid) throws RedbackException

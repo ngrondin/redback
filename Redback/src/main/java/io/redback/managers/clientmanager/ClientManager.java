@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
@@ -137,22 +138,35 @@ public class ClientManager extends Thread {
 	}
 	
 	public void onNotification(DataMap data) throws RedbackException {
-		Map<String, ClientHandler> handlers = new HashMap<String, ClientHandler>();
+		Map<String, List<ClientHandler>> handlers = new HashMap<String, List<ClientHandler>>();
 		synchronized(clientHandlers) {
 			for(String username: data.keySet()) {
+				List<ClientHandler> userHandlers = new ArrayList<ClientHandler>();
 				for(ClientHandler ch: clientHandlers)
 					if(ch.getSession().getUserProfile().getUsername().equals(username))
-						handlers.put(username, ch);
+						userHandlers.add(ch);
+				handlers.put(username, userHandlers);
 			}
 		}
 		for(String username: data.keySet()) {
-			if(handlers.containsKey(username))
-				handlers.get(username).receiveNotification(data.getObject(username));
+			List<ClientHandler> userHandlers = handlers.get(username);
+			for(ClientHandler ch: userHandlers) 
+				ch.receiveNotification(data.getObject(username));
 		}	
 	}
 	
 	public void onChatMessage(DataMap data) throws RedbackException {
 		
+	}
+	
+	public DataMap getStatus() {
+		DataMap status = new DataMap();
+		status.put("handlerCount", clientHandlers.size());
+		DataList chList = new DataList();
+		for(ClientHandler ch: clientHandlers)
+			chList.add(ch.getStatus());
+		status.put("handlers", chList);
+		return status;
 	}
 	
 	public void run() {

@@ -62,10 +62,6 @@ public class RedbackUIServer extends UIServer
 		viewConfigs.clear();
 	}
 
-	public void start() {
-		
-	}
-
 	protected HTML getAppClient(Session session, String name, String version) throws RedbackException
 	{
 		HTML html = null;

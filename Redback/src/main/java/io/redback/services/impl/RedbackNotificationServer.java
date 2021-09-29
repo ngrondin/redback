@@ -91,14 +91,6 @@ public class RedbackNotificationServer extends NotificationServer {
 
 	}
 
-	public void configure() {
-
-	}
-
-	public void start() {
-		
-	}	
-
 	@Override
 	protected void sendEmail(Session session, Email email) throws RedbackException {
 		Thread worker = new Thread() {
