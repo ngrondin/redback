@@ -91,8 +91,4 @@ public class RedbackIDGenerator extends IDGenerator
 	public void configure() {
 		configCache.clear();
 	}
-
-	public void start() {
-		
-	}	
 }

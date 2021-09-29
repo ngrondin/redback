@@ -43,14 +43,6 @@ public class RedbackGeoServer extends GeoServer
 		timezoneUrl = config.containsKey("timezoneurl") ? config.getString("timezoneurl") : "https://maps.googleapis.com/maps/api/timezone/json";
 		distanceUrl = config.containsKey("dirstanceurl") ? config.getString("dirstanceurl") : "https://maps.googleapis.com/maps/api/distancematrix/json";
 	}
-	
-	public void configure() {
-
-	}
-
-	public void start() {
-		
-	}	
 
 	protected Geometry geocode(String address) throws RedbackException
 	{

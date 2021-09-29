@@ -35,8 +35,6 @@ public abstract class ServiceProvider extends Provider implements io.firebus.int
 			throw handleException(e, "Exception in redback service '" + serviceName + "'");
 		} finally {
 			if(timer != null) timer.mark();
-			/*if(Thread.currentThread() instanceof FirebusThread) 
-				((FirebusThread)Thread.currentThread()).setTrackingId(null);*/			
 		}
 	}
 	

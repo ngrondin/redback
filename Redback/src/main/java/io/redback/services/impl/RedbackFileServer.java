@@ -69,14 +69,6 @@ public class RedbackFileServer extends FileServer
 		}
 	}
 
-	public void configure() {
-
-	}
-
-	public void start() {
-		
-	}	
-
 	public RedbackFileMetaData getMetadata(String fileUid) throws RedbackException
 	{
 		try {

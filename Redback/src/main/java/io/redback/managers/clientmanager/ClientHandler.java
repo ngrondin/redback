@@ -1,6 +1,7 @@
 package io.redback.managers.clientmanager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -12,6 +13,9 @@ import io.firebus.interfaces.StreamHandler;
 import io.firebus.data.DataException;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.clientmanager.SubscriptionManager.FilterSubscription;
+import io.redback.managers.clientmanager.SubscriptionManager.ObjectDomainPointer;
+import io.redback.managers.clientmanager.SubscriptionManager.ObjectUIDPointer;
 import io.redback.security.Session;
 import io.redback.services.ClientStreamHandler;
 import io.redback.utils.StringUtils;
@@ -181,7 +185,34 @@ public class ClientHandler extends ClientStreamHandler {
 		
 	}
 
-
+	public DataMap getStatus() {
+		DataMap status = new DataMap();
+		status.put("username", session.getUserProfile().getUsername());
+		DataMap in = new DataMap();
+		in.put("count", countIn);
+		in.put("bytes", bytesIn);
+		DataMap out = new DataMap();
+		out.put("count", countIn);
+		out.put("bytes", bytesIn);
+		status.put("in", in);
+		status.put("out", out);
+		status.put("username", session.getUserProfile().getUsername());
+		DataMap subs = new DataMap();
+		List<ObjectUIDPointer> ouidplist = clientManager.subsManager.sessionObjectUIDPointers.get(this);
+		subs.put("uniqueobjects", ouidplist.size());
+		int filterSubs = 0;
+		int objectSubs = 0;
+		List<ObjectDomainPointer> odplist = clientManager.subsManager.sessionObjectDomainPointers.get(this);
+		for(ObjectDomainPointer odp: odplist) {
+			objectSubs++;
+			List<FilterSubscription> fslist = clientManager.subsManager.objectFilterSubscriptions.get(odp.objectname).get(odp.domain);
+			filterSubs += fslist.size();
+		}
+		subs.put("objectfilters", filterSubs);
+		subs.put("objects", objectSubs);
+		status.put("subs", subs);
+		return status;
+	}
 	
 
 }

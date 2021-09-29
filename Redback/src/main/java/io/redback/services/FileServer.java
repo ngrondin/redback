@@ -10,6 +10,7 @@ import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.information.StreamInformation;
 import io.firebus.interfaces.StreamProvider;
+import io.firebus.threads.FirebusThread;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -18,6 +19,7 @@ import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
+import io.redback.utils.Timer;
 
 public abstract class FileServer extends AuthenticatedServiceProvider  implements StreamProvider
 {
@@ -171,9 +173,14 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 	}
 	
 	public Payload acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
+		Timer timer = null;
 		try {
 			Session session = accessManagementClient.getSession(payload);
 			if(session.getUserProfile() != null) {
+				session.setTimezone(payload.metadata.get("timezone"));
+				if(Thread.currentThread() instanceof FirebusThread) 
+					((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
+				timer = new Timer(serviceName, session.getId(), getLogline(payload));
 				DataMap request = new DataMap(payload.getString());
 				String action = request.getString("action");
 				if(action.equals("get")) {
@@ -204,7 +211,9 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 				throw new FunctionErrorException("All stream requests need to be authenticated", 401);
 			}
 		} catch(Exception e) {
-			throw new FunctionErrorException("Cannot accept stream", e);
+			throw handleException(e, "Exception in redback stream '" + serviceName + "'");
+		} finally {
+			if(timer != null) timer.mark();
 		}
 	}
 

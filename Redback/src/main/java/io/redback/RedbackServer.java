@@ -6,7 +6,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -30,7 +32,7 @@ import io.redback.utils.Watchdog;
 public class RedbackServer 
 {
 	private Logger logger = Logger.getLogger("io.redback.RedbackServer");
-	protected ArrayList<BusFunction> services;
+	protected Map<String, BusFunction> services;
 	protected static ArrayList<Logger> loggers;
 	protected Firebus firebus;
 	
@@ -123,7 +125,7 @@ public class RedbackServer
 		}		
 
 		logger.fine("Adding services to container");
-		services = new ArrayList<BusFunction>();
+		services = new HashMap<String, BusFunction>();
 		DataList serviceConfigs = config.getList("services");
 		for(int i = 0; i < serviceConfigs.size(); i++)
 		{
@@ -150,46 +152,53 @@ public class RedbackServer
 					else
 					{
 						try {
-							cons = c.getConstructor(new Class[]{DataMap.class, Firebus.class});
-						} catch (NoSuchMethodException e) {}
-						if(cons != null) 
-						{
-							service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig, firebus});
-						}
-						else
-						{
+							cons = c.getConstructor(new Class[] {String.class, DataMap.class, RedbackServer.class});
+						} catch(NoSuchMethodException e) {}
+						if(cons != null) {
+							service = (BusFunction)cons.newInstance(new Object[]{name, deploymentConfig, this});
+						} else {
 							try {
-								cons = c.getConstructor(new Class[]{String.class, DataMap.class});
-								
+								cons = c.getConstructor(new Class[]{DataMap.class, Firebus.class});
 							} catch (NoSuchMethodException e) {}
-							if(cons != null)
+							if(cons != null) 
 							{
-								service = (BusFunction)cons.newInstance(new Object[]{name, deploymentConfig});
+								service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig, firebus});
 							}
 							else
 							{
 								try {
-									cons = c.getConstructor(new Class[]{DataMap.class});
+									cons = c.getConstructor(new Class[]{String.class, DataMap.class});
+									
 								} catch (NoSuchMethodException e) {}
 								if(cons != null)
 								{
-									service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig});
+									service = (BusFunction)cons.newInstance(new Object[]{name, deploymentConfig});
 								}
 								else
 								{
 									try {
-										cons = c.getConstructor();
+										cons = c.getConstructor(new Class[]{DataMap.class});
 									} catch (NoSuchMethodException e) {}
 									if(cons != null)
 									{
-										service = (BusFunction)cons.newInstance();
+										service = (BusFunction)cons.newInstance(new Object[]{deploymentConfig});
 									}
 									else
 									{
-										logger.severe("No appropriate constructor can be found for class " + className + " ");
+										try {
+											cons = c.getConstructor();
+										} catch (NoSuchMethodException e) {}
+										if(cons != null)
+										{
+											service = (BusFunction)cons.newInstance();
+										}
+										else
+										{
+											logger.severe("No appropriate constructor can be found for class " + className + " ");
+										}
 									}
 								}
-							}
+							}	
 						}
 					}
 					
@@ -201,7 +210,7 @@ public class RedbackServer
 							firebus.registerStreamProvider(name, ((StreamProvider)service), concurrent);
 						if(service instanceof Consumer)
 							firebus.registerConsumer(name, ((Consumer)service), concurrent);
-						services.add(service);
+						services.put(name, service);
 					}
 				}
 				catch(ClassNotFoundException e)
@@ -227,19 +236,37 @@ public class RedbackServer
 	}
 	
 	protected void configureAllServices() {
-		for(int i = 0; i < services.size(); i++) {
-			BusFunction func = services.get(i);
+		for(String name: services.keySet()) {
+			BusFunction func = services.get(name);
 			if(func instanceof Provider)
 				((Provider)func).configure();
 		}		
 	}
 
 	protected void startAllServices() {
-		for(int i = 0; i < services.size(); i++) {
-			BusFunction func = services.get(i);
+		for(String name: services.keySet()) {
+			BusFunction func = services.get(name);
 			if(func instanceof Provider)
 				((Provider)func).start();
 		}		
+	}
+	
+	public Firebus getFirebus() {
+		return firebus;
+	}
+	
+	public DataMap getStatus() {
+		DataMap status = new DataMap();
+		for(String name: services.keySet()) {
+			BusFunction func = services.get(name);
+			if(func instanceof Provider) {
+				DataMap subStatus = ((Provider)func).getStatus();
+				if(subStatus != null) {
+					status.put(name, subStatus);
+				}
+			}
+		}		
+		return status;
 	}
 	
 	public static void main(String[] args)
