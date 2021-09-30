@@ -192,8 +192,8 @@ public class ClientHandler extends ClientStreamHandler {
 		in.put("count", countIn);
 		in.put("bytes", bytesIn);
 		DataMap out = new DataMap();
-		out.put("count", countIn);
-		out.put("bytes", bytesIn);
+		out.put("count", countOut);
+		out.put("bytes", bytesOut);
 		status.put("in", in);
 		status.put("out", out);
 		status.put("username", session.getUserProfile().getUsername());
