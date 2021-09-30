@@ -67,13 +67,15 @@ public class SubscriptionManager {
 				list = new ArrayList<ClientHandler>();
 				objMap.put(uid, list);
 			}
-			list.add(clientHandler);
-			List<ObjectUIDPointer> pointers = sessionObjectUIDPointers.get(clientHandler);
-			if(pointers == null) {
-				pointers = new ArrayList<ObjectUIDPointer>();
-				sessionObjectUIDPointers.put(clientHandler, pointers);
+			if(!list.contains(clientHandler)) {
+				list.add(clientHandler);
+				List<ObjectUIDPointer> pointers = sessionObjectUIDPointers.get(clientHandler);
+				if(pointers == null) {
+					pointers = new ArrayList<ObjectUIDPointer>();
+					sessionObjectUIDPointers.put(clientHandler, pointers);
+				}
+				pointers.add(new ObjectUIDPointer(objectname, uid));
 			}
-			pointers.add(new ObjectUIDPointer(objectname, uid));
 		} catch(Exception e) {
 			throw new RedbackException("Error subscribing session " + clientHandler.getSession().getId() + " to " + objectname + "." + uid , e);
 		}
@@ -107,7 +109,12 @@ public class SubscriptionManager {
 					pointers = new ArrayList<ObjectDomainPointer>();
 					sessionObjectDomainPointers.put(clientHandler, pointers);
 				}
-				pointers.add(new ObjectDomainPointer(objectname, domain));						
+				ObjectDomainPointer existingObjectDomainPointer = null;
+				for(ObjectDomainPointer odp: pointers)
+					if(odp.domain.equals(domain) && odp.objectname.equals(objectname))
+						existingObjectDomainPointer = odp;
+				if(existingObjectDomainPointer == null)
+					pointers.add(new ObjectDomainPointer(objectname, domain));						
 			}
 		} catch(Exception e) {
 			throw new RedbackException("Error subscribing session " + clientHandler.getSession().getId() + " to filter " + id + " for " + objectname, e);
@@ -170,7 +177,8 @@ public class SubscriptionManager {
 			List<ClientHandler> list = map1.get(uid);
 			if(list != null)
 				for(ClientHandler clientHandler : list) 
-					subscribers.add(clientHandler);
+					if(!subscribers.contains(clientHandler))
+						subscribers.add(clientHandler);
 		}
 
 		String domain = data.getString("domain");
