@@ -121,6 +121,12 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 						throw new RedbackException("Multi requests can only produce JSON responses");
 					}
 				}
+				else if(action.equals("noop")) 
+				{
+					//Do nothing, just used to log the call;
+					response = new Payload(new DataMap("result", "ok").toString());
+					response.metadata.put("mime", "application/json");
+				}
 				else
 				{
 					throw new RedbackException("The '" + action + "' action is not valid as an object request");

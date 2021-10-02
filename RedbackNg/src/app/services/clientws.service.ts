@@ -176,8 +176,14 @@ export class ClientWSService {
       this.subscriptionRequestPending = true;
       setTimeout(() => {
         let subreq = {type: "subscribe", list: []};
-        this.uniqueObjectSubscriptions.filter(item => item.sent == false).forEach(item => subreq.list.push({"objectname": item.objectname, "uid": item.uid}));
-        Object.keys(this.filterObjectSubscriptions).filter(key => this.filterObjectSubscriptions[key].sent == false).forEach(key => subreq.list.push({"objectname": this.filterObjectSubscriptions[key].objectname, "filter": this.filterObjectSubscriptions[key].filter, "id": key}));
+        this.uniqueObjectSubscriptions.filter(item => item.sent == false).forEach(item => {
+          subreq.list.push({"objectname": item.objectname, "uid": item.uid});
+          item.sent = true;
+        });
+        Object.keys(this.filterObjectSubscriptions).filter(key => this.filterObjectSubscriptions[key].sent == false).forEach(key => {
+          subreq.list.push({"objectname": this.filterObjectSubscriptions[key].objectname, "filter": this.filterObjectSubscriptions[key].filter, "id": key});
+          this.filterObjectSubscriptions[key].sent = true;
+        });
         this.websocket.next(subreq);    
         this.subscriptionRequestPending = false;
       }, 500);
@@ -213,8 +219,10 @@ export class ClientWSService {
   }
 
   subscribeToUniqueObjectUpdate(objectname: string, uid: string) {
-    this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
-    this.sendSubscriptionRequests();
+    if(this.uniqueObjectSubscriptions.find(item => item.objectname == objectname && item.uid == uid) == null) {
+      this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
+      this.sendSubscriptionRequests();
+    }
   }
 
   subscribeToFilterObjectUpdate(objectname: String, filter: any, id: string) {

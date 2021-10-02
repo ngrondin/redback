@@ -192,21 +192,23 @@ public class ClientHandler extends ClientStreamHandler {
 		in.put("count", countIn);
 		in.put("bytes", bytesIn);
 		DataMap out = new DataMap();
-		out.put("count", countIn);
-		out.put("bytes", bytesIn);
+		out.put("count", countOut);
+		out.put("bytes", bytesOut);
 		status.put("in", in);
 		status.put("out", out);
 		status.put("username", session.getUserProfile().getUsername());
 		DataMap subs = new DataMap();
 		List<ObjectUIDPointer> ouidplist = clientManager.subsManager.sessionObjectUIDPointers.get(this);
-		subs.put("uniqueobjects", ouidplist.size());
+		subs.put("uniqueobjects", ouidplist != null ? ouidplist.size() : 0);
 		int filterSubs = 0;
 		int objectSubs = 0;
 		List<ObjectDomainPointer> odplist = clientManager.subsManager.sessionObjectDomainPointers.get(this);
-		for(ObjectDomainPointer odp: odplist) {
-			objectSubs++;
-			List<FilterSubscription> fslist = clientManager.subsManager.objectFilterSubscriptions.get(odp.objectname).get(odp.domain);
-			filterSubs += fslist.size();
+		if(odplist != null) {
+			for(ObjectDomainPointer odp: odplist) {
+				objectSubs++;
+				List<FilterSubscription> fslist = clientManager.subsManager.objectFilterSubscriptions.get(odp.objectname).get(odp.domain);
+				filterSubs += fslist.size();
+			}
 		}
 		subs.put("objectfilters", filterSubs);
 		subs.put("objects", objectSubs);
