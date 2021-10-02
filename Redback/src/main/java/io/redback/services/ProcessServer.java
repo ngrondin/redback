@@ -134,6 +134,16 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 					responseData = new DataMap();
 					responseData.put("count", count);
 				}
+				else if(action.equals("noop"))
+				{
+					//Do nothing, this is used to log request
+					response = new Payload(new DataMap("result", "ok").toString());
+					response.metadata.put("mime", "application/json");					
+				}
+				else
+				{
+					throw new RedbackException("The '" + action + "' action is not valid as a process request");
+				}
 			}
 			else
 			{
