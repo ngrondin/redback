@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.firebus.data.DataMap;
 import io.firebus.script.Converter;
+import io.firebus.script.Function;
 import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.values.abs.SCallable;
 import io.redback.exceptions.RedbackException;
@@ -134,11 +135,11 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 		} else if(key.equals("elevate")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					if(arguments.length > 0 && arguments[0] instanceof SCallable) {
-						SCallable callable = (SCallable)arguments[0];
+					if(arguments.length > 0 && arguments[0] instanceof Function) {
+						Function function = (Function)arguments[0];
 						try {
 							objectManager.elevateSession(session);
-							callable.call();
+							function.call();
 							objectManager.demoteSession(session);
 						} catch(ScriptException e) {
 							throw new RedbackException("Error in elevate", e);

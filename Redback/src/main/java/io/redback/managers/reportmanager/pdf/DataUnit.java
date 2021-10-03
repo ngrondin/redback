@@ -19,6 +19,8 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
+import io.redback.client.RedbackObjectRemote;
+import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -96,12 +98,13 @@ public abstract class DataUnit extends Unit {
 	    return lines;
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
 		Session session = (Session)context.get("session");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		jsContext.put("dataset", context.get("dataset"));
-		jsContext.put("object", context.get("object"));
-		jsContext.put("master", context.get("master"));
+		jsContext.put("dataset", RedbackObjectRemoteJSWrapper.convertList((List<RedbackObjectRemote>)context.get("dataset")));
+		jsContext.put("object", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)context.get("object")));
+		jsContext.put("master", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)context.get("master")));
 		jsContext.put("page", context.get("page"));
 		Object value = null;
 		try {

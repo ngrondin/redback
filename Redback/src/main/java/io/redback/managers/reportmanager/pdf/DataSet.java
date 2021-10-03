@@ -11,6 +11,7 @@ import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
+import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.reportmanager.ReportConfig;
@@ -55,7 +56,7 @@ public class DataSet extends ContainerUnit {
 			Object currentMasterObject = context.get("master");
 			List<?> currentMasterDataset = (List<?>)context.get("dataset");
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("master", currentObject);
+			jsContext.put("master", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)currentObject));
 			jsContext.put("filter", context.get("filter"));
 			ObjectClient oc = reportManager.getObjectClient();
 			DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));

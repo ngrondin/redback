@@ -9,6 +9,8 @@ import java.util.Map;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
+import io.redback.client.RedbackObjectRemote;
+import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -40,7 +42,7 @@ public abstract class ContainerUnit extends Unit {
 	protected boolean show(Map<String, Object> context) throws RedbackException {
 		if(showExpr != null) {
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("object", context.get("object"));
+			jsContext.put("object", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)context.get("object")));
 			jsContext.put("page", context.get("page"));
 			Object value = null;
 			try {

@@ -165,7 +165,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		return ret;
 	}
 
-	protected static List<RedbackObjectJSWrapper> convertList(List<RedbackObject> list) 
+	public static List<RedbackObjectJSWrapper> convertList(List<RedbackObject> list) 
 	{
 		List<RedbackObjectJSWrapper> ret = new ArrayList<RedbackObjectJSWrapper>();
 		for(RedbackObject rbo: list) 

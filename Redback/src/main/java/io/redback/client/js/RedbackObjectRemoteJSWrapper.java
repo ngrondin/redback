@@ -3,7 +3,6 @@ package io.redback.client.js;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import io.firebus.data.DataMap;
 import io.firebus.script.Converter;
 import io.firebus.script.values.abs.SDynamicObject;
@@ -31,7 +30,8 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 					RedbackObjectRemote ror = rbObjectRemote.getRelated((String)arguments[0]);
 					if(ror != null)
 						return new RedbackObjectRemoteJSWrapper(ror);
-					return null;
+					else
+						return null;
 				}
 			};				
 		}
@@ -96,4 +96,12 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 		
 	}
 
+	public static List<RedbackObjectRemoteJSWrapper> convertList(List<RedbackObjectRemote> list) 
+	{
+		List<RedbackObjectRemoteJSWrapper> ret = new ArrayList<RedbackObjectRemoteJSWrapper>();
+		if(list != null)
+			for(RedbackObjectRemote ror: list) 
+				ret.add(new RedbackObjectRemoteJSWrapper(ror));
+		return ret;
+	}
 }

@@ -8,6 +8,8 @@ import java.util.Map;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.Function;
+import io.redback.client.RedbackObjectRemote;
+import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -26,13 +28,14 @@ public class DataSetTransformer extends ContainerUnit {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public Box produce(Map<String, Object> context) throws RedbackException {
 		try {
 			Object currentObject = context.get("object");
-			List<?> currentDataSet = (List<?>)context.get("dataset");
+			List<RedbackObjectRemote> currentDataSet = (List<RedbackObjectRemote>)context.get("dataset");
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("dataset", currentDataSet);
-			jsContext.put("object", currentObject);
+			jsContext.put("dataset", RedbackObjectRemoteJSWrapper.convertList(currentDataSet));
+			jsContext.put("object", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)currentObject));
 			Object newDataSet = function.call(jsContext);
 			if(newDataSet instanceof DataList) {
 				List<Object> list = new ArrayList<Object>();

@@ -9,6 +9,8 @@ import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
 import io.firebus.script.exceptions.ScriptException;
 import io.redback.client.FileClient;
+import io.redback.client.RedbackObjectRemote;
+import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -35,7 +37,7 @@ public class FileSet extends ContainerUnit {
 			Object currentMasterObject = context.get("master");
 			List<?> currentMasterDataset = (List<?>)context.get("dataset");
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("master", currentObject);
+			jsContext.put("master", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)currentObject));
 			jsContext.put("filter", context.get("filter"));
 			FileClient fc = reportManager.getFileClient();
 			Session session = (Session)context.get("session");

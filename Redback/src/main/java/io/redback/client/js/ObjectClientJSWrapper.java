@@ -54,7 +54,7 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					return objectClient.listObjects(session, objectname, filter, sort);
+					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listObjects(session, objectname, filter, sort));
 				}
 			};
 		} else if(key.equals("listAllObjects")) {
@@ -66,7 +66,7 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					boolean addRelated = arguments.length > 3 ? (Boolean)arguments[3] : true;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					return objectClient.listAllObjects(session, objectname, filter, sort, addRelated);
+					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listAllObjects(session, objectname, filter, sort, addRelated));
 				}
 			};
 		} else if(key.equals("createObject")) {
@@ -77,7 +77,8 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					DataMap data = (DataMap)(arguments.length == 2 ? arguments[1] : arguments[2]);
 					if(domainLock != null)
 						domain = domainLock;
-					return objectClient.createObject(session, objectname, domain, data, true);
+					RedbackObjectRemote ror =  objectClient.createObject(session, objectname, domain, data, true);
+					return new RedbackObjectRemoteJSWrapper(ror);
 				}
 			};
 		} else if(key.equals("updateObject")) {
@@ -88,8 +89,8 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					DataMap data = (DataMap)arguments[2];
 					try
 					{
-						Object o = objectClient.updateObject(session, objectname, uid, data, true);
-						return o;
+						RedbackObjectRemote ror = objectClient.updateObject(session, objectname, uid, data, true);
+						return new RedbackObjectRemoteJSWrapper(ror);
 					}
 					catch(Exception e)
 					{
