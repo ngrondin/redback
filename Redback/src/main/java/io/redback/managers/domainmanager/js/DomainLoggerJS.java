@@ -13,7 +13,10 @@ public class DomainLoggerJS extends CallableJSWrapper {
 	
 	public Object call(Object... arguments) throws RedbackException {
 		Object val = arguments[0];
-		logger.log(val.toString());
+		if(val != null)
+			logger.log(val.toString());
+		else
+			logger.log("null");
 		logger.log("\r\n");
 		return null;
 	}

@@ -44,7 +44,7 @@ public class AggregateRequest extends ObjectRequest {
 
 	public DataMap getDataMap() {
 		DataMap map = new DataMap();
-		map.put("action", "list");
+		map.put("action", "aggregate");
 		map.put("object", objectName);
 		map.put("filter", filter != null ? filter : new DataMap());
 		if(searchText != null)

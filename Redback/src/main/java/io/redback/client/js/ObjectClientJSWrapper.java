@@ -1,6 +1,5 @@
 package io.redback.client.js;
 
-
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.ObjectClient;
@@ -16,7 +15,7 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 	protected ObjectClient objectClient;
 	protected Session session;
 	protected String domainLock;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "updateObject", "execute", "multi"};
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "updateObject", "execute", "multi", "aggregate"};
 
 	public ObjectClientJSWrapper(ObjectClient oc, Session s)
 	{
@@ -122,6 +121,17 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					{
 						throw new RuntimeException("Error executing function on remote object", e);
 					}
+				}
+			};		
+		} else if(key.equals("aggregate")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)arguments[1];
+					DataList tuple = (DataList)arguments[2];
+					DataList metrics = (DataList)arguments[3];
+					DataMap sort = (DataMap)arguments[4];
+					return RedbackAggregateRemoteJSWrapper.convertList(objectClient.aggregate(session, objectname, filter, null, tuple, metrics, sort, null, true, 0, 5000));
 				}
 			};		
 		} else {

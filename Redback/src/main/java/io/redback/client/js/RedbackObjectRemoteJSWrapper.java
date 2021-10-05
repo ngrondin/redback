@@ -91,10 +91,6 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 			throw new RuntimeException(errMsg, e);		
 		}		
 	}
-	
-	public void removeMember(String key) {
-		
-	}
 
 	public static List<RedbackObjectRemoteJSWrapper> convertList(List<RedbackObjectRemote> list) 
 	{
@@ -104,4 +100,5 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 				ret.add(new RedbackObjectRemoteJSWrapper(ror));
 		return ret;
 	}
+
 }
