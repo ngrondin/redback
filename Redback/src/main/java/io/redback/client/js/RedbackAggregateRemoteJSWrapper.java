@@ -10,6 +10,7 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import io.redback.client.RedbackAggregateRemote;
+import io.redback.client.RedbackObjectRemote;
 import io.redback.utils.js.JSConverter;
 
 public class RedbackAggregateRemoteJSWrapper implements ProxyObject
@@ -28,9 +29,9 @@ public class RedbackAggregateRemoteJSWrapper implements ProxyObject
 		{
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
-					RedbackAggregateRemote rar = rbAggregateRemote.getRelated(arguments[0].asString());
-					if(rar != null)
-						return new RedbackAggregateRemoteJSWrapper(rar);
+					RedbackObjectRemote ror = rbAggregateRemote.getRelated(arguments[0].asString());
+					if(ror != null)
+						return new RedbackObjectRemoteJSWrapper(ror);
 					return null;
 				}
 			};				
