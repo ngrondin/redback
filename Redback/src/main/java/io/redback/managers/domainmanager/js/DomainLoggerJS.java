@@ -18,7 +18,10 @@ public class DomainLoggerJS extends DomainLogger implements ProxyExecutable {
 	
 	public Object execute(Value... arguments) {
 		Object val = JSConverter.toJava(arguments[0]);
-		sb.append(val.toString());
+		if(val != null)
+			sb.append(val.toString());
+		else
+			sb.append("null");
 		sb.append("\r\n");
 		return null;
 	}

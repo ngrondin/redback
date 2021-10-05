@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.Firebus;
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.objectmanager.requests.AggregateRequest;
 import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.managers.objectmanager.requests.MultiResponse;
 import io.redback.managers.objectmanager.requests.UpdateRequest;
@@ -20,13 +22,13 @@ public class ObjectClient extends Client
 
 	
 	public RedbackObjectRemote getObject(Session session, String objectname, String uid) throws RedbackException  {
-			DataMap req = new DataMap();
-			req.put("action", "get");
-			req.put("object", objectname);
-			req.put("uid", uid);
-			req.put("options", new DataMap("addrelated", true));
-			DataMap resp = request(session, req);
-			return new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
+		DataMap req = new DataMap();
+		req.put("action", "get");
+		req.put("object", objectname);
+		req.put("uid", uid);
+		req.put("options", new DataMap("addrelated", true));
+		DataMap resp = request(session, req);
+		return new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter) throws RedbackException  {
@@ -112,5 +114,16 @@ public class ObjectClient extends Client
 	public MultiResponse multi(Session session, MultiRequest multiRequest) throws RedbackException {
 		DataMap resp = request(session, multiRequest.getDataMap());
 		return new MultiResponse(resp);
+	}
+	
+	public List<RedbackAggregateRemote> aggregate(Session session, String objectname, DataMap filter, String search, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException {
+		AggregateRequest req = new AggregateRequest(objectname, filter, search, tuple, metrics, sort, base, addRelated, page, pageSize);
+		DataMap resp = request(session, req.getDataMap());
+		List<RedbackAggregateRemote> list = new ArrayList<RedbackAggregateRemote>();
+		for(int i = 0; i < resp.getList("list").size(); i++) {
+			DataMap item = resp.getList("list").getObject(i);
+			list.add(new RedbackAggregateRemote(firebus, serviceName, session.getToken(), item));
+		}		
+		return list;
 	}
 }

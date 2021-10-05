@@ -97,19 +97,4 @@ public class RedbackObjectRemoteJSWrapper implements ProxyObject
 			throw new RuntimeException(errMsg, e);		
 		}		
 	}
-
-	/*
-	protected String constructErrorString(Throwable e) 
-	{
-		String ret = "";
-		Throwable t = e;
-		while(t != null) {
-			if(ret.length() > 0)
-				ret = ret + " : ";
-			ret = ret + t.getMessage();
-			t = t.getCause();
-		}
-		return ret;
-	}
-	 */
 }

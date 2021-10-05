@@ -1,7 +1,9 @@
 package io.redback.client.js;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 //import java.util.logging.Logger;
+import java.util.List;
 
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
@@ -11,6 +13,7 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.ObjectClient;
+import io.redback.client.RedbackAggregateRemote;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.managers.objectmanager.requests.MultiResponse;
@@ -23,7 +26,7 @@ public class ObjectClientJSWrapper implements ProxyObject {
 	protected ObjectClient objectClient;
 	protected Session session;
 	protected String domainLock;
-	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "updateObject", "execute", "multi"};
+	protected String[] members = {"getObject", "listObjects", "listAllObjects", "listObjects", "createObject", "updateObject", "execute", "multi", "aggregate"};
 
 	public ObjectClientJSWrapper(ObjectClient oc, Session s)
 	{
@@ -159,6 +162,28 @@ public class ObjectClientJSWrapper implements ProxyObject {
 					{
 						MultiResponse mr = objectClient.multi(session, new MultiRequest(list));
 						return null;//TODO Return a response for multi gets and lists
+					}
+					catch(Exception e)
+					{
+						throw new RuntimeException("Error executing function on remote object", e);
+					}
+				}
+			};		
+		} else if(key.equals("aggregate")) {
+			return new ProxyExecutable() {
+				public Object execute(Value... arguments) {
+					String objectname = arguments[0].asString();
+					DataMap filter = (DataMap)JSConverter.toJava(arguments[1]);
+					DataList tuple = (DataList)JSConverter.toJava(arguments[2]);
+					DataList metrics = (DataList)JSConverter.toJava(arguments[3]);
+					DataMap sort = (DataMap)JSConverter.toJava(arguments[4]);
+					try
+					{
+						List<RedbackAggregateRemote> rarList = objectClient.aggregate(session, objectname, filter, null, tuple, metrics, sort, null, true, 0, 5000);
+						List<RedbackAggregateRemoteJSWrapper> list = new ArrayList<RedbackAggregateRemoteJSWrapper>();
+						for(RedbackAggregateRemote rar: rarList)
+							list.add(new RedbackAggregateRemoteJSWrapper(rar));
+						return list;
 					}
 					catch(Exception e)
 					{
