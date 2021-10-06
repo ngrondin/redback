@@ -2,6 +2,7 @@ package io.redback.utils.js;
 
 import io.firebus.script.Converter;
 import io.firebus.script.exceptions.ScriptCallException;
+import io.firebus.script.exceptions.ScriptPassthroughException;
 import io.firebus.script.values.abs.SCallable;
 import io.firebus.script.values.abs.SValue;
 import io.redback.exceptions.RedbackException;
@@ -16,7 +17,7 @@ public abstract class CallableJSWrapper extends SCallable {
 			Object ret = call(javaArgs);
 			return Converter.convertIn(ret);
 		} catch(Exception e) {
-			throw new ScriptCallException("Error in callable", e);
+			throw new ScriptPassthroughException("Error in external call", e);
 		}
 	}
 
