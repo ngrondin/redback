@@ -7,6 +7,7 @@ import io.redback.client.RedbackAggregateRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
+import io.redback.client.RedbackObjectRemote;
 
 public class RedbackAggregateRemoteJSWrapper extends ObjectJSWrapper
 {
@@ -25,9 +26,9 @@ public class RedbackAggregateRemoteJSWrapper extends ObjectJSWrapper
 		{
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					RedbackAggregateRemote rar = rbAggregateRemote.getRelated((String)arguments[0]);
-					if(rar != null)
-						return new RedbackAggregateRemoteJSWrapper(rar);
+					RedbackObjectRemote ror = rbAggregateRemote.getRelated((String)arguments[0]);
+					if(ror != null)
+						return new RedbackObjectRemoteJSWrapper(ror);
 					return null;
 				}
 			};				
