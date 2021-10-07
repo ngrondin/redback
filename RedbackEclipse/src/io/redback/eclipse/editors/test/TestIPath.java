@@ -170,7 +170,7 @@ public class TestIPath implements IPath {
 
 	@Override
 	public String[] segments() {
-		String[] s = path.split("\\\\");
+		String[] s = path.split(File.separator);
 		String[] s1 = new String[s.length - 1];
 		System.arraycopy(s, 1, s1, 0, s.length - 1);
 		return s1;

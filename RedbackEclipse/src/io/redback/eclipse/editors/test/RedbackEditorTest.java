@@ -26,7 +26,9 @@ public class RedbackEditorTest {
 		try {
 			//IFileEditorInput fei = new TestFileEditorInput("C:\\Users\\ngron\\git\\redbackwms\\src\\main\\resources\\io\\redback\\config\\rbui\\view\\ganttlayout.json");
 			//IFileEditorInput fei = new TestFileEditorInput("C:\\Users\\ngron\\git\\redbackwms\\src\\main\\resources\\io\\redback\\config\\rbo\\object\\code.json");
-			IFileEditorInput fei = new TestFileEditorInput("C:\\Users\\ngron\\git\\redbackwms\\src\\main\\resources\\io\\redback\\config\\rbpm\\process\\workorder.json");
+			//IFileEditorInput fei = new TestFileEditorInput("/home/nicolas/Source/redbackwms/src/main/resources/io/redback/config/rbpm/process/workorder.json");
+			//IFileEditorInput fei = new TestFileEditorInput("/home/nicolas/Source/redbackwms/src/main/resources/io/redback/config/rbin/client/test.json");
+			IFileEditorInput fei = new TestFileEditorInput("/home/nicolas/Source/redbackwms/src/main/resources/io/redback/config/rbui/app/wms.json");
 			IEditorSite es = new TestEditorSite();
 			RedbackConfigEditor rce = new RedbackConfigEditor();
 			rce.init(es, fei);

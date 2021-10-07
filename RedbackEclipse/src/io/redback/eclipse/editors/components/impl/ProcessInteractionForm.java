@@ -1,12 +1,8 @@
 package io.redback.eclipse.editors.components.impl;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -14,7 +10,6 @@ import org.eclipse.swt.widgets.Group;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
-
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.NavigatorAction;
 import io.redback.eclipse.editors.components.SelectField;
@@ -43,7 +38,7 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 		col1.setLayout(new RowLayout(SWT.VERTICAL));
 		new TextField(_data, "name", "Name", col1, SWT.NONE);
 		new TextField(_data, "notification.code", "Interaction Code", col1, SWT.NONE);
-		new SelectField(_data, "notification.type", "Type", new String[] {"exception", "operation", "option"}, new String[] {"Exception", "Operation", "Option"}, col1, SWT.NONE);
+		new SelectField(_data, "notification.type", "Type", new String[] {"exception", "operation", "option", "notification"}, new String[] {"Exception", "Operation", "Option"}, col1, SWT.NONE);
 		new TextField(_data, "notification.label", "Label (!)", col1, SWT.NONE);
 		new TextField(_data, "notification.message", "Message (!)", col1, SWT.NONE);
 
