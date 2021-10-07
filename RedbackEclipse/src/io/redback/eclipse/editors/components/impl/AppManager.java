@@ -10,6 +10,7 @@ import io.redback.eclipse.editors.RedbackConfigEditor;
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.Navigator;
+import io.redback.eclipse.editors.components.ScriptForm;
 
 public class AppManager extends Manager {
 	
@@ -30,6 +31,8 @@ public class AppManager extends Manager {
 	protected Form getForm(String type, String name) {
 		if(type.equals("root")) {
 			return new AppHeaderForm(_data, this, sashForm, SWT.PUSH);
+		} else if(type.equals("onload")) {
+			return new ScriptForm(_data, "onload", this, sashForm, SWT.PUSH);
 		} else {
 			return null;
 		}

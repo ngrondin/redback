@@ -17,7 +17,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -30,7 +29,6 @@ import org.eclipse.swt.widgets.Widget;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
-
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.Navigator;
 import io.redback.eclipse.editors.components.NavigatorAction;
@@ -152,6 +150,8 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 	public void paintControl(PaintEvent event) {
 		GC gc = event.gc;
 		Display display = Display.getCurrent();
+		gc.setBackground(new Color(display, 240, 240, 240));
+		gc.fillRectangle(0, 0, canvasWidth, canvasHeight);
 		for(int i = 0; i < _data.getList("nodes").size(); i++) {
 			DataMap node = _data.getList("nodes").getObject(i);
 			int x = node.getNumber("position.x").intValue() + scrollHPos;
@@ -165,7 +165,7 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 				gc.fillArc(x, y, 20, 20, 0, 360);
 			} else {
 				String name = node.getString("name") != null ? node.getString("name") : "No label";
-				String id = node.getString("id");
+				//String id = node.getString("id");
 				
 				//Box
 				if(node == selectedNode) {
@@ -173,9 +173,11 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 					gc.setForeground(new Color(display, 200, 0, 0));
 				} else { 
 					gc.setBackground(new Color(display, 255, 255, 255));
-					gc.setForeground(new Color(display, 0, 0, 0));
+					gc.setForeground(new Color(display, 128, 128, 128));
 				}
+				gc.setLineStyle(SWT.LINE_SOLID);
 				gc.fillRectangle(x, y, boxWidth, boxHeight);
+				gc.drawRectangle(x, y, boxWidth, boxHeight);
 				
 				//Header
 				if(node == selectedNode) {
@@ -237,7 +239,7 @@ public class ProcessNavigator extends Navigator implements PaintListener, MouseL
 				gc.setLineStyle(SWT.LINE_DOT);
 				paintConnector(gc, node, interruptDestNode, "interrupt");				
 			} else if(type.equals("condition")) {
-				DataList actions = node.getList("actions");
+				//DataList actions = node.getList("actions");
 				DataMap trueNode = getNode(node.getString("truenode"));
 				paintConnector(gc, node, trueNode, "true");
 				DataMap falseNode = getNode(node.getString("falsenode"));
