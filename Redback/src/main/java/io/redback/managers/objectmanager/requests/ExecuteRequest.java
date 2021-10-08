@@ -2,6 +2,7 @@ package io.redback.managers.objectmanager.requests;
 
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.objectmanager.RedbackObject;
 
 public class ExecuteRequest extends ObjectRequest {
 	public String objectName;
@@ -37,5 +38,13 @@ public class ExecuteRequest extends ObjectRequest {
 		req.put("function", function);
 		req.put("data", param);
 		return req;
+	}
+	
+	public DataMap produceResponse(Object resp) throws RedbackException {
+		if(resp instanceof RedbackObject) {
+			return ((RedbackObject)resp).getDataMap(addValidation, addRelated, true);
+		} else {
+			throw new RedbackException("Unexpected object response format");
+		}
 	}
 }

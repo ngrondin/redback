@@ -1,7 +1,11 @@
 package io.redback.managers.objectmanager.requests;
 
+import java.util.List;
+
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.objectmanager.RedbackObject;
 
 public class ListRequest extends ObjectRequest {
 	public String objectName;
@@ -47,5 +51,17 @@ public class ListRequest extends ObjectRequest {
 		return req;
 	}
 	
-	
+	@SuppressWarnings("unchecked")
+	public DataMap produceResponse(Object resp) throws RedbackException {
+		if(resp instanceof List<?>) {
+			DataMap responseData = new DataMap();
+			DataList respList = new DataList();
+			for(RedbackObject object: (List<RedbackObject>)resp)
+				respList.add(object.getDataMap(addValidation, addRelated, true));
+			responseData.put("list", respList);
+			return responseData;
+		} else {
+			throw new RedbackException("Unexpected object response format");
+		}
+	}
 }

@@ -31,7 +31,6 @@ export class RbActiongroupAction {
   styleUrls: ['./rb-actiongroup.component.css']
 })
 export class RbActiongroupComponent extends RbDataObserverComponent {
-  //@Input('dataset') dataset: RbDatasetComponent;
   @Input('actions') actions: any;
   @Input('domaincategory') domaincategory: string;
   @Input('showprocessinteraction') showprocessinteraction: boolean = false;

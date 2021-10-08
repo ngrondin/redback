@@ -33,11 +33,12 @@ export class FilterService {
         __varString = __varString + "var uid = '" + obj.uid + "';\r\n"
         for(const attr in obj.data) {
           let val = obj.data[attr];
-          if(typeof val == 'object') {
-            val = JSON.stringify(val);
-          } 
-          if(typeof val == 'string') {
+          if(val == null) {
+            val = null;
+          } else if(typeof val == 'string') {
             val = "'" + val.replace(/\'/g, "\\'").replace(/\"/g, "\\\"").replace(/\n/g, "\\n").replace(/\r/g, "\\r") + "'";
+          } else if(typeof val == 'object') {
+            val = JSON.stringify(val);
           } 
           __varString = __varString + "var " + attr + " = " + val + ";\r\n"
         }

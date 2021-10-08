@@ -39,8 +39,8 @@ public class ProcessClientJSWrapper implements ProxyObject
 			return new ProxyExecutable() {
 				public Object execute(Value... arguments) {
 					String process = arguments[0].asString();
-					String domain = arguments[1].asString();
-					DataMap data = (DataMap)JSConverter.toJava(arguments[2]);
+					String domain = arguments.length == 2 ? null : arguments[1].asString(); 
+					DataMap data = (DataMap)JSConverter.toJava(arguments.length == 2 ? arguments[1] : arguments[2]);
 					if(domainLock != null)
 						domain = domainLock;
 					try

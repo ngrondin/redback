@@ -40,6 +40,7 @@ public class RedbackObject extends RedbackElement
 	protected Map<String, Boolean> updatedAttributes;
 	protected boolean isNewObject;
 	protected boolean isDeleted;
+	protected DataMap cachedDataMap;
 
 	// Initiate existing object from pre-loaded data
 	protected RedbackObject(Session s, ObjectManager om, ObjectConfig cfg, DataMap dbData) throws RedbackException, ScriptException
@@ -578,60 +579,73 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 	
-	public DataMap getJSON(boolean addValidation, boolean addRelated) throws RedbackException
+	public DataMap getDataMap(boolean addValidation, boolean addRelated) throws RedbackException
 	{
-		DataMap object = new DataMap();
-		
-		object.put("objectname", config.getName());
-		object.put("uid", uid.getObject());
-		object.put("domain", domain.getObject());
-
-		DataMap dataNode = new DataMap();
-		DataMap validatonNode = new DataMap();
-		DataMap relatedNode = new DataMap();
-
-		if(addValidation)
-			validatonNode.put("_candelete", this.canDelete());
-		
-		Iterator<String> it = config.getAttributeNames().iterator();
-		while(it.hasNext())
-		{
-			AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-			String attrName = attributeConfig.getName();
-			Value attrValue = get(attrName);
-
-			if(addValidation) {
-				DataMap attributeValidation = new DataMap();
-				attributeValidation.put("editable", isEditable(attrName));
-				attributeValidation.put("mandatory", isMandatory(attrName));
-				attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
-				if(attributeConfig.hasRelatedObject())
-				{
-					DataMap relatedObjectValidation = new DataMap();
-					relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
-					relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
-					attributeValidation.put("related", relatedObjectValidation);
-				}
-				validatonNode.put(attrName, attributeValidation);
-			}
+		return getDataMap(addValidation, addRelated, false);
+	}
+	
+	public DataMap getDataMap(boolean addValidation, boolean addRelated, boolean cache) throws RedbackException
+	{
+		if(cache == true && cachedDataMap != null) {
+			return cachedDataMap;
+		} else {
+			DataMap object = new DataMap();
 			
-			if(addRelated  &&  attributeConfig.hasRelatedObject())
+			object.put("objectname", config.getName());
+			object.put("uid", uid.getObject());
+			object.put("domain", domain.getObject());
+
+			DataMap dataNode = new DataMap();
+			DataMap validatonNode = new DataMap();
+			DataMap relatedNode = new DataMap();
+
+			if(addValidation)
+				validatonNode.put("_candelete", this.canDelete());
+			
+			Iterator<String> it = config.getAttributeNames().iterator();
+			while(it.hasNext())
 			{
-				RedbackObject relatedObject = getRelated(attrName);
-				if(relatedObject != null)
-					relatedNode.put(attrName, relatedObject.getJSON(false, false));
-			}
+				AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+				String attrName = attributeConfig.getName();
+				Value attrValue = get(attrName);
 
-			dataNode.put(attrName, attrValue.getObject());
-		}
-		object.put("data", dataNode);
-		
-		if(addValidation)
-			object.put("validation", validatonNode);
-		if(addRelated)
-			object.put("related", relatedNode);
+				if(addValidation) {
+					DataMap attributeValidation = new DataMap();
+					attributeValidation.put("editable", isEditable(attrName));
+					attributeValidation.put("mandatory", isMandatory(attrName));
+					attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
+					if(attributeConfig.hasRelatedObject())
+					{
+						DataMap relatedObjectValidation = new DataMap();
+						relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
+						relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
+						attributeValidation.put("related", relatedObjectValidation);
+					}
+					validatonNode.put(attrName, attributeValidation);
+				}
+				
+				if(addRelated  &&  attributeConfig.hasRelatedObject())
+				{
+					RedbackObject relatedObject = getRelated(attrName);
+					if(relatedObject != null)
+						relatedNode.put(attrName, relatedObject.getDataMap(false, false, cache));
+				}
+
+				dataNode.put(attrName, attrValue.getObject());
+			}
+			object.put("data", dataNode);
 			
-		return object;
+			if(addValidation)
+				object.put("validation", validatonNode);
+			if(addRelated)
+				object.put("related", relatedNode);
+				
+			if(cache)
+				cachedDataMap = object;
+			
+			return object;			
+		}
+
 	}
 	
 
@@ -684,7 +698,7 @@ public class RedbackObject extends RedbackElement
 	{
 		try
 		{
-			return getJSON(false, false).toString();
+			return getDataMap(false, false).toString();
 		}
 		catch(RedbackException e)
 		{

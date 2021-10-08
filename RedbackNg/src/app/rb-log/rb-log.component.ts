@@ -24,6 +24,7 @@ export class RbLogComponent extends RbDataObserverComponent {
 
   public value: string; 
   public isEditable: boolean = false;
+  private reachedBottom: boolean = false;
 
   constructor(
     private actionService: ActionService
@@ -124,5 +125,13 @@ export class RbLogComponent extends RbDataObserverComponent {
         }
     }
     console.log('eval editable = ' + this.isEditable);
+  }
+
+  onScroll(event) {
+    if(event.currentTarget.scrollTop > Math.floor(event.currentTarget.scrollHeight - event.currentTarget.clientHeight - 10) && this.reachedBottom == false) {
+      this.dataset.fetchNextPage();
+      this.reachedBottom = true;
+      setTimeout(() => {this.reachedBottom = false}, 1000);
+    }
   }
 }

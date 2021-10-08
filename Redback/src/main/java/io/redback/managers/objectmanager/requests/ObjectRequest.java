@@ -1,6 +1,7 @@
 package io.redback.managers.objectmanager.requests;
 
 import io.firebus.data.DataMap;
+import io.redback.exceptions.RedbackException;
 
 public abstract class ObjectRequest {
 	public boolean addRelated;
@@ -21,4 +22,6 @@ public abstract class ObjectRequest {
 	}
 	
 	public abstract DataMap getDataMap();
+	
+	public abstract DataMap produceResponse(Object resp) throws RedbackException;
 }

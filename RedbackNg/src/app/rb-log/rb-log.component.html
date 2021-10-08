@@ -18,7 +18,8 @@
     </button>
 </div>
 <div
-    class="rb-log-container hscroll">
+    class="rb-log-container hscroll"
+    (scroll)="onScroll($event)">
     <div
         [class]="'rb-log-card' + (canClick ? ' rb-log-card-active' : '')"
         *ngFor="let item of list"

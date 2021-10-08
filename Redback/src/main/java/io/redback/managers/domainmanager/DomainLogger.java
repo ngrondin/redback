@@ -27,7 +27,9 @@ public class DomainLogger {
 	}
 	
 	public void commit() {
-		log("Execution completed in " + (System.currentTimeMillis() - start) + "ms");
-		domainManager.addFunctionLog(session, function, getLog());
+		if(sb.length() > 0) {
+			log("Execution completed in " + (System.currentTimeMillis() - start) + "ms");
+			domainManager.addFunctionLog(session, function, getLog());
+		}
 	}
 }

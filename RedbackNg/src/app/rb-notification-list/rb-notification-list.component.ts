@@ -28,13 +28,20 @@ export class RbNotificationListComponent implements OnInit {
   }
 
   public selectNotification(notification: RbNotification) {
-    let evt = {
-      object : (notification.data.object != null ? notification.data.object : (notification.data.objectname != null ? notification.data.objectname : null)),
-      filter : {
-        uid : "'" + notification.data.uid + "'"
-      },
-      reset : true
+    if((notification.data.object != null || notification.data.objectname != null) && notification.data.uid != null) {
+      this.navigate.emit({
+        object : notification.data.object || notification.data.objectname,
+        filter : {
+          uid : "'" + notification.data.uid + "'"
+        },
+        reset : true
+      });
     }
-    this.navigate.emit(evt);
+    if(notification.type == 'notification') {
+      let firstAction = notification.actions[0];
+      if(firstAction != null) {
+        this.notificationService.actionNotification(notification, firstAction.action).subscribe();
+      }
+    }
   }
 }

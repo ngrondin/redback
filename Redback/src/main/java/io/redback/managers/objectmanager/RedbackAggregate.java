@@ -223,7 +223,7 @@ public class RedbackAggregate extends RedbackElement
 	
 
 	
-	public DataMap getJSON(boolean addRelated) throws RedbackException
+	public DataMap getDataMap(boolean addRelated) throws RedbackException
 	{
 		DataMap object = new DataMap();
 		object.put("objectname", config.getName());
@@ -244,7 +244,7 @@ public class RedbackAggregate extends RedbackElement
 				{
 					RedbackObject relatedObject = getRelated(attrName);
 					if(relatedObject != null)
-						relatedNode.put(attrName, relatedObject.getJSON(false, false));
+						relatedNode.put(attrName, relatedObject.getDataMap(false, false));
 				}
 				dimensionsNode.put(attrName, attrValue.getObject());				
 			}
@@ -286,7 +286,7 @@ public class RedbackAggregate extends RedbackElement
 	{
 		try
 		{
-			return getJSON(false).toString();
+			return getDataMap(false).toString();
 		}
 		catch(RedbackException e)
 		{

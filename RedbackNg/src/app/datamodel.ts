@@ -33,7 +33,7 @@ export class RbObject {
         const inData: any = json.data;
         let isChanged: boolean = false;
         for(const attribute in json.data) {
-            if(ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
+            if(this.data[attribute] === undefined || ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
                 this.data[attribute] = json.data[attribute];
                 isChanged = true;
             }
