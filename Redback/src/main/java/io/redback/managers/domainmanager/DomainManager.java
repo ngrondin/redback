@@ -39,6 +39,7 @@ import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.StringUtils;
+import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class DomainManager implements Consumer {
 	private Logger logger = Logger.getLogger("io.redback");
@@ -69,34 +70,39 @@ public class DomainManager implements Consumer {
 	protected CollectionConfig logCollection;
 	protected Map<String, DomainEntry> entries;
 
-	public DomainManager(Firebus fb, DataMap config) {
-		firebus = fb;
-		scriptFactory = new ScriptFactory();
-		includeLoaded = false;
-		configServiceName = config.getString("configservice");
-		objectServiceName = config.getString("objectservice");
-		processServiceName = config.getString("processservice");
-		dataServiceName = config.getString("dataservice");
-		fileServiceName = config.getString("fileservice");
-		notificationServiceName = config.getString("notificationservice");
-		reportServiceName = config.getString("reportservice");
-		gatewayServiceName = config.getString("gatewayservice");
-		geoServiceName = config.getString("geoservice");
-		integrationServiceName = config.getString("integrationservice");
-		configClient = new ConfigurationClient(firebus, configServiceName);
-		objectClient = new ObjectClient(firebus, objectServiceName);
-		processClient = new ProcessClient(firebus, processServiceName);
-		dataClient = new DataClient(firebus, dataServiceName);
-		fileClient = new FileClient(firebus, fileServiceName);
-		notificationClient = new NotificationClient(firebus, notificationServiceName);
-		reportClient = new ReportClient(firebus, reportServiceName);
-		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
-		geoClient = new GeoClient(firebus, geoServiceName);
-		integrationClient = new IntegrationClient(firebus, integrationServiceName);
-		entryCollection = new CollectionConfig(config.getObject("entrycollection"), "rbdm_entry");
-		logCollection = new CollectionConfig(config.getObject("logcollection"), "rbdm_log");
-		entries = new HashMap<String, DomainEntry>();	
-		firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
+	public DomainManager(Firebus fb, DataMap config) throws RedbackException {
+		try {
+			firebus = fb;
+			scriptFactory = new ScriptFactory();
+			includeLoaded = false;
+			configServiceName = config.getString("configservice");
+			objectServiceName = config.getString("objectservice");
+			processServiceName = config.getString("processservice");
+			dataServiceName = config.getString("dataservice");
+			fileServiceName = config.getString("fileservice");
+			notificationServiceName = config.getString("notificationservice");
+			reportServiceName = config.getString("reportservice");
+			gatewayServiceName = config.getString("gatewayservice");
+			geoServiceName = config.getString("geoservice");
+			integrationServiceName = config.getString("integrationservice");
+			configClient = new ConfigurationClient(firebus, configServiceName);
+			objectClient = new ObjectClient(firebus, objectServiceName);
+			processClient = new ProcessClient(firebus, processServiceName);
+			dataClient = new DataClient(firebus, dataServiceName);
+			fileClient = new FileClient(firebus, fileServiceName);
+			notificationClient = new NotificationClient(firebus, notificationServiceName);
+			reportClient = new ReportClient(firebus, reportServiceName);
+			gatewayClient = new GatewayClient(firebus, gatewayServiceName);
+			geoClient = new GeoClient(firebus, geoServiceName);
+			integrationClient = new IntegrationClient(firebus, integrationServiceName);
+			entryCollection = new CollectionConfig(config.getObject("entrycollection"), "rbdm_entry");
+			logCollection = new CollectionConfig(config.getObject("logcollection"), "rbdm_log");
+			entries = new HashMap<String, DomainEntry>();	
+			firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
+			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising Domain Manager", e);
+		}
 	}
 
 	protected void loadIncludeScripts(Session session) throws RedbackException

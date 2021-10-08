@@ -15,7 +15,7 @@ public class RedbackDomainServer extends DomainServer {
 
 	protected DomainManager domainManager;
 	
-	public RedbackDomainServer(String n, DataMap c, Firebus f) {
+	public RedbackDomainServer(String n, DataMap c, Firebus f) throws RedbackException {
 		super(n, c, f);
 		domainManager = new DomainManager(firebus, config);
 	}
