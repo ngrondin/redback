@@ -33,8 +33,8 @@ public class ProcessClientJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					String process = (String)arguments[0];
-					String domain = (String)arguments[1];
-					DataMap data = (DataMap)(arguments[2]);
+					String domain = arguments.length == 2 ? null : (String)arguments[1]; 
+					DataMap data = (DataMap)(arguments.length == 2 ? arguments[1] : arguments[2]);
 					if(domainLock != null)
 						domain = domainLock;
 					processClient.initiate(session, process, domain, data);

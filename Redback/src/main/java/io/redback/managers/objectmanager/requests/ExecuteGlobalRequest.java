@@ -1,6 +1,7 @@
 package io.redback.managers.objectmanager.requests;
 
 import io.firebus.data.DataMap;
+import io.redback.exceptions.RedbackException;
 
 public class ExecuteGlobalRequest extends ObjectRequest {
 	public String function;
@@ -19,5 +20,9 @@ public class ExecuteGlobalRequest extends ObjectRequest {
 		req.put("function", function);
 		req.put("data", param);
 		return req;
+	}
+	
+	public DataMap produceResponse(Object resp) throws RedbackException {
+		return new DataMap("result", "ok");
 	}
 }

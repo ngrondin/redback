@@ -1125,7 +1125,7 @@ public class ObjectManager
 		{
 			try 
 			{
-				Payload payload = new Payload(object.getJSON(true, true).toString());
+				Payload payload = new Payload(object.getDataMap(true, true).toString());
 				logger.finest("Publishing object update");
 				firebus.publish(objectUpdateChannel, payload);
 				logger.finest("Published object update");

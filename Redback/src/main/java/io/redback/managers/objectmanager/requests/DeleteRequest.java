@@ -28,4 +28,8 @@ public class DeleteRequest extends ObjectRequest {
 		req.put("uid", uid);
 		return req;
 	}
+	
+	public DataMap produceResponse(Object resp) throws RedbackException {
+		return new DataMap("result", "ok");
+	}
 }

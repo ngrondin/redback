@@ -88,7 +88,6 @@ export class NotificationService {
     let notif: RbNotification = new RbNotification(json, this);
     this.removeAllProcessNotifications(notif.pid);
     this.notifications.push(notif);
-    //console.log('new notification: ' + notif.code + " " + notif.pid);
     this.publish("notification", notif);
     this.lastReceived = new Date();
     return notif;
@@ -97,7 +96,6 @@ export class NotificationService {
   private receiveCompletion(json: any) {
     let sub = this.notifications.filter(item => item.process == json.process && item.pid == json.pid && item.code == json.code);
     for(let notif of sub) {
-      //console.log('comp notification: ' + notif.code + " " + notif.pid);
       this.publish("completion", notif);
       this.removeAllProcessNotifications(notif.pid);
       this.lastReceived = new Date();
@@ -105,8 +103,8 @@ export class NotificationService {
   }
 
   private calcStats() {
-    this.topExceptions = this.notifications.filter(item => item.type == 'exception').slice(0, 100);
-    this.exceptionCount = this.notifications.filter(item => item.type == 'exception').length;
+    this.topExceptions = this.notifications.filter(item => item.type == 'exception' || item.type == 'notification').slice(0, 100);
+    this.exceptionCount = this.notifications.filter(item => item.type == 'exception' || item.type == 'notification').length;
   }
 
   private publish(type: string, notif: RbNotification) {
@@ -122,14 +120,13 @@ export class NotificationService {
   private removeNotification(notif: RbNotification) {
     var i = this.notifications.indexOf(notif);
     if(i > -1) {
-      //console.log("remove notification: " + notif.code + " " + notif.pid);
       this.notifications.splice(i, 1);
     }
   }
 
   public getNotificationFor(objectname: string, uid: string) : Observable<RbNotification> {
     const obs = new Observable<RbNotification>((observer) => {
-      let sub = this.notifications.filter(item => item.data != null && item.data.objectname == objectname && item.data.uid == uid);
+      let sub = this.notifications.filter(item => item.data != null && item.data.objectname == objectname && item.data.uid == uid && item.type != 'notification');
       if(sub.length > 0) {
         observer.next(sub[0]);
         observer.complete();

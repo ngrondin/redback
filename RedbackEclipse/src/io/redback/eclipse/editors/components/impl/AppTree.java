@@ -30,6 +30,11 @@ public class AppTree extends Navigator {
 		TreeItem rootNode = new TreeItem (tree, 0);
 		rootNode.setText (_data.getString("name"));
 		rootNode.setData(new NavigatorAction("select", "root", null));
+		
+		TreeItem onloadNode = new TreeItem (rootNode, 1);
+		onloadNode.setText ("onLoad");
+		onloadNode.setData(new NavigatorAction("select", "onload", null));
+		
 	}
 	
 

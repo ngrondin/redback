@@ -113,11 +113,10 @@ public class RedbackObjectServer extends ObjectServer
 		return object;
 	}
 	
-	protected RedbackObject execute(Session session, String function, DataMap param) throws RedbackException {
+	protected void execute(Session session, String function, DataMap param) throws RedbackException {
 		objectManager.initiateCurrentTransaction();
 		objectManager.executeFunction(session, function, param);
 		objectManager.commitCurrentTransaction();
-		return null;
 	}
 
 	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException {

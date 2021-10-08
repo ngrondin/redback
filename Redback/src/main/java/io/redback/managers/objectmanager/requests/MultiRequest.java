@@ -108,4 +108,18 @@ public class MultiRequest extends ObjectRequest {
 		map.put("multi", getDataList());
 		return map;
 	}
+
+	public DataMap produceResponse(Object resp) throws RedbackException {
+		if(resp instanceof MultiResponse) {
+			MultiResponse mr = (MultiResponse)resp;
+			DataMap respMap = new DataMap();
+			for(String key: mr.getKeys()) {
+				ObjectRequest originalRequest = requests.get(key);
+				respMap.put(key, originalRequest.produceResponse(mr.getResponse(key)));
+			}
+			return respMap;
+		} else {
+			throw new RedbackException("Unexpected object response format");
+		}
+	}
 }
