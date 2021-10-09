@@ -8,7 +8,7 @@
             <button
                 mat-list-item 
                 [rb-drag-object]="item.object"
-                [class]="'rb-list-item' + (selectedObject == item.object ? ' ' + userprefService.getAtlClassFor('rb-list-item-active') : '')"
+                [class]="'rb-list-item' + (selectedObject == item.object ? ' rb-list-item-active' : '')"
                 (click)="itemClicked(item.object)">
                 <div 
                     class="rb-list-item-data">

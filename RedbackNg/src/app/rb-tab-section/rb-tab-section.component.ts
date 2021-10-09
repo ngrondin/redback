@@ -49,7 +49,7 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   }
 
   public register(tab: RbTabComponent) {
-    let swtch = this.userpref.getUISwitch('tab',  tab.label);
+    let swtch = this.userpref.getCurrentViewUISwitch('tab',  tab.label);
     if(swtch == null || swtch == true) {
       this.tabs.push(tab);
       if(tab.isdefault == true) {

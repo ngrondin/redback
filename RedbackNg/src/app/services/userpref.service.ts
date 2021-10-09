@@ -2,13 +2,37 @@ import { Injectable, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
+export class PrefOption {
+  value: string;
+  label: string;
+
+  constructor(json: any) {
+    this.value = json.value;
+    this.label = json.label;
+  }
+}
+
+export class GlobalPref {
+  code: string;
+  label: string;
+  options: PrefOption[];
+
+  constructor(json: any) {
+    this.code = json.code;
+    this.label = json.label;
+    this.options = [];
+    if(json.options != null) {
+      this.options = json.options.map(element => new PrefOption(element));
+    }
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class UserprefService {
 
-  selectedUIAlt: string = 'base';
-  uiAlternates: string[] = ['base', 'alt1', 'alt2'];
+  globalPrefs: GlobalPref[] = [];
   currentView: string;
   domainUISwitches: any = {};
   roleUISwitches: any = {};
@@ -17,33 +41,23 @@ export class UserprefService {
   constructor(
     private apiService: ApiService
   ) { 
-
+    this.globalPrefs.push(new GlobalPref({code:'uialt', label: 'UI Styles', options:[{value:'base', label: 'Base'}, {value:'alt1', label: 'Alternate 1'}, {value:'alt2', label: 'Alternate 2'}]}));
   }
 
   public load() {
     return new Observable<null>((observer) => {
       if(this.apiService.userprefService != null) {
-        this.apiService.getUserPreference('user', 'uialt').subscribe(
+        this.apiService.getUserPreference('domain', 'uiswitch').subscribe(
           resp => {
-            if(resp.name != null && this.uiAlternates.indexOf(resp.name) > -1) {
-              this.selectedUIAlt = resp.name;
-            }
-            this.apiService.getUserPreference('domain', 'uiswitch').subscribe(
+            this.domainUISwitches = resp;
+            this.apiService.getUserPreference('role', 'uiswitch').subscribe(
               resp => {
-                this.domainUISwitches = resp;
-                this.apiService.getUserPreference('role', 'uiswitch').subscribe(
+                this.roleUISwitches = resp;
+                this.apiService.getUserPreference('user', 'uiswitch').subscribe(
                   resp => {
-                    this.roleUISwitches = resp;
-                    this.apiService.getUserPreference('user', 'uiswitch').subscribe(
-                      resp => {
-                        this.userUISwitches = resp;
-                        observer.next();
-                        observer.complete();
-                      },
-                      error => {
-                        observer.error(error);
-                      }
-                    );
+                    this.userUISwitches = resp;
+                    observer.next();
+                    observer.complete();
                   },
                   error => {
                     observer.error(error);
@@ -53,106 +67,69 @@ export class UserprefService {
               error => {
                 observer.error(error);
               }
-            );         
+            );
           },
           error => {
             observer.error(error);
           }
-        );
+        );         
       } else {
         observer.next();
         observer.complete();
       }
     });
-
   }
 
-  public get selecteduialt() : string {
-    return this.selectedUIAlt;
+  public addGlobalPreference(json: any) {
+    this.globalPrefs.push(json);
   }
 
-  public set selecteduialt(s: string) {
-    this.selectedUIAlt = s;
-    if(this.apiService.userprefService != null) {
-      this.apiService.putUserPreference('user', 'uialt', {
-        name: this.selectedUIAlt
-      }).subscribe(resp => {});
-    }
-  }
-
-  public getAtlClassFor(c: string) : string {
-    if(this.selectedUIAlt == 'base') {
-      return c;
-    } else {
-      return c + "-" + this.selectedUIAlt;
-    }
+  public getGlobalPreferences() : GlobalPref[] {
+    return this.globalPrefs;
   }
 
   public getInitialView() : any {
-    return this.getUISwitchGeneral("initialview");
+    return this.getGlobalPreferenceValue("initialview");
+  }
+
+  public getGlobalPreferenceValue(name: string) : any {
+    var stack = [this.userUISwitches, this.roleUISwitches, this.domainUISwitches];
+    for(let i = 0; i < stack.length; i++) {
+      if(stack[i]["_general"] != null && stack[i]["_general"][name] != null) {
+        return stack[i]["_general"][name];
+      }
+    }
+  }
+
+  public setGlobalPreferenceValue(level: string, name: string, val: any) {
+    let map = level == 'domain' ? this.domainUISwitches : level == 'role' ? this.roleUISwitches : level == 'user' ? this.userUISwitches : null;
+    if(map != null) {
+      if(map["_general"] == null) {
+        map["_general"] = {};
+      }
+      map["_general"][name] = val;
+      if(this.apiService.userprefService != null) {
+        this.apiService.putUserPreference(level, 'uiswitch', map).subscribe(resp => {});
+      }      
+    }
   }
 
   public setCurrentView(view: string) {
     this.currentView = view;
   }
 
-  public getUISwitch(comp: string, name: string) : Boolean {
-    let val = this.getUISwitchValue(this.userUISwitches, comp, name);
-    if(val != null) {
-      return val;
-    } else {
-      val = this.getUISwitchValue(this.roleUISwitches, comp, name);
-      if(val != null) {
-        return val;
-      } else {
-        val = this.getUISwitchValue(this.domainUISwitches, comp, name);
-        if(val != null) {
-          return val;
-        } else {
-          return null;
-        }
+  public getCurrentViewUISwitch(cat: string, name: string) : any {
+    return this.getUISwitch(this.currentView, cat, name);
+  }
+
+  private getUISwitch(view: string, cat: string, name: string) : any {
+    var stack = [this.userUISwitches, this.roleUISwitches, this.domainUISwitches];
+    for(let i = 0; i < stack.length; i++) {
+      if(stack[i][view] != null && stack[i][view][cat] != null && stack[i][view][cat][name] != null) {
+        return stack[i][view][cat][name];
       }
     }
   }
-
-  private getUISwitchValue(cfg: any, comp: string, name: string) : any {
-    if(cfg[this.currentView] != null) {
-      if(cfg[this.currentView][comp] != null) {
-        if(cfg[this.currentView][comp][name] != null) {
-          return cfg[this.currentView][comp][name];
-        }
-      } 
-    }
-    return null;
-  }
-
-  public getUISwitchGeneral(name: string) : any {
-    let val = this.getUISwitchGeneralValue(this.userUISwitches, name);
-    if(val != null) {
-      return val;
-    } else {
-      val = this.getUISwitchGeneralValue(this.roleUISwitches, name);
-      if(val != null) {
-        return val;
-      } else {
-        val = this.getUISwitchGeneralValue(this.domainUISwitches, name);
-        if(val != null) {
-          return val;
-        } else {
-          return null;
-        }
-      }
-    }
-  }
-
-  private getUISwitchGeneralValue(cfg: any, name: string) : any {
-    if(cfg["_general"] != null) {
-      if(cfg["_general"][name] != null) {
-         return cfg["_general"][name];
-      } 
-    }
-    return null;
-  }  
 
   public setUISwitch(level: string, comp: string, name: string, val: any) {
     let map = level == 'domain' ? this.domainUISwitches : level == 'role' ? this.roleUISwitches : level == 'user' ? this.userUISwitches : null;
@@ -167,8 +144,7 @@ export class UserprefService {
       if(this.apiService.userprefService != null) {
         this.apiService.putUserPreference(level, 'uiswitch', map).subscribe(resp => {});
       }      
-    }
-    
+    } 
   }
 
  }

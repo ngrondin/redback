@@ -10,7 +10,7 @@
             {{apptitle}}
         </span>
         <span
-            *ngIf="userprefService.selecteduialt != 'base'"
+            *ngIf="userprefService.getGlobalPreferenceValue('uialt') != 'base'"
             class="rb-toolbar-pagetitle">
             &nbsp;&nbsp;|&nbsp;&nbsp;{{currentTitle}}
         </span>
@@ -48,19 +48,25 @@
         <mat-menu
             #prefmenu="matMenu">
             <button
+                *ngFor="let pref of userprefService.getGlobalPreferences()"
                 mat-menu-item
-                [matMenuTriggerFor]="uialtmenu">
-                UI Styles
-            </button>
+                (click)="focusGlobalPreference(pref)"
+                [matMenuTriggerFor]="prefoption"
+                [matMenuTriggerData]="pref">
+                {{pref.label}}
+            </button>            
         </mat-menu>
         <mat-menu
-            #uialtmenu="matMenu">
-            <button
-                *ngFor="let alt of userprefService.uiAlternates"
-                mat-menu-item
-                (click)="userprefService.selecteduialt = alt">
-                {{alt}}
-            </button>
+            #prefoption="matMenu">
+            <ng-template 
+                matMenuContent 
+                let-options="options">
+                <button
+                    *ngFor="let prefoption of options"
+                    mat-menu-item>
+                    {{prefoption.label}}
+                </button>            
+            </ng-template>
         </mat-menu>
     </mat-toolbar-row>
 </mat-toolbar>
@@ -88,13 +94,7 @@
     </mat-sidenav>    
     <mat-sidenav-content>
         <rb-vsection>
-            <rb-breadcrumb
-                *ngIf="viewTargetStack.length > 1 && userprefService.selecteduialt != 'base'"
-                [targetStack]="viewTargetStack"
-                (backTo)="backTo($event)">
-            </rb-breadcrumb>
             <rb-view-header
-                *ngIf="userprefService.selecteduialt == 'base'"
                 [targetStack]="viewTargetStack"
                 (backTo)="backTo($event)">
             </rb-view-header>

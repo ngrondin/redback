@@ -95,6 +95,12 @@ export class AppComponent implements OnInit {
     for(const set of this.iconsets) {
       this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'), {viewBox: "0 0 24 24"});
     }
+    let preferences = config["preferences"];
+    if(preferences != null) {
+      preferences.forEach(element => {
+        this.userprefService.addGlobalPreference(element);
+      });  
+    }
     if(config['onload'] != null) {
       this.onloadFunction = Function(config['onload']);
     }

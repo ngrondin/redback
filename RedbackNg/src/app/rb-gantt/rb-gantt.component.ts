@@ -106,7 +106,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   get userPref() : any {
-    return this.id != null ? this.userprefService.getUISwitch("gantt", this.id) : null;
+    return this.id != null ? this.userprefService.getCurrentViewUISwitch("gantt", this.id) : null;
   }
 
   get selectedObject() : RbObject {
