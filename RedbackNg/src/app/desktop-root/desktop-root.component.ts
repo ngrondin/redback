@@ -3,7 +3,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ViewTarget } from 'app/datamodel';
 import { ConfigService } from 'app/services/config.service';
-import { UserprefService } from 'app/services/userpref.service';
+import { GlobalPref, PrefOption, UserprefService } from 'app/services/userpref.service';
 import { ApiService } from 'app/services/api.service';
 import { DragService } from 'app/services/drag.service';
 import { ClientWSService } from 'app/services/clientws.service';
@@ -34,6 +34,7 @@ export class DesktopRootComponent implements OnInit {
   title: string = "Welcome";
   //rightDrawerIsOpen: boolean = false;
   rightDrawerShowing: string = null;
+  focusPrefOptions: PrefOption[];
  
   constructor(
     private configService : ConfigService,
@@ -137,6 +138,10 @@ export class DesktopRootComponent implements OnInit {
 
   closeRightDrawer() {
     this.rightdrawer.close();
+  }
+
+  focusGlobalPreference(pref: GlobalPref) {
+    this.focusPrefOptions = pref.options;
   }
 
   @HostListener('mouseup', ['$event']) onMouseUp($event) {

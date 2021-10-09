@@ -62,7 +62,7 @@ public class ObjectConfig
 			}
 			
 			if(config.containsKey("datagen")) {
-				String[] scriptVars2 = new String[] {"filter", "sort", "search", "tuple", "metrics", "page", "pageSize", "action"};
+				String[] scriptVars2 = new String[] {"session", "userprofile", "firebus", "om", "pm", "pc", "geo", "fc", "rc", "nc", "dc", "ic", "self", "canRead", "canWrite", "canExecute", "uid", "filter", "sort", "search", "tuple", "metrics", "page", "pageSize", "action"};
 				generationScript = objectManager.getScriptFactory().createFunction(getName() + "_datagen", scriptVars2, config.getString("datagen"));
 			}
 					

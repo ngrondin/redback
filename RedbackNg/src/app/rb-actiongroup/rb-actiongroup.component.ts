@@ -149,7 +149,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
     if(this.actions != null) {
       this.actions.forEach(item => {
         if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject) == true))) {
-          let swtch = this.userpref.getUISwitch('action',  item.action + "_" + item.param);
+          let swtch = this.userpref.getCurrentViewUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
             this.actionData.push(new RbActiongroupAction(item.action, item.param, item.timeout, item.label, false));
           }

@@ -75,7 +75,7 @@ export class RbViewHeaderComponent implements OnInit {
   }
 
   getPreferredColor() {
-    let color = this.userPref.getUISwitch("viewheader", "color");
+    let color = this.userPref.getCurrentViewUISwitch("viewheader", "color");
     if(color != null) { 
       this.color = color;
     } else {
@@ -93,7 +93,7 @@ export class RbViewHeaderComponent implements OnInit {
   }
 
   getPreferredPattern() {
-    let pattern = this.userPref.getUISwitch("viewheader", "pattern");
+    let pattern = this.userPref.getCurrentViewUISwitch("viewheader", "pattern");
     if(pattern != null) { 
       this.pattern = pattern;
     } else {

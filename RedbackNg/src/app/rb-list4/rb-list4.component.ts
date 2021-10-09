@@ -46,7 +46,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   get userPref() : any {
-    return this.id != null ? this.userprefService.getUISwitch("list4", this.id) : null;
+    return this.id != null ? this.userprefService.getCurrentViewUISwitch("list4", this.id) : null;
   }
 
   public hasMainLine() : boolean {
