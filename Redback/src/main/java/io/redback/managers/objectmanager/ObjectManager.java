@@ -506,17 +506,17 @@ public class ObjectManager
 						for(int i = 0; i < dbResultList.size(); i++)
 						{
 							DataMap dbData = dbResultList.getObject(i);
-							RedbackObject object = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
-							if(object != null && !objectList.contains(object)) 
+							RedbackObject objectInTransaction = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
+							if(objectInTransaction != null && !objectList.contains(objectInTransaction) && !objectInTransaction.isDeleted()) 
 							{
-								logger.warning("Memory filter missed " + objectName + ":" + object.getUID().stringValue + " with filter: " + objectFilter.toString(0, true));
-								objectList.add(object);
+								logger.warning("Memory filter missed " + objectName + ":" + objectInTransaction.getUID().stringValue + " with filter: " + objectFilter.toString(0, true));
+								objectList.add(objectInTransaction);
 							}
-							if(object == null)
+							if(objectInTransaction == null)
 							{
-								object = new RedbackObject(session, this, objectConfig, dbData);
-								putInCurrentTransaction(object);
-								objectList.add(object);
+								objectInTransaction = new RedbackObject(session, this, objectConfig, dbData);
+								putInCurrentTransaction(objectInTransaction);
+								objectList.add(objectInTransaction);
 							}
 						}
 						if(addRelated)
@@ -845,7 +845,7 @@ public class ObjectManager
 			if(objectList.size() > 0) {
 				for(RedbackObject rbo: objectList) {
 					if(rbo.getObjectConfig().getName().equals(objectName)) {
-						if(rbo.filterApplies(objectFilter))
+						if(rbo.filterApplies(objectFilter) && !rbo.isDeleted())
 							list.add(rbo);
 					}
 				}

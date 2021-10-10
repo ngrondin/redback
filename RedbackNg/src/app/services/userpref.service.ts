@@ -99,6 +99,7 @@ export class UserprefService {
         return stack[i]["_general"][name];
       }
     }
+    return null;
   }
 
   public setGlobalPreferenceValue(level: string, name: string, val: any) {
@@ -129,6 +130,7 @@ export class UserprefService {
         return stack[i][view][cat][name];
       }
     }
+    return null;
   }
 
   public setUISwitch(level: string, comp: string, name: string, val: any) {

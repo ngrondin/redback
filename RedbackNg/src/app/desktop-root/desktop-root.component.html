@@ -9,11 +9,6 @@
             class="rb-toolbar-title">
             {{apptitle}}
         </span>
-        <span
-            *ngIf="userprefService.getGlobalPreferenceValue('uialt') != 'base'"
-            class="rb-toolbar-pagetitle">
-            &nbsp;&nbsp;|&nbsp;&nbsp;{{currentTitle}}
-        </span>
         <div
             class="rb-toolbar-spacer">
         </div>
@@ -50,9 +45,8 @@
             <button
                 *ngFor="let pref of userprefService.getGlobalPreferences()"
                 mat-menu-item
-                (click)="focusGlobalPreference(pref)"
                 [matMenuTriggerFor]="prefoption"
-                [matMenuTriggerData]="pref">
+                [matMenuTriggerData]="{pref: pref, value: userprefService.getGlobalPreferenceValue(pref.code)}">
                 {{pref.label}}
             </button>            
         </mat-menu>
@@ -60,10 +54,20 @@
             #prefoption="matMenu">
             <ng-template 
                 matMenuContent 
-                let-options="options">
+                let-pref="pref"
+                let-value="value">
                 <button
-                    *ngFor="let prefoption of options"
+                    *ngFor="let prefoption of pref.options"
+                    (click)="userprefService.setGlobalPreferenceValue('user', pref.code, prefoption.value)"
                     mat-menu-item>
+                    <mat-icon
+                        *ngIf="value === prefoption.value">
+                        check_box
+                    </mat-icon>
+                    <mat-icon
+                        *ngIf="value !== prefoption.value">
+                        check_box_outline_blank
+                    </mat-icon>                    
                     {{prefoption.label}}
                 </button>            
             </ng-template>
