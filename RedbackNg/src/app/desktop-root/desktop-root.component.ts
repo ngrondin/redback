@@ -32,10 +32,8 @@ export class DesktopRootComponent implements OnInit {
   subscription: Subscription;
   viewTargetStack: ViewTarget[] = [];
   title: string = "Welcome";
-  //rightDrawerIsOpen: boolean = false;
   rightDrawerShowing: string = null;
-  focusPrefOptions: PrefOption[];
- 
+  
   constructor(
     private configService : ConfigService,
     public dragService: DragService,
@@ -138,10 +136,6 @@ export class DesktopRootComponent implements OnInit {
 
   closeRightDrawer() {
     this.rightdrawer.close();
-  }
-
-  focusGlobalPreference(pref: GlobalPref) {
-    this.focusPrefOptions = pref.options;
   }
 
   @HostListener('mouseup', ['$event']) onMouseUp($event) {
