@@ -5,7 +5,7 @@ import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Composite;
 
 import io.firebus.data.DataMap;
-
+import io.redback.eclipse.editors.components.CheckboxField;
 import io.redback.eclipse.editors.components.Form;
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.ReadOnlyField;
@@ -28,6 +28,7 @@ public class ObjectHeaderForm extends Form
 		new TextField(_data, "uidgenerator", "UID Generator", this, SWT.NONE);
 		new TextField(_data, "group", "Group", this, SWT.NONE);
 		new TextField(_data, "candelete", "Can Delete (!)", this, SWT.NONE);
+		new CheckboxField(_data, "trace", "Trace", this, SWT.NONE);
 		ScriptField sf = new ScriptField(_data, "datagen", "Data Generation (!)", this, SWT.NONE);
 	    RowData rowData = new RowData();
 	    rowData.width = 500;

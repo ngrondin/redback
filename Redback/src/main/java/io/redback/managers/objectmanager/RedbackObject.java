@@ -136,7 +136,7 @@ public class RedbackObject extends RedbackElement
 						value = new Value(defaultValue.eval(scriptContext));
 					if(value != null) {
 						data.put(attributeName, value);
-						updatedAttributes.put(attributeName, true);	
+						updatedAttributes.put(attributeName, false);	
 						executeAttributeFunctionForEvent(attributeName, "onupdate");
 					}
 				}
@@ -411,9 +411,9 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 	
-	public void clear(String name, boolean isAutomated) throws ScriptException, RedbackException
+	public void clear(String name, boolean trace) throws ScriptException, RedbackException
 	{
-		put(name, new Value(null), isAutomated);
+		put(name, new Value(null), trace);
 	}
 	
 	public boolean isEditable(String name) throws RedbackException

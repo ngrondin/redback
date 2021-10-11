@@ -141,7 +141,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 	public void putMember(String key, SValue value) throws ScriptValueException {
 		try
 		{
-			rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)), true);
+			rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)), false);
 		} 
 		catch (Exception e)
 		{
