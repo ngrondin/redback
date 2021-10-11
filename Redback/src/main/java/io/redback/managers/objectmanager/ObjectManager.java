@@ -563,7 +563,7 @@ public class ObjectManager
 			while(it.hasNext())
 			{
 				String attributeName = it.next();
-				object.put(attributeName, new Value(updateData.get(attributeName)), isAutomated);
+				object.put(attributeName, new Value(updateData.get(attributeName)), !isAutomated);
 			}
 		}
 		return object;
@@ -588,7 +588,7 @@ public class ObjectManager
 						if(key.startsWith("$"))
 							isFilter = true;
 				if(!isFilter)
-					object.put(attributeName, new Value(value), isAutomated);
+					object.put(attributeName, new Value(value), !isAutomated);
 			}
 			logger.fine("Created object " + object.getObjectConfig().getName() + ":" + object.getUID().getString());
 		}
