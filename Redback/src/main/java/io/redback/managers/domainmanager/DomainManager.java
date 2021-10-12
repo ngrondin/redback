@@ -151,7 +151,7 @@ public class DomainManager implements Consumer {
 			catch(Exception e)
 			{
 				logger.severe(e.getMessage());
-				throw new RedbackException("Exception getting domain entry", e);
+				throw new RedbackException("Exception getting domain entry '" + domain + "." + name + "'", e);
 			}
 		}
 		return entry;
@@ -185,7 +185,7 @@ public class DomainManager implements Consumer {
 		catch(Exception e)
 		{
 			logger.severe(e.getMessage());
-			throw new RedbackException("Exception listing domain entries", e);
+			throw new RedbackException("Exception listing domain entries for '" + domain + "'", e);
 		}
 		return list;
 	}
@@ -218,7 +218,7 @@ public class DomainManager implements Consumer {
 		catch(Exception e)
 		{
 			logger.severe(e.getMessage());
-			throw new RedbackException("Exception listing all entries with name", e);
+			throw new RedbackException("Exception listing all entries with name '" + name + "'", e);
 		}
 		return list;
 	}

@@ -17,7 +17,7 @@ public abstract class CallableJSWrapper extends SCallable {
 			Object ret = call(javaArgs);
 			return Converter.convertIn(ret);
 		} catch(Exception e) {
-			throw new ScriptPassthroughException("Error in external call", e);
+			throw new ScriptPassthroughException("Error in script external call", e);
 		}
 	}
 

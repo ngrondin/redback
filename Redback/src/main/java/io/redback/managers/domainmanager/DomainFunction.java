@@ -23,7 +23,7 @@ public class DomainFunction extends DomainEntry {
 		try {
 			function = sf.createFunction(funcName, params, source);
 		} catch(ScriptException e) {
-			throw new RedbackException("Error compiling domain function", e);
+			throw new RedbackException("Error compiling domain function '" + funcName + "'", e);
 		}
 	}
 
