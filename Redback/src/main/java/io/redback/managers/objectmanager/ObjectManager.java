@@ -271,24 +271,27 @@ public class ObjectManager
 		return context;
 	}
 	
-	protected void loadAllIncludeScripts(Session session) throws RedbackException
+	protected synchronized void loadAllIncludeScripts(Session session) throws RedbackException
 	{
-		DataMap result = configClient.listConfigs(session, "rbo", "include");
-		DataList resultList = result.getList("result");
-		for(int i = 0; i < resultList.size(); i++)
-		{
-			DataMap cfg = resultList.getObject(i);
-			try {
-				scriptFactory.executeInRootScope("include_" + cfg.getString("name"), cfg.getString("script"));
-			} catch(ScriptException e) {
-				throw new RedbackException("Error loading include scripts", e);
+		if(includeLoaded == false) {
+			DataMap result = configClient.listConfigs(session, "rbo", "include");
+			DataList resultList = result.getList("result");
+			for(int i = 0; i < resultList.size(); i++)
+			{
+				DataMap cfg = resultList.getObject(i);
+				try {
+					scriptFactory.executeInRootScope("include_" + cfg.getString("name"), cfg.getString("script"));
+				} catch(ScriptException e) {
+					throw new RedbackException("Error loading include scripts", e);
+				}
 			}
+			includeLoaded = true;
 		}
-		includeLoaded = true;
 	}
 	
 	protected void loadAllGlobalScripts(Session session)  throws RedbackException
 	{
+		
 		DataMap result = configClient.listConfigs(session, "rbo", "script");
 		DataList resultList = result.getList("result");
 		for(int i = 0; i < resultList.size(); i++)

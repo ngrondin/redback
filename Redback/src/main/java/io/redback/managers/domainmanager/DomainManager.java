@@ -105,22 +105,24 @@ public class DomainManager implements Consumer {
 		}
 	}
 
-	protected void loadIncludeScripts(Session session) throws RedbackException
+	protected synchronized void loadIncludeScripts(Session session) throws RedbackException
 	{
-		DataMap result = configClient.listConfigs(session, "rbdm", "include");
-		DataList resultList = result.getList("result");
-		for(int i = 0; i < resultList.size(); i++)
-		{
-			try 
+		if(includeLoaded == false) {
+			DataMap result = configClient.listConfigs(session, "rbdm", "include");
+			DataList resultList = result.getList("result");
+			for(int i = 0; i < resultList.size(); i++)
 			{
-				scriptFactory.executeInRootScope("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
+				try 
+				{
+					scriptFactory.executeInRootScope("include_" + resultList.getObject(i).getString("name"), resultList.getObject(i).getString("script"));
+				}
+				catch(Exception e) 
+				{
+					throw new RedbackException("Problem compiling include scripts", e);
+				}
 			}
-			catch(Exception e) 
-			{
-				throw new RedbackException("Problem compiling include scripts", e);
-			}
+			includeLoaded = true;
 		}
-		includeLoaded = true;
 	}
 	
 	protected DomainEntry getDomainEntry(String domain, String name) throws RedbackException {
