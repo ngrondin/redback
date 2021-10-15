@@ -25,8 +25,8 @@ public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					try {
-						int col = (Integer)arguments[0];
-						int row = (Integer)arguments[1];
+						int col = ((Long)arguments[0]).intValue();
+						int row = ((Long)arguments[1]).intValue();
 						if(arguments[2] instanceof java.lang.Number) {
 							Number num = new Number(col, row, ((java.lang.Number)arguments[2]).doubleValue());
 							sheet.addCell(num);
