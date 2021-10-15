@@ -15,7 +15,7 @@ public class RedbackReportServer extends ReportServer {
 	
 	protected ReportManager reportManager;
 
-	public RedbackReportServer(String n, DataMap c, Firebus f) {
+	public RedbackReportServer(String n, DataMap c, Firebus f) throws RedbackException {
 		super(n, c, f);
 		reportManager = new ReportManager(f, c);
 	}

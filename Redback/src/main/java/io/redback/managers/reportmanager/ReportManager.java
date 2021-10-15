@@ -21,6 +21,7 @@ import io.redback.managers.reportmanager.pdf.PDFReport;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.RedbackFileMetaData;
+import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class ReportManager {
 	//private Logger logger = Logger.getLogger("io.redback");
@@ -40,22 +41,27 @@ public class ReportManager {
 	protected Map<String, Map<String, ReportConfig>> domainConfigs;
 	protected Map<Integer, List<ReportConfig>> listsQueried;
 
-	public ReportManager(Firebus fb, DataMap config) {
-		firebus = fb;
-		scriptFactory = new ScriptFactory();
-		includeLoaded = false;
-		configServiceName = config.getString("configservice");
-		objectServiceName = config.getString("objectservice");
-		dataServiceName = config.getString("dataservice");
-		fileServiceName = config.getString("fileservice");
-		configClient = new ConfigurationClient(firebus, configServiceName);
-		objectClient = new ObjectClient(firebus, objectServiceName);
-		dataClient = new DataClient(firebus, dataServiceName);
-		fileClient = new FileClient(firebus, fileServiceName);
-		collection = new CollectionConfig(config.getObject("collection"));
-		configs = new HashMap<String, ReportConfig>();
-		domainConfigs = new HashMap<String, Map<String, ReportConfig>>();
-		listsQueried = new HashMap<Integer, List<ReportConfig>>();
+	public ReportManager(Firebus fb, DataMap config) throws RedbackException {
+		try {
+			firebus = fb;
+			scriptFactory = new ScriptFactory();
+			includeLoaded = false;
+			configServiceName = config.getString("configservice");
+			objectServiceName = config.getString("objectservice");
+			dataServiceName = config.getString("dataservice");
+			fileServiceName = config.getString("fileservice");
+			configClient = new ConfigurationClient(firebus, configServiceName);
+			objectClient = new ObjectClient(firebus, objectServiceName);
+			dataClient = new DataClient(firebus, dataServiceName);
+			fileClient = new FileClient(firebus, fileServiceName);
+			collection = new CollectionConfig(config.getObject("collection"));
+			configs = new HashMap<String, ReportConfig>();
+			domainConfigs = new HashMap<String, Map<String, ReportConfig>>();
+			listsQueried = new HashMap<Integer, List<ReportConfig>>();
+			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
+		} catch(Exception e) {
+			throw new RedbackException("Error initialising Report Manager", e);
+		}
 	}
 	
 	protected void loadIncludeScripts(Session session) throws RedbackException
