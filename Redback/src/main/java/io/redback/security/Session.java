@@ -2,6 +2,8 @@ package io.redback.security;
 
 import java.util.Random;
 
+import io.firebus.script.ScriptContext;
+
 
 
 public class Session
@@ -11,6 +13,7 @@ public class Session
 	public UserProfile userProfile;
 	public UserProfile elevatedUserProfile;
 	public String timezone;
+	public ScriptContext scriptContext;
 
 	public Session() 
 	{
@@ -68,6 +71,10 @@ public class Session
 		timezone = zoneId;
 	}
 
+	public void setScriptContext(ScriptContext sc) {
+		scriptContext = sc;
+	}
+	
 	public String getId()
 	{
 		return id;
@@ -86,6 +93,11 @@ public class Session
 	public String getTimezone()
 	{
 		return timezone;
+	}
+	
+	public ScriptContext getScriptContext() 
+	{
+		return scriptContext;
 	}
 
 }

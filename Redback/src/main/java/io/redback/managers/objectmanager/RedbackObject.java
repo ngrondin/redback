@@ -15,6 +15,7 @@ import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.script.Expression;
 import io.firebus.script.Function;
 import io.firebus.script.exceptions.ScriptException;
+import io.firebus.script.exceptions.ScriptValueException;
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataMap;
 import io.redback.client.DataClient.DataTransaction;
@@ -165,26 +166,38 @@ public class RedbackObject extends RedbackElement
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new HashMap<String, Boolean>();
-		scriptContext = objectManager.createScriptContext(session);
-		scriptContext.put("self", new RedbackObjectJSWrapper(this));
+		scriptContext = session.getScriptContext().createChild();
+		try {
+			scriptContext.put("self", new RedbackObjectJSWrapper(this));
+		} catch(ScriptValueException e) {
+			throw new RedbackException("Error setting script context value", e);
+		}
 	}
 	
 	protected void postInitScriptContextUpdate() throws RedbackException
 	{
-		scriptContext.put("dc", new DomainClientJSWrapper(objectManager.getDomainClient(), session, getDomain().getString()));
-		scriptContext.put("ic", new IntegrationClientJSWrapper(objectManager.getIntegrationClient(), session, getDomain().getString()));
-		scriptContext.put("uid", getUID().getString());
+		try {
+			scriptContext.put("dc", new DomainClientJSWrapper(objectManager.getDomainClient(), session, getDomain().getString()));
+			scriptContext.put("ic", new IntegrationClientJSWrapper(objectManager.getIntegrationClient(), session, getDomain().getString()));
+			scriptContext.put("uid", getUID().getString());
+		} catch(ScriptValueException e) {
+			throw new RedbackException("Error setting script context value", e);
+		}		
 	}
 	
 	protected void updateScriptContext() throws RedbackException 
 	{
-		Iterator<String> it = getAttributeNames().iterator();
-		while(it.hasNext())
-		{	
-			String key = it.next();
-			if(getObjectConfig().getAttributeConfig(key).getExpression() == null)
-				scriptContext.put(key, get(key).getObject());
-		}
+		try {
+			Iterator<String> it = getAttributeNames().iterator();
+			while(it.hasNext())
+			{	
+				String key = it.next();
+				if(getObjectConfig().getAttributeConfig(key).getExpression() == null)
+					scriptContext.put(key, get(key).getObject());
+			}
+		} catch(ScriptValueException e) {
+			throw new RedbackException("Error setting script context value", e);
+		}	
 	}
 
 	public Value getUID()
@@ -360,11 +373,15 @@ public class RedbackObject extends RedbackElement
 				{
 					data.put(name, actualValue);
 					updatedAttributes.put(name, trace);	
-					if(attributeConfig.getExpression() == null) 
-						scriptContext.put(name, actualValue.getObject());
-					scriptContext.put("previousValue", currentValue.getObject());
-					executeAttributeFunctionForEvent(name, "onupdate");
-					scriptContext.remove("previousValue");
+					try {
+						if(attributeConfig.getExpression() == null) 
+							scriptContext.put(name, actualValue.getObject());
+						scriptContext.put("previousValue", currentValue.getObject());
+						executeAttributeFunctionForEvent(name, "onupdate");
+						scriptContext.remove("previousValue");
+					} catch(ScriptValueException e) {
+						throw new RedbackException("Error setting script context value", e);
+					}
 				}
 				else
 				{

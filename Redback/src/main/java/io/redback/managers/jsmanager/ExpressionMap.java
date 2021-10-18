@@ -9,6 +9,7 @@ import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
 import io.firebus.script.Expression;
+import io.firebus.script.ScriptContext;
 
 public class ExpressionMap {
 	
@@ -32,6 +33,23 @@ public class ExpressionMap {
 		}
 	}
 	
+	public DataMap eval(ScriptContext context) throws RedbackException
+	{
+		try {
+			DataMap out = new DataMap();
+			Iterator<String> it = map.keySet().iterator();
+			while(it.hasNext()) 
+			{
+				String key = it.next();
+				out.put(key, map.get(key).eval(context));
+			}
+			return out;
+		} catch(ScriptException e) {
+			throw new RedbackException("Error evaluating expression map", e);
+		}
+	}
+	
+	@Deprecated
 	public DataMap eval(Map<String, Object> context) throws RedbackException
 	{
 		try {

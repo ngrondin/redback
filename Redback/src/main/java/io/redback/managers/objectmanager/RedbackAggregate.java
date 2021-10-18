@@ -11,14 +11,10 @@ import java.util.logging.Logger;
 import javax.script.ScriptException;
 
 import io.firebus.data.DataMap;
+import io.firebus.script.exceptions.ScriptValueException;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
 import io.redback.managers.objectmanager.js.RedbackAggregateJSWrapper;
 import io.redback.security.Session;
-import io.redback.security.js.SessionRightsJSFunction;
-import io.redback.security.js.UserProfileJSWrapper;
-import io.redback.utils.js.FirebusJSWrapper;
-import io.redback.utils.js.LoggerJSFunction;
 
 public class RedbackAggregate extends RedbackElement
 {
@@ -65,7 +61,7 @@ public class RedbackAggregate extends RedbackElement
 		}
 	}
 		
-	protected void init(Session s, ObjectManager om, ObjectConfig cfg)
+	protected void init(Session s, ObjectManager om, ObjectConfig cfg) throws RedbackException
 	{
 		session = s;
 		objectManager = om;
@@ -75,26 +71,26 @@ public class RedbackAggregate extends RedbackElement
 		metrics = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new ArrayList<String>();
-		scriptContext = new HashMap<String, Object>();
-		scriptContext.put("self", new RedbackAggregateJSWrapper(this));
-		scriptContext.put("om", new ObjectManagerJSWrapper(objectManager, session));
-		scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
-		scriptContext.put("firebus", new FirebusJSWrapper(objectManager.getFirebus(), session));
-		//scriptContext.put("global", objectManager.getGlobalVariables());
-		scriptContext.put("log", new LoggerJSFunction());
-		scriptContext.put("canRead", new SessionRightsJSFunction(session, "read"));
-		scriptContext.put("canWrite", new SessionRightsJSFunction(session, "write"));
-		scriptContext.put("canExecute", new SessionRightsJSFunction(session, "execute"));		
+		scriptContext = session.getScriptContext().createChild();
+		try {
+			scriptContext.put("self", new RedbackAggregateJSWrapper(this));
+		} catch(ScriptValueException e) {
+			throw new RedbackException("Error setting script context value", e);
+		}
 	}
 	
 	protected void updateScriptContext() throws RedbackException 
 	{
 		Iterator<String> it = getAttributeNames().iterator();
-		while(it.hasNext())
-		{	
-			String key = it.next();
-			if(getObjectConfig().getAttributeConfig(key).getExpression() == null)
-				scriptContext.put(key, get(key).getObject());
+		try {
+			while(it.hasNext())
+			{	
+				String key = it.next();
+				if(getObjectConfig().getAttributeConfig(key).getExpression() == null)
+					scriptContext.put(key, get(key).getObject());
+			}
+		} catch(ScriptValueException e) {
+			throw new RedbackException("Error setting script context value", e);
 		}
 	}	
 	

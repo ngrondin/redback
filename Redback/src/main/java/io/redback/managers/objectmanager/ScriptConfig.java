@@ -2,10 +2,10 @@ package io.redback.managers.objectmanager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import io.firebus.data.DataMap;
 import io.firebus.script.Function;
+import io.firebus.script.ScriptContext;
 import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
@@ -53,7 +53,7 @@ public class ScriptConfig
 	}
 
 	
-	public void execute(Map<String, Object> context) throws RedbackException
+	public void execute(ScriptContext context) throws RedbackException
 	{
 		try {
 			function.call(context);

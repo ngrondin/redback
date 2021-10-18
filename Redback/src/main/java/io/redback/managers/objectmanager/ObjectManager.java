@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
@@ -13,16 +12,18 @@ import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.exceptions.FunctionTimeoutException;
-import io.firebus.script.Function;
-import io.firebus.script.ScriptFactory;
-import io.firebus.script.exceptions.ScriptException;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
+import io.firebus.exceptions.FunctionErrorException;
+import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.script.Function;
+import io.firebus.script.ScriptContext;
+import io.firebus.script.ScriptFactory;
+import io.firebus.script.exceptions.ScriptException;
+import io.firebus.script.exceptions.ScriptValueException;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
@@ -252,22 +253,26 @@ public class ObjectManager
 		}
 	}
 	
-	public Map<String, Object> createScriptContext(Session session) throws RedbackException
+	public ScriptContext createScriptContext(Session session) throws RedbackException
 	{
-		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("session", new SessionJSWrapper(session));
-		context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
-		context.put("firebus", new FirebusJSWrapper(firebus, session));
-		context.put("om", new ObjectManagerJSWrapper(this, session));
-		context.put("pm", new ProcessClientJSWrapper(getProcessClient(), session));
-		context.put("pc", new ProcessClientJSWrapper(getProcessClient(), session));
-		context.put("geo", new GeoClientJSWrapper(geoClient));
-		context.put("fc", new FileClientJSWrapper(getFileClient(), session));
-		context.put("rc", new ReportClientJSWrapper(getReportClient(), session));
-		context.put("nc", new NotificationClientJSWrapper(getNotificationClient(), session));
-		context.put("canRead", new SessionRightsJSFunction(session, "read"));
-		context.put("canWrite", new SessionRightsJSFunction(session, "write"));
-		context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
+		ScriptContext context = getScriptFactory().createScriptContext();
+		try {
+			context.put("session", new SessionJSWrapper(session));
+			context.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
+			context.put("firebus", new FirebusJSWrapper(firebus, session));
+			context.put("om", new ObjectManagerJSWrapper(this, session));
+			context.put("pm", new ProcessClientJSWrapper(getProcessClient(), session));
+			context.put("pc", new ProcessClientJSWrapper(getProcessClient(), session));
+			context.put("geo", new GeoClientJSWrapper(geoClient));
+			context.put("fc", new FileClientJSWrapper(getFileClient(), session));
+			context.put("rc", new ReportClientJSWrapper(getReportClient(), session));
+			context.put("nc", new NotificationClientJSWrapper(getNotificationClient(), session));
+			context.put("canRead", new SessionRightsJSFunction(session, "read"));
+			context.put("canWrite", new SessionRightsJSFunction(session, "write"));
+			context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
+		} catch(ScriptValueException e) {
+			throw new RedbackException("Error creating script context", e);
+		}
 		return context;
 	}
 	
@@ -490,7 +495,7 @@ public class ObjectManager
 					} else {
 						Function gs = objectConfig.getGenerationScript();
 						if(gs != null) {
-							Map<String, Object> context = createScriptContext(session);
+							ScriptContext context = session.getScriptContext().createChild();
 							context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
 							context.put("filter", filter);
 							context.put("sort", sort);
@@ -622,8 +627,12 @@ public class ObjectManager
 		if(scriptCfg != null)
 		{
 			if(session.getUserProfile().canExecute("rb.scripts." + function)) {
-				Map<String, Object> context = this.createScriptContext(session);
-				context.put("param", param);
+				ScriptContext context = session.getScriptContext().createChild();
+				try {
+					context.put("param", param);
+				} catch(ScriptValueException e) {
+					throw new RedbackException("Error setting script context value", e);
+				}
 				scriptCfg.execute(context);
 			} else {
 				throw new RedbackException("No rights to execute global function " + function);
@@ -732,7 +741,7 @@ public class ObjectManager
 					{
 						Function gs = objectConfig.getGenerationScript();
 						if(gs != null) {
-							Map<String, Object> context = createScriptContext(session);
+							ScriptContext context = session.getScriptContext().createChild();
 							context.put("filter", filter);
 							context.put("tuple", tuple);
 							context.put("metrics", metrics);
@@ -815,13 +824,14 @@ public class ObjectManager
 		return new Value(value);
 	}
 	
-	public void initiateCurrentTransaction() 
+	public void initiateCurrentTransaction(Session session)  throws RedbackException
 	{
 		long txId = Thread.currentThread().getId();
 		synchronized(transactions)
 		{
 			transactions.put(txId, new ArrayList<RedbackObject>());
 		}
+		session.setScriptContext(createScriptContext(session));
 	}
 	
 	protected RedbackObject getFromCurrentTransaction(String objectName, String uid)
@@ -868,7 +878,7 @@ public class ObjectManager
 		transactions.get(txId).add(obj);
 	}
 	
-	public void commitCurrentTransaction() throws RedbackException
+	public void commitCurrentTransaction(Session session) throws RedbackException
 	{
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))
