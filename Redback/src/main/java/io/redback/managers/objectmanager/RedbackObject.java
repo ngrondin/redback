@@ -635,32 +635,34 @@ public class RedbackObject extends RedbackElement
 			while(it.hasNext())
 			{
 				AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-				String attrName = attributeConfig.getName();
-				Value attrValue = get(attrName);
-
-				if(addValidation) {
-					DataMap attributeValidation = new DataMap();
-					attributeValidation.put("editable", isEditable(attrName));
-					attributeValidation.put("mandatory", isMandatory(attrName));
-					attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
-					if(attributeConfig.hasRelatedObject())
-					{
-						DataMap relatedObjectValidation = new DataMap();
-						relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
-						relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
-						attributeValidation.put("related", relatedObjectValidation);
+				if(attributeConfig.isSub() == false) {
+					String attrName = attributeConfig.getName();
+					Value attrValue = get(attrName);
+	
+					if(addValidation) {
+						DataMap attributeValidation = new DataMap();
+						attributeValidation.put("editable", isEditable(attrName));
+						attributeValidation.put("mandatory", isMandatory(attrName));
+						attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
+						if(attributeConfig.hasRelatedObject())
+						{
+							DataMap relatedObjectValidation = new DataMap();
+							relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
+							relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
+							attributeValidation.put("related", relatedObjectValidation);
+						}
+						validatonNode.put(attrName, attributeValidation);
 					}
-					validatonNode.put(attrName, attributeValidation);
+					
+					if(addRelated  &&  attributeConfig.hasRelatedObject())
+					{
+						RedbackObject relatedObject = getRelated(attrName);
+						if(relatedObject != null)
+							relatedNode.put(attrName, relatedObject.getDataMap(false, false, cache));
+					}
+	
+					dataNode.put(attrName, attrValue.getObject());
 				}
-				
-				if(addRelated  &&  attributeConfig.hasRelatedObject())
-				{
-					RedbackObject relatedObject = getRelated(attrName);
-					if(relatedObject != null)
-						relatedNode.put(attrName, relatedObject.getDataMap(false, false, cache));
-				}
-
-				dataNode.put(attrName, attrValue.getObject());
 			}
 			object.put("data", dataNode);
 			

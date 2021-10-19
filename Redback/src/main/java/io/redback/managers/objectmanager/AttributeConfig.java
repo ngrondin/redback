@@ -114,6 +114,11 @@ public class AttributeConfig
 		return config.getBoolean("search");
 	}
 	
+	public boolean isSub()
+	{
+		return config.getBoolean("sub");
+	}
+	
 	public RelatedObjectConfig getRelatedObjectConfig()
 	{
 		return relatedObjectConfig;

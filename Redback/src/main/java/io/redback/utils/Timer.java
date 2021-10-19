@@ -19,7 +19,7 @@ public class Timer {
 	
 	public void mark(String l) {
 		long end = System.currentTimeMillis();
-		logger.info((end - start) + "ms" + (data != null ? ":" + data : ""));
+		logger.info((end - start) + "ms" + (data != null ? ":" + data : "") + (l != null ? ":" + l : ""));
 	}
 	
 	public void mark() {

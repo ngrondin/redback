@@ -397,7 +397,7 @@ public class ObjectManager
 							if(linkValue != null && !linkValue.isNull())
 							{
 								RedbackObject relatedObject = null;
-								for(int k = 0; k < result.size(); k++)
+								for(int k = 0; k < result.size() && relatedObject == null; k++)
 								{
 									RedbackObject resultObject = result.get(k);
 									Value resultObjectLinkValue = resultObject.get(relatedObjectLinkAttributeName);
@@ -460,6 +460,7 @@ public class ObjectManager
 	@SuppressWarnings("unchecked")
 	public List<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
+		//Timer t = new Timer("test", session.getId(), "list");
 		if(session.getUserProfile().canRead("rb.objects." + objectName))
 		{
 			ObjectConfig objectConfig = getObjectConfig(session, objectName);
@@ -490,8 +491,10 @@ public class ObjectManager
 						if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains() && !objectFilter.containsKey("domain"))
 							dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
 						DataMap dbSort = generateDBSort(session, objectConfig, sort);
+						//t.mark(dbFilter.toString(0, true));
 						DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
 						dbResultList = dbResult.getList("result");
+						//t.mark("data in");
 					} else {
 						Function gs = objectConfig.getGenerationScript();
 						if(gs != null) {
@@ -530,6 +533,7 @@ public class ObjectManager
 						if(addRelated)
 							addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 					}
+					//t.mark("done");
 					return objectList;			
 				}
 				catch(Exception e)
