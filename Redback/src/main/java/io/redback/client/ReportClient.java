@@ -30,7 +30,7 @@ public class ReportClient extends Client {
 			req.put("report", name);
 			req.put("filter", filter);
 			Payload resp = requestPayload(session, new Payload(req.toString()));
-			return resp.data;
+			return resp.getBytes();
 		} catch(Exception e) {
 			throw new RedbackException("Error producing report", e);
 		}
