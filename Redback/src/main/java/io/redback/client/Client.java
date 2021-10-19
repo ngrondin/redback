@@ -41,8 +41,8 @@ public class Client {
 			Payload reqP = new Payload(req.toString());
 			reqP.metadata.put("mime", "application/json");
 			Payload respP = requestPayload(session, reqP, async);
-			if(respP != null && respP.getBytes().length > 0) {
-				DataMap resp = new DataMap(respP.getString());
+			if(respP != null) {
+				DataMap resp = respP.getDataMap();
 				return resp;
 			} else {
 				return null;

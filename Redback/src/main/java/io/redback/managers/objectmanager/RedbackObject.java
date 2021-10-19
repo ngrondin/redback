@@ -242,7 +242,7 @@ public class RedbackObject extends RedbackElement
 					Value val = new Value(o);
 					return val;
 				} catch(ScriptException e) {
-					throw new RedbackException("Error getting expression attribute", e);
+					throw new RedbackException("Error getting expression attribute '" + name + "' for object '" + getObjectConfig().getName() + "." + getUID().getString() + "'", e);
 				}
 			} else 
 				return new Value(null);
