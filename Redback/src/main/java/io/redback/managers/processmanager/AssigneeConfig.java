@@ -1,9 +1,8 @@
 package io.redback.managers.processmanager;
 
-import java.util.Map;
-
 import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
+import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
 import io.redback.utils.StringUtils;
 
@@ -38,7 +37,7 @@ public class AssigneeConfig
 		}
 	}
 	
-	public Object evaluateId(Map<String, Object> context) throws RedbackException
+	public Object evaluateId(ScriptContext context) throws RedbackException
 	{
 		try {
 			return assigneeExpr.eval(context);

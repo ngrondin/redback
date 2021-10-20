@@ -16,6 +16,7 @@ import io.firebus.Payload;
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.ScriptContext;
 import io.firebus.script.ScriptFactory;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigurationClient;
@@ -546,13 +547,15 @@ public class ProcessManager
 		}
 	}
 	
-	public void initiateCurrentTransaction() 
+	public void initiateCurrentTransaction(Session session) 
 	{
 		long txId = Thread.currentThread().getId();
 		synchronized(transactions)
 		{
 			transactions.put(txId, new HashMap<String, ProcessInstance>());
 		}
+		ScriptContext scriptContext = this.getScriptFactory().createScriptContext();
+		session.setScriptContext(scriptContext);
 	}
 	
 	protected ProcessInstance getFromCurrentTransaction(String pid)
@@ -575,7 +578,7 @@ public class ProcessManager
 		transactions.get(txId).put(pi.getId(), pi);
 	}
 	
-	public void commitCurrentTransaction() throws RedbackException 
+	public void commitCurrentTransaction(Session session) throws RedbackException 
 	{
 		long txId = Thread.currentThread().getId();
 		if(transactions.containsKey(txId))

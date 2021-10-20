@@ -1,16 +1,16 @@
 package io.redback.managers.processmanager.units;
 
-import java.util.Map;
 import java.util.logging.Level;
 
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
-import io.redback.managers.processmanager.ProcessInstance;
-import io.redback.managers.processmanager.ProcessManager;
-import io.redback.managers.processmanager.ProcessUnit;
+import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.processmanager.Process;
+import io.redback.managers.processmanager.ProcessInstance;
+import io.redback.managers.processmanager.ProcessManager;
+import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
 
@@ -43,7 +43,7 @@ public class DomainServiceUnit extends ProcessUnit
 		if(processManager.getDomainServiceName() != null)
 		{
 			Session sysUserSession = pi.getOutboundActionner().getSession();
-			Map<String, Object> context = pi.getScriptContext();
+			ScriptContext context = pi.getScriptContext();
 			DataMap data = inputExpressionMap.eval(context);
 			DataMap req = new DataMap();
 			req.put("action", "execute");

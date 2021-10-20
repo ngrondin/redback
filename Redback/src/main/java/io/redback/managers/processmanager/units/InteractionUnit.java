@@ -9,6 +9,7 @@ import java.util.Map;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
+import io.firebus.script.ScriptContext;
 import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
@@ -149,7 +150,7 @@ public class InteractionUnit extends ProcessUnit
 	
 	private List<Assignee> getAssignes(ProcessInstance pi) throws RedbackException {
 		List<Assignee> assignees = new ArrayList<Assignee>();
-		Map<String, Object> context = pi.getScriptContext();
+		ScriptContext context = pi.getScriptContext();
 		for(AssigneeConfig assigneeConfig : assigneeConfigs)
 		{
 			Object assigneeObject = assigneeConfig.evaluateId(context);
@@ -192,7 +193,7 @@ public class InteractionUnit extends ProcessUnit
 	private RawNotification getRawNotification(ProcessInstance pi) throws RedbackException 
 	{
 		try {
-			Map<String, Object> context = pi.getScriptContext();
+			ScriptContext context = pi.getScriptContext();
 			String code = notificationConfig.getString("code");
 			String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
 			String label = (String)labelExpression.eval(context);

@@ -1,15 +1,13 @@
 package io.redback.managers.processmanager.units;
 
-import java.util.Map;
-
-
 import io.firebus.data.DataMap;
 import io.firebus.script.Function;
+import io.firebus.script.ScriptContext;
+import io.redback.exceptions.RedbackException;
+import io.redback.managers.processmanager.Process;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.exceptions.RedbackException;
-import io.redback.managers.processmanager.Process;
 import io.redback.utils.StringUtils;
 
 public class ScriptUnit extends ProcessUnit 
@@ -36,7 +34,7 @@ public class ScriptUnit extends ProcessUnit
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
 		logger.finer("Start executing script");
-		Map<String, Object> context = pi.getScriptContext();
+		ScriptContext context = pi.getScriptContext();
 		try
 		{
 			DataMap piData = (DataMap)script.call(context);

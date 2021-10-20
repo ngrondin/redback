@@ -2,17 +2,17 @@ package io.redback.managers.processmanager;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.UUID;
-
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.ScriptContext;
+import io.firebus.script.exceptions.ScriptValueException;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.js.ProcessManagerJSWrapper;
+import io.redback.security.Session;
 import io.redback.utils.js.FirebusJSWrapper;
 
 public class ProcessInstance 
@@ -31,7 +31,7 @@ public class ProcessInstance
 	protected DataList assignees;
 	protected Actionner lastActioner;
 	protected Date lastActioned;
-	protected Map<String, Object> scriptContext;
+	protected ScriptContext scriptContext;
 	protected boolean updated;
 	
 	protected ProcessInstance(Actionner a, ProcessManager pm, String pn, int v, String dom, DataMap d) throws RedbackException
@@ -78,8 +78,10 @@ public class ProcessInstance
 	
 	protected void createScriptBindings() throws RedbackException
 	{
-		outboundActionner = new Actionner(this, processManager.getProcessUserSession(inboundActionner.getSession().getId()));
-		scriptContext = new HashMap<String, Object>();
+		Session outboundSession = processManager.getProcessUserSession(inboundActionner.getSession().getId());
+		outboundSession.setScriptContext(inboundActionner.getSession().getScriptContext());
+		outboundActionner = new Actionner(this, outboundSession);
+		scriptContext = inboundActionner.getSession().getScriptContext().createChild();
 		try {
 			scriptContext.put("pid", getId());
 			scriptContext.put("pm", new ProcessManagerJSWrapper(outboundActionner, processManager));
@@ -93,8 +95,12 @@ public class ProcessInstance
 	
 	public void updateScriptBindings()
 	{
-		scriptContext.put("data", data);
-		scriptContext.put("lastactioned", lastActioned);
+		try {
+			scriptContext.put("data", data);
+			scriptContext.put("lastactioned", lastActioned);
+		} catch(ScriptValueException e) {
+			//TODO: Throw this
+		}
 	}
 	
 	public String getId()
@@ -132,7 +138,7 @@ public class ProcessInstance
 		return data;
 	}
 	
-	public Map<String, Object> getScriptContext()
+	public ScriptContext getScriptContext()
 	{
 		return scriptContext;
 	}

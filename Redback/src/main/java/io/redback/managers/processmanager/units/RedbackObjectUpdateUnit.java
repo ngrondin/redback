@@ -1,18 +1,18 @@
 package io.redback.managers.processmanager.units;
 
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
-import io.redback.managers.processmanager.ProcessInstance;
-import io.redback.managers.processmanager.ProcessManager;
-import io.redback.managers.processmanager.ProcessUnit;
+import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.processmanager.Process;
+import io.redback.managers.processmanager.ProcessInstance;
+import io.redback.managers.processmanager.ProcessManager;
+import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.security.Session;
 
 public class RedbackObjectUpdateUnit extends ProcessUnit 
@@ -47,7 +47,7 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 			if(processManager.getObjectServiceName() != null)
 			{
 				Session sysUserSession = pi.getOutboundActionner().getSession();
-				Map<String, Object> context = pi.getScriptContext();
+				ScriptContext context = pi.getScriptContext();
 				DataMap updateData = inputExpressionMap.eval(context);
 				String objectUID = (String)objectUIDExpression.eval(context);
 				DataMap req = new DataMap();
