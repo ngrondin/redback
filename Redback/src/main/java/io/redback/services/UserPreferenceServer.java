@@ -21,7 +21,7 @@ public abstract class UserPreferenceServer extends AuthenticatedServiceProvider 
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		Payload response = new Payload();
 		try {
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
 			String type = request.getString("type");
 			String name = request.getString("name");

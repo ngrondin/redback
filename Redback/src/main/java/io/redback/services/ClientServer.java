@@ -22,7 +22,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 			f.registerConsumer(c.getString("objectupdatechannel"), new Consumer() {
 				public void consume(Payload payload) {
 					try {
-						onObjectUpdate(new DataMap(payload.getString()));
+						onObjectUpdate(payload.getDataMap());
 					} catch(Exception e) {
 						logger.severe(StringUtils.getStackTrace(e));
 					}					
@@ -33,7 +33,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 			f.registerConsumer(c.getString("processnotificationchannel"), new Consumer() {
 				public void consume(Payload payload) {
 					try {
-						onNotification(new DataMap(payload.getString()));
+						onNotification(payload.getDataMap());
 					} catch(Exception e) {
 						logger.severe(StringUtils.getStackTrace(e));
 					}
@@ -44,7 +44,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 			f.registerConsumer(c.getString("chatchannel"), new Consumer() {
 				public void consume(Payload payload) {
 					try {
-						onChatMessage(new DataMap(payload.getString()));
+						onChatMessage(payload.getDataMap());
 					} catch(Exception e) {
 						logger.severe(StringUtils.getStackTrace(e));
 					}

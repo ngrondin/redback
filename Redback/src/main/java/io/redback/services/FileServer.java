@@ -62,7 +62,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 			}
 			else
 			{
-				DataMap request = new DataMap(payload.getString());
+				DataMap request = payload.getDataMap();
 				String action = request.getString("action");
 				if(action == null) {
 					if(request.containsKey("fileuid") && request.containsKey("object") && request.containsKey("uid"))
@@ -181,7 +181,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 				if(Thread.currentThread() instanceof FirebusThread) 
 					((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
 				timer = new Timer(serviceName, session.getId(), getLogline(payload));
-				DataMap request = new DataMap(payload.getString());
+				DataMap request = payload.getDataMap();
 				String action = request.getString("action");
 				if(action.equals("get")) {
 					String fileuid = request.getString("fileuid");

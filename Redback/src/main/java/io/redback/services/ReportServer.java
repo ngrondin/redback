@@ -28,7 +28,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		Payload response = null;
 		try
 		{
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String get = request.getString("get");
 			String action = request.getString("action");
 			String reportName = get != null && get.length() > 1 ? get.substring(1) : request.getString("report");

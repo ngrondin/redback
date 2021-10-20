@@ -27,7 +27,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 		Payload responsePayload = null;
 		try
 		{
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String client = request.getString("client");
 			String domain = request.getString("domain");
 			String action = request.getString("action");

@@ -35,7 +35,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 		Payload response = new Payload();
 		try
 		{
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
 			DataMap responseData = null;
 			

@@ -47,7 +47,7 @@ public abstract class AccessManager extends ServiceProvider
 		DataMap response = new DataMap();
 		try
 		{
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
 
 			if(action.equals("validate"))

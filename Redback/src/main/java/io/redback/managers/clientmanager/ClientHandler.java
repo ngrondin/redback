@@ -79,7 +79,7 @@ public class ClientHandler extends ClientStreamHandler {
 					try {
 						String mime = payload.metadata.get("mime");
 						if(mime == null || (mime != null && mime.equals("application/json")))
-							sendRequestResultData(reqUid, new DataMap(payload.getString()));
+							sendRequestResultData(reqUid, payload.getDataMap());
 						else if(mime.startsWith("text/"))
 							sendRequestResultText(reqUid, payload.getString());
 					} catch(DataException e2) {
@@ -117,7 +117,7 @@ public class ClientHandler extends ClientStreamHandler {
 						} else if(ctl.equals("complete")) {
 							// Don't close yet as we're waiting for a response with the file meta
 						} else if(ctl.equals("chunk")) { //This is the meta response after upload
-							DataMap result = new DataMap(payload.getString());
+							DataMap result = payload.getDataMap();
 							if(object != null && uid != null)
 								clientManager.getFileClient().linkFileTo(session, result.getString("fileuid"), object, uid);
 							sendUploadResult(uploaduid, result);

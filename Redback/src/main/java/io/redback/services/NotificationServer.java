@@ -30,7 +30,7 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 		try {
 			logger.finer("Notification service start");
 			Payload response = null;
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
 			if(action != null) {
 				if(action.equals("sendemail")) {

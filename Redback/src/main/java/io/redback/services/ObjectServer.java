@@ -36,7 +36,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try {
-			DataMap requestData = new DataMap(payload.getString());
+			DataMap requestData = payload.getDataMap();
 			String action = requestData.getString("action");
 			
 			if(action != null)

@@ -255,7 +255,7 @@ public class DomainManager implements Consumer {
 	
 	public void consume(Payload payload) {
 		try {
-			DataMap key = new DataMap(payload.getString());
+			DataMap key = payload.getDataMap();
 			entries.remove(key.getString("domain") + "." + key.getString("name"));
 			includeLoaded = false;
 		} catch(Exception e) {

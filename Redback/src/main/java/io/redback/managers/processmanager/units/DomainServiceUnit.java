@@ -1,6 +1,7 @@
 package io.redback.managers.processmanager.units;
 
 import java.util.Map;
+import java.util.logging.Level;
 
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
@@ -51,18 +52,18 @@ public class DomainServiceUnit extends ProcessUnit
 			req.put("param", data);
 			req.put("async", async);
 			Payload payload = new Payload();
-			payload.setData(req.toString());
+			payload.setData(req);
 			payload.metadata.put("token", sysUserSession.getToken());
 			payload.metadata.put("session", sysUserSession.getId());
 			payload.metadata.put("mime", "application/json");
 			try
 			{
-				logger.finest("Calling " + processManager.getDomainServiceName() + " " + payload.getString());
+				if(logger.getLevel() == Level.FINEST) logger.finest("Calling " + processManager.getDomainServiceName() + " " + req);
 				Payload response = processManager.getFirebus().requestService(processManager.getDomainServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
 				context.put("result", respData);
 				DataMap respOutput = outputExpressionMap.eval(context);
-				logger.finest("Output data was: " + respOutput);
+				if(logger.getLevel() == Level.FINEST) logger.finest("Output data was: " + respOutput);
 				pi.setData(respOutput);
 			} 
 			catch (Exception e)

@@ -33,7 +33,7 @@ public abstract class GeoServer extends ServiceProvider
 		Payload response = new Payload();
 		try
 		{
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
 			DataMap responseData = null;
 			if(action != null)

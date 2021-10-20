@@ -25,7 +25,7 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		try {
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
 			String domain = request.getString("domain");
 			String name = request.getString("name");

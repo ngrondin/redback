@@ -1,6 +1,7 @@
 package io.redback.utils.js;
 
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -36,7 +37,7 @@ public class FirebusJSWrapper extends ObjectJSWrapper
 					{
 						try
 						{
-							Payload request = new Payload(requestObject.toString());
+							Payload request = new Payload(requestObject);
 							request.metadata.put("token", session.getToken());
 							request.metadata.put("session", session.getId());
 							if(metaData != null) 
@@ -47,7 +48,7 @@ public class FirebusJSWrapper extends ObjectJSWrapper
 									request.metadata.put(key, metaData.getString(key));
 								}
 							}
-							logger.finest("Requesting firebus service : " + serviceName + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
+							if(logger.getLevel() == Level.FINEST) logger.finest("Requesting firebus service : " + serviceName + "  " + request.toString().replace("\r\n", "").replace("\t", ""));
 							Payload response = firebus.requestService(serviceName, request, timeout);
 							logger.finest("Receiving firebus service respnse");
 							try {

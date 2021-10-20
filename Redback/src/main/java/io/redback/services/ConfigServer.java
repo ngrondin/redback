@@ -21,7 +21,7 @@ public abstract class ConfigServer extends ServiceProvider
 		Payload response = new Payload();
 		try
 		{
-			DataMap request = new DataMap(payload.getString());
+			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
 			String service = request.getString("service");
 			String category = request.getString("category");

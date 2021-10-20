@@ -3,6 +3,7 @@ package io.redback.managers.processmanager.units;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
@@ -43,17 +44,17 @@ public class FirebusRequestUnit extends ProcessUnit
 		Session sysUserSession = pi.getOutboundActionner().getSession();
 		Map<String, Object> context = pi.getScriptContext();
 		DataMap data = inputExpressionMap.eval(context);
-		Payload payload = new Payload(data.toString());
+		Payload payload = new Payload(data);
 		payload.metadata.put("token", sysUserSession.getToken());
 		payload.metadata.put("session", sysUserSession.getId());
 		try
 		{
-			logger.finest("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + payload.getString());
+			if(logger.getLevel() == Level.FINEST) logger.finest("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + data);
 			Payload response = processManager.getFirebus().requestService(firebusServiceName, payload, 10000);
 			DataMap respData = new DataMap(response.getString());
 			context.put("result",respData);
 			DataMap respOutput = outputExpressionMap.eval(context);
-			logger.finest("Output data was: " + respOutput);
+			if(logger.getLevel() == Level.FINEST) logger.finest("Output data was: " + respOutput);
 			pi.setData(respOutput);
 		} 
 		catch (Exception e)
