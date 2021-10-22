@@ -47,12 +47,12 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 			{
 				String fileName = payload.metadata.get("filename");
 				String mime = payload.metadata.get("mime");
-				RedbackFileMetaData newFilemd = putFile(fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
+				RedbackFileMetaData newFilemd = putFile(session, fileName, mime, session.getUserProfile().getUsername(), payload.getBytes());
 				if(payload.metadata.containsKey("object") && payload.metadata.containsKey("uid"))
 				{
 					String object = payload.metadata.get("object");
 					String uid = payload.metadata.get("uid");
-					linkFileTo(newFilemd.fileuid, object, uid);
+					linkFileTo(session, newFilemd.fileuid, object, uid);
 				}
 				DataMap resp = new DataMap();
 				resp.put("fileuid", newFilemd.fileuid);
@@ -103,7 +103,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						String object = request.getString("object");
 						String uid = request.getString("uid");
 						String fileUid = request.getString("fileuid");
-						linkFileTo(fileUid, object, uid);
+						linkFileTo(session, fileUid, object, uid);
 						response = new Payload((new DataMap("result", "ok")));
 						response.metadata.put("mime", "application/json");
 					}
@@ -112,7 +112,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						String object = request.getString("object");
 						String uid = request.getString("uid");
 						String fileUid = request.getString("fileuid");
-						unlinkFileFrom(fileUid, object, uid);
+						unlinkFileFrom(session, fileUid, object, uid);
 						response = new Payload((new DataMap("result", "ok")));
 						response.metadata.put("mime", "application/json");
 					}					
@@ -233,11 +233,11 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 
 	public abstract List<RedbackFileMetaData> listFilesFor(String object, String uid) throws RedbackException;
 
-	public abstract void linkFileTo(String fileUid, String object, String uid) throws RedbackException;
+	public abstract void linkFileTo(Session session, String fileUid, String object, String uid) throws RedbackException;
 	
-	public abstract void unlinkFileFrom(String fileUid, String object, String uid) throws RedbackException;
+	public abstract void unlinkFileFrom(Session session, String fileUid, String object, String uid) throws RedbackException;
 
-	public abstract RedbackFileMetaData putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException;
+	public abstract RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException;
 	
 	public abstract void acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException;
 	

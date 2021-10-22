@@ -187,25 +187,25 @@ public class RedbackFileServer extends FileServer
 	}
 	
 
-	public RedbackFileMetaData putFile(String fileName, String mime, String username, byte[] bytes) throws RedbackException
+	public RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException
 	{
 		try {
 			String tempFileName = UUID.randomUUID().toString();
 			File file = new File(tempFileName);
 			Files.write(file.toPath(), bytes);
-			return putFile(fileName, mime, username, file);
+			return putFile(session, fileName, mime, username, file);
 		} catch(Exception e) {
 			throw new RedbackException("Error putting file", e);
 		}
 	}
 	
-	public RedbackFileMetaData putFile(String fileName, String mime, String username, File file) throws RedbackException
+	public RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, File file) throws RedbackException
 	{
 		try {
 			RedbackFileMetaData filemd = getMetadata(file);
 		    if(filemd.fileuid == null) 
 		    {
-				filemd.fileuid = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
+				filemd.fileuid = getNewId(session);
 				if(mime.startsWith("image")) {
 					filemd.thumbnail = ImageUtils.getBase64ThumbnailOfImage(Files.readAllBytes(file.toPath()));
 				} else if(mime.equals("application/pdf")) {
@@ -267,10 +267,10 @@ public class RedbackFileServer extends FileServer
 		}
 	}
 	
-	public void linkFileTo(String fileUid, String object, String uid) throws RedbackException {
+	public void linkFileTo(Session session, String fileUid, String object, String uid) throws RedbackException {
 		try {
 			if(linkCollection != null) {
-				String linkId = firebus.requestService(idGeneratorService, new Payload(idName)).getString();
+				String linkId = getNewId(session);
 				DataMap key = new DataMap(linkCollection.getField("linkid"), linkId);
 				DataMap data = new DataMap();
 				data.put(linkCollection.getField("fileuid"), fileUid);
@@ -289,7 +289,7 @@ public class RedbackFileServer extends FileServer
 		}
 	}
 	
-	public void unlinkFileFrom(String fileUid, String object, String uid) throws RedbackException {
+	public void unlinkFileFrom(Session session, String fileUid, String object, String uid) throws RedbackException {
 		try {
 			if(linkCollection != null) {
 				DataMap key = new DataMap();
@@ -308,6 +308,18 @@ public class RedbackFileServer extends FileServer
 			throw new RedbackException("Error unlinking file");
 		}
 		
+	}
+	
+	public String getNewId(Session session) throws RedbackException {
+		try {
+			Payload idRequest = new Payload(idName);
+			idRequest.metadata.put("mime", "text/plain");
+			idRequest.metadata.put("session", session.getId());
+			Payload idResponse = firebus.requestService(idGeneratorService, idRequest); 
+			return idResponse.getString();
+		} catch(Exception e) {
+			throw new RedbackException("Error getting new file id");
+		}
 	}
 	
 	public String getMimeType(String filename)
@@ -335,9 +347,9 @@ public class RedbackFileServer extends FileServer
 				public void completed() {
 					try {
 						fos.close();
-						RedbackFileMetaData filemd = putFile(filename, mime != null ? mime : getMimeType(filename), session.getUserProfile().getUsername(), file);
+						RedbackFileMetaData filemd = putFile(session, filename, mime != null ? mime : getMimeType(filename), session.getUserProfile().getUsername(), file);
 						if(objectname != null && objectuid != null)
-							linkFileTo(filemd.fileuid, objectname, objectuid);
+							linkFileTo(session, filemd.fileuid, objectname, objectuid);
 						DataMap resp = new DataMap();
 						resp.put("fileuid", filemd.fileuid);
 						resp.put("thumbnail", filemd.thumbnail);
