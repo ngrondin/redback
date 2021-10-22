@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
@@ -417,7 +418,7 @@ public class ProcessManager
 	
 	public ArrayList<ProcessInstance> findProcesses(Actionner actionner, DataMap filter, int page, int pageSize) throws RedbackException
 	{
-		logger.finer("Finding processes for " + filter.toString());
+		if(logger.getLevel().intValue() <= Level.FINER.intValue()) logger.finer("Finding processes for " + filter.toString());
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
 		try 
 		{
@@ -509,7 +510,7 @@ public class ProcessManager
 				DataMap data = new DataMap();
 				for(String username: sendMap.keySet()) 
 					data.put(username, sendMap.get(username).getDataMap());
-				Payload payload = new Payload(data.toString());
+				Payload payload = new Payload(data);
 				logger.finest("Publishing process notification");
 				firebus.publish(processNotificationChannel, payload);
 				logger.finest("Published process notification");
@@ -535,7 +536,7 @@ public class ProcessManager
 				for(String username: to) {
 					sendMap.put(username, intcomp);
 				}
-				Payload payload = new Payload(sendMap.toString());
+				Payload payload = new Payload(sendMap);
 				logger.finest("Publishing process notification completion");
 				firebus.publish(processNotificationChannel, payload);
 				logger.finest("Published process notification completion");

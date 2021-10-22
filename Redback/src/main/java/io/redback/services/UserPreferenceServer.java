@@ -35,7 +35,7 @@ public abstract class UserPreferenceServer extends AuthenticatedServiceProvider 
 					} else if(type.equals("domain")) {
 						value = getDomainPreference(session, name);
 					}
-					response.setData(value != null ? value.toString() : new DataMap().toString());
+					response.setData(value != null ? value : new DataMap());
 				} else if(action.equals("put")) {
 					DataMap value = request.getObject("value");
 					if(type == null || (type != null && type.equals("user"))) {
@@ -45,7 +45,7 @@ public abstract class UserPreferenceServer extends AuthenticatedServiceProvider 
 					} else if(type.equals("domain")) {
 						putDomainPreference(session, name, value);
 					}
-					response.setData(new DataMap("result", "ok").toString());
+					response.setData(new DataMap("result", "ok"));
 				} else {
 					throw new RedbackException("Unknown action");
 				}

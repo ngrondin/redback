@@ -137,8 +137,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 				else if(action.equals("noop"))
 				{
 					//Do nothing, this is used to log request
-					response = new Payload(new DataMap("result", "ok").toString());
-					response.metadata.put("mime", "application/json");					
+					responseData = new DataMap("result", "ok");
 				}
 				else
 				{
@@ -149,8 +148,10 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 			{
 				throw new RedbackException("Requests must have at least an 'action' attribute");
 			}
-			if(responseData != null)
-				response.setData(responseData.toString());
+			if(responseData != null) {
+				response.setData(responseData);
+				response.metadata.put("mime", "application/json");					
+			}
 		}
 		catch(DataException e)
 		{

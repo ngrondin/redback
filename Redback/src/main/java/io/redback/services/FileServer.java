@@ -57,7 +57,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 				DataMap resp = new DataMap();
 				resp.put("fileuid", newFilemd.fileuid);
 				resp.put("thumbnail", newFilemd.thumbnail);
-				response = new Payload(resp.toString());
+				response = new Payload(resp);
 				response.metadata.put("mime", "application/json");
 			}
 			else
@@ -95,7 +95,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 					else if(action.equals("getmetadata")) 
 					{
 						RedbackFileMetaData filemd = this.getMetadata(request.getString("fileuid"));
-						response = new Payload(filemd.getDataMap(addThumbnail).toString());
+						response = new Payload(filemd.getDataMap(addThumbnail));
 						response.metadata.put("mime", "application/json");
 					} 
 					else if(action.equals("link")) 
@@ -104,7 +104,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						String uid = request.getString("uid");
 						String fileUid = request.getString("fileuid");
 						linkFileTo(fileUid, object, uid);
-						response = new Payload((new DataMap("result", "ok")).toString());
+						response = new Payload((new DataMap("result", "ok")));
 						response.metadata.put("mime", "application/json");
 					}
 					else if(action.equals("unlink")) 
@@ -113,7 +113,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						String uid = request.getString("uid");
 						String fileUid = request.getString("fileuid");
 						unlinkFileFrom(fileUid, object, uid);
-						response = new Payload((new DataMap("result", "ok")).toString());
+						response = new Payload((new DataMap("result", "ok")));
 						response.metadata.put("mime", "application/json");
 					}					
 					else if(action.equals("list"))
@@ -126,7 +126,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 						for(RedbackFileMetaData filemd : fileData) 
 							respList.add(filemd.getDataMap(addThumbnail));
 						resp.put("list", respList);
-						response = new Payload(resp.toString());
+						response = new Payload(resp);
 						response.metadata.put("mime", "application/json");
 					}
 					else if(action.equals("listmulti"))
@@ -151,14 +151,14 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 							}
 						}
 						resp.put("list", itemList);
-						response = new Payload(resp.toString());
+						response = new Payload(resp);
 						response.metadata.put("mime", "application/json");
 					}					
 				}
 			}
 			if(response == null)
 			{
-				response = new Payload("{error:\"no action taken\"}");
+				response = new Payload(new DataMap("error", "no action taken"));
 			}
 			return response;
 		} catch(DataException e) {

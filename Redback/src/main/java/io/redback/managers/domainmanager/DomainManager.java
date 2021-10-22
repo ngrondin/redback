@@ -233,7 +233,7 @@ public class DomainManager implements Consumer {
 		dataClient.putData(entryCollection.getName(), entryCollection.convertObjectToSpecific(key), entryCollection.convertObjectToSpecific(entry.getConfig()));
 		if(entry.canCache()) {
 			//entries.put(domain + "." + name, entry);
-			firebus.publish("_rb_domain_cache_clear", new Payload(key.toString()));
+			firebus.publish("_rb_domain_cache_clear", new Payload(key));
 		}
 	}
 	
@@ -391,6 +391,6 @@ public class DomainManager implements Consumer {
 		DataMap key = new DataMap();
 		key.put("domain", domain);
 		key.put("name", name);
-		firebus.publish("_rb_domain_cache_clear", new Payload(key.toString()));
+		firebus.publish("_rb_domain_cache_clear", new Payload(key));
 	}
 }

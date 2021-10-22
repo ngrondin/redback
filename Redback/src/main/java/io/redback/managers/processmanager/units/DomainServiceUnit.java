@@ -51,8 +51,7 @@ public class DomainServiceUnit extends ProcessUnit
 			req.put("name", functionName);
 			req.put("param", data);
 			req.put("async", async);
-			Payload payload = new Payload();
-			payload.setData(req);
+			Payload payload = new Payload(req);
 			payload.metadata.put("token", sysUserSession.getToken());
 			payload.metadata.put("session", sysUserSession.getId());
 			payload.metadata.put("mime", "application/json");

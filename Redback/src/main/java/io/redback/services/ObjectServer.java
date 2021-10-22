@@ -111,7 +111,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 				{
 					throw new RedbackException("The '" + action + "' action is not valid as an object request");
 				}
-				Payload response = new Payload(responseData.toString());
+				Payload response = new Payload(responseData);
 				response.metadata.put("mime", "application/json");
 				return response;
 			}

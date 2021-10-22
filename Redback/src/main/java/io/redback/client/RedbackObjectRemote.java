@@ -91,10 +91,10 @@ public class RedbackObjectRemote {
 			req.put("object", data.getString("objectname"));
 			req.put("uid", getUid());
 			req.put("data", map);
-			Payload reqP = new Payload(req.toString());
+			Payload reqP = new Payload(req);
 			reqP.metadata.put("token", token);
 			Payload respP = firebus.requestService(objectService, reqP);
-			DataMap resp = new DataMap(respP.getString());
+			DataMap resp = respP.getDataMap();
 			this.data = resp;
 		} catch(Exception e) {
 			throw new RedbackException("Error updating object", e);
@@ -118,10 +118,10 @@ public class RedbackObjectRemote {
 			req.put("uid", getUid());
 			req.put("function", function);
 			req.put("data", param);
-			Payload reqP = new Payload(req.toString());
+			Payload reqP = new Payload(req);
 			reqP.metadata.put("token", token);
 			Payload respP = firebus.requestService(objectService, reqP);
-			DataMap resp = new DataMap(respP.getString());
+			DataMap resp = respP.getDataMap();
 			this.data = resp;
 		} catch(Exception e) {
 			throw new RedbackException("Error execute function on object", e);

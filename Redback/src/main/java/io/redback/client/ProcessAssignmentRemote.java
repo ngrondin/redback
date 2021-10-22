@@ -63,7 +63,7 @@ public class ProcessAssignmentRemote {
 		request.put("processaction", action);
 		try
 		{
-			Payload requestPayload = new Payload(request.toString());
+			Payload requestPayload = new Payload(request);
 			requestPayload.metadata.put("token", token);
 			firebus.requestService(processService, requestPayload);
 		}
@@ -80,7 +80,7 @@ public class ProcessAssignmentRemote {
 		request.put("pid", getPid());
 		try
 		{
-			Payload requestPayload = new Payload(request.toString());
+			Payload requestPayload = new Payload(request);
 			requestPayload.metadata.put("token", token);
 			firebus.requestService(processService, requestPayload);
 		}

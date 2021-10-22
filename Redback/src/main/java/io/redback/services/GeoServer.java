@@ -100,7 +100,7 @@ public abstract class GeoServer extends ServiceProvider
 					throw new RedbackException("Valid actions are 'address', 'geocode', 'timezone' and 'travel'");
 				}
 			}
-			response.setData(responseData.toString());
+			response.setData(responseData);
 			response.metadata.put("mime", "application/json");
 		}
 		catch(Exception e)

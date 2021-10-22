@@ -52,7 +52,7 @@ public class FirebusJSWrapper extends ObjectJSWrapper
 							Payload response = firebus.requestService(serviceName, request, timeout);
 							logger.finest("Receiving firebus service respnse");
 							try {
-								DataMap responseObject = new DataMap(response.getString());
+								DataMap responseObject = response.getDataMap();
 								return responseObject;
 							} catch(DataException e ) {
 								return response.getString();

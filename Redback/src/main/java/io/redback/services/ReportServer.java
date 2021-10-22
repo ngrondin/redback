@@ -48,13 +48,13 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 				response.metadata.put("filename", report.getFilename());
 			} else if(action.equals("producestore")) {
 				String fileUid = produceAndStore(session, domain, reportName, filter);
-				response = new Payload(new DataMap("fileuid", fileUid).toString());
+				response = new Payload(new DataMap("fileuid", fileUid));
 			} else if(action.equals("list")) {
 				List<ReportInfo> reports = list(session, category);
 				DataList result = new DataList();
 				for(ReportInfo ri: reports)
 					result.add(ri.toDataMap());
-				response = new Payload(new DataMap("result", result).toString());
+				response = new Payload(new DataMap("result", result));
 			} else if(action.equals("cleardomaincache")) {
 				this.clearDomainCache(session, domain, reportName);
 			} else {

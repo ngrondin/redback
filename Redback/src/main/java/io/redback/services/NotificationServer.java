@@ -35,7 +35,7 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 			if(action != null) {
 				if(action.equals("sendemail")) {
 					sendEmail(session, new Email(request));
-					response = new Payload(new DataMap("result", "ok").toString());
+					response = new Payload(new DataMap("result", "ok"));
 				} else if(action.equals("getemails")) {
 					String server = request.getString("server");
 					String username = request.getString("username");
@@ -47,21 +47,21 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 						for(Email email: emails) {
 							result.add(email.toDataMap());
 						}
-						response = new Payload(new DataMap("result", result).toString());
+						response = new Payload(new DataMap("result", result));
 					} else {
-						response = new Payload(new DataMap("result", new DataList()).toString());
+						response = new Payload(new DataMap("result", new DataList()));
 					}
 				} else if(action.equals("registerfcmtoken")) {
 					String token = request.getString("token");
 					registerFCMToken(session, token);
-					response = new Payload(new DataMap("result", "ok").toString());
+					response = new Payload(new DataMap("result", "ok"));
 				} else if(action.equals("sendfcmmessage")) {
 					String username = request.getString("username");
 					String message = request.getString("message");
 					String subject = request.getString("subject");
 					DataMap data = request.getObject("data");
 					sendFCMMessage(session, username, subject, message, data);
-					response = new Payload(new DataMap("result", "ok").toString());
+					response = new Payload(new DataMap("result", "ok"));
 				}
 			} else {
 				throw new RedbackException("No valid action was provided");

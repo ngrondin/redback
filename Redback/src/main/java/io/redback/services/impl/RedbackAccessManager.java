@@ -148,7 +148,7 @@ public class RedbackAccessManager extends AccessManager
 					reqBody.put("client_secret", idmClientSecret);
 					req.put("body", reqBody);
 					try {
-						Payload respP = firebus.requestService(outboundService, new Payload(req.toString()));
+						Payload respP = firebus.requestService(outboundService, new Payload(req));
 						userConfig = new DataMap(respP.getString());
 					} catch(Exception e) {
 						if(!e.getMessage().contains("Invalid user id"))

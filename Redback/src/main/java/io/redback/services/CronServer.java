@@ -16,7 +16,7 @@ public abstract class CronServer extends ServiceProvider {
 
 	public Payload redbackService(Session session, Payload payload) throws RedbackException {
 		DataMap resp = new DataMap("result", "no actions");
-		Payload respPayload = new Payload(resp.toString());
+		Payload respPayload = new Payload(resp);
 		return respPayload;
 	}
 

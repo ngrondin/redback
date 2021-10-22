@@ -29,7 +29,7 @@ public class ReportClient extends Client {
 				req.put("domain", domain);
 			req.put("report", name);
 			req.put("filter", filter);
-			Payload resp = requestPayload(session, new Payload(req.toString()));
+			Payload resp = requestPayload(session, new Payload(req));
 			return resp.getBytes();
 		} catch(Exception e) {
 			throw new RedbackException("Error producing report", e);
@@ -78,7 +78,7 @@ public class ReportClient extends Client {
 			if(domain != null)
 				req.put("domain", domain);
 			req.put("report", name);
-			requestPayload(session, new Payload(req.toString()));
+			requestPayload(session, new Payload(req));
 		} catch(Exception e) {
 			throw new RedbackException("Error clearing domain cache", e);
 		}		

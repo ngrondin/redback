@@ -651,7 +651,7 @@ public class ObjectManager
 		request.put("object", objectName);
 		request.put("uid", id);
 		request.put("function", function);
-		Payload reqP = new Payload(request.toString());
+		Payload reqP = new Payload(request);
 		reqP.metadata.put("session", session.id);
 		reqP.metadata.put("token", session.token);
 		if(session.getTimezone() != null)
@@ -1142,7 +1142,7 @@ public class ObjectManager
 		{
 			try 
 			{
-				Payload payload = new Payload(object.getDataMap(true, true).toString());
+				Payload payload = new Payload(object.getDataMap(true, true));
 				logger.finest("Publishing object update");
 				firebus.publish(objectUpdateChannel, payload);
 				logger.finest("Published object update");

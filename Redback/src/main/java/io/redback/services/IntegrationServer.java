@@ -120,7 +120,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 				}
 				
 				if(response != null) {
-					responsePayload = new Payload(response.toString());
+					responsePayload = new Payload(response);
 				} else {
 					throw new RedbackException("Null response");
 				}

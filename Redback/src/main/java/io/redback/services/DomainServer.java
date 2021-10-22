@@ -47,10 +47,10 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 						result.add(map);
 					}
 					resp.put("result", result);
-					return new Payload(resp.toString());
+					return new Payload(resp);
 				} else if(action.equals("getvariable")) {
 					DataEntity entity = getVariable(session, domain, name);
-					return new Payload((new DataMap("result", entity)).toString());
+					return new Payload((new DataMap("result", entity)));
 				} else if(action.equals("execute")) {
 					boolean async = request.getBoolean("async");
 					DataMap param = request.getObject("param");
@@ -58,10 +58,10 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 					return new Payload(ret != null ? ret.toString() : new DataMap("result", "ok").toString());
 				} else if(action.equals("executeinalldomains")) {
 					executeFunctionInAllDomains(session, name, request.getObject("param"));
-					return new Payload(new DataMap("result", "ok").toString());
+					return new Payload(new DataMap("result", "ok"));
 				} else if(action.equals("clearcache")) {
 					clearCache(session, domain, name);
-					return new Payload(new DataMap("result", "ok").toString());
+					return new Payload(new DataMap("result", "ok"));
 				} else {
 					throw new RedbackException("The action '" + action + "' is not valid");
 				}

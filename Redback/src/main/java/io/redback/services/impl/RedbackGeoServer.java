@@ -188,7 +188,7 @@ public class RedbackGeoServer extends GeoServer
 				}
 			}
 			if(resp == null) {
-				Payload respPayload = firebus.requestService(outboundService, new Payload(request.toString()));
+				Payload respPayload = firebus.requestService(outboundService, new Payload(request));
 				resp = new DataMap(respPayload.getString());
 				if(dataClient != null) {
 					dataClient.putData(cacheCollection.getName(), new DataMap("request", reqStr), new DataMap("response", resp));

@@ -32,11 +32,11 @@ public abstract class ConfigServer extends ServiceProvider
 			{
 				DataMap config = getConfig(service, category, name);
 				if(config != null)
-					response.setData(config.toString());
+					response.setData(config);
 			} 
 			else if(action.equals("list"))
 			{
-				response.setData("{\"result\":" + getConfigList(service, category, filter).toString() + "}");
+				response.setData(new DataMap("result", getConfigList(service, category, filter)));
 			}
 			else 
 			{

@@ -148,7 +148,7 @@ public class RedbackFileServer extends FileServer
 			DataMap streamReq = new DataMap();
 			streamReq.put("action", "get");
 			streamReq.put("filename", fileUid);
-			StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(streamReq.toString()), 5000);
+			StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(streamReq), 5000);
 			return sep;
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file stream", e);
@@ -239,7 +239,7 @@ public class RedbackFileServer extends FileServer
 				DataMap req = new DataMap();
 				req.put("filename", fileUid);
 				req.put("action", "put");
-				StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(req.toString()), 5000);
+				StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(req), 5000);
 				new StreamSender(fis, sep, new StreamSender.CompletionListener() {
 					public void completed() {
 						try {

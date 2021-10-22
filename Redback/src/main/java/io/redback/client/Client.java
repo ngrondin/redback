@@ -38,7 +38,7 @@ public class Client {
 	{
 		try
 		{
-			Payload reqP = new Payload(req.toString());
+			Payload reqP = new Payload(req);
 			reqP.metadata.put("mime", "application/json");
 			Payload respP = requestPayload(session, reqP, async);
 			if(respP != null) {
@@ -91,7 +91,7 @@ public class Client {
 	
 	protected StreamEndpoint requestStream(Session session, DataMap req) throws RedbackException
 	{
-		Payload reqP = new Payload(req.toString());
+		Payload reqP = new Payload(req);
 		reqP.metadata.put("mime", "application/json");
 		StreamEndpoint sep = requestStream(session, reqP);
 		return sep;
@@ -134,7 +134,7 @@ public class Client {
 		{
 			try
 			{
-				Payload reqP = new Payload(req.toString());
+				Payload reqP = new Payload(req);
 				reqP.metadata.put("mime", "application/json");
 				if(session != null) {
 					reqP.metadata.put("session", session.id);

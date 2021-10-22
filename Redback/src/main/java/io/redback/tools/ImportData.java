@@ -123,7 +123,7 @@ public class ImportData extends Thread
 									fbReqmap.put("action", "list");
 									fbReqmap.put("object", objectname);
 									fbReqmap.put("filter", filter);
-									Payload request = new Payload(fbReqmap.toString());
+									Payload request = new Payload(fbReqmap);
 									request.metadata.put("token", token);
 									request.metadata.put("session", session.getId());
 									request.metadata.put("mime", "application/json");
@@ -144,7 +144,7 @@ public class ImportData extends Thread
 										fbReqmap.put("object", objectname);
 										fbReqmap.put("data", data);
 										fbReqmap.put("domain", domain);
-										request = new Payload(fbReqmap.toString());
+										request = new Payload(fbReqmap);
 										request.metadata.put("token", token);
 										response = firebus.requestService(objectService, request);
 										fbRespmap = new DataMap(response.getString());

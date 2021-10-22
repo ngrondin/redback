@@ -93,7 +93,7 @@ public class ExportData extends Thread
 				{
 					System.out.print(".");
 					fbReqmap.put("page", page);
-					Payload fbReq = new Payload(fbReqmap.toString());
+					Payload fbReq = new Payload(fbReqmap);
 					fbReq.metadata.put("token", token);
 					Payload fbResp = firebus.requestService(objectService, fbReq);
 					DataMap dataResult = new DataMap(fbResp.getString());
