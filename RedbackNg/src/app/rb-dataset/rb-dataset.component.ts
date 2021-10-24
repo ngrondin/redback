@@ -161,7 +161,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(this.hasMorePages) {
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
       const search = this.searchString;
-      this.dataService.listObjects(this.objectname, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, this.addrelated).subscribe({
+      const addRel = this.fetchAll ? false : this.addrelated;
+      this.dataService.listServerObjects(this.objectname, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, addRel).subscribe({
         next: (data) => {
           this.fetchThreads--;
           this.setData(data);
@@ -228,6 +229,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         } else {
           this.totalCount = this._list.length;
         }
+      }
+      if(this.addrelated == true && this.fetchAll == true) {
+        this.dataService.loadMissingRelatedObjects(this._list);
       }
     }
   }

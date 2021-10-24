@@ -4,6 +4,7 @@ import { Observable, of, Observer } from 'rxjs';
 import { RbObject, RbFile, RbAggregate } from '../datamodel';
 import { ErrorService } from './error.service';
 import { ClientWSService } from './clientws.service';
+import { FilterService } from './filter.service';
 
 
 
@@ -18,7 +19,8 @@ export class DataService {
   constructor(
     private apiService: ApiService,
     private clientWSService: ClientWSService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private filterService: FilterService
   ) {
     this.allObjects = [];
     this.saveImmediatly = true;
@@ -45,13 +47,19 @@ export class DataService {
   }
 
   getLocalObject(objectname: string, uid: string) : RbObject {
-    let rbObject: RbObject = null;
-    for(const o of this.allObjects) {
+   for(const o of this.allObjects) {
       if(o.objectname == objectname && o.uid == uid) {
-        rbObject = o;
+        return o;
       }
     }
-    return rbObject;
+  }
+
+  findFirstLocalObject(objectname: string, filter: any) : RbObject {
+    for(const o of this.allObjects) {
+      if(o.objectname == objectname && this.filterService.applies(filter, o)) {
+        return o;
+      }
+    }
   }
 
   
@@ -70,7 +78,7 @@ export class DataService {
     return dataObservable; 
   }
 
-  listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean) : Observable<any> {
+  listServerObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean) : Observable<any> {
     const apiObservable = this.apiService.listObjects(name, filter, search, sort, page, pageSize, addRelated);
     const dataObservable = new Observable((observer) => {
       apiObservable.subscribe(
@@ -85,7 +93,7 @@ export class DataService {
     return dataObservable; 
   }
 
-  listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean) : Observable<any> {
+  listServerRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean) : Observable<any> {
     const apiObservable = this.apiService.listRelatedObjects(name, uid, attribute, filter, search, sort, addRelated);
     const dataObservable = new Observable((observer) => {
       apiObservable.subscribe(
@@ -100,15 +108,70 @@ export class DataService {
     return dataObservable; 
   }
 
-
-  updateObjectFromServer(json: any) : RbObject {
-    if(json.related != null) {
-      for(const a in json.related) {
-        const relatedJson = json.related[a];
-        this.updateObjectFromServer(relatedJson);
+  loadMissingRelatedObjects(list: RbObject[]) {
+    console.log("Add missing related");
+    let reqMap = {}
+    for(let o of list) {
+      for(let attr in o.validation) {
+        if(o.data[attr] != null && o.validation[attr].related != null && o.related[attr] == null) {
+          let relObjectName = o.validation[attr].related.object;
+          let relObjectLink = o.validation[attr].related.link;
+          let linkVal = o.data[attr];
+          if(reqMap[relObjectName] == null) reqMap[relObjectName] = {};
+          if(reqMap[relObjectName][relObjectLink] == null) reqMap[relObjectName][relObjectLink] = [];
+          if(reqMap[relObjectName][relObjectLink].indexOf(linkVal) == -1) {
+            reqMap[relObjectName][relObjectLink].push(linkVal)
+          }
+        }
       }
     }
+    let multi = [];
+    for(let objectname in reqMap) {
+      let orList = [];
+      for(let link in reqMap[objectname]) {
+        let filter = {};
+        filter[link] = {"$in": reqMap[objectname][link]};
+        orList.push(filter);
+      }
+      multi.push({
+        key: objectname,
+        action: "list",
+        object: objectname,
+        filter: orList.length > 1 ? {"$or": orList} : orList[0],
+        options: {addvalidation: false, addrelated: false},
+        page: 0,
+        pagesize: 500
+      })
+    }
+    if(multi.length > 0) {
+      this.apiService.objectMulti(multi).subscribe(
+        resp => {
+          for(let objectname in resp) {
+            for(let objectjson of resp[objectname].list) {
+              this.updateObjectFromServer(objectjson);
+            }
+          }
+          for(let object of list) {
+            for(let attr in object.validation) {
+              if(object.data[attr] != null && object.validation[attr].related != null && object.related[attr] == null) {
+                if(object.validation[attr].related.link == 'uid') {
+                  object.related[attr] = this.getLocalObject(object.validation[attr].related.object, object.data[attr]);
+                } else {
+                    let filter = {};
+                    filter[object.validation[attr].related.link] = object.data[attr];
+                    object.related[attr] = this.findFirstLocalObject(object.validation[attr].related.object, filter);
+                }
+              }
+            }
+          }
+        },
+        error => this.errorService.receiveHttpError(error)
+      )
+    }
+  }
 
+
+  updateObjectFromServer(json: any) : RbObject {
     let rbObject : RbObject = this.getLocalObject(json.objectname, json.uid);
     if(rbObject != null) {
       rbObject.updateFromServer(json);
@@ -174,7 +237,7 @@ export class DataService {
     });
   }
 
-  executeObject(rbObject: RbObject, func: string, param: string) : Observable<null> {
+  executeObjectFunction(rbObject: RbObject, func: string, param: string) : Observable<null> {
     return new Observable<null>((observer) => {
       this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(
         resp => {
@@ -191,7 +254,7 @@ export class DataService {
   }
 
   
-  executeGlobal(func: string, param: any) : Observable<null> {
+  executeGlobalFunction(func: string, param: any) : Observable<null> {
     return new Observable<null>((observer) => {
       this.apiService.executeGlobal(func, param).subscribe(
         resp => {

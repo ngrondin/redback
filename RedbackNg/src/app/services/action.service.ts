@@ -146,7 +146,7 @@ export class ActionService {
 
   public execute(dataset: RbDatasetComponent, functionName: string, functionParams: string) : Observable<null> {
     return new Observable((observer) => {
-      this.dataService.executeObject(dataset.selectedObject, functionName, functionParams).subscribe(new ObserverProxy(observer));
+      this.dataService.executeObjectFunction(dataset.selectedObject, functionName, functionParams).subscribe(new ObserverProxy(observer));
     });
   }
 
@@ -156,7 +156,7 @@ export class ActionService {
       let doneCount: number = 0;
       dataset.list.forEach((object) => {
         setTimeout(() => {
-          this.dataService.executeObject(object, functionName, null).subscribe(
+          this.dataService.executeObjectFunction(object, functionName, null).subscribe(
             resp => {
               doneCount++;
               if(doneCount == dataset.list.length) {
@@ -176,7 +176,7 @@ export class ActionService {
   public executeMaster(dataset: RbDatasetComponent, functionName: string) : Observable<null> {
     return new Observable((observer) => {
       if(dataset.relatedObject != null) {
-        this.dataService.executeObject(dataset.relatedObject, functionName, null).subscribe(new ObserverProxy(observer));
+        this.dataService.executeObjectFunction(dataset.relatedObject, functionName, null).subscribe(new ObserverProxy(observer));
       }
     });
   }
@@ -187,7 +187,7 @@ export class ActionService {
         "filter": dataset.resolvedFilter,
         "selecteduid": (dataset.selectedObject != null ? dataset.selectedObject.uid : null)
       }
-      this.dataService.executeGlobal(functionName, funcParam).subscribe(new ObserverProxy(observer));
+      this.dataService.executeGlobalFunction(functionName, funcParam).subscribe(new ObserverProxy(observer));
     });
   }
 

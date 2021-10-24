@@ -40,7 +40,7 @@ export class RbObject {
 
             if(json.related != null) {
                 if(json.related[attribute] != null) {
-                    let related = this.dataService.getLocalObject(json.related[attribute].objectname, json.related[attribute].uid);
+                    let related = this.dataService.updateObjectFromServer(json.related[attribute]);
                     if(this.related[attribute] != related) {
                         this.related[attribute] = related;
                     }
@@ -51,8 +51,17 @@ export class RbObject {
 
             if(json.validation != null && json.validation[attribute] != null) {
                 this.validation[attribute] = json.validation[attribute];
+                let relatedValid = this.validation[attribute].related;
+                if(relatedValid != null && this.related[attribute] == null) {
+                    if(relatedValid.link == 'uid') {
+                        this.related[attribute] = this.dataService.getLocalObject(relatedValid.object, this.data[attribute]);
+                    } else {
+                        let filter = {};
+                        filter[relatedValid.link] = this.data[attribute];
+                        this.related[attribute] = this.dataService.findFirstLocalObject(relatedValid.object, filter);
+                    }
+                }
             }
-        
         }
 
         if(isChanged) {

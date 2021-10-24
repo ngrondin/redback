@@ -205,6 +205,14 @@ export class ApiService {
     return this.requestService(this.objectService, req);
   }
 
+  objectMulti(reqs: any[]): Observable<any> {
+    const req = {
+      action: 'multi',
+      multi: reqs
+    };
+    return this.requestService(this.objectService, req);
+  }
+
   /******* Files *********/
 
   uploadFile(file: File, object: string, uid: string) : Observable<any> {

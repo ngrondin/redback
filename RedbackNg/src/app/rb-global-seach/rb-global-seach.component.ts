@@ -35,7 +35,7 @@ export class RbGlobalSeachComponent implements OnInit {
     let objectnames = Object.keys(this.configService.objectsConfig);
     if(this.currentlyLoading >= 0 && this.currentlyLoading < objectnames.length) {
       let objectname = objectnames[this.currentlyLoading];
-      this.dataService.listObjects(objectname, null, this.searchString, null, 0, 50, true).subscribe(
+      this.dataService.listServerObjects(objectname, null, this.searchString, null, 0, 50, true).subscribe(
         data => {
           this.searchResult = this.searchResult.concat(data);
           this.currentlyLoading++;
