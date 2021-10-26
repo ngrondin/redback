@@ -1,5 +1,6 @@
 package io.redback.managers.reportmanager.pdf;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,7 @@ public class DataSet extends ContainerUnit {
 			Object currentMasterObject = context.get("master");
 			List<?> currentMasterDataset = (List<?>)context.get("dataset");
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("master", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)currentObject));
+			jsContext.put("master", convertToScript(currentObject));
 			jsContext.put("filter", context.get("filter"));
 			ObjectClient oc = reportManager.getObjectClient();
 			DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
@@ -78,6 +79,19 @@ public class DataSet extends ContainerUnit {
 			return c;
 		} catch(Exception e) {
 			throw new RedbackException("Error producing dataset unit", e);
+		}
+	}
+	
+	protected static Object convertToScript(Object in) {
+		if(in instanceof RedbackObjectRemote) {
+			return new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)in);
+		} else if(in instanceof List) {
+			List<Object> convertedList = new ArrayList<Object>();
+			for(Object item: (List<?>)in) 
+				convertedList.add(convertToScript(item));
+			return convertedList;
+		} else {
+			return in;
 		}
 	}
 

@@ -42,7 +42,7 @@ public abstract class ContainerUnit extends Unit {
 	protected boolean show(Map<String, Object> context) throws RedbackException {
 		if(showExpr != null) {
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("object", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)context.get("object")));
+			jsContext.put("object", DataSet.convertToScript(context.get("object")));
 			jsContext.put("page", context.get("page"));
 			Object value = null;
 			try {

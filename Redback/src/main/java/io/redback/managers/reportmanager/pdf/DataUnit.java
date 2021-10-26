@@ -98,13 +98,12 @@ public abstract class DataUnit extends Unit {
 	    return lines;
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
 		Session session = (Session)context.get("session");
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		jsContext.put("dataset", RedbackObjectRemoteJSWrapper.convertList((List<RedbackObjectRemote>)context.get("dataset")));
-		jsContext.put("object", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)context.get("object")));
-		jsContext.put("master", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)context.get("master")));
+		jsContext.put("dataset", DataSet.convertToScript(context.get("dataset")));
+		jsContext.put("object", DataSet.convertToScript(context.get("object")));
+		jsContext.put("master", DataSet.convertToScript(context.get("master")));
 		jsContext.put("page", context.get("page"));
 		Object value = null;
 		try {

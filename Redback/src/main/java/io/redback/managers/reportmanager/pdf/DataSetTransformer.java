@@ -28,14 +28,13 @@ public class DataSetTransformer extends ContainerUnit {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public Box produce(Map<String, Object> context) throws RedbackException {
 		try {
 			Object currentObject = context.get("object");
-			List<RedbackObjectRemote> currentDataSet = (List<RedbackObjectRemote>)context.get("dataset");
+			List<?> currentDataSet = (List<?>)context.get("dataset");
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("dataset", RedbackObjectRemoteJSWrapper.convertList(currentDataSet));
-			jsContext.put("object", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)currentObject));
+			jsContext.put("dataset", DataSet.convertToScript(currentDataSet));
+			jsContext.put("object", DataSet.convertToScript(currentObject));
 			Object newDataSet = function.call(jsContext);
 			if(newDataSet instanceof DataList) {
 				List<Object> list = new ArrayList<Object>();

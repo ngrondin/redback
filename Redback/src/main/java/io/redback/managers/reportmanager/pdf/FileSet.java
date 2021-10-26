@@ -37,7 +37,7 @@ public class FileSet extends ContainerUnit {
 			Object currentMasterObject = context.get("master");
 			List<?> currentMasterDataset = (List<?>)context.get("dataset");
 			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("master", new RedbackObjectRemoteJSWrapper((RedbackObjectRemote)currentObject));
+			jsContext.put("master", DataSet.convertToScript(currentObject));
 			jsContext.put("filter", context.get("filter"));
 			FileClient fc = reportManager.getFileClient();
 			Session session = (Session)context.get("session");

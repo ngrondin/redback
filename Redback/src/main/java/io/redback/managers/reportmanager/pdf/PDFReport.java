@@ -1,6 +1,5 @@
 package io.redback.managers.reportmanager.pdf;
 
-import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -90,10 +89,7 @@ public class PDFReport extends Report {
 		if(breakPoints.size() > 0) {
 			for(int i = breakPoints.size() - 1; i >= 0; i--) {
 				float bp = breakPoints.get(i);
-				if(bp > 0)
-					pages.add(0, root.breakAt(bp));
-				else 
-					pages.add(root);
+				pages.add(0, root.breakAt(bp));
 			}
 			if(root.children.size() > 0)
 				pages.add(0, root);
