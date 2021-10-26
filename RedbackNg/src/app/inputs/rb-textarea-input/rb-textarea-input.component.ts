@@ -17,7 +17,21 @@ export class RbTextareaInputComponent extends RbFieldInputComponent {
     super();
   }
 
-  public get displayvalue(): string {
+  public get displayvalue(): any {
+    if(this.isEditing) {
+      return this.editedValue;
+    } else {
+      return this.value;
+    }
+  }
+  
+  public set displayvalue(val: any) {
+    if(this.isEditing) {
+      this.editedValue = val;
+    } 
+  }
+  
+  /*public get displayvalue(): string {
     if(this.rbObject != null) {
       let val = this.rbObject.data[this.attribute];
       if(val == null || val == "") {
@@ -34,7 +48,7 @@ export class RbTextareaInputComponent extends RbFieldInputComponent {
 
   public set displayvalue(val: string) {
     this.editedValue = val;
-  }
+  }*/
 
   public onKeydown(event: any) {
     if(event.keyCode == 27) {

@@ -95,6 +95,14 @@
                                     </td>
                                 </tr>
                             </table>
+
+                            <rb-switch-input
+                                *ngIf="filterConstruct.config.type == 'switch'"
+                                [label]="null"
+                                [size]="0"
+                                [margin]="true"
+                                [(value)]="filterConstruct.val1">
+                            </rb-switch-input>
                         </td>
                         <td
                             class="rb-fb-buttoncol">

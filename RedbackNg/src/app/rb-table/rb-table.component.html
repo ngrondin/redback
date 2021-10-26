@@ -45,6 +45,13 @@
                     [displayattribute]="col.displayAttribute"
                     [editable]="true">
                 </rb-related-input>
+                <rb-switch-input
+                    *ngIf="col.type == 'switch'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [editable]="true">
+                </rb-switch-input>                
             </div>
             <div
                 class="rb-table-rowbutton">

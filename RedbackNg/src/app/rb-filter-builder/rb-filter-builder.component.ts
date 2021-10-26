@@ -114,6 +114,8 @@ export class FilterItemConstruct {
       } else {
         this.val1 = [];
       }
+    } else if(this.config.type == 'switch') {
+      this.val1 = v == true ? true : false;
     }
   }
 
@@ -146,6 +148,8 @@ export class FilterItemConstruct {
       }
     } else if(this.config.type == 'multiselect') {
       return {"$in": this.val1.map(item => "'" + item + "'")};
+    } else if(this.config.type == 'switch') {
+      return this.val1 == true ? true : false;
     }
   }
 }
