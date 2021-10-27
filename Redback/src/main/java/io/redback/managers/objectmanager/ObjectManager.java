@@ -1070,7 +1070,7 @@ public class ObjectManager
 			filter = new DataMap();
 			DataList orList = new DataList();
 			ObjectConfig config = getObjectConfig(session, objectName);
-			orList.add(new DataMap("uid", new DataMap("$regex", regexExpr)));
+			//orList.add(new DataMap("uid", new DataMap("$regex", regexExpr)));
 			Iterator<String> it = config.getAttributeNames().iterator();
 			while(it.hasNext())
 			{
