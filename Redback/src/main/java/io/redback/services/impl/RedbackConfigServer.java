@@ -115,29 +115,31 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 			{
 				root = classpath + "/" + service + "/" + category;
 				URL pathUrl = Thread.currentThread().getContextClassLoader().getResource(root);
-				if(pathUrl.getProtocol().equals("file"))
-				{
-					File[] files = new File(pathUrl.toURI()).listFiles();
-					for(int i = 0; i < files.length; i++)
-	    				if(files[i].getName().endsWith(".json"))
-	    					names.add(files[i].getName().substring(0, files[i].getName().length() - 5));
-				}
-				else if(pathUrl.getProtocol().equals("jar"))
-				{
-					String jarPath = pathUrl.getPath().substring(5, pathUrl.getPath().indexOf("!")); 
-			        JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
-			        Enumeration<JarEntry> entries = jar.entries(); 
-			        while(entries.hasMoreElements()) 
-			        {
-			          String name = entries.nextElement().getName();
-			          if (name.startsWith(root)) 
-			          { 
-			            String resource = name.substring(root.length() + 1);
-			            if(resource.endsWith(".json"))
-			            	names.add(resource.substring(0, resource.length() - 5));
-			          }
-			        }
-			        jar.close();
+				if(pathUrl != null) {
+					if(pathUrl.getProtocol().equals("file"))
+					{
+						File[] files = new File(pathUrl.toURI()).listFiles();
+						for(int i = 0; i < files.length; i++)
+		    				if(files[i].getName().endsWith(".json"))
+		    					names.add(files[i].getName().substring(0, files[i].getName().length() - 5));
+					}
+					else if(pathUrl.getProtocol().equals("jar"))
+					{
+						String jarPath = pathUrl.getPath().substring(5, pathUrl.getPath().indexOf("!")); 
+				        JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+				        Enumeration<JarEntry> entries = jar.entries(); 
+				        while(entries.hasMoreElements()) 
+				        {
+				          String name = entries.nextElement().getName();
+				          if (name.startsWith(root)) 
+				          { 
+				            String resource = name.substring(root.length() + 1);
+				            if(resource.endsWith(".json"))
+				            	names.add(resource.substring(0, resource.length() - 5));
+				          }
+				        }
+				        jar.close();
+					}
 				}
 			}		
 	

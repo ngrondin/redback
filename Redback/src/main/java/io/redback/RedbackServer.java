@@ -1,9 +1,14 @@
 package io.redback;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +20,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import io.firebus.DiscoveryAgent;
 import io.firebus.Firebus;
@@ -271,51 +277,65 @@ public class RedbackServer
 	
 	public static void main(String[] args)
 	{
-		if(args.length > 0)
-		{			
-			try
-			{
-				Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
-				DataMap config = null;
-				String configString = null;
-				Properties props = null;
-				for(int i = 0; i < args.length; i++) 
-				{
-					if(args[i].endsWith(".json"))
-					{
+		try {
+			String configString = null;
+			Properties props = null;
+			if(args.length > 0) {
+				for(int i = 0; i < args.length; i++)  {
+					if(args[i].endsWith(".json")) {
 						configString = new String(Files.readAllBytes(Paths.get(args[i])));
-					}
-					else if(args[i].endsWith("properties"))
-					{
+					} else if(args[i].endsWith("properties")) {
 						props = new Properties();
 						props.load(new FileInputStream(args[i]));
 					}
+				}		
+			} 
+			
+			if(configString == null) {
+				Path configPath = Paths.get("redback.json");
+				if(Files.exists(configPath)) {
+					configString = new String(Files.readAllBytes(configPath));
+				} else {
+					InputStream in = RedbackServer.class.getClassLoader().getResourceAsStream("redback.json");
+					if(in != null) {
+						configString = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
+					}
 				}
-				
-				if(configString != null) 
-				{
+			}
+			
+			if(props == null) {
+				Path propsPath = Paths.get("redback.properties");
+				if(Files.exists(propsPath)) {
+					props = new Properties();
+					props.load(Files.newInputStream(propsPath));
+				} else {
+					InputStream in = RedbackServer.class.getClassLoader().getResourceAsStream("redback.properties");
+					if(in != null) {
+						props = new Properties();
+						props.load(in);
+					}
+				}
+			}
+			
+			if(configString != null) {
+					Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
+	
 					int pos1 = -1;
-					while((pos1 = configString.indexOf("{{")) != -1)
-					{
+					while((pos1 = configString.indexOf("{{")) != -1) {
 						int pos2 = configString.indexOf("}}", pos1);
 						String key = configString.substring(pos1 + 2, pos2);
 						String val = props != null && props.getProperty(key) != null ? props.getProperty(key) : System.getenv(key);
 						if(val == null) val = "";
 						configString = configString.substring(0, pos1) + val + configString.substring(pos2 + 2);
 					}
-					config = new DataMap(configString);
-					new RedbackServer(config);
-				}
-				else
-				{
-					Logger.getLogger("io.redback").severe("No config file provided");
-				}
-			} 
-			catch (Exception e)
-			{
-				e.printStackTrace();
+					new RedbackServer(new DataMap(configString));
+	
+			} else {
+				Logger.getLogger("io.redback").severe("No config file provided");
 			}
-		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 
 	}
 
