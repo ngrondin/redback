@@ -101,7 +101,7 @@ public class ClientManager extends Thread {
 		}			
 	}
 	
-	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, String username) throws RedbackException {
+	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, boolean notifAuthorized, String screenSize, String username) throws RedbackException {
 		if(deviceCollection != null && dataClient != null) {
 			DataMap key = new DataMap("_id", deviceId);
 			DataMap data = new DataMap();
@@ -109,6 +109,8 @@ public class ClientManager extends Thread {
 			data.put("os", os);
 			data.put("app", appVersion);
 			data.put("locationpermissions", locationPermissions);
+			data.put("notifauthorized", notifAuthorized);
+			data.put("screen", screenSize);
 			data.put("username", username);
 			data.put("lastlogin", new Date());
 			dataClient.putData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key), deviceCollection.convertObjectToSpecific(data));

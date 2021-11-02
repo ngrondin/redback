@@ -122,6 +122,7 @@ import { RbStarsInputComponent } from './inputs/rb-stars-input/rb-stars-input.co
 import { RbPercentInputComponent } from './inputs/rb-percent-input/rb-percent-input.component';
 import { RbNotificationBellComponent } from './rb-notification-bell/rb-notification-bell.component';
 import { RbNotificationListComponent } from './rb-notification-list/rb-notification-list.component';
+import { PlatformModule } from '@angular/cdk/platform';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -140,6 +141,7 @@ window.redback = window.redback || {};
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    PlatformModule,
     MatIconModule,
     HttpClientModule,
     ToastrModule.forRoot(),

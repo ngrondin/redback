@@ -99,6 +99,10 @@ export class RbObject {
         if(attr != null) {
             if(attr.indexOf('.') == -1) {
                 ret = this.related[attr];
+            } else {
+                let root = attr.substring(0, attr.lastIndexOf("."));
+                let related = this.getRelated(root);
+                return related.related[attr.substring(attr.lastIndexOf(".") + 1)];
             }
         }
         if(typeof ret == 'undefined') ret = null;

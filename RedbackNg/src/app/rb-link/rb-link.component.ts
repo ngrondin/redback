@@ -36,10 +36,13 @@ export class RbLinkComponent extends RbDataObserverComponent {
         target['object'] = this.rbObject.objectname;
         target['filter'] = {uid: "'" + this.rbObject.uid + "'"};
       } else {
-        let related = this.rbObject.related[this.attribute];
+        let related = this.rbObject.getRelated(this.attribute);
         if(related != null) {
           target['object'] = related.objectname;
           target['filter'] = {uid: "'" + related.uid + "'"};
+        } else {
+          let relatedUid = this.rbObject.get(this.attribute);
+          target['filter'] = {uid: "'" + relatedUid + "'"};
         }
       }
       if(this.view != null) {

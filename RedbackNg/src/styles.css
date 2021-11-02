@@ -131,7 +131,7 @@ rb-menu > .mat-list-base {
 }
 
 .rb-switch-margin {
-    margin: var(--v16px) var(--v5px) var(--v12px) var(--v16px)
+    margin: var(--v24px) var(--v10px) var(--v12px) var(--v16px)
 }
 
 .rb-input-text-color {

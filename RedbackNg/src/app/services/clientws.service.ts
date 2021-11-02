@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { UUID } from 'angular2-uuid';
+import { Platform } from '@angular/cdk/platform';
 
 export class Upload {
   uploaduid = UUID.UUID();
@@ -61,6 +62,7 @@ export class Upload {
   providedIn: 'root'
 })
 export class ClientWSService {
+  public deviceId: string;
   public baseUrl: string;
   public path: string;
   public websocket: WebSocketSubject<any>;
@@ -78,8 +80,15 @@ export class ClientWSService {
   public heartbeatFreq: number = 0;
 
   constructor(
-    private http: HttpClient
-  ) { }
+    private http: HttpClient,
+    private platform: Platform
+  ) {
+    this.deviceId = localStorage.getItem("rbdeviceid");
+    if(this.deviceId == null) {
+      this.deviceId = UUID.UUID();
+      localStorage.setItem("rbdeviceid", this.deviceId);
+    }
+  }
 
   initWebsocket() : Observable<boolean> {
     if(this.path != null && this.path != "" && this.websocket == null) {
@@ -111,6 +120,7 @@ export class ClientWSService {
         this.connected = true;
         console.log("WS Connection Open");
         this.sendSubscriptionRequests();
+        this.sendDeviceInfo();
         this.heartbeatFreq = 10000;
         this.stateObservers.forEach((observer) => observer.next(true));
       }
@@ -169,6 +179,18 @@ export class ClientWSService {
       this.websocket.next({type:"heartbeat"});
       setTimeout(() => {this.heartbeat()}, this.heartbeatFreq);
     }
+  }
+
+  sendDeviceInfo() {
+    let req = {
+      type:"clientinfo",
+      data:{
+       deviceid: this.deviceId,
+       devicemodel: this.platform.BLINK ? "blink" : this.platform.EDGE ? "edge" : this.platform.FIREFOX ? "firefox" : this.platform.SAFARI ? "safari" : this.platform.TRIDENT ? "trident" : this.platform.WEBKIT ? "webkit" : "unknown",
+       screensize: window.innerWidth + "x" + window.innerHeight 
+      }
+    };
+    this.websocket.next(req);
   }
 
   sendSubscriptionRequests() {
