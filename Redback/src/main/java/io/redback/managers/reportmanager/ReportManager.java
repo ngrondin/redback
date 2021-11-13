@@ -7,8 +7,10 @@ import java.util.Map;
 //import java.util.logging.Logger;
 
 import io.firebus.Firebus;
+import io.firebus.Payload;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.interfaces.Consumer;
 import io.firebus.script.ScriptFactory;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
@@ -23,7 +25,7 @@ import io.redback.utils.CollectionConfig;
 import io.redback.utils.RedbackFileMetaData;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
 
-public class ReportManager {
+public class ReportManager implements Consumer {
 	//private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
 	protected ScriptFactory scriptFactory;
@@ -58,9 +60,19 @@ public class ReportManager {
 			configs = new HashMap<String, ReportConfig>();
 			domainConfigs = new HashMap<String, Map<String, ReportConfig>>();
 			listsQueried = new HashMap<Integer, List<ReportConfig>>();
+			firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
 			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising Report Manager", e);
+		}
+	}
+
+	public void consume(Payload payload) {
+		try {
+			DataMap key = payload.getDataMap();
+			if(domainConfigs.get(key.getString("domain")) != null)
+				domainConfigs.get(key.getString("domain")).remove(key.getString("name"));
+		} catch(Exception e) {
 		}
 	}
 	
@@ -206,7 +218,10 @@ public class ReportManager {
 	}
 	
 	public void clearDomainCache(Session session, String domain, String name) throws RedbackException {
-		if(domainConfigs.get(domain) != null)
-			domainConfigs.get(domain).remove(name);
+		DataMap key = new DataMap();
+		key.put("domain", domain);
+		key.put("name", name);
+		firebus.publish("_rb_domain_cache_clear", new Payload(key));
 	}
+
 }
