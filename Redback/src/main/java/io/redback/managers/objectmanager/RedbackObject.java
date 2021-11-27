@@ -14,6 +14,7 @@ import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.script.Expression;
 import io.firebus.script.Function;
+import io.firebus.script.ScriptContext;
 import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.exceptions.ScriptValueException;
 import io.firebus.data.DataFilter;
@@ -374,11 +375,9 @@ public class RedbackObject extends RedbackElement
 					data.put(name, actualValue);
 					updatedAttributes.put(name, trace);	
 					try {
-						if(attributeConfig.getExpression() == null) 
-							scriptContext.put(name, actualValue.getObject());
-						scriptContext.put("previousValue", currentValue.getObject());
-						executeAttributeFunctionForEvent(name, "onupdate");
-						scriptContext.remove("previousValue");
+						ScriptContext attributeUpdateScriptContext = this.scriptContext.createChild();
+						attributeUpdateScriptContext.put("previousValue", currentValue.getObject());
+						executeAttributeFunctionForEvent(name, "onupdate", attributeUpdateScriptContext);
 					} catch(ScriptValueException e) {
 						throw new RedbackException("Error setting script context value", e);
 					}
@@ -679,30 +678,43 @@ public class RedbackObject extends RedbackElement
 
 	}
 	
-
 	protected Object executeFunctionForEvent(String event) throws RedbackException
 	{
-		Function function  = config.getScriptForEvent(event);
-		if(function != null)
-			return executeFunction(function, getObjectConfig().getName() + ":" + getUID().getString() + "." + event);
-		else
-			return null;
+		return executeFunctionForEvent(event, this.scriptContext);
 	}
 
-	protected void executeAttributeFunctionForEvent(String attributeName, String event) throws RedbackException
+	protected Object executeFunctionForEvent(String event, ScriptContext context) throws RedbackException
 	{
-		Function script  = config.getAttributeConfig(attributeName).getScriptForEvent(event);
-		if(script != null)
-			executeFunction(script, getObjectConfig().getName() + ":" + getUID().getString() + "." + attributeName + "." + event);
+		Function function  = config.getScriptForEvent(event);
+		if(function != null) {
+			String name = getObjectConfig().getName() + ":" + getUID().getString() + "." + event;
+			return executeFunction(function, name, context);
+		} else {
+			return null;
+		}
 	}
 	
-	protected Object executeFunction(Function function, String name) throws RedbackException
+	protected void executeAttributeFunctionForEvent(String attributeName, String event) throws RedbackException
+	{
+		executeAttributeFunctionForEvent(attributeName, event, this.scriptContext);
+	}
+
+	protected void executeAttributeFunctionForEvent(String attributeName, String event, ScriptContext context) throws RedbackException
+	{
+		Function script  = config.getAttributeConfig(attributeName).getScriptForEvent(event);
+		if(script != null) {
+			String name = getObjectConfig().getName() + ":" + getUID().getString() + "." + attributeName + "." + event;
+			executeFunction(script, name, context);
+		}
+	}
+	
+	protected Object executeFunction(Function function, String name, ScriptContext context) throws RedbackException
 	{
 		Object retVal = null;
 		logger.finer("Start executing script : " + name);
 		try
 		{
-			retVal = function.call(scriptContext);
+			retVal = function.call(context);
 		} 
 		catch (ScriptException e)
 		{
