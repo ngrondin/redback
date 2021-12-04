@@ -72,6 +72,7 @@ public class ReportManager implements Consumer {
 			DataMap key = payload.getDataMap();
 			if(domainConfigs.get(key.getString("domain")) != null)
 				domainConfigs.get(key.getString("domain")).remove(key.getString("name"));
+			listsQueried.clear();
 		} catch(Exception e) {
 		}
 	}
