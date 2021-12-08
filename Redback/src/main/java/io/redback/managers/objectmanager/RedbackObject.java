@@ -375,7 +375,9 @@ public class RedbackObject extends RedbackElement
 					data.put(name, actualValue);
 					updatedAttributes.put(name, trace);	
 					try {
-						ScriptContext attributeUpdateScriptContext = this.scriptContext.createChild();
+						if(attributeConfig.getExpression() == null) 
+							scriptContext.put(name, actualValue.getObject());
+						ScriptContext attributeUpdateScriptContext = scriptContext.createChild();
 						attributeUpdateScriptContext.put("previousValue", currentValue.getObject());
 						executeAttributeFunctionForEvent(name, "onupdate", attributeUpdateScriptContext);
 					} catch(ScriptValueException e) {
