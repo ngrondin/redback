@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { ToastrModule } from 'ngx-toastr';
 
-import {Compiler, COMPILER_OPTIONS, CompilerFactory} from '@angular/core';
+import {Compiler, COMPILER_OPTIONS, CompilerFactory, Injectable, APP_INITIALIZER} from '@angular/core';
 import {JitCompilerFactory} from '@angular/platform-browser-dynamic';
 import { Injector } from '@angular/core';
 import { NgModule } from '@angular/core';
@@ -30,7 +30,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { RbListScrollDirective } from './rb-list-scroll/rb-list-scroll.directive';
 import { ApiService } from './services/api.service';
@@ -45,7 +45,7 @@ import { RbSearchComponent } from './rb-search/rb-search.component';
 import { RbMapComponent } from './rb-map/rb-map.component';
 import { RbDurationInputComponent } from './inputs/rb-duration-input/rb-duration-input.component';
 import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.component';
-import { AgmCoreModule } from '@agm/core';
+import { AgmCoreModule, LAZY_MAPS_API_CONFIG, LazyMapsAPILoaderConfigLiteral} from '@agm/core';
 import { RbProcessactionsComponent } from './rb-processactions/rb-processactions.component';
 import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
 import { RbViewDirective } from './rb-view/rb-view.directive';
@@ -135,7 +135,10 @@ declare global {
 }
 window.redback = window.redback || {};
 
+
+
 //export let isoDateRegExp: RegExp = /^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d{1,9})?(?:Z|[+-][01]\\d:[0-5]\\d)$/;
+
 
 @NgModule({
   imports: [
@@ -170,7 +173,7 @@ window.redback = window.redback || {};
     NgxChartsModule,
     AgmOverlays,
     AgmCoreModule.forRoot({
-      apiKey: 'AIzaSyBc0KUFKS6XuCL2PRiFv9XATkMFJah6x88'
+      apiKey: window['googlekey']
     }),
     AceModule,
     RedbackgraphsModule

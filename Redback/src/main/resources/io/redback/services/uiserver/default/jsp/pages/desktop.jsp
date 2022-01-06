@@ -11,7 +11,10 @@ var versionOrDefault = version != null ? version : 'default';
   <link rel="icon" type="image/x-icon" href="<%=config.logo%>">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC78ZWKE3Shecj9QgDf84TW9kk7r5NrVPE&libraries=places"></script>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%=global.googlekey%>&libraries=places"></script>
+  <script>
+    var googlekey = "<%=global.googlekey%>";
+  </script>
 </head>
 <body oncontextmenu="return false;">
   <app-root 
