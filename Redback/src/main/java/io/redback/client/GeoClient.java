@@ -6,6 +6,7 @@ import java.util.List;
 import io.firebus.Firebus;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
+import io.redback.security.Session;
 import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 
@@ -16,31 +17,31 @@ public class GeoClient extends Client {
 		super(fb, sn);
 	}
 	
-	public Geometry geocode(String address) throws RedbackException {
+	public Geometry geocode(Session session, String address) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "geocode");
 			req.put("address", address);
-			DataMap resp = request(req);
+			DataMap resp = request(session, req);
 			return new Geometry(resp.getObject("geometry"));
 		} catch(Exception e) {
 			throw new RedbackException("Error geocoding", e);
 		}
 	}
 
-	public String geocode(Geometry geometry) throws RedbackException {
+	public String geocode(Session session, Geometry geometry) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "geocode");
 			req.put("geometry", geometry.toDataMap());
-			DataMap resp = request(req);
+			DataMap resp = request(session, req);
 			return resp.getString("address");
 		} catch(Exception e) {
 			throw new RedbackException("Error geocoding", e);
 		}		
 	}
 	
-	public List<String> address(String search, Geometry location, Long radius) throws RedbackException {
+	public List<String> address(Session session, String search, Geometry location, Long radius) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "address");
@@ -49,7 +50,7 @@ public class GeoClient extends Client {
 				req.put("location", location.toDataMap());
 			if(radius != null)
 				req.put("radius", radius);
-			DataMap resp = request(req);
+			DataMap resp = request(session, req);
 			List<String> list = new ArrayList<String>();
 			for(int i = 0; i < resp.getList("result").size(); i++) {
 				list.add(resp.getList("result").getString(i));
@@ -60,25 +61,25 @@ public class GeoClient extends Client {
 		}		
 	}	
 	
-	public String timezone(Geometry geometry) throws RedbackException {
+	public String timezone(Session session, Geometry geometry) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "timezone");
 			req.put("geometry", geometry.toDataMap());
-			DataMap resp = request(req);
+			DataMap resp = request(session, req);
 			return resp.getString("timezone");
 		} catch(Exception e) {
 			throw new RedbackException("Error getting timezone", e);
 		}		
 	}
 	
-	public GeoRoute travel(Geometry start, Geometry end) throws RedbackException {
+	public GeoRoute travel(Session session, Geometry start, Geometry end) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "travel");
 			req.put("start", start.toDataMap());
 			req.put("end", end.toDataMap());
-			DataMap resp = request(req);
+			DataMap resp = request(session, req);
 			return new GeoRoute(resp);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting travel distance and time", e);

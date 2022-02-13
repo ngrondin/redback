@@ -263,7 +263,7 @@ public class ObjectManager
 			context.put("om", new ObjectManagerJSWrapper(this, session));
 			context.put("pm", new ProcessClientJSWrapper(getProcessClient(), session));
 			context.put("pc", new ProcessClientJSWrapper(getProcessClient(), session));
-			context.put("geo", new GeoClientJSWrapper(geoClient));
+			context.put("geo", new GeoClientJSWrapper(geoClient, session));
 			context.put("fc", new FileClientJSWrapper(getFileClient(), session));
 			context.put("rc", new ReportClientJSWrapper(getReportClient(), session));
 			context.put("nc", new NotificationClientJSWrapper(getNotificationClient(), session));

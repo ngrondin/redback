@@ -26,11 +26,14 @@ public class RedbackGeoServer extends GeoServer
 	protected String addressUrl;
 	protected String timezoneUrl;
 	protected String distanceUrl;
+	protected long lastCall;
+	protected long minBetweenCalls = 500;
 
 
 	public RedbackGeoServer(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
+		lastCall = 0;
 		apiKey = config.getString("apikey");
 		outboundService = config.getString("outboundservice");
 		dataService = config.getString("dataservice");
@@ -52,7 +55,7 @@ public class RedbackGeoServer extends GeoServer
 			DataMap request = new DataMap();
 			request.put("method", "get");
 			request.put("url", geocodeUrl + "?address=" + StringUtils.urlencode(address) + "&key=" + apiKey);
-			DataMap resp = requestService(request);
+			DataMap resp = requestGoogleService(request);
 			if(resp.getList("results").size() > 0) {
 				DataMap geoData = new DataMap();
 				geoData.put("type", "point");
@@ -79,7 +82,7 @@ public class RedbackGeoServer extends GeoServer
 			DataMap request = new DataMap();
 			request.put("method", "get");
 			request.put("url", geocodeUrl + "?latlng=" + geometry.getLatitude() + "," + geometry.getLongitude() + "&key=" + apiKey);
-			DataMap resp = requestService(request);
+			DataMap resp = requestGoogleService(request);
 			if(resp.getList("results").size() > 0) {
 				address = resp.getString("results.0.formatted_address");
 			} 
@@ -104,7 +107,7 @@ public class RedbackGeoServer extends GeoServer
 			DataMap request = new DataMap();
 			request.put("method", "get");
 			request.put("url", url);
-			DataMap resp = requestService(request);
+			DataMap resp = requestGoogleService(request);
 			if(resp.getList("predictions").size() > 0) {
 				for(int i = 0; i < resp.getList("predictions").size(); i++) 
 				{
@@ -129,7 +132,7 @@ public class RedbackGeoServer extends GeoServer
 			DataMap request = new DataMap();
 			request.put("method", "get");
 			request.put("url", timezoneUrl + "?location=" + geometry.getLatitude() + "," + geometry.getLongitude());
-			DataMap resp = requestService(request);
+			DataMap resp = requestGeneralService(request);
 			if(resp.containsKey("timezone")) {
 				zoneId = resp.getString("timezone");
 			}
@@ -150,21 +153,28 @@ public class RedbackGeoServer extends GeoServer
 				DataMap request = new DataMap();
 				request.put("method", "get");
 				request.put("url", distanceUrl + "?origins=" + start.getLatitude() + "," + start.getLongitude() + "&destinations=" + end.getLatitude() + "," + end.getLongitude() + "&key=" + apiKey);
-				DataMap resp = requestService(request);
+				DataMap resp = requestGoogleService(request);
 				DataList rows = resp.getList("rows");
-				if(rows.size() > 0) {
-					DataList elements = ((DataMap)rows.get(0)).getList("elements");
-					if(elements.size() > 0) {
-						DataMap element = (DataMap)elements.get(0);
-						if(element.getString("status").equals("OK")) {
-							DataMap rc = new DataMap();
-							rc.put("start", start.toDataMap());
-							rc.put("end", end.toDataMap());
-							rc.put("distance", element.getNumber("distance.value").longValue());
-							rc.put("duration", 1000 * element.getNumber("duration.value").longValue());
-							route = new GeoRoute(rc);						
+				String errorMsg = resp.getString("error_message");
+				if(errorMsg == null) {
+					if(rows.size() > 0) {
+						DataList elements = ((DataMap)rows.get(0)).getList("elements");
+						if(elements.size() > 0) {
+							DataMap element = (DataMap)elements.get(0);
+							if(element.getString("status").equals("OK")) {
+								DataMap rc = new DataMap();
+								rc.put("start", start.toDataMap());
+								rc.put("end", end.toDataMap());
+								rc.put("distance", element.getNumber("distance.value").longValue());
+								rc.put("duration", 1000 * element.getNumber("duration.value").longValue());
+								route = new GeoRoute(rc);						
+							}
 						}
+					} else {
+						throw new RedbackException("No rows returned");
 					}
+				} else {
+					throw new RedbackException(errorMsg);
 				}
 			}
 			catch(Exception e)
@@ -177,28 +187,64 @@ public class RedbackGeoServer extends GeoServer
 		return route;
 	}
 	
-	protected DataMap requestService(DataMap request) throws RedbackException {
+	protected DataMap requestGoogleService(DataMap request) throws RedbackException {
+		try {
+			DataMap response = getCacheForRequest(request);
+			if(response == null) {
+				long now = System.currentTimeMillis();
+				if(now < lastCall + minBetweenCalls)
+					Thread.sleep(minBetweenCalls - (now - lastCall));				
+				lastCall = System.currentTimeMillis(); // Multi-threading unsafe
+				Payload respPayload = firebus.requestService(outboundService, new Payload(request));
+				response = respPayload.getDataMap();
+				String errorMessage = response.getString("error_message");
+				if(errorMessage == null)
+					putCacheForRequest(request, response);
+			}
+			return response;
+		} catch(Exception e) {
+			throw new RedbackException("Error requesting Google geo service", e);
+		}
+	}
+	
+
+
+	protected DataMap requestGeneralService(DataMap request) throws RedbackException {
+		try {
+			DataMap response = getCacheForRequest(request);
+			if(response == null) {
+				Payload respPayload = firebus.requestService(outboundService, new Payload(request));
+				response = respPayload.getDataMap();
+				putCacheForRequest(request, response);
+			}
+			return response;
+		} catch(Exception e) {
+			throw new RedbackException("Error requesting external geo service", e);
+		}
+	}
+	
+	protected DataMap getCacheForRequest(DataMap request) throws RedbackException {
 		try {
 			DataMap resp = null;
 			String reqStr = request.toString(0, true);
 			if(dataClient != null) {
 				DataMap cachedResult = dataClient.getData(cacheCollection.getName(), new DataMap("request", reqStr), null);
-				if(cachedResult.getList("result").size() > 0) {
+				if(cachedResult.getList("result").size() > 0)
 					resp = cachedResult.getList("result").getObject(0).getObject("response");
-				}
-			}
-			if(resp == null) {
-				Payload respPayload = firebus.requestService(outboundService, new Payload(request));
-				resp = new DataMap(respPayload.getString());
-				if(dataClient != null) {
-					dataClient.putData(cacheCollection.getName(), new DataMap("request", reqStr), new DataMap("response", resp));
-				}
 			}
 			return resp;
 		} catch(Exception e) {
-			throw new RedbackException("Error requesting external geo service", e);
-		}
+			throw new RedbackException("Error retrieving cache for Geo service", e);
+		}		
 	}
-
+	
+	protected void putCacheForRequest(DataMap request, DataMap response) throws RedbackException {
+		try {
+			if(dataClient != null && response != null)
+				dataClient.putData(cacheCollection.getName(), new DataMap("request", request.toString(0, true)), new DataMap("response", response));
+		} catch(Exception e) {
+			throw new RedbackException("Error requesting external geo service", e);
+		}		
+	}
 
 }

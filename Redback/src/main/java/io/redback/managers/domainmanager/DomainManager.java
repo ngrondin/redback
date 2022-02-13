@@ -325,7 +325,7 @@ public class DomainManager implements Consumer {
 		context.put("nc", new NotificationClientJSWrapper(notificationClient, session));
 		context.put("rc", new ReportClientJSWrapper(reportClient, session, df.getDomain()));
 		context.put("gc", new GatewayClientJSWrapper(gatewayClient));
-		context.put("geo", new GeoClientJSWrapper(geoClient));
+		context.put("geo", new GeoClientJSWrapper(geoClient, session));
 		context.put("ic", new IntegrationClientJSWrapper(integrationClient, session, df.getDomain()));
 		context.put("param", param);
 		context.put("dm", new DomainManagerJSWrapper(this, session, df.getDomain()));
