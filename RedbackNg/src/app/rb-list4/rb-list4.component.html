@@ -9,7 +9,8 @@
                 mat-list-item 
                 [rb-drag-object]="item.object"
                 [class]="'rb-list-item' + (selectedObject == item.object ? ' rb-list-item-active' : '')"
-                (click)="itemClicked(item.object)">
+                (click)="itemClicked(item.object)"
+                [style.background]="item.color">
                 <div 
                     class="rb-list-item-data">
                     <div

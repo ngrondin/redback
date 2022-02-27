@@ -16,6 +16,8 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('subattribute') subattribute: string;
   @Input('meta1attribute') meta1attribute: string;
   @Input('meta2attribute') meta2attribute: string;
+  @Input('colormap') colormap: any;
+  @Input('colorattribute') colorattribute: string;
   @Input('modal') modal: string;
 
   enhancedList: any[];
@@ -87,6 +89,20 @@ export class RbList4Component extends RbDataObserverComponent {
         data["meta2"] = this.formatText(obj.get(this.meta2attribute));
         data["meta2isabadge"] = data["meta2"] !== "" && !isNaN(Number(data["meta2"]))
       }
+
+      let thisColorAttribute = this.colorattribute;
+      if(this.userPref != null && this.userPref.colorattribute != null) {
+        thisColorAttribute = this.userPref.colorattribute;
+      } 
+      let thisColorMap = this.colormap;
+      if(this.userPref != null && this.userPref.colormap != null) {
+        thisColorMap = this.userPref.colormap;
+      }
+      if(thisColorAttribute != null) {
+        data["color"] = thisColorMap != null ? thisColorMap[obj.get(thisColorAttribute)] : obj.get(thisColorAttribute);
+      } else {
+        data["color"] = "transparent";
+      }
       
       if(data["main"] == null || data["main"] == "") {
         if(data["sub"] != null && data["sub"] != "") {
@@ -95,7 +111,7 @@ export class RbList4Component extends RbDataObserverComponent {
         } else {
           data["main"] = "No Label"
         }
-      } 
+      }       
       data["object"] = obj;
       this.enhancedList.push(data);                 
     }
