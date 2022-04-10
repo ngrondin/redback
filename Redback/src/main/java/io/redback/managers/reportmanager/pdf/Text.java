@@ -13,6 +13,7 @@ public class Text extends DataUnit {
 	public static int ALIGN_RIGHT = 1;
 	public static int ALIGN_CENTER = 2;
 	protected int align = 0;
+	protected int valign = 0;
 	protected boolean bold = false;
 	
 	public Text(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {

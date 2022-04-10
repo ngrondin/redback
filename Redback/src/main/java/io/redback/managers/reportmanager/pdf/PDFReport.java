@@ -134,6 +134,12 @@ public class PDFReport extends Report {
 				stream.addRect(offsetx, pageTop - offsety - reportBox.height, reportBox.width, reportBox.height);
 				stream.fill();
 			}
+			if(reportBox.borderColor != null) {
+				stream.setStrokingColor(reportBox.borderColor);
+				stream.setLineWidth(0.3f);
+				stream.addRect(offsetx, pageTop - offsety - reportBox.height, reportBox.width, reportBox.height);
+				stream.stroke();
+			}
 			for(Box rb : reportBox.children) {
 				renderReportBox(page, stream, rb, offsetx + rb.x, offsety + rb.y);
 			}
@@ -153,7 +159,7 @@ public class PDFReport extends Report {
 				stream.beginText(); 
 				stream.setNonStrokingColor(reportBox.color);
 				stream.setFont(reportBox.font, reportBox.fontSize);
-				stream.newLineAtOffset(offsetx, pageTop - offsety - reportBox.height);
+				stream.newLineAtOffset(offsetx, pageTop - offsety - (0.75f * reportBox.height));
 				stream.showText(txt);      
 				stream.endText();
 			}

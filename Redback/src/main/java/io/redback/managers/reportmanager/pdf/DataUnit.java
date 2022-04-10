@@ -31,6 +31,7 @@ public abstract class DataUnit extends Unit {
 	protected PDFont font;
 	protected PDFont boldFont;
 	protected float fontSize;
+	protected float fontHeight;
 	protected Color color;
 	protected float height;
 	protected float width;
@@ -46,7 +47,8 @@ public abstract class DataUnit extends Unit {
 			font = PDType1Font.HELVETICA;
 			boldFont = PDType1Font.HELVETICA_BOLD;
 			fontSize = config.containsKey("fontsize") ? config.getNumber("fontsize").floatValue() : 12f;
-			height = config.containsKey("height") ? config.getNumber("height").floatValue() : 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize;
+			fontHeight = 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize; 
+			height = config.containsKey("height") ? config.getNumber("height").floatValue() : fontHeight;
 			color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
 			format = config.getString("format");
 			commaToLine = config.containsKey("commatoline") ? config.getBoolean("commatoline") : false;

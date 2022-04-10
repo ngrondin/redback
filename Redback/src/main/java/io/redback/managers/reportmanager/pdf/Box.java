@@ -12,6 +12,7 @@ public class Box {
 	public PDFont font;
 	public float fontSize;
 	public Color color;
+	public Color borderColor;
 	public float lineWidth;
 	public byte[] bytes;
 	public boolean checked;

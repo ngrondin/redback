@@ -19,6 +19,8 @@ public class HSection extends ContainerUnit {
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
 		Box c = Box.HContainer(true);
 		c.breakBefore = pagebreak;
+		c.color = color(context);
+		c.borderColor = borderColor(context);
 		if(show(context)) {
 			for(Unit unit: contentUnits) {
 				c.addChild(unit.produce(context));
