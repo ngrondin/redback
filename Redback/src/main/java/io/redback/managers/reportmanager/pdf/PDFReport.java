@@ -25,7 +25,13 @@ public class PDFReport extends Report {
 	protected PDDocument document;
 	protected List<Unit> rootUnits;
 	protected List<Unit> headerUnits;	
-	protected List<Unit> footerUnits;	
+	protected List<Unit> footerUnits;
+	protected float pageHeight = 792;
+	protected float pageWidth = 550;
+	protected float marginTop = 50;
+	protected float marginBottom = 50;
+	protected float marginLeft = 50;
+	protected float marginRight = 50;
 		
 	public PDFReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
 		super(s, rm, rc);
@@ -48,7 +54,13 @@ public class PDFReport extends Report {
 			for(int i = 0; i < footer.size(); i++) {
 				footerUnits.add(Unit.fromConfig(reportManager, rc, footer.getObject(i)));
 			}		
-		}		
+		}
+		DataMap layout = rc.getData().getObject("layout");
+		if(layout != null) {
+			if(layout.containsKey("margin")) {
+				marginTop = marginBottom = marginLeft = marginRight = layout.getNumber("margin").floatValue();
+			} 
+		}
 	}
 	
 	public void produce(DataMap filter) throws RedbackException {
@@ -60,17 +72,19 @@ public class PDFReport extends Report {
 			Box header = Box.VContainer(true);
 			if(headerUnits != null) {
 				for(int j = 0; j < headerUnits.size(); j++) 
-					header.addChild(headerUnits.get(j).produce(context));			
+					header.addChild(headerUnits.get(j).produce(context));
+				marginTop = Math.max(marginTop * 0.4f, marginTop - header.height);
 			}				
 			Box footer = Box.VContainer(true);
 			if(footerUnits != null) {
 				for(int j = 0; j < footerUnits.size(); j++) 
 					footer.addChild(footerUnits.get(j).produce(context));		
+				marginBottom = Math.max(marginBottom * 0.4f, marginBottom - footer.height);
 			}
 			Box root = Box.VContainer(true);
 			for(int i = 0; i < rootUnits.size(); i++) 
 				root.addChild(rootUnits.get(i).produce(context));
-			float maxHeight = 667 - header.height;
+			float maxHeight = pageHeight - marginTop - marginBottom - header.height - footer.height;
 			List<Box> pages = paginate(root, maxHeight);
 			for(int i = 0; i < pages.size(); i++) {
 				context.put("page", (i + 1));
@@ -119,15 +133,16 @@ public class PDFReport extends Report {
 		PDPage pdPage = new PDPage();
 		document.addPage(pdPage);
 		PDPageContentStream contentStream = new PDPageContentStream(document, pdPage);
-		renderReportBox(pdPage, contentStream, header, 50, 20);
-		renderReportBox(pdPage, contentStream, content, 50, 50 + header.height);
-		renderReportBox(pdPage, contentStream, footer, 50, 730);
+		
+		renderReportBox(pdPage, contentStream, header, marginLeft, marginTop);
+		renderReportBox(pdPage, contentStream, content, marginLeft, marginTop + header.height);
+		renderReportBox(pdPage, contentStream, footer, marginLeft, pageHeight - marginBottom - footer.height);
 		contentStream.close();			
 	}
 	
 	protected void renderReportBox(PDPage page, PDPageContentStream stream, Box reportBox, float offsetx, float offsety) throws IOException {
 
-		float pageTop = 800;//782;
+		float pageTop = pageHeight;//782;
 		if(reportBox.type.equals("container")) {
 			if(reportBox.color != null) {
 				stream.setNonStrokingColor(reportBox.color);
@@ -159,7 +174,7 @@ public class PDFReport extends Report {
 				stream.beginText(); 
 				stream.setNonStrokingColor(reportBox.color);
 				stream.setFont(reportBox.font, reportBox.fontSize);
-				stream.newLineAtOffset(offsetx, pageTop - offsety - (0.75f * reportBox.height));
+				stream.newLineAtOffset(offsetx + (0.15f * reportBox.height), pageTop - offsety - (0.75f * reportBox.height) );
 				stream.showText(txt);      
 				stream.endText();
 			}
