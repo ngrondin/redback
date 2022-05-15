@@ -60,7 +60,7 @@ public class DomainServiceUnit extends ProcessUnit
 				if(logger.getLevel() == Level.FINEST) logger.finest("Calling " + processManager.getDomainServiceName() + " " + req);
 				Payload response = processManager.getFirebus().requestService(processManager.getDomainServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
-				context.put("result", respData);
+				context.put("result", respData.containsKey("data") ? respData.get("data") : null);
 				DataMap respOutput = outputExpressionMap.eval(context);
 				if(logger.getLevel() == Level.FINEST) logger.finest("Output data was: " + respOutput);
 				pi.setData(respOutput);
