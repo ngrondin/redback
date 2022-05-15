@@ -55,7 +55,10 @@ public abstract class DomainServer extends AuthenticatedServiceProvider {
 					boolean async = request.getBoolean("async");
 					DataMap param = request.getObject("param");
 					Object ret = executeFunction(session, domain, name, param, async);
-					return new Payload(ret != null ? ret.toString() : new DataMap("result", "ok").toString());
+					DataMap resp = new DataMap("result", "ok");
+					if(ret != null) 
+						resp.put("data", ret);
+					return new Payload(resp);
 				} else if(action.equals("executeinalldomains")) {
 					executeFunctionInAllDomains(session, name, request.getObject("param"));
 					return new Payload(new DataMap("result", "ok"));
