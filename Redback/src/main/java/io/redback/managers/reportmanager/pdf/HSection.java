@@ -9,10 +9,12 @@ import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 
 public class HSection extends ContainerUnit {
+	protected float width;
 	protected float height;
 	
 	public HSection(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
+		width = c.containsKey("width") ? c.getNumber("width").floatValue() : -1;
 		height = c.containsKey("height") ? c.getNumber("height").floatValue() : -1;
 	}
 
@@ -26,6 +28,8 @@ public class HSection extends ContainerUnit {
 				c.addChild(unit.produce(context));
 			}
 		}
+		if(width > -1) c.width = width;
+		if(height > -1) c.height = height;
 		return c;		
 	}
 

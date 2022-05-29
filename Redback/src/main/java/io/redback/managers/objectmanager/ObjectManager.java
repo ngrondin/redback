@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
@@ -81,10 +82,12 @@ public class ObjectManager
 	protected String objectUpdateChannel;
 	protected DataMap globalVariables;
 	protected HashMap<String, ObjectConfig> objectConfigs;
+	protected Map<String, Map<String, ObjectConfig>> domainObjectConfigs;
 	protected HashMap<String, ScriptConfig> globalScripts;
 	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters;
 	protected CollectionConfig traceCollection;
+	protected CollectionConfig configCollection;
 	protected HashMap<Long, List<RedbackObject>> transactions;
 	protected AccessManagementClient accessManagementClient;
 	protected DataClient dataClient;
@@ -127,6 +130,7 @@ public class ObjectManager
 			objectUpdateChannel = config.getString("objectupdatechannel");
 			globalVariables = config.getObject("globalvariables");
 			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
+			configCollection = new CollectionConfig(config.containsKey("configcollection") ? config.getString("configcollection") : "rbo_object");
 			useMultiDBTransactions = config.containsKey("multidbtransactions") ? config.getBoolean("multidbtransactions") : false;
 			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 			dataClient = new DataClient(firebus, dataServiceName);
@@ -142,6 +146,7 @@ public class ObjectManager
 			jwtSecret = config.getString("jwtsecret");
 			jwtIssuer = config.getString("jwtissuer");
 			objectConfigs = new HashMap<String, ObjectConfig>();
+			domainObjectConfigs = new HashMap<String, Map<String, ObjectConfig>>();
 			globalScripts = new HashMap<String, ScriptConfig>();
 			readRightsFilters = new HashMap<String, ExpressionMap>();
 			transactions = new HashMap<Long, List<RedbackObject>>();
@@ -331,30 +336,49 @@ public class ObjectManager
 		}
 		return scriptConfig;
 	}
-	
-	protected ObjectConfig getObjectConfig(Session session, String object) throws RedbackException
+
+	protected ObjectConfig getObjectConfig(Session session, String name) throws RedbackException
 	{
-		ObjectConfig objectConfig = objectConfigs.get(object);
-		if(objectConfig == null)
-		{
-			try
-			{
-				if(!includeLoaded)
-					loadAllIncludeScripts(session);
-				DataMap cfg = configClient.getConfig(session, "rbo", "object", object);
+		ObjectConfig objectConfig = null;
+		if(!includeLoaded)
+			loadAllIncludeScripts(session);
+		
+		List<String> userDomains = session.getUserProfile().getDomains();
+		Iterator<String> it = userDomains.iterator();
+		while(it.hasNext() && objectConfig == null) {
+			String domain = it.next();
+			if(!domain.equals("*")) {
+				if(!domainObjectConfigs.containsKey(domain)) 
+					domainObjectConfigs.put(domain, new HashMap<String, ObjectConfig>());
+				if(domainObjectConfigs.get(domain).containsKey(name)) {
+					objectConfig = domainObjectConfigs.get(domain).get(name);
+				} else {
+					DataMap key = new DataMap();
+					key.put("domain", domain);
+					key.put("name", name);
+					DataMap res = dataClient.getData(configCollection.getName(), configCollection.convertObjectToSpecific(key), null);
+					if(res.containsKey("result") && res.getList("result").size() > 0) {
+						DataMap cfg = configCollection.convertObjectToCanonical(res.getList("result").getObject(0));
+						objectConfig = new ObjectConfig(this, cfg);
+					}
+					domainObjectConfigs.get(domain).put(name, objectConfig);
+				} 
+			}
+		} 
+		
+		if(objectConfig == null) {
+			if(objectConfigs.containsKey(name)) {
+				return objectConfigs.get(name);
+			} else {
+				DataMap cfg = configClient.getConfig(session, "rbo", "object", name);
 				if(cfg != null) {
 					objectConfig = new ObjectConfig(this, cfg);
-					objectConfigs.put(object, objectConfig);
+					objectConfigs.put(name, objectConfig);
 				} else {
-					throw new RedbackException("Object config '" + object + "' is null");
+					throw new RedbackException("Object config '" + name + "' is null");
 				}
 			}
-			catch(Exception e)
-			{
-				//logger.severe(e.getMessage());
-				throw new RedbackException("Exception getting object config", e);
-			}
-		}
+		} 
 		return objectConfig;
 	}
 	
