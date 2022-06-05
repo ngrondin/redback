@@ -19,11 +19,13 @@ import io.firebus.data.DataMap;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.objectmanager.ObjectConfig;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 import io.redback.services.AccessManager;
 import io.redback.utils.CacheEntry;
+import io.redback.utils.CollectionConfig;
 
 public class RedbackAccessManager extends AccessManager 
 {
@@ -35,9 +37,12 @@ public class RedbackAccessManager extends AccessManager
 	protected String idmUrl;
 	protected String idmClientId;
 	protected String idmClientSecret;
-	protected DataClient dataClient;
 	protected DataList hardUsers;
+	protected DataClient dataClient;
 	protected ConfigurationClient configClient;
+	protected CollectionConfig roleCollection;
+	protected CollectionConfig userCollection;
+	protected Map<String, Map<String, Role>> roles;
 	protected Map<String, CacheEntry<UserProfile>> cachedUserProfiles;
 
 
@@ -47,12 +52,19 @@ public class RedbackAccessManager extends AccessManager
 		sysusername = config.getString("sysuser");
 		secret = config.getString("jwtsecret");
 		issuer = config.getString("jwtissuer");
+		if(config.containsKey("dataservice")) {
+			dataClient = new DataClient(firebus, config.getString("dataservice"));
+			roleCollection = new CollectionConfig(config.containsKey("rolecollection") ? config.getString("rolecollection") : "rbam_role");
+			if(config.containsKey("usercollection"))
+				userCollection = new CollectionConfig(config.getString("usercollection"));
+		}
+		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
 		if(config.containsKey("users")) {
 			type = "hardusers";
 			hardUsers = config.getList("users");
-		} else if(config.containsKey("dataservice")) {
+		} else if(userCollection != null) {
 			type = "data";
-			dataClient = new DataClient(firebus, config.getString("dataservice"));
+			userCollection = new CollectionConfig(config.containsKey("usercollection") ? config.getString("usercollection") : "rbam_user");
 		} else if(config.containsKey("idmurl") && config.containsKey("outboundservice")) {
 			type = "idm";
 			idmUrl = config.getString("idmurl");
@@ -60,7 +72,7 @@ public class RedbackAccessManager extends AccessManager
 			idmClientSecret = config.getString("idmclientsecret");
 			outboundService = config.getString("outboundservice");
 		}
-		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
+		roles = new HashMap<String, Map<String, Role>>();
 		cachedUserProfiles = new HashMap<String, CacheEntry<UserProfile>>();
 	}
 
@@ -133,8 +145,7 @@ public class RedbackAccessManager extends AccessManager
 				}
 				else if(type.equals("data"))
 				{
-					String userCollection = config.containsKey("usertable") ? config.getString("usertable") : "rbam_user";
-					DataMap userResult = dataClient.getData(userCollection, new DataMap("username" , username), null);
+					DataMap userResult = dataClient.getData(userCollection.getName(), userCollection.convertObjectToSpecific(new DataMap("username" , username)), null);
 					if(userResult != null && userResult.getList("result") != null && userResult.getList("result").size() > 0)
 						userConfig = userResult.getList("result").getObject(0);
 				}
@@ -159,15 +170,18 @@ public class RedbackAccessManager extends AccessManager
 				if(userConfig != null)
 				{
 					DataList rolesList = userConfig.getList("roles");
+					DataList domainsList = userConfig.getList("domains");
 					DataMap rights = new DataMap();
-					for(int j = 0; j < rolesList.size(); j++)
+					for(int i = 0; i < rolesList.size(); i++)
 					{
-						String roleName = rolesList.getString(j);
-						Role role = getRole(session, roleName);
-						if(role != null)
+						String roleName = rolesList.getString(i);
+						mergeRoleIntoRights(session, null, roleName, rights);						
+						for(int j = 0; j < domainsList.size(); j++)
 						{
-							DataMap roleRights = role.getAllRights();
-							mergeRights(rights, roleRights);
+							String domain = domainsList.getString(j);
+							if(!(domain != null && domain.equals("*"))) {
+								mergeRoleIntoRights(session, domain, roleName, rights);
+							}
 						}
 					}
 					userConfig.put("rights", rights);
@@ -177,7 +191,6 @@ public class RedbackAccessManager extends AccessManager
 					return userProfile;
 				} else {
 					return null;
-					//throw new RedbackException("Error getting user profile for " + username);
 				}
 			}
 			catch(Exception e)
@@ -187,18 +200,48 @@ public class RedbackAccessManager extends AccessManager
 		}
 	}
 	
-	protected Role getRole(Session session, String name) throws RedbackException
+	
+	protected void mergeRoleIntoRights(Session session, String domain, String roleName, DataMap rights) throws RedbackException
 	{
-		Role role = roles.get(name);
+		Role role = getRole(session, domain, roleName);
+		if(role != null)
+		{
+			DataMap roleRights = role.getAllRights();
+			mergeRights(rights, roleRights);
+		}
+	}
+	
+	protected Role getRole(Session session, String domain, String name) throws RedbackException
+	{
+		Map<String, Role> domainRoles = roles.get(domain);
+		if(domainRoles == null) {
+			domainRoles = new HashMap<String, Role>();
+			roles.put(domain, domainRoles);
+		}
+		Role role = domainRoles.get(name);
 		if(role == null)
 		{
 			try
 			{
-				DataMap config = configClient.getConfig(session, "rbam", "role", name);
-				if(config != null) {
-					role =  new Role(config);
-					roles.put(name, role);
+				if(domain != null) {
+					if(dataClient != null && roleCollection != null) {
+						DataMap key = new DataMap();
+						key.put("domain", domain);
+						key.put("name", name);
+						DataMap res = dataClient.getData(roleCollection.getName(), roleCollection.convertObjectToSpecific(key), null);
+						if(res.containsKey("result") && res.getList("result").size() > 0) {
+							DataMap config = roleCollection.convertObjectToCanonical(res.getList("result").getObject(0));
+							role = new Role(config);
+						}						
+					}
+				} else {
+					DataMap config = configClient.getConfig(session, "rbam", "role", name);
+					if(config != null) {
+						role =  new Role(config);
+					}
 				}
+				if(role != null)
+					domainRoles.put(name, role);
 			}
 			catch(Exception e)
 			{
@@ -207,6 +250,7 @@ public class RedbackAccessManager extends AccessManager
 		}
 		return role;		
 	}
+
 
 	protected void mergeRights(DataMap to, DataMap from)
 	{

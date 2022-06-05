@@ -18,7 +18,6 @@ import io.redback.services.common.ServiceProvider;
 public abstract class AccessManager extends ServiceProvider
 {
 	private Logger logger = Logger.getLogger("io.redback");
-	protected HashMap<String, Role> roles;
 	protected KeySpec keySpec;
 	protected MessageDigest digest;
 	protected long expiryTime;
@@ -29,7 +28,6 @@ public abstract class AccessManager extends ServiceProvider
 	{
 		super(n, c, f);
 		expiryTime = 1800000;
-		roles = new HashMap<String, Role>();
 		try
 		{
 			digest = MessageDigest.getInstance("SHA-256");
