@@ -65,7 +65,7 @@ public class DataSet extends ContainerUnit {
 			Session session = (Session)context.get("session");
 			List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, filter, sort, true);
 			context.put("master", currentObject);
-			context.put("object", null);
+			context.put("object", rors.size() > 0 ? rors.get(0) : null);
 			context.put("dataset", rors);
 	
 			Box c = Box.VContainer(true);
