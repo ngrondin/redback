@@ -39,7 +39,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 			if(type != null) {
 				if(type.equals("clientinfo")) {
 					DataMap clientData = data.getObject("data");
-					registerDevice(clientData.getString("deviceid"), clientData.getString("devicemodel"), clientData.getString("os"), clientData.getString("appversion"), clientData.getString("locationpermission"), clientData.getBoolean("notificationauthorized"), clientData.getString("screensize"));
+					registerDevice(clientData.getString("deviceid"), clientData.getString("devicemodel"), clientData.getString("os"), clientData.getString("appversion"), clientData.getString("locationpermission"), clientData.getBoolean("notificationauthorized"), clientData.getBoolean("nfcavailable"), clientData.getString("screensize"));
 				} else if(type.equals("subscribe")) {
 					if(data.containsKey("uid")) {
 						this.subscribeObject(data.getString("objectname"), data.getString("uid"));
@@ -185,7 +185,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		sendClientData(msg);		
 	}
 	
-	public abstract void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, boolean notifAuthorized, String screenSize) throws RedbackException;
+	public abstract void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, boolean notifAuthorized, boolean nfcAvailable, String screenSize) throws RedbackException;
 	
 	public abstract void subscribeObject(String objectname, String uid) throws RedbackException;
 	
