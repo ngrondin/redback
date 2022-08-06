@@ -16,7 +16,7 @@ public class HLine extends Unit {
 	public HLine(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
 		width = config.containsKey("width") ? config.getNumber("width").floatValue() : 0;
-		color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
+		color = config.containsKey("color") ? decodeColor(config.getString("color")) : Color.DARK_GRAY;
 	}
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {

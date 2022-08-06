@@ -2,14 +2,18 @@ package io.redback.managers.reportmanager.pdf;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
 import io.firebus.data.DataMap;
+import io.firebus.script.Expression;
+import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
+import io.redback.security.Session;
 import io.redback.utils.StringUtils;
 
 public abstract class Unit {
@@ -19,13 +23,22 @@ public abstract class Unit {
 	protected String jsFunctionNameRoot;
 	protected List<String> jsParams;
 	protected boolean pagebreak; 
+	protected Expression widthExpr;
+	protected Expression heightExpr;
+
 	
 	public Unit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException  {
 		config = c;
 		reportManager = rm;
 		reportConfig = rc;
 		jsFunctionNameRoot = "report_" + rc.getName() + "_" + StringUtils.base16(this.hashCode());
-		pagebreak = config.containsKey("pagebreak") ? config.getBoolean("pagebreak") : false;
+		try {
+			pagebreak = config.containsKey("pagebreak") ? config.getBoolean("pagebreak") : false;
+			widthExpr = config.containsKey("width") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_width", config.getString("width")) : null;
+			heightExpr = config.containsKey("height") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_height", config.getString("height")) : null;
+		} catch(Exception e) {
+			throw new RedbackException("Error intialising unit", e);
+		}
 	}
 	
 	protected static Unit fromConfig(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
@@ -53,6 +66,8 @@ public abstract class Unit {
 			newUnit = new Space(rm, rc, c);
 		else if(type.equals("hline"))
 			newUnit = new HLine(rm, rc, c);
+		else if(type.equals("vars"))
+			newUnit = new Variables(rm, rc, c);
 		else if(type.equals("image"))
 			newUnit = new Image(rm, rc, c);		
 		else if(type.equals("fileset"))
@@ -61,13 +76,9 @@ public abstract class Unit {
 			newUnit = new FileList(rm, rc, c);				
 		return newUnit;
 	}
-	/*
-	protected float getStringWidth(String text, PDFont pdfFont, float fontSize) throws IOException {
-		return pdfFont.getStringWidth(text) / 1000f * fontSize;
-	}
-	*/
+
 	
-	protected Color getColor(String c) {
+	protected Color decodeColor(String c) {
 		if(c.startsWith("#")) {
 			return new Color(
 	            Integer.valueOf( c.substring( 1, 3 ), 16 ),
@@ -83,7 +94,55 @@ public abstract class Unit {
 		return Color.DARK_GRAY;
 	}
 	
+	@SuppressWarnings("unchecked")
+	protected Map<String, Object> getJSContext(Map<String, Object> context) {
+		Map<String, Object> jsContext = new HashMap<String, Object>();
+		jsContext.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), (Session)context.get("session")));
+		jsContext.put("object", DataSet.convertToScript(context.get("object")));
+		jsContext.put("page", context.get("page"));
+		jsContext.put("vars", context.get("vars"));
+		/*Map<String, Object> vars = (Map<String, Object>)context.get("variables");
+		if(vars != null) {
+			for(String varName: vars.keySet()) {
+				jsContext.put(varName, vars.get(varName));
+			}				
+		}*/
+		return jsContext;
+	}
+	
+	protected float width(Map<String, Object> context) throws RedbackException {
+		if(widthExpr != null) {
+			try {
+				return ((Number)widthExpr.eval(getJSContext(context))).floatValue();
+			} catch(Exception e) {
+				return -1f;
+			}
+		} else {
+			return -1f;
+		}
+	}
+	
+	protected float height(Map<String, Object> context) throws RedbackException {
+		if(heightExpr != null) {
+			try {
+				return ((Number)heightExpr.eval(getJSContext(context))).floatValue();
+			} catch(Exception e) {
+				return -1f;
+			}
+		} else {
+			return -1f;
+		}
+	}
+	
+	protected void overrideHeight(Box box, Map<String, Object> context) throws RedbackException {
+		float overrideHeight = height(context);
+		if(overrideHeight > -1f) box.height = overrideHeight;
+	}
 
+	protected void overrideWidth(Box box, Map<String, Object> context) throws RedbackException {
+		float overrideWidth = height(context);
+		if(overrideWidth > -1f) box.height = overrideWidth;
+	}
 	
 	public abstract Box produce(Map<String, Object> context) throws IOException, RedbackException;
 }

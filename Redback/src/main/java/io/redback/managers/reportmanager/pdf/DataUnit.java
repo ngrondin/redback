@@ -19,8 +19,6 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
-import io.redback.client.RedbackObjectRemote;
-import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -30,11 +28,8 @@ public abstract class DataUnit extends Unit {
 	protected Expression valueExpr;
 	protected PDFont font;
 	protected PDFont boldFont;
-	protected float fontSize;
-	protected float fontHeight;
+	protected Expression fontSizeExpr;
 	protected Color color;
-	protected float height;
-	protected float width;
 	protected String format;
 	protected boolean commaToLine;
 
@@ -43,13 +38,10 @@ public abstract class DataUnit extends Unit {
 		try {
 			jsParams = Arrays.asList(new String[] {"dataset", "object", "master", "page"});
 			valueExpr = reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_text_value", c.getString("value"));
-			width = config.containsKey("width") ? config.getNumber("width").floatValue() : -1;
 			font = PDType1Font.HELVETICA;
 			boldFont = PDType1Font.HELVETICA_BOLD;
-			fontSize = config.containsKey("fontsize") ? config.getNumber("fontsize").floatValue() : 12f;
-			fontHeight = 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize; 
-			height = config.containsKey("height") ? config.getNumber("height").floatValue() : fontHeight;
-			color = config.containsKey("color") ? getColor(config.getString("color")) : Color.DARK_GRAY;
+			fontSizeExpr = config.containsKey("fontsize") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_dataunit_fontsize", config.getString("fontsize")) : null;
+			color = config.containsKey("color") ? decodeColor(config.getString("color")) : Color.DARK_GRAY;
 			format = config.getString("format");
 			commaToLine = config.containsKey("commatoline") ? config.getBoolean("commatoline") : false;
 		} catch(Exception e) {
@@ -60,11 +52,15 @@ public abstract class DataUnit extends Unit {
 
 	public abstract Box produce(Map<String, Object> context) throws IOException, RedbackException;
 	
-	protected float getStringWidth(String text) throws IOException {
+	protected float getStringWidth(float fontSize, String text) throws IOException {
 		return font.getStringWidth(text) / 1000f * fontSize;
 	}
 	
-	protected List<String> cutToLines(String text, float width) throws IOException {
+	protected float getFontHeight(float fontSize) {
+		return  2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize;
+	}
+	
+	protected List<String> cutToLines(float fontSize, String text, float width) throws IOException {
 		List<String> lines = new ArrayList<String>();
 		if(text.length() > 0) {
 		    int lastSpace = -1;
@@ -74,7 +70,7 @@ public abstract class DataUnit extends Unit {
 		        if (spaceIndex < 0)
 		            spaceIndex = text.length();
 		        String subString = text.substring(0, spaceIndex);
-		        float size = getStringWidth(subString);
+		        float size = getStringWidth(fontSize, subString);
 		        if (size > width)
 		        {
 		            if (lastSpace < 0)
@@ -102,11 +98,9 @@ public abstract class DataUnit extends Unit {
 	
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
 		Session session = (Session)context.get("session");
-		Map<String, Object> jsContext = new HashMap<String, Object>();
+		Map<String, Object> jsContext = getJSContext(context);
 		jsContext.put("dataset", DataSet.convertToScript(context.get("dataset")));
-		jsContext.put("object", DataSet.convertToScript(context.get("object")));
 		jsContext.put("master", DataSet.convertToScript(context.get("master")));
-		jsContext.put("page", context.get("page"));
 		Object value = null;
 		try {
 			value = valueExpr.eval(jsContext);
@@ -168,5 +162,15 @@ public abstract class DataUnit extends Unit {
 	}
 	
 
-
+	protected float fontSize(Map<String, Object> context) throws RedbackException {
+		if(fontSizeExpr != null) {
+			try {
+				return ((Number)fontSizeExpr.eval(getJSContext(context))).floatValue();
+			} catch(Exception e) {
+				return 12f;
+			}
+		} else {
+			return 12f;
+		}
+	}
 }

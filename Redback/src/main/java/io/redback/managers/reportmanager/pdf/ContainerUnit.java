@@ -3,7 +3,6 @@ package io.redback.managers.reportmanager.pdf;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,15 +43,11 @@ public abstract class ContainerUnit extends Unit {
 	
 	protected boolean show(Map<String, Object> context) throws RedbackException {
 		if(showExpr != null) {
-			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("object", DataSet.convertToScript(context.get("object")));
-			jsContext.put("page", context.get("page"));
-			Object value = null;
 			try {
-				value = showExpr.eval(jsContext);
+				return (Boolean)showExpr.eval(getJSContext(context));
 			} catch(Exception e) {
+				return true;
 			}
-			return (Boolean)value;			
 		} else {
 			return true;
 		}
@@ -60,15 +55,11 @@ public abstract class ContainerUnit extends Unit {
 	
 	protected Color color(Map<String, Object> context) throws RedbackException {
 		if(colorExpr != null) {
-			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("object", DataSet.convertToScript(context.get("object")));
-			jsContext.put("page", context.get("page"));
-			Object value = null;
 			try {
-				value = colorExpr.eval(jsContext);
+				return Color.decode((String)colorExpr.eval(getJSContext(context)));
 			} catch(Exception e) {
+				return null;
 			}
-			return Color.decode(value.toString()) ;		
 		} else {
 			return null;
 		}
@@ -76,15 +67,11 @@ public abstract class ContainerUnit extends Unit {
 	
 	protected Color borderColor(Map<String, Object> context) throws RedbackException {
 		if(borderColorExpr != null) {
-			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("object", DataSet.convertToScript(context.get("object")));
-			jsContext.put("page", context.get("page"));
-			Object value = null;
 			try {
-				value = borderColorExpr.eval(jsContext);
+				return Color.decode((String)borderColorExpr.eval(getJSContext(context)));
 			} catch(Exception e) {
+				return null;
 			}
-			return Color.decode(value.toString()) ;		
 		} else {
 			return null;
 		}

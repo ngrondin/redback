@@ -2,7 +2,6 @@ package io.redback.managers.reportmanager.pdf;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Collections;
@@ -12,11 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.imageio.ImageIO;
-
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
@@ -86,6 +80,7 @@ public class DynamicForm extends DataUnit {
 		Box container = Box.VContainer(true);
 		container.breakBefore = pagebreak;
 		String lastCatOrder = "";
+		float fontSize = fontSize(context);
 		for(RedbackObjectRemote ror: rors) {
 			String cat = catAttribute != null ? ror.getString(catAttribute) : null;
 			String catOrder = catOrderAttribute != null ? ror.getString(catOrderAttribute) : null;
@@ -158,7 +153,7 @@ public class DynamicForm extends DataUnit {
 						String[] lines = value.split("\\n");
 						for(int i = 0; i < lines.length; i++) {
 							String line = lines[i];
-							List<String> sublines = cutToLines(line, answerMaxWidth > -1 ? answerMaxWidth : 200);
+							List<String> sublines = cutToLines(fontSize, line, answerMaxWidth > -1 ? answerMaxWidth : 200);
 							for(String subline : sublines) {
 								col.addChild(Box.Text(subline, font, fontSize));
 							}		

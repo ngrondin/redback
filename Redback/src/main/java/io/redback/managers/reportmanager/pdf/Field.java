@@ -17,17 +17,16 @@ public class Field extends DataUnit {
 		super(rm, rc, c);
 		label = config.containsKey("label") ? config.getString("label") : "";
 		labelFontSize = 9f;
-		height = 35f;
+		//height = 35f;
 	}
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
 		String valueStr = getSringValue(context);
 		Box rb1 = Box.Text(label, font, labelFontSize);
 		rb1.color = Color.GRAY;
-		Box rb2 = Box.Text(valueStr, font, fontSize);
+		Box rb2 = Box.Text(valueStr, font, fontSize(context));
 		rb2.height += 3;
-		if(width > -1)
-			rb2.width = width;
+		overrideWidth(rb2, context);
 		rb2.color = color;
 		Box c = Box.VContainer(false);
 		c.addChild(rb1);
