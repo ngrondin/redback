@@ -77,7 +77,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   }
 
   get userPref() : any {
-    return this.id != null ? this.userprefService.getCurrentViewUISwitch("calendar", this.id) : null;
+    return this.id != null ? this.userprefService.getCurrentViewUISwitch("calendar", this.id) : {};
   }
 
   get objectname() : string {
