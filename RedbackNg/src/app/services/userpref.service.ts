@@ -124,13 +124,15 @@ export class UserprefService {
   }
 
   private getUISwitch(view: string, cat: string, name: string) : any {
-    var stack = [this.userUISwitches, this.roleUISwitches, this.domainUISwitches];
+    var stack = [this.domainUISwitches, this.roleUISwitches, this.userUISwitches];
+    var val = null;
     for(let i = 0; i < stack.length; i++) {
       if(stack[i][view] != null && stack[i][view][cat] != null && stack[i][view][cat][name] != null) {
-        return stack[i][view][cat][name];
+        var readValue = stack[i][view][cat][name];
+        val = (typeof val == 'object' && typeof readValue == 'object' ? {...val, ... readValue} : readValue);
       }
     }
-    return null;
+    return val;
   }
 
   public setUISwitch(level: string, comp: string, name: string, val: any) {
@@ -142,7 +144,8 @@ export class UserprefService {
       if(map[this.currentView][comp] == null) {
         map[this.currentView][comp] = {};
       }
-      map[this.currentView][comp][name] = val;
+      var currentValue = map[this.currentView][comp][name];
+      map[this.currentView][comp][name] = (typeof currentValue == 'object' && typeof val == 'object' ? {... currentValue, ...val} : val);
       if(this.apiService.userprefService != null) {
         this.apiService.putUserPreference(level, 'uiswitch', map).subscribe(resp => {});
       }      

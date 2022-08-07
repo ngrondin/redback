@@ -43,7 +43,9 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
       val = this.value;
     }
     for(let opt of this.choicelist) {
-      if((opt['value'] != null && opt['value'] == val) || (opt['value'] == null && opt === val)) {
+      if((opt['value'] != null && opt['value'] == val) 
+        || (opt['value'] == null && opt === val) 
+        || (typeof opt['value'].getTime == 'function' && typeof val.getTime == 'function' && opt['value'].getTime() == val.getTime())) {
         return opt;
       }
     }

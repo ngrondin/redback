@@ -17,6 +17,16 @@
         [(value)]="activeDatasets">
     </rb-choice-input>
     <rb-spacer></rb-spacer>
+    <button
+        mat-icon-button
+        (click)="previous()">
+        <mat-icon>arrow_back_ios</mat-icon>
+    </button>
+    <button
+        mat-icon-button
+        (click)="next()">
+        <mat-icon>arrow_forward_ios</mat-icon>
+    </button>    
     <rb-choice-input
         [choicelist]="modes"
         [label]="'Display'"
@@ -68,15 +78,18 @@
                 {{day.label}}
             </div>
             <div
-                class="rb-cal-day-content">
+                class="rb-cal-day-content-scroll">
                 <div
-                    *ngFor="let item of data[day.id]"
-                    class="rb-cal-item"
-                    [style.backgroundColor]="item.color"
-                    (click)="clickItem(item)">
-                    {{item.label}}
-                </div>
-            </div>        
+                    class="rb-cal-day-content">
+                    <div
+                        *ngFor="let item of data[day.id]"
+                        class="rb-cal-item"
+                        [style.backgroundColor]="item.color"
+                        (click)="clickItem(item)">
+                        {{item.label}}
+                    </div>
+                </div>                    
+            </div>
             <div
                 *ngIf="data[day.id] != null && data[day.id].length > 3"
                 class="rb-cal-count">

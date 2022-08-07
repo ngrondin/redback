@@ -7,6 +7,11 @@
 .rb-cal-toolbar {
     display: flex;
     flex-direction: row;
+    align-items: center;
+}
+
+.rb-cal-toolbar button {
+    color: grey;
 }
 
 .rb-cal-week-header {
@@ -63,6 +68,13 @@
 .rb-cal-day-header-light {
     background-color: #e8e8e8;
     color:#999;
+}
+
+.rb-cal-day-content-scroll {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    overflow-y: scroll;
 }
 
 .rb-cal-day-content {

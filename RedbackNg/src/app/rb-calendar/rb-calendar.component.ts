@@ -23,6 +23,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   data: any = {};
   _year: number;
   _month: number;
+  _weekStarting: Date;
   startDate: Date;
   endDate: Date;
 
@@ -51,10 +52,11 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   dataCalcInit() {
     let dt = new Date();
     dt.setDate(1);
-    this._mode = 'month';
+    this._mode = this.userPref.mode != null ? this.userPref.mode : 'month';
     this._year = dt.getFullYear();
     this._month = dt.getMonth();
-    this.calcDays(); 
+    this._weekStarting = this.findStartOfTheWeek(new Date());
+    this.calcDisplayParams();
     if(this.layers != null && this.layers.length > 0) {
       this.layerOptions = [];
       for(let item of this.layers) {
@@ -89,9 +91,9 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
 
   set mode(m: string) {
     this._mode = m;
-    if(this._mode == 'week') this.calcWeeksOfThisMonth();
-    this.calcDays();
+    this.calcDisplayParams();
     this.updateData(true);
+    this.userprefService.setUISwitch('user', 'calendar', this.id, {mode: m});
   }
 
   get year():  number {
@@ -100,8 +102,8 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
 
   set year(val: number) {
     this._year = val;
-    if(this._mode == 'week') this.calcWeeksOfThisMonth();
-    this.calcDays();
+    this.resetWeekStarting();
+    this.calcDisplayParams();
     this.updateData(true);
   }
 
@@ -111,18 +113,18 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
 
   set month(val: number) {
     this._month = val;
-    if(this._mode == 'week') this.calcWeeksOfThisMonth();
-    this.calcDays();
+    this.resetWeekStarting();
+    this.calcDisplayParams();
     this.updateData(true);
   }
 
   get weekStarting() : Date {
-    return this.startDate;
+    return this._weekStarting;
   }
 
   set weekStarting(val: Date) {
-    this.startDate = val;
-    this.calcDays();
+    this._weekStarting = val;
+    this.calcDisplayParams();
     this.updateData(true);
   }
 
@@ -144,33 +146,43 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     this.updateData(true);
   }
 
-  calcWeeksOfThisMonth() {
-    let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
-    let dt = new Date(firstOfMonth.getTime() - (firstOfMonth.getDay() * 86400000));
-    this.startDate = dt;
-    this.weeksOfThisMonth = [];
-    while(dt.getMonth() <= this.month) {
-      this.weeksOfThisMonth.push({display: dt.getDate() + " " + this.months[dt.getMonth()], value: dt});
-      if(dt.getTime() < (new Date()).getTime()) this.startDate = dt;
-      dt = new Date(dt.getTime() + (7 * 86400000));
+  findStartOfTheWeek(dt: Date) : Date {
+    let dtMidnight = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), 0, 0, 0, 0);
+    let sow = new Date(dtMidnight.getTime() - (dtMidnight.getDay() * 86400000));
+    return sow;
+  }
+
+  resetWeekStarting() {
+    let now = new Date();
+    if(now.getFullYear() == this._year && now.getMonth() == this._month) {
+      this._weekStarting = this.findStartOfTheWeek(now);
+    } else {
+      let dt = new Date(this._year, this._month, 1, 0, 0, 0, 0);
+      this._weekStarting = this.findStartOfTheWeek(dt);
     }
   }
 
-  calcDays() {
-    if(this.mode == 'month') {
-      let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
-      let firstDay = firstOfMonth.getDay();
-      this.startDate = new Date(firstOfMonth.getTime() - (firstDay * 86400000));
-      let firstofNextMonth = new Date((new Date(firstOfMonth.getTime()).setMonth(this.month + 1)));
-      this.endDate = new Date(firstofNextMonth.getTime() + (((7 - firstofNextMonth.getDay()) % 7) * 86400000));  
-    } else if(this.mode == 'week') {
+  calcDisplayParams() {
+    this.weeksOfThisMonth = [];
+    this.weeks = [];
+    let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
+    let dt = this.findStartOfTheWeek(firstOfMonth);
+    let monthStart = dt;
+    while(dt.getMonth() == this.month - 1 || dt.getMonth() == this.month) {
+      this.weeksOfThisMonth.push({display: dt.getDate() + " " + this.months[dt.getMonth()], value: dt});
+      dt = new Date(dt.getTime() + (7 * 86400000));
+    }
+    let monthEnd = dt;    
+    if(this.mode == 'week') {
+      this.startDate = this.weekStarting;
       this.endDate = new Date(this.startDate.getTime() + (7 * 86400000));
+    } else if(this.mode == 'month') {
+      this.startDate = monthStart;
+      this.endDate = monthEnd;;
     }
     let dayCount = (this.endDate.getTime() - this.startDate.getTime()) / 86400000;
     let weekCount = Math.ceil(dayCount / 7);
-    this.weeks = [];
-    this.data = {};
-    let dt = new Date(this.startDate.getTime());
+    dt = new Date(this.startDate.getTime());
     for(var w = 0; w < weekCount; w++) {
       let days = [];
       for(var day of this.days) {
@@ -230,6 +242,42 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       if(this.data[dateId] == null) this.data[dateId] = [];
       this.data[dateId].push(entry);
      }
+  }
+
+  next() {
+    if(this.mode == 'month') {
+      var newMonth = this.month + 1;
+      if(newMonth > 11) {
+        this._year = this._year + 1;
+        newMonth = 0;
+      }
+      this.month = newMonth;
+    } else if(this.mode == 'week') {
+      var newWeekStarting = new Date(this.weekStarting.getTime() + (7 * 86400000));
+      if(newWeekStarting.getMonth() != this.month) {
+        this._year = newWeekStarting.getFullYear();
+        this._month = newWeekStarting.getMonth();
+      }
+      this.weekStarting = newWeekStarting;
+    }
+  }
+
+  previous() {
+    if(this.mode == 'month') {
+      var newMonth = this.month - 1;
+      if(newMonth < 0) {
+        this._year = this._year - 1;
+        newMonth = 11;
+      }
+      this.month = newMonth;
+    } else if(this.mode == 'week') {
+      var newWeekStarting = new Date(this.weekStarting.getTime() - (7 * 86400000));
+      if(newWeekStarting.getMonth() != this.month) {
+        this._year = newWeekStarting.getFullYear();
+        this._month = newWeekStarting.getMonth();
+      }
+      this.weekStarting = newWeekStarting;
+    }
   }
 
   clickDay(day: any) {
