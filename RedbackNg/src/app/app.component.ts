@@ -8,6 +8,7 @@ import { NotificationService } from './services/notification.service';
 import { ClientWSService } from './services/clientws.service';
 import { MenuService } from './services/menu.service';
 import { Subject } from 'rxjs';
+import { DataService } from './services/data.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -40,6 +41,7 @@ export class AppComponent implements OnInit {
       private matIconRegistry: MatIconRegistry,
       private domSanitizer: DomSanitizer,
       private apiService: ApiService,
+      private dataService: DataService,
       private clientWSService: ClientWSService,
       private configService: ConfigService,
       private notificationService: NotificationService,
@@ -78,6 +80,8 @@ export class AppComponent implements OnInit {
     this.apiService.baseUrl = currentUrl;
     this.clientWSService.baseUrl = currentUrl;
     window.redback.username = this.username;
+    window.redback.api = this.apiService;
+    window.redback.data = this.dataService;
   }
 
   ngOnInit(): void {

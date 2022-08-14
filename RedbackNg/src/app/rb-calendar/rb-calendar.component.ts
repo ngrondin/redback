@@ -59,10 +59,13 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     this.calcDisplayParams();
     if(this.layers != null && this.layers.length > 0) {
       this.layerOptions = [];
+      let initialLayer = null;
+      let preferedLayer = this.userPref.layer != null ? this.userPref.layer : null;
       for(let item of this.layers) {
         this.layerOptions.push({display: item.label, value: item.datasets});
+        if(preferedLayer != null && preferedLayer.toString() == item.datasets.toString()) initialLayer = item.datasets;
       }
-      this.activeDatasets = this.layerOptions[0].value;
+      this.activeDatasets = initialLayer ?? this.layerOptions[0].value;
     } else {
       this.updateData();
     }
@@ -142,7 +145,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
           cfg.active = false;
       }
     }
-    //this.redraw(); // This is an optimistic redraw in the case where the filterDataset will not update the dataset because the filter is identical
+    this.userprefService.setUISwitch('user', 'calendar', this.id, {layer: val});
     this.updateData(true);
   }
 

@@ -2,9 +2,10 @@ import { Component, Input, ViewContainerRef, ComponentRef, Injector, HostBinding
 import { OverlayRef, Overlay } from '@angular/cdk/overlay';
 import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
-import { RbFilterBuilderComponent, FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder.component';
+import { RbFilterBuilderComponent } from 'app/rb-filter-builder/rb-filter-builder.component';
 import { RbFieldInputComponent } from 'app/inputs/abstract/rb-field-input';
 import { RbSearchTarget } from './rb-search-target';
+import { FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder-configs';
 
 @Component({
   selector: 'rb-search',
@@ -14,7 +15,7 @@ import { RbSearchTarget } from './rb-search-target';
 export class RbSearchComponent extends RbFieldInputComponent {
   @Input('filter') filterconfig: any;
   @Input('sort') sortconfig: any;
-  @Input('target') searchTarget: RbSearchTarget;
+  @Input('searchtarget') searchtarget: RbSearchTarget;
   
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;
@@ -37,11 +38,11 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   inputInit() {
-    if(this.searchTarget == null) {
+    if(this.searchtarget == null) {
       if(this.dataset != null) {
-        this.searchTarget = this.dataset;
+        this.searchtarget = this.dataset;
       } else if(this.datasetgroup != null) {
-        this.searchTarget = this.datasetgroup;
+        this.searchtarget = this.datasetgroup;
       }
     }
   }
@@ -89,7 +90,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   search() {
-    let fetched = this.searchTarget.filterSort({search: this.editedValue});
+    let fetched = this.searchtarget.filterSort({search: this.editedValue});
     if(fetched == true) {
       this.queuedSearch = null;
     } else {
@@ -131,7 +132,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     config.initialFilter = this.filterValue;
     config.sortConfig = this.sortconfig;
     config.initialSort = this.sortValue;
-    config.objectname = this.searchTarget.objectname;
+    config.objectname = this.searchtarget.objectname;
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);
@@ -149,7 +150,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     this.overlayRef = null;
     this.filterValue = event.filter;
     this.sortValue = event.sort;
-    this.searchTarget.filterSort({filter: this.filterValue, sort: this.sortValue});
+    this.searchtarget.filterSort({filter: this.filterValue, sort: this.sortValue});
   }
 
   cancelFilterBuilder() {
