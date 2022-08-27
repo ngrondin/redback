@@ -30,6 +30,7 @@ export class ReportService {
     if(domain != null) {
       query = query + '&domain=' + domain;
     }
+    query = query + "&timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone; 
     window.open(this.apiService.baseUrl + '/' + this.apiService.reportService + '?' + query);
 
   }

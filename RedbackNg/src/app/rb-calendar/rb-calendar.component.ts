@@ -26,6 +26,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   _weekStarting: Date;
   startDate: Date;
   endDate: Date;
+  mondayFirst: boolean = false;
 
   modes: any[] = [
     {display: "Month", value: "month"},
@@ -53,9 +54,14 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     let dt = new Date();
     dt.setDate(1);
     this._mode = this.userPref.mode != null ? this.userPref.mode : 'month';
+    if(this.userPref.mondayfirst == true) {
+      this.mondayFirst = true;
+      this.days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    }
     this._year = dt.getFullYear();
     this._month = dt.getMonth();
     this._weekStarting = this.findStartOfTheWeek(new Date());
+    this.mondayFirst = this.userPref.mondayfirst != null ? this.userPref.mondayfirst : false;
     this.calcDisplayParams();
     if(this.layers != null && this.layers.length > 0) {
       this.layerOptions = [];
@@ -151,7 +157,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
 
   findStartOfTheWeek(dt: Date) : Date {
     let dtMidnight = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), 0, 0, 0, 0);
-    let sow = new Date(dtMidnight.getTime() - (dtMidnight.getDay() * 86400000));
+    let sow = new Date(dtMidnight.getTime() - ((dtMidnight.getDay() - (this.mondayFirst ? 1 : 0)) * 86400000));
     return sow;
   }
 
