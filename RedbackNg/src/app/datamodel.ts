@@ -86,7 +86,8 @@ export class RbObject {
                 let relationship = attr.substring(0, attr.indexOf('.'));
                 let finalattr = attr.substring(attr.indexOf('.') + 1);
                 if(this.related[relationship] != null) {
-                    ret = this.related[relationship].data[finalattr];
+                    //ret = this.related[relationship].data[finalattr];
+                    ret = this.related[relationship].get(finalattr);
                 } 
             }
         }

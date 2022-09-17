@@ -94,7 +94,6 @@ export class RbViewLoaderComponent implements OnInit {
     private componentFactoryResolver:ComponentFactoryResolver,
     private buildService: BuildService
   ) { 
-    window.redback.api = apiService;
   }
 
   ngOnInit() {

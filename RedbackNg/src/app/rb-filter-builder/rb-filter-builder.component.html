@@ -20,12 +20,13 @@
                         </td>
                         <td>
                             <rb-choice-input
-                                [choicelist]="filterConfig.attributes"
+                                [choicelist]="availableAttributes"
                                 [label]="'Attributes'"
                                 [icon]="'search'"
                                 [margin]="false"
                                 [size]="12"
-                                [(value)]="attributeToAddToFilter">
+                                [(value)]="attributeToAddToFilter"
+                                (valueChange)="changed = true">
                             </rb-choice-input>
                         </td>
                     </tr>
@@ -46,7 +47,8 @@
                                 [label]="null"
                                 [size]="15"
                                 [margin]="false"
-                                [(value)]="filterConstruct.val1">
+                                [(value)]="filterConstruct.val1"
+                                (valueChange)="changed = true">
                             </rb-string-input>
 
                             <rb-choice-input
@@ -56,19 +58,22 @@
                                 [icon]="'date_range'"
                                 [size]="12"
                                 [margin]="false"
-                                [(value)]="filterConstruct.val1">
+                                [(value)]="filterConstruct.val1"
+                                (valueChange)="changed = true">
                             </rb-choice-input>
 
                             <rb-datetime-input
                                 *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'since' || filterConstruct.val1 == 'between')"
                                 [margin]="false"
-                                [(value)]=filterConstruct.val2>
+                                [(value)]=filterConstruct.val2
+                                (valueChange)="changed = true">
                             </rb-datetime-input>  
 
                             <rb-datetime-input
                                 *ngIf="filterConstruct.config.type == 'date' &&  filterConstruct.val1 == 'between'"
                                 [margin]="false"
-                                [(value)]=filterConstruct.val3>
+                                [(value)]=filterConstruct.val3
+                                (valueChange)="changed = true">
                             </rb-datetime-input>  
 
                             <table
@@ -90,7 +95,8 @@
                                         <rb-switch-input
                                             [margin]="false"
                                             [value]="filterConstruct.val1.includes(option.value)"
-                                            (valueChange)="$event == true ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexof(option.value))">
+                                            (valueChange)="$event == true ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexOf(option.value), 1)"
+                                            (valueChange)="changed = true">
                                         </rb-switch-input>
                                     </td>
                                 </tr>
@@ -101,7 +107,8 @@
                                 [label]="null"
                                 [size]="0"
                                 [margin]="true"
-                                [(value)]="filterConstruct.val1">
+                                [(value)]="filterConstruct.val1"
+                                (valueChange)="changed = true">
                             </rb-switch-input>
                         </td>
                         <td
@@ -190,9 +197,25 @@
         class="rb-filter-builder-bottom">
         <button
             mat-button
-            class="mat-mini-fab mat-primary" 
+            *ngIf="changed"
+            class="mat-raised-button mat-primary" 
             (click)="clickOk()">
-            <mat-icon class="md-hue-3">check</mat-icon>
+            Apply
         </button>
+        &nbsp;
+        <button
+            mat-button
+            *ngIf="!empty"
+            class="mat-stroked-button mat-primary" 
+            (click)="clickClear()">
+            Clear
+        </button>
+        &nbsp;
+        <button
+            mat-button
+            class="mat-stroked-button mat-primary" 
+            (click)="clickCancel()">
+            Cancel
+        </button>              
     </div>
 </div>
