@@ -140,8 +140,8 @@ public abstract class Unit {
 	}
 
 	protected void overrideWidth(Box box, Map<String, Object> context) throws RedbackException {
-		float overrideWidth = height(context);
-		if(overrideWidth > -1f) box.height = overrideWidth;
+		float overrideWidth = width(context);
+		if(overrideWidth > -1f) box.width = overrideWidth;
 	}
 	
 	public abstract Box produce(Map<String, Object> context) throws IOException, RedbackException;
