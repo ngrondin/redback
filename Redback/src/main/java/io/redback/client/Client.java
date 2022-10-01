@@ -38,7 +38,7 @@ public class Client {
 	protected DataMap requestDataMap(Session session, DataMap req, boolean async) throws RedbackException
 	{
 		Object resp = requestObject(session, req, async);
-		if(resp instanceof DataMap) {
+		if(resp instanceof DataMap || resp == null) {
 			return (DataMap)resp;
 		} else if(resp instanceof String) {
 			try {
@@ -65,7 +65,7 @@ public class Client {
 	protected DataList requestDataList(Session session, DataMap req, boolean async) throws RedbackException
 	{
 		Object resp = requestObject(session, req, async);
-		if(resp instanceof DataMap) {
+		if(resp instanceof DataList || resp == null) {
 			return (DataList)resp;
 		} else if(resp instanceof String) {
 			try {
