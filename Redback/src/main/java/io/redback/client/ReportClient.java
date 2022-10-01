@@ -48,7 +48,7 @@ public class ReportClient extends Client {
 				req.put("domain", domain);
 			req.put("report", name);
 			req.put("filter", filter);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			return resp.getString("fileuid");
 		} catch(Exception e) {
 			throw new RedbackException("Error producing and storing report", e);
@@ -60,7 +60,7 @@ public class ReportClient extends Client {
 			DataMap req = new DataMap();
 			req.put("action", "list");
 			req.put("category", category);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			DataList result = resp.getList("result");
 			List<ReportInfo> list = new ArrayList<ReportInfo>();
 			for(int i = 0; i < list.size(); i++)

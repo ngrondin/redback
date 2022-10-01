@@ -4,6 +4,7 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.data.DataException;
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
@@ -24,34 +25,66 @@ public class Client {
 		defaultTimeout = t;
 	}
 	
-	protected DataMap request(DataMap req) throws RedbackException
+	protected DataMap requestDataMap(DataMap req) throws RedbackException
 	{
-		return request(null, req, false);
+		return requestDataMap(null, req, false);
 	}
 	
-	protected DataMap request(Session session, DataMap req) throws RedbackException
+	protected DataMap requestDataMap(Session session, DataMap req) throws RedbackException
 	{
-		return request(session, req, false);
+		return requestDataMap(session, req, false);
 	}
 	
-	protected DataMap request(Session session, DataMap req, boolean async) throws RedbackException
+	protected DataMap requestDataMap(Session session, DataMap req, boolean async) throws RedbackException
 	{
-		try
-		{
-			Payload reqP = new Payload(req);
-			reqP.metadata.put("mime", "application/json");
-			Payload respP = requestPayload(session, reqP, async);
-			if(respP != null) {
-				DataMap resp = respP.getDataMap();
-				return resp;
-			} else {
-				return null;
+		Object resp = requestObject(session, req, async);
+		if(resp instanceof DataMap) {
+			return (DataMap)resp;
+		} else if(resp instanceof String) {
+			try {
+				DataMap map = new DataMap((String)resp);
+				return map;
+			} catch (DataException e) {
+				throw new RedbackException("Return data from " + serviceName + " is not a DataMap");
 			}
+		} else {
+			throw new RedbackException("Return data from " + serviceName + " is not a DataMap");
 		}
-		catch(DataException e)
-		{
-			throw new RedbackException("Error requesting " + serviceName, e);
+	}
+	
+	protected DataList requestDataList(DataMap req) throws RedbackException
+	{
+		return requestDataList(null, req, false);
+	}
+	
+	protected DataList requestDataList(Session session, DataMap req) throws RedbackException
+	{
+		return requestDataList(session, req, false);
+	}
+	
+	protected DataList requestDataList(Session session, DataMap req, boolean async) throws RedbackException
+	{
+		Object resp = requestObject(session, req, async);
+		if(resp instanceof DataMap) {
+			return (DataList)resp;
+		} else if(resp instanceof String) {
+			try {
+				DataList list = new DataList((String)resp);
+				return list;
+			} catch (DataException e) {
+				throw new RedbackException("Return data from " + serviceName + " is not a DataList");
+			}
+		} else {
+			throw new RedbackException("Return data from " + serviceName + " is not a DataList");
 		}
+	}
+	
+	protected Object requestObject(Session session, DataMap req, boolean async) throws RedbackException
+	{
+		Payload reqP = new Payload(req);
+		reqP.metadata.put("mime", "application/json");
+		Payload respP = requestPayload(session, reqP, async);
+		return respP.getDataObject();
 	}
 	
 	protected Payload requestPayload(Session session, Payload reqP) throws RedbackException 

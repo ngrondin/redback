@@ -20,7 +20,7 @@ public class ProcessClient extends Client
 		request.put("process", process);
 		request.put("domain", domain);
 		request.put("data", data);
-		request(session, request);
+		requestDataMap(session, request);
 	}
 	
 	public void continueProcess(Session session, String pid) throws RedbackException
@@ -28,7 +28,7 @@ public class ProcessClient extends Client
 		DataMap request = new DataMap();
 		request.put("action", "continueprocess");
 		request.put("pid", pid);
-		request(session, request);
+		requestDataMap(session, request);
 	}
 	
 	public void actionProcess(Session session, String pid, String action) throws RedbackException
@@ -37,7 +37,7 @@ public class ProcessClient extends Client
 		request.put("action", "actionprocess");
 		request.put("pid", pid);
 		request.put("action", action);
-		request(session, request);
+		requestDataMap(session, request);
 	}
 	
 	public void interruptProcess(Session session, String pid) throws RedbackException
@@ -45,7 +45,7 @@ public class ProcessClient extends Client
 		DataMap request = new DataMap();
 		request.put("action", "interruptprocess");
 		request.put("pid", pid);
-		request(session, request);
+		requestDataMap(session, request);
 	}
 	
 	public void interruptProcesses(Session session, DataMap filter) throws RedbackException
@@ -53,7 +53,7 @@ public class ProcessClient extends Client
 		DataMap request = new DataMap();
 		request.put("action", "interruptprocesses");
 		request.put("filter", filter);
-		request(session, request);
+		requestDataMap(session, request);
 	}
 	
 	public ProcessAssignmentRemote getAssignment(Session session, DataMap filter) throws RedbackException
@@ -61,7 +61,7 @@ public class ProcessClient extends Client
 		DataMap request = new DataMap();
 		request.put("action", "getassignments");
 		request.put("filter", filter);
-		DataMap response = request(session, request);
+		DataMap response = requestDataMap(session, request);
 		if(response != null && response.getList("result").size() > 0) 
 		{
 			return new ProcessAssignmentRemote(firebus, serviceName, session.getToken(), response.getList("result").getObject(0));

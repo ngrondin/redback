@@ -35,7 +35,7 @@ public class NotificationClient extends Client {
 		try {
 			DataMap req = email.toDataMap();
 			req.put("action", "sendemail");
-			request(session, req);
+			requestDataMap(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error sending emails", e);
 		}
@@ -50,7 +50,7 @@ public class NotificationClient extends Client {
 			req.put("username", username);
 			req.put("password", password);
 			req.put("folder", folder);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			DataList result = resp.getList("result");
 			for(int i = 0; i < result.size(); i++) {
 				emails.add(new Email(result.getObject(i)));
@@ -70,7 +70,7 @@ public class NotificationClient extends Client {
 			req.put("message", message);
 			if(data != null)
 				req.put("data", data);
-			request(session, req);
+			requestDataMap(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error sending FCM Message", e);
 		}		

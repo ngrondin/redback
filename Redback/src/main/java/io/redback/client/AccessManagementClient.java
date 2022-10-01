@@ -42,7 +42,7 @@ public class AccessManagementClient extends Client
 				DataMap req = new DataMap();
 				req.put("action", "validate");
 				req.put("token", token);
-				DataMap resp = request(session, req);
+				DataMap resp = requestDataMap(session, req);
 				if(resp != null  &&  resp.getString("result").equals("ok")) {
 					userProfile = new UserProfile(resp.getObject("userprofile"));
 					cachedUserProfiles.put(token,  userProfile);

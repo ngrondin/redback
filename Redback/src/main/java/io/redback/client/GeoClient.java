@@ -22,7 +22,7 @@ public class GeoClient extends Client {
 			DataMap req = new DataMap();
 			req.put("action", "geocode");
 			req.put("address", address);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			return new Geometry(resp.getObject("geometry"));
 		} catch(Exception e) {
 			throw new RedbackException("Error geocoding", e);
@@ -34,7 +34,7 @@ public class GeoClient extends Client {
 			DataMap req = new DataMap();
 			req.put("action", "geocode");
 			req.put("geometry", geometry.toDataMap());
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			return resp.getString("address");
 		} catch(Exception e) {
 			throw new RedbackException("Error geocoding", e);
@@ -50,7 +50,7 @@ public class GeoClient extends Client {
 				req.put("location", location.toDataMap());
 			if(radius != null)
 				req.put("radius", radius);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			List<String> list = new ArrayList<String>();
 			for(int i = 0; i < resp.getList("result").size(); i++) {
 				list.add(resp.getList("result").getString(i));
@@ -66,7 +66,7 @@ public class GeoClient extends Client {
 			DataMap req = new DataMap();
 			req.put("action", "timezone");
 			req.put("geometry", geometry.toDataMap());
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			return resp.getString("timezone");
 		} catch(Exception e) {
 			throw new RedbackException("Error getting timezone", e);
@@ -79,7 +79,7 @@ public class GeoClient extends Client {
 			req.put("action", "travel");
 			req.put("start", start.toDataMap());
 			req.put("end", end.toDataMap());
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			return new GeoRoute(resp);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting travel distance and time", e);

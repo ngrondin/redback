@@ -25,7 +25,7 @@ public class DomainClient extends Client {
 			req.put("name", name);
 			req.put("category", category);
 			req.put("report", report);
-			request(session, req);
+			requestDataMap(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error putting domain report", e);
 		}
@@ -38,7 +38,7 @@ public class DomainClient extends Client {
 			req.put("domain", domain);
 			req.put("name", name);
 			req.put("variable", var);
-			request(session, req);			
+			requestDataMap(session, req);			
 		} catch(Exception e) {
 			throw new RedbackException("Error putting domain variable", e);
 		}
@@ -51,7 +51,7 @@ public class DomainClient extends Client {
 			req.put("domain", domain);
 			req.put("name", name);
 			req.put("function", function);
-			request(session, req);
+			requestDataMap(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error putting domain function", e);
 		}
@@ -63,7 +63,7 @@ public class DomainClient extends Client {
 			req.put("action", "getreport");
 			req.put("domain", domain);
 			req.put("name", name);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			return resp;			
 		} catch(Exception e) {
 			throw new RedbackException("Error getting domain report", e);
@@ -75,7 +75,7 @@ public class DomainClient extends Client {
 			DataMap req = new DataMap();
 			req.put("action", "listreport");
 			req.put("category", category);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			DataList result = resp.getList("result");
 			List<DataMap> list = new ArrayList<DataMap>();
 			for(int i = 0; i < result.size(); i++) {
@@ -93,7 +93,7 @@ public class DomainClient extends Client {
 			req.put("action", "getvariable");
 			req.put("domain", domain);
 			req.put("name", name);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			return resp.get("result");				
 		} catch(Exception e) {
 			throw new RedbackException("Error getting domain variable", e);
@@ -107,7 +107,7 @@ public class DomainClient extends Client {
 			req.put("domain", domain);
 			req.put("name", name);
 			req.put("param", param);
-			DataMap res = request(session, req, async);
+			DataMap res = requestDataMap(session, req, async);
 			Object respObject = res.get("data");
 			return respObject;
 		} catch(Exception e) {
@@ -121,7 +121,7 @@ public class DomainClient extends Client {
 			req.put("action", "clearcache");
 			req.put("domain", domain);
 			req.put("name", name);
-			request(session, req);
+			requestDataMap(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error clearing domain cache", e);
 		}

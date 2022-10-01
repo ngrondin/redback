@@ -19,7 +19,6 @@ import io.firebus.data.DataMap;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.objectmanager.ObjectConfig;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;

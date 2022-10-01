@@ -2,15 +2,13 @@ package io.redback.services;
 
 import java.security.MessageDigest;
 import java.security.spec.KeySpec;
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.information.ServiceInformation;
 import io.firebus.data.DataMap;
+import io.firebus.information.ServiceInformation;
 import io.redback.exceptions.RedbackException;
-import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 import io.redback.services.common.ServiceProvider;
@@ -70,7 +68,7 @@ public abstract class AccessManager extends ServiceProvider
 			throw new RedbackException("Exception in access management service", e);
 		}
 		
-		responsePayload.setData(response.toString());
+		responsePayload.setData(response);
 		logger.finer("Access manager service finish");
 		return responsePayload;
 	}

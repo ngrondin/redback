@@ -21,7 +21,7 @@ public class IntegrationClient extends Client {
 		req.put("uid", uid);
 		if(options != null)
 			req.put("options", options);
-		return request(session, req);
+		return requestDataMap(session, req);
 	}
 	
 	public DataMap list(Session session, String client, String domain, String objectName, DataMap filter, DataMap options) throws RedbackException {
@@ -33,7 +33,7 @@ public class IntegrationClient extends Client {
 		req.put("filter", filter);
 		if(options != null)
 			req.put("options", options);
-		return request(session, req);
+		return requestDataMap(session, req);
 	}
 	
 	public DataMap update(Session session, String client, String domain, String objectName, String uid, Object data, DataMap options) throws RedbackException {
@@ -46,7 +46,7 @@ public class IntegrationClient extends Client {
 		req.put("data", data);
 		if(options != null)
 			req.put("options", options);
-		return request(session, req);
+		return requestDataMap(session, req);
 	}
 
 	public DataMap create(Session session, String client, String domain, String objectName, Object data, DataMap options) throws RedbackException {
@@ -58,7 +58,7 @@ public class IntegrationClient extends Client {
 		req.put("data", data);
 		if(options != null)
 			req.put("options", options);
-		return request(session, req);
+		return requestDataMap(session, req);
 	}
 
 	public DataMap delete(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException {
@@ -70,7 +70,7 @@ public class IntegrationClient extends Client {
 		req.put("uid", uid);
 		if(options != null)
 			req.put("options", options);
-		return request(session, req);
+		return requestDataMap(session, req);
 	}
 	
 	public void clearCachedClientData(Session session, String client, String domain) throws RedbackException {
@@ -78,7 +78,7 @@ public class IntegrationClient extends Client {
 		req.put("client", client);
 		req.put("domain", domain);
 		req.put("action", "clearcacheddata");
-		request(session, req);
+		requestDataMap(session, req);
 	}
 
 	

@@ -57,7 +57,7 @@ public class FileClient extends Client {
 			DataMap req = new DataMap();
 			req.put("action", "getmetadata");
 			req.put("fileuid", fileUid);
-			DataMap resp = request(session, req);
+			DataMap resp = requestDataMap(session, req);
 			return resp;
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
@@ -92,7 +92,7 @@ public class FileClient extends Client {
 			req.put("fileuid", fileUid);
 			req.put("object", object);
 			req.put("uid", uid);
-			request(session, req);
+			requestDataMap(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error link files to object", e);
 		}		

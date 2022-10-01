@@ -1,6 +1,10 @@
 package io.redback.client;
 
+import org.bson.internal.Base64;
+
 import io.firebus.Firebus;
+import io.firebus.data.DataException;
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 
@@ -165,13 +169,41 @@ public class GatewayClient extends Client
 
 	protected DataMap call(DataMap req) throws RedbackException
 	{
-		Object ret = request(req);
-		if(ret instanceof DataMap)
+		Object ret = requestObject(null, req, false);
+		if(ret instanceof DataMap) {
 			return (DataMap)ret;
-		else if(ret instanceof String)
-			return new DataMap("result", ret.toString());
-		else 
+		} if(ret instanceof DataList) {
+			return new DataMap("list", ret);
+		} else if(ret instanceof String) {
+			String str = (String)ret;
+			try {
+				DataMap map = new DataMap(str);
+				return map;
+			} catch(DataException e1) {
+				try {
+					DataList list = new DataList(str);
+					return new DataMap("list", list);
+				} catch(DataException e2) {
+					return new DataMap("result", str);					
+				}
+			}
+		} else if(ret instanceof byte[]) {
+			byte[] bytes = (byte[])ret;
+			String str = new String(bytes);
+			try {
+				DataMap map = new DataMap(str);
+				return map;
+			} catch(DataException e1) {
+				try {
+					DataList list = new DataList(str);
+					return new DataMap("list", list);
+				} catch(DataException e2) {
+					return new DataMap("base64", Base64.encode(bytes));		
+				}
+			}
+		} else {
 			return new DataMap();
+		}
 	}
 
 

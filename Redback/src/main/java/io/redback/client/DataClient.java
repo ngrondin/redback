@@ -25,7 +25,7 @@ public class DataClient extends Client
 	
 	public DataMap runTransaction(DataTransaction tx) throws RedbackException 
 	{
-		return request(tx.req);
+		return requestDataMap(tx.req);
 	}
 
 
@@ -70,7 +70,7 @@ public class DataClient extends Client
 	public DataMap putData(String object, DataMap key, DataMap data, boolean replace) throws RedbackException
 	{
 		DataTransaction tx = createPut(object, key, data, replace);
-		return request(tx.req);
+		return requestDataMap(tx.req);
 	}
 
 	public DataMap putData(String object, DataMap key, DataMap data) throws RedbackException
@@ -89,7 +89,7 @@ public class DataClient extends Client
 			req.put("sort", sort);
 		req.put("page", page);
 		req.put("pagesize", pageSize);
-		return request(req);
+		return requestDataMap(req);
 	}
 
 	public DataTransaction createPublish(String object, DataMap key, DataMap data) throws RedbackException
@@ -128,6 +128,6 @@ public class DataClient extends Client
 		for(DataTransaction tx: list)
 			multi.add(tx.req);
 		req.put("multi", multi);
-		return request(req);
+		return requestDataMap(req);
 	}
 }

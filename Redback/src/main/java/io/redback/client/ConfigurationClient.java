@@ -20,7 +20,7 @@ public class ConfigurationClient extends Client
 		req.put("service", service);
 		req.put("category", category);
 		req.put("name", name);
-		return request(session, req);
+		return requestDataMap(session, req);
 	}
 	
 	public DataMap listConfigs(Session session, String service, String category, DataMap filter) throws RedbackException
@@ -30,7 +30,7 @@ public class ConfigurationClient extends Client
 		req.put("service", service);
 		req.put("category", category);
 		req.put("filter", filter);
-		return request(session, req);
+		return requestDataMap(session, req);
 	}
 
 	public DataMap listConfigs(Session session, String service, String category) throws RedbackException
@@ -39,7 +39,7 @@ public class ConfigurationClient extends Client
 		req.put("action", "list");
 		req.put("service", service);
 		req.put("category", category);
-		return request(session, req);
+		return requestDataMap(session, req);
 	}
 	
 
