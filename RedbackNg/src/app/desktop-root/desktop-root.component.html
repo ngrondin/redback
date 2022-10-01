@@ -81,7 +81,8 @@
         mode="side" 
         position="start"
         disableClose="true"
-        opened>
+        opened
+        [class]="userprefService.getGlobalPreferenceValue('uialt') == 'alt1' ? ' rb-sidenav-alt1' : ''">
         <rb-menu
             (navigate)="navigateTo($event)">
         </rb-menu>
