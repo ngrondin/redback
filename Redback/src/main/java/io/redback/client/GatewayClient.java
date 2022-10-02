@@ -3,6 +3,7 @@ package io.redback.client;
 import org.bson.internal.Base64;
 
 import io.firebus.Firebus;
+import io.firebus.Payload;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -169,7 +170,8 @@ public class GatewayClient extends Client
 
 	protected DataMap call(DataMap req) throws RedbackException
 	{
-		Object ret = requestObject(null, req, false);
+		Payload resp = requestPayload(null, req, false);
+		Object ret = resp.getDataObject();
 		if(ret instanceof DataMap) {
 			return (DataMap)ret;
 		} if(ret instanceof DataList) {

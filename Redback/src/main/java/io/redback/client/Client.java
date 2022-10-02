@@ -37,18 +37,11 @@ public class Client {
 	
 	protected DataMap requestDataMap(Session session, DataMap req, boolean async) throws RedbackException
 	{
-		Object resp = requestObject(session, req, async);
-		if(resp instanceof DataMap || resp == null) {
-			return (DataMap)resp;
-		} else if(resp instanceof String) {
-			try {
-				DataMap map = new DataMap((String)resp);
-				return map;
-			} catch (DataException e) {
-				throw new RedbackException("Return data from " + serviceName + " is not a DataMap");
-			}
-		} else {
-			throw new RedbackException("Return data from " + serviceName + " is not a DataMap");
+		Payload resp = requestPayload(session, req, async);
+		try {
+			return resp.getDataMap();
+		} catch(DataException e) {
+			throw new RedbackException("Return data from " + serviceName + " is not a DataMap", e);
 		}
 	}
 	
@@ -64,27 +57,19 @@ public class Client {
 	
 	protected DataList requestDataList(Session session, DataMap req, boolean async) throws RedbackException
 	{
-		Object resp = requestObject(session, req, async);
-		if(resp instanceof DataList || resp == null) {
-			return (DataList)resp;
-		} else if(resp instanceof String) {
-			try {
-				DataList list = new DataList((String)resp);
-				return list;
-			} catch (DataException e) {
-				throw new RedbackException("Return data from " + serviceName + " is not a DataList");
-			}
-		} else {
-			throw new RedbackException("Return data from " + serviceName + " is not a DataList");
+		Payload resp = requestPayload(session, req, async);
+		try {
+			return resp.getDataList();
+		} catch(DataException e) {
+			throw new RedbackException("Return data from " + serviceName + " is not a DataList", e);
 		}
 	}
 	
-	protected Object requestObject(Session session, DataMap req, boolean async) throws RedbackException
+	protected Payload requestPayload(Session session, DataMap req, boolean async) throws RedbackException 
 	{
 		Payload reqP = new Payload(req);
 		reqP.metadata.put("mime", "application/json");
-		Payload respP = requestPayload(session, reqP, async);
-		return respP.getDataObject();
+		return requestPayload(session, reqP, async);
 	}
 	
 	protected Payload requestPayload(Session session, Payload reqP) throws RedbackException 
