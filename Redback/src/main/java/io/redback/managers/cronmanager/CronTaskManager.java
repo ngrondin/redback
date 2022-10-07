@@ -85,7 +85,7 @@ public class CronTaskManager extends Thread {
 	public Session getSystemUserSession() throws RedbackException 
 	{
 		Session session = new Session();
-		if(cronUserProfile != null  &&  cronUserProfile.getExpiry() < System.currentTimeMillis())
+		if(cronUserProfile != null  &&  cronUserProfile.getExpiry() < System.currentTimeMillis() + 300000)
 			cronUserProfile = null;
 
 		if(cronUserProfile == null)
