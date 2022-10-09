@@ -336,7 +336,7 @@ public class ProcessManager
 		List<Notification> list = new ArrayList<Notification>();
 		if(actionner.isUser())
 			loadGroupsOf(actionner);
-		DataMap fullFilter = new DataMap();
+		DataMap fullFilter = new DataMap("complete", false);
 		if(filter != null)
 			fullFilter.merge(filter);
 		if(!actionner.getId().equals(getProcessUsername())) 

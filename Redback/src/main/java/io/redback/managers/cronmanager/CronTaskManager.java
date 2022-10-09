@@ -235,9 +235,11 @@ public class CronTaskManager extends Thread {
 				DataMap call = ctc.getFirebusCall();
 				String serviceName = config.getString(call.getString("service"));
 				Payload req = new Payload(call.getObject("payload"));
+				req.metadata.put("session", session.id);
+				req.metadata.put("token", session.getToken());
 				req.metadata.put("mime", "application/json");
 				boolean faf = call.getBoolean("fireandforget");
-				req.metadata.put("token", session.getToken());
+				logger.info("Running cron task '" + ctc.getName() + "' with token: " + session.getToken());
 				if(faf)
 					firebus.requestServiceAndForget(serviceName, req);
 				else
