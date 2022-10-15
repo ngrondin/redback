@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Properties;
 
@@ -16,8 +17,6 @@ import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
-import org.bson.internal.Base64;
 
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
@@ -119,12 +118,12 @@ public class StringUtils
 	
 	public static String base64encode(String s) 
 	{
-		return Base64.encode(s.getBytes());
+		return new String(Base64.getEncoder().encode(s.getBytes()));
 	}
 	
 	public static String base64decode(String s) 
 	{
-		return new String(Base64.decode(s));
+		return new String(Base64.getDecoder().decode(s));
 	}
 
 
@@ -269,7 +268,7 @@ public class StringUtils
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         email.writeTo(buffer);
         byte[] bytes = buffer.toByteArray();
-        return Base64.encode(bytes);
+        return new String(Base64.getEncoder().encode(bytes));
     }
 	
 }

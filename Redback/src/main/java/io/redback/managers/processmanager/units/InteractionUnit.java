@@ -229,7 +229,7 @@ public class InteractionUnit extends ProcessUnit
 	
 	private boolean isAssignee(Actionner actionner, ProcessInstance pi)
 	{
-		if(actionner.getId().equals(pi.getProcessManager().getProcessUsername())) 
+		if(actionner.getId().equals(pi.getProcessManager().getSysUserManager().getUsername())) 
 		{
 			return true;
 		} 

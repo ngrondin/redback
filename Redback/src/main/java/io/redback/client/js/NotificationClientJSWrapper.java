@@ -58,6 +58,15 @@ public class NotificationClientJSWrapper extends ObjectJSWrapper {
 					return null;
 				}
 			};
+		} else if(key.equals("sendsmsmessage")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String phoneNumber = (String)arguments[0];
+					String message = (String)arguments[1];
+					notificationClient.sendSMSMessage(session, phoneNumber, message);
+					return null;
+				}
+			};
 		} else {
 			return null;
 		}

@@ -78,7 +78,7 @@ public class ProcessInstance
 	
 	protected void createScriptBindings() throws RedbackException
 	{
-		Session outboundSession = processManager.getProcessUserSession(inboundActionner.getSession().getId());
+		Session outboundSession = processManager.getSysUserManager().getSession(inboundActionner.getSession().getId());
 		outboundSession.setScriptContext(inboundActionner.getSession().getScriptContext());
 		outboundActionner = new Actionner(this, outboundSession);
 		scriptContext = inboundActionner.getSession().getScriptContext().createChild();

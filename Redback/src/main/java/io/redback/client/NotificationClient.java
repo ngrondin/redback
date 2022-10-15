@@ -76,4 +76,15 @@ public class NotificationClient extends Client {
 		}		
 	}
 
+	public void sendSMSMessage(Session session, String phoneNumber, String message) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "sendsmsmessage");
+			req.put("phonenumber", phoneNumber);
+			req.put("message", message);
+			requestDataMap(session, req);
+		} catch(Exception e) {
+			throw new RedbackException("Error sending SMS Message", e);
+		}		
+	}
 }

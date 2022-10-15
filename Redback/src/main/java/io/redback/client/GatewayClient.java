@@ -1,6 +1,7 @@
 package io.redback.client;
 
-import org.bson.internal.Base64;
+
+import java.util.Base64;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -200,7 +201,7 @@ public class GatewayClient extends Client
 					DataList list = new DataList(str);
 					return new DataMap("list", list);
 				} catch(DataException e2) {
-					return new DataMap("base64", Base64.encode(bytes));		
+					return new DataMap("base64", Base64.getEncoder().encode(bytes));		
 				}
 			}
 		} else {

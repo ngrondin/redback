@@ -9,9 +9,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataFilter;
@@ -27,7 +24,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
-import io.redback.security.UserProfile;
+import io.redback.security.SysUserManager;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.StringUtils;
 
@@ -54,13 +51,9 @@ public class ProcessManager
 	protected CollectionConfig gmCollectionConfig;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
 	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
-	protected String processUserName;
-	protected String jwtSecret;
-	protected String jwtIssuer;
-	protected String sysUserToken;
-	protected UserProfile sysUserProfile;
 	protected DataMap globalVariables;
 	protected List<String> scriptVars;
+	protected SysUserManager sysUserManager;
 	
 	public ProcessManager(Firebus fb, DataMap config) throws RedbackException
 	{
@@ -79,9 +72,7 @@ public class ProcessManager
 			objectClient = new ObjectClient(firebus, objectServiceName);
 			domainServiceName = config.getString("domainservice");
 			processNotificationChannel = config.getString("processnotificationchannel");
-			processUserName = config.getString("processuser");
-			jwtSecret = config.getString("jwtsecret");
-			jwtIssuer = config.getString("jwtissuer");
+			sysUserManager = new SysUserManager(accessManagementClient, config);
 			processes = new HashMap<String, HashMap<Integer, Process>>();
 			transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
 			globalVariables = config.getObject("globalvariables");
@@ -122,6 +113,11 @@ public class ProcessManager
 		return scriptVars;
 	}
 	
+	public SysUserManager getSysUserManager()
+	{
+		return sysUserManager;
+	}
+	
 	public void refreshAllConfigs()
 	{
 		processes.clear();
@@ -129,7 +125,6 @@ public class ProcessManager
 			Session session = new Session();
 			try {
 				loadAppProcesses(session);
-				//jsManager.precompile(preCompile);
 			} catch(Exception e) {
 				logger.severe(StringUtils.rollUpExceptions(e));
 			}
@@ -234,39 +229,6 @@ public class ProcessManager
 		return pi;
 	}
 	
-	public String getProcessUsername() 
-	{
-		return processUserName;
-	}
-	
-	public Session getProcessUserSession(String sessionId) throws RedbackException 
-	{
-		Session session = new Session(sessionId);
-		if(sysUserProfile != null  &&  sysUserProfile.getExpiry() < System.currentTimeMillis())
-			sysUserProfile = null;
-
-		if(sysUserProfile == null)
-		{
-			try
-			{
-				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
-				sysUserToken = JWT.create()
-						.withIssuer(jwtIssuer)
-						.withClaim("email", processUserName)
-						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
-						.sign(algorithm);
-				sysUserProfile = accessManagementClient.validate(session, sysUserToken);
-			}
-			catch(Exception e)
-			{
-				throw new RedbackException("Error authenticating sys user", e);
-			}
-		}
-		session.setUserProfile(sysUserProfile);
-		session.setToken(sysUserToken);
-		return session;
-	}
-	
 	public DataMap getGlobalVariables()
 	{
 		return globalVariables;
@@ -339,7 +301,7 @@ public class ProcessManager
 		DataMap fullFilter = new DataMap("complete", false);
 		if(filter != null)
 			fullFilter.merge(filter);
-		if(!actionner.getId().equals(getProcessUsername())) 
+		if(!actionner.getId().equals(sysUserManager.getUsername())) 
 		{
 			DataList assigneeInList = new DataList();
 			assigneeInList.add(actionner.getId());
@@ -424,7 +386,7 @@ public class ProcessManager
 		{
 			DataMap fullFilterMap = new DataMap();
 			fullFilterMap.merge(filter);
-			if(!actionner.getId().equals(getProcessUsername()))
+			if(!actionner.getId().equals(sysUserManager.getUsername()))
 				fullFilterMap.put("domain", actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
 			DataFilter fullFilter = new DataFilter(fullFilterMap);
 			long txId = Thread.currentThread().getId();

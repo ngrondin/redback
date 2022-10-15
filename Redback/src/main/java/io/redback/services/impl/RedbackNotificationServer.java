@@ -40,6 +40,7 @@ import com.auth0.jwt.interfaces.RSAKeyProvider;
 import com.sun.mail.imap.IMAPFolder;
 
 import io.firebus.Firebus;
+import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -67,6 +68,7 @@ public class RedbackNotificationServer extends NotificationServer {
 	protected String fileServiceName;
 	protected FileClient fileClient;
 	protected String gatewayServiceName;
+	protected String smsServiceName;
 	protected GatewayClient gatewayClient;
 	protected DataMap fcmConfig;
 	protected String fcmAccessToken;
@@ -85,6 +87,7 @@ public class RedbackNotificationServer extends NotificationServer {
 		gatewayServiceName = config.getString("gatewayservice");
 		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
 		fcmConfig = config.getObject("fcmconfig");
+		smsServiceName = config.getString("smsservice");
 	}
 
 	protected void email(Session session, List<String> addresses, String fromAddress, String fromName, String subject, String body, List<String> attachments) throws RedbackException {
@@ -318,6 +321,24 @@ public class RedbackNotificationServer extends NotificationServer {
 		} else {
 			throw new RedbackException("Gateway client or Data client not configured");
 		}
+	}
+
+	protected void sendSMSMessage(Session session, String phonenumber, String message) throws RedbackException {
+		if(smsServiceName != null) {
+			try {
+				DataMap request = new DataMap();
+				request.put("phonenumber", phonenumber);
+				request.put("message", message);
+				Payload requestPayload = new Payload(request);
+				requestPayload.metadata.put("session", session.getId());
+				firebus.requestService(smsServiceName, requestPayload);
+			} catch(Exception e) {
+				throw new RedbackException("Error sending sms", e);
+			}			
+		} else {
+			throw new RedbackException("SMS adapter not configured");
+		}
+
 	}
 
 }

@@ -48,21 +48,6 @@
 		</dependency>
 		<dependency>
 			<groupId>io.firebus</groupId>
-			<artifactId>firebus-adapters</artifactId>
-			<version>${io.firebus.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.firebus</groupId>
-			<artifactId>firebus-http</artifactId>
-			<version>${io.firebus.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.firebus</groupId>
-			<artifactId>firebus-discovery</artifactId>
-			<version>${io.firebus.version}</version>
-		</dependency>	
-		<dependency>
-			<groupId>io.firebus</groupId>
 			<artifactId>firebus-script</artifactId>
 			<version>${io.firebus.version}</version>
 		</dependency>

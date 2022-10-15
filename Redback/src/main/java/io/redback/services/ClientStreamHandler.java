@@ -1,7 +1,6 @@
 package io.redback.services;
 
-
-import org.apache.commons.codec.binary.Base64;
+import java.util.Base64;
 
 import io.firebus.Payload;
 import io.firebus.exceptions.FunctionErrorException;
@@ -76,9 +75,13 @@ public abstract class ClientStreamHandler extends StreamHandler {
 						} else if(data.containsKey("data")) {
 							int seq = data.getNumber("sequence").intValue();
 							String base64data = data.getString("data");
-							if(base64data.indexOf(",") > -1)
-								base64data = base64data.split(",")[1];
-							byte[] bytes = Base64.decodeBase64(base64data);
+							if(base64data.indexOf(",") > -1) base64data = base64data.split(",")[1];
+							byte[] bytes = null;
+							if(base64data.contains("-") || base64data.contains("_")) {
+								bytes = Base64.getUrlDecoder().decode(base64data);
+							} else {
+								bytes = Base64.getDecoder().decode(base64data);
+							}
 							uploadChunk(uploadUid, seq, bytes);
 						} else if(data.containsKey("complete")) {
 							finishUpload(uploadUid);

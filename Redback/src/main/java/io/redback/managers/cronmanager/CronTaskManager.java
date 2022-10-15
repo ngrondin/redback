@@ -12,9 +12,6 @@ import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataList;
@@ -24,6 +21,7 @@ import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
+import io.redback.security.SysUserManager;
 import io.redback.security.UserProfile;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.CollectionConfig;
@@ -41,9 +39,6 @@ public class CronTaskManager extends Thread {
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String accessManagerServiceName;
-	protected String cronUserName;
-	protected String jwtSecret;
-	protected String jwtIssuer;
 	protected String cronUserToken;
 	protected UserProfile cronUserProfile;
 	protected CollectionConfig collectionConfig;
@@ -53,6 +48,7 @@ public class CronTaskManager extends Thread {
 	protected Map<String, CronTaskConfig> taskConfigs;
 	protected boolean quit = false;
 	protected long randomDelay;
+	protected SysUserManager sysUserManager;
 
 
 	public CronTaskManager(Firebus fb, DataMap c)
@@ -64,12 +60,10 @@ public class CronTaskManager extends Thread {
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
-		cronUserName = config.getString("cronuser");
-		jwtSecret = config.getString("jwtsecret");
-		jwtIssuer = config.getString("jwtissuer");
 		dataClient = new DataClient(firebus, dataServiceName);
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
+		sysUserManager = new SysUserManager(accessManagementClient, config);
 		collectionConfig = new CollectionConfig(config.getObject("collection"), "rbcr_task");
 		taskConfigs = new HashMap<String, CronTaskConfig>();
 		randomDelay = (new Random()).nextInt(5000);
@@ -81,38 +75,9 @@ public class CronTaskManager extends Thread {
 		return jsEngine;
 	}
 
-	
-	public Session getSystemUserSession() throws RedbackException 
-	{
-		Session session = new Session();
-		if(cronUserProfile != null  &&  cronUserProfile.getExpiry() < System.currentTimeMillis() + 300000)
-			cronUserProfile = null;
-
-		if(cronUserProfile == null)
-		{
-			try
-			{
-				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
-				cronUserToken = JWT.create()
-						.withIssuer(jwtIssuer)
-						.withClaim("email", cronUserName)
-						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
-						.sign(algorithm);
-				cronUserProfile = accessManagementClient.validate(session, cronUserToken);
-			}
-			catch(Exception e)
-			{
-				throw new RedbackException("Error authenticating sys user", e);
-			}
-		}
-		session.setToken(cronUserToken);
-		session.setUserProfile(cronUserProfile);
-		return session;
-	}
-
 	public void run() {
 		try {
-			loadConfigs(getSystemUserSession());
+			loadConfigs(sysUserManager.getSession());
 			while(!quit) {
 				try {
 					long current = System.currentTimeMillis() - randomDelay;
@@ -224,7 +189,7 @@ public class CronTaskManager extends Thread {
 	
 	protected void runTask(CronTaskConfig ctc) throws RedbackException {
 		try {
-			Session session = getSystemUserSession();
+			Session session = sysUserManager.getSession();
 			if(ctc.getScript() != null) {
 				Bindings scriptContext = jsEngine.createBindings();
 				scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
@@ -272,7 +237,7 @@ public class CronTaskManager extends Thread {
 
 	public void clearCaches() {
 		try {
-			loadConfigs(getSystemUserSession());
+			loadConfigs(sysUserManager.getSession());
 		} catch(RedbackException e) {
 			logger.severe("Cannot clear config caches: " + e.getMessage());
 		}

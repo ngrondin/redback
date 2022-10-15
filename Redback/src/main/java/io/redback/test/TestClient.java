@@ -1,29 +1,14 @@
 package io.redback.test;
 
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.util.EntityUtils;
-
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.interfaces.ServiceProvider;
-import io.firebus.data.DataMap;
 import io.redback.client.ObjectClient;
 import io.redback.client.ProcessAssignmentRemote;
 import io.redback.client.ProcessClient;
@@ -37,7 +22,7 @@ public class TestClient {
 	protected ProcessClient processClient;
 	protected String url;
 	protected DataMap roleMap;
-	protected HttpClient httpClient;
+	//protected HttpClient httpClient;
 	
 	protected class HTTPProxy implements ServiceProvider {
 		protected String servicePath;
@@ -47,7 +32,7 @@ public class TestClient {
 		}
 
 		public Payload service(Payload payload) throws FunctionErrorException {
-			try {
+			/*try {
 				HttpPost httpRequest = new HttpPost(url + "/" + servicePath);
 				httpRequest.setEntity(new ByteArrayEntity(payload.getBytes()));
 				httpRequest.setHeader("Content-Type", "application/json");
@@ -66,7 +51,8 @@ public class TestClient {
 	    		}
 			} catch(Exception e) {
 				throw new FunctionErrorException("Error proxying firebus request", e);
-			}
+			}*/
+			return null;
 		}
 
 		public ServiceInformation getServiceInformation() {
@@ -76,7 +62,7 @@ public class TestClient {
 	}
 
 	public TestClient(String fbNet, String fbPass, String os, String ps, String u, String jwtIssuer, String jwtSecret, DataMap rm) {
-		firebus = new Firebus(fbNet, fbPass);
+		/*firebus = new Firebus(fbNet, fbPass);
 		firebus.setThreadCount(50);
 		firebus.setDefaultTimeout(15000);
 		if(u == null) {
@@ -104,7 +90,7 @@ public class TestClient {
 					.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
 					.sign(algorithm);
 			roleMap.getObject(role).put("token", token);
-		}
+		}*/
 	}
 	
 	public boolean isReady() {

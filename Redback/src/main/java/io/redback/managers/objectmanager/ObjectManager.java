@@ -1,15 +1,11 @@
 package io.redback.managers.objectmanager;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -48,7 +44,7 @@ import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
 import io.redback.security.Session;
-import io.redback.security.UserProfile;
+import io.redback.security.SysUserManager;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
@@ -99,13 +95,9 @@ public class ObjectManager
 	protected NotificationClient notificationClient;
 	protected DomainClient domainClient;
 	protected IntegrationClient integrationClient;
-	protected String elevatedUserName;
-	protected String jwtSecret;
-	protected String jwtIssuer;
-	protected String elevatedUserToken;	
-	protected UserProfile elevatedUserProfile;
 	protected boolean useMultiDBTransactions;
 	protected Cache<DataMap> searchCache;
+	protected SysUserManager sysUserManager;
 
 	public ObjectManager(String n, DataMap config, Firebus fb) throws RedbackException
 	{
@@ -142,15 +134,13 @@ public class ObjectManager
 			notificationClient = new NotificationClient(firebus, notificationServiceName);
 			domainClient = new DomainClient(firebus, domainServiceName);
 			integrationClient = new IntegrationClient(firebus, integrationServiceName);
-			elevatedUserName = config.getString("elevateduser");
-			jwtSecret = config.getString("jwtsecret");
-			jwtIssuer = config.getString("jwtissuer");
 			objectConfigs = new HashMap<String, ObjectConfig>();
 			domainObjectConfigs = new HashMap<String, Map<String, ObjectConfig>>();
 			globalScripts = new HashMap<String, ScriptConfig>();
 			readRightsFilters = new HashMap<String, ExpressionMap>();
 			transactions = new HashMap<Long, List<RedbackObject>>();
-			searchCache = new Cache<DataMap>(5000);			
+			searchCache = new Cache<DataMap>(5000);	
+			sysUserManager = new SysUserManager(accessManagementClient, config);
 			scriptFactory.setGlobals(globalVariables);
 			scriptFactory.setInRootScope("log", new LoggerJSFunction());
 			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
@@ -208,36 +198,7 @@ public class ObjectManager
 	{
 		return integrationClient;
 	}
-	
-	/*public DataMap getGlobalVariables()
-	{
-		return globalVariables;
-	}*/
-	
-	public UserProfile getElevatedUserProfile(Session session) throws RedbackException 
-	{
-		if(elevatedUserProfile != null  &&  elevatedUserProfile.getExpiry() < System.currentTimeMillis())
-			elevatedUserProfile = null;
 
-		if(elevatedUserProfile == null)
-		{
-			try
-			{
-				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
-				elevatedUserToken = JWT.create()
-						.withIssuer(jwtIssuer)
-						.withClaim("email", elevatedUserName)
-						.withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
-						.sign(algorithm);
-				elevatedUserProfile = accessManagementClient.validate(session, elevatedUserToken);
-			}
-			catch(Exception e)
-			{
-				throw new RedbackException("Error authenticating sys user", e);
-			}
-		}
-		return elevatedUserProfile;
-	}		
 	
 	public void refreshAllConfigs()
 	{	
@@ -595,7 +556,7 @@ public class ObjectManager
 		RedbackObject object = getObject(session, objectName, id);
 		if(object != null)
 		{
-			boolean isAutomated = session.getUserProfile().getUsername().equals(elevatedUserName);
+			boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
 			Iterator<String> it = updateData.keySet().iterator();
 			while(it.hasNext())
 			{
@@ -613,7 +574,7 @@ public class ObjectManager
 		putInCurrentTransaction(object);
 		if(initialData != null)
 		{
-			boolean isAutomated = session.getUserProfile().getUsername().equals(elevatedUserName);
+			boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
 			for(String attributeName: initialData.keySet())
 			{
 				boolean isFilter = false;
@@ -688,7 +649,7 @@ public class ObjectManager
 	}
 	
 	public void elevateSession(Session session) throws RedbackException {
-		session.setElevatedUserProfile(getElevatedUserProfile(session));
+		session.setElevatedUserProfile(sysUserManager.getProfile(session));
 	}
 	
 	public void demoteSession(Session session) throws RedbackException {
