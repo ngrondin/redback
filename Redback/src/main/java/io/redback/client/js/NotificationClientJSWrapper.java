@@ -62,8 +62,9 @@ public class NotificationClientJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					String phoneNumber = (String)arguments[0];
-					String message = (String)arguments[1];
-					notificationClient.sendSMSMessage(session, phoneNumber, message);
+					String senderId = arguments.length > 2 ? (String)arguments[1] : null;
+					String message = (String)arguments[arguments.length > 2 ? 2 : 1];
+					notificationClient.sendSMSMessage(session, phoneNumber, senderId, message);
 					return null;
 				}
 			};

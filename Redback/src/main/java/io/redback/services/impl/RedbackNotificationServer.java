@@ -323,12 +323,14 @@ public class RedbackNotificationServer extends NotificationServer {
 		}
 	}
 
-	protected void sendSMSMessage(Session session, String phonenumber, String message) throws RedbackException {
+	protected void sendSMSMessage(Session session, String phonenumber, String senderId, String message) throws RedbackException {
 		if(smsServiceName != null) {
 			try {
 				DataMap request = new DataMap();
 				request.put("phonenumber", phonenumber);
 				request.put("message", message);
+				if(senderId != null)
+					request.put("senderid", senderId);
 				Payload requestPayload = new Payload(request);
 				requestPayload.metadata.put("session", session.getId());
 				firebus.requestService(smsServiceName, requestPayload);
