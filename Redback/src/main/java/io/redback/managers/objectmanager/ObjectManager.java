@@ -950,7 +950,9 @@ public class ObjectManager
 			}
 			else if(key.equals("$in")  ||  key.equals("$nin"))
 			{
-				dbFilter.put(key, objectFilter.getList(key));
+				DataList list = objectFilter.getList(key);
+				if(list == null) list = new DataList();
+				dbFilter.put(key, list);
 			}
 			else if(key.equals("$or") || key.equals("$and"))
 			{
@@ -1055,7 +1057,6 @@ public class ObjectManager
 			filter = new DataMap();
 			DataList orList = new DataList();
 			ObjectConfig config = getObjectConfig(session, objectName);
-			//orList.add(new DataMap("uid", new DataMap("$regex", regexExpr)));
 			Iterator<String> it = config.getAttributeNames().iterator();
 			while(it.hasNext())
 			{
@@ -1138,31 +1139,6 @@ public class ObjectManager
 			}
 		}		
 	}
-	/*
-	protected void trace(String objectname, String uid, String domain, String attribute, DataEntity value, String username)
-	{
-		if(traceCollection != null && dataClient != null) 
-		{
-			try 
-			{
-				DataMap key = new DataMap();
-				key.put("_id", UUID.randomUUID().toString());
-				DataMap data = new DataMap();
-				data.put("object", objectname);
-				data.put("uid", uid);
-				data.put("domain", domain);
-				data.put("attribute", attribute);
-				data.put("value", value);
-				data.put("username", username);
-				data.put("date", new Date());
-				dataClient.putData(traceCollection.getName(), traceCollection.convertObjectToSpecific(key), traceCollection.convertObjectToSpecific(data));
-			}
-			catch(Exception e) 
-			{
-				logger.severe("Cannot send out signal : " + StringUtils.rollUpExceptions(e));
-			}
-		}		
-	}*/
 
 }
 
