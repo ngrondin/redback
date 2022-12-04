@@ -109,9 +109,13 @@ public class RedbackUIServer extends UIServer
 					throw new RedbackUnauthorisedException("Unauthorised to access application '" + name + "'");
 				}
 			}
-			else 
+			else if(name != null)
 			{
 				throw new RedbackInvalidRequestException("Application '" + name + "' does not exist");
+			}
+			else 
+			{
+				throw new RedbackInvalidRequestException("Default application was not found");
 			}
 		}
 		else
