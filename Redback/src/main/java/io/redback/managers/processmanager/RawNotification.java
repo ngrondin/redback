@@ -92,9 +92,11 @@ public class RawNotification {
 				} else if(action.exclusiveToIds.length == 0) {
 					applies = true;
 				} else {
-					for(int i = 0; i < action.exclusiveToIds.length; i++)
-						if(action.exclusiveToIds[i].equals(actionner.getId()))
+					for(int i = 0; i < action.exclusiveToIds.length; i++) {
+						String exclusiveToId = action.exclusiveToIds[i];
+						if(actionner.getId().equals(exclusiveToId) || actionner.isInGroup(exclusiveToId))
 							applies = true;
+					}
 				}
 				if(applies) {
 					notification.addAction(action.action, action.description, action.main);				
