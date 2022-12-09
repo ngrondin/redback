@@ -82,6 +82,7 @@ export class AppComponent implements OnInit {
     window.redback.username = this.username;
     window.redback.api = this.apiService;
     window.redback.data = this.dataService;
+    window.redback.notifications = this.notificationService;
   }
 
   ngOnInit(): void {
