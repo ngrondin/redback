@@ -650,6 +650,7 @@ public class RedbackObject extends RedbackElement
 							DataMap relatedObjectValidation = new DataMap();
 							relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
 							relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
+							relatedObjectValidation.put("listfilter",  getRelatedListFilter(attributeConfig.getName()));
 							attributeValidation.put("related", relatedObjectValidation);
 						}
 						validatonNode.put(attrName, attributeValidation);
