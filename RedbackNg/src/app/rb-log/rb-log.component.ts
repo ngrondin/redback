@@ -87,7 +87,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   keydown(event: any) {
-    console.log(event.keyCode);
+    //console.log(event.keyCode);
     if(event.keyCode == 13) {
       this.post();
     }
@@ -124,7 +124,7 @@ export class RbLogComponent extends RbDataObserverComponent {
             this.isEditable = false;
         }
     }
-    console.log('eval editable = ' + this.isEditable);
+    //console.log('eval editable = ' + this.isEditable);
   }
 
   onScroll(event) {

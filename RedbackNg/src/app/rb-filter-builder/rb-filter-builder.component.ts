@@ -148,7 +148,7 @@ export class RbFilterBuilderComponent implements OnInit {
         }
       }
       fltr = this.filterService.resolveFilter(fltr, null, null, null);
-      this.dataService.aggregateObjects(this.config.objectname, fltr, null, [fac.attribute], [{function:"count", name:"count"}], null, 0, 500).subscribe(list => {
+      this.dataService.aggregate(this.config.objectname, fltr, null, [fac.attribute], [{function:"count", name:"count"}], null, 0, 500).subscribe(list => {
         fac.options = list.map(agg => {return {
           name: agg.getDimension(fac.attribute + "." + fac.displayAttribute), 
           value: agg.getDimension(fac.attribute),

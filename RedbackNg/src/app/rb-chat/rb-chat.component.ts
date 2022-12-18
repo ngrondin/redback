@@ -110,7 +110,7 @@ export class RbChatComponent implements OnInit {
       if(json.object != null && json.uid != null && (json.object != thisChat.object || json.uid != thisChat.uid)) {
         thisChat.object = json.object;
         thisChat.uid = json.uid;
-        this.dataService.getServerObject(thisChat.object, thisChat.uid).subscribe((object) => {
+        this.dataService.fetch(thisChat.object, thisChat.uid).subscribe((object) => {
           thisChat.linkLabel = this.configService.getLabel(object)
         });
       }

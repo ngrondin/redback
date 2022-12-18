@@ -36,6 +36,7 @@ import { RbListScrollDirective } from './rb-list-scroll/rb-list-scroll.directive
 import { ApiService } from './services/api.service';
 import { DataService } from './services/data.service';
 import { FormsModule } from '@angular/forms';
+import { FileService } from './services/file.service';
 import { RbRelatedInputComponent } from './inputs/rb-related-input/rb-related-input.component';
 import { RbPopupListComponent } from './popups/rb-popup-list/rb-popup-list.component';
 import { RbPopupDatetimeComponent } from './popups/rb-popup-datetime/rb-popup-datetime.component';
@@ -264,6 +265,7 @@ window.redback = window.redback || {};
     CookieService,
     ApiService,
     DataService,
+    FileService,
     ConfigService,
     DragService,
     FilterService,

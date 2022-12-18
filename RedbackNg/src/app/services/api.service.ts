@@ -65,7 +65,7 @@ export class ApiService {
       object: name,
       uid: uid,
       options: {
-        addrelated: true,
+        addrelated: false,
         addvalidation: true
       }
     };
@@ -113,7 +113,7 @@ export class ApiService {
       uid: uid,
       data: data,
       options: {
-        addrelated: true,
+        addrelated: false,
         addvalidation: true
       }
     };
@@ -126,7 +126,7 @@ export class ApiService {
       object: name,
       data: data,
       options: {
-        addrelated: true,
+        addrelated: false,
         addvalidation: true
       }
     };
@@ -152,7 +152,7 @@ export class ApiService {
       uid: uid,
       function: func,
       options: {
-        addrelated: true,
+        addrelated: false,
         addvalidation: true
       }
     };

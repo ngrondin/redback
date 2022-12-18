@@ -153,7 +153,7 @@ export class NotificationService {
         resp => {
           if(resp != null && resp.rbobjectupdate != null && resp.rbobjectupdate.length > 0 && !this.clientWSService.isConnected()) {
             for(let row of resp.rbobjectupdate) {
-              this.dataService.getServerObject(row.objectname, row.uid).subscribe(resp => {});
+              this.dataService.fetch(row.objectname, row.uid).subscribe(resp => {});
             }
           }
           this.removeNotification(notification);

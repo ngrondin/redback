@@ -1,8 +1,7 @@
 import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
-import { DataService } from 'app/services/data.service';
+import { FileService } from 'app/services/file.service';
 import { RbObject, RbFile } from 'app/datamodel';
-//import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
 import { RbSetComponent } from 'app/abstract/rb-set';
 
 @Component({
@@ -18,7 +17,7 @@ export class RbFilesetComponent extends RbSetComponent {
   public overrideRbObject: RbObject;
 
   constructor(
-    private dataService: DataService,
+    private fileService: FileService,
     private apiService: ApiService
   ) {
     super();
@@ -65,7 +64,7 @@ export class RbFilesetComponent extends RbSetComponent {
 
   public refreshData() {
     if(this.active && this.relatedObject != null) {
-      this.dataService.listFiles(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
+      this.fileService.list(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
         data => this.setData(data)
       );
       this.filesLoading = true;

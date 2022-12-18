@@ -31,7 +31,6 @@ export class Translator {
     }
 }
 
-
 export class InitialsMaker {
 
     get(val: string): string {
@@ -213,5 +212,12 @@ export class Evaluator {
         } else {
             return null;
         }
+    }
+}
+
+export class Hasher {
+    public static hash(value: any) {
+        let hash = JSON.stringify(value).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);   
+        return hash;
     }
 }

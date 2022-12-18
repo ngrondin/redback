@@ -51,7 +51,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   setInit() {
-    this.dataSubscription = this.dataService.getObjectCreateObservable().subscribe(object => this.receiveNewlyCreatedData(object));
+    this.dataSubscription = this.dataService.getCreationObservable().subscribe(object => this.receiveNewlyCreatedData(object));
     this.pageSize = this.fetchAll == true ? 250 : 50;
     this.fetchThreads = 0;
     this.hasMorePages = true;
@@ -162,7 +162,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
       const search = this.searchString;
       const addRel = this.fetchAll ? false : this.addrelated;
-      this.dataService.listServerObjects(this.objectname, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, addRel).subscribe({
+      this.dataService.fetchList(this.objectname, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, addRel).subscribe({
         next: (data) => {
           this.fetchThreads--;
           this.setData(data);
@@ -193,7 +193,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     }
     this.mergedFilter = filter;
     this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
-    this.dataService.subscribeObjectCreation(this.uid, this.objectname, this.resolvedFilter);
+    this.dataService.subscribeToCreation(this.uid, this.objectname, this.resolvedFilter);
   }
 
   private setData(data: RbObject[]) {
@@ -230,9 +230,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
           this.totalCount = this._list.length;
         }
       }
-      if(this.addrelated == true && this.fetchAll == true) {
-        this.dataService.loadMissingRelatedObjects(this._list);
-      }
+      /*if(this.addrelated == true && this.fetchAll == true) {
+        this.dataService.fetchMissingRelated(this._list);
+      }*/
     }
   }
   
@@ -278,11 +278,11 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   } 
 
   public create() {
-    this.dataService.createObject(this.objectname, null, this.resolvedFilter).subscribe(newObject => this.addObjectAndSelect(newObject));
+    this.dataService.create(this.objectname, null, this.resolvedFilter).subscribe(newObject => this.addObjectAndSelect(newObject));
   }
 
   public delete(obj: RbObject) {
-    this.dataService.deleteObject(obj).subscribe(result => this.remove(obj));
+    this.dataService.delete(obj).subscribe(result => this.remove(obj));
   }
 
   public addObjectAndSelect(obj: RbObject) {

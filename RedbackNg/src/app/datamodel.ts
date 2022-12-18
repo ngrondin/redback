@@ -1,8 +1,8 @@
 import { DataService } from './services/data.service';
-import { analyzeAndValidateNgModules } from '@angular/compiler';
 import { RbDatasetComponent } from './rb-dataset/rb-dataset.component';
 import { ValueComparator } from './helpers';
 import { NotificationService } from './services/notification.service';
+import { FileService } from './services/file.service';
 
 export class ObjectResp {
     objects: object;
@@ -16,63 +16,100 @@ export class RbObject {
     data: any = {};
     related: any = {};
     validation: any = {};
-    changed: any = [];
+    flags: any = {};
+    updatedAttributes: any = [];
     dataService: DataService;
     lastUpdated: number;
     datasets: RbDatasetComponent[] = [];
-
+    
     constructor(json: any, ds: DataService) {
         this.dataService = ds;
         this.uid = json.uid;
         this.objectname = json.objectname;
         this.domain = json.domain;
-        this.updateFromServer(json);
+        this.updateFromJSON(json);
     }
 
-    updateFromServer(json: any) {
+    updateFromJSON(json: any) {
         const inData: any = json.data;
         let isChanged: boolean = false;
         for(const attribute in json.data) {
-            if(this.data[attribute] === undefined || ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
-                this.data[attribute] = json.data[attribute];
-                isChanged = true;
-            }
-
-            if(json.related != null) {
-                if(json.related[attribute] != null) {
-                    let related = this.dataService.updateObjectFromServer(json.related[attribute]);
-                    if(this.related[attribute] != related) {
-                        this.related[attribute] = related;
-                    }
-                } else {
-                    this.related[attribute] = null;
-                }
-            }
-
             if(json.validation != null && json.validation[attribute] != null) {
                 this.validation[attribute] = json.validation[attribute];
-                let relatedValid = this.validation[attribute].related;
-                if(relatedValid != null && this.related[attribute] == null) {
-                    if(relatedValid.link == 'uid') {
-                        this.related[attribute] = this.dataService.getLocalObject(relatedValid.object, this.data[attribute]);
-                    } else {
-                        let filter = {};
-                        filter[relatedValid.link] = this.data[attribute];
-                        this.related[attribute] = this.dataService.findFirstLocalObject(relatedValid.object, filter);
-                    }
+            }
+
+            if(ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
+                isChanged = true;
+                this.data[attribute] = json.data[attribute];
+                if((this.validation[attribute] != null && this.validation[attribute].related != null) || this.related[attribute] !== undefined) {
+                    this.related[attribute] = null;
+                    this._setAttributeFlag(attribute, 'reqrel', false);
+                } 
+            }
+
+            if(json.related != null && json.related[attribute] != null) {
+                let related = this.dataService.receive(json.related[attribute]);
+                if(this.related[attribute] != related) {
+                    this.related[attribute] = related;
+                    isChanged = true;
                 }
             }
         }
 
+        if(json.validation != null) this._linkMissingRelated();
+
         if(isChanged) {
-            this.changed = [];
+            this.updatedAttributes = [];
             this.lastUpdated = (new Date()).getTime();
             this._adviseSetsOfChange();
         }
     }
 
+    linkMissingRelated() {
+        if(this._linkMissingRelated()) {
+            this._adviseSetsOfChange();
+        }
+    }
+
+    _linkMissingRelated() {
+        let isChanged: boolean = false;
+        for(const attribute in this.data) {
+            if(this.validation[attribute] != null && this.validation[attribute].related != null && this.related[attribute] == null && this.data[attribute] != null) {
+                let relatedRule = this.validation[attribute].related;
+                if(relatedRule != null && this.related[attribute] == null) {
+                    let relatedObject = null, uid = null, filter = null;
+                    if(relatedRule.link == 'uid') {
+                        uid = this.data[attribute];
+                        relatedObject = this.dataService.get(relatedRule.object, uid);
+                    } else {
+                        filter = {...relatedRule.listfilter};
+                        filter[relatedRule.link] = this.data[attribute];
+                        relatedObject = this.dataService.findFirst(relatedRule.object, filter);
+                    }
+                    if(relatedObject != null) {
+                        isChanged = true
+                        this.related[attribute] = relatedObject;
+                    } else {
+                        if(this.flags[attribute]['reqrel'] != true) {
+                            this.dataService.enqueueRelatedFetch(relatedRule.object, uid, filter, this);
+                            this._setAttributeFlag(attribute, 'reqrel', true);
+                        } else {
+                            console.log("Can't find related object for " + this.objectname + ":" + this.uid + "." + attribute + " = '" + this.data[attribute] + "'");
+                        }
+                    }
+                }
+            } 
+        }
+        return isChanged;
+    }
+
+    _setAttributeFlag(attribute, flag, value) {
+        if(this.flags[attribute] == null) this.flags[attribute] = {};
+        this.flags[attribute][flag] = value;
+    }
+
     refresh() {
-        this.dataService.getServerObject(this.objectname, this.uid).subscribe((obj) => {});
+        this.dataService.fetch(this.objectname, this.uid).subscribe((obj) => {});
     }
 
     get(attr: string) : any {
@@ -140,12 +177,12 @@ export class RbObject {
         if(attribute == 'uid') {
             if(this.uid == null) {
                 this.uid = value;
-                this.dataService.createObject(this.objectname, this.uid, this.data).subscribe(val => {});
+                this.dataService.create(this.objectname, this.uid, this.data).subscribe(val => {});
             }
-        } else if(this.validation[attribute].editable == true) {
+        } else if(this.validation[attribute] != null && this.validation[attribute].editable == true) {
             this.data[attribute] = value;
             this.related[attribute] = related;
-            if(this.changed.indexOf(attribute) == -1) this.changed.push(attribute);
+            if(this.updatedAttributes.indexOf(attribute) == -1) this.updatedAttributes.push(attribute);
             return true;
         }
         return false;
@@ -156,7 +193,7 @@ export class RbObject {
             this.lastUpdated = (new Date()).getTime();
             this._adviseSetsOfChange();
             if(this.dataService.saveImmediatly) {
-                this.dataService.updateObjectToServer(this);
+                this.dataService.pushToServer(this);
             }            
         }
     }
@@ -197,8 +234,6 @@ export class RbObject {
 }
 
 
-
-
 export class RbFile {
     fileUid: string;
     relatedObject: string;
@@ -209,7 +244,7 @@ export class RbFile {
     username: string;
     date: Date;
 
-    constructor(json: any, ds: DataService) {
+    constructor(json: any, fs: FileService) {
         this.fileUid = json.fileuid;
         this.relatedObject = json.relatedobject;
         this.relatedUid = json.relateduid;
@@ -220,7 +255,6 @@ export class RbFile {
         this.date = new Date(json.date);
     }
 }
-
 
 
 export class RbAggregate {
@@ -238,7 +272,7 @@ export class RbAggregate {
         this.dataService = ds;
         if(json.related != null) {
             for(const attribute in json.related) {
-                this.related[attribute] = this.dataService.updateObjectFromServer(json.related[attribute]);
+                this.related[attribute] = this.dataService.receive(json.related[attribute]);
             }
         }
     }
@@ -455,9 +489,9 @@ export class DataTarget {
       this.filter = f;
       this.search = s;
     }
-  }
+}
   
-  export class ViewTarget {
+export class ViewTarget {
     domain: string;
     view: string;
     title: string;
@@ -490,4 +524,4 @@ export class DataTarget {
     set breadcrumbLabel(v: string) {
       this._breadcrumbLabel = v;
     }
-  }
+}
