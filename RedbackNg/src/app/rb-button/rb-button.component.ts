@@ -13,6 +13,8 @@ export class RbButtonComponent extends RbDataObserverComponent {
   @Input('label') label: string;
   @Input('action') action: string;
   @Input('param') param: string;
+  @Input('timeout') timeout: number;
+  @Input('confirm') confirm: string;
 
   constructor(
     private actionService: ActionService
@@ -34,7 +36,7 @@ export class RbButtonComponent extends RbDataObserverComponent {
 
   public click() {
     if(this.dataset != null) {
-      this.actionService.action(this.dataset, this.action, this.param).subscribe((rbObject) => {
+      this.actionService.action(this.dataset, this.action, this.param, this.timeout, this.confirm).subscribe((rbObject) => {
       })
     }
   }

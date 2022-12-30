@@ -26,38 +26,51 @@ export class ActionService {
   ) { }
 
 
-  public action(dataset: RbDatasetComponent, actionName: string, param: any, timeout?: number) : Observable<null> {
-    let _name: string = actionName.toLowerCase();
-    if(_name == 'create') {
-      return this.create(dataset, param);
-    } else if(_name == 'createinmemory') {
-      return this.createInMemory(dataset, param);
-    } else if(_name == 'delete') {
-      return this.deleteSelected(dataset);
-    } else if(_name == 'exportall') {
-      return this.exportAll(dataset);
-    } else if(_name == 'report') {
-      return this.report(dataset, param);
-    } else if(_name == 'reportall') {
-      return this.reportAll(dataset, param);
-    } else if(_name == 'reportlist') {
-      return this.reportList(dataset, param);
-    } else if(_name == 'execute') {
-      return this.execute(dataset, param, null);
-    } else if(_name == 'executeall') {
-      return this.executeAll(dataset, param);
-    } else if(_name == 'executemaster') {
-      return this.executeMaster(dataset, param);
-    } else if(_name == 'executeglobal') {
-      return this.executeGlobal(dataset, param);
-    } else if(_name == 'executedomain') {
-      return this.executeDomain(dataset, param, timeout);
-    } else if(_name == 'modal') {
-      return this.showModal(param);
-    } else if(_name == 'externallink') {
-      return this.launchExternalLink(dataset, param);
-    } else if(dataset.selectedObject != null) {
-      return this.execute(dataset, actionName, param);
+  public action(dataset: RbDatasetComponent, actionName: string, param: any, timeout?: number, confirm?: string) : Observable<null> {
+    if(confirm == null) {
+      let _name: string = actionName.toLowerCase();
+      if(_name == 'create') {
+        return this.create(dataset, param);
+      } else if(_name == 'createinmemory') {
+        return this.createInMemory(dataset, param);
+      } else if(_name == 'delete') {
+        return this.deleteSelected(dataset);
+      } else if(_name == 'exportall') {
+        return this.exportAll(dataset);
+      } else if(_name == 'report') {
+        return this.report(dataset, param);
+      } else if(_name == 'reportall') {
+        return this.reportAll(dataset, param);
+      } else if(_name == 'reportlist') {
+        return this.reportList(dataset, param);
+      } else if(_name == 'execute') {
+        return this.execute(dataset, param, null);
+      } else if(_name == 'executeall') {
+        return this.executeAll(dataset, param);
+      } else if(_name == 'executemaster') {
+        return this.executeMaster(dataset, param);
+      } else if(_name == 'executeglobal') {
+        return this.executeGlobal(dataset, param);
+      } else if(_name == 'executedomain') {
+        return this.executeDomain(dataset, param, timeout);
+      } else if(_name == 'modal') {
+        return this.showModal(param);
+      } else if(_name == 'externallink') {
+        return this.launchExternalLink(dataset, param);
+      } else if(dataset.selectedObject != null) {
+        return this.execute(dataset, actionName, param);
+      }
+    } else {
+      return new Observable((observer) => {
+        this.dialogService.openDialog(confirm, [
+          {label:"Ok", callback:() => {
+            this.action(dataset, actionName, param, timeout, null).subscribe(() => observer.complete());
+          }}, 
+          {label:"Cancel", callback:() => {
+            observer.complete();
+          }}
+        ]);
+      })
     }
   }
 

@@ -1,0 +1,49 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 17.5vw;
+    flex: 1 1 auto;
+}
+
+.rb-tree-node {
+
+}
+
+.rb-tree-node-mainrow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.rb-tree-node-emptybutton {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.rb-tree-node-label {
+
+}
+
+.rb-tree-node-children {
+    padding-left: 12px;
+}
+
+mat-action-list {
+    padding-top: 0px;
+    overflow: hidden;
+}
+
+.rb-tree-label {
+    font-weight: 400;
+    line-height: var(--v24px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.0rem;
+}

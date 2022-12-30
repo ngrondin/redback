@@ -1,0 +1,60 @@
+<ng-template 
+    #nodeTemplateRef 
+    let-node="node">
+	<div 
+        class="rb-tree-node">
+        <div
+            class="rb-tree-node-mainrow">
+            <button
+                mat-icon-button
+                *ngIf="node.children.length > 0"
+                (click)="toggleNode(node)">
+                <mat-icon
+                    *ngIf="node.open">
+                    expand_more
+                </mat-icon>
+                <mat-icon
+                    *ngIf="!node.open">
+                    chevron_right
+                </mat-icon>
+            </button>
+            <div
+                *ngIf="node.children.length == 0"
+                class="rb-tree-node-emptybutton">
+                &#x2022;             
+            </div>
+            <mat-action-list>
+                <button
+                    mat-list-item 
+                    [class]="'rb-tree-node' + (selectedObject == node.object ? ' rb-tree-node-active' : '')"
+                    (click)="selectNode(node)">
+                    <div
+                        class="rb-tree-label">
+                        {{ node.label || 'No Label' }}
+                    </div>
+                </button>
+            </mat-action-list>        
+        </div>
+ 		<div 
+            *ngIf="node.children.length > 0 && node.open == true" 
+            class="rb-tree-node-children">
+ 			<ng-template 
+                ngFor 
+                let-child 
+                [ngForOf]="node.children">
+				<ng-template
+					[ngTemplateOutlet]="nodeTemplateRef"
+					[ngTemplateOutletContext]="{ node: child }">
+				</ng-template>
+			</ng-template>
+		</div>
+	</div>
+</ng-template>
+ 
+<ng-container
+    *ngFor="let rootitem of treeData">
+    <ng-template
+        [ngTemplateOutlet]="nodeTemplateRef"
+        [ngTemplateOutletContext]="{ node: rootitem }">
+    </ng-template>
+</ng-container>

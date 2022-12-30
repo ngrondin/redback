@@ -32,6 +32,7 @@ import { RbLayoutComponent } from "app/rb-layout/rb-layout.component";
 import { RbLinkComponent } from "app/rb-link/rb-link.component";
 import { RbListComponent } from "app/rb-list/rb-list.component";
 import { RbList4Component } from "app/rb-list4/rb-list4.component";
+import { RbTreeComponent } from "app/rb-tree/rb-tree.component";
 import { RbLogComponent } from "app/rb-log/rb-log.component";
 import { RbMapComponent } from "app/rb-map/rb-map.component";
 import { RbModalComponent } from "app/rb-modal/rb-modal.component";
@@ -60,6 +61,7 @@ export const componentRegistry = {
     "relatedinput": RbRelatedInputComponent,
     "list3": RbListComponent,
     "list4": RbList4Component,
+    "tree": RbTreeComponent,
     "button": RbButtonComponent,
     "search": RbSearchComponent,
     "actiongroup": RbActiongroupComponent,

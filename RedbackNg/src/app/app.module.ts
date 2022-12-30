@@ -32,7 +32,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
-import { RbListScrollDirective } from './rb-list-scroll/rb-list-scroll.directive';
 import { ApiService } from './services/api.service';
 import { DataService } from './services/data.service';
 import { FormsModule } from '@angular/forms';
@@ -124,6 +123,7 @@ import { RbPercentInputComponent } from './inputs/rb-percent-input/rb-percent-in
 import { RbNotificationBellComponent } from './rb-notification-bell/rb-notification-bell.component';
 import { RbNotificationListComponent } from './rb-notification-list/rb-notification-list.component';
 import { PlatformModule } from '@angular/cdk/platform';
+import { RbTreeComponent } from './rb-tree/rb-tree.component';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -192,7 +192,6 @@ window.redback = window.redback || {};
     RbVsectionComponent,
     RbDatasetComponent,
     RbDatasetGroupComponent,
-    RbListScrollDirective,
     RbListComponent,
     RbList4Component,
     RbStringInputComponent,
@@ -256,7 +255,8 @@ window.redback = window.redback || {};
     RbStarsInputComponent,
     RbPercentInputComponent,
     RbNotificationBellComponent,
-    RbNotificationListComponent
+    RbNotificationListComponent,
+    RbTreeComponent
   ],
   providers: [
     {provide: COMPILER_OPTIONS, useValue: {}, multi: true},

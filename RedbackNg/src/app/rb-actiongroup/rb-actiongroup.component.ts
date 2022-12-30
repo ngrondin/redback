@@ -14,13 +14,15 @@ export class RbActiongroupAction {
   param: string;
   timeout: number;
   label: string;
+  confirm: string;
   focus: boolean;
 
-  constructor(a: string, p: string, t:number, l: string, f: boolean) {
+  constructor(a: string, p: string, t:number, l: string, c: string, f: boolean) {
     this.action = a;
     this.param = p;
     this.timeout = t;
     this.label = l;
+    this.confirm = c;
     this.focus = f;
   }
 }
@@ -40,11 +42,11 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   open: boolean = false;
   actionning: boolean = false;
   domainActions: RbActiongroupAction[];
+  actionData: RbActiongroupAction[] = [];
   notification: RbNotification;
   notificationRetreived: boolean = false;
   notificationSubscription: Subscription;
-  actionData: RbActiongroupAction[] = [];
-
+  
   constructor(
     private apiService: ApiService,
     private actionService: ActionService,
@@ -63,7 +65,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
       this.apiService.listDomainFunctions(this.domaincategory).subscribe(json => {
         this.domainActions = [];
         json.result.forEach(item => {
-          this.domainActions.push(new RbActiongroupAction('executedomain', item.name, item.timeout, item.description, false));
+          this.domainActions.push(new RbActiongroupAction('executedomain', item.name, item.timeout, item.description, item.confirm, false));
         });
         this.calcActionData();
       });
@@ -143,7 +145,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
     let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
     if(this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
-        this.actionData.push(new RbActiongroupAction("processaction", action.action, null, action.description, action.main))
+        this.actionData.push(new RbActiongroupAction("processaction", action.action, null, action.description, null, action.main))
       }
     }
     if(this.actions != null) {
@@ -151,7 +153,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
         if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject) == true))) {
           let swtch = this.userpref.getCurrentViewUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
-            this.actionData.push(new RbActiongroupAction(item.action, item.param, item.timeout, item.label, false));
+            this.actionData.push(new RbActiongroupAction(item.action, item.param, item.timeout, item.label, item.confirm, false));
           }
         }
       });
@@ -186,7 +188,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
         });
     } else {
       this.actionning = true;
-      this.actionService.action(this.dataset, action.action, action.param, action.timeout).subscribe().add(() => {
+      this.actionService.action(this.dataset, action.action, action.param, action.timeout, action.confirm).subscribe().add(() => {
         this.actionning = false;
       });
     }
