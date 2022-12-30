@@ -30,7 +30,7 @@
 	display: flex;
 	flex: 0 0 auto;
 	height: var(--v12px);
-	background: #3f51b5;
+	background: var(--primary-color);
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
@@ -61,10 +61,13 @@
 
 mat-toolbar {
     min-height:var(--v40px);
+    background: var(--primary-dark-color);
+    color: var(--light-inverse-writing-color);
 }
 
 mat-toolbar-row {
     height: var(--v40px);
+    padding: 0 var(--v10px);
 }
 
 mat-sidenav-container {
@@ -75,12 +78,13 @@ mat-sidenav-container {
 
 mat-sidenav {
     display: flex;
-    border-right: Solid 1px rgba(0,0,0,.12);
+    border-right: Solid 0px;
+    /*border-right: Solid 1px rgba(0,0,0,.12);*/
 }
-
+/*
 .rb-sidenav-alt1 {
     background: #2b3360
-}
+}*/
 
 mat-sidenav-content {
     display: flex;

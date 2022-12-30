@@ -1,5 +1,4 @@
-<mat-toolbar
-    color="primary">
+<mat-toolbar>
     <mat-toolbar-row>
         <img 
             [src]="logoUrl"
@@ -81,9 +80,9 @@
         mode="side" 
         position="start"
         disableClose="true"
-        opened
-        [class]="userprefService.getGlobalPreferenceValue('uialt') == 'alt1' ? ' rb-sidenav-alt1' : ''">
+        opened>
         <rb-menu
+            [look]="userprefService.getGlobalPreferenceValue('uialt')"
             (navigate)="navigateTo($event)">
         </rb-menu>
     </mat-sidenav>

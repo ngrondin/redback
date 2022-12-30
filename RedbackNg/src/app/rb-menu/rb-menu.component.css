@@ -5,10 +5,25 @@
     height: 100%;
 }
 
+.rb-menu-alt1 {
+    border-right: Solid 0px;
+}
+
 .rb-menu-container {
     display: flex;
 	flex-direction: column;
     flex: 1 1 auto;
+    background: transparent;
+    border-right: Solid 1px rgba(0,0,0,.12);
+}
+
+.rb-menu-container-primary {
+    
+}
+
+.rb-menu-container-alt1 {
+    background: var(--primary-color);
+    border-right: Solid 0px;
 }
 
 .rb-menu {
@@ -17,11 +32,23 @@
 
 .rb-menu-control {
     display: flex;
+    border-right: Solid 1px rgba(0,0,0,.12);
+}
+
+.rb-menu-control-alt1 {
+    background: var(--primary-color);
+    border-right: Solid 0px;
+    /*background: var(--primary-color);*/
 }
 
 .rb-menu-control mat-icon {
     font-size: 1.5rem;
     color: grey;
+}
+
+.rb-menu-control-alt1 mat-icon {
+    font-size: 1.5rem;
+    color: #dddddd;
 }
 
 .rb-menu-item {

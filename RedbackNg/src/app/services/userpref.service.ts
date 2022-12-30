@@ -41,7 +41,7 @@ export class UserprefService {
   constructor(
     private apiService: ApiService
   ) { 
-    this.globalPrefs.push(new GlobalPref({code:'uialt', label: 'UI Styles', options:[{value:'base', label: 'Base'}, {value:'alt1', label: 'Alternate 1'}, {value:'alt2', label: 'Alternate 2'}]}));
+    this.globalPrefs.push(new GlobalPref({code:'uialt', label: 'UI Styles', options:[{value:'primary', label: 'Primary'}, {value:'alt1', label: 'Alternate 1'}, {value:'alt2', label: 'Alternate 2'}]}));
   }
 
   public load() {

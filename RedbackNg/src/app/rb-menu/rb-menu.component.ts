@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@angular/core';
 import { MenuService } from 'app/services/menu.service';
 import { Subscription } from 'rxjs';
 
@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 })
 export class RbMenuComponent implements OnInit {
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
+  @Input('look') look: any = 'primary';
   _type: string = 'full';
   _mode: string = 'large';
   content: any;

@@ -12,9 +12,9 @@
 
 .rb-globalsearch-search {
     border-style: solid;
-    border-color: darkblue;
-    border-width: 0px;
-    background-color: #444488;
+    border-color: var(--primary-light-color);
+    border-width: 1px;
+    background-color: #175C96;
     width: 12vw;
     height: var(--v28px);
     font-size: 0.8rem;

@@ -10,6 +10,7 @@ import { MenuService } from 'app/services/menu.service';
 export class RbMenuLinkComponent implements OnInit {
   @Input('config') config: any;
   @Input('mode') mode: any;
+  @Input('look') look: any = 'primary';
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
 
   cmTop: number = 100;

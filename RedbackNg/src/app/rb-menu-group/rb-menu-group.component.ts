@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+//import { threadId } from 'worker_threads';
 
 @Component({
   selector: 'rb-menu-group',
@@ -8,6 +9,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 export class RbMenuGroupComponent implements OnInit {
   @Input('config') config: any;
   @Input('mode') mode: any;
+  @Input('look') look: any = 'primary';
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
 
 
@@ -16,6 +18,14 @@ export class RbMenuGroupComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  public get icon(): any {
+    return this.config != null ? this.config.icon : null;
+  }
+
+  public get label(): any {
+    return this.config != null ? this.config.label : null;
   }
 
   public get content(): any {
@@ -28,6 +38,10 @@ export class RbMenuGroupComponent implements OnInit {
 
   public get isOpen() : boolean {
     return this._isOpen;
+  }
+
+  getTooltip() : string {
+    return this.mode != 'large' ? this.config.label : null;
   }
 
   click() {

@@ -5,12 +5,21 @@
 
 :root {
 	--main-color: #3f51b5;
+	--primary-color: #0277bc;
+	--primary-dark-color: #004c8b;
+	--primary-dark2-color: #175C96;
+	--primary-light-color: #58a5ef;
+	--dark-writing-color: #202020;
+	--light-writing-color: #444444;
+	--dark-inverse-writing-color: #d2d2d2;
+	--light-inverse-writing-color: #eeeeee;
 	--bw: 100vw;
 	--v5px: 0.29vw;
 	--v8px: 0.47vw;
 	--v10px: 0.58vw;
 	--v12px: 0.70vw;
 	--v16px: 0.94vw;
+	--v20px: 1.17vw;
 	--v24px: 1.41vw;
 	--v28px: 1.64vw;
 	--v32px: 1.88vw;

@@ -1,5 +1,5 @@
 <div
-    [class]="'rb-menu-container' + (mode == 'large' ? ' hscroll' : ' hscroll-nobar')">
+    [class]="'rb-menu-container' + (mode == 'large' ? ' hscroll' : ' hscroll-nobar') + ' rb-menu-container-' + look">
     <mat-action-list>
         <div
             class="rb-menu-item"
@@ -8,19 +8,21 @@
                 *ngIf="item.type == 'menugroup'"
                 [config]="item"
                 [mode]="mode"
+                [look]="look"
                 (navigate)="navigateTo($event)">
             </rb-menu-group>
             <rb-menu-link
                 *ngIf="item.type == 'menulink'"
                 [config]="item"
                 [mode]="mode"
+                [look]="look"
                 (navigate)="navigateTo($event)">
             </rb-menu-link>
         </div>    
     </mat-action-list>    
 </div>
 <div
-    class="rb-menu-control">
+    [class]="'rb-menu-control rb-menu-control-' + look">
     <button
         mat-icon-button
         (click)="toggleMenuMode()">
@@ -36,7 +38,7 @@
     <button
         mat-icon-button
         *ngIf="mode == 'large'"
-        class="rb-menu-control-grew-button"
+        [class]="'rb-menu-grew-button rb-menu-grew-button-' + look"
         (click)="setMenu('full')">
         <mat-icon>
             subject
@@ -45,7 +47,7 @@
     <button
         mat-icon-button
         *ngIf="mode == 'large'"
-        class="rb-menu-control-grew-button"
+        [class]="'rb-menu-grew-button rb-menu-grew-button-' + look"
         (click)="setMenu('group')">
         <mat-icon>
             group
@@ -54,7 +56,7 @@
     <button
         mat-icon-button
         *ngIf="mode == 'large'"
-        class="rb-menu-control-grew-button"
+        [class]="'rb-menu-grew-button rb-menu-grew-button-' + look"
         (click)="setMenu('personal')">
         <mat-icon>
             person

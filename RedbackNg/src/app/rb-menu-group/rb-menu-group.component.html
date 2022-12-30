@@ -1,37 +1,42 @@
 <mat-divider></mat-divider> 
 <button
 	mat-list-item 
-	class="rb-menu-group-button" 	
+    [class]="'rb-menu-group-button rb-menu-group-button-' + look"	
+    [matTooltip]="getTooltip()"
+    [matTooltipShowDelay]="100"
+    [matTooltipPosition]="'right'"
+    [matTooltipClass]="'rb-menu-group-tooltip rb-menu-group-tooltip-' + look"
     (click)="click()">
     <mat-icon 
-        *ngIf="config.icon.indexOf(':') >= 0"
-        [svgIcon]="config.icon"
-        class="rb-menu-group-icon">
+        *ngIf="icon.indexOf(':') >= 0"
+        [svgIcon]="icon"
+        [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
     </mat-icon>
     <mat-icon
-        *ngIf="config.icon.indexOf(':') == -1"
-        class="rb-menu-group-icon">
-        {{config.icon}}
+        *ngIf="icon.indexOf(':') == -1"
+        [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+        {{icon}}
     </mat-icon>
 	<span 
 		flex
-		class="rb-menu-group-text"
+        [class]="'rb-menu-group-text rb-menu-group-text-' + look"
 		*ngIf="mode == 'large'">
-        {{config.label}}
+        {{label}}
     </span>
     <mat-icon 
         *ngIf="mode == 'large' && !isOpen"
-        class="rb-menu-group-icon">
+        [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
         keyboard_arrow_down
     </mat-icon>
     <mat-icon 
         *ngIf="mode == 'large' && isOpen"
-        class="rb-menu-group-icon">
+        [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
         keyboard_arrow_up
     </mat-icon>
 </button> 
 <div
-    *ngIf="isOpen">
+    *ngIf="isOpen"
+    [class]="'rb-menu-group-content rb-menu-group-content-' + look">
     <mat-divider></mat-divider> 
     <div
         class="rb-menu-item"
@@ -40,12 +45,14 @@
             *ngIf="item.type == 'menugroup'"
             [config]="item"
             [mode]="mode"
+            [look]="look"
             (navigate)="navigateTo($event)">
         </rb-menu-group>
         <rb-menu-link
             *ngIf="item.type == 'menulink'"
             [config]="item"
             [mode]="mode"
+            [look]="look"
             (navigate)="navigateTo($event)">
         </rb-menu-link>
     </div>

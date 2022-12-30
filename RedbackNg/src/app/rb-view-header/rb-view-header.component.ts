@@ -19,7 +19,7 @@ export class RbViewHeaderComponent implements OnInit {
   @HostBinding('style.backgroundColor') get backColor() { return this.color != null ? this.color.back : "#ffffff";}
   @HostBinding('style.backgroundImage') get backImg() { return this.pattern != null && this.pattern.value != null ? this.sanitizer.bypassSecurityTrustStyle('url("' + this.setFillColor(this.pattern.value, this.darken(this.backColor)) +'")') : null;}
 
-  defaultColor: any = {name:"Default", fore:"white", back:"#2071C5"};
+  defaultColor: any = {name:"Default", fore:"white", back:"var(--primary-color)"};
   color: any = this.defaultColor;
   colors: any = [
     this.defaultColor,    
@@ -121,11 +121,15 @@ export class RbViewHeaderComponent implements OnInit {
 
   darken(hex) : string {
     let rgb = this.hexToRgb(hex);
-    let ratio = 0.88;
-    rgb.r = Math.floor(rgb.r * ratio);
-    rgb.g = Math.floor(rgb.g * ratio);
-    rgb.b = Math.floor(rgb.b * ratio);
-    return this.rgbToHex(rgb);
+    if(rgb != null) {
+      let ratio = 0.88;
+      rgb.r = Math.floor(rgb.r * ratio);
+      rgb.g = Math.floor(rgb.g * ratio);
+      rgb.b = Math.floor(rgb.b * ratio);
+      return this.rgbToHex(rgb);  
+    } else {
+      return hex;
+    }
   }
 
   setFillColor(svg, hex) : string {
