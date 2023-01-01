@@ -90,11 +90,12 @@ export class RbObject {
                         isChanged = true
                         this.related[attribute] = relatedObject;
                     } else {
-                        if(this.flags[attribute]['reqrel'] != true) {
-                            this.dataService.enqueueRelatedFetch(relatedRule.object, uid, filter, this);
+                        if(this.flags[attribute] == null || this.flags[attribute]['reqrel'] != true) {
+                            if(uid != null) this.dataService.enqueueDeferredFetch(relatedRule.object, uid, this);
+                            else this.dataService.enqueueDeferredFetchList(relatedRule.object, filter, this);
                             this._setAttributeFlag(attribute, 'reqrel', true);
                         } else {
-                            console.log("Can't find related object for " + this.objectname + ":" + this.uid + "." + attribute + " = '" + this.data[attribute] + "'");
+                            //console.log("Can't find related object for " + this.objectname + ":" + this.uid + "." + attribute + " = '" + this.data[attribute] + "'");
                         }
                     }
                 }

@@ -50,10 +50,12 @@ export class FilterService {
 
       function evalValue(__value) {
         var ret = null;
-        try { 
-          ret = eval(__varString + " (" + __value + ")"); 
-        } catch(err) {
-          console.error(err);
+        if(__value != null && __value != "") {
+          try { 
+            ret = eval(__varString + " (" + __value + ")"); 
+          } catch(err) {
+            console.error(err);
+          }  
         }
         return ret;
       }

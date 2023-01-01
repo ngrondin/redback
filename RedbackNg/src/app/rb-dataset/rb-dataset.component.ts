@@ -36,7 +36,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public nextPage: number;
   public pageSize: number;
   public hasMorePages: boolean = true;
-  public fetchThreads: number = 0;
+  public _loading: boolean = false;
   private observers: Observer<string>[] = [];
   public refreshOnActivate: boolean = true;
 
@@ -53,7 +53,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   setInit() {
     this.dataSubscription = this.dataService.getCreationObservable().subscribe(object => this.receiveNewlyCreatedData(object));
     this.pageSize = this.fetchAll == true ? 250 : 50;
-    this.fetchThreads = 0;
+    this._loading = false;
     this.hasMorePages = true;
     if(this.datasetgroup != null) {
       this.datasetgroup.register((this.id || this.name), this);
@@ -111,14 +111,14 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public get isLoading() : boolean {
-    return this.fetchThreads > 0;
+    return this._loading;
   }
 
   public get canLoadData() : boolean {
     return this.active 
       && (this.master == null || (this.master != null && this.relatedObject != null))
       && (this.requiresuserfilter == false || this.userFilter != null)
-      && this.fetchThreads == 0;
+      && !this._loading;
   }
 
   getObservable() : Observable<string>  {
@@ -131,12 +131,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(this.canLoadData) {
       this.clear();
       this.calcFilter();
-      if(this.fetchAll) {
-        setTimeout(() => this.fetchNextPage(), 1);
-        setTimeout(() => this.fetchNextPage(), 200);
-      } else {
-        this.fetchNextPage();
-      }
+      this.fetchNextPage();
       this.refreshOnActivate = false;
       return true;
     } else {
@@ -162,17 +157,25 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
       const search = this.searchString;
       const addRel = this.fetchAll ? false : this.addrelated;
-      this.dataService.fetchList(this.objectname, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, addRel).subscribe({
+      let observable = null;
+      if(this.fetchAll) {
+        observable = this.dataService.fetchEntireList(this.objectname, this.resolvedFilter, search, sort);
+      } else {
+        observable = this.dataService.fetchList(this.objectname, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, addRel);
+        this.nextPage++;
+      }
+      observable.subscribe({
         next: (data) => {
-          this.fetchThreads--;
           this.setData(data);
         },
         error: (error) => {
-          this.fetchThreads--;
+          this._loading = false;
+        },
+        complete: () => {
+          this._loading = false;
         }
       });
-      this.fetchThreads++;
-      this.nextPage++;
+      this._loading = true;
     }
   }
 
@@ -204,36 +207,28 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         obj.addSet(this);
       }
     } 
-    if(data.length == this.pageSize) {
-      if(this.fetchAll == true) {
-        this.fetchNextPage();
-      }
-    } else {
+    if(data.length != this.pageSize || this.fetchAll) {
       this.hasMorePages = false
     }
-    if(this.fetchThreads == 0) {
-      this.firstLoad = false;
-      this.publishEvent('load');
-      if(this._list.length == 0) {
+    this.firstLoad = false;
+    this.publishEvent('load');
+    if(this._list.length == 0) {
+      this._selectedObject = null;
+    } else if(this._list.length == 1) {
+      this.select(this._list[0]);
+    } else if(this._list.length > 1) {
+      if(this.selectedObject != null && !this._list.includes(this.selectedObject)) {
         this._selectedObject = null;
-      } else if(this._list.length == 1) {
-        this.select(this._list[0]);
-      } else if(this._list.length > 1) {
-        if(this.selectedObject != null && !this._list.includes(this.selectedObject)) {
-          this._selectedObject = null;
-        }
       }
-      if(this.nextPage == 1) { 
-        if(this.fetchAll == false && this._list.length > 10) {
-          this.apiService.aggregateObjects(this.objectname, this.resolvedFilter, this.searchString, [], [{function:'count', name:'count'}], null).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
-        } else {
-          this.totalCount = this._list.length;
-        }
-      }
-      /*if(this.addrelated == true && this.fetchAll == true) {
-        this.dataService.fetchMissingRelated(this._list);
-      }*/
     }
+    if(this.nextPage == 1) { 
+      if(this.fetchAll == false && this._list.length > 10) {
+        this.apiService.aggregateObjects(this.objectname, this.resolvedFilter, this.searchString, [], [{function:'count', name:'count'}], null).subscribe(data => {this.totalCount = data.list != null && data.list.length > 0 ? data.list[0].metrics.count : -1});
+      } else {
+        this.totalCount = this._list.length;
+      }
+    }
+
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
