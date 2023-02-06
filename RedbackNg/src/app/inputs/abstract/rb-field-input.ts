@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { HostBinding } from '@angular/core';
 import { Input } from '@angular/core';
 import { AppInjector } from 'app/app.module';
@@ -9,6 +9,9 @@ import { RbInputComponent } from './rb-input';
 @Component({template: ''})
 export abstract class RbFieldInputComponent extends RbInputComponent {
   @Input('margin') margin: boolean = true;
+
+  @Output('keydown') keydown = new EventEmitter();
+  
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
   @HostBinding('style.width') get styleWidth() { return (this.size != null ? ((0.88 * this.size) + 'vw'): this.defaultSize != null ? ((0.88 * this.defaultSize) + 'vw'): null);}
@@ -31,6 +34,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
 
 
   public onKeydown(event: any) {
+    this.keydown.emit(event);
     if(event.keyCode == 13) {
       event.target.blur();
     } else if(event.keyCode == 27) {

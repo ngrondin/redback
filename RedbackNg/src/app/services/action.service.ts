@@ -74,7 +74,7 @@ export class ActionService {
     }
   }
 
-  private calcCreateData(dataset: RbDatasetComponent, param: any) : any {
+  public calcCreateData(dataset: RbDatasetComponent, param: any) : any {
     let data = dataset.resolvedFilter;
     if(param != null) {
       let paramResolvedFilter: any = this.filterService.resolveFilter(param, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);

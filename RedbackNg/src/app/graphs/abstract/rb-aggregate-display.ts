@@ -16,8 +16,14 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     @Input('max') max: number;
     @Input('grow') grow: number;
     @Input('shrink') shrink: number;
+    @Input('width') width: number;
+    @Input('height') height: number;
     @Input('colormap') colormap: any;
+    
     @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
+
+    @HostBinding('style.width.px') get widthStyle() { return this.width != null ? this.width : null;}
+    @HostBinding('style.height.px') get heightStyle() { return this.height != null ? this.height : null;}
     //@HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 1;}
     //@HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
     

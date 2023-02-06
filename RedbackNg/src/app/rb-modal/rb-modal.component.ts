@@ -13,6 +13,7 @@ import { ModalService } from 'app/services/modal.service';
 export class RbModalComponent extends RbActivatorComponent {
 
   @Input('name') name: string;
+  @Input('title') title: string;
   @HostBinding('style.display') get visitility() {return this.isOpen ? 'flex' : 'none'; }
   @HostListener('click', ['$event']) onMouseMove($event) {this.close() }
 

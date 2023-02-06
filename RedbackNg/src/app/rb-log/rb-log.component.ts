@@ -3,6 +3,7 @@ import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { Formatter } from 'app/helpers';
 import { ActionService } from 'app/services/action.service';
+import { DataService } from 'app/services/data.service';
 
 @Component({
   selector: 'rb-log',
@@ -27,7 +28,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   private reachedBottom: boolean = false;
 
   constructor(
-    private actionService: ActionService
+    private dataService: DataService
   ) {
     super();
   }
@@ -81,23 +82,19 @@ export class RbLogComponent extends RbDataObserverComponent {
     if(str == null) {
       str = "";
     } else {
-      str = str.split('\r\n').join('<br>').split('\t').join('&nbsp;&nbsp;');
+      str = str.split('\r\n').join('<br>').split('\n').join('<br>').split('\t').join('&nbsp;&nbsp;');
     }
     return str;
   }
 
   keydown(event: any) {
-    //console.log(event.keyCode);
-    if(event.keyCode == 13) {
-      this.post();
-    }
+
   }
 
   post() {
-    let msg: any = {};
-    msg[this.entryattribute] = "'" + this.value.replace("'", "\\'") + "'";
-    this.actionService.action(this.dataset, 'create', msg).subscribe();
-    this.value = "";
+    let data = Object.assign({}, this.dataset.resolvedFilter);
+    data[this.entryattribute] = this.value;
+    this.dataService.create(this.dataset.objectname, null, data).subscribe(() => this.value = "");
   }
 
   clickCard(object: RbObject) {

@@ -4,10 +4,14 @@ import io.firebus.Firebus;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
+import io.redback.security.UserProfile;
+import io.redback.utils.Cache;
 
 public class ConfigurationClient extends Client
 {
+	protected Cache<UserProfile> cachedUserProfiles;
 
+	
 	public ConfigurationClient(Firebus fb, String sn) 
 	{
 		super(fb, sn);

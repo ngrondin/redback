@@ -1,14 +1,15 @@
 <div
     class="rb-log-post"
     *ngIf="isEditable">
-    <rb-string-input
+    <rb-textarea-input
         [label]="'New Note'"
         [icon]="'create'"
         [size]="40"
         [margin]="false"
+        [rows]="2"
         [(value)]="value"
         (keydown)="keydown($event)">
-    </rb-string-input>
+    </rb-textarea-input>
     <button
         mat-stroked-button
         class="rb-button"
