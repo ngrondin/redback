@@ -1,5 +1,6 @@
 package io.redback.services.common;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //import java.util.logging.Logger;
@@ -25,18 +26,11 @@ public abstract class Provider
 		firebus = f;
 	}
 	
-	protected String getLogline(Payload payload) {
-		String mime = payload.metadata.get("mime");
-		String body = null;
-		if(mime != null && mime.equals("application/json")) {
-			body = payload.getString().replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "");
-			return body;
-		} else if(mime != null && mime.equals("text/plain")) {
-			body = payload.getString();
-		} else {
-			body = "";
-		}
-		return body;
+	protected void logExecution(Payload payload, long duration) {
+		DataMap params = new DataMap();
+		params.put("dur", duration);
+		params.put("req", payload.getDataObject());
+		logger.log(Level.INFO, "exec", params);
 	}
 	
 	protected FunctionErrorException handleException(Exception e, String msg) {
@@ -48,9 +42,9 @@ public abstract class Provider
 			
 		}
 		if(errorCode == 0 || errorCode >= 500)
-			logger.severe(StringUtils.getStackTrace(e));
+			logger.log(Level.SEVERE, msg, e);
 		else 
-			logger.warning("Invalid request: " + StringUtils.rollUpExceptions(e));
+			logger.log(Level.WARNING, StringUtils.rollUpExceptions(e));
 		return new FunctionErrorException(msg, e, errorCode);
 	}
 

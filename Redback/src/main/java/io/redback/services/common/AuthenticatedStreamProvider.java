@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
+import io.firebus.threads.FirebusThread;
 import io.redback.client.AccessManagementClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
@@ -35,6 +36,8 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 		{			
 			session.setUserProfile(up);
 			session.setToken(token);
+			if(Thread.currentThread() instanceof FirebusThread) 
+				((FirebusThread)Thread.currentThread()).setUser(up.getUsername());
 			response = redbackAcceptAuthenticatedStream(session, payload);
 		}
 		else

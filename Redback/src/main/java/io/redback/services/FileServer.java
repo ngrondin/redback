@@ -180,7 +180,7 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 				session.setTimezone(payload.metadata.get("timezone"));
 				if(Thread.currentThread() instanceof FirebusThread) 
 					((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
-				timer = new Timer(serviceName, session.getId(), getLogline(payload));
+				timer = new Timer();
 				DataMap request = payload.getDataMap();
 				String action = request.getString("action");
 				if(action.equals("get")) {
@@ -206,15 +206,14 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 					String objectuid = request.getString("uid");
 					acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
 				}
+				logExecution(payload, timer.mark());
 				return null;
 			} else {
 				throw new FunctionErrorException("All stream requests need to be authenticated", 401);
 			}
 		} catch(Exception e) {
 			throw handleException(e, "Exception in redback stream '" + serviceName + "'");
-		} finally {
-			if(timer != null) timer.mark();
-		}
+		} 
 	}
 
 
