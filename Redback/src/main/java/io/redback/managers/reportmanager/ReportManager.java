@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-//import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -26,7 +25,6 @@ import io.redback.utils.RedbackFileMetaData;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class ReportManager implements Consumer {
-	//private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
 	protected ScriptFactory scriptFactory;
 	protected String configServiceName;

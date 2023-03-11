@@ -5,12 +5,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.exceptions.RedbackException;
@@ -18,7 +18,6 @@ import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
 
 public class ClientManager extends Thread {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected String name;
 	protected DataMap config;
 	protected Firebus firebus;
@@ -181,7 +180,7 @@ public class ClientManager extends Thread {
 						ch.sendClientData(new DataMap("type", "serverkeepalive"));
 				}
 			} catch(Exception e) {
-				logger.severe("Error during client service heartbeat: " + e.getMessage());
+				Logger.severe("rb.client.run", "Error during client service heartbeat", e);
 			}
 		}
 	}

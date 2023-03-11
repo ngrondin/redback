@@ -1,15 +1,12 @@
 package io.redback.services.common;
 
-import java.util.logging.Logger;
-
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
-import io.redback.utils.StringUtils;
 
 public abstract class StreamHandler implements io.firebus.interfaces.StreamHandler {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected Session session;
 	protected StreamEndpoint streamEndpoint;
 	
@@ -27,7 +24,7 @@ public abstract class StreamHandler implements io.firebus.interfaces.StreamHandl
 			try {
 				receiveData(payload);
 			} catch(Exception e) {
-				logger.severe(StringUtils.getStackTrace(e));
+				Logger.severe("rb.streamhandler.receive", "Error receiving stream data", e);
 			}
 		}	
 	}
@@ -37,7 +34,7 @@ public abstract class StreamHandler implements io.firebus.interfaces.StreamHandl
 			try {
 				closed();
 			} catch(Exception e) {
-				logger.severe(StringUtils.getStackTrace(e));
+				Logger.severe("rb.streamhandler.closed", "Error closing stream", e);
 			}
 		}
 	}

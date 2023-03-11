@@ -1,10 +1,8 @@
 package io.redback.managers.processmanager.units;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.Expression;
 import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
@@ -17,7 +15,6 @@ import io.redback.security.Session;
 
 public class RedbackObjectGetUnit extends ProcessUnit 
 {
-	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected String objectName;
 	protected Expression objectUIDExpression;
 	protected ExpressionMap outputExpressionMap;
@@ -40,7 +37,7 @@ public class RedbackObjectGetUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Starting redback object get node");
+		Logger.finer("rb.process.getobject.start", null);
 		try {
 			if(processManager.getObjectServiceName() != null)
 			{
@@ -57,23 +54,17 @@ public class RedbackObjectGetUnit extends ProcessUnit
 				payload.metadata.put("mime", "application/json");
 				try
 				{
-					if(logger.getLevel() == Level.FINEST)  logger.finest("Calling redback object service " + processManager.getObjectServiceName() + " " + req);
 					Payload response = processManager.getFirebus().requestService(processManager.getObjectServiceName(), payload, 10000);
 					DataMap respData = new DataMap(response.getString());
 					context.put("result", respData);
 					DataMap respOutput = outputExpressionMap.eval(context);
-					if(logger.getLevel() == Level.FINEST)  logger.finest("Output data was: " + respOutput);
 					pi.setData(respOutput);
 				} 
 				catch (Exception e)
 				{
 					throw new RedbackException("Error getting Redback object '" + objectName + "'",  e);
 				}
-				logger.finer("Finished redback object get node");
-			}
-			else
-			{
-				logger.info("No object service defined");
+				Logger.finer("rb.process.getobject.finish", null);
 			}
 			pi.setCurrentNode(nextNode);
 		} catch(Exception e) {

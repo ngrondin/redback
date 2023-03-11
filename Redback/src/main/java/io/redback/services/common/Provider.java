@@ -1,20 +1,14 @@
 package io.redback.services.common;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-//import java.util.logging.Logger;
-
 import io.firebus.Firebus;
-import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.data.DataMap;
+import io.firebus.exceptions.FunctionErrorException;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.utils.StringUtils;
 
 public abstract class Provider 
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected String serviceName;
 	protected Firebus firebus;
 	protected DataMap config;
@@ -25,15 +19,9 @@ public abstract class Provider
 		config = c;
 		firebus = f;
 	}
+
 	
-	protected void logExecution(Payload payload, long duration) {
-		DataMap params = new DataMap();
-		params.put("dur", duration);
-		params.put("req", payload.getDataObject());
-		logger.log(Level.INFO, "exec", params);
-	}
-	
-	protected FunctionErrorException handleException(Exception e, String msg) {
+	protected FunctionErrorException handleException(String event, String msg, Exception e) {
 		int errorCode = 0;
 		if(e instanceof RedbackException) {
 			RedbackException rbe = (RedbackException)e;
@@ -42,9 +30,9 @@ public abstract class Provider
 			
 		}
 		if(errorCode == 0 || errorCode >= 500)
-			logger.log(Level.SEVERE, msg, e);
+			Logger.severe(event, msg, e);
 		else 
-			logger.log(Level.WARNING, StringUtils.rollUpExceptions(e));
+			Logger.severe(event, StringUtils.rollUpExceptions(e) + ": " + msg, e);
 		return new FunctionErrorException(msg, e, errorCode);
 	}
 

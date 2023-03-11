@@ -1,10 +1,9 @@
 package io.redback.services;
 
-import java.util.logging.Logger;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.ServiceInformation;
+import io.firebus.logging.Logger;
 import io.firebus.data.DataException;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
@@ -14,8 +13,6 @@ import io.redback.utils.HTML;
 
 public abstract class UIServer extends AuthenticatedServiceProvider
 {
-	private Logger logger = Logger.getLogger("io.redback");
-
 	public UIServer(String n, DataMap c, Firebus f)
 	{
 		super(n, c, f);
@@ -25,7 +22,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	{
 		try
 		{
-			logger.finer("UI unauthenticated service start");
+			Logger.finer("rb.ui.start", null);
 			Payload response = new Payload();
 			String get = extractGetString(payload);
 			if(get != null)
@@ -54,7 +51,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				
 				if(category.equals("resource"))
 				{
-					logger.finer("Get resource " + name);
+					Logger.finer("rb.ui.getresource", new DataMap("name", name));
 					response.setData(getResource(session, name, version));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
@@ -65,7 +62,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 					response.metadata.put("httpcode", "401");
 				}
 			}
-			logger.finer("UI unauthenticated service finish");
+			Logger.finer("rb.ui.finish", null);
 			return response;
 		}
 		catch(DataException e)
@@ -107,31 +104,31 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				
 				if(category.equals("resource"))
 				{
-					logger.finer("Get resource " + name);
+					Logger.finer("rb.ui.getresource", new DataMap("name", name));
 					response.setData(getResource(session, name, specifier));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
 				else if(category.equals("app"))
 				{
-					logger.finer("Get app client " + (name != null ? name : "?"));
+					Logger.finer("rb.ui.getapp", new DataMap("name", name));
 					response.setData(getAppClient(session, name, specifier).toString());
 					response.metadata.put("mime", "text/html");
 				}
 				else if(category.equals("config"))
 				{
-					logger.finer("Get app config " + (name != null ? name : "?"));
+					Logger.finer("rb.ui.getconfig", new DataMap("name", name));
 					response.setData(getAppConfig(session, name).toString());
 					response.metadata.put("mime", "application/json");
 				}				
 				else if(category.equals("menu"))
 				{
-					logger.finer("Get menu " + name);
+					Logger.finer("rb.ui.getmenu", new DataMap("name", name));
 					response.setData(getMenu(session, name).toString());
 					response.metadata.put("mime", "text/html");
 				}
 				else if(category.equals("view"))
 				{
-					logger.finer("Get view " + (specifier != null ? specifier + ":" : "") + name);
+					Logger.finer("rb.ui.getview", new DataMap("name", (specifier != null ? specifier + ":" : "") + name));
 					response.setData(getView(session, specifier, name).toString());
 					response.metadata.put("mime", "application/json");						
 				}

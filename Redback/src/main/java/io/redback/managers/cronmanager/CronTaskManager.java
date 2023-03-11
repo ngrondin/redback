@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -16,6 +15,7 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigurationClient;
 import io.redback.client.DataClient;
@@ -25,13 +25,11 @@ import io.redback.security.SysUserManager;
 import io.redback.security.UserProfile;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.CollectionConfig;
-import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.LoggerJSFunction;
 
 public class CronTaskManager extends Thread {
 
-	private Logger logger = Logger.getLogger("io.redback");
 	protected String uuid;
 	protected Firebus firebus;
 	protected DataMap config;
@@ -92,7 +90,7 @@ public class CronTaskManager extends Thread {
 								try {
 									runTask(ctc);
 								} catch(Exception e) {
-									logger.severe(StringUtils.rollUpExceptions(e));
+									Logger.severe("rb.cron.run", "Error while running cron task", e);
 								}
 								if(ctc.getPeriod() > 0) {
 									ctc.setNextRun(current + ctc.getPeriod());
@@ -111,11 +109,11 @@ public class CronTaskManager extends Thread {
 					sleep += randomDelay;
 					Thread.sleep(sleep);
 				} catch(Exception e) {
-					logger.severe("General error in CronTaskManager thread : " + StringUtils.rollUpExceptions(e));
+					Logger.severe("rb.cron.run", "General error in CronTaskManager thread", e);
 				}
 			}
 		} catch(Exception e) {
-			logger.severe("Cron task manager cannot load configured tasks : " + StringUtils.rollUpExceptions(e));
+			Logger.severe("rb.cron.run", "Cron task manager cannot load configured tasks" , e);
 		}
 	}
 	
@@ -204,7 +202,7 @@ public class CronTaskManager extends Thread {
 				req.metadata.put("token", session.getToken());
 				req.metadata.put("mime", "application/json");
 				boolean faf = call.getBoolean("fireandforget");
-				logger.info("Running cron task '" + ctc.getName() + "' with token: " + session.getToken());
+				Logger.info("rb.cron.runtask", new DataMap("task", ctc.getName(), "token", session.getToken()));
 				if(faf)
 					firebus.requestServiceAndForget(serviceName, req);
 				else
@@ -239,7 +237,7 @@ public class CronTaskManager extends Thread {
 		try {
 			loadConfigs(sysUserManager.getSession());
 		} catch(RedbackException e) {
-			logger.severe("Cannot clear config caches: " + e.getMessage());
+			Logger.severe("rb.cron.clearcache", "Cannot clear config caches" , e);
 		}
 	}
 }

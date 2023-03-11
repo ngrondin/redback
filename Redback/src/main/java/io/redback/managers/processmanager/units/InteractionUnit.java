@@ -8,6 +8,7 @@ import java.util.Map;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.Expression;
 import io.firebus.script.ScriptContext;
 import io.firebus.script.exceptions.ScriptException;
@@ -63,7 +64,7 @@ public class InteractionUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Starting interaction node execution");
+		Logger.finer("rb.process.interaction.start", null);
 		DataMap interactionDetails = new DataMap();
 		interactionDetails.put("code", notificationConfig.getString("code"));
 		interactionDetails.put("type", notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception");
@@ -80,24 +81,25 @@ public class InteractionUnit extends ProcessUnit
 				sendMap.put(username, rn.getNotificationForActionner(new Actionner(username)));
 			pi.getProcessManager().sendNotification(sendMap);
 		}
-		logger.finer("Finished interaction node execution");
+		Logger.finer("rb.process.interaction.finish", null);
+		
 	}
 	
 	public void interrupt(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Starting interaction node interruption");
+		Logger.finer("rb.process.interaction.interrupt.start", null);
 		if(nextNodeInterruption != null) {
 			pi.clearAssignees();
 			pi.clearInteractionDetails();
 			sendCompletion(pi);
 			pi.setCurrentNode(nextNodeInterruption);
 		}
-		logger.finer("Finished interaction node interruption");
+		Logger.finer("rb.process.interaction.interrupt.finish", null);
 	}
 
 	public void action(Actionner actionner, ProcessInstance pi, String action, Date date, DataMap data) throws RedbackException
 	{
-		logger.finer("Starting interaction node action");
+		Logger.finer("rb.process.interaction.action.start", null);
 		boolean foundAction = false;
 		if(isAssignee(actionner, pi))
 		{
@@ -106,7 +108,7 @@ public class InteractionUnit extends ProcessUnit
 				ActionConfig actionConfig = actionConfigs.get(i);
 				if(actionConfig.getActionName().equals(action))
 				{
-					logger.fine("Actionning interaction with '" + action + "'");
+					Logger.fine("rb.process.interaction.action", new DataMap("action", action));
 					foundAction = true;
 					pi.clearAssignees();
 					pi.clearInteractionDetails();
@@ -125,7 +127,7 @@ public class InteractionUnit extends ProcessUnit
 		{
 			throw new RedbackInvalidRequestException("Actionning user or process is not a current assignee");
 		}		
-		logger.finer("Finished interaction node action");
+		Logger.finer("rb.process.interaction.action.finish", null);
 	}
 	
 	public Notification getNotificationForActionner(Actionner actionner, ProcessInstance pi) throws RedbackException

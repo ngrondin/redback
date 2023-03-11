@@ -1,6 +1,7 @@
 package io.redback.managers.processmanager.units;
 
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.Expression;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
@@ -31,7 +32,7 @@ public class ConditionalUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Start executing condition");
+		Logger.finer("rb.process.consitional.start", null);
 		try
 		{
 			boolean bool = (Boolean)expression.eval(pi.getScriptContext());
@@ -44,7 +45,7 @@ public class ConditionalUnit extends ProcessUnit
 		{
 			throw new RedbackException("Error executing a process condition", e);
 		}		
-		logger.finer("Finish executing condition");		
+		Logger.finer("rb.process.consitional.finish", null);
 	}
 
 }

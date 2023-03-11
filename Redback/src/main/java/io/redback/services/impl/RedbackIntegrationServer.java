@@ -5,12 +5,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.Expression;
 import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
@@ -22,7 +22,6 @@ import io.redback.security.Session;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.services.IntegrationServer;
 import io.redback.utils.CollectionConfig;
-import io.redback.utils.StringUtils;
 
 public class RedbackIntegrationServer extends IntegrationServer {
 	
@@ -60,7 +59,6 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		}
 	};
 	
-	private Logger logger = Logger.getLogger("io.redback");
 	protected ScriptFactory scriptFactory;
 	protected boolean loadAllOnInit;
 	protected int preCompile;
@@ -100,9 +98,8 @@ public class RedbackIntegrationServer extends IntegrationServer {
 			Session session = new Session();
 			try {
 				loadAllClientConfigs(session);
-				//jsManager.precompile(preCompile);
 			} catch(Exception e) {
-				logger.severe(StringUtils.rollUpExceptions(e));
+				Logger.severe("rb.integreation.config", "Error loading client config", e);
 			}
 		}
 	}

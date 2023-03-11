@@ -3,7 +3,6 @@ package io.redback.managers.objectmanager.js;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.firebus.script.Converter;
 import io.firebus.script.exceptions.ScriptValueException;
@@ -17,7 +16,6 @@ import io.redback.utils.js.CallableJSWrapper;
 
 public class RedbackObjectJSWrapper extends SDynamicObject
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected RedbackObject rbObject;
 	protected String[] members = {"getRelated", "save", "getUpdatedAttributes", "isNew", "isAttributeUpdated", "delete"};
 	
@@ -146,7 +144,6 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		catch (Exception e)
 		{
 			String errMsg = "Error setting the Redback Object attribute '" + key + "' : " + constructErrorString(e);
-			logger.severe(errMsg);
 			throw new ScriptValueException(errMsg, e);		
 		}		
 	}

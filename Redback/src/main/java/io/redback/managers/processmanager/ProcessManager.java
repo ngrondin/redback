@@ -6,14 +6,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.ScriptContext;
 import io.firebus.script.ScriptFactory;
 import io.redback.client.AccessManagementClient;
@@ -26,13 +25,11 @@ import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
 import io.redback.security.SysUserManager;
 import io.redback.utils.CollectionConfig;
-import io.redback.utils.StringUtils;
 
 
 
 public class ProcessManager
 {
-	private Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected Firebus firebus;
 	protected ScriptFactory scriptFactory;
 	protected boolean loadAllOnInit;
@@ -126,7 +123,8 @@ public class ProcessManager
 			try {
 				loadAppProcesses(session);
 			} catch(Exception e) {
-				logger.severe(StringUtils.rollUpExceptions(e));
+				Logger.severe("rb.process.refreshconfig", null, e);
+				//logger.severe(StringUtils.rollUpExceptions(e));
 			}
 		}
 	}
@@ -169,8 +167,9 @@ public class ProcessManager
 		}
 		catch(Exception e)
 		{
-			logger.severe(e.getMessage());
-			throw new RedbackException("Exception getting process config '" + name + "'", e);
+			String msg = "Exception getting process config '" + name + "'";
+			Logger.severe("rb.process.load", msg, e);
+			throw new RedbackException(msg, e);
 		}
 	
 	}
@@ -246,7 +245,7 @@ public class ProcessManager
 	
 	public ProcessInstance initiateProcess(Actionner actionner, String processName, String domain, DataMap data) throws RedbackException
 	{
-		logger.finer("Initiating process '" + processName + "'");
+		Logger.finer("rb.process.init.start", new DataMap("name", processName));
 		ProcessInstance pi = null;
 		Process process = getProcess(actionner.getSession(), processName);
 		if(process != null)
@@ -257,7 +256,7 @@ public class ProcessManager
 			putInCurrentTransaction(pi);
 			commitInstance(pi); //This is necessary to allow dependent processes created afterward to interact with this instance before its first segment is committed.
 			process.startInstance(actionner, pi);
-			logger.finer("Initiated instance '" + pi.getId() + "' for process '" + processName + "'");
+			Logger.finer("rb.process.init.end", new DataMap("pid", pi.getId(), "name", processName));
 		}
 		else
 		{
@@ -271,7 +270,7 @@ public class ProcessManager
 		ProcessInstance pi = getProcessInstance(actionner, pid);
 		if(pi != null)
 		{
-			logger.finer("Restarting process " + pi.getProcessName() + ":" + pid);
+			Logger.finer("rb.process.continue.start", new DataMap("name", pi.getProcessName(), "pid", pid));
 			Process process = getProcess(actionner.getSession(), pi.getProcessName(), pi.getProcessVersion());
 			if(!pi.isComplete()) 
 			{
@@ -285,7 +284,7 @@ public class ProcessManager
 				}
 			}
 		}
-		logger.finer("Finished processing action");
+		Logger.finer("rb.process.continue.end", new DataMap("name", pi.getProcessName(), "pid", pid));
 	}
 
 	public List<Notification> getNotifications(Actionner actionner, DataMap filter, DataList viewdata) throws RedbackException
@@ -346,7 +345,7 @@ public class ProcessManager
 	public void actionProcess(Actionner actionner, String pid, String action, Date date, DataMap data) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(actionner, pid);
-		logger.finer("Processing action " + action + " on process " + pi.getProcessName() + ":" + pid);
+		Logger.finer("rb.process.action.start", new DataMap("name", pi.getProcessName(), "pid", pid, "action", action));
 		Process process = getProcess(actionner.getSession(), pi.getProcessName(), pi.getProcessVersion());
 		ProcessUnit pu = process.getNode(pi.getCurrentNode());
 		if(pu instanceof InteractionUnit)
@@ -358,13 +357,13 @@ public class ProcessManager
 		{
 			throw new RedbackInvalidRequestException("The process " + pid + " is not on an interaction node to process action " + action);
 		}
-		logger.finer("Finished processing action");
+		Logger.finer("rb.process.action.end", new DataMap("name", pi.getProcessName(), "pid", pid, "action", action));
 	}
 	
 	public void interruptProcess(Actionner actionner, String pid) throws RedbackException
 	{
 		ProcessInstance pi = getProcessInstance(actionner, pid);
-		logger.finer("Interrupting interaction on process " + pi.getProcessName() + ":" + pid);
+		Logger.finer("rb.process.interrupt.start", new DataMap("name", pi.getProcessName(), "pid", pid));
 		Process process = getProcess(actionner.getSession(), pi.getProcessName(), pi.getProcessVersion());
 		ProcessUnit pu = process.getNode(pi.getCurrentNode());
 		if(pu instanceof InteractionUnit)
@@ -375,12 +374,12 @@ public class ProcessManager
 		{
 			throw new RedbackInvalidRequestException("The process " + pid + " is not on an interaction node");
 		}
-		logger.finer("Finished processing action");
+		Logger.finer("rb.process.interrupt.end", new DataMap("name", pi.getProcessName(), "pid", pid));
 	}
 	
 	public ArrayList<ProcessInstance> findProcesses(Actionner actionner, DataMap filter, int page, int pageSize) throws RedbackException
 	{
-		if(logger.getLevel().intValue() <= Level.FINER.intValue()) logger.finer("Finding processes for " + filter.toString());
+		Logger.finer("rb.process.find.start", new DataMap("filter", filter.toString(0, true)));
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
 		try 
 		{
@@ -395,7 +394,7 @@ public class ProcessManager
 			while(it.hasNext()) {
 				ProcessInstance pi = txProcesses.get(it.next());
 				if(fullFilter.apply(pi.getJSON())) {
-					logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId() + " in transaction with data " + pi.getData());
+					Logger.finer("rb.process.find.found", new DataMap("name", pi.getProcessName(), "pid", pi.getId()));
 					list.add(pi);
 				}
 			}
@@ -409,7 +408,7 @@ public class ProcessManager
 				{
 					pi = new ProcessInstance(actionner, this, resultList.getObject(i));
 					putInCurrentTransaction(pi);
-					logger.finer("Found process " + pi.getProcessName() + ":" + pi.getId() + " in database with data " + pi.getData());
+					Logger.finer("rb.process.find.found", new DataMap("name", pi.getProcessName(), "pid", pi.getId()));
 					list.add(pi);
 				} 
 			}
@@ -418,13 +417,13 @@ public class ProcessManager
 		{
 			throw new RedbackException("Error retreiving process instance", e);
 		} 	
-		logger.finer("Finished finding processes");
+		Logger.finer("rb.process.find.end", null);
 		return list;
 	}
 	
 	protected void loadGroupsOf(Actionner actionner) throws RedbackException
 	{
-		logger.finer("Finding groups for " + actionner.getId());
+		Logger.finer("rb.process.loadgroups.start", new DataMap("actionner", actionner.getId()));
 		try 
 		{
 			DataMap filter = new DataMap();
@@ -439,12 +438,12 @@ public class ProcessManager
 		{
 			throw new RedbackException("Error retreiving groups", e);
 		} 	
-		logger.finer("Finished finding groups");
+		Logger.finer("rb.process.loadgroups.end", new DataMap("actionner", actionner.getId()));
 	}
 	
 	public List<String> getUsersOfGroup(String domain, String groupid) throws RedbackException
 	{
-		logger.finer("Finding users for group " + groupid);
+		Logger.finer("rb.process.getusersofgroup.start", new DataMap("group", groupid));
 		List<String> users = new ArrayList<String>();
 		try 
 		{
@@ -460,7 +459,7 @@ public class ProcessManager
 		{
 			throw new RedbackException("Error retreiving user for group", e);
 		} 	
-		logger.finer("Finished finding users for group");	
+		Logger.finer("rb.process.getusersofgroup.end", new DataMap("group", groupid));
 		return users;
 	}
 	
@@ -473,13 +472,11 @@ public class ProcessManager
 				for(String username: sendMap.keySet()) 
 					data.put(username, sendMap.get(username).getDataMap());
 				Payload payload = new Payload(data);
-				logger.finest("Publishing process notification");
 				firebus.publish(processNotificationChannel, payload);
-				logger.finest("Published process notification");
 			}
 			catch(Exception e) 
 			{
-				logger.severe("Cannot send out signal : " + e.getMessage());
+				Logger.severe("rb.process.sendnotif", "Cannot send out signal", e);
 			}	
 		}
 	}
@@ -499,13 +496,11 @@ public class ProcessManager
 					sendMap.put(username, intcomp);
 				}
 				Payload payload = new Payload(sendMap);
-				logger.finest("Publishing process notification completion");
 				firebus.publish(processNotificationChannel, payload);
-				logger.finest("Published process notification completion");
 			}
 			catch(Exception e) 
 			{
-				logger.severe("Cannot send out signal : " + e.getMessage());
+				Logger.severe("rb.process.sendcompletion", "Cannot send out signal", e);
 			}	
 		}
 	}
@@ -564,7 +559,7 @@ public class ProcessManager
 	
 	protected void commitInstance(ProcessInstance pi) throws RedbackException
 	{
-		logger.finest("Publishing to firebus service : " + dataServiceName + "  ");
+		Logger.finest("rb.process.commit");
 		DataMap key = new DataMap(piCollectionConfig.getField("_id"), pi.getId());
 		dataClient.putData(piCollectionConfig.getName(), key, pi.getJSON(), true);
 	}

@@ -1,20 +1,17 @@
 package io.redback.services;
 
-import java.util.logging.Logger;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.data.DataMap;
 import io.firebus.information.StreamInformation;
 import io.firebus.interfaces.Consumer;
-import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedStreamProvider;
 import io.redback.services.common.StreamHandler;
-import io.redback.utils.StringUtils;
 
 public abstract class ClientServer extends AuthenticatedStreamProvider {
-	private Logger logger = Logger.getLogger("io.redback");
 	
 	public ClientServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
@@ -24,7 +21,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 					try {
 						onObjectUpdate(payload.getDataMap());
 					} catch(Exception e) {
-						logger.severe(StringUtils.getStackTrace(e));
+						Logger.severe("rb.client.onupdate", "Error receiving object update", e);
 					}					
 				}
 			}, 10);			
@@ -35,7 +32,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 					try {
 						onNotification(payload.getDataMap());
 					} catch(Exception e) {
-						logger.severe(StringUtils.getStackTrace(e));
+						Logger.severe("rb.client.onnotification", "Error receiving process notification", e);
 					}
 				}
 			}, 10);			
@@ -46,7 +43,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 					try {
 						onChatMessage(payload.getDataMap());
 					} catch(Exception e) {
-						logger.severe(StringUtils.getStackTrace(e));
+						Logger.severe("rb.client.onchat", "Error receiving chat", e);
 					}
 				}
 			}, 10);			

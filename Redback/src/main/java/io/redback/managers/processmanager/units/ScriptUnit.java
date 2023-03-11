@@ -1,6 +1,7 @@
 package io.redback.managers.processmanager.units;
 
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.Function;
 import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
@@ -33,7 +34,7 @@ public class ScriptUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Start executing script");
+		Logger.finer("rb.process.script.start", null);
 		ScriptContext context = pi.getScriptContext();
 		try
 		{
@@ -45,7 +46,7 @@ public class ScriptUnit extends ProcessUnit
 		{
 			throw new RedbackException("Error executing script of node '" + name + "'", e);
 		}		
-		logger.finer("Finish executing script ");		
+		Logger.finer("rb.process.script.finish", null);
 	}
 
 }

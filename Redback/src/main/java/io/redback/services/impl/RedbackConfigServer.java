@@ -15,13 +15,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.services.ConfigServer;
 import io.redback.utils.FileWatcher;
@@ -29,7 +29,6 @@ import io.redback.utils.FileWatcher.FileWatcherListener;
 
 public class RedbackConfigServer extends ConfigServer implements FileWatcherListener
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	private String devpath;
 	private String classpath;
 	
@@ -45,7 +44,7 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 			} 
 			catch (IOException e) 
 			{
-				logger.severe("Exception trying to watch the filesystem: " + e.getMessage());
+				Logger.severe("rb.config.init", "Exception trying to watch the filesystem", e);
 			}
 		}
 		classpath = "io/redback/config";		

@@ -1,14 +1,11 @@
 package io.redback.managers.processmanager;
 
-import java.util.logging.Logger;
-
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.utils.StringUtils;
 
 public abstract class ProcessUnit 
 {
-	protected Logger logger = Logger.getLogger("io.redback.managers.processmanager");
 	protected String nodeId;
 	protected String name;
 	protected ProcessManager processManager;
@@ -36,28 +33,5 @@ public abstract class ProcessUnit
 	{
 		pi.setCurrentNode(null);
 	}
-/*
-	protected void error(String msg) throws RedbackException
-	{
-		error(msg, null);
-	}
-	
-	protected void error(String msg, Exception cause) throws RedbackException
-	{
-		String extendedMsg = msg;
-		Throwable t = cause;
-		while(t != null)
-		{
-			if(extendedMsg.length() > 0)
-				extendedMsg += " : ";
-			extendedMsg += t.getMessage();
-			t = t.getCause();
-		}
-		logger.severe(extendedMsg);
-		if(cause != null)
-			throw new RedbackException(msg, cause);
-		else
-			throw new RedbackException(msg);
-	}*/
 
 }

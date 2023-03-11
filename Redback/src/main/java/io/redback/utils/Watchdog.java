@@ -1,13 +1,13 @@
 package io.redback.utils;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
+import io.firebus.data.DataMap;
 import io.firebus.information.Statistics;
+import io.firebus.logging.Logger;
 
 public class Watchdog extends Thread {
-	private Logger logger = Logger.getLogger("io.redback");
 	public boolean quit;
 	public Firebus firebus;
 	
@@ -25,12 +25,12 @@ public class Watchdog extends Thread {
 				long totalHeap = (Runtime.getRuntime().totalMemory() / 1048576);
 				long freeHeap = (Runtime.getRuntime().freeMemory() / 1048576);
 				long usedHeap = totalHeap - freeHeap;
-				logger.info("memory::" + System.currentTimeMillis() + ":" + usedHeap + "/" + totalHeap + "/" + maxHeap);
+				Logger.info("rb.watch.memory", new DataMap("used", usedHeap, "total", totalHeap, "max", maxHeap));
 				List<Statistics> stats = firebus.getStatistics();
 				StringBuilder sb = new StringBuilder();
 				for(Statistics stat : stats) 
 					sb.append(stat.toString());
-				logger.info("firebus:" + sb.toString());
+				Logger.info("rb.watch.firebus", sb.toString());
 				Thread.sleep(60000);
 			} catch(Exception e) {
 				e.printStackTrace();

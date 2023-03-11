@@ -1,11 +1,11 @@
 package io.redback.services;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.ServiceInformation;
+import io.firebus.logging.Logger;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -17,14 +17,12 @@ import io.redback.services.common.AuthenticatedServiceProvider;
 
 public abstract class ReportServer extends AuthenticatedServiceProvider {
 
-	private Logger logger = Logger.getLogger("io.redback");
-
 	public ReportServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 	}
 
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
-		logger.finer("Report service start");
+		Logger.finer("rb.report.start", null);
 		Payload response = null;
 		try
 		{
@@ -65,8 +63,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		{
 			throw new RedbackException("Error in report server", e);
 		}		
-
-		logger.finer("Report service finish");
+		Logger.finer("rb.report.finish", null);
 		return response;	
 	}
 

@@ -1,15 +1,13 @@
 package io.redback.utils.js;
 
 
-import java.util.logging.Logger;
-
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 
 
 public class LoggerJSFunction extends CallableJSWrapper
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected Session session;
 	protected String right;
 	
@@ -22,11 +20,11 @@ public class LoggerJSFunction extends CallableJSWrapper
 		String level = (String)arguments[0];
 		String msg = arguments[1] instanceof String ? (String)arguments[1] : arguments[1].toString();
 		if(level.equals("info"))
-			logger.info((String)msg);
+			Logger.info("rb.js", msg);
 		if(level.equals("fine"))
-			logger.fine((String)msg);
+			Logger.fine("rb.js", msg);
 		if(level.equals("finder"))
-			logger.finer((String)msg);
+			Logger.finer("rb.js", msg);
 		return null;
 	}
 }

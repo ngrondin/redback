@@ -1,18 +1,17 @@
 package io.redback.services.common;
 
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
+import io.firebus.logging.Logger;
 import io.firebus.threads.FirebusThread;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.Timer;
 
 public abstract class ServiceProvider extends Provider implements io.firebus.interfaces.ServiceProvider {
-	private Logger logger = Logger.getLogger("io.redback");
 	
 	public ServiceProvider(String n, DataMap c, Firebus f) {
 		super(n, c, f);
@@ -27,13 +26,11 @@ public abstract class ServiceProvider extends Provider implements io.firebus.int
 			if(Thread.currentThread() instanceof FirebusThread) 
 				((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
 			timer = new Timer();
-			logger.finer("Service '" + serviceName + "' started");
 			Payload response = redbackService(session, payload);
-			logger.finer("Service '" + this.serviceName + "' finished");
-			logExecution(payload, timer.mark());
+			Logger.info("rb.service", new DataMap("ms", timer.mark(), "req", payload.getDataObject()));
 			return response;
 		} catch(Exception e) {
-			throw handleException(e, "Exception in redback service '" + serviceName + "'");
+			throw handleException("rb.service", "Exception in redback service '" + serviceName + "'", e);
 		}
 	}
 	

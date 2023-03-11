@@ -4,6 +4,7 @@ import java.util.List;
 
 
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.Actionner;
 import io.redback.managers.processmanager.Notification;
@@ -30,7 +31,7 @@ public class ActionUnit extends ProcessUnit
 	
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Starting Action node");
+		Logger.finer("rb.process.action.start", null);
 		Actionner actionner = pi.getOutboundActionner();
 		DataMap filter = new DataMap();
 		if(process != null) 
@@ -47,18 +48,18 @@ public class ActionUnit extends ProcessUnit
 						actionExists = true;
 				if(actionExists)
 				{
-					logger.fine("Actionning interaction '" + notification.code + "' with action '" + action +"' in process '" + notification.processName + "' instance '" + notification.pid +"'");
+					Logger.fine("rb.process.action", new DataMap("interaction", notification.code, "action", action, "process", notification.processName, "pid", notification.pid));
 					processManager.actionProcess(actionner, notification.pid, action, null, null);
 				}
 				else
 				{
-					logger.info("ActionUnit tried to process the interaction '" + interactionCode + "' with an invalid action '" + action + "'");
+					Logger.warning("rb.process.action.invalid", new DataMap("interaction", notification.code, "action", action, "process", notification.processName, "pid", notification.pid));
 				}
 			}
 		}	
 
 		pi.setCurrentNode(nextNode);
-		logger.finer("Finished Action node");
+		Logger.finer("rb.process.action.finish", null);
 	}
 
 }

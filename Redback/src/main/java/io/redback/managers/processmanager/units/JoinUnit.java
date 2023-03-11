@@ -1,6 +1,7 @@
 package io.redback.managers.processmanager.units;
 
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.processmanager.Process;
 import io.redback.managers.processmanager.ProcessInstance;
@@ -19,9 +20,9 @@ public class JoinUnit extends ProcessUnit
 	
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Starting Join node");
+		Logger.finer("rb.process.join.start", null);
 		pi.setCurrentNode(nextNode);
-		logger.finer("Finished Join node");
+		Logger.finer("rb.process.join.finish", null);
 	}
 
 }

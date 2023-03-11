@@ -2,12 +2,12 @@ package io.redback.services;
 
 import java.security.MessageDigest;
 import java.security.spec.KeySpec;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
 import io.firebus.information.ServiceInformation;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
@@ -15,7 +15,6 @@ import io.redback.services.common.ServiceProvider;
 
 public abstract class AccessManager extends ServiceProvider
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected KeySpec keySpec;
 	protected MessageDigest digest;
 	protected long expiryTime;
@@ -32,13 +31,13 @@ public abstract class AccessManager extends ServiceProvider
 		}
 		catch(Exception e)
 		{
-			logger.severe(e.getMessage());
+			Logger.severe("rb.access.init", "Error configuring access manager", e);
 		}
 	}
 
 	public Payload redbackService(Session session, Payload payload) throws RedbackException 
 	{
-		logger.finer("Access manager service start");
+		Logger.finer("rb.access.start", null);
 		Payload responsePayload = new Payload();
 		DataMap response = new DataMap();
 		try
@@ -69,7 +68,7 @@ public abstract class AccessManager extends ServiceProvider
 		}
 		
 		responsePayload.setData(response);
-		logger.finer("Access manager service finish");
+		Logger.finer("rb.access.finish", null);
 		return responsePayload;
 	}
 

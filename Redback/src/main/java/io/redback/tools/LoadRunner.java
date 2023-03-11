@@ -7,16 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.information.ServiceInformation;
-import io.firebus.interfaces.ServiceProvider;
-import io.firebus.logging.FirebusSimpleFormatter;
 
 public class LoadRunner 
 {
@@ -178,14 +171,6 @@ public class LoadRunner
 		try
 		{
 			Thread.currentThread().setName("rbLoadRunner");
-			Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
-			Logger logger = Logger.getLogger("io.firebus");
-			FileHandler fh = new FileHandler("LoadRunner.log");
-			fh.setFormatter(new FirebusSimpleFormatter());
-			fh.setLevel(Level.FINEST);
-			logger.addHandler(fh);
-			logger.setLevel(Level.FINEST);
-			
 			LoadRunner lr = new LoadRunner(args[0], args[1], args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]));
 			Thread.sleep(2000);
 			lr.run();

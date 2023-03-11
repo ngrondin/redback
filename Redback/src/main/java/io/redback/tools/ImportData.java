@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -16,13 +15,11 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.security.Session;
-import io.redback.utils.StringUtils;
 
 public class ImportData extends Thread
 {
-	private Logger logger = Logger.getLogger("io.redback");
-	
 	protected Firebus firebus;
 	protected String token;
 	protected String objectService;
@@ -58,7 +55,7 @@ public class ImportData extends Thread
 		try
 		{
 			InputStream is = null;
-			logger.info("Starting to import " + fileurl);
+			Logger.info("rb.import.start", new DataMap("file", fileurl));
 			if(fileurl.startsWith("classpath:")) {
 				URL url = this.getClass().getClassLoader().getResource(fileurl.substring(11));
 				is = url.openStream();
@@ -135,7 +132,7 @@ public class ImportData extends Thread
 									{
 										DataMap existing = list.getObject(0);
 										newUid = existing.getString("uid");
-										logger.fine("Found existing object " + objectname + "." + newUid);
+										Logger.fine("rb.import.objectexists", new DataMap("object", objectname, "uid", newUid));
 									}
 									else
 									{
@@ -149,7 +146,7 @@ public class ImportData extends Thread
 										response = firebus.requestService(objectService, request);
 										fbRespmap = new DataMap(response.getString());
 										newUid = fbRespmap.getString("uid");
-										logger.info("Imported object " + objectname + "." + newUid);
+										Logger.fine("rb.import.objectimported", new DataMap("object", objectname, "uid", newUid));
 									}
 									String oldKey = objectname + "." + oldUid;
 									keyMap.put(oldKey, newUid);
@@ -163,21 +160,21 @@ public class ImportData extends Thread
 							else
 							{
 								skippedAtLeastOne = true;
-								logger.fine("Skipping object " + objectname + "." + oldUid + " for the moment");
+								Logger.fine("rb.import.skipping", new DataMap("object", objectname, "uid", oldUid));
 							}
 						}				
 					}
 				} while(skippedAtLeastOne);
-				logger.info("Finished importing " + fileurl);
+				Logger.info("rb.import.finish", new DataMap("file", fileurl));
 			}
 			else
 			{
-				logger.severe("File was not found : " + fileurl);
+				Logger.severe("rb.import.filenotfound", new DataMap("file", fileurl), null);
 			}
 		}
 		catch(Exception e)
 		{
-			logger.severe(StringUtils.rollUpExceptions(e));
+			Logger.severe("rb.import", new DataMap("file", fileurl), e);
 		}
 	}
 
@@ -219,13 +216,13 @@ public class ImportData extends Thread
 				Thread.sleep(5000);
 				id.importData();
 			} catch(Exception e) {
-				System.err.println("Error " + e.getMessage());
+				Logger.severe("rb.import.error", e);
 			}
 		} else {
-			System.out.println("Some parameters are missing");
+			Logger.severe("rb.import.missingparams");
 		}		
 		firebus.close();
-		System.out.println("import ended");
+		Logger.info("rb.import.complete");
 	}
 }
 

@@ -1,11 +1,11 @@
 package io.redback.services;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.ServiceInformation;
+import io.firebus.logging.Logger;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
@@ -16,8 +16,6 @@ import io.redback.utils.Geometry;
 
 public abstract class GeoServer extends ServiceProvider
 {
-	private Logger logger = Logger.getLogger("io.redback");
-
 
 	public GeoServer(String n, DataMap c, Firebus f) 
 	{
@@ -29,7 +27,7 @@ public abstract class GeoServer extends ServiceProvider
 	}
 
 	public Payload redbackService(Session session, Payload payload) throws RedbackException {
-		logger.finer("Geo service start");
+		Logger.finer("rb.geo.start", null);
 		Payload response = new Payload();
 		try
 		{
@@ -108,7 +106,7 @@ public abstract class GeoServer extends ServiceProvider
 			throw new RedbackException("Exception in geo service", e);
 		}		
 
-		logger.finer("Geo service finish");
+		Logger.finer("rb.geo.finish", null);
 		return response;			
 		
 	}

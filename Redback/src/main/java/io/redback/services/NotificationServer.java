@@ -1,11 +1,11 @@
 package io.redback.services;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.information.ServiceInformation;
+import io.firebus.logging.Logger;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -16,8 +16,6 @@ import io.redback.utils.Email;
 
 public abstract class NotificationServer extends AuthenticatedServiceProvider {
 
-	private Logger logger = Logger.getLogger("io.redback");
-	
 	public NotificationServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 	}
@@ -28,7 +26,8 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		try {
-			logger.finer("Notification service start");
+			Logger.finer("rb.notif.start", null);
+
 			Payload response = null;
 			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
@@ -73,7 +72,7 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 				throw new RedbackException("No valid action was provided");
 			}
 	
-			logger.finer("Notification service finish");
+			Logger.finer("rb.geo.finish", null);
 			return response;	
 		} catch(DataException e) {
 			throw new RedbackException("Error in Notification server", e);

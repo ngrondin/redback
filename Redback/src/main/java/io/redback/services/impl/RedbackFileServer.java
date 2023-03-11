@@ -12,13 +12,13 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.utils.StreamPipe;
 import io.firebus.utils.StreamReceiver;
 import io.firebus.utils.StreamSender;
@@ -33,9 +33,6 @@ import io.redback.utils.RedbackFileMetaData;
 
 public class RedbackFileServer extends FileServer 
 {
-	private Logger logger = Logger.getLogger("io.redback");
-	
-	//protected FileManager fileManager;
 	protected ArrayList<String> fileServices = new ArrayList<String>();
 	protected String defaultFileService;
 	protected String defaultFileStream;
@@ -247,7 +244,7 @@ public class RedbackFileServer extends FileServer
 							fis.close();
 							file.delete();
 						} catch(Exception e2) {
-							logger.severe("Error sending file to storage service : " + e2.getMessage());
+							Logger.severe("rb.file.store", "Error sending file to storage service", e2);
 						}
 					}
 
@@ -355,14 +352,14 @@ public class RedbackFileServer extends FileServer
 						resp.put("thumbnail", filemd.thumbnail);
 						ByteArrayInputStream bais = new ByteArrayInputStream(resp.toString().getBytes());
 						new StreamSender(bais, streamEndpoint);
-						logger.info("Finished putting file");
+						Logger.info("rb.file.put", "Finished putting file");
 					} catch(Exception e) {
-						logger.severe("Error putting file : " + e);
+						Logger.severe("rb.file.put", "Error putting file", e);
 					}	
 				}
 	
 				public void error(String message) {
-					logger.severe(message);
+					Logger.severe("rb.file.put", "Error putting file", null);
 				}
 			});
 		} catch(Exception e) {

@@ -1,7 +1,6 @@
 package io.redback;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,32 +11,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import io.firebus.DiscoveryAgent;
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.firebus.interfaces.BusFunction;
 import io.firebus.interfaces.Consumer;
 import io.firebus.interfaces.ServiceProvider;
 import io.firebus.interfaces.StreamProvider;
-import io.firebus.logging.FirebusConsoleHandler;
-import io.firebus.data.DataList;
-import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.services.common.Provider;
 import io.redback.utils.Watchdog;
 
 public class RedbackServer 
 {
-	private Logger logger = Logger.getLogger("io.redback.RedbackServer");
+	//private Logger logger = Logger.getLogger("io.redback.RedbackServer");
 	protected Map<String, BusFunction> services;
 	protected static ArrayList<Logger> loggers;
 	protected Firebus firebus;
@@ -45,7 +38,13 @@ public class RedbackServer
 	public RedbackServer(DataMap config)
 	{
 		long start = System.currentTimeMillis();
-		List<Logger> loggers = new ArrayList<Logger>();
+		DataMap loggingConfig = config.getObject("logging");
+		if(loggingConfig != null) {
+			Logger.setLevel(Logger.getLevelFromString(loggingConfig.getString("level")));
+		}
+		
+		
+		/*List<Logger> loggers = new ArrayList<Logger>();
 		DataList loggerConfigs = config.getList("loggers");
 		if(loggerConfigs != null) {
 			for(int i = 0; i < loggerConfigs.size(); i++)
@@ -74,7 +73,7 @@ public class RedbackServer
 					logger.severe("General error when configuring loggers : " + e.getMessage());
 				}
 			}
-		}
+		}*/
 		
 		firebus = new Firebus(config.getString("network"), config.getString("password"));
 		if(config.containsKey("threads"))
@@ -95,12 +94,12 @@ public class RedbackServer
 		DataList knownAddresses = config.getList("knownaddresses");
 		if(knownAddresses != null)
 		{
-			logger.fine("Adding known addresses to firebus");
+			Logger.fine("Adding known addresses to firebus");
 			for(int i = 0; i < knownAddresses.size(); i++)
 			{
 				String address = knownAddresses.getObject(i).getString("address");
 				int port = Integer.parseInt(knownAddresses.getObject(i).getString("port"));
-				logger.fine("Adding known address " + address + ":" + port);
+				Logger.fine("Adding known address " + address + ":" + port);
 				firebus.addKnownNodeAddress(address, port);
 			}
 		}
@@ -108,14 +107,14 @@ public class RedbackServer
 		DataList discoveryAgents = config.getList("discoveryagents");
 		if(discoveryAgents != null)
 		{
-			logger.fine("Adding discovery agents to firebus");
+			Logger.fine("Adding discovery agents to firebus");
 			for(int i = 0; i < discoveryAgents.size(); i++)
 			{
 				DataMap discoveryAgent = discoveryAgents.getObject(i);  
 				String className = discoveryAgent.getString("class");
 				try
 				{
-					logger.fine("Instantiating discovery agent " + className);
+					Logger.fine("Instantiating discovery agent " + className);
 					Class<?> c = Class.forName(className);
 					Constructor<?> agentConstructor = c.getDeclaredConstructor();
 					DiscoveryAgent agent = (DiscoveryAgent)agentConstructor.newInstance();
@@ -125,12 +124,12 @@ public class RedbackServer
 				} 
 				catch (Exception e) 
 				{
-					logger.severe("Error instantiating discoveryAgent " + className + " : " + e.getMessage());
+					Logger.severe("Error instantiating discoveryAgent " + className + " : " + e.getMessage());
 				}
 			}
 		}		
 
-		logger.fine("Adding services to container");
+		Logger.fine("Adding services to container");
 		services = new HashMap<String, BusFunction>();
 		DataList serviceConfigs = config.getList("services");
 		for(int i = 0; i < serviceConfigs.size(); i++)
@@ -144,7 +143,7 @@ public class RedbackServer
 			{
 				try
 				{
-					logger.fine("Instantiating service " + name);
+					Logger.fine("Instantiating service " + name);
 					Class<?> c = Class.forName(className);
 					Constructor<?> cons = null;
 					BusFunction service = null;
@@ -200,7 +199,7 @@ public class RedbackServer
 										}
 										else
 										{
-											logger.severe("No appropriate constructor can be found for class " + className + " ");
+											Logger.severe("No appropriate constructor can be found for class " + className + " ");
 										}
 									}
 								}
@@ -221,16 +220,16 @@ public class RedbackServer
 				}
 				catch(ClassNotFoundException e)
 				{
-					logger.severe("Class " + className + " cannot be found in the classpath");
+					Logger.severe("Class " + className + " cannot be found in the classpath");
 				}
 				catch(InvocationTargetException | IllegalAccessException | InstantiationException e)
 				{
-					logger.severe("Error invoking the constructor for class " + className + " : " + e.getCause().getMessage());
+					Logger.severe("Error invoking the constructor for class " + className + " : " + e.getCause().getMessage());
 				}					
 			}
 			else
 			{
-				logger.severe("No class or name provided for service");
+				Logger.severe("No class or name provided for service");
 			}
 		}
 		
@@ -238,7 +237,7 @@ public class RedbackServer
 		startAllServices();
 		new Watchdog(firebus);
 		long end = System.currentTimeMillis();
-		Logger.getLogger("io.redback").info("Redback server started in " + (end - start) + "ms");
+		Logger.info("Redback server started in " + (end - start) + "ms");
 	}
 	
 	protected void configureAllServices() {
@@ -318,7 +317,7 @@ public class RedbackServer
 			}
 			
 			if(configString != null) {
-					Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
+					//Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
 	
 					int pos1 = -1;
 					while((pos1 = configString.indexOf("{{")) != -1) {
@@ -331,7 +330,7 @@ public class RedbackServer
 					new RedbackServer(new DataMap(configString));
 	
 			} else {
-				Logger.getLogger("io.redback").severe("No config file provided");
+				Logger.severe("No config file provided");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

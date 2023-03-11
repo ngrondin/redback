@@ -11,6 +11,7 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 
 public class ExportData extends Thread
 {
@@ -78,7 +79,7 @@ public class ExportData extends Thread
 			for(int i = 0; i < objectList.length; i++)
 			{
 				String objectname = objectList[i];
-				System.out.print("Reading object " + objectname);
+				Logger.info("rb.export", new DataMap("object", objectname));
 				int newUID = 0;
 				boolean hasMore = true;
 				DataMap fbReqmap = new DataMap();
@@ -91,7 +92,6 @@ public class ExportData extends Thread
 				int count = 0;
 				while(hasMore)
 				{
-					System.out.print(".");
 					fbReqmap.put("page", page);
 					Payload fbReq = new Payload(fbReqmap);
 					fbReq.metadata.put("token", token);
@@ -120,7 +120,7 @@ public class ExportData extends Thread
 						hasMore = false;
 					}
 				}
-				System.out.println(count + " records");
+				Logger.info("rb.export.count", new DataMap("count", count));
 			}
 			
 			DataMap result = new DataMap();
@@ -218,7 +218,7 @@ public class ExportData extends Thread
 				System.err.println("Error " + e.getMessage());
 			}
 		} else {
-			System.out.println("Some parameters were missing");
+			Logger.severe("rb.export.missingparamter");
 		}
 		firebus.close();
 	}

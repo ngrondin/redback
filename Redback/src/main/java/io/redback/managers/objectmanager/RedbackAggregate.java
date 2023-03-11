@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.script.ScriptException;
 
@@ -18,7 +17,6 @@ import io.redback.security.Session;
 
 public class RedbackAggregate extends RedbackElement
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected boolean canRead;
 	protected HashMap<String, Value> dimensions;
 	protected HashMap<String, Value> metrics;
@@ -57,7 +55,7 @@ public class RedbackAggregate extends RedbackElement
 		}
 		else
 		{
-			error("User does not have the right to read object " + config.getName());
+			throw new RedbackException("User does not have the right to read object " + config.getName());
 		}
 	}
 		
@@ -260,21 +258,6 @@ public class RedbackAggregate extends RedbackElement
 			object.put("related", relatedNode);
 		
 		return object;
-	}
-	
-
-	protected void error(String msg) throws RedbackException
-	{
-		error(msg, null);
-	}
-	
-	protected void error(String msg, Exception cause) throws RedbackException
-	{
-		logger.severe(msg);
-		if(cause != null)
-			throw new RedbackException(msg, cause);
-		else
-			throw new RedbackException(msg);
 	}
 
 	public String toString()

@@ -1,10 +1,9 @@
 package io.redback.services.common;
 
-import java.util.logging.Logger;
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.threads.FirebusThread;
 import io.redback.client.AccessManagementClient;
 import io.redback.exceptions.RedbackException;
@@ -13,7 +12,6 @@ import io.redback.security.UserProfile;
 
 public abstract class AuthenticatedServiceProvider extends ServiceProvider
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected String accessManagementService;
 	protected AccessManagementClient accessManagementClient;
 
@@ -30,7 +28,7 @@ public abstract class AuthenticatedServiceProvider extends ServiceProvider
 		String token = payload.metadata.get("token");
 		UserProfile up = null;
 		
-		logger.finer("Authenticated service start (token: " + token + ")");
+		Logger.finer("rb.authservice.start", new DataMap("token", token));
 
 		if(token != null)
 			up = accessManagementClient.validate(session, token);
@@ -47,7 +45,7 @@ public abstract class AuthenticatedServiceProvider extends ServiceProvider
 		{
 			response = redbackUnauthenticatedService(session, payload);
 		}
-		logger.finer("Authenticated service finish");
+		Logger.finer("rb.authservice.finish", null);
 		return response;
 
 	}

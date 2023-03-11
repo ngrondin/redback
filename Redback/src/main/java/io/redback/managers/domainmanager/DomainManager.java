@@ -5,11 +5,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.interfaces.Consumer;
+import io.firebus.logging.Logger;
 import io.firebus.script.ScriptFactory;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
@@ -42,7 +42,6 @@ import io.redback.utils.StringUtils;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class DomainManager implements Consumer {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected Firebus firebus;
 	protected ScriptFactory scriptFactory;
 	protected boolean includeLoaded;
@@ -152,7 +151,6 @@ public class DomainManager implements Consumer {
 			}
 			catch(Exception e)
 			{
-				logger.severe(e.getMessage());
 				throw new RedbackException("Exception getting domain entry '" + domain + "." + name + "'", e);
 			}
 		}
@@ -186,7 +184,6 @@ public class DomainManager implements Consumer {
 		}
 		catch(Exception e)
 		{
-			logger.severe(e.getMessage());
 			throw new RedbackException("Exception listing domain entries for '" + domain + "'", e);
 		}
 		return list;
@@ -219,7 +216,6 @@ public class DomainManager implements Consumer {
 		}
 		catch(Exception e)
 		{
-			logger.severe(e.getMessage());
 			throw new RedbackException("Exception listing all entries with name '" + name + "'", e);
 		}
 		return list;
@@ -249,7 +245,7 @@ public class DomainManager implements Consumer {
 			log.put("date", new Date());
 			dataClient.putData(logCollection.getName(), logCollection.convertObjectToSpecific(key), logCollection.convertObjectToSpecific(log));
 		} catch(Exception e) {
-			logger.severe(StringUtils.rollUpExceptions(e));
+			Logger.severe("rb.domain.addlog", "Error adding log entry", e);
 		}
 	}
 	
@@ -259,7 +255,7 @@ public class DomainManager implements Consumer {
 			entries.remove(key.getString("domain") + "." + key.getString("name"));
 			includeLoaded = false;
 		} catch(Exception e) {
-			logger.severe("Error consuming cache control message: " + e.getMessage());
+			Logger.severe("rb.domain.consume", "Error consuming cache control message", e);
 		}
 	}
 	
@@ -383,7 +379,7 @@ public class DomainManager implements Consumer {
 				}
 			} 			
 		} catch(Exception e) {
-			logger.severe(StringUtils.rollUpExceptions(e));
+			Logger.severe("rb.domain.execute", "Error executing function", e);
 		}
 	}
 	

@@ -2,10 +2,10 @@ package io.redback.managers.processmanager.units;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
@@ -40,7 +40,7 @@ public class FirebusRequestUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Starting firebus call node");
+		Logger.finer("rb.process.firebusrequest.start", null);
 		Session sysUserSession = pi.getOutboundActionner().getSession();
 		ScriptContext context = pi.getScriptContext();
 		DataMap data = inputExpressionMap.eval(context);
@@ -49,12 +49,10 @@ public class FirebusRequestUnit extends ProcessUnit
 		payload.metadata.put("session", sysUserSession.getId());
 		try
 		{
-			if(logger.getLevel() == Level.FINEST) logger.finest("Calling " + processManager.getGlobalVariables().getString("rbobjectservice") + " " + data);
 			Payload response = processManager.getFirebus().requestService(firebusServiceName, payload, 10000);
 			DataMap respData = new DataMap(response.getString());
 			context.put("result",respData);
 			DataMap respOutput = outputExpressionMap.eval(context);
-			if(logger.getLevel() == Level.FINEST) logger.finest("Output data was: " + respOutput);
 			pi.setData(respOutput);
 		} 
 		catch (Exception e)
@@ -62,7 +60,7 @@ public class FirebusRequestUnit extends ProcessUnit
 			throw new RedbackException("Error executing firebus service '" + firebusServiceName + "' ",  e);
 		}
 		pi.setCurrentNode(nextNode);
-		logger.finer("Finished firebus call node");
+		Logger.finer("rb.process.firebusrequest.finish", null);
 	}
 
 }

@@ -1,10 +1,10 @@
 package io.redback.services.common;
 
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.threads.FirebusThread;
 import io.redback.client.AccessManagementClient;
 import io.redback.exceptions.RedbackException;
@@ -12,7 +12,6 @@ import io.redback.security.Session;
 import io.redback.security.UserProfile;
 
 public abstract class AuthenticatedStreamProvider extends StreamProvider {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected String accessManagementService;
 	protected AccessManagementClient accessManagementClient;
 	
@@ -27,7 +26,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 		String token = payload.metadata.get("token");
 		UserProfile up = null;
 		
-		logger.finer("Authenticated stream request start (token: " + token + ")");
+		Logger.finer("rb.authstream.start", new DataMap("token", token));
 
 		if(token != null)
 			up = accessManagementClient.validate(session, token);
@@ -44,7 +43,7 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 		{
 			response = redbackAcceptUnauthenticatedStream(session, payload);
 		}
-		logger.finer("Authenticated stream request finish");
+		Logger.finer("rb.authstream.finish", null);
 		return response;
 	}
 

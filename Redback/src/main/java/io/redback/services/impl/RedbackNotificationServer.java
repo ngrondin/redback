@@ -3,7 +3,6 @@ package io.redback.services.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.security.KeyFactory;
-
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.KeySpec;
@@ -13,20 +12,19 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Store;
 import javax.mail.Transport;
-import javax.mail.Flags.Flag;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -41,9 +39,10 @@ import com.sun.mail.imap.IMAPFolder;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.exceptions.FunctionErrorException;
+import io.firebus.logging.Logger;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.GatewayClient;
@@ -57,7 +56,6 @@ import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
 
 public class RedbackNotificationServer extends NotificationServer {
-	private Logger logger = Logger.getLogger("io.redback");
 	
 	protected String smtpServer;
 	protected String smtpUser;
@@ -115,7 +113,7 @@ public class RedbackNotificationServer extends NotificationServer {
 			        	}
 			        });
 			        
-			        logger.fine("Sending email");
+			        Logger.fine("rb.notif.sendemail", null);
 			        Message msg = new MimeMessage(mailSession);
 			        msg.setFrom(email.from);
 			        if(email.reply != null)
@@ -151,7 +149,7 @@ public class RedbackNotificationServer extends NotificationServer {
 			        msg.setSentDate(new Date());
 			        Transport.send(msg);	
 				} catch(Exception e) {
-					logger.severe("Problem sending email : " + e.getMessage());
+					Logger.severe("rb.notif.sendemail", "Error sending emails", e);
 				}
 			}
 		};

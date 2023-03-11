@@ -1,9 +1,8 @@
 package io.redback.managers.processmanager.units;
 
-import java.util.logging.Level;
-
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
@@ -12,7 +11,6 @@ import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
 import io.redback.security.Session;
-import io.redback.utils.StringUtils;
 
 public class DomainServiceUnit extends ProcessUnit 
 {
@@ -39,7 +37,7 @@ public class DomainServiceUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		logger.finer("Starting domain service call node");
+		Logger.finer("rb.process.domain.start", null);
 		if(processManager.getDomainServiceName() != null)
 		{
 			Session sysUserSession = pi.getOutboundActionner().getSession();
@@ -57,23 +55,17 @@ public class DomainServiceUnit extends ProcessUnit
 			payload.metadata.put("mime", "application/json");
 			try
 			{
-				if(logger.getLevel() == Level.FINEST) logger.finest("Calling " + processManager.getDomainServiceName() + " " + req);
 				Payload response = processManager.getFirebus().requestService(processManager.getDomainServiceName(), payload, 10000);
 				DataMap respData = new DataMap(response.getString());
 				context.put("result", respData.containsKey("data") ? respData.get("data") : null);
 				DataMap respOutput = outputExpressionMap.eval(context);
-				if(logger.getLevel() == Level.FINEST) logger.finest("Output data was: " + respOutput);
 				pi.setData(respOutput);
 			} 
 			catch (Exception e)
 			{
-				logger.warning(StringUtils.rollUpExceptions(e));
+				Logger.warning("rb.process.domain", "Error executing domain function", e);
 			}
-			logger.finer("Finished domain service call node");
-		}
-		else
-		{
-			logger.fine("No domain service defined");
+			Logger.finer("rb.process.domain.finish", null);
 		}
 		pi.setCurrentNode(nextNode);
 	}

@@ -3,25 +3,23 @@ package io.redback.managers.clientmanager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
+import io.firebus.data.DataException;
+import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.interfaces.ServiceRequestor;
 import io.firebus.interfaces.StreamHandler;
-import io.firebus.data.DataException;
-import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.clientmanager.SubscriptionManager.FilterSubscription;
 import io.redback.managers.clientmanager.SubscriptionManager.ObjectDomainPointer;
 import io.redback.managers.clientmanager.SubscriptionManager.ObjectUIDPointer;
 import io.redback.security.Session;
 import io.redback.services.ClientStreamHandler;
-import io.redback.utils.StringUtils;
 
 public class ClientHandler extends ClientStreamHandler {
-	private Logger logger = Logger.getLogger("io.redback");
 	
 	protected ClientManager clientManager;
 	protected Map<String, StreamEndpoint> uploads;
@@ -35,16 +33,16 @@ public class ClientHandler extends ClientStreamHandler {
 		uploads = new HashMap<String, StreamEndpoint>();
 		String gatewayNode = payload.metadata.get("streamgwnode");
 		gatewayConnectionId = payload.metadata.get("streamgwid");
-		logger.info("Client connected for " + session.getUserProfile().getUsername() + " (client_node: " + clientManager.firebus.getNodeId() + (gatewayNode != null ? " gateway_node: " + gatewayNode : "") + " gateway_conn_id: " + gatewayConnectionId + ")");
-
+		Logger.info("rb.client.connect", new DataMap("firebusnode", clientManager.firebus.getNodeId(), "gatewaynode", gatewayNode, "gatewayconnid", gatewayConnectionId));
 	}
 	
 	public void clientStreamClosed() throws RedbackException {
 		try {
 			clientManager.onClientLeave(this);
-			logger.info("Client disconnected for " + session.getUserProfile().getUsername() + " (" + "gateway_conn_id: " + gatewayConnectionId + " " + getStatString() + ")");
+			Logger.info("rb.client.disconnect", new DataMap("gatewayconnid", gatewayConnectionId, "stats", getStatString()));			
 		} catch(Exception e) {
-			logger.severe("Error closing client handler : " + e.getMessage());
+			Logger.severe("rb.client.disconnect", "Error closing client handler", e);
+			//logger.severe("Error closing client handler : " + e.getMessage());
 		}
 	}
 	
@@ -83,7 +81,7 @@ public class ClientHandler extends ClientStreamHandler {
 						else if(mime.startsWith("text/"))
 							sendRequestResultText(reqUid, payload.getString());
 					} catch(DataException e2) {
-						logger.severe("Client service request error while parsing response json: " + StringUtils.rollUpExceptions(e2));
+						Logger.severe("rb.client.request", "Client service request error while parsing response json", e2);
 					}
 				}
 

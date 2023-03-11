@@ -3,19 +3,17 @@ package io.redback.utils.js;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.logging.Logger;
 
 
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.services.impl.RedbackUIServer;
 import io.redback.utils.StringUtils;
 
 public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 {
-	private Logger logger = Logger.getLogger("io.redback");
-	
 	public RedbackUtilsJSWrapper() {
 		super(new String[] {"convertDataEntityToAttributeString", 
 				"convertDataMapToAttributeString", 
@@ -84,7 +82,7 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 				public Object call(Object... arguments) throws RedbackException {
 					String tzName = (String)arguments[0];
 					if(tzName == null || (tzName != null && (tzName.equals("") || tzName.equals("null")))) {
-						logger.warning("Problem in getTImezoneOffset, timezone argument was '" + tzName + "'");
+						Logger.warning("rb.js.utils", "Problem in getTImezoneOffset, timezone argument was '" + tzName + "'");
 						tzName = "UTC";
 					}
 					ZoneId here = ZoneId.of(tzName);

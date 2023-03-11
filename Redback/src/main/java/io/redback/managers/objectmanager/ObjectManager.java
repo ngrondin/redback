@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -16,6 +15,7 @@ import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.logging.Logger;
 import io.firebus.script.Function;
 import io.firebus.script.ScriptContext;
 import io.firebus.script.ScriptFactory;
@@ -57,7 +57,6 @@ import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class ObjectManager
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected String name;
 	protected Firebus firebus;
 	protected ScriptFactory scriptFactory;
@@ -212,9 +211,8 @@ public class ObjectManager
 				loadAllIncludeScripts(session);
 				loadAllGlobalScripts(session);
 				loadAllObjectConfigs(session);
-				//jsManager.precompile(preCompile);
 			} catch(Exception e) {
-				logger.severe(StringUtils.rollUpExceptions(e));
+				Logger.severe("rb.object.refresh", "Error refreshing configs", e);
 			}
 		}
 	}
@@ -505,7 +503,7 @@ public class ObjectManager
 							RedbackObject objectInTransaction = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
 							if(objectInTransaction != null && !objectList.contains(objectInTransaction) && !objectInTransaction.isDeleted()) 
 							{
-								logger.warning("Memory filter missed " + objectName + ":" + objectInTransaction.getUID().stringValue + " with filter: " + objectFilter.toString(0, true));
+								Logger.warning("rb.object.list.memorymiss", new DataMap("object", objectName, "uid", objectInTransaction.getUID().stringValue, "filter", objectFilter));
 								objectList.add(objectInTransaction);
 							}
 							if(objectInTransaction == null)
@@ -588,7 +586,7 @@ public class ObjectManager
 				if(!isFilter)
 					object.put(attributeName, new Value(value), !isAutomated);
 			}
-			logger.fine("Created object " + object.getObjectConfig().getName() + ":" + object.getUID().getString());
+			Logger.fine("rb.object.create", new DataMap("object", object.getObjectConfig().getName(), "uid", object.getUID().getString()));
 		}
 		return object;
 	}
@@ -1115,9 +1113,7 @@ public class ObjectManager
 			if(orList.size() > 1)
 				filter.put("$or", orList);
 			searchCache.put(key, filter);
-		} else {
-			logger.info("Search Filter already found");
-		}
+		} 
 		return filter;
 	}
 
@@ -1129,13 +1125,11 @@ public class ObjectManager
 			try 
 			{
 				Payload payload = new Payload(object.getDataMap(true, true));
-				logger.finest("Publishing object update");
 				firebus.publish(objectUpdateChannel, payload);
-				logger.finest("Published object update");
 			}
 			catch(Exception e) 
 			{
-				logger.severe("Cannot send out signal : " + StringUtils.rollUpExceptions(e));
+				Logger.severe("rb.object.signal", "Cannot send out signal", e);
 			}
 		}		
 	}

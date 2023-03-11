@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import io.firebus.Firebus;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.firebus.script.Function;
 import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
@@ -34,7 +34,6 @@ import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class RedbackUIServer extends UIServer 
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected String devpath;
 	protected ScriptFactory scriptFactory;
 	protected HashMap<String, Function> jspScripts;
@@ -77,7 +76,7 @@ public class RedbackUIServer extends UIServer
 			context.put("config", appConfig);
 			html = executeJSP("pages/" + page, version, context);			
 		} catch(Exception e) {
-			logger.warning(e.getMessage());
+			Logger.warning("rb.ui.getapp", e.getMessage());
 			html = executeJSP("pages/error", version, context).inject("errormessage", formatErrorMessage(e.getMessage(), e.getCause()));
 		}
 		return html;

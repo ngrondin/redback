@@ -8,28 +8,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
 
+import io.firebus.data.DataFilter;
+import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.logging.Logger;
 import io.firebus.script.Expression;
 import io.firebus.script.Function;
 import io.firebus.script.ScriptContext;
 import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.exceptions.ScriptValueException;
-import io.firebus.data.DataFilter;
-import io.firebus.data.DataMap;
 import io.redback.client.DataClient.DataTransaction;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
-import io.redback.utils.StringUtils;
 
 public class RedbackObject extends RedbackElement
 {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected Value uid;
 	protected Value domain;
 	protected boolean canRead;
@@ -586,7 +584,7 @@ public class RedbackObject extends RedbackElement
 					isNewObject = false;
 				}
 			} catch(Exception e) {
-				logger.severe(StringUtils.getStackTrace(e));
+				Logger.severe("rb.object.aftersave", "Error in after save trigger", e);
 			}				
 			updatedAttributes.clear();
 		}		
@@ -714,7 +712,6 @@ public class RedbackObject extends RedbackElement
 	protected Object executeFunction(Function function, String name, ScriptContext context) throws RedbackException
 	{
 		Object retVal = null;
-		logger.finer("Start executing script : " + name);
 		try
 		{
 			retVal = function.call(context);
@@ -723,7 +720,6 @@ public class RedbackObject extends RedbackElement
 		{
 			throw new RedbackException("Problem occurred executing script " + name, e);
 		}		
-		logger.finer("Finish executing script : " + name);
 		return retVal;
 	}
 	

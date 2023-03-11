@@ -1,17 +1,16 @@
 package io.redback.security;
 
 import java.util.Date;
-import java.util.logging.Logger;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.client.AccessManagementClient;
 import io.redback.exceptions.RedbackException;
 
 public class SysUserManager {
-	private Logger logger = Logger.getLogger("io.redback");
 	protected DataMap config;
 	protected String jwtSecret;
 	protected String jwtIssuer;
@@ -47,7 +46,7 @@ public class SysUserManager {
 						.withExpiresAt(new Date(expiry))
 						.sign(algorithm);
 				profile = accessManagementClient.validate(session, token);
-				logger.info("New sysuser token: " + token);
+				Logger.info("rb.sysuser.newtoken", new DataMap("token", token));
 			}
 			catch(Exception e)
 			{

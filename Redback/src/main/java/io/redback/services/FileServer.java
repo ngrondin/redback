@@ -10,6 +10,7 @@ import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.information.ServiceInformation;
 import io.firebus.information.StreamInformation;
 import io.firebus.interfaces.StreamProvider;
+import io.firebus.logging.Logger;
 import io.firebus.threads.FirebusThread;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
@@ -206,13 +207,13 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 					String objectuid = request.getString("uid");
 					acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
 				}
-				logExecution(payload, timer.mark());
+				Logger.info("rb.fileserver", new DataMap("ms", timer.mark(), "req", payload.getDataObject()));
 				return null;
 			} else {
 				throw new FunctionErrorException("All stream requests need to be authenticated", 401);
 			}
 		} catch(Exception e) {
-			throw handleException(e, "Exception in redback stream '" + serviceName + "'");
+			throw handleException("rb.fileserver", "Exception in redback stream '" + serviceName + "'", e);
 		} 
 	}
 
