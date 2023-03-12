@@ -1,16 +1,16 @@
 package io.redback.utils;
 
 public class CacheEntry<T> {
-	protected T entry;
+	protected T value;
 	protected long expiry;
 
-	public CacheEntry(T e, long exp) {
-		entry = e;
+	public CacheEntry(T v, long exp) {
+		value = v;
 		expiry = exp;
 	}
 	
 	public T get() {
-		return entry;
+		return value;
 	}
 	
 	public boolean hasExpired() {

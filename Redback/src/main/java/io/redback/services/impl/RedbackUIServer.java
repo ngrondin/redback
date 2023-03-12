@@ -26,6 +26,7 @@ import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.services.UIServer;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.ConfigCache;
 import io.redback.utils.HTML;
 import io.redback.utils.KeyEscaper;
 import io.redback.utils.StringUtils;
@@ -37,7 +38,8 @@ public class RedbackUIServer extends UIServer
 	protected String devpath;
 	protected ScriptFactory scriptFactory;
 	protected HashMap<String, Function> jspScripts;
-	protected HashMap<String, DataMap> viewConfigs;
+	//protected HashMap<String, DataMap> viewConfigs;
+	protected ConfigCache<DataMap> viewConfigs;
 	protected ConfigurationClient configClient;
 	protected DataClient dataClient;
 	protected CollectionConfig viewCollection;
@@ -49,12 +51,17 @@ public class RedbackUIServer extends UIServer
 		devpath = config.getString("devpath");
 		scriptFactory = new ScriptFactory(); 
 		jspScripts = new HashMap<String, Function>();
-		viewConfigs = new HashMap<String, DataMap>();
+		//viewConfigs = new HashMap<String, DataMap>();
 		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
 		if(config.containsKey("dataservice")) {
 			dataClient = new DataClient(firebus, config.getString("dataservice"));
 		}
 		viewCollection = new CollectionConfig(config.getObject("collection"), "rbui_view");
+		viewConfigs = new ConfigCache<DataMap>(configClient, dataClient, "rbui", "view", viewCollection, new ConfigCache.ConfigFactory<DataMap> () {
+			public DataMap createConfig(DataMap map) throws Exception {
+				return KeyEscaper.escape(map);
+			}
+		});
 	}
 	
 	public void configure() {
@@ -334,9 +341,7 @@ public class RedbackUIServer extends UIServer
 			}
 			catch(Exception e)
 			{
-				String error = "Error when trying to retreive " + name + ".jsp";
-				//logger.severe(error + " : " + e.getMessage());
-				throw new RedbackException(error, e);
+				throw new RedbackException("Error when trying to retreive " + name + ".jsp", e);
 			}					
 		}
 		return script;
@@ -345,7 +350,8 @@ public class RedbackUIServer extends UIServer
 	
 	protected DataMap getViewConfig(Session session, String domain, String viewName) throws RedbackException
 	{
-		String viewKey = (domain != null ? domain : "root") + "." + viewName;
+		DataMap viewConfig = viewConfigs.get(session, viewName, domain);
+		/*String viewKey = (domain != null ? domain : "root") + "." + viewName;
 		DataMap viewConfig = viewConfigs.get(viewKey);
 		if(viewConfig == null)
 		{
@@ -365,7 +371,7 @@ public class RedbackUIServer extends UIServer
 				viewConfig = configClient.getConfig(session, "rbui", "view", viewName);
 				viewConfigs.put(viewKey, viewConfig);				
 			}
-		}
+		}*/
 		return viewConfig;
 	}
 

@@ -7,28 +7,30 @@ import java.util.Map;
 public class Cache<T> {
 	
 	protected Map<String, CacheEntry<T>> cachedEntries;
-	protected long lastClean = 0;
+	protected long lastClean;
 	protected long timeout;
 	
 	public Cache(long to) {
 		cachedEntries = new HashMap<String, CacheEntry<T>>();
 		timeout = to;
-		if(timeout == 0) 
+		lastClean = System.currentTimeMillis();
+		if(timeout <= 0) 
 			timeout = 120000;
 	}
 	
-	public T get(String key) {
-		if(System.currentTimeMillis() > lastClean + (5 * timeout)) {
-			clean();
-			lastClean = System.currentTimeMillis();			
-		}
-		
+	public CacheEntry<T> getEntry(String key) {
+		clean();
 		CacheEntry<T> ce = cachedEntries.get(key);
 		if(ce != null && ce.hasExpired()) {
 			cachedEntries.remove(key);
 			ce = null;
 		}
-		
+		return ce;
+	}
+
+	
+	public T get(String key) {
+		CacheEntry<T> ce = getEntry(key);
 		if(ce != null)
 			return ce.get();
 		else
@@ -40,14 +42,25 @@ public class Cache<T> {
 	}
 	
 	protected void clean() {
-		Iterator<String> it = cachedEntries.keySet().iterator();
-		if(it.hasNext()) {
-			String key = it.next();
-			CacheEntry<T> ce = cachedEntries.get(key);
-			if(ce.hasExpired())
-				cachedEntries.remove(key);
-		}			
+		if(System.currentTimeMillis() > lastClean + (5 * timeout)) {
+			Iterator<String> it = cachedEntries.keySet().iterator();
+			if(it.hasNext()) {
+				String key = it.next();
+				CacheEntry<T> ce = cachedEntries.get(key);
+				if(ce.hasExpired())
+					cachedEntries.remove(key);
+			}				
+			lastClean = System.currentTimeMillis();			
+		}
+		
 	}
 	
+	public void clear(String key) {
+		cachedEntries.remove(key);
+	}
+	
+	public void clear() {
+		cachedEntries.clear();
+	}
 
 }

@@ -30,7 +30,6 @@ import io.redback.utils.Watchdog;
 
 public class RedbackServer 
 {
-	//private Logger logger = Logger.getLogger("io.redback.RedbackServer");
 	protected Map<String, BusFunction> services;
 	protected static ArrayList<Logger> loggers;
 	protected Firebus firebus;
@@ -40,40 +39,11 @@ public class RedbackServer
 		long start = System.currentTimeMillis();
 		DataMap loggingConfig = config.getObject("logging");
 		if(loggingConfig != null) {
-			Logger.setLevel(Logger.getLevelFromString(loggingConfig.getString("level")));
+			if(loggingConfig.containsKey("level"))
+				Logger.setLevel(Logger.getLevelFromString(loggingConfig.getString("level")));
+			if(loggingConfig.containsKey("format"))
+				Logger.setFormatter(loggingConfig.getString("format"));
 		}
-		
-		
-		/*List<Logger> loggers = new ArrayList<Logger>();
-		DataList loggerConfigs = config.getList("loggers");
-		if(loggerConfigs != null) {
-			for(int i = 0; i < loggerConfigs.size(); i++)
-			{
-				try
-				{
-					DataMap loggerConfig = loggerConfigs.getObject(i);
-					Logger logger = Logger.getLogger(loggerConfig.getString("name"));
-					Constructor<?> formatterConsuctor = Class.forName(loggerConfig.getString("formatter")).getDeclaredConstructor();
-					Formatter formatter = (Formatter)formatterConsuctor.newInstance();
-					Handler handler = null;
-					if(loggerConfig.containsKey("filename")) 
-						handler = new FileHandler(loggerConfig.getString("filename"));
-					else 
-						handler = new FirebusConsoleHandler();
-					
-					handler.setFormatter(formatter);
-					handler.setLevel(Level.parse(loggerConfig.getString("level")));
-					logger.addHandler(handler);
-					logger.setUseParentHandlers(false);
-					logger.setLevel(Level.parse(loggerConfig.getString("level")));
-					loggers.add(logger);
-				}
-				catch(Exception e)
-				{
-					logger.severe("General error when configuring loggers : " + e.getMessage());
-				}
-			}
-		}*/
 		
 		firebus = new Firebus(config.getString("network"), config.getString("password"));
 		if(config.containsKey("threads"))
@@ -317,8 +287,6 @@ public class RedbackServer
 			}
 			
 			if(configString != null) {
-					//Logger.getLogger("").removeHandler(Logger.getLogger("").getHandlers()[0]);
-	
 					int pos1 = -1;
 					while((pos1 = configString.indexOf("{{")) != -1) {
 						int pos2 = configString.indexOf("}}", pos1);

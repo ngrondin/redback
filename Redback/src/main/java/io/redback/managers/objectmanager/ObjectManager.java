@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -50,6 +49,7 @@ import io.redback.security.js.SessionRightsJSFunction;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.Cache;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.ConfigCache;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.LoggerJSFunction;
@@ -76,13 +76,13 @@ public class ObjectManager
 	protected String integrationServiceName;
 	protected String objectUpdateChannel;
 	protected DataMap globalVariables;
-	protected HashMap<String, ObjectConfig> objectConfigs;
-	protected Map<String, Map<String, ObjectConfig>> domainObjectConfigs;
-	protected HashMap<String, ScriptConfig> globalScripts;
+	protected ConfigCache<ObjectConfig> objectConfigs;
+	protected ConfigCache<ScriptConfig> globalScripts;
 	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters;
 	protected CollectionConfig traceCollection;
-	protected CollectionConfig configCollection;
+	protected CollectionConfig objectCollection;
+	protected CollectionConfig scriptCollection;
 	protected HashMap<Long, List<RedbackObject>> transactions;
 	protected AccessManagementClient accessManagementClient;
 	protected DataClient dataClient;
@@ -121,7 +121,8 @@ public class ObjectManager
 			objectUpdateChannel = config.getString("objectupdatechannel");
 			globalVariables = config.getObject("globalvariables");
 			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
-			configCollection = new CollectionConfig(config.containsKey("configcollection") ? config.getString("configcollection") : "rbo_object");
+			objectCollection = config.containsKey("objectcollection") ? new CollectionConfig(config.getObject("objectcollection")) : null;
+			scriptCollection = config.containsKey("scriptcollection") ? new CollectionConfig(config.getObject("scriptcollection")) : null;
 			useMultiDBTransactions = config.containsKey("multidbtransactions") ? config.getBoolean("multidbtransactions") : false;
 			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 			dataClient = new DataClient(firebus, dataServiceName);
@@ -133,9 +134,15 @@ public class ObjectManager
 			notificationClient = new NotificationClient(firebus, notificationServiceName);
 			domainClient = new DomainClient(firebus, domainServiceName);
 			integrationClient = new IntegrationClient(firebus, integrationServiceName);
-			objectConfigs = new HashMap<String, ObjectConfig>();
-			domainObjectConfigs = new HashMap<String, Map<String, ObjectConfig>>();
-			globalScripts = new HashMap<String, ScriptConfig>();
+			ObjectManager om = this;
+			objectConfigs = new ConfigCache<ObjectConfig>(configClient, dataClient, "rbo", "object", objectCollection, new ConfigCache.ConfigFactory<ObjectConfig>() {
+				public ObjectConfig createConfig(DataMap map) throws Exception {
+					return new ObjectConfig(om, map);
+				}});
+			globalScripts = new ConfigCache<ScriptConfig>(configClient, dataClient, "rbo", "script", scriptCollection, new ConfigCache.ConfigFactory<ScriptConfig>() {
+				public ScriptConfig createConfig(DataMap map) throws Exception {
+					return new ScriptConfig(scriptFactory, map);
+				}});
 			readRightsFilters = new HashMap<String, ExpressionMap>();
 			transactions = new HashMap<Long, List<RedbackObject>>();
 			searchCache = new Cache<DataMap>(5000);	
@@ -199,24 +206,6 @@ public class ObjectManager
 	}
 
 	
-	public void refreshAllConfigs()
-	{	
-		includeLoaded = false;
-		objectConfigs.clear();
-		globalScripts.clear();
-		readRightsFilters.clear();
-		if(loadAllOnInit) {
-			Session session = new Session();
-			try {
-				loadAllIncludeScripts(session);
-				loadAllGlobalScripts(session);
-				loadAllObjectConfigs(session);
-			} catch(Exception e) {
-				Logger.severe("rb.object.refresh", "Error refreshing configs", e);
-			}
-		}
-	}
-	
 	public ScriptContext createScriptContext(Session session) throws RedbackException
 	{
 		ScriptContext context = getScriptFactory().createScriptContext();
@@ -240,6 +229,29 @@ public class ObjectManager
 		return context;
 	}
 	
+	public void refreshAllConfigs()
+	{	
+		includeLoaded = false;
+		objectConfigs.clear();
+		globalScripts.clear();
+		readRightsFilters.clear();
+		try {
+			loadAllIncludeScripts(new Session());
+		} catch(Exception e) {
+			Logger.severe("rb.object.loadinclude", e);
+		}
+		/*if(loadAllOnInit) {
+			Session session = new Session();
+			try {
+				loadAllIncludeScripts(session);
+				loadAllGlobalScripts(session);
+				loadAllObjectConfigs(session);
+			} catch(Exception e) {
+				Logger.severe("rb.object.refresh", "Error refreshing configs", e);
+			}
+		}*/
+	}
+
 	protected synchronized void loadAllIncludeScripts(Session session) throws RedbackException
 	{
 		if(includeLoaded == false) {
@@ -257,8 +269,9 @@ public class ObjectManager
 			includeLoaded = true;
 		}
 	}
+
 	
-	protected void loadAllGlobalScripts(Session session)  throws RedbackException
+	/*protected void loadAllGlobalScripts(Session session)  throws RedbackException
 	{
 		
 		DataMap result = configClient.listConfigs(session, "rbo", "script");
@@ -269,9 +282,9 @@ public class ObjectManager
 			ScriptConfig scriptConfig = new ScriptConfig(scriptFactory, cfg);
 			globalScripts.put(cfg.getString("name"), scriptConfig);
 		}		
-	}
+	}*/
 	
-	protected void loadAllObjectConfigs(Session session)  throws RedbackException
+	/*protected void loadAllObjectConfigs(Session session)  throws RedbackException
 	{
 		DataMap result = configClient.listConfigs(session, "rbo", "object");
 		DataList resultList = result.getList("result");
@@ -281,9 +294,9 @@ public class ObjectManager
 			ObjectConfig objectConfig = new ObjectConfig(this, cfg);
 			objectConfigs.put(cfg.getString("name"), objectConfig);
 		}		
-	}
+	}*/
 
-	protected ScriptConfig getGlobalScript(Session session, String name) throws RedbackException
+	/*protected ScriptConfig getGlobalScript(Session session, String name) throws RedbackException
 	{
 		ScriptConfig scriptConfig = globalScripts.get(name);
 		if(scriptConfig == null)
@@ -294,9 +307,9 @@ public class ObjectManager
 			globalScripts.put(name, scriptConfig);
 		}
 		return scriptConfig;
-	}
+	}*/
 
-	protected ObjectConfig getObjectConfig(Session session, String name) throws RedbackException
+	/*protected ObjectConfig getObjectConfig(Session session, String name) throws RedbackException
 	{
 		ObjectConfig objectConfig = null;
 		if(!includeLoaded)
@@ -339,7 +352,7 @@ public class ObjectManager
 			}
 		} 
 		return objectConfig;
-	}
+	}*/
 	
 	protected void addRelatedBulk(Session session, List<RedbackElement> elements) throws RedbackException, ScriptException
 	{
@@ -390,7 +403,8 @@ public class ObjectManager
 								if(relatedObject == null) // Because of a broken link in the DB
 								{
 									//logger.info("Broken data link for object '" + objectConfig.getName() + (element instanceof RedbackObject ? ":" + ((RedbackObject)element).getUID().getString() : "") + "." + attributeName);
-									ObjectConfig zombieObjectConfig = getObjectConfig(session, relatedObjectConfig.getObjectName());
+									//ObjectConfig zombieObjectConfig = getObjectConfig(session, relatedObjectConfig.getObjectName());
+									ObjectConfig zombieObjectConfig = objectConfigs.get(session, relatedObjectConfig.getObjectName());
 									String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
 									relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));
 								}
@@ -410,7 +424,7 @@ public class ObjectManager
 			RedbackObject object = getFromCurrentTransaction(objectName, id);
 			if(object == null)
 			{
-				ObjectConfig objectConfig = getObjectConfig(session, objectName);
+				ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 				try
 				{
 					DataMap dbFilter = new DataMap("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
@@ -446,7 +460,7 @@ public class ObjectManager
 		//Timer t = new Timer("test", session.getId(), "list");
 		if(session.getUserProfile().canRead("rb.objects." + objectName))
 		{
-			ObjectConfig objectConfig = getObjectConfig(session, objectName);
+			ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 			if(objectConfig != null)
 			{
 				try
@@ -567,7 +581,7 @@ public class ObjectManager
 	
 	public RedbackObject createObject(Session session, String objectName, String uid, String domain, DataMap initialData) throws RedbackException
 	{
-		ObjectConfig objectConfig = getObjectConfig(session, objectName);
+		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
 		putInCurrentTransaction(object);
 		if(initialData != null)
@@ -610,7 +624,7 @@ public class ObjectManager
 	
 	public void executeFunction(Session session, String function, DataMap param) throws RedbackException
 	{
-		ScriptConfig scriptCfg = getGlobalScript(session, function);
+		ScriptConfig scriptCfg = globalScripts.get(session, function);
 		if(scriptCfg != null)
 		{
 			if(session.getUserProfile().canExecute("rb.scripts." + function)) {
@@ -661,7 +675,7 @@ public class ObjectManager
 		if(session.getUserProfile().canRead("rb.objects." + objectName))
 		{
 			List<RedbackAggregate> list = new ArrayList<RedbackAggregate>();
-			ObjectConfig objectConfig = getObjectConfig(session, objectName);
+			ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 			if(objectConfig != null)
 			{
 				try
@@ -971,7 +985,7 @@ public class ObjectManager
 				{
 					DataList dbList = new DataList();
 					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-					ObjectConfig nextObjectConfig = getObjectConfig(session, roc.getObjectName());
+					ObjectConfig nextObjectConfig = objectConfigs.get(session, roc.getObjectName());
 					List<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, null, false, 0, 1000);
 					if(list.size() > 0) {
 						for(int k = 0; k < list.size(); k++)
@@ -1054,7 +1068,7 @@ public class ObjectManager
 			String regexExpr = "(?i)" + StringUtils.escapeRegex(searchText) + "";
 			filter = new DataMap();
 			DataList orList = new DataList();
-			ObjectConfig config = getObjectConfig(session, objectName);
+			ObjectConfig config = objectConfigs.get(session, objectName);
 			Iterator<String> it = config.getAttributeNames().iterator();
 			while(it.hasNext())
 			{
@@ -1071,7 +1085,7 @@ public class ObjectManager
 					else
 					{
 						String relatedObjectName = roc.getObjectName();
-						ObjectConfig relatedConfig = getObjectConfig(session, relatedObjectName);
+						ObjectConfig relatedConfig = objectConfigs.get(session, relatedObjectName);
 						if(relatedConfig != null)
 						{
 							DataList relatedOrList = new DataList();
@@ -1129,7 +1143,7 @@ public class ObjectManager
 			}
 			catch(Exception e) 
 			{
-				Logger.severe("rb.object.signal", "Cannot send out signal", e);
+				Logger.severe("rb.object.signal.error", e);
 			}
 		}		
 	}

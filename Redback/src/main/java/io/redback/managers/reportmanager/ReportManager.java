@@ -21,6 +21,7 @@ import io.redback.managers.reportmanager.excel.ExcelReport;
 import io.redback.managers.reportmanager.pdf.PDFReport;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.ConfigCache;
 import io.redback.utils.RedbackFileMetaData;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
 
@@ -37,8 +38,7 @@ public class ReportManager implements Consumer {
 	protected FileClient fileClient;
 	protected CollectionConfig collection;
 	protected boolean includeLoaded;
-	protected Map<String, ReportConfig> configs;
-	protected Map<String, Map<String, ReportConfig>> domainConfigs;
+	protected ConfigCache<ReportConfig> configs;
 	protected Map<Integer, List<ReportConfig>> listsQueried;
 
 	public ReportManager(Firebus fb, DataMap config) throws RedbackException {
@@ -55,8 +55,12 @@ public class ReportManager implements Consumer {
 			dataClient = new DataClient(firebus, dataServiceName);
 			fileClient = new FileClient(firebus, fileServiceName);
 			collection = new CollectionConfig(config.getObject("collection"));
-			configs = new HashMap<String, ReportConfig>();
-			domainConfigs = new HashMap<String, Map<String, ReportConfig>>();
+			ReportManager rm = this;
+			configs = new ConfigCache<ReportConfig>(configClient, dataClient, "rbrs", "report", collection, new ConfigCache.ConfigFactory<ReportConfig>() {
+				public ReportConfig createConfig(DataMap map) throws Exception {
+					return new ReportConfig(rm, map);
+				}
+			});
 			listsQueried = new HashMap<Integer, List<ReportConfig>>();
 			firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
 			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
@@ -68,8 +72,7 @@ public class ReportManager implements Consumer {
 	public void consume(Payload payload) {
 		try {
 			DataMap key = payload.getDataMap();
-			if(domainConfigs.get(key.getString("domain")) != null)
-				domainConfigs.get(key.getString("domain")).remove(key.getString("name"));
+			configs.clear(key.getString("name"), key.getString("domain"));
 			listsQueried.clear();
 		} catch(Exception e) {
 		}
@@ -91,42 +94,6 @@ public class ReportManager implements Consumer {
 			}
 		}
 		includeLoaded = true;
-	}
-	
-	protected ReportConfig getConfig(Session session, String domain, String name) throws RedbackException {
-		if(domain != null) {
-			List<String> userDomains = session.getUserProfile().getDomains();
-			if(userDomains.contains(domain) || userDomains.contains("*")) {
-				if(!domainConfigs.containsKey(domain)) 
-					domainConfigs.put(domain, new HashMap<String, ReportConfig>());
-				if(domainConfigs.get(domain).containsKey(name)) {
-					return domainConfigs.get(domain).get(name);
-				} else {
-					DataMap key = new DataMap();
-					key.put("domain", domain);
-					key.put("name", name);
-					DataMap res = dataClient.getData(collection.getName(), collection.convertObjectToSpecific(key), null);
-					if(res.containsKey("result") && res.getList("result").size() > 0) {
-						DataMap cfg = collection.convertObjectToCanonical(res.getList("result").getObject(0));
-						ReportConfig rc = new ReportConfig(this, cfg);
-						domainConfigs.get(domain).put(name, rc);
-						return rc;
-					} else {
-						return null;
-					}
-				} 
-			} else {
-				return null;
-			}
-		} else {
-			if(configs.containsKey(name)) {
-				return configs.get(name);
-			} else {
-				ReportConfig rc = new ReportConfig(this, configClient.getConfig(session, "rbrs", "report", name));
-				configs.put(name, rc);
-				return rc;
-			}
-		}
 	}
 	
 	protected List<ReportConfig> listConfigs(Session session, String category) throws RedbackException {
@@ -172,7 +139,7 @@ public class ReportManager implements Consumer {
 	}
 
 	public Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException {
-		ReportConfig config = getConfig(session, domain, name);
+		ReportConfig config = configs.get(session, name, domain);
 		if(!includeLoaded)
 			loadIncludeScripts(session);		
 		Report report = null;
@@ -212,7 +179,7 @@ public class ReportManager implements Consumer {
 	
 	public void clearCaches() {
 		configs.clear();
-		domainConfigs.clear();
+		configs.clear();
 		listsQueried.clear();
 	}
 	

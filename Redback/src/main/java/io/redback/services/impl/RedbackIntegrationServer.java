@@ -10,7 +10,6 @@ import io.firebus.Firebus;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
-import io.firebus.logging.Logger;
 import io.firebus.script.Expression;
 import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
@@ -22,6 +21,7 @@ import io.redback.security.Session;
 import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.services.IntegrationServer;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.ConfigCache;
 
 public class RedbackIntegrationServer extends IntegrationServer {
 	
@@ -69,7 +69,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	protected ConfigurationClient configClient;
 	protected GatewayClient gatewayClient;
 	protected CollectionConfig clientDataCollection;
-	protected Map<String, ClientConfig> clientConfigs;
+	protected ConfigCache<ClientConfig> clientConfigs;
 	protected Map<String, DataMap> cachedClientData;
 	protected String publicUrl;
 
@@ -85,7 +85,10 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		configClient = new ConfigurationClient(firebus, configServiceName);
 		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
 		clientDataCollection = new CollectionConfig(c.getObject("clientdatacollection"), "rbin_clientdata");
-		clientConfigs = new HashMap<String, ClientConfig>();
+		clientConfigs = new ConfigCache<ClientConfig>(configClient, null, "rbin", "client", null, new ConfigCache.ConfigFactory<ClientConfig>() {
+			public ClientConfig createConfig(DataMap map) throws Exception {
+				return new ClientConfig(map);
+			}});
 		cachedClientData = new HashMap<String, DataMap>();
 		publicUrl = config.getString("publicurl");
 	}
@@ -94,44 +97,12 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	public void configure() {
 		clientConfigs.clear();
 		cachedClientData.clear();
-		if(loadAllOnInit) {
-			Session session = new Session();
-			try {
-				loadAllClientConfigs(session);
-			} catch(Exception e) {
-				Logger.severe("rb.integreation.config", "Error loading client config", e);
-			}
-		}
 	}
 	
 	protected String getRedirectUri(String client) {
 		return publicUrl + "/" + client;
 	}
 	
-	protected void loadAllClientConfigs(Session session) throws RedbackException {
-		DataMap result = configClient.listConfigs(session, "rbin", "client");
-		DataList resultList = result.getList("result");
-		for(int i = 0; i < resultList.size(); i++)
-		{
-			DataMap cfg = resultList.getObject(i);
-			ClientConfig config = new ClientConfig(cfg);
-			clientConfigs.put(cfg.getString("name"), config);
-		}			
-	}
-	
-	protected ClientConfig getClientConfig(Session session, String client) throws RedbackException {
-		ClientConfig config = clientConfigs.get(client);
-		if(config == null) {
-			DataMap configData = configClient.getConfig(session, "rbin", "client", client);
-			if(configData != null) {
-				config = new ClientConfig(configData);
-				clientConfigs.put(client, config);
-			} else {
-				throw new RedbackException("Cannot find integration client " + client);
-			}
-		}
-		return config;
-	}
 	
 	protected DataMap getClientData(Session session, ClientConfig config, String domain) throws RedbackException {
 		String cacheKey = config.name + domain;
@@ -217,14 +188,14 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	}
 
 	protected DataMap get(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException {
-		ClientConfig config = getClientConfig(session, client);
+		ClientConfig config = clientConfigs.get(session, client);
 		Map<String, Object> context = createScriptContext(session, config, domain, "get", objectName, uid, null, null, options);
 		return gatewayRequest(config, context);
 	}
 
 	protected List<DataMap> list(Session session, String client, String domain, String objectName, DataMap filter, DataMap options, int page, int pageSize) throws RedbackException {
 		List<DataMap> respList = new ArrayList<DataMap>();
-		ClientConfig config = getClientConfig(session, client);
+		ClientConfig config = clientConfigs.get(session, client);
 		Map<String, Object> context = createScriptContext(session, config, domain, "list", objectName, null, filter, null, options);
 		DataMap resp = gatewayRequest(config, context);
 		DataList list = resp.getList("list");
@@ -237,31 +208,31 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	}
 
 	protected DataMap update(Session session, String client, String domain, String objectName, String uid, DataEntity data, DataMap options) throws RedbackException {
-		ClientConfig config = getClientConfig(session, client);
+		ClientConfig config = clientConfigs.get(session, client);
 		Map<String, Object> context = createScriptContext(session, config, domain, "update", objectName, uid, null, data, options);
 		return gatewayRequest(config, context);
 	}
 
 	protected DataMap create(Session session, String client, String domain, String objectName, DataEntity data, DataMap options) throws RedbackException {
-		ClientConfig config = getClientConfig(session, client);
+		ClientConfig config = clientConfigs.get(session, client);
 		Map<String, Object> context = createScriptContext(session, config, domain, "create", objectName, null, null, data, options);
 		return gatewayRequest(config, context);
 	}
 
 	protected void delete(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException {
-		ClientConfig config = getClientConfig(session, client);
+		ClientConfig config = clientConfigs.get(session, client);
 		Map<String, Object> context = createScriptContext(session, config, domain, "delete", objectName, uid, null, null, options);
 		gatewayRequest(config, context);
 	}
 
 	protected String getLoginUrl(Session session, String client, String domain, String state) throws RedbackException {
-		ClientConfig config = getClientConfig(session, client);
+		ClientConfig config = clientConfigs.get(session, client);
 		String url = config.loginUrl + "?response_type=code&redirect_uri=" + getRedirectUri(client) + "&client_id=" + config.clientId +"&scope=" + config.scope + (config.extraLoginParams != null ? "&" + config.extraLoginParams : "") + (state != null ? "&state=" + state : "");
 		return url; 
 	}
 
 	protected void exchangeAuthCode(Session session, String client, String domain, String code) throws RedbackException {
-		ClientConfig config = getClientConfig(session, client);
+		ClientConfig config = clientConfigs.get(session, client);
 		DataMap form = new DataMap();
 		form.put("client_id", config.clientId);
 		form.put("client_secret", config.clientSecrect);
