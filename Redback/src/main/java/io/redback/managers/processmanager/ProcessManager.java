@@ -16,7 +16,7 @@ import io.firebus.logging.Logger;
 import io.firebus.script.ScriptContext;
 import io.firebus.script.ScriptFactory;
 import io.redback.client.AccessManagementClient;
-import io.redback.client.ConfigurationClient;
+import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.client.ObjectClient;
 import io.redback.exceptions.RedbackException;
@@ -42,7 +42,7 @@ public class ProcessManager
 	protected String processNotificationChannel;
 	protected ObjectClient objectClient;
 	protected DataClient dataClient;
-	protected ConfigurationClient configClient;
+	protected ConfigClient configClient;
 	protected AccessManagementClient accessManagementClient;
 	protected CollectionConfig piCollectionConfig;
 	protected CollectionConfig gmCollectionConfig;
@@ -60,7 +60,7 @@ public class ProcessManager
 			loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
 			preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
 			configServiceName = config.getString("configservice");
-			configClient = new ConfigurationClient(firebus, configServiceName);
+			configClient = new ConfigClient(firebus, configServiceName);
 			dataServiceName = config.getString("dataservice");
 			dataClient = new DataClient(firebus, dataServiceName);
 			accessManagerServiceName = config.getString("accessmanagementservice");

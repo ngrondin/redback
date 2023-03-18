@@ -11,7 +11,7 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.interfaces.Consumer;
 import io.firebus.script.ScriptFactory;
-import io.redback.client.ConfigurationClient;
+import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.ObjectClient;
@@ -20,7 +20,6 @@ import io.redback.managers.reportmanager.csv.CSVReport;
 import io.redback.managers.reportmanager.excel.ExcelReport;
 import io.redback.managers.reportmanager.pdf.PDFReport;
 import io.redback.security.Session;
-import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.RedbackFileMetaData;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
@@ -32,11 +31,10 @@ public class ReportManager implements Consumer {
 	protected String objectServiceName;
 	protected String dataServiceName;
 	protected String fileServiceName;
-	protected ConfigurationClient configClient;
+	protected ConfigClient configClient;
 	protected ObjectClient objectClient;
 	protected DataClient dataClient;
 	protected FileClient fileClient;
-	protected CollectionConfig collection;
 	protected boolean includeLoaded;
 	protected ConfigCache<ReportConfig> configs;
 	protected Map<Integer, List<ReportConfig>> listsQueried;
@@ -50,13 +48,12 @@ public class ReportManager implements Consumer {
 			objectServiceName = config.getString("objectservice");
 			dataServiceName = config.getString("dataservice");
 			fileServiceName = config.getString("fileservice");
-			configClient = new ConfigurationClient(firebus, configServiceName);
+			configClient = new ConfigClient(firebus, configServiceName);
 			objectClient = new ObjectClient(firebus, objectServiceName);
 			dataClient = new DataClient(firebus, dataServiceName);
 			fileClient = new FileClient(firebus, fileServiceName);
-			collection = new CollectionConfig(config.getObject("collection"));
 			ReportManager rm = this;
-			configs = new ConfigCache<ReportConfig>(configClient, dataClient, "rbrs", "report", collection, new ConfigCache.ConfigFactory<ReportConfig>() {
+			configs = new ConfigCache<ReportConfig>(configClient, "rbrs", "report", new ConfigCache.ConfigFactory<ReportConfig>() {
 				public ReportConfig createConfig(DataMap map) throws Exception {
 					return new ReportConfig(rm, map);
 				}
@@ -97,26 +94,28 @@ public class ReportManager implements Consumer {
 	}
 	
 	protected List<ReportConfig> listConfigs(Session session, String category) throws RedbackException {
-		DataMap filter = new DataMap();
-		filter.put("domain", session.getUserProfile().getDBFilterDomainClause());
+		DataMap filter = new DataMap("category", category);
 		filter.put("category", category);
 		int h = filter.toString().hashCode();
 		if(!listsQueried.containsKey(h)) {
 			List<ReportConfig> list = new ArrayList<ReportConfig>();
-			DataMap res = dataClient.getData(collection.getName(), collection.convertObjectToSpecific(filter), null);
-			if(res.containsKey("result")) {
-				DataList resList = res.getList("result");
-				for(int i = 0; i < resList.size(); i++) {
-					DataMap cfg = collection.convertObjectToCanonical(resList.getObject(i));
-					list.add(new ReportConfig(this, cfg));
+			for(String domain : session.getUserProfile().getDomains()) {
+				if(!domain.equals("*")) {
+					DataMap res = configClient.listDomainConfigs(session, "rbrs", "report", domain, filter);
+					if(res.containsKey("result")) {
+						DataList resList = res.getList("result");
+						for(int i = 0; i < resList.size(); i++) {
+							list.add(new ReportConfig(this, resList.getObject(i)));
+						}
+					} 
 				}
 			} 
-			res = configClient.listConfigs(session, "rbrs", "report", new DataMap("category", category));
+			
+			DataMap res = configClient.listConfigs(session, "rbrs", "report", filter);
 			if(res.containsKey("result")) {
 				DataList resList = res.getList("result");
 				for(int i = 0; i < resList.size(); i++) {
-					DataMap cfg = collection.convertObjectToCanonical(resList.getObject(i));
-					list.add(new ReportConfig(this, cfg));
+					list.add(new ReportConfig(this, resList.getObject(i)));
 				}
 			} 
 			listsQueried.put(h, list);

@@ -13,7 +13,7 @@ import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
 import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
-import io.redback.client.ConfigurationClient;
+import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.client.GatewayClient;
 import io.redback.exceptions.RedbackException;
@@ -66,7 +66,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	protected String dataServiceName;
 	protected String gatewayServiceName;
 	protected DataClient dataClient;
-	protected ConfigurationClient configClient;
+	protected ConfigClient configClient;
 	protected GatewayClient gatewayClient;
 	protected CollectionConfig clientDataCollection;
 	protected ConfigCache<ClientConfig> clientConfigs;
@@ -82,10 +82,10 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		dataServiceName = config.getString("dataservice");
 		gatewayServiceName = config.getString("gatewayservice");
 		dataClient = new DataClient(firebus, dataServiceName);
-		configClient = new ConfigurationClient(firebus, configServiceName);
+		configClient = new ConfigClient(firebus, configServiceName);
 		gatewayClient = new GatewayClient(firebus, gatewayServiceName);
 		clientDataCollection = new CollectionConfig(c.getObject("clientdatacollection"), "rbin_clientdata");
-		clientConfigs = new ConfigCache<ClientConfig>(configClient, null, "rbin", "client", null, new ConfigCache.ConfigFactory<ClientConfig>() {
+		clientConfigs = new ConfigCache<ClientConfig>(configClient, "rbin", "client", new ConfigCache.ConfigFactory<ClientConfig>() {
 			public ClientConfig createConfig(DataMap map) throws Exception {
 				return new ClientConfig(map);
 			}});

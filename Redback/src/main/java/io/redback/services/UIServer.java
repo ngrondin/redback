@@ -82,12 +82,12 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 			{
 				String[] parts = get.split("/");
 				String category = null;
-				String specifier = null;
+				String version = null;
 				String name = null;			
 				if(parts.length >= 3)
 				{
 					category = parts[0];
-					specifier = parts[1];
+					version = parts[1];
 					name = parts[2];
 				}
 				if(parts.length == 2)
@@ -105,13 +105,13 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				if(category.equals("resource"))
 				{
 					Logger.finer("rb.ui.getresource", new DataMap("name", name));
-					response.setData(getResource(session, name, specifier));
+					response.setData(getResource(session, name, version));
 					response.metadata.put("mime", getResourceMimeType(name));
 				}
 				else if(category.equals("app"))
 				{
 					Logger.finer("rb.ui.getapp", new DataMap("name", name));
-					response.setData(getAppClient(session, name, specifier).toString());
+					response.setData(getAppClient(session, name, version).toString());
 					response.metadata.put("mime", "text/html");
 				}
 				else if(category.equals("config"))
@@ -128,8 +128,8 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				}
 				else if(category.equals("view"))
 				{
-					Logger.finer("rb.ui.getview", new DataMap("name", (specifier != null ? specifier + ":" : "") + name));
-					response.setData(getView(session, specifier, name).toString());
+					Logger.finer("rb.ui.getview", new DataMap("name", name));
+					response.setData(getView(session, name).toString());
 					response.metadata.put("mime", "application/json");						
 				}
 			}
@@ -167,7 +167,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 
 	protected abstract DataMap getMenu(Session session, String version) throws RedbackException;
 	
-	protected abstract DataMap getView(Session session, String domain, String viewName);
+	protected abstract DataMap getView(Session session, String viewName);
 
 	protected abstract byte[] getResource(Session session, String name, String version) throws RedbackException;
 

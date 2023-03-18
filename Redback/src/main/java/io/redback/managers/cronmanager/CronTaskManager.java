@@ -17,7 +17,7 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
 import io.redback.client.AccessManagementClient;
-import io.redback.client.ConfigurationClient;
+import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
@@ -41,7 +41,7 @@ public class CronTaskManager extends Thread {
 	protected UserProfile cronUserProfile;
 	protected CollectionConfig collectionConfig;
 	protected DataClient dataClient;
-	protected ConfigurationClient configClient;
+	protected ConfigClient configClient;
 	protected AccessManagementClient accessManagementClient;
 	protected Map<String, CronTaskConfig> taskConfigs;
 	protected boolean quit = false;
@@ -59,7 +59,7 @@ public class CronTaskManager extends Thread {
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
 		dataClient = new DataClient(firebus, dataServiceName);
-		configClient = new ConfigurationClient(firebus, configServiceName);
+		configClient = new ConfigClient(firebus, configServiceName);
 		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 		sysUserManager = new SysUserManager(accessManagementClient, config);
 		collectionConfig = new CollectionConfig(config.getObject("collection"), "rbcr_task");

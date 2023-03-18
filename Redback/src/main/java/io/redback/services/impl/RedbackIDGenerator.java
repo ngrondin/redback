@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import io.firebus.Firebus;
 import io.firebus.data.DataMap;
-import io.redback.client.ConfigurationClient;
+import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
@@ -14,7 +14,7 @@ public class RedbackIDGenerator extends IDGenerator
 {
 	private DataMap configCache;
 	protected DataClient dataClient;
-	protected ConfigurationClient configClient;
+	protected ConfigClient configClient;
 
 
 	public RedbackIDGenerator(String n, DataMap c, Firebus f) 
@@ -22,7 +22,7 @@ public class RedbackIDGenerator extends IDGenerator
 		super(n, c, f);
 		configCache = new DataMap();
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
-		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
+		configClient = new ConfigClient(firebus, config.getString("configservice"));
 
 	}
 	

@@ -11,8 +11,10 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -22,19 +24,27 @@ import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
+import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidConfigException;
 import io.redback.services.ConfigServer;
+import io.redback.utils.CollectionConfig;
 import io.redback.utils.FileWatcher;
 import io.redback.utils.FileWatcher.FileWatcherListener;
 
 public class RedbackConfigServer extends ConfigServer implements FileWatcherListener
 {
+	private DataClient dataClient;
 	private String devpath;
 	private String classpath;
+	private Map<String, Map<String, CollectionConfig>> domainConfigCollections;
 	
 	public RedbackConfigServer(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
+		if(config.containsKey("dataservice")) {
+			dataClient = new DataClient(firebus, config.getString("dataservice"));
+		}
 		if(config.containsKey("devpath") && config.getString("devpath").length() > 0) 
 		{
 			devpath = config.getString("devpath");
@@ -47,7 +57,18 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 				Logger.severe("rb.config.init", "Exception trying to watch the filesystem", e);
 			}
 		}
-		classpath = "io/redback/config";		
+		classpath = "io/redback/config";	
+		domainConfigCollections = new HashMap<String, Map<String, CollectionConfig>>();
+		if(config.containsKey("domainconfigcollections")) {
+			for(String service : config.getObject("domainconfigcollections").keySet()) {
+				domainConfigCollections.put(service, new HashMap<String, CollectionConfig>());
+				DataMap serviceMap = config.getObject("domainconfigcollections").getObject(service);
+				for(String category : serviceMap.keySet()) {
+					DataMap configMap = serviceMap.getObject(category);
+					domainConfigCollections.get(service).put(category, new CollectionConfig(configMap));
+				}
+			}
+		}
 	}
 
 	
@@ -61,9 +82,8 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 				File file = new File(devpath + File.separator + service + File.separator + category + File.separator + name + ".json");
 				if(file.exists())
 					reader = new FileReader(file);
-			}
-			
-			if(reader == null)
+			} 
+			else 
 			{
 	    		InputStream is = getClass().getResourceAsStream("/" + classpath + "/" + service + "/" + category + "/" + name + ".json");
 	    		if(is != null)
@@ -82,14 +102,33 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 			else
 			{
 				return null;
-				//throw new RedbackException("The requested configuration '" + service + "/" + category + "/" + name + "' is not found");
-			}
+			}				
+
 		}
 		catch(IOException | DataException e)
 		{
-			throw new RedbackException("Error getting config " + service + "/" + category + "/" + name, e);
+			throw new RedbackInvalidConfigException("Error getting config " + service + "/" + category + "/" + name, e);
 		}
 	}
+	
+	protected DataMap getDomainConfig(String service, String category, String name, String domain) throws RedbackException
+	{
+		if(dataClient != null) 
+		{
+			if(domainConfigCollections.containsKey(service) && domainConfigCollections.get(service).containsKey(category)) 
+			{
+				CollectionConfig collectionConfig = domainConfigCollections.get(service).get(category);
+				DataMap reqkey = new DataMap("domain", domain, "name", name);
+				DataMap res = dataClient.getData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(reqkey), null);
+				if(res.containsKey("result") && res.getList("result").size() > 0) 
+				{
+					return res.getList("result").getObject(0);
+				}
+			}
+		}
+		return null;
+	}
+	
 	
 	protected DataList getConfigList(String service, String category, DataMap filter) throws RedbackException
 	{
@@ -101,14 +140,11 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 			if(devpath != null)
 			{
 				root = devpath + File.separator + service + File.separator + category;
-				File file = new File(root);
-				if(file.isDirectory())
-				{
-					File[] files = file.listFiles();
-					for(int i = 0; i < files.length; i++)
-	    				if(files[i].getName().endsWith(".json"))
-	    					names.add(files[i].getName().substring(0, files[i].getName().length() - 5));
-				}
+				File rootDir = new File(root);
+				if(rootDir.isDirectory())
+					for(File file: rootDir.listFiles()) 
+						if(file.getName().endsWith(".json"))
+	    					names.add(file.getName().substring(0, file.getName().length() - 5));
 			}
 			else
 			{
@@ -117,10 +153,10 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 				if(pathUrl != null) {
 					if(pathUrl.getProtocol().equals("file"))
 					{
-						File[] files = new File(pathUrl.toURI()).listFiles();
-						for(int i = 0; i < files.length; i++)
-		    				if(files[i].getName().endsWith(".json"))
-		    					names.add(files[i].getName().substring(0, files[i].getName().length() - 5));
+						File dir = new File(pathUrl.toURI());
+						for(File file: dir.listFiles()) 
+		    				if(file.getName().endsWith(".json"))
+		    					names.add(file.getName().substring(0, file.getName().length() - 5));
 					}
 					else if(pathUrl.getProtocol().equals("jar"))
 					{
@@ -167,6 +203,25 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 		}
 	}
 
+	
+	protected DataList getDomainConfigList(String service, String category, String domain, DataMap filter) throws RedbackException
+	{
+		if(dataClient != null) 
+		{
+			if(domainConfigCollections.containsKey(service) && domainConfigCollections.get(service).containsKey(category)) 
+			{
+				CollectionConfig collectionConfig = domainConfigCollections.get(service).get(category);
+				DataMap reqFilter = new DataMap("domain", domain);
+				reqFilter.merge(filter);
+				DataMap res = dataClient.getData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(reqFilter), null);
+				if(res.containsKey("result")) 
+				{
+					return res.getList("result");
+				}
+			}
+		}
+		return null;
+	}
 
 	public void fileModified(File file, int o) 
 	{

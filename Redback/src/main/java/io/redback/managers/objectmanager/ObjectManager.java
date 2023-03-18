@@ -21,7 +21,7 @@ import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.exceptions.ScriptValueException;
 import io.redback.client.AccessManagementClient;
-import io.redback.client.ConfigurationClient;
+import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.client.DataClient.DataTransaction;
 import io.redback.client.DomainClient;
@@ -81,12 +81,10 @@ public class ObjectManager
 	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters;
 	protected CollectionConfig traceCollection;
-	protected CollectionConfig objectCollection;
-	protected CollectionConfig scriptCollection;
 	protected HashMap<Long, List<RedbackObject>> transactions;
 	protected AccessManagementClient accessManagementClient;
 	protected DataClient dataClient;
-	protected ConfigurationClient configClient;
+	protected ConfigClient configClient;
 	protected ProcessClient processClient;
 	protected GeoClient geoClient;
 	protected FileClient fileClient;
@@ -121,12 +119,10 @@ public class ObjectManager
 			objectUpdateChannel = config.getString("objectupdatechannel");
 			globalVariables = config.getObject("globalvariables");
 			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
-			objectCollection = config.containsKey("objectcollection") ? new CollectionConfig(config.getObject("objectcollection")) : null;
-			scriptCollection = config.containsKey("scriptcollection") ? new CollectionConfig(config.getObject("scriptcollection")) : null;
 			useMultiDBTransactions = config.containsKey("multidbtransactions") ? config.getBoolean("multidbtransactions") : false;
 			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 			dataClient = new DataClient(firebus, dataServiceName);
-			configClient = new ConfigurationClient(firebus, configServiceName);
+			configClient = new ConfigClient(firebus, configServiceName);
 			processClient = new ProcessClient(firebus, processServiceName);
 			geoClient = new GeoClient(firebus, geoServiceName);
 			fileClient = new FileClient(firebus, fileServiceName);
@@ -135,11 +131,11 @@ public class ObjectManager
 			domainClient = new DomainClient(firebus, domainServiceName);
 			integrationClient = new IntegrationClient(firebus, integrationServiceName);
 			ObjectManager om = this;
-			objectConfigs = new ConfigCache<ObjectConfig>(configClient, dataClient, "rbo", "object", objectCollection, new ConfigCache.ConfigFactory<ObjectConfig>() {
+			objectConfigs = new ConfigCache<ObjectConfig>(configClient, "rbo", "object", new ConfigCache.ConfigFactory<ObjectConfig>() {
 				public ObjectConfig createConfig(DataMap map) throws Exception {
 					return new ObjectConfig(om, map);
 				}});
-			globalScripts = new ConfigCache<ScriptConfig>(configClient, dataClient, "rbo", "script", scriptCollection, new ConfigCache.ConfigFactory<ScriptConfig>() {
+			globalScripts = new ConfigCache<ScriptConfig>(configClient, "rbo", "script", new ConfigCache.ConfigFactory<ScriptConfig>() {
 				public ScriptConfig createConfig(DataMap map) throws Exception {
 					return new ScriptConfig(scriptFactory, map);
 				}});

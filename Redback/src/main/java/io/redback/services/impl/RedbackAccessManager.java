@@ -16,7 +16,7 @@ import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
-import io.redback.client.ConfigurationClient;
+import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Role;
@@ -38,7 +38,7 @@ public class RedbackAccessManager extends AccessManager
 	protected String idmClientSecret;
 	protected DataList hardUsers;
 	protected DataClient dataClient;
-	protected ConfigurationClient configClient;
+	protected ConfigClient configClient;
 	protected CollectionConfig roleCollection;
 	protected CollectionConfig userCollection;
 	protected Map<String, Map<String, Role>> roles;
@@ -57,7 +57,7 @@ public class RedbackAccessManager extends AccessManager
 			if(config.containsKey("usercollection"))
 				userCollection = new CollectionConfig(config.getString("usercollection"));
 		}
-		configClient = new ConfigurationClient(firebus, config.getString("configservice"));
+		configClient = new ConfigClient(firebus, config.getString("configservice"));
 		if(config.containsKey("users")) {
 			type = "hardusers";
 			hardUsers = config.getList("users");

@@ -14,7 +14,7 @@ import io.firebus.script.ScriptFactory;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
-import io.redback.client.ConfigurationClient;
+import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.GatewayClient;
@@ -55,7 +55,7 @@ public class DomainManager implements Consumer {
 	protected String gatewayServiceName;
 	protected String geoServiceName;
 	protected String integrationServiceName;
-	protected ConfigurationClient configClient;
+	protected ConfigClient configClient;
 	protected ObjectClient objectClient;
 	protected ProcessClient processClient;
 	protected DataClient dataClient;
@@ -84,7 +84,7 @@ public class DomainManager implements Consumer {
 			gatewayServiceName = config.getString("gatewayservice");
 			geoServiceName = config.getString("geoservice");
 			integrationServiceName = config.getString("integrationservice");
-			configClient = new ConfigurationClient(firebus, configServiceName);
+			configClient = new ConfigClient(firebus, configServiceName);
 			objectClient = new ObjectClient(firebus, objectServiceName);
 			processClient = new ProcessClient(firebus, processServiceName);
 			dataClient = new DataClient(firebus, dataServiceName);
