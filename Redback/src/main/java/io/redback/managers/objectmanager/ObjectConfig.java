@@ -126,6 +126,11 @@ public class ObjectConfig
 			return false;
 	}
 	
+	public String getAccessCategory() 
+	{
+		return config.getString("accesscat");
+	}
+	
 	public boolean traceUpdates()
 	{
 		if(config.containsKey("trace"))

@@ -41,6 +41,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackResourceNotFoundException;
 import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.managers.jsmanager.ExpressionMap;
+import io.redback.managers.objectmanager.js.DomainScriptLogger;
 import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.SysUserManager;
@@ -50,6 +51,7 @@ import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.Cache;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
+import io.redback.utils.FunctionInfo;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.LoggerJSFunction;
@@ -81,6 +83,7 @@ public class ObjectManager
 	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters;
 	protected CollectionConfig traceCollection;
+	protected CollectionConfig scriptLogCollection;
 	protected HashMap<Long, List<RedbackObject>> transactions;
 	protected AccessManagementClient accessManagementClient;
 	protected DataClient dataClient;
@@ -119,6 +122,7 @@ public class ObjectManager
 			objectUpdateChannel = config.getString("objectupdatechannel");
 			globalVariables = config.getObject("globalvariables");
 			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
+			scriptLogCollection = config.containsKey("scriptlogcollection") ? new CollectionConfig(config.getObject("scriptlogcollection")) : null;
 			useMultiDBTransactions = config.containsKey("multidbtransactions") ? config.getBoolean("multidbtransactions") : false;
 			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 			dataClient = new DataClient(firebus, dataServiceName);
@@ -236,16 +240,6 @@ public class ObjectManager
 		} catch(Exception e) {
 			Logger.severe("rb.object.loadinclude", e);
 		}
-		/*if(loadAllOnInit) {
-			Session session = new Session();
-			try {
-				loadAllIncludeScripts(session);
-				loadAllGlobalScripts(session);
-				loadAllObjectConfigs(session);
-			} catch(Exception e) {
-				Logger.severe("rb.object.refresh", "Error refreshing configs", e);
-			}
-		}*/
 	}
 
 	protected synchronized void loadAllIncludeScripts(Session session) throws RedbackException
@@ -266,89 +260,6 @@ public class ObjectManager
 		}
 	}
 
-	
-	/*protected void loadAllGlobalScripts(Session session)  throws RedbackException
-	{
-		
-		DataMap result = configClient.listConfigs(session, "rbo", "script");
-		DataList resultList = result.getList("result");
-		for(int i = 0; i < resultList.size(); i++)
-		{
-			DataMap cfg = resultList.getObject(i);
-			ScriptConfig scriptConfig = new ScriptConfig(scriptFactory, cfg);
-			globalScripts.put(cfg.getString("name"), scriptConfig);
-		}		
-	}*/
-	
-	/*protected void loadAllObjectConfigs(Session session)  throws RedbackException
-	{
-		DataMap result = configClient.listConfigs(session, "rbo", "object");
-		DataList resultList = result.getList("result");
-		for(int i = 0; i < resultList.size(); i++)
-		{
-			DataMap cfg = resultList.getObject(i);
-			ObjectConfig objectConfig = new ObjectConfig(this, cfg);
-			objectConfigs.put(cfg.getString("name"), objectConfig);
-		}		
-	}*/
-
-	/*protected ScriptConfig getGlobalScript(Session session, String name) throws RedbackException
-	{
-		ScriptConfig scriptConfig = globalScripts.get(name);
-		if(scriptConfig == null)
-		{
-			if(!includeLoaded)
-				loadAllIncludeScripts(session);
-			scriptConfig = new ScriptConfig(scriptFactory, configClient.getConfig(session, "rbo", "script", name));
-			globalScripts.put(name, scriptConfig);
-		}
-		return scriptConfig;
-	}*/
-
-	/*protected ObjectConfig getObjectConfig(Session session, String name) throws RedbackException
-	{
-		ObjectConfig objectConfig = null;
-		if(!includeLoaded)
-			loadAllIncludeScripts(session);
-		
-		List<String> userDomains = session.getUserProfile().getDomains();
-		Iterator<String> it = userDomains.iterator();
-		while(it.hasNext() && objectConfig == null) {
-			String domain = it.next();
-			if(!domain.equals("*")) {
-				if(!domainObjectConfigs.containsKey(domain)) 
-					domainObjectConfigs.put(domain, new HashMap<String, ObjectConfig>());
-				if(domainObjectConfigs.get(domain).containsKey(name)) {
-					objectConfig = domainObjectConfigs.get(domain).get(name);
-				} else {
-					DataMap key = new DataMap();
-					key.put("domain", domain);
-					key.put("name", name);
-					DataMap res = dataClient.getData(configCollection.getName(), configCollection.convertObjectToSpecific(key), null);
-					if(res.containsKey("result") && res.getList("result").size() > 0) {
-						DataMap cfg = configCollection.convertObjectToCanonical(res.getList("result").getObject(0));
-						objectConfig = new ObjectConfig(this, cfg);
-					}
-					domainObjectConfigs.get(domain).put(name, objectConfig);
-				} 
-			}
-		} 
-		
-		if(objectConfig == null) {
-			if(objectConfigs.containsKey(name)) {
-				return objectConfigs.get(name);
-			} else {
-				DataMap cfg = configClient.getConfig(session, "rbo", "object", name);
-				if(cfg != null) {
-					objectConfig = new ObjectConfig(this, cfg);
-					objectConfigs.put(name, objectConfig);
-				} else {
-					throw new RedbackException("Object config '" + name + "' is null");
-				}
-			}
-		} 
-		return objectConfig;
-	}*/
 	
 	protected void addRelatedBulk(Session session, List<RedbackElement> elements) throws RedbackException, ScriptException
 	{
@@ -415,12 +326,12 @@ public class ObjectManager
 
 	public RedbackObject getObject(Session session, String objectName, String id) throws RedbackException
 	{
-		if(session.getUserProfile().canRead("rb.objects." + objectName))
+		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
+		if(session.getUserProfile().canRead("rb.objects." + objectName) || session.getUserProfile().canRead("rb.accesscat." + objectConfig.getAccessCategory()))
 		{
 			RedbackObject object = getFromCurrentTransaction(objectName, id);
 			if(object == null)
 			{
-				ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 				try
 				{
 					DataMap dbFilter = new DataMap("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
@@ -447,99 +358,88 @@ public class ObjectManager
 		else
 		{
 			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
-		}
+		}			
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
-		//Timer t = new Timer("test", session.getId(), "list");
-		if(session.getUserProfile().canRead("rb.objects." + objectName))
+		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
+		if(session.getUserProfile().canRead("rb.objects." + objectName) || session.getUserProfile().canRead("rb.accesscat." + objectConfig.getAccessCategory()))
 		{
-			ObjectConfig objectConfig = objectConfigs.get(session, objectName);
-			if(objectConfig != null)
+			try
 			{
-				try
+				DataMap objectFilter = new DataMap();
+				DataList objectFilterAndList = new DataList();
+				if(filter != null)
+					objectFilterAndList.add(filter);
+				if(searchText != null  &&  searchText.length() > 0)
+					objectFilterAndList.add(generateSearchFilter(session, objectName, searchText.trim()));
+				DataMap rightsReadFilter = generateRightsReadFilter(session, objectName);
+				if(rightsReadFilter != null)
+					objectFilterAndList.add(rightsReadFilter);
+				if(objectFilterAndList.size() == 0) 
+					objectFilter = new DataMap();
+				else if(objectFilterAndList.size() == 1)
+					objectFilter = objectFilterAndList.getObject(0);
+				else if(objectFilterAndList.size() > 1)
+					objectFilter = new DataMap("$and", objectFilterAndList);
+				List<RedbackObject> objectList = this.listFromCurrentTransaction(objectName, objectFilter);
+				DataList dbResultList = null;
+				if(objectConfig.isPersistent()) 
 				{
-					DataMap objectFilter = new DataMap();
-					DataList objectFilterAndList = new DataList();
-					if(filter != null)
-						objectFilterAndList.add(filter);
-					if(searchText != null  &&  searchText.length() > 0)
-						objectFilterAndList.add(generateSearchFilter(session, objectName, searchText.trim()));
-					DataMap rightsReadFilter = generateRightsReadFilter(session, objectName);
-					if(rightsReadFilter != null)
-						objectFilterAndList.add(rightsReadFilter);
-					if(objectFilterAndList.size() == 0) 
-						objectFilter = new DataMap();
-					else if(objectFilterAndList.size() == 1)
-						objectFilter = objectFilterAndList.getObject(0);
-					else if(objectFilterAndList.size() > 1)
-						objectFilter = new DataMap("$and", objectFilterAndList);
-					List<RedbackObject> objectList = this.listFromCurrentTransaction(objectName, objectFilter);
-					DataList dbResultList = null;
-					if(objectConfig.isPersistent()) 
-					{
-						DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
-						if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains() && !objectFilter.containsKey("domain"))
-							dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-						DataMap dbSort = generateDBSort(session, objectConfig, sort);
-						//t.mark(dbFilter.toString(0, true));
-						DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
-						dbResultList = dbResult.getList("result");
-						//t.mark("data in");
-					} else {
-						Function gs = objectConfig.getGenerationScript();
-						if(gs != null) {
-							ScriptContext context = session.getScriptContext().createChild();
-							context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
-							context.put("filter", filter);
-							context.put("sort", sort);
-							context.put("search", searchText);
-							context.put("action", "list");
-							context.put("page", page);
-							context.put("pageSize", pageSize);
-							Object o = gs.call(context);
-							if(o instanceof DataList)
-								dbResultList = (DataList)o;
-						}
+					DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
+					if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains() && !objectFilter.containsKey("domain"))
+						dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+					DataMap dbSort = generateDBSort(session, objectConfig, sort);
+					DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
+					dbResultList = dbResult.getList("result");
+				} else {
+					Function gs = objectConfig.getGenerationScript();
+					if(gs != null) {
+						ScriptContext context = session.getScriptContext().createChild();
+						context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
+						context.put("filter", filter);
+						context.put("sort", sort);
+						context.put("search", searchText);
+						context.put("action", "list");
+						context.put("page", page);
+						context.put("pageSize", pageSize);
+						Object o = gs.call(context);
+						if(o instanceof DataList)
+							dbResultList = (DataList)o;
 					}
-					
-					if(dbResultList != null) 
+				}
+				
+				if(dbResultList != null) 
+				{
+					for(int i = 0; i < dbResultList.size(); i++)
 					{
-						for(int i = 0; i < dbResultList.size(); i++)
+						DataMap dbData = dbResultList.getObject(i);
+						RedbackObject objectInTransaction = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
+						if(objectInTransaction != null && !objectList.contains(objectInTransaction) && !objectInTransaction.isDeleted()) 
 						{
-							DataMap dbData = dbResultList.getObject(i);
-							RedbackObject objectInTransaction = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
-							if(objectInTransaction != null && !objectList.contains(objectInTransaction) && !objectInTransaction.isDeleted()) 
-							{
-								Logger.warning("rb.object.list.memorymiss", new DataMap("object", objectName, "uid", objectInTransaction.getUID().stringValue, "filter", objectFilter));
-								objectList.add(objectInTransaction);
-							}
-							if(objectInTransaction == null)
-							{
-								objectInTransaction = new RedbackObject(session, this, objectConfig, dbData);
-								putInCurrentTransaction(objectInTransaction);
-								objectList.add(objectInTransaction);
-							}
+							Logger.warning("rb.object.list.memorymiss", new DataMap("object", objectName, "uid", objectInTransaction.getUID().stringValue, "filter", objectFilter));
+							objectList.add(objectInTransaction);
 						}
-						if(addRelated)
-							addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
+						if(objectInTransaction == null)
+						{
+							objectInTransaction = new RedbackObject(session, this, objectConfig, dbData);
+							putInCurrentTransaction(objectInTransaction);
+							objectList.add(objectInTransaction);
+						}
 					}
-					//t.mark("done");
-					return objectList;			
+					if(addRelated)
+						addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 				}
-				catch(Exception e)
-				{
-					throw new RedbackException("Error getting object list", e);
-				}
+				return objectList;			
 			}
-			else
+			catch(Exception e)
 			{
-				throw new RedbackResourceNotFoundException("No object config is available for '" + objectName + "'");	
+				throw new RedbackException("Error getting object list", e);
 			}
 		}
-		else 
+		else
 		{
 			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
 		}
@@ -553,24 +453,18 @@ public class ObjectManager
 	public List<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
-		if(object != null)
-			return object.getRelatedList(attributeName, filterData, searchText, sort, page, pageSize);
-		else
-			return new ArrayList<RedbackObject>();
+		return object.getRelatedList(attributeName, filterData, searchText, sort, page, pageSize);
 	}
 	
 	public RedbackObject updateObject(Session session, String objectName, String id, DataMap updateData) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
-		if(object != null)
+		boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
+		Iterator<String> it = updateData.keySet().iterator();
+		while(it.hasNext())
 		{
-			boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
-			Iterator<String> it = updateData.keySet().iterator();
-			while(it.hasNext())
-			{
-				String attributeName = it.next();
-				object.put(attributeName, new Value(updateData.get(attributeName)), !isAutomated);
-			}
+			String attributeName = it.next();
+			object.put(attributeName, new Value(updateData.get(attributeName)), !isAutomated);
 		}
 		return object;
 	}
@@ -598,7 +492,7 @@ public class ObjectManager
 			}
 			Logger.fine("rb.object.create", new DataMap("object", object.getObjectConfig().getName(), "uid", object.getUID().getString()));
 		}
-		return object;
+		return object;				
 	}
 	
 	public void deleteObject(Session session, String objectName, String uid) throws RedbackException
@@ -608,34 +502,49 @@ public class ObjectManager
 			object.delete();
 	}	
 	
-	public RedbackObject executeFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
+	public RedbackObject executeObjectFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
-		if(object != null)
-		{
-			object.execute(function);
-		}
+		object.execute(function);
 		return object;
 	}
 	
-	public void executeFunction(Session session, String function, DataMap param) throws RedbackException
+	public Object executeFunction(Session session, String function, DataMap param) throws RedbackException
 	{
+		Object ret = null;
 		ScriptConfig scriptCfg = globalScripts.get(session, function);
-		if(scriptCfg != null)
-		{
-			if(session.getUserProfile().canExecute("rb.scripts." + function)) {
+		if(session.getUserProfile().canExecute("rb.scripts." + function) || session.getUserProfile().canExecute("rb.accesscat." + scriptCfg.getAccessCategory())) {
+			DomainScriptLogger domainScriptLogger = scriptCfg.getDomain() != null ? new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info") : null;	
+			try {
 				ScriptContext context = session.getScriptContext().createChild();
-				try {
-					context.put("param", param);
-				} catch(ScriptValueException e) {
-					throw new RedbackException("Error setting script context value", e);
-				}
-				scriptCfg.execute(context);
-			} else {
-				throw new RedbackException("No rights to execute global function " + function);
+				context.put("param", param);
+				if(domainScriptLogger != null)
+					context.put("log", domainScriptLogger);
+				ret = scriptCfg.execute(context);
+				return ret;
+			} catch(Exception e) {
+				if(domainScriptLogger != null)
+					domainScriptLogger.log(StringUtils.rollUpExceptions(e));
+				throw new RedbackException("Error in script " + function, e);
+			} finally {
+				if(domainScriptLogger != null)
+					domainScriptLogger.commit();
 			}
+		} else {
+			throw new RedbackUnauthorisedException("No rights to execute script " + function);
 		}
 	}	
+	
+	public List<FunctionInfo> listFunctions(Session session, String category) throws RedbackException {
+		List<FunctionInfo> retList = new ArrayList<FunctionInfo>();
+		List<ScriptConfig> list = globalScripts.list(session, new DataMap("category", category));
+		for(ScriptConfig sc: list) {
+			if(session.getUserProfile().canExecute("rb.scripts." + sc.getName()) || session.getUserProfile().canExecute("rb.accesscat." + sc.getAccessCategory())) {
+				retList.add(new FunctionInfo(sc.getName(), sc.getDescription(), sc.getTimeout()));
+			}
+		}
+		return retList;
+	}
 	
 	public void fork(Session session, String objectName, String id, String function) throws RedbackException
 	{
@@ -668,146 +577,140 @@ public class ObjectManager
 	@SuppressWarnings("unchecked")
 	public List<RedbackAggregate> aggregateObjects(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
-		if(session.getUserProfile().canRead("rb.objects." + objectName))
+		List<RedbackAggregate> list = new ArrayList<RedbackAggregate>();
+		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
+		if(session.getUserProfile().canRead("rb.objects." + objectName) || session.getUserProfile().canRead("rb.accesscat." + objectConfig.getAccessCategory()))
 		{
-			List<RedbackAggregate> list = new ArrayList<RedbackAggregate>();
-			ObjectConfig objectConfig = objectConfigs.get(session, objectName);
-			if(objectConfig != null)
+			try
 			{
-				try
+				DataMap objectFilter = new DataMap();
+				if(filter != null)
+					objectFilter.merge(filter);
+				if(searchText != null  &&  searchText.length() > 0)
+					objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
+				if(base != null)
+					objectFilter.merge(new DataMap("$or", base));
+				DataList dbResultList = null;
+				
+				if(objectConfig.isPersistent()) 
 				{
-					DataMap objectFilter = new DataMap();
-					if(filter != null)
-						objectFilter.merge(filter);
-					if(searchText != null  &&  searchText.length() > 0)
-						objectFilter.merge(generateSearchFilter(session, objectName, searchText.trim()));
-					if(base != null)
-						objectFilter.merge(new DataMap("$or", base));
-					DataList dbResultList = null;
-					
-					if(objectConfig.isPersistent()) 
-					{
-						DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
-						if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
-							dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-						DataList dbTuple = new DataList();
-						for(int i = 0; i < tuple.size(); i++) {
-							if(tuple.get(i) instanceof DataMap) {
-								DataMap tupleItem = (DataMap)tuple.getObject(i).getCopy();
-								tupleItem.put("attribute", objectConfig.getAttributeConfig(tupleItem.getString("attribute")).getDBKey());
-								dbTuple.add(tupleItem);
-							} else {
-								dbTuple.add(objectConfig.getAttributeConfig(tuple.getString(i)).getDBKey());
-							}
+					DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
+					if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
+						dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+					DataList dbTuple = new DataList();
+					for(int i = 0; i < tuple.size(); i++) {
+						if(tuple.get(i) instanceof DataMap) {
+							DataMap tupleItem = (DataMap)tuple.getObject(i).getCopy();
+							tupleItem.put("attribute", objectConfig.getAttributeConfig(tupleItem.getString("attribute")).getDBKey());
+							dbTuple.add(tupleItem);
+						} else {
+							dbTuple.add(objectConfig.getAttributeConfig(tuple.getString(i)).getDBKey());
 						}
-						DataList dbMetrics = new DataList();
-						for(int i = 0; i < metrics.size(); i++)
-						{
-							DataMap metric = metrics.getObject(i);
-							String metricName = metric.getString("name");
-							if(metricName != null && objectConfig.getAttributeConfig(metricName) == null) {
-								String function = metric.getString("function");
-								if(function.equals("count") || function.equals("sum") || function.equals("max") || function.equals("min"))
+					}
+					DataList dbMetrics = new DataList();
+					for(int i = 0; i < metrics.size(); i++)
+					{
+						DataMap metric = metrics.getObject(i);
+						String metricName = metric.getString("name");
+						if(metricName != null && objectConfig.getAttributeConfig(metricName) == null) {
+							String function = metric.getString("function");
+							if(function.equals("count") || function.equals("sum") || function.equals("max") || function.equals("min"))
+							{
+								DataMap dbMetric = new DataMap();
+								dbMetric.put("function", function);
+								if(!function.equals("count"))
 								{
-									DataMap dbMetric = new DataMap();
-									dbMetric.put("function", function);
-									if(!function.equals("count"))
-									{
-										String attribute = metric.getString("attribute");
-										if(attribute != null)
-											dbMetric.put("field", objectConfig.getAttributeConfig(attribute).getDBKey());
-									}
-									dbMetric.put("name", metricName);
-									dbMetrics.add(metric);
-								} 
-								else
-								{
-									throw new RedbackException("The metric function hasn't been provided");
+									String attribute = metric.getString("attribute");
+									if(attribute != null)
+										dbMetric.put("field", objectConfig.getAttributeConfig(attribute).getDBKey());
 								}
+								dbMetric.put("name", metricName);
+								dbMetrics.add(metric);
 							} 
-							else 
-							{
-								throw new RedbackException("A metric cannot have the same name as one of the object's attribute");
-							}
-						}
-						DataMap dbSort = generateDBSort(session, objectConfig, sort);
-						DataMap dbResult = dataClient.aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics, dbSort, page, pageSize);
-						dbResultList = dbResult.getList("result");
-					} 
-					else 
-					{
-						Function gs = objectConfig.getGenerationScript();
-						if(gs != null) {
-							ScriptContext context = session.getScriptContext().createChild();
-							context.put("filter", filter);
-							context.put("tuple", tuple);
-							context.put("metrics", metrics);
-							context.put("action", "aggregate");
-							Object o = gs.call(context);
-							if(o instanceof DataList)
-								dbResultList = (DataList)o;
 							else
-								dbResultList = new DataList();
-						}
-					}		
-					
-					if(base != null) {
-						DataList baseDb = new DataList();
-						for(int i = 0; i < base.size(); i++) {
-							DataMap baseItem = base.getObject(i);
-							DataMap baseDbItem = new DataMap();
-							for(String baseAttr: baseItem.keySet()) {
-								String baseDbAttr = objectConfig.getAttributeConfig(baseAttr).getDBKey();
-								baseDbItem.put(baseDbAttr, baseItem.getString(baseAttr));
-							}
-							DataMap dbDataMatch = null;
-							for(int j = 0; j < dbResultList.size(); j++) {
-								DataMap dbData = dbResultList.getObject(j);
-								boolean match = true;
-								for(String baseDbAttr: baseDbItem.keySet()) {
-									if(!baseDbItem.getString(baseDbAttr).equals(dbData.getString(baseDbAttr)))
-										match = false;
-								}
-								if(match) {
-									dbDataMatch = dbData;
-									break;
-								}
-							}
-							
-							for(int j = 0; j < metrics.size(); j++)
 							{
-								DataMap metric = metrics.getObject(j);
-								String metricName = metric.getString("name");
-								baseDbItem.put(metricName, dbDataMatch != null ? dbDataMatch.getNumber(metricName) : 0);
+								throw new RedbackException("The metric function hasn't been provided");
 							}
-							baseDb.add(baseDbItem);
+						} 
+						else 
+						{
+							throw new RedbackException("A metric cannot have the same name as one of the object's attribute");
 						}
-						dbResultList = baseDb;
 					}
-										
-					for(int i = 0; i < dbResultList.size(); i++)
-					{
-						DataMap dbData = dbResultList.getObject(i);
-						RedbackAggregate aggregate = new RedbackAggregate(session, this, objectConfig, dbData);
-						list.add(aggregate);
-					}
-					
-					if(addRelated)
-						addRelatedBulk(session, (List<RedbackElement>)(List<?>)list);
-				}
-				catch(Exception e)
+					DataMap dbSort = generateDBSort(session, objectConfig, sort);
+					DataMap dbResult = dataClient.aggregateData(objectConfig.getCollection(), dbFilter, dbTuple, dbMetrics, dbSort, page, pageSize);
+					dbResultList = dbResult.getList("result");
+				} 
+				else 
 				{
-					//logger.severe(e.getMessage());
-					throw new RedbackException("Error aggregating objects", e);
+					Function gs = objectConfig.getGenerationScript();
+					if(gs != null) {
+						ScriptContext context = session.getScriptContext().createChild();
+						context.put("filter", filter);
+						context.put("tuple", tuple);
+						context.put("metrics", metrics);
+						context.put("action", "aggregate");
+						Object o = gs.call(context);
+						if(o instanceof DataList)
+							dbResultList = (DataList)o;
+						else
+							dbResultList = new DataList();
+					}
+				}		
+				
+				if(base != null) {
+					DataList baseDb = new DataList();
+					for(int i = 0; i < base.size(); i++) {
+						DataMap baseItem = base.getObject(i);
+						DataMap baseDbItem = new DataMap();
+						for(String baseAttr: baseItem.keySet()) {
+							String baseDbAttr = objectConfig.getAttributeConfig(baseAttr).getDBKey();
+							baseDbItem.put(baseDbAttr, baseItem.getString(baseAttr));
+						}
+						DataMap dbDataMatch = null;
+						for(int j = 0; j < dbResultList.size(); j++) {
+							DataMap dbData = dbResultList.getObject(j);
+							boolean match = true;
+							for(String baseDbAttr: baseDbItem.keySet()) {
+								if(!baseDbItem.getString(baseDbAttr).equals(dbData.getString(baseDbAttr)))
+									match = false;
+							}
+							if(match) {
+								dbDataMatch = dbData;
+								break;
+							}
+						}
+						
+						for(int j = 0; j < metrics.size(); j++)
+						{
+							DataMap metric = metrics.getObject(j);
+							String metricName = metric.getString("name");
+							baseDbItem.put(metricName, dbDataMatch != null ? dbDataMatch.getNumber(metricName) : 0);
+						}
+						baseDb.add(baseDbItem);
+					}
+					dbResultList = baseDb;
 				}
+									
+				for(int i = 0; i < dbResultList.size(); i++)
+				{
+					DataMap dbData = dbResultList.getObject(i);
+					RedbackAggregate aggregate = new RedbackAggregate(session, this, objectConfig, dbData);
+					list.add(aggregate);
+				}
+				
+				if(addRelated)
+					addRelatedBulk(session, (List<RedbackElement>)(List<?>)list);
+				return list;	
 			}
-			else
+			catch(Exception e)
 			{
-				throw new RedbackException("No object config is available for '" + objectName + "'");	
+				throw new RedbackException("Error aggregating objects", e);
 			}
-			return list;	
-		} else {
-			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
+		}
+		else
+		{
+			throw new RedbackException("No object config is available for '" + objectName + "'");	
 		}
 	}
 	

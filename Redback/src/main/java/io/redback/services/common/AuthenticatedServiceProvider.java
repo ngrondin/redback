@@ -26,6 +26,7 @@ public abstract class AuthenticatedServiceProvider extends ServiceProvider
 	protected Payload redbackService(Session session, Payload payload) throws RedbackException {
 		Payload response = null;
 		String token = payload.metadata.get("token");
+		String domain = payload.metadata.get("domain");
 		UserProfile up = null;
 		
 		Logger.finer("rb.authservice.start", new DataMap("token", token));
@@ -37,6 +38,8 @@ public abstract class AuthenticatedServiceProvider extends ServiceProvider
 		{			
 			session.setUserProfile(up);
 			session.setToken(token);
+			if(domain != null && (session.getUserProfile().hasAllDomains() || session.getUserProfile().hasDomain(domain)))
+				session.setDomainLock(domain);
 			if(Thread.currentThread() instanceof FirebusThread) 
 				((FirebusThread)Thread.currentThread()).setUser(up.getUsername());
 			response = redbackAuthenticatedService(session, payload);

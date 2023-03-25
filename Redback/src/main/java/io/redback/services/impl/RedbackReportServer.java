@@ -24,12 +24,12 @@ public class RedbackReportServer extends ReportServer {
 		reportManager.clearCaches();	
 	}
 
-	protected Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException {
-		return reportManager.produce(session, domain, name, filter);
+	protected Report produce(Session session, String name, DataMap filter) throws RedbackException {
+		return reportManager.produce(session, name, filter);
 	}
 
-	protected String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException {
-		return reportManager.produceAndStore(session, domain, name, filter);
+	protected String produceAndStore(Session session, String name, DataMap filter) throws RedbackException {
+		return reportManager.produceAndStore(session, name, filter);
 	}
 
 	protected List<ReportInfo> list(Session session, String category) throws RedbackException {

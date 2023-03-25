@@ -17,14 +17,16 @@ public class LoggerJSFunction extends CallableJSWrapper
 
 
 	public Object call(Object... arguments) throws RedbackException {
-		String level = (String)arguments[0];
-		String msg = arguments[1] instanceof String ? (String)arguments[1] : arguments[1].toString();
+		String level = arguments.length == 1 ? "info" : arguments[0].toString().toLowerCase();
+		Object val = arguments.length == 1 ?  arguments[0] : arguments[1];
+		String msg = val != null ? val.toString() : "null";
 		if(level.equals("info"))
 			Logger.info("rb.js", msg);
 		if(level.equals("fine"))
 			Logger.fine("rb.js", msg);
 		if(level.equals("finder"))
 			Logger.finer("rb.js", msg);
+			
 		return null;
 	}
 }

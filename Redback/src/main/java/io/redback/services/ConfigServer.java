@@ -31,21 +31,26 @@ public abstract class ConfigServer extends ServiceProvider
 			
 			if(action.equals("get"))
 			{
-				DataMap config = null;
-				if(domain == null)
-					config = getConfig(service, category, name);
-				else
-					config = getDomainConfig(service, category, name, domain);
+				DataMap config = getConfig(service, category, name);
+				if(config != null)
+					response.setData(config);
+			} 
+			else if(action.equals("getdomain"))
+			{
+				DataMap config = getDomainConfig(service, category, name, domain);
 				if(config != null)
 					response.setData(config);
 			} 
 			else if(action.equals("list"))
 			{
-				DataList list = null;
-				if(domain == null)
-					list = getConfigList(service, category, filter);
-				else
-					list = getDomainConfigList(service, category, domain, filter);
+				DataList list = getConfigList(service, category, filter);
+				if(list == null) 
+					list = new DataList();
+				response.setData(new DataMap("result", list));
+			}
+			else if(action.equals("listdomain"))
+			{
+				DataList list = getDomainConfigList(service, category, filter);
 				if(list == null) 
 					list = new DataList();
 				response.setData(new DataMap("result", list));
@@ -69,7 +74,7 @@ public abstract class ConfigServer extends ServiceProvider
 
 	protected abstract DataList getConfigList(String service, String category, DataMap filter) throws RedbackException;
 
-	protected abstract DataList getDomainConfigList(String service, String category, String domain, DataMap filter) throws RedbackException;
+	protected abstract DataList getDomainConfigList(String service, String category, DataMap filter) throws RedbackException;
 
 	
 	public ServiceInformation getServiceInformation() 

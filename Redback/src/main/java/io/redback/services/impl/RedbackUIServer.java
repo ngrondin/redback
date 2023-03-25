@@ -51,7 +51,6 @@ public class RedbackUIServer extends UIServer
 		devpath = config.getString("devpath");
 		scriptFactory = new ScriptFactory(); 
 		jspScripts = new HashMap<String, Function>();
-		//viewConfigs = new HashMap<String, DataMap>();
 		configClient = new ConfigClient(firebus, config.getString("configservice"));
 		if(config.containsKey("dataservice")) {
 			dataClient = new DataClient(firebus, config.getString("dataservice"));

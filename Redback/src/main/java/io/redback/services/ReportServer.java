@@ -40,12 +40,12 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 				session.setTimezone(timezone);
 			
 			if(action.equals("produce")) {
-				Report report = produce(session, domain, reportName, filter);
+				Report report = produce(session, reportName, filter);
 				response = new Payload(report.getBytes());
 				response.metadata.put("mime", report.getMime());
 				response.metadata.put("filename", report.getFilename());
 			} else if(action.equals("producestore")) {
-				String fileUid = produceAndStore(session, domain, reportName, filter);
+				String fileUid = produceAndStore(session, reportName, filter);
 				response = new Payload(new DataMap("fileuid", fileUid));
 			} else if(action.equals("list")) {
 				List<ReportInfo> reports = list(session, category);
@@ -76,9 +76,9 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 	
-	protected abstract Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException;
+	protected abstract Report produce(Session session, String name, DataMap filter) throws RedbackException;
 	
-	protected abstract String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException;
+	protected abstract String produceAndStore(Session session, String name, DataMap filter) throws RedbackException;
 	
 	protected abstract List<ReportInfo> list(Session session, String category) throws RedbackException;
 	

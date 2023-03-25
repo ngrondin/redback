@@ -62,9 +62,9 @@ public class MultiRequest extends ObjectRequest {
 			else if(action.equals("execute"))
 			{
 				if(line.containsKey("object")) {
-					request = new ExecuteRequest(line);
+					request = new ExecuteObjectRequest(line);
 				} else {
-					request = new ExecuteGlobalRequest(line);
+					request = new ExecuteRequest(line);
 				}
 			}
 			else if(action.equals("aggregate"))

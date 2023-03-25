@@ -159,9 +159,9 @@ public class RedbackObject extends RedbackElement
 		session = s;
 		objectManager = om;
 		config = cfg;
-		canRead = session.getUserProfile().canRead("rb.objects." + config.getName());
-		canWrite = session.getUserProfile().canWrite("rb.objects." + config.getName());
-		canExecute = session.getUserProfile().canExecute("rb.objects." + config.getName());
+		canRead = session.getUserProfile().canRead("rb.objects." + config.getName()) || session.getUserProfile().canRead("rb.accesscat." + config.getName());
+		canWrite = session.getUserProfile().canWrite("rb.objects." + config.getName()) || session.getUserProfile().canWrite("rb.accesscat." + config.getName());
+		canExecute = session.getUserProfile().canExecute("rb.objects." + config.getName()) || session.getUserProfile().canExecute("rb.accesscat." + config.getName());
 		data = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new HashMap<String, Boolean>();

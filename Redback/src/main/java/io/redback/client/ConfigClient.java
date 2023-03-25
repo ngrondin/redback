@@ -25,7 +25,7 @@ public class ConfigClient extends Client
 	
 	public DataMap getDomainConfig(Session session, String service, String category, String name, String domain) throws RedbackException
 	{
-		DataMap req = new DataMap("action", "get", "service", service, "category", category, "name", name, "domain", domain);
+		DataMap req = new DataMap("action", "getdomain", "service", service, "category", category, "name", name, "domain", domain);
 		return requestDataMap(session, req);
 	}
 	
@@ -42,9 +42,9 @@ public class ConfigClient extends Client
 
 	}
 	
-	public DataMap listDomainConfigs(Session session, String service, String category, String domain, DataMap filter) throws RedbackException
+	public DataMap listDomainConfigs(Session session, String service, String category, DataMap filter) throws RedbackException
 	{
-		DataMap req = new DataMap("action", "list", "service", service, "category", category, "domain", domain, "filter", filter);
+		DataMap req = new DataMap("action", "listdomain", "service", service, "category", category, "filter", filter);
 		return requestDataMap(session, req);
 	}
 

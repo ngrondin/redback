@@ -15,7 +15,11 @@ public class ScriptConfig
 {
 	protected DataMap config;
 	protected String name;
+	protected String domain;
+	protected String description;
+	protected String accessCategory;
 	protected String source;
+	protected long timeout;
 	protected Function function;
 
 	public ScriptConfig(ScriptFactory sf, DataMap cfg) throws RedbackException
@@ -23,6 +27,10 @@ public class ScriptConfig
 		config = cfg;
 		name = config.getString("name");
 		source = StringUtils.unescape(config.getString("script"));
+		description = config.getString("description");
+		domain = config.getString("domain");
+		accessCategory = config.getString("accesscat");
+		timeout = config.containsKey("timeout") ? config.getNumber("timeout").longValue(): 10000;
 		List<String> scriptVars = new ArrayList<String>();
 		scriptVars.add("session");
 		scriptVars.add("userprofile");
@@ -47,16 +55,36 @@ public class ScriptConfig
 		return name;
 	}
 	
+	public String getDomain()
+	{
+		return domain;
+	}
+	
+	public String getDescription()
+	{
+		return description;
+	}
+	
+	public String getAccessCategory() 
+	{
+		return accessCategory;
+	}
+	
+	public long getTimeout() 
+	{
+		return timeout;
+	}
+	
 	public String getSource()
 	{
 		return source;
 	}
 
 	
-	public void execute(ScriptContext context) throws RedbackException
+	public Object execute(ScriptContext context) throws RedbackException
 	{
 		try {
-			function.call(context);
+			return function.call(context);
 		} catch(ScriptException e) {
 			throw new RedbackException("Error running script", e);
 		}

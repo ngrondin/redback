@@ -3,8 +3,6 @@ package io.redback.services.impl;
 import java.util.HashMap;
 import java.util.List;
 
-
-
 import io.firebus.Firebus;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -13,20 +11,9 @@ import io.redback.managers.objectmanager.ObjectConfig;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
-import io.redback.managers.objectmanager.requests.AggregateRequest;
-import io.redback.managers.objectmanager.requests.CreateRequest;
-import io.redback.managers.objectmanager.requests.DeleteRequest;
-import io.redback.managers.objectmanager.requests.ExecuteGlobalRequest;
-import io.redback.managers.objectmanager.requests.ExecuteRequest;
-import io.redback.managers.objectmanager.requests.GetRequest;
-import io.redback.managers.objectmanager.requests.ListRelatedRequest;
-import io.redback.managers.objectmanager.requests.ListRequest;
-import io.redback.managers.objectmanager.requests.MultiRequest;
-import io.redback.managers.objectmanager.requests.MultiResponse;
-import io.redback.managers.objectmanager.requests.ObjectRequest;
-import io.redback.managers.objectmanager.requests.UpdateRequest;
 import io.redback.security.Session;
 import io.redback.services.ObjectServer;
+import io.redback.utils.FunctionInfo;
 
 public class RedbackObjectServer extends ObjectServer
 {
@@ -41,13 +28,21 @@ public class RedbackObjectServer extends ObjectServer
 	public void configure() {
 		objectManager.refreshAllConfigs();
 	}	
+	
+
+	protected void startTransaction(Session session) throws RedbackException {
+		objectManager.initiateCurrentTransaction(session);
+	}
+
+	protected void commitTransaction(Session session) throws RedbackException {
+		objectManager.commitCurrentTransaction(session);
+	}
+	
 
 	protected RedbackObject get(Session session, String objectName, String uid) throws RedbackException
 	{
 		RedbackObject object = null;
-		objectManager.initiateCurrentTransaction(session);
 		object = objectManager.getObject(session, objectName, uid);
-		objectManager.commitCurrentTransaction(session);
 		return object;
 	}
 
@@ -58,9 +53,7 @@ public class RedbackObjectServer extends ObjectServer
 		if(filter == null)
 			filter = new DataMap();
 		
-		objectManager.initiateCurrentTransaction(session);
 		objects = objectManager.listObjects(session, objectName, filter, search, sort, addRelated, page, pageSize);
-		objectManager.commitCurrentTransaction(session);
 		return objects;	
 	}
 
@@ -70,64 +63,50 @@ public class RedbackObjectServer extends ObjectServer
 		if(filter == null)
 			filter = new DataMap();
 
-		objectManager.initiateCurrentTransaction(session);
 		objects = objectManager.listRelatedObjects(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
-		objectManager.commitCurrentTransaction(session);
 		return objects;	
 	}
 
 	protected RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException
 	{
 		RedbackObject object = null;
-		objectManager.initiateCurrentTransaction(session);
 		object = objectManager.updateObject(session, objectName, uid, data);
-		if(object != null) {
-			objectManager.commitCurrentTransaction(session);
-		} else {
-			throw new RedbackException("No such object to update");
-		}
 		return object;
 	}
 
 	protected RedbackObject create(Session session, String objectName, String uid, String domain, DataMap data) throws RedbackException
 	{
 		RedbackObject object = null;
-		objectManager.initiateCurrentTransaction(session);
 		object = objectManager.createObject(session, objectName, uid, domain, data);
-		objectManager.commitCurrentTransaction(session);
 		return object;
 	}
 
 	protected void delete(Session session, String objectName, String uid) throws RedbackException {
-		objectManager.initiateCurrentTransaction(session);
 		objectManager.deleteObject(session, objectName, uid);
-		objectManager.commitCurrentTransaction(session);
 	}
 
 	protected RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = null;
-		objectManager.initiateCurrentTransaction(session);
-		object = objectManager.executeFunction(session, objectName, uid, function, param);
-		objectManager.commitCurrentTransaction(session);
+		object = objectManager.executeObjectFunction(session, objectName, uid, function, param);
 		return object;
 	}
 	
-	protected void execute(Session session, String function, DataMap param) throws RedbackException {
-		objectManager.initiateCurrentTransaction(session);
-		objectManager.executeFunction(session, function, param);
-		objectManager.commitCurrentTransaction(session);
+	protected Object execute(Session session, String function, DataMap param) throws RedbackException {
+		return objectManager.executeFunction(session, function, param);
+	}
+	
+	protected List<FunctionInfo> listFunctions(Session session, String category) throws RedbackException {
+		return objectManager.listFunctions(session, category);
 	}
 
 	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException {
 		List<RedbackAggregate> aggregates = null;
-		objectManager.initiateCurrentTransaction(session);
 		aggregates = objectManager.aggregateObjects(session, objectName, filter, searchText, tuple, metrics, sort, base, addRelated, page, pageSize);
-		objectManager.commitCurrentTransaction(session);
 		return aggregates;	
 	}
 
-	protected MultiResponse multi(Session session, MultiRequest multiRequest) throws RedbackException {
+	/*protected MultiResponse multi(Session session, MultiRequest multiRequest) throws RedbackException {
 		MultiResponse response = new MultiResponse();
 		objectManager.initiateCurrentTransaction(session);
 		for(String key: multiRequest.getKeys()) {
@@ -150,12 +129,12 @@ public class RedbackObjectServer extends ObjectServer
 			} else if(request instanceof DeleteRequest) {
 				DeleteRequest req = (DeleteRequest)request;
 				objectManager.deleteObject(session, req.objectName, req.uid);
+			} else if(request instanceof ExecuteObjectRequest) {
+				ExecuteObjectRequest req = (ExecuteObjectRequest)request;
+				response.addResponse(key, objectManager.executeObjectFunction(session, req.objectName, req.uid, req.function, req.param));
 			} else if(request instanceof ExecuteRequest) {
 				ExecuteRequest req = (ExecuteRequest)request;
-				response.addResponse(key, objectManager.executeFunction(session, req.objectName, req.uid, req.function, req.param));
-			} else if(request instanceof ExecuteGlobalRequest) {
-				ExecuteGlobalRequest req = (ExecuteGlobalRequest)request;
-				objectManager.executeFunction(session, req.function, req.param);
+				objectManager.executeFunction(session, req.function, req.domain, req.param);
 			} else if(request instanceof AggregateRequest) {
 				AggregateRequest req = (AggregateRequest)request;
 				response.addResponse(key, objectManager.aggregateObjects(session, req.objectName, req.filter, req.searchText, req.tuple, req.metrics, req.sort, req.base, req.addRelated, req.page, req.pageSize));
@@ -163,6 +142,7 @@ public class RedbackObjectServer extends ObjectServer
 		}
 		objectManager.commitCurrentTransaction(session);
 		return response;
-	}
+	}*/
+
 
 }

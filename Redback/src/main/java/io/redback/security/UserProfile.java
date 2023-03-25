@@ -69,13 +69,17 @@ public class UserProfile
 	
 	public boolean hasAllDomains()
 	{
-		boolean hasAllDomains = false;
-		
+		return hasDomain("*");
+	}
+	
+	public boolean hasDomain(String domain)
+	{
+		boolean hasDomain = false;
 		DataList list = profile.getList("domains");
 		for(int i = 0; i < list.size(); i++)
-			if(list.getString(i).equals("*"))
-				hasAllDomains = true;
-		return hasAllDomains;
+			if(list.getString(i).equals(domain))
+				hasDomain = true;
+		return hasDomain;
 	}
 	
 	public DataMap getDBFilterDomainClause()

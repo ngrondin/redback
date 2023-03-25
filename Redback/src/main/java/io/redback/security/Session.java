@@ -13,6 +13,7 @@ public class Session
 	public UserProfile userProfile;
 	public UserProfile elevatedUserProfile;
 	public String timezone;
+	public String domainLock;
 	public ScriptContext scriptContext;
 
 	public Session() 
@@ -70,8 +71,14 @@ public class Session
 	{
 		timezone = zoneId;
 	}
+	
+	public void setDomainLock(String domain) 
+	{
+		domainLock = domain;
+	}
 
-	public void setScriptContext(ScriptContext sc) {
+	public void setScriptContext(ScriptContext sc) 
+	{
 		scriptContext = sc;
 	}
 	
@@ -93,6 +100,11 @@ public class Session
 	public String getTimezone()
 	{
 		return timezone;
+	}
+	
+	public String getDomainLock()
+	{
+		return domainLock;
 	}
 	
 	public ScriptContext getScriptContext() 

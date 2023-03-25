@@ -112,9 +112,15 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 		} else if(key.equals("execute")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					String functionName = (String)arguments[0]; 
-					DataMap param = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
-					objectManager.executeFunction(session, functionName, param);
+					if(arguments.length == 1 && arguments[0] instanceof String) {
+						objectManager.executeFunction(session, (String)arguments[0], null);						
+					} else if(arguments.length == 2 && arguments[0] instanceof String && arguments[1] instanceof DataMap) {
+						objectManager.executeFunction(session, (String)arguments[0], (DataMap)(arguments[1]));	
+					}/* else if(arguments.length == 2 && arguments[0] instanceof String && arguments[1] instanceof String) {
+						objectManager.executeFunction(session, (String)arguments[0], (String)(arguments[1]), null);	
+					} else if(arguments.length == 3 && arguments[0] instanceof String && arguments[1] instanceof String && arguments[2] instanceof DataMap) {
+						objectManager.executeFunction(session, (String)arguments[0], (String)(arguments[1]), (DataMap)(arguments[2]));	
+					}*/
 					return null;
 				}
 			};

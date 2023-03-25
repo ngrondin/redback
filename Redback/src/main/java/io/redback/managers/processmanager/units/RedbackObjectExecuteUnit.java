@@ -58,6 +58,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 				Payload payload = new Payload(req);
 				payload.metadata.put("token", sysUserSession.getToken());
 				payload.metadata.put("session", sysUserSession.getId());
+				payload.metadata.put("domain", sysUserSession.getDomainLock());
 				payload.metadata.put("mime", "application/json");
 				try
 				{

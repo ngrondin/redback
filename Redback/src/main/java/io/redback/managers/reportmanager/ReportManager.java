@@ -92,38 +92,6 @@ public class ReportManager implements Consumer {
 		}
 		includeLoaded = true;
 	}
-	
-	protected List<ReportConfig> listConfigs(Session session, String category) throws RedbackException {
-		DataMap filter = new DataMap("category", category);
-		filter.put("category", category);
-		int h = filter.toString().hashCode();
-		if(!listsQueried.containsKey(h)) {
-			List<ReportConfig> list = new ArrayList<ReportConfig>();
-			for(String domain : session.getUserProfile().getDomains()) {
-				if(!domain.equals("*")) {
-					DataMap res = configClient.listDomainConfigs(session, "rbrs", "report", domain, filter);
-					if(res.containsKey("result")) {
-						DataList resList = res.getList("result");
-						for(int i = 0; i < resList.size(); i++) {
-							list.add(new ReportConfig(this, resList.getObject(i)));
-						}
-					} 
-				}
-			} 
-			
-			DataMap res = configClient.listConfigs(session, "rbrs", "report", filter);
-			if(res.containsKey("result")) {
-				DataList resList = res.getList("result");
-				for(int i = 0; i < resList.size(); i++) {
-					list.add(new ReportConfig(this, resList.getObject(i)));
-				}
-			} 
-			listsQueried.put(h, list);
-			return list;
-		} else {
-			return listsQueried.get(h);
-		}
-	}
 
 	public ObjectClient getObjectClient() {
 		return objectClient;
@@ -137,8 +105,8 @@ public class ReportManager implements Consumer {
 		return scriptFactory;
 	}
 
-	public Report produce(Session session, String domain, String name, DataMap filter) throws RedbackException {
-		ReportConfig config = configs.get(session, name, domain);
+	public Report produce(Session session, String name, DataMap filter) throws RedbackException {
+		ReportConfig config = configs.get(session, name);
 		if(!includeLoaded)
 			loadIncludeScripts(session);		
 		Report report = null;
@@ -157,8 +125,8 @@ public class ReportManager implements Consumer {
 		return report;
 	}
 	
-	public String produceAndStore(Session session, String domain, String name, DataMap filter) throws RedbackException {
-		Report report = produce(session, domain, name, filter);
+	public String produceAndStore(Session session, String name, DataMap filter) throws RedbackException {
+		Report report = produce(session, name, filter);
 		if(report != null) {
 			RedbackFileMetaData filemd = fileClient.putFile(session, name + ".pdf", "application/pdf", session.getUserProfile().getUsername(), report.getBytes());
 			return filemd.fileuid;
@@ -168,9 +136,9 @@ public class ReportManager implements Consumer {
 	}
 	
 	public List<ReportInfo> list(Session session, String category) throws RedbackException {
-		List<ReportConfig> configs = listConfigs(session, category);
+		List<ReportConfig> confgiList = configs.list(session, new DataMap("category", category));
 		List<ReportInfo> infos = new ArrayList<ReportInfo>();
-		for(ReportConfig rc: configs) {
+		for(ReportConfig rc: confgiList) {
 			infos.add(new ReportInfo(rc.getName(), rc.getDescription(), rc.getType(), rc.getDomain()));
 		}
 		return infos;		
