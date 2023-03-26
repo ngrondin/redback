@@ -941,18 +941,20 @@ public class ObjectManager
 			dbSort = new DataMap();
 			for(int i = 0; objectSort.containsKey(String.valueOf(i)); i++) {
 				DataMap sortItem = new DataMap();
-				String attribute = objectSort.getObject("" + i).getString("attribute");
-				String dbKey = null;
-				if(attribute.equals("uid"))
-					dbKey = objectConfig.getUIDDBKey();
-				else if(attribute.equals("domain"))
-					dbKey = objectConfig.getDomainDBKey();
-				else
-					dbKey = objectConfig.getAttributeConfig(attribute).getDBKey(); 
-				if(dbKey != null) {
-					sortItem.put("attribute", dbKey);
-					sortItem.put("dir", objectSort.getObject("" + i).getString("dir"));
-					dbSort.put("" + i, sortItem);
+				String attribute = objectSort.getObject(String.valueOf(i)).getString("attribute");
+				if(attribute != null) {
+					String dbKey = null;
+					if(attribute.equals("uid"))
+						dbKey = objectConfig.getUIDDBKey();
+					else if(attribute.equals("domain"))
+						dbKey = objectConfig.getDomainDBKey();
+					else
+						dbKey = objectConfig.getAttributeConfig(attribute).getDBKey(); 
+					if(dbKey != null) {
+						sortItem.put("attribute", dbKey);
+						sortItem.put("dir", objectSort.getObject("" + i).getString("dir"));
+						dbSort.put("" + i, sortItem);
+					}					
 				}
 			}
 		}
