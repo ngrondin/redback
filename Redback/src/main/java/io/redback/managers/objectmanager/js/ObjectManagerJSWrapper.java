@@ -112,16 +112,13 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 		} else if(key.equals("execute")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
+					Object ret = null;
 					if(arguments.length == 1 && arguments[0] instanceof String) {
-						objectManager.executeFunction(session, (String)arguments[0], null);						
+						ret = objectManager.executeFunction(session, (String)arguments[0], null);						
 					} else if(arguments.length == 2 && arguments[0] instanceof String && arguments[1] instanceof DataMap) {
-						objectManager.executeFunction(session, (String)arguments[0], (DataMap)(arguments[1]));	
-					}/* else if(arguments.length == 2 && arguments[0] instanceof String && arguments[1] instanceof String) {
-						objectManager.executeFunction(session, (String)arguments[0], (String)(arguments[1]), null);	
-					} else if(arguments.length == 3 && arguments[0] instanceof String && arguments[1] instanceof String && arguments[2] instanceof DataMap) {
-						objectManager.executeFunction(session, (String)arguments[0], (String)(arguments[1]), (DataMap)(arguments[2]));	
-					}*/
-					return null;
+						ret = objectManager.executeFunction(session, (String)arguments[0], (DataMap)(arguments[1]));	
+					}
+					return ret;
 				}
 			};
 		} else if(key.equals("fork")) {
@@ -156,8 +153,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					}
 				}
 			};
-		}
-		else if(key.equals("iterate")) {
+		} else if(key.equals("iterate")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					String objectName = (String)arguments[0];
@@ -188,7 +184,25 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					return null;
 				}
 			};
-		}		
+		} else if(key.equals("clearObjectConfig")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0]; 
+					String domain = (String)arguments[1]; 
+					objectManager.clearDomainObjectConfig(session, objectName, domain);
+					return null;
+				}
+			};
+		} else if(key.equals("clearScriptConfig")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0]; 
+					String domain = (String)arguments[1]; 
+					objectManager.clearDomainScriptConfig(session, objectName, domain);
+					return null;
+				}
+			};
+		}			
 		return null;
 	}
 }

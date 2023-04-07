@@ -153,9 +153,7 @@ public class ConfigCache<T> {
 	}
 	
 	public void clear(String name, String domain) {
-		String key = service + "." + category + "." + name;
-		if(domain != null)
-			key = key + "." + domain;
+		String key = domain != null ? name + "." + domain : name;
 		cache.clear(key);
 	}
 	

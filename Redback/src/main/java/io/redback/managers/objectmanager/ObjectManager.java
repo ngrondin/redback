@@ -241,6 +241,14 @@ public class ObjectManager
 			Logger.severe("rb.object.loadinclude", e);
 		}
 	}
+	
+	public void clearDomainObjectConfig(Session session, String object, String domain) throws RedbackException {
+		objectConfigs.clear(object, domain);
+	}
+	
+	public void clearDomainScriptConfig(Session session, String object, String domain) throws RedbackException {
+		globalScripts.clear(object, domain);
+	}
 
 	protected synchronized void loadAllIncludeScripts(Session session) throws RedbackException
 	{
@@ -519,7 +527,7 @@ public class ObjectManager
 				ScriptContext context = session.getScriptContext().createChild();
 				context.put("param", param);
 				if(domainScriptLogger != null)
-					context.put("log", domainScriptLogger);
+					context.declare("log", domainScriptLogger);
 				ret = scriptCfg.execute(context);
 				return ret;
 			} catch(Exception e) {
