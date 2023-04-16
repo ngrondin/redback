@@ -23,6 +23,7 @@ import io.redback.client.DataClient.DataTransaction;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidConfigException;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 
@@ -307,16 +308,17 @@ public class RedbackObject extends RedbackElement
 	
 	public List<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, DataMap sort, int page, int pageSize) throws RedbackException
 	{
-		List<RedbackObject> relatedObjectList = null;
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
 		if(roc != null)
 		{
 			DataMap relatedObjectListFilter = getRelatedListFilter(attributeName);
 			if(additionalFilter != null)
 				relatedObjectListFilter.merge(additionalFilter);
-			relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, sort, false, page, pageSize);
+			List<RedbackObject> relatedObjectList = objectManager.listObjects(session, roc.getObjectName(), relatedObjectListFilter, searchText, sort, false, page, pageSize);
+			return relatedObjectList;		
+		} else {
+			throw new RedbackInvalidConfigException("Attribute " + attributeName + " does not have a relationship");
 		}
-		return relatedObjectList;		
 	}
 	
 	public DataMap getRelatedFindFilter(String attributeName) throws RedbackException

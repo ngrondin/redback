@@ -24,21 +24,18 @@ public class MultilineText extends DataUnit {
 		Box c = Box.VContainer(canBreak);
 		c.breakBefore = pagebreak;
 		float fs = fontSize(context);
-		float widthOverride = width(context);
-		if(widthOverride > -1) 
-			c.width = widthOverride;	
+		overrideWidth(c, context);
+		overrideHeight(c, context);
 		for(int i = 0; i < lines.length; i++) {
-			if(widthOverride > -1) {
-				List<String> sublines = this.cutToLines(fs, lines[i], widthOverride);
+			if(c.width > 0) {
+				List<String> sublines = this.cutToLines(fs, lines[i], c.width);
 				for(String subline : sublines) {
 					Box rb = Box.Text(subline, font, fs);
-					//rb.height = height;
 					rb.color = color;
 					c.addChild(rb);							
 				}
 			} else {
 				Box rb = Box.Text(lines[i], font, fs);
-				//rb.height = height;
 				rb.color = color;
 				c.addChild(rb);					
 			}

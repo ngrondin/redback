@@ -34,8 +34,7 @@ public class Image extends Unit {
 
 	public Box produce(Map<String, Object> context) throws RedbackException {
 		try {
-			float widthOverride = width(context);
-			float heightOverride = height(context);
+			Box rb = null;
 			if(base64 != null || base64Expr != null) {
 				if(base64Expr != null) {
 					base64 = (String)base64Expr.eval(getJSContext(context));
@@ -43,21 +42,22 @@ public class Image extends Unit {
 				String parts[] = base64.split(",");
 				byte[] bytes = Base64.getDecoder().decode(parts[1]);
 				BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
-				Box rb = Box.Image(bytes, widthOverride == -1 ? img.getWidth() : widthOverride, heightOverride == -1 ? img.getHeight() : heightOverride);
+				rb = Box.Image(bytes, img.getWidth(), img.getHeight());
 				rb.breakBefore = pagebreak;
-				return rb;
 			} else {
 				RedbackFile file = (RedbackFile)context.get("file");
 				if(file != null) {
 					int ori = ImageUtils.getOrientation(file.bytes);
-					BufferedImage img = ImageUtils.getImage(file.bytes, (int)widthOverride, (int)heightOverride, ori);
-					Box rb = Box.Image(ImageUtils.getBytes(img, "png"), img.getWidth(), img.getHeight());
+					BufferedImage img = ImageUtils.getImage(file.bytes, -1, -1, ori);
+					rb = Box.Image(ImageUtils.getBytes(img, "png"), img.getWidth(), img.getHeight());
 					rb.breakBefore = pagebreak;
-					return rb;
-				} else {
-					return null;
-				}
+				} 
 			} 
+			if(rb != null) {
+				overrideWidth(rb, context);
+				overrideHeight(rb, context);
+			}
+			return rb;
 		} catch(Exception e) {
 			throw new RedbackException("Error producing image", e);
 		}

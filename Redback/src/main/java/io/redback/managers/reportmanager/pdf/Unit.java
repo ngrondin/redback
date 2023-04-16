@@ -24,7 +24,11 @@ public abstract class Unit {
 	protected List<String> jsParams;
 	protected boolean pagebreak; 
 	protected Expression widthExpr;
+	protected Expression minWidthExpr;
+	protected Expression maxWidthExpr;
 	protected Expression heightExpr;
+	protected Expression minHeightExpr;
+	protected Expression maxHeightExpr;
 
 	
 	public Unit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException  {
@@ -35,7 +39,11 @@ public abstract class Unit {
 		try {
 			pagebreak = config.containsKey("pagebreak") ? config.getBoolean("pagebreak") : false;
 			widthExpr = config.containsKey("width") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_width", config.getString("width")) : null;
+			minWidthExpr = config.containsKey("minwidth") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_minwidth", config.getString("minwidth")) : null;
+			maxWidthExpr = config.containsKey("maxwidth") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_maxwidth", config.getString("maxwidth")) : null;
 			heightExpr = config.containsKey("height") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_height", config.getString("height")) : null;
+			minHeightExpr = config.containsKey("minheight") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_minheight", config.getString("minheight")) : null;
+			maxHeightExpr = config.containsKey("maxheight") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_maxheight", config.getString("maxheight")) : null;
 		} catch(Exception e) {
 			throw new RedbackException("Error intialising unit", e);
 		}
@@ -94,54 +102,49 @@ public abstract class Unit {
 		return Color.DARK_GRAY;
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected Map<String, Object> getJSContext(Map<String, Object> context) {
 		Map<String, Object> jsContext = new HashMap<String, Object>();
 		jsContext.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), (Session)context.get("session")));
 		jsContext.put("object", DataSet.convertToScript(context.get("object")));
 		jsContext.put("page", context.get("page"));
 		jsContext.put("vars", context.get("vars"));
-		/*Map<String, Object> vars = (Map<String, Object>)context.get("variables");
-		if(vars != null) {
-			for(String varName: vars.keySet()) {
-				jsContext.put(varName, vars.get(varName));
-			}				
-		}*/
 		return jsContext;
 	}
 	
-	protected float width(Map<String, Object> context) throws RedbackException {
-		if(widthExpr != null) {
+	protected float evalFloat(Expression expr, Map<String, Object> context, float def)  throws RedbackException {
+		if(expr != null) {
 			try {
-				return ((Number)widthExpr.eval(getJSContext(context))).floatValue();
+				return ((Number)expr.eval(getJSContext(context))).floatValue();
 			} catch(Exception e) {
-				return -1f;
+				return def;
 			}
 		} else {
-			return -1f;
-		}
-	}
-	
-	protected float height(Map<String, Object> context) throws RedbackException {
-		if(heightExpr != null) {
-			try {
-				return ((Number)heightExpr.eval(getJSContext(context))).floatValue();
-			} catch(Exception e) {
-				return -1f;
-			}
-		} else {
-			return -1f;
+			return def;
 		}
 	}
 	
 	protected void overrideHeight(Box box, Map<String, Object> context) throws RedbackException {
-		float overrideHeight = height(context);
-		if(overrideHeight > -1f) box.height = overrideHeight;
+		float height = evalFloat(heightExpr, context, -1f);
+		if(height > -1f) {
+			box.height = height;
+		} else {
+			float minHeight = evalFloat(minHeightExpr, context, -1f);
+			float maxHeight = evalFloat(maxHeightExpr, context, -1f);
+			if(minHeight > -1f && box.height < minHeight) box.height = minHeight;
+			if(maxHeight > -1f && box.height > minHeight) box.height = maxHeight;
+		}
 	}
 
 	protected void overrideWidth(Box box, Map<String, Object> context) throws RedbackException {
-		float overrideWidth = width(context);
-		if(overrideWidth > -1f) box.width = overrideWidth;
+		float width = evalFloat(widthExpr, context, -1f);
+		if(width > -1f) {
+			box.width = width;
+		} else {
+			float minWidth = evalFloat(minWidthExpr, context, -1f);
+			float maxWidth = evalFloat(maxWidthExpr, context, -1f);
+			if(minWidth > -1f && box.width < minWidth) box.width = minWidth;
+			if(maxWidth > -1f && box.width > maxWidth) box.width = maxWidth;
+		}
 	}
 	
 	public abstract Box produce(Map<String, Object> context) throws IOException, RedbackException;

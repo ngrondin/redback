@@ -30,21 +30,17 @@ public class Text extends DataUnit {
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
 		String valueStr = getSringValue(context);
-		Box rb = Box.Text(valueStr, bold ? boldFont : font, fontSize(context));
-		rb.color = color;
-		rb.breakBefore = pagebreak;
+		Box rb = Box.HContainer(false);
+		Box text = Box.Text(valueStr, bold ? boldFont : font, fontSize(context));
+		text.color = color;
+		text.breakBefore = pagebreak;
+		rb.addChild(text);
 		overrideHeight(rb, context);
-		float widthOverride = width(context);
-		if(widthOverride > -1) {
-			Box text = rb;
-			rb = Box.HContainer(false);
-			rb.addChild(text);
-			rb.width = widthOverride;
-			if(align == ALIGN_RIGHT) {
-				text.x = rb.width - text.width;
-			} else if(align == ALIGN_CENTER) {
-				text.x = (rb.width - text.width) / 2;
-			}
+		overrideWidth(rb, context);
+		if(align == ALIGN_RIGHT) {
+			text.x = rb.width - text.width;
+		} else if(align == ALIGN_CENTER) {
+			text.x = (rb.width - text.width) / 2;
 		}
 		return rb;
 	}

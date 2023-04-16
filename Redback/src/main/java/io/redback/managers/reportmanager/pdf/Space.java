@@ -14,13 +14,14 @@ public class Space extends Unit {
 	
 	public Space(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
 		super(rm, rc, c);
-		width = config.containsKey("width") ? config.getNumber("width").floatValue() : 10;
-		height = config.containsKey("height") ? config.getNumber("height").floatValue() : 10;
+
 	}
 
 	public Box produce(Map<String, Object> context) throws IOException, RedbackException {
-		Box c = Box.Empty(width, height);
+		Box c = Box.Empty(10, 10);
 		c.breakBefore = pagebreak;
+		overrideWidth(c, context);
+		overrideHeight(c, context);
 		return c;
 	}
 
