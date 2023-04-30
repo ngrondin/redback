@@ -100,8 +100,12 @@ public class ConfigCache<T> {
 		}
 	}
 
-	
 	public T get(Session session, String name) throws RedbackException
+	{
+		return get(session, name, true);
+	}
+	
+	public T get(Session session, String name, boolean exceptionOnNotFound) throws RedbackException
 	{
 		T config = null;
 		String domainLock = session.getDomainLock();
@@ -124,10 +128,10 @@ public class ConfigCache<T> {
 			config = getFromCacheOrClient(session, name, null);
 		} 
 		
-		if(config != null)
-			return config;
-		else
+		if(config == null && exceptionOnNotFound)
 			throw new RedbackConfigNotFoundException("Config not found for " + service + "." + category + "." + name);
+		else
+			return config;
 	}
 	
 	public List<T> list(Session session, DataMap filter) throws RedbackException 

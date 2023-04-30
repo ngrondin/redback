@@ -1,10 +1,12 @@
 package io.redback.managers.processmanager.units;
 
-import io.firebus.Payload;
+import io.firebus.data.DataEntity;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
 import io.firebus.script.Expression;
 import io.firebus.script.ScriptContext;
+import io.redback.client.ObjectClient;
+import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.processmanager.Process;
@@ -17,10 +19,11 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 {
 	protected String objectName;
 	protected Expression objectUIDExpression;
-	protected String objectFunctionName;
+	protected String functionName;
 	protected ExpressionMap inputExpressionMap;
 	protected ExpressionMap outputExpressionMap;
 	protected String nextNode;
+	protected ObjectClient objectClient;
 	
 	public RedbackObjectExecuteUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
@@ -28,10 +31,11 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 		try {
 			objectName = config.getString("object");
 			objectUIDExpression = pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_uidexpr", config.getString("uid"));
-			objectFunctionName = config.getString("function");
+			functionName = config.getString("function");
 			inputExpressionMap = new ExpressionMap(pm.getScriptFactory(), jsFunctionNameRoot + "_inexpr", config.get("data") != null ? config.getObject("data") : new DataMap());
 			outputExpressionMap = new ExpressionMap(pm.getScriptFactory(), jsFunctionNameRoot + "_outexpr", config.get("outmap") != null ? config.getObject("outmap") : new DataMap());
 			nextNode = config.getString("nextnode");
+			objectClient = new ObjectClient(processManager.getFirebus(), processManager.getObjectServiceName());
 		}
 		catch(Exception e)
 		{
@@ -49,29 +53,15 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 				Session sysUserSession = pi.getOutboundActionner().getSession();
 				DataMap functionParams = inputExpressionMap.eval(context);
 				String objectUID = (String)objectUIDExpression.eval(context);
-				DataMap req = new DataMap();
-				req.put("action", "execute");
-				req.put("object", objectName);
-				req.put("uid", objectUID);
-				req.put("function", objectFunctionName);
-				req.put("data", functionParams);
-				Payload payload = new Payload(req);
-				payload.metadata.put("token", sysUserSession.getToken());
-				payload.metadata.put("session", sysUserSession.getId());
-				payload.metadata.put("domain", sysUserSession.getDomainLock());
-				payload.metadata.put("mime", "application/json");
-				try
-				{
-					Payload response = processManager.getFirebus().requestService(processManager.getObjectServiceName(), payload, 10000);
-					DataMap respData = new DataMap(response.getString());
-					context.put("result", respData);
-					DataMap respOutput = outputExpressionMap.eval(context);
-					pi.setData(respOutput);
-				} 
-				catch (Exception e)
-				{
-					throw new RedbackException("Error executing function '" + objectFunctionName + "' on Redback object '" + objectName + "'",  e);
+				if(objectName != null && objectUID != null) {
+					RedbackObjectRemote ror = objectClient.execute(sysUserSession, objectName, objectUID, functionName, functionParams);
+					context.put("result", ror.data);
+				} else {
+					DataEntity resp = objectClient.execute(sysUserSession, functionName, functionParams);
+					context.put("result", resp);
 				}
+				DataMap respOutput = outputExpressionMap.eval(context);
+				pi.setData(respOutput);				
 				Logger.finer("rb.process.objectexecute.finish", null);
 			}
 			pi.setCurrentNode(nextNode);

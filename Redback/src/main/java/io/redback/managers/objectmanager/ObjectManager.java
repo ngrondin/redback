@@ -520,27 +520,31 @@ public class ObjectManager
 	public Object executeFunction(Session session, String function, DataMap param) throws RedbackException
 	{
 		Object ret = null;
-		ScriptConfig scriptCfg = globalScripts.get(session, function);
-		if(session.getUserProfile().canExecute("rb.scripts." + function) || session.getUserProfile().canExecute("rb.accesscat." + scriptCfg.getAccessCategory())) {
-			DomainScriptLogger domainScriptLogger = scriptCfg.getDomain() != null ? new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info") : null;	
-			try {
-				ScriptContext context = session.getScriptContext().createChild();
-				context.put("param", param);
-				if(domainScriptLogger != null)
-					context.declare("log", domainScriptLogger);
-				ret = scriptCfg.execute(context);
-				return ret;
-			} catch(Exception e) {
-				if(domainScriptLogger != null)
-					domainScriptLogger.log(StringUtils.rollUpExceptions(e));
-				throw new RedbackException("Error in script " + function, e);
-			} finally {
-				if(domainScriptLogger != null)
-					domainScriptLogger.commit();
-			}
-		} else {
-			throw new RedbackUnauthorisedException("No rights to execute script " + function);
+		ScriptConfig scriptCfg = globalScripts.get(session, function, false);
+		if(scriptCfg != null) {
+			if(session.getUserProfile().canExecute("rb.scripts." + function) || session.getUserProfile().canExecute("rb.accesscat." + scriptCfg.getAccessCategory())) {
+				DomainScriptLogger domainScriptLogger = scriptCfg.getDomain() != null ? new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info") : null;	
+				try {
+					ScriptContext context = session.getScriptContext().createChild();
+					context.put("param", param);
+					if(domainScriptLogger != null) {
+						context.declare("log", domainScriptLogger);
+						context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, scriptCfg.getDomain()));
+					}
+					ret = scriptCfg.execute(context);
+				} catch(Exception e) {
+					if(domainScriptLogger != null)
+						domainScriptLogger.log(StringUtils.rollUpExceptions(e));
+					throw new RedbackException("Error in script " + function, e);
+				} finally {
+					if(domainScriptLogger != null)
+						domainScriptLogger.commit();
+				}
+			} else {
+				throw new RedbackUnauthorisedException("No rights to execute script " + function);
+			}			
 		}
+		return ret;
 	}	
 	
 	public List<FunctionInfo> listFunctions(Session session, String category) throws RedbackException {

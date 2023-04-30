@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.Firebus;
+import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
@@ -109,6 +110,15 @@ public class ObjectClient extends Client
 		req.put("data", data);
 		DataMap resp = requestDataMap(session, req);
 		return new RedbackObjectRemote(firebus, serviceName, session.getToken(), resp);
+	}
+	
+	public DataEntity execute(Session session, String function, DataMap data) throws RedbackException  {
+		DataMap req = new DataMap();
+		req.put("action", "execute");
+		req.put("function", function);
+		req.put("data", data);
+		DataMap resp = requestDataMap(session, req);
+		return resp.get("data");
 	}
 	
 	public MultiResponse multi(Session session, MultiRequest multiRequest) throws RedbackException {

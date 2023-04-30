@@ -77,7 +77,7 @@ public class UserProfile
 		boolean hasDomain = false;
 		DataList list = profile.getList("domains");
 		for(int i = 0; i < list.size(); i++)
-			if(list.getString(i).equals(domain))
+			if(list.getString(i).equals(domain) || list.getString(i).equals("*"))
 				hasDomain = true;
 		return hasDomain;
 	}

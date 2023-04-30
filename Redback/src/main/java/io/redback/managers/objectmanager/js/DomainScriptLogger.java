@@ -52,15 +52,18 @@ public class DomainScriptLogger extends CallableJSWrapper
 	
 	public void commit() {
 		try {
-			String id = UUID.randomUUID().toString();
-			DataMap key = new DataMap("_id", id);
-			DataMap log = new DataMap();
-			log.put("domain", domain);
-			log.put("script", scriptName);
-			log.put("entry", builder.toString());
-			log.put("username", session.getUserProfile().getUsername());
-			log.put("date", new Date());
-			dataClient.putData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), collectionConfig.convertObjectToSpecific(log));
+			String content = builder.toString();
+			if(content.trim().length() > 0) {
+				String id = UUID.randomUUID().toString();
+				DataMap key = new DataMap("_id", id);
+				DataMap log = new DataMap();
+				log.put("domain", domain);
+				log.put("script", scriptName);
+				log.put("entry", builder.toString());
+				log.put("username", session.getUserProfile().getUsername());
+				log.put("date", new Date());
+				dataClient.putData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), collectionConfig.convertObjectToSpecific(log));				
+			}
 		} catch(Exception e) {
 			Logger.severe("rb.script.addlog", "Error adding log entry", e);
 		}
