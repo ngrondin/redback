@@ -64,7 +64,9 @@ public class RedbackAggregate extends RedbackElement
 		session = s;
 		objectManager = om;
 		config = cfg;
-		canRead = session.getUserProfile().canRead("rb.objects." + config.getName());
+		String objectRightKey = "rb.objects." + config.getName();
+		String accessCatKey = "rb.accesscat." + config.getAccessCategory();
+		canRead = session.getUserProfile().canRead(objectRightKey) || session.getUserProfile().canRead(accessCatKey);
 		dimensions = new HashMap<String, Value>();
 		metrics = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
