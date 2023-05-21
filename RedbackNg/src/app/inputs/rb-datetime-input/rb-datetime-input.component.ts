@@ -28,7 +28,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     if(this.isEditing) {
       val = this.editedValue;
     } else {
-      val = Formatter.formatDateTime(this.getDateValue());
+      val = Formatter.formatDateTimeCustom(this.getDateValue(), this.format);
       //val = this.formatDateTime(this.getDateValue());
     }
     return val;
@@ -105,7 +105,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
   public startEditing() {
     super.startEditing();
     if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
-      this.editedValue = Formatter.formatDateTime(this.getDateValue());
+      this.editedValue = Formatter.formatDateTimeCustom(this.getDateValue(), this.format);
       //this.editedValue = this.formatDateTime(this.getDateValue());
     } else {
       this.editedValue = '';

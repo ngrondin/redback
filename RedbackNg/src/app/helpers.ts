@@ -120,6 +120,20 @@ export class Formatter {
         }
         return str;
     }
+
+  static formatDateTimeCustom(dt: Date, format: string) : string {
+        let str = "";
+        if(dt != null) {
+            str = format;
+            str = str.replace('YYYY', dt.getFullYear().toString());
+            str = str.replace('YY', (dt.getFullYear() % 100).toString());
+            str = str.replace('MM', (dt.getMonth() + 1).toString().padStart(2, "0"));
+            str = str.replace('DD', (dt.getDate()).toString().padStart(2, "0"));
+            str = str.replace('HH', (dt.getHours()).toString().padStart(2, "0"));
+            str = str.replace('mm', (dt.getMinutes()).toString().padStart(2, "0"));
+        }
+        return str;
+    }   
 }
 
 @Pipe({name: 'rbDate'})
