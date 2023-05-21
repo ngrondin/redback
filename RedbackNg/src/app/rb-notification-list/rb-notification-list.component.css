@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 20vw;
 }
 
 :host > mat-action-list > button.mat-menu-item {
@@ -15,7 +16,7 @@
     flex-direction: row;
     align-items: center;
     color: white;
-    background-color: #307fd2;
+    background-color: var(--primary-dark2-color)
 }
 
 .rb-notification-title {
@@ -24,7 +25,8 @@
 }
 
 .rb-notification-listcontainer {
-
+    display: flex;
+    flex-direction: column;
 }
 
 .rb-notification-group {
@@ -35,17 +37,16 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    background-color: var(--primary-dark2-color);
+    background-color: var(--primary-color);
     cursor: pointer;
     border-top: 1px solid white;
-    width: 20vw;
     padding: 6px 8px 6px 15px;
 }
 
 .rb-notification-group-header-name {
     display: block;
     flex: 1 1 auto;
-    color: #eeeeee;
+    color: var(--light-inverse-writing-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -57,7 +58,7 @@
     display: flex;
     flex-direction: row;
     /*background-color: #d50707;*/
-    color: #cccccc;
+    color: var(--dark-inverse-writing-color);
     font-size: 0.8rem;
     border-radius: 12px;
     padding: 3px;
