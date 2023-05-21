@@ -12,33 +12,51 @@
 </div> 
 <div
     class="rb-notification-listcontainer hscroll">
-    <mat-action-list>
+    <div 
+        *ngFor="let group of groups"
+        class="rb-notification-group">
         <div
-            *ngFor="let notification of list"
-            class="rb-notification-listitem">
-            <button 
-                mat-menu-item
-                style="height: auto"
-                (click)="selectNotification(notification)">
-                <div
-                    class="rb-notification-listitemcontent">
-                    <div
-                        class="rb-notification-listheader">
-                        {{notification.label}}
-                    </div>
-                    <div
-                        class="rb-notification-listsub">
-                        {{notification.message}}
-                    </div>
-                </div>        
-            </button>
+            *ngIf="group.group != null"
+            class="rb-notification-group-header"
+            (click)="clickGroupHeader(group.group)">
             <div
-                class="rb-notification-divider">
-                <div
-                    class="rb-notification-divider-line">
-                </div>
+                class="rb-notification-group-header-name">
+                {{group.group}}            
+            </div>
+            <div
+                class="rb-notification-group-header-count">
+                {{group.exceptions.length}}            
             </div>            
         </div>
+        <mat-action-list
+            *ngIf="group.group == null || group.group == selectedGroup">
+            <div
+                *ngFor="let notification of group.exceptions"
+                class="rb-notification-listitem">
+                <button 
+                    mat-menu-item
+                    style="height: auto"
+                    (click)="selectNotification(notification)">
+                    <div
+                        class="rb-notification-listitemcontent">
+                        <div
+                            class="rb-notification-listheader">
+                            {{notification.label}}
+                        </div>
+                        <div
+                            class="rb-notification-listsub">
+                            {{notification.message}}
+                        </div>
+                    </div>        
+                </button>
+                <div
+                    class="rb-notification-divider">
+                    <div
+                        class="rb-notification-divider-line">
+                    </div>
+                </div>            
+            </div>
+        </mat-action-list>        
+    </div>
 
-    </mat-action-list>
 </div>

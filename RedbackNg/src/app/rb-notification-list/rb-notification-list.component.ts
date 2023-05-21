@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { RbNotification } from 'app/datamodel';
 import { NotificationService } from 'app/services/notification.service';
+import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
   selector: 'rb-notification-list',
@@ -10,21 +11,43 @@ import { NotificationService } from 'app/services/notification.service';
 export class RbNotificationListComponent implements OnInit {
   @Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() close: EventEmitter<any> = new EventEmitter();
+
+  selectedGroup: String = null;
   
   constructor(
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private userprefService: UserprefService
   ) { 
   }
   
   ngOnInit(): void {
   }
 
-  public get list() : RbNotification[] {
-    return this.notificationService.topExceptions;
+  public get groups() : any[] {
+    let grouping = this.userprefService.getGlobalPreferenceValue("notifgroup");
+    if(grouping == "byaction") {
+      return this.notificationService.topExceptionsByAction;
+    } else if(grouping == "byobject") {
+      return this.notificationService.topExceptionsByObject;
+    } else {
+      return this.notificationService.topExceptions;
+    }
   }
+
+  /*public get list() : RbNotification[] {
+    return this.notificationService.topExceptions;
+  }*/
 
   public closeNotifications() {
     this.close.emit();
+  }
+
+  public clickGroupHeader(groupname: String) {
+    if(this.selectedGroup == groupname) {
+      this.selectedGroup = null;
+    } else {
+      this.selectedGroup = groupname;
+    }
   }
 
   public selectNotification(notification: RbNotification) {

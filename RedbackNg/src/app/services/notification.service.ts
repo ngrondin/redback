@@ -13,7 +13,9 @@ import { ErrorService } from './error.service';
 export class NotificationService {
   notifications: RbNotification[] = [];
   exceptionCount: number;
-  topExceptions: RbNotification[] = [];
+  topExceptions: any[] = [];
+  topExceptionsByAction: any[] = [];
+  topExceptionsByObject: any[] = [];
   page: number;
   pageSize: number = 500;
   lastReceived: Date;
@@ -103,8 +105,13 @@ export class NotificationService {
   }
 
   private calcStats() {
-    this.topExceptions = this.notifications.filter(item => item.type == 'exception' || item.type == 'notification').slice(0, 100);
-    this.exceptionCount = this.notifications.filter(item => item.type == 'exception' || item.type == 'notification').length;
+    let exceptions = this.notifications.filter(item => item.type == 'exception' || item.type == 'notification');
+    this.exceptionCount = exceptions.length;
+    this.topExceptions = [{group:null, exceptions:exceptions.slice(0, 100)}];
+    let actions = exceptions.map(item => item.message).filter((value, index, self) => self.indexOf(value) == index);
+    let objects = exceptions.map(item => item.data.objectname).filter((value, index, self) => self.indexOf(value) == index);
+    this.topExceptionsByAction = actions.map(action => ({group: action, exceptions: exceptions.filter(e => e.message == action).slice(0, 100)}));
+    this.topExceptionsByObject = objects.map(objectname => ({group: objectname, exceptions: exceptions.filter(e => e.data.objectname == objectname).slice(0, 100)}));
   }
 
   private publish(type: string, notif: RbNotification) {

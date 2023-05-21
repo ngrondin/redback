@@ -3,6 +3,7 @@ import { Time } from 'app/datamodel';
 import { Overlay } from '@angular/cdk/overlay';
 import { RbPopupDatetimeComponent } from 'app/popups/rb-popup-datetime/rb-popup-datetime.component';
 import { RbPopupInputComponent } from '../abstract/rb-popup-input';
+import { Formatter } from 'app/helpers';
 
 @Component({
   selector: 'rb-datetime-input',
@@ -27,7 +28,8 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     if(this.isEditing) {
       val = this.editedValue;
     } else {
-      val = this.formatDateTime(this.getDateValue());
+      val = Formatter.formatDateTime(this.getDateValue());
+      //val = this.formatDateTime(this.getDateValue());
     }
     return val;
   }
@@ -39,7 +41,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     }
   }
 
-  private formatDateTime(dt: Date) : string {
+  /*private formatDateTime(dt: Date) : string {
     let val = null;
     if(dt != null) {
       val = this.format;
@@ -51,7 +53,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
       val = val.replace('mm', (dt.getMinutes()).toString().padStart(2, "0"));
     }
     return val;
-  }
+  }*/
 
   private getDateValue() : Date {
     let iso: string = this.getISOValue();
@@ -103,7 +105,8 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
   public startEditing() {
     super.startEditing();
     if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
-      this.editedValue = this.formatDateTime(this.getDateValue());
+      this.editedValue = Formatter.formatDateTime(this.getDateValue());
+      //this.editedValue = this.formatDateTime(this.getDateValue());
     } else {
       this.editedValue = '';
     }

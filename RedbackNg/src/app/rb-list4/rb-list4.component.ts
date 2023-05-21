@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { Evaluator } from 'app/helpers';
+import { Evaluator, Formatter } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 
@@ -86,8 +86,9 @@ export class RbList4Component extends RbDataObserverComponent {
       }
 
       if(this.meta2attribute !== null) {
-        data["meta2"] = this.formatText(obj.get(this.meta2attribute));
-        data["meta2isabadge"] = data["meta2"] !== "" && !isNaN(Number(data["meta2"]))
+        let val = this.formatText(obj.get(this.meta2attribute));
+        data["meta2"] = val
+        data["meta2isabadge"] = (val !== "" && !isNaN(Number(data["meta2"])))
       }
 
       let thisColorAttribute = this.colorattribute;
@@ -117,13 +118,18 @@ export class RbList4Component extends RbDataObserverComponent {
     }
   }
 
-  private formatText(txt: string) : string {
-    if(txt == null) {
+  private formatText(txt: any) : string {
+    if(txt === null) {
       return "";
+    } else if(txt === true) {
+      return String.fromCharCode(9745);
+    } else if(txt === false) {
+      return String.fromCharCode(9634);
     } else if(this.isoDateRegExp.test(txt)) {
-      return (new Date(txt)).toLocaleString();
+      return Formatter.formatDateTime(new Date(txt));
+      //return (new Date(txt)).toLocaleString();
     } else {
-      return txt;
+      return txt.toString();
     }
   }
 

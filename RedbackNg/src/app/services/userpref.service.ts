@@ -42,6 +42,7 @@ export class UserprefService {
     private apiService: ApiService
   ) { 
     this.globalPrefs.push(new GlobalPref({code:'uialt', label: 'UI Styles', options:[{value:'primary', label: 'Primary'}, {value:'alt1', label: 'Alternate 1'}, {value:'alt2', label: 'Alternate 2'}]}));
+    this.globalPrefs.push(new GlobalPref({code:'notifgroup', label: 'Notification Grouping', options:[{value:'nogroup', label: 'No Grouping'}, {value:'byaction', label: 'By Action'}, {value:'byobject', label: 'By Object'}]}));
   }
 
   public load() {

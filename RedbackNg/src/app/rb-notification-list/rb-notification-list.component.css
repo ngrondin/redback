@@ -27,6 +27,42 @@
 
 }
 
+.rb-notification-group {
+
+}
+
+.rb-notification-group-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--primary-dark2-color);
+    cursor: pointer;
+    border-top: 1px solid white;
+    width: 20vw;
+    padding: 6px 8px 6px 15px;
+}
+
+.rb-notification-group-header-name {
+    display: block;
+    flex: 1 1 auto;
+    color: #eeeeee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 12px;
+    font-size: 0.85rem;
+}
+
+.rb-notification-group-header-count {
+    display: flex;
+    flex-direction: row;
+    /*background-color: #d50707;*/
+    color: #cccccc;
+    font-size: 0.8rem;
+    border-radius: 12px;
+    padding: 3px;
+}
+
 .rb-notification-listitem {
 
 }
