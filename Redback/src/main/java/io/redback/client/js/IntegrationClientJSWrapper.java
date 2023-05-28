@@ -83,7 +83,7 @@ public class IntegrationClientJSWrapper extends ObjectJSWrapper {
 				}
 			};
 		} else {
-			return null;
+			return new IntegrationClientInstanceJSWrapper(integrationClient, session, domain, key);
 		}
 	}	
 }

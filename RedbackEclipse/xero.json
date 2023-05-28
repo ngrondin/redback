@@ -1,0 +1,14 @@
+{
+	"name":"xero",
+	"clientid":"4B58D33095D449A69E6E59EBAF8251D4",
+	"clientsecret":"iHZ2dj5MMkvFbVT2jHhpBvud8V7_6OaFBP6oqpYLHeYt8oUr",
+	"scope":"openid profile email offline_access accounting.transactions payroll.employees.read payroll.timesheets payroll.settings.read",
+	"loginurl":"https://login.xero.com/identity/connect/authorize",
+	"tokenurl":"https://identity.xero.com/connect/token",
+	"tokenheaders":"{'Authorization':'Basic ' + rbutils.base64encode(clientid + ':' + clientsecret)}",
+	"method":"(action == 'get' || action == 'list' ? 'get' : 'post')",
+	"header":"{'Authorization':'Bearer ' + clientdata.access_token, 'accept':'application/json', 'Content-Type':'application/json', 'Xero-tenant-id': clientdata.remotedomain}",
+	"url":"'https://api.xero.com/' + (object == 'PayItems' || object == 'Employees' || object == 'Timesheets'  || object == 'PayrollCalendars' ? 'payroll.xro/1.0' : 'api.xro/2.0') + '/' + object + (uid != null ? '/' + uid : '') + (filter != null ? '?' + Object.entries(filter).map(item => item[0]+'='+item[1]).join('&') : '')",
+	"body":"data",
+	"response":"(action == 'list' ? {list:response[object]} : response)"
+}

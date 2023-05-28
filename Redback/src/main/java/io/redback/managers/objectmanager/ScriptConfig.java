@@ -42,6 +42,7 @@ public class ScriptConfig
 		scriptVars.add("fc");
 		scriptVars.add("rc");
 		scriptVars.add("nc");
+		scriptVars.add("ic");
 		scriptVars.add("param");
 		try {
 			function = sf.createFunction(name, scriptVars.toArray(new String[] {}), source);

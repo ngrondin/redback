@@ -126,6 +126,16 @@ public class StringUtils
 		return new String(Base64.getDecoder().decode(s));
 	}
 
+	public static String base64urlencode(String s) 
+	{
+		return new String(Base64.getUrlEncoder().encode(s.getBytes()));
+	}
+	
+	public static String base64urldecode(String s) 
+	{
+		return new String(Base64.getUrlDecoder().decode(s));
+	}
+
 
 	public static String base16(int n) 
 	{

@@ -25,6 +25,7 @@ public class IntegrationRootForm extends Form
 		new TextField(_data, "scope", "Scope", this, SWT.NONE);
 		new TextField(_data, "loginurl", "Login URL", this, SWT.NONE);
 		new TextField(_data, "tokenurl", "Token URL", this, SWT.NONE);
+		new TextField(_data, "baseurl", "Base URL", this, SWT.NONE);
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {

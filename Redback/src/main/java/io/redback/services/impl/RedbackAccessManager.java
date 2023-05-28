@@ -19,6 +19,7 @@ import io.firebus.data.DataMap;
 import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
@@ -88,11 +89,15 @@ public class RedbackAccessManager extends AccessManager
 			DecodedJWT jwt = JWT.decode(token);
 			Claim usernameClaim = jwt.getClaim("email");
 			String username = usernameClaim.asString();
-			UserProfile profile = getUserProfile(session, username);
-			if(profile == null) 
-				profile = createEmptyProfile(username);
-			profile.setExpiry(jwt.getExpiresAt().getTime());
-			return profile;
+			if(username != null) {
+				UserProfile profile = getUserProfile(session, username);
+				if(profile == null) 
+					profile = createEmptyProfile(username);
+				profile.setExpiry(jwt.getExpiresAt().getTime());
+				return profile;
+			} else {
+				throw new RedbackInvalidRequestException("token email is numm");
+			}
 		} 
 		catch (RedbackException exception)
 		{

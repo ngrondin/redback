@@ -34,6 +34,7 @@ import io.redback.client.ReportClient;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.FileClientJSWrapper;
 import io.redback.client.js.GeoClientJSWrapper;
+import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.client.js.ProcessClientJSWrapper;
 import io.redback.client.js.ReportClientJSWrapper;
@@ -530,6 +531,7 @@ public class ObjectManager
 					if(domainScriptLogger != null) {
 						context.declare("log", domainScriptLogger);
 						context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, scriptCfg.getDomain()));
+						context.put("ic", new IntegrationClientJSWrapper(getIntegrationClient(), session, scriptCfg.getDomain()));
 					}
 					ret = scriptCfg.execute(context);
 				} catch(Exception e) {

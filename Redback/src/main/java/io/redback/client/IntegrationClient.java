@@ -73,6 +73,18 @@ public class IntegrationClient extends Client {
 		return requestDataMap(session, req);
 	}
 	
+	public DataMap execute(Session session, String client, String domain, String function, Object data, DataMap options) throws RedbackException {
+		DataMap req = new DataMap();
+		req.put("client", client);
+		req.put("domain", domain);
+		req.put("action", "execute");
+		req.put("function", function);
+		req.put("data", data);
+		if(options != null)
+			req.put("options", options);
+		return requestDataMap(session, req);
+	}
+	
 	public void clearCachedClientData(Session session, String client, String domain) throws RedbackException {
 		DataMap req = new DataMap();
 		req.put("client", client);

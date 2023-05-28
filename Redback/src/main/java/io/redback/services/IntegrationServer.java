@@ -28,32 +28,31 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 		try
 		{
 			DataMap request = payload.getDataMap();
-			String client = request.getString("client");
+			String get = request.getString("get");
 			String domain = request.getString("domain");
 			String action = request.getString("action");
-			String get = request.getString("get");
 			String objectName = request.getString("object");
 			DataMap options = request.getObject("options");
 			if(get != null) 
 			{
-				client = get.startsWith("/") ? get.substring(1) : get;
 				String code = request.getString("code");
 				String state = request.getString("state");
-				if(state != null && state.equals("")) state = null;
 				if(domain == null) domain = session.getUserProfile().getDefaultDomain();
 				String response = null;
 				if(code == null) {
-					String redirect = getLoginUrl(session, client, domain, state);
+					String client = get.startsWith("/") ? get.substring(1) : get;
+					String redirect = getLoginUrl(session, client, domain);
 					response = "<html><body><script>window.location='" + redirect + "';</script></body></html>";
 				} else {
-					exchangeAuthCode(session, client, domain, code);
-					response = "<html><body>" + (state != null ? "<script>window.location='" + state + "';</script>" : "Logged in. Thank you.") + "</body></html>";
+					exchangeAuthCode(session, null, domain, code, state);
+					response = "<html><body>Logged in. Thank you.</body></html>";
 				}
 				responsePayload = new Payload(response);
 			}
 			else if(action != null)
 			{
 				DataMap response = null;
+				String client = request.getString("client");
 				if(objectName != null)
 				{
 					if(action.equals("get"))
@@ -109,6 +108,28 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 						throw new RedbackException("The '" + action + "' action is not valid as an object request");
 					}
 				}
+				else if(action.equals("execute"))
+				{
+					String function = request.getString("function");
+					DataEntity data = request.get("data");
+					Object ret = execute(session, client, domain, function, data, options);
+					if(ret instanceof List) {
+						DataList respList = new DataList();
+						for(Object map: (List<?>)ret) {
+							if(map instanceof DataMap)
+								respList.add(map);
+						}
+						response = new DataMap("list", respList);						
+					}
+					else if(ret instanceof DataMap)
+					{
+						response = (DataMap)ret;
+					}
+					else
+					{
+						response = new DataMap("result", "ok");
+					}
+				}
 				else if(action.equals("clearcacheddata"))
 				{
 					clearCachedClientData(session, client, domain);
@@ -144,20 +165,22 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 	}
 
 	
-	protected abstract DataMap get(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException;
+	protected abstract DataMap get(Session session, String name, String domain, String objectName, String uid, DataMap options) throws RedbackException;
 
-	protected abstract List<DataMap> list(Session session, String client, String domain, String objectName, DataMap filter, DataMap options, int page, int pageSize) throws RedbackException;
+	protected abstract List<DataMap> list(Session session, String name, String domain, String objectName, DataMap filter, DataMap options, int page, int pageSize) throws RedbackException;
 
-	protected abstract DataMap update(Session session, String client, String domain, String objectName, String uid, DataEntity data, DataMap options) throws RedbackException;
+	protected abstract DataMap update(Session session, String name, String domain, String objectName, String uid, DataEntity data, DataMap options) throws RedbackException;
 
-	protected abstract DataMap create(Session session, String client, String domain, String objectName, DataEntity data, DataMap options) throws RedbackException;
-
-	protected abstract void delete(Session session, String client, String domain, String objectName, String uid, DataMap options) throws RedbackException;
-
-	protected abstract String getLoginUrl(Session session, String client, String domain, String state) throws RedbackException;
+	protected abstract DataMap create(Session session, String name, String domain, String objectName, DataEntity data, DataMap options) throws RedbackException;
 	
-	protected abstract void exchangeAuthCode(Session session, String client, String domain, String code) throws RedbackException;
+	protected abstract void delete(Session session, String name, String domain, String objectName, String uid, DataMap options) throws RedbackException;
+
+	protected abstract Object execute(Session session, String name, String domain, String function, DataEntity data, DataMap options) throws RedbackException;
+
+	protected abstract String getLoginUrl(Session session, String name, String domain) throws RedbackException;
 	
-	protected abstract void clearCachedClientData(Session session, String client, String domain) throws RedbackException;
+	protected abstract void exchangeAuthCode(Session session, String name, String domain, String code, String state) throws RedbackException;
+	
+	protected abstract void clearCachedClientData(Session session, String name, String domain) throws RedbackException;
 
 }

@@ -59,6 +59,18 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 					return StringUtils.base64decode((String)arguments[0]);
 				}
 			};
+		} else if(key.equals("base64urlencode")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return StringUtils.base64urlencode((String)arguments[0]);
+				}
+			};
+		} else if(key.equals("base64urldecode")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return StringUtils.base64urldecode((String)arguments[0]);
+				}
+			};
 		} else if(key.equals("urlencode")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
