@@ -10,6 +10,7 @@ import { RbFileInputComponent } from "app/inputs/rb-file-input/rb-file-input.com
 import { RbNumberInputComponent } from "app/inputs/rb-number-input/rb-number-input.component";
 import { RbPercentInputComponent } from "app/inputs/rb-percent-input/rb-percent-input.component";
 import { RbRelatedInputComponent } from "app/inputs/rb-related-input/rb-related-input.component";
+import { RbHierarchyInputComponent } from "app/inputs/rb-hierarchy-input/rb-hierarchy-input.component";
 import { RbStarsInputComponent } from "app/inputs/rb-stars-input/rb-stars-input.component";
 import { RbStringInputComponent } from "app/inputs/rb-string-input/rb-string-input.component";
 import { RbSwitchInputComponent } from "app/inputs/rb-switch-input/rb-switch-input.component";
@@ -59,6 +60,7 @@ export const componentRegistry = {
     "input": RbStringInputComponent,
     "numberinput":RbNumberInputComponent,
     "relatedinput": RbRelatedInputComponent,
+    "hierarchyinput": RbHierarchyInputComponent,
     "list3": RbListComponent,
     "list4": RbList4Component,
     "tree": RbTreeComponent,

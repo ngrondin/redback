@@ -1,0 +1,41 @@
+<mat-list>
+    <mat-list-item
+        *ngFor="let item of hierarchy">
+        <button 
+            mat-button 
+            class="rb-list-select-button"
+            (click)="select(item)">
+            {{item.get(config.displayattribute)}}
+        </button>
+        <button 
+            mat-button 
+            class="rb-list-expand-button"
+            *ngIf="isHierarchical"
+            (click)="colapse(item)">
+                <mat-icon>expand_less</mat-icon>
+            </button>
+    </mat-list-item>    
+    <mat-list-item
+        *ngFor="let item of list">
+        <button 
+            mat-button 
+            [ngClass]="'rb-list-select-button' + (getHighlighted() == item ? ' rb-list-select-button-hightlight' : '')"
+            (click)="select(item)">
+            {{item.data[config.displayattribute]}}
+        </button>
+        <button 
+            mat-button 
+            [ngClass]="'rb-list-expand-button' + (getHighlighted() == item ? ' rb-list-select-button-hightlight' : '')"
+            *ngIf="isHierarchical"
+            (click)="expand(item)">
+                <mat-icon>expand_more</mat-icon>
+            </button>
+    </mat-list-item>
+</mat-list>
+<div
+    class="rb-spinner-container"
+    *ngIf="isLoading">
+    <mat-spinner
+        diameter="20">
+    </mat-spinner>
+</div>

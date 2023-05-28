@@ -1,8 +1,8 @@
 :host {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
-margin-right: 5px;
+    align-items: stretch;
+    margin-right: 5px;
     /*margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)*/
 }
 

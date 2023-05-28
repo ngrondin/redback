@@ -9,7 +9,7 @@ import { RbFieldInputComponent } from '../abstract/rb-field-input';
   styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbTextareaInputComponent extends RbFieldInputComponent {
-  @Input('rows') rows: number = 3;
+  @Input('rows') rows: number = null;
 
   defaultIcon: string = 'description';
 

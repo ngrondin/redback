@@ -124,6 +124,8 @@ import { RbNotificationBellComponent } from './rb-notification-bell/rb-notificat
 import { RbNotificationListComponent } from './rb-notification-list/rb-notification-list.component';
 import { PlatformModule } from '@angular/cdk/platform';
 import { RbTreeComponent } from './rb-tree/rb-tree.component';
+import { RbHierarchyInputComponent } from './inputs/rb-hierarchy-input/rb-hierarchy-input.component';
+import { RbPopupHierarchyComponent } from './popups/rb-popup-hierarchy/rb-popup-hierarchy.component';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -198,9 +200,11 @@ window.redback = window.redback || {};
     RbNumberInputComponent,
     RbTextareaInputComponent,
     RbRelatedInputComponent,
+    RbHierarchyInputComponent,
     RbDatetimeInputComponent,
     RbDurationInputComponent,
     RbPopupListComponent,
+    RbPopupHierarchyComponent,
     RbPopupDatetimeComponent,
     RbPopupAddressesComponent,
     RbSearchComponent,
@@ -274,9 +278,10 @@ window.redback = window.redback || {};
   ],
   entryComponents :[
     RbPopupListComponent,
+    RbPopupHierarchyComponent,
     RbPopupDatetimeComponent,
-    RbFilterBuilderComponent,
     RbPopupAddressesComponent,
+    RbFilterBuilderComponent,
     RbReportlistComponent
   ],
   bootstrap: [

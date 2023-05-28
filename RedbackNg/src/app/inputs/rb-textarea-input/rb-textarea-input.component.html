@@ -12,6 +12,7 @@
     <textarea 
         #input
         [class]="'rb-input-input rb-input-text-color' + (mandatoryalert ? ' rb-input-mandatory' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
+        [style.flex-grow]="rows == null ? 1 : 0"
         [(ngModel)]="displayvalue"
         (focus)="onFocus($event)"
         (blur)="onBlur($event)"
