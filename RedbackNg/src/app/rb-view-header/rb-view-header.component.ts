@@ -1,9 +1,9 @@
-import { TOUCH_BUFFER_MS } from '@angular/cdk/a11y';
+//import { TOUCH_BUFFER_MS } from '@angular/cdk/a11y';
 import { SimpleChanges } from '@angular/core';
 import { EventEmitter, HostBinding, Output } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { hexToRgb } from '@swimlane/ngx-charts';
+//import { hexToRgb } from '@swimlane/ngx-charts';
 import { ViewTarget } from 'app/datamodel';
 import { UserprefService } from 'app/services/userpref.service';
 

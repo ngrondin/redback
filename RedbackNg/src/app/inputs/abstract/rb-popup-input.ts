@@ -83,9 +83,9 @@ export abstract class RbPopupInputComponent extends RbFieldInputComponent {
       let positionStrategy: any = null;
 
       if(direction == 'up') {
-        positionStrategy = this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'top' }, { overlayX: 'start', overlayY: 'bottom' })
+        positionStrategy = this.overlay.position().flexibleConnectedTo(this.inputContainerRef.element).withPositions([{ originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' }])
       } else {
-        positionStrategy = this.overlay.position().connectedTo(this.inputContainerRef.element, { originX: 'start', originY: 'bottom' }, { overlayX: 'start', overlayY: 'top' })
+        positionStrategy = this.overlay.position().flexibleConnectedTo(this.inputContainerRef.element).withPositions([{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top' }])
       }
 
       this.overlayRef = this.overlay.create({

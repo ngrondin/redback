@@ -11,6 +11,7 @@ var versionOrDefault = version != null ? version : 'default';
   <link rel="icon" type="image/x-icon" href="<%=config.logo%>">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="<%=deployment.uiservicepath%>/resource/styles.css" rel="stylesheet">
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%=global.googlekey%>&libraries=places"></script>
   <script>
     var googlekey = "<%=global.googlekey%>";
@@ -33,15 +34,19 @@ var versionOrDefault = version != null ? version : 'default';
     clientservice="<%=deployment.clientservicepath%>"
     usecsforapi="<%=deployment.useclientforapi%>">
   </app-root>
+  
+  <script src="<%=deployment.uiservicepath%>/resource/runtime.js" type="module"></script>
+  <script src="<%=deployment.uiservicepath%>/resource/polyfills.js" type="module"></script>
+  <script src="<%=deployment.uiservicepath%>/resource/main.js" type="module"></script>
 
-  <script src="/<%=deployment.uiservicepath%>/resource/runtime-es2015.js" type="module"></script>
+  <!--<script src="/<%=deployment.uiservicepath%>/resource/runtime-es2015.js" type="module"></script>
   <script src="/<%=deployment.uiservicepath%>/resource/runtime-es5.js" nomodule defer></script>
   <script src="/<%=deployment.uiservicepath%>/resource/polyfills-es5.js" nomodule defer></script>
   <script src="/<%=deployment.uiservicepath%>/resource/polyfills-es2015.js" type="module"></script>
   <script src="/<%=deployment.uiservicepath%>/resource/styles-es2015.js" type="module"></script>
   <script src="/<%=deployment.uiservicepath%>/resource/styles-es5.js" nomodule defer></script>
   <script src="/<%=deployment.uiservicepath%>/resource/main-es2015.js" type="module"></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/main-es5.js" nomodule defer></script></body>
+  <script src="/<%=deployment.uiservicepath%>/resource/main-es5.js" nomodule defer></script></body>-->
 
 </body>
 </html>
