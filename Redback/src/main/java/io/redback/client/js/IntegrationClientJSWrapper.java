@@ -82,6 +82,13 @@ public class IntegrationClientJSWrapper extends ObjectJSWrapper {
 					return null;
 				}
 			};
+		} else if(key.equals("client")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String name = (String)arguments[0];
+					return new IntegrationClientInstanceJSWrapper(integrationClient, session, domain, name);
+				}
+			};			
 		} else {
 			return new IntegrationClientInstanceJSWrapper(integrationClient, session, domain, key);
 		}
