@@ -133,7 +133,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     }
   
     public onClick(event: any) {
-      console.log("Graph click");
+      //console.log("Graph click");
       let dimensionFilter = {};
       const name = event.name;
       this.aggregates.forEach(agg => {

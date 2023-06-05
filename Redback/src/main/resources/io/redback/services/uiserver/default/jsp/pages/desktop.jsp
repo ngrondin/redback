@@ -38,6 +38,7 @@ var versionOrDefault = version != null ? version : 'default';
   <script src="<%=deployment.uiservicepath%>/resource/runtime.js" type="module"></script>
   <script src="<%=deployment.uiservicepath%>/resource/polyfills.js" type="module"></script>
   <script src="<%=deployment.uiservicepath%>/resource/main.js" type="module"></script>
+  <script src="<%=deployment.uiservicepath%>/resource/971.js" type="module"></script>
 
   <!--<script src="/<%=deployment.uiservicepath%>/resource/runtime-es2015.js" type="module"></script>
   <script src="/<%=deployment.uiservicepath%>/resource/runtime-es5.js" nomodule defer></script>

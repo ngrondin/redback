@@ -70,6 +70,6 @@ export class RbTableComponent extends RbDataObserverComponent {
   }
 
   canDelete(object: RbObject) {
-    return true;
+    return object.canDelete()
   }
 }

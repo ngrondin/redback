@@ -1,7 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
-
+@import '~quill/dist/quill.snow.css';
 
 :root {
 	--main-color: #3f51b5;
@@ -181,6 +181,39 @@ rb-list-scroll > mat-action-list > button {
 	stroke: white!important;
 } 
 
+/************ MAT specific ************/
+
+
+.mat-menu-panel {
+    background-color: white;
+}
+
+.mat-menu-item {
+	background-color: white;
+}
+
+
+/************ Quill specific ************/
+
+.ql-stroke {
+    stroke: var(--light-writing-color)!important;
+    color: var(--light-writing-color)!important;
+}
+
+.ql-fill {
+    stroke: var(--light-writing-color)!important;
+    color: var(--light-writing-color)!important;
+}
+
+.ql-picker-label {
+    stroke: var(--light-writing-color)!important;
+    color: var(--light-writing-color)!important;	
+}
+
+.ql-editor {
+	font-size: 0.9rem;
+}
+
 /******** Others *********/
 
 rb-view-loader {
@@ -210,16 +243,6 @@ rb-layout {
 	overflow: hidden;
 }
 
-/************ MAT specific ************/
-
-
-.mat-menu-panel {
-    background-color: white;
-}
-
-.mat-menu-item {
-	background-color: white;
-}
 
 /*************************************/
 

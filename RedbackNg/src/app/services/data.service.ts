@@ -86,10 +86,10 @@ export class DataService {
 
   fetchList(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean) : Observable<any> {
     return new Observable((observer) => {
-      console.log((new Date()).getTime() + " Requesting list " + name);
+      //console.log((new Date()).getTime() + " Requesting list " + name);
       this.apiService.listObjects(name, filter, search, sort, page, pageSize, false).subscribe(
         resp => {
-          console.log((new Date()).getTime() + " Received list");
+          //console.log((new Date()).getTime() + " Received list");
           const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
           this.finalizeReceipt();
           observer.next(rbObjectArray);
@@ -105,7 +105,7 @@ export class DataService {
 
   fetchEntireList(name: string, filter: any, search: string, sort: any) : Observable<any> {
     return new Observable((observer) => {
-      console.log((new Date()).getTime() + " Requesting entire list " + name);
+      //console.log((new Date()).getTime() + " Requesting entire list " + name);
       this._fetchEntireList(observer, name, filter, search, sort, 0, 500);
     });
   }
@@ -118,7 +118,7 @@ export class DataService {
         if(resp.list.length == pageSize) {
           this._fetchEntireList(observer, name, filter, search, sort, page + 1, pageSize);
         } else {
-          console.log((new Date()).getTime() + " Received entire list");
+          //console.log((new Date()).getTime() + " Received entire list");
           this.finalizeReceipt();
           observer.complete();
         }
@@ -190,18 +190,18 @@ export class DataService {
     let objects = [...this.deferredFetchQueue.objects];
     this.deferredFetchQueue.clear();
     if(multi.length > 0) {
-      console.log((new Date()).getTime() + " Fetching enqueued: " + multi.map(i => i.key).join(','));
+      //console.log((new Date()).getTime() + " Fetching enqueued: " + multi.map(i => i.key).join(','));
       this.apiService.objectMulti(multi).subscribe(
         resp => {
-          console.log((new Date()).getTime() + " Received related multifetch");
+          //console.log((new Date()).getTime() + " Received related multifetch");
           for(var objectname of Object.keys(resp)) {
             const rbObjectArray = Object.values(resp[objectname].list).map(json => this.receive(json));
           }
-          console.log((new Date()).getTime() + " Re-running linkMissingRelated");
+          //console.log((new Date()).getTime() + " Re-running linkMissingRelated");
           for(var object of objects) {
             object.linkMissingRelated();
           }
-          console.log((new Date()).getTime() + " Finished linkMissingRelated");
+          //console.log((new Date()).getTime() + " Finished linkMissingRelated");
           this.finalizeReceipt();
 
         }

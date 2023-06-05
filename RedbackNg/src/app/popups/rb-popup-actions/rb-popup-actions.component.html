@@ -1,13 +1,14 @@
 <div
     *ngIf="config.actions.length == 0"
-    class="rb-action-group-message">
+    class="rb-popup-actions-container">
     No actions
 </div>
-<rb-list-item
+<rb-clickable
     *ngFor="let action of config.actions"
+    [focus]="action.focus"
     (click)="clickAction(action)">
     <div
         class="rb-popup-actions-container">
         {{action.label}}
     </div>
-</rb-list-item>
+</rb-clickable>

@@ -123,7 +123,29 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 						throw new RuntimeException("Error creating Base64 Mime Message", e);
 					}
 				}
+			};	
+		} else if(key.equals("isHtml")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						String str = (String)arguments[0];
+						return StringUtils.isHtml(str);
+					} catch(Exception e) {
+						throw new RuntimeException("Error determining if is html", e);
+					}
+				}
 			};			
+		} else if(key.equals("stripHtml")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						String str = (String)arguments[0];
+						return StringUtils.stripHtml(str);
+					} catch(Exception e) {
+						throw new RuntimeException("Error stripping html", e);
+					}
+				}
+			};				
 		} else {	
 			return null;
 		}

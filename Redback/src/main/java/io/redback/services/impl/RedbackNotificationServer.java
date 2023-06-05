@@ -54,6 +54,7 @@ import io.redback.utils.Email;
 import io.redback.utils.EmailAttachment;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
+import io.redback.utils.StringUtils;
 
 public class RedbackNotificationServer extends NotificationServer {
 	
@@ -113,6 +114,7 @@ public class RedbackNotificationServer extends NotificationServer {
 			        	}
 			        });
 			        
+			        String bodyType = StringUtils.isHtml(email.body) ? "text/html; charset=utf-8" : "text/plain";
 			        Logger.fine("rb.notif.sendemail", null);
 			        Message msg = new MimeMessage(mailSession);
 			        msg.setFrom(email.from);
@@ -121,12 +123,12 @@ public class RedbackNotificationServer extends NotificationServer {
 			        msg.setRecipients(Message.RecipientType.TO, email.to);
 			        msg.setSubject(email.subject);
 			        if(email.attachments == null) {
-			        	msg.setText(email.body); 
+			        	msg.setContent(email.body, bodyType);
 			        } else {
 			            Multipart multipart = new MimeMultipart();
 
 			            BodyPart messageBodyPart = new MimeBodyPart();
-			            messageBodyPart.setText(email.body);
+			            messageBodyPart.setContent(email.body, bodyType);
 			            multipart.addBodyPart(messageBodyPart);
 
 			            for(EmailAttachment att: email.attachments) {

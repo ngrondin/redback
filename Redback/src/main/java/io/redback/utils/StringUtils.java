@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -24,6 +26,8 @@ import io.firebus.data.DataMap;
 
 public class StringUtils
 {
+	protected static Pattern htmlPattern = Pattern.compile("<([a-z]|\\/[a-z])(.|\\n)*?>", Pattern.CASE_INSENSITIVE);
+	
 	public static String unescape(String st)
 	{
 		 StringBuilder sb = new StringBuilder(st.length());
@@ -217,15 +221,6 @@ public class StringUtils
 			if(msg.length() > 0)
 				msg = msg + ": ";
 			msg = msg + t.getMessage();
-			/*if(t instanceof PolyglotException) {
-				PolyglotException pge = (PolyglotException)t;
-				SourceSection ss = pge.getSourceLocation();
-				if(ss != null) {
-					msg = msg + " (" + ss.toString() + ")";
-				}
-				if(pge.isHostException())
-					t = pge.asHostException();
-			} */
 			t = t.getCause();
 		}
 		return msg;
@@ -280,5 +275,15 @@ public class StringUtils
         byte[] bytes = buffer.toByteArray();
         return new String(Base64.getEncoder().encode(bytes));
     }
+    
+    public static boolean isHtml(String str) {
+    	Matcher matcher = htmlPattern.matcher(str);
+        return  matcher.find();
+    }
 	
+    public static String stripHtml(String str) {
+    	Matcher matcher = htmlPattern.matcher(str);
+    	String ret = matcher.replaceAll("");
+    	return ret;
+    }
 }

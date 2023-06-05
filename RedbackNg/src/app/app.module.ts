@@ -130,6 +130,8 @@ import { RbListItemComponent } from './clickable/rb-list-item/rb-list-item.compo
 import { RbClickableComponent } from './clickable/rb-clickable/rb-clickable.component';
 import { RbIconbuttonComponent } from './clickable/rb-iconbutton/rb-iconbutton.component';
 import { RbButtonComponent } from './clickable/rb-button/rb-button';
+import { QuillModule } from 'ngx-quill';
+import { RbRichtextInputComponent } from './inputs/rb-richtext-input/rb-richtext-input.component'
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -183,8 +185,8 @@ window.redback = window.redback || {};
             apiKey: window['googlekey']
         }),
         AceModule,
-        RedbackgraphsModule
-    ],
+        RedbackgraphsModule,
+        QuillModule.forRoot()    ],
     exports: [
         MatIconModule
     ],
@@ -269,7 +271,8 @@ window.redback = window.redback || {};
         RbPopupActionsComponent,
         RbListItemComponent,
         RbClickableComponent,
-        RbIconbuttonComponent
+        RbIconbuttonComponent,
+        RbRichtextInputComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

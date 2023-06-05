@@ -1,0 +1,11 @@
+
+
+quill-editor {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+}
+
+quill-editor .ql-container {
+    flex: 1 1 auto!important;
+}

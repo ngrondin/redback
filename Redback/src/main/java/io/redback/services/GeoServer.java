@@ -41,7 +41,7 @@ public abstract class GeoServer extends ServiceProvider
 					if(request.containsKey("address"))
 					{
 						Geometry geometry = geocode(request.getString("address"));
-						responseData = new DataMap("geometry", geometry.toDataMap());
+						responseData = new DataMap("geometry", geometry != null ? geometry.toDataMap() : null);
 					}
 					else if(request.containsKey("geometry"))
 					{

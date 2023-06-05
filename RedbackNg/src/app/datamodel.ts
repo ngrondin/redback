@@ -56,7 +56,10 @@ export class RbObject {
             }
         }
 
-        if(json.validation != null) this._linkMissingRelated();
+        if(json.validation != null) {
+            this.validation._candelete = json.validation._candelete;
+            this._linkMissingRelated();
+        }
 
         if(isChanged) {
             this.updatedAttributes = [];
@@ -150,6 +153,10 @@ export class RbObject {
     
     canEdit(attribute: string) : boolean {
         return (this.validation != null && this.validation[attribute] != null && this.validation[attribute].editable == true);
+    }
+
+    canDelete() : boolean {
+        return (this.validation != null && this.validation._candelete == true);
     }
 
     setValue(attribute: string, value: any) {

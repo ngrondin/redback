@@ -27,14 +27,15 @@ export class RbClickableComponent {
       tgt = tgt.offsetParent;
     }
     this.clicked = true;
+    this.hovering = false;
     setTimeout(() => this.clicked = false, 500);
   }
 
-  @HostListener('mouseover', ['$event']) _mouseover($event) {
+  @HostListener('mouseenter', ['$event']) _mouseenter($event) {
     this.hovering = true;  
   }
 
-  @HostListener('mouseout', ['$event']) _mouseout($event) {
+  @HostListener('mouseleave', ['$event']) _mouseleave($event) {
     this.hovering = false;  
   }
 

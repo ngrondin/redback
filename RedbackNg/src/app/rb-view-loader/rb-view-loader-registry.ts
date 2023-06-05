@@ -47,6 +47,7 @@ import { RbTimelineComponent } from "app/rb-timeline/rb-timeline.component";
 import { RbVcollapseComponent } from "app/rb-vcollapse/rb-vcollapse.component";
 import { RbVsectionComponent } from "app/rb-vsection/rb-vsection.component";
 import { RbActionButtonComponent } from "app/clickable/rb-actionbutton/rb-actionbutton.component";
+import { RbRichtextInputComponent } from "app/inputs/rb-richtext-input/rb-richtext-input.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -79,6 +80,7 @@ export const componentRegistry = {
     "filelist": RbFilelistComponent,
     "fileset": RbFilesetComponent,
     "textarea": RbTextareaInputComponent,
+    'richtext': RbRichtextInputComponent,
     "datepicker": RbDatetimeInputComponent,
     "dateinput": RbTextareaInputComponent,
     "gantt": RbGanttComponent,
