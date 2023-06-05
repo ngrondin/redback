@@ -5,10 +5,13 @@
 	position: relative;
 }
 
-.rb-menu-link-button {
-	height: 2.8vw;
+.rb-menu-link-container {
+	display: flex;
+	flex-direction: row;
+	flex: 1 1 auto;
+	align-items: flex-start;
+	padding: var(--v12px) var(--v12px)
 }
-
 
 .rb-menu-link-text {
 	flex-grow: 1;
@@ -17,26 +20,27 @@
 	text-overflow: ellipsis;
 	font-weight: 300;
 	font-size: 0.9rem;
-	color: #444444;
+	color: var(--light-writing-color);
 	padding-left: 0.8vw;
 	width: 10vw;
 	max-width: 10vw;
+	
 }
 
 .rb-menu-link-text-alt1 {
-	color: #dddddd;
+	color: var(--light-inverse-writing-color);
 	font-size: 0.7rem;
 }
 
 .rb-menu-link-icon {
-	color:#888888;
+	color:var(--light-writing-color);
 	font-size: 1.5rem;
 	width: var(--v24px);
 	height: var(--v24px);	
 }
 
 .rb-menu-link-icon-alt1 {
-	color:#dddddd;
+	color:var(--light-inverse-writing-color);
 	font-size: 1.3rem;
 	width: var(--v20px);
 	height: var(--v20px);

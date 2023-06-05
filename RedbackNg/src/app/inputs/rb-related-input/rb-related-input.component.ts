@@ -1,8 +1,8 @@
-import { Component, OnInit, Input, ViewContainerRef, Injector } from '@angular/core';
-import { Overlay } from  '@angular/cdk/overlay';
+import { Component, Input, ViewContainerRef } from '@angular/core';
 import { RbObject } from '../../datamodel';
 import { RbPopupListComponent } from '../../popups/rb-popup-list/rb-popup-list.component';
 import { RbPopupInputComponent } from '../abstract/rb-popup-input';
+import { PopupService } from 'app/services/popup.service';
 
 @Component({
   selector: 'rb-related-input',
@@ -10,7 +10,6 @@ import { RbPopupInputComponent } from '../abstract/rb-popup-input';
   styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbRelatedInputComponent extends RbPopupInputComponent  {
-
   @Input('displayattribute') displayattribute: string;
   @Input('parentattribute') parentattribute: string;
   @Input('childattribute') childattribute: string;
@@ -19,11 +18,9 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
   defaultIcon: string = 'description';
 
   constructor(
-    public injector: Injector,
-    public overlay: Overlay,
-    public viewContainerRef: ViewContainerRef
+    public popupService: PopupService
   ) {
-    super(injector, overlay, viewContainerRef);
+    super(popupService);
   }
 
   public get displayvalue(): string {

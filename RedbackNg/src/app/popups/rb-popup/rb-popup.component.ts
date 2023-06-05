@@ -8,7 +8,8 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 export abstract class RbPopupComponent implements OnInit {
   
   @Output() selected: EventEmitter<any> = new EventEmitter();
-  
+  @Output() cancelled: EventEmitter<any> = new EventEmitter();
+
   constructor() { }
 
   ngOnInit(): void {
@@ -19,5 +20,9 @@ export abstract class RbPopupComponent implements OnInit {
   public abstract setSearch(val: String);
 
   public abstract keyTyped(keyCode: number);
+
+  public onOverlayClick() {
+    this.cancelled.emit();
+  }
 
 }

@@ -1,16 +1,15 @@
 <div
     class="rb-list-container hscroll"
     (scroll)="onScroll($event)">
-    <mat-action-list>
+    <div>
         <div
             *ngFor="let item of enhancedList"
             class="rb-list-repeater">
-            <button
-                mat-list-item 
-                [rb-drag-object]="item.object"
-                [class]="'rb-list-item' + (selectedObject == item.object ? ' rb-list-item-active' : '')"
-                (click)="itemClicked(item.object)"
-                [style.background]="item.color">
+            <!--[class]="'rb-list-item' + (selectedObject == item.object ? ' rb-list-item-active' : '')"
+                [style.background]="item.color"-->
+            <rb-list-item
+                [rb-drag-object]="item.object"                
+                (click)="itemClicked(item.object)">
                 <div 
                     class="rb-list-item-data">
                     <div
@@ -39,7 +38,7 @@
                         {{item.sub}}
                     </span>
                 </div>
-            </button> 
+            </rb-list-item> 
             <div
                 class="rb-list-divider">
                 <div
@@ -47,7 +46,7 @@
                 </div>
             </div>
         </div>
-    </mat-action-list>
+    </div>
     <div
         class="rb-spinner-container"
         *ngIf="list.length == 0 && isLoading == false">

@@ -1,29 +1,30 @@
-<button
-	mat-list-item 
-    [class]="'rb-menu-link-button rb-menu-link-button-' + look"
+<rb-clickable
     [matTooltip]="getTooltip()"
     [matTooltipShowDelay]="100"
     [matTooltipPosition]="'right'"
     [matTooltipClass]="'rb-menu-link-tooltip rb-menu-link-tooltip-' + look"
     (click)="click()"
     (contextmenu)="rightclick($event)">
-    <mat-icon 
-        *ngIf="config.icon.indexOf(':') >= 0"
-        [svgIcon]="config.icon"
-        [class]="'rb-menu-link-icon rb-menu-link-icon-' + look">
-    </mat-icon>
-    <mat-icon
-        *ngIf="config.icon.indexOf(':') == -1"
-        [class]="'rb-menu-link-icon rb-menu-link-icon-' + look">
-        {{config.icon}}
-    </mat-icon>
-	<span 
-		flex
-		[class]="'rb-menu-link-text rb-menu-link-text-' + look"
-		*ngIf="mode == 'large'">
-        {{config.label}}
-	</span>
-</button> 
+    <div
+        class="rb-menu-link-container">
+        <mat-icon 
+            *ngIf="config.icon.indexOf(':') >= 0"
+            [svgIcon]="config.icon"
+            [class]="'rb-menu-link-icon rb-menu-link-icon-' + look">
+        </mat-icon>
+        <mat-icon
+            *ngIf="config.icon.indexOf(':') == -1"
+            [class]="'rb-menu-link-icon rb-menu-link-icon-' + look">
+            {{config.icon}}
+        </mat-icon>
+        <span 
+            flex
+            [class]="'rb-menu-link-text rb-menu-link-text-' + look"
+            *ngIf="mode == 'large'">
+            {{config.label}}
+        </span>
+    </div>
+</rb-clickable> 
 <div
     [class]="'rb-menu-link-popup-back rb-menu-link-popup-back-' + look"
     [style.visibility]="cmShow ? 'visible' : 'hidden'"

@@ -1,9 +1,9 @@
-import { Component,  Input, Injector, ViewContainerRef } from '@angular/core';
+import { Component,  Input } from '@angular/core';
 import { Time } from 'app/datamodel';
-import { Overlay } from '@angular/cdk/overlay';
 import { RbPopupDatetimeComponent } from 'app/popups/rb-popup-datetime/rb-popup-datetime.component';
 import { RbPopupInputComponent } from '../abstract/rb-popup-input';
 import { Formatter } from 'app/helpers';
+import { PopupService } from 'app/services/popup.service';
 
 @Component({
   selector: 'rb-datetime-input',
@@ -16,11 +16,9 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
   defaultIcon: string = 'calendar_today';
 
   constructor(
-    public injector: Injector,
-    public overlay: Overlay,
-    public viewContainerRef: ViewContainerRef
+    public popupService: PopupService
   ) {
-    super(injector, overlay, viewContainerRef);
+    super(popupService);
    }
 
   public get displayvalue(): string {

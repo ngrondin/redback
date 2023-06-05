@@ -11,26 +11,25 @@ import { CommonModule } from '@angular/common';
 
 import { DesktopRootComponent } from './desktop-root/desktop-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-//import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatList, MatListItem, MatFormFieldModule, MatInputModule, MatCheckboxModule, MatRadioModule, MatSelectModule, MatExpansionModule, MatDialog, MatDialogModule, MatDividerModule, MatProgressSpinner, MatProgressSpinnerModule, MatMenuModule, MatSlideToggleModule, MatTooltipModule, MatTooltip } from '@angular/material';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatLegacyListModule as MatListModule } from '@angular/material/legacy-list';
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
-import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox';
-import { MatLegacyRadioModule as MatRadioModule } from '@angular/material/legacy-radio';
+import { MatListModule } from '@angular/material/list';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatLegacySliderModule as MatSliderModule } from '@angular/material/legacy-slider';
-import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner';
-import { MatLegacyProgressBarModule as MatProgressBarModule } from '@angular/material/legacy-progress-bar';
-import { MatLegacyMenuModule as MatMenuModule } from '@angular/material/legacy-menu';
-import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle';
-import { MatLegacyTooltipModule as MatTooltipModule } from '@angular/material/legacy-tooltip';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { HttpClientModule } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { ApiService } from './services/api.service';
 import { DataService } from './services/data.service';
@@ -46,7 +45,7 @@ import { RbMapComponent } from './rb-map/rb-map.component';
 import { RbDurationInputComponent } from './inputs/rb-duration-input/rb-duration-input.component';
 import { RbFilterBuilderComponent } from './rb-filter-builder/rb-filter-builder.component';
 import { AgmCoreModule, LAZY_MAPS_API_CONFIG, LazyMapsAPILoaderConfigLiteral} from '@agm/core';
-import { RbProcessactionsComponent } from './rb-processactions/rb-processactions.component';
+import { RbProcessactionsComponent } from './clickable/rb-processactions/rb-processactions.component';
 import { RbViewLoaderComponent } from './rb-view-loader/rb-view-loader.component';
 import { RbViewDirective } from './rb-view/rb-view.directive';
 import { RbGlobalSeachComponent } from './rb-global-seach/rb-global-seach.component';
@@ -86,7 +85,7 @@ import 'brace/theme/eclipse';
 import { RbTableComponent } from './rb-table/rb-table.component';
 import { ReportService } from './services/report.service';
 import { RbReportlistComponent } from './rb-reportlist/rb-reportlist.component';
-import { RbActiongroupComponent } from './rb-actiongroup/rb-actiongroup.component';
+import { RbActiongroupComponent } from './clickable/rb-actiongroup/rb-actiongroup.component';
 import { RbDatasetComponent } from './rb-dataset/rb-dataset.component';
 import { RbLayoutComponent } from './rb-layout/rb-layout.component';
 import { RbHsectionComponent } from './rb-hsection/rb-hsection.component';
@@ -98,7 +97,7 @@ import { RbMenuGroupComponent } from './rb-menu-group/rb-menu-group.component';
 import { RbMenuLinkComponent } from './rb-menu-link/rb-menu-link.component';
 import { MenuService } from './services/menu.service';
 import { RbList4Component } from './rb-list4/rb-list4.component';
-import { RbButtonComponent } from './rb-button/rb-button.component';
+import { RbActionButtonComponent } from './clickable/rb-actionbutton/rb-actionbutton.component';
 import { RbDatasetGroupComponent } from './rb-datasetgroup/rb-datasetgroup.component';
 import { RbFormComponent } from './rb-form/rb-form.component';
 import { RbAggregatesetComponent } from './rb-aggregateset/rb-aggregateset.component';
@@ -126,6 +125,11 @@ import { PlatformModule } from '@angular/cdk/platform';
 import { RbTreeComponent } from './rb-tree/rb-tree.component';
 import { RbHierarchyInputComponent } from './inputs/rb-hierarchy-input/rb-hierarchy-input.component';
 import { RbPopupHierarchyComponent } from './popups/rb-popup-hierarchy/rb-popup-hierarchy.component';
+import { RbPopupActionsComponent } from './popups/rb-popup-actions/rb-popup-actions.component';
+import { RbListItemComponent } from './clickable/rb-list-item/rb-list-item.component';
+import { RbClickableComponent } from './clickable/rb-clickable/rb-clickable.component';
+import { RbIconbuttonComponent } from './clickable/rb-iconbutton/rb-iconbutton.component';
+import { RbButtonComponent } from './clickable/rb-button/rb-button';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -241,8 +245,9 @@ window.redback = window.redback || {};
         RbCodeInputComponent,
         RbTableComponent,
         RbReportlistComponent,
-        RbActiongroupComponent,
         RbButtonComponent,
+        RbActiongroupComponent,
+        RbActionButtonComponent,
         RbFormComponent,
         RbHseparatorComponent,
         RbSpacerComponent,
@@ -260,7 +265,11 @@ window.redback = window.redback || {};
         RbPercentInputComponent,
         RbNotificationBellComponent,
         RbNotificationListComponent,
-        RbTreeComponent
+        RbTreeComponent,
+        RbPopupActionsComponent,
+        RbListItemComponent,
+        RbClickableComponent,
+        RbIconbuttonComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

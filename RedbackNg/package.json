@@ -31,10 +31,11 @@
     "ngx-cookie-service": "^2.4.0",
     "ngx-toastr": "^16.2.0",
     "redbackgraphs": "0.0.3",
-    "rxjs": "~6.6.0",
+    "rxjs": "~6.6.7",
     "ts-md5": "^1.2.8",
     "tslib": "^2.0.0",
-    "zone.js": "~0.11.4"
+    "zone.js": "~0.11.4",
+    "ngx-quill": "^20.0.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.2.8",

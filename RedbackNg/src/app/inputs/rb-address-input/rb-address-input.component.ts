@@ -1,7 +1,7 @@
-import { Component, OnInit, Injector, ViewContainerRef, Input } from '@angular/core';
-import { Overlay } from '@angular/cdk/overlay';
+import { Component, Input } from '@angular/core';
 import { RbPopupInputComponent } from '../abstract/rb-popup-input';
 import { RbPopupAddressesComponent } from 'app/popups/rb-popup-addresses/rb-popup-addresses.component';
+import { PopupService } from 'app/services/popup.service';
 
 @Component({
   selector: 'rb-address-input',
@@ -14,11 +14,9 @@ export class RbAddressInputComponent extends RbPopupInputComponent {
   defaultIcon: string = 'description';
 
   constructor(
-    public injector: Injector,
-    public overlay: Overlay,
-    public viewContainerRef: ViewContainerRef
+    public popupService: PopupService
   ) {
-    super(injector, overlay, viewContainerRef);
+    super(popupService);
   }
   
   public get displayvalue(): string {

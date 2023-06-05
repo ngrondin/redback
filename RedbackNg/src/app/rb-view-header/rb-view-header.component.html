@@ -23,12 +23,10 @@
 <div
     class="rb-vh-space">
 </div>
-<button
-    class="rb-vh-more"
-    mat-icon-button
+<rb-iconbutton
+    [icon]="'more_vert'"
     [matMenuTriggerFor]="headermenu">
-    <mat-icon>more_vert</mat-icon>
-</button>
+</rb-iconbutton>
 <mat-menu
     #headermenu="matMenu">
     <button

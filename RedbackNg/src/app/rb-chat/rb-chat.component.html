@@ -1,11 +1,9 @@
-<button
-    mat-icon-button
-    class="rb-icon-button"
+<rb-iconbutton
+    [icon]="'chat_bubble_outline'"
     [matMenuTriggerFor]="chatmenu"
     (menuOpened)="menuOpened()" 
     (menuClosed)="menuClosed()">
-    <mat-icon>chat_bubble_outline</mat-icon>
-</button>
+</rb-iconbutton>
 <div
     *ngIf="totalUnread > 0"
     class="rb-chat-badge">

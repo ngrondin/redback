@@ -1,11 +1,11 @@
-<mat-list>
-    <mat-list-item
-        *ngFor="let item of list">
-        <button 
-            mat-button 
-            class="rb-hardlist-button"
-            (click)="select(item)">
+<div
+    *ngFor="let item of list"
+    class="rb-popup-hardlist-line">
+    <rb-clickable
+        (click)="select(item)">
+        <span
+            class="rb-popup-hardlist-text">
             {{item.display || item.label}}
-        </button>
-    </mat-list-item>    
-</mat-list>
+        </span>
+    </rb-clickable>    
+</div>

@@ -24,11 +24,9 @@
         [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
     </div>
 </div>
-<button 
-    mat-button
+<rb-iconbutton 
     *ngIf="filterconfig != null"
-    style="margin-top:var(--v10px)!important;"
-    [class]="(hasFilter ? 'rb-active-icon' : 'rb-grey-icon') + ' rb-icon-button'"
+    [icon]="'filter_list'"
+    [style.color]="hasFilter ? 'var(--primary-dark-color)' : 'var(--dark-writing-color)'"
     (click)="openFilterBuilder()">
-    <mat-icon>filter_list</mat-icon>
-</button>
+</rb-iconbutton>

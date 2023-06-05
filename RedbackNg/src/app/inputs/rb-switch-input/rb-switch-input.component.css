@@ -7,10 +7,10 @@
 
 
 .rb-switch-container {
-    /*padding: 10px 10px 15px 10px;*/
     display: flex;
     flex-grow: 1;
     flex-direction: row;
+    align-items: center;
 }
 
 .rb-switch-label {

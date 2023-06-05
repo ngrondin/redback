@@ -1,13 +1,16 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ComponentRef, Input,  } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { UserprefService } from 'app/services/userpref.service';
 import { NotificationService } from 'app/services/notification.service';
-import { Subscription } from 'rxjs';
-import { RbNotification, RbObject } from 'app/datamodel';
-import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { Observable, Subscription } from 'rxjs';
+import { RbNotification } from 'app/datamodel';
 import { Evaluator } from 'app/helpers';
 import { ActionService } from 'app/services/action.service';
+import { RbButtonComponent } from 'app/clickable/rb-button/rb-button';
+import { PopupService } from 'app/services/popup.service';
+import { RbPopupActionsComponent } from 'app/popups/rb-popup-actions/rb-popup-actions.component';
+import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+
 
 export class RbActiongroupAction {
   action: string;
@@ -29,31 +32,33 @@ export class RbActiongroupAction {
 
 @Component({
   selector: 'rb-actiongroup',
-  templateUrl: './rb-actiongroup.component.html',
-  styleUrls: ['./rb-actiongroup.component.css']
+  templateUrl: '../rb-button/rb-button.html',
+  styleUrls: ['../rb-button/rb-button.css']
 })
-export class RbActiongroupComponent extends RbDataObserverComponent {
+export class RbActiongroupComponent extends RbButtonComponent {
   @Input('actions') actions: any;
   @Input('domaincategory') domaincategory: string;
   @Input('showprocessinteraction') showprocessinteraction: boolean = false;
   @Input('round') round: boolean = false;
   @Input('hideonempty') hideonempty: boolean = false;
-
-  open: boolean = false;
-  actionning: boolean = false;
+  
   domainActions: RbActiongroupAction[];
   actionData: RbActiongroupAction[] = [];
   notification: RbNotification;
   notificationRetreived: boolean = false;
   notificationSubscription: Subscription;
   
+  popupComponentRef: ComponentRef<RbPopupComponent>;
+
   constructor(
     private apiService: ApiService,
     private actionService: ActionService,
     private notificationService: NotificationService,
-    public userpref: UserprefService
+    public userpref: UserprefService,
+    public popupService: PopupService
   ) {
     super();
+    this.label = 'Actions';
   }
   
 
@@ -83,11 +88,14 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
   onDatasetEvent(event: any) {
     if(event == 'select') {
       if(this.showprocessinteraction) {
-        this.getNotificationThenCalcActions();
+        this.getNotificationThenCalcActions().subscribe(() => {});
       } else {
         this.calcActionData();
       }
     } else if(event == 'update') {
+      this.calcActionData();
+    } else if(event == 'clear') {
+      this.notification = null;
       this.calcActionData();
     }
   }
@@ -116,27 +124,42 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
     }
   }
 
+  get open() : boolean {
+    return this.popupComponentRef != null;
+  }
+
   get focus() : boolean {
-    let ret: boolean = false;
-    if(this.notification != null) {
-      for(let action of this.notification.actions) {
-        if(action.main == true) {
-          ret = true;
-        }
+    if(!this.open && this.showprocessinteraction && this.notification != null) {
+      for(var action of this.notification.actions) {
+        if(action.main == true) return true;
       }
     }
-    return ret;
+    return false;
   }
 
-  public activate() {
-    this.open = true;
-    if(this.showprocessinteraction && this.notificationRetreived == false) {
-      this.getNotificationThenCalcActions();
+  click() {
+    if(this.popupComponentRef == null) {
+      if(this.showprocessinteraction && this.notificationRetreived == false) {
+        this.getNotificationThenCalcActions().subscribe(() => {
+          this.openPopup();
+        });
+      } else {
+        this.openPopup();
+      }
+    } else {
+      this.closePopup();
     }
   }
+  
+  public openPopup() {
+    this.popupComponentRef = this.popupService.openPopup(this.buttonContainerRef, RbPopupActionsComponent, {actions: this.actionData});
+    this.popupComponentRef.instance.selected.subscribe(value => this.clickAction(value));
+    this.popupComponentRef.instance.cancelled.subscribe(() => this.closePopup());
+  }
 
-  public deactivate() {
-    this.open = false;
+  public closePopup() {
+    this.popupService.closePopup();
+    this.popupComponentRef = null;
   }
   
   private calcActionData() {
@@ -145,7 +168,7 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
     let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
     if(this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
-        this.actionData.push(new RbActiongroupAction("processaction", action.action, null, action.description, null, action.main))
+        this.actionData.push(new RbActiongroupAction("processaction", action.action, null, action.description, null, action.main));
       }
     }
     if(this.actions != null) {
@@ -165,15 +188,26 @@ export class RbActiongroupComponent extends RbDataObserverComponent {
     }
   }
 
-  private getNotificationThenCalcActions() {
-    this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => {
-      this.notification = notif;
-      this.notificationRetreived = true;
-      this.calcActionData();
+  private getNotificationThenCalcActions() : Observable<null> {
+    const obs = new Observable<null>((observer) => {
+      if(this.rbObject != null) {
+        this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => {
+          this.notification = notif;
+          this.notificationRetreived = true;
+          this.calcActionData();
+          observer.complete()
+        });
+      } else {
+        this.notification = null;
+        this.notificationRetreived = true;
+        observer.complete();
+      }
     });
+    return obs;
   }
 
   public clickAction(action: RbActiongroupAction) {
+    this.closePopup();
     if(action.action == 'processaction' && this.notification != null) {
       let notif = this.notification;
       this.actionning = true;

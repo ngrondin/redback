@@ -12,16 +12,17 @@
             [shrink]="0">
             <div
                 class="rb-reportlist-list">
-                <div
-                    class="rb-reportlist-report"
-                    *ngFor="let report of reports">
-                    <button
-                        mat-button
-                        (click)="launch(report)">
-                        <img class="rb-reportlist-icon" [src]="getIcon(report.type)">
-                        {{report.description || report.name}}                     
-                    </button>
-                </div>            
+                <rb-clickable
+                    *ngFor="let report of reports"
+                    (click)="launch(report)">
+                    <div
+                        class="rb-reportlist-line">
+                        <img 
+                            class="rb-reportlist-icon" 
+                            [src]="getIcon(report.type)">
+                        <span>{{report.description || report.name}}</span>                        
+                    </div>
+                </rb-clickable>
             </div>
             <div
                 class="rb-reportlist-spinner-conntainer"

@@ -5,8 +5,12 @@
 	flex: 1 1 auto;
 }
 
-.rb-menu-group-button {
-	height: 2.8vw;
+.rb-menu-group-container {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: row;
+	align-items: flex-start;
+	padding: var(--v12px) var(--v12px)
 }
 
 .rb-menu-group-text {
@@ -39,10 +43,6 @@
 	font-size: 1.3rem;
 	width: var(--v20px);
 	height: var(--v20px);
-}
-
-.rb-menu-group {
-	background: #f8f8fa;
 }
 
 .rb-menu-group-content-alt1 {

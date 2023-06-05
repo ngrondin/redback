@@ -201,11 +201,11 @@
     background-color: #f4f4f4;
 }
 
-.rb-gantt-button {
+/*.rb-gantt-button {
     margin: 0.3vw!important;
     line-height: 1.5vw!important;
     height: 2vw;
-}
+}*/
 
 .rb-gantt-loadoverlay {
     position: absolute;

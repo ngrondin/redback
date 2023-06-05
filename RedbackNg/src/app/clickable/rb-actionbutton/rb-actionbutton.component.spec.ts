@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { RbButtonComponent } from './rb-button.component';
+import { RbActionButtonComponent } from './rb-actionbutton.component';
 
 describe('RbButtonComponent', () => {
-  let component: RbButtonComponent;
-  let fixture: ComponentFixture<RbButtonComponent>;
+  let component: RbActionButtonComponent;
+  let fixture: ComponentFixture<RbActionButtonComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ RbButtonComponent ]
+      declarations: [ RbActionButtonComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(RbButtonComponent);
+    fixture = TestBed.createComponent(RbActionButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,6 +1,6 @@
 
 import { Injectable, Injector } from '@angular/core';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { RbDialogComponent } from 'app/rb-dialog/rb-dialog.component';
 import { Overlay } from 'ngx-toastr';
 

@@ -25,42 +25,13 @@
 	border: 0px Solid;
 	cursor: pointer;
 	padding: 0px;
-    color: darkblue;
     border-radius: var(--v5px) var(--v5px) 0px 0px;
+	overflow: hidden;
 }
 
-.rb-tabsection-tabheader-button {
-	font-weight: initial;
-	font-size: 1.0rem;
-	line-height: var(--v36px) !important;
-	margin: 0px var(--v5px) 0px var(--v5px) !important;
-	padding: 0px var(--v16px);
-	min-width: var(--v32px);
-}
-
-.rb-tabsection-tabheader-active {
-    /*background-color: #5262bc;*/
-	background-color: var(--primary-color);
-    color: white;
-}
-
-.rb-tabsection-tabheader-active-alt1 {
-    /*background-color: #5262bc;*/
-	background-color: var(--primary-color);
-    color: white;
-}
-
-.rb-tabsection-tabheader-active-alt2 {
-	border-bottom: 2px Solid red;
-  }
-  
-.rb-tabsection-tabheader-button-active {
-}
-
-.rb-tabsection-tabheader-button-active-alt1 {
-}
-
-.rb-tabsection-tabheader-button-active-alt2 {
+.rb-tabsection-tabheader-label {
+	padding: var(--v8px) var(--v12px);
+    color: var(--primary-dark-color);
 }
 
 .rb-tabsection-divider {

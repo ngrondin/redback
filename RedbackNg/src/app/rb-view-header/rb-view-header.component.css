@@ -44,3 +44,15 @@
     cursor: pointer;
     font-size: 14px;
 }
+
+.rb-vh-menu-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: white;
+}
+
+.rb-vh-menu-item {
+    flex: 1 1 auto;
+    padding: var(--v10px)
+}

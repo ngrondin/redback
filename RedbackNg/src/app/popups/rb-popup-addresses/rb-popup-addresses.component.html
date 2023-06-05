@@ -1,14 +1,15 @@
-<mat-list>
-    <mat-list-item
+<div
+    class="rb-popup-address-line">
+    <rb-list-item
         *ngFor="let item of list">
-        <button 
-            mat-button 
-            [ngClass]="'rb-list-select-button' + (getHighlighted() == item ? ' rb-list-select-button-hightlight' : '')"
+        <span 
+            [class]="'rb-popup-address-text' + (getHighlighted() == item ? ' rb-popup-address-text-hightlight' : '')"
             (click)="select(item)">
             {{item}}
-        </button>
-    </mat-list-item>
-</mat-list>
+        </span>
+    </rb-list-item>
+</div>
+
 
 <div
     class="rb-spinner-container"

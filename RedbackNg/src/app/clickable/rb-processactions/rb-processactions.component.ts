@@ -3,13 +3,14 @@ import { RbNotification, RbNotificationAction, RbObject } from 'app/datamodel';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { NotificationService } from 'app/services/notification.service';
 import { Subscription } from 'rxjs';
+import { RbButtonComponent } from 'app/clickable/rb-button/rb-button';
 
 @Component({
   selector: 'rb-processactions',
-  templateUrl: './rb-processactions.component.html',
-  styleUrls: ['./rb-processactions.component.css']
+  templateUrl: '../rb-button/rb-button.html',
+  styleUrls: ['../rb-button/rb-button.css']
 })
-export class RbProcessactionsComponent extends RbDataObserverComponent  {
+export class RbProcessactionsComponent extends RbButtonComponent  {
   @Input('round') round: boolean = false;
   @Input('hideonempty') hideonempty: boolean = false;
 
@@ -77,6 +78,10 @@ export class RbProcessactionsComponent extends RbDataObserverComponent  {
     return !this.round && this.notification != null;
   }
 
+  click() {
+
+  }
+  
   activate() {
   }
 

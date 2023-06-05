@@ -50,7 +50,7 @@
     display: flex;
     flex: 1 1 auto;
 	flex-direction: column;
-    margin: var(--v12px) var(--v5px) var(--v12px) var(--v5px);
+    margin: var(--v12px) var(--v20px);
     min-height: 3.2vw;
     overflow: hidden;
     justify-content: center;

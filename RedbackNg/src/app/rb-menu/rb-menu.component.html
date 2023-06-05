@@ -23,43 +23,29 @@
 </div>
 <div
     [class]="'rb-menu-control rb-menu-control-' + look">
-    <button
-        mat-icon-button
+    <rb-iconbutton
+        *ngIf="mode == 'small'"
+        [icon]="'navigate_next'"
         (click)="toggleMenuMode()">
-        <mat-icon
-            *ngIf="mode == 'small'">
-            navigate_next
-        </mat-icon>
-        <mat-icon
-            *ngIf="mode == 'large'">
-            navigate_before
-        </mat-icon>
-    </button>
-    <button
-        mat-icon-button
+    </rb-iconbutton>  
+    <rb-iconbutton
         *ngIf="mode == 'large'"
-        [class]="'rb-menu-grew-button rb-menu-grew-button-' + look"
+        [icon]="'navigate_before'"
+        (click)="toggleMenuMode()">
+    </rb-iconbutton>  
+    <rb-iconbutton
+        *ngIf="mode == 'large'"
+        [icon]="'subject'"
         (click)="setMenu('full')">
-        <mat-icon>
-            subject
-        </mat-icon>
-    </button>  
-    <button
-        mat-icon-button
+    </rb-iconbutton>  
+    <rb-iconbutton
         *ngIf="mode == 'large'"
-        [class]="'rb-menu-grew-button rb-menu-grew-button-' + look"
+        [icon]="'group'"
         (click)="setMenu('group')">
-        <mat-icon>
-            group
-        </mat-icon>
-    </button>       
-    <button
-        mat-icon-button
+    </rb-iconbutton>       
+    <rb-iconbutton
         *ngIf="mode == 'large'"
-        [class]="'rb-menu-grew-button rb-menu-grew-button-' + look"
+        [icon]="'person'"
         (click)="setMenu('personal')">
-        <mat-icon>
-            person
-        </mat-icon>
-    </button>       
+    </rb-iconbutton>       
 </div>

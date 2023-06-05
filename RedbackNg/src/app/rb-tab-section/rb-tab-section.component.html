@@ -10,16 +10,17 @@
         #tabheaderscroll
         class="rb-tabsection-tabheaderscroll">
         <div
-            [ngClass]="'rb-tabsection-tabheader' + (isTabActive(tab) ? ' rb-tabsection-tabheader-active' : '')"
-            *ngFor="let tab of tabs">
-            <button
-                mat-button
-                *ngIf="tab.showResult == true"
-                [ngClass]="'rb-tabsection-tabheader-button' + (isTabActive(tab) ? ' rb-tabsection-tabheader-button-active' : '')"
+            [class]="'rb-tabsection-tabheader'"
+            *ngFor="let tab of visibleTabs">
+            <rb-clickable
+                [focus]="isTabActive(tab)"
                 (click)="selectTab(tab)"
                 (contextmenu)="openPopup($event, tab)">
-                {{tab.label}}
-            </button>
+                <span
+                    class="rb-tabsection-tabheader-label">
+                    {{tab.label}}
+                </span>
+            </rb-clickable>
         </div>
     </div>
     <button

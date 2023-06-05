@@ -1,0 +1,13 @@
+:host {
+    display: flex;
+    width: var(--v36px);
+    height: var(--v36px);
+    border-radius: 50%;
+    overflow: hidden;
+    flex: 0 0 auto;
+}
+
+rb-clickable {
+    width: 100%;
+    height: 100%;
+}

@@ -1,39 +1,40 @@
 <mat-divider></mat-divider> 
-<button
-	mat-list-item 
-    [class]="'rb-menu-group-button rb-menu-group-button-' + look"	
+<rb-clickable
     [matTooltip]="getTooltip()"
     [matTooltipShowDelay]="100"
     [matTooltipPosition]="'right'"
     [matTooltipClass]="'rb-menu-group-tooltip rb-menu-group-tooltip-' + look"
     (click)="click()">
-    <mat-icon 
-        *ngIf="icon.indexOf(':') >= 0"
-        [svgIcon]="icon"
-        [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
-    </mat-icon>
-    <mat-icon
-        *ngIf="icon.indexOf(':') == -1"
-        [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
-        {{icon}}
-    </mat-icon>
-	<span 
-		flex
-        [class]="'rb-menu-group-text rb-menu-group-text-' + look"
-		*ngIf="mode == 'large'">
-        {{label}}
-    </span>
-    <mat-icon 
-        *ngIf="mode == 'large' && !isOpen"
-        [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
-        keyboard_arrow_down
-    </mat-icon>
-    <mat-icon 
-        *ngIf="mode == 'large' && isOpen"
-        [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
-        keyboard_arrow_up
-    </mat-icon>
-</button> 
+    <div
+        class="rb-menu-group-container">
+        <mat-icon 
+            *ngIf="icon.indexOf(':') >= 0"
+            [svgIcon]="icon"
+            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+        </mat-icon>
+        <mat-icon
+            *ngIf="icon.indexOf(':') == -1"
+            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+            {{icon}}
+        </mat-icon>
+        <span 
+            flex
+            [class]="'rb-menu-group-text rb-menu-group-text-' + look"
+            *ngIf="mode == 'large'">
+            {{label}}
+        </span>
+        <mat-icon 
+            *ngIf="mode == 'large' && !isOpen"
+            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+            keyboard_arrow_down
+        </mat-icon>
+        <mat-icon 
+            *ngIf="mode == 'large' && isOpen"
+            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+            keyboard_arrow_up
+        </mat-icon>
+    </div>
+</rb-clickable> 
 <div
     *ngIf="isOpen"
     [class]="'rb-menu-group-content rb-menu-group-content-' + look">

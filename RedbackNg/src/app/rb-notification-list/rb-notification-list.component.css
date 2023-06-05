@@ -38,9 +38,15 @@
     flex-direction: row;
     align-items: center;
     background-color: var(--primary-color);
-    cursor: pointer;
     border-top: 1px solid white;
-    padding: 6px 8px 6px 15px;
+}
+
+.rb-notification-group-header-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    padding: var(--v10px) var(--v8px) var(--v10px) var(--v16px);
+    overflow: hidden;
 }
 
 .rb-notification-group-header-name {
@@ -61,7 +67,7 @@
     color: var(--dark-inverse-writing-color);
     font-size: 0.8rem;
     border-radius: 12px;
-    padding: 3px;
+    /*padding: 3px;*/
 }
 
 .rb-notification-listitem {
@@ -71,7 +77,8 @@
 .rb-notification-listitemcontent {
     display: flex;
     flex-direction: column;
-    padding: var(--v10px);
+    flex: 1 1 auto;
+    padding: var(--v10px) var(--v20px);
     min-height: var(--v48px);
 }
 
@@ -81,10 +88,11 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     padding-top: 6px;
+    color: var(--dark-writing-color);
 }
 
 .rb-notification-listsub {
-    color: #aaaaaa;
+    color: var(--light-writing-color);
     font-size: 0.8rem;
     max-width: 330px;
     white-space: nowrap;

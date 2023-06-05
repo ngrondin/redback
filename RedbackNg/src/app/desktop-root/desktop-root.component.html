@@ -21,11 +21,13 @@
         <rb-notification-bell
             (click)="toggleNotifications()">
         </rb-notification-bell>
-        <button
-            mat-button
+        <rb-clickable
+            class="rb-toolbar-username"
             [matMenuTriggerFor]="usermenu">
-            {{userdisplay}}
-        </button>
+            <span>
+                {{userdisplay}}
+            </span>
+        </rb-clickable>
         <mat-menu
             #usermenu="matMenu">
             <button

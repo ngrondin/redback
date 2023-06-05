@@ -1,6 +1,6 @@
 import { Injectable, Injector } from '@angular/core';
 import { ApiService } from './api.service';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { RbReportlistComponent } from '../rb-reportlist/rb-reportlist.component';
 
 @Injectable({

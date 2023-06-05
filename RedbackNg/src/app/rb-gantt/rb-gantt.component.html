@@ -16,7 +16,7 @@
     <button
         [matMenuTriggerFor]="zoomMenu"
         mat-stroked-button
-		class="mat-primary rb-button rb-gantt-button">
+		class="mat-primary">
         <mat-icon>zoom_in</mat-icon>
     </button>
     <mat-menu #zoomMenu="matMenu">
@@ -28,7 +28,7 @@
     <button
         [matMenuTriggerFor]="spanMenu"
         mat-stroked-button
-		class="mat-primary rb-button rb-gantt-button">
+		class="mat-primary">
         <mat-icon>swap_horiz</mat-icon>
     </button>
     <mat-menu #spanMenu="matMenu">
@@ -38,7 +38,7 @@
     </mat-menu>    
     <button
         mat-stroked-button
-		class="mat-primary rb-button rb-gantt-button"
+		class="mat-primary"
         (click)="forceDatasetReload()">
         <mat-icon>refresh</mat-icon>
     </button> 

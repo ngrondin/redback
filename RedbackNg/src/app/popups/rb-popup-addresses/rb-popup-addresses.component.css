@@ -12,35 +12,19 @@
     overflow: auto;
 }
 
-.mat-list {
-    padding: 0px;
-    flex-grow: 1;
+.rb-popup-address-line {
+    display: flex;
+    flex-direction: row;
 }
 
-.mat-list-item {
-    font-size: 1.0rem;
-    padding: 0px;
+.rb-popup-address-text {
+    display: flex;
+    flex-direction: row;
+    padding: var(--v10px) var(--v12px);
+    flex: 1 1 auto;
 }
 
-:host ::ng-deep .mat-list-item-content {
-    padding: 0!important;
+.rb-popup-address-text-hightlight {
+    background-color: #dddddd;
 }
 
-.mat-button {
-    font-size: 1.0rem;
-    font-weight: initial;
-    height: 48px;
-}
-
-.rb-list-select-button {
-    flex-grow: 1;
-    text-align: left;
-}
-
-.rb-list-select-button-hightlight {
-    background-color: #eceef8;
-}
-
-.rb-list-expand-button {
-
-}

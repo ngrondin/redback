@@ -5,6 +5,10 @@
     height: 100%;
 }
 
+.rb-menu {
+    display: block;
+}
+
 .rb-menu-alt1 {
     border-right: Solid 0px;
 }
@@ -26,24 +30,19 @@
     border-right: Solid 0px;
 }
 
-.rb-menu {
-    display: block;
-}
 
 .rb-menu-control {
     display: flex;
     border-right: Solid 1px rgba(0,0,0,.12);
+    color: var(--light-writing-color);
+    font-size: 1.5rem;
+    padding-left: var(--v5px);
 }
 
 .rb-menu-control-alt1 {
     background: var(--primary-color);
     border-right: Solid 0px;
-    /*background: var(--primary-color);*/
-}
-
-.rb-menu-control mat-icon {
-    font-size: 1.5rem;
-    color: grey;
+    color: var(--light-inverse-writing-color);
 }
 
 .rb-menu-control-alt1 mat-icon {

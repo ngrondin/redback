@@ -1,3 +1,18 @@
+:host {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.1),
+        0 13px 19px 2px rgba(0, 0, 0, 0.07),
+        0 5px 24px 4px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 12vw;
+    max-height: 20vw;
+    overflow: auto;
+}
+
+
 .rb-reportlist-container {
     display: flex;
     flex-direction: column;
@@ -19,9 +34,11 @@
     padding: 10px 0px 10px 0px;
 }
 
-.rb-reportlist-report .mat-button  {
-    font-size: 18px!important;
-    font-weight: 400!important;
+.rb-reportlist-line {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    padding: var(--v10px) var(--v12px);
 }
 
 .rb-reportlist-icon {

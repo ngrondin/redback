@@ -20,7 +20,6 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
 
   constructor(
     @Inject(CONTAINER_DATA) public config: any, 
-    //public overlayRef: OverlayRef,
     private dataService: DataService
   ) {
     super();

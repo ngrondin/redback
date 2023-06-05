@@ -113,12 +113,10 @@
                         </td>
                         <td
                             class="rb-fb-buttoncol">
-                            <button
-                                mat-button
-                                class="mat-mini mat-primary" 
+                            <rb-iconbutton
+                                [icon]="'remove_circle_outline'"
                                 (click)="removeFilterItem(filterConstruct)">
-                                <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
-                            </button>
+                            </rb-iconbutton>
                 
                         </td>
                     </tr>
@@ -165,7 +163,7 @@
                             class="rb-fb-maincol">
                             <button
                                 mat-button
-                                class="mat-mini mat-primary rb-button" 
+                                class="mat-mini mat-primary" 
                                 (click)="toggleDir(sortConstruct)">
                                 <mat-icon 
                                     *ngIf="sortConstruct.direction == 1"
@@ -180,13 +178,10 @@
                             </button>                           
                         </td>
                         <td>
-                            <button
-                                mat-button
-                                class="mat-mini mat-primary " 
+                            <rb-iconbutton
+                                [icon]="'remove_circle_outline'"
                                 (click)="removeSortItem(sortConstruct)">
-                                <mat-icon class="md-hue-3" >remove_circle_outline</mat-icon>
-                            </button>
-                            
+                            </rb-iconbutton>                                                        
                         </td>   
                     </tr>             
                 </table>   
@@ -195,27 +190,21 @@
     </rb-tab-section>
     <div
         class="rb-filter-builder-bottom">
-        <button
-            mat-button
+        <rb-button
             *ngIf="changed"
-            class="mat-raised-button mat-primary" 
-            (click)="clickOk()">
-            Apply
-        </button>
+            (click)="clickOk()"
+            [label]="'Apply'">
+        </rb-button>
         &nbsp;
-        <button
-            mat-button
+        <rb-button
             *ngIf="!empty"
-            class="mat-stroked-button mat-primary" 
-            (click)="clickClear()">
-            Clear
-        </button>
+            (click)="clickClear()"
+            [label]="'Clear'">
+        </rb-button>
         &nbsp;
-        <button
-            mat-button
-            class="mat-stroked-button mat-primary" 
-            (click)="clickCancel()">
-            Cancel
-        </button>              
+        <rb-button
+            (click)="clickCancel()"
+            [label]="'Cancel'">
+        </rb-button>              
     </div>
 </div>

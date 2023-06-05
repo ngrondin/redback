@@ -15,9 +15,8 @@ import { RbStarsInputComponent } from "app/inputs/rb-stars-input/rb-stars-input.
 import { RbStringInputComponent } from "app/inputs/rb-string-input/rb-string-input.component";
 import { RbSwitchInputComponent } from "app/inputs/rb-switch-input/rb-switch-input.component";
 import { RbTextareaInputComponent } from "app/inputs/rb-textarea-input/rb-textarea-input.component";
-import { RbActiongroupComponent } from "app/rb-actiongroup/rb-actiongroup.component";
+import { RbActiongroupComponent } from "app/clickable/rb-actiongroup/rb-actiongroup.component";
 import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
-import { RbButtonComponent } from "app/rb-button/rb-button.component";
 import { RbCalendarComponent } from "app/rb-calendar/rb-calendar.component";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
@@ -37,7 +36,7 @@ import { RbTreeComponent } from "app/rb-tree/rb-tree.component";
 import { RbLogComponent } from "app/rb-log/rb-log.component";
 import { RbMapComponent } from "app/rb-map/rb-map.component";
 import { RbModalComponent } from "app/rb-modal/rb-modal.component";
-import { RbProcessactionsComponent } from "app/rb-processactions/rb-processactions.component";
+import { RbProcessactionsComponent } from "app/clickable/rb-processactions/rb-processactions.component";
 import { RbSearchComponent } from "app/rb-search/rb-search.component";
 import { RbSpacerComponent } from "app/rb-spacer/rb-spacer.component";
 import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.component";
@@ -47,6 +46,7 @@ import { RbTileComponent } from "app/rb-tile/rb-tile.component";
 import { RbTimelineComponent } from "app/rb-timeline/rb-timeline.component";
 import { RbVcollapseComponent } from "app/rb-vcollapse/rb-vcollapse.component";
 import { RbVsectionComponent } from "app/rb-vsection/rb-vsection.component";
+import { RbActionButtonComponent } from "app/clickable/rb-actionbutton/rb-actionbutton.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -64,7 +64,7 @@ export const componentRegistry = {
     "list3": RbListComponent,
     "list4": RbList4Component,
     "tree": RbTreeComponent,
-    "button": RbButtonComponent,
+    "button": RbActionButtonComponent,
     "search": RbSearchComponent,
     "actiongroup": RbActiongroupComponent,
     "addressinput": RbAddressInputComponent,

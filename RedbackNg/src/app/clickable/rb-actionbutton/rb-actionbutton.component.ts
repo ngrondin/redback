@@ -1,21 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { Component, Input } from '@angular/core';
+import { RbButtonComponent } from 'app/clickable/rb-button/rb-button';
 import { ActionService } from 'app/services/action.service';
 
 @Component({
-  selector: 'rb-button',
-  templateUrl: './rb-button.component.html',
-  styleUrls: ['./rb-button.component.css']
+  selector: 'rb-actionbutton',
+  templateUrl: '../rb-button/rb-button.html',
+  styleUrls: ['../rb-button/rb-button.css']
 })
-export class RbButtonComponent extends RbDataObserverComponent {
-  @Input('dataset') dataset: RbDatasetComponent;
-  @Input('label') label: string;
+export class RbActionButtonComponent extends RbButtonComponent {
   @Input('action') action: string;
   @Input('param') param: string;
   @Input('timeout') timeout: number;
   @Input('confirm') confirm: string;
-
+  
   constructor(
     private actionService: ActionService
   ) {
@@ -34,11 +31,12 @@ export class RbButtonComponent extends RbDataObserverComponent {
   onActivationEvent(event: any) {
   }
 
-  public click() {
+  click() {
     if(this.dataset != null) {
       this.actionService.action(this.dataset, this.action, this.param, this.timeout, this.confirm).subscribe((rbObject) => {
       })
     }
   }
-
 }
+
+

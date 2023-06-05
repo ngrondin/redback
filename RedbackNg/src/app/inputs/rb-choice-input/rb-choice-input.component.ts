@@ -1,8 +1,7 @@
-import { Overlay } from '@angular/cdk/overlay';
-import { Component, Input, Injector, ViewContainerRef } from '@angular/core';
-
+import { Component, Input } from '@angular/core';
 import { RbPopupHardlistComponent } from 'app/popups/rb-popup-hardlist/rb-popup-hardlist.component';
 import { RbPopupInputComponent } from '../abstract/rb-popup-input';
+import { PopupService } from 'app/services/popup.service';
 
 
 @Component({
@@ -18,11 +17,9 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
   defaultIcon: string = 'description';
 
   constructor(
-    public injector: Injector,
-    public overlay: Overlay,
-    public viewContainerRef: ViewContainerRef
+    public popupService: PopupService
   ) {
-    super(injector, overlay, viewContainerRef);
+    super(popupService);
   }
 
   public get choicelist(): any {

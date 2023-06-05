@@ -22,6 +22,15 @@
     flex-grow: 1;
 }
 
+.rb-toolbar-username {
+    flex: 0 0 auto;
+}
+
+.rb-toolbar-username span {
+    padding: var(--v5px);
+    font-size: 0.85rem;
+}
+
 :host .mat-toolbar .mat-toolbar-row button {
     font-size: 0.9rem;
 }
