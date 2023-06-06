@@ -48,10 +48,6 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     }    
   }
 
-  get visibleTabs(): RbTabComponent[] {
-    return this.tabs.filter(t => t.showResult == true);
-  }
-
   public register(tab: RbTabComponent) {
     let swtch = this.userpref.getCurrentViewUISwitch('tab',  tab.label);
     if(swtch == null || swtch == true) {

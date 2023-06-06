@@ -13,43 +13,44 @@
         [format]="'YYYY-MM-DD'"
         [(value)]="startDate">
     </rb-datetime-input>
-    <button
+    <rb-button
         [matMenuTriggerFor]="zoomMenu"
-        mat-stroked-button
-		class="mat-primary">
-        <mat-icon>zoom_in</mat-icon>
-    </button>
+        [icon]="'zoom_in'"
+        [margin]="false">
+    </rb-button>
     <mat-menu #zoomMenu="matMenu">
         <button mat-menu-item (click)="setZoom(86400000)">1 day</button>
         <button mat-menu-item (click)="setZoom(259200000)">3 Days</button>
         <button mat-menu-item (click)="setZoom(604800000)">7 Days</button>
     </mat-menu>    
     &nbsp;
-    <button
+    <rb-button
         [matMenuTriggerFor]="spanMenu"
-        mat-stroked-button
-		class="mat-primary">
-        <mat-icon>swap_horiz</mat-icon>
-    </button>
+        [icon]="'swap_horiz'"
+        [margin]="false">   
+    </rb-button>
     <mat-menu #spanMenu="matMenu">
         <button mat-menu-item (click)="setSpan(259200000)">3 day</button>
         <button mat-menu-item (click)="setSpan(604800000)">7 Days</button>
         <button mat-menu-item (click)="setSpan(1209600000)">14 Days</button>
     </mat-menu>    
-    <button
-        mat-stroked-button
-		class="mat-primary"
-        (click)="forceDatasetReload()">
-        <mat-icon>refresh</mat-icon>
-    </button> 
-    <button
+    &nbsp;
+    <rb-button
+        (click)="forceDatasetReload()"
+        [icon]="'refresh'"
+        [margin]="false">
+    </rb-button> 
+    &nbsp;
+    <rb-iconbutton
         [matMenuTriggerFor]="settingsMenu"
-        mat-icon-button
-		class="mat-primary rb-gantt-button">
-        <mat-icon>more_vert</mat-icon>
-    </button>
+        [icon]="'more_vert'">
+    </rb-iconbutton>
     <mat-menu #settingsMenu="matMenu">
-        <button mat-menu-item (click)="toggleDragFilter()">{{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}</button>
+        <button 
+            mat-menu-item 
+            (click)="toggleDragFilter()">
+            {{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}
+        </button>
     </mat-menu>         
 </div>
 <div

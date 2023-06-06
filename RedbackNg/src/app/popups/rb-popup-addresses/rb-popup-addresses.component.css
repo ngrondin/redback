@@ -17,6 +17,10 @@
     flex-direction: row;
 }
 
+.rb-popup-address-text-hightlight {
+    background-color: #dddddd;
+}
+
 .rb-popup-address-text {
     display: flex;
     flex-direction: row;
@@ -25,7 +29,5 @@
     flex: 1 1 auto;
 }
 
-.rb-popup-address-text-hightlight {
-    background-color: #dddddd;
-}
+
 

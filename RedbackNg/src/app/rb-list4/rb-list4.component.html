@@ -4,11 +4,9 @@
     <div>
         <div
             *ngFor="let item of enhancedList"
+            [rb-drag-object]="item.object"                
             class="rb-list-repeater">
-            <!--[class]="'rb-list-item' + (selectedObject == item.object ? ' rb-list-item-active' : '')"
-                [style.background]="item.color"-->
-            <rb-list-item
-                [rb-drag-object]="item.object"                
+            <rb-clickable
                 (click)="itemClicked(item.object)">
                 <div 
                     class="rb-list-item-data">
@@ -38,7 +36,7 @@
                         {{item.sub}}
                     </span>
                 </div>
-            </rb-list-item> 
+            </rb-clickable> 
             <div
                 class="rb-list-divider">
                 <div

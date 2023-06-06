@@ -10,12 +10,11 @@
         [(value)]="value"
         (keydown)="keydown($event)">
     </rb-textarea-input>
-    <button
-        mat-stroked-button
-        class="mat-primary"
+    <rb-button
+        [label]="'Post'"
+        [focus]="true"
         (click)="post()">
-        Post
-    </button>
+    </rb-button>
 </div>
 <div
     class="rb-log-container hscroll"

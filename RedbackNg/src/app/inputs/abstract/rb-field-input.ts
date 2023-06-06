@@ -25,11 +25,15 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
   }
 
   public onFocus(event: any) {
-    this.startEditing();
+    if(!this.isEditing) {
+      this.startEditing();
+    }
   }
 
   public onBlur(event: any) {
-    this.finishEditing();
+    if(this.isEditing) {
+      this.finishEditing();
+    }
   }
 
 

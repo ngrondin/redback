@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
 import { EditorChangeContent, EditorChangeSelection } from 'ngx-quill';
 import Quill from 'quill'
@@ -9,7 +9,10 @@ import Quill from 'quill'
   styleUrls: ['./rb-richtext-input.component.css']
 })
 export class RbRichtextInputComponent extends RbFieldInputComponent {
-  
+  @ViewChild('quilleditorparent') quilleditorparent; 
+
+  hackDone: boolean = false;
+
   public get displayvalue(): any {
     if(this.isEditing) {
       return this.editedValue;
@@ -37,13 +40,37 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   }
 
   public startEditing() {
+    console.log("QL Start editing");
     super.startEditing();
     this.editedValue = this.value;
+    if(!this.hackDone) {
+      this.hackQuillEditor();
+    }
   }
 
   public finishEditing() {
+    console.log("QL Finish editing");
     this.commit(this.editedValue);
     super.finishEditing();
   }
 
+  hackQuillEditor() {
+    var qep = this.quilleditorparent.elementRef.nativeElement;
+    var list = qep.getElementsByClassName('ql-editor');
+    if(list.length > 0) {
+      var qe = list[0];
+      qe.addEventListener("focus", ($event) => {
+        console.log('QL hack focus')
+        this.onFocus($event);
+      });      
+      qe.addEventListener("blur", ($event) => {
+        console.log('QL hack blur')
+        this.onBlur($event);
+      });
+    }
+    this.hackDone = true;
+    console.log("Hack done");
+  }
 }
+
+

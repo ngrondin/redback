@@ -1,16 +1,14 @@
 <div
     *ngFor="let item of list"
-    class="rb-popup-address-line">
-    <rb-list-item>
+    [class]="'rb-popup-address-line' + (getHighlighted() == item ? ' rb-popup-address-line-hightlight' : '')">
+    <rb-clickable
+        (click)="select(item)">
         <span 
-            [class]="'rb-popup-address-text' + (getHighlighted() == item ? ' rb-popup-address-text-hightlight' : '')"
-            (click)="select(item)">
+            class="rb-popup-address-text">
             {{item}}
         </span>
-    </rb-list-item>
+    </rb-clickable>
 </div>
-
-
 <div
     class="rb-spinner-container"
     *ngIf="isLoading">

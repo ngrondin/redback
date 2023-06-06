@@ -1,18 +1,18 @@
 <div
     class="rb-tabsection-tabheaders">
-    <button
-        mat-icon-button
+    <rb-iconbutton
+        [icon]="'navigate_before'"
         *ngIf="overflows(tabheaderscroll)"
         (click)="scrollLeft(tabheaderscroll)">
-        <mat-icon>navigate_before</mat-icon>
-    </button>
+    </rb-iconbutton>
     <div
         #tabheaderscroll
         class="rb-tabsection-tabheaderscroll">
         <div
             [class]="'rb-tabsection-tabheader'"
-            *ngFor="let tab of visibleTabs">
+            *ngFor="let tab of tabs">
             <rb-clickable
+                *ngIf="tab.show == true"
                 [focus]="isTabActive(tab)"
                 (click)="selectTab(tab)"
                 (contextmenu)="openPopup($event, tab)">
@@ -23,12 +23,11 @@
             </rb-clickable>
         </div>
     </div>
-    <button
-        mat-icon-button
+    <rb-iconbutton
+        [icon]="'navigate_next'"
         *ngIf="overflows(tabheaderscroll)"
         (click)="scrollRight(tabheaderscroll)">
-        <mat-icon>navigate_next</mat-icon>
-    </button>
+    </rb-iconbutton>    
 </div>
 <div
     class="rb-tabsection-divider">

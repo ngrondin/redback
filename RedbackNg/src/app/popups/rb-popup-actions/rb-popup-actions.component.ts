@@ -4,7 +4,7 @@ import { DataService } from 'app/services/data.service';
 import { CONTAINER_DATA } from 'app/tokens';
 
 @Component({
-  selector: 'app-rb-popup-actions',
+  selector: 'rb-popup-actions',
   templateUrl: './rb-popup-actions.component.html',
   styleUrls: ['./rb-popup-actions.component.css']
 })

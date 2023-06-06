@@ -21,13 +21,12 @@ export class RbClickableComponent {
     let tgt = $event.target;
     this.clickTop = $event.offsetY;
     this.clickLeft = $event.offsetX;
-    while(tgt.className.indexOf("rb-clickable-container") == -1) {
+    while(tgt != null && (tgt.className == null || (tgt.className != null && tgt.className.indexOf("rb-clickable-container") == -1))) {
       this.clickLeft = this.clickLeft + tgt.offsetLeft;
       this.clickTop = this.clickTop + tgt.offsetTop;
       tgt = tgt.offsetParent;
     }
     this.clicked = true;
-    this.hovering = false;
     setTimeout(() => this.clicked = false, 500);
   }
 

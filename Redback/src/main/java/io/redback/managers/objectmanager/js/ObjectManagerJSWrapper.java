@@ -30,7 +30,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 		if(key.equals("getObject")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					RedbackObject rbo = objectManager.getObject(session, (String)arguments[0], (String)arguments[1]);
+					RedbackObject rbo = objectManager.getObject(session, arguments[0].toString(), arguments[1].toString());
 					if(rbo != null)
 						return new RedbackObjectJSWrapper(rbo);
 					else

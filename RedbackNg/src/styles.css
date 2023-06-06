@@ -14,6 +14,8 @@
 	--dark-inverse-writing-color: #d2d2d2;
 	--light-inverse-writing-color: #eeeeee;
 	--bw: 100vw;
+	--v2px: 0.12vw;
+	--v3px: 0.18vw;
 	--v5px: 0.29vw;
 	--v8px: 0.47vw;
 	--v10px: 0.58vw;
@@ -42,6 +44,9 @@ body {
     flex-direction: column;
 	overflow: hidden;
 	font-family: Roboto, "Helvetica Neue", sans-serif;
+	-webkit-user-select: none; /* Safari */
+	-ms-user-select: none; /* IE 10 and IE 11 */
+	user-select: none; /* Standard syntax */
 }
 
 

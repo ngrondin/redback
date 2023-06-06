@@ -1,11 +1,20 @@
 <div
     #button
-    class="rb-button">
+    class="rb-button-frame">
     <rb-clickable
         [focus]="focus">
-        <span
-            class="rb-button-label">
-            {{label}}
-        </span>
+        <div
+            class="rb-button-content-wrapper">
+            <mat-icon 
+                *ngIf="icon != null"
+                class="rb-button-icon"
+                [fontIcon]="icon">
+            </mat-icon>
+            <span
+                *ngIf="label != null"
+                class="rb-button-label">
+                {{label}}
+            </span>        
+        </div>
     </rb-clickable>    
 </div>

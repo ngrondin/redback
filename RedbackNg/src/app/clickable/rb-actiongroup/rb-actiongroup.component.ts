@@ -10,6 +10,7 @@ import { RbButtonComponent } from 'app/clickable/rb-button/rb-button';
 import { PopupService } from 'app/services/popup.service';
 import { RbPopupActionsComponent } from 'app/popups/rb-popup-actions/rb-popup-actions.component';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+import { RbDataButtonComponent } from '../abstract/rb-databutton';
 
 
 export class RbActiongroupAction {
@@ -35,7 +36,7 @@ export class RbActiongroupAction {
   templateUrl: '../rb-button/rb-button.html',
   styleUrls: ['../rb-button/rb-button.css']
 })
-export class RbActiongroupComponent extends RbButtonComponent {
+export class RbActiongroupComponent extends RbDataButtonComponent {
   @Input('actions') actions: any;
   @Input('domaincategory') domaincategory: string;
   @Input('showprocessinteraction') showprocessinteraction: boolean = false;

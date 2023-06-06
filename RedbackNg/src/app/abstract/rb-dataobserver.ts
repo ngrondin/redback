@@ -15,13 +15,13 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('dataset') dataset: RbDatasetComponent;
     @Input('datasetgroup') datasetgroup: RbDatasetGroupComponent;
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
-    @Input('show') show: string;
-    @HostBinding('style.display') get visitility() { return this.showResult ? 'flex' : 'none'; }
+    @Input('show') showExpr: string;
+    @HostBinding('style.display') get visitility() { return this.show ? 'flex' : 'none'; }
     
     public datasetSubscription: Subscription;
     public datasetGroupSubscription: Subscription;
     public aggregatesetSubscription: Subscription;
-    public showResult: boolean = true;
+    public show: boolean = true;
 
     constructor() {
         super();
@@ -37,10 +37,10 @@ export abstract class RbDataObserverComponent extends RbComponent {
         if(this.aggregateset != null) {
             this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.internalDatasetEvent(event));
         }        
-        if(this.show != null) {
+        if(this.showExpr != null) {
             this.evalShow()
         } else {
-            this.showResult = true;
+            this.show = true;
         }
         this.dataObserverInit();
     }
@@ -59,7 +59,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     private internalDatasetEvent(event: string) {
-        if(this.show != null) {
+        if(this.showExpr != null) {
             this.evalShow();
         }
         this.onDatasetEvent(event);
@@ -100,22 +100,22 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     evalShow() {
-        if(this.show == 'true') {
-            this.showResult = true;
-        } else if(this.show == 'false') {
-            this.showResult = false;
+        if(this.showExpr == 'true') {
+            this.show = true;
+        } else if(this.showExpr == 'false') {
+            this.show = false;
         } else if(this.dataset != null && (this.dataset.selectedObject != null || this.dataset.relatedObject != null)) {
-            let str: string = decodeURIComponent(this.show);
+            let str: string = decodeURIComponent(this.showExpr);
             let object = this.dataset.selectedObject;
             let relatedObject = this.dataset.relatedObject;
             //TODO: Should be changed to use Evaluator.eval
             if(!((str.indexOf("object.") > -1 && object == null) || (str.indexOf("relatedObject.") > -1 && relatedObject == null))) {
-                this.showResult = eval(str);            
+                this.show = eval(str);            
             } else {
-                this.showResult = false;
+                this.show = false;
             }
         } else {
-            this.showResult = false;
+            this.show = false;
         }
     }
   }

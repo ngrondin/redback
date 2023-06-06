@@ -1,16 +1,15 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RbNotification, RbNotificationAction, RbObject } from 'app/datamodel';
-import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { NotificationService } from 'app/services/notification.service';
 import { Subscription } from 'rxjs';
-import { RbButtonComponent } from 'app/clickable/rb-button/rb-button';
+import { RbDataButtonComponent } from '../abstract/rb-databutton';
 
 @Component({
   selector: 'rb-processactions',
   templateUrl: '../rb-button/rb-button.html',
   styleUrls: ['../rb-button/rb-button.css']
 })
-export class RbProcessactionsComponent extends RbButtonComponent  {
+export class RbProcessactionsComponent extends RbDataButtonComponent  {
   @Input('round') round: boolean = false;
   @Input('hideonempty') hideonempty: boolean = false;
 

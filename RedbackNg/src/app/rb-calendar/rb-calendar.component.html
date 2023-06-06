@@ -17,16 +17,14 @@
         [(value)]="activeDatasets">
     </rb-choice-input>
     <rb-spacer></rb-spacer>
-    <button
-        mat-icon-button
+    <rb-iconbutton
+        [icon]="'arrow_back_ios'"
         (click)="previous()">
-        <mat-icon>arrow_back_ios</mat-icon>
-    </button>
-    <button
-        mat-icon-button
+    </rb-iconbutton>
+    <rb-iconbutton
+        [icon]="'arrow_forward_ios'"
         (click)="next()">
-        <mat-icon>arrow_forward_ios</mat-icon>
-    </button>    
+    </rb-iconbutton>    
     <rb-choice-input
         [choicelist]="modes"
         [label]="'Display'"

@@ -3,7 +3,7 @@
     flex-direction: column;
 }
 
-.rb-button {
+.rb-button-frame {
     display: flex;
     flex-direction: row;
     border: 1px solid var(--primary-dark-color);
@@ -12,7 +12,17 @@
     font-size: 0.9rem;
 }
 
-.rb-button-label {
+.rb-button-content-wrapper {
+    display: flex;
+    flex-direction: row;
     padding: var(--v8px) var(--v12px);
     color: var(--primary-dark-color);
+}
+
+.rb-button-icon {
+    margin: -3px;
+}
+
+.rb-button-label {
+    
 }

@@ -50,7 +50,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
       const userpref = AppInjector.get(UserprefService);
       let swtch = userpref.getCurrentViewUISwitch('input',  this.dataset.objectname + "." + this.attribute);
       if(swtch == false) {
-        this.show = 'false';
+        this.showExpr = 'false';
       }
     }
     this.inputInit();
