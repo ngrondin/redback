@@ -22,7 +22,9 @@ export class RbActionButtonComponent extends RbDataButtonComponent {
 
   click() {
     if(this.dataset != null) {
+      this.running = true;
       this.actionService.action(this.dataset, this.action, this.param, this.timeout, this.confirm).subscribe((rbObject) => {
+        this.running = false;
       })
     }
   }

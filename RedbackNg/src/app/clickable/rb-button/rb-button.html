@@ -1,8 +1,10 @@
 <div
     #button
-    class="rb-button-frame">
+    [class]="'rb-button-frame' + (!enabled ? ' rb-button-frame-disabled' : '')">
     <rb-clickable
-        [focus]="focus">
+        [enabled]="enabled"
+        [focus]="focus"
+        [running]="running">
         <div
             class="rb-button-content-wrapper">
             <mat-icon 

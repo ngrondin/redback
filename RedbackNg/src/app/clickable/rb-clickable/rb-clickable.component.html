@@ -1,26 +1,23 @@
 <div 
-    *ngIf="focus"
+    *ngIf="focus && enabled"
     class="rb-clickable-back">
 </div>
 <div 
-    *ngIf="hovering"
+    *ngIf="hovering && enabled"
     class="rb-clickable-hover">
 </div>
-<div
-    [class]="'rb-clickable-container' + (focus ? ' rb-clickable-container-inverted' : '')">
-    <ng-content></ng-content>
-    <div #container></div>
-</div>
 <div 
-    *ngIf="clicked"
     [class]="'rb-clickable-click' + (clicked ? ' rb-clickable-click-clicked' : '')"
     [style.top.px]="clickTop"
     [style.left.px]="clickLeft">
 </div>
 <div
-    class="rb-clickable-spinner"
-    *ngIf="running">
-    <mat-spinner
-        diameter="15">
-    </mat-spinner>
+    [class]="'rb-clickable-content' + (running ? ' rb-clickable-content-invisible' : '') + (!enabled ? ' rb-clickable-content-disabled' : focus ? ' rb-clickable-content-inverted' :  '' )">
+    <ng-content></ng-content>
+    <div #container></div>
+</div>
+<div
+    *ngIf="running && enabled"
+    [class]="'rb-clickable-spinner' + (focus ? ' rb-clickable-spinner-inverted' : '')">
+    <div></div><div></div><div></div><div></div>
 </div>

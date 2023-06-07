@@ -6,6 +6,7 @@ import { Component, HostListener, Input } from '@angular/core';
   styleUrls: ['./rb-clickable.component.css']
 })
 export class RbClickableComponent {
+  @Input('enabled') enabled = true;
   @Input('focus') focus = false;
   @Input('running') running = false;
   hovering: boolean = false;
@@ -18,16 +19,18 @@ export class RbClickableComponent {
   }
 
   @HostListener('click', ['$event']) _onclick($event) {
-    let tgt = $event.target;
-    this.clickTop = $event.offsetY;
-    this.clickLeft = $event.offsetX;
-    while(tgt != null && (tgt.className == null || (tgt.className != null && tgt.className.indexOf("rb-clickable-container") == -1))) {
-      this.clickLeft = this.clickLeft + tgt.offsetLeft;
-      this.clickTop = this.clickTop + tgt.offsetTop;
-      tgt = tgt.offsetParent;
+    if(this.enabled) {
+      let tgt = $event.target;
+      this.clickTop = $event.offsetY;
+      this.clickLeft = $event.offsetX;
+      while(tgt != null && (tgt.className == null || (tgt.className != null && tgt.className.indexOf("rb-clickable-content") == -1))) {
+        this.clickLeft = this.clickLeft + tgt.offsetLeft;
+        this.clickTop = this.clickTop + tgt.offsetTop;
+        tgt = tgt.offsetParent;
+      }
+      this.clicked = true;
+      setTimeout(() => this.clicked = false, 500);  
     }
-    this.clicked = true;
-    setTimeout(() => this.clicked = false, 500);
   }
 
   @HostListener('mouseenter', ['$event']) _mouseenter($event) {

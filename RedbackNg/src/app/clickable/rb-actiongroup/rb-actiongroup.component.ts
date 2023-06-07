@@ -129,6 +129,10 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     return this.popupComponentRef != null;
   }
 
+  get enabled() : boolean {
+    return this.actionData.length > 0;
+  }
+
   get focus() : boolean {
     if(!this.open && this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
@@ -211,20 +215,20 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     this.closePopup();
     if(action.action == 'processaction' && this.notification != null) {
       let notif = this.notification;
-      this.actionning = true;
+      this.running = true;
       this.notificationService.actionNotification(this.notification, action.param).subscribe(() => {
           if(this.notification === notif) {
             this.notification = null;
             this.notificationRetreived = false;
           }
         }).add(() => {
-          this.actionning = false;
+          this.running = false;
           this.calcActionData();
         });
     } else {
-      this.actionning = true;
+      this.running = true;
       this.actionService.action(this.dataset, action.action, action.param, action.timeout, action.confirm).subscribe().add(() => {
-        this.actionning = false;
+        this.running = false;
       });
     }
   }

@@ -31,6 +31,8 @@
     padding: var(--v12px);
     background-color: #fcfcfc;
     border: 1px solid #dfdfdf;
+    -ms-user-select:text;
+	user-select: text;
 }
 
 .rb-log-card-active:hover {

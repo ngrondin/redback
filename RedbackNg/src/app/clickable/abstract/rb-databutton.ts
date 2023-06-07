@@ -6,6 +6,7 @@ import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 export class RbDataButtonComponent extends RbDataObserverComponent {
   @Input('label') label: string;
   @Input('icon') icon: string;
+  @Input('enabled') _enabled: boolean = true;
   @Input('focus') _focus: boolean = false;
   @Input('margin') margin: boolean = true;
 
@@ -13,7 +14,7 @@ export class RbDataButtonComponent extends RbDataObserverComponent {
 
   @HostBinding('class.rb-button-margin') get marginclass() { return this.margin }
 
-  actionning: boolean = false;
+  running: boolean = false;
 
   constructor(
   ) {
@@ -27,6 +28,10 @@ export class RbDataButtonComponent extends RbDataObserverComponent {
   onDatasetEvent(event: string) {
   }
   onActivationEvent(state: boolean) {
+  }
+
+  get enabled() : boolean {
+    return this._enabled;
   }
   
   get focus() : boolean {
