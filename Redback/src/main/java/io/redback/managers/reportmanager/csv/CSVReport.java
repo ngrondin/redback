@@ -16,9 +16,11 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
+import io.firebus.script.ScriptContext;
 import io.firebus.script.exceptions.ScriptException;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
+import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
@@ -35,6 +37,8 @@ public class CSVReport extends Report {
 	protected Expression sortExp;
 	protected ExpressionMap sortExpMap;
 	protected DataList columns;
+	protected ExpressionMap varsExpMap;
+	protected ScriptContext baseContext;
 	protected byte[] bytes;
 	
 	public CSVReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
@@ -57,9 +61,13 @@ public class CSVReport extends Report {
 				else if(sort instanceof DataLiteral)
 					sortExp = reportManager.getScriptFactory().createExpression("sort", ((DataLiteral)sort).getString());	
 			}	
+			if(c.containsKey("vars")) {
+				varsExpMap = new ExpressionMap(reportManager.getScriptFactory(), "csvdataset_filter", c.getObject("vars"));
+			}
 			if(c.containsKey("columns")) {
 				columns = c.getList("columns");
 			}
+			baseContext = reportManager.getScriptFactory().createScriptContext();
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising csv report", e);
 		}
@@ -67,12 +75,16 @@ public class CSVReport extends Report {
 
 	public void produce(DataMap filter) throws RedbackException {
 		try {
-			Map<String, Expression> exprCache = new HashMap<String, Expression>();
-			Map<String, Object> jsContext = new HashMap<String, Object>();
-			jsContext.put("filter", filter);
 			ObjectClient oc = reportManager.getObjectClient();
-			DataMap localFilter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
-			DataMap localSort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);
+			Map<String, Expression> exprCache = new HashMap<String, Expression>();
+			baseContext.declare("filter", filter);
+			baseContext.declare("oc", new ObjectClientJSWrapper(oc, this.session));
+			if(varsExpMap != null) {
+				DataMap vars = varsExpMap.eval(baseContext);
+				baseContext.declare("vars", vars);
+			}
+			DataMap localFilter = (filterExp != null ? (DataMap)filterExp.eval(baseContext) : filterExpMap.eval(baseContext));
+			DataMap localSort = (sortExp != null ? (DataMap)sortExp.eval(baseContext) : sortExpMap != null ? sortExpMap.eval(baseContext) : null);
 			List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, localFilter, localSort, true);
 			StringBuilder sb = new StringBuilder();
 			for(int i = 0; i < columns.size(); i++) {
@@ -81,6 +93,8 @@ public class CSVReport extends Report {
 			}
 			for(int i = 0; i < rors.size(); i++) {
 				sb.append("\r\n");
+				ScriptContext rowContext = baseContext.createChild();
+				rowContext.declare("object", new RedbackObjectRemoteJSWrapper(rors.get(i)));
 				for(int j = 0; j < columns.size(); j++) {
 					if(j > 0) sb.append(",");
 					DataMap colCfg = columns.getObject(j);
@@ -94,9 +108,7 @@ public class CSVReport extends Report {
 							expr = this.reportManager.getScriptFactory().createExpression(exprStr);
 							exprCache.put(exprStr, expr);
 						}
-						Map<String, Object> exprContext = new HashMap<String, Object>();
-						exprContext.put("object", new RedbackObjectRemoteJSWrapper(rors.get(i)));
-						value = expr.eval(exprContext);
+						value = expr.eval(rowContext);
 					} else if(attribute != null) {
 						DataEntity e = rors.get(i).get(attribute);
 						if(e instanceof DataLiteral)
