@@ -12,8 +12,14 @@
     flex: 1 1 auto;   
 }
 
-:host > .rb-list-container > mat-action-list > button {
-	height: auto!important;
+.rb-list-repeater {
+    display:flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.rb-list-repeater-selected {
+    background-color: #e0e9f2;
 }
 
 .rb-list-item {
@@ -40,7 +46,8 @@
 .rb-list-item-data {
 	display: flex;
 	flex-direction: row;
-	margin: 12px 4px 12px 4px;
+    flex: 1 1 auto;
+	margin: var(--v12px) var(--v20px);
     min-height: 40px;
 }
 
@@ -62,6 +69,7 @@
 .rb-list-item-datablock {
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 .rb-list-item-header {

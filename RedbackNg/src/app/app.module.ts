@@ -131,7 +131,8 @@ import { RbClickableComponent } from './clickable/rb-clickable/rb-clickable.comp
 import { RbIconbuttonComponent } from './clickable/rb-iconbutton/rb-iconbutton.component';
 import { RbButtonComponent } from './clickable/rb-button/rb-button';
 import { QuillModule } from 'ngx-quill';
-import { RbRichtextInputComponent } from './inputs/rb-richtext-input/rb-richtext-input.component'
+import { RbRichtextInputComponent } from './inputs/rb-richtext-input/rb-richtext-input.component';
+import { RbVseparatorComponent } from './rb-vseparator/rb-vseparator.component'
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();
@@ -272,7 +273,8 @@ window.redback = window.redback || {};
         RbListItemComponent,
         RbClickableComponent,
         RbIconbuttonComponent,
-        RbRichtextInputComponent
+        RbRichtextInputComponent,
+        RbVseparatorComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

@@ -7,17 +7,13 @@
     flex: 1 1 auto;
 }
 
-.rb-tree-node {
-
-}
-
 .rb-tree-node-mainrow {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.rb-tree-node-emptybutton {
+.rb-tree-node-expandbutton {
     display: flex;
     width: 40px;
     height: 40px;
@@ -26,17 +22,8 @@
     align-items: center;
 }
 
-.rb-tree-node-label {
-
-}
-
 .rb-tree-node-children {
-    padding-left: 12px;
-}
-
-mat-action-list {
-    padding-top: 0px;
-    overflow: hidden;
+    padding-left: var(--v20px);
 }
 
 .rb-tree-label {
@@ -46,4 +33,6 @@ mat-action-list {
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 1.0rem;
+    flex: 1 1 auto;
+    padding: var(--v12px) var(--v2px)
 }

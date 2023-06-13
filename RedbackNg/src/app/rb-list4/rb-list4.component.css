@@ -25,6 +25,10 @@
     align-items: stretch;
 }
 
+.rb-list-repeater-selected {
+    background-color: #e0e9f2;
+}
+
 .rb-list-item {
     border-left: 4px Solid transparent;
 }

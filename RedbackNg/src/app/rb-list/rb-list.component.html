@@ -1,11 +1,10 @@
 <div
     class="rb-list-container hscroll">
-    <mat-action-list>
-        <button
-            mat-list-item 
-            *ngFor="let item of list" 
-            [rb-drag-object]="item"
-            [ngClass]="'rb-list-item' + (selectedObject == item ? ' rb-list-item-active' : '')"
+    <div
+        *ngFor="let item of list" 
+        [rb-drag-object]="item"
+        [class]="'rb-list-repeater' + (selectedObject == item ? ' rb-list-repeater-selected' : '')">
+        <rb-clickable
             (click)="itemClicked(item)">
             <div 
                 class="rb-list-item-data">
@@ -31,8 +30,8 @@
                     </span>
                 </div>
             </div>
-        </button>
-    </mat-action-list>
+        </rb-clickable>
+    </div>
     <div
         class="rb-spinner-container"
         *ngIf="list.length == 0 && isLoading == false">

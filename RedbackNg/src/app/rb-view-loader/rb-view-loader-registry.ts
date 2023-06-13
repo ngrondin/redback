@@ -48,6 +48,7 @@ import { RbVcollapseComponent } from "app/rb-vcollapse/rb-vcollapse.component";
 import { RbVsectionComponent } from "app/rb-vsection/rb-vsection.component";
 import { RbActionButtonComponent } from "app/clickable/rb-actionbutton/rb-actionbutton.component";
 import { RbRichtextInputComponent } from "app/inputs/rb-richtext-input/rb-richtext-input.component";
+import { RbVseparatorComponent } from "app/rb-vseparator/rb-vseparator.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -93,6 +94,7 @@ export const componentRegistry = {
     "table": RbTableComponent,
     "vcollapse": RbVcollapseComponent,
     "hseparator": RbHseparatorComponent,
+    "vseparator": RbVseparatorComponent,
     "spacer": RbSpacerComponent,
     "graph": RbDynamicGraphComponent,
     "calendar": RbCalendarComponent,

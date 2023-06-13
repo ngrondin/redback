@@ -11,7 +11,7 @@ import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 export class RbButtonComponent extends RbComponent {
   @Input('label') label: string;
   @Input('icon') icon: string;
-  @Input('enabled') enabled: string;
+  @Input('enabled') enabled: boolean = true;
   @Input('focus') focus: boolean = false;
   @Input('margin') margin: boolean = true;
 

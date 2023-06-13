@@ -5,9 +5,9 @@
         class="rb-tree-node">
         <div
             class="rb-tree-node-mainrow">
-            <button
-                mat-icon-button
+            <rb-clickable
                 *ngIf="node.children.length > 0"
+                class="rb-tree-node-expandbutton"
                 (click)="toggleNode(node)">
                 <mat-icon
                     *ngIf="node.open">
@@ -17,23 +17,19 @@
                     *ngIf="!node.open">
                     chevron_right
                 </mat-icon>
-            </button>
+            </rb-clickable>
             <div
                 *ngIf="node.children.length == 0"
-                class="rb-tree-node-emptybutton">
+                class="rb-tree-node-expandbutton">
                 &#x2022;             
             </div>
-            <mat-action-list>
-                <button
-                    mat-list-item 
-                    [class]="'rb-tree-node' + (selectedObject == node.object ? ' rb-tree-node-active' : '')"
-                    (click)="selectNode(node)">
-                    <div
-                        class="rb-tree-label">
-                        {{ node.label || 'No Label' }}
-                    </div>
-                </button>
-            </mat-action-list>        
+            <rb-clickable
+                (click)="selectNode(node)">
+                <div
+                    class="rb-tree-label">
+                    {{ node.label || 'No Label' }}
+                </div>
+            </rb-clickable>
         </div>
  		<div 
             *ngIf="node.children.length > 0 && node.open == true" 
