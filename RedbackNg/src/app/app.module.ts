@@ -130,7 +130,6 @@ import { RbListItemComponent } from './clickable/rb-list-item/rb-list-item.compo
 import { RbClickableComponent } from './clickable/rb-clickable/rb-clickable.component';
 import { RbIconbuttonComponent } from './clickable/rb-iconbutton/rb-iconbutton.component';
 import { RbButtonComponent } from './clickable/rb-button/rb-button';
-import { QuillModule } from 'ngx-quill';
 import { RbRichtextInputComponent } from './inputs/rb-richtext-input/rb-richtext-input.component';
 import { RbVseparatorComponent } from './rb-vseparator/rb-vseparator.component'
 
@@ -186,8 +185,8 @@ window.redback = window.redback || {};
             apiKey: window['googlekey']
         }),
         AceModule,
-        RedbackgraphsModule,
-        QuillModule.forRoot()    ],
+        RedbackgraphsModule
+    ],
     exports: [
         MatIconModule
     ],

@@ -219,6 +219,10 @@ rb-list-scroll > mat-action-list > button {
 	font-size: 0.9rem;
 }
 
+.ql-editor p {
+    margin-bottom: 12px;
+}
+
 /******** Others *********/
 
 rb-view-loader {

@@ -159,21 +159,23 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   }
 
   public commit(val: any, related: RbObject = null) {
-    if(this.attribute != null) {
-      if(this.rbObject != null) {
-          this.rbObject.setValueAndRelated
-          if(related != null) {
-              return this.rbObject.setValueAndRelated(this.attribute, val, related)
-          } else {
-              return this.rbObject.setValue(this.attribute, val);
-          } 
-      }
-    } else if(this.variable != null) {
-      window.redback[this.variable] = val;
-    } else {
+    var currentValue = this.value;
+    if(currentValue != val) {
+      if(this.attribute != null) {
+        if(this.rbObject != null) {
+            if(related != null) {
+                return this.rbObject.setValueAndRelated(this.attribute, val, related)
+            } else {
+                return this.rbObject.setValue(this.attribute, val);
+            } 
+        }
+      } else if(this.variable != null) {
+        window.redback[this.variable] = val;
+      } else {
         this._value = val;
-    }      
-    this.valueChange.emit(val);
+      }      
+      this.valueChange.emit(val);  
+    }
   }
 
 

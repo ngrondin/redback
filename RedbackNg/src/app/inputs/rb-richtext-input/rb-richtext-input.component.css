@@ -1,11 +1,19 @@
+:host {
+    display: flex;
+    flex-direction: row;
+}
 
-
-quill-editor {
+.rb-richtext-quillcontainer {
     display: flex;
     flex-direction: column;
-    font-size: 0.9rem;
+    flex: 1 1 auto;
 }
 
-quill-editor .ql-container {
-    flex: 1 1 auto!important;
+.rb-richtext-switchbutton {
+    color: #aaa;
 }
+
+.rb-richtext-codeeditor {
+    flex: 1 1 auto;
+}
+

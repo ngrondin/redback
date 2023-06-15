@@ -235,3 +235,88 @@ export class Hasher {
         return hash;
     }
 }
+
+export class HtmlParser {
+    private static selfEndedTags = ["br"];
+
+    public static parse(str) {
+        let ret = this.recparse(str ?? "", 0);
+        return ret.nodes;
+    }
+    
+    private static recparse(str, pos) {
+        let nodes = [];
+        while(pos > -1 && pos < str.length) {
+            let lastpos = pos;
+            pos = str.indexOf("<", pos);
+            let text = str.substring(lastpos, (pos > -1 ? pos : str.length));
+            if(text.trim().length > 0) {
+                nodes.push({type:"text", text: text.trim()});
+            }
+            if(pos > -1) {
+                lastpos = pos;
+                pos = str.indexOf(">", pos);
+                if(pos > -1) {
+                    let substr = str.substring(lastpos + 1, pos);
+                    pos++;
+                    if(substr.startsWith("/")) {
+                        return {nodes, pos};
+                    } else {
+                        let selfend = false;
+                        if(substr.endsWith("/")) {
+                            substr = substr.substring(0, substr.length - 1);
+                            selfend = true;
+                        }
+                        let parts = substr.split(" ");
+                        let tag = parts[0];    
+                        let attrs = parts.slice(1).reduce((acc, val) => {var subparts = val.split("="); acc[subparts[0]] = subparts[1]; return acc;}, {});
+                        let node = {type: "tag", tag, attrs, selfend};
+                        if(selfend) {
+                            //seld ended
+                        } else if(this.selfEndedTags.indexOf(tag) > -1) {
+                            //implicit self-ended tag
+                        } else {
+                            let result = this.recparse(str, pos);
+                            node['children'] = result.nodes;
+                            pos = result.pos;
+                        }
+                        nodes.push(node);
+                    }
+                }
+            }
+        }
+        return {nodes, pos};
+    }
+
+    public static stringify(nodes, indent = 0, baseindent = 0) {
+        var str = "";
+        var basepad = "".padStart(baseindent, " ");
+        for(var node of nodes) {
+            if(node.type == 'tag') {
+                str = str + basepad + "<" + node.tag;
+                str = str + (Object.keys(node.attrs).length > 0 ? " " + Object.keys(node.attrs).map(key => key + "=" + node.attrs[key]).join(" ") : "") 
+                str = str + (node.selfend ? "/" : "");
+                str = str + ">";
+                if(indent > 0) {
+                    str = str + "\r\n";
+                }
+                if( node.children != null && node.children.length > 0) {
+                    str = str + this.stringify(node.children, indent, (indent > 0 ? baseindent + indent : 0));
+                }
+                if(node.selfend == false && this.selfEndedTags.indexOf(node.tag) == -1) {
+                    str = str + basepad + "</" + node.tag + ">"; 
+                    if(indent > 0) {
+                        str = str + "\r\n";
+                    }  
+                }         
+            } else if(node.type == 'text') {
+                str = str + basepad + node.text;
+                if(indent > 0) {
+                    str = str + "\r\n";
+                }  
+            }
+             
+        }
+        return str;
+    }
+}

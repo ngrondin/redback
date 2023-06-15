@@ -1,9 +1,57 @@
-<quill-editor 
-    #quilleditorparent
-    [(ngModel)]="displayvalue"
-    [readOnly]="readonly"
-    (onFocus)="onFocus($event)" 
-    (onEditorChanged)="changedEditor($event)" 
-    (onBlur)="onBlur($event)" 
-    (onEditorCreated)="created($event)">
-</quill-editor>
+<div
+    class="rb-richtext-quillcontainer"
+    [style.visibility]="mode == 'editor' ? 'visible' : 'collapse'">
+    <div 
+        #quilltoolbar
+        id="quilltoolbar">
+        <select class="ql-size">
+            <option value="small"></option>
+            <option selected></option>
+            <option value="large"></option>
+            <option value="huge"></option>
+        </select>
+        <select class="ql-font">
+        </select>
+        <button class="ql-bold"></button>
+        <button class="ql-italic"></button>
+        <button class="ql-underline"></button>
+        <button class="ql-strike"></button>
+        <button class="ql-list" value="bullet"></button>
+        <button class="ql-list" value="ordered"></button>
+        <button class="ql-script" value="sub"></button>
+        <button class="ql-script" value="super"></button>   
+        <button class="ql-indent" value="-1"></button>
+        <button class="ql-indent" value="+1"></button>
+        <select class="ql-align">
+        </select>
+        <select class="ql-color">
+        </select>
+        <select class="ql-background">
+        </select>
+        <button class="ql-link"></button>
+        <button class="ql-image"></button>
+    </div>
+    <div
+        #quilleditor
+        id="quilleditor">
+    </div>
+</div>
+<ace
+  *ngIf="mode == 'code'"
+  class="rb-richtext-codeeditor"
+  [style.width.px]="null"
+  [style.height.px]="null"
+  [theme]="null"
+  [mode]="null"  
+  [config]="codeconfig"
+  [disabled]="readonly"
+  [(value)]="codeSource"        
+  (focus)="onFocus($event)"
+  (blur)="onBlur($event)">
+</ace>
+<rb-iconbutton
+    *ngIf="allowswitch"
+    [icon]="mode == 'editor' ? 'code' : 'edit_mode'"
+    class="rb-richtext-switchbutton"
+    (click)="toggleMode()">
+</rb-iconbutton>

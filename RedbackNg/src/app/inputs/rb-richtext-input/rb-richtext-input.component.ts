@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
-import { EditorChangeContent, EditorChangeSelection } from 'ngx-quill';
 import Quill from 'quill'
+import { HtmlParser } from 'app/helpers';
 
 @Component({
   selector: 'rb-richtext-input',
@@ -9,28 +9,53 @@ import Quill from 'quill'
   styleUrls: ['./rb-richtext-input.component.css']
 })
 export class RbRichtextInputComponent extends RbFieldInputComponent {
-  @ViewChild('quilleditorparent') quilleditorparent; 
+  @Input('allowswitch') allowswitch: boolean = false;
+  editor: any = null;
+  editorconfig: any = {
+    modules: {
+      toolbar: {
+        container: "#quilltoolbar"
+      }
+    },
+    theme: 'snow'
+  };
+  codeconfig: any = {
+    printMargin: false
+  }
+  mode: string = 'editor';
+  codeSource: string = null;
 
-  hackDone: boolean = false;
+  ngAfterViewInit() {
+    this.editor = new Quill('#quilleditor', this.editorconfig);
+    this.editor.root.addEventListener("focus", ($event) => {
+      this.onFocus($event);
+    });      
+    this.editor.root.addEventListener("blur", ($event) => {
+      this.onBlur($event);
+    });
+  }
+
+
+  onDatasetEvent(event: string) {
+    if(this.innerHtml != this.value) this.innerHtml = this.value;
+    if(this.codeSource != this.value) this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), 2);
+    this.editor.enable(!this.readonly);
+  }
 
   public get displayvalue(): any {
-    if(this.isEditing) {
-      return this.editedValue;
-    } else {
-      return this.value;
-    }
+    return null;
   }
   
   public set displayvalue(val: any) {
-    if(this.isEditing) {
-      this.editedValue = val;
-    } 
+   
   }
 
-  created(event: Quill) {
+  public get innerHtml() : string {
+    return this.editor.root.innerHTML;
   }
 
-  changedEditor(event: EditorChangeContent | EditorChangeSelection) {
+  public set innerHtml(val: string) {
+    this.editor.root.innerHTML = val;  
   }
   
   public onKeydown(event: any) {
@@ -43,34 +68,25 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
     console.log("QL Start editing");
     super.startEditing();
     this.editedValue = this.value;
-    if(!this.hackDone) {
-      this.hackQuillEditor();
-    }
   }
 
   public finishEditing() {
     console.log("QL Finish editing");
+    if(this.mode == 'editor') {
+      this.editedValue = this.innerHtml;
+    } else {
+      this.editedValue = HtmlParser.stringify(HtmlParser.parse(this.codeSource));
+    }
     this.commit(this.editedValue);
     super.finishEditing();
   }
 
-  hackQuillEditor() {
-    var qep = this.quilleditorparent.elementRef.nativeElement;
-    var list = qep.getElementsByClassName('ql-editor');
-    if(list.length > 0) {
-      var qe = list[0];
-      qe.addEventListener("focus", ($event) => {
-        console.log('QL hack focus')
-        this.onFocus($event);
-      });      
-      qe.addEventListener("blur", ($event) => {
-        console.log('QL hack blur')
-        this.onBlur($event);
-      });
+  public toggleMode() {
+    if(this.allowswitch) {
+      this.mode = (this.mode == 'editor' ? 'code' : 'editor');
     }
-    this.hackDone = true;
-    console.log("Hack done");
   }
+
 }
 
 
