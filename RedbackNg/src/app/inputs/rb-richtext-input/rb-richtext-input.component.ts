@@ -38,7 +38,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
 
   onDatasetEvent(event: string) {
     if(this.innerHtml != this.value) this.innerHtml = this.value;
-    if(this.codeSource != this.value) this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), 2);
+    if(this.codeSource != this.value) this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), true);
     this.editor.enable(!this.readonly);
   }
 

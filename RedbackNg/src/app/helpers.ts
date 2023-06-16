@@ -250,8 +250,9 @@ export class HtmlParser {
             let lastpos = pos;
             pos = str.indexOf("<", pos);
             let text = str.substring(lastpos, (pos > -1 ? pos : str.length));
-            if(text.trim().length > 0) {
-                nodes.push({type:"text", text: text.trim()});
+            if(text.length > 0) {
+                text = text.replaceAll('\r', '').replaceAll('\n', '').replaceAll('\t', '');
+                nodes.push({type:"text", text: text});
             }
             if(pos > -1) {
                 lastpos = pos;
@@ -288,30 +289,30 @@ export class HtmlParser {
         return {nodes, pos};
     }
 
-    public static stringify(nodes, indent = 0, baseindent = 0) {
+    public static stringify(nodes, indent = false, baseindent = 0) {
         var str = "";
-        var basepad = "".padStart(baseindent, " ");
+        var basepad = "".padStart(baseindent, "\t");
         for(var node of nodes) {
             if(node.type == 'tag') {
                 str = str + basepad + "<" + node.tag;
                 str = str + (node.attrs != null ? " " + node.attrs : "");
                 str = str + (node.selfend ? "/" : "");
                 str = str + ">";
-                if(indent > 0) {
+                if(indent) {
                     str = str + "\r\n";
                 }
                 if( node.children != null && node.children.length > 0) {
-                    str = str + this.stringify(node.children, indent, (indent > 0 ? baseindent + indent : 0));
+                    str = str + this.stringify(node.children, indent, (indent ? baseindent + 1 : 0));
                 }
                 if(node.selfend == false && this.selfEndedTags.indexOf(node.tag) == -1) {
                     str = str + basepad + "</" + node.tag + ">"; 
-                    if(indent > 0) {
+                    if(indent) {
                         str = str + "\r\n";
                     }  
                 }         
             } else if(node.type == 'text') {
                 str = str + basepad + node.text;
-                if(indent > 0) {
+                if(indent) {
                     str = str + "\r\n";
                 }  
             }
