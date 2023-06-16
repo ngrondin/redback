@@ -153,7 +153,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 						throw new RedbackException("Requires an executable argument");
 					}
 				}
-			};
+			};	
 		} else if(key.equals("iterate")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
