@@ -267,9 +267,9 @@ export class HtmlParser {
                             substr = substr.substring(0, substr.length - 1);
                             selfend = true;
                         }
-                        let parts = substr.split(" ");
-                        let tag = parts[0];    
-                        let attrs = parts.slice(1).reduce((acc, val) => {var subparts = val.split("="); acc[subparts[0]] = subparts[1]; return acc;}, {});
+                        let firstSpacePos = substr.indexOf(" ");
+                        let tag = firstSpacePos > -1 ? substr.substring(0, firstSpacePos) : substr;
+                        let attrs = firstSpacePos > -1 ? substr.substring(firstSpacePos + 1) : null;
                         let node = {type: "tag", tag, attrs, selfend};
                         if(selfend) {
                             //seld ended
@@ -294,7 +294,7 @@ export class HtmlParser {
         for(var node of nodes) {
             if(node.type == 'tag') {
                 str = str + basepad + "<" + node.tag;
-                str = str + (Object.keys(node.attrs).length > 0 ? " " + Object.keys(node.attrs).map(key => key + "=" + node.attrs[key]).join(" ") : "") 
+                str = str + (node.attrs != null ? " " + node.attrs : "");
                 str = str + (node.selfend ? "/" : "");
                 str = str + ">";
                 if(indent > 0) {
