@@ -51,11 +51,13 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   }
 
   public get innerHtml() : string {
-    return this.editor.root.innerHTML;
+    return this.editor != null && this.editor.root != null ? this.editor.root.innerHTML : null;
   }
 
   public set innerHtml(val: string) {
-    this.editor.root.innerHTML = val;  
+    if(this.editor != null && this.editor.root != null) {
+      this.editor.root.innerHTML = val;  
+    }
   }
   
   public onKeydown(event: any) {
