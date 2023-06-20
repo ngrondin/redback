@@ -26,7 +26,7 @@ export class RbCodeInputComponent extends RbInputComponent {
 
   public get displayvalue(): any {
     let ret = this.value;
-    if(ret == null) {
+    if(ret == null || !this.active) {
       ret = "";
     } else if(typeof ret === 'object') {
       ret = JSON.stringify(ret, null, 2);

@@ -26,13 +26,12 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   codeSource: string = null;
 
   ngAfterViewInit() {
-    this.editor = new Quill('#quilleditor', this.editorconfig);
-    this.editor.root.addEventListener("focus", ($event) => {
-      this.onFocus($event);
-    });      
-    this.editor.root.addEventListener("blur", ($event) => {
-      this.onBlur($event);
-    });
+    setTimeout(() => this.initiateQuill(), 100);
+  }
+
+  onActivationEvent(state: boolean) {
+    super.onActivationEvent(state);
+    this.initiateQuill();
   }
 
 
@@ -40,6 +39,18 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
     if(this.innerHtml != this.value) this.innerHtml = this.value;
     if(this.codeSource != this.value) this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), true);
     if(this.editor != null) this.editor.enable(!this.readonly);
+  }
+
+  initiateQuill() {
+    if(this.active && this.editor == null) {
+      this.editor = new Quill('#quilleditor', this.editorconfig);
+      this.editor.root.addEventListener("focus", ($event) => {
+        this.onFocus($event);
+      });      
+      this.editor.root.addEventListener("blur", ($event) => {
+        this.onBlur($event);
+      });  
+    }
   }
 
   public get displayvalue(): any {

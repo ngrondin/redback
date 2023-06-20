@@ -23,13 +23,15 @@ export class RbClickableComponent {
       let tgt = $event.target;
       this.clickTop = $event.offsetY;
       this.clickLeft = $event.offsetX;
-      while(tgt != null && (tgt.className == null || (tgt.className != null && tgt.className.indexOf("rb-clickable-content") == -1))) {
+      while(tgt != null && !(tgt.className != null && tgt.className.indexOf != null && tgt.className.indexOf("rb-clickable-content") > -1)) {
         this.clickLeft = this.clickLeft + tgt.offsetLeft;
         this.clickTop = this.clickTop + tgt.offsetTop;
         tgt = tgt.offsetParent;
       }
       this.clicked = true;
       setTimeout(() => this.clicked = false, 500);  
+    } else {
+      $event.stopPropagation();
     }
   }
 

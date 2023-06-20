@@ -144,7 +144,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
 
   click() {
     if(this.popupComponentRef == null) {
-      if(this.showprocessinteraction && this.notificationRetreived == false) {
+      if(this.showprocessinteraction && this.notificationRetreived == false && this.rbObject != null) {
         this.getNotificationThenCalcActions().subscribe(() => {
           this.openPopup();
         });
@@ -202,10 +202,6 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
           this.calcActionData();
           observer.complete()
         });
-      } else {
-        this.notification = null;
-        this.notificationRetreived = true;
-        observer.complete();
       }
     });
     return obs;
