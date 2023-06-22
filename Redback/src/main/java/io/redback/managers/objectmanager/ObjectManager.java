@@ -54,6 +54,7 @@ import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.FunctionInfo;
 import io.redback.utils.StringUtils;
+import io.redback.utils.TxStore;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.LoggerJSFunction;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
@@ -338,7 +339,7 @@ public class ObjectManager
 		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 		if(session.getUserProfile().canRead("rb.objects." + objectName) || session.getUserProfile().canRead("rb.accesscat." + objectConfig.getAccessCategory()))
 		{
-			RedbackObject object = getFromCurrentTransaction(objectName, id);
+			RedbackObject object = (RedbackObject)session.getTxStore().get(objectName + ":" + id);
 			if(object == null)
 			{
 				try
@@ -352,7 +353,7 @@ public class ObjectManager
 					{
 						DataMap dbData = dbResultList.getObject(0);
 						object = new RedbackObject(session, this, objectConfig, dbData);
-						putInCurrentTransaction(object);
+						session.getTxStore().add(object.getLabel(), object);
 					}
 				}
 				catch(Exception e)
@@ -393,7 +394,6 @@ public class ObjectManager
 					objectFilter = objectFilterAndList.getObject(0);
 				else if(objectFilterAndList.size() > 1)
 					objectFilter = new DataMap("$and", objectFilterAndList);
-				List<RedbackObject> objectList = this.listFromCurrentTransaction(objectName, objectFilter);
 				DataList dbResultList = null;
 				if(objectConfig.isPersistent()) 
 				{
@@ -420,23 +420,19 @@ public class ObjectManager
 					}
 				}
 				
+				List<RedbackObject> objectList = new ArrayList<RedbackObject>();
 				if(dbResultList != null) 
 				{
 					for(int i = 0; i < dbResultList.size(); i++)
 					{
 						DataMap dbData = dbResultList.getObject(i);
-						RedbackObject objectInTransaction = getFromCurrentTransaction(objectName, dbData.getString(objectConfig.getUIDDBKey()));
-						if(objectInTransaction != null && !objectList.contains(objectInTransaction) && !objectInTransaction.isDeleted()) 
-						{
-							Logger.warning("rb.object.list.memorymiss", new DataMap("object", objectName, "uid", objectInTransaction.getUID().stringValue, "filter", objectFilter));
-							objectList.add(objectInTransaction);
+						String uid = dbData.getString(objectConfig.getUIDDBKey());
+						RedbackObject object = (RedbackObject)session.getTxStore().get(objectName + ":" + uid); 
+						if(object == null) {
+							object = new RedbackObject(session, this, objectConfig, dbData);
+							session.getTxStore().add(object.getLabel(), object);
 						}
-						if(objectInTransaction == null)
-						{
-							objectInTransaction = new RedbackObject(session, this, objectConfig, dbData);
-							putInCurrentTransaction(objectInTransaction);
-							objectList.add(objectInTransaction);
-						}
+						objectList.add(object);
 					}
 					if(addRelated)
 						addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
@@ -453,7 +449,7 @@ public class ObjectManager
 			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
 		}
 	}
-	
+
 	public List<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, DataMap sort, boolean addRelated) throws RedbackException
 	{
 		return listRelatedObjects(session, objectName, uid, attributeName, filterData, searchText, sort, addRelated, 0, 50);
@@ -482,7 +478,7 @@ public class ObjectManager
 	{
 		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
-		putInCurrentTransaction(object);
+		session.getTxStore().add(object.getLabel(), object);
 		if(initialData != null)
 		{
 			boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
@@ -740,109 +736,50 @@ public class ObjectManager
 	
 	public void initiateCurrentTransaction(Session session)  throws RedbackException
 	{
-		long txId = Thread.currentThread().getId();
-		synchronized(transactions)
-		{
-			transactions.put(txId, new ArrayList<RedbackObject>());
-		}
 		session.setScriptContext(createScriptContext(session));
-	}
-	
-	protected RedbackObject getFromCurrentTransaction(String objectName, String uid)
-	{
-		long txId = Thread.currentThread().getId();
-		if(transactions.containsKey(txId))
-		{
-			List<RedbackObject> list = transactions.get(txId);
-			for(RedbackObject object: list) {
-				if(object.getObjectConfig().getName().equals(objectName) && object.getUID().getString().equals(uid))
-					return object;
-			}
-		}
-		return null;
-	}
-
-	protected List<RedbackObject> listFromCurrentTransaction(String objectName, DataMap objectFilter) throws RedbackException
-	{
-		List<RedbackObject> list = new ArrayList<RedbackObject>();
-		long txId = Thread.currentThread().getId();
-		if(transactions.containsKey(txId))
-		{
-			List<RedbackObject> objectList = transactions.get(txId);
-			if(objectList.size() > 0) {
-				for(RedbackObject rbo: objectList) {
-					if(rbo.getObjectConfig().getName().equals(objectName)) {
-						if(rbo.filterApplies(objectFilter) && !rbo.isDeleted())
-							list.add(rbo);
-					}
-				}
-			}
-		}
-		return list;
-	}
-	
-	protected void putInCurrentTransaction(RedbackObject obj)
-	{
-		long txId = Thread.currentThread().getId();
-		synchronized(transactions)
-		{
-			if(!transactions.containsKey(txId))
-				transactions.put(txId, new ArrayList<RedbackObject>());
-		}
-		transactions.get(txId).add(obj);
+		session.setTxStore(new TxStore<Object>());
 	}
 	
 	public void commitCurrentTransaction(Session session) throws RedbackException
 	{
-		long txId = Thread.currentThread().getId();
-		if(transactions.containsKey(txId))
-		{
-			List<RedbackObject> list = new ArrayList<RedbackObject>();
-			synchronized(transactions)
-			{
-				List<RedbackObject> txObjects = transactions.get(txId);
-				for(RedbackObject object: txObjects)
-					list.add(object);
+		@SuppressWarnings("unchecked")
+		List<Object> txlist = session.getTxStore().getCopyOfAll();
+		List<RedbackObject> list = new ArrayList<RedbackObject>();
+		for(Object o : txlist)
+			list.add((RedbackObject)o);
+
+		List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
+		for(RedbackObject rbObject: list) {
+			if(rbObject.isDeleted) {
+				dbtxs.add(rbObject.getDBDeleteTransaction());
+			} else if(rbObject.isUpdated()) {
+				rbObject.onSave();
+				dbtxs.add(rbObject.getDBUpdateTransaction());
+				List<DataTransaction> traceTxs = rbObject.getDBTraceTransactions();
+				if(traceTxs != null) 
+					for(DataTransaction ttx: traceTxs)
+						dbtxs.add(ttx);
 			}
-			
-			List<DataTransaction> txs = new ArrayList<DataTransaction>();
-			for(RedbackObject object: list) {
-				if(object.isDeleted) {
-					txs.add(object.getDBDeleteTransaction());
-				} else if(object.isUpdated()) {
-					object.onSave();
-					txs.add(object.getDBUpdateTransaction());
-					List<DataTransaction> traceTxs = object.getDBTraceTransactions();
-					if(traceTxs != null) 
-						for(DataTransaction ttx: traceTxs)
-							txs.add(ttx);
+		}
+		
+		if(dbtxs.size() > 0) {
+			if(this.useMultiDBTransactions) {
+				dataClient.multi(dbtxs);
+			} else {
+				for(DataTransaction tx: dbtxs) {
+					dataClient.runTransaction(tx);
 				}
 			}
-			
-			if(txs.size() > 0) {
-				if(this.useMultiDBTransactions) {
-					dataClient.multi(txs);
-				} else {
-					for(DataTransaction tx: txs) {
-						dataClient.runTransaction(tx);
-					}
-				}
+		}
+		
+		for(RedbackObject rbObject: list) {
+			if(rbObject.isDeleted) {
+				rbObject.afterDelete();
+			} else if(rbObject.isUpdated()) {
+				rbObject.afterSave();
+				signal(rbObject);
 			}
-			
-			for(RedbackObject object: list) {
-				if(object.isDeleted) {
-					object.afterDelete();
-				} else if(object.isUpdated()) {
-					object.afterSave();
-					signal(object);
-				}
-			}
-							
-			synchronized(transactions)
-			{
-				transactions.remove(txId);
-			}
-		}		
+		}
 	}
 	
 	public DataMap generateRightsReadFilter(Session session, String objectName) throws RedbackException 

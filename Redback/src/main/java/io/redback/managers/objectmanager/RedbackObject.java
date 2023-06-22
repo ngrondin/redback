@@ -212,6 +212,11 @@ public class RedbackObject extends RedbackElement
 		return domain;
 	}
 	
+	public String getLabel()
+	{
+		return config.getName() + ":" + uid.getString();
+	}
+	
 	public boolean isNew()
 	{
 		return isNewObject;

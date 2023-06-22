@@ -145,7 +145,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 					return resp;
 				}
 			}
-			else if(action.equals("listfunctions"))
+			else if(action.equals("listfunctions") || action.equals("listscripts"))
 			{
 				String category = requestData.getString("category");
 				List<FunctionInfo> list = listFunctions(session, category);

@@ -3,6 +3,7 @@ package io.redback.security;
 import java.util.Random;
 
 import io.firebus.script.ScriptContext;
+import io.redback.utils.TxStore;
 
 
 
@@ -15,6 +16,7 @@ public class Session
 	public String timezone;
 	public String domainLock;
 	public ScriptContext scriptContext;
+	public TxStore<Object> txStore;
 
 	public Session() 
 	{
@@ -82,6 +84,11 @@ public class Session
 		scriptContext = sc;
 	}
 	
+	public void setTxStore(TxStore<Object> txs)
+	{
+		txStore = txs;
+	}
+	
 	public String getId()
 	{
 		return id;
@@ -110,6 +117,10 @@ public class Session
 	public ScriptContext getScriptContext() 
 	{
 		return scriptContext;
+	}
+	
+	public TxStore<Object> getTxStore() {
+		return txStore;
 	}
 
 }

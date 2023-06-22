@@ -106,43 +106,4 @@ public class RedbackObjectServer extends ObjectServer
 		return aggregates;	
 	}
 
-	/*protected MultiResponse multi(Session session, MultiRequest multiRequest) throws RedbackException {
-		MultiResponse response = new MultiResponse();
-		objectManager.initiateCurrentTransaction(session);
-		for(String key: multiRequest.getKeys()) {
-			ObjectRequest request = multiRequest.getRequest(key);
-			if(request instanceof GetRequest) {
-				GetRequest req = (GetRequest)request;
-				response.addResponse(key, objectManager.getObject(session, req.objectName, req.uid));
-			} else if(request instanceof ListRequest) {
-				ListRequest req = (ListRequest)request;
-				response.addResponse(key, objectManager.listObjects(session, req.objectName, req.filter, req.searchText, req.sort, req.addRelated, req.page, req.pageSize));
-			} else if(request instanceof ListRelatedRequest) {
-				ListRelatedRequest req = (ListRelatedRequest)request;
-				response.addResponse(key, objectManager.listRelatedObjects(session, req.objectName, req.uid, req.attribute, req.filter, req.searchText, req.sort, req.addRelated, req.page, req.pageSize));
-			} else if(request instanceof CreateRequest) {
-				CreateRequest req = (CreateRequest)request;
-				response.addResponse(key, objectManager.createObject(session, req.objectName, req.uid, req.domain, req.initialData));
-			} else if(request instanceof UpdateRequest) {
-				UpdateRequest req = (UpdateRequest)request;
-				response.addResponse(key, objectManager.updateObject(session, req.objectName, req.uid, req.updateData));
-			} else if(request instanceof DeleteRequest) {
-				DeleteRequest req = (DeleteRequest)request;
-				objectManager.deleteObject(session, req.objectName, req.uid);
-			} else if(request instanceof ExecuteObjectRequest) {
-				ExecuteObjectRequest req = (ExecuteObjectRequest)request;
-				response.addResponse(key, objectManager.executeObjectFunction(session, req.objectName, req.uid, req.function, req.param));
-			} else if(request instanceof ExecuteRequest) {
-				ExecuteRequest req = (ExecuteRequest)request;
-				objectManager.executeFunction(session, req.function, req.domain, req.param);
-			} else if(request instanceof AggregateRequest) {
-				AggregateRequest req = (AggregateRequest)request;
-				response.addResponse(key, objectManager.aggregateObjects(session, req.objectName, req.filter, req.searchText, req.tuple, req.metrics, req.sort, req.base, req.addRelated, req.page, req.pageSize));
-			}  
-		}
-		objectManager.commitCurrentTransaction(session);
-		return response;
-	}*/
-
-
 }

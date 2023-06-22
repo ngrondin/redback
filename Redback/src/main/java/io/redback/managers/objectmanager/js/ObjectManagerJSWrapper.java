@@ -1,5 +1,6 @@
 package io.redback.managers.objectmanager.js;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.data.DataMap;
@@ -56,7 +57,17 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
-					List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 5000);
+					int page = 0;
+					int pageSize = 250;
+					boolean more = true;
+					List<RedbackObject> list = new ArrayList<RedbackObject>();
+					while(more) 
+					{
+						List<RedbackObject> sublist = objectManager.listObjects(session, objectName, filter, search, sort, false, page++, pageSize);
+						list.addAll(sublist);
+						if(sublist.size() != pageSize)
+							more = false;
+					}
 					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};
@@ -121,7 +132,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					}
 					return ret;
 				}
-			};
+			};			
 		} else if(key.equals("fork")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
