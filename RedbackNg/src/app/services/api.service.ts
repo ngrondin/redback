@@ -106,6 +106,14 @@ export class ApiService {
     return this.requestService(this.objectService, req);
   }
 
+  listScripts(category: string): Observable<any> {
+    const req = {
+      action: 'listscripts',
+      category: category
+    };
+    return this.requestService(this.objectService, req);
+  }
+
   updateObject(name: string, uid: string, data: any) {
     const req = {
       action: 'update',
@@ -159,13 +167,13 @@ export class ApiService {
     return this.requestService(this.objectService, req);
   }
   
-  executeGlobal(func: string, param: any) {
+  executeGlobal(func: string, param: any, timeout?: number) {
     const req = {
       action: 'execute',
       function: func,
       param: param
     };
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, timeout);
   }
 
   aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, base: any, page: number = 0, pageSize: number = 50): Observable<any> {

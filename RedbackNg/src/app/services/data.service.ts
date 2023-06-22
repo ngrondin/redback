@@ -293,9 +293,9 @@ export class DataService {
     });
   }
   
-  executeGlobalFunction(func: string, param: any) : Observable<null> {
+  executeGlobalFunction(func: string, param: any, timeout: number) : Observable<null> {
     return new Observable<null>((observer) => {
-      this.apiService.executeGlobal(func, param).subscribe(
+      this.apiService.executeGlobal(func, param, timeout).subscribe(
         resp => {
           observer.next();
           observer.complete();

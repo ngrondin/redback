@@ -50,7 +50,7 @@ export class ActionService {
       } else if(_name == 'executemaster') {
         return this.executeMaster(dataset, param);
       } else if(_name == 'executeglobal') {
-        return this.executeGlobal(dataset, param);
+        return this.executeGlobal(dataset, param, timeout);
       } else if(_name == 'executedomain') {
         return this.executeDomain(dataset, param, timeout);
       } else if(_name == 'modal') {
@@ -194,13 +194,13 @@ export class ActionService {
     });
   }
 
-  public executeGlobal(dataset: RbDatasetComponent, functionName: string) : Observable<null> {
+  public executeGlobal(dataset: RbDatasetComponent, functionName: string, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       let funcParam = {
         "filter": dataset.resolvedFilter,
         "selecteduid": (dataset.selectedObject != null ? dataset.selectedObject.uid : null)
       }
-      this.dataService.executeGlobalFunction(functionName, funcParam).subscribe(new ObserverProxy(observer));
+      this.dataService.executeGlobalFunction(functionName, funcParam, timeout).subscribe(new ObserverProxy(observer));
     });
   }
 

@@ -19,7 +19,7 @@ export class RbClickableComponent {
   }
 
   @HostListener('click', ['$event']) _onclick($event) {
-    if(this.enabled) {
+    if(this.enabled && !this.running) {
       let tgt = $event.target;
       this.clickTop = $event.offsetY;
       this.clickLeft = $event.offsetX;

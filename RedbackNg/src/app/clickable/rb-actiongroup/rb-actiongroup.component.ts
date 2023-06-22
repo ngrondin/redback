@@ -38,6 +38,7 @@ export class RbActiongroupAction {
 })
 export class RbActiongroupComponent extends RbDataButtonComponent {
   @Input('actions') actions: any;
+  @Input('menucategory') menucategory: string;
   @Input('domaincategory') domaincategory: string;
   @Input('showprocessinteraction') showprocessinteraction: boolean = false;
   @Input('round') round: boolean = false;
@@ -67,13 +68,19 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     if(this.showprocessinteraction) {   
       this.notificationSubscription = this.notificationService.getObservable().subscribe(event => this.onNotificationEvent(event));
     }
-    if(this.domaincategory != null && this.domaincategory != "") {
-      this.apiService.listDomainFunctions(this.domaincategory).subscribe(json => {
-        this.domainActions = [];
-        json.result.forEach(item => {
-          this.domainActions.push(new RbActiongroupAction('executedomain', item.name, item.timeout, item.description, item.confirm, false));
+    let category = this.menucategory != null && this.menucategory != "" ? this.menucategory : this.domaincategory != null && this.domaincategory != "" ? this.domaincategory : null;
+    if(category != null) {
+      this.domainActions = [];
+      this.apiService.listScripts(category).subscribe(json => {
+        for(var item of json.list) {
+          this.domainActions.push(new RbActiongroupAction('executeglobal', item.name, item.timeout, item.description, item.confirm, false));
+        }
+        this.apiService.listDomainFunctions(category).subscribe(json => {
+          for(var item of json.result) {
+            this.domainActions.push(new RbActiongroupAction('executedomain', item.name, item.timeout, item.description, item.confirm, false));
+          }
+          this.calcActionData();
         });
-        this.calcActionData();
       });
     } else {
       this.calcActionData();
