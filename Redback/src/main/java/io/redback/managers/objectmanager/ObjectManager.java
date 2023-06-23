@@ -339,7 +339,8 @@ public class ObjectManager
 		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 		if(session.getUserProfile().canRead("rb.objects." + objectName) || session.getUserProfile().canRead("rb.accesscat." + objectConfig.getAccessCategory()))
 		{
-			RedbackObject object = (RedbackObject)session.getTxStore().get(objectName + ":" + id);
+			String key = objectName + ":" + id;
+			RedbackObject object = (RedbackObject)session.getTxStore().get(key);
 			if(object == null)
 			{
 				try
@@ -353,7 +354,7 @@ public class ObjectManager
 					{
 						DataMap dbData = dbResultList.getObject(0);
 						object = new RedbackObject(session, this, objectConfig, dbData);
-						session.getTxStore().add(object.getLabel(), object);
+						session.getTxStore().add(key, object);
 					}
 				}
 				catch(Exception e)
@@ -421,22 +422,38 @@ public class ObjectManager
 				}
 				
 				List<RedbackObject> objectList = new ArrayList<RedbackObject>();
-				if(dbResultList != null) 
-				{
+				if(page == 0)  {
+					//Get new or updated objects not yet saved to the database.
+					List<Object> txList = session.getTxStore().getAll();
+					for(Object o: txList) {
+						RedbackObject rbo = (RedbackObject)o;
+						if((rbo.isNew() || rbo.isUpdated()) && rbo.getObjectConfig().getName().equals(objectName) && rbo.filterApplies(objectFilter) && !objectList.contains(rbo)) {
+							objectList.add(rbo);
+						}
+					}
+				}
+				if(dbResultList != null)  {
+					//Search for object in tx, if not found, add it; if found, check if it's updated and if so, if the filter still applies
 					for(int i = 0; i < dbResultList.size(); i++)
 					{
 						DataMap dbData = dbResultList.getObject(i);
 						String uid = dbData.getString(objectConfig.getUIDDBKey());
-						RedbackObject object = (RedbackObject)session.getTxStore().get(objectName + ":" + uid); 
-						if(object == null) {
-							object = new RedbackObject(session, this, objectConfig, dbData);
-							session.getTxStore().add(object.getLabel(), object);
+						String key = objectName + ":" + uid;
+						RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
+						if(rbo == null) {
+							rbo = new RedbackObject(session, this, objectConfig, dbData);
+							session.getTxStore().add(key, rbo);
+							objectList.add(rbo);
+						} else {
+							boolean isUpdated = rbo.isUpdated();
+							if(!isUpdated || (isUpdated && rbo.filterApplies(objectFilter))) 
+								objectList.add(rbo);
 						}
-						objectList.add(object);
 					}
-					if(addRelated)
-						addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 				}
+
+				if(addRelated)
+					addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 				return objectList;			
 			}
 			catch(Exception e)
@@ -742,7 +759,6 @@ public class ObjectManager
 	
 	public void commitCurrentTransaction(Session session) throws RedbackException
 	{
-		@SuppressWarnings("unchecked")
 		List<Object> txlist = session.getTxStore().getCopyOfAll();
 		List<RedbackObject> list = new ArrayList<RedbackObject>();
 		for(Object o : txlist)

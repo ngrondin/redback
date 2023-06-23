@@ -3,8 +3,11 @@ package io.redback.client;
 import java.util.List;
 
 import io.firebus.Firebus;
+import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.interfaces.StreamHandler;
 import io.redback.exceptions.RedbackException;
 
 public class DataClient extends Client
@@ -42,8 +45,36 @@ public class DataClient extends Client
 	
 	public DataMap getData(String object, DataMap filter, DataMap sort, int page, int pageSize) throws RedbackException
 	{
-		DataTransaction tx = createGet(object, filter, sort, page, pageSize);
-		return runTransaction(tx);
+		if(pageSize > -1) {
+			DataTransaction tx = createGet(object, filter, sort, page, pageSize);
+			return runTransaction(tx);			
+		} else {
+			DataMap req = new DataMap();
+			req.put("object", object);
+			req.put("filter", filter);
+			if(sort != null) req.put("sort", sort);
+			DataList list = new DataList();
+			StreamEndpoint sep = this.requestStream(null, req);
+			sep.setHandler(new StreamHandler() {
+				public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+					try {
+						list.add(payload.getDataMap());
+						sep.send(new Payload("next"));
+					} catch(Exception e) { }
+				}
+
+				public void streamClosed(StreamEndpoint streamEndpoint) {
+					sep.close();
+					sep.notify();
+				}
+			});
+			try {
+				synchronized(sep) {
+					sep.wait();
+				}
+			} catch(Exception e) {}
+			return new DataMap("result", list);
+		}
 	}
 	
 	public DataMap getData(String object, DataMap filter, DataMap sort) throws RedbackException
@@ -130,4 +161,6 @@ public class DataClient extends Client
 		req.put("multi", multi);
 		return requestDataMap(req);
 	}
+	
+	
 }

@@ -71,6 +71,17 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};
+		} else if(key.equals("streamListAllObjects")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectName = (String)arguments[0];
+					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
+					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
+					String search = arguments.length > 3 ? (String)arguments[3] : null;
+					List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, search, sort, false, 0, -1);
+					return RedbackObjectJSWrapper.convertList(list);
+				}
+			};			
 		} else if(key.equals("getRelatedObjectList")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
