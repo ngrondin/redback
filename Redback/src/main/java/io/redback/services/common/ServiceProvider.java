@@ -1,12 +1,10 @@
 package io.redback.services.common;
 
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.logging.Logger;
-import io.firebus.threads.FirebusThread;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.Timer;
@@ -19,14 +17,9 @@ public abstract class ServiceProvider extends Provider implements io.firebus.int
 
 	public Payload service(Payload payload) throws FunctionErrorException
 	{
-		Timer timer = null;
 		try {
-			Session session = new Session(payload.metadata.get("session"));
-			session.setTimezone(payload.metadata.get("timezone"));
-			if(Thread.currentThread() instanceof FirebusThread) 
-				((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
-			timer = new Timer();
-			Payload response = redbackService(session, payload);
+			Timer timer = new Timer();
+			Payload response = redbackService(getSession(payload), payload);
 			Logger.info("rb.service", new DataMap("ms", timer.mark(), "req", payload.getDataObject()));
 			return response;
 		} catch(Exception e) {
@@ -34,7 +27,5 @@ public abstract class ServiceProvider extends Provider implements io.firebus.int
 		}
 	}
 	
-
-
 	protected abstract Payload redbackService(Session session, Payload payload) throws RedbackException;
 }

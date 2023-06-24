@@ -10,13 +10,10 @@ public abstract class StreamHandler implements io.firebus.interfaces.StreamHandl
 	protected Session session;
 	protected StreamEndpoint streamEndpoint;
 	
-	public StreamHandler(Session s) {
+	public StreamHandler(Session s, StreamEndpoint se) {
 		session = s;
-	}
-	
-	protected void setStreamEndpoint(StreamEndpoint sep) {
-		streamEndpoint = sep;
-		streamEndpoint.setHandler(this);		
+		streamEndpoint = se;
+		streamEndpoint.setHandler(this);
 	}
 	
 	public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
@@ -43,14 +40,12 @@ public abstract class StreamHandler implements io.firebus.interfaces.StreamHandl
 		if(streamEndpoint != null)
 			streamEndpoint.send(payload);
 	}
-
-	public abstract void receiveData(Payload payload) throws RedbackException;
-	
-	public abstract void closed() throws RedbackException;
-	
-	public abstract Payload getAcceptPayload() throws RedbackException;
 	
 	public Session getSession() {
 		return session;
 	}
+
+	public abstract void receiveData(Payload payload) throws RedbackException;
+	
+	public abstract void closed() throws RedbackException;
 }

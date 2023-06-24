@@ -3,6 +3,7 @@ package io.redback.services;
 import java.util.Base64;
 
 import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -22,8 +23,8 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	protected long countIn = 0;
 	protected long countOut = 0;
 	
-	public ClientStreamHandler(Session s) {
-		super(s);
+	public ClientStreamHandler(Session s, StreamEndpoint se) {
+		super(s, se);
 		start = System.currentTimeMillis();
 	}
 
@@ -107,10 +108,6 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		} catch(Exception e) {
 			throw new RedbackException("error closing client stream", e);
 		}
-	}
-
-	public Payload getAcceptPayload() throws RedbackException {
-		return null;
 	}
 	
 	public void sendClientData(DataMap data) {

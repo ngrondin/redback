@@ -8,6 +8,7 @@ import java.util.Map;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
@@ -67,8 +68,8 @@ public class ClientManager extends Thread {
 		return userCollection;
 	}
 	
-	public ClientHandler acceptClientConnection(Session session, Payload payload) throws RedbackException {
-		ClientHandler ch = new ClientHandler(this, session, payload);
+	public Payload acceptClientConnection(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
+		ClientHandler ch = new ClientHandler(this, session, payload, streamEndpoint);
 		synchronized(clientHandlers) {
 			clientHandlers.add(ch);
 		}
@@ -78,7 +79,7 @@ public class ClientManager extends Thread {
 			data.put("lastlogin", new Date());
 			dataClient.putData(userCollection.getName(), userCollection.convertObjectToSpecific(key), userCollection.convertObjectToSpecific(data));
 		}
-		return ch;
+		return new Payload();
 	}
 	
 	protected void onClientLeave(ClientHandler clientHandler) throws RedbackException {

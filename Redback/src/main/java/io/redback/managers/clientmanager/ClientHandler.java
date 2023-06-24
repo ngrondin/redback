@@ -26,8 +26,8 @@ public class ClientHandler extends ClientStreamHandler {
 	protected String deviceId;
 	protected String gatewayConnectionId;
 	
-	public ClientHandler(ClientManager cm, Session s, Payload payload) {
-		super(s);
+	public ClientHandler(ClientManager cm, Session s, Payload payload, StreamEndpoint streamEndpoint) {
+		super(s, streamEndpoint);
 		clientManager = cm;
 		session = s;
 		uploads = new HashMap<String, StreamEndpoint>();

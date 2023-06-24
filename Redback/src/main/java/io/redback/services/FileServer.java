@@ -6,40 +6,33 @@ import java.util.List;
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
-import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.information.ServiceInformation;
-import io.firebus.information.StreamInformation;
-import io.firebus.interfaces.StreamProvider;
-import io.firebus.logging.Logger;
-import io.firebus.threads.FirebusThread;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.information.ServiceInformation;
+import io.firebus.information.StreamInformation;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
-import io.redback.services.common.AuthenticatedServiceProvider;
+import io.redback.services.common.AuthenticatedDualProvider;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
-import io.redback.utils.Timer;
 
-public abstract class FileServer extends AuthenticatedServiceProvider  implements StreamProvider
+public abstract class FileServer extends AuthenticatedDualProvider
 {
 	protected boolean enableStream;
 	
-	public FileServer(String n, DataMap c, Firebus f)
-	{
+	public FileServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
-		enableStream = config.getBoolean("enablestream");
-		if(enableStream) {
-			firebus.registerStreamProvider(n, this, 10);
-		}
 	}
 	
-	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException
-	{
+	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException {
 		throw new RedbackException("Redback File Service always needs to receive authenticated requests");
 	}
 
+	public Payload redbackAcceptUnauthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
+		throw new RedbackException("Redback File Service always needs to receive authenticated requests");	
+	}
+	
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		try {
@@ -165,66 +158,52 @@ public abstract class FileServer extends AuthenticatedServiceProvider  implement
 		} catch(DataException e) {
 			throw new RedbackException("Error in file server", e);
 		}
-		
+	}
+
+	public Payload redbackAcceptAuthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
+		try {
+			DataMap request = payload.getDataMap();
+			String action = request.getString("action");
+			if(action.equals("get")) {
+				String fileuid = request.getString("fileuid");
+				if(fileuid != null) {
+					acceptGetStream(session, streamEndpoint, fileuid);
+				} else { // For backwards compatibility, to be removed
+					String objectname = request.getString("object");
+					String objectuid = request.getString("uid");
+					if(objectname != null && objectuid != null) {
+						acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
+					}
+				}
+			} else if(action.equals("put")) {
+				final String fileName = request.getString("filename");
+				final int fileSize = request.containsKey("filesize") ? request.getNumber("filesize").intValue() : -1;
+				final String mime = request.getString("mime");
+				final String objectname = request.getString("object");
+				final String objectuid = request.getString("uid");
+				acceptPutStream(session, streamEndpoint, fileName, fileSize, mime, objectname, objectuid);
+			} else if(action.equals("list")) { // This section is only for backwards compatibility of getting the list on the same get path
+				String objectname = request.getString("object");
+				String objectuid = request.getString("uid");
+				acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
+			}
+			return null;			
+		} catch(DataException e) {
+			throw new RedbackException("Error in file server", e);
+		}
 	}
 
 	public ServiceInformation getServiceInformation()
 	{
 		return null;
 	}
-	
-	public Payload acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
-		Timer timer = null;
-		try {
-			Session session = accessManagementClient.getSession(payload);
-			if(session.getUserProfile() != null) {
-				session.setTimezone(payload.metadata.get("timezone"));
-				if(Thread.currentThread() instanceof FirebusThread) 
-					((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
-				timer = new Timer();
-				DataMap request = payload.getDataMap();
-				String action = request.getString("action");
-				if(action.equals("get")) {
-					String fileuid = request.getString("fileuid");
-					if(fileuid != null) {
-						acceptGetStream(session, streamEndpoint, fileuid);
-					} else { // For backwards compatibility, to be removed
-						String objectname = request.getString("object");
-						String objectuid = request.getString("uid");
-						if(objectname != null && objectuid != null) {
-							acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
-						}
-					}
-				} else if(action.equals("put")) {
-					final String fileName = request.getString("filename");
-					final int fileSize = request.containsKey("filesize") ? request.getNumber("filesize").intValue() : -1;
-					final String mime = request.getString("mime");
-					final String objectname = request.getString("object");
-					final String objectuid = request.getString("uid");
-					acceptPutStream(session, streamEndpoint, fileName, fileSize, mime, objectname, objectuid);
-				} else if(action.equals("list")) { // This section is only for backwards compatibility of getting the list on the same get path
-					String objectname = request.getString("object");
-					String objectuid = request.getString("uid");
-					acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
-				}
-				Logger.info("rb.fileserver", new DataMap("ms", timer.mark(), "req", payload.getDataObject()));
-				return null;
-			} else {
-				throw new FunctionErrorException("All stream requests need to be authenticated", 401);
-			}
-		} catch(Exception e) {
-			throw handleException("rb.fileserver", "Exception in redback stream '" + serviceName + "'", e);
-		} 
-	}
-
-
-	public int getStreamIdleTimeout() {
-		return 10000;
-	}
-
 
 	public StreamInformation getStreamInformation() {
 		return null;
+	}
+
+	public int getStreamIdleTimeout() {
+		return 10000;
 	}
 
 	public abstract RedbackFile getFile(String fileUid) throws RedbackException;

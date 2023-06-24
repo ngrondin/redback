@@ -1,15 +1,12 @@
 package io.redback.services.common;
 
-
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
 import io.firebus.data.DataMap;
-import io.firebus.logging.Logger;
-import io.firebus.threads.FirebusThread;
 import io.redback.client.AccessManagementClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
-import io.redback.security.UserProfile;
 
 public abstract class AuthenticatedStreamProvider extends StreamProvider {
 	protected String accessManagementService;
@@ -21,35 +18,17 @@ public abstract class AuthenticatedStreamProvider extends StreamProvider {
 		accessManagementClient = new AccessManagementClient(firebus, accessManagementService);
 	}
 
-	public StreamHandler redbackAcceptStream(Session session, Payload payload) throws RedbackException {
-		StreamHandler response = null;
-		String token = payload.metadata.get("token");
-		UserProfile up = null;
-		
-		Logger.finer("rb.authstream.start", new DataMap("token", token));
-
-		if(token != null)
-			up = accessManagementClient.validate(session, token);
-
-		if(up != null)
-		{			
-			session.setUserProfile(up);
-			session.setToken(token);
-			if(Thread.currentThread() instanceof FirebusThread) 
-				((FirebusThread)Thread.currentThread()).setUser(up.getUsername());
-			response = redbackAcceptAuthenticatedStream(session, payload);
+	public Payload redbackAcceptStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
+		if(AuthenticationHelper.authenticateSession(session, payload, accessManagementClient)) {
+			return redbackAcceptAuthenticatedStream(session, payload, streamEndpoint);
+		} else {
+			return redbackAcceptUnauthenticatedStream(session, payload, streamEndpoint);
 		}
-		else
-		{
-			response = redbackAcceptUnauthenticatedStream(session, payload);
-		}
-		Logger.finer("rb.authstream.finish", null);
-		return response;
 	}
 
-	public abstract StreamHandler redbackAcceptAuthenticatedStream(Session session, Payload payload) throws RedbackException;
+	public abstract Payload redbackAcceptAuthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException;
 
-	public abstract StreamHandler redbackAcceptUnauthenticatedStream(Session session, Payload payload) throws RedbackException;
+	public abstract Payload redbackAcceptUnauthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException;
 
 	
 }

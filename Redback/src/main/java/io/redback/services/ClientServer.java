@@ -2,6 +2,7 @@ package io.redback.services;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
 import io.firebus.data.DataMap;
 import io.firebus.information.StreamInformation;
 import io.firebus.interfaces.Consumer;
@@ -9,7 +10,6 @@ import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedStreamProvider;
-import io.redback.services.common.StreamHandler;
 
 public abstract class ClientServer extends AuthenticatedStreamProvider {
 	
@@ -50,11 +50,11 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 		}		
 	}
 
-	public StreamHandler redbackAcceptAuthenticatedStream(Session session, Payload payload) throws RedbackException {
-		return acceptClientStream(session, payload);
+	public Payload redbackAcceptAuthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
+		return acceptClientStream(session, payload, streamEndpoint);
 	}
 
-	public StreamHandler redbackAcceptUnauthenticatedStream(Session session, Payload payload) throws RedbackException {
+	public Payload redbackAcceptUnauthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
 		throw new RedbackException("All client streams need to be authenticated");
 	}
 	
@@ -62,7 +62,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 		return null;
 	}
 	
-	public abstract StreamHandler acceptClientStream(Session session, Payload payload) throws RedbackException;
+	public abstract Payload acceptClientStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException;
 
 	protected abstract void onObjectUpdate(DataMap data) throws RedbackException;
 	

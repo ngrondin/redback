@@ -41,7 +41,6 @@ public class RedbackFileServer extends FileServer
 	protected CollectionConfig fileCollection;
 	protected CollectionConfig linkCollection;
 	protected DataClient dataClient;
-	//protected MessageDigest messageDigest;
 
 	public RedbackFileServer(String n, DataMap c, Firebus f) 
 	{
@@ -60,10 +59,6 @@ public class RedbackFileServer extends FileServer
 		if(config.containsKey("linkcollection"))
 			linkCollection = new CollectionConfig(config.getObject("linkcollection"));
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
-		enableStream = config.getBoolean("enablestream");
-		if(enableStream) {
-			firebus.registerStreamProvider(n, this, 10);
-		}
 	}
 
 	public RedbackFileMetaData getMetadata(String fileUid) throws RedbackException
