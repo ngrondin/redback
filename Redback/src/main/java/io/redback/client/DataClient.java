@@ -9,6 +9,7 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.interfaces.StreamHandler;
 import io.redback.exceptions.RedbackException;
+import io.redback.utils.Sink;
 
 public class DataClient extends Client
 {
@@ -45,36 +46,8 @@ public class DataClient extends Client
 	
 	public DataMap getData(String object, DataMap filter, DataMap sort, int page, int pageSize) throws RedbackException
 	{
-		if(pageSize > -1) {
-			DataTransaction tx = createGet(object, filter, sort, page, pageSize);
-			return runTransaction(tx);			
-		} else {
-			DataMap req = new DataMap();
-			req.put("object", object);
-			req.put("filter", filter);
-			if(sort != null) req.put("sort", sort);
-			DataList list = new DataList();
-			StreamEndpoint sep = this.requestStream(null, req);
-			sep.setHandler(new StreamHandler() {
-				public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
-					try {
-						list.add(payload.getDataMap());
-						sep.send(new Payload("next"));
-					} catch(Exception e) { }
-				}
-
-				public void streamClosed(StreamEndpoint streamEndpoint) {
-					sep.close();
-					sep.notify();
-				}
-			});
-			try {
-				synchronized(sep) {
-					sep.wait();
-				}
-			} catch(Exception e) {}
-			return new DataMap("result", list);
-		}
+		DataTransaction tx = createGet(object, filter, sort, page, pageSize);
+		return runTransaction(tx);			
 	}
 	
 	public DataMap getData(String object, DataMap filter, DataMap sort) throws RedbackException
@@ -87,6 +60,31 @@ public class DataClient extends Client
 		return getData(object, filter, null, 0, 50);
 	}	
 	
+	public void streamData(String object, DataMap filter, DataMap sort, Sink<DataMap> sink) throws RedbackException
+	{
+		DataMap req = new DataMap();
+		req.put("object", object);
+		req.put("filter", filter);
+		if(sort != null) req.put("sort", sort);
+		StreamEndpoint sep = this.requestStream(null, req);
+		sep.setHandler(new StreamHandler() {
+			public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+				try {
+					DataMap chunk = payload.getDataMap();
+					DataList list = chunk.getList("result");
+					for(int i = 0; i < list.size(); i++) {
+						sink.next(list.getObject(i));
+					}
+					sep.send(new Payload("next"));
+				} catch(Exception e) { }
+			}
+
+			public void streamClosed(StreamEndpoint streamEndpoint) {
+				sep.close();
+				sink.complete();
+			}
+		});
+	}
 	
 	public DataTransaction createPut(String object, DataMap key, DataMap data, boolean replace) {
 		DataMap req = new DataMap();

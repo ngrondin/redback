@@ -53,6 +53,7 @@ import io.redback.utils.Cache;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.FunctionInfo;
+import io.redback.utils.Sink;
 import io.redback.utils.StringUtils;
 import io.redback.utils.TxStore;
 import io.redback.utils.js.FirebusJSWrapper;
@@ -333,140 +334,110 @@ public class ObjectManager
 			}
 		}
 	}
-
-	public RedbackObject getObject(Session session, String objectName, String id) throws RedbackException
+	
+	protected ObjectConfig getConfigIfCanRead(Session session, String objectName) throws RedbackException 
 	{
 		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 		if(session.getUserProfile().canRead("rb.objects." + objectName) || session.getUserProfile().canRead("rb.accesscat." + objectConfig.getAccessCategory()))
 		{
-			String key = objectName + ":" + id;
-			RedbackObject object = (RedbackObject)session.getTxStore().get(key);
-			if(object == null)
-			{
-				try
-				{
-					DataMap dbFilter = new DataMap("{\"" + objectConfig.getUIDDBKey() + "\":\"" + id +"\"}");
-					if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
-						dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-					DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, null);
-					DataList dbResultList = dbResult.getList("result");
-					if(dbResultList.size() > 0)
-					{
-						DataMap dbData = dbResultList.getObject(0);
-						object = new RedbackObject(session, this, objectConfig, dbData);
-						session.getTxStore().add(key, object);
-					}
-				}
-				catch(Exception e)
-				{
-					throw new RedbackException("Problem initiating object " + objectName, e);
-				}		
-			}
-			if(object == null)
-				throw new RedbackResourceNotFoundException("No " + objectName + " object exists with uid " + id);
-			return object;
-		}
-		else
-		{
+			return objectConfig;
+		} else {
 			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
-		}			
+		}
+	}
+
+	public RedbackObject getObject(Session session, String objectName, String id) throws RedbackException
+	{
+		ObjectConfig objectConfig = getConfigIfCanRead(session, objectName);
+		String key = objectName + ":" + id;
+		RedbackObject object = (RedbackObject)session.getTxStore().get(key);
+		if(object == null)
+		{
+			try
+			{
+				DataMap dbFilter = generateDBFilter(session, objectConfig, new DataMap("uid", id));
+				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, null);
+				DataList dbResultList = dbResult.getList("result");
+				if(dbResultList.size() > 0)
+				{
+					DataMap dbData = dbResultList.getObject(0);
+					object = new RedbackObject(session, this, objectConfig, dbData);
+					session.getTxStore().add(key, object);
+				}
+			}
+			catch(Exception e)
+			{
+				throw new RedbackException("Problem initiating object " + objectName, e);
+			}		
+		}
+		if(object == null)
+			throw new RedbackResourceNotFoundException("No " + objectName + " object exists with uid " + id);
+		return object;
+		
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{
-		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
-		if(session.getUserProfile().canRead("rb.objects." + objectName) || session.getUserProfile().canRead("rb.accesscat." + objectConfig.getAccessCategory()))
+		ObjectConfig objectConfig = getConfigIfCanRead(session, objectName);
+		try
 		{
-			try
+			DataMap objectFilter = generateObjectFilter(session, objectName, filter, searchText);
+			DataList dbResultList = null;
+			if(objectConfig.isPersistent()) 
 			{
-				DataMap objectFilter = new DataMap();
-				DataList objectFilterAndList = new DataList();
-				if(filter != null)
-					objectFilterAndList.add(filter);
-				if(searchText != null  &&  searchText.length() > 0)
-					objectFilterAndList.add(generateSearchFilter(session, objectName, searchText.trim()));
-				DataMap rightsReadFilter = generateRightsReadFilter(session, objectName);
-				if(rightsReadFilter != null)
-					objectFilterAndList.add(rightsReadFilter);
-				if(objectFilterAndList.size() == 0) 
-					objectFilter = new DataMap();
-				else if(objectFilterAndList.size() == 1)
-					objectFilter = objectFilterAndList.getObject(0);
-				else if(objectFilterAndList.size() > 1)
-					objectFilter = new DataMap("$and", objectFilterAndList);
-				DataList dbResultList = null;
-				if(objectConfig.isPersistent()) 
-				{
-					DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
-					if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains() && !objectFilter.containsKey("domain"))
-						dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
-					DataMap dbSort = generateDBSort(session, objectConfig, sort);
-					DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
-					dbResultList = dbResult.getList("result");
-				} else {
-					Function gs = objectConfig.getGenerationScript();
-					if(gs != null) {
-						ScriptContext context = session.getScriptContext().createChild();
-						context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
-						context.put("filter", filter);
-						context.put("sort", sort);
-						context.put("search", searchText);
-						context.put("action", "list");
-						context.put("page", page);
-						context.put("pageSize", pageSize);
-						Object o = gs.call(context);
-						if(o instanceof DataList)
-							dbResultList = (DataList)o;
-					}
-				}
-				
-				List<RedbackObject> objectList = new ArrayList<RedbackObject>();
-				if(page == 0)  {
-					//Get new or updated objects not yet saved to the database.
-					List<Object> txList = session.getTxStore().getAll();
-					for(Object o: txList) {
-						RedbackObject rbo = (RedbackObject)o;
-						if((rbo.isNew() || rbo.isUpdated()) && rbo.getObjectConfig().getName().equals(objectName) && rbo.filterApplies(objectFilter) && !objectList.contains(rbo)) {
-							objectList.add(rbo);
-						}
-					}
-				}
-				if(dbResultList != null)  {
-					//Search for object in tx, if not found, add it; if found, check if it's updated and if so, if the filter still applies
-					for(int i = 0; i < dbResultList.size(); i++)
-					{
-						DataMap dbData = dbResultList.getObject(i);
-						String uid = dbData.getString(objectConfig.getUIDDBKey());
-						String key = objectName + ":" + uid;
-						RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
-						if(rbo == null) {
-							rbo = new RedbackObject(session, this, objectConfig, dbData);
-							session.getTxStore().add(key, rbo);
-							objectList.add(rbo);
-						} else {
-							boolean isUpdated = rbo.isUpdated();
-							if(!isUpdated || (isUpdated && rbo.filterApplies(objectFilter))) 
-								objectList.add(rbo);
-						}
-					}
-				}
-
-				if(addRelated)
-					addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
-				return objectList;			
+				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
+				DataMap dbSort = generateDBSort(session, objectConfig, sort);
+				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, dbSort, page, pageSize);
+				dbResultList = dbResult.getList("result");
+			} else {
+				dbResultList = generateNonPersistentObjectData(session, objectConfig, filter, searchText, sort, page, pageSize);
 			}
-			catch(Exception e)
-			{
-				throw new RedbackException("Error getting object list", e);
-			}
+			List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, page == 0);
+			if(addRelated)
+				addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
+			return objectList;			
 		}
-		else
+		catch(Exception e)
 		{
-			throw new RedbackUnauthorisedException("User does not have the right to read object " + objectName);
+			throw new RedbackException("Error getting object list", e);
 		}
 	}
 
+	public void streamListObjects(Session session, Sink<RedbackObject> sink, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException 
+	{
+		ObjectConfig objectConfig = getConfigIfCanRead(session, objectName);
+		try
+		{
+			DataMap objectFilter = generateObjectFilter(session, objectName, filter, searchText);
+			if(objectConfig.isPersistent()) 
+			{
+				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
+				DataMap dbSort = generateDBSort(session, objectConfig, sort);
+				final ObjectManager om = this;
+				dataClient.streamData(objectConfig.getCollection(), dbFilter, dbSort, new Sink<DataMap>() {
+					public void next(DataMap dbData) {
+						try {
+							RedbackObject rbo = new RedbackObject(session, om, objectConfig, dbData);
+							session.getTxStore().add(rbo.getLabel(), rbo);
+							sink.next(rbo);
+						} catch(Exception e) {
+							Logger.severe("rb.objectmanager.streamlist", "Error stream object list", e);
+						}
+					}
+
+					public void complete() {
+						sink.complete();
+					}
+				});
+			}	
+		}
+		catch(Exception e)
+		{
+			throw new RedbackException("Error getting object list", e);
+		}
+	}
+	
 	public List<RedbackObject> listRelatedObjects(Session session, String objectName, String uid, String attributeName, DataMap filterData, String searchText, DataMap sort, boolean addRelated) throws RedbackException
 	{
 		return listRelatedObjects(session, objectName, uid, attributeName, filterData, searchText, sort, addRelated, 0, 50);
@@ -797,8 +768,83 @@ public class ObjectManager
 			}
 		}
 	}
+
+	protected List<RedbackObject> convertDBDataToObjects(Session session, ObjectConfig objectConfig, DataMap objectFilter, DataList dbResultList, boolean includeNewObjects) throws RedbackException 
+	{
+		List<RedbackObject> objectList = new ArrayList<RedbackObject>();
+		if(includeNewObjects)  {
+			//Get new or updated objects not yet saved to the database.
+			List<Object> txList = session.getTxStore().getAll();
+			for(Object o: txList) {
+				RedbackObject rbo = (RedbackObject)o;
+				if((rbo.isNew() || rbo.isUpdated()) && rbo.getObjectConfig().getName().equals(objectConfig.getName()) && rbo.filterApplies(objectFilter) && !objectList.contains(rbo)) {
+					objectList.add(rbo);
+				}
+			}
+		}
+		if(dbResultList != null)  {
+			//Search for object in tx, if not found, add it; if found, check if it's updated and if so, if the filter still applies
+			for(int i = 0; i < dbResultList.size(); i++)
+			{
+				DataMap dbData = dbResultList.getObject(i);
+				String uid = dbData.getString(objectConfig.getUIDDBKey());
+				String key = objectConfig.getName() + ":" + uid;
+				RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
+				if(rbo == null) {
+					rbo = new RedbackObject(session, this, objectConfig, dbData);
+					session.getTxStore().add(key, rbo);
+					objectList.add(rbo);
+				} else {
+					boolean isUpdated = rbo.isUpdated();
+					if(!isUpdated || (isUpdated && rbo.filterApplies(objectFilter))) 
+						objectList.add(rbo);
+				}
+			}
+		}
+		return objectList;
+	}
 	
-	public DataMap generateRightsReadFilter(Session session, String objectName) throws RedbackException 
+	protected DataList generateNonPersistentObjectData(Session session, ObjectConfig objectConfig, DataMap filter, String searchText, DataMap sort, int page, int pageSize) throws RedbackException, ScriptException
+	{
+		DataList dbResultList = null;
+		Function gs = objectConfig.getGenerationScript();
+		if(gs != null) {
+			ScriptContext context = session.getScriptContext().createChild();
+			context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, session.getUserProfile().getDefaultDomain()));
+			context.put("filter", filter);
+			context.put("sort", sort);
+			context.put("search", searchText);
+			context.put("action", "list");
+			context.put("page", page);
+			context.put("pageSize", pageSize);
+			Object o = gs.call(context);
+			if(o instanceof DataList)
+				dbResultList = (DataList)o;
+		}
+		return dbResultList;
+	}
+	
+	protected DataMap generateObjectFilter(Session session, String objectName, DataMap filter, String searchText) throws RedbackException 
+	{
+		DataMap objectFilter = new DataMap();
+		DataList objectFilterAndList = new DataList();
+		if(filter != null)
+			objectFilterAndList.add(filter);
+		if(searchText != null  &&  searchText.length() > 0)
+			objectFilterAndList.add(generateSearchFilter(session, objectName, searchText.trim()));
+		DataMap rightsReadFilter = generateRightsReadFilter(session, objectName);
+		if(rightsReadFilter != null)
+			objectFilterAndList.add(rightsReadFilter);
+		if(objectFilterAndList.size() == 0) 
+			objectFilter = new DataMap();
+		else if(objectFilterAndList.size() == 1)
+			objectFilter = objectFilterAndList.getObject(0);
+		else if(objectFilterAndList.size() > 1)
+			objectFilter = new DataMap("$and", objectFilterAndList);
+		return objectFilter;
+	}
+	
+	protected DataMap generateRightsReadFilter(Session session, String objectName) throws RedbackException 
 	{
 		DataMap filter = session.getUserProfile().getReadFilter("rb.objects." + objectName);
 		if(filter != null) {
@@ -815,7 +861,15 @@ public class ObjectManager
 		}
 	}
 	
-	public DataMap generateDBFilter(Session session, ObjectConfig objectConfig, DataMap objectFilter) throws DataException, FunctionErrorException, RedbackException
+	protected DataMap generateDBFilter(Session session, ObjectConfig objectConfig, DataMap objectFilter) throws DataException, RedbackException
+	{
+		DataMap dbFilter = generateDBFilterRecurring(session, objectConfig, objectFilter);
+		if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains() && !objectFilter.containsKey("domain"))
+			dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+		return dbFilter;
+	}
+	
+	protected DataMap generateDBFilterRecurring(Session session, ObjectConfig objectConfig, DataMap objectFilter) throws DataException, RedbackException
 	{
 		DataMap dbFilter = new DataMap();
 		Iterator<String> it = objectFilter.keySet().iterator();
@@ -838,7 +892,7 @@ public class ObjectManager
 				DataList dbList = new DataList();
 				for(int i = 0; i < list.size(); i++)
 				{
-					dbList.add(generateDBFilter(session, objectConfig, list.getObject(i)));
+					dbList.add(generateDBFilterRecurring(session, objectConfig, list.getObject(i)));
 				}
 				dbFilter.put(key, dbList);
 			}
@@ -883,7 +937,7 @@ public class ObjectManager
 					DataEntity dbFilterValue = null;
 					if(objectFilterValue instanceof DataMap)
 					{
-						dbFilterValue = generateDBFilter(session, objectConfig, (DataMap)objectFilterValue);
+						dbFilterValue = generateDBFilterRecurring(session, objectConfig, (DataMap)objectFilterValue);
 					}
 					else if(objectFilterValue instanceof DataLiteral)
 					{
@@ -897,11 +951,10 @@ public class ObjectManager
 				}
 			}
 		}
-
 		return dbFilter;
 	}
 	
-	public DataMap generateDBSort(Session session, ObjectConfig objectConfig, DataMap objectSort) throws DataException, FunctionErrorException, RedbackException
+	protected DataMap generateDBSort(Session session, ObjectConfig objectConfig, DataMap objectSort) throws DataException, RedbackException
 	{
 		DataMap dbSort = null;
 		if(objectSort != null) {

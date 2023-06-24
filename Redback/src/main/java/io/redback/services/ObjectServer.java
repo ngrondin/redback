@@ -4,31 +4,32 @@ import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
+import io.firebus.StreamEndpoint;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.information.ServiceInformation;
+import io.firebus.information.StreamInformation;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
-import io.redback.services.common.AuthenticatedServiceProvider;
+import io.redback.services.common.AuthenticatedDualProvider;
 import io.redback.utils.FunctionInfo;
+import io.redback.utils.Sink;
 
-public abstract class ObjectServer extends AuthenticatedServiceProvider 
+public abstract class ObjectServer extends AuthenticatedDualProvider 
 {
 	
-	public ObjectServer(String n, DataMap c, Firebus f)
-	{
+	public ObjectServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 	}
 
-	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException
-	{
+	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		try {
 			DataMap requestData = payload.getDataMap();
 			startTransaction(session);
-			DataMap responseData = processRequest(session, requestData);
+			DataMap responseData = processServiceRequest(session, requestData);
 			commitTransaction(session);
 			Payload response = new Payload(responseData);
 			response.metadata.put("mime", "application/json");
@@ -38,8 +39,23 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 		}
 	}
 
-	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException
-	{
+	public Payload redbackUnauthenticatedService(Session session, Payload payload) throws RedbackException {
+		throw new RedbackException("All requests need to be authenticated");
+	}
+	
+	public Payload redbackAcceptAuthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
+		try {
+			DataMap requestData = payload.getDataMap();
+			startTransaction(session);
+			processStreamRequest(session, requestData, streamEndpoint);
+			commitTransaction(session);
+			return null;
+		} catch(DataException e) {
+			throw new RedbackException("Error in object server", e);
+		}
+	}
+
+	public Payload redbackAcceptUnauthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
 		throw new RedbackException("All requests need to be authenticated");
 	}
 
@@ -48,7 +64,15 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 		return null;
 	}
 
-	protected DataMap processRequest(Session session, DataMap requestData) throws RedbackException {
+	public int getStreamIdleTimeout() {
+		return 10000;
+	}
+
+	public StreamInformation getStreamInformation() {
+		return null;
+	}
+	
+	protected DataMap processServiceRequest(Session session, DataMap requestData) throws RedbackException {
 		String action = requestData.getString("action");
 		DataMap options = requestData.getObject("options");
 		boolean addValidation = options != null && options.containsKey("addvalidation") ? options.getBoolean("addvalidation") : false;
@@ -181,7 +205,7 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 				for(int i = 0; i < list.size(); i++) {
 					DataMap sub = list.getObject(i);
 					String key = sub.getString("key");
-					DataMap subResp = processRequest(session, sub);
+					DataMap subResp = processServiceRequest(session, sub);
 					respMap.put(key, subResp);
 				}
 				return respMap;
@@ -201,6 +225,42 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 		}	
 	}
 	
+	protected void processStreamRequest(Session session, DataMap requestData, StreamEndpoint streamEndpoint) throws RedbackException {
+		String action = requestData.getString("action");
+		DataMap options = requestData.getObject("options");
+		boolean addValidation = options != null && options.containsKey("addvalidation") ? options.getBoolean("addvalidation") : false;
+		boolean addRelated = options != null && options.containsKey("addrelated") ? options.getBoolean("addrelated") : false;
+		if(action != null)
+		{
+			if(action.equals("list") && !requestData.containsKey("uid")) {
+				String objectName = requestData.getString("object");
+				DataMap filter = requestData.getObject("filter");
+				String searchText = requestData.getString("search");
+				DataMap sort = requestData.getObject("sort");
+				Sink<RedbackObject> sink = new Sink<RedbackObject>() {
+					public void next(RedbackObject rbo) {
+						try {
+							DataMap resp = rbo.getDataMap(addValidation, addRelated, true);
+							streamEndpoint.send(new Payload(resp));
+						} catch (RedbackException e) {
+
+						}
+					}
+
+					public void complete() {
+					}
+				};
+				streamList(session, sink, objectName, filter, searchText, sort, addRelated, addValidation);
+			} else if(action.equals("listrelated") || (action.equals("list") && requestData.containsKey("uid"))) {
+				throw new RedbackException("Not yet implemented");
+			}
+		}
+		else
+		{
+			throw new RedbackException("Requests must have at least an 'action' attribute");
+		}	
+	}
+	
 	protected abstract void startTransaction(Session session) throws RedbackException;
 	
 	protected abstract void commitTransaction(Session session) throws RedbackException;
@@ -208,6 +268,8 @@ public abstract class ObjectServer extends AuthenticatedServiceProvider
 	protected abstract RedbackObject get(Session session, String objectName, String uid) throws RedbackException;
 
 	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
+
+	protected abstract void streamList(Session session, Sink<RedbackObject> sink, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException;
 
 	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 

@@ -14,6 +14,7 @@ import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 import io.redback.services.ObjectServer;
 import io.redback.utils.FunctionInfo;
+import io.redback.utils.Sink;
 
 public class RedbackObjectServer extends ObjectServer
 {
@@ -38,58 +39,36 @@ public class RedbackObjectServer extends ObjectServer
 		objectManager.commitCurrentTransaction(session);
 	}
 	
-
-	protected RedbackObject get(Session session, String objectName, String uid) throws RedbackException
-	{
-		RedbackObject object = null;
-		object = objectManager.getObject(session, objectName, uid);
-		return object;
+	protected RedbackObject get(Session session, String objectName, String uid) throws RedbackException {
+		return objectManager.getObject(session, objectName, uid);
 	}
-
 	
-	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException 
-	{
-		List<RedbackObject> objects = null;
-		if(filter == null)
-			filter = new DataMap();
-		
-		objects = objectManager.listObjects(session, objectName, filter, search, sort, addRelated, page, pageSize);
-		return objects;	
+	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException {
+		return objectManager.listObjects(session, objectName, filter != null ? filter : new DataMap(), search, sort, addRelated, page, pageSize);
 	}
 
-	protected List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException 
-	{
-		List<RedbackObject> objects = null;
-		if(filter == null)
-			filter = new DataMap();
-
-		objects = objectManager.listRelatedObjects(session, objectName, uid, attribute, filter, search, sort, addRelated, page, pageSize);
-		return objects;	
+	protected void streamList(Session session, Sink<RedbackObject> sink, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException {
+		objectManager.streamListObjects(session, sink, objectName, filter != null ? filter : new DataMap(), search, sort, addRelated, addValidation);		
 	}
 
-	protected RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException
-	{
-		RedbackObject object = null;
-		object = objectManager.updateObject(session, objectName, uid, data);
-		return object;
+	protected List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException {
+		return objectManager.listRelatedObjects(session, objectName, uid, attribute, filter != null ? filter : new DataMap(), search, sort, addRelated, page, pageSize);
 	}
 
-	protected RedbackObject create(Session session, String objectName, String uid, String domain, DataMap data) throws RedbackException
-	{
-		RedbackObject object = null;
-		object = objectManager.createObject(session, objectName, uid, domain, data);
-		return object;
+	protected RedbackObject update(Session session, String objectName, String uid, DataMap data) throws RedbackException {
+		return objectManager.updateObject(session, objectName, uid, data);
+	}
+
+	protected RedbackObject create(Session session, String objectName, String uid, String domain, DataMap data) throws RedbackException {
+		return objectManager.createObject(session, objectName, uid, domain, data);
 	}
 
 	protected void delete(Session session, String objectName, String uid) throws RedbackException {
 		objectManager.deleteObject(session, objectName, uid);
 	}
 
-	protected RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException
-	{
-		RedbackObject object = null;
-		object = objectManager.executeObjectFunction(session, objectName, uid, function, param);
-		return object;
+	protected RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException {
+		return objectManager.executeObjectFunction(session, objectName, uid, function, param);
 	}
 	
 	protected Object execute(Session session, String function, DataMap param) throws RedbackException {
@@ -101,9 +80,10 @@ public class RedbackObjectServer extends ObjectServer
 	}
 
 	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException {
-		List<RedbackAggregate> aggregates = null;
-		aggregates = objectManager.aggregateObjects(session, objectName, filter, searchText, tuple, metrics, sort, base, addRelated, page, pageSize);
-		return aggregates;	
+		return objectManager.aggregateObjects(session, objectName, filter, searchText, tuple, metrics, sort, base, addRelated, page, pageSize);
 	}
+
+
+
 
 }

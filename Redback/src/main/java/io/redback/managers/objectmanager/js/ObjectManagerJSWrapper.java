@@ -12,6 +12,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
+import io.redback.utils.Sink;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
 
@@ -57,31 +58,29 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
-					int page = 0;
-					int pageSize = 250;
-					boolean more = true;
 					List<RedbackObject> list = new ArrayList<RedbackObject>();
-					while(more) 
-					{
-						List<RedbackObject> sublist = objectManager.listObjects(session, objectName, filter, search, sort, false, page++, pageSize);
-						list.addAll(sublist);
-						if(sublist.size() != pageSize)
-							more = false;
-					}
+					Sink<RedbackObject> sink = new Sink<RedbackObject>() {
+						public void next(RedbackObject item) {
+							list.add(item);
+						}
+
+						public void complete() {
+							try {
+								synchronized(list) {
+									list.notify();
+								}
+							} catch(Exception e) {}
+						}
+					};
+					objectManager.streamListObjects(session, sink, objectName, filter, search, sort, false, false);
+					try {
+						synchronized(list) {
+							list.wait(60000);
+						}
+					} catch(Exception e) {}
 					return RedbackObjectJSWrapper.convertList(list);
 				}
-			};
-		} else if(key.equals("streamListAllObjects")) {
-			return new CallableJSWrapper() {
-				public Object call(Object... arguments) throws RedbackException {
-					String objectName = (String)arguments[0];
-					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
-					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
-					String search = arguments.length > 3 ? (String)arguments[3] : null;
-					List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, search, sort, false, 0, -1);
-					return RedbackObjectJSWrapper.convertList(list);
-				}
-			};			
+			};		
 		} else if(key.equals("getRelatedObjectList")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
