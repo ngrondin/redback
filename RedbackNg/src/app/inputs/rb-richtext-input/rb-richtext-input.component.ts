@@ -1,7 +1,8 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
-import Quill from 'quill'
 import { HtmlParser } from 'app/helpers';
+
+declare var Quill: any;
 
 @Component({
   selector: 'rb-richtext-input',

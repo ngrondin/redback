@@ -12,7 +12,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
-import io.redback.utils.Sink;
+import io.redback.utils.DataStream;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
 
@@ -59,25 +59,18 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
 					List<RedbackObject> list = new ArrayList<RedbackObject>();
-					Sink<RedbackObject> sink = new Sink<RedbackObject>() {
-						public void next(RedbackObject item) {
-							list.add(item);
+					DataStream<List<RedbackObject>, Boolean> stream = new DataStream<List<RedbackObject>, Boolean>() {
+						public void received(List<RedbackObject> sublist) {
+							list.addAll(sublist);
+							sendOut(true);
 						}
 
-						public void complete() {
-							try {
-								synchronized(list) {
-									list.notify();
-								}
-							} catch(Exception e) {}
+						public void completed() {
+							try {synchronized(list) {list.notify();}} catch(Exception e) {}
 						}
 					};
-					objectManager.streamListObjects(session, sink, objectName, filter, search, sort, false, false);
-					try {
-						synchronized(list) {
-							list.wait(60000);
-						}
-					} catch(Exception e) {}
+					objectManager.streamObjects(session, objectName, filter, search, sort, false, stream);
+					try {synchronized(list) {list.wait(60000);}} catch(Exception e) {}
 					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};		

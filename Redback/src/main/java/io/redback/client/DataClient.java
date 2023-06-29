@@ -9,7 +9,8 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.interfaces.StreamHandler;
 import io.redback.exceptions.RedbackException;
-import io.redback.utils.Sink;
+import io.redback.utils.DataStream;
+import io.redback.utils.DataStreamReceiver;
 
 public class DataClient extends Client
 {
@@ -60,7 +61,7 @@ public class DataClient extends Client
 		return getData(object, filter, null, 0, 50);
 	}	
 	
-	public void streamData(String object, DataMap filter, DataMap sort, Sink<DataMap> sink) throws RedbackException
+	public void streamData(String object, DataMap filter, DataMap sort, DataStream<DataMap, Boolean> stream) throws RedbackException
 	{
 		DataMap req = new DataMap();
 		req.put("object", object);
@@ -70,18 +71,19 @@ public class DataClient extends Client
 		sep.setHandler(new StreamHandler() {
 			public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
 				try {
-					DataMap chunk = payload.getDataMap();
-					DataList list = chunk.getList("result");
-					for(int i = 0; i < list.size(); i++) {
-						sink.next(list.getObject(i));
-					}
-					sep.send(new Payload("next"));
+					stream.sendIn(payload.getDataMap());
 				} catch(Exception e) { }
 			}
 
 			public void streamClosed(StreamEndpoint streamEndpoint) {
 				sep.close();
-				sink.complete();
+				stream.complete();
+			}
+		});
+		stream.setReceiver(new DataStreamReceiver<Boolean>() {
+			public void receive(Boolean data) {
+				if(data == true)
+					sep.send(new Payload("next"));
 			}
 		});
 	}

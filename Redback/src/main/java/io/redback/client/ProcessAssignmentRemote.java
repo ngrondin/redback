@@ -1,5 +1,7 @@
 package io.redback.client;
 
+import java.util.Date;
+
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
@@ -57,10 +59,17 @@ public class ProcessAssignmentRemote {
 	
 	public void action(String action)
 	{
+		action(action, null);
+	}
+	
+	public void action(String action, Date date)
+	{
 		DataMap request = new DataMap();
 		request.put("action", "actionprocess");
 		request.put("pid", getPid());
 		request.put("processaction", action);
+		if(date != null) 
+			request.put("date", date);
 		try
 		{
 			Payload requestPayload = new Payload(request);

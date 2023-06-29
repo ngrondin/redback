@@ -1,5 +1,7 @@
 package io.redback.client.js;
 
+import java.util.Date;
+
 import io.redback.client.ProcessAssignmentRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.utils.js.CallableJSWrapper;
@@ -21,7 +23,8 @@ public class ProcessAssignmentRemoteJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					String action = (String)arguments[0];
-					processAssignmentRemote.action(action);
+					Date date = arguments.length > 1 ? (Date)arguments[1] : null;
+					processAssignmentRemote.action(action, date);
 					return null;
 				}
 			};				

@@ -112,7 +112,6 @@ import { RbViewHeaderComponent } from './rb-view-header/rb-view-header.component
 import { DragService } from './services/drag.service';
 import { RbDialogComponent } from './rb-dialog/rb-dialog.component';
 import { RbTileComponent } from './rb-tile/rb-tile.component';
-import { RedbackgraphsModule } from 'redbackgraphs';
 import { RbTimesliderComponent } from './rb-timeslider/rb-timeslider.component';
 import { RbNumberTilesComponent } from './graphs/rb-number-tiles/rb-number-tiles.component';
 import { RbTimelineComponent } from './rb-timeline/rb-timeline.component';
@@ -132,6 +131,8 @@ import { RbIconbuttonComponent } from './clickable/rb-iconbutton/rb-iconbutton.c
 import { RbButtonComponent } from './clickable/rb-button/rb-button';
 import { RbRichtextInputComponent } from './inputs/rb-richtext-input/rb-richtext-input.component';
 import { RbVseparatorComponent } from './rb-vseparator/rb-vseparator.component'
+import { RedbackgraphsModule } from 'redbackgraphs';
+
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler();

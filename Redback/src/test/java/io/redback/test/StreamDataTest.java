@@ -6,10 +6,13 @@ import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.interfaces.StreamHandler;
+import io.firebus.logging.Level;
+import io.firebus.logging.Logger;
 
 public class StreamDataTest {
 
 	public static void main(String[] args) {
+		Logger.setLevel(Level.FINE);
 		Firebus firebus = new Firebus("firebus", "firebuspassword0");
 		try {
 			StreamEndpoint sep = firebus.requestStream("db", new Payload(new DataMap("object", "statushistory", "filter", new DataMap())), 10000);

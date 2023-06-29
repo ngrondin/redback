@@ -23,6 +23,7 @@ public class ClientHandler extends ClientStreamHandler {
 	
 	protected ClientManager clientManager;
 	protected Map<String, StreamEndpoint> uploads;
+	protected Map<String, StreamEndpoint> streams;
 	protected String deviceId;
 	protected String gatewayConnectionId;
 	
@@ -31,6 +32,7 @@ public class ClientHandler extends ClientStreamHandler {
 		clientManager = cm;
 		session = s;
 		uploads = new HashMap<String, StreamEndpoint>();
+		streams = new HashMap<String, StreamEndpoint>();
 		String gatewayNode = payload.metadata.get("streamgwnode");
 		gatewayConnectionId = payload.metadata.get("streamgwid");
 		Logger.info("rb.client.connect", new DataMap("firebusnode", clientManager.firebus.getNodeId(), "gatewaynode", gatewayNode, "gatewayconnid", gatewayConnectionId));
@@ -99,6 +101,42 @@ public class ClientHandler extends ClientStreamHandler {
 	}
 
 
+	public void requestStream(String requid, String service, DataMap data) throws RedbackException {
+		try {
+			Payload payload = new Payload();
+			payload.metadata.put("token", session.getToken());
+			if(session != null && session.getTimezone() != null)
+				payload.metadata.put("timezone", session.getTimezone());
+			payload.metadata.put("mime", "application/json");
+			payload.setData(data);
+			StreamEndpoint sep = clientManager.firebus.requestStream(service, payload, requid, 10000);
+			streams.put(requid, sep);
+			sep.setHandler(new StreamHandler() {
+				public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+					try {
+						DataMap data = payload.getDataMap();
+						sendStreamData(requid, data);
+					} catch(Exception e) {
+						sendStreamError(requid, new FunctionErrorException("Error receiving stream data", e));
+					}
+				}
+
+				public void streamClosed(StreamEndpoint streamEndpoint) {
+					sendStreamComplete(requid);
+				}
+			});
+
+		} catch(Exception e) {
+			throw new RedbackException("Error requesting service for client", e);
+		}
+	}
+	
+	public void sendStreamNext(String requid) throws RedbackException {
+		StreamEndpoint sep = streams.get(requid);
+		if(sep != null) {
+			sep.send(new Payload("next"));
+		}
+	}	
 
 	public void startUpload(String uploaduid, String filename, int filesize, String mime, String object, String uid) throws RedbackException {
 		try {
@@ -213,6 +251,6 @@ public class ClientHandler extends ClientStreamHandler {
 		status.put("subs", subs);
 		return status;
 	}
-	
+
 
 }

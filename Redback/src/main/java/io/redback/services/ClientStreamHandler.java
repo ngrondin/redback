@@ -62,6 +62,14 @@ public abstract class ClientStreamHandler extends StreamHandler {
 					DataMap request = data.getObject("request");
 					int timeout = data.containsKey("timeout") ? data.getNumber("timeout").intValue() : -1;
 					requestService(reqUid, serviceName, request, timeout);
+				} else if(type.equals("streamrequest")) {
+					String reqUid = data.getString("requid");
+					String serviceName = data.getString("servicename");
+					DataMap request = data.getObject("request");
+					requestStream(reqUid, serviceName, request);	
+				} else if(type.equals("streamnext")) {
+					String reqUid = data.getString("requid");
+					sendStreamNext(reqUid);						
 				} else if(type.equals("upload")) {
 					String uploadUid = data.getString("uploaduid");
 					try {
@@ -151,6 +159,38 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		sendClientData(respWrapper);						
 	}	
 	
+	public void sendStreamData(String reqUid, DataMap data) {
+		DataMap respWrapper = new DataMap();
+		respWrapper.put("type", "streamdata");
+		respWrapper.put("requid", reqUid);
+		respWrapper.put("data", data);
+		sendClientData(respWrapper);
+	}
+	
+	public void sendStreamError(String reqUid, FunctionErrorException e) { 
+		DataMap respWrapper = new DataMap();
+		respWrapper.put("type", "streamerror");
+		respWrapper.put("requid", reqUid);
+		respWrapper.put("error", StringUtils.rollUpExceptions(e));
+		respWrapper.put("code", String.valueOf(e.getErrorCode())); //TODO: Change back to int when the mobile bug is fixed
+		sendClientData(respWrapper);					
+	}
+
+	public void sendStreamTimeout(String reqUid) { 
+		DataMap respWrapper = new DataMap();
+		respWrapper.put("type", "streamerror");
+		respWrapper.put("requid", reqUid);
+		respWrapper.put("error", "service request timed out");
+		sendClientData(respWrapper);						
+	}	
+
+	public void sendStreamComplete(String reqUid) { 
+		DataMap respWrapper = new DataMap();
+		respWrapper.put("type", "streamcomplete");
+		respWrapper.put("requid", reqUid);
+		sendClientData(respWrapper);						
+	}	
+	
 	public void sendUploadNext(String uploaduid) {
 		DataMap msg = new DataMap();
 		msg.put("type", "uploadctl");
@@ -192,7 +232,11 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	public abstract void subscribeFilter(String objectname, DataMap filter, String id) throws RedbackException;
 	
 	public abstract void requestService(String requid, String service, DataMap data, int timeout) throws RedbackException;
-	
+
+	public abstract void requestStream(String requid, String service, DataMap data) throws RedbackException;
+
+	public abstract void sendStreamNext(String requid) throws RedbackException;
+
 	public abstract void startUpload(String uploaduid, String filename, int filesize, String mime, String object, String uid) throws RedbackException;
 
 	public abstract void uploadChunk(String uploaduid, int chunkSequence, byte[] bytes) throws RedbackException;

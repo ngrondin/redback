@@ -96,7 +96,7 @@ public class RedbackAccessManager extends AccessManager
 				profile.setExpiry(jwt.getExpiresAt().getTime());
 				return profile;
 			} else {
-				throw new RedbackInvalidRequestException("token email is numm");
+				throw new RedbackInvalidRequestException("token email is null");
 			}
 		} 
 		catch (RedbackException exception)

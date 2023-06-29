@@ -10,13 +10,15 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.information.ServiceInformation;
 import io.firebus.information.StreamInformation;
+import io.firebus.interfaces.StreamHandler;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedDualProvider;
+import io.redback.utils.DataStream;
 import io.redback.utils.FunctionInfo;
-import io.redback.utils.Sink;
 
 public abstract class ObjectServer extends AuthenticatedDualProvider 
 {
@@ -237,20 +239,39 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				DataMap filter = requestData.getObject("filter");
 				String searchText = requestData.getString("search");
 				DataMap sort = requestData.getObject("sort");
-				Sink<RedbackObject> sink = new Sink<RedbackObject>() {
-					public void next(RedbackObject rbo) {
+				DataStream<List<RedbackObject>, Boolean> objectStream = new DataStream<List<RedbackObject>, Boolean>() {
+					public void received(List<RedbackObject> sublist) {
 						try {
-							DataMap resp = rbo.getDataMap(addValidation, addRelated, true);
-							streamEndpoint.send(new Payload(resp));
+							DataList list = new DataList();							
+							for(RedbackObject rbo: sublist)
+								list.add(rbo.getDataMap(addValidation, addRelated, true));
+							streamEndpoint.send(new Payload(new DataMap("result", list)));
 						} catch (RedbackException e) {
-
+							Logger.severe("rb.objectserver.stream.in", e);
 						}
 					}
 
-					public void complete() {
+					public void completed() {
+						streamEndpoint.close();
 					}
 				};
-				streamList(session, sink, objectName, filter, searchText, sort, addRelated, addValidation);
+				StreamHandler streamHandler = new StreamHandler() {
+					public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+						try {
+							String s = payload.getString();
+							if(s.equals("next"))
+								objectStream.sendOut(true);
+						} catch(Exception e) {
+							Logger.severe("rb.objectserver.stream.out", e);
+						}
+					}
+
+					public void streamClosed(StreamEndpoint streamEndpoint) {
+						objectStream.complete();
+					}
+				};
+				streamEndpoint.setHandler(streamHandler);
+				streamList(session, objectName, filter, searchText, sort, addRelated, objectStream);
 			} else if(action.equals("listrelated") || (action.equals("list") && requestData.containsKey("uid"))) {
 				throw new RedbackException("Not yet implemented");
 			}
@@ -269,7 +290,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 
 	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 
-	protected abstract void streamList(Session session, Sink<RedbackObject> sink, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException;
+	protected abstract void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, DataStream<List<RedbackObject>, Boolean> stream) throws RedbackException;
 
 	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 

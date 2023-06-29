@@ -52,8 +52,9 @@ import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.Cache;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
+import io.redback.utils.DataStream;
+import io.redback.utils.DataStreamReceiver;
 import io.redback.utils.FunctionInfo;
-import io.redback.utils.Sink;
 import io.redback.utils.StringUtils;
 import io.redback.utils.TxStore;
 import io.redback.utils.js.FirebusJSWrapper;
@@ -394,8 +395,7 @@ public class ObjectManager
 				dbResultList = generateNonPersistentObjectData(session, objectConfig, filter, searchText, sort, page, pageSize);
 			}
 			List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, page == 0);
-			if(addRelated)
-				addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
+			if(addRelated) addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 			return objectList;			
 		}
 		catch(Exception e)
@@ -404,7 +404,8 @@ public class ObjectManager
 		}
 	}
 
-	public void streamListObjects(Session session, Sink<RedbackObject> sink, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException 
+	@SuppressWarnings("unchecked")
+	public void streamObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, DataStream<List<RedbackObject>, Boolean> objectStream) throws RedbackException 
 	{
 		ObjectConfig objectConfig = getConfigIfCanRead(session, objectName);
 		try
@@ -414,22 +415,30 @@ public class ObjectManager
 			{
 				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 				DataMap dbSort = generateDBSort(session, objectConfig, sort);
-				final ObjectManager om = this;
-				dataClient.streamData(objectConfig.getCollection(), dbFilter, dbSort, new Sink<DataMap>() {
-					public void next(DataMap dbData) {
+				DataStream<DataMap, Boolean> dataStream = new DataStream<DataMap, Boolean>() {
+					protected int page = 0;
+					protected void received(DataMap dbData) {
 						try {
-							RedbackObject rbo = new RedbackObject(session, om, objectConfig, dbData);
-							session.getTxStore().add(rbo.getLabel(), rbo);
-							sink.next(rbo);
+							DataList dbResultList = dbData.getList("result");
+							List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, page == 0);
+							if(addRelated) addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
+							objectStream.sendIn(objectList);
+							page++;
 						} catch(Exception e) {
 							Logger.severe("rb.objectmanager.streamlist", "Error stream object list", e);
 						}
 					}
 
-					public void complete() {
-						sink.complete();
+					protected void completed() {
+						objectStream.complete();
+					}
+				};
+				objectStream.setReceiver(new DataStreamReceiver<Boolean>() {
+					public void receive(Boolean sendMore) {
+						dataStream.sendOut(sendMore);
 					}
 				});
+				dataClient.streamData(objectConfig.getCollection(), dbFilter, dbSort, dataStream);
 			}	
 		}
 		catch(Exception e)

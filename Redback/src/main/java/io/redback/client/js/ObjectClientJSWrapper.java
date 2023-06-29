@@ -62,10 +62,9 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					String objectname = (String)arguments[0];
 					DataMap filter = (DataMap)(arguments[1]);
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
-					boolean addRelated = arguments.length > 3 ? (Boolean)arguments[3] : true;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listAllObjects(session, objectname, filter, sort, addRelated));
+					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listAllObjects(session, objectname, filter, sort, false));
 				}
 			};
 		} else if(key.equals("createObject")) {
