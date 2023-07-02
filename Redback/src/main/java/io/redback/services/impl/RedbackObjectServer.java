@@ -47,8 +47,8 @@ public class RedbackObjectServer extends ObjectServer
 		return objectManager.listObjects(session, objectName, filter != null ? filter : new DataMap(), search, sort, addRelated, page, pageSize);
 	}
 
-	protected void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, DataStream<List<RedbackObject>, Boolean> stream) throws RedbackException {
-		objectManager.streamObjects(session, objectName, filter != null ? filter : new DataMap(), search, sort, addRelated, stream);		
+	protected void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int chunkSize, int advance, DataStream<List<RedbackObject>, Boolean> stream) throws RedbackException {
+		objectManager.streamObjects(session, objectName, filter != null ? filter : new DataMap(), search, sort, addRelated, chunkSize, advance, stream);		
 	}
 
 	protected List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException {

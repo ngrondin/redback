@@ -66,7 +66,8 @@ public abstract class ClientStreamHandler extends StreamHandler {
 					String reqUid = data.getString("requid");
 					String serviceName = data.getString("servicename");
 					DataMap request = data.getObject("request");
-					requestStream(reqUid, serviceName, request);	
+					boolean autoNext = data.getBoolean("autonext");
+					requestStream(reqUid, serviceName, request, autoNext);	
 				} else if(type.equals("streamnext")) {
 					String reqUid = data.getString("requid");
 					sendStreamNext(reqUid);						
@@ -233,7 +234,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	public abstract void requestService(String requid, String service, DataMap data, int timeout) throws RedbackException;
 
-	public abstract void requestStream(String requid, String service, DataMap data) throws RedbackException;
+	public abstract void requestStream(String requid, String service, DataMap data, boolean autoNext) throws RedbackException;
 
 	public abstract void sendStreamNext(String requid) throws RedbackException;
 

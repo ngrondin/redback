@@ -61,12 +61,14 @@ public class DataClient extends Client
 		return getData(object, filter, null, 0, 50);
 	}	
 	
-	public void streamData(String object, DataMap filter, DataMap sort, DataStream<DataMap, Boolean> stream) throws RedbackException
+	public void streamData(String object, DataMap filter, DataMap sort, int chunkSize, int advance, DataStream<DataMap, Boolean> stream) throws RedbackException
 	{
 		DataMap req = new DataMap();
 		req.put("object", object);
 		req.put("filter", filter);
 		if(sort != null) req.put("sort", sort);
+		if(chunkSize != -1) req.put("chunksize", chunkSize);
+		if(advance != -1) req.put("advance", advance);
 		StreamEndpoint sep = this.requestStream(null, req);
 		sep.setHandler(new StreamHandler() {
 			public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
@@ -88,6 +90,10 @@ public class DataClient extends Client
 		});
 	}
 	
+	public void streamData(String object, DataMap filter, DataMap sort, DataStream<DataMap, Boolean> stream) throws RedbackException {
+		streamData(object, filter, sort, 20, 0, stream);
+	}
+
 	public DataTransaction createPut(String object, DataMap key, DataMap data, boolean replace) {
 		DataMap req = new DataMap();
 		req.put("object", object);

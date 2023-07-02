@@ -58,6 +58,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
+					int chunkSize = arguments.length > 4 ? (Integer)arguments[4] : 20;
 					List<RedbackObject> list = new ArrayList<RedbackObject>();
 					DataStream<List<RedbackObject>, Boolean> stream = new DataStream<List<RedbackObject>, Boolean>() {
 						public void received(List<RedbackObject> sublist) {
@@ -69,7 +70,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 							try {synchronized(list) {list.notify();}} catch(Exception e) {}
 						}
 					};
-					objectManager.streamObjects(session, objectName, filter, search, sort, false, stream);
+					objectManager.streamObjects(session, objectName, filter, search, sort, false, chunkSize, 0, stream);
 					try {synchronized(list) {list.wait(60000);}} catch(Exception e) {}
 					return RedbackObjectJSWrapper.convertList(list);
 				}

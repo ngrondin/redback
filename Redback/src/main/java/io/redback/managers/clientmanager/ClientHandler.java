@@ -101,7 +101,7 @@ public class ClientHandler extends ClientStreamHandler {
 	}
 
 
-	public void requestStream(String requid, String service, DataMap data) throws RedbackException {
+	public void requestStream(String requid, String service, DataMap data, boolean autoNext) throws RedbackException {
 		try {
 			Payload payload = new Payload();
 			payload.metadata.put("token", session.getToken());
@@ -116,6 +116,8 @@ public class ClientHandler extends ClientStreamHandler {
 					try {
 						DataMap data = payload.getDataMap();
 						sendStreamData(requid, data);
+						if(autoNext)
+							streamEndpoint.send(new Payload("next"));
 					} catch(Exception e) {
 						sendStreamError(requid, new FunctionErrorException("Error receiving stream data", e));
 					}

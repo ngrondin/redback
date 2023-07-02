@@ -78,17 +78,18 @@ public class ObjectClient extends Client
 				try {synchronized(list) {list.notify();}} catch(Exception e) {}
 			}
 		};
-		StreamObjects(session, objectname, filter, sort, addRelated, stream);
+		StreamObjects(session, objectname, filter, sort, addRelated, -1, stream);
 		try {synchronized(list) {list.wait(60000);}} catch(Exception e) {}
 		return list;
 	}
 	
-	public void StreamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, DataStream<List<RedbackObjectRemote>, Boolean> stream) throws RedbackException  {
+	public void StreamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int chunkSize, DataStream<List<RedbackObjectRemote>, Boolean> stream) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "list");
 		req.put("object", objectname);
 		req.put("filter", filter != null ? filter : new DataMap());
 		if(sort != null) req.put("sort", sort);
+		if(chunkSize != -1) req.put("chunksize", chunkSize);
 		StreamEndpoint sep = this.requestStream(session, req);
 		sep.setHandler(new StreamHandler() {
 			public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {

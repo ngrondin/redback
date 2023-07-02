@@ -405,7 +405,7 @@ public class ObjectManager
 	}
 
 	@SuppressWarnings("unchecked")
-	public void streamObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, DataStream<List<RedbackObject>, Boolean> objectStream) throws RedbackException 
+	public void streamObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int chunkSize, int advance, DataStream<List<RedbackObject>, Boolean> objectStream) throws RedbackException 
 	{
 		ObjectConfig objectConfig = getConfigIfCanRead(session, objectName);
 		try
@@ -438,7 +438,7 @@ public class ObjectManager
 						dataStream.sendOut(sendMore);
 					}
 				});
-				dataClient.streamData(objectConfig.getCollection(), dbFilter, dbSort, dataStream);
+				dataClient.streamData(objectConfig.getCollection(), dbFilter, dbSort, chunkSize, advance, dataStream);
 			}	
 		}
 		catch(Exception e)

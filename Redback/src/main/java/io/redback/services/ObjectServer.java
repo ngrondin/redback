@@ -239,6 +239,8 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				DataMap filter = requestData.getObject("filter");
 				String searchText = requestData.getString("search");
 				DataMap sort = requestData.getObject("sort");
+				int chunkSize = requestData.containsKey("chunksize") ? requestData.getNumber("chunksize").intValue() : -1;
+				int advance = requestData.containsKey("advance") ? requestData.getNumber("advance").intValue() : -1;
 				DataStream<List<RedbackObject>, Boolean> objectStream = new DataStream<List<RedbackObject>, Boolean>() {
 					public void received(List<RedbackObject> sublist) {
 						try {
@@ -271,7 +273,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 					}
 				};
 				streamEndpoint.setHandler(streamHandler);
-				streamList(session, objectName, filter, searchText, sort, addRelated, objectStream);
+				streamList(session, objectName, filter, searchText, sort, addRelated, chunkSize, advance, objectStream);
 			} else if(action.equals("listrelated") || (action.equals("list") && requestData.containsKey("uid"))) {
 				throw new RedbackException("Not yet implemented");
 			}
@@ -290,7 +292,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 
 	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 
-	protected abstract void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, DataStream<List<RedbackObject>, Boolean> stream) throws RedbackException;
+	protected abstract void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int chunkSize, int advance, DataStream<List<RedbackObject>, Boolean> stream) throws RedbackException;
 
 	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 
