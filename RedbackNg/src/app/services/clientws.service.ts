@@ -72,6 +72,7 @@ export class ClientWSService {
   public chatObservers: Observer<any>[] = [];
   public clientPingObservers: Observer<String>[] = [];
   public requestObservers: any = {};
+  public streamObservers: any = {};
   public uploads: any = {};
   public uniqueObjectSubscriptions: any[] = [];
   public filterObjectSubscriptions: any = {};
@@ -139,6 +140,24 @@ export class ClientWSService {
             observer.error(msg.error);
           }
           delete this.requestObservers[msg.requid];
+        }
+      } else if(msg.type == 'streamdata' || msg.type == 'streamcomplete' || msg.type == 'streamerror') {
+        let observer: Observer<any> = this.streamObservers[msg.requid];
+        if(observer != null) {
+          if(msg.type == 'streamdata') {
+            observer.next(msg.data);
+            this.websocket.next({
+              type:"streamnext",
+              requid: msg.requid
+            });
+          } else {
+            if(msg.type == 'streamcomplete') {
+              observer.complete();
+            } else if(msg.type == 'streamerror') {
+              observer.error(msg.error);
+            }
+            delete this.requestObservers[msg.requid];
+          }
         }
       } else if(msg.type == 'uploadctl') {
         let upload: Upload = this.uploads[msg.uploaduid];
@@ -262,7 +281,7 @@ export class ClientWSService {
     }
   }
 
-  request(service: string, request: any, timeout: number) : Observable<any> {
+  requestService(service: string, request: any, timeout: number) : Observable<any> {
     if(this.connected) {
       return new Observable((observer) => {
         let ruid = UUID.UUID();
@@ -273,6 +292,24 @@ export class ClientWSService {
           requid: ruid,
           request: request,
           timeout: timeout
+        });
+      });
+    } else {
+      return null;
+    }
+  }
+
+  requestStream(service: string, request: any, autoNext: boolean) : Observable<any> {
+    if(this.connected) {
+      return new Observable((observer) => {
+        let ruid = UUID.UUID();
+        this.streamObservers[ruid] = observer;
+        this.websocket.next({
+          type:"streamrequest",
+          servicename: service,
+          requid: ruid,
+          request: request,
+          autonext: autoNext
         });
       });
     } else {

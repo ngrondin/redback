@@ -45,7 +45,7 @@ export class ApiService {
 
   private requestService(service: string, request: any, timeout?: number) {
     if(this.clientWSService.isConnected() && this.useCSForAPI) {
-      return this.clientWSService.request(service, request, timeout);
+      return this.clientWSService.requestService(service, request, timeout);
     } else {
       let headers = new HttpHeaders()
         .set("Content-Type", "application/json")
@@ -53,6 +53,18 @@ export class ApiService {
       if(timeout != null) headers.set("firebus-timeout", timeout.toString());
       return this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true});
     }
+  }
+
+  private requestStream(service: string, request: any, autoNext: boolean) {
+    if(this.clientWSService.isConnected() && this.useCSForAPI) {
+      return this.clientWSService.requestStream(service, request, autoNext);
+    } else {
+      throw "Streams can only be requested with connected to the client servce";
+    }
+  }
+
+  canStream() {
+    return this.clientWSService.isConnected() && this.useCSForAPI;
   }
 
   getAppConfig(name: string) {
@@ -87,6 +99,23 @@ export class ApiService {
     };
     if(search != null) req['search'] = search;
     return this.requestService(this.objectService, req);
+  }
+
+  streamObjects(name: string, filter: any, search: string, sort: any, addRelated: boolean): Observable<any> {
+    const req = {
+      action: 'list',
+      object: name,
+      filter: filter,
+      sort: sort,
+      chunksize: 250,
+      advance: 1,
+      options: {
+        addrelated: addRelated,
+        addvalidation: true
+      }
+    };
+    if(search != null) req['search'] = search;
+    return this.requestStream(this.objectService, req, false);
   }
 
   listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean): Observable<any> {

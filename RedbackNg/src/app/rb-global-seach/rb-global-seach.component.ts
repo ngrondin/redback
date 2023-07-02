@@ -73,7 +73,7 @@ export class RbGlobalSeachComponent implements OnInit {
 
   blur(event: any) {
     setTimeout(()=> {
-      this.showResults = false;;
+      this.showResults = false;
     }, 100);
   }
 

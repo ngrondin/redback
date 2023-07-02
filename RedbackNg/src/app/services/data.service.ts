@@ -106,7 +106,24 @@ export class DataService {
   fetchEntireList(name: string, filter: any, search: string, sort: any) : Observable<any> {
     return new Observable((observer) => {
       //console.log((new Date()).getTime() + " Requesting entire list " + name);
-      this._fetchEntireList(observer, name, filter, search, sort, 0, 500);
+      if(this.apiService.canStream()) {
+        this.apiService.streamObjects(name, filter, search, sort, false).subscribe(
+          resp => {
+            const rbObjectArray = Object.values(resp.result).map(json => this.receive(json));
+            observer.next(rbObjectArray);
+          },
+          error => {
+            this.errorService.receiveHttpError(error)
+            observer.error(error);
+          },
+          () => {
+            this.finalizeReceipt();
+            observer.complete();
+          }
+        );
+      } else {
+        this._fetchEntireList(observer, name, filter, search, sort, 0, 500);
+      }
     });
   }
 
@@ -128,7 +145,7 @@ export class DataService {
         observer.error(error);
       }
     )
-  }
+  } 
 
   fetchRelatedList(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean) : Observable<any> {
     return new Observable((observer) => {

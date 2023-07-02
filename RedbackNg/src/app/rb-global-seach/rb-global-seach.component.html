@@ -4,18 +4,21 @@
     [(ngModel)]="searchString"
     (keydown)="keyDown($event)"
     (blur)="blur($event)">
+
+
+
 <div
     class="rb-globalsearch-resultwindow"
     *ngIf="showResults">
     <div
         class="rb-globalsearch-resultcontainer">
-        <mat-action-list>
-            <button 
-                mat-list-item 
-                *ngFor="let item of searchResult"
+        <div
+            *ngFor="let item of searchResult"
+            class="rb-globalsearch-listitem">
+            <rb-clickable 
                 (click)="navigateToObject(item)">
                 <div
-                    class="rb-globalsearch-listcontainer">
+                    class="rb-globalsearch-listcontent">
                     <div
                         class="rb-globalsearch-listheader">
                         {{getObjectHeaderText(item)}}
@@ -25,8 +28,8 @@
                         {{getObjectSubText(item)}}
                     </div>
                 </div>
-            </button>
-        </mat-action-list>  
+            </rb-clickable>
+        </div>
         <div
             class="rb-spinner-container"
             *ngIf="currentlyLoading >= 0">

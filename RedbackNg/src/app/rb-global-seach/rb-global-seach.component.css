@@ -51,24 +51,39 @@
     align-items: stretch;
 }
 
-.rb-globalsearch-listcontainer {
+.rb-globalsearch-listitem {
     display: flex;
+    flex: 0 0 auto;
     flex-direction: column;
-    padding-left: 12px;
+}
+
+.rb-globalsearch-listcontent {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    padding: var(--v12px);
+    font-weight: 400;
 }
 
 .rb-globalsearch-listheader {
-    margin: 0px 0px 0px 0px;
+    color: var(--dark-writing-color);
+    font-size: 0.9rem;
+    max-width: 330px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: var(--v20px);
 }
 
 .rb-globalsearch-listsub {
     color: #aaaaaa;
     font-size: 0.8rem;
-    margin: -12px 0px 0px 0px;
     max-width: 330px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--light-writing-color);
+    line-height: var(--v20px);
 }
 
 :host ::ng-deep .mat-list-item-content {
