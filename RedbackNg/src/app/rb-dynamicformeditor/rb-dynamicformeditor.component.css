@@ -38,6 +38,7 @@
     padding: var(--v3px);
     background-color: var(--primary-color);
     min-height: var(--v16px);
+    overflow: hidden;
 }
 
 .rb-dfe-cat-header-label {
@@ -46,6 +47,15 @@
     flex: 1 1 auto;
     align-items: center;
     cursor: grab;
+    margin-left: var(--v10px);
+    overflow: hidden;
+}
+
+.rb-dfe-cat-header-label span {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rb-dfe-cat-header-edit {
@@ -77,6 +87,8 @@
     border-radius: 5px;
     border: 1px solid var(--primary-color);
     color: var(--dark-writing-color);
+    overflow: hidden;
+    
 }
 
 .rb-dfe-item mat-icon {
@@ -84,10 +96,13 @@
 }
 
 .rb-dfe-item-label {
-    display: flex;
+    display: inline-block;
     flex: 1 1 auto;
     cursor: grab;
     margin-left: var(--v10px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rb-dfe-item-edit {

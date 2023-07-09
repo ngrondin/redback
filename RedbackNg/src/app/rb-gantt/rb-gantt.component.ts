@@ -389,7 +389,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
     
     if(Object.keys(update).length > 0) {
-      event.object.setValuesAndRelated(update, related);
+      object.setValuesAndRelated(update, related);
     }
 
     if(this.datasetgroup.datasets[config.dataset].list.indexOf(object) == -1) {

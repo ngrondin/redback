@@ -6,7 +6,7 @@ import { DragService } from 'app/services/drag.service';
   selector: '[rb-drag-object]'
 })
 export class RbDragObjectDirective {
-  @Input('rb-drag-object') object: RbObject;
+  @Input('rb-drag-object') data: any;
 
   constructor(
     private el: ElementRef,
@@ -14,8 +14,8 @@ export class RbDragObjectDirective {
   ) { }
     
   @HostListener('mousedown', ['$event']) onMouseDown($event) {
-    if(this.object != null) {
-      this.dragService.prepareDrag(this.el, this.object, $event); 
+    if($event.which == 1 && this.data != null) {
+      this.dragService.prepareDrag(this.el, this.data, $event); 
     }
   }
 

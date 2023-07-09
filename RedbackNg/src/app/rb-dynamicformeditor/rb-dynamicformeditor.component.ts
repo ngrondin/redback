@@ -9,6 +9,7 @@ import { UserprefService } from 'app/services/userpref.service';
 import { ActionService } from 'app/services/action.service';
 import { finalize } from 'rxjs';
 import { DynamicFormEditorCategory, DynamicFormEditorCategorySeriesConfig, DynamicFormEditorItem, DynamicFormEditorItemSeriesConfig } from './rb-dynamicformeditor-models';
+import { DialogService } from 'app/services/dialog.service';
 
 @Component({
   selector: 'rb-dynamicformeditor',
@@ -45,7 +46,7 @@ export class RbDynamicformeditorComponent extends RbDataCalcComponent<DynamicFor
     private userprefService: UserprefService,
     private filterService: FilterService,
     private dataService: DataService,
-    private actionService: ActionService
+    private dialogService: DialogService
   ) {
     super();
   }
@@ -200,6 +201,22 @@ export class RbDynamicformeditorComponent extends RbDataCalcComponent<DynamicFor
   }
 
   delete(entity) {
+    this.dialogService.openDialog(
+      (entity.is == 'cat' ? "Delete this category? All contained items will also be deleted." : "Delete this item?"), 
+      [
+        {
+          label: "Yes", 
+          callback: () => this._delete(entity)
+        }, 
+        {
+          label: "No", 
+          callback: () => {}
+        }
+      ]
+    );    
+  }  
+
+  private _delete(entity) {
     let cfg = null;
     if(entity.is == 'item') {
       cfg = this.seriesConfigs[0];
@@ -213,7 +230,7 @@ export class RbDynamicformeditorComponent extends RbDataCalcComponent<DynamicFor
       cfg = this.categoryConfig;
     }
     let dataset = this.datasetgroup.datasets[cfg.dataset];
-    dataset.delete(entity.object);
-  }  
+    dataset.delete(entity.object);    
+  }
 }
 
