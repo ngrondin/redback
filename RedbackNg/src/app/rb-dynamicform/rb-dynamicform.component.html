@@ -107,7 +107,7 @@
             <div
                 class="rb-df-inputwrapper">
                 <mat-icon
-                    style="color:gray; width:30px; margin-left: 15px">
+                    class="rb-df-input-icon">
                     attach_file
                 </mat-icon>
                 <div
@@ -137,7 +137,7 @@
             <div
                 class="rb-df-inputwrapper">
                 <mat-icon
-                    style="color:gray; width:30px; margin-left: 15px">
+                    class="rb-df-input-icon">
                     gesture
                 </mat-icon>
                 <div
@@ -163,7 +163,6 @@
             <rb-switch-input
                 [object]="object"
                 [attribute]="valueattribute"
-                [icon]="'description'"
                 [label]="object.get(labelattribute)"
                 [editable]="isEditable"
                 [grow]="1"
@@ -185,7 +184,7 @@
         <div
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'unknown'">
-            Unknown type<br><br>
+            Unknown type<br><br>                                                                                                                                                                                                                        
         </div> 
         <div
             *ngIf="object.get(detailattribute) != null"

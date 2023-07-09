@@ -1,0 +1,150 @@
+:host {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-dfe-scroll {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    width: 40vw;
+    overflow: auto;
+}
+
+.rb-dfe-content {
+    display: flex;
+    flex-direction: column;
+    padding: var(--v10px);
+}
+
+.rb-dfe-category-repeater {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+}
+
+.rb-dfe-category {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    border-radius: 5px;
+    border: 1px solid var(--primary-dark-color);
+}
+
+.rb-dfe-cat-header {
+    display: flex;
+    flex: 0 0 auto;
+    color: white;
+    padding: var(--v3px);
+    background-color: var(--primary-color);
+    min-height: var(--v16px);
+}
+
+.rb-dfe-cat-header-label {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    align-items: center;
+    cursor: grab;
+}
+
+.rb-dfe-cat-header-edit {
+    cursor: pointer;
+}
+
+.rb-dfe-cat-header-delete {
+    cursor: pointer;
+    margin-right: var(--v10px);
+    margin-left: var(--v10px);
+}
+
+.rb-dfe-cat-content {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+}
+
+.rb-dfe-item-repeater {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-dfe-item {
+    display: flex;
+    height: var(--v20px);
+    padding: var(--v10px);
+    margin: 0px var(--v3px);
+    border-radius: 5px;
+    border: 1px solid var(--primary-color);
+    color: var(--dark-writing-color);
+}
+
+.rb-dfe-item mat-icon {
+    color: #aaa;
+}
+
+.rb-dfe-item-label {
+    display: flex;
+    flex: 1 1 auto;
+    cursor: grab;
+    margin-left: var(--v10px);
+}
+
+.rb-dfe-item-edit {
+    color: #aaa;
+    cursor: pointer;
+}
+
+.rb-dfe-item-delete {
+    color: #aaa;
+    cursor: pointer;
+    margin-left: var(--v10px);
+}
+
+.rb-dfe-dropzone {
+    display: flex;
+    flex: 0 0 auto;
+    height: var(--v5px);
+}
+
+.rb-dfe-dropzone-active {
+    height: var(--v8px);
+    background-color: var(--primary-light-color);
+}
+
+.rb-dfe-dropzone-over {
+    height: var(--v28px);
+    background-color: var(--primary-dark-color);
+}
+
+.rb-dfe-toolbox {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+}
+
+.rb-dfe-toolbox-item mat-icon {
+    color: #aaa;
+    margin-right: var(--v5px);
+}
+
+.rb-dfe-toolbox-box {
+    display: flex;
+    border-radius: var(--v3px);
+    padding: var(--v3px);
+    margin: var(--v3px);
+    width: 7vw;
+    cursor: grab;
+}
+
+.rb-dfe-toolbox-item {
+    border: 1px solid lightgray;
+    background-color: #eee;
+    color: var(--dark-writing-color);
+}
+
+.rb-dfe-toolbox-cat {
+    border: 1px solid var(--primary-dark-color);
+    background-color: var(--primary-color);
+    color: white;
+}

@@ -17,6 +17,7 @@ import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.managers.objectmanager.requests.MultiResponse;
 import io.redback.managers.objectmanager.requests.UpdateRequest;
 import io.redback.security.Session;
+import io.redback.utils.AccumulatingDataStream;
 import io.redback.utils.DataStream;
 import io.redback.utils.DataStreamReceiver;
 
@@ -66,24 +67,14 @@ public class ObjectClient extends Client
 
 	}
 
-	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
-		List<RedbackObjectRemote> list = new ArrayList<RedbackObjectRemote>();
-		DataStream<List<RedbackObjectRemote>, Boolean> stream = new DataStream<List<RedbackObjectRemote>, Boolean>() {
-			public void received(List<RedbackObjectRemote> sublist) {
-				list.addAll(sublist);
-				sendOut(true);
-			}
-
-			public void completed() {
-				try {synchronized(list) {list.notify();}} catch(Exception e) {}
-			}
-		};
-		StreamObjects(session, objectname, filter, sort, addRelated, -1, stream);
-		try {synchronized(list) {list.wait(60000);}} catch(Exception e) {}
+	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
+		AccumulatingDataStream<RedbackObjectRemote> stream = new AccumulatingDataStream<RedbackObjectRemote>();
+		streamObjects(session, objectName, filter, sort, addRelated, -1, (DataStream<List<RedbackObjectRemote>, Boolean>)stream);
+		List<RedbackObjectRemote> list = stream.getList();
 		return list;
 	}
 	
-	public void StreamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int chunkSize, DataStream<List<RedbackObjectRemote>, Boolean> stream) throws RedbackException  {
+	public void streamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int chunkSize, DataStream<List<RedbackObjectRemote>, Boolean> stream) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "list");
 		req.put("object", objectname);

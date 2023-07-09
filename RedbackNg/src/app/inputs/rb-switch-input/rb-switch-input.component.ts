@@ -16,6 +16,7 @@ export class RbSwitchInputComponent extends RbInputComponent {
   constructor() {
     super();
     this.defaultSize = null;
+    this.defaultIcon = 'playlist_add_check_circle';
   }
 
   inputInit() {

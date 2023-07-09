@@ -40,7 +40,11 @@ export class ApiService {
     private http: HttpClient,
     private clientWSService: ClientWSService
   ) { 
-    this.placesAutocompleteService = new google.maps.places.AutocompleteService();
+    try {
+      this.placesAutocompleteService = new google.maps.places.AutocompleteService();
+    } catch(error) {
+      console.error(error);
+    }
   }
 
   private requestService(service: string, request: any, timeout?: number) {

@@ -16,7 +16,7 @@ export class RbDragDropzoneDirective {
   @HostListener('mouseup', ['$event']) onMouseUp($event) {
     if(this.dragService.isDragging) {
       this.dropped.emit({
-        object: this.dragService.object, 
+        data: this.dragService.data, 
         offset: this.dragService.offset,
         mouseEvent: $event
       });

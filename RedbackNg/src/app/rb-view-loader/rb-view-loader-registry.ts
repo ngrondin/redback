@@ -49,6 +49,7 @@ import { RbVsectionComponent } from "app/rb-vsection/rb-vsection.component";
 import { RbActionButtonComponent } from "app/clickable/rb-actionbutton/rb-actionbutton.component";
 import { RbRichtextInputComponent } from "app/inputs/rb-richtext-input/rb-richtext-input.component";
 import { RbVseparatorComponent } from "app/rb-vseparator/rb-vseparator.component";
+import { RbDynamicformeditorComponent } from "app/rb-dynamicformeditor/rb-dynamicformeditor.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -76,6 +77,7 @@ export const componentRegistry = {
     "currencyinput": RbCurrencyInputComponent,
     "durationinput": RbDurationInputComponent,
     "dynamicform": RbDynamicformComponent,
+    "dynamicformeditor": RbDynamicformeditorComponent,
     "fileinput": RbFileInputComponent,
     "filedrop": RbFiledropComponent,
     "filelist": RbFilelistComponent,

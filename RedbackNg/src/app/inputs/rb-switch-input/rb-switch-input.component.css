@@ -6,6 +6,19 @@
 }
 
 
+.rb-switch-icon {
+    flex: 0 0 auto;
+	color: grey;
+	margin-right: var(--v5px);
+	font-size: 1.4rem;
+    width: var(--v24px);
+    height: var(--v24px);
+}
+
+.rb-switch-icon-mandatory {
+    color: red;
+}
+
 .rb-switch-container {
     display: flex;
     flex-grow: 1;

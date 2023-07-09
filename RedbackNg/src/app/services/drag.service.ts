@@ -11,7 +11,7 @@ export class DragService {
   isDragging: boolean = false;
   draggingElement: ElementRef;
   innerHTML: String;
-  object: RbObject;
+  data: any;
   droppedOnElement: ElementRef;
   mouseOrigin: XY;
   offset: XY;
@@ -20,9 +20,9 @@ export class DragService {
 
   constructor() { }
 
-  public prepareDrag(el: ElementRef, o: RbObject, event: any) {
+  public prepareDrag(el: ElementRef, d: any, event: any) {
     this.draggingElement = el;
-    this.object = o;
+    this.data = d;
     this.mouseOrigin = new XY(event.clientX, event.clientY);
     this.offset = new XY(event.offsetX, event.offsetY);
     this.position = new XY(event.clientX - this.offset.x, event.clientY - this.offset.y);
@@ -30,18 +30,18 @@ export class DragService {
   }
 
   public startDragging() {
-    if(this.isDragging == false && this.object != null) {
+    if(this.isDragging == false && this.data != null) {
       this.isDragging = true;
       this.draggingElement.nativeElement.style.opacity = "15%";
       this.innerHTML = "";
-      this.publishEvent({type:"start", object: this.object});
+      this.publishEvent({type:"start", data: this.data});
     }
   }
 
   public move(event: any) {
-    if(this.object != null) {
+    if(this.data != null) {
       this.position = new XY(event.clientX - this.offset.x, event.clientY - this.offset.y);
-      if(this.isDragging == false && this.object != null && (Math.abs(event.clientX - this.mouseOrigin.x) > 5 || Math.abs(event.clientY - this.mouseOrigin.y) > 5)) {
+      if(this.isDragging == false && (Math.abs(event.clientX - this.mouseOrigin.x) > 5 || Math.abs(event.clientY - this.mouseOrigin.y) > 5)) {
         this.startDragging();
       }
     }
@@ -64,7 +64,7 @@ export class DragService {
     this.droppedOnElement = null;
     this.draggingElement = null;
     this.innerHTML = null;
-    this.object = null;
+    this.data = null;
     this.mouseOrigin = null;
     this.offset = null;
     this.position = null;

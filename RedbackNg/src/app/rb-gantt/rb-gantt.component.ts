@@ -225,7 +225,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       let list: RbObject[] = this.lists != null ? this.lists[cfg.dataset] : this.list;
       for(var i in list) {
         let obj = list[i];
-        if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.object) {
+        if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.data) {
           let startMS = (new Date(obj.get(cfg.startAttribute))).getTime();
           let startPX: number = Math.round((startMS - this.startMS) * this.multiplier);
           if(startPX < this.widthPX) {
@@ -359,7 +359,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   public dropped(event: any, lane: GanttLane, ignoreTime: boolean = false) {
     let update: any = {};
     let related: any = {}
-    let object: RbObject = event.object;
+    let object: RbObject = event.data;
     let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
 
     if(ignoreTime == false) {

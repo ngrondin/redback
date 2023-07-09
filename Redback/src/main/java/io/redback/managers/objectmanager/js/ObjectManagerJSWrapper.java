@@ -1,6 +1,5 @@
 package io.redback.managers.objectmanager.js;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.data.DataMap;
@@ -12,7 +11,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
-import io.redback.utils.DataStream;
+import io.redback.utils.AccumulatingDataStream;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
 
@@ -59,19 +58,9 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
 					int chunkSize = arguments.length > 4 ? (Integer)arguments[4] : 20;
-					List<RedbackObject> list = new ArrayList<RedbackObject>();
-					DataStream<List<RedbackObject>, Boolean> stream = new DataStream<List<RedbackObject>, Boolean>() {
-						public void received(List<RedbackObject> sublist) {
-							list.addAll(sublist);
-							sendOut(true);
-						}
-
-						public void completed() {
-							try {synchronized(list) {list.notify();}} catch(Exception e) {}
-						}
-					};
+					AccumulatingDataStream<RedbackObject> stream = new AccumulatingDataStream<RedbackObject>();
 					objectManager.streamObjects(session, objectName, filter, search, sort, false, chunkSize, 0, stream);
-					try {synchronized(list) {list.wait(60000);}} catch(Exception e) {}
+					List<RedbackObject> list = stream.getList();
 					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};		

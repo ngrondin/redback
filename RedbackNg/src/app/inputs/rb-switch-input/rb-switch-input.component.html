@@ -1,3 +1,8 @@
+<mat-icon 
+    *ngIf="showicon" 
+    [class]="'rb-switch-icon' + (mandatoryalert ? ' rb-switch-icon-mandatory' : '') ">
+    {{icon}}
+</mat-icon>
 <div
     class="rb-switch-container">
     <div
