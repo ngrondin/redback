@@ -51,9 +51,10 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					String objectname = (String)arguments[0];
 					DataMap filter = (DataMap)(arguments[1]);
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
+					boolean addRelated = arguments.length > 3 ? (boolean)(arguments[3]) : false;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listObjects(session, objectname, filter, sort));
+					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listObjects(session, objectname, filter, sort, addRelated));
 				}
 			};
 		} else if(key.equals("listAllObjects")) {
@@ -62,9 +63,10 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					String objectname = (String)arguments[0];
 					DataMap filter = (DataMap)(arguments[1]);
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
+					boolean addRelated = arguments.length > 3 ? (boolean)(arguments[3]) : false;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listAllObjects(session, objectname, filter, sort, false));
+					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listAllObjects(session, objectname, filter, sort, addRelated));
 				}
 			};
 		} else if(key.equals("createObject")) {

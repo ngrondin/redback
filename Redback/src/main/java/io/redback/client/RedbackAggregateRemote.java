@@ -4,21 +4,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import io.firebus.Firebus;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
+import io.redback.security.Session;
 
 public class RedbackAggregateRemote {
 	public DataMap data;
-	protected Firebus firebus;
-	protected String objectService;
-	protected String token;
+	protected ObjectClient objectClient;
+	protected Session session;
 	
-	public RedbackAggregateRemote(Firebus fb, String os, String t, DataMap d) {
-		firebus = fb;
-		objectService = os;
-		token = t;
+	public RedbackAggregateRemote(Session s, ObjectClient oc, DataMap d) {
+		objectClient = oc;
+		session = s;
 		data = d;
 	}
 
@@ -50,7 +48,7 @@ public class RedbackAggregateRemote {
 		if(data.containsKey("related")) {
 			DataMap d = data.getObject("related." + attribute);
 			if(d != null)
-				return new RedbackObjectRemote(firebus, objectService, token, d);
+				return new RedbackObjectRemote(session, objectClient, d);
 			else
 				return null;
 		} else {

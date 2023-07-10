@@ -10,6 +10,7 @@ import io.redback.utils.js.ObjectJSWrapper;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.WritableCellFormat;
+import jxl.CellView;
 import jxl.format.Colour;
 import jxl.write.DateTime;
 import jxl.write.WritableSheet;
@@ -52,6 +53,21 @@ public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 							sheet.addCell(dt);
 						}
 						
+						return null;
+					} catch(Exception e) {
+						throw new RuntimeException("Error setting cell value", e);
+					}
+				}
+			};
+		} else if(key.equals("setColumnWidth")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						int col = ((Long)arguments[0]).intValue();
+						int width = ((Long)arguments[1]).intValue() * 128;
+						CellView cv = new CellView();
+						cv.setSize(width);
+						sheet.setColumnView(col, cv);
 						return null;
 					} catch(Exception e) {
 						throw new RuntimeException("Error setting cell value", e);

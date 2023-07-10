@@ -377,6 +377,12 @@ public class ObjectManager
 		
 	}
 	
+	public RedbackObject getRelatedObject(Session session, String objectName, String id, String attribute) throws RedbackException 
+	{
+		RedbackObject baseObject = getObject(session, objectName, id);
+		return baseObject.getRelated(attribute);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<RedbackObject> listObjects(Session session, String objectName, DataMap filter, String searchText, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException
 	{

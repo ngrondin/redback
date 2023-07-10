@@ -21,7 +21,7 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 		rbObjectRemote = o;
 	}
 	
-	public SValue getMember(String name)
+	public SValue getMember(String name)  
 	{
 		if(name.equals("getRelated"))
 		{
@@ -52,8 +52,12 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 		}
 		else
 		{
-			Object obj = rbObjectRemote.get(name);
-			return Converter.tryConvertIn(obj);
+			try {
+				Object obj = rbObjectRemote.get(name);
+				return Converter.tryConvertIn(obj);
+			} catch(RedbackException e) {
+				return null;
+			}
 		}
 	}
 
@@ -69,13 +73,17 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 	}
 
 	public boolean hasMember(String key) {
-		if(key.equals("execute") || key.equals("getRelated")) {
-			return true;
-		} else if(rbObjectRemote.get(key) != null) {
-			return true;
-		} else if(key.equals("uid") || key.equals("objectname") || key.equals("domain")) {
-			return true;
-		} else {
+		try {
+			if(key.equals("execute") || key.equals("getRelated")) {
+				return true;
+			} else if(rbObjectRemote.get(key) != null) {
+				return true;
+			} else if(key.equals("uid") || key.equals("objectname") || key.equals("domain")) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch(RedbackException e) {
 			return false;
 		}
 	}

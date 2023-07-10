@@ -67,12 +67,16 @@ public class DynamicForm extends DataUnit {
 				.collect(Collectors.toList());
 		Collections.sort(rors, new Comparator<RedbackObjectRemote>() {
 			public int compare(RedbackObjectRemote o1, RedbackObjectRemote o2) {
-				if(catOrderAttribute != null && orderAttribute != null)
-					return (o1.getNumber(catOrderAttribute).intValue() * rors.size() + o1.getNumber(orderAttribute).intValue()) - (o2.getNumber(catOrderAttribute).intValue() * rors.size() + o2.getNumber(orderAttribute).intValue()); 
-				else if(orderAttribute != null)
-					return o1.getNumber(orderAttribute).intValue() - o2.getNumber(orderAttribute).intValue();
-				else
+				try {
+					if(catOrderAttribute != null && orderAttribute != null)
+						return (o1.getNumber(catOrderAttribute).intValue() * rors.size() + o1.getNumber(orderAttribute).intValue()) - (o2.getNumber(catOrderAttribute).intValue() * rors.size() + o2.getNumber(orderAttribute).intValue()); 
+					else if(orderAttribute != null)
+						return o1.getNumber(orderAttribute).intValue() - o2.getNumber(orderAttribute).intValue();
+					else
+						return 0;
+				} catch(RedbackException e) {
 					return 0;
+				}
 			}
 		});	
 		Map<String, RedbackObjectRemote> orderMap = new HashMap<String, RedbackObjectRemote>();

@@ -81,7 +81,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 		boolean addRelated = options != null && options.containsKey("addrelated") ? options.getBoolean("addrelated") : false;
 		if(action != null)
 		{
-			if(action.equals("get"))
+			if(action.equals("get") && !requestData.containsKey("attribute"))
 			{
 				String objectName = requestData.getString("object");
 				String uid = requestData.getString("uid");
@@ -91,6 +91,18 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				} else {
 					throw new RedbackException("A 'get' action requires a 'uid' attribute");
 				}
+			}
+			else if(action.equals("getrelated") || (action.equals("get") && requestData.containsKey("attribute"))) 
+			{
+				String objectName = requestData.getString("object");
+				String uid = requestData.getString("uid");
+				String attribute = requestData.getString("attribute");
+				if(objectName != null && uid != null) {
+					RedbackObject resp = getRelated(session, objectName, uid, attribute);
+					return resp.getDataMap(addValidation, addRelated, true);
+				} else {
+					throw new RedbackException("A 'get' action requires a 'uid' attribute");
+				}				
 			}
 			else if(action.equals("list") && !requestData.containsKey("uid"))
 			{
@@ -289,6 +301,8 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 	protected abstract void commitTransaction(Session session) throws RedbackException;
 		
 	protected abstract RedbackObject get(Session session, String objectName, String uid) throws RedbackException;
+
+	protected abstract RedbackObject getRelated(Session session, String objectName, String uid, String attribute) throws RedbackException;
 
 	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 

@@ -43,6 +43,10 @@ public class RedbackObjectServer extends ObjectServer
 		return objectManager.getObject(session, objectName, uid);
 	}
 	
+	protected RedbackObject getRelated(Session session, String objectName, String uid, String attribute) throws RedbackException {
+		return objectManager.getRelatedObject(session, objectName, uid, attribute);
+	}
+
 	protected List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException {
 		return objectManager.listObjects(session, objectName, filter != null ? filter : new DataMap(), search, sort, addRelated, page, pageSize);
 	}
@@ -82,8 +86,4 @@ public class RedbackObjectServer extends ObjectServer
 	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException {
 		return objectManager.aggregateObjects(session, objectName, filter, searchText, tuple, metrics, sort, base, addRelated, page, pageSize);
 	}
-
-
-
-
 }
