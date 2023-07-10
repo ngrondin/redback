@@ -44,6 +44,7 @@
 .rb-reportlist-icon {
     color: #888888;
     max-height: 24px;
+    margin-right: var(--v10px);
 }
 
 .rb-reportlist-spinner-conntainer {
