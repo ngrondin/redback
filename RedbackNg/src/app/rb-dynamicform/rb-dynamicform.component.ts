@@ -91,8 +91,6 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
         this.sortedVisibleList = this.list.filter(obj => {
           let dependentLinkValue = obj.get(this.dependencyattribute);
           if(dependentLinkValue != null) {            
-            //let dependentLinkAttribute = (this.dependencyattribute.indexOf(".") > -1 ? this.dependencyattribute.substr(0, this.dependencyattribute.indexOf(".")) : "uid");
-            //let depObj = this.lookupObjectFromList(dependentLinkAttribute, dependentLinkValue);
             let depObj = obj.getRelated(this.dependencyattribute);
             if(depObj != null) {
               let dependentValue: any = obj.get(this.dependencyvalueattribute);
@@ -122,16 +120,16 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
       if(this.orderattribute != null) {
         this.sortedVisibleList = this.sortedVisibleList.sort((a, b) => {
           if(this.categoryattribute != null) {
-            let acat = a.get(this.categoryorderattribute);
-            let bcat = b.get(this.categoryorderattribute);
-            let c = (acat | 0) - (bcat | 0); 
+            let acat = (a.get(this.categoryorderattribute) || '0').toString();
+            let bcat = (b.get(this.categoryorderattribute) || '0').toString();
+            let c = acat.localeCompare(bcat);
             if(c != 0) {
               return c;
             }
           }
-          let aord = a.get(this.orderattribute);
-          let bord = b.get(this.orderattribute);
-          return (aord | 0) - (bord | 0); 
+          let aord = (a.get(this.orderattribute) || '0').toString();
+          let bord = (b.get(this.orderattribute) || '0').toString();
+          return aord.localeCompare(bord);
         });
       }
     } else {
