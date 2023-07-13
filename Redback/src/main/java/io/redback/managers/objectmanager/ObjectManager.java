@@ -84,11 +84,11 @@ public class ObjectManager
 	protected DataMap globalVariables;
 	protected ConfigCache<ObjectConfig> objectConfigs;
 	protected ConfigCache<ScriptConfig> globalScripts;
+	protected ConfigCache<PackConfig> packConfigs;
 	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters;
 	protected CollectionConfig traceCollection;
 	protected CollectionConfig scriptLogCollection;
-	protected HashMap<Long, List<RedbackObject>> transactions;
 	protected AccessManagementClient accessManagementClient;
 	protected DataClient dataClient;
 	protected ConfigClient configClient;
@@ -147,8 +147,11 @@ public class ObjectManager
 				public ScriptConfig createConfig(DataMap map) throws Exception {
 					return new ScriptConfig(scriptFactory, map);
 				}});
+			packConfigs = new ConfigCache<PackConfig>(configClient, "rbo", "pack", new ConfigCache.ConfigFactory<PackConfig>() {
+				public PackConfig createConfig(DataMap map) throws Exception {
+					return new PackConfig(om, map);
+				}});			
 			readRightsFilters = new HashMap<String, ExpressionMap>();
-			transactions = new HashMap<Long, List<RedbackObject>>();
 			searchCache = new Cache<DataMap>(5000);	
 			sysUserManager = new SysUserManager(accessManagementClient, config);
 			scriptFactory.setGlobals(globalVariables);
@@ -422,14 +425,14 @@ public class ObjectManager
 				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 				DataMap dbSort = generateDBSort(session, objectConfig, sort);
 				DataStream<DataMap, Boolean> dataStream = new DataStream<DataMap, Boolean>() {
-					protected int page = 0;
+					protected int chunk = 0;
 					protected void received(DataMap dbData) {
 						try {
 							DataList dbResultList = dbData.getList("result");
-							List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, page == 0);
+							List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, chunk == 0);
 							if(addRelated) addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 							objectStream.sendIn(objectList);
-							page++;
+							chunk++;
 						} catch(Exception e) {
 							Logger.severe("rb.objectmanager.streamlist", "Error stream object list", e);
 						}
@@ -547,6 +550,17 @@ public class ObjectManager
 		}
 		return ret;
 	}	
+	
+	public List<RedbackObject> getPack(Session session, String name) throws RedbackException 
+	{
+		PackConfig packConfig = packConfigs.get(session, name);
+		packConfig.execute(session);
+		List<RedbackObject> list = new ArrayList<RedbackObject>();
+		List<Object> txlist = session.getTxStore().getCopyOfAll();
+		for(Object o : txlist)
+			list.add((RedbackObject)o);
+		return list;
+	}
 	
 	public List<FunctionInfo> listFunctions(Session session, String category) throws RedbackException {
 		List<FunctionInfo> retList = new ArrayList<FunctionInfo>();

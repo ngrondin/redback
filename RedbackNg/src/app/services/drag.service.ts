@@ -41,6 +41,7 @@ export class DragService {
   public move(event: any) {
     if(this.data != null) {
       this.position = new XY(event.clientX - this.offset.x, event.clientY - this.offset.y);
+      console.log(this.position);
       if(this.isDragging == false && (Math.abs(event.clientX - this.mouseOrigin.x) > 5 || Math.abs(event.clientY - this.mouseOrigin.y) > 5)) {
         this.startDragging();
       }

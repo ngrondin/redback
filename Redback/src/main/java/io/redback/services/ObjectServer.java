@@ -183,16 +183,23 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 					return resp;
 				}
 			}
+			else if(action.equals("getpack"))
+			{
+				String name = requestData.getString("name");
+				List<RedbackObject> objects = getPack(session, name);
+				DataList respList = new DataList();
+				for(RedbackObject object: objects)
+					respList.add(object.getDataMap(addValidation, addRelated, true));
+				return new DataMap("list", respList);
+			}
 			else if(action.equals("listfunctions") || action.equals("listscripts"))
 			{
 				String category = requestData.getString("category");
 				List<FunctionInfo> list = listFunctions(session, category);
-				DataMap responseData = new DataMap();
 				DataList respList = new DataList();
 				for(FunctionInfo fi: list)
 					respList.add(new DataMap("name", fi.name, "description", fi.description, "timeout", fi.timeout));
-				responseData.put("list", respList);
-				return responseData;
+				return new DataMap("list", respList);
 			}
 			else if(action.equals("aggregate"))
 			{
@@ -319,6 +326,8 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException;
 
 	protected abstract Object execute(Session session, String function, DataMap param) throws RedbackException;
+
+	protected abstract List<RedbackObject> getPack(Session session, String name) throws RedbackException;
 
 	protected abstract List<FunctionInfo> listFunctions(Session session, String category) throws RedbackException;
 	

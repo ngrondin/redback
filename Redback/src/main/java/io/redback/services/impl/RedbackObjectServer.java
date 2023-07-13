@@ -79,6 +79,10 @@ public class RedbackObjectServer extends ObjectServer
 		return objectManager.executeFunction(session, function, param);
 	}
 	
+	protected List<RedbackObject> getPack(Session session, String name) throws RedbackException {
+		return objectManager.getPack(session, name);
+	}
+	
 	protected List<FunctionInfo> listFunctions(Session session, String category) throws RedbackException {
 		return objectManager.listFunctions(session, category);
 	}
@@ -86,4 +90,5 @@ public class RedbackObjectServer extends ObjectServer
 	protected List<RedbackAggregate> aggregate(Session session, String objectName, DataMap filter, String searchText, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException {
 		return objectManager.aggregateObjects(session, objectName, filter, searchText, tuple, metrics, sort, base, addRelated, page, pageSize);
 	}
+
 }

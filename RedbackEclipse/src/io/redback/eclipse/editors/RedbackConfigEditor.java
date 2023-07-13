@@ -10,19 +10,16 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.EditorPart;
 
 import io.firebus.data.DataException;
 import io.firebus.data.DataMap;
-
 import io.redback.eclipse.editors.components.Manager;
 import io.redback.eclipse.editors.components.impl.AppManager;
 import io.redback.eclipse.editors.components.impl.IncludeManager;
@@ -30,7 +27,7 @@ import io.redback.eclipse.editors.components.impl.IntegrationManager;
 import io.redback.eclipse.editors.components.impl.KeyManager;
 import io.redback.eclipse.editors.components.impl.MenuManager;
 import io.redback.eclipse.editors.components.impl.ObjectManager;
-import io.redback.eclipse.editors.components.impl.ObjectTree;
+import io.redback.eclipse.editors.components.impl.PackManager;
 import io.redback.eclipse.editors.components.impl.ProcessManager;
 import io.redback.eclipse.editors.components.impl.ResourceManager;
 import io.redback.eclipse.editors.components.impl.RoleManager;
@@ -118,6 +115,8 @@ public class RedbackConfigEditor extends EditorPart implements IResourceChangeLi
 						manager = new IncludeManager(data, this, composite, SWT.HORIZONTAL);
 					} else if(rbConfigType.equals("script")) {
 						manager = new ScriptManager(data, this, composite, SWT.HORIZONTAL);
+					} else if(rbConfigType.equals("pack")) {
+						manager = new PackManager(data, this, composite, SWT.HORIZONTAL);
 					}
 				} else if(rbService.equals("rbui")) {
 					if(rbConfigType.equals("view")) {
