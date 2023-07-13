@@ -448,7 +448,23 @@ public class ObjectManager
 					}
 				});
 				dataClient.streamData(objectConfig.getCollection(), dbFilter, dbSort, chunkSize, advance, dataStream);
-			}	
+			} else { // Non persistent objects
+				DataList dbResultList = generateNonPersistentObjectData(session, objectConfig, filter, searchText, sort, 0, 5000);
+				final List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, true);
+				if(addRelated) addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
+				objectStream.sendIn(objectList.subList(0, Math.min(objectList.size(), chunkSize)));
+				objectStream.setReceiver(new DataStreamReceiver<Boolean>() {
+					protected int chunk = 1;
+					public void receive(Boolean sendMore) {
+						if(objectList.size() > (chunk * chunkSize)) {
+							objectStream.sendIn(objectList.subList(chunk * chunkSize, Math.min(objectList.size(), (chunk + 1) * chunkSize)));
+							chunk++;							
+						} else {
+							objectStream.complete();
+						}
+					}
+				});				
+			}
 		}
 		catch(Exception e)
 		{
