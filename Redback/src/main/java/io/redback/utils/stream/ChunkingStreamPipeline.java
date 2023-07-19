@@ -12,12 +12,12 @@ public class ChunkingStreamPipeline<TARGET, SOURCE> implements DataStreamNextHan
 	protected DataStream<SOURCE> sourceStream;
 	protected ChunkingConverter<TARGET, SOURCE> converter;
 	protected int chunkSize;
-	//protected int nextBacklog = 1;
-	protected boolean inStreamComplete = false;
+	protected boolean sourceStreamComplete = false;
 	
 	public ChunkingStreamPipeline(DataStream<TARGET> ts, int cs, ChunkingConverter<TARGET, SOURCE> cc) {
+		//System.out.println("CSP Created");
 		targetStream = ts;
-		chunkSize = cs;
+		chunkSize = cs > 0 ? cs : 50;
 		converter = cc;
 		sourceBuffer = new ArrayList<SOURCE>();
 		targetBuffer = new ArrayList<TARGET>();
@@ -31,9 +31,8 @@ public class ChunkingStreamPipeline<TARGET, SOURCE> implements DataStreamNextHan
 			}
 
 			protected void completed() {
-				inStreamComplete = true;
-				if(sourceBuffer.size() > 0)
-					convert();
+				sourceStreamComplete = true;
+				convertOrRequestNext();
 			}
 		};
 		
@@ -41,11 +40,13 @@ public class ChunkingStreamPipeline<TARGET, SOURCE> implements DataStreamNextHan
 	}
 	
 	protected void convertOrRequestNext() {
-		if(sourceBuffer.size() >= chunkSize || inStreamComplete) {
+		if((sourceBuffer.size() >= chunkSize || sourceStreamComplete)) {
+			//System.out.println("CSP converting, source=" + sourceBuffer.size());
 			convert();
-		} else {
+		} else if(!sourceStreamComplete) {
+			//System.out.println("CSP request next");
 			sourceStream.requestNext();
-		}
+		} 
 	}
 	
 	protected void convert() {
@@ -65,10 +66,13 @@ public class ChunkingStreamPipeline<TARGET, SOURCE> implements DataStreamNextHan
 	}
 
 	public void sendNext() {
+		//System.out.println("CSP send next, target=" + targetBuffer.size() + " sourceComplete=" + sourceStreamComplete);
 		if(targetBuffer.size() > 0) {
 			targetStream.send(targetBuffer.remove(0));
+		} else if(sourceStreamComplete == false) {
+			sourceStream.requestNext();			
 		} else {
-			sourceStream.requestNext();
+			targetStream.complete();
 		}	
 	}
 	

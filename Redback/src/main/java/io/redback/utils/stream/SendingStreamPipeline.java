@@ -18,31 +18,41 @@ public class SendingStreamPipeline<T> implements StreamHandler {
 	protected boolean streamComplete = false;
 	
 	public SendingStreamPipeline(StreamEndpoint s, int cs, SendingConverter<T> rc) {
+		System.out.println("SSP Created");
 		sep = s;
 		converter = rc;
-		chunkSize = cs;
+		chunkSize = cs > 0 ? cs : 50;
 		buffer = new ArrayList<T>();
 		dataStream = new DataStream<T>() {
 			protected void received(T data) {
 				synchronized(buffer) {
 					buffer.add(data);
 				}
-				sendBufferOrRequestNext();
+				//System.out.println("SSP datastream received, buffer=" + buffer.size());
+				determineAction();
 			}
 
 			protected void completed() {
+				//System.out.println("SSP datastream complete");
 				streamComplete = true;
-				sendBuffer();
+				determineAction();
 			}
 		};
 		sep.setHandler(this);
 	}
 	
-	protected void sendBufferOrRequestNext() {
-		if(nextBacklog > 0 && (buffer.size() >= chunkSize || streamComplete)) {
-			sendBuffer();
-		} else {
-			dataStream.requestNext();
+	protected void determineAction() {
+		if(nextBacklog > 0) {
+			if(buffer.size() > 0 && (buffer.size() >= chunkSize || streamComplete)) {
+				//System.out.println(System.currentTimeMillis() + " SSP Sending Buffer, buffer=" + buffer.size());
+				sendBuffer();
+			} else if(!streamComplete) {
+				//System.out.println("SSP datastream request next, buffer=" + buffer.size() + " nextBacklog=" + nextBacklog + " streamComplete=" + streamComplete);
+				dataStream.requestNext();			
+			} else {
+				//System.out.println(System.currentTimeMillis() + " SSP closing sep");
+				sep.close();
+			}			
 		}
 	}
 	
@@ -50,13 +60,11 @@ public class SendingStreamPipeline<T> implements StreamHandler {
 		try {
 			List<T> list = new ArrayList<T>();
 			synchronized(buffer) {
-				while(list.size() < chunkSize && buffer.size() > 0) {
+				while(list.size() < chunkSize && buffer.size() > 0)
 					list.add(buffer.remove(0));
-				}
 			}
 			sep.send(converter.convert(list));
-			if(nextBacklog > 0) 
-				nextBacklog--;
+			if(nextBacklog > 0) nextBacklog--;				
 		} catch (Exception e) {
 			Logger.severe("rb.sendingstreampipeline.send", e);
 		} 
@@ -66,16 +74,17 @@ public class SendingStreamPipeline<T> implements StreamHandler {
 		try {
 			String s = payload.getString();
 			if(s.equals("next")) {
+				//System.out.println(System.currentTimeMillis() + " SSP next");
 				nextBacklog++;
-				sendBufferOrRequestNext();
+				determineAction();
 			}
 		} catch(Exception e) {
 			Logger.severe("rb.sendingstreampipeline.receive", e);
 		}
 	}
-
+	
 	public void streamClosed(StreamEndpoint streamEndpoint) {
-		dataStream.complete();
+		//dataStream.complete();
 	}
 	
 	public DataStream<T> getDataStream() {

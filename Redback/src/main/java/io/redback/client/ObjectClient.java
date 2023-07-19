@@ -84,7 +84,7 @@ public class ObjectClient extends Client
 
 	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
 		AccumulatingDataStream<RedbackObjectRemote> stream = new AccumulatingDataStream<RedbackObjectRemote>();
-		streamObjects(session, objectName, filter, sort, addRelated, -1, (DataStream<RedbackObjectRemote>)stream);
+		streamObjects(session, objectName, filter, sort, addRelated, -1, stream);
 		List<RedbackObjectRemote> list = stream.getList();
 		return list;
 	}

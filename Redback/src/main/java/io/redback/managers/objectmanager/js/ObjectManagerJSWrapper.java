@@ -57,7 +57,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
-					int chunkSize = arguments.length > 4 ? (Integer)arguments[4] : 20;
+					int chunkSize = arguments.length > 4 ? (Integer)arguments[4] : 50;
 					AccumulatingDataStream<RedbackObject> stream = new AccumulatingDataStream<RedbackObject>();
 					objectManager.streamObjects(session, objectName, filter, search, sort, false, chunkSize, 0, stream);
 					List<RedbackObject> list = stream.getList();

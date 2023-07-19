@@ -15,6 +15,7 @@ public class ReceivingStreamPipeline<T> implements StreamHandler, DataStreamNext
 	protected ReceivingConverter<T> converter;
 	
 	public ReceivingStreamPipeline(StreamEndpoint s, DataStream<T> ds, ReceivingConverter<T> rc) {
+		//System.out.println("RSP Created");
 		sep = s;
 		dataStream = ds;
 		converter = rc;
@@ -27,6 +28,7 @@ public class ReceivingStreamPipeline<T> implements StreamHandler, DataStreamNext
 		try {
 			List<T> list = converter.convert(payload);
 			buffer.addAll(list);
+			//System.out.println("RSP Received " + list.size());
 			sendNext();
 		} catch(Exception e) {
 			Logger.severe("rb.receivingstreampipeline.convert", e);
@@ -34,11 +36,13 @@ public class ReceivingStreamPipeline<T> implements StreamHandler, DataStreamNext
 	}
 
 	public void streamClosed(StreamEndpoint streamEndpoint) {
+		//System.out.println("RSP sep closed, buffer=" + buffer.size());
 		if(buffer.size() == 0)
 			dataStream.complete();
 	}
 
 	public void sendNext() {
+		//System.out.println("RSP Send Next, buffer=" + buffer.size() + ", sep=" + sep.isActive());
 		if(buffer.size() > 0) {
 			T item = buffer.remove(0);
 			dataStream.send(item);
