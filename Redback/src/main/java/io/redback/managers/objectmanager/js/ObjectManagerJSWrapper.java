@@ -11,9 +11,9 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
-import io.redback.utils.AccumulatingDataStream;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
+import io.redback.utils.stream.AccumulatingDataStream;
 
 public class ObjectManagerJSWrapper extends ObjectJSWrapper
 {

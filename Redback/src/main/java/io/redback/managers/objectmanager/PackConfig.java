@@ -11,7 +11,7 @@ import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidConfigException;
 import io.redback.security.Session;
-import io.redback.utils.AccumulatingDataStream;
+import io.redback.utils.stream.AccumulatingDataStream;
 
 public class PackConfig {
 	protected ObjectManager objectManager;

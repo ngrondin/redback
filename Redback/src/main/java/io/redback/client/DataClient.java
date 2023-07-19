@@ -1,16 +1,18 @@
 package io.redback.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
+import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
-import io.firebus.interfaces.StreamHandler;
 import io.redback.exceptions.RedbackException;
-import io.redback.utils.DataStream;
-import io.redback.utils.DataStreamReceiver;
+import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.ReceivingConverter;
+import io.redback.utils.stream.ReceivingStreamPipeline;
 
 public class DataClient extends Client
 {
@@ -61,36 +63,23 @@ public class DataClient extends Client
 		return getData(object, filter, null, 0, 50);
 	}	
 	
-	public void streamData(String object, DataMap filter, DataMap sort, int chunkSize, int advance, DataStream<DataMap, Boolean> stream) throws RedbackException
+	public void streamData(String object, DataMap filter, DataMap sort, int chunkSize, int advance, DataStream<DataMap> stream) throws RedbackException
 	{
 		DataMap req = new DataMap();
 		req.put("object", object);
 		req.put("filter", filter);
 		if(sort != null) req.put("sort", sort);
-		if(chunkSize != -1) req.put("chunksize", chunkSize);
-		if(advance != -1) req.put("advance", advance);
+		if(chunkSize > 0) req.put("chunksize", chunkSize);
+		if(advance > 0) req.put("advance", advance);
 		StreamEndpoint sep = this.requestStream(null, req);
-		sep.setHandler(new StreamHandler() {
-			public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
-				try {
-					stream.sendIn(payload.getDataMap());
-				} catch(Exception e) { }
-			}
-
-			public void streamClosed(StreamEndpoint streamEndpoint) {
-				sep.close();
-				stream.complete();
-			}
-		});
-		stream.setReceiver(new DataStreamReceiver<Boolean>() {
-			public void receive(Boolean data) {
-				if(data == true)
-					sep.send(new Payload("next"));
+		new ReceivingStreamPipeline<DataMap>(sep, stream, new ReceivingConverter<DataMap>() {
+			public List<DataMap> convert(Payload payload) throws DataException {
+				return convertDbResultToList(payload.getDataMap());
 			}
 		});
 	}
 	
-	public void streamData(String object, DataMap filter, DataMap sort, DataStream<DataMap, Boolean> stream) throws RedbackException {
+	public void streamData(String object, DataMap filter, DataMap sort, DataStream<DataMap> stream) throws RedbackException {
 		streamData(object, filter, sort, 20, 0, stream);
 	}
 
@@ -168,5 +157,12 @@ public class DataClient extends Client
 		return requestDataMap(req);
 	}
 	
+	protected List<DataMap> convertDbResultToList(DataMap data) throws DataException {
+		DataList dbList = data.getList("result");
+		List<DataMap> list = new ArrayList<DataMap>();
+		for(int i = 0; i < dbList.size(); i++)
+			list.add(dbList.getObject(i));
+		return list;
+	}
 	
 }

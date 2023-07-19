@@ -13,8 +13,8 @@ import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 import io.redback.services.ObjectServer;
-import io.redback.utils.DataStream;
 import io.redback.utils.FunctionInfo;
+import io.redback.utils.stream.DataStream;
 
 public class RedbackObjectServer extends ObjectServer
 {
@@ -51,7 +51,7 @@ public class RedbackObjectServer extends ObjectServer
 		return objectManager.listObjects(session, objectName, filter != null ? filter : new DataMap(), search, sort, addRelated, page, pageSize);
 	}
 
-	protected void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int chunkSize, int advance, DataStream<List<RedbackObject>, Boolean> stream) throws RedbackException {
+	protected void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int chunkSize, int advance, DataStream<RedbackObject> stream) throws RedbackException {
 		objectManager.streamObjects(session, objectName, filter != null ? filter : new DataMap(), search, sort, addRelated, chunkSize, advance, stream);		
 	}
 

@@ -10,15 +10,15 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.information.ServiceInformation;
 import io.firebus.information.StreamInformation;
-import io.firebus.interfaces.StreamHandler;
-import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedDualProvider;
-import io.redback.utils.DataStream;
 import io.redback.utils.FunctionInfo;
+import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.SendingConverter;
+import io.redback.utils.stream.SendingStreamPipeline;
 
 public abstract class ObjectServer extends AuthenticatedDualProvider 
 {
@@ -260,39 +260,15 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				DataMap sort = requestData.getObject("sort");
 				int chunkSize = requestData.containsKey("chunksize") ? requestData.getNumber("chunksize").intValue() : -1;
 				int advance = requestData.containsKey("advance") ? requestData.getNumber("advance").intValue() : -1;
-				DataStream<List<RedbackObject>, Boolean> objectStream = new DataStream<List<RedbackObject>, Boolean>() {
-					public void received(List<RedbackObject> sublist) {
-						try {
-							DataList list = new DataList();							
-							for(RedbackObject rbo: sublist)
-								list.add(rbo.getDataMap(addValidation, addRelated, true));
-							streamEndpoint.send(new Payload(new DataMap("result", list)));
-						} catch (RedbackException e) {
-							Logger.severe("rb.objectserver.stream.in", e);
-						}
+				SendingStreamPipeline<RedbackObject> ssp = new SendingStreamPipeline<RedbackObject>(streamEndpoint, chunkSize, new SendingConverter<RedbackObject>() {
+					public Payload convert(List<RedbackObject> list) throws DataException, RedbackException {
+						DataList dataList = new DataList();							
+						for(RedbackObject rbo: list)
+							dataList.add(rbo.getDataMap(addValidation, addRelated, true));
+						return new Payload(new DataMap("result", dataList));						
 					}
-
-					public void completed() {
-						streamEndpoint.close();
-					}
-				};
-				StreamHandler streamHandler = new StreamHandler() {
-					public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
-						try {
-							String s = payload.getString();
-							if(s.equals("next"))
-								objectStream.sendOut(true);
-						} catch(Exception e) {
-							Logger.severe("rb.objectserver.stream.out", e);
-						}
-					}
-
-					public void streamClosed(StreamEndpoint streamEndpoint) {
-						objectStream.complete();
-					}
-				};
-				streamEndpoint.setHandler(streamHandler);
-				streamList(session, objectName, filter, searchText, sort, addRelated, chunkSize, advance, objectStream);
+				});
+				streamList(session, objectName, filter, searchText, sort, addRelated, chunkSize, advance, ssp.getDataStream());
 			} else if(action.equals("listrelated") || (action.equals("list") && requestData.containsKey("uid"))) {
 				throw new RedbackException("Not yet implemented");
 			}
@@ -313,7 +289,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 
 	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 
-	protected abstract void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int chunkSize, int advance, DataStream<List<RedbackObject>, Boolean> stream) throws RedbackException;
+	protected abstract void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int chunkSize, int advance, DataStream<RedbackObject> stream) throws RedbackException;
 
 	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 

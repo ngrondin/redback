@@ -7,19 +7,19 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.data.DataEntity;
+import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
-import io.firebus.interfaces.StreamHandler;
-import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.requests.AggregateRequest;
 import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.managers.objectmanager.requests.MultiResponse;
 import io.redback.managers.objectmanager.requests.UpdateRequest;
 import io.redback.security.Session;
-import io.redback.utils.AccumulatingDataStream;
-import io.redback.utils.DataStream;
-import io.redback.utils.DataStreamReceiver;
+import io.redback.utils.stream.AccumulatingDataStream;
+import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.ReceivingConverter;
+import io.redback.utils.stream.ReceivingStreamPipeline;
 
 public class ObjectClient extends Client
 {
@@ -84,12 +84,12 @@ public class ObjectClient extends Client
 
 	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
 		AccumulatingDataStream<RedbackObjectRemote> stream = new AccumulatingDataStream<RedbackObjectRemote>();
-		streamObjects(session, objectName, filter, sort, addRelated, -1, (DataStream<List<RedbackObjectRemote>, Boolean>)stream);
+		streamObjects(session, objectName, filter, sort, addRelated, -1, (DataStream<RedbackObjectRemote>)stream);
 		List<RedbackObjectRemote> list = stream.getList();
 		return list;
 	}
 	
-	public void streamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int chunkSize, DataStream<List<RedbackObjectRemote>, Boolean> stream) throws RedbackException  {
+	public void streamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int chunkSize, DataStream<RedbackObjectRemote> stream) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "list");
 		req.put("object", objectname);
@@ -97,32 +97,16 @@ public class ObjectClient extends Client
 		if(sort != null) req.put("sort", sort);
 		if(chunkSize != -1) req.put("chunksize", chunkSize);
 		if(addRelated) req.put("options", new DataMap("addrelated", true));
-		StreamEndpoint sep = this.requestStream(session, req);
 		final ObjectClient objectClient = this;
-		sep.setHandler(new StreamHandler() {
-			public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
-				try {
-					DataList list = payload.getDataMap().getList("result");
-					List<RedbackObjectRemote> rorList = new ArrayList<RedbackObjectRemote>();
-					for(int i = 0; i < list.size(); i++) {
-						rorList.add(new RedbackObjectRemote(session, objectClient, list.getObject(i)));
-					}
-					stream.sendIn(rorList);
-				} catch(Exception e) {
-					Logger.severe("rb.objectclient.stream", e);
+		StreamEndpoint sep = this.requestStream(session, req);
+		new ReceivingStreamPipeline<RedbackObjectRemote>(sep, stream, new ReceivingConverter<RedbackObjectRemote>() {
+			public List<RedbackObjectRemote> convert(Payload payload) throws DataException {
+				DataList list = payload.getDataMap().getList("result");
+				List<RedbackObjectRemote> rorList = new ArrayList<RedbackObjectRemote>();
+				for(int i = 0; i < list.size(); i++) {
+					rorList.add(new RedbackObjectRemote(session, objectClient, list.getObject(i)));
 				}
-			}
-
-			public void streamClosed(StreamEndpoint streamEndpoint) {
-				sep.close();
-				stream.complete();
-			}
-		});
-		
-		stream.setReceiver(new DataStreamReceiver<Boolean>() {
-			public void receive(Boolean sendMore) {
-				if(sendMore == true) 
-					sep.send(new Payload("next"));
+				return rorList;
 			}
 		});
 	}

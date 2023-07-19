@@ -1,4 +1,4 @@
-package io.redback.utils;
+package io.redback.utils.stream;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,13 +7,13 @@ import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 
 
-public class AccumulatingDataStream<T> extends DataStream<List<T>, Boolean> {
+public class AccumulatingDataStream<T> extends DataStream<T> {
 	protected List<T> list = new ArrayList<T>();
 	protected boolean complete = false;
 	
-	public void received(List<T> sublist) {
-		list.addAll(sublist);
-		sendOut(true);
+	public void received(T item) {
+		list.add(item);
+		requestNext();
 	}
 
 	public void completed() {
