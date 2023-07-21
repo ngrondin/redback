@@ -4,6 +4,7 @@ import { Observable, Observer } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { UUID } from 'angular2-uuid';
 import { Platform } from '@angular/cdk/platform';
+import * as pako from 'pako';
 
 export class Upload {
   uploaduid = UUID.UUID();
@@ -80,6 +81,7 @@ export class ClientWSService {
   public connected: boolean = false;
   public heartbeatFreq: number = 0;
 
+
   constructor(
     private http: HttpClient,
     private platform: Platform
@@ -91,10 +93,19 @@ export class ClientWSService {
     }
   }
 
+  get url() : string {
+    let u = this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.path;
+    u = u + '?firebus-timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone;
+    u = u + '&wscangzip=true';
+    return u;
+  }
+
   initWebsocket() : Observable<boolean> {
     if(this.path != null && this.path != "" && this.websocket == null) {
       this.websocket = webSocket({
-        url: this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.path + '?firebus-timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone,
+        url: this.url,
+        binaryType: "arraybuffer",
+        deserializer: msg => msg.data,
         openObserver: {next: () => this.opened()},
         closeObserver: {next: (closeEvent) => this.closed(closeEvent)}
       });
@@ -104,10 +115,10 @@ export class ClientWSService {
   }
 
   initWebsocketSubscribe() {
-    this.websocket.asObservable().subscribe(
-      (msg) => this.receive(msg),
-      (err) => this.error(err)
-    );
+    this.websocket.subscribe({
+      next: (msg) => this.receive(msg),
+      error: (err) => this.error(err)
+    });
   }
 
   opened() {
@@ -115,7 +126,7 @@ export class ClientWSService {
     this.heartbeat();
   }
 
-  receive(msg: any) {
+  receive(data: any) {
     try {
       if(this.connected == false) {
         this.connected = true;
@@ -124,6 +135,15 @@ export class ClientWSService {
         this.sendDeviceInfo();
         this.heartbeatFreq = 10000;
         this.stateObservers.forEach((observer) => observer.next(true));
+      }
+
+      let msg = null;
+      if(typeof data == 'string') {
+        msg = JSON.parse(data);
+      } else {
+        console.log("Binary");
+        let str = pako.ungzip(data, { to: 'string' });
+        msg = JSON.parse(str);
       }
 
       if(msg.type == 'objectupdate') {

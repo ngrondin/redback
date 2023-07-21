@@ -105,7 +105,7 @@ export class ApiService {
     return this.requestService(this.objectService, req);
   }
 
-  streamObjects(name: string, filter: any, search: string, sort: any, addRelated: boolean): Observable<any> {
+  streamObjects(name: string, filter: any, search: string, sort: any/*, addRelated: boolean*/): Observable<any> {
     const req = {
       action: 'list',
       object: name,
@@ -114,7 +114,7 @@ export class ApiService {
       chunksize: 250,
       advance: 1,
       options: {
-        addrelated: addRelated,
+        //addrelated: addRelated,
         addvalidation: true
       }
     };

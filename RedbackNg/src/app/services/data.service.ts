@@ -107,7 +107,7 @@ export class DataService {
     return new Observable((observer) => {
       //console.log((new Date()).getTime() + " Requesting entire list " + name);
       if(this.apiService.canStream()) {
-        this.apiService.streamObjects(name, filter, search, sort, false).subscribe(
+        this.apiService.streamObjects(name, filter, search, sort).subscribe(
           resp => {
             const rbObjectArray = Object.values(resp.result).map(json => this.receive(json));
             observer.next(rbObjectArray);
