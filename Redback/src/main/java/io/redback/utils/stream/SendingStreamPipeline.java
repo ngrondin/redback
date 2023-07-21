@@ -18,7 +18,7 @@ public class SendingStreamPipeline<T> implements StreamHandler {
 	protected boolean streamComplete = false;
 	
 	public SendingStreamPipeline(StreamEndpoint s, int cs, SendingConverter<T> rc) {
-		System.out.println("SSP Created");
+		//System.out.println("SSP Created");
 		sep = s;
 		converter = rc;
 		chunkSize = cs > 0 ? cs : 50;

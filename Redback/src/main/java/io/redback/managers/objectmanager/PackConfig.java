@@ -40,7 +40,7 @@ public class PackConfig {
 		if(queries != null) {
 			for(QueryConfig query: queries) {
 				AccumulatingDataStream<RedbackObject> ads = new AccumulatingDataStream<RedbackObject>();
-				objectManager.streamObjects(session, query.getObjectName(), query.getFilter(session), null, null, false, 50, 0, ads);
+				objectManager.streamObjects(session, query.getObjectName(), query.getFilter(session), null, null, 50, 0, ads);
 				ads.getList();
 			}
 		} else if(script != null) {

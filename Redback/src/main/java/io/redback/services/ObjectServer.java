@@ -250,6 +250,8 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 		String action = requestData.getString("action");
 		DataMap options = requestData.getObject("options");
 		boolean addValidation = options != null && options.containsKey("addvalidation") ? options.getBoolean("addvalidation") : false;
+		if(options != null && options.containsKey("addrelated") && options.getBoolean("addrelated") == true)
+			throw new RedbackException("Cannot add related objects in a stream");
 		boolean addRelated = options != null && options.containsKey("addrelated") ? options.getBoolean("addrelated") : false;
 		if(action != null)
 		{
@@ -268,14 +270,14 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 						return new Payload(new DataMap("result", dataList));						
 					}
 				});
-				streamList(session, objectName, filter, searchText, sort, addRelated, chunkSize, advance, ssp.getDataStream());
+				streamList(session, objectName, filter, searchText, sort, chunkSize, advance, ssp.getDataStream());
 			} else if(action.equals("listrelated") || (action.equals("list") && requestData.containsKey("uid"))) {
 				throw new RedbackException("Not yet implemented");
 			}
 		}
 		else
 		{
-			throw new RedbackException("Requests must have at least an 'action' attribute");
+			throw new RedbackException("Requests must havea valid 'action' attribute");
 		}	
 	}
 	
@@ -289,7 +291,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 
 	protected abstract List<RedbackObject> list(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 
-	protected abstract void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, int chunkSize, int advance, DataStream<RedbackObject> stream) throws RedbackException;
+	protected abstract void streamList(Session session, String objectName, DataMap filter, String search, DataMap sort, int chunkSize, int advance, DataStream<RedbackObject> stream) throws RedbackException;
 
 	protected abstract List<RedbackObject> listRelated(Session session, String objectName, String uid, String attribute, DataMap filter, String search, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException;
 

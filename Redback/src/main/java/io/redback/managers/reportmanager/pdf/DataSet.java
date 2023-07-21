@@ -63,7 +63,7 @@ public class DataSet extends ContainerUnit {
 			DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
 			DataMap sort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);
 			Session session = (Session)context.get("session");
-			List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, filter, sort, true);
+			List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, filter, sort, false);
 			context.put("master", currentObject);
 			context.put("object", rors.size() > 0 ? rors.get(0) : null);
 			context.put("dataset", rors);

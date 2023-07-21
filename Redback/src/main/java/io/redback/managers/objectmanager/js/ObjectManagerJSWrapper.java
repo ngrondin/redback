@@ -59,7 +59,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
 					int chunkSize = arguments.length > 4 ? (Integer)arguments[4] : 50;
 					AccumulatingDataStream<RedbackObject> stream = new AccumulatingDataStream<RedbackObject>();
-					objectManager.streamObjects(session, objectName, filter, search, sort, false, chunkSize, 0, stream);
+					objectManager.streamObjects(session, objectName, filter, search, sort, chunkSize, 0, stream);
 					List<RedbackObject> list = stream.getList();
 					return RedbackObjectJSWrapper.convertList(list);
 				}

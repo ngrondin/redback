@@ -97,6 +97,7 @@ public class ObjectClient extends Client
 		if(sort != null) req.put("sort", sort);
 		if(chunkSize != -1) req.put("chunksize", chunkSize);
 		if(addRelated) req.put("options", new DataMap("addrelated", true));
+		//req.put("options", new DataMap("addvalidation", true));
 		final ObjectClient objectClient = this;
 		StreamEndpoint sep = this.requestStream(session, req);
 		new ReceivingStreamPipeline<RedbackObjectRemote>(sep, stream, new ReceivingConverter<RedbackObjectRemote>() {

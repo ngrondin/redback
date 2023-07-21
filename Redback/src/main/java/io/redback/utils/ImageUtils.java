@@ -79,9 +79,17 @@ public class ImageUtils {
 	    return orientation;
 	}
 
+	public static BufferedImage getImage(byte[] bytes) throws RedbackException {
+		try {
+		    return ImageIO.read(new ByteArrayInputStream(bytes));
+		} catch(Exception e) {
+			throw new RedbackException("Error getting image", e);
+		}
+	}
+	
 	public static BufferedImage getImage(byte[] bytes, int w, int h, int r) throws RedbackException {
 		try {
-		    BufferedImage origImg = ImageIO.read(new ByteArrayInputStream(bytes));
+		    BufferedImage origImg = getImage(bytes);
 		    return getImage(origImg, w, h, r);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting image", e);

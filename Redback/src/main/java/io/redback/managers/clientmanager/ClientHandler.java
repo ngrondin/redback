@@ -129,6 +129,7 @@ public class ClientHandler extends ClientStreamHandler {
 			});
 
 		} catch(Exception e) {
+			sendStreamError(requid, new FunctionErrorException("Error requesting stream", e));
 			throw new RedbackException("Error requesting service for client", e);
 		}
 	}
