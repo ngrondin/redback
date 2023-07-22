@@ -1,7 +1,7 @@
 .rb-file-container {
     display: flex;
     flex-direction: row;
-    min-width: 300px;
+    /*min-width: 300px;*/
     min-height: 40px;
     flex-wrap: wrap;
 }
@@ -9,7 +9,7 @@
 .rb-file-item-wrapper {
     display: flex;
     flex-direction: row;
-    width: 18vw;
+    /*width: 18vw;*/
     cursor: pointer;
 }
 
@@ -46,6 +46,7 @@
     height: 4vw;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 .rb-files-img {
@@ -80,12 +81,16 @@
 }
 
 .rb-files-delete {
-    display: flex;
-    flex-direction: column;
-    width: 40px;
-    justify-content: center;
-    align-items: flex-start;
-    color: grey;
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 24px;
+    height: 24px;
+    background-color: #ffffffaa;
+    border-radius: 50%;
+    border: 2px solid darkred;
+    color: darkred;
 }
 
 .rb-files-nofiles {

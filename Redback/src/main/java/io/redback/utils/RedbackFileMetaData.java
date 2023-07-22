@@ -28,7 +28,7 @@ public class RedbackFileMetaData {
 		fileName = config.getString("filename");
 		mime = config.getString("mime");
 		thumbnail = config.getString("thumbnail");
-		username = config.getString("user");
+		username = config.getString("username");
 		date = config.getDate("date");
 		hash = config.getString("hash");
 	}

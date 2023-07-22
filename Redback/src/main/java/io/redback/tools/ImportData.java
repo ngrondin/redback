@@ -125,7 +125,7 @@ public class ImportData extends Thread
 									request.metadata.put("session", session.getId());
 									request.metadata.put("mime", "application/json");
 									Payload response = firebus.requestService(objectService, request);
-									DataMap fbRespmap = new DataMap(response.getString());
+									DataMap fbRespmap = response.getDataMap();
 									DataList list = fbRespmap.getList("list");
 									String newUid = null;
 									if(list.size() > 0)

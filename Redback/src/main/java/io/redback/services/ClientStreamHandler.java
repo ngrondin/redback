@@ -120,7 +120,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	}
 	
 	public void sendClientData(DataMap data) {
-		String payloadStr = data.toString();
+		String payloadStr = data.toString(true);
 		sendStreamData(new Payload(payloadStr));
 		lastOut = System.currentTimeMillis();
 		bytesOut += payloadStr.length();

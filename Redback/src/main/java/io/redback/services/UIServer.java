@@ -150,13 +150,10 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	protected String extractGetString(Payload payload) throws DataException
 	{
 		String get = payload.metadata.get("get");
-		if(payload.getString().length() > 0)
-		{
-			DataMap request = new DataMap(payload.getString());
-			if(get == null) 
-				get = request.getString("get");
-		}
-		if(get.startsWith("/"))
+		DataMap request = payload.getDataMap();
+		if(get == null) 
+			get = request.getString("get");
+		if(get != null && get.startsWith("/"))
 			get = get.substring(1);
 		return get;
 	}

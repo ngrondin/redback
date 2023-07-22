@@ -5,6 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
 import { RbComponent } from 'app/abstract/rb-component';
 import { UserprefService } from 'app/services/userpref.service';
+import { Formatter } from 'app/helpers';
 
 @Component({
   selector: 'rb-filelist',
@@ -65,6 +66,10 @@ export class RbFilelistComponent extends RbComponent {
     } else {
       return file.fileName;
     }
+  }
+
+  getDateString(file: RbFile) {
+    return Formatter.formatDateTime(file.date);
   }
 
   getBase64Thumbnail(file: RbFile) {
