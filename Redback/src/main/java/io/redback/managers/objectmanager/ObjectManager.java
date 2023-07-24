@@ -365,11 +365,7 @@ public class ObjectManager
 				DataMap dbResult = dataClient.getData(objectConfig.getCollection(), dbFilter, null);
 				DataList dbResultList = dbResult.getList("result");
 				if(dbResultList.size() > 0)
-				{
-					DataMap dbData = dbResultList.getObject(0);
-					object = new RedbackObject(session, this, objectConfig, dbData);
-					session.getTxStore().add(key, object);
-				}
+					object = new RedbackObject(session, this, objectConfig, dbResultList.getObject(0));
 			}
 			catch(Exception e)
 			{
@@ -405,7 +401,7 @@ public class ObjectManager
 			} else {
 				dbResultList = generateNonPersistentObjectData(session, objectConfig, filter, searchText, sort, page, pageSize);
 			}
-			List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, true, page == 0);
+			List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, false, page == 0);
 			if(addRelated) addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 			return objectList;			
 		}
@@ -469,7 +465,6 @@ public class ObjectManager
 	{
 		ObjectConfig objectConfig = objectConfigs.get(session, objectName);
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
-		session.getTxStore().add(object.getLabel(), object);
 		if(initialData != null)
 		{
 			boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());

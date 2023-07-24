@@ -31,6 +31,7 @@ public class RedbackObject extends RedbackElement
 {
 	protected Value uid;
 	protected Value domain;
+	protected String key;
 	protected boolean canRead;
 	protected boolean canWrite;
 	protected boolean canExecute;
@@ -50,6 +51,7 @@ public class RedbackObject extends RedbackElement
 		{
 			uid = new Value(dbData.getString(config.getUIDDBKey()));
 			domain = new Value(config.isDomainManaged() ? dbData.getString(config.getDomainDBKey()) : "root");
+			key = config.getName() + ":" + uid.getString();
 			Iterator<String> it = config.getAttributeNames().iterator();
 			while(it.hasNext())
 			{
@@ -121,6 +123,8 @@ public class RedbackObject extends RedbackElement
 				{
 					throw new RedbackException("No domain has been provided and no default domain has been configure for the user");
 				}
+				key = config.getName() + ":" + uid.getString();
+				session.getTxStore().add(key, this);
 				postInitScriptContextUpdate();
 
 				Iterator<String> it = config.getAttributeNames().iterator();
@@ -210,11 +214,6 @@ public class RedbackObject extends RedbackElement
 	public Value getDomain()
 	{
 		return domain;
-	}
-	
-	public String getLabel()
-	{
-		return config.getName() + ":" + uid.getString();
 	}
 	
 	public boolean isNew()
@@ -382,6 +381,7 @@ public class RedbackObject extends RedbackElement
 					data.put(name, actualValue);
 					updatedAttributes.put(name, trace);	
 					try {
+						session.getTxStore().add(key, this);
 						if(attributeConfig.getExpression() == null) 
 							scriptContext.put(name, actualValue.getObject());
 						ScriptContext attributeUpdateScriptContext = scriptContext.createChild();
@@ -502,6 +502,7 @@ public class RedbackObject extends RedbackElement
 	{
 		if(canDelete()) {
 			isDeleted = true;
+			session.getTxStore().add(key, this);
 			executeFunctionForEvent("ondelete");
 		} else {
 			throw new RedbackException("The object '" + config.getName() + ":" + getUID().getString() + "' cannot be deleted");
