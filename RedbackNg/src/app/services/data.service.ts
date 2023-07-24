@@ -13,7 +13,7 @@ import { Hasher } from '../helpers';
   providedIn: 'root'
 })
 export class DataService {
-  allObjects: { [key: string]: RbObject[] };
+  allObjects: { [objectname: string]: { [uid: string]: RbObject } };
   saveImmediatly: boolean;
   objectCreateObservers: Observer<RbObject>[] = [];
   deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue();
@@ -47,18 +47,20 @@ export class DataService {
 
   get(objectname: string, uid: string) : RbObject {
     if(this.allObjects[objectname] != null) {
-      for(const o of this.allObjects[objectname]) {
-        if(o.uid == uid) {
-          return o;
-        }
-      }
+      return this.allObjects[objectname][uid];
     }
     return null;
   }
 
+  put(rbObject: RbObject) {
+    if(this.allObjects[rbObject.objectname] == null) this.allObjects[rbObject.objectname] = {};
+    this.allObjects[rbObject.objectname][rbObject.uid] = rbObject;
+  }
+
   findFirst(objectname: string, filter: any) : RbObject {
     if(this.allObjects[objectname] != null) {  
-      for(const o of this.allObjects[objectname]) {
+      let objects = Object.values(this.allObjects[objectname]);
+      for(const o of objects) {
         if(this.filterService.applies(filter, o)) {
           return o;
         }
@@ -232,8 +234,7 @@ export class DataService {
       rbObject.updateFromJSON(json);
     } else {
       rbObject = new RbObject(json, this);
-      if(this.allObjects[rbObject.objectname] == null) this.allObjects[rbObject.objectname] = [];
-      this.allObjects[rbObject.objectname].push(rbObject);
+      this.put(rbObject);
       this.clientWSService.subscribeToUniqueObjectUpdate(rbObject.objectname, rbObject.uid);
     }
     return rbObject;
@@ -287,8 +288,7 @@ export class DataService {
   createInMemory(name: string, uid: string, data: any) : Observable<RbObject> {
     return new Observable<RbObject>((observer) => {
       let newObj: RbObject = new RbObject({objectname: name, uid: uid, data: data}, this);
-      if(this.allObjects[name] == null) this.allObjects[name] = [];
-      this.allObjects[name].push(newObj);
+      this.put(newObj);
       observer.next(newObj);
       observer.complete();
     });
