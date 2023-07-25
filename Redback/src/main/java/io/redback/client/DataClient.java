@@ -161,7 +161,8 @@ public class DataClient extends Client
 		DataList dbList = data.getList("result");
 		List<DataMap> list = new ArrayList<DataMap>();
 		for(int i = 0; i < dbList.size(); i++)
-			list.add(dbList.getObject(i));
+			if(dbList.getObject(i) != null)
+				list.add(dbList.getObject(i));
 		return list;
 	}
 	

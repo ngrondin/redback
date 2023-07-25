@@ -886,7 +886,7 @@ public class ObjectManager
 	{
 		DataMap filter = session.getUserProfile().getReadFilter("rb.objects." + objectName);
 		if(filter != null) {
-			String s = filter.toString(0, true);
+			String s = filter.toString(true);
 			ExpressionMap em = readRightsFilters.get(s);
 			if(em == null) {
 				String funcName = objectName + "_readrightsfilter_" + StringUtils.base16(filter.hashCode());
