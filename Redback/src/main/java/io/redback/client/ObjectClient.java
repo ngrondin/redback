@@ -27,7 +27,7 @@ public class ObjectClient extends Client
 	{
 		super(fb, sn);
 	}
-
+	
 	public RedbackObjectRemote getObject(Session session, String objectname, String uid) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "get");
@@ -50,18 +50,22 @@ public class ObjectClient extends Client
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter) throws RedbackException  {
-		return listObjects(session, objectname, filter, null, true, 0, 50);
+		return listObjects(session, objectname, filter, null, false, false, 0, 50);
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort) throws RedbackException  {
-		return listObjects(session, objectname, filter, sort, true, 0, 50);
+		return listObjects(session, objectname, filter, sort, false, false, 0, 50);
 	}
 	
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
-		return listObjects(session, objectname, filter, sort, addRelated, 0, 50);
+		return listObjects(session, objectname, filter, sort, addRelated, false, 0, 50);
+	}
+	
+	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException  {
+		return listObjects(session, objectname, filter, sort, addRelated, addValidation, 0, 50);
 	}
 
-	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int page, int pageSize) throws RedbackException  {
+	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, boolean addValidation, int page, int pageSize) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "list");
 		req.put("object", objectname);
@@ -70,34 +74,54 @@ public class ObjectClient extends Client
 			req.put("sort", sort);
 		req.put("page", page);
 		req.put("pagesize", pageSize);
-		if(addRelated)
-			req.put("options", new DataMap("addrelated", true));
+		if(addRelated || addValidation) {
+			DataMap options = new DataMap();
+			//if(addRelated) options.put("addrelated", true);
+			if(addValidation) options.put("addvalidation", true);
+			req.put("options", options);
+		}
 		DataMap resp = requestDataMap(session, req);
 		List<RedbackObjectRemote> list = new ArrayList<RedbackObjectRemote>();
 		for(int i = 0; i < resp.getList("list").size(); i++) {
 			DataMap item = resp.getList("list").getObject(i);
 			list.add(new RedbackObjectRemote(session, this, item));
 		}
+		if(addRelated) {
+			RemoteObjectRelater relater = new RemoteObjectRelater(session, this);
+			relater.resolve(list);
+		}
 		return list;
 
 	}
 
 	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
+		return listAllObjects(session, objectName, filter, sort, addRelated, false);
+	}
+	
+	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException  {
 		AccumulatingDataStream<RedbackObjectRemote> stream = new AccumulatingDataStream<RedbackObjectRemote>();
-		streamObjects(session, objectName, filter, sort, addRelated, -1, stream);
+		streamObjects(session, objectName, filter, sort, addValidation || addRelated, -1, stream);
 		List<RedbackObjectRemote> list = stream.getList();
+		if(addRelated) {
+			RemoteObjectRelater relater = new RemoteObjectRelater(session, this);
+			relater.resolve(list);
+		}
 		return list;
 	}
 	
-	public void streamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, int chunkSize, DataStream<RedbackObjectRemote> stream) throws RedbackException  {
+	public void streamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addValidation, int chunkSize, DataStream<RedbackObjectRemote> stream) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "list");
 		req.put("object", objectname);
 		req.put("filter", filter != null ? filter : new DataMap());
 		if(sort != null) req.put("sort", sort);
 		if(chunkSize != -1) req.put("chunksize", chunkSize);
-		if(addRelated) req.put("options", new DataMap("addrelated", true));
-		//req.put("options", new DataMap("addvalidation", true));
+		if(addValidation) {
+			DataMap options = new DataMap();
+			//if(addRelated) options.put("addrelated", true);
+			if(addValidation) options.put("addvalidation", true);
+			req.put("options", options);
+		}
 		final ObjectClient objectClient = this;
 		StreamEndpoint sep = this.requestStream(session, req);
 		new ReceivingStreamPipeline<RedbackObjectRemote>(sep, stream, new ReceivingConverter<RedbackObjectRemote>() {

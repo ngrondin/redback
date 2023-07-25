@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.FileClient;
@@ -198,8 +197,8 @@ public class DynamicForm extends DataUnit {
 					String value = ror.getString(valueAttribute);
 					if(value != null) {
 						String display = value;
-						if(ror.get(optionsAttribute) != null) {
-							DataList options = (DataList)ror.get(optionsAttribute);
+						if(ror.hasAttribute(optionsAttribute)) {
+							DataList options = (DataList)ror.getObject(optionsAttribute);
 							for(int i = 0; i < options.size(); i++) {
 								DataMap option = options.getObject(i);
 								if(option.getString("value").equals(value)) {
@@ -219,7 +218,7 @@ public class DynamicForm extends DataUnit {
 					//addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
 
 				} else if(type.equals("signature")) {
-					DataEntity de = ror.get(valueAttribute);
+					Object de = ror.getObject(valueAttribute);
 					if(de != null && de instanceof DataMap) {
 						FileClient fc = reportManager.getFileClient();
 						RedbackFile file = fc.getFile(session, ((DataMap)de).getString("fileuid"));

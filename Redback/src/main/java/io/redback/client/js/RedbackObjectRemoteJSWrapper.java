@@ -35,6 +35,33 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 				}
 			};				
 		}
+		else if(name.equals("related"))
+		{
+			return new SDynamicObject() {
+				public SValue getMember(String relatedname)  
+				{
+					try {
+						RedbackObjectRemote relatedRor = rbObjectRemote.getRelated(relatedname);
+						if(relatedRor != null)
+							return new RedbackObjectRemoteJSWrapper(relatedRor);
+					} catch(Exception e) { }
+					return null;
+				}
+			};				
+		}		
+		else if(name.equals("data"))
+		{
+			return new SDynamicObject() {
+				public SValue getMember(String attributename)  
+				{
+					try {
+						return Converter.tryConvertIn(rbObjectRemote.getObject(attributename));
+					} catch(Exception e) {
+						return null;
+					}
+				}
+			};				
+		}			
 		else if(name.equals("execute"))
 		{
 			return new CallableJSWrapper() {
@@ -53,8 +80,7 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 		else
 		{
 			try {
-				Object obj = rbObjectRemote.get(name);
-				return Converter.tryConvertIn(obj);
+				return Converter.tryConvertIn(rbObjectRemote.getObject(name));
 			} catch(RedbackException e) {
 				return null;
 			}
@@ -76,7 +102,7 @@ public class RedbackObjectRemoteJSWrapper extends SDynamicObject {
 		try {
 			if(key.equals("execute") || key.equals("getRelated")) {
 				return true;
-			} else if(rbObjectRemote.get(key) != null) {
+			} else if(rbObjectRemote.hasAttribute(key)) {
 				return true;
 			} else if(key.equals("uid") || key.equals("objectname") || key.equals("domain")) {
 				return true;

@@ -85,7 +85,7 @@ public class CSVReport extends Report {
 			}
 			DataMap localFilter = (filterExp != null ? (DataMap)filterExp.eval(baseContext) : filterExpMap.eval(baseContext));
 			DataMap localSort = (sortExp != null ? (DataMap)sortExp.eval(baseContext) : sortExpMap != null ? sortExpMap.eval(baseContext) : null);
-			List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, localFilter, localSort, false);
+			List<RedbackObjectRemote> rors = oc.listAllObjects(session, object, localFilter, localSort, true, false);
 			StringBuilder sb = new StringBuilder();
 			for(int i = 0; i < columns.size(); i++) {
 				if(i > 0) sb.append(",");
@@ -110,11 +110,7 @@ public class CSVReport extends Report {
 						}
 						value = expr.eval(rowContext);
 					} else if(attribute != null) {
-						DataEntity e = rors.get(i).get(attribute);
-						if(e instanceof DataLiteral)
-							value = ((DataLiteral)e).getObject();
-						else
-							value = e;
+						value = rors.get(i).getObject(attribute);
 					}
 					String valueStr = "";
 					if(value != null) {

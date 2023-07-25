@@ -48,6 +48,7 @@ public class ListRequest extends ObjectRequest {
 		DataMap options = new DataMap();
 		options.put("addrelated", addRelated);
 		options.put("addvalidation", addValidation);
+		req.put("options", options);
 		return req;
 	}
 	

@@ -20,8 +20,8 @@ public class ReceivingStreamPipeline<T> implements StreamHandler, DataStreamNext
 		dataStream = ds;
 		converter = rc;
 		buffer = new ArrayList<T>();
-		sep.setHandler(this);
 		ds.setNextHandler(this);
+		sep.setHandler(this);
 	}
 
 	public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {

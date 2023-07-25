@@ -1,12 +1,13 @@
 package io.redback.client.js;
 
+import java.util.List;
+
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.requests.MultiRequest;
-import io.redback.managers.objectmanager.requests.MultiResponse;
 import io.redback.security.Session;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
@@ -54,7 +55,8 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					boolean addRelated = arguments.length > 3 ? (boolean)(arguments[3]) : false;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listObjects(session, objectname, filter, sort, addRelated));
+					List<RedbackObjectRemote> list = objectClient.listObjects(session, objectname, filter, sort, addRelated);
+					return RedbackObjectRemoteJSWrapper.convertList(list);
 				}
 			};
 		} else if(key.equals("listAllObjects")) {
@@ -66,7 +68,8 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					boolean addRelated = arguments.length > 3 ? (boolean)(arguments[3]) : false;
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					return RedbackObjectRemoteJSWrapper.convertList(objectClient.listAllObjects(session, objectname, filter, sort, addRelated));
+					List<RedbackObjectRemote> list = objectClient.listAllObjects(session, objectname, filter, sort, addRelated);
+					return RedbackObjectRemoteJSWrapper.convertList(list);
 				}
 			};
 		} else if(key.equals("createObject")) {
@@ -115,7 +118,7 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					DataList list = (DataList)arguments[0];
 					try
 					{
-						MultiResponse mr = objectClient.multi(session, new MultiRequest(list));
+						/*MultiResponse mr = */objectClient.multi(session, new MultiRequest(list));
 						return null;//TODO Return a response for multi gets and lists
 					}
 					catch(Exception e)

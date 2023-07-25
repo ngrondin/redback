@@ -99,7 +99,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				String attribute = requestData.getString("attribute");
 				if(objectName != null && uid != null) {
 					RedbackObject resp = getRelated(session, objectName, uid, attribute);
-					return resp.getDataMap(addValidation, addRelated, true);
+					return resp != null ? resp.getDataMap(addValidation, addRelated, true) : null;
 				} else {
 					throw new RedbackException("A 'get' action requires a 'uid' attribute");
 				}				

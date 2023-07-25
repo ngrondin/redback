@@ -24,6 +24,7 @@ import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidConfigException;
+import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
 
@@ -394,9 +395,9 @@ public class RedbackObject extends RedbackElement
 				else
 				{
 					if(canWrite)
-						throw new RedbackException("User '" + session.getUserProfile().getUsername() + "' does not have the right to update attribute '" + name + "' on object '" + config.getName() + ":" + getUID().getString() + "'");
+						throw new RedbackInvalidRequestException("User '" + session.getUserProfile().getUsername() + "' does not have the right to update attribute '" + name + "' on object '" + config.getName() + ":" + getUID().getString() + "'");
 					else
-						throw new RedbackException("User '" + session.getUserProfile().getUsername() + "' does not have the right to update object '" + config.getName() + ":" + getUID().getString() + "'");
+						throw new RedbackInvalidRequestException("User '" + session.getUserProfile().getUsername() + "' does not have the right to update object '" + config.getName() + ":" + getUID().getString() + "'");
 				}
 			}
 		}

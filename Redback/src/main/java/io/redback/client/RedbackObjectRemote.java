@@ -42,13 +42,26 @@ public class RedbackObjectRemote {
 		return data.getString("domain");
 	}
 	
+	public DataMap getData() {
+		return data.getObject("data");
+	}
+	
+	public boolean hasAttribute(String attribute) throws RedbackException {
+		return get(attribute) != null;
+	}
+	
 	public String getString(String attribute) throws RedbackException {
 		if(attribute.equals("uid"))
 			return getUid();
 		else if(attribute.equals("domain"))
 			return getDomain();
-		else
-			return ((DataLiteral)get(attribute)).getString();
+		else {
+			DataEntity entity = get(attribute);
+			if(entity instanceof DataLiteral)
+				return ((DataLiteral)entity).getString();
+			else
+				return entity.toString();
+		}
 	}
 	
 	public Number getNumber(String attribute) throws RedbackException {
@@ -62,8 +75,16 @@ public class RedbackObjectRemote {
 	public boolean getBool(String attribute) throws RedbackException {
 		return ((DataLiteral)get(attribute)).getBoolean();
 	}
+	
+	public Object getObject(String attribute) throws RedbackException {
+		DataEntity entity = get(attribute);
+		if(entity instanceof DataLiteral)
+			return ((DataLiteral)entity).getObject();
+		else
+			return entity;
+	}
 
-	public DataEntity get(String attribute) throws RedbackException {
+	protected DataEntity get(String attribute) throws RedbackException {
 		if(attribute.indexOf(".") == -1) {
 			return data.getObject("data").get(attribute);
 		} else {
@@ -79,12 +100,20 @@ public class RedbackObjectRemote {
 		}
 	}
 	
-	public RedbackObjectRemote getRelated(String attribute) throws RedbackException {
-		RedbackObjectRemote rror = related.get(attribute);
-		if(rror == null) {
-			rror = objectClient.getRelatedObject(session, getObjectName(), getUid(), attribute);
+	public RedbackObjectRemote getRelated(String attribute, boolean resolveIfMissing) throws RedbackException {
+		RedbackObjectRemote rror = null;
+		DataEntity val = get(attribute);
+		if(!val.equals(null)) { 
+			rror = related.get(attribute);
+			if(rror == null && resolveIfMissing) {
+				rror = objectClient.getRelatedObject(session, getObjectName(), getUid(), attribute);
+			}
 		}
 		return rror;
+	}
+	
+	public RedbackObjectRemote getRelated(String attribute) throws RedbackException {
+		return getRelated(attribute, true);
 	}
 	
 	public void set(String attribute, Object value) throws RedbackException {
@@ -93,6 +122,10 @@ public class RedbackObjectRemote {
 	
 	public void set(DataMap map) throws RedbackException {
 		objectClient.updateObject(session, getObjectName(), getUid(), map, false);
+	}
+	
+	public void setRelated(String attribute, RedbackObjectRemote ror) {
+		related.put(attribute, ror);
 	}
 	
 	public List<String> getAttributeNames() {
@@ -108,4 +141,14 @@ public class RedbackObjectRemote {
 		objectClient.execute(session, getObjectName(), getUid(), function, param);
 	}
 	
+	public DataMap getValidation(String attribute) {
+		if(data.containsKey("validation"))
+			return data.getObject("validation").getObject(attribute);
+		else 
+			return null;
+	}
+	
+	public String toString() {
+		return data.toString();
+	}
 }
