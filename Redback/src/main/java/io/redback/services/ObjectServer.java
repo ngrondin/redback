@@ -22,7 +22,6 @@ import io.redback.utils.stream.SendingStreamPipeline;
 
 public abstract class ObjectServer extends AuthenticatedDualProvider 
 {
-	
 	public ObjectServer(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 	}
@@ -183,15 +182,6 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 					return resp;
 				}
 			}
-			else if(action.equals("getpack"))
-			{
-				String name = requestData.getString("name");
-				List<RedbackObject> objects = getPack(session, name);
-				DataList respList = new DataList();
-				for(RedbackObject object: objects)
-					respList.add(object.getDataMap(addValidation, addRelated, true));
-				return new DataMap("list", respList);
-			}
 			else if(action.equals("listfunctions") || action.equals("listscripts"))
 			{
 				String category = requestData.getString("category");
@@ -273,6 +263,19 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				streamList(session, objectName, filter, searchText, sort, chunkSize, advance, ssp.getDataStream());
 			} else if(action.equals("listrelated") || (action.equals("list") && requestData.containsKey("uid"))) {
 				throw new RedbackException("Not yet implemented");
+			} else if(action.equals("streampack")) {
+				String name = requestData.getString("name");
+				int chunkSize = requestData.containsKey("chunksize") ? requestData.getNumber("chunksize").intValue() : -1;
+				SendingStreamPipeline<RedbackObject> ssp = new SendingStreamPipeline<RedbackObject>(streamEndpoint, chunkSize, new SendingConverter<RedbackObject>() {
+					public Payload convert(List<RedbackObject> list) throws DataException, RedbackException {
+						DataList dataList = new DataList();							
+						for(RedbackObject rbo: list)
+							dataList.add(rbo.getDataMap(addValidation, addRelated, true));
+						System.out.println("Sending");
+						return new Payload(new DataMap("result", dataList));						
+					}
+				});
+				streamPack(session, name, ssp.getDataStream());
 			}
 		}
 		else
@@ -305,7 +308,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 
 	protected abstract Object execute(Session session, String function, DataMap param) throws RedbackException;
 
-	protected abstract List<RedbackObject> getPack(Session session, String name) throws RedbackException;
+	protected abstract void streamPack(Session session, String name, DataStream<RedbackObject> stream) throws RedbackException;
 
 	protected abstract List<FunctionInfo> listFunctions(Session session, String category) throws RedbackException;
 	

@@ -62,6 +62,7 @@ import io.redback.utils.stream.BasicConverter;
 import io.redback.utils.stream.BasicStreamPipeline;
 import io.redback.utils.stream.DataStream;
 import io.redback.utils.stream.StaticStreamSource;
+import io.redback.utils.stream.js.DataStreamJSWrapper;
 
 public class ObjectManager
 {
@@ -531,15 +532,31 @@ public class ObjectManager
 		return ret;
 	}	
 	
-	public List<RedbackObject> getPack(Session session, String name) throws RedbackException 
+	public void streamPack(Session session, String name, DataStream<RedbackObject> objectStream) throws RedbackException 
 	{
-		PackConfig packConfig = packConfigs.get(session, name);
-		packConfig.execute(session);
-		List<RedbackObject> list = new ArrayList<RedbackObject>();
-		List<Object> txlist = session.getTxStore().getCopyOfAll();
-		for(Object o : txlist)
-			list.add((RedbackObject)o);
-		return list;
+		final PackConfig packConfig = packConfigs.get(session, name);
+		try {
+			if(packConfig.hasQueries()) {
+				throw new RedbackException("Not implemented");
+			} else {
+				final Function script = packConfig.getScript();
+				ScriptContext context = session.getScriptContext().createChild();
+				context.put("stream", new DataStreamJSWrapper<RedbackObject>(objectStream));
+				firebus.runAdhoc(new Runnable() {
+					public void run() {
+						try {
+							script.call(context);
+						} catch (ScriptException e) {
+							Logger.severe("Error run pack script", e);
+						} finally {
+							objectStream.complete();
+						}
+					}
+				});
+			}
+		} catch(Exception e) {
+			throw new RedbackException("Error starting pack stream" + name, e);
+		} 		
 	}
 	
 	public List<FunctionInfo> listFunctions(Session session, String category) throws RedbackException {

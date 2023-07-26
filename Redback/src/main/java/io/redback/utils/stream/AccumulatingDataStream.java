@@ -13,14 +13,12 @@ public class AccumulatingDataStream<T> extends DataStream<T> {
 	
 	public void received(T item) {
 		list.add(item);
-		//System.out.println("ADS received");
 		requestNext();
 	}
 
 	public void completed() {
 		try {
 			synchronized(this) {
-				//System.out.println("ADS complete");
 				complete = true;
 				this.notify();
 			}

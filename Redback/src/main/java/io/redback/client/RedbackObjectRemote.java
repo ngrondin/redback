@@ -18,11 +18,17 @@ public class RedbackObjectRemote {
 	protected ObjectClient objectClient;
 	protected Session session;
 	protected Map<String, RedbackObjectRemote> related = new HashMap<String, RedbackObjectRemote>();
+	protected String objectName;
+	protected String uid;
+	protected String domain;
 	
 	public RedbackObjectRemote(Session s, ObjectClient oc, DataMap d) {
 		session = s;
 		objectClient = oc;
 		data = d;
+		objectName = data.getString("objectname");
+		uid = data.getString("uid");
+		domain = data.getString("domain");
 		if(data.containsKey("related")) {
 			DataMap relatedData = data.getObject("related"); 
 			for(String key: relatedData.keySet())
@@ -31,15 +37,15 @@ public class RedbackObjectRemote {
 	}
 	
 	public String getObjectName() {
-		return data.getString("objectname");
+		return objectName;
 	}
 	
 	public String getUid() {
-		return data.getString("uid");
+		return uid;
 	}
 	
 	public String getDomain() {
-		return data.getString("domain");
+		return domain;
 	}
 	
 	public DataMap getData() {

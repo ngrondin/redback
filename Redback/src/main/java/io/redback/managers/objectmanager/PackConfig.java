@@ -7,11 +7,8 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.Function;
 import io.firebus.script.exceptions.ScriptBuildException;
-import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidConfigException;
-import io.redback.security.Session;
-import io.redback.utils.stream.AccumulatingDataStream;
 
 public class PackConfig {
 	protected ObjectManager objectManager;
@@ -36,19 +33,16 @@ public class PackConfig {
 		}
 	}
 	
-	public void execute(Session session) throws RedbackException {
-		if(queries != null) {
-			for(QueryConfig query: queries) {
-				AccumulatingDataStream<RedbackObject> ads = new AccumulatingDataStream<RedbackObject>();
-				objectManager.streamObjects(session, query.getObjectName(), query.getFilter(session), null, null, 50, 0, ads);
-				ads.getList();
-			}
-		} else if(script != null) {
-			try {
-				script.call(session.getScriptContext());
-			} catch (ScriptException e) {
-				throw new RedbackException("Error executing pack script", e);
-			}
-		}
+	public boolean hasQueries() {
+		return queries != null;
 	}
+	
+	public List<QueryConfig> getQueries() {
+		return queries;
+	}
+	
+	public Function getScript() {
+		return script;
+	}
+
 }
