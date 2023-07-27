@@ -44,6 +44,7 @@ import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.objectmanager.js.DomainScriptLogger;
 import io.redback.managers.objectmanager.js.ObjectManagerJSWrapper;
+import io.redback.managers.objectmanager.js.PackStreamJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.SysUserManager;
 import io.redback.security.js.SessionJSWrapper;
@@ -62,7 +63,6 @@ import io.redback.utils.stream.BasicConverter;
 import io.redback.utils.stream.BasicStreamPipeline;
 import io.redback.utils.stream.DataStream;
 import io.redback.utils.stream.StaticStreamSource;
-import io.redback.utils.stream.js.DataStreamJSWrapper;
 
 public class ObjectManager
 {
@@ -535,25 +535,18 @@ public class ObjectManager
 	public void streamPack(Session session, String name, DataStream<RedbackObject> objectStream) throws RedbackException 
 	{
 		final PackConfig packConfig = packConfigs.get(session, name);
+		PackStream packStream = new PackStream(session, this, objectStream);
 		try {
 			if(packConfig.hasQueries()) {
-				throw new RedbackException("Not implemented");
+				for(QueryConfig query: packConfig.getQueries()) 
+					packStream.addQuery(query.getObjectName(), query.getFilter(session));
 			} else {
-				final Function script = packConfig.getScript();
+				Function script = packConfig.getScript();
 				ScriptContext context = session.getScriptContext().createChild();
-				context.put("stream", new DataStreamJSWrapper<RedbackObject>(objectStream));
-				firebus.runAdhoc(new Runnable() {
-					public void run() {
-						try {
-							script.call(context);
-						} catch (ScriptException e) {
-							Logger.severe("Error run pack script", e);
-						} finally {
-							objectStream.complete();
-						}
-					}
-				});
+				context.put("stream", new PackStreamJSWrapper(packStream));
+				script.call(context);
 			}
+			packStream.start();
 		} catch(Exception e) {
 			throw new RedbackException("Error starting pack stream" + name, e);
 		} 		

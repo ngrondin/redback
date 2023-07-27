@@ -271,7 +271,6 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 						DataList dataList = new DataList();							
 						for(RedbackObject rbo: list)
 							dataList.add(rbo.getDataMap(addValidation, addRelated, true));
-						System.out.println("Sending");
 						return new Payload(new DataMap("result", dataList));						
 					}
 				});

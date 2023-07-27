@@ -15,12 +15,11 @@ public class StaticStreamSource<T> implements DataStreamNextHandler {
 	}
 
 	public void sendNext() {
-		if(i < list.size()) {
-			System.out.println("Static source send, i=" + i);
-			dataStream.send(list.get(i));
-			i++;	
+		if(i < list.size()) 
+		{
+			T data = list.get(i++);
+			dataStream.send(data);
 		} else {
-			System.out.println("Static source complete");
 			dataStream.complete();
 		}
 	}
