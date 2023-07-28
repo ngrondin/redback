@@ -42,6 +42,21 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 				}
 			};				
 		}
+		else if(name.equals("related"))
+		{
+			return new SDynamicObject() {
+				public SValue getMember(String relatedname)  
+				{
+					try {
+						RedbackObject rbo = rbObject.getRelated(relatedname);
+						if(rbo != null)
+							return new RedbackObjectJSWrapper(rbo);
+						return null;
+					} catch(Exception e) { }
+					return null;
+				}
+			};				
+		}		
 		else if(name.equals("getUpdatedAttributes"))
 		{
 			return new CallableJSWrapper() {

@@ -217,6 +217,11 @@ public class RedbackObject extends RedbackElement
 		return domain;
 	}
 	
+	public String getKey() 
+	{
+		return key;
+	}
+	
 	public boolean isNew()
 	{
 		return isNewObject;

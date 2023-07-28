@@ -790,8 +790,7 @@ public class ObjectManager
 
 	protected List<RedbackObject> getNewOrUpdatedObjects(Session session, ObjectConfig objectConfig, DataMap objectFilter) throws RedbackException 
 	{
-		//Get new or updated objects not yet saved to the database.
-		List<RedbackObject> objectList = new ArrayList<RedbackObject>();
+		RedbackObjectList objectList = new RedbackObjectList();
 		List<Object> txList = session.getTxStore().getAll();
 		for(Object o: txList) {
 			RedbackObject rbo = (RedbackObject)o;
@@ -802,7 +801,8 @@ public class ObjectManager
 		return objectList;
 	}
 
-	protected List<DataMap> convertDataListToList(DataList dataList) {
+	protected List<DataMap> convertDataListToList(DataList dataList) 
+	{
 		List<DataMap> list = new ArrayList<DataMap>();
 		if(dataList != null) 
 			for(int i = 0; i < dataList.size(); i++)
@@ -837,18 +837,13 @@ public class ObjectManager
 
 	protected List<RedbackObject> convertDBDataToObjects(Session session, ObjectConfig objectConfig, DataMap objectFilter, List<DataMap> dbResultList, boolean saveToTransaction, boolean includeNewObjects) throws RedbackException 
 	{
-		List<RedbackObject> objectList = new ArrayList<RedbackObject>();
+		RedbackObjectList objectList = new RedbackObjectList();
 		if(includeNewObjects)  
 			objectList.addAll(getNewOrUpdatedObjects(session, objectConfig, objectFilter));
 
-		if(dbResultList != null)  {
-			//Search for object in tx, if not found, add it; if found, check if it's updated and if so, if the filter still applies
+		if(dbResultList != null)  
 			for(DataMap dbData : dbResultList)
-			{
-				RedbackObject rbo = convertDBDataToObject(session, objectConfig, objectFilter, dbData, saveToTransaction);
-				if(rbo != null) objectList.add(rbo);
-			}
-		}
+				objectList.add(convertDBDataToObject(session, objectConfig, objectFilter, dbData, saveToTransaction));
 		return objectList;
 	}
 	
@@ -912,8 +907,12 @@ public class ObjectManager
 	protected DataMap generateDBFilter(Session session, ObjectConfig objectConfig, DataMap objectFilter) throws DataException, RedbackException
 	{
 		DataMap dbFilter = generateDBFilterRecurring(session, objectConfig, objectFilter);
-		if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains() && !objectFilter.containsKey("domain"))
-			dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+		if(objectConfig.getDomainDBKey() != null) {
+			if(session.getDomainLock() != null)
+				dbFilter.put(objectConfig.getDomainDBKey(), session.getDomainLock());
+			else if(!session.getUserProfile().hasAllDomains())
+				dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+		}
 		return dbFilter;
 	}
 	
