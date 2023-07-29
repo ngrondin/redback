@@ -120,11 +120,13 @@
                         #fileset
                         [overrideobject]="object">
                             <rb-filedrop
-                                [fileset]="fileset">
+                                [fileset]="fileset"
+                                [editable]="isEditable">
                                 <rb-filelist
                                     [fileset]="fileset"
                                     [details]="false"
-                                    [downloadOnSelect]="true">
+                                    [downloadOnSelect]="true"
+                                    [editable]="isEditable">
                                 </rb-filelist>
                             </rb-filedrop>
                     </rb-fileset>

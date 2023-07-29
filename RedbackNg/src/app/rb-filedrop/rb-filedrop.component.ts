@@ -12,6 +12,7 @@ import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
 })
 export class RbFiledropComponent extends RbContainerComponent {
   @Input('fileset') fileset: RbFilesetComponent;
+  @Input('editable') editable: boolean = true;
 
   @Output() dropped: EventEmitter<any> = new EventEmitter();
 
@@ -37,29 +38,35 @@ export class RbFiledropComponent extends RbContainerComponent {
 
   @HostListener('drop', ['$event'])
   public drop(event: any) {
-    event.preventDefault();
-    event.stopPropagation();
-    console.log("File dropped");
-    if (event.dataTransfer != null && event.dataTransfer.items) {
-      for (var i = 0; i < event.dataTransfer.items.length; i++) {
-        if (event.dataTransfer.items[i].kind === 'file') {
-          var file = event.dataTransfer.items[i].getAsFile();
-          this.fileset.uploadFile(file);
+    if(this.editable) {
+      event.preventDefault();
+      event.stopPropagation();
+      console.log("File dropped");
+      if (event.dataTransfer != null && event.dataTransfer.items) {
+        for (var i = 0; i < event.dataTransfer.items.length; i++) {
+          if (event.dataTransfer.items[i].kind === 'file') {
+            var file = event.dataTransfer.items[i].getAsFile();
+            this.fileset.uploadFile(file);
+          }
         }
       }
+      this.hasFileOver = false;
     }
-    this.hasFileOver = false;
   }
   
   @HostListener('dragover', ['$event'])
   dragover(event: any) {
-    event.stopPropagation();
-    event.preventDefault();
-    this.hasFileOver = true;
+    if(this.editable) {
+      event.stopPropagation();
+      event.preventDefault();
+      this.hasFileOver = true;
+    }
   }
 
   @HostListener('dragleave', ['$event'])
   dragleave(event: any) {
-    this.hasFileOver = false;
+    if(this.editable) {
+      this.hasFileOver = false;
+    }
   }
 }

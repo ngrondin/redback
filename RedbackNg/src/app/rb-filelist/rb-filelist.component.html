@@ -17,15 +17,7 @@
                 <img
                     class="rb-files-img"
                     [src]="getBase64Thumbnail(file)"
-                    *ngIf="file.thumbnail != null">
-                <div
-                    class="rb-files-delete"
-                    *ngIf="hovering == file">
-                    <mat-icon
-                        (click)="delete(file)">
-                        clear
-                    </mat-icon>
-                </div>                     
+                    *ngIf="file.thumbnail != null">                   
             </div>
             <div
                 *ngIf="showDetails"
@@ -43,6 +35,14 @@
                     {{file.username}}
                 </div>
             </div>
+            <div
+                class="rb-files-delete"
+                *ngIf="hovering == file && editable == true">
+                <mat-icon
+                    (click)="delete($event, file)">
+                    clear
+                </mat-icon>
+            </div>              
         </div>         
     </div>
     <div

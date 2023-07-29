@@ -16,7 +16,8 @@ export class RbFilelistComponent extends RbComponent {
   @Input('fileset') fileset: RbFilesetComponent;
   @Input('downloadOnSelect') downloadOnSelect: boolean = true;
   @Input('details') showDetails: boolean = true;
-
+  @Input('editable') editable: boolean = true;
+  
   hasFileOver: boolean = false;
   hovering: RbFile = null;
 
@@ -84,7 +85,9 @@ export class RbFilelistComponent extends RbComponent {
     if(this.hovering == file) this.hovering = null;
   }
 
-  delete(file) {
+  delete(event, file) {
     this.fileset.delete(file);
+    event.stopPropagation();
+    event.preventDefault();
   }
 }
