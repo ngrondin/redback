@@ -59,9 +59,10 @@ import io.redback.utils.TxStore;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.LoggerJSFunction;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
-import io.redback.utils.stream.BasicConverter;
-import io.redback.utils.stream.BasicStreamPipeline;
+import io.redback.utils.stream.Converter;
+import io.redback.utils.stream.ConverterStreamPipeline;
 import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.MultiStreamPipeline;
 import io.redback.utils.stream.StaticStreamSource;
 
 public class ObjectManager
@@ -402,7 +403,7 @@ public class ObjectManager
 			} else {
 				dbResultList = generateNonPersistentObjectData(session, objectConfig, filter, searchText, sort, page, pageSize);
 			}
-			List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, false, page == 0);
+			List<RedbackObject> objectList = convertDBDataToObjects(session, objectConfig, objectFilter, dbResultList, page == 0);
 			if(addRelated) addRelatedBulk(session, (List<RedbackElement>)(List<?>)objectList);
 			return objectList;			
 		}
@@ -418,18 +419,20 @@ public class ObjectManager
 		try
 		{
 			DataMap objectFilter = generateObjectFilter(session, objectName, filter, searchText);
-			BasicStreamPipeline<RedbackObject, DataMap> bsp = new BasicStreamPipeline<RedbackObject, DataMap>(objectStream, new BasicConverter<RedbackObject, DataMap>() {
+			MultiStreamPipeline<RedbackObject> msp = new MultiStreamPipeline<RedbackObject>(objectStream, 2);
+			new StaticStreamSource<RedbackObject>(msp.getSourceDataStream(0), getNewOrUpdatedObjects(session, objectConfig, filter));
+			ConverterStreamPipeline<RedbackObject, DataMap> csp = new ConverterStreamPipeline<RedbackObject, DataMap>(msp.getSourceDataStream(1), new Converter<RedbackObject, DataMap>() {
 				public RedbackObject convert(DataMap data) throws DataException, RedbackException {
-					return convertDBDataToObject(session, objectConfig, objectFilter, data, false);
+					return convertDBDataToObjectIfStillApplies(session, objectConfig, filter, data);
 				}});
 			if(objectConfig.isPersistent()) 
 			{
 				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
 				DataMap dbSort = generateDBSort(session, objectConfig, sort);
-				dataClient.streamData(objectConfig.getCollection(), dbFilter, dbSort, chunkSize, advance, bsp.getSourceDataStream());
+				dataClient.streamData(objectConfig.getCollection(), dbFilter, dbSort, chunkSize, advance, csp.getSourceDataStream());
 			} else { // Non persistent objects
 				DataList dbResultList = generateNonPersistentObjectData(session, objectConfig, filter, searchText, sort, 0, 5000);
-				new StaticStreamSource<DataMap>(bsp.getSourceDataStream(), convertDataListToList(dbResultList));
+				new StaticStreamSource<DataMap>(csp.getSourceDataStream(), convertDataListToList(dbResultList));
 			}
 		}
 		catch(Exception e)
@@ -794,9 +797,8 @@ public class ObjectManager
 		List<Object> txList = session.getTxStore().getAll();
 		for(Object o: txList) {
 			RedbackObject rbo = (RedbackObject)o;
-			if((rbo.isNew() || rbo.isUpdated()) && rbo.getObjectConfig().getName().equals(objectConfig.getName()) && rbo.filterApplies(objectFilter) && !objectList.contains(rbo)) {
+			if(rbo.getObjectConfig().getName().equals(objectConfig.getName()) && rbo.filterApplies(objectFilter))
 				objectList.add(rbo);
-			}
 		}
 		return objectList;
 	}
@@ -809,43 +811,50 @@ public class ObjectManager
 				list.add(dataList.getObject(i));
 		return list;
 	}
+
 	
-	protected RedbackObject convertDBDataToObject(Session session, ObjectConfig objectConfig, DataMap objectFilter, DataMap dbData, boolean saveToTransaction) throws RedbackException 
+	protected List<RedbackObject> convertDBDataToObjects(Session session, ObjectConfig objectConfig, DataMap objectFilter, DataList dbResultList, boolean includeNewObjects) throws RedbackException 
 	{
-		String uid = dbData.getString(objectConfig.getUIDDBKey());
-		String key = objectConfig.getName() + ":" + uid;
-		if(saveToTransaction) {
-			RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
-			if(rbo == null) {
-				rbo = new RedbackObject(session, this, objectConfig, dbData);
-				session.getTxStore().add(key, rbo);
-			} else {
-				boolean isUpdated = rbo.isUpdated();
-				if(isUpdated && !rbo.filterApplies(objectFilter))
-					rbo = null;
-			}
-			return rbo;
-		} else {
-			return new RedbackObject(session, this, objectConfig, dbData);
-		}
-	}
-	
-	protected List<RedbackObject> convertDBDataToObjects(Session session, ObjectConfig objectConfig, DataMap objectFilter, DataList dbResultList, boolean saveToTransaction, boolean includeNewObjects) throws RedbackException 
-	{
-		return convertDBDataToObjects(session, objectConfig, objectFilter, convertDataListToList(dbResultList), saveToTransaction, includeNewObjects);
+		return convertDBDataToObjects(session, objectConfig, objectFilter, convertDataListToList(dbResultList), includeNewObjects);
 	}
 
-	protected List<RedbackObject> convertDBDataToObjects(Session session, ObjectConfig objectConfig, DataMap objectFilter, List<DataMap> dbResultList, boolean saveToTransaction, boolean includeNewObjects) throws RedbackException 
+	protected List<RedbackObject> convertDBDataToObjects(Session session, ObjectConfig objectConfig, DataMap objectFilter, List<DataMap> dbResultList, boolean includeNewObjects) throws RedbackException 
 	{
 		RedbackObjectList objectList = new RedbackObjectList();
 		if(includeNewObjects)  
 			objectList.addAll(getNewOrUpdatedObjects(session, objectConfig, objectFilter));
 
-		if(dbResultList != null)  
-			for(DataMap dbData : dbResultList)
-				objectList.add(convertDBDataToObject(session, objectConfig, objectFilter, dbData, saveToTransaction));
+		if(dbResultList != null) { 
+			for(DataMap dbData : dbResultList) {
+				RedbackObject rbo = convertDBDataToObjectIfStillApplies(session, objectConfig, objectFilter, dbData);
+				if(rbo != null)
+					objectList.add(rbo);
+			}
+		}
 		return objectList;
 	}
+	
+	protected RedbackObject convertDBDataToObjectIfStillApplies(Session session, ObjectConfig objectConfig, DataMap objectFilter, DataMap dbData) throws RedbackException 
+	{
+		String key = objectConfig.getName() + ":" + dbData.getString(objectConfig.getUIDDBKey());
+		RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
+		if(rbo != null) {
+			if(!rbo.filterApplies(objectFilter))
+				rbo = null;
+		} else {
+			rbo = new RedbackObject(session, this, objectConfig, dbData);
+		}
+		return rbo;
+	}
+	
+	/*protected RedbackObject convertDBDataToObject(Session session, ObjectConfig objectConfig, DataMap dbData) throws RedbackException 
+	{
+		String key = objectConfig.getName() + ":" + dbData.getString(objectConfig.getUIDDBKey());
+		RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
+		if(rbo == null)
+			rbo = new RedbackObject(session, this, objectConfig, dbData);
+		return rbo;
+	}*/
 	
 	protected DataList generateNonPersistentObjectData(Session session, ObjectConfig objectConfig, DataMap filter, String searchText, DataMap sort, int page, int pageSize) throws RedbackException, ScriptException
 	{

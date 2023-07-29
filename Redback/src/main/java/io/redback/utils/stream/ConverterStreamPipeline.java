@@ -2,12 +2,12 @@ package io.redback.utils.stream;
 
 import io.firebus.logging.Logger;
 
-public class BasicStreamPipeline<TARGET, SOURCE> implements DataStreamNextHandler {
+public class ConverterStreamPipeline<TARGET, SOURCE> implements DataStreamNextHandler {
 	protected DataStream<TARGET> targetStream;
 	protected DataStream<SOURCE> sourceStream;
-	protected BasicConverter<TARGET, SOURCE> converter;
+	protected Converter<TARGET, SOURCE> converter;
 	
-	public BasicStreamPipeline(DataStream<TARGET> ts, BasicConverter<TARGET, SOURCE> bc) {
+	public ConverterStreamPipeline(DataStream<TARGET> ts, Converter<TARGET, SOURCE> bc) {
 		targetStream = ts;
 		converter = bc;
 		

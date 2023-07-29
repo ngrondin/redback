@@ -5,16 +5,16 @@ import java.util.List;
 
 import io.firebus.logging.Logger;
 
-public class ChunkingStreamPipeline<TARGET, SOURCE> implements DataStreamNextHandler {
+public class ChunkConverterStreamPipeline<TARGET, SOURCE> implements DataStreamNextHandler {
 	protected List<TARGET> targetBuffer;
 	protected List<SOURCE> sourceBuffer;
 	protected DataStream<TARGET> targetStream;
 	protected DataStream<SOURCE> sourceStream;
-	protected ChunkingConverter<TARGET, SOURCE> converter;
+	protected ChunkConverter<TARGET, SOURCE> converter;
 	protected int chunkSize;
 	protected boolean sourceStreamComplete = false;
 	
-	public ChunkingStreamPipeline(DataStream<TARGET> ts, int cs, ChunkingConverter<TARGET, SOURCE> cc) {
+	public ChunkConverterStreamPipeline(DataStream<TARGET> ts, int cs, ChunkConverter<TARGET, SOURCE> cc) {
 		//System.out.println("CSP Created");
 		targetStream = ts;
 		chunkSize = cs > 0 ? cs : 50;

@@ -1,6 +1,7 @@
 package io.redback.managers.objectmanager.requests;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,7 +10,7 @@ import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 
 public class MultiRequest extends ObjectRequest {
-	public Map<String, ObjectRequest> requests;
+	public Map<String, ObjectRequest> requests = new HashMap<String, ObjectRequest>();;
 	
 	public MultiRequest() {
 		super(false, false);
@@ -18,65 +19,77 @@ public class MultiRequest extends ObjectRequest {
 	
 	public MultiRequest(DataMap data) throws RedbackException {
 		super(data);
-		requests = new HashMap<String, ObjectRequest>();
-		DataList list = data.getList("multi");
-		processList(list);
+		processList(data.getList("multi"));
 	}
 	
 	public MultiRequest(DataList list) throws RedbackException {
 		super(false, false);
-		requests = new HashMap<String, ObjectRequest>();
 		processList(list);
+	}
+	
+	public MultiRequest(List<DataMap> list) throws RedbackException {
+		super(false, false);
+		processList(list);
+	}
+	
+	private void processList(List<DataMap> list) throws RedbackException {
+		for(DataMap line : list) {
+			processListItem(line);
+		}
 	}
 	
 	private void processList(DataList list) throws RedbackException {
 		for(int i = 0; i < list.size(); i++) {
 			DataMap line = list.getObject(i);
-			String action = line.getString("action");
-			String key = line.getString("key");
-			ObjectRequest request = null;
-			if(action.equals("get"))
-			{
-				request = new GetRequest(line);
+			processListItem(line);
+		}
+	}
+	
+	private void processListItem(DataMap line) throws RedbackException {
+		String action = line.getString("action");
+		String key = line.getString("key");
+		ObjectRequest request = null;
+		if(action.equals("get"))
+		{
+			request = new GetRequest(line);
+		}
+		else if(action.equals("list") && !line.containsKey("uid"))
+		{
+			request = new ListRequest(line);
+		}
+		else if(action.equals("listrelated") || (action.equals("list") && line.containsKey("uid")))
+		{
+			request = new ListRelatedRequest(line);
+		}					
+		else if(action.equals("update"))
+		{
+			request = new UpdateRequest(line);
+		}
+		else if(action.equals("create"))
+		{
+			request = new CreateRequest(line);
+		}
+		else if(action.equals("delete"))
+		{
+			request = new DeleteRequest(line);
+		}					
+		else if(action.equals("execute"))
+		{
+			if(line.containsKey("object")) {
+				request = new ExecuteObjectRequest(line);
+			} else {
+				request = new ExecuteRequest(line);
 			}
-			else if(action.equals("list") && !line.containsKey("uid"))
-			{
-				request = new ListRequest(line);
-			}
-			else if(action.equals("listrelated") || (action.equals("list") && line.containsKey("uid")))
-			{
-				request = new ListRelatedRequest(line);
-			}					
-			else if(action.equals("update"))
-			{
-				request = new UpdateRequest(line);
-			}
-			else if(action.equals("create"))
-			{
-				request = new CreateRequest(line);
-			}
-			else if(action.equals("delete"))
-			{
-				request = new DeleteRequest(line);
-			}					
-			else if(action.equals("execute"))
-			{
-				if(line.containsKey("object")) {
-					request = new ExecuteObjectRequest(line);
-				} else {
-					request = new ExecuteRequest(line);
-				}
-			}
-			else if(action.equals("aggregate"))
-			{
-				request = new AggregateRequest(line);
-			}
-			else
-			{
-				throw new RedbackException("The '" + action + "' action is not valid as an object request");
-			}	
-			requests.put(key, request);
+		}
+		else if(action.equals("aggregate"))
+		{
+			request = new AggregateRequest(line);
+		}
+		else
+		{
+			throw new RedbackException("The '" + action + "' action is not valid as an object request");
 		}	
+		requests.put(key, request);	
 	}
 	
 	public Set<String> getKeys() {

@@ -26,4 +26,8 @@ public class RedbackObjectList extends ArrayList<RedbackObject> {
 			ret = ret || add(rbo);
 		return ret;
 	}
+	
+	public boolean contains(String key) {
+		return map.containsKey(key);
+	}
 }

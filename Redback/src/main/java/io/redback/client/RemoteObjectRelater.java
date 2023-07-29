@@ -10,7 +10,6 @@ import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.FilterProcessor;
-import io.redback.utils.Timer;
 
 public class RemoteObjectRelater {
 	protected ObjectClient objectClient;
@@ -47,16 +46,13 @@ public class RemoteObjectRelater {
 	}
 	
 	public void resolve(List<RedbackObjectRemote> list) throws RedbackException {
-		System.out.println("Relater starting");
-		Timer t = new Timer();
 		for(RedbackObjectRemote ror: list) 
 			put(ror);
 		Map<String, List<DataMap>> queryMap = null;
 		int n = 0;
 		while(!(queryMap = scan()).isEmpty() && n++ < 10) {
-			request(queryMap);			
+			request(queryMap);
 		}
-		System.out.println("Relater took " + t.mark() + "ms");
 	}
 	
 	protected Map<String, List<DataMap>> scan() throws RedbackException {

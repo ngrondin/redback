@@ -4,6 +4,7 @@ public abstract class DataStream<TYPE> {
 	protected DataStreamNextHandler nextHandler = null;
 	protected Object waitLock = new Object();
 	protected int nextBacklog = 1;
+	protected boolean _isComplete = false;
 	
 	public DataStream() {
 		
@@ -29,6 +30,7 @@ public abstract class DataStream<TYPE> {
 	}
 	
 	public void complete() {
+		_isComplete = true;
 		completed();
 	}
 	
@@ -43,6 +45,10 @@ public abstract class DataStream<TYPE> {
 				} 
 			} catch(Exception e) {}
 		}
+	}
+	
+	public boolean isComplete() {
+		return _isComplete;
 	}
 	
 	protected abstract void received(TYPE data);
