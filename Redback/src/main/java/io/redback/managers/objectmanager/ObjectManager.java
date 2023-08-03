@@ -797,7 +797,7 @@ public class ObjectManager
 		List<Object> txList = session.getTxStore().getAll();
 		for(Object o: txList) {
 			RedbackObject rbo = (RedbackObject)o;
-			if(rbo.getObjectConfig().getName().equals(objectConfig.getName()) && rbo.filterApplies(objectFilter))
+			if(rbo.getObjectConfig().getName().equals(objectConfig.getName()) && rbo.filterApplies(objectFilter) && !rbo.filterOriginallyApplied(objectFilter))
 				objectList.add(rbo);
 		}
 		return objectList;
@@ -839,7 +839,7 @@ public class ObjectManager
 		String key = objectConfig.getName() + ":" + dbData.getString(objectConfig.getUIDDBKey());
 		RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
 		if(rbo != null) {
-			if(!rbo.filterApplies(objectFilter))
+			if(rbo.isDeleted || !rbo.filterApplies(objectFilter))
 				rbo = null;
 		} else {
 			rbo = new RedbackObject(session, this, objectConfig, dbData);

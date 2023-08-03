@@ -9,7 +9,6 @@ import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.security.Session;
-import io.redback.utils.Convert;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
 
@@ -131,12 +130,11 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 			};		
 		} else if(key.equals("aggregate")) {
 			return new CallableJSWrapper() {
-				@SuppressWarnings("unchecked")
 				public Object call(Object... arguments) throws RedbackException {
 					String objectname = (String)arguments[0];
 					DataMap filter = (DataMap)arguments[1];
-					DataList tuple = Convert.listToDataList((List<DataMap>)arguments[2]);
-					DataList metrics = Convert.listToDataList((List<DataMap>)arguments[3]);
+					DataList tuple = (DataList)arguments[2];
+					DataList metrics = (DataList)arguments[3];
 					DataMap sort = (DataMap)arguments[4];
 					return RedbackAggregateRemoteJSWrapper.convertList(objectClient.aggregate(session, objectname, filter, null, tuple, metrics, sort, null, true, 0, 5000));
 				}

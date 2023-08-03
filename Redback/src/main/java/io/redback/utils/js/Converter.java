@@ -46,11 +46,15 @@ public class Converter {
 			return ((RedbackObjectJSWrapper)v).getRedbackObject();
 		} else if(v instanceof SArray) {
 			SArray a = (SArray)v;
-			List<Object> list = new ArrayList<Object>();
-			for(int i = 0; i < a.getSize(); i++)
-				list.add(convertOut(a.get(i)));
-			return list;
-			
+			SValue v1 = a.getSize() > 0 ? a.get(0) : null;
+			if(v1 != null && v1 instanceof RedbackObjectJSWrapper) {
+				List<Object> list = new ArrayList<Object>();
+				for(int i = 0; i < a.getSize(); i++)
+					list.add(convertOut(a.get(i)));
+				return list;	
+			} else {
+				return io.firebus.script.Converter.convertOut(v);
+			}
 		} else {
 			return io.firebus.script.Converter.convertOut(v);
 		}

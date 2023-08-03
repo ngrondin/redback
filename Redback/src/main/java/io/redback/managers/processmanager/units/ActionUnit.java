@@ -53,7 +53,7 @@ public class ActionUnit extends ProcessUnit
 				}
 				else
 				{
-					Logger.warning("rb.process.action.invalid", new DataMap("interaction", notification.code, "action", action, "process", notification.processName, "pid", notification.pid));
+					Logger.userError("rb.process.action.invalid", new DataMap("interaction", notification.code, "action", action, "process", notification.processName, "pid", notification.pid));
 				}
 			}
 		}	

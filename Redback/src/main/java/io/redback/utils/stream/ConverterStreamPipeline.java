@@ -14,7 +14,11 @@ public class ConverterStreamPipeline<TARGET, SOURCE> implements DataStreamNextHa
 		sourceStream = new DataStream<SOURCE>() {
 			protected void received(SOURCE data) {
 				try {
-					targetStream.send(converter.convert(data));
+					TARGET tdata = converter.convert(data);
+					if(tdata != null)
+						targetStream.send(tdata);
+					else
+						sourceStream.requestNext();
 				} catch (Exception e) {
 					Logger.severe("rb.basicstreampipeline.convert", e);
 				}

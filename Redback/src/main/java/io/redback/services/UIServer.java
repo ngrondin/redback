@@ -120,12 +120,6 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 					response.setData(getAppConfig(session, name).toString());
 					response.metadata.put("mime", "application/json");
 				}				
-				else if(category.equals("menu"))
-				{
-					Logger.finer("rb.ui.getmenu", new DataMap("name", name));
-					response.setData(getMenu(session, name).toString());
-					response.metadata.put("mime", "text/html");
-				}
 				else if(category.equals("view"))
 				{
 					Logger.finer("rb.ui.getview", new DataMap("name", name));
@@ -161,8 +155,6 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	protected abstract HTML getAppClient(Session session, String name, String version) throws RedbackException;
 
 	protected abstract DataMap getAppConfig(Session session, String name) throws RedbackException;
-
-	protected abstract DataMap getMenu(Session session, String version) throws RedbackException;
 	
 	protected abstract DataMap getView(Session session, String viewName);
 

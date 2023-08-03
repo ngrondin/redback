@@ -27,6 +27,7 @@ import io.redback.security.js.SessionJSWrapper;
 import io.redback.services.UIServer;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
+import io.redback.utils.Convert;
 import io.redback.utils.HTML;
 import io.redback.utils.KeyEscaper;
 import io.redback.utils.StringUtils;
@@ -75,9 +76,9 @@ public class RedbackUIServer extends UIServer
 		context.put("version", version);
 		context.put("deployment",  config);
 		context.put("utils", new RedbackUtilsJSWrapper());
+		context.put("session", new SessionJSWrapper(session));
 		try {
 			DataMap appConfig = getAppConfig(session, name);
-			context.put("session", new SessionJSWrapper(session));
 			String page = appConfig.getString("page");
 			context.put("config", appConfig);
 			html = executeJSP("pages/" + page, version, context);			
@@ -107,7 +108,17 @@ public class RedbackUIServer extends UIServer
 				String appName = appConfig.getString("name");
 				if(session.getUserProfile().canRead("rb.apps." + appName))
 				{
-					return appConfig;
+					DataMap ret = (DataMap)appConfig.getCopy();
+					List<DataMap> allMenus = Convert.dataListToList(configClient.listConfigs(session, "rbui", "menu").getList("result"));
+					DataList menuConfig = appConfig.getList("menu");
+					DataList menus = new DataList();
+					for(int i = 0; i < menuConfig.size(); i++) {
+						DataMap menu = buildMenuFor(session, menuConfig.getString(i), allMenus);
+						if(menu != null)
+							menus.add(menu);
+					}
+					ret.put("menu", menus);
+					return ret;
 				}
 				else 
 				{
@@ -129,52 +140,35 @@ public class RedbackUIServer extends UIServer
 		}
 	}
 	
-	
-	protected DataMap getMenu(Session session, String version) throws RedbackException
+	protected DataMap buildMenuFor(Session session, String name, List<DataMap> allMenus) 
 	{
-		try {
-			DataMap menu = new DataMap("{type:menu, content:[]}");
-			DataMap result = configClient.listConfigs(session, "rbui", "menu");
-			DataList resultList = result.getList("result");
-			for(int i = 0; i < resultList.size(); i++)
-			{
-				if(resultList.getObject(i).getString("type").equals("menugroup"))
-				{
-					boolean validGroup = false;
-					DataMap menuGroup = resultList.getObject(i);
-					menuGroup.put("content", new DataList());
-					for(int j = 0; j < resultList.size(); j++)
-					{
-						if(resultList.getObject(j).getString("type").equals("menulink") && menuGroup.getString("name").equals(resultList.getObject(j).getString("group")))
-						{
-							DataMap menuLink = resultList.getObject(j);
-							if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
-							{
-								menuGroup.getList("content").add(menuLink);
-								validGroup = true;
-							}
+		DataMap menu = null;
+		for(DataMap item : allMenus) {
+			if(name.equals(item.getString("name"))) {
+				if(item.getString("type").equals("menugroup")) {
+					DataList subList = new DataList();
+					for(DataMap subItem: allMenus) {
+						if(name.equals(subItem.getString("group"))) {
+							DataMap sub = buildMenuFor(session, subItem.getString("name"), allMenus);
+							if(sub != null) 
+								subList.add(sub);
 						}
 					}
-					if(validGroup)
-					{
-						menuGroup.getList("content").sort("order");
-						menu.getList("content").add(menuGroup);
+					if(subList.size() > 0) {
+						subList.sort("order");
+						menu = (DataMap)item.getCopy();
+						menu.put("content", subList);
 					}
-				} 
-				else if(resultList.getObject(i).getString("type").equals("menulink") && resultList.getObject(i).getString("group") == null)
-				{
-					DataMap menuLink = resultList.getObject(i);
-					if(session.getUserProfile().canRead("rb.views." + menuLink.getString("view")))
-						menu.getList("content").add(menuLink);
+				} else if(item.getString("type").equals("menulink")) {
+					if(session.getUserProfile().canRead("rb.views." + item.getString("view"))) {
+						menu = (DataMap)item.getCopy();;
+					}
 				}
 			}
-			menu.getList("content").sort("order");
-			return menu;
-		} catch(Exception e) {
-			throw new RedbackException("Error getting menu", e);
-		}
+ 		}
+		return menu;
 	}
-	
+		
 
 	protected DataMap getView(Session session, String viewName)
 	{
@@ -272,14 +266,18 @@ public class RedbackUIServer extends UIServer
 	
 	protected HTML executeJSP(String name, String version, Map<String, Object> context) throws RedbackException
 	{
-		HTML html = new HTML();
-		context.put("sb", new HTMLJSWrapper(html));
 		Function script = getCompiledJSP(name, version);
-		try {
-			script.call(context);
-			return html;
-		} catch(ScriptException e) {
-			throw new RedbackException("Error executing jsp", e);
+		if(script != null) {
+			try {
+				HTML html = new HTML();
+				context.put("sb", new HTMLJSWrapper(html));
+				script.call(context);
+				return html;
+			} catch(ScriptException e) {
+				throw new RedbackException("Error executing jsp", e);
+			}			
+		} else {
+			throw new RedbackException("JSP " + name + " does not exist");
 		}
 	}
 	

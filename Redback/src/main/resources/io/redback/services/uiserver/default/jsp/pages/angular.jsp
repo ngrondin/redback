@@ -14,7 +14,7 @@ var versionOrDefault = version != null ? version : 'default';
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%=global.googlekey%>&libraries=places"></script>
   <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
   <script src="https://cdn.quilljs.com/1.0.0/quill.js"></script>  
-  <link href="<%=deployment.uiservicepath%>/resource/styles.css" rel="stylesheet">
+  <link href="/<%=deployment.uiservicepath%>/resource/styles.css" rel="stylesheet">
   <script>
     var googlekey = "<%=global.googlekey%>";
   </script>
@@ -37,19 +37,9 @@ var versionOrDefault = version != null ? version : 'default';
     usecsforapi="<%=deployment.useclientforapi%>">
   </app-root>
   
-  <script src="<%=deployment.uiservicepath%>/resource/runtime.js" type="module"></script>
-  <script src="<%=deployment.uiservicepath%>/resource/polyfills.js" type="module"></script>
-  <script src="<%=deployment.uiservicepath%>/resource/main.js" type="module"></script>
-  <!-- <script src="<%=deployment.uiservicepath%>/resource/971.js" type="module"></script> -->
-
-  <!--<script src="/<%=deployment.uiservicepath%>/resource/runtime-es2015.js" type="module"></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/runtime-es5.js" nomodule defer></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/polyfills-es5.js" nomodule defer></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/polyfills-es2015.js" type="module"></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/styles-es2015.js" type="module"></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/styles-es5.js" nomodule defer></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/main-es2015.js" type="module"></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/main-es5.js" nomodule defer></script></body>-->
+  <script src="/<%=deployment.uiservicepath%>/resource/runtime.js" type="module"></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/polyfills.js" type="module"></script>
+  <script src="/<%=deployment.uiservicepath%>/resource/main.js" type="module"></script>
 
 </body>
 </html>

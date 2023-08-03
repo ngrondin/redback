@@ -37,6 +37,7 @@ public class RedbackObject extends RedbackElement
 	protected boolean canWrite;
 	protected boolean canExecute;
 	protected Map<String, Value> data;
+	protected Map<String, Value> originalData;
 	protected Map<String, RedbackObject> related;
 	protected Map<String, Boolean> updatedAttributes;
 	protected boolean isNewObject;
@@ -62,6 +63,7 @@ public class RedbackObject extends RedbackElement
 				{
 					Value val = new Value(dbData.get(dbKey));
 					data.put(attributeConfig.getName(), val);
+					originalData.put(attributeConfig.getName(), val);
 				}
 			}
 			postInitScriptContextUpdate();
@@ -171,6 +173,7 @@ public class RedbackObject extends RedbackElement
 		canWrite = session.getUserProfile().canWrite(objectRightKey) || session.getUserProfile().canWrite(accessCatKey);
 		canExecute = session.getUserProfile().canExecute(objectRightKey) || session.getUserProfile().canExecute(accessCatKey);
 		data = new HashMap<String, Value>();
+		originalData = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new HashMap<String, Boolean>();
 		scriptContext = session.getScriptContext().createChild();
@@ -740,12 +743,18 @@ public class RedbackObject extends RedbackElement
 	}
 	
 	public boolean filterApplies(DataMap objectFilter) {
+		return filterAppliesToDataView(objectFilter, data);
+	
+	}
+	
+	public boolean filterOriginallyApplied(DataMap objectFilter) {
+		return filterAppliesToDataView(objectFilter, originalData);
+	}
+	
+	protected boolean filterAppliesToDataView(DataMap objectFilter, Map<String, Value> d) {
 		DataMap dataView = new DataMap();
-		Iterator<String> it = data.keySet().iterator();
-		while(it.hasNext()) {
-			String key = it.next();
-			dataView.put(key, data.get(key).getObject());
-		}
+		for(String key: d.keySet()) 
+			dataView.put(key, d.get(key).getObject());
 		dataView.put("uid", uid.getObject());
 		dataView.put("domain", domain.getObject());
 		DataFilter filter = new DataFilter(objectFilter);

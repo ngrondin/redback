@@ -23,9 +23,18 @@
                                 class="rb-list-item-metaspacer">
                             </div>
                             <span
-                                [ngClass]="'rb-list-item-meta2' + (item.meta2isabadge ? ' rb-list-item-meta2-badge' : '')">
+                                *ngIf="item.meta2type == 'text' || item.meta2type == 'badge'"
+                                [ngClass]="'rb-list-item-meta2' + (item.meta2type == 'badge' ? ' rb-list-item-meta2-badge' : '')">
                                 {{item.meta2}}
                             </span>
+                            <div
+                                *ngIf="item.meta2type == 'bool'"
+                                [ngClass]="'rb-list-item-meta2-checkbox' + (item.meta2 == true ? ' rb-list-item-meta2-checkbox-checked' : '')">
+                                <svg focusable="false" viewBox="0 0 24 24">
+                                    <path fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59">
+                                    </path>
+                                </svg>
+                            </div>
                         </div>
                         <span
                             class="rb-list-item-main"

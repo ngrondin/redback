@@ -9,7 +9,7 @@ import { Injector } from '@angular/core';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { DesktopRootComponent } from './desktop-root/desktop-root.component';
+import { DesktopRootComponent } from './roots/desktop-root/desktop-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -133,6 +133,7 @@ import { RbRichtextInputComponent } from './inputs/rb-richtext-input/rb-richtext
 import { RbVseparatorComponent } from './rb-vseparator/rb-vseparator.component'
 import { RedbackgraphsModule } from 'redbackgraphs';
 import { RbDynamicformeditorComponent } from './rb-dynamicformeditor/rb-dynamicformeditor.component';
+import { PortalRootComponent } from './roots/portal-root/portal-root.component';
 
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -195,6 +196,7 @@ window.redback = window.redback || {};
     declarations: [
         AppComponent,
         DesktopRootComponent,
+        PortalRootComponent,
         RbViewLoaderComponent,
         RbViewDirective,
         RbLayoutComponent,

@@ -86,9 +86,16 @@ export class RbList4Component extends RbDataObserverComponent {
       }
 
       if(this.meta2attribute !== null) {
-        let val = this.formatText(obj.get(this.meta2attribute));
-        data["meta2"] = val
-        data["meta2isabadge"] = (val !== "" && !isNaN(Number(data["meta2"])))
+        let rawval = obj.get(this.meta2attribute);
+        let isTrueFalse = (rawval === true || rawval === false);
+        if(isTrueFalse) {
+          data["meta2"] = rawval;
+          data["meta2type"] = "bool";
+        } else {
+          let formattedval = this.formatText(rawval);
+          data["meta2"] = formattedval;
+          data["meta2type"] = (formattedval !== "" && !isNaN(Number(formattedval)) ? "badge" : "text");
+        }
       }
 
       let thisColorAttribute = this.colorattribute;

@@ -94,6 +94,23 @@
     padding: 0px 3px 0px 3px;
 }
 
+.rb-list-item-meta2-checkbox {
+    display: flex;
+    width: var(--v14px);
+    height: var(--v14px);
+    border: 1px solid #aaa;
+    border-radius: var(--v3px);
+    stroke: white;
+    stroke-width: var(--v3px);
+    stroke-opacity: 0;
+}
+
+.rb-list-item-meta2-checkbox-checked {
+    background: var(--primary-color);
+    stroke-opacity: 1;
+    
+}
+
 .rb-list-item-metaspacer {
     flex: 1 1 auto;
 }

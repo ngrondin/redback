@@ -12,7 +12,8 @@ public class AccumulatingDataStream<T> extends DataStream<T> {
 	protected boolean complete = false;
 	
 	public void received(T item) {
-		list.add(item);
+		if(item != null)
+			list.add(item);
 		requestNext();
 	}
 

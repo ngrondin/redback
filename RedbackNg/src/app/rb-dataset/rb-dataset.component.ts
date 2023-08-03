@@ -32,7 +32,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public userSort: any = null;
   public mergedFilter: any;
   public resolvedFilter: any;
-  public firstLoad: boolean = true;
+  //public firstLoad: boolean = true;
   public nextPage: number;
   public pageSize: number;
   public hasMorePages: boolean = true;
@@ -169,10 +169,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
           this.setData(data);
         },
         error: (error) => {
-          this._loading = false;
+          this.loadComplete(false);
         },
         complete: () => {
-          this._loading = false;
+          this.loadComplete(true);
         }
       });
       this._loading = true;
@@ -207,11 +207,18 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         obj.addSet(this);
       }
     } 
-    if(data.length != this.pageSize || this.fetchAll) {
+    if(this.fetchAll == false && data.length < this.pageSize) {
       this.hasMorePages = false
     }
-    this.firstLoad = false;
+  }
+
+  private loadComplete(success) {
+    this._loading = false;
+    if(this.fetchAll) {
+      this.hasMorePages = false;
+    }
     this.publishEvent('load');
+    //this.firstLoad = false;
     if(this._list.length == 0) {
       this._selectedObject = null;
     } else if(this._list.length == 1) {
@@ -228,7 +235,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         this.totalCount = this._list.length;
       }
     }
-
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
