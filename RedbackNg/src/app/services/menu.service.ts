@@ -19,31 +19,27 @@ export class MenuService {
   ) {
   }
 
-  load(): Observable<null> {
+  setFullMenuConfig(fm) {
+    this.fullMenu = {
+      content:fm
+    }
+  }
+
+  loadPreferences(): Observable<null> {
     const obs = new Observable<null>((observer) => {
-      let respCount = 0;
-      let url = this.apiService.baseUrl + '/' + this.apiService.uiService + '/menu/default/any';
-      this.http.get(url, { withCredentials: true, responseType: 'json' }).subscribe(
-        resp => {
-          this.fullMenu = resp;
-          if(this.apiService.userprefService != null) {
-            this.apiService.getUserPreference('user', 'menu').subscribe(
+      if(this.apiService.userprefService != null) {
+        this.apiService.getUserPreference('user', 'menu').subscribe(
+          resp => {
+            this.personalMenu = resp;
+            this.apiService.getUserPreference('role', 'menu').subscribe(
               resp => {
-                this.personalMenu = resp;
-                this.apiService.getUserPreference('role', 'menu').subscribe(
+                this.groupMenu = resp
+                this.apiService.getUserPreference('user', 'defaultmenu').subscribe(
                   resp => {
-                    this.groupMenu = resp
-                    this.apiService.getUserPreference('user', 'defaultmenu').subscribe(
-                      resp => {
-                        this.config = resp;
-                        observer.next();
-                        observer.complete();
-                        this.publish();
-                      },
-                      error => {
-                        observer.error(error);
-                      }
-                    );
+                    this.config = resp;
+                    observer.next();
+                    observer.complete();
+                    this.publish();
                   },
                   error => {
                     observer.error(error);
@@ -53,17 +49,17 @@ export class MenuService {
               error => {
                 observer.error(error);
               }
-            )
-          } else {
-            observer.next();
-            observer.complete();
+            );
+          },
+          error => {
+            observer.error(error);
           }
-        },
-        error => {
-          observer.error(error);
-        }
-      );
-     })
+        )
+      } else {
+        observer.next();
+        observer.complete();
+      }
+    });
     return obs; 
   }
 

@@ -1,0 +1,128 @@
+<mat-toolbar>
+    <mat-toolbar-row>
+        <img 
+            [src]="logoUrl"
+            class="rb-toolbar-logo"/>
+        &nbsp;&nbsp;
+        <span
+            class="rb-toolbar-title">
+            {{apptitle}}
+        </span>
+        <div
+            class="rb-toolbar-spacer">
+        </div>
+        <rb-global-search
+            (navigate)="navigateTo($event)">
+        </rb-global-search>
+        <rb-chat
+            *ngIf="apiService.chatService != null && apiService.chatService != ''"
+            (navigate)="navigateTo($event)">
+        </rb-chat>
+        <rb-notification-bell
+            (click)="toggleNotifications()">
+        </rb-notification-bell>
+        <rb-clickable
+            class="rb-toolbar-username"
+            [matMenuTriggerFor]="usermenu">
+            <span>
+                {{userdisplay}}
+            </span>
+        </rb-clickable>
+        <mat-menu
+            #usermenu="matMenu">
+            <button
+                mat-menu-item
+                [matMenuTriggerFor]="prefmenu">
+                Preferences
+            </button>
+            <button
+                mat-menu-item
+                (click)="logout()">
+                Logout
+            </button>
+        </mat-menu>
+        <mat-menu
+            #prefmenu="matMenu">
+            <button
+                *ngFor="let pref of userprefService.getGlobalPreferences()"
+                mat-menu-item
+                [matMenuTriggerFor]="prefoption"
+                [matMenuTriggerData]="{pref: pref, value: userprefService.getGlobalPreferenceValue(pref.code)}">
+                {{pref.label}}
+            </button>            
+        </mat-menu>
+        <mat-menu
+            #prefoption="matMenu">
+            <ng-template 
+                matMenuContent 
+                let-pref="pref"
+                let-value="value">
+                <button
+                    *ngFor="let prefoption of pref.options"
+                    (click)="userprefService.setGlobalPreferenceValue('user', pref.code, prefoption.value)"
+                    mat-menu-item>
+                    <mat-icon
+                        *ngIf="value === prefoption.value">
+                        check_box
+                    </mat-icon>
+                    <mat-icon
+                        *ngIf="value !== prefoption.value">
+                        check_box_outline_blank
+                    </mat-icon>                    
+                    {{prefoption.label}}
+                </button>            
+            </ng-template>
+        </mat-menu>
+    </mat-toolbar-row>
+</mat-toolbar>
+<mat-sidenav-container
+    [hasBackdrop]="false"
+    autosize>
+    <mat-sidenav 
+        mode="side" 
+        position="start"
+        disableClose="true"
+        opened>
+        <rb-menu
+            [look]="userprefService.getGlobalPreferenceValue('uialt')"
+            (navigate)="navigateTo($event)">
+        </rb-menu>
+    </mat-sidenav>
+    <mat-sidenav 
+        #rightdrawer
+        mode="over" 
+        position="end"> 
+        <rb-notification-list
+            *ngIf="rightDrawerShowing == 'notifications'"
+            (navigate)="navigateTo($event)"
+            (close)="closeRightDrawer()">
+        </rb-notification-list>
+    </mat-sidenav>    
+    <mat-sidenav-content>
+        <rb-vsection>
+            <rb-view-header
+                [targetStack]="viewTargetStack"
+                (backTo)="backTo($event)">
+            </rb-view-header>
+            <rb-view-loader 
+                [target]="currentViewTarget"
+                (navigate)="navigateTo($event)">
+            </rb-view-loader>
+        </rb-vsection>
+    </mat-sidenav-content>
+</mat-sidenav-container>
+<div
+    class="rb-footer">
+    <div
+        [class]="'rb-footer-indicator' + (clientWSServer.isConnected() ? ' rb-footer-indicator-on' : '')">
+    </div>
+</div>
+<div
+    class="rb-drag-box"
+    [style.visibility]="dragService.isDragging ? 'visible' : 'hidden'"
+    [style.left.px]="dragService.position != null ? dragService.position.x : 0"
+    [style.top.px]="dragService.position != null ? dragService.position.y : 0"
+    [style.width.px]="dragService.size != null ? dragService.size.x : 0"
+    [style.height.px]="dragService.size != null ? dragService.size.y : 0"
+    [innerHTML]="dragService.innerHTML">
+</div>

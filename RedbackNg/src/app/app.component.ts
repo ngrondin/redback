@@ -24,7 +24,7 @@ export class AppComponent implements OnInit {
 
   apptitle: string; 
   logo: string;
-  type: string;
+  layout: string;
   initialView: string;
   initialViewTitle: string;
   menuView: string;
@@ -90,13 +90,14 @@ export class AppComponent implements OnInit {
   }  
 
   onAppConfig(config: any) {
-    this.type = config['page'];
+    this.layout = config['layout'];
     this.apptitle = config['label'];
     this.logo = config['logo'];
     this.initialView = config['defaultview'];
     this.menuView = this.appname; //TODO: Fix this
     this.configService.setObjectsConfig(config['objects']);
     this.iconsets = config["iconsets"];
+    this.menuService.setFullMenuConfig(config['menu']);
     for(const set of this.iconsets) {
       this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'), {viewBox: "0 0 24 24"});
     }
@@ -117,7 +118,7 @@ export class AppComponent implements OnInit {
   firstLoad() {
     if(this.firstConnected == false) {
       this.firstConnected = true;
-      this.menuService.load().subscribe(() => {
+      this.menuService.loadPreferences().subscribe(() => {
         this.userprefService.load().subscribe(() => {
           this.notificationService.load().subscribe(() => {
             if(this.onloadFunction != null) {

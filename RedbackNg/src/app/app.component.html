@@ -1,6 +1,6 @@
 <desktop-root 
     #root
-    *ngIf="type == 'desktop'"
+    *ngIf="layout == 'desktop'"
     [apptitle] = "apptitle"
     [logo] = "logo"
     [username] = "username"
@@ -9,3 +9,14 @@
     [version]="version"
     [events]="events.asObservable()"> 
 </desktop-root>
+<portal-root 
+    #root
+    *ngIf="layout == 'portal'"
+    [apptitle] = "apptitle"
+    [logo] = "logo"
+    [username] = "username"
+    [userdisplay] = "userdisplay"
+    [initialView] = "initialView"
+    [version]="version"
+    [events]="events.asObservable()"> 
+</portal-root>

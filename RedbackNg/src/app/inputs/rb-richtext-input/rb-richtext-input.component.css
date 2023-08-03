@@ -17,3 +17,10 @@
     flex: 1 1 auto;
 }
 
+.rb-richtext-readonlyviewer {
+    flex: 1 1 auto;
+    border-right: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    padding: 12px 15px;
+}
