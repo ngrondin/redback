@@ -69,7 +69,7 @@ public class ObjectManager
 {
 	protected String name;
 	protected Firebus firebus;
-	protected ScriptFactory scriptFactory;
+	protected ScriptFactory scriptFactory = new ScriptFactory();
 	protected boolean loadAllOnInit;
 	protected int preCompile;
 	protected boolean includeLoaded;
@@ -90,7 +90,7 @@ public class ObjectManager
 	protected ConfigCache<ScriptConfig> globalScripts;
 	protected ConfigCache<PackConfig> packConfigs;
 	protected List<ScriptConfig> includeScripts;
-	protected HashMap<String, ExpressionMap> readRightsFilters;
+	protected HashMap<String, ExpressionMap> readRightsFilters = new HashMap<String, ExpressionMap>();
 	protected CollectionConfig traceCollection;
 	protected CollectionConfig scriptLogCollection;
 	protected AccessManagementClient accessManagementClient;
@@ -115,7 +115,6 @@ public class ObjectManager
 			includeLoaded = false;
 			loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
 			preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
-			scriptFactory = new ScriptFactory();
 			configServiceName = config.getString("configservice");
 			accessManagerServiceName = config.getString("accessmanagementservice");
 			dataServiceName = config.getString("dataservice");
@@ -155,7 +154,6 @@ public class ObjectManager
 				public PackConfig createConfig(DataMap map) throws Exception {
 					return new PackConfig(om, map);
 				}});			
-			readRightsFilters = new HashMap<String, ExpressionMap>();
 			searchCache = new Cache<DataMap>(5000);	
 			sysUserManager = new SysUserManager(accessManagementClient, config);
 			scriptFactory.setGlobals(globalVariables);
@@ -847,15 +845,6 @@ public class ObjectManager
 		return rbo;
 	}
 	
-	/*protected RedbackObject convertDBDataToObject(Session session, ObjectConfig objectConfig, DataMap dbData) throws RedbackException 
-	{
-		String key = objectConfig.getName() + ":" + dbData.getString(objectConfig.getUIDDBKey());
-		RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
-		if(rbo == null)
-			rbo = new RedbackObject(session, this, objectConfig, dbData);
-		return rbo;
-	}*/
-	
 	protected DataList generateNonPersistentObjectData(Session session, ObjectConfig objectConfig, DataMap filter, String searchText, DataMap sort, int page, int pageSize) throws RedbackException, ScriptException
 	{
 		DataList dbResultList = null;
@@ -900,14 +889,14 @@ public class ObjectManager
 	{
 		DataMap filter = session.getUserProfile().getReadFilter("rb.objects." + objectName);
 		if(filter != null) {
-			String s = filter.toString(true);
+			String s = filter.toString(true); //Not ideal to get the cache key;
 			ExpressionMap em = readRightsFilters.get(s);
 			if(em == null) {
 				String funcName = objectName + "_readrightsfilter_" + StringUtils.base16(filter.hashCode());
 				em = new ExpressionMap(scriptFactory, funcName, filter);
 				readRightsFilters.put(s, em);
 			}
-			return em.eval(createScriptContext(session));
+			return em.eval(session.getScriptContext());
 		} else {
 			return null;
 		}

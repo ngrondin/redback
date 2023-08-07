@@ -115,8 +115,7 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 		} else if(key.equals("multi")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					@SuppressWarnings("unchecked")
-					List<DataMap> list = (List<DataMap>)arguments[0];
+					DataList list = (DataList)arguments[0];
 					try
 					{
 						/*MultiResponse mr = */objectClient.multi(session, new MultiRequest(list));
