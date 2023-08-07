@@ -1,6 +1,8 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
 import { HtmlParser } from 'app/helpers';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AppInjector } from 'app/app.module';
 
 declare var Quill: any;
 
@@ -25,6 +27,13 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   }
   mode: string = 'editor';
   codeSource: string = null;
+  domSanitizer: DomSanitizer = null;
+
+  constructor() {
+    super();
+    this.defaultIcon = "description";
+    this.domSanitizer = AppInjector.get(DomSanitizer);
+  }
 
   ngAfterViewInit() {
     setTimeout(() => this.initiateQuill(), 100);
@@ -64,6 +73,10 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
 
   public get innerHtml() : string {
     return this.editor != null && this.editor.root != null ? this.editor.root.innerHTML : null;
+  }
+
+  public get safeInnerHtml() : SafeHtml {
+    return this.domSanitizer.bypassSecurityTrustHtml(this.innerHtml);
   }
 
   public set innerHtml(val: string) {
