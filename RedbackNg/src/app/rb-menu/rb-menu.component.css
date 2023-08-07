@@ -27,7 +27,7 @@
 
 .rb-menu-container-alt1 {
     background: var(--primary-color);
-    border-right: Solid 0px;
+    border-right: Solid 1px var(--primary-color);
 }
 
 
@@ -41,7 +41,7 @@
 
 .rb-menu-control-alt1 {
     background: var(--primary-color);
-    border-right: Solid 0px;
+    border-right: Solid 1px var(--primary-color);
     color: var(--light-inverse-writing-color);
 }
 

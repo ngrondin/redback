@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 export class RbMenuComponent implements OnInit {
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
   @Input('look') look: any = 'primary';
+  @Input('showcontrols') showcontrols: boolean = true;
   _type: string = 'full';
   _mode: string = 'large';
   content: any;

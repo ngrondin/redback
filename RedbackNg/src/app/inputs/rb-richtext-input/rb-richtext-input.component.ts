@@ -27,6 +27,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   }
   mode: string = 'editor';
   codeSource: string = null;
+  safeHtml: SafeHtml = null;
   domSanitizer: DomSanitizer = null;
 
   constructor() {
@@ -46,9 +47,19 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
 
 
   onDatasetEvent(event: string) {
-    if(this.innerHtml != this.value) this.innerHtml = this.value;
-    if(this.codeSource != this.value) this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), true);
-    if(this.editor != null) this.editor.enable(!this.readonly);
+    if(this.editor != null) {
+      if(this.editor.root != null && this.editor.root.innerHTML != this.value) {
+        this.editor.root.innerHTML = this.value;  
+      }
+      this.editor.enable(!this.readonly);
+    }
+    if(this.codeSource != this.value) {
+      this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), true);
+    } 
+    let _safeHtml = this.domSanitizer.bypassSecurityTrustHtml(this.value);
+    if(this.safeHtml != _safeHtml) {
+      this.safeHtml = _safeHtml;
+    }  
   }
 
   initiateQuill() {
@@ -70,20 +81,6 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   public set displayvalue(val: any) {
    
   }
-
-  public get innerHtml() : string {
-    return this.editor != null && this.editor.root != null ? this.editor.root.innerHTML : null;
-  }
-
-  public get safeInnerHtml() : SafeHtml {
-    return this.domSanitizer.bypassSecurityTrustHtml(this.innerHtml);
-  }
-
-  public set innerHtml(val: string) {
-    if(this.editor != null && this.editor.root != null) {
-      this.editor.root.innerHTML = val;  
-    }
-  }
   
   public onKeydown(event: any) {
     if(event.keyCode == 27) {
@@ -100,7 +97,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   public finishEditing() {
     console.log("QL Finish editing");
     if(this.mode == 'editor') {
-      this.editedValue = this.innerHtml;
+      this.editedValue = (this.editor != null && this.editor.root != null ? this.editor.root.innerHTML : null);
     } else {
       this.editedValue = HtmlParser.stringify(HtmlParser.parse(this.codeSource));
     }

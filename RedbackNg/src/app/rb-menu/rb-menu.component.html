@@ -22,7 +22,8 @@
     </mat-action-list>    
 </div>
 <div
-    [class]="'rb-menu-control rb-menu-control-' + look">
+    [class]="'rb-menu-control rb-menu-control-' + look"
+    *ngIf="showcontrols">
     <rb-iconbutton
         *ngIf="mode == 'small'"
         [icon]="'navigate_next'"

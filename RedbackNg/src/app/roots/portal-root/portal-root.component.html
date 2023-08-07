@@ -85,6 +85,7 @@
         opened>
         <rb-menu
             [look]="userprefService.getGlobalPreferenceValue('uialt')"
+            [showcontrols]="false"
             (navigate)="navigateTo($event)">
         </rb-menu>
     </mat-sidenav>
