@@ -22,8 +22,10 @@ public class RedbackObjectList extends ArrayList<RedbackObject> {
 	
 	public boolean addAll(List<RedbackObject> list) {
 		boolean ret = false;
-		for(RedbackObject rbo : list) 
-			ret = ret || add(rbo);
+		for(RedbackObject rbo : list) {
+			boolean r = add(rbo);
+			ret = ret || r;
+		}
 		return ret;
 	}
 	
