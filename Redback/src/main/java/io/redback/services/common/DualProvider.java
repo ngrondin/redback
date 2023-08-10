@@ -20,8 +20,9 @@ public abstract class DualProvider extends Provider implements io.firebus.interf
 	{
 		try {
 			Timer timer = new Timer();
-			Payload response = redbackService(getSession(payload), payload);
-			Logger.info("rb.service", new DataMap("ms", timer.mark(), "req", payload.getDataObject()));
+			Session session = getSession(payload);
+			Payload response = redbackService(session, payload);
+			Logger.info("rb.service", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return response;
 		} catch(Exception e) {
 			throw handleException("rb.service", "Exception in redback service '" + serviceName + "'", e);
@@ -31,8 +32,9 @@ public abstract class DualProvider extends Provider implements io.firebus.interf
 	public Payload acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
 		try {
 			Timer timer = new Timer();
-			Payload acceptPayload = redbackAcceptStream(getSession(payload), payload, streamEndpoint);
-			Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject()));
+			Session session = getSession(payload);
+			Payload acceptPayload = redbackAcceptStream(session, payload, streamEndpoint);
+			Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return acceptPayload;
 		} catch(Exception e) {
 			throw handleException("rb.stream", "Exception in redback stream '" + serviceName + "'", e);

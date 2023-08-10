@@ -19,8 +19,9 @@ public abstract class StreamProvider extends Provider implements io.firebus.inte
 	public Payload acceptStream(Payload payload, StreamEndpoint streamEndpoint) throws FunctionErrorException {
 		try {
 			Timer timer = new Timer();
-			Payload acceptPayload = redbackAcceptStream(getSession(payload), payload, streamEndpoint);
-			Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject()));
+			Session session = getSession(payload);
+			Payload acceptPayload = redbackAcceptStream(session, payload, streamEndpoint);
+			Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return acceptPayload;
 		} catch(Exception e) {
 			throw handleException("rb.stream", "Exception in redback stream '" + serviceName + "'", e);

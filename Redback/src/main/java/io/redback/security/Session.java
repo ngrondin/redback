@@ -2,6 +2,7 @@ package io.redback.security;
 
 import java.util.Random;
 
+import io.firebus.data.DataMap;
 import io.firebus.script.ScriptContext;
 import io.redback.utils.TxStore;
 
@@ -17,6 +18,7 @@ public class Session
 	public String domainLock;
 	public ScriptContext scriptContext;
 	public TxStore<Object> txStore;
+	public DataMap stats;
 
 	public Session() 
 	{
@@ -52,6 +54,7 @@ public class Session
 		}
 		token = t;
 		userProfile = up;	
+		stats = new DataMap();
 	}
 	
 	public void setUserProfile(UserProfile up) 
@@ -89,6 +92,11 @@ public class Session
 		txStore = txs;
 	}
 	
+	public void setStat(String name, Object value) 
+	{
+		stats.put(name, value);
+	}
+	
 	public String getId()
 	{
 		return id;
@@ -122,5 +130,12 @@ public class Session
 	public TxStore<Object> getTxStore() {
 		return txStore;
 	}
+	
+	public boolean hasTxStore() {
+		return txStore != null;
+	}
 
+	public DataMap getStats() {
+		return stats;
+	}
 }

@@ -31,8 +31,8 @@ public class RedbackObjectServer extends ObjectServer
 	}	
 	
 
-	protected void startTransaction(Session session) throws RedbackException {
-		objectManager.initiateCurrentTransaction(session);
+	protected void startTransaction(Session session, boolean store) throws RedbackException {
+		objectManager.initiateCurrentTransaction(session, store);
 	}
 
 	protected void commitTransaction(Session session) throws RedbackException {

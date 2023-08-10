@@ -29,7 +29,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		try {
 			DataMap requestData = payload.getDataMap();
-			startTransaction(session);
+			startTransaction(session, true);
 			DataMap responseData = processServiceRequest(session, requestData);
 			commitTransaction(session);
 			Payload response = new Payload(responseData);
@@ -47,9 +47,8 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 	public Payload redbackAcceptAuthenticatedStream(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {
 		try {
 			DataMap requestData = payload.getDataMap();
-			startTransaction(session);
+			startTransaction(session, false);
 			processStreamRequest(session, requestData, streamEndpoint);
-			commitTransaction(session);
 			return null;
 		} catch(DataException e) {
 			throw new RedbackException("Error in object server", e);
@@ -283,7 +282,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 		}	
 	}
 	
-	protected abstract void startTransaction(Session session) throws RedbackException;
+	protected abstract void startTransaction(Session session, boolean store) throws RedbackException;
 	
 	protected abstract void commitTransaction(Session session) throws RedbackException;
 		

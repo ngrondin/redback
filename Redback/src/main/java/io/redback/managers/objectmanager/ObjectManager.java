@@ -356,7 +356,7 @@ public class ObjectManager
 	{
 		ObjectConfig objectConfig = getConfigIfCanRead(session, objectName);
 		String key = objectName + ":" + id;
-		RedbackObject object = (RedbackObject)session.getTxStore().get(key);
+		RedbackObject object = session.hasTxStore() ? (RedbackObject)session.getTxStore().get(key) : null;
 		if(object == null)
 		{
 			try
@@ -491,8 +491,9 @@ public class ObjectManager
 	public void deleteObject(Session session, String objectName, String uid) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, uid);
-		if(object != null)
+		if(object != null) {
 			object.delete();
+		}
 	}	
 	
 	public RedbackObject executeObjectFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
@@ -742,61 +743,70 @@ public class ObjectManager
 		return new Value(value);
 	}
 	
-	public void initiateCurrentTransaction(Session session)  throws RedbackException
+	public void initiateCurrentTransaction(Session session, boolean store)  throws RedbackException
 	{
 		session.setScriptContext(createScriptContext(session));
-		session.setTxStore(new TxStore<Object>());
+		if(store)
+			session.setTxStore(new TxStore<Object>());
 	}
 	
 	public void commitCurrentTransaction(Session session) throws RedbackException
 	{
-		List<Object> txlist = session.getTxStore().getCopyOfAll();
-		List<RedbackObject> list = new ArrayList<RedbackObject>();
-		for(Object o : txlist)
-			list.add((RedbackObject)o);
+		if(session.hasTxStore()) {
+			int updates = 0;
+			List<RedbackObject> list = new ArrayList<RedbackObject>();
+			for(Object o : session.getTxStore().getAll())
+				list.add((RedbackObject)o);
 
-		List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
-		for(RedbackObject rbObject: list) {
-			if(rbObject.isDeleted) {
-				dbtxs.add(rbObject.getDBDeleteTransaction());
-			} else if(rbObject.isUpdated()) {
-				rbObject.onSave();
-				dbtxs.add(rbObject.getDBUpdateTransaction());
-				List<DataTransaction> traceTxs = rbObject.getDBTraceTransactions();
-				if(traceTxs != null) 
-					for(DataTransaction ttx: traceTxs)
-						dbtxs.add(ttx);
-			}
-		}
-		
-		if(dbtxs.size() > 0) {
-			if(this.useMultiDBTransactions) {
-				dataClient.multi(dbtxs);
-			} else {
-				for(DataTransaction tx: dbtxs) {
-					dataClient.runTransaction(tx);
+			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
+			for(RedbackObject rbObject: list) {
+				if(rbObject.isDeleted) {
+					dbtxs.add(rbObject.getDBDeleteTransaction());
+					updates++;
+				} else if(rbObject.isUpdated()) {
+					rbObject.onSave();
+					dbtxs.add(rbObject.getDBUpdateTransaction());
+					updates++;
+					List<DataTransaction> traceTxs = rbObject.getDBTraceTransactions();
+					if(traceTxs != null) 
+						for(DataTransaction ttx: traceTxs)
+							dbtxs.add(ttx);
 				}
 			}
-		}
-		
-		for(RedbackObject rbObject: list) {
-			if(rbObject.isDeleted) {
-				rbObject.afterDelete();
-			} else if(rbObject.isUpdated()) {
-				rbObject.afterSave();
-				signal(rbObject);
+			
+			if(dbtxs.size() > 0) {
+				if(this.useMultiDBTransactions) {
+					dataClient.multi(dbtxs);
+				} else {
+					for(DataTransaction tx: dbtxs) {
+						dataClient.runTransaction(tx);
+					}
+				}
 			}
+			
+			for(RedbackObject rbObject: list) {
+				if(rbObject.isDeleted) {
+					rbObject.afterDelete();
+				} else if(rbObject.isUpdated()) {
+					rbObject.afterSave();
+					signal(rbObject);
+				}
+			}	
+			session.setStat("objects", list.size());
+			session.setStat("updates", updates);
 		}
 	}
 
 	protected List<RedbackObject> getNewOrUpdatedObjects(Session session, ObjectConfig objectConfig, DataMap objectFilter) throws RedbackException 
 	{
 		RedbackObjectList objectList = new RedbackObjectList();
-		List<Object> txList = session.getTxStore().getAll();
-		for(Object o: txList) {
-			RedbackObject rbo = (RedbackObject)o;
-			if(rbo.getObjectConfig().getName().equals(objectConfig.getName()) && rbo.filterApplies(objectFilter) && !rbo.filterOriginallyApplied(objectFilter))
-				objectList.add(rbo);
+		if(session.getTxStore() != null) {
+			List<Object> txList = session.getTxStore().getAll();
+			for(Object o: txList) {
+				RedbackObject rbo = (RedbackObject)o;
+				if(rbo.getObjectConfig().getName().equals(objectConfig.getName()) && rbo.filterApplies(objectFilter) && !rbo.filterOriginallyApplied(objectFilter))
+					objectList.add(rbo);
+			}			
 		}
 		return objectList;
 	}
@@ -835,7 +845,7 @@ public class ObjectManager
 	protected RedbackObject convertDBDataToObjectIfStillApplies(Session session, ObjectConfig objectConfig, DataMap objectFilter, DataMap dbData) throws RedbackException 
 	{
 		String key = objectConfig.getName() + ":" + dbData.getString(objectConfig.getUIDDBKey());
-		RedbackObject rbo = (RedbackObject)session.getTxStore().get(key); 
+		RedbackObject rbo = session.hasTxStore() ? (RedbackObject)session.getTxStore().get(key) : null; 
 		if(rbo != null) {
 			if(rbo.isDeleted || !rbo.filterApplies(objectFilter))
 				rbo = null;
