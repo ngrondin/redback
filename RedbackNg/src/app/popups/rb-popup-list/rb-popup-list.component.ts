@@ -1,6 +1,5 @@
-import { Component, OnInit, Inject, InjectionToken, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { RbObject } from '../../datamodel';
-//import { OverlayRef } from '@angular/cdk/overlay';
 import { CONTAINER_DATA } from '../../tokens';
 import { DataService } from 'app/services/data.service';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
@@ -35,7 +34,7 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
   }
 
   public getData() {
-    let filter: any = {};
+    let filter: any = {...this.config.filter};
     if(this.config.parentattribute != null) {
       if(this.hierarchy.length > 0) {
         const lastObject = this.hierarchy[this.hierarchy.length - 1];
@@ -51,7 +50,11 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
       }
     }
     this.isLoading = true;
-    this.dataService.fetchRelatedList(this.config.rbObject.objectname, this.config.rbObject.uid, this.config.attribute, filter, this.search, sort, true).subscribe(data => this.setData(data));
+    if(this.config.rbObject != null && this.config.attribute != null) {
+      this.dataService.fetchRelatedList(this.config.rbObject.objectname, this.config.rbObject.uid, this.config.attribute, filter, this.search, sort, true).subscribe(data => this.setData(data));
+    } else if(this.config.objectname != null) {
+      this.dataService.fetchList(this.config.objectname, filter, this.search, sort, 0, 50, false).subscribe(data => this.setData(data));
+    }
   }
 
   public setData(objects: RbObject[]) {

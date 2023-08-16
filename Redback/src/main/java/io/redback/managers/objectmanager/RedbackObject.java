@@ -33,6 +33,7 @@ public class RedbackObject extends RedbackElement
 	protected Value uid;
 	protected Value domain;
 	protected String key;
+	protected long lastUpdated;
 	protected boolean canRead;
 	protected boolean canWrite;
 	protected boolean canExecute;
@@ -170,6 +171,7 @@ public class RedbackObject extends RedbackElement
 		session = s;
 		objectManager = om;
 		config = cfg;
+		lastUpdated = System.currentTimeMillis();
 		String objectRightKey = "rb.objects." + config.getName();
 		String accessCatKey = "rb.accesscat." + config.getAccessCategory();
 		canRead = session.getUserProfile().canRead(objectRightKey) || session.getUserProfile().canRead(accessCatKey);
@@ -391,7 +393,8 @@ public class RedbackObject extends RedbackElement
 				if(canWrite  &&  (isEditable(name) || isNewObject))
 				{
 					data.put(name, actualValue);
-					updatedAttributes.put(name, trace);	
+					updatedAttributes.put(name, trace);
+					lastUpdated = System.currentTimeMillis();
 					try {
 						if(attributeConfig.getExpression() == null) 
 							scriptContext.put(name, actualValue.getObject());
@@ -513,6 +516,7 @@ public class RedbackObject extends RedbackElement
 	{
 		if(canDelete()) {
 			isDeleted = true;
+			lastUpdated = System.currentTimeMillis();
 			executeFunctionForEvent("ondelete");
 		} else {
 			throw new RedbackException("The object '" + config.getName() + ":" + getUID().getString() + "' cannot be deleted");
@@ -642,6 +646,7 @@ public class RedbackObject extends RedbackElement
 			object.put("objectname", config.getName());
 			object.put("uid", uid.getObject());
 			object.put("domain", domain.getObject());
+			object.put("ts", lastUpdated);
 
 			DataMap dataNode = new DataMap();
 			DataMap validatonNode = new DataMap();

@@ -15,16 +15,18 @@ import { RbDataButtonComponent } from '../abstract/rb-databutton';
 
 export class RbActiongroupAction {
   action: string;
+  target: string;
   param: string;
   timeout: number;
   label: string;
   confirm: string;
   focus: boolean;
 
-  constructor(a: string, p: string, t:number, l: string, c: string, f: boolean) {
+  constructor(a: string, t: string, p: string, to:number, l: string, c: string, f: boolean) {
     this.action = a;
+    this.target = t;
     this.param = p;
-    this.timeout = t;
+    this.timeout = to;
     this.label = l;
     this.confirm = c;
     this.focus = f;
@@ -73,11 +75,11 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
       this.domainActions = [];
       this.apiService.listScripts(category).subscribe(json => {
         for(var item of json.list) {
-          this.domainActions.push(new RbActiongroupAction('executeglobal', item.name, item.timeout, item.description, item.confirm, false));
+          this.domainActions.push(new RbActiongroupAction('executeglobal', item.name, null, item.timeout, item.description, item.confirm, false));
         }
         this.apiService.listDomainFunctions(category).subscribe(json => {
           for(var item of json.result) {
-            this.domainActions.push(new RbActiongroupAction('executedomain', item.name, item.timeout, item.description, item.confirm, false));
+            this.domainActions.push(new RbActiongroupAction('executedomain', item.name, null, item.timeout, item.description, item.confirm, false));
           }
           this.calcActionData();
         });
@@ -180,7 +182,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
     if(this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
-        this.actionData.push(new RbActiongroupAction("processaction", action.action, null, action.description, null, action.main));
+        this.actionData.push(new RbActiongroupAction("processaction", null, action.action, null, action.description, null, action.main));
       }
     }
     if(this.actions != null) {
@@ -188,7 +190,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject) == true))) {
           let swtch = this.userpref.getCurrentViewUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
-            this.actionData.push(new RbActiongroupAction(item.action, item.param, item.timeout, item.label, item.confirm, false));
+            this.actionData.push(new RbActiongroupAction(item.action, item.target, item.param, item.timeout, item.label, item.confirm, false));
           }
         }
       });
@@ -230,7 +232,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         });
     } else {
       this.running = true;
-      this.actionService.action(this.dataset, action.action, action.param, action.timeout, action.confirm).subscribe().add(() => {
+      this.actionService.action(this.dataset, action.action, action.target, action.param, null, action.confirm, action.timeout).subscribe().add(() => {
         this.running = false;
       });
     }

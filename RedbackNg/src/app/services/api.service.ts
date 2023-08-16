@@ -186,7 +186,7 @@ export class ApiService {
     return this.requestService(this.objectService, req);
   }
 
-  executeObject(name: string, uid: string, func: string) {
+  executeObject(name: string, uid: string, func: string, param?: any) {
     const req = {
       action: 'execute',
       object: name,
@@ -197,6 +197,7 @@ export class ApiService {
         addvalidation: true
       }
     };
+    if(param != null) req["param"] = param;
     return this.requestService(this.objectService, req);
   }
   

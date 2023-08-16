@@ -2,16 +2,18 @@ package io.redback.managers.objectmanager.js;
 
 import java.util.List;
 
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
-import io.firebus.script.Converter;
 import io.firebus.script.Function;
 import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.values.abs.SCallable;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.ObjectManager;
+import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.security.Session;
 import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.Converter;
 import io.redback.utils.js.ObjectJSWrapper;
 import io.redback.utils.stream.AccumulatingDataStream;
 
@@ -46,7 +48,9 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
-					List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, search, sort, false, 0, 50);
+					long page = arguments.length > 4 ? (long)arguments[4] : 0;
+					long pageSize = arguments.length > 5 ? (long)arguments[5] : 50;
+					List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, search, sort, false, (int)page, (int)pageSize);
 					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};
@@ -75,6 +79,22 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					return RedbackObjectJSWrapper.convertList(list);
 				}
 			};
+		} else if(key.equals("aggregateObjects")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)arguments[1];
+					DataList tuple = (DataList)arguments[2];
+					DataList metrics = (DataList)arguments[3];
+					DataMap sort = (DataMap)arguments[4];
+					try {
+						List<RedbackAggregate> list = objectManager.aggregateObjects(session, objectname, filter, null, tuple, metrics, sort, null, true, 0, 5000);
+						return Converter.convertIn(list);
+					} catch(ScriptException e) {
+						throw new RedbackException("Error in aggregateObjects", e);
+					}
+				}
+			};			
 		} else if(key.equals("updateObject")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

@@ -50,6 +50,8 @@ import { RbActionButtonComponent } from "app/clickable/rb-actionbutton/rb-action
 import { RbRichtextInputComponent } from "app/inputs/rb-richtext-input/rb-richtext-input.component";
 import { RbVseparatorComponent } from "app/rb-vseparator/rb-vseparator.component";
 import { RbDynamicformeditorComponent } from "app/rb-dynamicformeditor/rb-dynamicformeditor.component";
+import { RbFunnelComponent } from "app/rb-funnel/rb-funnel.component";
+import { RbActionlistComponent } from "app/clickable/rb-actionlist/rb-actionlist.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -104,5 +106,7 @@ export const componentRegistry = {
     "numbertiles": RbNumberTilesComponent,
     "timeline": RbTimelineComponent,
     "stars": RbStarsInputComponent,
-    "percentinput": RbPercentInputComponent
+    "percentinput": RbPercentInputComponent,
+    "funnel":RbFunnelComponent,
+    "listbutton": RbActionlistComponent
   }

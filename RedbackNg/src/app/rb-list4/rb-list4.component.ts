@@ -19,6 +19,7 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('colormap') colormap: any;
   @Input('colorattribute') colorattribute: string;
   @Input('modal') modal: string;
+  @Input('showrefresh') showrefresh: boolean = true;
 
   enhancedList: any[];
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
@@ -141,7 +142,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   showCount() : boolean {
-    return this.dataset.totalCount > 10;
+    return this.showrefresh && this.dataset.totalCount > 10;
   }
 
   getCountText() : string {
@@ -149,7 +150,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   showRefresh() : boolean {
-    return true;
+    return this.showrefresh;
   }
 
   itemClicked(item: RbObject) {

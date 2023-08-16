@@ -10,12 +10,13 @@ import { RbDataButtonComponent } from '../abstract/rb-databutton';
 })
 export class RbActionButtonComponent extends RbDataButtonComponent {
   @Input('action') action: string;
+  @Input('target') target: string;
   @Input('param') param: string;
-  @Input('timeout') timeout: number;
   @Input('confirm') confirm: string;
+  @Input('timeout') timeout: number;
   
   constructor(
-    private actionService: ActionService
+    public actionService: ActionService
   ) {
     super();
   }
@@ -23,7 +24,7 @@ export class RbActionButtonComponent extends RbDataButtonComponent {
   click() {
     if(this.dataset != null) {
       this.running = true;
-      this.actionService.action(this.dataset, this.action, this.param, this.timeout, this.confirm).subscribe((rbObject) => {
+      this.actionService.action(this.dataset, this.action, this.target, this.param, null, this.confirm, this.timeout).subscribe((rbObject) => {
         this.running = false;
       })
     }

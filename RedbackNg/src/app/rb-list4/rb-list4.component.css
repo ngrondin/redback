@@ -143,6 +143,15 @@
     width: 90%;
 }
 
+.rb-list-norecords {
+    color: var(--light-writing-color);
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+}
+
 .rb-list-floating {
     display:block;
     position: absolute;

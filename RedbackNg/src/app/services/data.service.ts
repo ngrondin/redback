@@ -296,7 +296,7 @@ export class DataService {
 
   executeObjectFunction(rbObject: RbObject, func: string, param: string) : Observable<null> {
     return new Observable<null>((observer) => {
-      this.apiService.executeObject(rbObject.objectname, rbObject.uid, func).subscribe(
+      this.apiService.executeObject(rbObject.objectname, rbObject.uid, func, param).subscribe(
         resp => {
           if(!this.clientWSService.isConnected()) this.receive(resp);
           observer.next();

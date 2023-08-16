@@ -7,7 +7,9 @@ import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.exceptions.ScriptValueException;
 import io.firebus.script.values.SArray;
 import io.firebus.script.values.abs.SValue;
+import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
+import io.redback.managers.objectmanager.js.RedbackAggregateJSWrapper;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 
 public class Converter {
@@ -22,6 +24,8 @@ public class Converter {
 	public static SValue convertIn(Object o) throws ScriptValueException {
 		if(o instanceof RedbackObject) {
 			return new RedbackObjectJSWrapper((RedbackObject)o);
+		} if(o instanceof RedbackAggregate) {
+			return new RedbackAggregateJSWrapper((RedbackAggregate)o);			
 		} else if(o instanceof List) {
 			List<?> list = (List<?>)o;
 			SArray a = new SArray();
@@ -44,6 +48,8 @@ public class Converter {
 	public static Object convertOut(SValue v) throws ScriptException {
 		if(v instanceof RedbackObjectJSWrapper) {
 			return ((RedbackObjectJSWrapper)v).getRedbackObject();
+		} if(v instanceof RedbackAggregateJSWrapper) {
+			return ((RedbackAggregateJSWrapper)v).getRedbackAggregate();
 		} else if(v instanceof SArray) {
 			SArray a = (SArray)v;
 			SValue v1 = a.getSize() > 0 ? a.get(0) : null;

@@ -9,6 +9,7 @@ import { ClientWSService } from './services/clientws.service';
 import { MenuService } from './services/menu.service';
 import { Subject } from 'rxjs';
 import { DataService } from './services/data.service';
+import { ModalService } from './services/modal.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -46,7 +47,8 @@ export class AppComponent implements OnInit {
       private configService: ConfigService,
       private notificationService: NotificationService,
       private userprefService: UserprefService,
-      private menuService: MenuService
+      private menuService: MenuService,
+      private modalService: ModalService
    ) {
     var native = this.elementRef.nativeElement;
 
@@ -82,6 +84,7 @@ export class AppComponent implements OnInit {
     window.redback.username = this.username;
     window.redback.api = this.apiService;
     window.redback.data = this.dataService;
+    window.redback.modal = this.modalService;
     window.redback.notifications = this.notificationService;
   }
 

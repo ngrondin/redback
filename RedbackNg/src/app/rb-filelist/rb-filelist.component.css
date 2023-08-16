@@ -106,8 +106,9 @@
     min-height: 80px;
     justify-content: center;
     align-items: center;
+    color: var(--light-writing-color);
+    font-size: 0.9rem;
 }
-
 
 .rb-files-uploading {
     display: flex;

@@ -1,0 +1,116 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+.rb-funnel-phase {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #888;
+    border-radius: var(--v3px);
+    margin: var(--v5px);
+    width: 16vw;
+    background-color: #fdfdfd;
+}
+
+.rb-funnel-phase-title {
+    display: flex;
+    flex: 0 0 auto;
+    padding: var(--v10px) var(--v8px) var(--v10px) var(--v16px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    align-items: center;
+    color: white;
+    background-color: var(--primary-color);
+}
+
+.rb-funnel-scroll {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.rb-funnel-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-funnel-group-header {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--primary-dark2-color);
+    border-top: 1px solid white;
+}
+
+.rb-funnel-group-header-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    padding: var(--v10px) var(--v8px) var(--v10px) var(--v16px);
+    overflow: hidden;
+}
+
+.rb-funnel-group-header-name {
+    display: block;
+    flex: 1 1 auto;
+    color: var(--light-inverse-writing-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 12px;
+    font-size: 0.85rem;
+}
+
+.rb-funnel-group-header-count {
+    display: flex;
+    flex-direction: row;
+    color: var(--dark-inverse-writing-color);
+    font-size: 0.8rem;
+    border-radius: 12px;
+}
+
+.rb-funnel-listitemcontent {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: var(--v10px) var(--v20px);
+    min-height: var(--v48px);
+    overflow: hidden;
+}
+
+.rb-funnel-listheader {
+    line-height: 20px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding-top: 6px;
+    color: var(--dark-writing-color);
+    font-size: 0.9rem;
+}
+
+.rb-funnel-listsub {
+    color: var(--light-writing-color);
+    font-size: 0.8rem;
+    max-width: 330px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 18px;
+}
+
+.rb-funnel-emptymessage {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    color: var(--light-writing-color);
+    font-size: 0.9rem;
+    justify-content: center;
+    align-items: center;
+}

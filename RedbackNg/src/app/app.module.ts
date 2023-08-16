@@ -134,6 +134,9 @@ import { RbVseparatorComponent } from './rb-vseparator/rb-vseparator.component'
 import { RedbackgraphsModule } from 'redbackgraphs';
 import { RbDynamicformeditorComponent } from './rb-dynamicformeditor/rb-dynamicformeditor.component';
 import { PortalRootComponent } from './roots/portal-root/portal-root.component';
+import { RbActionlistComponent } from './clickable/rb-actionlist/rb-actionlist.component';
+import { RbFunnelComponent } from './rb-funnel/rb-funnel.component';
+
 
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -278,7 +281,9 @@ window.redback = window.redback || {};
         RbIconbuttonComponent,
         RbRichtextInputComponent,
         RbVseparatorComponent,
-        RbDynamicformeditorComponent
+        RbDynamicformeditorComponent,
+        RbActionlistComponent,
+        RbFunnelComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

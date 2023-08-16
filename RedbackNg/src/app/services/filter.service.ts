@@ -27,69 +27,77 @@ export class FilterService {
 
 
 
-  public resolveFilter(__inMap: any, obj: RbObject, selectedObject: RbObject, relatedObject: RbObject) : any {
-    let userpref = this.userPrefService;
+  public resolveFilter(__inMap: any, obj: RbObject, selectedObject?: RbObject, relatedObject?: RbObject, extraContext?: any) : any {
     try {
-      let __outMap: any = {};
-      let uid = null;
-      let __varString = "";
+      let params: string[] = ["obj", "selectedObject", "relatedObject", "userpref", "uid"];
+      let args: any[] = [obj, selectedObject, relatedObject, this.userPrefService];
+
       if(obj != null && typeof obj != 'undefined') {
-        __varString = __varString + "var uid = '" + obj.uid + "';\r\n"
+        args.push(obj.uid);
         for(const attr in obj.data) {
-          let val = obj.data[attr];
-          if(val == null) {
-            val = null;
-          } else if(typeof val == 'string') {
-            val = "'" + val.replace(/\'/g, "\\'").replace(/\"/g, "\\\"").replace(/\n/g, "\\n").replace(/\r/g, "\\r") + "'";
-          } else if(typeof val == 'object') {
-            val = JSON.stringify(val);
-          } 
-          __varString = __varString + "var " + attr + " = " + val + ";\r\n"
+          params.push(attr);
+          args.push(obj.data[attr]);
         }
-      } 
-
-      function evalValue(__value) {
-        var ret = null;
-        if(__value != null && __value != "") {
-          try { 
-            ret = eval(__varString + " (" + __value + ")"); 
-          } catch(err) {
-            console.error(err);
-          }  
-        }
-        return ret;
+      } else {
+        args.push(null);
       }
 
-      for (const __key in __inMap) {
-        let __value = __inMap[__key];
-        if(__value == null) {
-          __value = null;
-        } else if(typeof __value == "string") {
-          __value = evalValue(__value);
-        } else if(typeof __value == "object" ) {
-          if(Array.isArray(__value)) {
-            let __outArray = [];
-            for(const __valueItem of __value) {
-              if(typeof __valueItem == "object") {
-                __outArray.push(this.resolveFilter(__valueItem, obj, selectedObject, relatedObject));
-              } else if(typeof __valueItem == "string") {
-                __outArray.push(evalValue(__valueItem));
-              }
-            }
-            __value = __outArray;
-          } else {
-            __value = this.resolveFilter(__value, obj, selectedObject, relatedObject);
-          }
+      if(extraContext != null && typeof extraContext != 'undefined') {
+        for(const key in extraContext) {
+          params.push(key);
+          args.push(extraContext[key]);
         }
-        __outMap[__key] = __value;
       }
-      return __outMap;
+
+      return this._resolveFilter(__inMap, params, args);
     } catch(e) {
       return __inMap;
     }
   }
 
-  applies(filter: any, object: RbObject) : boolean {
+  private _resolveFilter(__inMap: any, params: string[], args: any[]) : any {
+    let __outMap: any = {};
+    for (const __key in __inMap) {
+      let __value = __inMap[__key];
+      if(__value == null) {
+        __value = null;
+      } else if(typeof __value == "string") {
+        __value = this.evalExpression(__value, params, args);
+      } else if(typeof __value == "object" ) {
+        if(Array.isArray(__value)) {
+          let __outArray = [];
+          for(const __valueItem of __value) {
+            if(typeof __valueItem == "object") {
+              __outArray.push(this._resolveFilter(__valueItem, params, args));
+            } else if(typeof __valueItem == "string") {
+              __outArray.push(this.evalExpression(__valueItem, params, args));
+            }
+          }
+          __value = __outArray;
+        } else {
+          __value = this._resolveFilter(__value, params, args);
+        }
+      }
+      __outMap[__key] = __value;
+    }
+    return __outMap;
+  }
+
+  private evalExpression(expr, params: string[], args: any[]): any {
+    var ret = null;
+    if(expr != null && expr != "") {
+      try { 
+        let source = "return (" + expr + ")"; 
+        let func = Function(...[...params, source]);
+        ret = func.call(window.redback, ...args); 
+      } catch(err) {
+        console.error(err);
+      }  
+    }
+    return ret;
+  }
+
+  public applies(filter: any, object: RbObject) : boolean {
     let ret: boolean = true;
     for(let key in filter) {
       let fVal = filter[key];

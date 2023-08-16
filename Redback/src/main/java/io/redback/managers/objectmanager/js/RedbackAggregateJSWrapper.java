@@ -39,5 +39,10 @@ public class RedbackAggregateJSWrapper extends ObjectJSWrapper
 			return obj;
 		}
 	}
+	
+	public RedbackAggregate getRedbackAggregate() 
+	{
+		return rbAggregate;
+	}
 
 }

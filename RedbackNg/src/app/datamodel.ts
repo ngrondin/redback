@@ -13,6 +13,7 @@ export class RbObject {
     objectname: string;
     uid: string;
     domain: string;
+    lastupdate: number;
     data: any = {};
     related: any = {};
     validation: any = {};
@@ -31,40 +32,43 @@ export class RbObject {
     }
 
     updateFromJSON(json: any) {
-        const inData: any = json.data;
-        let isChanged: boolean = false;
-        for(const attribute in json.data) {
-            if(json.validation != null && json.validation[attribute] != null) {
-                this.validation[attribute] = json.validation[attribute];
-            }
-
-            if(ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
-                isChanged = true;
-                this.data[attribute] = json.data[attribute];
-                if((this.validation[attribute] != null && this.validation[attribute].related != null) || this.related[attribute] !== undefined) {
-                    this.related[attribute] = null;
-                    this._setAttributeFlag(attribute, 'reqrel', false);
-                } 
-            }
-
-            if(json.related != null && json.related[attribute] != null) {
-                let related = this.dataService.receive(json.related[attribute]);
-                if(this.related[attribute] != related) {
-                    this.related[attribute] = related;
+        if(json.ts >= (this.lastUpdated ?? 0)) {
+            const inData: any = json.data;
+            let isChanged: boolean = false;
+            for(const attribute in json.data) {
+                if(json.validation != null && json.validation[attribute] != null) {
+                    this.validation[attribute] = json.validation[attribute];
+                }
+    
+                if(ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
                     isChanged = true;
+                    this.data[attribute] = json.data[attribute];
+                    if((this.validation[attribute] != null && this.validation[attribute].related != null) || this.related[attribute] !== undefined) {
+                        this.related[attribute] = null;
+                        this._setAttributeFlag(attribute, 'reqrel', false);
+                    } 
+                }
+    
+                if(json.related != null && json.related[attribute] != null) {
+                    let related = this.dataService.receive(json.related[attribute]);
+                    if(this.related[attribute] != related) {
+                        this.related[attribute] = related;
+                        isChanged = true;
+                    }
                 }
             }
-        }
-
-        if(json.validation != null) {
-            this.validation._candelete = json.validation._candelete;
-            this._linkMissingRelated();
-        }
-
-        if(isChanged) {
-            this.updatedAttributes = [];
-            this.lastUpdated = (new Date()).getTime();
-            this._adviseSetsOfChange();
+    
+            if(json.validation != null) {
+                this.validation._candelete = json.validation._candelete;
+                this._linkMissingRelated();
+            }
+    
+            if(isChanged) {
+                this.updatedAttributes = [];
+                this.lastUpdated = (new Date()).getTime();
+                this._adviseSetsOfChange();
+            }
+            this.lastUpdated = json.ts;
         }
     }
 
