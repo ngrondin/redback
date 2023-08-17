@@ -45,6 +45,7 @@ export abstract class AppRootComponent implements OnInit {
         this.cookieService = AppInjector.get(CookieService);
         this.apiService = AppInjector.get(ApiService);
         this.clientWSServer = AppInjector.get(ClientWSService);
+        window.redback.navigateTo = (event) => this.navigateTo(event);
      }
   
     ngOnInit() {

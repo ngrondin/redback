@@ -141,7 +141,6 @@ export class ClientWSService {
       if(typeof data == 'string') {
         msg = JSON.parse(data);
       } else {
-        console.log("Binary");
         let str = pako.ungzip(data, { to: 'string' });
         msg = JSON.parse(str);
       }
