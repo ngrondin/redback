@@ -41,7 +41,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 			f.registerConsumer(c.getString("chatchannel"), new Consumer() {
 				public void consume(Payload payload) {
 					try {
-						onChatMessage(payload.getDataMap());
+						onChatUpdate(payload.getDataMap());
 					} catch(Exception e) {
 						Logger.severe("rb.client.onchat", "Error receiving chat", e);
 					}
@@ -68,5 +68,5 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 	
 	protected abstract void onNotification(DataMap data) throws RedbackException;
 	
-	protected abstract void onChatMessage(DataMap data) throws RedbackException;
+	protected abstract void onChatUpdate(DataMap data) throws RedbackException;
 }

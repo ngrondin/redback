@@ -220,9 +220,10 @@ public class ClientHandler extends ClientStreamHandler {
 		sendClientData(wrapper);
 	}
 	
-	public void receiveChat(DataMap data) throws RedbackException {
-		
+	public void receiveChatUpdate(DataMap data) throws RedbackException {
+		sendChatUpdate(data);
 	}
+
 
 	public DataMap getStatus() {
 		DataMap status = new DataMap();

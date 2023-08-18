@@ -226,6 +226,13 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		sendClientData(msg);		
 	}
 	
+	public void sendChatUpdate(DataMap data) {
+		DataMap msg = new DataMap();
+		msg.put("type", "chatupdate");
+		msg.put("data", data);
+		sendClientData(msg);		
+	}
+	
 	public abstract void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, boolean notifAuthorized, boolean nfcAvailable, String screenSize) throws RedbackException;
 	
 	public abstract void subscribeObject(String objectname, String uid) throws RedbackException;
@@ -248,7 +255,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	public abstract void receiveNotification(DataMap data) throws RedbackException;
 	
-	public abstract void receiveChat(DataMap data) throws RedbackException;
+	public abstract void receiveChatUpdate(DataMap data) throws RedbackException;
 	
 	public abstract void clientStreamClosed() throws RedbackException;
 	

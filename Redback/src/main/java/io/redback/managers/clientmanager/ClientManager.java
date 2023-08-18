@@ -158,8 +158,19 @@ public class ClientManager extends Thread {
 		}	
 	}
 	
-	public void onChatMessage(DataMap data) throws RedbackException {
-		
+	public void onChatUpdate(DataMap data) throws RedbackException {
+		DataList usernames = data.getList("users");
+		List<ClientHandler> handlers = new ArrayList<ClientHandler>();
+		synchronized(clientHandlers) {
+			for(int i = 0; i < usernames.size(); i++) {
+				String username = usernames.getString(i);
+				for(ClientHandler ch: clientHandlers)
+					if(ch.getSession().getUserProfile().getUsername().equals(username))
+						handlers.add(ch);
+			}
+		}
+		for(ClientHandler ch : handlers) 
+			ch.receiveChatUpdate(data);
 	}
 	
 	public DataMap getStatus() {

@@ -34,8 +34,8 @@ public class RedbackClientServer extends ClientServer {
 		clientManager.onNotification(data);
 	}
 
-	protected void onChatMessage(DataMap data) throws RedbackException {
-		clientManager.onChatMessage(data);
+	protected void onChatUpdate(DataMap data) throws RedbackException {
+		clientManager.onChatUpdate(data);
 	}
 	
 	public DataMap getStatus() {
