@@ -118,7 +118,6 @@ import { RbTimelineComponent } from './rb-timeline/rb-timeline.component';
 import { RbDatePipe, RbTimePipe } from './helpers';
 import { RbStarsInputComponent } from './inputs/rb-stars-input/rb-stars-input.component';
 import { RbPercentInputComponent } from './inputs/rb-percent-input/rb-percent-input.component';
-import { RbNotificationBellComponent } from './rb-notification-bell/rb-notification-bell.component';
 import { RbNotificationListComponent } from './rb-notification-list/rb-notification-list.component';
 import { PlatformModule } from '@angular/cdk/platform';
 import { RbTreeComponent } from './rb-tree/rb-tree.component';
@@ -136,6 +135,7 @@ import { RbDynamicformeditorComponent } from './rb-dynamicformeditor/rb-dynamicf
 import { PortalRootComponent } from './roots/portal-root/portal-root.component';
 import { RbActionlistComponent } from './clickable/rb-actionlist/rb-actionlist.component';
 import { RbFunnelComponent } from './rb-funnel/rb-funnel.component';
+import { RbIconbuttonBadgeComponent } from './clickable/rb-iconbutton-badge/rb-iconbutton-badge.component';
 
 
 
@@ -272,7 +272,6 @@ window.redback = window.redback || {};
         RbTimePipe,
         RbStarsInputComponent,
         RbPercentInputComponent,
-        RbNotificationBellComponent,
         RbNotificationListComponent,
         RbTreeComponent,
         RbPopupActionsComponent,
@@ -283,7 +282,8 @@ window.redback = window.redback || {};
         RbVseparatorComponent,
         RbDynamicformeditorComponent,
         RbActionlistComponent,
-        RbFunnelComponent
+        RbFunnelComponent,
+        RbIconbuttonBadgeComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

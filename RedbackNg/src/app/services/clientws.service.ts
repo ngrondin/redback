@@ -186,8 +186,8 @@ export class ClientWSService {
         }
       } else if(msg.type == 'serverkeepalive') {
         this.websocket.next({type:"clientisalive"});
-      } else if(msg.type == 'chatmessage') {
-        this.chatObservers.forEach((observer) => observer.next(msg.message))
+      } else if(msg.type == 'chatupdate') {
+        this.chatObservers.forEach((observer) => observer.next(msg.data));
       } else if(msg.type == 'clientpong') {
         this.clientPingObservers.forEach((observer) => observer.next(msg.username))
       }
@@ -358,34 +358,9 @@ export class ClientWSService {
     }
   }
 
-  pingOtherClients() : Observable<any> {
-    if(this.connected) {
-      return new Observable((observer) => {
-        this.clientPingObservers.push(observer);
-        this.websocket.next({
-          type:"pingclients"
-        });
-        setTimeout(() => {
-          observer.complete();
-          this.clientPingObservers.splice(this.clientPingObservers.indexOf(observer), 1);
-        }, 3000);
-      });
-    } else {
-      return null;
-    }    
-  }
 
-  sendChat(to: String[], id: String, object: String, uid: String, body: String) {
-    let json: any = {
-      action: "sendtext",
-      to: to,
-      chatid: id,
-      object: object,
-      uid: uid,
-      body: body
-    }
-    this.websocket.next(json);
-  }
+
+
 }
 
 

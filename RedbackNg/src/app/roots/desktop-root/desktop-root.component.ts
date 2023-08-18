@@ -9,6 +9,8 @@ import { ClientWSService } from 'app/services/clientws.service';
 import { DialogService } from 'app/services/dialog.service';
 import { MatSidenav } from '@angular/material/sidenav';
 import { AppRootComponent } from '../abstract/app-root';
+import { ChatService } from 'app/services/chat.service';
+import { NotificationService } from 'app/services/notification.service';
 
 
 
@@ -23,6 +25,8 @@ export class DesktopRootComponent extends AppRootComponent {
   rightDrawerShowing: string = null;
   
   constructor(
+    public chatService: ChatService,
+    public notificationService: NotificationService
   ) {
     super();
   }
@@ -35,7 +39,7 @@ export class DesktopRootComponent extends AppRootComponent {
     if(this.rightdrawer.opened) {
       this.rightdrawer.close();
       if(this.rightDrawerShowing != 'notifications') {
-        setTimeout(() => this.toggleNotifications(), 500);
+        setTimeout(() => this.toggleNotifications(), 250);
       } 
     } else {
       this.rightDrawerShowing = 'notifications';
@@ -43,6 +47,17 @@ export class DesktopRootComponent extends AppRootComponent {
     }
   }
 
+  toggleChat() {
+    if(this.rightdrawer.opened) {
+      this.rightdrawer.close();
+      if(this.rightDrawerShowing != 'chat') {
+        setTimeout(() => this.toggleChat(), 250);
+      } 
+    } else {
+      this.rightDrawerShowing = 'chat';
+      this.rightdrawer.open();
+    }
+  }
 
   navigated() {
     if(this.rightdrawer.opened) {

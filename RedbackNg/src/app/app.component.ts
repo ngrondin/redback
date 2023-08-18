@@ -10,6 +10,7 @@ import { MenuService } from './services/menu.service';
 import { Subject } from 'rxjs';
 import { DataService } from './services/data.service';
 import { ModalService } from './services/modal.service';
+import { ChatService } from './services/chat.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -48,7 +49,8 @@ export class AppComponent implements OnInit {
       private notificationService: NotificationService,
       private userprefService: UserprefService,
       private menuService: MenuService,
-      private modalService: ModalService
+      private modalService: ModalService,
+      private chatService: ChatService
    ) {
     var native = this.elementRef.nativeElement;
 
@@ -124,10 +126,12 @@ export class AppComponent implements OnInit {
       this.menuService.loadPreferences().subscribe(() => {
         this.userprefService.load().subscribe(() => {
           this.notificationService.load().subscribe(() => {
-            if(this.onloadFunction != null) {
-              this.onloadFunction.call(window.redback);
-            }
-            this.events.next("init");
+            this.chatService.load().subscribe(() => {
+              if(this.onloadFunction != null) {
+                this.onloadFunction.call(window.redback);
+              }
+              this.events.next("init");  
+            })
           })
         })
       })

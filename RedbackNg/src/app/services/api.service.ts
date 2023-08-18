@@ -389,6 +389,71 @@ export class ApiService {
     })    
   }
 
+
+  /********* Chat **********/  
+
+  listChatUsers(): Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'listusers'
+    });
+  }
+
+  listChats(): Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'listconversations'
+    });
+  }
+
+  listChatMessages(chat: string): Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'listmessages',
+      conversation: chat
+    });
+  }
+
+  listAllUnreadChatMessages(): Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'listunreadmessages'
+    });
+  }
+
+  createChat(name: string): Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'createconversation',
+      name: name
+    })
+  }
+
+  addUserToChat(chat: string, username: string):  Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'adduser',
+      conversation: chat,
+      username: username
+    })
+  }
+
+  removeUserFromChat(chat: string, username: string):  Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'removeuser',
+      conversation: chat,
+      username: username
+    })
+  }
+
+  sendChatMessage(chat:string, body: string): Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'sendmessage',
+      conversation: chat,
+      body: body
+    })
+  }
+
+  markChatMessageAsRead(message: string): Observable<any> {
+    return this.requestService(this.chatService, {
+      action: 'markread',
+      message: message
+    })
+  }
 }
 
  

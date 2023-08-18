@@ -537,3 +537,56 @@ export class ViewTarget {
       this._breadcrumbLabel = v;
     }
 }
+
+export class ChatUser {
+    id: string;
+    username: string;
+    fullname: string;
+    available: boolean;
+
+    constructor(json: any) {
+        this.id = json.id;
+        this.username = json.username;
+        this.fullname = json.fullname;
+        this.available = json.available;
+    }
+}
+
+export class ChatMessage {
+    id: string;
+    date: Date;
+    from: ChatUser;
+    body: string;
+    readby: ChatUser[];
+
+    constructor(json: any) {
+        this.id = json.id;
+        this.date = new Date(json.date);
+        this.body = json.body;
+        this.readby = [];
+    }
+
+    get isRead() {
+        return this.readby.find(u => u.username == window.redback.username) != null
+    }
+}
+
+export class Chat {
+    id: string;
+    name: string;
+    owner: string;
+    latest: Date;
+    users: ChatUser[];
+    messages: ChatMessage[];
+    unreadCount: number;
+
+    constructor(json: any) {
+        this.id = json.id;
+        this.name = json.name;
+        this.owner = json.owner;
+        this.latest = new Date(json.latest);
+        this.users = [];
+        this.messages = [];
+        this.unreadCount = 0;
+    }
+}

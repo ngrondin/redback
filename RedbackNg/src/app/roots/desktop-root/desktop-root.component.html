@@ -14,13 +14,16 @@
         <rb-global-search
             (navigate)="navigateTo($event)">
         </rb-global-search>
-        <rb-chat
-            *ngIf="apiService.chatService != null && apiService.chatService != ''"
-            (navigate)="navigateTo($event)">
-        </rb-chat>
-        <rb-notification-bell
+        <rb-iconbutton-badge
+            [icon]="'chat_bubble_outline'"
+            [count]="chatService.unreadCount"
+            (click)="toggleChat()">
+        </rb-iconbutton-badge>     
+        <rb-iconbutton-badge
+            [icon]="'notifications'"
+            [count]="notificationService.exceptionCount"
             (click)="toggleNotifications()">
-        </rb-notification-bell>
+        </rb-iconbutton-badge>           
         <rb-clickable
             class="rb-toolbar-username"
             [matMenuTriggerFor]="usermenu">
@@ -97,6 +100,10 @@
             (navigate)="navigateTo($event)"
             (close)="closeRightDrawer()">
         </rb-notification-list>
+        <rb-chat
+            *ngIf="rightDrawerShowing == 'chat'"
+            (close)="closeRightDrawer()">
+        </rb-chat>
     </mat-sidenav>    
     <mat-sidenav-content>
         <rb-vsection>

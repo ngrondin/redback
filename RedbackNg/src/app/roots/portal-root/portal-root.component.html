@@ -18,9 +18,6 @@
             *ngIf="apiService.chatService != null && apiService.chatService != ''"
             (navigate)="navigateTo($event)">
         </rb-chat>
-        <rb-notification-bell
-            (click)="toggleNotifications()">
-        </rb-notification-bell>
         <rb-clickable
             class="rb-toolbar-username"
             [matMenuTriggerFor]="usermenu">

@@ -1,74 +1,188 @@
-<rb-iconbutton
-    [icon]="'chat_bubble_outline'"
-    [matMenuTriggerFor]="chatmenu"
-    (menuOpened)="menuOpened()" 
-    (menuClosed)="menuClosed()">
-</rb-iconbutton>
+<!-- List of Conversations -->
 <div
-    *ngIf="totalUnread > 0"
-    class="rb-chat-badge">
-    <span>{{totalUnread}}</span>
-</div>
-<mat-menu
-    #chatmenu="matMenu"
-    class="rb-chat-menupanel">
+    class="rb-chat-header">
     <div
-        class="rb-chat-container"
-        (click)="$event.stopPropagation()">
+        class="rb-chat-title">
+        Chat
+    </div>
+    <rb-iconbutton
+        [icon]="'add'"
+        (click)="createChat()">
+    </rb-iconbutton>               
+    <div
+        class="rb-chat-conversation-header-spacer">
+    </div>     
+    <rb-iconbutton
+        [icon]="'navigate_next'"
+        (click)="closeChat()">
+    </rb-iconbutton>         
+</div> 
+<div
+    *ngIf="selectedChat == null"
+    class="rb-chat-listcontainer hscroll">
+    <div
+        *ngIf="creatingChat == true"
+        class="rb-chat-conversation-header">
+        <input
+            #createinput
+            class="rb-chat-creating-input"
+            (keydown)="chatCreationKeydown($event)"
+            (blur)="chatCreationBlur()"
+            [(ngModel)]="newChatName"
+            placeholder="New conversation name">
+    </div>
+    <div
+        *ngFor="let chat of chats"
+        class="rb-chat-conversation-header">
+        <rb-clickable
+            (click)="selectChat(chat)">
+            <div
+                class="rb-chat-conversation-header-name">
+                {{chat.name}}            
+            </div>     
+            <div
+                class="rb-chat-conversation-header-spacer">
+            </div> 
+            <div
+                class="rb-chat-conversation-header-badge"
+                [style.visibility]="chat.unreadCount > 0 ? 'visible' : 'hidden'">
+                {{chat.unreadCount}}
+            </div>                                                           
+        </rb-clickable>
+    </div>      
+</div>
+
+<!-- Opened Conversation -->
+<div
+    *ngIf="selectedChat != null"
+    class="rb-chat-conversation">
+    <div
+        class="rb-chat-conversation-header">
         <div
-            *ngFor="let chat of chats"
-            class="rb-chat-conversation-container">
+            class="rb-chat-conversation-header-name">
+            {{selectedChat.name}}            
+        </div>
+        <rb-iconbutton
+            *ngIf="conversationMode == 'messages'"
+            [icon]="'person_add'"
+            (click)="changeConversationMode('users')">
+        </rb-iconbutton> 
+        <rb-iconbutton
+            *ngIf="conversationMode == 'users'"
+            [icon]="'comment'"
+            (click)="changeConversationMode('messages')">
+        </rb-iconbutton> 
+        <div
+            class="rb-chat-conversation-header-spacer">
+        </div>     
+        <rb-iconbutton
+            [icon]="'expand_less'"
+            (click)="unselectChat()">
+        </rb-iconbutton>            
+    </div>
+    <!-- Messages -->
+    <div
+        #messagescroll
+        *ngIf="conversationMode == 'messages'"
+        class="rb-chat-listcontainer hscroll">
+        <div
+            *ngFor="let message of selectedChat.messages"
+            class="rb-chat-listitem">
             <div
-                class="rb-chat-conversation-header"
-                (click)="openChat(chat)">
-                {{chat.label}}
-            </div>
-            <div
-                *ngIf="chat.linkLabel != null && chat == focusChat"
-                class="rb-chat-conversation-link"
-                (click)="clickLink(chat)">
-                {{chat.linkLabel}}
-            </div>
-            <div
-                *ngIf="chat == focusChat"
-                class="rb-chat-conversation"
-                [(scrollTop)]="chat.scrollpos">
+                class="rb-chat-listitemcontent">
                 <div
-                    *ngFor="let message of chat.messages"
-                    [class]="'rb-chat-message' + (message.fromMe == true ? ' rb-chat-message-fromme' : '')">
+                    class="rb-chat-listitemmeta">
+                    <div
+                        class="rb-chat-from">
+                        {{message.from.fullname}}
+                    </div>
                     <div
                         class="rb-chat-date">
-                        {{message.date | date : 'shortTime'}}
-                    </div>
-                    <div
-                        class="rb-chat-body">
-                        {{message.body}}
-                    </div>
+                        {{formatDate(message.date)}}
+                    </div>                
                 </div>
-            </div>
-            <textarea
-                *ngIf="chat == focusChat"
-                class="rb-chat-textarea"
-                (keyup)="keyUp($event)" 
-                [(ngModel)]="chat.newmessage">
-            </textarea> 
+                <div
+                    class="rb-chat-body">
+                    {{message.body}}
+                </div>
+            </div>        
+            <div
+                class="rb-chat-divider">
+                <div
+                    class="rb-chat-divider-line">
+                </div>
+            </div>            
+        </div>    
+    </div>
+    <div
+        *ngIf="conversationMode == 'messages'"
+        class="rb-chat-inputcontainer">
+        <input
+            class="rb-chat-input"
+            (keydown)="chatInputKeydown($event)"
+            [(ngModel)]="textToSend">
+        <rb-iconbutton
+            [icon]="'send'"
+            (click)="post()">
+        </rb-iconbutton>   
+    </div>    
+
+    <!-- Users -->
+    <div
+        *ngIf="conversationMode == 'users'"
+        class="rb-chat-listcontainer hscroll">
+        <div
+            class="rb-chat-groupheader">
+            Current users
         </div>
         <div
-            class="rb-chat-add-container">
-            <button
-                mat-stroked-button
-                (click)="newChat()">
-                <mat-icon>add</mat-icon>
-                New Chat
-            </button>           
-            <mat-action-list>
-                <button 
-                    mat-menu-item
-                    *ngFor="let user of users"
-                    (click)="newChatWith(user)">
-                    {{user}}
-                </button>
-            </mat-action-list>     
-        </div>
-    </div>
-</mat-menu>    
+            *ngFor="let user of selectedChat.users"
+            class="rb-chat-listitem">
+            <div
+                class="rb-chat-listitemcontent-row">
+                <div
+                    class="rb-chat-user">
+                    {{user.fullname}}
+                </div>
+                <rb-iconbutton
+                    *ngIf="user.username != username"
+                    [icon]="'remove'"
+                    (click)="removeUser(user)">
+                </rb-iconbutton>                  
+            </div>        
+            <div
+                class="rb-chat-divider">
+                <div
+                    class="rb-chat-divider-line">
+                </div>
+            </div>            
+        </div>    
+        <div
+            class="rb-chat-groupheader">
+            Add new user
+        </div>        
+        <div
+            *ngFor="let user of listOtherUsers(selectedChat.users)"
+            class="rb-chat-listitem">
+            <div
+                class="rb-chat-listitemcontent-row">
+                <div
+                    class="rb-chat-user">
+                    {{user.fullname}}
+                </div>
+                <rb-iconbutton
+                    [icon]="'add'"
+                    (click)="addUser(user)">
+                </rb-iconbutton>                  
+            </div>        
+            <div
+                class="rb-chat-divider">
+                <div
+                    class="rb-chat-divider-line">
+                </div>
+            </div>            
+        </div>    
+    </div>     
+    
+
+</div>

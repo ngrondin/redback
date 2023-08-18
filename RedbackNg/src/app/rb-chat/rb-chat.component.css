@@ -1,105 +1,212 @@
 :host {
-    padding-left: 3px;
-    padding-right: 3px;
-    position: relative;
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    width: 20vw;
 }
-
-
-:host button {
-    /*font-size: 1.5rem!important;*/
-    width: var(--v36px);
-    height: var(--v36px);
-    margin: 0px !important;
-    line-height: 1.2rem;
-}
-
-.rb-chat-badge {
-    position: absolute;
-    top: 0px;
-    right: 45%;
-    height: 1.4vw;
-    min-width: 1.1vw;
-    border-radius: 0.7vw;
-    background-color: red;
-    font-size: 0.8rem;
-    text-align: center;
-    line-height: 200%;
-    padding-left: 3px;
-    padding-right: 3px;
-    pointer-events: none;
-}
-
 
 :host > mat-action-list > button.mat-menu-item {
 	height: auto!important;
     margin: 0px!important;
 }
 
-.mat-menu-panel.rb-chat-menupanel {
-    width: 500px!important;
-    max-width: 500px!important;
-}
 
-.rb-chat-container {
-    margin-top: -8px;
-    margin-bottom: -8px;
-}
-
-.rb-chat-conversation-container {
-
-}
-
-.rb-chat-conversation-header {
-    background-color: #3f51b5;
+.rb-chat-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     color: white;
-    padding: 8px 15px 8px 15px;
-    cursor: pointer;
+    background-color: var(--primary-dark2-color)
 }
 
-.rb-chat-conversation-link {
-    color: darkblue;
-    cursor: pointer;
-    background-color: #9798c9;
-    padding: 5px 15px;
-    font-size: smaller;
+.rb-chat-title {
+    flex: 0 0 auto;
+    padding-left: 15px;
+}
+
+.rb-chat-conversation { 
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+.rb-chat-listcontainer {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
 }
 
 .rb-chat-conversation {
-    padding: 2px;
-    max-height: 300px;
-    overflow-y: scroll;
+    display: flex;
+    flex: 1 1 auto;
+    overflow: hidden;
 }
 
-.rb-chat-message {
-    padding: 8px;
-    border-radius: 3px;
+.rb-chat-conversation-header {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--primary-color);
+    border-top: 1px solid white;
+    overflow: hidden;
+    color: var(--light-inverse-writing-color);
 }
 
-.rb-chat-message-fromme {
-    text-align: right;
+
+.rb-chat-conversation-header-name {
+    display: block;
+    flex: 0 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: var(--v12px);
+    font-size: 0.85rem;
+    padding-left: var(--v20px);
+}
+
+.rb-chat-conversation-header-spacer {
+    display: flex;
+    flex: 1 1 0;
+}
+
+.rb-chat-conversation-header-badge {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: var(--v24px);
+    width: var(--v24px);
+    margin: var(--v5px) var(--v12px) var(--v5px) var(--v5px);
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+}
+
+.rb-chat-conversation-header mat-icon {
+    color:var(--dark-inverse-writing-color);
+}
+
+.rb-chat-conversation-header rb-iconbutton {
+    color:var(--dark-inverse-writing-color);
+}
+
+.rb-chat-groupheader {
+    display: flex;
+    flex-direction: row;
+    padding: var(--v10px) var(--v20px);
+    overflow: hidden;
+    background: #eee;
+    font-size: 0.9rem;
+    color: var(--light-writing-color);
+}
+
+.rb-chat-listitem {
+
+}
+
+.rb-chat-listitemcontent {
+    display: flex;
+    flex-direction: column;
+    padding: var(--v14px) var(--v20px);
+    overflow: hidden;
+}
+
+.rb-chat-listitemcontent-row {
+    display: flex;
+    flex-direction: row;
+    padding: var(--v14px) var(--v20px);
+    overflow: hidden;
+    align-items: center;
+}
+
+.rb-chat-listitemmeta {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    color: #888;
+    font-size: 0.70rem;
+    overflow: hidden;
 }
 
 .rb-chat-date {
-    font-size: x-small;
-    color: grey;
+    display: flex;
+    flex: 0 0 auto;
+}
 
+.rb-chat-from {
+    display: flex;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .rb-chat-body {
-
+    line-height: 20px;
+    overflow: hidden;
+    color: var(--dark-writing-color);
+    font-size: 0.9rem;
+    margin-top: var(--v5px);
 }
 
-.rb-chat-textarea {
-    width: 92%;
-    margin-left: 2%;
-    margin-right: 2%;
+.rb-chat-user {
+    display: flex;
+    flex: 1 1 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--dark-writing-color);
+    font-size: 0.9rem;
+    height: var(--v36px);
+    align-items: center;
 }
 
-.rb-chat-add-container {
+.rb-chat-listsub {
+    color: var(--light-writing-color);
+    font-size: 0.8rem;
+    max-width: 330px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 18px;
+}
+
+:host > .mat-menu-panel {
+    max-width: 350px!important;
+}
+
+.rb-chat-divider {
     display: flex;
     flex-direction: column;
-    margin-top: 5px;
+    align-items: center;
+}
+
+.rb-chat-divider-line {
+    border-bottom: 1px solid #e0e0e0;
+    width: 90%;
+}
+
+.rb-chat-inputcontainer {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    border: 1px solid #888;
+    margin: 2px;
+}
+
+.rb-chat-input {
+    display: flex;
+    flex: 1 1 auto;
+    border: none;
+    outline: none;
+}
+
+.rb-chat-creating-input {
+    margin: var(--v5px);
+    background-color: #ffffff40;
+    height: var(--v20px);
+    border: none;
+    outline: none;
+    flex: 1 1 auto;
+    color: white;
 }
