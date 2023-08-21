@@ -457,7 +457,7 @@ public class RedbackObject extends RedbackElement
 	
 	public boolean isEditable(String name) throws RedbackException
 	{
-		if(domain != null && domain.equals("root"))
+		if((domain != null && domain.equals("root")) || !canWrite)
 			return false;
 		else
 		{
