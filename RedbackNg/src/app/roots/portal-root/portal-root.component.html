@@ -14,10 +14,6 @@
         <rb-global-search
             (navigate)="navigateTo($event)">
         </rb-global-search>
-        <rb-chat
-            *ngIf="apiService.chatService != null && apiService.chatService != ''"
-            (navigate)="navigateTo($event)">
-        </rb-chat>
         <rb-clickable
             class="rb-toolbar-username"
             [matMenuTriggerFor]="usermenu">
