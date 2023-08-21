@@ -93,6 +93,7 @@
 .rb-chat-groupheader {
     display: flex;
     flex-direction: row;
+    flex: 0 0 auto;
     padding: var(--v10px) var(--v20px);
     overflow: hidden;
     background: #eee;
