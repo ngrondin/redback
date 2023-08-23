@@ -18,6 +18,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
 
   editedValue: any;
   isEditing: boolean = false;
+  inputType: string = 'text';
   
   constructor() {
     super();
