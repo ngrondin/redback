@@ -13,7 +13,7 @@ import { UserprefService } from 'app/services/userpref.service';
 export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('attribute') attribute: string;    
   @Input('object') _rbObject: RbObject;
-  @Input('value') _value: any;
+  @Input('value') _value: any = null;
   @Input('variable') variable: any;
   @Input('label') label: string;
   @Input('tip') tip: string;

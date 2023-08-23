@@ -1,0 +1,61 @@
+.rb-url-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+.rb-url-inputrow {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+}
+
+.rb-url-iframe-container {
+    display: flex;
+    flex: 0 0 auto;
+    margin: 2px;
+}
+
+.rb-url-iframe {
+    border: 1px solid #bbb;
+}
+
+.rb-url-description-container {
+    display: flex;
+    flex-direction: row;
+    margin: 4px;
+    cursor: pointer;
+}
+
+.rb-url-description-img {
+    display: flex;
+    flex-direction: row;
+
+}
+
+.rb-url-description-img img {
+    width: 10vw;
+}
+
+.rb-url-description-detail {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.rb-url-description-title {
+    display: flex;
+    flex-direction: row;
+    font-size: 1rem;
+    color: var(--dark-writing-color);
+    margin: 2px;
+
+}
+
+.rb-url-description-description {
+    display: flex;
+    flex-direction: row;
+    font-size: 0.8rem;
+    color: var(--light-writing-color);
+    margin: 2px;
+}

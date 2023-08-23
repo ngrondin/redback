@@ -71,9 +71,19 @@ export class ApiService {
     return this.clientWSService.isConnected() && this.useCSForAPI;
   }
 
+
+  /********* UI **********/  
+
+  getPreviewUrl(url: string): Observable<any> {
+    let reqUrl = this.baseUrl + '/' + this.uiService + "/tools/urlpreview?url=" + encodeURIComponent(url);
+    return this.http.get<any>(reqUrl, httpJSONOptions);
+  }
+
   getAppConfig(name: string) {
     return this.http.get<any>(this.baseUrl + "/" + this.uiService + "/config/" + name, httpJSONOptions);
   }
+
+ /********* Objects Service **********/  
 
   getObject(name: string, uid: string): Observable<any> {
     const req = {

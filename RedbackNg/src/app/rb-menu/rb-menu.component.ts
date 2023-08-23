@@ -39,6 +39,10 @@ export class RbMenuComponent implements OnInit {
     return this._mode || 'large';
   }
 
+  public get width(): string { 
+    return this._mode == 'large' ? ((5 * Math.floor(document.body.clientWidth * 15 / 500)) + 'px') : 'auto';// This weird calculation is to allow the sidenav to align to the closes 5px -- weirdness of material
+  }
+
   public toggleMenuMode() {
     let newMode = this._mode == 'small' ? 'large' : 'small';
     this.menuService.setMenu(this._type, newMode);

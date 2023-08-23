@@ -19,31 +19,28 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	font-weight: 300;
-	font-size: 0.9rem;
-	color: var(--light-writing-color);
 	padding-left: 0.8vw;
-	width: 10vw;
-	max-width: 10vw;
-	
-}
-
-.rb-menu-link-text-alt1 {
 	color: var(--light-inverse-writing-color);
 	font-size: 0.7rem;
 }
 
-.rb-menu-link-icon {
-	color:var(--light-writing-color);
-	font-size: 1.5rem;
-	width: var(--v24px);
-	height: var(--v24px);	
+.rb-menu-link-text-alt1 {
+	font-size: 0.9rem;
+	color: var(--light-writing-color);
 }
 
-.rb-menu-link-icon-alt1 {
+.rb-menu-link-icon {
 	color:var(--light-inverse-writing-color);
 	font-size: 1.3rem;
 	width: var(--v20px);
 	height: var(--v20px);
+}
+
+.rb-menu-link-icon-alt1 {
+	color:var(--light-writing-color);
+	font-size: 1.5rem;
+	width: var(--v24px);
+	height: var(--v24px);	
 }
 
 .rb-menu-link-popup-back {
@@ -67,13 +64,13 @@
 }
 
 ::ng-deep .rb-menu-link-tooltip {
-	background-color: white;
-	color: #444444 !important;
+	background-color: var(--primary-dark-color);
+	color: white !important;
 	font-size: 0.95rem;
 	border: 1px solid #aaaaaa
 }
 
 ::ng-deep .rb-menu-link-tooltip-alt1 {
-	background-color: var(--primary-dark-color);
-	color: white !important;
+	background-color: white;
+	color: #444444 !important;
 }

@@ -1,0 +1,62 @@
+<div
+    class="rb-url-container">
+    <div
+        class="rb-url-inputrow">
+        <mat-icon 
+            *ngIf="showicon" 
+            [class]="'rb-input-icon' + (mandatoryalert ? ' rb-input-icon-mandatory' : '') ">
+            {{icon}}
+        </mat-icon>
+        <div
+            class="rb-input-container">
+            <span
+                [class]="'rb-input-label' + (mandatoryalert ? ' rb-input-label-mandatory' : '')  + ((displayvalue === null || displayvalue === '') && !isEditing ? ' rb-input-label-big' : '')">
+                {{label}}
+            </span>    
+            <input 
+                #input
+                [class]="'rb-input-input rb-input-text-color' + (mandatoryalert ? ' rb-input-mandatory' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
+                [(ngModel)]="displayvalue"
+                (focus)="onFocus($event)"
+                (blur)="onBlur($event)"
+                (keydown)="onKeydown($event)"
+                (keyup)="onKeyup($event)"
+                [readonly]="readonly"
+                autocomplete="off"
+                data-lpignore="true"
+                [type]="'text'">
+            <div
+                [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
+            </div> 
+        </div>
+    </div>
+    <div
+        class="rb-url-iframe-container"
+        *ngIf="iframeurl != null">
+        <iframe
+            class="rb-url-iframe"
+            [cachedsrc]="iframeurl">
+        </iframe>
+    </div>
+    <div
+        class="rb-url-description-container"
+        *ngIf="iframeurl == null && title != null"
+        (click)="click()">
+        <div
+            class="rb-url-description-img">
+            <img 
+                [src]="image">
+        </div>
+        <div
+            class="rb-url-description-detail">
+            <div
+                class="rb-url-description-title">
+                {{title}}
+            </div>  
+            <div
+                class="rb-url-description-description">
+                {{description}}
+            </div>              
+        </div>        
+    </div>    
+</div>

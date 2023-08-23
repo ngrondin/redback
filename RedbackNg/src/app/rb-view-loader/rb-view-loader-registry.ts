@@ -52,6 +52,7 @@ import { RbVseparatorComponent } from "app/rb-vseparator/rb-vseparator.component
 import { RbDynamicformeditorComponent } from "app/rb-dynamicformeditor/rb-dynamicformeditor.component";
 import { RbFunnelComponent } from "app/rb-funnel/rb-funnel.component";
 import { RbActionlistComponent } from "app/clickable/rb-actionlist/rb-actionlist.component";
+import { RbUrlInputComponent } from "app/inputs/rb-url-input/rb-url-input.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -88,6 +89,7 @@ export const componentRegistry = {
     'richtext': RbRichtextInputComponent,
     "datepicker": RbDatetimeInputComponent,
     "dateinput": RbTextareaInputComponent,
+    "urlinput": RbUrlInputComponent,
     "gantt": RbGanttComponent,
     "link": RbLinkComponent,
     "log": RbLogComponent,

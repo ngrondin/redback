@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from "@angular/core";
+import { Directive, ElementRef, Input, Pipe, PipeTransform, Renderer2 } from "@angular/core";
 import { Observer } from "rxjs";
 import { RbObject } from "./datamodel";
 
@@ -321,3 +321,26 @@ export class HtmlParser {
         return str;
     }
 }
+
+
+@Directive({
+    selector: 'iframe'
+  })
+  export class CachedSrcDirective {
+  
+      @Input() 
+      public get cachedsrc(): string {
+          return this.elref.nativeElement.src;
+      }
+      public set cachedsrc(src: string) {
+          if (this.elref.nativeElement.src !== src) {
+              this.renderer.setAttribute(this.elref.nativeElement, 'src', src);
+          }
+      }
+  
+      constructor(
+          private elref: ElementRef,
+          private renderer : Renderer2
+          ) { }
+  }
+

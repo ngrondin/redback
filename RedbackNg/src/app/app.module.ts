@@ -115,7 +115,7 @@ import { RbTileComponent } from './rb-tile/rb-tile.component';
 import { RbTimesliderComponent } from './rb-timeslider/rb-timeslider.component';
 import { RbNumberTilesComponent } from './graphs/rb-number-tiles/rb-number-tiles.component';
 import { RbTimelineComponent } from './rb-timeline/rb-timeline.component';
-import { RbDatePipe, RbTimePipe } from './helpers';
+import { CachedSrcDirective, RbDatePipe, RbTimePipe } from './helpers';
 import { RbStarsInputComponent } from './inputs/rb-stars-input/rb-stars-input.component';
 import { RbPercentInputComponent } from './inputs/rb-percent-input/rb-percent-input.component';
 import { RbNotificationListComponent } from './rb-notification-list/rb-notification-list.component';
@@ -136,6 +136,8 @@ import { PortalRootComponent } from './roots/portal-root/portal-root.component';
 import { RbActionlistComponent } from './clickable/rb-actionlist/rb-actionlist.component';
 import { RbFunnelComponent } from './rb-funnel/rb-funnel.component';
 import { RbIconbuttonBadgeComponent } from './clickable/rb-iconbutton-badge/rb-iconbutton-badge.component';
+import { RbUrlInputComponent } from './inputs/rb-url-input/rb-url-input.component';
+
 
 
 
@@ -283,7 +285,9 @@ window.redback = window.redback || {};
         RbDynamicformeditorComponent,
         RbActionlistComponent,
         RbFunnelComponent,
-        RbIconbuttonBadgeComponent
+        RbIconbuttonBadgeComponent,
+        RbUrlInputComponent,
+        CachedSrcDirective
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },
