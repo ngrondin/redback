@@ -1,14 +1,20 @@
 package io.redback.services.impl;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.firebus.Firebus;
 import io.firebus.data.DataList;
@@ -29,6 +35,7 @@ import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.Convert;
 import io.redback.utils.HTML;
+import io.redback.utils.HTMLMetaParser;
 import io.redback.utils.KeyEscaper;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.HTMLJSWrapper;
@@ -426,6 +433,41 @@ public class RedbackUIServer extends UIServer
 				out.put(outKey, in.get(inKey));				
 		}
 		return out;
+	}
+
+	protected DataMap getUrlPreview(Session session, String url) throws RedbackException {
+		Pattern pattern = Pattern.compile("^.*(youtu.be\\/|v\\/|u\\/\\w\\/|embed\\/|watch\\?v=|&v=)([^#&?]*).*");
+	    Matcher matcher = pattern.matcher(url);
+	    boolean matchFound = matcher.find();
+	    if(matchFound) {
+	    	String part = matcher.group(2);
+	    	return new DataMap("url", url, "iframeurl", ("//www.youtube.com/embed/" + part));
+	    } else {
+	    	HttpURLConnection con = null;
+	    	try {
+	    		URL u = new URL(url);
+		    	con = (HttpURLConnection) u.openConnection();
+		    	con.setRequestMethod("GET");
+		    	//int status = con.getResponseCode();
+		    	BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    			String inputLine;
+    			StringBuffer content = new StringBuffer();
+    			while ((inputLine = in.readLine()) != null) content.append(inputLine);
+    			in.close();
+    			System.out.println(content.toString());
+    			DataMap meta = HTMLMetaParser.parse(content.toString());
+    			meta.put("url", url);
+    			return meta;
+	    	} catch(Exception e) {
+	    		Logger.warning("rb.ui.geturlpreview", new DataMap("url", url), e);
+	    		return new DataMap("url", url);
+	    	} finally {
+	    		if(con != null) {
+	    			try {con.disconnect();} catch(Exception e) {}
+	    		}
+	    	}
+	    }
+
 	}
 
 

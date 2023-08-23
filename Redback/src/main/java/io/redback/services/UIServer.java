@@ -76,6 +76,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 		try
 		{
 			Payload response = new Payload();
+			DataMap request = payload.getDataMap();
 			String get = extractGetString(payload);
 
 			if(get != null)
@@ -117,14 +118,22 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 				else if(category.equals("config"))
 				{
 					Logger.finer("rb.ui.getconfig", new DataMap("name", name));
-					response.setData(getAppConfig(session, name).toString());
+					response.setData(getAppConfig(session, name));
 					response.metadata.put("mime", "application/json");
 				}				
 				else if(category.equals("view"))
 				{
 					Logger.finer("rb.ui.getview", new DataMap("name", name));
-					response.setData(getView(session, name).toString());
+					response.setData(getView(session, name));
 					response.metadata.put("mime", "application/json");						
+				}
+				else if(category.equals("tools")) 
+				{
+					if(name.equals("urlpreview")) {
+						response.setData(getUrlPreview(session, request.getString("url")));
+						response.metadata.put("mime", "application/json");						
+					}
+
 				}
 			}
 			return response;
@@ -159,6 +168,8 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	protected abstract DataMap getView(Session session, String viewName);
 
 	protected abstract byte[] getResource(Session session, String name, String version) throws RedbackException;
+	
+	protected abstract DataMap getUrlPreview(Session session, String url) throws RedbackException;
 
 	protected String getResourceMimeType(String name)
 	{
