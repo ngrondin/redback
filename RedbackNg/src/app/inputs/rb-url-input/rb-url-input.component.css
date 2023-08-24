@@ -34,13 +34,16 @@
 }
 
 .rb-url-description-img img {
-    width: 10vw;
+    max-width:10vw;
+    max-height:6vw;
+    width: auto;
+    height: auto;
 }
 
 .rb-url-description-detail {
     display: flex;
     flex-direction: column;
-
+    margin-left: var(--v3px);
 }
 
 .rb-url-description-title {
@@ -58,4 +61,7 @@
     font-size: 0.8rem;
     color: var(--light-writing-color);
     margin: 2px;
+    overflow: hidden;
+    max-height: 4vw;
+    text-overflow: ellipsis;
 }
