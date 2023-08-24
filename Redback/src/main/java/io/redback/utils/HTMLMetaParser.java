@@ -1,10 +1,58 @@
 package io.redback.utils;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 
 public class HTMLMetaParser {
+	
+	public static DataMap parseUrl(String url) {
+		String _url = url;
+		if(!_url.startsWith("http"))
+			_url = "https://" + _url;
+		int hoststart = _url.indexOf("//") + 2;
+		int hostend = _url.indexOf("/", hoststart);
+		if(hostend == -1) hostend = _url.length();
+		String host = _url.substring(hoststart, hostend);
+    	HttpURLConnection con = null;
+    	try {
+    		URL u = new URL(_url);
+	    	con = (HttpURLConnection) u.openConnection();
+	    	con.setRequestMethod("GET");
+	    	con.setRequestProperty("Accept", "text/html");
+	    	con.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/116.0");
+	    	con.setRequestProperty("Host", host);
+	    	int status = con.getResponseCode();
+	    	BufferedReader in = null;
+	    	if(status >= 100 && status < 400) {
+	    		in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+	    	} else {
+	    		in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+	    	}
+			StringBuffer content = new StringBuffer();
+	    	if(in != null) {
+				String inputLine;
+				while ((inputLine = in.readLine()) != null) content.append(inputLine);	    		
+				in.close();
+	    	}
+			//System.out.println(content.toString());
+			DataMap meta = parseHtml(content.toString());
+			return meta;
+    	} catch(Exception e) {
+    		Logger.warning("rb.ui.geturlpreview", new DataMap("url", url), e);
+    		return new DataMap();
+    	} finally {
+    		if(con != null) {
+    			try {con.disconnect();} catch(Exception e) {}
+    		}
+    	}
+	}
 
-	public static DataMap parse(String html) {
+	public static DataMap parseHtml(String html) {
 		String title = null;
 		String description = null;
 		String image = null;
@@ -43,6 +91,8 @@ public class HTMLMetaParser {
 			int end = t.indexOf("\"", valStart);
 			ret = t.substring(valStart, end);
 		}
+		if(ret != null)
+			ret = StringUtils.unescapeHtml(ret);
 		return ret;
 	}
 }
