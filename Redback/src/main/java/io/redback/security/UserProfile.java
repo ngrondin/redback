@@ -11,22 +11,22 @@ import io.firebus.data.DataMap;
 public class UserProfile 
 {
 	protected DataMap profile;
-	protected DataList domains;
+	protected DataList domains = new DataList();;
 	protected boolean hasAllDomains = false;
 	
 	public UserProfile(DataMap p)
 	{
 		profile = p;
-		domains = (DataList)profile.getList("domains").getCopy();
-		for(int i = 0; i < domains.size(); i++) {
-			if(domains.get(i).equals("*")) {
-				domains.remove(i);
-				i--;
-				hasAllDomains = true;
-			}
-		}
-		if(!domains.contains("root"))
-			domains.add("root");
+		domains.add("root");
+		if(profile.getList("domains") != null) {
+			for(int i = 0; i < profile.getList("domains").size(); i++) {
+				String d = profile.getList("domains").getString(i);
+				if(d.equals("*")) 
+					hasAllDomains = true;
+				else if(!domains.contains(d))
+					domains.add(d);
+			}			
+		}	
 	}
 	
 	public String getUsername()

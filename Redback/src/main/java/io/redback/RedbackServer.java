@@ -37,6 +37,7 @@ public class RedbackServer
 	public RedbackServer(DataMap config)
 	{
 		long start = System.currentTimeMillis();
+		java.util.logging.Logger.getLogger("").setLevel(java.util.logging.Level.OFF);
 		DataMap loggingConfig = config.getObject("logging");
 		if(loggingConfig != null) {
 			if(loggingConfig.containsKey("level"))
