@@ -11,10 +11,22 @@ import io.firebus.data.DataMap;
 public class UserProfile 
 {
 	protected DataMap profile;
+	protected DataList domains;
+	protected boolean hasAllDomains = false;
 	
 	public UserProfile(DataMap p)
 	{
 		profile = p;
+		domains = (DataList)profile.getList("domains").getCopy();
+		for(int i = 0; i < domains.size(); i++) {
+			if(domains.get(i).equals("*")) {
+				domains.remove(i);
+				i--;
+				hasAllDomains = true;
+			}
+		}
+		if(!domains.contains("root"))
+			domains.add("root");
 	}
 	
 	public String getUsername()
@@ -69,25 +81,21 @@ public class UserProfile
 	
 	public boolean hasAllDomains()
 	{
-		return hasDomain("*");
+		return hasAllDomains;
 	}
 	
 	public boolean hasDomain(String domain)
 	{
-		boolean hasDomain = false;
-		DataList list = profile.getList("domains");
-		for(int i = 0; i < list.size(); i++)
-			if(list.getString(i).equals(domain) || list.getString(i).equals("*"))
-				hasDomain = true;
-		return hasDomain;
+		return hasAllDomains || domains.contains(domain);
 	}
 	
 	public DataMap getDBFilterDomainClause()
 	{
-		DataList list = profile.containsKey("domains") ? profile.getList("domains") : new DataList();
-		if(!list.contains("root"))
-			list.add("root");
-		return new DataMap("$in", list);
+		if(hasAllDomains) {
+			return null;
+		} else {
+			return new DataMap("$in", domains);
+		}
 	}
 	
 	public String getAttribute(String name)

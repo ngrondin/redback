@@ -613,9 +613,7 @@ public class ObjectManager
 				
 				if(objectConfig.isPersistent()) 
 				{
-					DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
-					if(objectConfig.getDomainDBKey() != null  &&  !session.getUserProfile().hasAllDomains())
-						dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+					DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);						
 					DataList dbTuple = new DataList();
 					for(int i = 0; i < tuple.size(); i++) {
 						if(tuple.get(i) instanceof DataMap) {
@@ -916,10 +914,9 @@ public class ObjectManager
 	{
 		DataMap dbFilter = generateDBFilterRecurring(session, objectConfig, objectFilter);
 		if(objectConfig.getDomainDBKey() != null) {
-			if(session.getDomainLock() != null)
-				dbFilter.put(objectConfig.getDomainDBKey(), session.getDomainLock());
-			else if(!session.getUserProfile().hasAllDomains())
-				dbFilter.put(objectConfig.getDomainDBKey(), session.getUserProfile().getDBFilterDomainClause());
+			DataMap domainFilter = session.getDomainFilterClause();
+			if(domainFilter != null)
+				dbFilter.put(objectConfig.getDomainDBKey(), domainFilter);
 		}
 		return dbFilter;
 	}

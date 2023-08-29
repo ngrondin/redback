@@ -379,14 +379,14 @@ public class ProcessManager
 	
 	public ArrayList<ProcessInstance> findProcesses(Actionner actionner, DataMap filter, int page, int pageSize) throws RedbackException
 	{
-		Logger.finer("rb.process.find.start", new DataMap("filter", filter.toString(0, true)));
+		Logger.finer("rb.process.find.start", new DataMap("filter", filter.toString(true)));
 		ArrayList<ProcessInstance> list = new ArrayList<ProcessInstance>();
 		try 
 		{
 			DataMap fullFilterMap = new DataMap();
 			fullFilterMap.merge(filter);
 			if(!actionner.getId().equals(sysUserManager.getUsername()))
-				fullFilterMap.put("domain", actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
+				fullFilterMap.put("domain", actionner.getDomainFilterClause());
 			DataFilter fullFilter = new DataFilter(fullFilterMap);
 			long txId = Thread.currentThread().getId();
 			HashMap<String, ProcessInstance> txProcesses = transactions.get(txId);
@@ -427,7 +427,9 @@ public class ProcessManager
 		try 
 		{
 			DataMap filter = new DataMap();
-			filter.put(gmCollectionConfig.getField("domain"), actionner.isUser() ? actionner.getUserProfile().getDBFilterDomainClause() : actionner.getProcessInstance().getDomain());
+			Object domainFilter = actionner.getDomainFilterClause();
+			if(domainFilter != null)
+				filter.put(gmCollectionConfig.getField("domain"), domainFilter);
 			filter.put(gmCollectionConfig.getField("username"), actionner.getId());
 			DataMap result = dataClient.getData(gmCollectionConfig.getName(), filter);
 			DataList resultList = result.getList("result");

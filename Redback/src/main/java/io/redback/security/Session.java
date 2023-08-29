@@ -2,6 +2,7 @@ package io.redback.security;
 
 import java.util.Random;
 
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.ScriptContext;
 import io.redback.utils.TxStore;
@@ -120,6 +121,18 @@ public class Session
 	public String getDomainLock()
 	{
 		return domainLock;
+	}
+	
+	public DataMap getDomainFilterClause()
+	{
+		if(domainLock != null) {
+			DataList list = new DataList();
+			list.add(domainLock);
+			list.add("root");
+			return new DataMap("$in", list);
+		} else {
+			return getUserProfile().getDBFilterDomainClause();
+		}
 	}
 	
 	public ScriptContext getScriptContext() 

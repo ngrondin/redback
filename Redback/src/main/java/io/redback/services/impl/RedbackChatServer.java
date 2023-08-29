@@ -38,7 +38,9 @@ public class RedbackChatServer extends ChatServer {
 	
 	private List<DataMap> listCanonicalData(Session session, CollectionConfig collection, DataMap filter) throws RedbackException {
 		DataMap fullFilter = filter != null ? collection.convertObjectToSpecific(filter) : new DataMap();
-		fullFilter.put(collection.getField("domain"), session.getUserProfile().getDBFilterDomainClause());
+		DataMap domainFilter = session.getDomainFilterClause();
+		if(domainFilter != null)
+			fullFilter.put(collection.getField("domain"), domainFilter);
 		DataMap result = dataClient.getData(collection.getName(), collection.convertObjectToSpecific(fullFilter));
 		DataList resultList = result.getList("result");
 		List<DataMap> list = new ArrayList<DataMap>();

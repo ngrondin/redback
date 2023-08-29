@@ -106,6 +106,15 @@ public class Actionner
 		return groups;
 	}
 	
+	public DataMap getDomainFilterClause()
+	{
+		if(isProcess()) {
+			return new DataMap("$eq", getProcessInstance().getDomain());
+		} else {
+			return session.getDomainFilterClause();
+		}
+	}
+	
 	public DataMap getJSON()
 	{
 		DataMap retVal = new DataMap();
