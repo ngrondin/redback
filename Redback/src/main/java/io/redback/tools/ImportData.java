@@ -42,6 +42,7 @@ public class ImportData extends Thread
 		objectClient = new ObjectClient(firebus, os);
 		session = new Session(t, new UserProfile(new DataMap("username", username)));
 		session.setDomainLock(domain);
+		setName("rbImportThread");
 	}
 	
 	public void setPreLoad(boolean p) 
