@@ -91,7 +91,7 @@ import { RbLayoutComponent } from './rb-layout/rb-layout.component';
 import { RbHsectionComponent } from './rb-hsection/rb-hsection.component';
 import { RbVsectionComponent } from './rb-vsection/rb-vsection.component';
 import { RbTabComponent } from './rb-tab/rb-tab.component';
-import { RbTabSectionComponent } from './rb-tab-section/rb-tab-section.component';
+import { RbTabSectionComponent } from './rb-usermenu/rb-tab-section/rb-tab-section.component';
 import { RbMenuComponent } from './rb-menu/rb-menu.component';
 import { RbMenuGroupComponent } from './rb-menu-group/rb-menu-group.component';
 import { RbMenuLinkComponent } from './rb-menu-link/rb-menu-link.component';
@@ -137,6 +137,8 @@ import { RbActionlistComponent } from './clickable/rb-actionlist/rb-actionlist.c
 import { RbFunnelComponent } from './rb-funnel/rb-funnel.component';
 import { RbIconbuttonBadgeComponent } from './clickable/rb-iconbutton-badge/rb-iconbutton-badge.component';
 import { RbUrlInputComponent } from './inputs/rb-url-input/rb-url-input.component';
+import { RbPreferencesComponent } from './rb-preferences/rb-preferences.component';
+import { RbUsermenuComponent } from './rb-usermenu/rb-usermenu.component';
 
 
 
@@ -287,7 +289,9 @@ window.redback = window.redback || {};
         RbFunnelComponent,
         RbIconbuttonBadgeComponent,
         RbUrlInputComponent,
-        CachedSrcDirective
+        CachedSrcDirective,
+        RbPreferencesComponent,
+        RbUsermenuComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

@@ -46,7 +46,8 @@ export class PopupService {
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, configData);
     let inj : PortalInjector = new PortalInjector(this.injector, injectorTokens);
-
+    
+    
     const popupPortal = new ComponentPortal<RbPopupComponent>(popupClass, anchorElementRef, inj);
     const popupComponentRef = this.overlayRef.attach(popupPortal);
     this.overlayRef.backdropClick().subscribe(() => popupComponentRef.instance.onOverlayClick());

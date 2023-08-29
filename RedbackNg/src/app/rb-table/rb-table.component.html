@@ -29,6 +29,13 @@
                     [attribute]="col.attribute"
                     [editable]="true">
                 </rb-string-input>
+                <rb-number-input
+                    *ngIf="col.type == 'numberinput'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [editable]="true">
+                </rb-number-input>                
                 <rb-datetime-input
                     *ngIf="col.type == 'datepicker'"
                     [size]="col.size"

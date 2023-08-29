@@ -65,7 +65,6 @@ export class RbObject {
     
             if(isChanged) {
                 this.updatedAttributes = [];
-                this.lastUpdated = (new Date()).getTime();
                 this._adviseSetsOfChange();
             }
             this.lastUpdated = json.ts;
@@ -202,7 +201,6 @@ export class RbObject {
 
     _afterSetValue(updated: boolean) {
         if(updated) {
-            this.lastUpdated = (new Date()).getTime();
             this._adviseSetsOfChange();
             if(this.dataService.saveImmediatly) {
                 this.dataService.pushToServer(this);

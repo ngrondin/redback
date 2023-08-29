@@ -1,0 +1,77 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 20vw;
+}
+
+:host > mat-action-list > button.mat-menu-item {
+	height: auto!important;
+    margin: 0px!important;
+}
+
+
+.rb-prefs-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: white;
+    background-color: var(--primary-dark2-color)
+}
+
+.rb-prefs-title {
+    flex: 1 1 auto;
+    padding-left: 15px;
+}
+
+.rb-prefs-listcontainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-prefs-group {
+
+}
+
+.rb-prefs-group-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--primary-color);
+    border-top: 1px solid white;
+}
+
+.rb-prefs-group-header-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    padding: var(--v10px) var(--v8px) var(--v10px) var(--v16px);
+    overflow: hidden;
+}
+
+.rb-prefs-group-header-name {
+    display: block;
+    flex: 1 1 auto;
+    color: var(--light-inverse-writing-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 12px;
+    font-size: 0.85rem;
+}
+
+
+
+.rb-prefs-option {
+    display: flex;
+    flex-direction: row;
+    padding: var(--v5px) var(--v16px) var(--v5px) var(--v16px);
+}
+
+.rb-prefs-option-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1 1 auto;
+    font-size: 0.9rem;
+}

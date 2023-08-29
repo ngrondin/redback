@@ -75,6 +75,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.clear();
     } else if(event == 'update') {
       this.publishEvent('update');
+      this.refreshData(true);
     }
   }
 
@@ -127,13 +128,17 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     });
   }
 
-  public refreshData() : boolean {
+  public refreshData(onlyIfFilterChanged = false) : boolean {
     if(this.canLoadData) {
-      this.clear();
-      this.calcFilter();
-      this.fetchNextPage();
-      this.refreshOnActivate = false;
-      return true;
+      let filterChanged = this.calcFilter();
+      if(onlyIfFilterChanged == false || (onlyIfFilterChanged == true && filterChanged == true)) {
+        this.clear();
+        this.fetchNextPage();
+        this.refreshOnActivate = false;
+        return true;  
+      } else {
+        return false;
+      }
     } else {
       this.refreshOnActivate = true;
       return false;
@@ -179,7 +184,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     }
   }
 
-  private calcFilter() {
+  private calcFilter() : boolean {
+    let prevFilterStr = JSON.stringify(this.resolvedFilter);
     let filter = {};
     if(this.userFilter != null && this.userFilter["uid"] != null) {
       filter = this.userFilter;
@@ -197,6 +203,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.mergedFilter = filter;
     this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
     this.dataService.subscribeToCreation(this.uid, this.objectname, this.resolvedFilter);
+    return (JSON.stringify(this.resolvedFilter)) != prevFilterStr; //Has the filter changed?
   }
 
   private setData(data: RbObject[]) {

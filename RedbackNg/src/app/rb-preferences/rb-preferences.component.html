@@ -1,0 +1,46 @@
+<div
+    class="rb-prefs-header">
+    <div
+        class="rb-prefs-title">
+        Preferences
+    </div>
+    <rb-iconbutton
+        [icon]="'navigate_next'"
+        (click)="closePreferences()">
+    </rb-iconbutton>         
+</div> 
+<div
+    class="rb-prefs-listcontainer hscroll">
+    <div 
+        *ngFor="let preference of preferences"
+        class="rb-prefs-group">
+        <div
+            class="rb-prefs-group-header">
+            <div
+                class="rb-prefs-group-header-container">
+                <div
+                    class="rb-prefs-group-header-name">
+                    {{preference.label}}            
+                </div>         
+            </div>
+      
+        </div>
+
+        <div
+            *ngFor="let option of preference.options"
+            class="rb-prefs-option">
+            <div
+                class="rb-prefs-option-label">
+                {{option.label}}
+            </div>
+            <rb-switch-input
+                [margin]="false"
+                [showicon]="false"
+                [value]="getPreferenceValue(preference.code) == option.value"
+                (valueChange)="setPreferenceValue(preference.code, option.value)">
+
+            </rb-switch-input>
+        </div>                   
+       
+    </div>
+</div>

@@ -8,7 +8,7 @@ import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 @Component({
   selector: 'rb-popup-hierarchy',
   templateUrl: './rb-popup-hierarchy.component.html',
-  styleUrls: ['./rb-popup-hierarchy.component.css']
+  styleUrls: ['./rb-popup-hierarchy.component.css', '../rb-popup/rb-popup.component.css']
 })
 export class RbPopupHierarchyComponent extends RbPopupComponent implements OnInit {
 

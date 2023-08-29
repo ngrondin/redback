@@ -2,6 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { DataService } from 'app/services/data.service';
 import { ConfigService } from 'app/services/config.service';
+import { FilterService } from 'app/services/filter.service';
 
 @Component({
   selector: 'rb-global-search',
@@ -18,7 +19,8 @@ export class RbGlobalSeachComponent implements OnInit {
 
   constructor(
     private dataService: DataService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private filterService: FilterService
   ) { }
 
   ngOnInit() {
@@ -32,10 +34,11 @@ export class RbGlobalSeachComponent implements OnInit {
   }
 
   search() {
-    let objectnames = Object.keys(this.configService.objectsConfig);
+    let objectnames = Object.keys(this.configService.objectsConfig).filter(o => this.configService.objectsConfig[o].searchfilter != null);
     if(this.currentlyLoading >= 0 && this.currentlyLoading < objectnames.length) {
       let objectname = objectnames[this.currentlyLoading];
-      this.dataService.fetchList(objectname, null, this.searchString, null, 0, 50, true).subscribe(
+      let filter = this.filterService.resolveFilter(this.configService.objectsConfig[objectname].searchfilter, null);
+      this.dataService.fetchList(objectname, filter, this.searchString, null, 0, 50, true).subscribe(
         data => {
           this.searchResult = this.searchResult.concat(data);
           this.currentlyLoading++;

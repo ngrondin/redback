@@ -1,0 +1,46 @@
+:host {
+    overflow:hidden;
+}
+
+.rb-usermenu-fullname {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--v20px);
+    color: var(--dark-writing-color);
+    padding: var(--v10px) var(--v10px) 0px var(--v10px);
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.rb-usermenu-username {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--v10px);
+    font-size: 0.7rem;
+    color: var(--light-writing-color);
+    height: var(--v20px);
+    padding: 0px var(--v10px) var(--v10px) var(--v10px);
+    white-space: nowrap;
+}
+
+.rb-usermenu-preferences {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    height: var(--v20px);
+    padding: var(--v10px);
+    color: var(--dark-writing-color);
+    white-space: nowrap;
+}
+
+.rb-usermenu-logout {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    height: var(--v20px);
+    padding: var(--v10px);
+    color: var(--dark-writing-color);
+    white-space: nowrap;
+}

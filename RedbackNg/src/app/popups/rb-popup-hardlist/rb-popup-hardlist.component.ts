@@ -7,7 +7,7 @@ import { RbPopupComponent } from '../rb-popup/rb-popup.component';
 @Component({
   selector: 'app-rb-popup-hardlist',
   templateUrl: './rb-popup-hardlist.component.html',
-  styleUrls: ['./rb-popup-hardlist.component.css']
+  styleUrls: ['./rb-popup-hardlist.component.css', '../rb-popup/rb-popup.component.css']
 })
 export class RbPopupHardlistComponent extends RbPopupComponent implements OnInit {
 

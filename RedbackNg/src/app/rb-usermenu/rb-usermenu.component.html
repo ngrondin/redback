@@ -1,0 +1,23 @@
+<div
+   
+    class="rb-usermenu-fullname">
+    {{userdisplay}}
+</div>
+<div
+    class="rb-usermenu-username">
+    {{username}}
+</div>
+<rb-clickable
+    (click)="click('prefs')">
+    <div
+        class="rb-usermenu-preferences">
+        Preferences
+    </div>
+</rb-clickable>
+<rb-clickable
+    (click)="click('logout')">
+    <div
+        class="rb-usermenu-logout">
+        Logout
+    </div>
+</rb-clickable>

@@ -14,7 +14,7 @@ export class DateTimePopupConfig {
 @Component({
   selector: 'rb-popup-datetime',
   templateUrl: './rb-popup-datetime.component.html',
-  styleUrls: ['./rb-popup-datetime.component.css']
+  styleUrls: ['./rb-popup-datetime.component.css', '../rb-popup/rb-popup.component.css']
 })
 export class RbPopupDatetimeComponent extends RbPopupComponent implements OnInit {
 

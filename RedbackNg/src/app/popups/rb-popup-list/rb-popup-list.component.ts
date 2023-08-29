@@ -7,7 +7,7 @@ import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 @Component({
   selector: 'rb-popup-list',
   templateUrl: './rb-popup-list.component.html',
-  styleUrls: ['./rb-popup-list.component.css']
+  styleUrls: ['./rb-popup-list.component.css', '../rb-popup/rb-popup.component.css']
 })
 export class RbPopupListComponent extends RbPopupComponent implements OnInit {
 

@@ -7,7 +7,7 @@ import { ApiService } from 'app/services/api.service';
 @Component({
   selector: 'rb-popup-addresses',
   templateUrl: './rb-popup-addresses.component.html',
-  styleUrls: ['./rb-popup-addresses.component.css']
+  styleUrls: ['./rb-popup-addresses.component.css', '../rb-popup/rb-popup.component.css']
 })
 export class RbPopupAddressesComponent extends RbPopupComponent implements OnInit {
   public list: String[] = [];

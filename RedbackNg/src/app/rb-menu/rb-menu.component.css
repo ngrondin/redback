@@ -18,17 +18,16 @@
     display: flex;
 	flex-direction: column;
     flex: 1 1 auto;
-    background: transparent;
-    border-right: Solid 1px rgba(0,0,0,.12);
-}
-
-.rb-menu-container-primary {
     background: var(--primary-color);
     border-right: Solid 1px var(--primary-color);
 }
 
-.rb-menu-container-alt1 {
+.rb-menu-container-primary {
+}
 
+.rb-menu-container-alt1 {
+    background: transparent;
+    border-right: Solid 1px rgba(0,0,0,.12);
 }
 
 

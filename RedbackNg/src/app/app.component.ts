@@ -67,8 +67,10 @@ export class AppComponent implements OnInit {
     this.apiService.processService = native.getAttribute("processservice");
     this.apiService.userprefService = native.getAttribute("userpreferenceservice");
     this.apiService.chatService = native.getAttribute("chatservice");
-    this.clientWSService.path = native.getAttribute("clientservice");
     this.apiService.useCSForAPI = native.getAttribute("usecsforapi") == "true" ? true : false;
+    this.clientWSService.path = native.getAttribute("clientservice");
+    this.userprefService.userdisplay = this.userdisplay;
+    this.userprefService.username = this.username;
 
     let currentUrl = window.location.href;
     let pos = currentUrl.indexOf(this.apiService.uiService);

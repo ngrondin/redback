@@ -6,7 +6,7 @@ import { CONTAINER_DATA } from 'app/tokens';
 @Component({
   selector: 'rb-popup-actions',
   templateUrl: './rb-popup-actions.component.html',
-  styleUrls: ['./rb-popup-actions.component.css']
+  styleUrls: ['./rb-popup-actions.component.css', '../rb-popup/rb-popup.component.css']
 })
 export class RbPopupActionsComponent extends RbPopupComponent implements OnInit {
   constructor(

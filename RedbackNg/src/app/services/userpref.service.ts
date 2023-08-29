@@ -31,7 +31,8 @@ export class GlobalPref {
   providedIn: 'root'
 })
 export class UserprefService {
-
+  userdisplay: string;
+  username: string;
   globalPrefs: GlobalPref[] = [];
   currentView: string;
   domainUISwitches: any = {};
