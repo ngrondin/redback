@@ -3,39 +3,50 @@ package io.redback.tools;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import io.firebus.Firebus;
-import io.firebus.Payload;
-import io.firebus.data.DataList;
+import io.firebus.data.DataFilter;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
+import io.redback.client.ObjectClient;
+import io.redback.client.RedbackObjectRemote;
 import io.redback.security.Session;
+import io.redback.security.UserProfile;
 
 public class ImportData extends Thread
 {
 	protected Firebus firebus;
-	protected String token;
-	protected String objectService;
+	protected Session session;
+	protected ObjectClient objectClient;
 	protected String domain;
 	protected String fileurl;
 	protected String username;
+	protected boolean preLoadTarget = false;
 	
 	public ImportData(Firebus fb, String t, String os, String d, String fu)
 	{
 		firebus = fb;
-		token = t;
-		objectService = os;
-		domain = d;
 		fileurl = fu;
-		DecodedJWT jwt = JWT.decode(token);
+		DecodedJWT jwt = JWT.decode(t);
 		username = jwt.getClaim("email").asString();
+		domain = d;
+		objectClient = new ObjectClient(firebus, os);
+		session = new Session(t, new UserProfile(new DataMap("username", username)));
+		session.setDomainLock(domain);
+	}
+	
+	public void setPreLoad(boolean p) 
+	{
+		preLoadTarget = p;
 	}
 	
 	public void importDataAsync()
@@ -50,7 +61,6 @@ public class ImportData extends Thread
 	
 	public void run()
 	{
-		Session session = new Session();
 		Map<String, String> keyMap = new HashMap<String, String>();
 		try
 		{
@@ -75,6 +85,7 @@ public class ImportData extends Thread
 					{
 						String objectname = it1.next();
 						DataMap objects = input.getObject(objectname);
+						List<RedbackObjectRemote> existingTargets = preLoadTarget ? objectClient.listAllObjects(session, objectname, new DataMap(), null, false) : null;
 						String[] oldUids = objects.keySet().toArray(new String [0]);
 						for(int i = 0; i < oldUids.length; i++)
 						{
@@ -114,38 +125,25 @@ public class ImportData extends Thread
 							{
 								try
 								{
-									DataMap fbReqmap = new DataMap();
-									DataMap filter = (DataMap)data.getCopy(); 
-									filter.put("domain", domain);
-									fbReqmap.put("action", "list");
-									fbReqmap.put("object", objectname);
-									fbReqmap.put("filter", filter);
-									Payload request = new Payload(fbReqmap);
-									request.metadata.put("token", token);
-									request.metadata.put("session", session.getId());
-									request.metadata.put("mime", "application/json");
-									Payload response = firebus.requestService(objectService, request);
-									DataMap fbRespmap = response.getDataMap();
-									DataList list = fbRespmap.getList("list");
+									List<RedbackObjectRemote> matchingTargets = null;
+									if(existingTargets != null) {
+										matchingTargets = new ArrayList<RedbackObjectRemote>();
+										DataFilter filter = new DataFilter(data);
+										for(RedbackObjectRemote ro: existingTargets) 
+											if(filter.apply(ro.data.getObject("data")))
+												matchingTargets.add(ro);
+									} else {
+										matchingTargets = objectClient.listObjects(session, objectname, data);
+									}
 									String newUid = null;
-									if(list.size() > 0)
+									if(matchingTargets.size() > 0)
 									{
-										DataMap existing = list.getObject(0);
-										newUid = existing.getString("uid");
+										newUid = matchingTargets.get(0).getUid();
 										Logger.fine("rb.import.objectexists", new DataMap("object", objectname, "uid", newUid));
 									}
 									else
 									{
-										fbReqmap = new DataMap();
-										fbReqmap.put("action", "create");
-										fbReqmap.put("object", objectname);
-										fbReqmap.put("data", data);
-										fbReqmap.put("domain", domain);
-										request = new Payload(fbReqmap);
-										request.metadata.put("token", token);
-										response = firebus.requestService(objectService, request);
-										fbRespmap = new DataMap(response.getString());
-										newUid = fbRespmap.getString("uid");
+										objectClient.createObject(session, objectname, domain, data, false);
 										Logger.fine("rb.import.objectimported", new DataMap("object", objectname, "uid", newUid));
 									}
 									String oldKey = objectname + "." + oldUid;

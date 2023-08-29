@@ -66,7 +66,7 @@ public class ConfigCache<T> {
 	
 	private List<T> listFromCacheOrClient(Session session, DataMap filter, boolean fromDomains) throws RedbackException
 	{
-		String listKey = (fromDomains ? "dom." : "") + filter.toString(0, true);
+		String listKey = (fromDomains ? "dom." : "") + filter.toString(true);
 		CacheEntry<List<T>> listCE = listCache.getEntry(listKey);
 		if(listCE != null) {
 			return listCE.get();
