@@ -457,10 +457,9 @@ public class RedbackObject extends RedbackElement
 	
 	public boolean isEditable(String name) throws RedbackException
 	{
-		if((domain != null && domain.equals("root")) || !canWrite)
+		if((domain != null && domain.equals("root")) || !canWrite) {
 			return false;
-		else
-		{
+		} else {
 			try {
 				Expression expression = config.getAttributeConfig(name).getEditableExpression(); 
 				Object o = expression.eval(scriptContext);
@@ -500,16 +499,17 @@ public class RedbackObject extends RedbackElement
 	
 	public boolean canDelete() throws RedbackException
 	{
-		try {
-			Expression expression = config.getCanDeleteExpression();
-			Object o = expression.eval(scriptContext);
-			if(o instanceof Boolean)
-				return (Boolean)o;
-			else
-				return false;
-		} catch(ScriptException e) {
-			throw new RedbackException("Error evaluating canDelete expression", e);
-		}		
+		if((domain != null && domain.equals("root")) || !canWrite) {
+			return false;
+		} else {
+			try {
+				Expression expression = config.getCanDeleteExpression();
+				Object o = expression.eval(scriptContext);
+				return o instanceof Boolean ? (Boolean)o : false;
+			} catch(ScriptException e) {
+				throw new RedbackException("Error evaluating canDelete expression", e);
+			}	
+		}
 	}
 	
 	public void delete() throws RedbackException
