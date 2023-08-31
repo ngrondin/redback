@@ -1,35 +1,53 @@
-<!--div
-    ng2FileDrop
-    class="rb-file-input-box"    
-    [ngClass]="hasFileOver ? 'rb-file-input-active' : ''"
-    (fileOver)="fileOver($event)"
-    (onFileDrop)="fileDropped($event)"
-    [uploader]="uploader"
-    (click)="openFile()">
-    <img
-        class="rb-file-input-img"
-        [style.width.px] = "size"
-        *ngIf="hasThumbnail()"
-        [src]="displayvalue">
-    <mat-icon
-        class="rb-file-input-icon"
-        *ngIf="!hasThumbnail() && fileUid != null">
-        attach_file
-    </mat-icon>
-</div>-->
 <div
     class="rb-file-input-box"    
-    [ngClass]="hasFileOver ? 'rb-file-input-active' : ''"
+    [ngClass]="(hasFileOver ? 'rb-file-input-active' : fileUid == null ? 'rb-file-input-border' : '')"
     (click)="openFile()">
     <img
-        class="rb-file-input-img"
-        [style.width.px] = "size"
         *ngIf="hasThumbnail()"
+        class="rb-file-input-img"
         [src]="displayvalue">
+    <svg 
+        *ngIf="!hasThumbnail() && fileUid != null"
+        class="rb-file-fileicon"
+        viewBox="0 0 153.3886 187.59438" >
+        <defs
+            id="defs18" />
+        <g
+            id="layer1"
+            transform="translate(-40.7077,-28.449523)">
+            <path
+                style="fill:#eee;stroke:#888;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+                d="M 45.713771,33.677291 45.928406,209.91485 178.32178,211.00271 178.55336,94.42113 119.82934,33.455879 Z"
+                id="path138" />
+            <path
+                style="fill:#fff;stroke:#888;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+                d="m 120.56023,33.130537 0.88113,61.637396 58.0835,1.015561"
+                id="path140" />
+            <rect
+                id="rect194"
+                width="124.59536"
+                height="69.706528"
+                x="69.500931"
+                y="121.63792"
+                style="stroke-width:0.264583;fill:#666" />
+            <text 
+                x="71" 
+                y="180" 
+                font-size="4em"
+                fill="#ddd">
+                File
+            </text>
+        </g>
+    </svg>
     <mat-icon
-        class="rb-file-input-icon"
-        *ngIf="!hasThumbnail() && fileUid != null">
-        attach_file
-    </mat-icon>
+        *ngIf="fileUid == null"
+        class="rb-file-input-icon rb-file-lightgrey">
+        download
+    </mat-icon>   
+    <div
+        *ngIf="fileUid == null"
+        class="rb-file-tiptext rb-file-lightgrey">
+        Drop file here
+    </div>
 </div>
 

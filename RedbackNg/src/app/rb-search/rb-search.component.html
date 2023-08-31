@@ -6,7 +6,7 @@
 <div
     class="rb-input-container">
     <span
-        [class]="'rb-input-label' + ((displayvalue === null || displayvalue === '') && !isEditing ? ' rb-input-label-big' : '')">
+        [class]="'rb-input-label' + ((displayvalue === null || displayvalue === '' || displayvalue === undefined) && !isEditing ? ' rb-input-label-big' : '')">
         {{label}}
     </span>    
     <input 

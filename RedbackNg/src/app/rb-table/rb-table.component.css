@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px);
 }
 
 .rb-table-header-container {
@@ -39,14 +40,15 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-bottom: var(--v20px);
 }
 
 .rb-table-rowitem {
     display: flex;
     flex-direction: row;
-    margin: 0px 10px 0px 0px
+    margin: 0px var(--v10px) 0px 0px
 }
 
 .rb-table-rowbutton {
-    margin-left: 10px;
+    margin-left: var(--v10px);
 }

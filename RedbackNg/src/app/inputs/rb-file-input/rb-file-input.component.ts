@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
-//import { FileUploader, FileUploaderOptions } from 'ng2-file-upload';
 import { ApiService } from 'app/services/api.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HostBinding } from '@angular/core';
@@ -20,7 +19,6 @@ export class RbFileInputComponent extends RbInputComponent  {
   @HostBinding('style.height.px') get hostHeight() { return this.height != null ? this.height : 100;}
 
   hasFileOver: boolean = false;
-  //public uploader: FileUploader;
   defaultIcon: string = 'description';
   uploadProgress: number = -1;
 
@@ -30,8 +28,6 @@ export class RbFileInputComponent extends RbInputComponent  {
     private domSanitizer: DomSanitizer    
   ) {
     super();
-    //this.uploader = new FileUploader({});
-    //this.uploader.response.subscribe( (res: any) => this.fileUploaded(res) );
   }
 
   inputInit() {
@@ -91,23 +87,8 @@ export class RbFileInputComponent extends RbInputComponent  {
     this.hasFileOver = false;
   }
 
-/*
-  fileOver(event: any) {
-    if(this.hasFileOver != event) {
-      this.hasFileOver = event;
-    }
-  }
-
-  fileDropped(event: any) {
-    this.upload(event);
-  }*/
-
   upload(evetn: any) {
-    /*let options : FileUploaderOptions = {};
-    options.url = this.apiService.baseUrl + '/' + this.apiService.fileService;
-    options.disableMultipart = false;
-    this.uploader.setOptions(options);
-    this.uploader.uploadAll();*/
+
   }
 
   fileUploaded(res: any) {

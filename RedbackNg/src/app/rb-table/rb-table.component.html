@@ -27,14 +27,16 @@
                     [size]="col.size"
                     [object]="object"
                     [attribute]="col.attribute"
-                    [editable]="true">
+                    [editable]="true"
+                    [margin]="false">
                 </rb-string-input>
                 <rb-number-input
                     *ngIf="col.type == 'numberinput'"
                     [size]="col.size"
                     [object]="object"
                     [attribute]="col.attribute"
-                    [editable]="true">
+                    [editable]="true"
+                    [margin]="false">
                 </rb-number-input>                
                 <rb-datetime-input
                     *ngIf="col.type == 'datepicker'"
@@ -42,7 +44,8 @@
                     [object]="object"
                     [attribute]="col.attribute"
                     [format]="col.format"
-                    [editable]="true">
+                    [editable]="true"
+                    [margin]="false">
                 </rb-datetime-input>
                 <rb-related-input
                     *ngIf="col.type == 'relatedinput'"
@@ -50,14 +53,16 @@
                     [object]="object"
                     [attribute]="col.attribute"
                     [displayattribute]="col.displayAttribute"
-                    [editable]="true">
+                    [editable]="true"
+                    [margin]="false">
                 </rb-related-input>
                 <rb-switch-input
                     *ngIf="col.type == 'switch'"
                     [size]="col.size"
                     [object]="object"
                     [attribute]="col.attribute"
-                    [editable]="true">
+                    [editable]="true"
+                    [margin]="false">
                 </rb-switch-input>                
             </div>
             <div
