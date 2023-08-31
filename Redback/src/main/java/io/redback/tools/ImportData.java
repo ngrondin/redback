@@ -16,6 +16,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import io.firebus.Firebus;
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Level;
 import io.firebus.logging.Logger;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
@@ -144,7 +145,8 @@ public class ImportData extends Thread
 									}
 									else
 									{
-										objectClient.createObject(session, objectname, domain, data, false);
+										RedbackObjectRemote newObject = objectClient.createObject(session, objectname, domain, data, false);
+										newUid = newObject.getUid();
 										Logger.fine("rb.import.objectimported", new DataMap("object", objectname, "uid", newUid));
 									}
 									String oldKey = objectname + "." + oldUid;
@@ -184,6 +186,10 @@ public class ImportData extends Thread
 		String filepath = null;
 		String domain = null;
 		String token = null;
+		String knownAddress = null;
+		boolean preload = false;
+		
+		Logger.setLevel(Level.FINE);
 		
 		for(int i = 0; i < args.length; i++) {
 			String swt = args[i];
@@ -204,14 +210,27 @@ public class ImportData extends Thread
 			if(swt.equals("-t") && args.length > i + 1) {
 				token = args[++i];
 			}
+			if(swt.equals("-ka") && args.length > i + 1) {
+				knownAddress = args[++i];
+			}		
+			if(swt.equals("-pl") && args.length > i + 1) {
+				preload = args[++i].equals("true") ? true : false;
+			}
 		}
 		
 		if(firebus == null)
 			firebus = new Firebus();
 		
+		if(knownAddress != null) {
+			String[] parts = knownAddress.split(":");
+			if(parts.length  == 2) 
+				firebus.addKnownNodeAddress(parts[0], Integer.parseInt(parts[1]));
+		}
+		
 		if(token != null && objectService != null && domain != null && filepath != null) {
 			try {
 			    ImportData id = new ImportData(firebus, token, objectService, domain, filepath);
+			    id.setPreLoad(preload);
 				Thread.sleep(5000);
 				id.importData();
 			} catch(Exception e) {
