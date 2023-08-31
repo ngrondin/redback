@@ -84,7 +84,7 @@ export class MenuService {
       menu.content = [];
     }
     for(var i = 0; i < menu.content.length; i++) {
-      if(menu.content[i].name == item.name) {
+      if(menu.content[i].view == item.view) {
         exists = true;
       }
     }
