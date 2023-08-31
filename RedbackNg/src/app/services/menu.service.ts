@@ -201,12 +201,12 @@ export class MenuService {
     return menu;
   }
 
-  isInMenu(type: string, name: string): boolean {
+  isInMenu(type: string, view: string): boolean {
     let menu = this.getMenu(type);
     let ret: boolean = false;
     if(menu != null && menu.content != null) {
       for(var i = 0; i < menu.content.length; i++) {
-        if(menu.content[i].name == name) {
+        if(menu.content[i].view == view) {
           ret = true;
         }
       }

@@ -43,7 +43,7 @@ export class RbMenuLinkComponent implements OnInit {
   }
 
   isInPersonalMenu() {
-    return this.menuService.isInMenu('personal', this.config.name);
+    return this.menuService.isInMenu('personal', this.config.view);
   }
 
   addToPersonalMenu() {
@@ -55,7 +55,7 @@ export class RbMenuLinkComponent implements OnInit {
   }
 
   isInGroupMenu() {
-    return this.menuService.isInMenu('group', this.config.name);
+    return this.menuService.isInMenu('group', this.config.view);
   }
 
   addToGroupMenu() {
