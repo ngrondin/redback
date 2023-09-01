@@ -1111,7 +1111,7 @@ public class ObjectManager
 		{
 			try 
 			{
-				Payload payload = new Payload(object.getDataMap(true, true));
+				Payload payload = new Payload(object.getDataMap(true, false));
 				firebus.publish(objectUpdateChannel, payload);
 			}
 			catch(Exception e) 
