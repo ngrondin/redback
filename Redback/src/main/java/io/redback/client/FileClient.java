@@ -64,6 +64,23 @@ public class FileClient extends Client {
 		}
 	}
 
+	public List<String> listFileUidsFor(Session session, String object, String uid)  throws RedbackException {
+		List<String> uids = new ArrayList<String>();
+		try {
+			DataMap req = new DataMap();
+			req.put("object", object);
+			req.put("uid", uid);
+			Payload resp = requestPayload(session, new Payload(req));
+			DataMap respMap = new DataMap(resp.getString());
+			DataList list = respMap.getList("list");
+			for(int i = 0; i < list.size(); i++)
+				uids.add(list.getObject(i).getString("fileuid"));
+			return uids;
+		} catch(Exception e) {
+			throw new RedbackException("Error listing file uids", e);
+		}
+	}
+	
 	public List<RedbackFile> listFilesFor(Session session, String object, String uid)  throws RedbackException {
 		List<RedbackFile> files = new ArrayList<RedbackFile>();
 		try {
@@ -81,7 +98,7 @@ public class FileClient extends Client {
 			}
 			
 		} catch(Exception e) {
-			throw new RedbackException("Error getting file", e);
+			throw new RedbackException("Error listing file", e);
 		}
 		return files;
 	}

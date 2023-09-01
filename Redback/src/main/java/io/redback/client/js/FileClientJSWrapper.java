@@ -1,9 +1,15 @@
 package io.redback.client.js;
 
 
+import java.util.Base64;
+import java.util.List;
+
+import io.firebus.data.DataList;
+import io.firebus.data.DataMap;
 import io.redback.client.FileClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
+import io.redback.utils.RedbackFile;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
 
@@ -30,6 +36,18 @@ public class FileClientJSWrapper extends ObjectJSWrapper {
 					return null;
 				}
 			};
+		} else if(key.equals("listFileUidsFor")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String object = arguments[0].toString();
+					String objectuid = arguments[1].toString();
+					List<String> list = fileClient.listFileUidsFor(session, object, objectuid);
+					DataList ret = new DataList();
+					for(String uid: list)
+						ret.add(uid);
+					return ret;
+				}
+			};			
 		} else if(key.equals("getMetadata")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
@@ -37,6 +55,22 @@ public class FileClientJSWrapper extends ObjectJSWrapper {
 					return fileClient.getMetadata(session, fileUid);
 				}
 			};
+		} else if(key.equals("getFile")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String fileUid = arguments[0].toString();
+					RedbackFile file = fileClient.getFile(session, fileUid);
+					DataMap ret = new DataMap();
+					ret.put("filename", file.metadata.fileName);
+					ret.put("fileuid", file.metadata.fileuid);
+					ret.put("mime", file.metadata.mime);
+					ret.put("username", file.metadata.username);
+					ret.put("date", file.metadata.date);
+					String base64 = Base64.getEncoder().encodeToString(file.bytes);
+					ret.put("base64", base64);
+					return ret;
+				}
+			};			
 		} else {
 			return null;
 		}
