@@ -16,7 +16,7 @@ export class RbFilelistComponent extends RbComponent {
   @Input('fileset') fileset: RbFilesetComponent;
   @Input('downloadOnSelect') downloadOnSelect: boolean = true;
   @Input('details') showDetails: boolean = true;
-  @Input('editable') editable: boolean = true;
+  
   
   hasFileOver: boolean = false;
   hovering: RbFile = null;
@@ -43,6 +43,10 @@ export class RbFilelistComponent extends RbComponent {
 
   get uploadProgress(): number {
     return this.fileset != null ? this.fileset.uploadProgress : -1;
+  }
+
+  get editable(): boolean {
+    return this.fileset.editable;
   }
 
   componentInit() {
@@ -90,4 +94,6 @@ export class RbFilelistComponent extends RbComponent {
     event.stopPropagation();
     event.preventDefault();
   }
+
+
 }

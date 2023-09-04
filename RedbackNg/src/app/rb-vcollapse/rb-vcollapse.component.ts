@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 
 @Component({
@@ -8,6 +8,7 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
 })
 export class RbVcollapseComponent extends RbContainerComponent {
   open: boolean = false;
+  @Input('label') label: string = null;
 
   constructor() {
     super();

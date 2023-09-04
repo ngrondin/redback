@@ -220,8 +220,14 @@ export class ObserverProxy implements Observer<any> {
 }
 
 export class Evaluator {
-    public static eval(expr: string, object: RbObject, relatedObject: RbObject) {
-        if(!((expr.indexOf("object.") > -1 && object == null) || (expr.indexOf("relatedObject.") > -1 && relatedObject == null))) {
+    public static eval(expr: any, object: RbObject, relatedObject: RbObject) {
+        if(expr == null) {
+            return null;
+        } else if(expr == 'true' || expr == true) {
+            return true;
+        } else if(expr == 'false' || expr == false) {
+            return false;
+        } else if(typeof expr == 'string' && !((expr.indexOf("object.") > -1 && object == null) || (expr.indexOf("relatedObject.") > -1 && relatedObject == null))) {
             return eval(expr);            
         } else {
             return null;

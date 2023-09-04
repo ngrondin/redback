@@ -23,6 +23,14 @@
     border-bottom: 1px solid #e8e8e8;
 }
 
+.rb-vcollapse-label {
+    display: flex;
+    flex-direction: row;
+    font-size: 0.7rem;
+    color: lightgray;
+    align-items: center;
+}
+
 .rb-vcollapse-switch {
     display: flex;
     flex: 0 0 auto;

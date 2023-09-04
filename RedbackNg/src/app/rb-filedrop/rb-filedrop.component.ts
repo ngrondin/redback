@@ -12,7 +12,6 @@ import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
 })
 export class RbFiledropComponent extends RbContainerComponent {
   @Input('fileset') fileset: RbFilesetComponent;
-  @Input('editable') editable: boolean = true;
 
   @Output() dropped: EventEmitter<any> = new EventEmitter();
 
@@ -34,6 +33,10 @@ export class RbFiledropComponent extends RbContainerComponent {
   }
 
   onActivationEvent(state: boolean) {
+  }
+
+  get editable(): boolean {
+    return this.fileset.editable;
   }
 
   @HostListener('drop', ['$event'])

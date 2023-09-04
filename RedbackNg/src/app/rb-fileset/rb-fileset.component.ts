@@ -3,6 +3,7 @@ import { ApiService } from 'app/services/api.service';
 import { FileService } from 'app/services/file.service';
 import { RbObject, RbFile } from 'app/datamodel';
 import { RbSetComponent } from 'app/abstract/rb-set';
+import { Evaluator } from 'app/helpers';
 
 @Component({
   selector: 'rb-fileset',
@@ -10,11 +11,14 @@ import { RbSetComponent } from 'app/abstract/rb-set';
   styleUrls: ['./rb-fileset.component.css']
 })
 export class RbFilesetComponent extends RbSetComponent {
+  @Input('editable') editableExpr: any = null;
+
   public fileList: RbFile[] = [];
   public selectedFile: RbFile;
   public filesLoading: boolean;
   public uploadProgress: number = -1;
   public overrideRbObject: RbObject;
+  public editable: boolean = true;
 
   constructor(
     private fileService: FileService,
@@ -63,6 +67,7 @@ export class RbFilesetComponent extends RbSetComponent {
   }
 
   public refreshData() {
+    this.editable = Evaluator.eval(this.editableExpr, this.relatedObject, this.dataset != null ? this.dataset.relatedObject : null) ?? true;
     if(this.active && this.relatedObject != null) {
       this.fileService.list(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
         data => this.setData(data)
@@ -96,4 +101,6 @@ export class RbFilesetComponent extends RbSetComponent {
   public delete(file: RbFile) {
     this.apiService.unlinkFile(file.fileUid, this.relatedObject.objectname, this.relatedObject.uid).subscribe(next => this.refreshData());
   }
+
+
 }
