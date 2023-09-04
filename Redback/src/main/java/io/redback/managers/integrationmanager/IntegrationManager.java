@@ -10,10 +10,13 @@ import io.firebus.Firebus;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.ScriptContext;
 import io.firebus.script.ScriptFactory;
 import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
+import io.redback.client.FileClient;
 import io.redback.client.GatewayClient;
+import io.redback.client.js.FileClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
@@ -30,9 +33,11 @@ public class IntegrationManager {
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String gatewayServiceName;
+	protected String fileServiceName;
 	protected DataClient dataClient;
 	protected ConfigClient configClient;
 	protected GatewayClient gatewayClient;
+	protected FileClient fileClient;
 	protected CollectionConfig clientDataCollection;
 	protected ConfigCache<ClientConfig> clientConfigs;
 	protected String publicUrl;
@@ -49,9 +54,11 @@ public class IntegrationManager {
 			configServiceName = config.getString("configservice");
 			dataServiceName = config.getString("dataservice");
 			gatewayServiceName = config.getString("gatewayservice");
+			fileServiceName = config.getString("fileservice");
 			dataClient = new DataClient(firebus, dataServiceName);
 			configClient = new ConfigClient(firebus, configServiceName);
 			gatewayClient = new GatewayClient(firebus, gatewayServiceName);
+			fileClient = new FileClient(firebus, fileServiceName);
 			clientDataCollection = new CollectionConfig(config.getObject("clientdatacollection"), "rbin_clientdata");
 			final IntegrationManager im = this;
 			clientConfigs = new ConfigCache<ClientConfig>(configClient, "rbin", "client", new ConfigCache.ConfigFactory<ClientConfig>() {
@@ -66,6 +73,10 @@ public class IntegrationManager {
 	
 	public ScriptFactory getScriptFactory() {
 		return scriptFactory;
+	}
+	
+	public FileClient getFileClient() {
+		return fileClient;
 	}
 	
 	public void configure() {

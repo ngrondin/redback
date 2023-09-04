@@ -10,6 +10,7 @@ import io.firebus.script.ScriptContext;
 import io.firebus.script.exceptions.ScriptException;
 import io.firebus.script.exceptions.ScriptValueException;
 import io.redback.client.GatewayClient;
+import io.redback.client.js.FileClientJSWrapper;
 import io.redback.exceptions.RedbackConfigNotFoundException;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.integrationmanager.js.GatewayCallJSWrapper;
@@ -46,17 +47,21 @@ public class Client {
 		}
 	}
 	
-	protected ScriptContext getScriptContext(Map<String, Object> subContext) throws ScriptValueException {
+	protected ScriptContext getBaseScriptContext() throws ScriptValueException {
 		ScriptContext ctx = integrationManager.getScriptFactory().createScriptContext();
 		for(String key : baseScriptContext.keySet()) ctx.declare(key, baseScriptContext.get(key));
+		ctx.put("fc", new FileClientJSWrapper(integrationManager.getFileClient(), session));
+		return ctx;
+	}
+	
+	protected ScriptContext getScriptContext(Map<String, Object> subContext) throws ScriptValueException {
+		ScriptContext ctx = getBaseScriptContext();
 		for(String key : subContext.keySet()) ctx.declare(key, subContext.get(key));	
 		return ctx;
 	}
 	
 	protected ScriptContext getFunctionScriptContext() throws ScriptValueException {
-		ScriptContext ctx = integrationManager.getScriptFactory().createScriptContext();
-		for(String key : baseScriptContext.keySet()) 
-			ctx.declare(key, baseScriptContext.get(key));
+		ScriptContext ctx = getBaseScriptContext();
 		ctx.declare("call", new GatewayCallJSWrapper(this));
 		return ctx;
 	}
