@@ -41,10 +41,9 @@ public class ClientHandler extends ClientStreamHandler {
 	public void clientStreamClosed() throws RedbackException {
 		try {
 			clientManager.onClientLeave(this);
-			Logger.info("rb.client.disconnect", new DataMap("gatewayconnid", gatewayConnectionId, "stats", getStatString()));			
+			Logger.info("rb.client.disconnect", new DataMap("gatewayconnid", gatewayConnectionId, "stats", getStats()));			
 		} catch(Exception e) {
 			Logger.severe("rb.client.disconnect", "Error closing client handler", e);
-			//logger.severe("Error closing client handler : " + e.getMessage());
 		}
 	}
 	

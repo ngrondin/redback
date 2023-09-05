@@ -259,28 +259,18 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	public abstract void clientStreamClosed() throws RedbackException;
 	
-	protected String getStatString() {
+	protected DataMap getStats() {
 		long now = System.currentTimeMillis();
-		StringBuilder sb = new StringBuilder();
-		sb.append("life: ");
-		sb.append(now - start);
-		sb.append("ms");
-		sb.append("  in: ");
-		sb.append(bytesIn);
-		sb.append("b/");
-		sb.append(countIn);
-		sb.append("/");
-		sb.append(lastIn > 0 ? (now - lastIn) + "ms" : "-");
-		sb.append("  out: ");
-		sb.append(bytesOut);
-		sb.append("b/");
-		sb.append(countOut);
-		sb.append("/");
-		sb.append(lastOut > 0 ? (now - lastOut) + "ms" : "-");
-		sb.append("  hb_count: ");
-		sb.append(heartbeatCount);
-		sb.append("  last_hb: ");
-		sb.append(lastHeartbeat > 0 ? (now - lastHeartbeat) + "ms" : "-");
-		return sb.toString();
+		DataMap stats = new DataMap();
+		stats.put("life", (now - start));
+		stats.put("bytesin", bytesIn);
+		stats.put("countin", countIn);
+		stats.put("lastin", lastIn > 0 ? (now - lastIn) : -1);
+		stats.put("bytesout", bytesOut);
+		stats.put("countout", countOut);
+		stats.put("lastout", lastOut > 0 ? (now - lastOut) : -1);
+		stats.put("hb", heartbeatCount);
+		stats.put("lasthb", lastHeartbeat > 0 ? (now - lastHeartbeat) : -1);
+		return stats;
 	}
 }
