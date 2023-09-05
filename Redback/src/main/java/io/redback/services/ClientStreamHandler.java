@@ -262,6 +262,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	protected DataMap getStats() {
 		long now = System.currentTimeMillis();
 		DataMap stats = new DataMap();
+		stats.put("user", session.getUserProfile().getUsername());
 		stats.put("life", (now - start));
 		stats.put("bytesin", bytesIn);
 		stats.put("countin", countIn);
