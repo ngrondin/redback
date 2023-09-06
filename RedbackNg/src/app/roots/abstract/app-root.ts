@@ -104,8 +104,6 @@ export abstract class AppRootComponent implements OnInit {
         this.navigated();
       }
     }
-
-    abstract navigated();
   
     backTo($event) {
       let i = this.viewTargetStack.indexOf($event);
@@ -151,6 +149,16 @@ export abstract class AppRootComponent implements OnInit {
       } else {
         this.rightDrawerShowing = type;
         this.rightdrawer.open();
+      }
+    }
+
+    closeRightDrawer() {
+      this.rightdrawer.close();
+    }
+
+    navigated() {
+      if(this.rightdrawer.opened) {
+        this.rightdrawer.close();
       }
     }
   

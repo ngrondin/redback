@@ -18,15 +18,9 @@ export class DesktopRootComponent extends AppRootComponent {
     super();
   }
 
-  closeRightDrawer() {
-    this.rightdrawer.close();
-  }
 
 
-  navigated() {
-    if(this.rightdrawer.opened) {
-      this.rightdrawer.close();
-    }
-  }
+
+
 
 }

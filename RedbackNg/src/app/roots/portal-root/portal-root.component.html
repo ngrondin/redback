@@ -15,57 +15,14 @@
             (navigate)="navigateTo($event)">
         </rb-global-search>
         <rb-clickable
+            #usermenubutton
             class="rb-toolbar-username"
-            [matMenuTriggerFor]="usermenu">
+            (click)="openUserMenu()">
             <span>
                 {{userdisplay}}
             </span>
         </rb-clickable>
-        <mat-menu
-            #usermenu="matMenu">
-            <button
-                mat-menu-item
-                [matMenuTriggerFor]="prefmenu">
-                Preferences
-            </button>
-            <button
-                mat-menu-item
-                (click)="logout()">
-                Logout
-            </button>
-        </mat-menu>
-        <mat-menu
-            #prefmenu="matMenu">
-            <button
-                *ngFor="let pref of userprefService.getGlobalPreferences()"
-                mat-menu-item
-                [matMenuTriggerFor]="prefoption"
-                [matMenuTriggerData]="{pref: pref, value: userprefService.getGlobalPreferenceValue(pref.code)}">
-                {{pref.label}}
-            </button>            
-        </mat-menu>
-        <mat-menu
-            #prefoption="matMenu">
-            <ng-template 
-                matMenuContent 
-                let-pref="pref"
-                let-value="value">
-                <button
-                    *ngFor="let prefoption of pref.options"
-                    (click)="userprefService.setGlobalPreferenceValue('user', pref.code, prefoption.value)"
-                    mat-menu-item>
-                    <mat-icon
-                        *ngIf="value === prefoption.value">
-                        check_box
-                    </mat-icon>
-                    <mat-icon
-                        *ngIf="value !== prefoption.value">
-                        check_box_outline_blank
-                    </mat-icon>                    
-                    {{prefoption.label}}
-                </button>            
-            </ng-template>
-        </mat-menu>
+        
     </mat-toolbar-row>
 </mat-toolbar>
 <mat-sidenav-container
@@ -86,11 +43,10 @@
         #rightdrawer
         mode="over" 
         position="end"> 
-        <rb-notification-list
-            *ngIf="rightDrawerShowing == 'notifications'"
-            (navigate)="navigateTo($event)"
+        <rb-preferences
+            *ngIf="rightDrawerShowing == 'prefs'"
             (close)="closeRightDrawer()">
-        </rb-notification-list>
+        </rb-preferences>
     </mat-sidenav>    
     <mat-sidenav-content>
         <rb-vsection>

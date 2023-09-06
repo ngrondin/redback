@@ -15,27 +15,6 @@ export class PortalRootComponent extends AppRootComponent {
       super();
     }
   
-    closeRightDrawer() {
-      this.rightdrawer.close();
-    }
-  
-    toggleNotifications() {
-      if(this.rightdrawer.opened) {
-        this.rightdrawer.close();
-        if(this.rightDrawerShowing != 'notifications') {
-          setTimeout(() => this.toggleNotifications(), 500);
-        } 
-      } else {
-        this.rightDrawerShowing = 'notifications';
-        this.rightdrawer.open();
-      }
-    }
-  
-  
-    navigated() {
-      if(this.rightdrawer.opened) {
-        this.rightdrawer.close();
-      }
-    }
+
 
 }

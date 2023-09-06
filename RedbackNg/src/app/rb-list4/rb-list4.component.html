@@ -4,7 +4,7 @@
     <div>
         <div
             *ngFor="let item of enhancedList"
-            [rb-drag-object]="item.object"                
+            [rb-drag-object]="allowdrag ? item.object : null"                
             [class]="'rb-list-repeater' + (selectedObject == item.object ? ' rb-list-repeater-selected' : '')">
             <div
                 [style.background]="item.color">

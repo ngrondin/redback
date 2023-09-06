@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { Evaluator, Formatter } from 'app/helpers';
@@ -19,7 +19,11 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('colormap') colormap: any;
   @Input('colorattribute') colorattribute: string;
   @Input('modal') modal: string;
+  @Input('navigate') link: string;
+  @Input('allowdrag') allowdrag: boolean = false;
   @Input('showrefresh') showrefresh: boolean = true;
+
+  @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   enhancedList: any[];
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
@@ -157,6 +161,12 @@ export class RbList4Component extends RbDataObserverComponent {
     this.dataset.select(item);
     if(this.modal != null) {
       this.modalService.open(this.modal);
+    } else if(this.link != null) {
+      let target = {
+        "object": this.rbObject.objectname,
+        "filter": {uid: "'" + this.rbObject.uid + "'"}
+      };
+      this.navigate.emit(target);
     }
   }
 
