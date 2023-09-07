@@ -13,8 +13,10 @@ import io.redback.utils.FilterProcessor;
 
 public class RemoteObjectRelater {
 	protected ObjectClient objectClient;
-	protected Map<String, Map<String, RedbackObjectRemote>> objects = new HashMap<String, Map<String, RedbackObjectRemote>>();
-	protected Map<String, List<Integer>> queried = new HashMap<String, List<Integer>>();;
+	protected Map<String, Map<String, RedbackObjectRemote>> objectMap = new HashMap<String, Map<String, RedbackObjectRemote>>();
+	protected List<RedbackObjectRemote> objectList = new ArrayList<RedbackObjectRemote>();
+	protected Map<String, Map<Integer, Boolean>> queried = new HashMap<String, Map<Integer, Boolean>>();;
+	protected Map<String, List<DataMap>> queryMap = new HashMap<String, List<DataMap>>();
 	protected Session session;
 	
 	public RemoteObjectRelater(Session s, ObjectClient oc) {
@@ -23,12 +25,12 @@ public class RemoteObjectRelater {
 	}
 	
 	protected RedbackObjectRemote get(String objectname, String uid) {
-		Map<String, RedbackObjectRemote> sub = objects.get(objectname);
+		Map<String, RedbackObjectRemote> sub = objectMap.get(objectname);
 		return sub != null ? sub.get(uid) : null;
 	}
 	
 	protected RedbackObjectRemote find(String objectname, DataMap filter) {
-		Map<String, RedbackObjectRemote> sub = objects.get(objectname);
+		Map<String, RedbackObjectRemote> sub = objectMap.get(objectname);
 		if(sub != null)
 			for(RedbackObjectRemote ror: sub.values()) 
 				if(FilterProcessor.apply(ror.getData(), filter))
@@ -37,28 +39,38 @@ public class RemoteObjectRelater {
 	}
 	
 	protected void put(RedbackObjectRemote ror) {
-		Map<String, RedbackObjectRemote> sub = objects.get(ror.getObjectName());
+		Map<String, RedbackObjectRemote> sub = objectMap.get(ror.getObjectName());
 		if(sub == null) {
 			sub = new HashMap<String, RedbackObjectRemote>();
-			objects.put(ror.getObjectName(), sub);
+			objectMap.put(ror.getObjectName(), sub);
 		}
-		sub.put(ror.getUid(), ror);
+		if(!sub.containsKey(ror.getUid())) {
+			sub.put(ror.getUid(), ror);
+			objectList.add(ror);
+		}
 	}
 	
 	public void resolve(List<RedbackObjectRemote> list) throws RedbackException {
 		for(RedbackObjectRemote ror: list) 
 			put(ror);
-		Map<String, List<DataMap>> queryMap = null;
+		long start = System.currentTimeMillis();
 		int n = 0;
-		while(!(queryMap = scan()).isEmpty() && n++ < 10) {
-			request(queryMap);
+		while(scan() && n++ < 10) {
+			retrieve();
 		}
+		System.out.println("Resolve - in " + (System.currentTimeMillis() - start));
 	}
 	
-	protected Map<String, List<DataMap>> scan() throws RedbackException {
-		Map<String, List<DataMap>> queryMap = new HashMap<String, List<DataMap>>();
-		for(Map<String, RedbackObjectRemote> sub: objects.values()) {
-			for(RedbackObjectRemote ror: sub.values()) {
+	protected boolean scan() throws RedbackException {
+		int totalScanned = 0;
+		int totalToQuery = 0;
+		long start = System.currentTimeMillis();
+		/*for(String objectName: objectMap.keySet()) {
+			long ostart = System.currentTimeMillis();
+			Map<String, RedbackObjectRemote> sub = objectMap.get(objectName);
+			for(String uid: sub.keySet()) {
+				RedbackObjectRemote ror = sub.get(uid);*/
+			for(RedbackObjectRemote ror: objectList) {
 				for(String attribute: ror.getAttributeNames()) {
 					String attributeValue = ror.getString(attribute);
 					if(attributeValue != null) {
@@ -81,11 +93,12 @@ public class RemoteObjectRelater {
 										ror.setRelated(attribute, relRor);
 									} else {
 										int hash = filter.toString().hashCode();
-										if(!queried.containsKey(relObjectName)) queried.put(relObjectName, new ArrayList<Integer>());
-										if(!queried.get(relObjectName).contains(hash)) {
-											queried.get(relObjectName).add(hash);
+										if(!queried.containsKey(relObjectName)) queried.put(relObjectName, new HashMap<Integer, Boolean>());
+										if(!queried.get(relObjectName).containsKey(hash)) {
+											queried.get(relObjectName).put(hash, true);
 											if(!queryMap.containsKey(relObjectName)) queryMap.put(relObjectName, new ArrayList<DataMap>());										
-											queryMap.get(relObjectName).add(filter);										
+											queryMap.get(relObjectName).add(filter);	
+											totalToQuery++;
 										}
 									}
 								}
@@ -93,13 +106,19 @@ public class RemoteObjectRelater {
 						}
 					}
 				}
+				totalScanned++;
 			}
-		}
-		return queryMap;
+			//System.out.println("Scan - " + objectName + " " + sub.keySet().size() + " objects in " + (System.currentTimeMillis() - ostart) + "ms");
+		//}
+		System.out.println("Scan - total scanned " + totalScanned + " total to query " + totalToQuery + " in " + (System.currentTimeMillis() - start) + "ms");
+		return !queryMap.isEmpty();
 	}
 	
-	protected void request(Map<String, List<DataMap>> queryMap) throws RedbackException {
+	protected void retrieve() throws RedbackException {
+		int totalRetrieved = 0;
+		long start = System.currentTimeMillis();
 		for(String objectName: queryMap.keySet()) {
+			long ostart = System.currentTimeMillis();
 			List<DataMap> filterList = queryMap.get(objectName);
 			DataList orList = new DataList();
 			DataList uidList = new DataList();
@@ -114,8 +133,14 @@ public class RemoteObjectRelater {
 				filter.put("$or", orList);
 			}
 			List<RedbackObjectRemote> result = objectClient.listAllObjects(session, objectName, filter, null, false, true);
-			for(RedbackObjectRemote ror: result)
+			for(RedbackObjectRemote ror: result) {
 				put(ror);
+				totalRetrieved++;
+			}
+			System.out.println("Retrieve - " + objectName + " in " + (System.currentTimeMillis() - ostart) + "ms");
 		}
+		queryMap.clear();
+		System.out.println("Retrieve - total retrieved " + totalRetrieved + " in " + (System.currentTimeMillis() - start) + "ms");
+		
 	}
 }
