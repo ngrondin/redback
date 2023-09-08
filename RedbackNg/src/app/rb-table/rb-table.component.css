@@ -39,7 +39,7 @@
 .rb-table-row {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: end;
     margin-bottom: var(--v20px);
 }
 
