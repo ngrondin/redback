@@ -1,12 +1,9 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { LatLon, MapCircle, MapDot, MapObject, MapPin, MapPolygon, MapSeriesConfig } from './rb-map-models';
 import { InitialsMaker } from 'app/helpers';
-import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { ElementRef } from '@angular/core';
-import { RbDataCalcComponent, SeriesConfig } from 'app/abstract/rb-datacalc';
-
-
+import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 
 @Component({
   selector: 'rb-map',
@@ -39,7 +36,6 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   actualMapCenter: LatLon = new LatLon(0, 0);
   actualMperPX: number;
   preventReframe: boolean = false;
-  firstDraw: boolean = false;
   
   showContextMenu: boolean = false;
   contextMenuPosition: any = {x: 0, y: 0};
@@ -54,8 +50,6 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   maxDate: Date = new Date((new Date()).getTime() + 3600000);
   _currentDate: Date = null;
   
-  lastObjectCount: number = 0;
-  lastObjectUpdate: number = 0;
 
   defaultStyles = [
     {
@@ -72,6 +66,7 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   ) {
     super();
     this.dofilter = false;
+    this.recalcInterval = 1250;
   }
 
   dataCalcInit() {
@@ -85,6 +80,7 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   }
 
   dataCalcDestroy() {
+
   }
 
   onActivationEvent(event: any) {
@@ -198,7 +194,6 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
     this.mapCircles = [];
     this.mapPolygons = [];
     this.mapCurrentDatePin = null;
-
     for(let config of this.seriesConfigs) {
       if(config.dateAttribute == null) {
         this.iterateList(config, (object, config) => this.calcMapObject(object, config));

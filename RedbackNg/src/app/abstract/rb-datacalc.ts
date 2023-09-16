@@ -19,6 +19,9 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     seriesConfigs: T[] = [];
     filterDone: boolean = false;
+    lastRecalc: number = -1;
+    recalcInterval: number = -1;
+    minRecalcTime: number = -1;
     recalcPlanned: boolean = false;
 
     
@@ -92,14 +95,20 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
 
     redraw() {
-        //console.log("redraw " + this.id + " " + (!this.recalcPlanned) + " - " + (new Date()).getTime());
         if(this.recalcPlanned == false) {
           this.recalcPlanned = true;
+          let now = new Date().getTime();
+          let tillNextCalc = 0;
+          if(this.recalcInterval > -1) {
+            tillNextCalc = this.lastRecalc + (this.recalcInterval * Math.ceil((now - this.lastRecalc) / this.recalcInterval))
+          } else if(this.minRecalcTime > -1) {
+            tillNextCalc = Math.max(this.lastRecalc + this.minRecalcTime, now) - now;
+          }
           setTimeout(() => {
-              //console.log("redraw after timeout - " + (new Date()).getTime());
               this.calc();
               this.recalcPlanned = false;
-          }, 50);
+              this.lastRecalc = (new Date()).getTime();
+          }, tillNextCalc);
         }
       }
 
@@ -160,8 +169,6 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     abstract createSeriesConfig(json: any) : T;
 
     abstract getFilterSortForSeries(config: T) : any;
-
-    //abstract filterDataset();
 
     abstract calc();
     
