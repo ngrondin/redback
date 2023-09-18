@@ -1,12 +1,13 @@
 <div
-    class="rb-modal-container"
+    class="rb-modal-frame"
     (click)="$event.stopPropagation()">
     <div
         class="rb-modal-title"
         *ngIf="title != null">
         <span>{{title}}</span>
     </div>
-    <div>
+    <div
+        class="rb-modal-container">
         <ng-content></ng-content>
         <div #container></div>
     </div>
