@@ -20,6 +20,7 @@ import io.firebus.logging.Level;
 import io.firebus.logging.Logger;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
+import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
 
@@ -33,7 +34,7 @@ public class ImportData extends Thread
 	protected String username;
 	protected boolean preLoadTarget = false;
 	
-	public ImportData(Firebus fb, String t, String os, String d, String fu)
+	public ImportData(Firebus fb, String t, String os, String d, String fu) throws RedbackException
 	{
 		firebus = fb;
 		fileurl = fu;

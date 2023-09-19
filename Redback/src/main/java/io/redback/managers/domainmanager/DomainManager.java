@@ -295,8 +295,7 @@ public class DomainManager implements Consumer {
 			list = listDomainEntriesInCategory(domain, category);
 		} else {
 			list = new ArrayList<DomainEntry>();
-			List<String> domains = session.getUserProfile().getDomains();
-			for(String d: domains)
+			for(String d: session.getUserProfile().getDomains())
 				if(!d.equals("*"))
 					list.addAll(listDomainEntriesInCategory(d, category));
 		}
@@ -360,7 +359,7 @@ public class DomainManager implements Consumer {
 			
 			List<DomainEntry> functions = new ArrayList<DomainEntry>();
 			List<DomainEntry> allFunctions = listAllEntriesWithName(name);
-			if(session.getUserProfile().getDomains().contains("*")) {
+			if(session.getUserProfile().hasAllDomains()) {
 				functions.addAll(allFunctions);
 			} else {
 				List<String> domains = session.getUserProfile().getDomains();

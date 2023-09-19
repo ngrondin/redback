@@ -109,6 +109,7 @@ public class RedbackObject extends RedbackElement
 					throw new RedbackException("No UID has been provided or no UID Generator has been configured for object " + config.getName() , null);
 				}
 				
+				
 				if(!config.isDomainManaged()) 
 				{
 					domain = new Value("root");
@@ -117,18 +118,19 @@ public class RedbackObject extends RedbackElement
 				{
 					domain = new Value(d);
 				} 
-				else if(session.getUserProfile().getAttribute("rb.defaultdomain") != null)
-				{
-					domain = new Value(session.getUserProfile().getAttribute("rb.defaultdomain"));
-				}
-				else if(session.getUserProfile().getDomains().size() > 0)
-				{
-					domain = new Value(session.getUserProfile().getDomains().get(0));
+				else if(session.getDomainLock() != null) {
+					domain = new Value(session.getDomainLock());
 				}
 				else
 				{
-					throw new RedbackException("No domain has been provided and no default domain has been configure for the user");
+					String defaultDomain = session.getUserProfile().getDefaultDomain();
+					if(defaultDomain != null) {
+						domain = new Value(defaultDomain);
+					} else {
+						throw new RedbackException("No domain has been provided and no default domain has been configure for the user");
+					}
 				}
+
 				key = config.getName() + ":" + uid.getString();
 				if(session.hasTxStore())
 					session.getTxStore().add(key, this);

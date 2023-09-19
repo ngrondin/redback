@@ -1,17 +1,19 @@
 package io.redback.security;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataList;
 import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
+import io.redback.utils.Convert;
 
 public class UserProfile 
 {
 	protected DataMap profile;
-	protected DataList domains = new DataList();;
+	protected List<String> domains = new ArrayList<String>();
 	protected boolean hasAllDomains = false;
 	
 	public UserProfile(DataMap p)
@@ -19,14 +21,15 @@ public class UserProfile
 		profile = p;
 		domains.add("root");
 		if(profile.getList("domains") != null) {
-			for(int i = 0; i < profile.getList("domains").size(); i++) {
-				String d = profile.getList("domains").getString(i);
-				if(d.equals("*")) 
+			DataList domainList = profile.getList("domains");
+			for(int i = 0; i < domainList.size(); i++) {
+				String d = domainList.getString(i);
+				if(d.equals("*"))
 					hasAllDomains = true;
 				else if(!domains.contains(d))
 					domains.add(d);
 			}			
-		}	
+		}
 	}
 	
 	public String getUsername()
@@ -59,12 +62,8 @@ public class UserProfile
 		return roles;
 	}
 
-	public ArrayList<String> getDomains()
+	public List<String> getDomains()
 	{
-		ArrayList<String> domains = new ArrayList<String>();
-		DataList list = profile.getList("domains");
-		for(int i = 0; i < list.size(); i++)
-			domains.add(list.getString(i));
 		return domains;
 	}
 	
@@ -72,9 +71,9 @@ public class UserProfile
 	{
 		String domain = getAttribute("rb.defaultdomain");
 		if(domain == null && profile.containsKey("domains")) {
-			DataList list = profile.getList("domains");
-			if(list.size() > 0) 
-				domain = list.getString(0);
+			for(String d : domains)
+				if(!d.equals("root"))
+					domain = d;
 		}
 		return domain;
 	}
@@ -94,7 +93,7 @@ public class UserProfile
 		if(hasAllDomains) {
 			return null;
 		} else {
-			return new DataMap("$in", domains);
+			return new DataMap("$in", Convert.listToDataList(domains));
 		}
 	}
 	

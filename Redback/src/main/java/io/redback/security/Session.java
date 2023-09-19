@@ -5,6 +5,8 @@ import java.util.Random;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.ScriptContext;
+import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.utils.TxStore;
 
 
@@ -78,9 +80,12 @@ public class Session
 		timezone = zoneId;
 	}
 	
-	public void setDomainLock(String domain) 
+	public void setDomainLock(String domain) throws RedbackException
 	{
-		domainLock = domain;
+		if(userProfile.hasDomain(domain))
+			domainLock = domain;
+		else
+			throw new RedbackUnauthorisedException("Cannot lock to domain " + domain);
 	}
 
 	public void setScriptContext(ScriptContext sc) 
