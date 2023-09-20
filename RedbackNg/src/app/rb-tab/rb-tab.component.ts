@@ -1,7 +1,7 @@
 import { HostBinding } from '@angular/core';
 import { Component, Input, OnInit, SimpleChange } from '@angular/core';
 import { RbActivatorComponent } from 'app/abstract/rb-activator';
-import { RbTabSectionComponent } from 'app/rb-usermenu/rb-tab-section/rb-tab-section.component';
+import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
 
 @Component({
   selector: 'rb-tab',

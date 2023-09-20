@@ -43,7 +43,7 @@ import { RbModalComponent } from "app/rb-modal/rb-modal.component";
 import { RbProcessactionsComponent } from "app/clickable/rb-processactions/rb-processactions.component";
 import { RbSearchComponent } from "app/rb-search/rb-search.component";
 import { RbSpacerComponent } from "app/rb-spacer/rb-spacer.component";
-import { RbTabSectionComponent } from "app/rb-usermenu/rb-tab-section/rb-tab-section.component";
+import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.component";
 import { RbTabComponent } from "app/rb-tab/rb-tab.component";
 import { RbTableComponent } from "app/rb-table/rb-table.component";
 import { RbTileComponent } from "app/rb-tile/rb-tile.component";

@@ -91,7 +91,7 @@ import { RbLayoutComponent } from './rb-layout/rb-layout.component';
 import { RbHsectionComponent } from './rb-hsection/rb-hsection.component';
 import { RbVsectionComponent } from './rb-vsection/rb-vsection.component';
 import { RbTabComponent } from './rb-tab/rb-tab.component';
-import { RbTabSectionComponent } from './rb-usermenu/rb-tab-section/rb-tab-section.component';
+import { RbTabSectionComponent } from './rb-tab-section/rb-tab-section.component';
 import { RbMenuComponent } from './rb-menu/rb-menu.component';
 import { RbMenuGroupComponent } from './rb-menu-group/rb-menu-group.component';
 import { RbMenuLinkComponent } from './rb-menu-link/rb-menu-link.component';
