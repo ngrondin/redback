@@ -9,6 +9,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.UserPreferenceServer;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.Convert;
 
 public class RedbackUserPreferenceServer extends UserPreferenceServer {
 	protected CollectionConfig collection;
@@ -18,52 +19,21 @@ public class RedbackUserPreferenceServer extends UserPreferenceServer {
 		super(n, c, f);
 		collection = new CollectionConfig(config.getObject("collection"), "rbup_entry");
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
-	}
+	}	
 	
-	protected String getUsername(Session session) {
-		return session.getUserProfile().getUsername();
-	}
-	
-	protected String getRole(Session session) {
+	protected DataMap getRoleFilterClause(Session session) {
 		List<String> roles = session.getUserProfile().getRoles();
-		if(roles.size() > 0) {
+		return new DataMap("$in", Convert.listToDataList(roles));
+	}
+	
+	protected String getDefaultRole(Session session) {
+		List<String> roles = session.getUserProfile().getRoles();
+		if(roles.size() > 0) 
 			return roles.get(0);
-		} else {
+		else
 			return null;
-		}
-	}
-	
-	protected String getDomain(Session session) {
-		String domain = session.getUserProfile().getAttribute("rb.defaultdomain");
-		if(domain == null) {
-			List<String> domains = session.getUserProfile().getDomains();
-			if(domains.size() > 0) 
-				domain = domains.get(0);
-		}
-		return domain;
-	}
-	
-	protected DataMap getKeyForUser(Session session, String name) {
-		DataMap key = new DataMap();
-		key.put("username", getUsername(session));
-		key.put("name", name);
-		return key;
 	}
 
-	protected DataMap getKeyForRole(Session session, String name) {
-		DataMap key = new DataMap();
-		key.put("role", getRole(session));
-		key.put("domain", getDomain(session));
-		key.put("name", name);
-		return key;
-	}
-
-	protected DataMap getKeyForDomain(Session session, String name) {
-		DataMap key = new DataMap();
-		key.put("domain", getDomain(session));
-		key.put("name", name);
-		return key;
-	}
 	
 	protected DataMap get(DataMap key) throws RedbackException {
 		DataMap resp = collection.convertObjectToCanonical(
@@ -89,27 +59,47 @@ public class RedbackUserPreferenceServer extends UserPreferenceServer {
 	}
 
 	public DataMap getUserPreference(Session session, String name) throws RedbackException {
-		return get(getKeyForUser(session, name));
+		DataMap key = new DataMap();
+		key.put("username", session.getUserProfile().getUsername());
+		key.put("name", name);
+		return get(key);
 	}
 
 	public DataMap getRolePreference(Session session, String name) throws RedbackException {
-		return get(getKeyForRole(session, name));
+		DataMap key = new DataMap();
+		key.put("role", getRoleFilterClause(session));
+		key.put("domain", session.getDomainFilterClause());
+		key.put("name", name);
+		return get(key);
 	}
 
 	public DataMap getDomainPreference(Session session, String name) throws RedbackException {
-		return get(getKeyForDomain(session, name));
+		DataMap key = new DataMap();
+		key.put("domain", session.getDomainFilterClause());
+		key.put("name", name);
+		return get(key);
 	}
 
 	public void putUserPreference(Session session, String name, DataMap value) throws RedbackException {
-		put(getKeyForUser(session, name), value);
+		DataMap key = new DataMap();
+		key.put("username", session.getUserProfile().getUsername());
+		key.put("name", name);
+		put(key, value);
 	}
 
 	public void putRolePreference(Session session, String name, DataMap value) throws RedbackException {
-		put(getKeyForRole(session, name), value);
+		DataMap key = new DataMap();
+		key.put("role", getDefaultRole(session));
+		key.put("domain", session.getUserProfile().getDefaultDomain());
+		key.put("name", name);		
+		put(key, value);
 	}
 
 	public void putDomainPreference(Session session, String name, DataMap value) throws RedbackException {
-		put(getKeyForDomain(session, name), value);
+		DataMap key = new DataMap();
+		key.put("domain", session.getUserProfile().getDefaultDomain());
+		key.put("name", name);
+		put(key, value);
 	}
 
 }
