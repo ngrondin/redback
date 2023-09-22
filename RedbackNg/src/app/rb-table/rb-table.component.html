@@ -28,6 +28,7 @@
                     [object]="object"
                     [attribute]="col.attribute"
                     [editable]="true"
+                    [show]="col.showExpr"
                     [margin]="false">
                 </rb-string-input>
                 <rb-number-input
@@ -36,8 +37,18 @@
                     [object]="object"
                     [attribute]="col.attribute"
                     [editable]="true"
+                    [show]="col.showExpr"
                     [margin]="false">
-                </rb-number-input>                
+                </rb-number-input>
+                <rb-currency-input
+                    *ngIf="col.type == 'currencyinput'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [editable]="true"
+                    [show]="col.showExpr"
+                    [margin]="false">
+                </rb-currency-input>                   
                 <rb-datetime-input
                     *ngIf="col.type == 'datepicker'"
                     [size]="col.size"
@@ -45,6 +56,7 @@
                     [attribute]="col.attribute"
                     [format]="col.format"
                     [editable]="true"
+                    [show]="col.showExpr"
                     [margin]="false">
                 </rb-datetime-input>
                 <rb-related-input
@@ -54,6 +66,7 @@
                     [attribute]="col.attribute"
                     [displayattribute]="col.displayAttribute"
                     [editable]="true"
+                    [show]="col.showExpr"
                     [margin]="false">
                 </rb-related-input>
                 <rb-switch-input
@@ -62,6 +75,7 @@
                     [object]="object"
                     [attribute]="col.attribute"
                     [editable]="true"
+                    [show]="col.showExpr"
                     [margin]="false">
                 </rb-switch-input>                
             </div>

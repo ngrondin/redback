@@ -11,6 +11,7 @@ class TableColumnConfig {
   format: string;
   size: number;
   width: number;
+  showExpr: string;
 
   constructor(json: any) {
     this.label = json.label;
@@ -20,6 +21,7 @@ class TableColumnConfig {
     this.format = json.format;
     this.size = json.size;
     this.width = (json.size != null ? (json.size * 15) + 15 : 250);
+    this.showExpr = (json.show != null ? json.show : "true");
   }
 }
 
