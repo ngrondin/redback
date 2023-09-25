@@ -294,9 +294,9 @@ export class DataService {
     });
   }
 
-  executeObjectFunction(rbObject: RbObject, func: string, param: string) : Observable<null> {
+  executeObjectFunction(rbObject: RbObject, func: string, param: string, timeout: number) : Observable<null> {
     return new Observable<null>((observer) => {
-      this.apiService.executeObject(rbObject.objectname, rbObject.uid, func, param).subscribe(
+      this.apiService.executeObject(rbObject.objectname, rbObject.uid, func, param, timeout).subscribe(
         resp => {
           if(!this.clientWSService.isConnected()) this.receive(resp);
           observer.next();

@@ -196,7 +196,7 @@ export class ApiService {
     return this.requestService(this.objectService, req);
   }
 
-  executeObject(name: string, uid: string, func: string, param?: any) {
+  executeObject(name: string, uid: string, func: string, param?: any, timeout?: number) {
     const req = {
       action: 'execute',
       object: name,
@@ -208,7 +208,7 @@ export class ApiService {
       }
     };
     if(param != null) req["param"] = param;
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, timeout);
   }
   
   executeGlobal(func: string, param: any, timeout?: number) {

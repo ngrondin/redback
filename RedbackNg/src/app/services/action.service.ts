@@ -45,11 +45,11 @@ export class ActionService {
       } else if(_action == 'reportlist') {
         return this.reportList(dataset, (target ?? param));
       } else if(_action == 'execute') {
-        return this.execute(dataset, (target ?? param), (target != null ? param : null), extraContext);
+        return this.execute(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executeall') {
-        return this.executeAll(dataset, (target ?? param), (target != null ? param : null), extraContext);
+        return this.executeAll(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executemaster') {
-        return this.executeMaster(dataset, (target ?? param), (target != null ? param : null), extraContext);
+        return this.executeMaster(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executeglobal') {
         return this.executeGlobal(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executedomain') {
@@ -61,7 +61,7 @@ export class ActionService {
       } else if(_action == 'externallink') {
         return this.launchExternalLink(dataset, (target ?? param));
       } else if(dataset.selectedObject != null) {
-        return this.execute(dataset, _action, param, extraContext);
+        return this.execute(dataset, _action, param, extraContext, timeout);
       }
     } else {
       return new Observable((observer) => {
@@ -160,21 +160,21 @@ export class ActionService {
     });
   }
 
-  public execute(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any) : Observable<null> {
+  public execute(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);
-      this.dataService.executeObjectFunction(dataset.selectedObject, functionName, paramResolved).subscribe(new ObserverProxy(observer));
+      this.dataService.executeObjectFunction(dataset.selectedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
     });
   }
 
-  public executeAll(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any) : Observable<null> {
+  public executeAll(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       let delay: number = 0;
       let doneCount: number = 0;
       dataset.list.forEach((object) => {
         setTimeout(() => {
           let paramResolved: any = this.filterService.resolveFilter(functionParams, object, dataset.selectedObject, dataset.relatedObject, extraContext);
-          this.dataService.executeObjectFunction(object, functionName, paramResolved).subscribe(
+          this.dataService.executeObjectFunction(object, functionName, paramResolved, timeout).subscribe(
             resp => {
               doneCount++;
               if(doneCount == dataset.list.length) {
@@ -191,11 +191,11 @@ export class ActionService {
     });
   }
 
-  public executeMaster(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any) : Observable<null> {
+  public executeMaster(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       if(dataset.relatedObject != null) {
         let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.relatedObject, dataset.relatedObject, null, extraContext);
-        this.dataService.executeObjectFunction(dataset.relatedObject, functionName, paramResolved).subscribe(new ObserverProxy(observer));
+        this.dataService.executeObjectFunction(dataset.relatedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
       }
     });
   }
