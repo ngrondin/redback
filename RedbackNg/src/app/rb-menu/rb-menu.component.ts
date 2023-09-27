@@ -40,7 +40,10 @@ export class RbMenuComponent implements OnInit {
   }
 
   public get width(): string { 
-    return this._mode == 'large' ? ((5 * Math.floor(document.body.clientWidth * 15 / 500)) + 'px') : 'auto';// This weird calculation is to allow the sidenav to align to the closes 5px -- weirdness of material
+    var width = this._mode == 'large' ? 
+      (5 * Math.floor(document.body.clientWidth * 15 / 500)) : // This weird calculation is to allow the sidenav to align to the closes 5px -- weirdness of material
+      (5 * Math.floor(document.body.clientWidth * 46 / 8510));
+    return (width + "px");
   }
 
   public toggleMenuMode() {
