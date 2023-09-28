@@ -44,7 +44,7 @@ public class PackStream extends DataStream<RedbackObject> implements DataStreamN
 				createNextStream();
 			}
 		} else if(phase == 1) {
-			if(i < queries.size()) {
+			if(i <= queries.size()) {
 				requestNext();
 			} 
 		}
