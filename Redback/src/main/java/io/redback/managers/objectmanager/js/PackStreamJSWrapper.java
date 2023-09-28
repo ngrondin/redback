@@ -2,13 +2,16 @@ package io.redback.managers.objectmanager.js;
 
 import java.util.List;
 
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.values.abs.SDynamicObject;
 import io.firebus.script.values.abs.SValue;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.PackStream;
 import io.redback.managers.objectmanager.RedbackObject;
+import io.redback.utils.Convert;
 import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.Converter;
 
 public class PackStreamJSWrapper extends SDynamicObject
 {
@@ -31,9 +34,11 @@ public class PackStreamJSWrapper extends SDynamicObject
 		{
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					@SuppressWarnings("unchecked")
-					List<RedbackObject> list = (List<RedbackObject>)arguments[0];
-					packStream.addObjects(list);
+					if(arguments[0] instanceof List) {
+						@SuppressWarnings("unchecked")
+						List<RedbackObject> list = (List<RedbackObject>)arguments[0];
+						packStream.addObjects(list);						
+					}
 					return null;
 				}
 			};				

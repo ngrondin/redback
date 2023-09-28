@@ -243,6 +243,7 @@ public class ObjectManager
 		includeLoaded = false;
 		objectConfigs.clear();
 		globalScripts.clear();
+		packConfigs.clear();
 		readRightsFilters.clear();
 		try {
 			loadAllIncludeScripts(new Session());
