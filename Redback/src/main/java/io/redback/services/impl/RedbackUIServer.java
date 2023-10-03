@@ -117,13 +117,14 @@ public class RedbackUIServer extends UIServer
 				if(session.getUserProfile().canRead("rb.apps." + appName))
 				{
 					DataMap ret = (DataMap)appConfig.getCopy();
-					//List<DataMap> allMenus = Convert.dataListToList(configClient.listConfigs(session, "rbui", "menu").getList("result"));
 					DataList menuConfig = appConfig.getList("menu");
 					DataList menus = new DataList();
-					for(int i = 0; i < menuConfig.size(); i++) {
-						DataMap menu = buildMenuFor(session, menuConfig.getString(i));
-						if(menu != null)
-							menus.add(menu);
+					if(menuConfig != null) {
+						for(int i = 0; i < menuConfig.size(); i++) {
+							DataMap menu = buildMenuFor(session, menuConfig.getString(i));
+							if(menu != null)
+								menus.add(menu);
+						}						
 					}
 					ret.put("menu", menus);
 					return ret;
