@@ -81,7 +81,7 @@ public class Process
 
 	public ProcessInstance createInstance(Actionner actionner, String domain, DataMap data) throws RedbackException
 	{
-		ProcessInstance pi = new ProcessInstance(actionner, processManager, name, version, domain, data);
+		ProcessInstance pi = new ProcessInstance(actionner, processManager, name, version, domain, data.getString("objectname"), data.getString("uid"), data.getString("groupkey"), data);
 		return pi;
 	}
 	

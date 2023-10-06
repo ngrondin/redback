@@ -24,6 +24,9 @@ public class ProcessInstance
 	protected int processVersion;
 	protected String domain;
 	protected UUID id;
+	protected String objectUid;
+	protected String objectName;
+	protected String groupKey;
 	protected DataMap data;
 	protected String currentNode;
 	protected boolean complete;
@@ -34,7 +37,7 @@ public class ProcessInstance
 	protected ScriptContext scriptContext;
 	protected boolean updated;
 	
-	protected ProcessInstance(Actionner a, ProcessManager pm, String pn, int v, String dom, DataMap d) throws RedbackException
+	protected ProcessInstance(Actionner a, ProcessManager pm, String pn, int v, String dom, String on, String ouid, String gk, DataMap d) throws RedbackException
 	{
 		inboundActionner = a;
 		processManager = pm;
@@ -42,12 +45,14 @@ public class ProcessInstance
 		processVersion = v;
 		domain = dom;
 		id = UUID.randomUUID();
+		objectName = on;
+		objectUid = ouid;
+		groupKey = gk;
 		data = d;	
 		complete = false;
 		assignees = new DataList();
 		createScriptBindings();
 		updated = true;
-		//receivedNotifications = new JSONList();
 	}
 	
 	protected ProcessInstance(Actionner a, ProcessManager pm, DataMap c) throws RedbackException
@@ -58,6 +63,9 @@ public class ProcessInstance
 		processVersion = c.getNumber("version").intValue();
 		domain = c.getString("domain");
 		id = UUID.fromString(c.getString("_id"));
+		objectName = c.getString("objectname");
+		objectUid = c.getString("objectuid");
+		groupKey = c.getString("groupkey");
 		currentNode = c.getString("currentnode");
 		complete = c.getBoolean("complete");
 		data = c.getObject("data");
@@ -85,6 +93,9 @@ public class ProcessInstance
 		scriptContext = inboundActionner.getSession().getScriptContext().createChild();
 		try {
 			scriptContext.put("pid", getId());
+			scriptContext.put("objectname", objectName);
+			scriptContext.put("objectuid", objectUid);
+			scriptContext.put("groupkey", groupKey);
 			scriptContext.put("pm", new ProcessManagerJSWrapper(outboundActionner, processManager));
 			scriptContext.put("firebus", new FirebusJSWrapper(processManager.getFirebus(), outboundActionner.getSession()));
 			scriptContext.put("oc", new ObjectClientJSWrapper(processManager.getObjectClient(), outboundActionner.getSession()));
@@ -122,6 +133,21 @@ public class ProcessInstance
 	public String getDomain()
 	{
 		return domain;
+	}
+	
+	public String getObjectName() 
+	{
+		return objectName;
+	}
+	
+	public String getObjectUid()
+	{
+		return objectUid;
+	}
+	
+	public String getGroupKey()
+	{
+		return groupKey;
 	}
 	
 	public Actionner getOutboundActionner()
@@ -246,6 +272,9 @@ public class ProcessInstance
 		retVal.put("process", processName);
 		retVal.put("version", processVersion);
 		retVal.put("domain", domain);
+		retVal.put("objectname", objectName);
+		retVal.put("objectuid", objectUid);
+		retVal.put("groupkey", groupKey);
 		retVal.put("complete", complete);
 		retVal.put("currentnode", currentNode);
 		retVal.put("lastupdate", new Date());
