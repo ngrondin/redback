@@ -98,12 +98,13 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
         if(this.recalcPlanned == false) {
           this.recalcPlanned = true;
           let now = new Date().getTime();
-          let tillNextCalc = 0;
+          let nextCalc = now;
           if(this.recalcInterval > -1) {
-            tillNextCalc = this.lastRecalc + (this.recalcInterval * Math.ceil((now - this.lastRecalc) / this.recalcInterval))
+            nextCalc = this.lastRecalc + (this.recalcInterval * Math.ceil((now - this.lastRecalc) / this.recalcInterval));
           } else if(this.minRecalcTime > -1) {
-            tillNextCalc = Math.max(this.lastRecalc + this.minRecalcTime, now) - now;
+            nextCalc = this.lastRecalc + this.minRecalcTime;
           }
+          let tillNextCalc = Math.max(nextCalc, now) - now
           setTimeout(() => {
               this.calc();
               this.recalcPlanned = false;
