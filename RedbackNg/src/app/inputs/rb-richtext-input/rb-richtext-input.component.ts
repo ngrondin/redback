@@ -1,8 +1,9 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
-import { HtmlParser } from 'app/helpers';
+import { FileReferenceResolver, HtmlParser } from 'app/helpers';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AppInjector } from 'app/app.module';
+import { ApiService } from 'app/services/api.service';
 
 declare var Quill: any;
 
@@ -30,10 +31,12 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   safeHtml: SafeHtml = null;
   domSanitizer: DomSanitizer = null;
 
-  constructor() {
+  constructor(
+    public apiService: ApiService
+  ) {
     super();
     this.defaultIcon = "description";
-    this.domSanitizer = AppInjector.get(DomSanitizer);
+    this.domSanitizer = AppInjector.get(DomSanitizer); 
   }
 
   ngAfterViewInit() {
@@ -56,7 +59,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
     if(this.codeSource != this.value) {
       this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), true);
     } 
-    let _safeHtml = this.domSanitizer.bypassSecurityTrustHtml(this.value);
+    let _safeHtml = this.domSanitizer.bypassSecurityTrustHtml(FileReferenceResolver.resolve(this.value, this.apiService.fileService));
     if(this.safeHtml != _safeHtml) {
       this.safeHtml = _safeHtml;
     }  
