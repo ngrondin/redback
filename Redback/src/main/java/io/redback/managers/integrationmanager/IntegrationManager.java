@@ -61,7 +61,7 @@ public class IntegrationManager {
 			fileClient = new FileClient(firebus, fileServiceName);
 			clientDataCollection = new CollectionConfig(config.getObject("clientdatacollection"), "rbin_clientdata");
 			final IntegrationManager im = this;
-			clientConfigs = new ConfigCache<ClientConfig>(configClient, "rbin", "client", new ConfigCache.ConfigFactory<ClientConfig>() {
+			clientConfigs = new ConfigCache<ClientConfig>(configClient, "rbin", "client", 3600000, new ConfigCache.ConfigFactory<ClientConfig>() {
 				public ClientConfig createConfig(DataMap map) throws Exception {
 					return new ClientConfig(im, map);
 				}});

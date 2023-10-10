@@ -53,7 +53,7 @@ public class ReportManager implements Consumer {
 			dataClient = new DataClient(firebus, dataServiceName);
 			fileClient = new FileClient(firebus, fileServiceName);
 			ReportManager rm = this;
-			configs = new ConfigCache<ReportConfig>(configClient, "rbrs", "report", new ConfigCache.ConfigFactory<ReportConfig>() {
+			configs = new ConfigCache<ReportConfig>(configClient, "rbrs", "report", 3600000, new ConfigCache.ConfigFactory<ReportConfig>() {
 				public ReportConfig createConfig(DataMap map) throws Exception {
 					return new ReportConfig(rm, map);
 				}

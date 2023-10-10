@@ -11,8 +11,8 @@ import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 
 public class ConfigCache<T> {
-	protected Cache<T> cache = new Cache<T>(300000);
-	protected Cache<List<T>> listCache = new Cache<List<T>>(300000);
+	protected Cache<T> cache;
+	protected Cache<List<T>> listCache;
 	protected ConfigClient configClient;
 	protected String service;
 	protected String category;
@@ -23,12 +23,14 @@ public class ConfigCache<T> {
 	}
 	
 
-	public ConfigCache(ConfigClient cc, String s, String cat, ConfigFactory<T> cf) 
+	public ConfigCache(ConfigClient cc, String s, String cat, long timeout, ConfigFactory<T> cf) 
 	{
 		configClient = cc;
 		configFactory = cf;	
 		service = s;
 		category = cat;
+		cache = new Cache<T>(timeout);
+		listCache = new Cache<List<T>>(timeout);
 	}
 	
 	private T createConfig(DataMap m) throws RedbackException {

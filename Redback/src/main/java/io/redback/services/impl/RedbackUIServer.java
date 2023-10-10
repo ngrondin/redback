@@ -60,12 +60,12 @@ public class RedbackUIServer extends UIServer
 			dataClient = new DataClient(firebus, config.getString("dataservice"));
 		}
 		viewCollection = new CollectionConfig(config.getObject("collection"), "rbui_view");
-		viewConfigs = new ConfigCache<DataMap>(configClient, "rbui", "view", new ConfigCache.ConfigFactory<DataMap> () {
+		viewConfigs = new ConfigCache<DataMap>(configClient, "rbui", "view", 3600000, new ConfigCache.ConfigFactory<DataMap> () {
 			public DataMap createConfig(DataMap map) throws Exception {
 				return KeyEscaper.escape(map);
 			}
 		});
-		menuConfigs = new ConfigCache<DataMap>(configClient, "rbui", "menu", new ConfigCache.ConfigFactory<DataMap> () {
+		menuConfigs = new ConfigCache<DataMap>(configClient, "rbui", "menu", 3600000, new ConfigCache.ConfigFactory<DataMap> () {
 			public DataMap createConfig(DataMap map) throws Exception {
 				return KeyEscaper.escape(map);
 			}

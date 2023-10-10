@@ -142,15 +142,15 @@ public class ObjectManager
 			domainClient = new DomainClient(firebus, domainServiceName);
 			integrationClient = new IntegrationClient(firebus, integrationServiceName);
 			ObjectManager om = this;
-			objectConfigs = new ConfigCache<ObjectConfig>(configClient, "rbo", "object", new ConfigCache.ConfigFactory<ObjectConfig>() {
+			objectConfigs = new ConfigCache<ObjectConfig>(configClient, "rbo", "object", 3600000, new ConfigCache.ConfigFactory<ObjectConfig>() {
 				public ObjectConfig createConfig(DataMap map) throws Exception {
 					return new ObjectConfig(om, map);
 				}});
-			globalScripts = new ConfigCache<ScriptConfig>(configClient, "rbo", "script", new ConfigCache.ConfigFactory<ScriptConfig>() {
+			globalScripts = new ConfigCache<ScriptConfig>(configClient, "rbo", "script", 3600000, new ConfigCache.ConfigFactory<ScriptConfig>() {
 				public ScriptConfig createConfig(DataMap map) throws Exception {
 					return new ScriptConfig(scriptFactory, map);
 				}});
-			packConfigs = new ConfigCache<PackConfig>(configClient, "rbo", "pack", new ConfigCache.ConfigFactory<PackConfig>() {
+			packConfigs = new ConfigCache<PackConfig>(configClient, "rbo", "pack", 3600000, new ConfigCache.ConfigFactory<PackConfig>() {
 				public PackConfig createConfig(DataMap map) throws Exception {
 					return new PackConfig(om, map);
 				}});			
