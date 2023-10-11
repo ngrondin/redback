@@ -37,11 +37,15 @@ public class RedbackChatServer extends ChatServer {
 	}
 	
 	private List<DataMap> listCanonicalData(Session session, CollectionConfig collection, DataMap filter) throws RedbackException {
+		return listCanonicalData(session, collection, filter, 50);
+	}
+	
+	private List<DataMap> listCanonicalData(Session session, CollectionConfig collection, DataMap filter, int pageSize) throws RedbackException {
 		DataMap fullFilter = filter != null ? collection.convertObjectToSpecific(filter) : new DataMap();
 		DataMap domainFilter = session.getDomainFilterClause();
 		if(domainFilter != null)
 			fullFilter.put(collection.getField("domain"), domainFilter);
-		DataMap result = dataClient.getData(collection.getName(), collection.convertObjectToSpecific(fullFilter));
+		DataMap result = dataClient.getData(collection.getName(), collection.convertObjectToSpecific(fullFilter), null, 0, pageSize);
 		DataList resultList = result.getList("result");
 		List<DataMap> list = new ArrayList<DataMap>();
 		for(int i = 0; i < resultList.size(); i++) 
@@ -85,7 +89,7 @@ public class RedbackChatServer extends ChatServer {
 	}
 	
 	protected List<ChatUserInfo> listUsers(Session session) throws RedbackException {
-		List<DataMap> resultList = listCanonicalData(session, userCollection, new DataMap("username", new DataMap("$ne", null)));
+		List<DataMap> resultList = listCanonicalData(session, userCollection, new DataMap("username", new DataMap("$ne", null)), 250);
 		List<ChatServer.ChatUserInfo> list = new ArrayList<ChatServer.ChatUserInfo>();
 		for(DataMap data : resultList) 
 			list.add(toChatUserInfo(data));
