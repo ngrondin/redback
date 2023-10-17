@@ -7,6 +7,8 @@ class TableColumnConfig {
   label: string;
   attribute: string;
   displayAttribute: string;
+  parentAttribute: string;
+  childAttribute: string;
   type: string;
   format: string;
   size: number;
@@ -17,6 +19,8 @@ class TableColumnConfig {
     this.label = json.label;
     this.attribute = json.attribute;
     this.displayAttribute = json.displayattribute;
+    this.parentAttribute = json.parentattribute;
+    this.childAttribute = json.childattribute;
     this.type = json.type;
     this.format = json.format;
     this.size = json.size;
