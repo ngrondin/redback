@@ -5,9 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.firebus.data.DataMap;
+import io.redback.client.DataClient;
+import io.redback.exceptions.RedbackException;
 
 public class CollectionConfig {
 	
+	protected DataClient dataClient;
 	protected DataMap config;
 	
 	public CollectionConfig(String n) {
@@ -16,14 +19,20 @@ public class CollectionConfig {
 	}
 	
 	public CollectionConfig(DataMap cfg) {
-		init(cfg, null);
+		init(null, cfg, null);
 	}
 	
 	public CollectionConfig(DataMap cfg, String defaultName) {
-		init(cfg, defaultName);
+		init(null, cfg, defaultName);
+	}
+	
+	public CollectionConfig(DataClient dc, DataMap cfg, String defaultName) {
+		init(dc, cfg, defaultName);
 	}
 		
-	protected void init(DataMap cfg, String defaultName) {
+		
+	protected void init(DataClient dc, DataMap cfg, String defaultName) {
+		dataClient = dc;
 		config = cfg;
 		if(config == null)
 			config = new DataMap();
@@ -89,5 +98,20 @@ public class CollectionConfig {
 				specific.put(canonicalKey, canonical.get(canonicalKey));
 		}
 		return specific;
+	}
+	
+	public DataMap getData(DataMap canonicalFilter) throws RedbackException {
+		DataMap filter = convertObjectToSpecific(canonicalFilter);
+		DataMap resp = dataClient.getData(getName(), filter);
+		DataMap canonicalResp = convertObjectToCanonical(resp);
+		return canonicalResp;
+	}
+	
+	public DataMap putData(DataMap canonicalKey, DataMap canonicalData) throws RedbackException {
+		DataMap key = convertObjectToSpecific(canonicalKey);
+		DataMap data = convertObjectToSpecific(canonicalData);
+		DataMap resp = dataClient.putData(getName(), key, data);
+		DataMap canonicalResp = convertObjectToCanonical(resp);
+		return canonicalResp;
 	}
 }

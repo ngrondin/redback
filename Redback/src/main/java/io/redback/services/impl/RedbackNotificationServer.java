@@ -63,7 +63,8 @@ public class RedbackNotificationServer extends NotificationServer {
 	protected String smtpPass;
 	protected String dataServiceName;
 	protected DataClient dataClient;
-	protected CollectionConfig collectionConfig;
+	protected CollectionConfig userCollection;
+	protected CollectionConfig deviceCollection;
 	protected String fileServiceName;
 	protected FileClient fileClient;
 	protected String gatewayServiceName;
@@ -80,7 +81,8 @@ public class RedbackNotificationServer extends NotificationServer {
 		smtpPass = config.getString("smtppassword");
 		dataServiceName = config.getString("dataservice");
 		dataClient = new DataClient(firebus, dataServiceName);
-		collectionConfig = new CollectionConfig(config.getObject("collection"), "rbns_usertokens");
+		userCollection = new CollectionConfig(dataClient, config.getObject("usercollection"), "rbns_users");
+		deviceCollection = new CollectionConfig(dataClient, config.getObject("devicecollection"), "rbns_devices");
 		fileServiceName = config.getString("fileservice");
 		fileClient = new FileClient(firebus, fileServiceName);
 		gatewayServiceName = config.getString("gatewayservice");
@@ -218,19 +220,19 @@ public class RedbackNotificationServer extends NotificationServer {
 	}
 
 	protected void registerFCMToken(Session session, String token) throws RedbackException {
-		if(dataClient != null && collectionConfig != null) {
-			DataMap key = new DataMap(collectionConfig.getField("_id"), session.getUserProfile().getUsername());
-			DataMap data = new DataMap(collectionConfig.getField("fcmtoken"), token);
-			dataClient.putData(collectionConfig.getName(), key, data);
+		if(dataClient != null && userCollection != null) {
+			userCollection.putData(new DataMap("_id", session.getUserProfile().getUsername()), new DataMap("fcmtoken", token));
 		} else {
 			throw new RedbackException("No data client was configured");
 		}
 	}
 	
 	protected void removeFCMToken(Session session, String token) throws RedbackException {
-		if(dataClient != null && collectionConfig != null) {
-			DataMap key = new DataMap(collectionConfig.getField("fcmtoken"), token);
-			dataClient.deleteData(collectionConfig.getName(), key);
+		if(dataClient != null && userCollection != null) {
+			DataMap key = new DataMap("fcmtoken", token);
+			DataMap data = new DataMap("fcmtoken", null);
+			userCollection.putData(key, data);
+			deviceCollection.putData(key, data);
 		} else {
 			throw new RedbackException("No data client was configured");
 		}		
@@ -275,46 +277,67 @@ public class RedbackNotificationServer extends NotificationServer {
 		if(gatewayClient != null && dataClient != null) {
 			try {
 				String accessToken = getFCMAccessToken();	
-				DataMap filter = new DataMap(collectionConfig.getField("_id"), username);
-				DataMap userResults = dataClient.getData(collectionConfig.getName(), filter, null);
-				DataList list = userResults.getList("result");
+				DataMap deviceResults = deviceCollection.getData(new DataMap("username", username));
+				DataList list = deviceResults.getList("result");
+				Date latestlogin = null;
+				String fcmToken = null;
 				if(list != null && list.size() > 0) {
 					for(int i = 0; i < list.size(); i++) {
-						String fcmToken = list.getObject(i).getString(collectionConfig.getField("fcmtoken"));
-						if(fcmToken != null) {
-							DataMap fcmDataPart = data != null ? data : new DataMap();
-							fcmDataPart.put("sound", "default");
-							DataMap fcmNotificationPart = new DataMap();
-							fcmNotificationPart.put("title", subject);
-							fcmNotificationPart.put("body", message);
-							DataMap fcmAndroidPart = new DataMap();
-							fcmAndroidPart.put("priority", "high");
-							DataMap fcmAPNSPart = new DataMap();
-							fcmAPNSPart.put("headers", new DataMap("apns-priority", "5"));
-							DataMap fcmMessage = new DataMap();
-							fcmMessage.put("token", fcmToken);
-							fcmMessage.put("data", fcmDataPart);
-							fcmMessage.put("notification", fcmNotificationPart);
-							fcmMessage.put("android", fcmAndroidPart);
-							fcmMessage.put("apns", fcmAPNSPart);
-							DataMap body = new DataMap("message", fcmMessage);
-							DataMap headers = new DataMap();
-							headers.put("Content-Type", "application/json");
-							headers.put("Authorization", "Bearer " + accessToken);
-							try {
-								gatewayClient.post("https://fcm.googleapis.com/v1/projects/" + fcmConfig.getString("project_id") + "/messages:send", body, headers, null);
-							} catch(Exception e) {
-								Throwable t = e;
-								while(t != null && !(t instanceof FunctionErrorException)) t = t.getCause();
-								if(t != null) {
-									if(t.getMessage().contains("\"errorCode\": \"INVALID_ARGUMENT\"")) {
-										this.removeFCMToken(session, fcmToken);
-									}
-								}								
+						String t = list.getObject(i).getString("fcmtoken");
+						if(t != null) {
+							Date lli = list.getObject(i).getDate("lastlogin");
+							if(latestlogin == null || (latestlogin != null && lli != null && latestlogin.getTime() < lli.getTime())) {
+								latestlogin = lli;
+								fcmToken = t;
 							}
-						}						
+						}
 					}
-				}			
+				}
+				if(fcmToken == null) {
+					DataMap userResults = userCollection.getData(new DataMap("_id", username));
+					list = userResults.getList("result");
+					if(list != null && list.size() > 0) {
+						for(int i = 0; i < list.size(); i++) {
+							String t = list.getObject(i).getString("fcmtoken");
+							if(t != null) {
+								fcmToken = t;
+								break;
+							}
+						}
+					}
+				}
+				if(fcmToken != null) {
+					DataMap fcmDataPart = data != null ? data : new DataMap();
+					fcmDataPart.put("sound", "default");
+					DataMap fcmNotificationPart = new DataMap();
+					fcmNotificationPart.put("title", subject);
+					fcmNotificationPart.put("body", message);
+					DataMap fcmAndroidPart = new DataMap();
+					fcmAndroidPart.put("priority", "high");
+					DataMap fcmAPNSPart = new DataMap();
+					fcmAPNSPart.put("headers", new DataMap("apns-priority", "5"));
+					DataMap fcmMessage = new DataMap();
+					fcmMessage.put("token", fcmToken);
+					fcmMessage.put("data", fcmDataPart);
+					fcmMessage.put("notification", fcmNotificationPart);
+					fcmMessage.put("android", fcmAndroidPart);
+					fcmMessage.put("apns", fcmAPNSPart);
+					DataMap body = new DataMap("message", fcmMessage);
+					DataMap headers = new DataMap();
+					headers.put("Content-Type", "application/json");
+					headers.put("Authorization", "Bearer " + accessToken);
+					try {
+						gatewayClient.post("https://fcm.googleapis.com/v1/projects/" + fcmConfig.getString("project_id") + "/messages:send", body, headers, null);
+					} catch(Exception e) {
+						Throwable t = e;
+						while(t != null && !(t instanceof FunctionErrorException)) t = t.getCause();
+						if(t != null) {
+							if(t.getMessage().contains("\"errorCode\": \"UNREGISTERED\"") || t.getMessage().contains("\"errorCode\": \"INVALID_ARGUMENT\"")) {
+								removeFCMToken(session, fcmToken);
+							}
+						}								
+					}
+				} 		
 			} catch(Exception e) {
 				throw new RedbackException("Error sending FCM message", e);
 			}

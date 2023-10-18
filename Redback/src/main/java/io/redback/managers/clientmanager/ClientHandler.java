@@ -47,9 +47,9 @@ public class ClientHandler extends ClientStreamHandler {
 		}
 	}
 	
-	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, boolean notifAuthorized, boolean nfcAvailable, String screenSize) throws RedbackException {
+	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, String fcmToken, boolean nfcAvailable, String screenSize) throws RedbackException {
 		this.deviceId = deviceId;
-		clientManager.registerDevice(deviceId, deviceModel, os, appVersion, locationPermissions, notifAuthorized, nfcAvailable, screenSize, session.getUserProfile().getUsername());
+		clientManager.registerDevice(deviceId, deviceModel, os, appVersion, locationPermissions, fcmToken, nfcAvailable, screenSize, session.getUserProfile().getUsername());
 		DataMap flags = clientManager.getFlagsForDevice(deviceId);
 		if(flags != null ) {
 			if(flags.getBoolean("sendlog") == true) sendLogRequest();
