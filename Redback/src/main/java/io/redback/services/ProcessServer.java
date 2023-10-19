@@ -33,6 +33,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException
 	{
 		Payload response = new Payload();
+		startTransaction(session, true);
 		try
 		{
 			DataMap request = payload.getDataMap();
@@ -157,7 +158,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 		{
 			throw new RedbackException("Error in process server", e);
 		}
-
+		commitTransaction(session);
 		return response;	
 	}
 
@@ -168,7 +169,10 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 		return null;
 	}
 
-
+	protected abstract void startTransaction(Session session, boolean store) throws RedbackException;
+	
+	protected abstract void commitTransaction(Session session) throws RedbackException;
+	
 	protected abstract ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException;
 	
 	protected abstract void continueProcess(Session session, String pid) throws RedbackException;

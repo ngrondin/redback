@@ -13,11 +13,11 @@ import io.firebus.data.DataFilter;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
-import io.firebus.script.ScriptContext;
 import io.firebus.script.ScriptFactory;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
+import io.redback.client.DataClient.DataTransaction;
 import io.redback.client.ObjectClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
@@ -25,6 +25,7 @@ import io.redback.managers.processmanager.units.InteractionUnit;
 import io.redback.security.Session;
 import io.redback.security.SysUserManager;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.TxStore;
 
 
 
@@ -46,11 +47,13 @@ public class ProcessManager
 	protected AccessManagementClient accessManagementClient;
 	protected CollectionConfig piCollectionConfig;
 	protected CollectionConfig gmCollectionConfig;
+	protected CollectionConfig traceCollection;
 	protected HashMap<String, HashMap<Integer, Process>> processes;
-	protected HashMap<Long, HashMap<String, ProcessInstance>> transactions;
 	protected DataMap globalVariables;
 	protected List<String> scriptVars;
 	protected SysUserManager sysUserManager;
+	protected boolean useMultiDBTransactions;
+
 	
 	public ProcessManager(Firebus fb, DataMap config) throws RedbackException
 	{
@@ -69,12 +72,13 @@ public class ProcessManager
 			objectClient = new ObjectClient(firebus, objectServiceName);
 			domainServiceName = config.getString("domainservice");
 			processNotificationChannel = config.getString("processnotificationchannel");
+			useMultiDBTransactions = config.containsKey("multidbtransactions") ? config.getBoolean("multidbtransactions") : false;
 			sysUserManager = new SysUserManager(accessManagementClient, config);
 			processes = new HashMap<String, HashMap<Integer, Process>>();
-			transactions = new HashMap<Long, HashMap<String, ProcessInstance>>();
 			globalVariables = config.getObject("globalvariables");
 			piCollectionConfig = config.containsKey("processinstancecollection") ? new CollectionConfig(config.getObject("processinstancecollection")) : new CollectionConfig("rbpm_instance");
 			gmCollectionConfig = config.containsKey("groupmembercollection") ? new CollectionConfig(config.getObject("groupmembercollection")) : new CollectionConfig("rbam_groupmember");
+			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
 			scriptFactory.setGlobals(globalVariables);
 			scriptVars = new ArrayList<String>();
 			scriptVars.add("pid");
@@ -206,7 +210,7 @@ public class ProcessManager
 	
 	protected ProcessInstance getProcessInstance(Actionner actionner, String pid) throws RedbackException
 	{
-		ProcessInstance pi = getFromCurrentTransaction(pid);
+		ProcessInstance pi = actionner.getSession().hasTxStore() ? (ProcessInstance)actionner.getSession().getTxStore().get(pid) : null;
 		if(pi == null)
 		{
 			try 
@@ -215,7 +219,7 @@ public class ProcessManager
 				DataList result = response.getList("result");
 				if(result.size() > 0) {
 					pi = new ProcessInstance(actionner, this, piCollectionConfig.convertObjectToCanonical(result.getObject(0)));
-					putInCurrentTransaction(pi);
+					//putInCurrentTransaction(pi);
 				} else {
 					throw new RedbackInvalidRequestException("Process instance does not exist");
 				}
@@ -253,8 +257,8 @@ public class ProcessManager
 			if(domain == null && actionner.isUser())
 				domain = actionner.getUserProfile().getAttribute("rb.defaultdomain");
 			pi = process.createInstance(actionner, domain, data);
-			putInCurrentTransaction(pi);
-			commitInstance(pi); //This is necessary to allow dependent processes created afterward to interact with this instance before its first segment is committed.
+			//This is necessary to allow dependent processes created afterward to interact with this instance before its first segment is committed.
+			dataClient.putData(piCollectionConfig.getName(), new DataMap(piCollectionConfig.getField("_id"), pi.getId()), pi.getJSON(), true);
 			process.startInstance(actionner, pi);
 			Logger.finer("rb.process.init.end", new DataMap("pid", pi.getId(), "name", processName));
 		}
@@ -388,26 +392,24 @@ public class ProcessManager
 			if(!actionner.getId().equals(sysUserManager.getUsername()))
 				fullFilterMap.put("domain", actionner.getDomainFilterClause());
 			DataFilter fullFilter = new DataFilter(fullFilterMap);
-			long txId = Thread.currentThread().getId();
-			HashMap<String, ProcessInstance> txProcesses = transactions.get(txId);
-			Iterator<String> it = txProcesses.keySet().iterator();
-			while(it.hasNext()) {
-				ProcessInstance pi = txProcesses.get(it.next());
+			List<Object> txList = actionner.getSession().getTxStore().getAll();
+			for(Object o: txList) {
+				ProcessInstance pi = (ProcessInstance)o;
 				if(fullFilter.apply(pi.getJSON())) {
 					Logger.finer("rb.process.find.found", new DataMap("name", pi.getProcessName(), "pid", pi.getId()));
 					list.add(pi);
 				}
 			}
+
 			DataMap result = dataClient.getData("rbpm_instance", fullFilterMap, null, page, pageSize); 
 			DataList resultList = result.getList("result");
 			for(int i = 0; i < resultList.size(); i++)
 			{
 				String pid = resultList.getObject(i).getString("_id");
-				ProcessInstance pi = getFromCurrentTransaction(pid);
+				ProcessInstance pi = actionner.getSession().hasTxStore() ? (ProcessInstance)actionner.getSession().getTxStore().get(pid) : null;
 				if(pi == null)
 				{
 					pi = new ProcessInstance(actionner, this, resultList.getObject(i));
-					putInCurrentTransaction(pi);
 					Logger.finer("rb.process.find.found", new DataMap("name", pi.getProcessName(), "pid", pi.getId()));
 					list.add(pi);
 				} 
@@ -507,63 +509,39 @@ public class ProcessManager
 		}
 	}
 	
-	public void initiateCurrentTransaction(Session session) 
+	public void initiateCurrentTransaction(Session session, boolean store) 
 	{
-		long txId = Thread.currentThread().getId();
-		synchronized(transactions)
-		{
-			transactions.put(txId, new HashMap<String, ProcessInstance>());
-		}
-		ScriptContext scriptContext = this.getScriptFactory().createScriptContext();
-		session.setScriptContext(scriptContext);
-	}
-	
-	protected ProcessInstance getFromCurrentTransaction(String pid)
-	{
-		long txId = Thread.currentThread().getId();
-		if(transactions.containsKey(txId))
-			return transactions.get(txId).get(pid);
-		else
-			return null;
+		session.setScriptContext(getScriptFactory().createScriptContext());
+		if(store)
+			session.setTxStore(new TxStore<Object>());
 	}
 
-	protected void putInCurrentTransaction(ProcessInstance pi)
-	{
-		long txId = Thread.currentThread().getId();
-		synchronized(transactions)
-		{
-			if(!transactions.containsKey(txId))
-				transactions.put(txId, new HashMap<String, ProcessInstance>());
-		}
-		transactions.get(txId).put(pi.getId(), pi);
-	}
 	
 	public void commitCurrentTransaction(Session session) throws RedbackException 
 	{
-		long txId = Thread.currentThread().getId();
-		if(transactions.containsKey(txId))
-		{
-			HashMap<String, ProcessInstance> objects = transactions.get(txId);
-			Iterator<String> it = objects.keySet().iterator();
-			while(it.hasNext())
-			{
-				String key = it.next();
-				ProcessInstance pi = objects.get(key);
-				if(pi.isUpdated()) 
-					commitInstance(pi);
+		if(session.hasTxStore()) {
+			List<ProcessInstance> list = new ArrayList<ProcessInstance>();
+			for(Object pi : session.getTxStore().getAll())
+				list.add((ProcessInstance)pi);
+
+			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
+			for(ProcessInstance pi: list) {
+				if(pi.isUpdated()) {
+					dbtxs.add(dataClient.createPut(piCollectionConfig.getName(), new DataMap(piCollectionConfig.getField("_id"), pi.getId()), pi.getJSON(), true));
+				}		
+				dbtxs.addAll(pi.getDBTraceTransactions());
 			}
-			synchronized(transactions)
-			{
-				transactions.remove(txId);
+			
+			if(dbtxs.size() > 0) {
+				if(this.useMultiDBTransactions) {
+					dataClient.multi(dbtxs);
+				} else {
+					for(DataTransaction tx: dbtxs) {
+						dataClient.runTransaction(tx);
+					}
+				}
 			}
+
 		}		
 	}
-	
-	protected void commitInstance(ProcessInstance pi) throws RedbackException
-	{
-		Logger.finest("rb.process.commit");
-		DataMap key = new DataMap(piCollectionConfig.getField("_id"), pi.getId());
-		dataClient.putData(piCollectionConfig.getName(), key, pi.getJSON(), true);
-	}
-
 }

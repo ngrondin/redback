@@ -506,7 +506,8 @@ public class ObjectManager
 	public RedbackObject executeObjectFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
-		object.execute(function);
+		boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
+		object.execute(function, !isAutomated);
 		return object;
 	}
 	
@@ -762,11 +763,8 @@ public class ObjectManager
 					rbObject.onSave();
 					dbtxs.add(rbObject.getDBUpdateTransaction());
 					updates++;
-					List<DataTransaction> traceTxs = rbObject.getDBTraceTransactions();
-					if(traceTxs != null) 
-						for(DataTransaction ttx: traceTxs)
-							dbtxs.add(ttx);
 				}
+				dbtxs.addAll(rbObject.getDBTraceTransactions());
 			}
 			
 			if(dbtxs.size() > 0) {

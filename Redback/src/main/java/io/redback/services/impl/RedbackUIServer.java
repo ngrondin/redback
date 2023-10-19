@@ -6,10 +6,12 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,7 +49,7 @@ public class RedbackUIServer extends UIServer
 	protected ConfigClient configClient;
 	protected DataClient dataClient;
 	protected CollectionConfig viewCollection;
-
+	protected CollectionConfig traceCollection;
 	
 	public RedbackUIServer(String n, DataMap c, Firebus f) 
 	{
@@ -70,6 +72,7 @@ public class RedbackUIServer extends UIServer
 				return KeyEscaper.escape(map);
 			}
 		});
+		traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(dataClient, config.getObject("tracecollection"), "rbt_trace") : null;
 	}
 	
 	public void configure() {
@@ -196,6 +199,11 @@ public class RedbackUIServer extends UIServer
 				view.put("label", viewConfig.getString("label"));
 				view.put("onload", viewConfig.getString("onload"));
 				view.put("content", getViewContent(session, viewConfig, context));	
+				if(traceCollection != null && dataClient != null) {
+					dataClient.publishData(traceCollection.getName(), 
+							traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
+							traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", null, "action", "getview", "view", viewName)));
+				}
 			} else {
 				view.put("error", "No access to view " + viewName);
 			}

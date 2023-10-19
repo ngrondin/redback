@@ -91,7 +91,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		{
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					return rbObject.execute(name);
+					return rbObject.execute(name, false);
 				}
 			};				
 		}

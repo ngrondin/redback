@@ -29,63 +29,57 @@ public class RedbackProcessServer extends ProcessServer
 		processManager.refreshAllConfigs();		
 	}	
 	
+	protected void startTransaction(Session session, boolean store) throws RedbackException {
+		processManager.initiateCurrentTransaction(session, store);
+	}
+
+	protected void commitTransaction(Session session) throws RedbackException {
+		processManager.commitCurrentTransaction(session);
+	}
+	
 	protected ProcessInstance initiate(Session session, String process, String domain, DataMap data) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
-		processManager.initiateCurrentTransaction(session);
 		ProcessInstance pi = processManager.initiateProcess(actionner, process, domain, data);
-		processManager.commitCurrentTransaction(session);
 		return pi;
 	}
 	
 	protected void continueProcess(Session session, String pid) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
-		processManager.initiateCurrentTransaction(session);
 		processManager.continueProcess(actionner, pid);
-		processManager.commitCurrentTransaction(session);
 	}
 	
 	protected void actionProcess(Session session, String pid, String processAction, Date date, DataMap data) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
-		processManager.initiateCurrentTransaction(session);
 		processManager.actionProcess(actionner, pid, processAction, date, data);
-		processManager.commitCurrentTransaction(session);
 	}
 	
 	protected void interruptProcess(Session session, String pid) throws RedbackException {
 		Actionner actionner = new Actionner(session);
-		processManager.initiateCurrentTransaction(session);
 		processManager.interruptProcess(actionner, pid);
-		processManager.commitCurrentTransaction(session);
 	}
 
 	protected void interruptProcesses(Session session, DataMap filter) throws RedbackException {
 		Actionner actionner = new Actionner(session);
-		processManager.initiateCurrentTransaction(session);
 		List<ProcessInstance> list = processManager.findProcesses(actionner, filter, 0, 50);
 		for(ProcessInstance pi: list) {
 			processManager.interruptProcess(actionner, pi.getId());
 		}
-		processManager.commitCurrentTransaction(session);		
 	}
 
 
 	protected List<Notification> getAssignments(Session session, DataMap filter, DataList viewdata, int page, int pageSize) throws RedbackException
 	{
 		Actionner actionner = new Actionner(session);
-		processManager.initiateCurrentTransaction(session);
 		List<Notification> result = processManager.getNotifications(actionner, filter, viewdata, page, pageSize);
-		processManager.commitCurrentTransaction(session);
 		return result;
 	}
 	
 	protected int getAssignmentCount(Session session, DataMap filter) throws RedbackException {
 		Actionner actionner = new Actionner(session);
-		processManager.initiateCurrentTransaction(session);
 		int count = processManager.getNotificationCount(actionner, filter);
-		processManager.commitCurrentTransaction(session);
 		return count;
 	}
 

@@ -41,6 +41,7 @@ public class RedbackObject extends RedbackElement
 	protected Map<String, Value> originalData;
 	protected Map<String, RedbackObject> related;
 	protected Map<String, Boolean> updatedAttributes;
+	protected Map<String, Boolean> functionsExecuted;
 	protected boolean isNewObject;
 	protected boolean isDeleted;
 	protected DataMap cachedDataMap;
@@ -183,6 +184,7 @@ public class RedbackObject extends RedbackElement
 		originalData = new HashMap<String, Value>();
 		related = new HashMap<String, RedbackObject>();
 		updatedAttributes = new HashMap<String, Boolean>();
+		functionsExecuted = new HashMap<String, Boolean>();
 		scriptContext = session.getScriptContext().createChild();
 		try {
 			scriptContext.put("self", new RedbackObjectJSWrapper(this));
@@ -564,30 +566,49 @@ public class RedbackObject extends RedbackElement
 	
 	public List<DataTransaction> getDBTraceTransactions() throws RedbackException 
 	{
-		if(isUpdated() && config.traceUpdates() && objectManager.traceCollection != null) {
-			List<DataTransaction> traceTxs = new ArrayList<DataTransaction>();
+		List<DataTransaction> traceTxs = new ArrayList<DataTransaction>();
+		if(config.traceUpdates()
+				&& objectManager.traceCollection != null 
+				&& !session.getUserProfile().getUsername().equals(objectManager.sysUserManager.getUsername()) 
+				&& (isUpdated() || isDeleted())) {
+			if(this.isNewObject) 
+			{
+				traceTxs.add(objectManager.getDataClient().createPut(
+						objectManager.traceCollection.getName(), 
+						objectManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
+						objectManager.traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", getDomain().getString(), "action", "objectcreate", "object", config.getName(), "uid", uid.getString())), 
+						false));
+			}
+			if(this.isDeleted) 
+			{
+				traceTxs.add(objectManager.getDataClient().createPut(
+						objectManager.traceCollection.getName(), 
+						objectManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
+						objectManager.traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", getDomain().getString(), "action", "objectdelete", "object", config.getName(), "uid", uid.getString())), 
+						false));
+			}			
 			for(String attributeName: updatedAttributes.keySet())
 			{
 				if(updatedAttributes.get(attributeName) == true) {
-					DataMap data = new DataMap();
-					data.put("object", config.getName());
-					data.put("uid", uid.getString());
-					data.put("domain", getDomain().getString());
-					data.put("attribute", attributeName);
-					data.put("value", get(attributeName).getObject());
-					data.put("username", session.getUserProfile().getUsername());
-					data.put("date", new Date());
 					traceTxs.add(objectManager.getDataClient().createPut(
 							objectManager.traceCollection.getName(), 
 							objectManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
-							 objectManager.traceCollection.convertObjectToSpecific(data), 
+							objectManager.traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", getDomain().getString(), "action", "objectupdate", "object", config.getName(), "uid", uid.getString(), "attribute", attributeName, "value", get(attributeName).getObject())), 
 							false));
 				}
 			}
-			return traceTxs;
-		} else {
-			return null;
-		}
+			for(String functionName: functionsExecuted.keySet())
+			{
+				if(functionsExecuted.get(functionName) == true) {
+					traceTxs.add(objectManager.getDataClient().createPut(
+							objectManager.traceCollection.getName(), 
+							objectManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
+							objectManager.traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", getDomain().getString(), "action", "objectexecute", "object", config.getName(), "uid", uid.getString(), "function", functionName)), 
+							false));
+				}
+			}			
+		} 
+		return traceTxs;
 	}
 	
 	public void onSave() throws RedbackException
@@ -621,10 +642,11 @@ public class RedbackObject extends RedbackElement
 		
 	}
 	
-	public Object execute(String eventName) throws RedbackException
+	public Object execute(String eventName, boolean trace) throws RedbackException
 	{
 		if(canExecute)
 		{
+			functionsExecuted.put(eventName, trace);
 			return executeFunctionForEvent(eventName);
 		}
 		else

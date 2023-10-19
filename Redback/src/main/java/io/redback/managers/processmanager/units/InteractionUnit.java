@@ -112,7 +112,7 @@ public class InteractionUnit extends ProcessUnit
 					foundAction = true;
 					pi.clearAssignees();
 					pi.clearInteractionDetails();
-					pi.setLastActioner(actionner, date);
+					pi.setLastAction(actionner, date, action);
 					sendCompletion(pi);
 					pi.setCurrentNode(actionConfig.getNextNode());
 				}
