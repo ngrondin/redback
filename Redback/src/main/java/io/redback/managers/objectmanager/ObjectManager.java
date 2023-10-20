@@ -460,12 +460,11 @@ public class ObjectManager
 	public RedbackObject updateObject(Session session, String objectName, String id, DataMap updateData) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
-		boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
 		Iterator<String> it = updateData.keySet().iterator();
 		while(it.hasNext())
 		{
 			String attributeName = it.next();
-			object.put(attributeName, new Value(updateData.get(attributeName)), !isAutomated);
+			object.put(attributeName, new Value(updateData.get(attributeName)));
 		}
 		return object;
 	}
@@ -476,7 +475,7 @@ public class ObjectManager
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
 		if(initialData != null)
 		{
-			boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
+			session.pushScriptLevel();
 			for(String attributeName: initialData.keySet())
 			{
 				boolean isFilter = false;
@@ -488,8 +487,9 @@ public class ObjectManager
 						if(key.startsWith("$"))
 							isFilter = true;
 				if(!isFilter)
-					object.put(attributeName, new Value(value), !isAutomated);
+					object.put(attributeName, new Value(value));
 			}
+			session.popScriptLevel();
 			Logger.fine("rb.object.create", new DataMap("object", object.getObjectConfig().getName(), "uid", object.getUID().getString()));
 		}
 		return object;				
@@ -506,8 +506,7 @@ public class ObjectManager
 	public RedbackObject executeObjectFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
-		boolean isAutomated = session.getUserProfile().getUsername().equals(sysUserManager.getUsername());
-		object.execute(function, !isAutomated);
+		object.execute(function);
 		return object;
 	}
 	
@@ -526,7 +525,9 @@ public class ObjectManager
 						context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, scriptCfg.getDomain()));
 						context.put("ic", new IntegrationClientJSWrapper(getIntegrationClient(), session, scriptCfg.getDomain()));
 					}
+					session.pushScriptLevel();
 					ret = scriptCfg.execute(context);
+					session.popScriptLevel();
 				} catch(Exception e) {
 					if(domainScriptLogger != null)
 						domainScriptLogger.log(StringUtils.rollUpExceptions(e));

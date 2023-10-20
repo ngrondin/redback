@@ -91,7 +91,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		{
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					return rbObject.execute(name, false);
+					return rbObject.execute(name);
 				}
 			};				
 		}
@@ -154,7 +154,7 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 	public void putMember(String key, SValue value) throws ScriptValueException {
 		try
 		{
-			rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)), false);
+			rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)));
 		} 
 		catch (Exception e)
 		{

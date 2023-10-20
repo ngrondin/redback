@@ -38,9 +38,8 @@ public class ProcessInstance
 	protected Date lastActioned;
 	protected String lastAction;
 	protected ScriptContext scriptContext;
+	protected List<DataMap> traceEvents;
 	protected boolean updated;
-	protected boolean created;
-	protected boolean actionned;
 	
 	protected ProcessInstance(Actionner a, ProcessManager pm, String pn, int v, String dom, String on, String ouid, String gk, DataMap d) throws RedbackException
 	{
@@ -56,12 +55,11 @@ public class ProcessInstance
 		data = d;	
 		complete = false;
 		assignees = new DataList();
+		traceEvents = new ArrayList<DataMap>();
 		createScriptBindings();
 		if(inboundActionner.getSession().hasTxStore())
 			inboundActionner.getSession().getTxStore().add(id.toString(), this);
-		created = true;
 		updated = true;
-		actionned = false;
 	}
 	
 	protected ProcessInstance(Actionner a, ProcessManager pm, DataMap c) throws RedbackException
@@ -89,12 +87,11 @@ public class ProcessInstance
 			lastActioner = new Actionner(c.getObject("lastactioner"));
 		if(c.containsKey("lastactioned"))
 			lastActioned = c.getDate("lastactioned");
+		traceEvents = new ArrayList<DataMap>();
 		createScriptBindings();
 		if(inboundActionner.getSession().hasTxStore())
 			inboundActionner.getSession().getTxStore().add(id.toString(), this);
-		created = false;
 		updated = false;
-		actionned = false;
 	}
 	
 	protected void createScriptBindings() throws RedbackException
@@ -265,11 +262,23 @@ public class ProcessInstance
 	public void setLastAction(Actionner la, Date dt, String a)
 	{
 		updated = true;
-		actionned = true;
 		lastAction = a;
 		lastActioner = la;
 		lastActioned = dt != null ? dt : new Date();
+		traceEvent("processaction", a);
 		updateScriptBindings();
+	}
+	
+	protected void traceEvent(String action, String processAction) {
+		if(processManager.traceCollection != null 
+				&& inboundActionner.isUser() 
+				&& !inboundActionner.getUserProfile().getUsername().equals(processManager.getSysUserManager().getUsername())) {		
+			DataMap event = new DataMap("action", action);
+			if(processAction != null) {
+				event.put("processaction", processAction);
+			}
+			this.traceEvents.add(event);
+		}
 	}
 	
 	public boolean isComplete()
@@ -277,19 +286,9 @@ public class ProcessInstance
 		return complete;
 	}
 	
-	public boolean isCreated()
-	{
-		return created;
-	}
-	
 	public boolean isUpdated()
 	{
 		return updated;
-	}
-	
-	public boolean isActionned()
-	{
-		return actionned;
 	}
 	
 	public DataMap getJSON()
@@ -320,28 +319,20 @@ public class ProcessInstance
 	public List<DataTransaction> getDBTraceTransactions() throws RedbackException 
 	{
 		List<DataTransaction> traceTxs = new ArrayList<DataTransaction>();
-		if(processManager.traceCollection != null 
-				&& inboundActionner.isUser() 
-				&& !inboundActionner.getUserProfile().getUsername().equals(processManager.getSysUserManager().getUsername()) 
-				&& (isActionned() || isCreated())) {
-			String username = inboundActionner.getUserProfile().getUsername();
-			if(isCreated()) 
-			{
-				traceTxs.add(processManager.dataClient.createPut(
-						processManager.traceCollection.getName(), 
-						processManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
-						processManager.traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", username, "domain", getDomain(), "action", "processcreate", "process", getProcessName(), "processid", getId(), "object", getObjectName(), "uid", getObjectUid())), 
-						false));
-			}			
-			if(isActionned()) 
-			{
-				traceTxs.add(processManager.dataClient.createPut(
-						processManager.traceCollection.getName(), 
-						processManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
-						processManager.traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", username, "domain", getDomain(), "action", "processaction", "process", getProcessName(), "processid", getId(), "object", getObjectName(), "uid", getObjectUid(), "processaction", this.lastAction)), 
-						false));
-			}
-		} 
+		for(DataMap event: traceEvents) {
+			event.put("date", new Date());
+			event.put("username", inboundActionner.getUserProfile().getUsername());
+			event.put("domain", getDomain());
+			event.put("process", getProcessName());
+			event.put("processid", getId());
+			event.put("object", getObjectName());
+			event.put("uid", getObjectUid());
+			traceTxs.add(processManager.dataClient.createPut(
+					processManager.traceCollection.getName(), 
+					processManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
+					processManager.traceCollection.convertObjectToSpecific(event), 
+					false));
+		}
 		return traceTxs;
 	}
 }

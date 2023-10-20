@@ -20,6 +20,7 @@ public class Session
 	public String timezone;
 	public String domainLock;
 	public ScriptContext scriptContext;
+	public int scriptLevel = 0;
 	public TxStore<Object> txStore;
 	public DataMap stats;
 
@@ -155,5 +156,17 @@ public class Session
 
 	public DataMap getStats() {
 		return stats;
+	}
+	
+	public void pushScriptLevel() {
+		scriptLevel++;
+	}
+	
+	public void popScriptLevel() {
+		scriptLevel--;
+	}
+	
+	public boolean isInScript() {
+		return scriptLevel > 0;
 	}
 }
