@@ -399,7 +399,8 @@ public class RedbackObject extends RedbackElement
 				{
 					data.put(name, actualValue);
 					updatedAttributes.add(name);
-					traceEvent("objectupdate", name, actualValue.toString(), null);
+					if(!attributeConfig.noTrace())
+						traceEvent("objectupdate", name, actualValue.toString(), null);
 					lastUpdated = System.currentTimeMillis();
 					try {
 						if(attributeConfig.getExpression() == null) 

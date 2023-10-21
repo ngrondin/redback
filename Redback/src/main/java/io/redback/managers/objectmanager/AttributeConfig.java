@@ -114,6 +114,11 @@ public class AttributeConfig
 		return config.getBoolean("search");
 	}
 	
+	public boolean noTrace()
+	{
+		return config.getBoolean("notrace");
+	}
+	
 	public boolean isSub()
 	{
 		return config.getBoolean("sub");
