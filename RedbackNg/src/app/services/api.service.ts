@@ -34,6 +34,7 @@ export class ApiService {
   public userprefService: string;
   public useCSForAPI: boolean = false;
   public chatService: string; 
+  public aiService: string;
   public placesAutocompleteService: any;
 
   constructor(
@@ -463,6 +464,17 @@ export class ApiService {
       action: 'markread',
       message: message
     })
+  }
+
+
+  /********* AI **********/  
+
+  nlCommand(model: string, text: string): Observable<any> {
+    return this.requestService(this.aiService, {
+      action: 'nlcommand',
+      model: model,
+      text: text
+    });
   }
 }
 

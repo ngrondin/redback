@@ -139,6 +139,7 @@ import { RbIconbuttonBadgeComponent } from './clickable/rb-iconbutton-badge/rb-i
 import { RbUrlInputComponent } from './inputs/rb-url-input/rb-url-input.component';
 import { RbPreferencesComponent } from './rb-preferences/rb-preferences.component';
 import { RbUsermenuComponent } from './rb-usermenu/rb-usermenu.component';
+import { RbNlboxComponent } from './rb-nlbox/rb-nlbox.component';
 
 
 
@@ -291,7 +292,8 @@ window.redback = window.redback || {};
         RbUrlInputComponent,
         CachedSrcDirective,
         RbPreferencesComponent,
-        RbUsermenuComponent
+        RbUsermenuComponent,
+        RbNlboxComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

@@ -67,6 +67,7 @@ export class AppComponent implements OnInit {
     this.apiService.processService = native.getAttribute("processservice");
     this.apiService.userprefService = native.getAttribute("userpreferenceservice");
     this.apiService.chatService = native.getAttribute("chatservice");
+    this.apiService.aiService = native.getAttribute("aiservice");
     this.apiService.useCSForAPI = native.getAttribute("usecsforapi") == "true" ? true : false;
     this.clientWSService.path = native.getAttribute("clientservice");
     this.userprefService.userdisplay = this.userdisplay;
@@ -103,6 +104,7 @@ export class AppComponent implements OnInit {
     this.initialView = config['defaultview'];
     this.menuView = this.appname; //TODO: Fix this
     this.configService.setObjectsConfig(config['objects']);
+    this.configService.setNLCommandModel(config["nlcommandmodel"]);
     this.iconsets = config["iconsets"];
     this.menuService.setFullMenuConfig(config['menu']);
     for(const set of this.iconsets) {

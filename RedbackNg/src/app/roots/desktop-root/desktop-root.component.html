@@ -15,6 +15,12 @@
             (navigate)="navigateTo($event)">
         </rb-global-search>
         <rb-iconbutton-badge
+            *ngIf="configService.nlCommandModel != null"
+            [icon]="'robot_2'"
+            [count]="0"
+            (click)="toggleNLBox()">
+        </rb-iconbutton-badge>          
+        <rb-iconbutton-badge
             [icon]="'chat_bubble_outline'"
             [count]="chatService.unreadCount"
             (click)="toggleRightDrawer('chat')">
@@ -85,6 +91,11 @@
         [class]="'rb-footer-indicator' + (clientWSServer.isConnected() ? ' rb-footer-indicator-on' : '')">
     </div>
 </div>
+<rb-nlbox
+    *ngIf="showNLBox"
+    (navigate)="navigateTo($event)"
+    (close)="toggleNLBox()">
+</rb-nlbox>
 <div
     class="rb-drag-box"
     [style.visibility]="dragService.isDragging ? 'visible' : 'hidden'"

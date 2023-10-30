@@ -31,6 +31,7 @@ export abstract class AppRootComponent implements OnInit {
     subscription: Subscription;
     viewTargetStack: ViewTarget[] = [];
     title: string = "Welcome";
+    showNLBox: boolean = false;
     
     configService : ConfigService;
     dragService: DragService;
@@ -150,6 +151,10 @@ export abstract class AppRootComponent implements OnInit {
         this.rightDrawerShowing = type;
         this.rightdrawer.open();
       }
+    }
+
+    toggleNLBox() {
+      this.showNLBox = !this.showNLBox;
     }
 
     closeRightDrawer() {

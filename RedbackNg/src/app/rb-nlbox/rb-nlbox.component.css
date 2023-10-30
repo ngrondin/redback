@@ -1,0 +1,42 @@
+:host {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    position: absolute;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2), 0 13px 19px 2px rgba(0, 0, 0, 0.14), 0 5px 24px 4px rgba(0, 0, 0, 0.12);
+    padding: 10px;
+    max-width: 30%;
+    max-height: 30%;
+    bottom: 10px;
+    right: 10px;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.rb-nlbox-closearea {
+    position: absolute;
+    top:0px;
+    right: 0px;
+}
+
+.rb-nlbox-scroll {
+    overflow: auto;
+    min-height: var(--v24px);
+}
+
+.rb-nlbox-item {
+    display: flex;
+    padding-top: var(--v10px);
+    padding-bottom: var(--v10px);
+    -ms-user-select:text;
+	user-select: text;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.rb-nlbox-input {
+    width: 25vw;
+    color: #333;
+}

@@ -7,11 +7,16 @@ import { RbObject } from '../datamodel';
 export class ConfigService {
 
   public objectsConfig: any;
+  public nlCommandModel: string;
 
   constructor() { }
 
   setObjectsConfig(c: any) {
     this.objectsConfig = c;
+  }
+
+  setNLCommandModel(m: string) {
+    this.nlCommandModel = m;
   }
 
   getLabel(obj: RbObject) : string {

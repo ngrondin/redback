@@ -1,0 +1,21 @@
+<div
+    class="rb-nlbox-closearea">
+    <rb-iconbutton
+        icon="clear"
+        (click)="onClose()">
+    </rb-iconbutton>
+</div>
+<div
+    #historyscroll
+    class="rb-nlbox-scroll">
+    <div
+        class="rb-nlbox-item"
+        *ngFor="let item of history">
+        {{item.text}}
+    </div>
+</div>
+<textarea
+    class="rb-nlbox-input"
+    [(ngModel)]="currentText"
+    (keydown)="onKeyDown($event)">
+</textarea>
