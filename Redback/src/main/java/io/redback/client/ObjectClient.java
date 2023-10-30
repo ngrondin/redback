@@ -50,26 +50,32 @@ public class ObjectClient extends Client
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter) throws RedbackException  {
-		return listObjects(session, objectname, filter, null, false, false, 0, 50);
+		return listObjects(session, objectname, filter, null, null, false, false, 0, 50);
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort) throws RedbackException  {
-		return listObjects(session, objectname, filter, sort, false, false, 0, 50);
+		return listObjects(session, objectname, filter, null, sort, false, false, 0, 50);
 	}
 	
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
-		return listObjects(session, objectname, filter, sort, addRelated, false, 0, 50);
+		return listObjects(session, objectname, filter, null, sort, addRelated, false, 0, 50);
 	}
 	
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException  {
-		return listObjects(session, objectname, filter, sort, addRelated, addValidation, 0, 50);
+		return listObjects(session, objectname, filter, null, sort, addRelated, addValidation, 0, 50);
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addRelated, boolean addValidation, int page, int pageSize) throws RedbackException  {
+		return listObjects(session, objectname, filter, null, sort, addRelated, addValidation, 0, 50);
+	}
+	
+	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter, String search, DataMap sort, boolean addRelated, boolean addValidation, int page, int pageSize) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "list");
 		req.put("object", objectname);
 		req.put("filter", filter != null ? filter : new DataMap());
+		if(search != null) 
+			req.put("search", search);
 		if(sort != null)
 			req.put("sort", sort);
 		req.put("page", page);

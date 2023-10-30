@@ -130,8 +130,12 @@ public class RedbackObjectRemote {
 		objectClient.updateObject(session, getObjectName(), getUid(), map, false);
 	}
 	
-	public void setRelated(String attribute, RedbackObjectRemote ror) {
-		related.put(attribute, ror);
+	public void setRelated(String attribute, RedbackObjectRemote ror) throws RedbackException {
+		DataMap val = getValidation(attribute);
+		if(val != null && val.containsKey("related") && val.getString("related.object").equals(ror.getObjectName())) {
+			set(attribute, ror.getString(val.getString("related.link")));
+			related.put(attribute, ror);			
+		}
 	}
 	
 	public List<String> getAttributeNames() {

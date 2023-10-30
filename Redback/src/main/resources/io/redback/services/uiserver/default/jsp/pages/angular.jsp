@@ -11,6 +11,7 @@ var versionOrDefault = version != null ? version : 'default';
   <link rel="icon" type="image/x-icon" href="<%=config.logo%>">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />  
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%=global.googlekey%>&libraries=places"></script>
   <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
   <script src="https://cdn.quilljs.com/1.0.0/quill.js"></script>  
@@ -33,6 +34,7 @@ var versionOrDefault = version != null ? version : 'default';
     processservice="<%=deployment.processservicepath%>"
     userpreferenceservice="<%=deployment.userpreferenceservicepath%>"
     chatservice="<%=deployment.chatservicepath%>"
+    aiservice="<%=deployment.aiservicepath%>"
     clientservice="<%=deployment.clientservicepath%>"
     usecsforapi="<%=deployment.useclientforapi%>">
   </app-root>
