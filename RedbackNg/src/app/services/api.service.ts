@@ -469,11 +469,12 @@ export class ApiService {
 
   /********* AI **********/  
 
-  nlCommand(model: string, text: string): Observable<any> {
+  nlCommand(model: string, text: string, context: any): Observable<any> {
     return this.requestService(this.aiService, {
       action: 'nlcommand',
       model: model,
-      text: text
+      text: text,
+      context: context
     });
   }
 }

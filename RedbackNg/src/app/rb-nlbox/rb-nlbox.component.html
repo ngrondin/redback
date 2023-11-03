@@ -1,5 +1,12 @@
 <div
-    class="rb-nlbox-closearea">
+    class="rb-nlbox-header">
+    <span class="material-symbols-outlined rb-nlbox-topicon">
+        robot_2
+    </span>   
+    <div
+        class="rb-nlbox-spacer">
+        Assistant
+    </div>
     <rb-iconbutton
         icon="clear"
         (click)="onClose()">
@@ -11,11 +18,36 @@
     <div
         class="rb-nlbox-item"
         *ngFor="let item of history">
-        {{item.text}}
+        <span 
+            *ngIf="item.assistant == true"
+            class="material-symbols-outlined rb-nlbox-icon">
+            robot_2
+        </span>           
+        <span 
+            *ngIf="item.assistant == false"
+            class="material-symbols-outlined rb-nlbox-icon">
+            person
+        </span>           
+        <div
+            class="rb-nlbox-text">
+            {{item.text}}        
+        </div>        
+    </div>
+    <div
+        *ngIf="waiting == true"
+        class="rb-nlbox-item">
+        <span 
+            class="material-symbols-outlined rb-nlbox-icon">
+            robot_2
+        </span>  
+        <div
+            class="rb-nlbox-dots">
+        </div>
     </div>
 </div>
 <textarea
     class="rb-nlbox-input"
     [(ngModel)]="currentText"
-    (keydown)="onKeyDown($event)">
+    (keydown)="onKeyDown($event)"
+    [placeholder]="'Ask something...'">
 </textarea>

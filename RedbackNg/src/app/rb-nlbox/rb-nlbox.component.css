@@ -6,8 +6,8 @@
     background-color: white;
     border-radius: 4px;
     box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2), 0 13px 19px 2px rgba(0, 0, 0, 0.14), 0 5px 24px 4px rgba(0, 0, 0, 0.12);
-    padding: 10px;
-    max-width: 30%;
+    min-width: 20vw;
+    max-width: 25vw;
     max-height: 30%;
     bottom: 10px;
     right: 10px;
@@ -15,10 +15,21 @@
     overflow: hidden;
 }
 
-.rb-nlbox-closearea {
-    position: absolute;
-    top:0px;
-    right: 0px;
+.rb-nlbox-header {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--primary-color);
+    color: #ddd;
+    align-items: center;
+}
+
+.rb-nlbox-topicon {
+    margin-left: var(--v5px);
+}
+
+.rb-nlbox-spacer {
+    display: flex;
+    flex: 1 1 auto;
 }
 
 .rb-nlbox-scroll {
@@ -28,15 +39,85 @@
 
 .rb-nlbox-item {
     display: flex;
-    padding-top: var(--v10px);
-    padding-bottom: var(--v10px);
+    flex-direction: row;
+    padding: var(--v10px) var(--v10px) var(--v10px) var(--v5px);
     -ms-user-select:text;
 	user-select: text;
     color: #666;
     font-size: 0.95rem;
 }
 
-.rb-nlbox-input {
-    width: 25vw;
-    color: #333;
+.rb-nlbox-icon {
+    display: flex;
+    flex: 0 0 auto;
+    color: #ccc;
 }
+
+.rb-nlbox-text {
+    display: flex;
+    flex: 1 1 auto;
+    padding-left: var(--v5px)
+}
+
+.rb-nlbox-input {
+    color: #333;
+    margin: var(--v3px);
+    resize: none;
+}
+
+.rb-nlbox-input::placeholder {
+    color: #999;
+}
+
+.rb-nlbox-input:focus {
+    outline-width: 0;
+    outline: none;
+}
+
+
+.rb-nlbox-dots {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: var(--primary-color);
+    color: var(--primary-color);
+    animation: dot-flashing 1s infinite linear alternate;
+    animation-delay: 0.5s;
+    margin: var(--v5px) var(--v28px)
+  }
+  .rb-nlbox-dots::before, .rb-nlbox-dots::after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+  }
+  .rb-nlbox-dots::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: var(--primary-color);
+    color: var(--primary-color);
+    animation: dot-flashing 1s infinite alternate;
+    animation-delay: 0s;
+  }
+  .rb-nlbox-dots::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: var(--primary-color);
+    color: var(--primary-color);
+    animation: dot-flashing 1s infinite alternate;
+    animation-delay: 1s;
+  }
+  
+  @keyframes dot-flashing {
+    0% {
+      background-color: var(--primary-color);
+    }
+    50%, 100% {
+      background-color: rgb(100, 100, 100, 0.2)
+    }
+  }

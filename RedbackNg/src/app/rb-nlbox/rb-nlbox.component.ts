@@ -1,4 +1,6 @@
 import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
+import { RbObject } from 'app/datamodel';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { ApiService } from 'app/services/api.service';
 import { ConfigService } from 'app/services/config.service';
 
@@ -14,7 +16,9 @@ export class RbNlboxComponent {
   @ViewChild('historyscroll') historyscroll: ElementRef;
 
   history: any[] = []
+  historyPointer = -1;
   currentText: string = "";
+  waiting: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -22,25 +26,68 @@ export class RbNlboxComponent {
   ) {
   }
 
-  onKeyDown(event) {
+  onKeyDown(event: any) {
     if(event.keyCode == 13) {
-      this.post()
+      this.post();
+    } else if(event.keyCode == 38) {
+      if(this.historyPointer == -1) {
+        this.historyPointer = this.history.length - 1;
+      } else {
+        this.historyPointer--;
+      }
+      while(this.historyPointer > -1 && this.history[this.historyPointer].assistant == true) {
+        this.historyPointer--;
+      }
+      if(this.historyPointer > -1) {
+        this.currentText = this.history[this.historyPointer].text;
+      }
+    } else if(event.keyCode == 40) {
+      if(this.historyPointer == this.history.length - 1) {
+        this.historyPointer = 0;
+      } else {
+        this.historyPointer++;
+      }
+      while(this.historyPointer < this.history.length && this.history[this.historyPointer].assistant == true) {
+        this.historyPointer++;
+      }
+      if(this.historyPointer > -1) {
+        this.currentText = this.history[this.historyPointer].text;
+      }
     }
   }
 
   post() {
-    this.apiService.nlCommand(this.configService.nlCommandModel, this.currentText).subscribe((resp) => {
-      this.history.push({text:this.currentText});
+    let contextDS: RbDatasetComponent = window.redback?.currentLoadedView?.topSets[0];
+    let contextObj: RbObject = contextDS != null ? contextDS.selectedObject : null;
+    let context = {
+      objectname: contextDS != null ? contextDS.objectname : null,
+      uid: contextObj != null ? contextObj.uid : null,
+      filter: contextDS != null ? contextDS.resolvedFilter : null,
+      search: contextDS != null ? contextDS.searchString : null
+    }
+    this.apiService.nlCommand(this.configService.nlCommandModel, this.currentText, context).subscribe(
+      (resp) => {
+        let text = resp.text != null && resp.text != "" ? resp.text : "...";
+        if(resp.text != null) {
+          this.history.push({text:text, assistant:true});
+        }
+        if(resp.actions != null) {
+          this.processActions(resp.actions);
+        }
+        this.waiting = false;
+      },
+      (err) => {
+        this.history.push({text:"Something went wrong", assistant:true});
+        this.waiting = false;
+      }
+    );
+    setTimeout(() => {
+      this.history.push({text:this.currentText.trim(), assistant:false});
       this.currentText = "";
       this.scrollToBottom(); 
-      if(resp.text != null) {
-        this.history.push({text:resp.text});
-      }
-      if(resp.actions != null) {
-        this.processActions(resp.actions);
-      }
-    });
- 
+      this.waiting = true; 
+      this.historyPointer = -1; 
+    }, 10);
   }
 
   onClose() {
@@ -48,11 +95,18 @@ export class RbNlboxComponent {
   }
 
   processActions(actions: string[]) {
-    if(actions[0] == 'navto' && actions.length >= 3) {
+    if(actions[0] == 'navtosearch' && actions.length >= 3) {
       this.navigate.emit({
         view: actions[1],
         filter: {},
-        search: actions[2]
+        search: actions[2],
+        reset: true
+      });  
+    } else if(actions[0] == 'navtouid' && actions.length >= 3) {
+      this.navigate.emit({
+        view: actions[1],
+        filter: {uid: "'" + actions[2] + "'"},
+        reset: true
       });  
     }
   }
@@ -62,7 +116,7 @@ export class RbNlboxComponent {
       if(this.historyscroll != null) {
         this.historyscroll.nativeElement.scrollTop = this.historyscroll.nativeElement.scrollHeight;
       }
-    }, 100);
+    }, 10);
   }
 
 }

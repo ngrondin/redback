@@ -177,7 +177,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     let firstOfMonth = new Date(this.year, this.month, 1, 0, 0, 0, 0);
     let dt = this.findStartOfTheWeek(firstOfMonth);
     let monthStart = dt;
-    while(dt.getMonth() == this.month - 1 || dt.getMonth() == this.month) {
+    while(dt.getMonth() == this.month - 1 || dt.getMonth() == this.month || (dt.getMonth() == 11 && this.month == 0)) {
       this.weeksOfThisMonth.push({display: dt.getDate() + " " + this.months[dt.getMonth()], value: dt});
       dt = new Date(dt.getTime() + (7 * 86400000));
     }
