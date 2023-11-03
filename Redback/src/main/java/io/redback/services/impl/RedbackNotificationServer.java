@@ -227,12 +227,14 @@ public class RedbackNotificationServer extends NotificationServer {
 		}
 	}
 	
-	protected void removeFCMToken(Session session, String token) throws RedbackException {
+	protected void removeFCMToken(Session session, String username, String deviceId) throws RedbackException {
 		if(dataClient != null && userCollection != null) {
-			DataMap key = new DataMap("fcmtoken", token);
 			DataMap data = new DataMap("fcmtoken", null);
-			userCollection.putData(key, data);
-			deviceCollection.putData(key, data);
+			if(deviceId != null) {
+				deviceCollection.putData(new DataMap("_id", deviceId), data);				
+			} else if(username != null) {
+				userCollection.putData(new DataMap("_id", username), data);
+			}
 		} else {
 			throw new RedbackException("No data client was configured");
 		}		
@@ -277,17 +279,20 @@ public class RedbackNotificationServer extends NotificationServer {
 		if(gatewayClient != null && dataClient != null) {
 			try {
 				String accessToken = getFCMAccessToken();	
-				DataMap deviceResults = deviceCollection.getData(new DataMap("username", username));
-				DataList list = deviceResults.getList("result");
 				Date latestlogin = null;
 				String fcmToken = null;
+				String deviceId = null;
+				DataMap deviceResults = deviceCollection.getData(new DataMap("username", username));
+				DataList list = deviceResults.getList("result");
 				if(list != null && list.size() > 0) {
 					for(int i = 0; i < list.size(); i++) {
 						String t = list.getObject(i).getString("fcmtoken");
 						if(t != null) {
 							Date lli = list.getObject(i).getDate("lastlogin");
+							String did = list.getObject(i).getString("_id");
 							if(latestlogin == null || (latestlogin != null && lli != null && latestlogin.getTime() < lli.getTime())) {
 								latestlogin = lli;
+								deviceId = did;
 								fcmToken = t;
 							}
 						}
@@ -333,7 +338,7 @@ public class RedbackNotificationServer extends NotificationServer {
 						while(t != null && !(t instanceof FunctionErrorException)) t = t.getCause();
 						if(t != null) {
 							if(t.getMessage().contains("\"errorCode\": \"UNREGISTERED\"") || t.getMessage().contains("\"errorCode\": \"INVALID_ARGUMENT\"")) {
-								removeFCMToken(session, fcmToken);
+								removeFCMToken(session, username, deviceId);
 							}
 						}								
 					}

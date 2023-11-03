@@ -29,11 +29,20 @@ public class ObjectClient extends Client
 	}
 	
 	public RedbackObjectRemote getObject(Session session, String objectname, String uid) throws RedbackException  {
+		return getObject(session, objectname, uid, true, false);
+	}
+	
+	public RedbackObjectRemote getObject(Session session, String objectname, String uid, boolean addRelated, boolean addValidation) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "get");
 		req.put("object", objectname);
 		req.put("uid", uid);
-		req.put("options", new DataMap("addrelated", true));
+		if(addRelated || addValidation) {
+			DataMap options = new DataMap();
+			if(addRelated) options.put("addrelated", true);
+			if(addValidation) options.put("addvalidation", true);
+			req.put("options", options);
+		}
 		DataMap resp = requestDataMap(session, req);
 		return new RedbackObjectRemote(session, this, resp);
 	}
@@ -147,14 +156,22 @@ public class ObjectClient extends Client
 	}
 	
 	public RedbackObjectRemote createObject(Session session, String objectname, String domain, DataMap data, boolean addRelated) throws RedbackException  {
+		return createObject(session, objectname, domain, data, addRelated, false);
+	}
+	
+	public RedbackObjectRemote createObject(Session session, String objectname, String domain, DataMap data, boolean addRelated, boolean addValidation) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "create");
 		req.put("object", objectname);
 		req.put("data", data);
 		if(domain != null) 
 			req.put("domain", domain);
-		if(addRelated)
-			req.put("options", new DataMap("addrelated", true));
+		if(addRelated || addValidation) {
+			DataMap options = new DataMap();
+			if(addRelated) options.put("addrelated", true);
+			if(addValidation) options.put("addvalidation", true);
+			req.put("options", options);
+		}
 		DataMap resp = requestDataMap(session, req);
 		RedbackObjectRemote ror = new RedbackObjectRemote(session, this, resp);
 		return ror;

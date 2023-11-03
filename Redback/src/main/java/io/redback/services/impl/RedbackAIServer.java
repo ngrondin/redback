@@ -20,8 +20,8 @@ public class RedbackAIServer extends AIServer {
 
 	}	
 
-	protected NLCommandResponse nlCommand(Session session, String model, String text) throws RedbackException {
-		return aiManager.runNLCommand(session, model, text);
+	protected NLCommandResponse nlCommand(Session session, String model, String text, DataMap context) throws RedbackException {
+		return aiManager.runNLCommand(session, model, text, context);
 	}
 
 }

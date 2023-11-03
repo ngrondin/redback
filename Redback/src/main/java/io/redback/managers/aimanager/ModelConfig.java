@@ -18,7 +18,14 @@ public class ModelConfig {
 	}
 	
 	public String getUrl() {
-		return config.getString("url");
+		String url = config.getString("url");
+		if(!url.startsWith("http") && aiManager.urlMap != null) {
+			String val = aiManager.urlMap.getString(url);
+			if(val != null) {
+				url = val;
+			}
+		}
+		return url;
 	}
 	
 	public String getAPIKey() {

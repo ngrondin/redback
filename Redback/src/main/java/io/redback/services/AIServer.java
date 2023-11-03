@@ -38,7 +38,8 @@ public abstract class AIServer extends AuthenticatedServiceProvider {
 				{
 					String model = request.getString("model");
 					String text = request.getString("text");
-					NLCommandResponse resp = nlCommand(session, model, text);
+					DataMap context = request.getObject("context");
+					NLCommandResponse resp = nlCommand(session, model, text, context);
 					responseData = new DataMap("text", resp.text);
 					DataList list = new DataList();
 					if(resp.actions != null) {
@@ -62,6 +63,6 @@ public abstract class AIServer extends AuthenticatedServiceProvider {
 		}
 	}
 	
-	protected abstract NLCommandResponse nlCommand(Session session, String model, String text) throws RedbackException;
+	protected abstract NLCommandResponse nlCommand(Session session, String model, String text, DataMap context) throws RedbackException;
 
 }
