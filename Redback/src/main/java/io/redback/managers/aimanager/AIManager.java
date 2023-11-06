@@ -1,8 +1,6 @@
 package io.redback.managers.aimanager;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 import io.firebus.Firebus;
@@ -71,12 +69,16 @@ public class AIManager {
 	public NLCommandResponse runNLCommand(Session session, String model, String text, DataMap context) throws RedbackException {
 		ModelConfig modelConfig = modelConfigs.get(session, model);
 		if(modelConfig.getType().equals("nlcommand")) {
-			ObjectContext oc = new ObjectContext(context.getString("objectname"), context.getString("uid"), context.getObject("filter"), context.getString("search"));
-			List<String> seq = null;
+			SEContextLevel cl = null;
+			if(context.getString("uid") != null) {
+				cl = new ObjectContext(context.getString("objectname"), context.getString("uid"));
+			} else if(context.getObject("filter") != null ||  context.getString("search") != null) {
+				cl = new ListContext(context.getString("objectname"), context.getObject("filter"), context.getString("search"));
+			}
+			String actionsStr = null;
 			String respText = null;
 			if(text.startsWith("[seq]:")) {
-				String[] arr = text.substring(6).split(" ");
-				seq = Arrays.asList(arr);
+				actionsStr = text.substring(6);
 				respText = "Ok, here you go";
 			} else {
 				TimeZone tz = TimeZone.getTimeZone(session.getTimezone());
@@ -84,13 +86,11 @@ public class AIManager {
 				DataMap headers = new DataMap("apikey", modelConfig.getAPIKey());
 				DataMap response = gatewayClient.call("post", modelConfig.getUrl(), request, headers, null);
 				respText = response.getString("text");
-				String actionsStr = response.getString("actions");
-				if(actionsStr != null)
-					seq = Arrays.asList(actionsStr.split(" "));
+				actionsStr = response.getString("actions");
 			}
 			NLCommandResponse nlcr = null;
-			if(seq != null)
-				nlcr = sequenceExecuter.runSequence(session, seq, oc);
+			if(actionsStr != null)
+				nlcr = sequenceExecuter.runSequence(session, actionsStr, cl);
 			else
 				nlcr = new NLCommandResponse(null, null);
 			if(!(nlcr.text != null && nlcr.text.length() > 0)) 

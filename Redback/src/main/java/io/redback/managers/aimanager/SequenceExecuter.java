@@ -2,6 +2,7 @@ package io.redback.managers.aimanager;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -28,13 +29,27 @@ public class SequenceExecuter {
 		processClient = pc;
 	}
 	
-	public NLCommandResponse runSequence(Session session, List<String> seq, ObjectContext oc) throws RedbackException {
-		SeqExContext context = new SeqExContext(session);
-		if(oc != null) {
-			if(oc.objectname != null && oc.uid != null && oc.object == null) 
-				oc.object = objectClient.getObject(session, oc.objectname, oc.uid, false, true);
-			context.pushObjectContext(oc);
+	public NLCommandResponse runSequence(Session session, String seqStr, SEContextLevel cl) throws RedbackException {
+		SEContext context = new SEContext(session);
+		if(cl != null) {
+			if(cl instanceof ObjectContext) {
+				ObjectContext oc = (ObjectContext)cl;
+				if(oc.object == null)
+					oc.object = objectClient.getObject(session, oc.objectname, oc.uid, false, true);
+			} else if(cl instanceof ListContext) {
+				ListContext lc = (ListContext)cl;
+				if(lc.list == null)
+					lc.list = objectClient.listObjects(context.session, lc.objectname, lc.filter, lc.search, null, false, true, 0, 100);
+			}
+			context.pushContextLevel(cl);
 		}
+		List<String> seq = Arrays.asList(seqStr.trim().split(" "));
+		runSequence(context, seq);
+		NLCommandResponse nlcr = new NLCommandResponse(context.textResponse.toString(), context.uiActions);
+		return nlcr;
+	}
+
+	protected void runSequence(SEContext context, List<String> seq) throws RedbackException {
 		for(int cur = 0; cur < seq.size(); cur++) {
 			String curToken = seq.get(cur);
 			if(curToken.startsWith("$")) {
@@ -43,14 +58,11 @@ public class SequenceExecuter {
 					params.add(seq.get(i));
 				runCommand(context, curToken, params);
 				cur += params.size();					
-			} 
+			}
 		}
-		NLCommandResponse nlcr = new NLCommandResponse(context.textResponse.toString(), context.uiActions);
-		return nlcr;
 	}
-
 	
-	protected void runCommand(SeqExContext context, String command, List<String> params) throws RedbackException {
+	protected void runCommand(SEContext context, String command, List<String> params) throws RedbackException {
 		try {
 			if(command.equals("$find"))
 				find(context, params);
@@ -63,7 +75,9 @@ public class SequenceExecuter {
 			else if(command.equals("$link"))
 				link(context, params);	
 			else if(command.equals("$action"))
-				action(context, params);		
+				action(context, params);
+			else if(command.equals("$pop"))
+				pop(context, params);				
 			else if(command.equals("$respond"))
 				respond(context, params);		
 			else if(command.equals("$navto"))
@@ -73,117 +87,170 @@ public class SequenceExecuter {
 		}
 	}
 	
-	protected void find(SeqExContext context, List<String> params) throws RedbackException {
+	protected void find(SEContext context, List<String> params) throws RedbackException {
 		if(params.size() >= 2) {
 			String objectname = params.get(0);
-			String search = getValue(context, params.subList(1, params.size())).toString();
-			RedbackObjectRemote ror = findObject(context, objectname, search);
-			if(ror != null) {
-				context.pushObjectContext(ror, null, search);
-			}
+			findObject(context, objectname, params.subList(1, params.size()), true);
 		}
 	}
 	
-	protected void list(SeqExContext context, List<String> params) throws RedbackException {
+	protected void list(SEContext context, List<String> params) throws RedbackException {
 		if(params.size() >= 2) {
 			String objectname = params.get(0);
-			String search = getValue(context, params.subList(1, params.size())).toString();
-			List<RedbackObjectRemote> list = listObjects(context, objectname, search);
-			context.pushObjectContext(list, null, search);
+			listObjects(context, objectname, params.subList(1, params.size()), true);
 		}
 	}
 	
-	protected void create(SeqExContext context, List<String> params) throws RedbackException {
+	protected void create(SEContext context, List<String> params) throws RedbackException {
 		if(params.size() >= 1) {
 			String objectname = params.get(0);
 			RedbackObjectRemote ror = objectClient.createObject(context.session, objectname, null, null, false, true);
-			context.pushObjectContext(ror, null, null);
+			context.pushContextLevel(new ObjectContext(ror));
 		}
 	}
 	
-	protected void update(SeqExContext context, List<String> params) throws RedbackException {
-		ObjectContext oc = context.getObjectContext();
-		if(params.size() >= 2 && oc != null && oc.object != null) {
-			oc.object.set(params.get(0), getValue(context, params.subList(1, params.size())));
+	protected void update(SEContext context, List<String> params) throws RedbackException {
+		SEContextLevel cl = context.getContextLevel();
+		if(params.size() >= 2 && cl != null) {
+			String attribute = params.get(0);
+			Object value = getValue(context, params.subList(1, params.size()));
+			for(RedbackObjectRemote ror: listObjectsFromContext(context)) {
+				ror.set(attribute, value);
+			}
 		}
 	}
 	
-	protected void link(SeqExContext context, List<String> params) throws RedbackException {
-		ObjectContext oc = context.getObjectContext();
-		if(params.size() >= 3 && oc != null && oc.object != null) {
+	protected void link(SEContext context, List<String> params) throws RedbackException {
+		SEContextLevel cl = context.getContextLevel();
+		if(params.size() >= 3 && cl != null) {
 			String attribute = params.get(0);
 			String relatedObjectName = params.get(1);
-			String search = getValue(context, params.subList(2, params.size())).toString();
-			if(search.length() > 0) {
-				RedbackObjectRemote ror = findObject(context, relatedObjectName, search);
-				if(ror != null) {
-					oc.object.setRelated(attribute, ror);
-				}
+			RedbackObjectRemote target = findObject(context, relatedObjectName, params.subList(2, params.size()), false);
+			for(RedbackObjectRemote ror: listObjectsFromContext(context)) {
+				ror.setRelated(attribute, target);
 			}
 		}
 	}
 	
-	protected void action(SeqExContext context, List<String> params) throws RedbackException {
-		ObjectContext oc = context.getObjectContext();
-		if(params.size() >= 1 && oc != null && oc.object != null) {
+	protected void action(SEContext context, List<String> params) throws RedbackException {
+		SEContextLevel cl = context.getContextLevel();
+		if(params.size() >= 1 && cl != null) {
 			String action = getValue(context, params).toString();
 			if(action != null && action.length() > 0) {
-				ProcessAssignmentRemote par = processClient.getAssignment(context.session, new DataMap("data.objectname", oc.objectname, "data.uid", oc.uid));
-				if(par != null)
-					par.action(action);				
+				for(RedbackObjectRemote ror: listObjectsFromContext(context)) {
+					ProcessAssignmentRemote par = processClient.getAssignment(context.session, new DataMap("data.objectname", ror.getObjectName(), "data.uid", ror.getUid()));
+					if(par != null)
+						par.action(action);	
+				}
 			}
-		}
+		}		
 	}
 	
-	protected void respond(SeqExContext context, List<String> params) throws RedbackException {
+	protected void pop(SEContext context, List<String> params) throws RedbackException {
+		context.popContextLevel();
+	}
+	
+	protected void respond(SEContext context, List<String> params) throws RedbackException {
 		context.addResponse(getValue(context, params).toString());
 	}
 	
-	protected void navTo(SeqExContext context, List<String> params) throws RedbackException {
-		if(params.size() == 1 && context.getObjectContext() != null && context.getObjectContext().uid != null) {
-			context.uiActions.add("navtouid");
-			context.uiActions.add(params.get(0));
-			context.uiActions.add(context.getObjectContext().uid);
-		} else if(params.size() == 2) {
-			context.uiActions.add("navtosearch");
-			context.uiActions.add(params.get(0));
-			if(params.get(1).startsWith("#") && context.getObjectContext() != null) {
-				String attribute = params.get(1).substring(1);
-				context.uiActions.add(context.getObjectContext().object.getString(attribute));
-			} else {
-				context.uiActions.add(params.get(1));				
-			}
+	protected void navTo(SEContext context, List<String> params) throws RedbackException {
+		if(params.size() >= 1) {
+			String view = params.get(0);
+			SEContextLevel c = context.getContextLevel();
+			if(params.size() == 1) {
+				if(c instanceof ObjectContext) {
+					ObjectContext oc = (ObjectContext)c;
+					context.uiActions.add("navtouid");
+					context.uiActions.add(view);
+					context.uiActions.add(oc.uid);
+				} else if(c instanceof ListContext) {
+					ListContext lc = (ListContext)c;
+					context.uiActions.add("navtosearch");
+					context.uiActions.add(view);
+					context.uiActions.add(lc.search);
+				} else {
+					context.uiActions.add("navtosearch");
+					context.uiActions.add(view);
+				}
+			} else if(params.size() >= 2) {
+				Object val = getValue(context, params.subList(1, params.size()));
+				context.uiActions.add("navtosearch");
+				context.uiActions.add(view);
+				context.uiActions.add(val.toString());
+			}		
 		}
 	}
 	
-	protected Object getValue(SeqExContext context, List<String> tokens) throws RedbackException {
+	protected RedbackObjectRemote findObject(SEContext context, String objectName, List<String> params, boolean addToContext) throws RedbackException {
+		List<RedbackObjectRemote> list = listObjects(context, objectName, params, false);
+		if(list.size() > 0) {
+			RedbackObjectRemote ror = list.get(0);
+			if(addToContext) 
+				context.pushContextLevel(new ObjectContext(ror));
+			return ror;
+		} else {
+			return null;
+		}
+	}
+	
+	protected List<RedbackObjectRemote> listObjects(SEContext context, String objectName, List<String> params, boolean addToContext) throws RedbackException {
+		DataMap filter = null;
+		String search = null;
+		if(params.size() == 1) {
+			search = getValue(context, params).toString();
+		} else if(params.size() >= 2) {
+			String key = params.get(0);
+			Object val = getValue(context, params.subList(1, params.size()));
+			filter = new DataMap(key, val);
+		}
+		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, filter, search, null, false, true, 0, 100);
+		if(addToContext)
+			context.pushContextLevel(new ListContext(list, filter, search));
+		return list;
+	}
+	
+	protected List<RedbackObjectRemote> listObjectsFromContext(SEContext context) throws RedbackException {
+		SEContextLevel cl = context.getContextLevel();
+		List<RedbackObjectRemote> list = new ArrayList<RedbackObjectRemote>();
+		if(cl instanceof ObjectContext) {
+			list.add(((ObjectContext)cl).object);
+		} else if(cl instanceof ListContext) {
+			list.addAll(((ListContext)cl).list);
+		}
+		return list;
+	}
+	
+	protected Object getValue(SEContext context, List<String> tokens) throws RedbackException {
 		StringBuilder sb = new StringBuilder();
-		boolean nextIsDay = false;
-		String dayStr = null;
-		boolean nextIsTime = false;
-		String timeStr = null;
-		for(String token: tokens) {
-			if(nextIsDay) {
-				dayStr = token;
-				nextIsDay = false;
-			} else if(nextIsTime) {
-				timeStr = token;
-				nextIsTime = false;
-			} else if(token.equals("%day")) {
-				nextIsDay = true;
-			} else if(token.equals("%time")) {
-				nextIsTime = true;
+		for(String token: tokens) {			
+			Object val = null;
+			if(token.startsWith("#")) {
+				int l = -1;
+				String attribute = token;
+				while(attribute.startsWith("#")) {
+					l++;
+					attribute = attribute.substring(1);
+				}
+				SEContextLevel cl = context.getContextLevel(l);
+				if(cl instanceof ObjectContext) {
+					ObjectContext oc = (ObjectContext)cl;
+					if(attribute.equals("uid"))
+						val = oc.object.getUid();
+					else
+						val = oc.object.getObject(attribute);
+				}
 			} else {
-				if(sb.length() > 0) 
-					sb.append(" ");
-				sb.append(token);
+				val = parseString(token);
+			}
+			if(tokens.size() == 1) {
+				return val;
+			} else {
+				if(sb.length() > 0) sb.append(" ");
+				sb.append(val.toString());
 			}
 		}
-		if(dayStr != null || timeStr != null) {
-			return null; // getDate(dayStr, timeStr);
-		} else {
-			return parseString(sb.toString());			
-		}
+		return sb.toString();
 	}
 	
 	protected Object parseString(String str) {
@@ -214,49 +281,5 @@ public class SequenceExecuter {
 			}
 		}		
 	}
-	
-	
-	/*protected Date getDate(String dayStr, String timeStr) {
-		Date now = new Date();
-		HawkingConfiguration config = new HawkingConfiguration();
-		HawkingTimeParser parser = new HawkingTimeParser();
-		Calendar cal = Calendar.getInstance();
-		if(dayStr != null) {
-			DatesFound datesFound = parser.parse(dayStr, now, config, "eng");
-			List<ParserOutput> list = datesFound.getParserOutputs();
-			if(list.size() > 0) {
-				DateTime foundDay = list.get(0).getDateRange().getStart();
-				cal.set(Calendar.YEAR, foundDay.getYear());
-				cal.set(Calendar.MONTH, foundDay.getMonthOfYear());
-				cal.set(Calendar.DATE, foundDay.getDayOfMonth());
-			}
-		}
-		if(timeStr != null) {
-			DatesFound datesFound = parser.parse(timeStr, now, config, "eng");
-			List<ParserOutput> list = datesFound.getParserOutputs();
-			if(list.size() > 0) {
-				DateTime foundTime = list.get(0).getDateRange().getStart();
-				cal.set(Calendar.HOUR, foundTime.getHourOfDay());
-				cal.set(Calendar.MINUTE, foundTime.getMinuteOfHour());
-				cal.set(Calendar.SECOND, foundTime.getSecondOfMinute());
-			}
-		}
-		return cal.getTime();
-	}*/
-	
-	protected RedbackObjectRemote findObject(SeqExContext context, String objectName, String search) throws RedbackException {
-		List<RedbackObjectRemote> list = listObjects(context, objectName, search);
-		if(list.size() > 0) {
-			return list.get(0);
-		} else {
-			return null;
-		}
-	}
-	
-	protected List<RedbackObjectRemote> listObjects(SeqExContext context, String objectName, String search) throws RedbackException {
-		return objectClient.listObjects(context.session, objectName, null, search, null, false, true, 0, 100);
-	}
-	
-	
 
 }
