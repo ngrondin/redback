@@ -127,7 +127,7 @@ public class SequenceExecuter {
 			String relatedObjectName = params.get(1);
 			RedbackObjectRemote target = findObject(context, relatedObjectName, params.subList(2, params.size()), false);
 			for(RedbackObjectRemote ror: listObjectsFromContext(context)) {
-				ror.setRelated(attribute, target);
+				ror.set(attribute, target);
 			}
 		}
 	}

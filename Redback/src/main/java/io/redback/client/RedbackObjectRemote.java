@@ -126,18 +126,21 @@ public class RedbackObjectRemote {
 		set(new DataMap(attribute, value));
 	}
 	
+	public void set(String attribute, RedbackObjectRemote ror) throws RedbackException {
+		DataMap val = getValidation(attribute);
+		if(val != null && val.containsKey("related") && val.getString("related.object").equals(ror.getObjectName())) {
+			String linkValue = ror.getString(val.getString("related.link"));
+			set(new DataMap(attribute, linkValue));
+			setRelated(attribute, ror);
+		}
+	}
+	
 	public void set(DataMap map) throws RedbackException {
 		objectClient.updateObject(session, getObjectName(), getUid(), map, false);
 	}
 	
-	public void setRelated(String attribute, RedbackObjectRemote ror) throws RedbackException {
-		DataMap val = getValidation(attribute);
-		if(val != null && val.containsKey("related") && val.getString("related.object").equals(ror.getObjectName())) {
-			String linkValue = ror.getString(val.getString("related.link"));
-			if(!linkValue.equals(getString(attribute)))
-				set(attribute, linkValue);
-			related.put(attribute, ror);			
-		}
+	public void setRelated(String attribute, RedbackObjectRemote ror) {
+		related.put(attribute, ror);
 	}
 	
 	public List<String> getAttributeNames() {

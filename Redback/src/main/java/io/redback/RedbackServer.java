@@ -48,13 +48,13 @@ public class RedbackServer
 		
 		firebus = new Firebus(config.getString("network"), config.getString("password"));
 		if(config.containsKey("threads"))
-			firebus.setServiceThreadCount(config.getNumber("threads").intValue());
+			firebus.setServiceThreadCount(config.getNumber("threads").intValue(), config.getNumber("threads").intValue() * 2);
 		if(config.containsKey("servicethreads"))
-			firebus.setServiceThreadCount(config.getNumber("servicethreads").intValue());
+			firebus.setServiceThreadCount(config.getNumber("servicethreads").intValue(), config.getNumber("servicethreads").intValue() * 2);
 		if(config.containsKey("streamthreads"))
-			firebus.setStreamThreadCount(config.getNumber("streamthreads").intValue());
+			firebus.setStreamThreadCount(config.getNumber("streamthreads").intValue(), config.getNumber("streamthreads").intValue() * 2);
 		if(config.containsKey("messagethreads"))
-			firebus.setMessagingThreadCount(config.getNumber("messagethreads").intValue());
+			firebus.setMessagingThreadCount(config.getNumber("messagethreads").intValue(), config.getNumber("messagethreads").intValue() * 2);
 		
 		firebus.registerConsumer("_rb_config_cache_clear", new Consumer() {
 			public void consume(Payload payload) {
