@@ -180,6 +180,7 @@ public class ExportData extends Thread
 		String domain = null;
 		String filepath = null;
 		String token = null;
+		String knownAddress = null;
 		for(int i = 0; i < args.length; i++) {
 			String swt = args[i];
 			if(swt.equals("-fb") && args.length > i + 1) {
@@ -202,12 +203,19 @@ public class ExportData extends Thread
 			if(swt.equals("-t") && args.length > i + 1) {
 				token = args[++i];
 			}
+			if(swt.equals("-ka") && args.length > i + 1) {
+				knownAddress = args[++i];
+			}
 		}
 		
 		if(firebus == null)
 			firebus = new Firebus();
 		if(filepath == null)
 			filepath = System.getProperty("user.dir") + File.separator + "export.json";
+		if(knownAddress != null) {
+			String[] parts = knownAddress.split(":");
+			firebus.addKnownNodeAddress(parts[0], Integer.parseInt(parts[1]));
+		}
 		
 		if(token != null && objectService != null && objectList != null) {
 			try {

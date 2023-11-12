@@ -15,6 +15,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 import io.firebus.Firebus;
 import io.firebus.data.DataFilter;
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Level;
 import io.firebus.logging.Logger;
@@ -42,7 +43,9 @@ public class ImportData extends Thread
 		username = jwt.getClaim("email").asString();
 		domain = d;
 		objectClient = new ObjectClient(firebus, os);
-		session = new Session(t, new UserProfile(new DataMap("username", username)));
+		DataList domains = new DataList();
+		domains.add(domain);
+		session = new Session(t, new UserProfile(new DataMap("username", username, "domains", domains)));
 		session.setDomainLock(domain);
 		setName("rbImportThread");
 	}
