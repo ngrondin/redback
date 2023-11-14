@@ -147,6 +147,9 @@ export class RbFilterBuilderComponent implements OnInit {
           fltr[key] = this.filter[key];
         }
       }
+      if(this.config.aggregateFilter != null) {
+        fltr = this.filterService.mergeFilters(fltr, this.config.aggregateFilter);
+      }
       fltr = this.filterService.resolveFilter(fltr, null, null, null);
       this.dataService.aggregate(this.config.objectname, fltr, null, [fac.attribute], [{function:"count", name:"count"}], null, 0, 500).subscribe(list => {
         fac.options = list.map(agg => {return {

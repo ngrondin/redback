@@ -41,4 +41,5 @@ export abstract class RbSetComponent extends RbContainerComponent {
             this.onDataTargetEvent(dt);
         }
     };
+
 }

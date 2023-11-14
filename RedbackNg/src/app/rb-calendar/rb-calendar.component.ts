@@ -333,6 +333,15 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     }
   }
 
+  public getBaseSearchFilter(): any {
+    let filter = {};
+    filter[this.activeSeries[0].dateAttribute] = {
+      $gt: "'" + this.startDate.toISOString() + "'",
+      $lt: "'" + this.endDate.toISOString() + "'"
+    }
+    return filter;
+  }
+
 }
 
 

@@ -1,5 +1,6 @@
 
   export class FilterBuilderConfig {
+    aggregateFilter: any;
     filterConfig: any;
     initialFilter: any;
     sortConfig: any;

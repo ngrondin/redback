@@ -109,6 +109,10 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
     return fetched;
   }
 
+  public getBaseSearchFilter(): any {
+    return null;
+  }
+
   public groupMemberEvent(name: string, event: string) {
     this.publishEvent('group_' + name + "_" + event);
   }

@@ -285,6 +285,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     return fetched;
   } 
 
+  public getBaseSearchFilter(): any {
+    return this.baseFilter;
+  }
+
   public create() {
     this.dataService.create(this.objectname, null, this.resolvedFilter).subscribe(newObject => this.addObjectAndSelect(newObject));
   }
