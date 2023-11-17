@@ -2,6 +2,7 @@ package io.redback.services.impl;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.auth0.jwt.JWT;
@@ -90,7 +91,7 @@ public class RedbackAccessManager extends AccessManager
 			Claim usernameClaim = jwt.getClaim("email");
 			String username = usernameClaim.asString();
 			if(username != null) {
-				UserProfile profile = getUserProfile(session, username);
+				UserProfile profile = getUserProfile(session, username, jwt);
 				if(profile == null) 
 					profile = createEmptyProfile(username);
 				profile.setExpiry(jwt.getExpiresAt().getTime());
@@ -109,7 +110,7 @@ public class RedbackAccessManager extends AccessManager
 		}
 	}
 	
-	protected synchronized UserProfile getUserProfile(Session session, String username) throws RedbackException
+	protected synchronized UserProfile getUserProfile(Session session, String username, DecodedJWT token) throws RedbackException
 	{
 		long now = System.currentTimeMillis();
 		CacheEntry<UserProfile> ce = cachedUserProfiles.get(username);
@@ -140,6 +141,24 @@ public class RedbackAccessManager extends AccessManager
 					roles.add("admin");
 					roles.add("system");
 					userConfig.put("roles", roles);
+				}
+				else if(!token.getClaim("roles").isNull() && !token.getClaim("domains").isNull() && !token.getClaim("attrs").isNull())
+				{
+					List<String> roles = token.getClaim("roles").asList(String.class);
+					List<String> domains = token.getClaim("domains").asList(String.class);
+					userConfig = new DataMap();
+					userConfig.put("username", username);
+					DataList domList = new DataList();
+					for(String dom: domains)
+						domList.add(dom);
+					userConfig.put("domains", domList);
+					DataList roleList = new DataList();
+					for(String role: roles)
+						roleList.add(role);
+					userConfig.put("roles", roleList);
+					Claim attrs = token.getClaim("attrs");
+					DataMap attrMap = new DataMap(attrs.asString());
+					userConfig.put("attributes", attrMap);
 				}
 				else if(type.equals("hardusers"))
 				{
