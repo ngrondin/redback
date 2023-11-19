@@ -11,6 +11,7 @@
   
   export class FilterConfig {
     public attributes: FilterAttributeConfig[];
+    public useBaseFilter: boolean;
   
     constructor(json: any) {
       this.attributes = [];
@@ -19,6 +20,7 @@
           this.attributes.push(new FilterAttributeConfig(ac));
         }
       }
+      this.useBaseFilter = json.usebasefilter
     }
     
     getAttributeConfig(name: string) : FilterAttributeConfig {

@@ -147,7 +147,7 @@ export class RbFilterBuilderComponent implements OnInit {
           fltr[key] = this.filter[key];
         }
       }
-      if(this.config.aggregateFilter != null) {
+      if(this.filterConfig.useBaseFilter == true && this.config.aggregateFilter != null) {
         fltr = this.filterService.mergeFilters(fltr, this.config.aggregateFilter);
       }
       fltr = this.filterService.resolveFilter(fltr, null, null, null);
