@@ -1,0 +1,35 @@
+<div
+    #scroller
+    class="rb-scroll-scroller"
+    (scroll)="onScroll($event)">
+    <div
+        #content
+        class="rb-scroll-content">
+        <ng-content></ng-content>
+        <div #container></div>    
+    </div>
+</div>
+<div
+    *ngIf="showVTrack"
+    class="rb-scroll-vtrack"
+    (mouseover)="overVTrack()"
+    (mouseout)="outVTrack()">
+    <div
+        [class]="'rb-scroll-vthumb' + (vThumbBig ? ' rb-scroll-vthumb-active' : '')"
+        [style.top.px]="vThumbPosition"
+        [style.height.px]="vThumbLength"
+        (mousedown)="startVThumbDrag($event)">
+    </div>
+</div>
+<div
+    *ngIf="showHTrack"
+    class="rb-scroll-htrack"
+    (mouseover)="overHTrack()"
+    (mouseout)="outHTrack()">
+    <div
+        [class]="'rb-scroll-hthumb' + (hThumbBig ? ' rb-scroll-hthumb-active' : '')"
+        [style.left.px]="hThumbPosition"
+        [style.width.px]="hThumbLength"
+        (mousedown)="startHThumbDrag($event)">
+    </div>
+</div>

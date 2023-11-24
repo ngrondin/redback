@@ -7,6 +7,7 @@ import java.util.Map;
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.data.DataException;
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.interfaces.ServiceRequestor;
@@ -205,10 +206,10 @@ public class ClientHandler extends ClientStreamHandler {
 
 
 	
-	public void receiveObjectData(DataMap data) throws RedbackException {
+	public void receiveObjectData(DataList list) throws RedbackException {
 		DataMap wrapper = new DataMap();
 		wrapper.put("type", "objectupdate");
-		wrapper.put("object", data);
+		wrapper.put("objects", list);
 		sendClientData(wrapper);
 	}
 	

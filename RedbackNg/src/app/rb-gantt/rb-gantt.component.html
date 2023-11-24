@@ -108,11 +108,15 @@
             </div>
         </div>
     </div>
-    <div
+    <rb-scroll
         class="rb-gantt-lanescontainer"
-        (scroll)="scroll($event)">
+        (rbscroll)="scroll($event)">
+    <!--<div
+        class="rb-gantt-lanescontainer hscroll vscroll"
+        (scroll)="scroll($event)">-->
         <div
-            class="rb-gantt-lanes">
+            class="rb-gantt-lanes"
+            [style.width.px]="widthPX">
             <div
                 *ngFor="let mark of hourMarks"
                 [style.left.px]="mark.px"
@@ -142,7 +146,8 @@
                 </div>
             </div>
         </div>
-    </div>
+    <!--</div>-->
+    </rb-scroll>
 </div>
 <div
     class="rb-gantt-loadoverlay"

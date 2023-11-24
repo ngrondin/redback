@@ -1,59 +1,56 @@
-<div
-    class="rb-list-container hscroll"
-    (scroll)="onScroll($event)">
-    <div>
+<rb-scroll
+    (rbscroll)="onScroll($event)">
+    <div
+        *ngFor="let item of enhancedList"
+        [rb-drag-object]="allowdrag ? item.object : null"                
+        [class]="'rb-list-repeater' + (selectedObject == item.object ? ' rb-list-repeater-selected' : '')">
         <div
-            *ngFor="let item of enhancedList"
-            [rb-drag-object]="allowdrag ? item.object : null"                
-            [class]="'rb-list-repeater' + (selectedObject == item.object ? ' rb-list-repeater-selected' : '')">
-            <div
-                [style.background]="item.color">
-                <rb-clickable
-                    (click)="itemClicked(item.object)">
-                    <div 
-                        class="rb-list-item-data">
+            [style.background]="item.color">
+            <rb-clickable
+                (click)="itemClicked(item.object)">
+                <div 
+                    class="rb-list-item-data">
+                    <div
+                        class="rb-list-item-metaline"
+                        *ngIf="hasMetaLine()">
+                        <span
+                            class="rb-list-item-meta1">
+                            {{item.meta1}}
+                        </span>
                         <div
-                            class="rb-list-item-metaline"
-                            *ngIf="hasMetaLine()">
-                            <span
-                                class="rb-list-item-meta1">
-                                {{item.meta1}}
-                            </span>
-                            <div
-                                class="rb-list-item-metaspacer">
-                            </div>
-                            <span
-                                *ngIf="item.meta2type == 'text' || item.meta2type == 'badge'"
-                                [ngClass]="'rb-list-item-meta2' + (item.meta2type == 'badge' ? ' rb-list-item-meta2-badge' : '')">
-                                {{item.meta2}}
-                            </span>
-                            <div
-                                *ngIf="item.meta2type == 'bool'"
-                                [ngClass]="'rb-list-item-meta2-checkbox' + (item.meta2 == true ? ' rb-list-item-meta2-checkbox-checked' : '')">
-                                <svg focusable="false" viewBox="0 0 24 24">
-                                    <path fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59">
-                                    </path>
-                                </svg>
-                            </div>
+                            class="rb-list-item-metaspacer">
                         </div>
                         <span
-                            class="rb-list-item-main"
-                            *ngIf="hasMainLine()">
-                            {{item.main}}
+                            *ngIf="item.meta2type == 'text' || item.meta2type == 'badge'"
+                            [ngClass]="'rb-list-item-meta2' + (item.meta2type == 'badge' ? ' rb-list-item-meta2-badge' : '')">
+                            {{item.meta2}}
                         </span>
-                        <span
-                            class="rb-list-item-sub"
-                            *ngIf="hasSubLine()">
-                            {{item.sub}}
-                        </span>
+                        <div
+                            *ngIf="item.meta2type == 'bool'"
+                            [ngClass]="'rb-list-item-meta2-checkbox' + (item.meta2 == true ? ' rb-list-item-meta2-checkbox-checked' : '')">
+                            <svg focusable="false" viewBox="0 0 24 24">
+                                <path fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59">
+                                </path>
+                            </svg>
+                        </div>
                     </div>
-                </rb-clickable> 
-            </div>
-            <div
-                class="rb-list-divider">
-                <div
-                    class="rb-list-divider-line">
+                    <span
+                        class="rb-list-item-main"
+                        *ngIf="hasMainLine()">
+                        {{item.main}}
+                    </span>
+                    <span
+                        class="rb-list-item-sub"
+                        *ngIf="hasSubLine()">
+                        {{item.sub}}
+                    </span>
                 </div>
+            </rb-clickable> 
+        </div>
+        <div
+            class="rb-list-divider">
+            <div
+                class="rb-list-divider-line">
             </div>
         </div>
     </div>
@@ -69,7 +66,7 @@
             diameter="20">
         </mat-spinner>
     </div>	
-</div>
+</rb-scroll>    
 <div
     *ngIf="showCount()"
     class="rb-list-floating rb-list-floating-count">

@@ -755,12 +755,14 @@ public class ObjectManager
 			for(Object o : session.getTxStore().getAll())
 				list.add((RedbackObject)o);
 
+			List<RedbackObject> updatedList = new ArrayList<RedbackObject>();
 			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
 			for(RedbackObject rbObject: list) {
 				if(rbObject.isDeleted) {
 					dbtxs.add(rbObject.getDBDeleteTransaction());
 					updates++;
 				} else if(rbObject.isUpdated()) {
+					updatedList.add(rbObject);
 					rbObject.onSave();
 					dbtxs.add(rbObject.getDBUpdateTransaction());
 					updates++;
@@ -783,9 +785,10 @@ public class ObjectManager
 					rbObject.afterDelete();
 				} else if(rbObject.isUpdated()) {
 					rbObject.afterSave();
-					signal(rbObject);
 				}
 			}	
+			
+			signal(updatedList);
 			session.setStat("objects", list.size());
 			session.setStat("updates", updates);
 		}
@@ -1104,14 +1107,17 @@ public class ObjectManager
 	}
 
 	
-	protected void signal(RedbackObject object)
+	protected void signal(List<RedbackObject> list)
 	{
-		if(objectUpdateChannel != null) 
+		if(objectUpdateChannel != null && list.size() > 0) 
 		{
 			try 
 			{
-				Payload payload = new Payload(object.getDataMap(true, false));
-				firebus.publish(objectUpdateChannel, payload);
+				DataList outList = new DataList();
+				for(RedbackObject object: list)
+					outList.add(object.getDataMap(true, false));
+				Payload payload = new Payload(new DataMap("list", outList));
+				firebus.publish(objectUpdateChannel, payload);					
 			}
 			catch(Exception e) 
 			{

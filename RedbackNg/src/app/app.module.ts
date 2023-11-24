@@ -140,6 +140,7 @@ import { RbUrlInputComponent } from './inputs/rb-url-input/rb-url-input.componen
 import { RbPreferencesComponent } from './rb-preferences/rb-preferences.component';
 import { RbUsermenuComponent } from './rb-usermenu/rb-usermenu.component';
 import { RbNlboxComponent } from './rb-nlbox/rb-nlbox.component';
+import { RbScrollComponent } from './rb-scroll/rb-scroll.component';
 
 
 
@@ -293,7 +294,8 @@ window.redback = window.redback || {};
         CachedSrcDirective,
         RbPreferencesComponent,
         RbUsermenuComponent,
-        RbNlboxComponent
+        RbNlboxComponent,
+        RbScrollComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

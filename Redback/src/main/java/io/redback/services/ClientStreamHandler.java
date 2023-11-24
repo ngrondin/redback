@@ -251,7 +251,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	public abstract void finishUpload(String uploaduid) throws RedbackException;
 
-	public abstract void receiveObjectData(DataMap data) throws RedbackException;
+	public abstract void receiveObjectData(DataList list) throws RedbackException;
 	
 	public abstract void receiveNotification(DataMap data) throws RedbackException;
 	

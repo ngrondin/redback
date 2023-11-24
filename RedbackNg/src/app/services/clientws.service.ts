@@ -146,7 +146,7 @@ export class ClientWSService {
       }
 
       if(msg.type == 'objectupdate') {
-        this.objectUpdateObservers.forEach((observer) => observer.next(msg.object));  
+        this.objectUpdateObservers.forEach((observer) => observer.next(msg.object || msg.objects));           
       } else if(msg.type == 'notification') {
         this.notificationObservers.forEach((observer) => observer.next(msg.notification))
       } else if(msg.type == 'serviceresponse' || msg.type == 'serviceerror') {

@@ -3,18 +3,8 @@
     flex-direction: row;
 }
 
-.rb-dfe-scroll {
-    display: flex;
-    flex-direction: column;
-    flex: 0 0 auto;
+rb-scroll ::ng-deep .rb-scroll-content {
     width: 40vw;
-    overflow: auto;
-}
-
-.rb-dfe-content {
-    display: flex;
-    flex-direction: column;
-    padding: var(--v10px);
 }
 
 .rb-dfe-category-repeater {
@@ -119,17 +109,24 @@
 .rb-dfe-dropzone {
     display: flex;
     flex: 0 0 auto;
-    height: var(--v5px);
+    height: 0.29vw;
+    margin: 0px 0px;
+    z-index: 100;
 }
 
 .rb-dfe-dropzone-active {
-    height: var(--v8px);
-    background-color: var(--primary-light-color);
+    background-color: #58a5ef88;
+    margin: -0.58vw 0px;
+    height: 1.46vw;
+    z-index: 100;
 }
 
+
 .rb-dfe-dropzone-over {
-    height: var(--v28px);
-    background-color: var(--primary-dark-color);
+    background-color: #004c8b88;
+    margin: -0.58vw 0px;
+    height: 1.46vw;
+    z-index: 100;
 }
 
 .rb-dfe-toolbox {

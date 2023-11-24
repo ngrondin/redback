@@ -1,0 +1,75 @@
+:host{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    overflow: hidden;
+    position: relative;
+}
+
+.rb-scroll-scroller {
+    display: block;
+    flex: 1 1 auto;
+    overflow: auto;
+    -ms-overflow-style: none;  
+    scrollbar-width: none;  
+}
+
+.rb-scroll-scroller::-webkit-scrollbar {
+    display: none;
+  }
+
+.rb-scroll-content {
+    display: inline-block;
+    position: relative;
+    /*min-width: 100%;
+    min-height: 100%;*/
+}
+
+.rb-scroll-vtrack {
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    height: 100%;
+    width: 25px;
+    background-color: transparent;
+}
+
+.rb-scroll-vthumb {
+    display: block;
+    position: absolute;
+    right: 0px;
+    width: 4px;
+    background-color: #004c8b44;
+    border-radius: 5px;
+}
+
+.rb-scroll-vthumb-active {
+    width: 15px;
+    border-radius: 8px;
+}
+
+
+.rb-scroll-htrack {
+    display: block;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    height: 25px;
+    background-color: transparent;
+}
+
+.rb-scroll-hthumb {
+    display: block;
+    position: absolute;
+    bottom: 0px;
+    height: 4px;
+    background-color: #004c8b44;
+    border-radius: 5px;
+}
+
+.rb-scroll-hthumb-active {
+    height: 15px;
+    border-radius: 8px;
+}

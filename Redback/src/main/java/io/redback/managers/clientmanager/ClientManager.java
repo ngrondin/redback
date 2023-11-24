@@ -135,9 +135,19 @@ public class ClientManager extends Thread {
 	}
 	
 	public void onObjectUpdate(DataMap data) throws RedbackException {
-		List<ClientHandler> subscribers = subsManager.getSubscribersFor(data);
-		for(ClientHandler ch : subscribers) {
-			ch.receiveObjectData(data);
+		Map<ClientHandler, DataList> map = new HashMap<ClientHandler, DataList>();
+		DataList list = data.getList("list");
+		for(int i = 0; i < list.size(); i++) {
+			DataMap object = list.getObject(i);
+			List<ClientHandler> subscribers = subsManager.getSubscribersFor(object);
+			for(ClientHandler ch: subscribers) {
+				if(!map.containsKey(ch))
+					map.put(ch, new DataList());
+				map.get(ch).add(object);
+			}
+		}
+		for(ClientHandler ch : map.keySet()) {
+			ch.receiveObjectData(map.get(ch));
 		}		
 	}
 	

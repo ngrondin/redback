@@ -28,11 +28,11 @@ export class DataService {
     this.saveImmediatly = true;
     this.clientWSService.getObjectUpdateObservable().subscribe(
       json => {
-        //console.log("Received pushed update");
-        let rbObject: RbObject = this.receive(json);
+        let list = Array.isArray(json) ? json : [json];
+        const rbObjectArray = Object.values(list).map(json => this.receive(json));
         this.finalizeReceipt();
         this.objectCreateObservers.forEach((observer) => {
-          observer.next(rbObject);
+          rbObjectArray.forEach(rbObject => observer.next(rbObject)) ;
         });              
       }
     );
