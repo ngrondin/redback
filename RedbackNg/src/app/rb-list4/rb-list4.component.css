@@ -7,17 +7,20 @@
     width: 17.5vw;
 }
 
-:host > .rb-list-container > mat-action-list > .rb-list-repeater > button {
+/*:host > .rb-list-container > mat-action-list > .rb-list-repeater > button {
 	height: auto!important;
+}*/
+
+rb-scroll ::ng-deep .rb-scroll-content {
+    width: 17.5vw;  
 }
 
-.rb-list-container {
+/*.rb-list-container {
     display: flex;
-	/*overflow: scroll;*/
 	flex-direction: column;
     flex: 1 1 auto;
     width: 17.5vw;  
-}
+}*/
 
 .rb-list-repeater {
     display:flex;

@@ -1,79 +1,75 @@
-<div
-    class="rb-dfe-scroll">
+<rb-scroll>
     <div
-        class="rb-dfe-content">
+        class="rb-dfe-category-repeater"
+        *ngFor="let cat of data">
         <div
-            class="rb-dfe-category-repeater"
-            *ngFor="let cat of data">
+            class="rb-dfe-category">
             <div
-                class="rb-dfe-category">
+                class="rb-dfe-cat-header"
+                *ngIf="cat.object != null"
+                [rb-drag-object]="cat">
                 <div
-                    class="rb-dfe-cat-header"
-                    *ngIf="cat.object != null"
-                    [rb-drag-object]="cat">
-                    <div
-                        class="rb-dfe-cat-header-label">
-                        <span>{{cat.label}}</span>
-                    </div>
-                    <div
-                        class="rb-dfe-cat-header-edit"
-                        (click)="edit(cat)">
-                        <mat-icon>more_vert</mat-icon>
-                    </div>  
-                    <div
-                        class="rb-dfe-cat-header-delete"
-                        (click)="delete(cat)">
-                        <mat-icon>close</mat-icon>
-                    </div>                     
+                    class="rb-dfe-cat-header-label">
+                    <span>{{cat.label}}</span>
                 </div>
                 <div
-                    class="rb-dfe-cat-content">
+                    class="rb-dfe-cat-header-edit"
+                    (click)="edit(cat)">
+                    <mat-icon>more_vert</mat-icon>
+                </div>  
+                <div
+                    class="rb-dfe-cat-header-delete"
+                    (click)="delete(cat)">
+                    <mat-icon>close</mat-icon>
+                </div>                     
+            </div>
+            <div
+                class="rb-dfe-cat-content">
+                <div
+                    [class]="'rb-dfe-dropzone ' + dropzoneClass({type:'item', cat:cat, item:null}, 'rb-dfe-dropzone-active', 'rb-dfe-dropzone-over')"
+                    (mouseover)="over({type:'item', cat:cat, item:null})"
+                    (mouseout)="out()"
+                    (rb-drag-dropzone)="dropped($event)">
+                </div>
+                <div
+                    class="rb-dfe-item-repeater"
+                    *ngFor="let item of cat.items">
                     <div
-                        [class]="'rb-dfe-dropzone ' + dropzoneClass({type:'item', cat:cat, item:null}, 'rb-dfe-dropzone-active', 'rb-dfe-dropzone-over')"
-                        (mouseover)="over({type:'item', cat:cat, item:null})"
+                        class="rb-dfe-item"
+                        [rb-drag-object]="item">
+                        <mat-icon>{{item.icon}}</mat-icon>
+                        <div
+                            class="rb-dfe-item-label">
+                            <span>{{item.label}}</span>
+                        </div>        
+                        <div
+                            class="rb-dfe-item-edit"
+                            (click)="edit(item)">
+                            <mat-icon>more_vert</mat-icon>
+                        </div>  
+                        <div
+                            class="rb-dfe-item-delete"
+                            (click)="delete(item)">
+                            <mat-icon>close</mat-icon>
+                        </div>                              
+                    </div>
+                    <div
+                        [class]="'rb-dfe-dropzone ' + dropzoneClass({type:'item', cat:cat, item:item}, 'rb-dfe-dropzone-active', 'rb-dfe-dropzone-over')"
+                        (mouseover)="over({type:'item', cat:cat, item:item})"
                         (mouseout)="out()"
                         (rb-drag-dropzone)="dropped($event)">
                     </div>
-                    <div
-                        class="rb-dfe-item-repeater"
-                        *ngFor="let item of cat.items">
-                        <div
-                            class="rb-dfe-item"
-                            [rb-drag-object]="item">
-                            <mat-icon>{{item.icon}}</mat-icon>
-                            <div
-                                class="rb-dfe-item-label">
-                                <span>{{item.label}}</span>
-                            </div>        
-                            <div
-                                class="rb-dfe-item-edit"
-                                (click)="edit(item)">
-                                <mat-icon>more_vert</mat-icon>
-                            </div>  
-                            <div
-                                class="rb-dfe-item-delete"
-                                (click)="delete(item)">
-                                <mat-icon>close</mat-icon>
-                            </div>                              
-                        </div>
-                        <div
-                            [class]="'rb-dfe-dropzone ' + dropzoneClass({type:'item', cat:cat, item:item}, 'rb-dfe-dropzone-active', 'rb-dfe-dropzone-over')"
-                            (mouseover)="over({type:'item', cat:cat, item:item})"
-                            (mouseout)="out()"
-                            (rb-drag-dropzone)="dropped($event)">
-                        </div>
-                    </div>                
-                </div>     
-            </div> 
-            <div
-                [class]="'rb-dfe-dropzone ' + dropzoneClass({type:'cat', cat:cat}, 'rb-dfe-dropzone-active', 'rb-dfe-dropzone-over')"
-                (mouseover)="over({type:'cat', cat:cat})"
-                (mouseout)="out()"
-                (rb-drag-dropzone)="dropped($event)">
-            </div>                      
-        </div>
+                </div>                
+            </div>     
+        </div> 
+        <div
+            [class]="'rb-dfe-dropzone ' + dropzoneClass({type:'cat', cat:cat}, 'rb-dfe-dropzone-active', 'rb-dfe-dropzone-over')"
+            (mouseover)="over({type:'cat', cat:cat})"
+            (mouseout)="out()"
+            (rb-drag-dropzone)="dropped($event)">
+        </div>                      
     </div>
-</div>
+</rb-scroll>
 <div
     class="rb-dfe-toolbox">
     <div
