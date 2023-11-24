@@ -40,6 +40,7 @@
     padding-bottom: var(--v10px);
     max-width: 400px;
     flex: 0 1 auto;
+    white-space: pre-wrap;
 }
 
 .rb-df-headspace {

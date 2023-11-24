@@ -100,7 +100,7 @@
                 [editable]="isEditable"
                 (change)="calcSortedVisibleList()">
             </rb-datetime-input>
-        </div>  
+        </div>         
         <div
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'files' || getTypeOf(object) == 'photos' || getTypeOf(object) == 'videos'">
@@ -182,6 +182,24 @@
                 [editable]="isEditable">
             </rb-number-input>
         </div>
+        <div
+            class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'infoonly'">
+            <div
+                class="rb-df-inputwrapper">
+                <mat-icon
+                    class="rb-df-input-icon">
+                    info
+                </mat-icon>
+                <div
+                    class="rb-df-lineinput-vert">
+                    <div
+                        class="rb-df-linelabel">
+                        {{object.get(labelattribute)}}
+                    </div>
+                </div>                
+            </div>
+        </div>          
         <div
             class="rb-df-lineinput"
             *ngIf="getTypeOf(object) == 'unknown'">

@@ -22,7 +22,7 @@ export class RbDynamicformeditorComponent extends RbDataCalcComponent<DynamicFor
 
   categoryConfig: DynamicFormEditorCategorySeriesConfig;
   types: any[] = [
-    {name: "Category",    value: "category",  icon: "crop_16_9",     is: "cat"},
+    {name: "Category",    value: "category",  icon: "crop_16_9",      is: "cat"},
     {name: "Short Text",  value: "string",    icon: "short_text",     is: "item"},
     {name: "Text Area",   value: "textarea",  icon: "edit_note",      is: "item"},
     {name: "Address",     value: "address",   icon: "home",           is: "item"},
@@ -35,7 +35,8 @@ export class RbDynamicformeditorComponent extends RbDataCalcComponent<DynamicFor
     {name: "Photo",       value: "photos",    icon: "photo_camera",   is: "item"},
     {name: "Video",       value: "videos",    icon: "videocam",       is: "item"},
     {name: "Files",       value: "files",     icon: "attachment",     is: "item"},
-    {name: "Signature",   value: "signature", icon: "draw",           is: "item"}
+    {name: "Signature",   value: "signature", icon: "draw",           is: "item"},
+    {name: "Info Only",   value: "infoonly",  icon: "info",           is: "item"}    
   ];
   data: DynamicFormEditorCategory[];
   overDZ: any = null;
