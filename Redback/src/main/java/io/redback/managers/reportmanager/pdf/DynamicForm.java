@@ -67,12 +67,13 @@ public class DynamicForm extends DataUnit {
 		Collections.sort(rors, new Comparator<RedbackObjectRemote>() {
 			public int compare(RedbackObjectRemote o1, RedbackObjectRemote o2) {
 				try {
-					if(catOrderAttribute != null && orderAttribute != null)
+					return o1.getString(orderAttribute).compareTo(o2.getString(orderAttribute));
+					/*if(catOrderAttribute != null && orderAttribute != null)
 						return (o1.getNumber(catOrderAttribute).intValue() * rors.size() + o1.getNumber(orderAttribute).intValue()) - (o2.getNumber(catOrderAttribute).intValue() * rors.size() + o2.getNumber(orderAttribute).intValue()); 
 					else if(orderAttribute != null)
 						return o1.getNumber(orderAttribute).intValue() - o2.getNumber(orderAttribute).intValue();
 					else
-						return 0;
+						return 0;*/
 				} catch(RedbackException e) {
 					return 0;
 				}
@@ -91,6 +92,7 @@ public class DynamicForm extends DataUnit {
 			float labelWidth = font.getStringWidth(label) / 1000f * fontSize;
 			if(labelWidth > maxLabelWidth) maxLabelWidth = labelWidth;
 		}
+		if(maxLabelWidth < 150) maxLabelWidth = 200;
 		float maxAnswerWidth = width > -1 ? width - maxLabelWidth - 20 - (2 * marginWidth) : -1;
 		
 		for(RedbackObjectRemote ror: rors) {
@@ -100,7 +102,7 @@ public class DynamicForm extends DataUnit {
 			orderMap.put(order, ror);
 			if(cat == null) cat = "";
 			if(catOrder == null) catOrder = "";
-			if(!catOrder.equals(lastCatOrder)) {
+			if(!catOrder.equals(lastCatOrder) && !cat.equals("")) {
 				Box catRb = Box.VContainer(false);
 				catRb.color = Color.decode("#0277bc");
 				if(width > -1)
@@ -233,9 +235,18 @@ public class DynamicForm extends DataUnit {
 				if(detail != null) {
 					Box row = Box.HContainer(false);
 					row.addChild(Box.Empty(marginWidth + 1, 5));
-					Box detailRb = Box.Text(detail, font, fontSize - 4);
-					detailRb.color = Color.lightGray;
-					row.addChild(detailRb);
+					Box col = Box.VContainer(false);
+					String[] lines = detail.split("\\n");
+					for(int i = 0; i < lines.length; i++) {
+						String line = lines[i];
+						List<String> sublines = cutToLines(fontSize - 4, line, maxLabelWidth > -1 ? maxLabelWidth : 200);
+						for(String subline : sublines) {
+							Box detailLine = Box.Text(subline, font, fontSize - 4);
+							detailLine.color = Color.lightGray;
+							col.addChild(detailLine);
+						}		
+					}
+					row.addChild(col);
 					formItemRb.addChild(row);
 				}
 				if(type.equals("files") || type.equals("photos")) {

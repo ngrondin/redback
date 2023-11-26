@@ -127,9 +127,9 @@ export class RbDynamicformeditorComponent extends RbDataCalcComponent<DynamicFor
       let dataset = this.datasetgroup.datasets[cfg.dataset];
       let list: RbObject[] = dataset.list.filter(o => o != this.dragService.data.object);
       list.sort((a, b) => a.get(cfg.orderattribute) - b.get(cfg.orderattribute));
-      let newOrder = 0, o = 0;
+      let newOrder = 1, o = 1;
       if(this.overDZ.cat.object == null) {
-        newOrder = 0;
+        newOrder = 1;
         o++;
       }
       for(var obj of list) {
