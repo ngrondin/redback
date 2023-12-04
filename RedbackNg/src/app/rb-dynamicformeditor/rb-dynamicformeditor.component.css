@@ -83,6 +83,7 @@ rb-scroll ::ng-deep .rb-scroll-content {
 
 .rb-dfe-item mat-icon {
     color: #aaa;
+    flex: 0 0 auto;
 }
 
 .rb-dfe-item-label {

@@ -74,6 +74,10 @@
 .rb-df-linelabel {
     font-size: 0.8rem;
     color: grey;
+    max-width: 500px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rb-df-linelabel-small {
