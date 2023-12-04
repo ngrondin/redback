@@ -10,7 +10,9 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import io.firebus.Firebus;
@@ -30,6 +32,7 @@ import io.redback.utils.CollectionConfig;
 import io.redback.utils.ImageUtils;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
+import io.redback.utils.RedbackObjectIdentifier;
 
 public class RedbackFileServer extends FileServer 
 {
@@ -55,10 +58,10 @@ public class RedbackFileServer extends FileServer
 		}
 		defaultFileService = config.getString("defaultadapter");
 		defaultFileStream = config.getString("defaultstreamadapter");
-		fileCollection = new CollectionConfig(config.getObject("filecollection"));
-		if(config.containsKey("linkcollection"))
-			linkCollection = new CollectionConfig(config.getObject("linkcollection"));
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
+		fileCollection = new CollectionConfig(dataClient, config.getObject("filecollection"), "rbfs_file");
+		if(config.containsKey("linkcollection"))
+			linkCollection = new CollectionConfig(dataClient, config.getObject("linkcollection"), "rbfs_link");
 	}
 
 	public RedbackFileMetaData getMetadata(String fileUid) throws RedbackException
@@ -146,7 +149,8 @@ public class RedbackFileServer extends FileServer
 			throw new RedbackException("Error getting file stream", e);
 		}
 	}
-	
+	/*
+	@Deprecated
 	public List<RedbackFileMetaData> listFilesFor(String object, String uid) throws RedbackException
 	{
 		DataMap fileFilter = null;
@@ -176,6 +180,63 @@ public class RedbackFileServer extends FileServer
 			list.add(filemd);
 		}
 		return list;
+	}*/
+	
+	public List<RedbackFileMetaData> listFilesFor(Session session, String object, String uid, int page, int pageSize) throws RedbackException {
+		Map<RedbackObjectIdentifier, List<RedbackFileMetaData>> map = listAttachments(session, new DataMap("object", object, "objectuid", uid), page, pageSize);
+		List<RedbackFileMetaData> list = map.get(new RedbackObjectIdentifier(object, uid));
+		return list != null ? list : new ArrayList<RedbackFileMetaData>();
+	}
+	
+	public Map<RedbackObjectIdentifier, List<RedbackFileMetaData>> listFilesForMulti(Session session, List<RedbackObjectIdentifier> objects, int page, int pageSize) throws RedbackException {
+		if(objects.size() > 0) {
+			DataList orList = new DataList();
+			for(RedbackObjectIdentifier rbObjId: objects) 
+				orList.add(new DataMap("object", rbObjId.objectname, "objectuid", rbObjId.uid));
+			DataMap filter = new DataMap("$or", orList);
+			Map<RedbackObjectIdentifier, List<RedbackFileMetaData>> map = listAttachments(session, filter, page, pageSize);
+			return map;			
+		} else {
+			return new HashMap<RedbackObjectIdentifier, List<RedbackFileMetaData>>();
+		}
+	}
+
+	private Map<RedbackObjectIdentifier, List<RedbackFileMetaData>> listAttachments(Session session, DataMap filter, int page, int pageSize) throws RedbackException
+	{
+		Map<RedbackObjectIdentifier, List<RedbackFileMetaData>> map = new HashMap<RedbackObjectIdentifier, List<RedbackFileMetaData>>();
+		if(linkCollection != null) {
+			DataMap linkData = linkCollection.getData(filter, page, pageSize);
+			DataList fileIdList = new DataList();
+			for(int i = 0; i < linkData.getList("result").size(); i++) 
+				if(!fileIdList.contains(linkData.getList("result").getObject(i).getString("fileuid")))
+					fileIdList.add(linkData.getList("result").getObject(i).getString("fileuid"));
+
+			if(fileIdList.size() > 0) {
+				DataMap  filesData = fileCollection.getData(new DataMap("_id", new DataMap("$in", fileIdList)), 0, fileIdList.size());
+				Map<String, RedbackFileMetaData> tempMap = new HashMap<String, RedbackFileMetaData>();
+				for(int i = 0; i < filesData.getList("result").size(); i++)  {
+					RedbackFileMetaData filemd = new RedbackFileMetaData(filesData.getList("result").getObject(i));
+					tempMap.put(filemd.fileuid, filemd);
+				}
+				for(int i = 0; i < linkData.getList("result").size(); i++) {
+					DataMap linkItem = linkData.getList("result").getObject(i);
+					RedbackFileMetaData filemd = tempMap.get(linkItem.getString("fileuid"));
+					RedbackObjectIdentifier objectIdentifier = new RedbackObjectIdentifier(linkItem.getString("object"), linkItem.getString("objectuid"));
+					if(!map.containsKey(objectIdentifier)) map.put(objectIdentifier, new ArrayList<RedbackFileMetaData>());
+					map.get(objectIdentifier).add(filemd);
+				}				
+			}
+		} else {
+			DataMap  filesData = fileCollection.getData(filter);
+			for(int i = 0; i < filesData.getList("result").size(); i++) {
+				DataMap fileInfo = filesData.getList("result").getObject(i);
+				RedbackFileMetaData filemd = new RedbackFileMetaData(fileInfo);
+				RedbackObjectIdentifier objectIdentifier = new RedbackObjectIdentifier(fileInfo.getString("object"), fileInfo.getString("objectuid"));
+				if(!map.containsKey(objectIdentifier)) map.put(objectIdentifier, new ArrayList<RedbackFileMetaData>());
+				map.get(objectIdentifier).add(filemd);
+			}
+		}
+		return map;		
 	}
 	
 
@@ -364,7 +425,7 @@ public class RedbackFileServer extends FileServer
 
 	public void acceptListFilesForStream(Session session, StreamEndpoint streamEndpoint, String objectname, String objectuid) throws RedbackException {
 		try {
-			List<RedbackFileMetaData> fileData = listFilesFor(objectname, objectuid);
+			List<RedbackFileMetaData> fileData = listFilesFor(session, objectname, objectuid, 0, 50);
 			DataMap resp = new DataMap();
 			DataList list = new DataList();
 			for(RedbackFileMetaData filemd : fileData) 

@@ -24,7 +24,9 @@ public class RedbackFileMetaData {
 	}
 	
 	public RedbackFileMetaData(DataMap config) {
-		fileuid = config.getString("fileuid");
+		fileuid = config.getString("_id");
+		if(fileuid == null)
+			fileuid = config.getString("fileuid");
 		fileName = config.getString("filename");
 		mime = config.getString("mime");
 		thumbnail = config.getString("thumbnail");
@@ -44,5 +46,9 @@ public class RedbackFileMetaData {
 		if(addThumbnail) 
 			fileInfo.put("thumbnail", thumbnail);
 		return fileInfo;
+	}
+	
+	public String toString() {
+		return "file:" + fileuid;
 	}
 }

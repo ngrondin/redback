@@ -1,7 +1,9 @@
 package io.redback.services;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -16,6 +18,7 @@ import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedDualProvider;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
+import io.redback.utils.RedbackObjectIdentifier;
 
 public abstract class FileServer extends AuthenticatedDualProvider
 {
@@ -114,37 +117,40 @@ public abstract class FileServer extends AuthenticatedDualProvider
 					{
 						String object = request.getString("object");
 						String uid = request.getString("uid");
-						List<RedbackFileMetaData> fileData = listFilesFor(object, uid);
+						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
+						int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
+						List<RedbackFileMetaData> list = listFilesFor(session, object, uid, page, pageSize);
 						DataMap resp = new DataMap();
 						DataList respList = new DataList();
-						for(RedbackFileMetaData filemd : fileData) 
-							respList.add(filemd.getDataMap(addThumbnail));
+						for(RedbackFileMetaData fileMD : list) 
+							respList.add(fileMD.getDataMap(addThumbnail));
 						resp.put("list", respList);
 						response = new Payload(resp);
 						response.metadata.put("mime", "application/json");
 					}
 					else if(action.equals("listmulti"))
 					{
-						DataMap resp = new DataMap();
-						DataList itemList = new DataList();
+						List<RedbackObjectIdentifier> objectIdentifiers = new ArrayList<RedbackObjectIdentifier>();
+						int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
+						int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
 						DataList list = request.getList("objects");
 						if(list != null) {
 							for(int i = 0; i < list.size(); i++) {
 								DataMap item = list.getObject(i);
-								String object = item.getString("object");
-								String uid = item.getString("uid");
-								List<RedbackFileMetaData> fileData = listFilesFor(object, uid);
-								DataMap itemResp = new DataMap();
-								itemResp.put("object", object);
-								itemResp.put("uid", uid);
-								DataList fileList = new DataList();
-								for(RedbackFileMetaData filemd : fileData) 
-									fileList.add(filemd.getDataMap(addThumbnail));
-								itemResp.put("list", fileList);
-								itemList.add(itemResp);
+								objectIdentifiers.add(new RedbackObjectIdentifier(item.getString("object"), item.getString("uid")));
 							}
 						}
-						resp.put("list", itemList);
+						Map<RedbackObjectIdentifier, List<RedbackFileMetaData>> filesMap = listFilesForMulti(session, objectIdentifiers, page, pageSize);
+						DataList respList = new DataList();
+						for(RedbackObjectIdentifier objectIdentifier : filesMap.keySet()) {
+							DataList fileList = new DataList();
+							for(RedbackFileMetaData fileMD: filesMap.get(objectIdentifier)) {
+								fileList.add(fileMD.getDataMap(addThumbnail));
+							}
+							DataMap objectMap = new DataMap("object", objectIdentifier.objectname, "uid", objectIdentifier.uid, "list", fileList);
+							respList.add(objectMap);
+						}
+						DataMap resp = new DataMap("list", respList);
 						response = new Payload(resp);
 						response.metadata.put("mime", "application/json");
 					}					
@@ -210,7 +216,9 @@ public abstract class FileServer extends AuthenticatedDualProvider
 
 	public abstract RedbackFileMetaData getMetadata(String fileUid) throws RedbackException;
 
-	public abstract List<RedbackFileMetaData> listFilesFor(String object, String uid) throws RedbackException;
+	public abstract List<RedbackFileMetaData> listFilesFor(Session session, String object, String uid, int page, int pageSize) throws RedbackException;
+	
+	public abstract Map<RedbackObjectIdentifier, List<RedbackFileMetaData>> listFilesForMulti(Session session, List<RedbackObjectIdentifier> objects, int page, int pageSize) throws RedbackException;
 
 	public abstract void linkFileTo(Session session, String fileUid, String object, String uid) throws RedbackException;
 	

@@ -89,10 +89,10 @@ public class DynamicForm extends DataUnit {
 		float maxLabelWidth = 0;
 		for(RedbackObjectRemote ror: rors) {
 			String label = ror.getString(labelAttribute);
-			float labelWidth = font.getStringWidth(label) / 1000f * fontSize;
+			float labelWidth = (label != null ? font.getStringWidth(label) / 1000f * fontSize : 200);
 			if(labelWidth > maxLabelWidth) maxLabelWidth = labelWidth;
 		}
-		if(maxLabelWidth < 150) maxLabelWidth = 200;
+		if(maxLabelWidth < 200) maxLabelWidth = 200;
 		float maxAnswerWidth = width > -1 ? width - maxLabelWidth - 20 - (2 * marginWidth) : -1;
 		
 		for(RedbackObjectRemote ror: rors) {
