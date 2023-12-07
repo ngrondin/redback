@@ -50,18 +50,20 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
     this.data = [];
     let phaseList = this.lists[this.phasesConfig.dataset];
     for(var phaseObject of phaseList) {
-      let phase = new FunnelPhase(phaseObject.uid, phaseObject.get(this.phasesConfig.labelAttribute), this.phasesConfig);
+      let phase = new FunnelPhase(phaseObject.uid, phaseObject.get(this.phasesConfig.labelAttribute), phaseObject, this.phasesConfig);
       var groups = {};
       for(let cfg of this.seriesConfigs) {
         var entryList = this.lists[cfg.dataset].filter(rbo => rbo.get(cfg.phaseAttribute) == phaseObject.get(this.phasesConfig.keyAttribute));
         for(let entryObject of entryList) {
           var groupKey = entryObject.get(cfg.groupAttribute);
           var groupCfg = this.groupConfigs[groupKey];
-          if(groups[groupKey] == null) groups[groupKey] = new FunnelGroup(groupKey, groupCfg.label, groupCfg.open);
-          var color = cfg.colorMap[entryObject.get(cfg.colorAttribute)];
-          if(color == null) color = "#888";
-          let entry = new FunnelEntry(entryObject.uid, entryObject.get(cfg.labelAttribute), entryObject.get(cfg.subLabelAttribute), color, entryObject, cfg);
-          groups[groupKey].entries.push(entry);
+          if(groupCfg != null) {
+            if(groups[groupKey] == null) groups[groupKey] = new FunnelGroup(groupKey, groupCfg.label, groupCfg.open);
+            var color = cfg.colorMap[entryObject.get(cfg.colorAttribute)];
+            if(color == null) color = "#888";
+            let entry = new FunnelEntry(entryObject.uid, entryObject.get(cfg.labelAttribute), entryObject.get(cfg.subLabelAttribute), color, entryObject, cfg);
+            groups[groupKey].entries.push(entry);  
+          }
         }
       }
       for(var key of Object.keys(groups)) {
@@ -94,6 +96,15 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
 
   clickGroup(group: FunnelGroup) {
     group.open = !group.open;
+  }
+
+  dropped($event, phase) {
+    let object = $event.data.object;
+    let objectPhaseAttribute = $event.data.config.phaseAttribute;
+    let phaseKeyAttribute = phase.config.keyAttribute;
+    let phaseKey = phase.object.get(phaseKeyAttribute);
+    object.setValue(objectPhaseAttribute, phaseKey)
+    console.log($event);
   }
 }
 

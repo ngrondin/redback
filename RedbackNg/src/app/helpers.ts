@@ -331,13 +331,15 @@ export class HtmlParser {
 export class FileReferenceResolver {
     public static resolve(htmlStr: string, fileService: string) : string {
         let ret = htmlStr;
-        let pos = -1;
-        let marker = "src=\"fileuid:";
-        let endMarker = "\"";
-        while((pos = ret.indexOf(marker)) > -1) {
-            let posend = ret.indexOf(endMarker, pos + marker.length);
-            let fileuid = ret.substring(pos + marker.length, posend);
-            ret = ret.substring(0, pos) + "src=\"/" + fileService + "?fileuid=" + fileuid + "\"" + ret.substring(posend + 1);
+        if(ret != null) {
+            let pos = -1;
+            let marker = "src=\"fileuid:";
+            let endMarker = "\"";
+            while((pos = ret.indexOf(marker)) > -1) {
+                let posend = ret.indexOf(endMarker, pos + marker.length);
+                let fileuid = ret.substring(pos + marker.length, posend);
+                ret = ret.substring(0, pos) + "src=\"/" + fileService + "?fileuid=" + fileuid + "\"" + ret.substring(posend + 1);
+            }    
         }
         return ret;
     }

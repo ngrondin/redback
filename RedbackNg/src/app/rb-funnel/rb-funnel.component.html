@@ -1,61 +1,65 @@
-<div
-    class="rb-funnel-phase"
-    *ngFor="let phase of data">
+<rb-scroll>
     <div
-        class="rb-funnel-phase-title">
-        {{phase.label}}
-    </div>
-    <div
-        class="rb-funnel-scroll hscroll">
+        class="rb-funnel-phase"
+        *ngFor="let phase of data">
         <div
-            class="rb-funnel-group"
-            *ngFor="let group of phase.groups">
+            class="rb-funnel-phase-title">
+            {{phase.label}}
+        </div>
+        <div
+            class="rb-funnel-scroll hscroll"
+            (rb-drag-dropzone)="dropped($event, phase)">
             <div
-                class="rb-funnel-group-header">
-                <rb-clickable
-                    (click)="clickGroup(group)">
-                    <div
-                        class="rb-funnel-group-header-container">
+                class="rb-funnel-group"
+                *ngFor="let group of phase.groups">
+                <div
+                    class="rb-funnel-group-header">
+                    <rb-clickable
+                        (click)="clickGroup(group)">
                         <div
-                            class="rb-funnel-group-header-name">
-                            {{group.label}}            
+                            class="rb-funnel-group-header-container">
+                            <div
+                                class="rb-funnel-group-header-name">
+                                {{group.label}}            
+                            </div>
+                            <div
+                                class="rb-funnel-group-header-count">
+                                {{group.entries.length}}            
+                            </div>            
                         </div>
+                    </rb-clickable>         
+                </div>
+                <div
+                    *ngIf="group.open">
+                    <rb-list-item
+                        *ngFor="let entry of group.entries"
+                        (click)="click(entry)"
+                        [rb-drag-object]="entry">
                         <div
-                            class="rb-funnel-group-header-count">
-                            {{group.entries.length}}            
+                            class="rb-funnel-listitemcontent">
+                            <div
+                                class="rb-funnel-listheader">
+                                {{entry.label}}
+                            </div>
+                            <div
+                                class="rb-funnel-listsub">
+                                {{entry.sublabel}}
+                            </div>
+                        </div>        
+                        <div
+                            class="rb-funnel-divider">
+                            <div
+                                class="rb-funnel-divider-line">
+                            </div>
                         </div>            
-                    </div>
-                </rb-clickable>         
-            </div>
-            <div
-                *ngIf="group.open">
-                <rb-list-item
-                    *ngFor="let entry of group.entries"
-                    (click)="click(entry)">
-                    <div
-                        class="rb-funnel-listitemcontent">
-                        <div
-                            class="rb-funnel-listheader">
-                            {{entry.label}}
-                        </div>
-                        <div
-                            class="rb-funnel-listsub">
-                            {{entry.sublabel}}
-                        </div>
-                    </div>        
-                    <div
-                        class="rb-funnel-divider">
-                        <div
-                            class="rb-funnel-divider-line">
-                        </div>
-                    </div>            
-                </rb-list-item>
-            </div>
-        </div>        
+                    </rb-list-item>
+                </div>
+            </div>        
+        </div>
     </div>
-</div>
-<div
-    class="rb-funnel-emptymessage"
-    *ngIf="data.length == 0">
-    <p>{{emptymessage}}</p>
-</div>
+    <div
+        class="rb-funnel-emptymessage"
+        *ngIf="data.length == 0">
+        <p>{{emptymessage}}</p>
+    </div>
+</rb-scroll>

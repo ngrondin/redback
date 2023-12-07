@@ -60,12 +60,14 @@ export class FunnelPhaseConfig extends SeriesConfig {
 export class FunnelPhase {
     id: string;
     label: string;
+    object: RbObject;
     config: FunnelPhaseConfig;
     groups: FunnelGroup[] = [];
   
-    constructor(i: string, l: string, cfg: FunnelPhaseConfig) {
+    constructor(i: string, l: string, o: RbObject, cfg: FunnelPhaseConfig) {
       this.id = i;
       this.label = l;
+      this.object = o;
       this.config = cfg;
     }
 }

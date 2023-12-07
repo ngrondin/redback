@@ -20,6 +20,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   @Input('name') name: string; //To be deprecated
   @Input('fetchall') fetchAll: boolean = false;
   @Input('addrelated') addrelated: boolean = true;
+  @Input('addtoend') addtoend: boolean = false;
 
 
   public uid: string;
@@ -32,7 +33,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public userSort: any = null;
   public mergedFilter: any;
   public resolvedFilter: any;
-  //public firstLoad: boolean = true;
   public nextPage: number;
   public pageSize: number;
   public hasMorePages: boolean = true;
@@ -301,7 +301,11 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(this._list.indexOf(obj) > -1) {
       this._list.splice(this._list.indexOf(obj));
     }
-    this._list.unshift(obj);
+    if(this.addtoend == true) {
+      this._list.push(obj);
+    } else {
+      this._list.unshift(obj);
+    }
     obj.addSet(this);
     this.publishEvent("load");
     this.select(obj);
