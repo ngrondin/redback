@@ -5,6 +5,14 @@
     overflow: hidden;
 }
 
+rb-scroll ::ng-deep .rb-scroll-content {
+    display: flex;
+    flex-direction: row; 
+    height: 100%;
+    width: fit-content;
+    min-width: 100%;
+}
+
 .rb-funnel-phase {
     display: flex;
     flex-direction: column;
@@ -16,7 +24,7 @@
 }
 
 .rb-funnel-phase-title {
-    display: flex;
+    display: inline-block;
     flex: 0 0 auto;
     padding: var(--v10px) var(--v8px) var(--v10px) var(--v16px);
     overflow: hidden;
