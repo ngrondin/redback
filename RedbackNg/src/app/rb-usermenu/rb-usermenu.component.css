@@ -25,17 +25,7 @@
     white-space: nowrap;
 }
 
-.rb-usermenu-preferences {
-    display: flex;
-    flex: 1 1 auto;
-    align-items: center;
-    height: var(--v20px);
-    padding: var(--v10px);
-    color: var(--dark-writing-color);
-    white-space: nowrap;
-}
-
-.rb-usermenu-logout {
+.rb-usermenu-item {
     display: flex;
     flex: 1 1 auto;
     align-items: center;

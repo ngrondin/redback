@@ -331,7 +331,7 @@ public class ProcessInstance
 					processManager.traceCollection.getName(), 
 					processManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
 					processManager.traceCollection.convertObjectToSpecific(event), 
-					false));
+					null));
 		}
 		return traceTxs;
 	}

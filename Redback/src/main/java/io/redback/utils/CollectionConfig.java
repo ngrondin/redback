@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
@@ -107,7 +108,18 @@ public class CollectionConfig {
 	public DataMap getData(DataMap canonicalFilter, int page, int pageSize) throws RedbackException {
 		DataMap filter = convertObjectToSpecific(canonicalFilter);
 		DataMap resp = dataClient.getData(getName(), filter);
-		DataMap canonicalResp = convertObjectToCanonical(resp);
+		DataMap canonicalResp = null;
+		if(resp.containsKey("result")) {
+			DataList respList = resp.getList("result");
+			DataList canonicalList = new DataList();
+			for(int i = 0; i < respList.size(); i++) {
+				DataMap obj = respList.getObject(i);
+				canonicalList.add(convertObjectToCanonical(obj));
+			}
+			canonicalResp = new DataMap("result", canonicalList);
+		} else {
+			 canonicalResp = convertObjectToCanonical(resp);
+		}
 		return canonicalResp;
 	}
 	

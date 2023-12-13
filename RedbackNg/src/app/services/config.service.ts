@@ -8,6 +8,7 @@ export class ConfigService {
 
   public objectsConfig: any;
   public nlCommandModel: string;
+  public personalViews: any[];
 
   constructor() { }
 
@@ -17,6 +18,17 @@ export class ConfigService {
 
   setNLCommandModel(m: string) {
     this.nlCommandModel = m;
+  }
+
+  setPersonalViews(list: any[]) {
+    if(list != null) {
+      this.personalViews = list.map(i => ({
+        view: i.view,
+        label: i.label
+      }));  
+    } else {
+      this.personalViews = [];
+    }
   }
 
   getLabel(obj: RbObject) : string {

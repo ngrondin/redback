@@ -83,22 +83,28 @@ public class DataClient extends Client
 		streamData(object, filter, sort, 20, 0, stream);
 	}
 
-	public DataTransaction createPut(String object, DataMap key, DataMap data, boolean replace) {
+	public DataTransaction createPut(String object, DataMap key, DataMap data, String operation) {
 		DataMap req = new DataMap();
 		req.put("object", object);
 		req.put("key", key);
 		req.put("data", data);
-		if(replace) 
-			req.put("operation", "replace");
+		if(operation != null) 
+			if(operation.equals("replace") || operation.equals("update")) 
+				req.put("operation", operation);
 		return new DataTransaction(req);
 	}
 	
 	public DataMap putData(String object, DataMap key, DataMap data, boolean replace) throws RedbackException
 	{
-		DataTransaction tx = createPut(object, key, data, replace);
-		return requestDataMap(tx.req);
+		return putData(object, key, data, replace ? "replace" : null);
 	}
 
+	public DataMap putData(String object, DataMap key, DataMap data, String operation) throws RedbackException
+	{
+		DataTransaction tx = createPut(object, key, data, operation);
+		return requestDataMap(tx.req);
+	}
+	
 	public DataMap putData(String object, DataMap key, DataMap data) throws RedbackException
 	{
 		return putData(object, key, data, false);

@@ -561,7 +561,7 @@ public class RedbackObject extends RedbackElement
 					dbData.put(attributeDBKey, val);
 				}
 			}
-			return objectManager.getDataClient().createPut(config.getCollection(), key, dbData, false);
+			return objectManager.getDataClient().createPut(config.getCollection(), key, dbData, null);
 		} else {
 			return null;
 		}
@@ -580,7 +580,7 @@ public class RedbackObject extends RedbackElement
 					objectManager.traceCollection.getName(), 
 					objectManager.traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())),
 					objectManager.traceCollection.convertObjectToSpecific(event), 
-					false));
+					null));
 		}
 		return traceTxs;
 	}

@@ -527,7 +527,7 @@ public class ProcessManager
 			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
 			for(ProcessInstance pi: list) {
 				if(pi.isUpdated()) {
-					dbtxs.add(dataClient.createPut(piCollectionConfig.getName(), new DataMap(piCollectionConfig.getField("_id"), pi.getId()), pi.getJSON(), true));
+					dbtxs.add(dataClient.createPut(piCollectionConfig.getName(), new DataMap(piCollectionConfig.getField("_id"), pi.getId()), pi.getJSON(), "replace"));
 				}		
 				dbtxs.addAll(pi.getDBTraceTransactions());
 			}

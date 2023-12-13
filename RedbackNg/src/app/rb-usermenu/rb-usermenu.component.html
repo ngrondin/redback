@@ -10,14 +10,22 @@
 <rb-clickable
     (click)="click('prefs')">
     <div
-        class="rb-usermenu-preferences">
+        class="rb-usermenu-item">
         Preferences
+    </div>
+</rb-clickable>
+<rb-clickable
+    *ngFor="let view of views"
+    (click)="click(view.view)">
+    <div
+        class="rb-usermenu-item">
+        {{view.label}}
     </div>
 </rb-clickable>
 <rb-clickable
     (click)="click('logout')">
     <div
-        class="rb-usermenu-logout">
+        class="rb-usermenu-item">
         Logout
     </div>
 </rb-clickable>

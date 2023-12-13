@@ -131,8 +131,13 @@ export abstract class AppRootComponent implements OnInit {
       let popupComponentRef = this.popupService.openPopup(this.userMenuContainerRef, RbUsermenuComponent, {});
       popupComponentRef.instance.cancelled.subscribe(() => this.popupService.closePopup());
       popupComponentRef.instance.selected.subscribe(value => {
-        if(value == 'logout') this.logout();
-        if(value == 'prefs') this.toggleRightDrawer("prefs");
+        if(value == 'logout') {
+          this.logout();
+        } else if(value == 'prefs') {
+          this.toggleRightDrawer("prefs");
+        } else {
+          this.navigateTo({view: value});
+        }
       });
     }
   

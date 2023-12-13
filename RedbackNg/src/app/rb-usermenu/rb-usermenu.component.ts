@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+import { ConfigService } from 'app/services/config.service';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -8,9 +9,10 @@ import { UserprefService } from 'app/services/userpref.service';
   styleUrls: ['./rb-usermenu.component.css', '../popups/rb-popup/rb-popup.component.css']
 })
 export class RbUsermenuComponent extends RbPopupComponent {
-  
+
   constructor(
-    public userprefService: UserprefService
+    public userprefService: UserprefService,
+    public configService: ConfigService
   ) {
     super();
   }
@@ -21,6 +23,10 @@ export class RbUsermenuComponent extends RbPopupComponent {
 
   public get userdisplay() : string {
     return this.userprefService.userdisplay;
+  }
+
+  public get views() : any[] {
+    return this.configService.personalViews;
   }
 
   public click(type) {

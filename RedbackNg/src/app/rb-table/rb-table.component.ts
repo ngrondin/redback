@@ -11,6 +11,7 @@ class TableColumnConfig {
   childAttribute: string;
   type: string;
   format: string;
+  icon: string;
   size: number;
   width: number;
   showExpr: string;
@@ -23,6 +24,7 @@ class TableColumnConfig {
     this.childAttribute = json.childattribute;
     this.type = json.type;
     this.format = json.format;
+    this.icon = json.icon;
     this.size = json.size;
     this.width = (json.size != null ? (json.size * 15) + 15 : 250);
     this.showExpr = (json.show != null ? json.show : "true");

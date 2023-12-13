@@ -2,19 +2,16 @@ package io.redback.managers.cronmanager;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.exceptions.FunctionErrorException;
+import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.logging.Logger;
 import io.redback.client.AccessManagementClient;
 import io.redback.client.ConfigClient;
@@ -23,17 +20,13 @@ import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.security.SysUserManager;
 import io.redback.security.UserProfile;
-import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.CollectionConfig;
-import io.redback.utils.js.FirebusJSWrapper;
-import io.redback.utils.js.LoggerJSFunction;
 
 public class CronTaskManager extends Thread {
 
 	protected String uuid;
 	protected Firebus firebus;
 	protected DataMap config;
-	protected ScriptEngine jsEngine;
 	protected String configServiceName;
 	protected String dataServiceName;
 	protected String accessManagerServiceName;
@@ -54,7 +47,6 @@ public class CronTaskManager extends Thread {
 		uuid = UUID.randomUUID().toString();
 		firebus = fb;
 		config = c;
-		jsEngine = new ScriptEngineManager().getEngineByName("graal.js");
 		configServiceName = config.getString("configservice");
 		dataServiceName = config.getString("dataservice");
 		accessManagerServiceName = config.getString("accessmanagementservice");
@@ -62,41 +54,31 @@ public class CronTaskManager extends Thread {
 		configClient = new ConfigClient(firebus, configServiceName);
 		accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
 		sysUserManager = new SysUserManager(accessManagementClient, config);
-		collectionConfig = new CollectionConfig(config.getObject("collection"), "rbcr_task");
+		collectionConfig = new CollectionConfig(dataClient, config.getObject("collection"), "rbcr_task");
 		taskConfigs = new HashMap<String, CronTaskConfig>();
 		randomDelay = (new Random()).nextInt(5000);
 		setName("rbCronTaskManager");
 	}
-	
-	public ScriptEngine getScriptEngine()
-	{
-		return jsEngine;
-	}
+
 
 	public void run() {
 		try {
 			loadConfigs(sysUserManager.getSession());
 			while(!quit) {
 				try {
-					long current = System.currentTimeMillis() - randomDelay;
+					long current = System.currentTimeMillis();
 					long nextTime = current + 86400000;
 					refreshTaskStates();
-					Iterator<String> it = taskConfigs.keySet().iterator();
-					while(it.hasNext()) {
-						String name = it.next();
+					for(String name: taskConfigs.keySet()) {
 						CronTaskConfig ctc = taskConfigs.get(name);
-						if(ctc.getNextRun() < current && ctc.getLock() == null) {
+						if(ctc.getNextRun() < current + randomDelay) {
 							if(lockTask(ctc)) {
 								try {
 									runTask(ctc);
 								} catch(Exception e) {
 									Logger.severe("rb.cron.run", "Error while running cron task", e);
-								}
-								if(ctc.getPeriod() > 0) {
-									ctc.setNextRun(current + ctc.getPeriod());
-									unlockTask(ctc);
-								} else {
-									deleteTask(ctc);
+								} finally {
+									unlockTask(ctc, current + ctc.getPeriod() + randomDelay);									
 								}
 							}
 						}
@@ -106,7 +88,7 @@ public class CronTaskManager extends Thread {
 					long sleep = nextTime - System.currentTimeMillis();
 					if(sleep < 10000)
 						sleep = 10000;
-					sleep += randomDelay;
+					sleep -= randomDelay;
 					Thread.sleep(sleep);
 				} catch(Exception e) {
 					Logger.severe("rb.cron.run", "General error in CronTaskManager thread", e);
@@ -119,108 +101,72 @@ public class CronTaskManager extends Thread {
 	
 	
 	public void loadConfigs(Session session) throws RedbackException {
-		try {
-			taskConfigs.clear();
-			DataMap resp = configClient.listConfigs(session, "rbcr", "task");
-			DataList configList = resp.getList("result");
-			for(int i = 0; i < configList.size(); i++) {
-				CronTaskConfig ctc = new CronTaskConfig(this, configList.getObject(i));
+		taskConfigs.clear();
+		DataMap cfgresp = configClient.listConfigs(session, "rbcr", "task");
+		DataList configList = cfgresp.getList("result");
+		for(int i = 0; i < configList.size(); i++) {
+			CronTaskConfig ctc = new CronTaskConfig(this, configList.getObject(i));
+			if(ctc.getPeriod() > 0)
 				taskConfigs.put(ctc.getName(), ctc);
-			}
-		} catch(Exception e) {
-			throw new RedbackException("Error loading the cron configs", e);
 		}
 	}
 	
 	protected void refreshTaskStates() throws RedbackException {
-		try {
-			DataMap resp = dataClient.getData(collectionConfig.getName(), new DataMap("nextrun", new DataMap("$ne", null)), null);
-			DataList list = resp.getList("result");
-			for(int i = 0; i < list.size(); i++) {
-				DataMap taskState = collectionConfig.convertObjectToCanonical(list.getObject(i));
-				String name = taskState.getString("name");
-				CronTaskConfig ctc = taskConfigs.get(name);
-				if(ctc == null) {
-					ctc = new CronTaskConfig(this, taskState); 
-					taskConfigs.put(ctc.getName(), ctc);
-				} else {
-					long nextRun = taskState.getDate("nextrun").getTime();
-					String lock = taskState.getString("lock");
-					ctc.setNextRun(nextRun);
-					ctc.setLock(lock);
-				}				
-			}
-		} catch(Exception e) {
-			throw new RedbackException("Error when refreshing last run times", e);
+		DataMap resp = collectionConfig.getData(new DataMap("nextrun", new DataMap("$ne", null)));
+		DataList list = resp.getList("result");
+		for(int i = 0; i < list.size(); i++) {
+			DataMap taskState = list.getObject(i);
+			String name = taskState.getString("name");
+			CronTaskConfig ctc = taskConfigs.get(name);
+			if(ctc != null) {
+				long nextRun = taskState.getDate("nextrun").getTime();
+				ctc.setNextRun(nextRun);
+			}				
 		}
 	}
 	
 	protected boolean lockTask(CronTaskConfig ctc) throws RedbackException {
-		try {
-			DataMap key = new DataMap("name", ctc.getName());
-			DataMap resp = dataClient.getData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), null);
-			DataList list = resp.getList("result");
-			if(list.size() == 0) {
-				DataMap data = new DataMap();
-				data.put("name", ctc.getName());
-				data.put("nextrun", new Date(ctc.getNextRun()));
-				data.put("lock", uuid);
-				dataClient.putData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), collectionConfig.convertObjectToSpecific(data));
+		DataMap key = new DataMap("name", ctc.getName(), "lock", null);
+		DataMap data = new DataMap("lock", uuid);
+		dataClient.putData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), collectionConfig.convertObjectToSpecific(data), "update");
+		DataMap resp = collectionConfig.getData(new DataMap("name", ctc.getName()));
+		DataList result = resp.getList("result");
+		if(result.size() > 0) {
+			String lock = result.getObject(0).getString("lock");
+			if(lock != null && lock.equals(uuid))
 				return true;
-			} else {
-				DataMap dataItem = list.getObject(0);
-				String lock = dataItem.getString("lock");
-				if(lock == null) {
-					DataMap data = new DataMap();
-					data.put("lock", uuid);
-					dataClient.putData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), collectionConfig.convertObjectToSpecific(data));
-					ctc.setLock(uuid);
-					return true;
-				} else {
-					return false;
-				}
-			}
-		} catch(Exception e) {
-			throw new RedbackException("Error when trying to lock task", e);
+			else 
+				return false;
+		} else {
+			collectionConfig.putData(key, data);
+			return true;
 		}
 	}
 	
-	protected void runTask(CronTaskConfig ctc) throws RedbackException {
-		try {
-			Session session = sysUserManager.getSession();
-			if(ctc.getScript() != null) {
-				Bindings scriptContext = jsEngine.createBindings();
-				scriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
-				scriptContext.put("firebus", new FirebusJSWrapper(firebus, session));
-				scriptContext.put("log", new LoggerJSFunction());
-				ctc.getScript().eval(scriptContext);
-			} else if(ctc.getFirebusCall() != null) {
-				DataMap call = ctc.getFirebusCall();
-				String serviceName = config.getString(call.getString("service"));
-				Payload req = new Payload(call.getObject("payload"));
-				req.metadata.put("session", session.id);
-				req.metadata.put("token", session.getToken());
-				req.metadata.put("mime", "application/json");
-				boolean faf = call.getBoolean("fireandforget");
-				Logger.info("rb.cron.runtask", new DataMap("task", ctc.getName(), "token", session.getToken()));
-				if(faf)
-					firebus.requestServiceAndForget(serviceName, req);
-				else
-					firebus.requestService(serviceName, req);
-			}
-		} catch (Exception e) {
-			throw new RedbackException("Error running the cron task", e);
+	protected void runTask(CronTaskConfig ctc) throws RedbackException, FunctionErrorException, FunctionTimeoutException {
+		Session session = sysUserManager.getSession();
+		if(ctc.getFirebusCall() != null) {
+			DataMap call = ctc.getFirebusCall();
+			String serviceName = config.getString(call.getString("service"));
+			Payload req = new Payload(call.getObject("payload"));
+			boolean faf = call.containsKey("fireandforget") ? call.getBoolean("fireandforget") : false;
+			int timeout = call.containsKey("timeout") ? call.getNumber("timeout").intValue() : 60000;
+			req.metadata.put("session", session.id);
+			req.metadata.put("token", session.getToken());
+			req.metadata.put("mime", "application/json");
+			Logger.info("rb.cron.runtask", new DataMap("task", ctc.getName(), "token", session.getToken()));
+			if(faf)
+				firebus.requestServiceAndForget(serviceName, req);
+			else
+				firebus.requestService(serviceName, req, timeout);
 		}
 	}
 	
-	protected void unlockTask(CronTaskConfig ctc) throws RedbackException {
-		DataMap key = new DataMap();
-		key.put("name", ctc.getName());
-		DataMap data = new DataMap();
-		data.put("lock", null);
-		data.put("nextrun", new Date(ctc.getNextRun()));
-		dataClient.putData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), collectionConfig.convertObjectToSpecific(data));
-		ctc.setLock(null);
+	protected void unlockTask(CronTaskConfig ctc, long nextRun) throws RedbackException {
+		DataMap key = new DataMap("name", ctc.getName());
+		DataMap data = new DataMap("lock", null, "nextrun", new Date(nextRun));
+		collectionConfig.putData(key, data);
+		ctc.setNextRun(nextRun);
 	}
 	
 	protected void deleteTask(CronTaskConfig ctc) throws RedbackException {
@@ -235,9 +181,9 @@ public class CronTaskManager extends Thread {
 
 	public void clearCaches() {
 		try {
-			loadConfigs(sysUserManager.getSession());
-		} catch(RedbackException e) {
-			Logger.severe("rb.cron.clearcache", "Cannot clear config caches" , e);
+			this.loadConfigs(null);
+		} catch(Exception e) {
+			
 		}
 	}
 }
