@@ -1,0 +1,39 @@
+<div
+    class="rb-linktable-header-container"
+    [style.left.px]="-scrollLeft">
+    <div
+        class="rb-linktable-header">
+        <div
+            class="rb-linktable-colheader"
+            *ngFor="let col of columns"
+            [style.width.px]="col.width"
+            (click)="clickColumn(col)">
+            {{col.label}}
+        </div>
+    </div>
+</div>
+<rb-scroll
+    (rbscroll)="onScroll($event)">                                                                                                                                                    
+    <div
+        class="rb-linktable-body">
+        <div
+            class="rb-linktable-row"
+            *ngFor="let object of list">
+            <div
+                class="rb-linktable-rowitem"
+                *ngFor="let col of columns; index as i"
+                [style.width.px]="col.width">
+                <a
+                    *ngIf="i == 0"
+                    class="rb-linktable-link"
+                    (click)="clickLink(object)">
+                    {{getValue(object, col)}}                
+                </a>
+                <span
+                    *ngIf="i != 0">
+                    {{getValue(object, col)}}                
+                </span>                
+            </div>
+        </div>    
+    </div>
+</rb-scroll>

@@ -1,0 +1,69 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: var(--v12px) var(--v16px) var(--v12px) var(--v16px);
+}
+
+.rb-linktable-header-container {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    overflow-x: hidden;
+    height: var(--v24px);
+    position: relative;
+}
+
+.rb-linktable-header {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+.rb-linktable-colheader {
+    display: flex;
+    flex-direction: row;
+    margin: 0px var(--v10px) 0px 0px;
+    font-size: 0.9rem;
+    color: darkgray;
+    cursor: pointer;
+}
+
+.rb-linktable-body-container {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+
+.rb-linktable-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-linktable-row {
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    margin-bottom: var(--v20px);
+}
+
+.rb-linktable-rowitem {
+    display: block;
+    flex-direction: row;
+    margin: 0px var(--v10px) 0px 0px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rb-linktable-link {
+    color: var(--primary-dark-color);
+}
+
+a.rb-linktable-link:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+

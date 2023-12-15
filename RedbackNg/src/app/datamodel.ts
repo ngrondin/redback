@@ -127,12 +127,18 @@ export class RbObject {
             } else if(attr.indexOf('.') == -1) {
                 ret = this.data[attr];
             } else {
-                let relationship = attr.substring(0, attr.indexOf('.'));
-                let finalattr = attr.substring(attr.indexOf('.') + 1);
-                if(this.related[relationship] != null) {
-                    //ret = this.related[relationship].data[finalattr];
-                    ret = this.related[relationship].get(finalattr);
-                } 
+                let base = attr.substring(0, attr.indexOf('.'));
+                if(this.related[base] != null) {
+                    let rest = attr.substring(attr.indexOf('.') + 1);
+                    ret = this.related[base].get(rest);
+                } else if(typeof this.data[base] == 'object') {
+                    let parts = attr.split(".");
+                    let cur = this.data[base];
+                    for(let i = 1; i < parts.length && cur != null; i++) {
+                        cur = cur[parts[i]];
+                    }
+                    ret = cur;
+                }
             }
         }
         if(typeof ret == 'undefined') ret = null;

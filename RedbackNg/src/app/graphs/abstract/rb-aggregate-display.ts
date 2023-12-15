@@ -24,8 +24,6 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
 
     @HostBinding('style.width.px') get widthStyle() { return this.width != null ? this.width : null;}
     @HostBinding('style.height.px') get heightStyle() { return this.height != null ? this.height : null;}
-    //@HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 1;}
-    //@HostBinding('style.flex-shrink') get flexshrink() { return this.shrink != null ? this.shrink : 1;}
     
     colorScheme = {
       domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']

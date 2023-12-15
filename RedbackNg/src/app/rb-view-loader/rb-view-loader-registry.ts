@@ -42,6 +42,7 @@ import { RbSpacerComponent } from "app/rb-spacer/rb-spacer.component";
 import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.component";
 import { RbTabComponent } from "app/rb-tab/rb-tab.component";
 import { RbTableComponent } from "app/rb-table/rb-table.component";
+import { RbLinktableComponent } from "app/rb-linktable/rb-linktable.component";
 import { RbTileComponent } from "app/rb-tile/rb-tile.component";
 import { RbTimelineComponent } from "app/rb-timeline/rb-timeline.component";
 import { RbVcollapseComponent } from "app/rb-vcollapse/rb-vcollapse.component";
@@ -98,6 +99,7 @@ export const componentRegistry = {
     "processactionsbutton": RbProcessactionsComponent,
     "switch": RbSwitchInputComponent,
     "table": RbTableComponent,
+    "linktable": RbLinktableComponent,
     "vcollapse": RbVcollapseComponent,
     "hseparator": RbHseparatorComponent,
     "vseparator": RbVseparatorComponent,

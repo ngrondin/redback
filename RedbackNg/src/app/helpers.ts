@@ -52,6 +52,14 @@ export class Formatter {
     public static format(val: any, format: string) {
         if(format == 'duration') {
             return this.formatDuration(val);
+        } else if(format == 'datetime') {
+            return this.formatDateTime(val);
+        } else if(format == 'date') {
+            return this.formatDate(val);
+        } else if(format == 'time') {
+            return this.formatTime(val);
+        } else if(format == 'currency') {
+            return this.formatCurrency(val);
         } else {
             return val;
         }
@@ -92,36 +100,42 @@ export class Formatter {
         }
     }
 
-    static formatDateTime(value: Date) : string {
+    static formatDateTime(value: any) : string {
         let str = Formatter.formatDate(value);
         if(str != "") str = str + " ";
         str = str + Formatter.formatTime(value); 
         return str;
     }
 
-    static formatDate(value: Date) : string {
+    static formatDate(value: any) : string {
+        let dt = null;
+        if(value instanceof Date) dt = value;
+        else if(typeof value == 'string' && !isNaN(Date.parse(value))) dt = new Date(value);
         let str = "";
-        if(value != null) {
-            str = str + value.getFullYear().toString();
+        if(dt != null) {
+            str = str + dt.getFullYear().toString();
             str = str + "-";
-            str = str + (value.getMonth() + 1).toString().padStart(2, "0");
+            str = str + (dt.getMonth() + 1).toString().padStart(2, "0");
             str = str + "-";
-            str = str + value.getDate().toString().padStart(2, "0");
+            str = str + dt.getDate().toString().padStart(2, "0");
         }
         return str;
     }
 
-    static formatTime(value: Date) : string {
+    static formatTime(value: any) : string {
+        let dt = null;
+        if(value instanceof Date) dt = value;
+        else if(typeof value == 'string' && !isNaN(Date.parse(value))) dt = new Date(value);
         let str = "";
-        if(value != null) {
-            str = str + value.getHours().toString().padStart(2, "0");
+        if(dt != null) {
+            str = str + dt.getHours().toString().padStart(2, "0");
             str = str + ":";
-            str = str + value.getMinutes().toString().padStart(2, "0");
+            str = str + dt.getMinutes().toString().padStart(2, "0");
         }
         return str;
     }
 
-  static formatDateTimeCustom(dt: Date, format: string) : string {
+    static formatDateTimeCustom(dt: Date, format: string) : string {
         let str = "";
         if(dt != null) {
             str = format;
@@ -133,7 +147,12 @@ export class Formatter {
             str = str.replace('mm', (dt.getMinutes()).toString().padStart(2, "0"));
         }
         return str;
-    }   
+    }  
+    
+    static formatCurrency(value: number) : string {
+        const formatter = new Intl.NumberFormat('en-US', {style: 'currency',  currency: 'USD'});
+        return formatter.format(value);  
+    }
 }
 
 @Pipe({name: 'rbDate'})

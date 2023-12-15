@@ -141,6 +141,7 @@ import { RbPreferencesComponent } from './rb-preferences/rb-preferences.componen
 import { RbUsermenuComponent } from './rb-usermenu/rb-usermenu.component';
 import { RbNlboxComponent } from './rb-nlbox/rb-nlbox.component';
 import { RbScrollComponent } from './rb-scroll/rb-scroll.component';
+import { RbLinktableComponent } from './rb-linktable/rb-linktable.component';
 
 
 
@@ -295,7 +296,8 @@ window.redback = window.redback || {};
         RbPreferencesComponent,
         RbUsermenuComponent,
         RbNlboxComponent,
-        RbScrollComponent
+        RbScrollComponent,
+        RbLinktableComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

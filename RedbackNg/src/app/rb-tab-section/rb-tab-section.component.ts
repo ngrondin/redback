@@ -1,4 +1,4 @@
-import { ViewContainerRef } from '@angular/core';
+import { Input, ViewContainerRef } from '@angular/core';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { RbTabComponent } from 'app/rb-tab/rb-tab.component';
@@ -10,6 +10,7 @@ import { UserprefService } from 'app/services/userpref.service';
   styleUrls: ['./rb-tab-section.component.css']
 })
 export class RbTabSectionComponent extends RbContainerComponent implements OnInit {
+  @Input('keeplasttab') keeplasttab : boolean = false;
 
   @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
   
@@ -49,10 +50,11 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   }
 
   public register(tab: RbTabComponent) {
-    let swtch = this.userpref.getCurrentViewUISwitch('tab',  tab.label);
-    if(swtch == null || swtch == true) {
+    let showtab = this.userpref.getCurrentViewUISwitch('tab',  tab.label);
+    if(showtab == null || showtab == true) {
       this.tabs.push(tab);
-      if(tab.isdefault == true) {
+      let lasttab = this.keeplasttab == true && this.id != null ? this.userpref.getCurrentViewUISwitch('tabsection', this.id) : null;
+      if((lasttab == null && tab.isdefault == true) || (lasttab != null && tab.label == lasttab)) {
         this.selectTab(tab);
       }
     }
@@ -64,6 +66,9 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
       this.activeTab.deactivate();
     }
     this.activeTab = tab;
+    if(this.keeplasttab == true && this.id != null) {
+      this.userpref.setUISwitch('user', 'tabsection', this.id, tab.label);
+    }
     if(this.active == true) {
       this.activeTab.activate();
     }

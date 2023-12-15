@@ -6,7 +6,7 @@ import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
-  selector: 'app-rb-tree',
+  selector: 'rb-tree',
   templateUrl: './rb-tree.component.html',
   styleUrls: ['./rb-tree.component.css']
 })
@@ -45,7 +45,7 @@ export class RbTreeComponent  extends RbDataObserverComponent  {
 
   public redraw() {
     this.treeData = [];
-    let rootlist = this.list.filter(item => item.get(this.parentattribute) == null);
+    let rootlist = this.list.filter(item => this.list.filter(parentitem => item.get(this.parentattribute) == parentitem.get(this.childattribute)).length == 0);
     for(let obj of rootlist) {
       this.treeData.push(this.recursiveRedraw(obj));
     }

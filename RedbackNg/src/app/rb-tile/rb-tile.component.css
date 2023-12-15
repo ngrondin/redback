@@ -19,7 +19,9 @@
 }
 
 .rb-tile-refresh {
+    position: absolute;
     width: var(--v24px);
+    height: var(--v24px);
     padding-left: var(--v5px);
     color: grey;
     cursor: pointer;
@@ -29,6 +31,7 @@
     font-weight: 500;
     text-align: center;
     flex: 1 1 0;
+    color: #444;
 }
 
 .rb-tile-container {

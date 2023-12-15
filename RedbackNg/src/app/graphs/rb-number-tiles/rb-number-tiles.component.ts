@@ -10,7 +10,8 @@ import { RbAggregateDisplayComponent } from '../abstract/rb-aggregate-display';
 export class RbNumberTilesComponent extends RbAggregateDisplayComponent {
   @Input('rows') rows: number = 1;
   @Input('cols') cols: number = 1;
-
+  @Input('format') format: string = null;
+  
   constructor() {
     super();
   }
