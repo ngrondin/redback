@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.client.FileClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
@@ -224,7 +225,7 @@ public class DynamicForm extends DataUnit {
 					if(de != null && de instanceof DataMap) {
 						FileClient fc = reportManager.getFileClient();
 						RedbackFile file = fc.getFile(session, ((DataMap)de).getString("fileuid"));
-						Box rb = reportBoxFromFile(file, 50);
+						Box rb = reportBoxFromFile(file, 80);
 						labelAnswerRowRb.addChild(rb);
 						//addChildAlignedLeft(labelAnswerRowRb, rb, answerMaxWidth);
 					}
@@ -291,7 +292,8 @@ public class DynamicForm extends DataUnit {
 			BufferedImage img = ImageUtils.getImage(originalImage, newWidth, newHeight, ori);
 			ret = Box.Image(ImageUtils.getBytes(img, "png"), img.getWidth(), img.getHeight());
 		} catch(Exception e) {
-			throw new RedbackException("Error getting ReportBox image", e);
+			Logger.warning("Error getting ReportBox image", e);
+			ret = Box.Empty(50, 50);
 		}
 		return ret;	
 	}

@@ -1,6 +1,5 @@
 package io.redback.managers.integrationmanager;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import io.firebus.data.DataEntity;
@@ -15,7 +14,9 @@ import io.redback.exceptions.RedbackConfigNotFoundException;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.integrationmanager.js.GatewayCallJSWrapper;
 import io.redback.security.Session;
+import io.redback.security.js.SessionJSWrapper;
 import io.redback.security.js.UserProfileJSWrapper;
+import io.redback.utils.js.LoggerJSFunction;
 
 public class Client {
 	protected Session session;
@@ -23,7 +24,6 @@ public class Client {
 	protected ClientConfig config;
 	protected DataMap data;
 	protected GatewayClient gatewayClient;
-	protected Map<String, Object> baseScriptContext;
 	
 	public Client(Session s, IntegrationManager im, ClientConfig cc, DataMap cd, GatewayClient gwc) {
 		session = s;
@@ -31,12 +31,6 @@ public class Client {
 		config = cc;
 		setData(cd);
 		gatewayClient = gwc;
-		baseScriptContext = new HashMap<String, Object>();
-		baseScriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
-		baseScriptContext.put("clientid", config.clientId);
-		baseScriptContext.put("clientsecret", config.clientSecrect);
-		baseScriptContext.put("baseurl", config.baseUrl);
-		baseScriptContext.put("clientdata", data);
 	}
 	
 	public void setData(DataMap d) {
@@ -48,10 +42,16 @@ public class Client {
 	}
 	
 	protected ScriptContext getBaseScriptContext() throws ScriptValueException {
-		ScriptContext ctx = integrationManager.getScriptFactory().createScriptContext();
-		for(String key : baseScriptContext.keySet()) ctx.declare(key, baseScriptContext.get(key));
-		ctx.put("fc", new FileClientJSWrapper(integrationManager.getFileClient(), session));
-		return ctx;
+		ScriptContext baseScriptContext = integrationManager.getScriptFactory().createScriptContext();
+		baseScriptContext.put("log", new LoggerJSFunction());
+		baseScriptContext.put("session", new SessionJSWrapper(session));
+		baseScriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
+		baseScriptContext.put("clientid", config.clientId);
+		baseScriptContext.put("clientsecret", config.clientSecrect);
+		baseScriptContext.put("baseurl", config.baseUrl);
+		baseScriptContext.put("clientdata", data);
+		baseScriptContext.put("fc", new FileClientJSWrapper(integrationManager.getFileClient(), session));
+		return baseScriptContext;
 	}
 	
 	protected ScriptContext getScriptContext(Map<String, Object> subContext) throws ScriptValueException {
@@ -67,14 +67,14 @@ public class Client {
 	}
 	
 	protected String completeUrl(String url) {
-		if(!url.startsWith("http://") || url.startsWith("https://")) {
+		if(url.startsWith("http://") || url.startsWith("https://")) {
+			return url;
+		} else {
 			String fullUrl = config.baseUrl;
 			if(!fullUrl.endsWith("/"))
 				fullUrl = fullUrl + "/";
 			fullUrl = fullUrl + (url.startsWith("/") ? url.substring(1) : url);
 			return fullUrl;
-		} else {
-			return url;
 		}
 	}
 	
@@ -98,6 +98,7 @@ public class Client {
 	
 	public DataMap call(String method, String url, Object body, DataMap headers) throws RedbackException {
 		try {
+			ScriptContext baseScriptContext = getBaseScriptContext();
 			String finalMethod = method != null ? method : (String)config.methodExpr.eval(baseScriptContext);
 			String finalUrl = completeUrl(url != null ? url : (String)config.urlExpr.eval(baseScriptContext));
 			Object finalBody = body != null ? body : config.bodyExpr.eval(baseScriptContext);

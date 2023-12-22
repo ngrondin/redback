@@ -175,6 +175,11 @@ public class ImageUtils {
 				    	ty = nh;
 				        break;
 			    }
+			    BufferedImage srcImage = origImg;
+			    if(srcImage.getType() == BufferedImage.TYPE_CUSTOM) {
+			        srcImage = new BufferedImage(origImg.getWidth(), origImg.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			        srcImage.getGraphics().drawImage(origImg, 0, 0, null);
+			    }
 			    AffineTransform all = new AffineTransform();
 			    all.concatenate(AffineTransform.getTranslateInstance(tx, ty));
 			    all.concatenate(AffineTransform.getRotateInstance(rotate));
@@ -184,7 +189,7 @@ public class ImageUtils {
 			    Graphics2D g = destImage.createGraphics();
 			    g.setBackground(Color.WHITE);
 			    g.clearRect(0, 0, destImage.getWidth(), destImage.getHeight());
-			    destImage = op.filter(origImg, destImage);
+			    destImage = op.filter(srcImage, destImage);
 			    return destImage;
 			} else {
 				return origImg;

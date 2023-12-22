@@ -53,21 +53,23 @@ export class FunnelPhaseConfig extends SeriesConfig {
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
       this.keyAttribute = json.keyattribute;
       this.labelAttribute = json.labelattribute;
-      this.orderAttribute = json.orderAttribute;
+      this.orderAttribute = json.orderattribute;
     }
 }
 
 export class FunnelPhase {
     id: string;
     label: string;
+    order: number;
     object: RbObject;
     config: FunnelPhaseConfig;
     groups: FunnelGroup[] = [];
   
-    constructor(i: string, l: string, o: RbObject, cfg: FunnelPhaseConfig) {
+    constructor(i: string, l: string, o: number, obj: RbObject, cfg: FunnelPhaseConfig) {
       this.id = i;
       this.label = l;
-      this.object = o;
+      this.order = o;
+      this.object = obj;
       this.config = cfg;
     }
 }

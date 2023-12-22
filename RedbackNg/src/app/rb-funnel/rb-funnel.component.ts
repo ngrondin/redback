@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { FunnelEntry, FunnelGroup, FunnelGroupConfig, FunnelPhase, FunnelPhaseConfig, FunnelSeriesConfig } from './rb-funnel-models';
 import { UserprefService } from 'app/services/userpref.service';
+import { ValueComparator } from 'app/helpers';
 
 @Component({
   selector: 'rb-funnel',
@@ -17,7 +18,7 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
   phasesConfig: FunnelPhaseConfig = null;
   groupConfigs: any = {};
   
-  data: any = [];
+  data: FunnelPhase[] = [];
 
   constructor(
     private userPref: UserprefService
@@ -50,7 +51,7 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
     this.data = [];
     let phaseList = this.lists[this.phasesConfig.dataset];
     for(var phaseObject of phaseList) {
-      let phase = new FunnelPhase(phaseObject.uid, phaseObject.get(this.phasesConfig.labelAttribute), phaseObject, this.phasesConfig);
+      let phase = new FunnelPhase(phaseObject.uid, phaseObject.get(this.phasesConfig.labelAttribute), phaseObject.get(this.phasesConfig.orderAttribute), phaseObject, this.phasesConfig);
       var groups = {};
       for(let cfg of this.seriesConfigs) {
         var entryList = this.lists[cfg.dataset].filter(rbo => rbo.get(cfg.phaseAttribute) == phaseObject.get(this.phasesConfig.keyAttribute));
@@ -74,6 +75,7 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
       phase.groups = phase.groups.sort((a, b) => this.groupConfigs[a.id].order - this.groupConfigs[b.id].order);
       this.data.push(phase);
     }
+    this.data = this.data.sort((a, b) => ValueComparator.valueCompare(a, b, "order")); 
   }
 
   click(entry: FunnelEntry) {
