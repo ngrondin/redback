@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,7 +52,7 @@ public abstract class DataUnit extends Unit {
 	public abstract Box produce(Map<String, Object> context) throws IOException, RedbackException;
 	
 	protected float getStringWidth(float fontSize, String text) throws IOException {
-		return font.getStringWidth(text) / 1000f * fontSize;
+		return text != null ? font.getStringWidth(text) / 1000f * fontSize : 0;
 	}
 	
 	protected float getFontHeight(float fontSize) {
@@ -152,7 +151,7 @@ public abstract class DataUnit extends Unit {
 			} else if(format.equals("datetime") && value != null && value instanceof Date) {
 				try {
 					ZonedDateTime zdt = ZonedDateTime.ofInstant(((Date)value).toInstant(), session.getTimezone() != null ? ZoneId.of(session.getTimezone()) : ZoneId.systemDefault());
-					valueStr = zdt.format(DateTimeFormatter.ofPattern("d MMM yy HH:mm a"));
+					valueStr = zdt.format(DateTimeFormatter.ofPattern("d MMM yy HH:mm"));
 				} catch(Exception e) {
 					valueStr = "Bad data for datetime";
 				}

@@ -55,7 +55,10 @@ public class ObjectClient extends Client
 		req.put("attribute", attribute);
 		req.put("options", new DataMap("addrelated", true));
 		DataMap resp = requestDataMap(session, req);
-		return new RedbackObjectRemote(session, this, resp);
+		if(resp != null)
+			return new RedbackObjectRemote(session, this, resp);
+		else 
+			return null;
 	}
 
 	public List<RedbackObjectRemote> listObjects(Session session, String objectname, DataMap filter) throws RedbackException  {
