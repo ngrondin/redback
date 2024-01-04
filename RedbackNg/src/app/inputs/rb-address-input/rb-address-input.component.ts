@@ -18,18 +18,8 @@ export class RbAddressInputComponent extends RbPopupInputComponent {
   ) {
     super(popupService);
   }
-  
-  public get displayvalue(): string {
-    let val: string = null;
-    if(this.isEditing) {
-      val = this.editedValue;
-    } else if(this.rbObject != null) {
-      val = this.value;
-    }
-    return val;
-  }
 
-  public set displayvalue(str: string) {
+  public setDisplayValue(str: string) {
     this.editedValue = str;
     if(this.isEditing) {
       let currentValue = this.editedValue;
@@ -60,10 +50,10 @@ export class RbAddressInputComponent extends RbPopupInputComponent {
     return cfg;
   }
 
-  public startEditing() {
+  /*public startEditing() {
     super.startEditing();
     this.editedValue = this.rbObject.get(this.attribute);
-  }
+  }*/
 
   public onKeyTyped(keyCode: number) {
     super.onKeyTyped(keyCode);

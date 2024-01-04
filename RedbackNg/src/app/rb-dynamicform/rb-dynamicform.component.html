@@ -1,6 +1,6 @@
-<rb-scroll></rb-scroll>
-<div
-    class="rb-df-container">
+<rb-scroll>
+<!--<div
+    class="rb-df-container">-->
     <div
         *ngFor="let object of sortedVisibleList"
         class="rb-df-line">
@@ -212,7 +212,8 @@
             <span>{{object.get(detailattribute)}}</span>
         </div>
     </div>
-</div>
+<!--</div>-->
+</rb-scroll>
 <div
     class="rb-spinner-container"
     *ngIf="isLoading">

@@ -77,11 +77,15 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
     }
   }
 
-  public get displayvalue(): any {
+  public getPersistedDisplayValue(): any {
+    return null;
+  }
+
+  public getEditingDisplayValue(): any {
     return null;
   }
   
-  public set displayvalue(val: any) {
+  public setDisplayValue(val: any) {
    
   }
   
@@ -91,14 +95,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
     } 
   }
 
-  public startEditing() {
-    console.log("QL Start editing");
-    super.startEditing();
-    this.editedValue = this.value;
-  }
-
   public finishEditing() {
-    console.log("QL Finish editing");
     if(this.mode == 'editor') {
       this.editedValue = (this.editor != null && this.editor.root != null ? this.editor.root.innerHTML : null);
     } else {

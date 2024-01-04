@@ -11,19 +11,9 @@ export class RbNumberInputComponent extends RbFieldInputComponent {
   constructor() {
     super();
     this.defaultIcon = "dialpad";
-    //this.inputType = 'number'
-  }
-
-    
-  public get displayvalue(): any {
-    if(this.isEditing) {
-      return this.editedValue;
-    } else {
-      return this.value;
-    }
   }
   
-  public set displayvalue(val: any) {
+  public setDisplayValue(val: any) {
     if(this.isEditing) {
       console.log("set display value");
       if(isNaN(val) && val != '-' && !isNaN(this.editedValue)) {
@@ -34,29 +24,8 @@ export class RbNumberInputComponent extends RbFieldInputComponent {
     } 
   }
 
-  public onFocus(event: any) {
-    super.onFocus(event);
-    if(this.isEditing) event.target.select();
-  }
-  
-  public onBlur(event: any) {
-    super.onBlur(event);  
-  }
-
-  public onKeydown(event: any) {
-    super.onKeydown(event);
-  }
-
-  
-  public startEditing() {
-    super.startEditing();
-    this.editedValue = this.value;
-  }
-
   public finishEditing() {
     this.commit(parseFloat(this.editedValue));
     super.finishEditing();
   }
-
-
 }

@@ -43,23 +43,12 @@ export class RbUrlInputComponent extends RbStringInputComponent {
     return typeof this.value == 'object' && this.value != null && this.value.description != null ? this.value.description : null;
   }
 
-  public get displayvalue(): any {
-    if(this.isEditing) {
-      return this.editedValue;
-    } else {
-      return this.urlvalue;
-    }
-  }
-  
-  public set displayvalue(val: any) {
-    if(this.isEditing) {
-      this.editedValue = val;
-    } 
+  public getPersistedDisplayValue(): any {
+    return this.urlvalue;
   }
 
-  public startEditing() {
-    super.startEditing();
-    this.editedValue = this.urlvalue;
+  public initEditedValue() {
+    this.editedValue = this.getPersistedDisplayValue();
   }
 
   public finishEditing() {

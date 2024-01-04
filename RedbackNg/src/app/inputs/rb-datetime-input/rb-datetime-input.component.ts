@@ -19,39 +19,22 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     public popupService: PopupService
   ) {
     super(popupService);
-   }
-
-  public get displayvalue(): string {
-    let val: string = null;
-    if(this.isEditing) {
-      val = this.editedValue;
-    } else {
-      val = Formatter.formatDateTimeCustom(this.getDateValue(), this.format);
-      //val = this.formatDateTime(this.getDateValue());
-    }
-    return val;
   }
 
-  public set displayvalue(str: string) {
+  public getPersistedDisplayValue(): any {
+    return Formatter.formatDateTimeCustom(this.getDateValue(), this.format);
+  }
+
+  public setDisplayValue(str: string) {
     this.editedValue = str;
     if(this.popupComponentRef != null) {
       this.popupComponentRef.instance.setSearch(this.editedValue);
     }
   }
 
-  /*private formatDateTime(dt: Date) : string {
-    let val = null;
-    if(dt != null) {
-      val = this.format;
-      val = val.replace('YYYY', dt.getFullYear().toString());
-      val = val.replace('YY', (dt.getFullYear() % 100).toString());
-      val = val.replace('MM', (dt.getMonth() + 1).toString().padStart(2, "0"));
-      val = val.replace('DD', (dt.getDate()).toString().padStart(2, "0"));
-      val = val.replace('HH', (dt.getHours()).toString().padStart(2, "0"));
-      val = val.replace('mm', (dt.getMinutes()).toString().padStart(2, "0"));
-    }
-    return val;
-  }*/
+  public initEditedValue() {
+    this.editedValue = this.getPersistedDisplayValue();
+  }
 
   private getDateValue() : Date {
     let iso: string = this.getISOValue();
@@ -100,20 +83,9 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     };
   }
 
-  public startEditing() {
-    super.startEditing();
-    if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
-      this.editedValue = Formatter.formatDateTimeCustom(this.getDateValue(), this.format);
-      //this.editedValue = this.formatDateTime(this.getDateValue());
-    } else {
-      this.editedValue = '';
-    }
-  }
-
   public onKeyTyped(keyCode: number) {
     super.onKeyTyped(keyCode);
     if((keyCode == 8 || keyCode == 27) && (this.editedValue == "" || this.editedValue == null)) {
-      //this.finishEditing();
       this.finishEditingWithSelection(null);
     } 
   }
@@ -135,6 +107,5 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     }
     this.commit(val);
   }
-
 
 }

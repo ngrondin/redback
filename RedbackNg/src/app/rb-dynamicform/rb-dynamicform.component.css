@@ -5,10 +5,14 @@
     overflow: auto;
 }
 
-.rb-df-container {
+/*.rb-df-container {
     display: flex;
     flex-direction: column;
     min-width: 30vw;
+}*/
+
+rb-scroll ::ng-deep .rb-scroll-content {
+    width: 30vw;  
 }
 
 .rb-df-category {

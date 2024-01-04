@@ -23,18 +23,16 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
     super(popupService);
   }
 
-  public get displayvalue(): string {
-    let val: string = null;
-    if(this.isEditing) {
-      val = this.editedValue;
-    } else if(this.rbObject != null && this.rbObject.related[this.attribute] != null ) {
+  public getPersistedDisplayValue(): any {
+    if(this.rbObject != null && this.rbObject.related[this.attribute] != null ) {
       let check = this.value; //this is to force a check if changed
-      val = this.rbObject.related[this.attribute].get(this.displayattribute);
+      return this.rbObject.related[this.attribute].get(this.displayattribute);
+    } else {
+      return null;
     }
-    return val;
   }
 
-  public set displayvalue(str: string) {
+  public setDisplayValue(str: string) {
     this.editedValue = str;
     if(this.isEditing) {
       let currentValue = this.editedValue;
@@ -43,6 +41,10 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
         this.popupComponentRef.instance.setSearch(this.editedValue);
       }, 500);     
     }
+  }
+
+  public initEditedValue() {
+    this.editedValue = this.getPersistedDisplayValue();
   }
 
   public getPopupClass() {
@@ -57,15 +59,6 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
       parentattribute: this.parentattribute, 
       childattribute: this.childattribute
     };
-  }
-
-  public startEditing() {
-    super.startEditing();
-    if(this.rbObject != null && this.rbObject.related[this.attribute] != null ) {
-      this.editedValue = this.rbObject.related[this.attribute].get(this.displayattribute);
-    } else {
-      this.editedValue = null;
-    }
   }
 
   public onKeyTyped(keyCode: number) {

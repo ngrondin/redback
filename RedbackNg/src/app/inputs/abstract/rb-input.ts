@@ -149,10 +149,6 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     }
   }
 
-  public abstract get displayvalue(): any;
-
-  public abstract set displayvalue(val: any);
-
   public flash() {
     setTimeout(() => {this.flasherOn = true}, 1);
     setTimeout(() => {this.flasherOn = false}, 100);

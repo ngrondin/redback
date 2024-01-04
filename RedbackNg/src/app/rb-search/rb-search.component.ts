@@ -59,16 +59,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     }
   }
 
-  public get displayvalue(): any {
-    if(this.isEditing) {
-      return this.editedValue;
-    } else {
-      return this.value;
-    }
-    
-  }
-
-  public set displayvalue(val: any) {
+  public setDisplayValue(val: any) {
     this.editedValue = val;
     if(this.editedValue !== this.queuedSearch) {
       this.searchAfterDelay();
@@ -97,16 +88,6 @@ export class RbSearchComponent extends RbFieldInputComponent {
       console.error("Search blocked");
       this.searchAfterDelay();
     }
-  }
-
-  onFocus(event: any) {
-    super.onFocus(event);
-    if(this.isEditing) event.target.select();
-  }
-
-  startEditing() {
-    super.startEditing();
-    this.editedValue = this.value;
   }
 
   finishEditing() {

@@ -43,9 +43,6 @@ export class RbFileInputComponent extends RbInputComponent  {
     return null;
   }
 
-  public set displayvalue(val: any) {
-  }
-
   get fileUid() : String{
     if(this.rbObject != null) {
       let val = this.rbObject.get(this.attribute);

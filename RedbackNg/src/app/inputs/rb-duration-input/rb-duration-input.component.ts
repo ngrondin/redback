@@ -11,63 +11,45 @@ export class RbDurationInputComponent extends RbFieldInputComponent implements O
 
   constructor() {
     super();
-   }
+  }
 
-  get displayvalue() : string {
-    let ret: string = null;
-    if(this.isEditing) {
-      ret = this.editedValue;
+  public getPersistedDisplayValue(): any {
+    if(this.value != null) {
+      let ms = this.value;
+      let years = Math.floor(ms / 31536000000);
+      let weeks = Math.floor((ms % 31536000000) / 604800000);
+      let days = Math.floor((ms % 604800000) / 86400000);
+      let hours = Math.floor((ms % 86400000) / 3600000);
+      let minutes = Math.floor((ms % 3600000) / 60000);
+      let seconds = Math.floor((ms % 60000) / 1000);
+      let milli = Math.floor((ms % 1000));
+      let greaterThanMinute = ms > 60000;
+      let greaterThanHour = ms > 3600000;
+      let val = "";
+      if(years != 0)
+        val = val + " " + years + "y";
+      if(weeks != 0)
+        val = val + " " + weeks + "w";
+      if(days != 0)
+        val = val + " " + days + "d";
+      if(hours != 0)
+        val = val + " " + hours + "h";
+      if(minutes != 0)
+        val = val + " " + minutes + "m";
+      if(seconds != 0 && !greaterThanHour)
+        val = val + " " + seconds + "s";
+      if(milli != 0 && !greaterThanMinute)
+        val = val + " " + milli + "ms";
+      if(ms == 0) 
+        val = " 0";
+      return val.substr(1);
     } else {
-      if(this.value != null) {
-        let ms = this.value;
-        let years = Math.floor(ms / 31536000000);
-        let weeks = Math.floor((ms % 31536000000) / 604800000);
-        let days = Math.floor((ms % 604800000) / 86400000);
-        let hours = Math.floor((ms % 86400000) / 3600000);
-        let minutes = Math.floor((ms % 3600000) / 60000);
-        let seconds = Math.floor((ms % 60000) / 1000);
-        let milli = Math.floor((ms % 1000));
-        let greaterThanMinute = ms > 60000;
-        let greaterThanHour = ms > 3600000;
-        let val = "";
-        if(years != 0)
-          val = val + " " + years + "y";
-        if(weeks != 0)
-          val = val + " " + weeks + "w";
-        if(days != 0)
-          val = val + " " + days + "d";
-        if(hours != 0)
-          val = val + " " + hours + "h";
-        if(minutes != 0)
-          val = val + " " + minutes + "m";
-        if(seconds != 0 && !greaterThanHour)
-          val = val + " " + seconds + "s";
-        if(milli != 0 && !greaterThanMinute)
-          val = val + " " + milli + "ms";
-        if(ms == 0) 
-          val = " 0";
-        ret = val.substr(1);
-      } else {
-        ret = null;
-      }
+      return null;
     }
-    return ret;
   }
 
-  set displayvalue(val: string) {
-    this.editedValue = val;
-  }
-
-
-  public onFocus(event: any) {
-    super.onFocus(event);
-    if(this.isEditing) event.target.select();
-  }
-
-  public startEditing() {
-    let val = this.displayvalue;
-    super.startEditing();
-    this.editedValue = val;
+  public initEditedValue() {
+    this.editedValue = this.getPersistedDisplayValue();
   }
 
   public finishEditing() {

@@ -15,19 +15,14 @@ export class RbPercentInputComponent  extends RbFieldInputComponent  {
     this.defaultIcon = "trending_up";
   }
 
-
-  public get displayvalue(): any {
-    if(this.isEditing) {
-      return this.editedValue;
-    } else {
-      if(this.value != null)
-        return this.value + " %";
-      else 
-        return null;
-    }
+  public getPersistedDisplayValue(): any {
+    if(this.value != null)
+      return this.value + " %";
+    else 
+      return null; 
   }
   
-  public set displayvalue(val: any) {
+  public setDisplayValue(val: any) {
     if(this.isEditing) {
       if(isNaN(val) && val != '-' && !isNaN(this.editedValue)) {
         if(this.capped && val <= 100 && val >= -100) {
@@ -37,25 +32,6 @@ export class RbPercentInputComponent  extends RbFieldInputComponent  {
       }
       this.editedValue = val;
     } 
-  }
-
-  public onFocus(event: any) {
-    super.onFocus(event);
-    if(this.isEditing) event.target.select();
-  }
-  
-  public onBlur(event: any) {
-    super.onBlur(event);  
-  }
-
-  public onKeydown(event: any) {
-    super.onKeydown(event);
-  }
-
-  
-  public startEditing() {
-    super.startEditing();
-    this.editedValue = this.value;
   }
 
   public finishEditing() {

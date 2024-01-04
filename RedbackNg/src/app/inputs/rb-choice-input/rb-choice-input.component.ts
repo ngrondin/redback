@@ -49,7 +49,7 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
     return null;
   }
 
-  public get displayvalue(): any {
+  public getPersistedDisplayValue(): any {
     let item = this.selectedItem;
     if(item != null) {
       return item['display'] || item['label'];
@@ -57,7 +57,11 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
     return null;
   }
 
-  public set displayvalue(val: any) {
+  public getEditingDisplayValue(): any {
+    return this.getPersistedDisplayValue();
+  }
+
+  public setDisplayValue(val: any) {
 
   }
 

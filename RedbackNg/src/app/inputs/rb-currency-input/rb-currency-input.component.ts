@@ -18,37 +18,20 @@ export class RbCurrencyInputComponent extends RbFieldInputComponent  {
     super();
    }
 
-  get displayvalue() : string {
-    let ret: string = null;
-    if(this.isEditing) {
-      ret = this.editedValue;
+  public getPersistedDisplayValue(): any {
+    if(this.value != null) {
+      let amount = this.value;
+      const negativeSign = amount < 0 ? "-" : "";
+      let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(this.decimalCount)).toString();
+      let j = (i.length > 3) ? i.length % 3 : 0;
+      return negativeSign + (j ? i.substr(0, j) + this.thousandsSeparator : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + this.thousandsSeparator) + (this.decimalCount ? this.decimalSeparator + Math.abs(amount - parseInt(i)).toFixed(this.decimalCount).slice(2) : "");
     } else {
-      if(this.rbObject != null && this.rbObject.data[this.attribute] != null) {
-        let amount = this.rbObject.data[this.attribute];
-        const negativeSign = amount < 0 ? "-" : "";
-        let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(this.decimalCount)).toString();
-        let j = (i.length > 3) ? i.length % 3 : 0;
-        ret = negativeSign + (j ? i.substr(0, j) + this.thousandsSeparator : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + this.thousandsSeparator) + (this.decimalCount ? this.decimalSeparator + Math.abs(amount - parseInt(i)).toFixed(this.decimalCount).slice(2) : "");
-      } else {
-        ret = null;
-      }
+      return null;
     }
-    return ret;
   }
 
-  set displayvalue(val: string) {
-    this.editedValue = val;
-  }
-
-  public onFocus(event: any) {
-    super.onFocus(event);
-    if(this.isEditing) event.target.select();
-  }
-
-  public startEditing() {
-    let val = this.displayvalue;
-    super.startEditing();
-    this.editedValue = val;
+  public initEditedValue() {
+    this.editedValue = this.value != null ? this.value.toFixed(this.decimalCount) : null;
   }
 
   public finishEditing() {

@@ -1,11 +1,12 @@
-import { Component, EventEmitter, HostListener, Output, ViewChild, ViewContainerRef } from '@angular/core';
+import { AfterContentInit, Component, EventEmitter, HostListener, Output, ViewChild, ViewContainerRef } from '@angular/core';
 
 @Component({
   selector: 'rb-scroll',
   templateUrl: './rb-scroll.component.html',
   styleUrls: ['./rb-scroll.component.css']
 })
-export class RbScrollComponent {
+export class RbScrollComponent implements AfterContentInit {
+  contentInitiated: boolean = false;
   isOverVTrack: boolean = false;
   isOverHTrack: boolean = false;
   draggingVThumb: boolean = false;
@@ -15,13 +16,19 @@ export class RbScrollComponent {
   @ViewChild('content', { read: ViewContainerRef, static: true }) content: ViewContainerRef;
   @Output() rbscroll: EventEmitter<any> = new EventEmitter();
   
+  ngAfterContentInit() {
+    this.contentInitiated = true;    
+  }
+
   get showVTrack() {
+    if(!this.contentInitiated) return false;
     let scrollerH = this.scroller.element.nativeElement.clientHeight;
     let contentH = this.content.element.nativeElement.clientHeight;
     return contentH > scrollerH;
   }
 
   get showHTrack() {
+    if(!this.contentInitiated) return false;
     let scrollerW = this.scroller.element.nativeElement.clientWidth;
     let contentW = this.content.element.nativeElement.clientWidth;
     return contentW > scrollerW;
@@ -44,6 +51,7 @@ export class RbScrollComponent {
   }
 
   get vThumbPosition() {
+    if(!this.contentInitiated) return 0;
     let scrollerH = this.scroller.element.nativeElement.clientHeight;
     let contentH = this.content.element.nativeElement.clientHeight;
     let scrollTop = this.scroller.element.nativeElement.scrollTop;
@@ -51,6 +59,7 @@ export class RbScrollComponent {
   }
 
   get hThumbPosition() {
+    if(!this.contentInitiated) return 0;
     let scrollerW = this.scroller.element.nativeElement.clientWidth;
     let contentW = this.content.element.nativeElement.clientWidth;
     let scrollLeft = this.scroller.element.nativeElement.scrollLeft;

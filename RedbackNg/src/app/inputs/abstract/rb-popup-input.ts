@@ -90,7 +90,7 @@ export abstract class RbPopupInputComponent extends RbFieldInputComponent {
   }
 
   public cancelEditing() {
-      super.cancelEditing();
-      this.closePopup();
+    super.cancelEditing();
+    this.closePopup();
   }
 }
