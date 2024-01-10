@@ -141,6 +141,15 @@ public class Session
 		}
 	}
 	
+	public boolean hasAccessToDomain(String domain) 
+	{
+		if(domainLock != null) {
+			return domainLock.equals(domain);
+		} else {
+			return getUserProfile().hasDomain(domain);
+		}
+	}
+	
 	public ScriptContext getScriptContext() 
 	{
 		return scriptContext;

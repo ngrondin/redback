@@ -516,14 +516,17 @@ public class ObjectManager
 		ScriptConfig scriptCfg = globalScripts.get(session, function, false);
 		if(scriptCfg != null) {
 			if(session.getUserProfile().canExecute("rb.scripts." + function) || session.getUserProfile().canExecute("rb.accesscat." + scriptCfg.getAccessCategory())) {
-				DomainScriptLogger domainScriptLogger = scriptCfg.getDomain() != null ? new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info") : null;	
+				DomainScriptLogger domainScriptLogger = null;	
 				try {
 					ScriptContext context = session.getScriptContext().createChild();
 					context.put("param", param);
-					if(domainScriptLogger != null) {
+					if(scriptCfg.getDomain() != null) {
+						domainScriptLogger = new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info");
 						context.declare("log", domainScriptLogger);
 						context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, scriptCfg.getDomain()));
 						context.put("ic", new IntegrationClientJSWrapper(getIntegrationClient(), session, scriptCfg.getDomain()));
+					} else {
+						context.put("ic", new IntegrationClientJSWrapper(getIntegrationClient(), session));
 					}
 					session.pushScriptLevel();
 					ret = scriptCfg.execute(context);

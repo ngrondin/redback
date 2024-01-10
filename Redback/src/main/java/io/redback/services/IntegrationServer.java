@@ -130,11 +130,6 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 						response = new DataMap("result", "ok");
 					}
 				}
-				else if(action.equals("clearcacheddata"))
-				{
-					clearCachedClientData(session, client, domain);
-					response = new DataMap("result", "ok");
-				}
 				else
 				{
 					throw new RedbackException("No object was provided");
@@ -180,7 +175,5 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 	protected abstract String getLoginUrl(Session session, String name, String domain) throws RedbackException;
 	
 	protected abstract void exchangeAuthCode(Session session, String name, String domain, String code, String state) throws RedbackException;
-	
-	protected abstract void clearCachedClientData(Session session, String name, String domain) throws RedbackException;
 
 }

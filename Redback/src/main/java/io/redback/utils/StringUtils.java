@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
@@ -19,6 +20,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeMessage;
 
 import io.firebus.data.DataEntity;
@@ -485,5 +487,11 @@ public class StringUtils
     	Matcher matcher = htmlPattern.matcher(str);
     	String ret = matcher.replaceAll("");
     	return ret;
+    }
+    
+    public static Date parseMailDate(String str) throws ParseException {
+    	MailDateFormat mdf = new MailDateFormat();
+    	Date dt = mdf.parse(str);
+    	return dt;
     }
 }

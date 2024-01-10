@@ -145,6 +145,17 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 						throw new RuntimeException("Error stripping html", e);
 					}
 				}
+			};		
+		} else if(key.equals("parseMailDate")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						String str = (String)arguments[0];
+						return StringUtils.parseMailDate(str);
+					} catch(Exception e) {
+						throw new RuntimeException("Error parsing Mail date", e);
+					}
+				}
 			};				
 		} else {	
 			return null;

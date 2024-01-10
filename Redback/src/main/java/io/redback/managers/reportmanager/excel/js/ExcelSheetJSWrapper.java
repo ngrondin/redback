@@ -1,32 +1,25 @@
 package io.redback.managers.reportmanager.excel.js;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.reportmanager.excel.CellFormatter;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
+import jxl.CellView;
+import jxl.write.DateTime;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.WritableCellFormat;
-import jxl.CellView;
-import jxl.format.Colour;
-import jxl.write.DateTime;
 import jxl.write.WritableSheet;
 
 
 public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 	protected WritableSheet sheet;
-	protected Map<String, Colour> colourMap;
 	
 	public ExcelSheetJSWrapper(WritableSheet s) {
 		super(new String[] {"setCell"});
 		sheet = s;
-		colourMap = new HashMap<String, Colour>();
-		colourMap.put("YELLOW", Colour.YELLOW);
-		colourMap.put("RED", Colour.RED);
-		colourMap.put("GREEN", Colour.GREEN);
 	}
 	
 	public Object get(String key) {
@@ -34,12 +27,7 @@ public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					try {
-						WritableCellFormat wcf = new WritableCellFormat();
-						if(arguments.length >= 4 && arguments[3] != null) {
-							Colour c = colourMap.get(arguments[3]);
-							if(c != null)
-								wcf.setBackground(c);
-						}
+						WritableCellFormat wcf = CellFormatter.createFormat(arguments.length >= 4 ? arguments[3] : null);
 						int col = ((Long)arguments[0]).intValue();
 						int row = ((Long)arguments[1]).intValue();
 						if(arguments[2] instanceof java.lang.Number) {
@@ -70,7 +58,22 @@ public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 						sheet.setColumnView(col, cv);
 						return null;
 					} catch(Exception e) {
-						throw new RuntimeException("Error setting cell value", e);
+						throw new RuntimeException("Error setting col width", e);
+					}
+				}
+			};
+		} else if(key.equals("setRowHeight")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						int row = ((Long)arguments[0]).intValue();
+						int height = ((Long)arguments[1]).intValue() * 128;
+						CellView cv = new CellView();
+						cv.setSize(height);
+						sheet.setRowView(row, cv);
+						return null;
+					} catch(Exception e) {
+						throw new RuntimeException("Error setting row height", e);
 					}
 				}
 			};

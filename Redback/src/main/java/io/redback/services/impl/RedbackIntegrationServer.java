@@ -54,8 +54,4 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	protected void exchangeAuthCode(Session session, String name, String domain, String code, String state) throws RedbackException {
 		integrationManager.exchangeAuthCode(session, name, domain, code, state);		
 	}
-	
-	protected void clearCachedClientData(Session session, String client, String domain) throws RedbackException {
-
-	}
 }

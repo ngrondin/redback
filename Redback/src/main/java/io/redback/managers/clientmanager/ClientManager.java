@@ -100,22 +100,38 @@ public class ClientManager extends Thread {
 			dataClient.putData(userCollection.getName(), userCollection.convertObjectToSpecific(key), userCollection.convertObjectToSpecific(data));
 		}			
 	}
+
 	
 	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, String fcmToken, boolean nfcAvailable, String screenSize, String username) throws RedbackException {
 		if(deviceCollection != null && dataClient != null) {
 			DataMap key = new DataMap("_id", deviceId);
-			DataMap data = new DataMap();
-			data.put("model", deviceModel);
-			data.put("os", os);
-			data.put("app", appVersion);
-			data.put("locationpermissions", locationPermissions);
-			data.put("notifauthorized", fcmToken != null);
-			data.put("fcmtoken", fcmToken);
-			data.put("nfcavailable", nfcAvailable);
-			data.put("screen", screenSize);
-			data.put("username", username);
-			data.put("lastlogin", new Date());
-			dataClient.putData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key), deviceCollection.convertObjectToSpecific(data));
+			DataMap resp = dataClient.getData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key));
+			DataMap existingData = resp.containsKey("result") && resp.getList("result").size() > 0 ? resp.getList("result").getObject(0) : null;
+			DataList newHistory = new DataList();
+			DataMap newData = new DataMap();
+			registerDeviceUpdateData("model", existingData, deviceModel, newData, newHistory);
+			registerDeviceUpdateData("os", existingData, os, newData, newHistory);
+			registerDeviceUpdateData("app", existingData, appVersion, newData, newHistory);
+			registerDeviceUpdateData("locationpermissions", existingData, locationPermissions, newData, newHistory);
+			registerDeviceUpdateData("fcmtoken", existingData, fcmToken, newData, newHistory);
+			registerDeviceUpdateData("nfcavailable", existingData, nfcAvailable, newData, newHistory);
+			registerDeviceUpdateData("screen", existingData, screenSize, newData, newHistory);
+			registerDeviceUpdateData("username", existingData, username, newData, newHistory);
+			newData.put("lastlogin", new Date());
+			if(newHistory.size() > 0) {
+				DataList history = existingData != null && existingData.containsKey("history") ? existingData.getList("history") : new DataList();
+				for(int i = 0; i < newHistory.size(); i++)
+					history.add(newHistory.getObject(i));
+				newData.put("history", history);
+			}
+			dataClient.putData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key), deviceCollection.convertObjectToSpecific(newData));
+		}
+	}
+	
+	private void registerDeviceUpdateData(String key, DataMap existingData, Object newVal, DataMap newData, DataList history) {
+		if(newVal != null && (existingData == null || (existingData != null && !existingData.get(key).equals(newVal)))) {
+			newData.put(key, newVal);
+			history.add(new DataMap("date", new Date(), "key", key, "value", newVal));
 		}
 	}
 	

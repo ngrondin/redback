@@ -86,16 +86,20 @@ public class IntegrationManager {
 	}
 	
 	protected DataMap getClientData(Session session, String name, String domain) throws RedbackException {
-		DataMap clientData = null;
-		DataMap filter = new DataMap();
-		filter.put("name", name);
-		filter.put("domain", domain);
-		DataMap resp = dataClient.getData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(filter), null);
-		if(resp != null && resp.getList("result") != null && resp.getList("result").size() > 0) {
-			clientData = resp.getList("result").getObject(0);
-			return clientData;
+		if(session.hasAccessToDomain(domain)) {
+			DataMap clientData = null;
+			DataMap filter = new DataMap();
+			filter.put("name", name);
+			filter.put("domain", domain);
+			DataMap resp = dataClient.getData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(filter), null);
+			if(resp != null && resp.getList("result") != null && resp.getList("result").size() > 0) {
+				clientData = resp.getList("result").getObject(0);
+				return clientData;
+			} else {
+				throw new RedbackException("Could not find tokens for client " + name + " and domain " + domain);
+			}			
 		} else {
-			throw new RedbackException("Could not find tokens for client " + name + " and domain " + domain);
+			throw new RedbackException("No access to domain " + domain);
 		}
 	}
 

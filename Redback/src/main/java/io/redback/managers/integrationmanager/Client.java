@@ -67,15 +67,18 @@ public class Client {
 	}
 	
 	protected String completeUrl(String url) {
+		String fullUrl;
 		if(url.startsWith("http://") || url.startsWith("https://")) {
-			return url;
+			fullUrl = url;
 		} else {
-			String fullUrl = config.baseUrl;
+			fullUrl = config.baseUrl;
 			if(!fullUrl.endsWith("/"))
 				fullUrl = fullUrl + "/";
 			fullUrl = fullUrl + (url.startsWith("/") ? url.substring(1) : url);
-			return fullUrl;
 		}
+		if(fullUrl.endsWith("/"))
+			fullUrl = fullUrl.substring(0, fullUrl.length() - 1);
+		return fullUrl;
 	}
 	
 

@@ -78,7 +78,8 @@ public class FileClientJSWrapper extends ObjectJSWrapper {
 					String filename = arguments[0].toString();
 					String mime = arguments[1].toString();
 					String base64 = arguments[2].toString();
-					byte[] bytes = Base64.getDecoder().decode(base64);
+					boolean isUrlEncoded = arguments.length >= 4 ? (boolean)arguments[3] : false;
+					byte[] bytes = isUrlEncoded ? Base64.getUrlDecoder().decode(base64) : Base64.getDecoder().decode(base64);
 					RedbackFileMetaData md = fileClient.putFile(session, filename, mime, session.getUserProfile().getUsername(), bytes);
 					DataMap ret = new DataMap();
 					ret.put("thumbnail", md.thumbnail);
