@@ -129,7 +129,7 @@ public class ClientManager extends Thread {
 	}
 	
 	private void registerDeviceUpdateData(String key, DataMap existingData, Object newVal, DataMap newData, DataList history) {
-		if(newVal != null && (existingData == null || (existingData != null && !existingData.get(key).equals(newVal)))) {
+		if(newVal != null && (existingData == null || (existingData != null && !newVal.equals(existingData.get(key))))) {
 			newData.put(key, newVal);
 			history.add(new DataMap("date", new Date(), "key", key, "value", newVal));
 		}

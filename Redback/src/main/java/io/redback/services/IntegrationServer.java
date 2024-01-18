@@ -1,14 +1,14 @@
 package io.redback.services;
 
+import java.net.URLDecoder;
 import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.information.ServiceInformation;
 import io.firebus.data.DataEntity;
-import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.information.ServiceInformation;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
@@ -40,7 +40,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 				if(domain == null) domain = session.getUserProfile().getDefaultDomain();
 				String response = null;
 				if(code == null) {
-					String client = get.startsWith("/") ? get.substring(1) : get;
+					String client = URLDecoder.decode((get.startsWith("/") ? get.substring(1) : get), "UTF-8");
 					String redirect = getLoginUrl(session, client, domain);
 					response = "<html><body><script>window.location='" + redirect + "';</script></body></html>";
 				} else {
@@ -147,7 +147,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 			}		
 
 		}
-		catch(DataException e)
+		catch(Exception e)
 		{
 			throw new RedbackException("Error in integration server", e);
 		}		

@@ -5,12 +5,63 @@
     overflow: hidden;
 }
 
-rb-scroll ::ng-deep .rb-scroll-content {
+.rb-funnel-hscroll ::ng-deep .rb-scroll-content {
     display: flex;
     flex-direction: row; 
     height: 100%;
     width: fit-content;
     min-width: 100%;
+}
+
+.rb-funnel-hscroll-content {
+    display: flex;
+    flex-direction: row; 
+}
+
+.rb-funnel-phasegroup {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.rb-funnel-phasegroup-title {
+    display: inline-block;
+    flex: 0 0 auto;
+    margin: var(--v5px) var(--v5px) 0px var(--v5px);
+    padding: var(--v10px) var(--v8px) var(--v10px) var(--v16px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    align-items: center;
+    background-color: grey;
+    color: white;
+    border-radius: var(--v3px);
+    cursor: pointer;
+}
+
+.rb-funnel-phasegroup-closed {
+    display: inline-block;
+    flex: 1 1 auto;
+    margin: var(--v5px) var(--v5px) var(--v5px) var(--v5px);
+    padding: var(--v10px) var(--v8px) var(--v10px) var(--v16px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    align-items: center;
+    background-color: grey;
+    color: white;
+    border-radius: var(--v3px);
+    text-orientation: sideways-right;
+    writing-mode: sideways-lr;
+    width: var(--v24px);
+    cursor: pointer;
+}
+
+.rb-funnel-phasegroup-content {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    overflow: hidden;
 }
 
 .rb-funnel-phase {
@@ -41,6 +92,17 @@ rb-scroll ::ng-deep .rb-scroll-content {
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: auto;
+}
+
+.rb-funnel-vscroll ::ng-deep .rb-scroll-content {
+    width: 100%;
+    height:fit-content;
+}
+
+.rb-funnel-vscroll-content {
+    display: flex;
+    flex-direction: column; 
+    width: 100%;
 }
 
 .rb-funnel-group {
