@@ -2,79 +2,77 @@
     display: flex;
     flex-direction: row;
     overflow: hidden;
-    max-height: 30vw;
-}
-
-.rb-tl-container {
-    display: flex;
-    flex-direction: column;
-    padding-top: 16px;
+    max-width: 30vw;
 }
 
 .rb-tl-entry {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 }
 
-.rb-tl-daterow {
+
+.rb-tl-datecol {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    width: 5vw;
+    align-items: end;
 }
 
 .rb-tl-date {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;    
-    flex: 0 0 auto;
-    width: 100px;
-    margin: 0px 16px 0px 0px;
-    font-size: 0.75rem;
-    color:#999;
+    height: var(--v16px);
 }
 
+.rb-tl-date-textfocus {
+    font-size: 0.85rem;
+    color:#333;
+    margin: 0px;
+}
 
-.rb-tl-timerow {
-    display: flex;
-    flex-direction: row;
+.rb-tl-date-textnofocus {
+    font-size: 0.75rem;
+    color:#999;
+    margin: 0px;
 }
 
 .rb-tl-time {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    flex: 0 0 auto;
-    width: 100px;
-    margin: 0px 16px 20px 0px;
+    height: var(--v20px);
+}
+
+.rb-tl-time-textfocus {
     color: #333;
     font-size: 0.9rem;
     font-weight: 500;
+    margin: 0px;
 }
 
-.rb-tl-line {
+.rb-tl-time-textnofocus {
+    color: #999;
+    font-size: 0.8rem;
+    font-weight: 200;
+    margin: 0px;
+}
+
+
+.rb-tl-linecol {
     display: flex;
     flex-direction: column;
-    width: 20px;
+    width: 1.2vw;
     align-items: center;
+    margin-left: var(--v12px);
+    margin-right: var(--v12px);
 }
 
-.rb-tl-lineendtop {
+.rb-tl-lineend {
     display: flex;
     flex: 1 1 0;
     border-width: 2px;
     border-style: solid;
 }
 
-.rb-tl-lineendbottom {
-    display: flex;
-    flex: 1 1 16px;
-    border-width: 2px;
-    border-style: solid;
-}
 
 .rb-tl-linecolor {
-    border-color: #3f51b5;
+    /*border-color: #3f51b5;*/
+    border-color: var(--primary-color)
 }
 
 .rb-tl-linenocolor {
@@ -84,7 +82,8 @@
 .rb-tl-linecircle0 {
     display: flex;
     flex: 0 0 auto;
-    border: 3px solid #3f51b5;
+    border: 3px solid;
+    border-color: var(--primary-color);
     border-radius: 8px;
     width: 12px;
     height: 12px;
@@ -93,18 +92,19 @@
 .rb-tl-linecircle1 {
     display: flex;
     flex: 0 0 auto;
-    background: #3f51b5;
+    background: var(--primary-color);
     border-radius: 6px;
     width: 7px;
     height: 7px;
 }
 
-.rb-tl-detail {
+
+.rb-tl-detailcol {
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
-    margin: 0px 16px 20px 16px;
-    min-width: 100px;
+    justify-content: center;
+    min-width: 6vw;
 }
 
 .rb-tl-main {
@@ -112,7 +112,7 @@
     color: #333;
     font-size: 0.9rem;
     white-space: nowrap;
-    max-width: 25vw;
+    max-width: 15vw;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -122,7 +122,7 @@
     color: grey;
     font-size: 0.80rem;
     white-space: nowrap;
-    max-width: 25vw;
+    max-width: 20vw;
     overflow: hidden;
     text-overflow: ellipsis;
 }

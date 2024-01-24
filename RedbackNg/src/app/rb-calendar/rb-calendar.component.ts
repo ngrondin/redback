@@ -230,6 +230,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
         let label = obj.get(cfg.labelAttribute);
         let date = new Date(obj.get(cfg.dateAttribute));
         let color = 'white';
+        let icon = null;
         if(cfg.colorAttribute != null) {
           if(cfg.colorMap != null) {
             color = cfg.colorMap[obj.get(cfg.colorAttribute)];
@@ -238,8 +239,11 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
           }
         } else if(cfg.color != null) {
           color = cfg.color;
-        }       
-        let entry = new CalendarEntry(obj.uid, label, date, color, obj, cfg);
+        }  
+        if(cfg.icon != null) { // TODO: Placeholder for icon map, same as color
+          icon = cfg.icon;
+        }     
+        let entry = new CalendarEntry(obj.uid, icon, label, date, color, obj, cfg);
         this.putEntryInData(entry);
       }
     }

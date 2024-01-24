@@ -151,9 +151,10 @@ export class RbObject {
             if(attr.indexOf('.') == -1) {
                 ret = this.related[attr];
             } else {
-                let root = attr.substring(0, attr.lastIndexOf("."));
-                let related = this.getRelated(root);
-                return related.related[attr.substring(attr.lastIndexOf(".") + 1)];
+                let firstRelated = this.related[attr.substring(0, attr.indexOf("."))];
+                if(firstRelated != null) {
+                    ret = firstRelated.getRelated(attr.substring(attr.indexOf(".") + 1));
+                }
             }
         }
         if(typeof ret == 'undefined') ret = null;

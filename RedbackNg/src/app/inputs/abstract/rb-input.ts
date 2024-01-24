@@ -110,20 +110,23 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   }
 
   public get readonly(): boolean {
-    if(this.attribute != null) {
-      if(this.rbObject != null) {
-        if(this.attribute == 'uid') {
-          return this.rbObject.uid != null;
-        } else if(this.rbObject.validation[this.attribute] != null) {
-          return !(this.editable && this.rbObject.validation[this.attribute].editable);
-        } else {
-          return true;      
-        }
+    if(this.editable == false) return true;
+    if(this.attribute == null) return false;
+    if(this.rbObject == null) return true;
+    if(this.attribute == 'uid') {
+      return this.rbObject.uid != null;
+    } else {
+      let targetObj = this.rbObject;
+      let targetAttr = this.attribute;
+      if(this.attribute.indexOf(".") > -1) {
+        targetObj = this.rbObject.getRelated(this.attribute.substring(0, this.attribute.lastIndexOf(".")));
+        targetAttr = this.attribute.substring(this.attribute.lastIndexOf(".") + 1);
+      }
+      if(targetObj != null && targetObj.validation[targetAttr] != null) {
+        return !targetObj.validation[targetAttr].editable;
       } else {
         return true;
       }
-    } else {
-      return !this.editable;
     }
   }
 
@@ -159,11 +162,19 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     if(currentValue != val) {
       if(this.attribute != null) {
         if(this.rbObject != null) {
+          let targetObj = this.rbObject;
+          let targetAttr = this.attribute;
+          if(this.attribute.indexOf(".") > -1) {
+            targetObj = this.rbObject.getRelated(this.attribute.substring(0, this.attribute.lastIndexOf(".")));
+            targetAttr = this.attribute.substring(this.attribute.lastIndexOf(".") + 1);
+          }
+          if(targetObj != null) {
             if(related != null) {
-                return this.rbObject.setValueAndRelated(this.attribute, val, related)
+              return targetObj.setValueAndRelated(targetAttr, val, related)
             } else {
-                return this.rbObject.setValue(this.attribute, val);
+                return targetObj.setValue(targetAttr, val);
             } 
+          }
         }
       } else if(this.variable != null) {
         window.redback[this.variable] = val;

@@ -1,73 +1,73 @@
-<div
-    class="rb-tl-container hscroll">
+<rb-scroll>
     <div
         class="rb-tl-entry"
         *ngFor="let entry of entries">
         <div
-            *ngIf="entry.showDatePart"
-            class="rb-tl-daterow">
+            class="rb-tl-datecol">
             <div
                 class="rb-tl-date">
-                {{entry.date | rbDate}}
+                <p
+                    *ngIf="entry.showDatePart && !reverse"
+                    [class]="datefocus ? 'rb-tl-date-textfocus' : 'rb-tl-date-textnofocus'">
+                    {{entry.date | rbDate}}
+                </p>
             </div>
             <div
-                class="rb-tl-line">
-                <div
-                    [class]="'rb-tl-lineendtop' + (entry.showTopLine ? ' rb-tl-linecolor' : ' rb-tl-linenocolor')">
-                </div>            
+                class="rb-tl-time">
+                <p
+                    *ngIf="entry.showTimePart"
+                    [class]="datefocus ? 'rb-tl-time-textnofocus' : 'rb-tl-time-textfocus'">
+                    {{entry.date | rbTime}}
+                </p>
+            </div>
+            <div
+                class="rb-tl-date">
+                <p
+                    *ngIf="entry.showDatePart && reverse"
+                    [class]="datefocus ? 'rb-tl-date-textfocus' : 'rb-tl-date-textnofocus'">
+                    {{entry.date | rbDate}}
+                </p>
+            </div>                          
+        </div>
+        <div
+            class="rb-tl-linecol">
+            <div
+                [class]="'rb-tl-lineend' + (entry.showTopLine ? ' rb-tl-linecolor' : ' rb-tl-linenocolor')">
+            </div>
+            <div
+                *ngIf="entry.level == 0"
+                class="rb-tl-linecircle0">
+            </div>
+            <div
+                *ngIf="entry.level > 0"
+                class="rb-tl-linecircle1">
+            </div>
+            <div
+                [class]="'rb-tl-lineend' + (entry.showBottomLine ? ' rb-tl-linecolor' : ' rb-tl-linenocolor')">
             </div>
         </div>
         <div
-            class="rb-tl-timerow">
+            class="rb-tl-detailcol">
             <div
-                *ngIf="entry.showTimePart == true"
-                class="rb-tl-time">
-                {{entry.date | rbTime}}
+                class="rb-tl-main">
+                {{entry.main}}
             </div>
             <div
-                *ngIf="entry.showTimePart == false"
-                class="rb-tl-time">
-            </div>
-            <div
-                class="rb-tl-line">
-                <div
-                    [class]="'rb-tl-lineendtop' + (entry.showTopLine ? ' rb-tl-linecolor' : ' rb-tl-linenocolor')">
-                </div>
-                <div
-                    *ngIf="entry.level == 0"
-                    class="rb-tl-linecircle0">
-                </div>
-                <div
-                    *ngIf="entry.level > 0"
-                    class="rb-tl-linecircle1">
-                </div>
-                <div
-                    [class]="'rb-tl-lineendbottom' + (entry.showBottomLine ? ' rb-tl-linecolor' : ' rb-tl-linenocolor')">
-                </div>
-            </div>     
-            <div
-                class="rb-tl-detail">
-                <div
-                    class="rb-tl-main">
-                    {{entry.main}}
-                </div>
-                <div
-                    class="rb-tl-sub">
-                    {{entry.sub}}
-                </div>
-            </div>              
-        </div>
+                class="rb-tl-sub">
+                {{entry.sub}}
+            </div>       
+        </div>      
     </div>
     <div
         class="rb-tl-more"
-        *ngIf="showLevel == 0"
+        *ngIf="showLevel == 0 && maxLevel > 0"
         (click)="showMore()">
         Show more...
     </div>
     <div
         class="rb-tl-more"
-        *ngIf="showLevel > 0"
+        *ngIf="showLevel > 0 && maxLevel > 0"
         (click)="showLess()">
         Show less...
     </div>    
-</div>
+</rb-scroll>

@@ -84,7 +84,13 @@
                         class="rb-cal-item"
                         [style.backgroundColor]="item.color"
                         (click)="clickItem(item)">
-                        {{item.label}}
+                        <mat-icon
+                            *ngIf="item.icon != null">
+                            {{item.icon}}
+                        </mat-icon>
+                        <p>
+                            {{item.label}}
+                        </p>
                     </div>
                 </div>                    
             </div>

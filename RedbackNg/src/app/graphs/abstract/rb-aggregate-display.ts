@@ -59,7 +59,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     }
   
     get xAxisLabel(): String {
-      return this.categories != null ? this.categories.label : this.series.label;
+      return this.categories != null ? this.categories.label : this.series != null ? this.series.label : null;
     }
   
     get yAxisLabel(): String {
@@ -100,8 +100,8 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
       for(let agg of this.aggregates) {
         let thisCat: String = this.categories != null ? this.nullToEmptyString(agg.getDimension(this.categories.dimension)) : null;
         if(cat === null || cat === thisCat) {
-          let code: any = this.nullToEmptyString(agg.getDimension(this.series.dimension));
-          let label: any = this.nullToEmptyString(agg.getDimension(this.series.labelattribute));
+          let code: any = this.series != null ? this.nullToEmptyString(agg.getDimension(this.series.dimension)) : null;
+          let label: any = this.series ? this.nullToEmptyString(agg.getDimension(this.series.labelattribute)) : null;
           if(typeof label == 'string' && label.match(/^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:.\d{1,9})?(?:Z|[+-][01]\d:[0-5]\d)$/)) {
             label = new Date(Date.parse(label));
           }
@@ -112,11 +112,13 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
           series.push({code: code, name: label, label: label, value: value}); //TODO: Tfor legacy reasons
         }
       }
-      let sortKey = this.series.sortby == null || this.series.sortby == 'name' ? 'label' : 'value';
-      let sortDir = this.series.sortdir != null ? this.series.sortdir : 1;
-      series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir));
-      if(this.series.top != null) {
-        series = series.filter((value, index, array) => index < this.series.top);
+      if(this.series != null) {
+        let sortKey = this.series.sortby == null || this.series.sortby == 'name' ? 'label' : 'value';
+        let sortDir = this.series.sortdir != null ? this.series.sortdir : 1;
+        series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir));
+        if(this.series.top != null) {
+          series = series.filter((value, index, array) => index < this.series.top);
+        }  
       }
       return series;
     }
@@ -134,12 +136,14 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
       //console.log("Graph click");
       let dimensionFilter = {};
       const name = event.name;
-      this.aggregates.forEach(agg => {
-        if(name == (agg.getDimension(this.series.labelattribute) || "")) {
-          let dimensionValue = agg.getDimension(this.series.dimension);
-          dimensionFilter[this.series.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
-        }
-      });
+      if(this.series != null) {
+        this.aggregates.forEach(agg => {
+          if(name == (agg.getDimension(this.series.labelattribute) || "")) {
+            let dimensionValue = agg.getDimension(this.series.dimension);
+            dimensionFilter[this.series.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
+          }
+        });  
+      }
       const cat = event.series;
       if(cat != null) {
         this.aggregates.forEach(agg => {

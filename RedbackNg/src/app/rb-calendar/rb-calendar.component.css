@@ -91,10 +91,14 @@
 }
 
 .rb-cal-item {
-    border: 1px solid darkblue;
-    height: var(--v16px);
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    border: 1px solid;
+    border-color: var(--primary-dark-color);
+    height: var(--v24px);
     margin: 2px;
-    padding: var(--v5px);
     background-color: white;
     border-radius: 3px;
     -webkit-touch-callout: none; 
@@ -106,6 +110,15 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     font-size: 0.9rem;
+    color: #333;
+}
+
+.rb-cal-item mat-icon {
+    margin-left: var(--v5px);
+} 
+
+.rb-cal-item p {
+    margin-left: var(--v5px);
 }
 
 .rb-cal-count {

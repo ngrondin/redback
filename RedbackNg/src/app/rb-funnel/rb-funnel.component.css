@@ -52,7 +52,8 @@
     color: white;
     border-radius: var(--v3px);
     text-orientation: sideways-right;
-    writing-mode: sideways-lr;
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
     width: var(--v24px);
     cursor: pointer;
 }

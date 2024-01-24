@@ -92,9 +92,11 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   post() {
-    let data = Object.assign({}, this.dataset.resolvedFilter);
-    data[this.entryattribute] = this.value;
-    this.dataService.create(this.dataset.objectname, null, data).subscribe(() => this.value = "");
+    if(this.value != null && this.value.length > 0) {
+      let data = Object.assign({}, this.dataset.resolvedFilter);
+      data[this.entryattribute] = this.value;
+      this.dataService.create(this.dataset.objectname, null, data).subscribe(() => this.value = "");
+    }
   }
 
   clickCard(object: RbObject) {

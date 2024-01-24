@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, OnInit } from '@angular/core';
 import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { RbObject } from 'app/datamodel';
 import { Formatter } from 'app/helpers';
@@ -10,10 +10,15 @@ import { TimelineEntry, TimelineSeriesConfig } from './rb-timeline-models';
   styleUrls: ['./rb-timeline.component.css']
 })
 export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfig> {
+  @Input('reverse') reverse: boolean = false;
+  @Input('grow') grow: number;
+  @Input('datefocus') datefocus: boolean = false;
+  @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
 
   entries: TimelineEntry[] = [];
   formatter: Formatter = new Formatter();
   showLevel: number = 0;
+  maxLevel: number = 0;
 
   constructor() { 
     super();
@@ -36,11 +41,13 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
 
   calc() {
     this.entries = [];
+    this.maxLevel = 0;
     this.iterateAllLists((object, config) => {
       let main = this.getMain(object, config);
       let sub = this.getSub(object, config);
       let date = new Date(object.get(config.dateAttribute));
       let level = config.level || 0;
+      if(level > this.maxLevel) this.maxLevel = level;
       if(level <= this.showLevel) {
         this.entries.push(new TimelineEntry(date, main, sub, level));
       }
@@ -57,9 +64,11 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
       lastDate = entry.date;
     }
     if(this.entries.length > 0) {
+      if(this.reverse) this.entries.reverse();
       this.entries[0].showTopLine = false;
       this.entries[this.entries.length - 1].showBottomLine = false;
     }
+
   }
 
 
