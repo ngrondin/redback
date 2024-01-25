@@ -115,10 +115,14 @@
 
 .rb-cal-item mat-icon {
     margin-left: var(--v5px);
+    flex: 0 0 auto;
 } 
 
 .rb-cal-item p {
     margin-left: var(--v5px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .rb-cal-count {

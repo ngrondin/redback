@@ -2,8 +2,7 @@
     class="rb-richtext-quillcontainer"
     [style.visibility]="mode == 'editor' ? 'visible' : 'collapse'">
     <div 
-        #quilltoolbar
-        id="quilltoolbar">
+        [id]="'quilltoolbar_' + uniqueId">
         <select class="ql-size">
             <option value="small"></option>
             <option selected></option>
@@ -32,13 +31,11 @@
         <button class="ql-image"></button>
     </div>
     <div
-        #quilleditor
-        id="quilleditor"
+        [id]="'quilleditor_' + uniqueId"
         [style.visibility]="!readonly  ? 'visible' : 'collapse'">
     </div>
     <div
-        #readonlydiv
-        id="readonlydiv"
+        [id]="'readonlydiv_' + uniqueId"
         class="rb-richtext-readonlyviewer"
         [style.visibility]="readonly  ? 'visible' : 'collapse'"
         [innerHTML]="safeHtml">

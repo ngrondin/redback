@@ -15,14 +15,6 @@ declare var Quill: any;
 export class RbRichtextInputComponent extends RbFieldInputComponent {
   @Input('allowswitch') allowswitch: boolean = false;
   editor: any = null;
-  editorconfig: any = {
-    modules: {
-      toolbar: {
-        container: "#quilltoolbar"
-      }
-    },
-    theme: 'snow'
-  };
   codeconfig: any = {
     printMargin: false
   }
@@ -30,6 +22,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   codeSource: string = null;
   safeHtml: SafeHtml = null;
   domSanitizer: DomSanitizer = null;
+  uniqueId: number = Math.round(1000 * Math.random());
 
   constructor(
     public apiService: ApiService
@@ -67,7 +60,14 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
 
   initiateQuill() {
     if(this.active && this.editor == null) {
-      this.editor = new Quill('#quilleditor', this.editorconfig);
+      this.editor = new Quill('#quilleditor_' + this.uniqueId, {
+        modules: {
+          toolbar: {
+            container: "#quilltoolbar_" + this.uniqueId
+          }
+        },
+        theme: 'snow'
+      });
       this.editor.root.addEventListener("focus", ($event) => {
         this.onFocus($event);
       });      
