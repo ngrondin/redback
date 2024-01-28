@@ -13,6 +13,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
   @Input('reverse') reverse: boolean = false;
   @Input('grow') grow: number;
   @Input('datefocus') datefocus: boolean = false;
+  @Input('wide') wide: boolean = false;
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
 
   entries: TimelineEntry[] = [];

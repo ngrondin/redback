@@ -47,7 +47,7 @@
             </div>
         </div>
         <div
-            class="rb-tl-detailcol">
+            [class]="'rb-tl-detailcol ' + (wide ? 'rb-tl-detailcol-wide' : 'rb-tl-detailcol-narrow')">
             <div
                 class="rb-tl-main">
                 {{entry.main}}

@@ -3,6 +3,8 @@
     flex-direction: row;
     overflow: hidden;
     max-width: 30vw;
+    margin-left: var(--v8px);
+    margin-right: var(--v8px);
 }
 
 .rb-tl-entry {
@@ -71,7 +73,6 @@
 
 
 .rb-tl-linecolor {
-    /*border-color: #3f51b5;*/
     border-color: var(--primary-color)
 }
 
@@ -102,9 +103,17 @@
 .rb-tl-detailcol {
     display: flex;
     flex-direction: column;
-    flex: 1 1 0;
+    /*flex: 1 1 0;*/
     justify-content: center;
     min-width: 6vw;
+}
+
+.rb-tl-detailcol-narrow {
+    width: 10vw;
+}
+
+.rb-tl-detailcol-wide {
+    width: 20vw;
 }
 
 .rb-tl-main {
