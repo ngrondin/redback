@@ -73,7 +73,8 @@
 
 
 .rb-tl-linecolor {
-    border-color: var(--primary-color)
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
 }
 
 .rb-tl-linenocolor {
@@ -103,9 +104,9 @@
 .rb-tl-detailcol {
     display: flex;
     flex-direction: column;
-    /*flex: 1 1 0;*/
     justify-content: center;
     min-width: 6vw;
+    padding-right: var(--v12px);
 }
 
 .rb-tl-detailcol-narrow {

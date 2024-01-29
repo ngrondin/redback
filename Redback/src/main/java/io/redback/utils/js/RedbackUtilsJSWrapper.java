@@ -156,6 +156,18 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 						throw new RuntimeException("Error parsing Mail date", e);
 					}
 				}
+			};	
+		} else if(key.equals("sleep")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						long ms = (long)arguments[0];
+						Thread.sleep(ms);
+						return null;
+					} catch(Exception e) {
+						throw new RuntimeException("Error parsing Mail date", e);
+					}
+				}
 			};				
 		} else {	
 			return null;

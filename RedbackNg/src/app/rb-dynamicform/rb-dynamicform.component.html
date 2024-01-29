@@ -178,11 +178,33 @@
                 [object]="object"
                 [attribute]="valueattribute"
                 [size]="8"
-                [icon]="'description'"
+                
                 [label]="object.get(labelattribute)"
                 [editable]="isEditable">
             </rb-number-input>
         </div>
+        <div
+            class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'currency'">
+            <rb-currency-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [size]="12"
+                [label]="object.get(labelattribute)"
+                [editable]="isEditable">
+            </rb-currency-input>
+        </div>
+        <div
+            class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'url'">
+            <rb-url-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [size]="30"
+                [label]="object.get(labelattribute)"
+                [editable]="isEditable">
+            </rb-url-input>
+        </div>                
         <div
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'infoonly'">

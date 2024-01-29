@@ -133,6 +133,12 @@ rb-scroll ::ng-deep .rb-scroll-content {
     font-size: 0.75rem;
     line-height: var(--v16px);
     min-height: var(--v16px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* number of lines to show */
+            line-clamp: 2;
+    -webkit-box-orient: vertical;    
 }
 
 .rb-list-divider {

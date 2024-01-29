@@ -52,7 +52,8 @@ export class RbDynamicformComponent extends RbDataObserverComponent {
   getTypeOf(object: RbObject) : string {
     if(this.typeattribute != null) {
       let type = object.get(this.typeattribute);
-      if(type == 'string' || type == 'textarea' || type == 'choice' || type == 'files' || type == 'checkbox' || type == 'signature' || type == 'number' || type == 'date' || type == 'phone' || type == 'address' || type == 'email' || type == 'photos' || type == 'videos' || type == 'infoonly') {
+      const validTypes = ['string', 'textarea', 'choice', 'files', 'checkbox', 'signature', 'number', 'date', 'phone', 'address', 'email', 'currency', 'url', 'photos', 'videos', 'infoonly'];
+      if(validTypes.indexOf(type) > -1) {
         return type;
       } else {
         return 'unknown';
