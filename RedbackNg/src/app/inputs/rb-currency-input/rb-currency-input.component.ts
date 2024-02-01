@@ -35,11 +35,13 @@ export class RbCurrencyInputComponent extends RbFieldInputComponent  {
   }
 
   public finishEditing() {
-    let val = parseFloat(this.editedValue);
-    if(isNaN(val)) {
-      val = null;
+    if(this.hadUserEdit) {
+      let val = parseFloat(this.editedValue);
+      if(isNaN(val)) {
+        val = null;
+      }
+      this.commit(val);  
     }
-    this.commit(val);
     super.finishEditing()
   }
 }

@@ -50,11 +50,6 @@ export class RbAddressInputComponent extends RbPopupInputComponent {
     return cfg;
   }
 
-  /*public startEditing() {
-    super.startEditing();
-    this.editedValue = this.rbObject.get(this.attribute);
-  }*/
-
   public onKeyTyped(keyCode: number) {
     super.onKeyTyped(keyCode);
     if((keyCode == 8 || keyCode == 27) && this.editedValue == "") {

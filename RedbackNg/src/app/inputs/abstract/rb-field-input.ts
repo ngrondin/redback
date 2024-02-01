@@ -50,7 +50,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
       event.target.blur();
     } else if(event.keyCode == 27) {
       this.cancelEditing();
-    } else {
+    } else if(event.keyCode != 9) {
       this.hadUserEdit = true;
     }
   }
@@ -125,13 +125,12 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
   checkPersistedValueChangedWhileEditing() {
     if(this.isEditing == true && this.hadUserEdit == false) {
       if(this.value != this.originalValue) {
-        console.log("Value Changed from " + this.originalValue + " to " + this.value);
+        //console.log("Value Changed from " + this.originalValue + " to " + this.value);
         this.originalValue = this.value;
         this.initEditedValue();
-        setTimeout(() => this.input.element.nativeElement.select(), 100);
+        setTimeout(() => this.input.element.nativeElement.select(), 10);
       }
       setTimeout(() => this.checkPersistedValueChangedWhileEditing(), 250);
-      console.log("Checked");
     }
   }
 }

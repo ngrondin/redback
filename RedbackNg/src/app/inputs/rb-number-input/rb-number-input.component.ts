@@ -25,7 +25,9 @@ export class RbNumberInputComponent extends RbFieldInputComponent {
   }
 
   public finishEditing() {
-    this.commit(parseFloat(this.editedValue));
+    if(this.hadUserEdit) {
+      this.commit(parseFloat(this.editedValue));
+    }
     super.finishEditing();
   }
 }

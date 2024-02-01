@@ -35,7 +35,9 @@ export class RbPercentInputComponent  extends RbFieldInputComponent  {
   }
 
   public finishEditing() {
-    this.commit(this.editedValue);
+    if(this.hadUserEdit) {
+      this.commit(this.editedValue);
+    }
     super.finishEditing();
   }
 
