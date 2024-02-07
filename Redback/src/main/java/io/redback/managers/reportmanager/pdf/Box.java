@@ -168,7 +168,7 @@ public class Box {
 			if(vertical) {
 				float y = 0;
 				int i = 0;
-				while(y + children.get(i).height <= bp && i < children.size()) {
+				while(i < children.size() && y + children.get(i).height <= bp) {
 					y += children.get(i).height;
 					i++;
 				}

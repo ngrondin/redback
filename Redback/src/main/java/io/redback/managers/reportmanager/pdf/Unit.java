@@ -105,6 +105,7 @@ public abstract class Unit {
 	protected Map<String, Object> getJSContext(Map<String, Object> context) {
 		Map<String, Object> jsContext = new HashMap<String, Object>();
 		jsContext.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), (Session)context.get("session")));
+		jsContext.put("filter", context.get("filter"));
 		jsContext.put("object", DataSet.convertToScript(context.get("object")));
 		jsContext.put("page", context.get("page"));
 		jsContext.put("vars", context.get("vars"));

@@ -375,9 +375,9 @@ public class ProcessManager
 			process.interrupt(actionner, pi);
 		}
 		else
-		{
+		/*{
 			throw new RedbackInvalidRequestException("The process " + pid + " is not on an interaction node");
-		}
+		}*/
 		Logger.finer("rb.process.interrupt.end", new DataMap("name", pi.getProcessName(), "pid", pid));
 	}
 	
