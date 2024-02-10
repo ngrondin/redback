@@ -107,7 +107,7 @@ public class CollectionConfig {
 	
 	public DataMap getData(DataMap canonicalFilter, int page, int pageSize) throws RedbackException {
 		DataMap filter = convertObjectToSpecific(canonicalFilter);
-		DataMap resp = dataClient.getData(getName(), filter);
+		DataMap resp = dataClient.getData(getName(), filter, null, page, pageSize);
 		DataMap canonicalResp = null;
 		if(resp.containsKey("result")) {
 			DataList respList = resp.getList("result");
