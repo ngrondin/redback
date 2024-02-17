@@ -31,6 +31,7 @@ export class RbDynamicformeditorComponent extends RbDataCalcComponent<DynamicFor
     {name: "Checkbox",    value: "checkbox",  icon: "check_box",      is: "item"},
     {name: "Choice",      value: "choice",    icon: "list",           is: "item"},
     {name: "Date",        value: "date",      icon: "calendar_month", is: "item"},
+    {name: "Time",        value: "time",      icon: "schedule",       is: "item"},
     {name: "Number",      value: "number",    icon: "pin",            is: "item"},
     {name: "Photo",       value: "photos",    icon: "photo_camera",   is: "item"},
     {name: "Video",       value: "videos",    icon: "videocam",       is: "item"},

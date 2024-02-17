@@ -101,7 +101,21 @@
                 [editable]="isEditable"
                 (change)="calcSortedVisibleList()">
             </rb-datetime-input>
-        </div>         
+        </div>
+        <div
+            class="rb-df-lineinput rb-df-headspace"
+            *ngIf="getTypeOf(object) == 'time'">
+            <rb-datetime-input
+                [object]="object"
+                [attribute]="valueattribute"
+                [size]="15"
+                [format]="'HH:mm'"
+                [icon]="'schedule'"
+                [label]="object.get(labelattribute)"
+                [editable]="isEditable"
+                (change)="calcSortedVisibleList()">
+            </rb-datetime-input>
+        </div>                   
         <div
             class="rb-df-lineinput rb-df-headspace"
             *ngIf="getTypeOf(object) == 'files' || getTypeOf(object) == 'photos' || getTypeOf(object) == 'videos'">

@@ -6,7 +6,6 @@ import { Observable, Subscription } from 'rxjs';
 import { RbNotification } from 'app/datamodel';
 import { Evaluator } from 'app/helpers';
 import { ActionService } from 'app/services/action.service';
-import { RbButtonComponent } from 'app/clickable/rb-button/rb-button';
 import { PopupService } from 'app/services/popup.service';
 import { RbPopupActionsComponent } from 'app/popups/rb-popup-actions/rb-popup-actions.component';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
@@ -16,13 +15,13 @@ import { RbDataButtonComponent } from '../abstract/rb-databutton';
 export class RbActiongroupAction {
   action: string;
   target: string;
-  param: string;
+  param: any;
   timeout: number;
   label: string;
   confirm: string;
   focus: boolean;
 
-  constructor(a: string, t: string, p: string, to:number, l: string, c: string, f: boolean) {
+  constructor(a: string, t: string, p: any, to:number, l: string, c: string, f: boolean) {
     this.action = a;
     this.target = t;
     this.param = p;
@@ -41,8 +40,9 @@ export class RbActiongroupAction {
 export class RbActiongroupComponent extends RbDataButtonComponent {
   @Input('actions') actions: any;
   @Input('menucategory') menucategory: string;
-  @Input('domaincategory') domaincategory: string;
+  @Input('domaincategory') domaincategory: string; // Decrecated
   @Input('showprocessinteraction') showprocessinteraction: boolean = false;
+  @Input('script') script: string = null;
   @Input('round') round: boolean = false;
   @Input('hideonempty') hideonempty: boolean = false;
   
@@ -51,6 +51,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
   notification: RbNotification;
   notificationRetreived: boolean = false;
   notificationSubscription: Subscription;
+  scriptActions: any[];
   
   popupComponentRef: ComponentRef<RbPopupComponent>;
 
@@ -97,11 +98,11 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
 
   onDatasetEvent(event: any) {
     if(event == 'select') {
-      if(this.showprocessinteraction) {
-        this.getNotificationThenCalcActions().subscribe(() => {});
-      } else {
-        this.calcActionData();
-      }
+      this.getNotification().subscribe(() => {
+        this.getScriptActions().subscribe(() => {
+          this.calcActionData();
+        })
+      });
     } else if(event == 'update') {
       this.calcActionData();
     } else if(event == 'clear') {
@@ -154,9 +155,10 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
   click() {
     if(this.popupComponentRef == null) {
       if(this.showprocessinteraction && this.notificationRetreived == false && this.rbObject != null) {
-        this.getNotificationThenCalcActions().subscribe(() => {
+        this.getNotification().subscribe(() => {
+          this.calcActionData();
           this.openPopup();
-        });
+        });        
       } else {
         this.openPopup();
       }
@@ -195,6 +197,12 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         }
       });
     }
+    if(this.scriptActions != null) {
+      for(const item of this.scriptActions) {
+        let param = {action: "'" + item.action + "'", objectname: "'" + this.rbObject?.objectname + "'", uid: "'" + this.rbObject?.uid + "'"};
+        this.actionData.push(new RbActiongroupAction("executeglobal", this.script, param, 10000, item.label, null, false));
+      }
+    }
     if(this.domainActions != null) {
       this.domainActions.forEach(item => {
         this.actionData.push(item);
@@ -202,15 +210,43 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     }
   }
 
-  private getNotificationThenCalcActions() : Observable<null> {
+  private getNotification() : Observable<null> {
     const obs = new Observable<null>((observer) => {
-      if(this.rbObject != null) {
+      if(this.showprocessinteraction == true && this.rbObject != null) {
         this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => {
           this.notification = notif;
           this.notificationRetreived = true;
-          this.calcActionData();
-          observer.complete()
+          observer.next();
+          observer.complete();
+        }, (error) => {
+          observer.error(error);
         });
+      } else {
+        observer.next();
+        observer.complete();
+      }
+    });
+    return obs;
+  }
+
+  private getScriptActions() : Observable<null> {
+    const obs = new Observable<null>((observer) => {
+      if(this.script != null) {
+        let param = {action:"listactions"};
+        if(this.rbObject != null) {
+          param['objectname'] = this.rbObject.objectname;
+          param['uid'] = this.rbObject.uid;
+        }
+        this.apiService.executeGlobal(this.script, param).subscribe(resp => {
+          this.scriptActions = resp.data.list;
+          observer.next();
+          observer.complete();
+        }, (error) => {
+          observer.error(error);
+        });
+      } else {
+        observer.next();
+        observer.complete();
       }
     });
     return obs;

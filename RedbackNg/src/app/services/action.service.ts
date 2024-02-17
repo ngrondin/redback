@@ -200,7 +200,7 @@ export class ActionService {
     });
   }
 
-  public executeGlobal(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
+  public executeGlobal(dataset: RbDatasetComponent, functionName: string, functionParams: any, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       let paramResolved = {};
       if(functionParams != null) {
