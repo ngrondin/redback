@@ -64,6 +64,41 @@ public class FirebusJSWrapper extends ObjectJSWrapper
 					}
 				}
 			};
+		} else if(key.equals("publish")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String name = (String)arguments[0];
+					DataMap requestObject = (DataMap)(arguments[1]);
+					DataMap metaData = (DataMap)(arguments.length >= 3 ? arguments[2] : null);
+					if(name != null)
+					{
+						try
+						{
+							Payload request = new Payload(requestObject);
+							request.metadata.put("token", session.getToken());
+							request.metadata.put("session", session.getId());
+							if(metaData != null) 
+							{
+								Iterator<String> it = metaData.keySet().iterator();
+								while(it.hasNext()) {
+									String key = it.next();
+									request.metadata.put(key, metaData.getString(key));
+								}
+							}
+							firebus.publish(name, request);
+						}
+						catch(Exception e)
+						{
+							throw new RedbackException("Error processing firebus publish", e);
+						}
+					}
+					else
+					{
+						throw new RedbackException("No service name provided in javascript firebus publish");
+					}
+					return null;
+				}
+			};
 		} else {
 			return null;
 		}
