@@ -37,6 +37,16 @@ public class FileClientJSWrapper extends ObjectJSWrapper {
 					return null;
 				}
 			};
+		} else if(key.equals("unLinkFileFrom")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String fileUid = arguments[0].toString();
+					String object = arguments[1].toString();
+					String objectuid = arguments[2].toString();
+					fileClient.unLinkFileFrom(session, fileUid, object, objectuid);
+					return null;
+				}
+			};
 		} else if(key.equals("listFileUidsFor")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

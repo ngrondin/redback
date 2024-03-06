@@ -54,6 +54,7 @@ import { RbDynamicformeditorComponent } from "app/rb-dynamicformeditor/rb-dynami
 import { RbFunnelComponent } from "app/rb-funnel/rb-funnel.component";
 import { RbActionlistComponent } from "app/clickable/rb-actionlist/rb-actionlist.component";
 import { RbUrlInputComponent } from "app/inputs/rb-url-input/rb-url-input.component";
+import { RbStackedGraphComponent } from "app/graphs/rb-stacked-graph/rb-stacked-graph.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -108,6 +109,7 @@ export const componentRegistry = {
     "calendar": RbCalendarComponent,
     "tile": RbTileComponent,
     "numbertiles": RbNumberTilesComponent,
+    "stackedgraph": RbStackedGraphComponent,
     "timeline": RbTimelineComponent,
     "stars": RbStarsInputComponent,
     "percentinput": RbPercentInputComponent,

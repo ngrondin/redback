@@ -142,6 +142,7 @@ import { RbUsermenuComponent } from './rb-usermenu/rb-usermenu.component';
 import { RbNlboxComponent } from './rb-nlbox/rb-nlbox.component';
 import { RbScrollComponent } from './rb-scroll/rb-scroll.component';
 import { RbLinktableComponent } from './rb-linktable/rb-linktable.component';
+import { RbStackedGraphComponent } from './graphs/rb-stacked-graph/rb-stacked-graph.component';
 
 
 
@@ -297,7 +298,8 @@ window.redback = window.redback || {};
         RbUsermenuComponent,
         RbNlboxComponent,
         RbScrollComponent,
-        RbLinktableComponent
+        RbLinktableComponent,
+        RbStackedGraphComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

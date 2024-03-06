@@ -49,6 +49,8 @@ export class InitialsMaker {
 }
 
 export class Formatter {
+    static months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dev"];
+
     public static format(val: any, format: string) {
         if(format == 'duration') {
             return this.formatDuration(val);
@@ -141,6 +143,7 @@ export class Formatter {
             str = format;
             str = str.replace('YYYY', dt.getFullYear().toString());
             str = str.replace('YY', (dt.getFullYear() % 100).toString());
+            str = str.replace('MMM', Formatter.months[dt.getMonth()]);
             str = str.replace('MM', (dt.getMonth() + 1).toString().padStart(2, "0"));
             str = str.replace('DD', (dt.getDate()).toString().padStart(2, "0"));
             str = str.replace('HH', (dt.getHours()).toString().padStart(2, "0"));

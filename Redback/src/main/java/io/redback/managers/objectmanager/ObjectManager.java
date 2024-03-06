@@ -930,7 +930,7 @@ public class ObjectManager
 		while(it.hasNext())
 		{
 			String key = it.next();
-			if(key.equals("$eq")  ||  key.equals("$gt")  ||  key.equals("$gte")  ||  key.equals("$lt")  ||  key.equals("$lte")  ||  key.equals("$ne") || key.equals("$regex"))
+			if(key.equals("$eq")  ||  key.equals("$gt")  ||  key.equals("$gte")  ||  key.equals("$lt")  ||  key.equals("$lte")  ||  key.equals("$ne") || key.equals("$regex") || key.equals("$where"))
 			{
 				dbFilter.put(key, objectFilter.get(key));
 			}

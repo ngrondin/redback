@@ -1,0 +1,16 @@
+<rb-graphs-stacked
+    [data]="graphData"
+    [palette]="colorScheme.domain"
+    [colormap]="colormap"
+    [xlabel]="categories.label"
+    [ylabel]="value.label"
+    [legendlabel]="series.label"
+    (selectitem)="onClick($event)">
+</rb-graphs-stacked> 
+<div
+    class="rb-chart-loadoverlay"
+    *ngIf="isLoading">
+    <mat-spinner
+        diameter="50">
+    </mat-spinner>
+</div>

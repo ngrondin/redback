@@ -111,9 +111,22 @@ public class FileClient extends Client {
 			req.put("uid", uid);
 			requestDataMap(session, req);
 		} catch(Exception e) {
-			throw new RedbackException("Error link files to object", e);
+			throw new RedbackException("Error linking files to object", e);
 		}		
 	}
+	
+	public void unLinkFileFrom(Session session, String fileUid, String object, String uid)  throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "unlink");
+			req.put("fileuid", fileUid);
+			req.put("object", object);
+			req.put("uid", uid);
+			requestDataMap(session, req);
+		} catch(Exception e) {
+			throw new RedbackException("Error unlinking files from object", e);
+		}		
+	}	
 
 	public RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException {
 		try {

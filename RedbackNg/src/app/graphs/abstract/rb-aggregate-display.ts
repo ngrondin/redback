@@ -3,7 +3,7 @@ import { EventEmitter, HostBinding, HostListener, Input, Output } from "@angular
 import { RbDataObserverComponent } from "app/abstract/rb-dataobserver";
 import { AppInjector } from "app/app.module";
 import { RbAggregate } from "app/datamodel";
-import { ValueComparator, Converter } from "app/helpers";
+import { ValueComparator, Converter, Formatter } from "app/helpers";
 import { FilterService } from "app/services/filter.service";
 
 @Component({template: ''})
@@ -82,14 +82,12 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
           let cat = this.nullToEmptyString(agg.getDimension(this.categories.dimension));
           if(cats.indexOf(cat) == -1) {
             cats.push(cat);
-            let category: any = {
-              name: this.nullToEmptyString(agg.getDimension(this.categories.labelattribute)), 
-              series: this.getSeriesDataForCategory(cat)
-            }
-            this.graphData.push(category);
+            let label = this.processLabel(agg.getDimension(this.categories.labelattribute), this.categories.labelformat);
+            let series = this.getSeriesDataForCategory(cat);
+            this.graphData.push({code: cat, name: label, label: label, series: series});
           }
         }
-        this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, 'name')); 
+        this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, 'code')); 
       } else {
         this.graphData = this.getSeriesDataForCategory(null);
       } 
@@ -101,10 +99,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
         let thisCat: String = this.categories != null ? this.nullToEmptyString(agg.getDimension(this.categories.dimension)) : null;
         if(cat === null || cat === thisCat) {
           let code: any = this.series != null ? this.nullToEmptyString(agg.getDimension(this.series.dimension)) : null;
-          let label: any = this.series ? this.nullToEmptyString(agg.getDimension(this.series.labelattribute)) : null;
-          if(typeof label == 'string' && label.match(/^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:.\d{1,9})?(?:Z|[+-][01]\d:[0-5]\d)$/)) {
-            label = new Date(Date.parse(label));
-          }
+          let label: any = this.series ? this.processLabel(agg.getDimension(this.series.labelattribute), this.series.labelformat) : null;
           let value = agg.getMetric(this.value.name);
           if(this.value.convert != null) {
             value = Converter.convert(value, this.value.convert);
@@ -123,8 +118,23 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
       return series;
     }
 
+    private processLabel(label: any, labelFormat: any = null) : any {
+      if(label == null) {
+        return "";
+      } else if(typeof label == 'string') {
+        if(label.match(/^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:.\d{1,9})?(?:Z|[+-][01]\d:[0-5]\d)$/)) {
+          let dt = new Date(Date.parse(label));
+          if(labelFormat != null) {
+            return Formatter.formatDateTimeCustom(dt, labelFormat);
+          }
+          return dt;
+        } 
+      } 
+      return label;
+    }
+
   
-    private nullToEmptyString(str: String): String {
+   private nullToEmptyString(str: String): String {
       if(str == null) {
         return "";
       } else {
@@ -133,33 +143,26 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     }
   
     public onClick(event: any) {
-      //console.log("Graph click");
       let dimensionFilter = {};
-      const name = event.name;
-      if(this.series != null) {
-        this.aggregates.forEach(agg => {
-          if(name == (agg.getDimension(this.series.labelattribute) || "")) {
-            let dimensionValue = agg.getDimension(this.series.dimension);
-            dimensionFilter[this.series.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
-          }
-        });  
+      if(event.code != null) {
+        dimensionFilter[this.series.dimension] = "'" + event.code + "'";
       }
-      const cat = event.series;
-      if(cat != null) {
-        this.aggregates.forEach(agg => {
-          if(cat == (agg.getDimension(this.categories.labelattribute) || "")) {
-            let dimensionValue = agg.getDimension(this.categories.dimension);
-            dimensionFilter[this.categories.dimension] = dimensionValue == null ? null : typeof dimensionValue == 'number' ? dimensionValue : "'" + dimensionValue + "'";
-          }
-        });
+      if(event.name != null) { //For backwards compatibility (remove when dynamic graph is removed)
+        const aggregate = this.aggregates.find(agg => agg.getDimension(this.series.labelattribute) == event.name);
+        if(aggregate != null) {
+          const code = aggregate.getDimension(this.series.dimension);
+          dimensionFilter[this.series.dimension] = "'" + code + "'";
+        }
       }
-  
+      if(event.cat != null) {
+        dimensionFilter[this.categories.dimension] = "'" + event.cat + "'";
+      }
       let aggregatesetfilter = this.aggregateset.mergeFilters();
       let filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
       let target = {
         object: this.aggregateset.objectname,
         filter: filter,
-        label: event.name,
+        label: (event.code ?? event.name),
         reset: true
       };
       this.navigate.emit(target);
