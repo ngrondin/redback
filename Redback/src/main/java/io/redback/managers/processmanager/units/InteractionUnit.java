@@ -34,6 +34,7 @@ public class InteractionUnit extends ProcessUnit
 	protected DataMap notificationConfig;
 	protected Expression labelExpression;
 	protected Expression messageExpression;
+	protected Expression contextLabelExpression;
 
 	public InteractionUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
@@ -56,6 +57,7 @@ public class InteractionUnit extends ProcessUnit
 			notificationConfig = config.getObject("notification");
 			labelExpression = pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_labelexpr", notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
 			messageExpression = pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_msgexpr", notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
+			contextLabelExpression =  pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_clexpr", notificationConfig.containsKey("contextlabel") ? notificationConfig.getString("contextlabel") : "null");
 			nextNodeInterruption = config.getString("interruption");
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising interaction unit", e);
@@ -200,7 +202,8 @@ public class InteractionUnit extends ProcessUnit
 			String type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
 			String label = (String)labelExpression.eval(context);
 			String message = (String)messageExpression.eval(context);
-			RawNotification notification = new RawNotification(pi.getProcessName(), pi.getId(), code, type, label, message);
+			String contextLabel = (String)contextLabelExpression.eval(context);
+			RawNotification notification = new RawNotification(pi.getProcessName(), pi.getId(), code, type, label, message, contextLabel);
 			for(ActionConfig actionConfig: actionConfigs)
 			{
 				String[] exclusiveAppliesTo = null;

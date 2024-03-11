@@ -23,20 +23,19 @@ export class RbNotificationListComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  public get grouping(): string {
+    return this.userprefService.getGlobalPreferenceValue("notifgroup");
+  }
+
   public get groups() : any[] {
-    let grouping = this.userprefService.getGlobalPreferenceValue("notifgroup");
-    if(grouping == "byaction") {
+    if(this.grouping == "byaction") {
       return this.notificationService.topExceptionsByAction;
-    } else if(grouping == "byobject") {
+    } else if(this.grouping == "byobject") {
       return this.notificationService.topExceptionsByObject;
     } else {
       return this.notificationService.topExceptions;
     }
   }
-
-  /*public get list() : RbNotification[] {
-    return this.notificationService.topExceptions;
-  }*/
 
   public closeNotifications() {
     this.close.emit();

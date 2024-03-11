@@ -27,59 +27,28 @@ public class Notification {
 	public String type;
 	public String label;
 	public String message;
+	public String contextLabel;
 	public List<Action> actions;
-	//public List<String> to;
 	public DataMap data;
 	
 	
-	public Notification(String pn, String p, String c, String t, String l, String m, DataMap d) {
+	public Notification(String pn, String p, String c, String t, String l, String m, String cl, DataMap d) {
 		processName = pn;
 		pid = p;
 		code = c;
 		type = t;
 		label = l;
 		message = m;
+		contextLabel = cl;
 		actions = new ArrayList<Action>();
 		data = d;
-		//to = new ArrayList<String>();
 	}
-	
-	/*public Notification(DataMap c) {
-		processName = c.getString("process");
-		pid = c.getString("pid");
-		code = c.getString("code");
-		type = c.getString("type");
-		label = c.getString("label");
-		message = c.getString("message");
-		actions = new ArrayList<Action>();
-		to = new ArrayList<String>();
-		if(c.containsKey("actions")) {
-			DataList actionList = c.getList("actions");
-			for(int i = 0; i < actionList.size(); i++) {
-				DataMap action = actionList.getObject(i);
-				actions.add(new Action(action.getString("action"), action.getString("description"), action.getBoolean("main")));
-			}
-		}
-		if(c.containsKey("to")) {
-			DataList toList = c.getList("to");
-			for(int i = 0; i < toList.size(); i++) {
-				to.add(toList.getString(i));
-			}
-		}
-		if(c.containsKey("data")) {
-			data = c.getObject("data");
-		}
-	}*/
 	
 	public void addAction(String action, String desc, boolean m)
 	{
 		Action a = new Action(action, desc, m);
 		actions.add(a);
 	}
-	
-	/*public void addTo(String username) {
-		to.add(username);
-	}*/
 	
 	public void addData(String key, Object val)
 	{
@@ -132,6 +101,7 @@ public class Notification {
 		map.put("type", type);
 		map.put("label", label);
 		map.put("message", message);
+		map.put("contextlabel", contextLabel);
 		if(actions.size() > 0) {
 			DataList actionList = new DataList();
 			for(Action action: actions) {

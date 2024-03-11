@@ -30,7 +30,7 @@
     "ngx-ace-wrapper": "^10.0.1",
     "ngx-cookie-service": "^2.4.0",
     "ngx-toastr": "^16.2.0",
-    "redbackgraphs": "0.0.10",
+    "redbackgraphs": "0.0.13",
     "rxjs": "^7.8.1",
     "ts-md5": "^1.2.8",
     "tslib": "^2.0.0",

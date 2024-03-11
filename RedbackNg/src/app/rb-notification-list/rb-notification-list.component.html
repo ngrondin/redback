@@ -46,7 +46,7 @@
                     </div>
                     <div
                         class="rb-notification-listsub">
-                        {{notification.message}}
+                        {{grouping == 'byaction' ? notification.contextlabel : notification.message}}
                     </div>
                 </div>        
                 <div

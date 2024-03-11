@@ -1,0 +1,101 @@
+:host {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+.rb-toolbar-logo {
+    height: var(--v32px);
+}
+
+.rb-toolbar-title {
+    font-size: 1.3rem;
+}
+
+.rb-toolbar-pagetitle {
+    font-size: 14px;
+    color: #eeeeee;
+}
+
+.rb-toolbar-spacer {
+    flex-grow: 1;
+}
+
+.rb-toolbar-username {
+    flex: 0 0 auto;
+}
+
+.rb-toolbar-username span {
+    padding: var(--v5px);
+    font-size: 0.85rem;
+}
+
+:host .mat-toolbar .mat-toolbar-row button {
+    font-size: 0.9rem;
+}
+
+.rb-footer {
+	display: flex;
+	flex: 0 0 auto;
+	height: var(--v12px);
+	background: var(--primary-color);
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.rb-footer-indicator {
+    width: 6px;
+    height: 6px;
+    margin: 3px;
+    border-radius: 3px;
+    background-color: #1d296e;
+}
+
+.rb-footer-indicator-on {
+    background-color: #a3ade9;
+}
+
+
+.rb-drag-box {
+    display: block;
+    position: absolute;
+    background: rgb(232, 235, 240);
+    z-index: 1000;
+    border: solid 1px rgb(67, 86, 110);
+    border-radius: 3px;
+    pointer-events: none;
+}
+
+mat-toolbar {
+    min-height:var(--v40px);
+    background: var(--primary-dark-color);
+    color: var(--light-inverse-writing-color);
+}
+
+mat-toolbar-row {
+    height: var(--v40px);
+    padding: 0 var(--v10px);
+}
+
+mat-sidenav-container {
+    display: flex;
+    flex: 1 1 auto;
+
+}
+
+mat-sidenav {
+    display: flex;
+    border-right: Solid 0px;
+    /*border-right: Solid 1px rgba(0,0,0,.12);*/
+}
+/*
+.rb-sidenav-alt1 {
+    background: #2b3360
+}*/
+
+mat-sidenav-content {
+    display: flex;
+    flex: 1 1 auto;
+}

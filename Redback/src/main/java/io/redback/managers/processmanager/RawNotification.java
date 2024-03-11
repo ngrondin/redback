@@ -27,16 +27,18 @@ public class RawNotification {
 	public String type;
 	public String label;
 	public String message;
+	public String contextLabel;
 	public List<Action> actions;
 	public DataMap data;
 	
-	public RawNotification(String pn, String p, String c, String t, String l, String m) {
+	public RawNotification(String pn, String p, String c, String t, String l, String m, String cl) {
 		processName = pn;
 		pid = p;
 		code = c;
 		type = t;
 		label = l;
 		message = m;
+		contextLabel = cl;
 		actions = new ArrayList<Action>();
 	}
 
@@ -82,7 +84,7 @@ public class RawNotification {
 	}
 	
 	public Notification getNotificationForActionner(Actionner actionner) {
-		Notification notification = new Notification(processName, pid, code, type, label, message, data);
+		Notification notification = new Notification(processName, pid, code, type, label, message, contextLabel, data);
 
 		if(actions.size() > 0) {
 			for(Action action: actions) {

@@ -82,7 +82,7 @@ export class RbViewLoaderComponent implements OnInit {
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   private currentView: string;
-  private currentLoadedView: LoadedView = null;
+  public currentLoadedView: LoadedView = null;
   private viewCache: any = {};
   private factoryRegistry: any = {};
 

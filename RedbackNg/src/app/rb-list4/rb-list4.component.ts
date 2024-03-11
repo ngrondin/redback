@@ -14,6 +14,7 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('mainattribute') mainattribute: string;
   @Input('mainexpression') mainexpression: string;
   @Input('subattribute') subattribute: string;
+  @Input('subexpression') subexpression: string;
   @Input('meta1attribute') meta1attribute: string;
   @Input('meta2attribute') meta2attribute: string;
   @Input('colormap') colormap: any;
@@ -74,6 +75,8 @@ export class RbList4Component extends RbDataObserverComponent {
       let data = {};
       if(this.userPref != null && this.userPref.mainattribute != null) {
         data["main"] = this.formatText(obj.get(this.userPref.mainattribute));
+      } else if(this.userPref != null && this.userPref.mainexpression != null) {
+        data["main"] = Evaluator.eval(this.userPref.mainexpression, obj, null);
       } else if(this.mainattribute != null) {
         data["main"] = this.formatText(obj.get(this.mainattribute));
       } else if(this.mainexpression != null) {
@@ -82,11 +85,17 @@ export class RbList4Component extends RbDataObserverComponent {
 
       if(this.userPref != null && this.userPref.subattribute != null) {
         data["sub"] = this.formatText(obj.get(this.userPref.subattribute));
+      } else if(this.userPref != null && this.userPref.subexpression != null) {
+        data["sub"] = Evaluator.eval(this.userPref.subexpression, obj, null);
       } else if(this.subattribute !== null) {
         data["sub"] = this.formatText(obj.get(this.subattribute));
+      } else if(this.subexpression != null) {
+        data["sub"] = Evaluator.eval(this.subexpression, obj, null);
       }
 
-      if(this.meta1attribute !== null) {
+      if(this.userPref != null && this.userPref.meta1attribute != null) {
+        data["meta1"] = this.formatText(obj.get(this.userPref.meta1attribute));
+      } else if(this.meta1attribute !== null) {
         data["meta1"] = this.formatText(obj.get(this.meta1attribute));
       }
 

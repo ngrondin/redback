@@ -20,3 +20,10 @@
     [version]="version"
     [events]="events.asObservable()"> 
 </portal-root>
+<display-root 
+    #root
+    *ngIf="layout == 'display'"
+    [initialView] = "initialView"
+    [version]="version"
+    [events]="events.asObservable()"> 
+</display-root>

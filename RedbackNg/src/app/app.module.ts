@@ -10,6 +10,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { DesktopRootComponent } from './roots/desktop-root/desktop-root.component';
+import { DisplayRootComponent } from './roots/display-root/display-root.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -208,6 +209,7 @@ window.redback = window.redback || {};
         AppComponent,
         DesktopRootComponent,
         PortalRootComponent,
+        DisplayRootComponent,
         RbViewLoaderComponent,
         RbViewDirective,
         RbLayoutComponent,

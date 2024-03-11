@@ -108,7 +108,7 @@ export class AppComponent implements OnInit {
     this.configService.setPersonalViews(config["personalviews"]);
     this.iconsets = config["iconsets"];
     this.menuService.setFullMenuConfig(config['menu']);
-    for(const set of this.iconsets) {
+    for(const set of (this.iconsets || [])) {
       this.matIconRegistry.addSvgIconSetInNamespace(set, this.domSanitizer.bypassSecurityTrustResourceUrl(this.apiService.baseUrl + '/' + this.apiService.uiService + '/resource/' + set + '.svg'), {viewBox: "0 0 24 24"});
     }
     let preferences = config["preferences"];

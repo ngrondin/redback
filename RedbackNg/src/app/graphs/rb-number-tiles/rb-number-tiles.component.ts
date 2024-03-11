@@ -11,6 +11,8 @@ export class RbNumberTilesComponent extends RbAggregateDisplayComponent {
   @Input('rows') rows: number = 1;
   @Input('cols') cols: number = 1;
   @Input('format') format: string = null;
+  @Input('valuecolorrange') valuecolorrange: any;
+  @Input('fullcolor') fullcolor: boolean = false;
   
   constructor() {
     super();

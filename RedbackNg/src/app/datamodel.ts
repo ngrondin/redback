@@ -330,6 +330,7 @@ export class RbNotification {
     type: string;
     label: string;
     message: string;
+    contextlabel: string;
     actions: RbNotificationAction[];
     data: any;
     notificationService: NotificationService;
@@ -342,6 +343,7 @@ export class RbNotification {
         this.type = json.type;
         this.label = json.label;
         this.message = json.message;
+        this.contextlabel = json.contextlabel;
         this.data = json.data;
         if(json.actions != null) {
             this.actions = [];
