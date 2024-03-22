@@ -1,4 +1,4 @@
-<rb-graphs-vbar
+<rb-graphs-hbar
     [data]="graphData"
     [palette]="colorScheme.domain"
     [colormap]="colormap"
@@ -6,11 +6,11 @@
     [valuelabel]="value.label"
     [serieslabel]="series.label"
     [legendposition]="legendposition"
-    [verticalxlabels]="verticalxlabels"
-    [stacked]="true"
+    [valueonbar]="valueonbar"
+    [stacked]="false"
     [format]="value.format"
     (selectitem)="onClick($event)">
-</rb-graphs-vbar> 
+</rb-graphs-hbar> 
 <div
     class="rb-chart-loadoverlay"
     *ngIf="isLoading">

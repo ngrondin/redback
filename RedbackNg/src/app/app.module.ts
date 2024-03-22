@@ -144,6 +144,9 @@ import { RbNlboxComponent } from './rb-nlbox/rb-nlbox.component';
 import { RbScrollComponent } from './rb-scroll/rb-scroll.component';
 import { RbLinktableComponent } from './rb-linktable/rb-linktable.component';
 import { RbStackedGraphComponent } from './graphs/rb-stacked-graph/rb-stacked-graph.component';
+import { RbVbarGraphComponent } from './graphs/rb-vbar-graph/rb-vbar-graph.component';
+import { RbHbarGraphComponent } from './graphs/rb-hbar-graph/rb-hbar-graph.component';
+import { RbPopupGlobalSearchComponent } from './popups/rb-popup-globalsearch/rb-popup-globalsearch.component';
 
 
 
@@ -301,7 +304,10 @@ window.redback = window.redback || {};
         RbNlboxComponent,
         RbScrollComponent,
         RbLinktableComponent,
-        RbStackedGraphComponent
+        RbStackedGraphComponent,
+        RbVbarGraphComponent,
+        RbHbarGraphComponent,
+        RbPopupGlobalSearchComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

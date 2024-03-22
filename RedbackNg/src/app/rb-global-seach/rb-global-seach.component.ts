@@ -1,8 +1,11 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ComponentRef, ViewContainerRef, ViewChild } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { DataService } from 'app/services/data.service';
 import { ConfigService } from 'app/services/config.service';
 import { FilterService } from 'app/services/filter.service';
+import { PopupService } from 'app/services/popup.service';
+import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+import { RbPopupGlobalSearchComponent } from 'app/popups/rb-popup-globalsearch/rb-popup-globalsearch.component';
 
 @Component({
   selector: 'rb-global-search',
@@ -10,74 +13,52 @@ import { FilterService } from 'app/services/filter.service';
   styleUrls: ['./rb-global-seach.component.css']
 })
 export class RbGlobalSeachComponent implements OnInit {
+  @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   searchString: string;
-  searchResult: RbObject[] = [];
   showResults: boolean = false;
-  currentlyLoading: number = -1;
+  popupComponentRef: ComponentRef<RbPopupComponent>;
 
   constructor(
     private dataService: DataService,
     private configService: ConfigService,
-    private filterService: FilterService
+    private filterService: FilterService,
+    private popupService: PopupService
   ) { }
 
   ngOnInit() {
   }
 
-  globalSearch() {
-    this.searchResult = [];
-    this.showResults = true;
-    this.currentlyLoading = 0;
-    this.search();
-  }
-
-  search() {
-    let objectnames = Object.keys(this.configService.objectsConfig).filter(o => this.configService.objectsConfig[o].searchfilter != null);
-    if(this.currentlyLoading >= 0 && this.currentlyLoading < objectnames.length) {
-      let objectname = objectnames[this.currentlyLoading];
-      let filter = this.filterService.resolveFilter(this.configService.objectsConfig[objectname].searchfilter, null);
-      this.dataService.fetchList(objectname, filter, this.searchString, null, 0, 50, true).subscribe(
-        data => {
-          this.searchResult = this.searchResult.concat(data);
-          this.currentlyLoading++;
-          this.search();
-        }
-      ); 
-    } else {
-      this.currentlyLoading = -1;
+  startGlobalSearch() {
+    if(this.popupComponentRef == null) {
+      this.popupComponentRef = this.popupService.openPopup(this.inputContainerRef, RbPopupGlobalSearchComponent, {search: this.searchString});
+      this.popupComponentRef.instance.selected.subscribe(obj => this.navigateToObject(obj));
+      this.popupComponentRef.instance.cancelled.subscribe(() => this.stopGlobalSearch());
     }
   }
 
-  getObjectHeaderText(obj: RbObject): string {
-    let objectConfig = this.configService.objectsConfig[obj.objectname];
-    if(objectConfig != null) {
-      return (objectConfig.labelprefix != null ? objectConfig.labelprefix + ' ' : '') + obj.get(objectConfig.labelattribute);
-    } else {
-      return obj.uid;
-    }
-  }
-
-  getObjectSubText(obj: RbObject): string {
-    let objectConfig = this.configService.objectsConfig[obj.objectname];
-    if(objectConfig != null) {
-      return obj.get(objectConfig.descriptionattribute);
-    } else {
-      return null;
+  stopGlobalSearch() {
+    if(this.popupComponentRef != null) {
+      this.popupService.closePopup();
+      this.popupComponentRef = null;
     }
   }
 
   keyDown(event: any) {
     if(event.keyCode == 13) {
-      this.globalSearch();
+      this.startGlobalSearch();
+    } else if(event.keyCode == 27) {
+      this.stopGlobalSearch()
+    } else if(event.keyCode == 9) {
+      this.stopGlobalSearch();
     }
   }
 
   blur(event: any) {
-    setTimeout(()=> {
-      this.showResults = false;
-    }, 100);
+    if(this.popupComponentRef != null) {
+      this.inputContainerRef.element.nativeElement.focus();
+    }
   }
 
   navigateToObject(object: RbObject) {
@@ -87,5 +68,6 @@ export class RbGlobalSeachComponent implements OnInit {
         uid : "'" + object.uid + "'"
       }
     });
+    this.stopGlobalSearch();
   }
 }

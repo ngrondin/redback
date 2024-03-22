@@ -1,42 +1,7 @@
 <mat-icon>search</mat-icon>
 <input
+    #input
     class="rb-globalsearch-search"
     [(ngModel)]="searchString"
     (keydown)="keyDown($event)"
     (blur)="blur($event)">
-
-
-
-<div
-    class="rb-globalsearch-resultwindow"
-    *ngIf="showResults">
-    <div
-        class="rb-globalsearch-resultcontainer">
-        <div
-            *ngFor="let item of searchResult"
-            class="rb-globalsearch-listitem">
-            <rb-clickable 
-                (click)="navigateToObject(item)">
-                <div
-                    class="rb-globalsearch-listcontent">
-                    <div
-                        class="rb-globalsearch-listheader">
-                        {{getObjectHeaderText(item)}}
-                    </div>
-                    <div
-                        class="rb-globalsearch-listsub">
-                        {{getObjectSubText(item)}}
-                    </div>
-                </div>
-            </rb-clickable>
-        </div>
-        <div
-            class="rb-spinner-container"
-            *ngIf="currentlyLoading >= 0">
-            <mat-spinner
-                diameter="20">
-            </mat-spinner>
-        </div>
-    </div>
-</div>
-

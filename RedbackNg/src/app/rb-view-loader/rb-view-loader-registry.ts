@@ -55,6 +55,8 @@ import { RbFunnelComponent } from "app/rb-funnel/rb-funnel.component";
 import { RbActionlistComponent } from "app/clickable/rb-actionlist/rb-actionlist.component";
 import { RbUrlInputComponent } from "app/inputs/rb-url-input/rb-url-input.component";
 import { RbStackedGraphComponent } from "app/graphs/rb-stacked-graph/rb-stacked-graph.component";
+import { RbVbarGraphComponent } from "app/graphs/rb-vbar-graph/rb-vbar-graph.component";
+import { RbHbarGraphComponent } from "app/graphs/rb-hbar-graph/rb-hbar-graph.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -110,6 +112,8 @@ export const componentRegistry = {
     "tile": RbTileComponent,
     "numbertiles": RbNumberTilesComponent,
     "stackedgraph": RbStackedGraphComponent,
+    "vbargraph": RbVbarGraphComponent,
+    "hbargraph": RbHbarGraphComponent,
     "timeline": RbTimelineComponent,
     "stars": RbStarsInputComponent,
     "percentinput": RbPercentInputComponent,

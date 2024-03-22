@@ -12,6 +12,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     @Input('series') series: any;
     @Input('categories') categories: any;
     @Input('value') value: any;
+    @Input('target') target: any;
     @Input('min') min: number;
     @Input('max') max: number;
     @Input('grow') grow: number;
@@ -104,7 +105,11 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
           if(this.value.convert != null) {
             value = Converter.convert(value, this.value.convert);
           }
-          series.push({code: code, name: label, label: label, value: value}); //TODO: Tfor legacy reasons
+          let target = undefined;
+          if(this.target != null) {
+            target = agg.getMetric(this.target.name);
+          }
+          series.push({code: code, name: label, label: label, value: value, target: target}); //TODO: Tfor legacy reasons
         }
       }
       if(this.series != null) {
@@ -144,17 +149,17 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
   
     public onClick(event: any) {
       let dimensionFilter = {};
-      if(event.code != null) {
+      if(event.code != null && event.code != "" && this.series.dimension != null) {
         dimensionFilter[this.series.dimension] = "'" + event.code + "'";
       }
-      if(event.name != null) { //For backwards compatibility (remove when dynamic graph is removed)
+      if(event.name != null && event.name != "") { //For backwards compatibility (remove when dynamic graph is removed)
         const aggregate = this.aggregates.find(agg => agg.getDimension(this.series.labelattribute) == event.name);
         if(aggregate != null) {
           const code = aggregate.getDimension(this.series.dimension);
           dimensionFilter[this.series.dimension] = "'" + code + "'";
         }
       }
-      if(event.cat != null) {
+      if(event.cat != null && event.cat != "" && this.categories.dimension != null) {
         dimensionFilter[this.categories.dimension] = "'" + event.cat + "'";
       }
       let aggregatesetfilter = this.aggregateset.mergeFilters();
