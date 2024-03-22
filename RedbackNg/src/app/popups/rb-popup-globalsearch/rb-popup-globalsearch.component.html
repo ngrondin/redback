@@ -1,0 +1,45 @@
+<rb-scroll>
+    <div
+        *ngFor="let item of searchResult"
+        class="rb-globalsearch-listitem">
+        <rb-clickable 
+            (click)="select(item)">
+            <div
+                class="rb-globalsearch-listcontent">
+                <div
+                    class="rb-globalsearch-listicon">
+                    <mat-icon 
+                        *ngIf="getObjectIcon(item).indexOf(':') >= 0"
+                        [svgIcon]="getObjectIcon(item)">
+                    </mat-icon>
+                    <mat-icon
+                        *ngIf="getObjectIcon(item).indexOf(':') == -1">
+                        {{getObjectIcon(item)}}
+                    </mat-icon>                        
+                </div>
+                <div
+                    class="rb-globalsearch-listtextcol">
+                    <div
+                        class="rb-globalsearch-listtype">
+                        {{getObjectTypeText(item)}}
+                    </div>
+                    <div
+                        class="rb-globalsearch-listheader">
+                        {{getObjectHeaderText(item)}}
+                    </div>
+                    <div
+                        class="rb-globalsearch-listsub">
+                        {{getObjectSubText(item)}}
+                    </div>
+                </div>
+            </div>
+        </rb-clickable>
+    </div>
+    <div
+        class="rb-spinner-container"
+        *ngIf="currentlyLoading >= 0">
+        <mat-spinner
+            diameter="20">
+        </mat-spinner>
+    </div>
+</rb-scroll>
