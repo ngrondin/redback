@@ -11,8 +11,9 @@ export class RbMenuComponent implements OnInit {
   @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
   @Input('look') look: any = 'primary';
   @Input('showcontrols') showcontrols: boolean = true;
+  @Input('lockmode') lockmode: string;
   _type: string = 'full';
-  _mode: string = 'large';
+  _mode: string = null;
   content: any;
   subscription: Subscription;
 
@@ -36,14 +37,15 @@ export class RbMenuComponent implements OnInit {
 }
 
   public get mode(): string {
-    return this._mode || 'large';
+    return this.lockmode || (this._mode || 'large');
   }
 
-  public get width(): string { 
-    var width = this._mode == 'large' ? 
+  @HostBinding('style.width.px')
+  get width(): number { 
+    var width = this.mode == 'large' ? 
       (5 * Math.floor(document.body.clientWidth * 15 / 500)) : // This weird calculation is to allow the sidenav to align to the closes 5px -- weirdness of material
       (5 * Math.floor(document.body.clientWidth * 46 / 8510));
-    return (width + "px");
+    return width;
   }
 
   public toggleMenuMode() {

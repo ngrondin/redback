@@ -35,6 +35,7 @@
         opened>
         <rb-menu
             [look]="userprefService.getGlobalPreferenceValue('uialt')"
+            [lockmode]="'small'"
             [showcontrols]="false"
             (navigate)="navigateTo($event)">
         </rb-menu>
