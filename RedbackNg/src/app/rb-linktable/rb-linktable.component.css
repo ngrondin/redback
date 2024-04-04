@@ -3,6 +3,7 @@
     flex-direction: column;
     overflow: hidden;
     margin: var(--v12px) var(--v16px) var(--v12px) var(--v16px);
+    flex: 1 1 0;
 }
 
 .rb-linktable-header-container {

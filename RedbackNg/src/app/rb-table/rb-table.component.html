@@ -63,6 +63,16 @@
                     [show]="col.showExpr"
                     [margin]="false">
                 </rb-datetime-input>
+                <rb-duration-input
+                    *ngIf="col.type == 'durationinput'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [icon]="col.icon"
+                    [editable]="true"
+                    [show]="col.showExpr"
+                    [margin]="false">
+                </rb-duration-input>                
                 <rb-related-input
                     *ngIf="col.type == 'relatedinput'"
                     [size]="col.size"

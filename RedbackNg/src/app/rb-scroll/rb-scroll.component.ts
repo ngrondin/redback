@@ -1,11 +1,12 @@
 import { AfterContentInit, Component, EventEmitter, HostListener, Output, ViewChild, ViewContainerRef } from '@angular/core';
+import { RbContainerComponent } from 'app/abstract/rb-container';
 
 @Component({
   selector: 'rb-scroll',
   templateUrl: './rb-scroll.component.html',
   styleUrls: ['./rb-scroll.component.css']
 })
-export class RbScrollComponent implements AfterContentInit {
+export class RbScrollComponent  extends RbContainerComponent implements AfterContentInit {
   contentInitiated: boolean = false;
   isOverVTrack: boolean = false;
   isOverHTrack: boolean = false;
@@ -18,6 +19,18 @@ export class RbScrollComponent implements AfterContentInit {
   
   ngAfterContentInit() {
     this.contentInitiated = true;    
+  }
+
+  containerInit() {
+  }
+
+  containerDestroy() {
+  }
+
+  onDatasetEvent(event: string) {
+  }
+
+  onActivationEvent(state: boolean) {
   }
 
   get showVTrack() {

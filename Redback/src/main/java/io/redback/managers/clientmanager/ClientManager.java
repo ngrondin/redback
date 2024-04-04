@@ -112,7 +112,7 @@ public class ClientManager extends Thread {
 			String[] keys = {"model", "os", "app", "locationpermissions", "fcmtoken", "nfcavailabile", "screen", "username"};
 			DataMap diff = DataMapCompare.differences(newData, existingData, keys);
 			if(diff.keySet().size() > 0) {
-				DataList history = existingData.getList("history");
+				DataList history = existingData != null ? existingData.getList("history") : null;
 				if(history == null) history = new DataList();
 				for(String diffkey : diff.keySet())
 					history.add(new DataMap("date", new Date(), "key", diffkey, "value", diff.getString(diffkey)));

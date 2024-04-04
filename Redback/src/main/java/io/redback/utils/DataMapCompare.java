@@ -11,11 +11,13 @@ public class DataMapCompare {
 	
 	public static DataMap differences(DataMap map1, DataMap map2, String[] keys) {
 		DataMap ret = new DataMap();
-		Iterable<String> searchKeays = keys != null ? Arrays.asList(keys) : map1.keySet();
-		for(String key : searchKeays) {
-			DataEntity e1 = map1.get(key);
-			DataEntity e2 = map2.get(key);
-			if(areDataEntitiesDifferent(e1, e2)) ret.put(key, e1);
+		if(keys != null || map1 != null) {
+			Iterable<String> searchKeays = keys != null ? Arrays.asList(keys) : map1.keySet();
+			for(String key : searchKeays) {
+				DataEntity e1 = map1 != null ? map1.get(key) : null;
+				DataEntity e2 = map2 != null ? map2.get(key) : null;
+				if(areDataEntitiesDifferent(e1, e2)) ret.put(key, e1);
+			}			
 		}
 		return ret;
 	}

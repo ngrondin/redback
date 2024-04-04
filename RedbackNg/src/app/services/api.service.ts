@@ -49,7 +49,9 @@ export class ApiService {
   }
 
   private requestService(service: string, request: any, timeout?: number) {
-    if(this.clientWSService.isConnected() && this.useCSForAPI) {
+    if(service == null || service == '') {
+      throw "Undefined service";
+    } else if(this.clientWSService.isConnected() && this.useCSForAPI) {
       return this.clientWSService.requestService(service, request, timeout);
     } else {
       let headers = new HttpHeaders()
