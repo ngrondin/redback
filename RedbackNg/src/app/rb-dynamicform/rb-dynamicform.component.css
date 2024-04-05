@@ -3,13 +3,8 @@
     flex-direction: column;
     align-items: flex-start;
     overflow: auto;
+    flex: 1 1 0;
 }
-
-/*.rb-df-container {
-    display: flex;
-    flex-direction: column;
-    min-width: 30vw;
-}*/
 
 rb-scroll ::ng-deep .rb-scroll-content {
     width: 30vw;  
