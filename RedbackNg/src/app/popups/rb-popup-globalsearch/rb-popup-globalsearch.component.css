@@ -1,16 +1,6 @@
 
-.rb-globalsearch-resultwindow {
-    display:flex;
-    position: absolute;
-    top: 40px;
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
-        0 13px 19px 2px rgba(0, 0, 0, 0.14),
-        0 5px 24px 4px rgba(0, 0, 0, 0.12);
-    z-index: 1000;
-    max-height: 500px;
-    overflow: hidden;
+:host{
+    height:20vw;
 }
 
 rb-scroll ::ng-deep .rb-scroll-content {
@@ -84,4 +74,12 @@ rb-scroll ::ng-deep .rb-scroll-content {
 
 :host ::ng-deep .mat-list-item-content {
     padding: 0!important;
+}
+
+.rb-globalsearch-noresult {
+    color: var(--dark-writing-color);
+    font-size: 0.9rem;
+    width: 14vw;
+    padding: var(--v20px) 0px;
+    text-align: center;
 }

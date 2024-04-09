@@ -42,4 +42,9 @@
             diameter="20">
         </mat-spinner>
     </div>
+    <div
+        class="rb-globalsearch-noresult"
+        *ngIf="currentlyLoading == -1 && searchResult.length == 0">
+        No Result
+    </div>    
 </rb-scroll>

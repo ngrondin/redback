@@ -181,11 +181,11 @@ public class ClientHandler extends ClientStreamHandler {
 	}
 
 	public void uploadChunk(String uploaduid, int chunkSequence, byte[] bytes) throws RedbackException {
-		StreamEndpoint sep = uploads.get(uploaduid);
+		StreamEndpoint sep = getUploadStreamEndpoint(uploaduid);
 		Payload payload = new Payload(bytes);
 		payload.metadata.put("ctl", "chunk");
 		payload.metadata.put("seq", String.valueOf(chunkSequence));
-		sep.send(payload);
+		sep.send(payload);			
 	}
 
 	public void finishUpload(String uploaduid) throws RedbackException {
