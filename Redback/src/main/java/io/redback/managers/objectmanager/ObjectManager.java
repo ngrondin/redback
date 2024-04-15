@@ -577,13 +577,18 @@ public class ObjectManager
 		return retList;
 	}
 	
-	public void fork(Session session, String objectName, String id, String function) throws RedbackException
+	public void fork(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
 	{
 		DataMap request = new DataMap();
 		request.put("action", "execute");
-		request.put("object", objectName);
-		request.put("uid", id);
 		request.put("function", function);
+		if(objectName != null && id != null) {
+			request.put("object", objectName);
+			request.put("uid", id);			
+		}
+		if(param != null) {
+			request.put("param", param);
+		}
 		Payload reqP = new Payload(request);
 		reqP.metadata.put("session", session.id);
 		reqP.metadata.put("token", session.token);

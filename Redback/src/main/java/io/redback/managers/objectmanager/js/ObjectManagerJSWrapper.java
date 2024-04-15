@@ -149,14 +149,20 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 		} else if(key.equals("fork")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					RedbackObjectJSWrapper obj = (RedbackObjectJSWrapper)arguments[0];
-					if(obj != null) {
+					if(arguments[0] instanceof RedbackObjectJSWrapper) {
+						RedbackObjectJSWrapper obj = (RedbackObjectJSWrapper)arguments[0];
 						RedbackObject o = obj.getRedbackObject();
 						String function = (String)arguments[1]; 
-						objectManager.fork(session, o.getObjectConfig().getName(), o.getUID().getString(), function);
+						DataMap param = arguments.length > 2 ? (DataMap)arguments[2] : null;
+						objectManager.fork(session, o.getObjectConfig().getName(), o.getUID().getString(), function, param);
+						return null;
+					} else if(arguments[0] instanceof String) {
+						String function = (String)arguments[0];
+						DataMap param = arguments.length > 1 ? (DataMap)arguments[1] : null;
+						objectManager.fork(session, null, null, function, param);
 						return null;
 					} else {
-						throw new RedbackException("Fork argument must be an object");
+						throw new RuntimeException("Bad argument on call to fork");
 					}
 				}
 			};

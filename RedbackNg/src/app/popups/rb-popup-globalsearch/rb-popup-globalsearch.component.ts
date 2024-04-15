@@ -16,7 +16,7 @@ class GlobalSearchConfig {
   styleUrls: ['./rb-popup-globalsearch.component.css', '../rb-popup/rb-popup.component.css']
 })
 export class RbPopupGlobalSearchComponent extends RbPopupComponent implements OnInit {
-  @HostBinding('style.height') get hostHeight() { return this.searchResult.length > 1 ? "20vw" : "100px" }
+  //@HostBinding('style.height') get hostHeight() { return this.searchResult.length > 1 ? "20vw" : "100px" }
     
   searchResult: RbObject[] = [];
   currentlyLoading: number = -1;

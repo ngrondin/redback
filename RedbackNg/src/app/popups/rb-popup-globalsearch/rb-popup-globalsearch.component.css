@@ -1,11 +1,11 @@
 
-:host{
-    height:20vw;
-}
+/*:host{
+   min-width: 14vw!important; 
+}*/
 
-rb-scroll ::ng-deep .rb-scroll-content {
+/*rb-scroll ::ng-deep .rb-scroll-content {
     min-width: 14vw;
-}
+}*/
 
 .rb-globalsearch-resultcontainer {
     display: flex;
@@ -17,6 +17,7 @@ rb-scroll ::ng-deep .rb-scroll-content {
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
+    min-width: 14vw;
 }
 
 .rb-globalsearch-listcontent {
