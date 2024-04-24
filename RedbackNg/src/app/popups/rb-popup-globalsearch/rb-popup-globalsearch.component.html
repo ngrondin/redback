@@ -10,27 +10,27 @@
                 <div
                     class="rb-globalsearch-listicon">
                     <mat-icon 
-                        *ngIf="getObjectIcon(item).indexOf(':') >= 0"
-                        [svgIcon]="getObjectIcon(item)">
+                        *ngIf="item.getObjectIcon().indexOf(':') >= 0"
+                        [svgIcon]="item.getObjectIcon()">
                     </mat-icon>
                     <mat-icon
-                        *ngIf="getObjectIcon(item).indexOf(':') == -1">
-                        {{getObjectIcon(item)}}
+                        *ngIf="item.getObjectIcon().indexOf(':') == -1">
+                        {{item.getObjectIcon()}}
                     </mat-icon>                        
                 </div>
                 <div
                     class="rb-globalsearch-listtextcol">
                     <div
                         class="rb-globalsearch-listtype">
-                        {{getObjectTypeText(item)}}
+                        {{item.getObjectTypeText()}}
                     </div>
                     <div
                         class="rb-globalsearch-listheader">
-                        {{getObjectHeaderText(item)}}
+                        {{item.getObjectHeaderText()}}
                     </div>
                     <div
                         class="rb-globalsearch-listsub">
-                        {{getObjectSubText(item)}}
+                        {{item.getObjectSubText()}}
                     </div>
                 </div>
             </div>

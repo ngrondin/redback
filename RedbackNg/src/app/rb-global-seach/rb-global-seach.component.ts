@@ -33,7 +33,7 @@ export class RbGlobalSeachComponent implements OnInit {
   startGlobalSearch() {
     if(this.popupComponentRef == null) {
       this.popupComponentRef = this.popupService.openPopup(this.inputContainerRef, RbPopupGlobalSearchComponent, {search: this.searchString});
-      this.popupComponentRef.instance.selected.subscribe(obj => this.navigateToObject(obj));
+      this.popupComponentRef.instance.selected.subscribe(item => this.navigateToObject(item.object, item.view));
       this.popupComponentRef.instance.cancelled.subscribe(() => this.stopGlobalSearch());
     }
   }
@@ -61,13 +61,18 @@ export class RbGlobalSeachComponent implements OnInit {
     }
   }
 
-  navigateToObject(object: RbObject) {
-    this.navigate.emit({
-      object : object.objectname,
+  navigateToObject(object: RbObject, view: string) {
+    let event: any = {
       filter : {
         uid : "'" + object.uid + "'"
       }
-    });
+    };
+    if(view != null) {
+      event.view = view;
+    } else {
+      event.object = object.objectname;
+    }
+    this.navigate.emit(event);
     this.stopGlobalSearch();
   }
 }

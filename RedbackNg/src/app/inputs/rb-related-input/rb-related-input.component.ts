@@ -11,6 +11,7 @@ import { PopupService } from 'app/services/popup.service';
 })
 export class RbRelatedInputComponent extends RbPopupInputComponent  {
   @Input('displayattribute') displayattribute: string;
+  @Input('sortattribute') sortattribute: string;
   @Input('parentattribute') parentattribute: string;
   @Input('childattribute') childattribute: string;
 
@@ -56,6 +57,7 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
       rbObject: this.rbObject, 
       attribute: this.attribute, 
       displayattribute: this.displayattribute, 
+      sortattribute: this.sortattribute,
       parentattribute: this.parentattribute, 
       childattribute: this.childattribute
     };

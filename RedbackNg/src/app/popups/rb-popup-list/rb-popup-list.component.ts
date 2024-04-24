@@ -45,7 +45,7 @@ export class RbPopupListComponent extends RbPopupComponent implements OnInit {
     }
     let sort = {
       "0":{
-        attribute: this.config.displayattribute,
+        attribute: this.config.sortattribute ?? this.config.displayattribute,
         dir: 1
       }
     }

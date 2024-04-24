@@ -1,4 +1,4 @@
-import { Component, HostBinding, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 import { ConfigService } from 'app/services/config.service';
@@ -10,17 +10,41 @@ class GlobalSearchConfig {
   search: string;
 }
 
+class ResultItem {
+  config: any;
+  object: RbObject;
+
+  constructor(c: any, o: RbObject) {
+    this.config = c;
+    this.object = o;
+  }
+
+  getObjectIcon(): string {
+    return this.config.icon;
+  }
+
+  getObjectTypeText(): string {
+    return this.config.objectlabel;
+  }
+
+  getObjectHeaderText(): string {
+    return (this.config.labelprefix != null ? this.config.labelprefix + ' ' : '') + this.object.get(this.config.labelattribute);
+  }
+
+  getObjectSubText(): string {
+    return this.object.get(this.config.descriptionattribute);
+  }
+}
+
 @Component({
   selector: 'rb-popup-globalsearch',
   templateUrl: './rb-popup-globalsearch.component.html',
   styleUrls: ['./rb-popup-globalsearch.component.css', '../rb-popup/rb-popup.component.css']
 })
 export class RbPopupGlobalSearchComponent extends RbPopupComponent implements OnInit {
-  //@HostBinding('style.height') get hostHeight() { return this.searchResult.length > 1 ? "20vw" : "100px" }
-    
-  searchResult: RbObject[] = [];
+  searchResult: ResultItem[] = [];
   currentlyLoading: number = -1;
-  objectnames: string[];
+  objectIds: string[];
 
   constructor(
     @Inject(CONTAINER_DATA) public config: GlobalSearchConfig, 
@@ -32,8 +56,8 @@ export class RbPopupGlobalSearchComponent extends RbPopupComponent implements On
   }
 
   ngOnInit() {
-    this.objectnames = Object.keys(this.configService.objectsConfig).filter(o => this.configService.objectsConfig[o].searchfilter != null);
-    this.objectnames.sort((a, b) => this.configService.objectsConfig[a].searchpriority - this.configService.objectsConfig[b].searchpriority);
+    this.objectIds = Object.keys(this.configService.objectsConfig).filter(o => this.configService.objectsConfig[o].searchfilter != null);
+    this.objectIds.sort((a, b) => this.configService.objectsConfig[a].searchpriority - this.configService.objectsConfig[b].searchpriority);
     this.currentlyLoading = 0;
     this.searchNext();
   }
@@ -51,12 +75,16 @@ export class RbPopupGlobalSearchComponent extends RbPopupComponent implements On
   }
 
   searchNext() {
-    if(this.currentlyLoading >= 0 && this.currentlyLoading < this.objectnames.length) {
-      let objectname = this.objectnames[this.currentlyLoading];
-      let filter = this.filterService.resolveFilter(this.configService.objectsConfig[objectname].searchfilter, null);
+    if(this.currentlyLoading >= 0 && this.currentlyLoading < this.objectIds.length) {
+      let objectId = this.objectIds[this.currentlyLoading];
+      let objectConfig = this.configService.objectsConfig[objectId];
+      let objectname = objectConfig.object ?? objectId;
+      let filter = this.filterService.resolveFilter(objectConfig.searchfilter, null);
       this.dataService.fetchList(objectname, filter, this.config.search, null, 0, 50, true).subscribe(
         data => {
-          this.searchResult = this.searchResult.concat(data);
+          for(const object of data) {
+            this.searchResult.push(new ResultItem(objectConfig, object));
+          }
           this.currentlyLoading++;
           this.searchNext();
         }
@@ -66,43 +94,10 @@ export class RbPopupGlobalSearchComponent extends RbPopupComponent implements On
     }
   }
 
-  getObjectIcon(obj: RbObject): string {
-    let objectConfig = this.configService.objectsConfig[obj.objectname];
-    if(objectConfig != null) {
-      return objectConfig.icon;
-    } else {
-      return null;
-    }
-  }
-
-  getObjectTypeText(obj: RbObject): string {
-    let objectConfig = this.configService.objectsConfig[obj.objectname];
-    if(objectConfig != null) {
-      return objectConfig.objectlabel;
-    } else {
-      return null;
-    }  
-  }
-
-  getObjectHeaderText(obj: RbObject): string {
-    let objectConfig = this.configService.objectsConfig[obj.objectname];
-    if(objectConfig != null) {
-      return (objectConfig.labelprefix != null ? objectConfig.labelprefix + ' ' : '') + obj.get(objectConfig.labelattribute);
-    } else {
-      return obj.uid;
-    }
-  }
-
-  getObjectSubText(obj: RbObject): string {
-    let objectConfig = this.configService.objectsConfig[obj.objectname];
-    if(objectConfig != null) {
-      return obj.get(objectConfig.descriptionattribute);
-    } else {
-      return null;
-    }
-  }
-
-  select(obj: RbObject) {
-    this.selected.emit(obj);
+  select(item: ResultItem) {
+    this.selected.emit({
+      object: item.object,
+      view: item.config.view
+    });
   }
 }
