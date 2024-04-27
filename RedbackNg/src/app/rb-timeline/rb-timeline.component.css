@@ -100,12 +100,32 @@
     height: 7px;
 }
 
+.rb-tl-detail {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+}
+
+.rb-tl-detail-link {
+    cursor: pointer;
+}
+
+.rb-tl-detail-link:hover {
+    background-color: #eee;
+    border-radius: 5px;
+}
+
+.rb-tl-icon {
+    color: #afafaf;
+}
 
 .rb-tl-detailcol {
     display: flex;
     flex-direction: column;
     justify-content: center;
     min-width: 6vw;
+    padding-left: var(--v8px);
     padding-right: var(--v12px);
 }
 

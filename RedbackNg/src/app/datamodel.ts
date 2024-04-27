@@ -513,15 +513,17 @@ export class DataTarget {
 export class ViewTarget {
     domain: string;
     view: string;
+    tab: string;
     title: string;
     additionalTitle: string;
     _breadcrumbLabel: string;
     mode: string;
     dataTarget: DataTarget;
   
-    constructor(dom: string, v: string, o: string, f: any, s: string) {
+    constructor(dom: string, v: string, t:string, o: string, f: any, s: string) {
       this.domain = dom;
       this.view = v;
+      this.tab = t;
       this.title = null;
       if(f != null) {
         this.dataTarget = new DataTarget(o, f, s);

@@ -1,6 +1,6 @@
 import { Directive, ElementRef, Input, Pipe, PipeTransform, Renderer2 } from "@angular/core";
 import { Observer } from "rxjs";
-import { RbObject } from "./datamodel";
+import { RbObject, Time } from "./datamodel";
 
 export class Translator {
     cfg: any;
@@ -128,6 +128,7 @@ export class Formatter {
         let dt = null;
         if(value instanceof Date) dt = value;
         else if(typeof value == 'string' && !isNaN(Date.parse(value))) dt = new Date(value);
+        else if(typeof value == 'string' &&  value.startsWith('T')) dt = (new Time(value)).atDate(new Date());
         let str = "";
         if(dt != null) {
             str = str + dt.getHours().toString().padStart(2, "0");
@@ -388,3 +389,32 @@ export class FileReferenceResolver {
           ) { }
   }
 
+export class LinkConfig {
+    view: string;
+    attribute: string;
+    tab: string;
+
+    constructor(json: any) {
+        this.view = json.view;
+        this.attribute = json.attribute;
+        this.tab = json.tab;
+    }
+
+    getNavigationEvent(object: RbObject) {
+        let event: any = {};
+        if(this.view != null) {
+            event.view = this.view;
+        } else {
+            event.object = object.objectname;
+        }
+        if(this.attribute != null) {
+            event.filter = {uid: "'" + object.get(this.attribute) + "'"}
+        } else {
+            event.filter = {uid: "'" + object.uid + "'"}
+        }
+        if(this.tab != null) {
+            event.tab = this.tab;
+        }
+        return event;
+    }
+}

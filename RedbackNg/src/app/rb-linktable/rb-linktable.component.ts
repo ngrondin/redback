@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { Formatter } from 'app/helpers';
+import { Formatter, LinkConfig } from 'app/helpers';
+import { ModalService } from 'app/services/modal.service';
 
 class LinkTableColumnConfig {
   label: string;
@@ -12,6 +13,8 @@ class LinkTableColumnConfig {
   size: number;
   width: number;
   showExpr: string;
+  link: LinkConfig;
+  modal: string;
 
   constructor(json: any) {
     this.label = json.label;
@@ -22,6 +25,12 @@ class LinkTableColumnConfig {
     this.size = json.size;
     this.width = (json.size != null ? (json.size * 15) + 15 : 250);
     this.showExpr = (json.show != null ? json.show : "true");
+    this.link = json.link != null ? new LinkConfig(json.link) : null;
+    this.modal = json.modal;
+  }
+
+  get isClickable() : boolean {
+    return this.link != null || this.modal != null;
   }
 }
 
@@ -40,7 +49,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   scrollLeft: number;
 
 
-  constructor() {
+  constructor(
+    private modalService: ModalService
+  ) {
     super();
   }
 
@@ -80,15 +91,13 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     });
   }
 
-  clickLink(object: RbObject) {
-    if(object != null) {
-      let target = {};
-      target['object'] = object.objectname;
-      target['filter'] = {uid: "'" + object.uid + "'"};
-      if(this.view != null) {
-        target['view'] = this.view;
-      } 
-      this.navigate.emit(target);
+  clickLink(column: LinkTableColumnConfig, object: RbObject) {
+    if(column.link != null) {
+      let event = column.link.getNavigationEvent(object);
+      this.navigate.emit(event);
+    } else if(column.modal != null) {
+      this.dataset.select(object);
+      this.modalService.open(column.modal);
     }
 
   }

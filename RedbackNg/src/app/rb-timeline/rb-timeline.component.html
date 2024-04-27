@@ -47,26 +47,35 @@
             </div>
         </div>
         <div
-            [class]="'rb-tl-detailcol ' + (wide ? 'rb-tl-detailcol-wide' : 'rb-tl-detailcol-narrow')">
+            [class]="'rb-tl-detail' + (entry.isClickable ? ' rb-tl-detail-link' : '')"
+            (click)="clickItem(entry)">
+            <mat-icon 
+                *ngIf="entry.icon != null" 
+                [class]="'rb-tl-icon'">
+                {{entry.icon}}
+            </mat-icon>
             <div
-                class="rb-tl-main">
-                {{entry.main}}
-            </div>
-            <div
-                class="rb-tl-sub">
-                {{entry.sub}}
-            </div>       
-        </div>      
+                [class]="'rb-tl-detailcol ' + (wide ? 'rb-tl-detailcol-wide' : 'rb-tl-detailcol-narrow')">
+                <div
+                    class="rb-tl-main">
+                    {{entry.main}}
+                </div>
+                <div
+                    class="rb-tl-sub">
+                    {{entry.sub}}
+                </div>       
+            </div>   
+        </div>   
     </div>
     <div
         class="rb-tl-more"
-        *ngIf="showLevel == 0 && maxLevel > 0"
+        *ngIf="showLevel < showmorelevel && maxLevel >= showmorelevel"
         (click)="showMore()">
         Show more...
     </div>
     <div
         class="rb-tl-more"
-        *ngIf="showLevel > 0 && maxLevel > 0"
+        *ngIf="showLevel >= showmorelevel"
         (click)="showLess()">
         Show less...
     </div>    

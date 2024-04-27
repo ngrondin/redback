@@ -24,13 +24,13 @@
                 *ngFor="let col of columns; index as i"
                 [style.width.px]="col.width">
                 <a
-                    *ngIf="i == 0"
+                    *ngIf="col.isClickable"
                     class="rb-linktable-link"
-                    (click)="clickLink(object)">
+                    (click)="clickLink(col, object)">
                     {{getValue(object, col)}}                
                 </a>
                 <span
-                    *ngIf="i != 0">
+                    *ngIf="!col.isClickable">
                     {{getValue(object, col)}}                
                 </span>                
             </div>

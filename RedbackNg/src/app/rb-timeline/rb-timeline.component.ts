@@ -1,8 +1,9 @@
-import { Component, HostBinding, Input, OnInit } from '@angular/core';
-import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
+import { Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@angular/core';
+import { RbDataCalcComponent, SeriesConfig } from 'app/abstract/rb-datacalc';
 import { RbObject } from 'app/datamodel';
 import { Formatter } from 'app/helpers';
 import { TimelineEntry, TimelineSeriesConfig } from './rb-timeline-models';
+import { ModalService } from 'app/services/modal.service';
 
 @Component({
   selector: 'rb-timeline',
@@ -14,6 +15,8 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
   @Input('grow') grow: number;
   @Input('datefocus') datefocus: boolean = false;
   @Input('wide') wide: boolean = false;
+  @Input('showmorelevel') showmorelevel: number = 1;
+  @Output() navigate: EventEmitter<any> = new EventEmitter();
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
 
   entries: TimelineEntry[] = [];
@@ -21,12 +24,15 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
   showLevel: number = 0;
   maxLevel: number = 0;
 
-  constructor() { 
+  constructor(
+    private modalService: ModalService
+  ) { 
     super();
     this.dofilter = false;
   }
 
   dataCalcInit() {
+    this.showLevel = (this.showmorelevel - 1) ?? 0;
   }
 
   dataCalcDestroy() {
@@ -50,7 +56,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
       let level = config.level || 0;
       if(level > this.maxLevel) this.maxLevel = level;
       if(level <= this.showLevel) {
-        this.entries.push(new TimelineEntry(date, main, sub, level));
+        this.entries.push(new TimelineEntry(object, level, date, main, sub, config.icon, config.link, config.modal));
       }
     });
     this.entries.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -99,6 +105,15 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
   public showLess() {
     this.showLevel--;
     this.calc();
+  }
+
+  public clickItem(entry: TimelineEntry) {
+    if(entry.link != null) {
+      this.navigate.emit(entry.link?.getNavigationEvent(entry.object));
+    } else if(entry.modal) {
+      this.getDatasetForObject(entry.object).select(entry.object);
+      this.modalService.open(entry.modal);
+    }
   }
 
 }

@@ -2,6 +2,7 @@ import { ThisReceiver } from "@angular/compiler";
 import { Component, Input } from "@angular/core";
 import { RbObject } from "app/datamodel";
 import { RbDataObserverComponent } from "./rb-dataobserver";
+import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
 export class SeriesConfig {
     active: boolean = true;
@@ -141,6 +142,19 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             }
         } else {
             return this.seriesConfigs[0];
+        }
+        return null;
+    }
+
+    getDatasetForObject(object: RbObject) : RbDatasetComponent {
+        if(this.datasetgroup != null) {
+            for(let cfg of this.seriesConfigs) {
+                if(this.datasetgroup.datasets[cfg.dataset].objectname == object.objectname) {
+                    return this.datasetgroup.datasets[cfg.dataset];
+                }
+            }
+        } else {
+            return this.dataset;
         }
         return null;
     }

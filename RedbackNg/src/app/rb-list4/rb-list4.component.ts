@@ -62,7 +62,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public hasSubLine() : boolean {
-    return this.subattribute != null;
+    return this.subattribute != null || this.subexpression != null;
   }
 
   public hasMetaLine() : boolean {
@@ -87,7 +87,7 @@ export class RbList4Component extends RbDataObserverComponent {
         data["sub"] = this.formatText(obj.get(this.userPref.subattribute));
       } else if(this.userPref != null && this.userPref.subexpression != null) {
         data["sub"] = Evaluator.eval(this.userPref.subexpression, obj, null);
-      } else if(this.subattribute !== null) {
+      } else if(this.subattribute != null) {
         data["sub"] = this.formatText(obj.get(this.subattribute));
       } else if(this.subexpression != null) {
         data["sub"] = Evaluator.eval(this.subexpression, obj, null);
@@ -95,7 +95,7 @@ export class RbList4Component extends RbDataObserverComponent {
 
       if(this.userPref != null && this.userPref.meta1attribute != null) {
         data["meta1"] = this.formatText(obj.get(this.userPref.meta1attribute));
-      } else if(this.meta1attribute !== null) {
+      } else if(this.meta1attribute != null) {
         data["meta1"] = this.formatText(obj.get(this.meta1attribute));
       }
 

@@ -9,11 +9,13 @@ import { componentRegistry } from './rb-view-loader-registry';
 import { RbSetComponent } from 'app/abstract/rb-set';
 import { HttpClient } from '@angular/common/http';7
 import { BuildService } from 'app/services/build.service';
+import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
 
 
 export class LoadedView extends RbActivatorComponent {
   rootComponentRefs: ComponentRef<Component>[] = [];
   topSets: RbSetComponent[] = [];
+  topTabs: RbTabSectionComponent[] = [];
 
   constructor(
     public title: string,
@@ -56,6 +58,16 @@ export class LoadedView extends RbActivatorComponent {
       for(let dataset of this.topSets) {
         if(dataset.ignoretarget == false && (dataTarget.objectname == null || (dataTarget.objectname != null && dataTarget.objectname == dataset.objectname))) {
           dataset.setDataTarget(dataTarget);
+        }
+      }
+    }
+  }
+
+  openTab(tabid: String) {
+    for(let tabsection of this.topTabs) {
+      for(let tab of tabsection.tabs) {
+        if(tab.id == tabid || tab.label == tabid) {
+          tabsection.selectTab(tab);
         }
       }
     }
@@ -142,6 +154,7 @@ export class RbViewLoaderComponent implements OnInit {
       this.currentLoadedView = entry;
       window.redback.currentLoadedView = entry;
       entry.setTarget(this.target.dataTarget);
+      if(this.target.tab != null) entry.openTab(this.target.tab);
       entry.attachTo(this.container);
     }
   }
