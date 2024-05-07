@@ -1,6 +1,8 @@
 import { Injectable, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { defaultGlobalPrefs } from './userpref.service.default';
+import { Formatter } from 'app/helpers';
 
 export class PrefOption {
   value: string;
@@ -42,8 +44,10 @@ export class UserprefService {
   constructor(
     private apiService: ApiService
   ) { 
-    this.globalPrefs.push(new GlobalPref({code:'uialt', label: 'UI Styles', options:[{value:'primary', label: 'Primary'}, {value:'alt1', label: 'Alternate 1'}, {value:'alt2', label: 'Alternate 2'}]}));
-    this.globalPrefs.push(new GlobalPref({code:'notifgroup', label: 'Notification Grouping', options:[{value:'nogroup', label: 'No Grouping'}, {value:'byaction', label: 'By Action'}, {value:'byobject', label: 'By Object'}]}));
+    for(const entry of defaultGlobalPrefs) {
+      this.globalPrefs.push(new GlobalPref(entry));
+    };
+    Formatter.userPrefService = this;
   }
 
   public load() {

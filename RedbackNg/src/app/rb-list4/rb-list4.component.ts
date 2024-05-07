@@ -13,10 +13,16 @@ import { UserprefService } from 'app/services/userpref.service';
 export class RbList4Component extends RbDataObserverComponent {
   @Input('mainattribute') mainattribute: string;
   @Input('mainexpression') mainexpression: string;
+  @Input('mainformat') mainformat: string;
   @Input('subattribute') subattribute: string;
   @Input('subexpression') subexpression: string;
+  @Input('subformat') subformat: string;
   @Input('meta1attribute') meta1attribute: string;
+  @Input('meta1expression') meta1expression: string;
+  @Input('meta1format') meta1format: string;
   @Input('meta2attribute') meta2attribute: string;
+  @Input('meta2expression') meta2expression: string;
+  @Input('meta2format') meta2format: string;
   @Input('colormap') colormap: any;
   @Input('colorattribute') colorattribute: string;
   @Input('modal') modal: string;
@@ -57,6 +63,10 @@ export class RbList4Component extends RbDataObserverComponent {
     return this.id != null ? this.userprefService.getCurrentViewUISwitch("list4", this.id) : null;
   }
 
+  getUserPref(attr: string) {
+    return this.userPref != null ? this.userPref[attr] : null;
+  }
+
   public hasMainLine() : boolean {
     return this.mainattribute != null || this.mainexpression != null;
   }
@@ -72,44 +82,12 @@ export class RbList4Component extends RbDataObserverComponent {
   public redraw() {
     this.enhancedList = [];
     for(let obj of this.list) {
-      let data = {};
-      if(this.userPref != null && this.userPref.mainattribute != null) {
-        data["main"] = this.formatText(obj.get(this.userPref.mainattribute));
-      } else if(this.userPref != null && this.userPref.mainexpression != null) {
-        data["main"] = Evaluator.eval(this.userPref.mainexpression, obj, null);
-      } else if(this.mainattribute != null) {
-        data["main"] = this.formatText(obj.get(this.mainattribute));
-      } else if(this.mainexpression != null) {
-        data["main"] = Evaluator.eval(this.mainexpression, obj, null);
-      }
-
-      if(this.userPref != null && this.userPref.subattribute != null) {
-        data["sub"] = this.formatText(obj.get(this.userPref.subattribute));
-      } else if(this.userPref != null && this.userPref.subexpression != null) {
-        data["sub"] = Evaluator.eval(this.userPref.subexpression, obj, null);
-      } else if(this.subattribute != null) {
-        data["sub"] = this.formatText(obj.get(this.subattribute));
-      } else if(this.subexpression != null) {
-        data["sub"] = Evaluator.eval(this.subexpression, obj, null);
-      }
-
-      if(this.userPref != null && this.userPref.meta1attribute != null) {
-        data["meta1"] = this.formatText(obj.get(this.userPref.meta1attribute));
-      } else if(this.meta1attribute != null) {
-        data["meta1"] = this.formatText(obj.get(this.meta1attribute));
-      }
-
-      if(this.meta2attribute !== null) {
-        let rawval = obj.get(this.meta2attribute);
-        let isTrueFalse = (rawval === true || rawval === false);
-        if(isTrueFalse) {
-          data["meta2"] = rawval;
-          data["meta2type"] = "bool";
-        } else {
-          let formattedval = this.formatText(rawval);
-          data["meta2"] = formattedval;
-          data["meta2type"] = (formattedval !== "" && !isNaN(Number(formattedval)) ? "badge" : "text");
-        }
+      let data: any = {
+        object: obj,
+        main: this.getFieldValue(obj, "main"),
+        sub: this.getFieldValue(obj, "sub"),
+        meta1: this.getFieldValue(obj, "meta1"),
+        meta2: this.getFieldValue(obj, "meta2")
       }
 
       let thisColorAttribute = this.colorattribute;
@@ -121,34 +99,53 @@ export class RbList4Component extends RbDataObserverComponent {
         thisColorMap = this.userPref.colormap;
       }
       if(thisColorAttribute != null) {
-        data["color"] = thisColorMap != null ? thisColorMap[obj.get(thisColorAttribute)] : obj.get(thisColorAttribute);
+        data.color = thisColorMap != null ? thisColorMap[obj.get(thisColorAttribute)] : obj.get(thisColorAttribute);
       } else {
-        data["color"] = "transparent";
+        data.color = "transparent";
       }
       
-      if(data["main"] == null || data["main"] == "") {
-        if(data["sub"] != null && data["sub"] != "") {
-          data["main"] = data["sub"];
-          data["sub"] = "";
+      if(data.main.value == null || data.main.value == "") {
+        if(data.sub.value != null && data.sub.value != "") {
+          data.main.value = data.sub.value;
+          data.sub.value = "";
         } else {
-          data["main"] = "No Label"
+          data.main.value = "No Label"
         }
       }       
-      data["object"] = obj;
       this.enhancedList.push(data);                 
     }
   }
 
-  private formatText(txt: any) : string {
-    if(txt === null) {
+  private getFieldValue(obj: RbObject, field: string) : any {
+    const fieldAttr = field + "attribute";
+    const fieldExpr = field + "expression";
+    const fieldFormat = field + "format";
+    const prefAttr = this.getUserPref(fieldAttr);
+    const prefExpr = this.getUserPref(fieldExpr);
+    const raw = 
+      prefAttr != null ? obj.get(prefAttr) : 
+      prefExpr != null ? Evaluator.eval(prefExpr, obj, null) :
+      this[fieldAttr] != null ? obj.get(this[fieldAttr]) :
+      this[fieldExpr] != null ? Evaluator.eval(this[fieldExpr], obj, null) :
+      null;
+
+    let isTrueFalse = (raw === true || raw === false);
+    if(isTrueFalse) {
+      return {value: raw, type: 'bool'};
+    } else if(raw !== null && !isNaN(raw)) { 
+      return {value: raw, type: 'badge'};
+    } else {
+      const explicitFormat = this.getUserPref(fieldFormat) ?? this[fieldFormat];
+      const text = explicitFormat != null ? Formatter.format(raw, explicitFormat) : this.autoFormatText(raw);
+      return {value: text, type: 'text'};
+    }
+  }
+
+  private autoFormatText(txt: any) : string {
+    if(txt === null || txt === undefined) {
       return "";
-    } else if(txt === true) {
-      return String.fromCharCode(9745);
-    } else if(txt === false) {
-      return String.fromCharCode(9634);
     } else if(this.isoDateRegExp.test(txt)) {
       return Formatter.formatDateTime(new Date(txt));
-      //return (new Date(txt)).toLocaleString();
     } else {
       return txt.toString();
     }

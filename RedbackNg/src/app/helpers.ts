@@ -1,6 +1,7 @@
-import { Directive, ElementRef, Input, Pipe, PipeTransform, Renderer2 } from "@angular/core";
+import { Directive, ElementRef, Input, Pipe, PipeTransform, Renderer2, inject } from "@angular/core";
 import { Observer } from "rxjs";
 import { RbObject, Time } from "./datamodel";
+import { UserprefService } from "./services/userpref.service";
 
 export class Translator {
     cfg: any;
@@ -50,6 +51,7 @@ export class InitialsMaker {
 
 export class Formatter {
     static months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dev"];
+    static userPrefService: UserprefService;
 
     public static format(val: any, format: string) {
         if(format == 'duration') {
@@ -115,11 +117,14 @@ export class Formatter {
         else if(typeof value == 'string' && !isNaN(Date.parse(value))) dt = new Date(value);
         let str = "";
         if(dt != null) {
-            str = str + dt.getFullYear().toString();
-            str = str + "-";
-            str = str + (dt.getMonth() + 1).toString().padStart(2, "0");
-            str = str + "-";
-            str = str + dt.getDate().toString().padStart(2, "0");
+            const dateFormat = Formatter.userPrefService?.getGlobalPreferenceValue("dateformat") ?? "iso";
+            if(dateFormat == 'isorev') {
+                str =  dt.getDate().toString().padStart(2, "0") + "/" + (dt.getMonth() + 1).toString().padStart(2, "0") + "/" + dt.getFullYear().toString()
+            } else if(dateFormat == 'american') {
+                str =  (dt.getMonth() + 1).toString().padStart(2, "0") + "/" + dt.getDate().toString().padStart(2, "0") + "/" + dt.getFullYear().toString()
+            } else {
+                str = dt.getFullYear().toString() + "-" + (dt.getMonth() + 1).toString().padStart(2, "0") + "-" + dt.getDate().toString().padStart(2, "0");
+            }
         }
         return str;
     }
@@ -131,9 +136,14 @@ export class Formatter {
         else if(typeof value == 'string' &&  value.startsWith('T')) dt = (new Time(value)).atDate(new Date());
         let str = "";
         if(dt != null) {
-            str = str + dt.getHours().toString().padStart(2, "0");
-            str = str + ":";
-            str = str + dt.getMinutes().toString().padStart(2, "0");
+            const timeformat = Formatter.userPrefService?.getGlobalPreferenceValue("timeformat") ?? "iso";
+            if(timeformat == 'ampm') {
+                const hrs = dt.getHours();
+                const hrs12 = hrs == 0 ? 12 : hrs > 12 ? hrs - 12 : hrs;
+                str = hrs12.toString().padStart(2, "0") + ":" + dt.getMinutes().toString().padStart(2, "0") + (hrs > 12 ? "pm" : "am");
+            } else {
+                str = dt.getHours().toString().padStart(2, "0") + ":" + dt.getMinutes().toString().padStart(2, "0")
+            }
         }
         return str;
     }

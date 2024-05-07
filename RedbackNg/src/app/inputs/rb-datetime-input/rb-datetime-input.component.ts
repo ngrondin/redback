@@ -11,7 +11,9 @@ import { PopupService } from 'app/services/popup.service';
   styleUrls: ['../abstract/rb-field-input.css']
 })
 export class RbDatetimeInputComponent extends RbPopupInputComponent {
-  @Input('format') format: string = 'YYYY-MM-DD HH:mm';
+  @Input('format') format: string = 'YYYY-MM-DD HH:mm'; //Deprecated
+  @Input('datepart') datepart: boolean = true;
+  @Input('timepart') timepart: boolean = true;
   
   defaultIcon: string = 'calendar_today';
 
@@ -21,8 +23,25 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     super(popupService);
   }
 
+  inputInit() {
+    super.inputInit();
+    if(this.format == 'YYYY-MM-DD') {
+      this.timepart = false;
+    } else if(this.format == 'HH:mm') {
+      this.datepart = false;
+    }
+  }
+
   public getPersistedDisplayValue(): any {
-    return Formatter.formatDateTimeCustom(this.getDateValue(), this.format);
+    if(this.datepart && this.timepart) {
+      return Formatter.formatDateTime(this.getDateValue());
+    } else if(this.datepart) {
+      return Formatter.formatDate(this.getDateValue());
+    } else if(this.timepart) {
+      return Formatter.formatTime(this.getDateValue());
+    } else {
+      return "";
+    }
   }
 
   public setDisplayValue(str: string) {
@@ -66,10 +85,6 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     return iso;
   }
 
-  private hasDatePart() : boolean {
-    return this.format.indexOf('YY') > -1 || this.format.indexOf('MM') > -1 || this.format.indexOf('DD') > -1;
-  }
-
   public getPopupClass() {
     return RbPopupDatetimeComponent;
   }
@@ -77,9 +92,9 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
   public getPopupConfig() {
     return {
       initialDate: this.getDateValue() || (new Date()),
-      datePart: this.format.indexOf('YY') > -1 || this.format.indexOf('MM') > -1 || this.format.indexOf('DD') > -1 ? true : false,
-      hourPart: this.format.indexOf('HH') > -1 ? true : false,
-      minutePart: this.format.indexOf('mm') > -1 ? true : false
+      datePart: this.datepart,
+      hourPart: this.timepart,
+      minutePart: this.timepart
     };
   }
 
@@ -96,7 +111,7 @@ export class RbDatetimeInputComponent extends RbPopupInputComponent {
     let val: string = null;
     if(dt == null) {
       val = null;
-    } else if(this.hasDatePart()) {
+    } else if(this.datepart) {
       val = dt.toISOString();
     } else {
       let time: Time = new Time(); 
