@@ -12,6 +12,7 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.requests.AggregateRequest;
+import io.redback.managers.objectmanager.requests.DeleteRequest;
 import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.managers.objectmanager.requests.MultiResponse;
 import io.redback.managers.objectmanager.requests.UpdateRequest;
@@ -185,6 +186,11 @@ public class ObjectClient extends Client
 		DataMap resp = requestDataMap(session, req.getDataMap());
 		RedbackObjectRemote ror = new RedbackObjectRemote(session, this, resp);
 		return ror;
+	}
+	
+	public void deleteObject(Session session, String objectname, String uid) throws RedbackException  {
+		DeleteRequest req = new DeleteRequest(objectname, uid);
+		requestDataMap(session, req.getDataMap());
 	}
 	
 	public RedbackObjectRemote execute(Session session, String objectname, String uid, String function, DataMap data) throws RedbackException  {

@@ -753,9 +753,11 @@ public class RedbackObject extends RedbackElement
 		Object retVal = null;
 		try
 		{
+			session.pushDomainLock(getDomain().getString());
 			session.pushScriptLevel();
 			retVal = function.call(context);
 			session.popScriptLevel();
+			session.popDomainLock();
 		} 
 		catch (ScriptException e)
 		{

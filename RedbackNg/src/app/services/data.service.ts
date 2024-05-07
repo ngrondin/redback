@@ -57,6 +57,19 @@ export class DataService {
     this.allObjects[rbObject.objectname][rbObject.uid] = rbObject;
   }
 
+  list(objectname: string, filter: any) : RbObject[] {
+    var ret = [];
+    if(this.allObjects[objectname] != null) {  
+      let objects = Object.values(this.allObjects[objectname]);
+      for(const o of objects) {
+        if(this.filterService.applies(filter, o)) {
+          ret.push(o);
+        }
+      }
+    }
+    return ret;
+  }
+
   findFirst(objectname: string, filter: any) : RbObject {
     if(this.allObjects[objectname] != null) {  
       let objects = Object.values(this.allObjects[objectname]);
@@ -194,7 +207,7 @@ export class DataService {
       if(fetchRequest.filters.length > 0) {
         let subfilter = fetchRequest.filters.map(f => f.data);
         filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
-        count += fetchRequest.filters.length;
+        count += fetchRequest.filters.length * 2; //Times 2 in order to allow for domain overridden objects
       }
       multi.push({
         key: objectname,

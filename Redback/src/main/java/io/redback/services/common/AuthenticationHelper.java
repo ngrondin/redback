@@ -18,7 +18,7 @@ public class AuthenticationHelper {
 			session.setUserProfile(up);
 			session.setToken(token);
 			if(domain != null && (session.getUserProfile().hasAllDomains() || session.getUserProfile().hasDomain(domain)))
-				session.setDomainLock(domain);
+				session.pushDomainLock(domain);
 			if(Thread.currentThread() instanceof FirebusThread) 
 				((FirebusThread)Thread.currentThread()).setUser(up.getUsername());
 			return true;

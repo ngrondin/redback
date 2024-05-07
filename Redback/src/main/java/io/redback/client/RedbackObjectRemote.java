@@ -63,7 +63,9 @@ public class RedbackObjectRemote {
 			return getDomain();
 		else {
 			DataEntity entity = get(attribute);
-			if(entity instanceof DataLiteral)
+			if(entity == null)
+				return null;
+			else if(entity instanceof DataLiteral)
 				return ((DataLiteral)entity).getString();
 			else
 				return entity.toString();

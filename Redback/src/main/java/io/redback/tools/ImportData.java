@@ -46,7 +46,7 @@ public class ImportData extends Thread
 		DataList domains = new DataList();
 		domains.add(domain);
 		session = new Session(t, new UserProfile(new DataMap("username", username, "domains", domains)));
-		session.setDomainLock(domain);
+		session.pushDomainLock(domain);
 		setName("rbImportThread");
 	}
 	

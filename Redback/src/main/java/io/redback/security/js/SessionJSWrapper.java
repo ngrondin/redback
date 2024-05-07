@@ -42,21 +42,36 @@ public class SessionJSWrapper extends ObjectJSWrapper
 					if(arguments.length >= 2 && arguments[1] instanceof Function) {
 						String domain = arguments[0].toString();
 						Function function = (Function)arguments[1];
-						if(session.userProfile.hasDomain(domain) && session.getDomainLock() == null) {
-							session.setDomainLock(domain);
-							try {
-								function.call();
-							} catch(ScriptException e) {
-								throw new RedbackException("Error in fordomain", e);
-							}							
-							session.setDomainLock(null);
-						}
+						session.pushDomainLock(domain);
+						try {
+							function.call();
+						} catch(ScriptException e) {
+							throw new RedbackException("Error in fordomain", e);
+						}							
+						session.popDomainLock();
 						return null;
 					} else {
 						throw new RedbackException("Requires an executable argument");
 					}
 				}
-			};				
+			};	
+		} else if(key.equals("setData")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String key = arguments[0].toString();
+					session.setData(key, arguments[1]);
+					return null;
+				}
+			};	
+		} else if(key.equals("getData")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String key = arguments[0].toString();
+					return session.getData(key);
+				}
+			};	
+		} else if(key.equals("isInScript")) {
+			return session.isInScript();		
 		} else {
 			return null;
 		}

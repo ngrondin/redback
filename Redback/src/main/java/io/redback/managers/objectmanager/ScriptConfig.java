@@ -5,7 +5,6 @@ import java.util.List;
 
 import io.firebus.data.DataMap;
 import io.firebus.script.Function;
-import io.firebus.script.ScriptContext;
 import io.firebus.script.ScriptFactory;
 import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
@@ -80,14 +79,9 @@ public class ScriptConfig
 	{
 		return source;
 	}
-
 	
-	public Object execute(ScriptContext context) throws RedbackException
+	public Function getFunction() 
 	{
-		try {
-			return function.call(context);
-		} catch(ScriptException e) {
-			throw new RedbackException("Error running script", e);
-		}
-	}	
+		return function;
+	}
 }

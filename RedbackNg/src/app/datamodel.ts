@@ -90,7 +90,15 @@ export class RbObject {
                     } else {
                         filter = {...relatedRule.listfilter};
                         filter[relatedRule.link] = this.data[attribute];
-                        relatedObject = this.dataService.findFirst(relatedRule.object, filter);
+                        var relatedObjectOptions = this.dataService.list(relatedRule.object, filter);
+                        var selectedPoints = 0;
+                        for(var option of relatedObjectOptions) {
+                            var point = option.domain == this.domain ? 3 : option.domain == 'root' ? 1 : 2;
+                            if(point > selectedPoints) {
+                                selectedPoints = point;
+                                relatedObject = option;
+                            }
+                        }
                     }
                     if(relatedObject != null) {
                         isChanged = true

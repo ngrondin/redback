@@ -99,7 +99,7 @@ public class ProcessInstance
 		Session outboundSession = processManager.getSysUserManager().getSession(inboundActionner.getSession().getId());
 		outboundSession.setScriptContext(inboundActionner.getSession().getScriptContext());
 		outboundSession.setTxStore(inboundActionner.getSession().getTxStore());
-		outboundSession.setDomainLock(domain);
+		outboundSession.pushDomainLock(domain);
 		outboundActionner = new Actionner(this, outboundSession);
 		scriptContext = inboundActionner.getSession().getScriptContext().createChild();
 		try {

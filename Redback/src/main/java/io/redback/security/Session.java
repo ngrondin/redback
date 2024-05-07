@@ -19,10 +19,12 @@ public class Session
 	public UserProfile elevatedUserProfile;
 	public String timezone;
 	public String domainLock;
+	public int domainLockLevel = 0;
 	public ScriptContext scriptContext;
 	public int scriptLevel = 0;
 	public TxStore<Object> txStore;
 	public DataMap stats;
+	public DataMap data;
 
 	public Session() 
 	{
@@ -59,6 +61,7 @@ public class Session
 		token = t;
 		userProfile = up;	
 		stats = new DataMap();
+		data = new DataMap();
 	}
 	
 	public void setUserProfile(UserProfile up) 
@@ -79,14 +82,6 @@ public class Session
 	public void setTimezone(String zoneId) 
 	{
 		timezone = zoneId;
-	}
-	
-	public void setDomainLock(String domain) throws RedbackException
-	{
-		if(userProfile.hasDomain(domain))
-			domainLock = domain;
-		else
-			throw new RedbackUnauthorisedException("Cannot lock to domain " + domain);
 	}
 
 	public void setScriptContext(ScriptContext sc) 
@@ -124,6 +119,24 @@ public class Session
 		return timezone;
 	}
 	
+	public void pushDomainLock(String domain) throws RedbackException
+	{
+		if(domainLock != null && !domain.equals(domainLock)) {
+			throw new RedbackException("Domain already locked to '" + domainLock + "' but tried to lock with '" + domain + "'");
+		} else if(domainLock == null && !userProfile.hasDomain(domain)) {
+			throw new RedbackUnauthorisedException("Cannot lock to domain " + domain);
+		} else {
+			domainLock = domain;
+			domainLockLevel++;
+		}
+	}
+	
+	public void popDomainLock() 
+	{
+		domainLockLevel--;
+		if(domainLockLevel == 0) domainLock = null;
+	}
+	
 	public String getDomainLock()
 	{
 		return domainLock;
@@ -155,27 +168,45 @@ public class Session
 		return scriptContext;
 	}
 	
-	public TxStore<Object> getTxStore() {
+	public TxStore<Object> getTxStore() 
+	{
 		return txStore;
 	}
 	
-	public boolean hasTxStore() {
+	public boolean hasTxStore() 
+	{
 		return txStore != null;
 	}
+	
+	public void setData(String k, Object v) 
+	{
+		data.put(k, v);
+	}
+	
+	public Object getData(String k) 
+	{
+		return data.get(k);
+	}
 
-	public DataMap getStats() {
+	public DataMap getStats() 
+	{
 		return stats;
 	}
 	
-	public void pushScriptLevel() {
+	public void pushScriptLevel() 
+	{
 		scriptLevel++;
 	}
 	
-	public void popScriptLevel() {
+	public void popScriptLevel() 
+	{
 		scriptLevel--;
 	}
 	
-	public boolean isInScript() {
+	public boolean isInScript() 
+	{
 		return scriptLevel > 0;
 	}
+	
+	
 }

@@ -52,6 +52,14 @@ export class RbDurationInputComponent extends RbFieldInputComponent implements O
     this.editedValue = this.getPersistedDisplayValue();
   }
 
+  public onKeydown(event: any) {
+    super.onKeydown(event);
+    if((event.keyCode == 8 || event.keyCode == 27) && this.editedValue == "") {
+      this.editedValue = null;
+      this.finishEditing();
+    } 
+  }
+
   public finishEditing() {
     if(this.hadUserEdit) {
       if(this.editedValue != null) {

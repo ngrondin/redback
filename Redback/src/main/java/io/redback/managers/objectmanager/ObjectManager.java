@@ -213,6 +213,10 @@ public class ObjectManager
 	{
 		return integrationClient;
 	}
+	
+	public SysUserManager getSysUserManager() {
+		return sysUserManager;
+	}
 
 	
 	public ScriptContext createScriptContext(Session session) throws RedbackException
@@ -315,20 +319,23 @@ public class ObjectManager
 						{
 							RedbackElement element = elements.get(j);
 							Value linkValue = element.get(attributeName);
+							Value domainValue = element.get("domain");
 							if(linkValue != null && !linkValue.isNull())
 							{
 								RedbackObject relatedObject = null;
-								for(int k = 0; k < result.size() && relatedObject == null; k++)
-								{
-									RedbackObject resultObject = result.get(k);
+								int selectionPoints = 0;
+								for(RedbackObject resultObject: result) {
 									Value resultObjectLinkValue = resultObject.get(relatedObjectLinkAttributeName);
-									if(linkValue != null  &&  linkValue.equalsIgnoreCase(resultObjectLinkValue))
-										relatedObject = resultObject;
+									if(linkValue != null  &&  linkValue.equalsIgnoreCase(resultObjectLinkValue)) {
+										int points = resultObject.getDomain().equals(domainValue) ? 3 : resultObject.getDomain().equals("root") ? 1 : 2;
+										if(points > selectionPoints) {
+											selectionPoints = points;
+											relatedObject = resultObject;
+										}										
+									}
 								}
 								if(relatedObject == null) // Because of a broken link in the DB
 								{
-									//logger.info("Broken data link for object '" + objectConfig.getName() + (element instanceof RedbackObject ? ":" + ((RedbackObject)element).getUID().getString() : "") + "." + attributeName);
-									//ObjectConfig zombieObjectConfig = getObjectConfig(session, relatedObjectConfig.getObjectName());
 									ObjectConfig zombieObjectConfig = objectConfigs.get(session, relatedObjectConfig.getObjectName());
 									String zombieDBKey = (relatedObjectLinkAttributeName.equals("uid") ? zombieObjectConfig.getUIDDBKey() : zombieObjectConfig.getAttributeConfig(relatedObjectLinkAttributeName).getDBKey());
 									relatedObject = new RedbackObject(session, this, zombieObjectConfig, new DataMap(zombieDBKey, linkValue.getObject()));
@@ -510,17 +517,18 @@ public class ObjectManager
 		return object;
 	}
 	
-	public Object executeFunction(Session session, String function, DataMap param) throws RedbackException
+	public Object executeFunction(Session session, String functionName, DataMap param) throws RedbackException
 	{
 		Object ret = null;
-		ScriptConfig scriptCfg = globalScripts.get(session, function, false);
+		ScriptConfig scriptCfg = globalScripts.get(session, functionName, false);
 		if(scriptCfg != null) {
-			if(session.getUserProfile().canExecute("rb.scripts." + function) || session.getUserProfile().canExecute("rb.accesscat." + scriptCfg.getAccessCategory())) {
+			if(session.getUserProfile().canExecute("rb.scripts." + functionName) || session.getUserProfile().canExecute("rb.accesscat." + scriptCfg.getAccessCategory())) {
 				DomainScriptLogger domainScriptLogger = null;	
 				try {
 					ScriptContext context = session.getScriptContext().createChild();
 					context.put("param", param);
 					if(scriptCfg.getDomain() != null) {
+						session.pushDomainLock(scriptCfg.getDomain());
 						domainScriptLogger = new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info");
 						context.declare("log", domainScriptLogger);
 						context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, scriptCfg.getDomain()));
@@ -528,19 +536,22 @@ public class ObjectManager
 					} else {
 						context.put("ic", new IntegrationClientJSWrapper(getIntegrationClient(), session));
 					}
+					Function function = scriptCfg.getFunction();
 					session.pushScriptLevel();
-					ret = scriptCfg.execute(context);
+					ret = function.call(context);
 					session.popScriptLevel();
 				} catch(Exception e) {
 					if(domainScriptLogger != null)
 						domainScriptLogger.log(StringUtils.rollUpExceptions(e));
-					throw new RedbackException("Error in script " + function, e);
+					throw new RedbackException("Error in script " + functionName, e);
 				} finally {
-					if(domainScriptLogger != null)
+					if(domainScriptLogger != null) {
+						session.popDomainLock();
 						domainScriptLogger.commit();
+					}
 				}
 			} else {
-				throw new RedbackUnauthorisedException("No rights to execute script " + function);
+				throw new RedbackUnauthorisedException("No rights to execute script " + functionName);
 			}			
 		}
 		return ret;
