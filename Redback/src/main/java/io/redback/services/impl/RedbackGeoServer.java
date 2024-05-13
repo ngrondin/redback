@@ -11,6 +11,7 @@ import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.services.GeoServer;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.GeoInfo;
 import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 import io.redback.utils.StringUtils;
@@ -47,9 +48,9 @@ public class RedbackGeoServer extends GeoServer
 		distanceUrl = config.containsKey("dirstanceurl") ? config.getString("dirstanceurl") : "https://maps.googleapis.com/maps/api/distancematrix/json";
 	}
 
-	protected Geometry geocode(String address) throws RedbackException
+	protected GeoInfo geocode(String address) throws RedbackException
 	{
-		Geometry geometry = null;
+		GeoInfo geoinfo = null;
 		try
 		{
 			DataMap request = new DataMap();
@@ -57,26 +58,26 @@ public class RedbackGeoServer extends GeoServer
 			request.put("url", geocodeUrl + "?address=" + StringUtils.urlencode(address) + "&key=" + apiKey);
 			DataMap resp = requestGoogleService(request);
 			if(resp.getList("results").size() > 0) {
-				DataMap geoData = new DataMap();
-				geoData.put("type", "point");
+				DataMap geometry = new DataMap();
+				geometry.put("type", "point");
 				DataMap coords = new DataMap();
 				coords.put("latitude", resp.getNumber("results.0.geometry.location.lat"));
 				coords.put("longitude", resp.getNumber("results.0.geometry.location.lng"));
-				geoData.put("coords", coords);
-				geometry = new Geometry(geoData);
+				geometry.put("coords", coords);
+				geoinfo = new GeoInfo(new Geometry(geometry), address, getAddressParts(resp.getList("results.0.address_components")));
 			}
 		}
 		catch(Exception e)
 		{
 			throw new RedbackException("Error geocoding address", e);
 		}
-		return geometry;
+		return geoinfo;
 		
 	}
 
-	protected String geocode(Geometry geometry)  throws RedbackException
+	protected GeoInfo geocode(Geometry geometry)  throws RedbackException
 	{
-		String address = null;
+		GeoInfo geoinfo = null;
 		try
 		{
 			DataMap request = new DataMap();
@@ -84,14 +85,15 @@ public class RedbackGeoServer extends GeoServer
 			request.put("url", geocodeUrl + "?latlng=" + geometry.getLatitude() + "," + geometry.getLongitude() + "&key=" + apiKey);
 			DataMap resp = requestGoogleService(request);
 			if(resp.getList("results").size() > 0) {
-				address = resp.getString("results.0.formatted_address");
+				String address = resp.getString("results.0.formatted_address");
+				geoinfo = new GeoInfo(geometry, address, getAddressParts(resp.getList("results.0.address_components")));
 			} 
 		}
 		catch(Exception e)
 		{
 			throw new RedbackException("Error geocoding address", e);
 		}
-		return address;
+		return geoinfo;
 	}
 
 	protected List<String> address(String search, Geometry location, Long radius)  throws RedbackException
@@ -226,7 +228,7 @@ public class RedbackGeoServer extends GeoServer
 	protected DataMap getCacheForRequest(DataMap request) throws RedbackException {
 		try {
 			DataMap resp = null;
-			String reqStr = request.toString(0, true);
+			String reqStr = request.toString(true);
 			if(dataClient != null) {
 				DataMap cachedResult = dataClient.getData(cacheCollection.getName(), new DataMap("request", reqStr), null);
 				if(cachedResult.getList("result").size() > 0)
@@ -241,10 +243,37 @@ public class RedbackGeoServer extends GeoServer
 	protected void putCacheForRequest(DataMap request, DataMap response) throws RedbackException {
 		try {
 			if(dataClient != null && response != null)
-				dataClient.putData(cacheCollection.getName(), new DataMap("request", request.toString(0, true)), new DataMap("response", response));
+				dataClient.putData(cacheCollection.getName(), new DataMap("request", request.toString(true)), new DataMap("response", response));
 		} catch(Exception e) {
 			throw new RedbackException("Error requesting external geo service", e);
 		}		
+	}
+	
+	private DataMap getAddressParts(DataList components) {
+		DataMap addressParts = new DataMap();
+		addressParts.put("number", getGoogleAddressComponent(components, "street_number"));
+		addressParts.put("street", getGoogleAddressComponent(components, "route"));
+		addressParts.put("city", getGoogleAddressComponent(components, "locality"));
+		addressParts.put("state", getGoogleAddressComponent(components, "administrative_area_level_1"));
+		addressParts.put("postcode", getGoogleAddressComponent(components, "postal_code"));
+		addressParts.put("country", getGoogleAddressComponent(components, "country"));
+		return addressParts;
+	}
+	
+	private String getGoogleAddressComponent(DataList addressComponents, String ...types) {
+		for(int i = 0; i < addressComponents.size(); i++) {
+			DataMap comp = addressComponents.getObject(i);
+			DataList typelist = comp.getList("types");
+			for(int j = 0; j < typelist.size(); j++) {
+				String curtype = typelist.getString(j);
+				for(String type: types) {
+					if(curtype.equalsIgnoreCase(type)) {
+						return comp.getString("short_name");
+					}					
+				}
+			}
+		}
+		return null;
 	}
 
 }

@@ -4,13 +4,14 @@ import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.information.ServiceInformation;
-import io.firebus.logging.Logger;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.information.ServiceInformation;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.services.common.ServiceProvider;
+import io.redback.utils.GeoInfo;
 import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 
@@ -38,19 +39,24 @@ public abstract class GeoServer extends ServiceProvider
 			{
 				if(action.equals("geocode"))
 				{
+					GeoInfo geoinfo = null;
 					if(request.containsKey("address"))
 					{
-						Geometry geometry = geocode(request.getString("address"));
-						responseData = new DataMap("geometry", geometry != null ? geometry.toDataMap() : null);
+						geoinfo = geocode(request.getString("address"));
 					}
 					else if(request.containsKey("geometry"))
 					{
-						String address = geocode(new Geometry(request.getObject("geometry")));
-						responseData = new DataMap("address", address);
+						geoinfo = geocode(new Geometry(request.getObject("geometry")));
 					}
 					else
 					{
 						throw new RedbackException("A 'geocode' action requires an 'address' attribute");
+					}
+					responseData = new DataMap();
+					if(geoinfo != null) {
+						responseData.put("geometry", geoinfo.geometry.toDataMap());
+						responseData.put("address", geoinfo.address);
+						responseData.put("addressparts", geoinfo.addressParts);
 					}
 				}
 				else if(action.equals("address"))
@@ -111,9 +117,9 @@ public abstract class GeoServer extends ServiceProvider
 		
 	}
 	
-	protected abstract Geometry geocode(String address) throws RedbackException;
+	protected abstract GeoInfo geocode(String address) throws RedbackException;
 	
-	protected abstract String geocode(Geometry geometry) throws RedbackException;
+	protected abstract GeoInfo geocode(Geometry geometry) throws RedbackException;
 	
 	protected abstract List<String> address(String search, Geometry location, Long radius) throws RedbackException;	
 

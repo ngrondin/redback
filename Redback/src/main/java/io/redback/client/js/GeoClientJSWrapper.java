@@ -5,6 +5,7 @@ import io.firebus.data.DataMap;
 import io.redback.client.GeoClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
+import io.redback.utils.GeoInfo;
 import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 import io.redback.utils.js.CallableJSWrapper;
@@ -27,12 +28,16 @@ public class GeoClientJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					Object arg = arguments[0];
+					boolean full = arguments.length > 1 ? (Boolean)arguments[1] : false;
 					if(arg instanceof DataMap) {
-						String address = geoClient.geocode(session, new Geometry((DataMap)arg));
-						return address;
+						Geometry geometry = new Geometry((DataMap)arg);
+						GeoInfo geoinfo = geoClient.geocode(session, geometry);
+						if(full) return geoinfo.toDataMap();
+						else return geoinfo.address;
 					} else if(arg instanceof String) {
-						Geometry geometry = geoClient.geocode(session, (String)arg);
-						return geometry.toDataMap();
+						GeoInfo geoinfo = geoClient.geocode(session, (String)arg);
+						if(full) return geoinfo.toDataMap();
+						else return geoinfo.geometry.toDataMap();
 					}
 					return null;
 				}

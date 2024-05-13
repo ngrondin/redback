@@ -7,6 +7,7 @@ import io.firebus.Firebus;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
+import io.redback.utils.GeoInfo;
 import io.redback.utils.GeoRoute;
 import io.redback.utils.Geometry;
 
@@ -17,25 +18,25 @@ public class GeoClient extends Client {
 		super(fb, sn);
 	}
 	
-	public Geometry geocode(Session session, String address) throws RedbackException {
+	public GeoInfo geocode(Session session, String address) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "geocode");
 			req.put("address", address);
 			DataMap resp = requestDataMap(session, req);
-			return new Geometry(resp.getObject("geometry"));
+			return new GeoInfo(resp);
 		} catch(Exception e) {
 			throw new RedbackException("Error geocoding", e);
 		}
 	}
 
-	public String geocode(Session session, Geometry geometry) throws RedbackException {
+	public GeoInfo geocode(Session session, Geometry geometry) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "geocode");
 			req.put("geometry", geometry.toDataMap());
 			DataMap resp = requestDataMap(session, req);
-			return resp.getString("address");
+			return new GeoInfo(resp);
 		} catch(Exception e) {
 			throw new RedbackException("Error geocoding", e);
 		}		
