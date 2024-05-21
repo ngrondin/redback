@@ -100,6 +100,9 @@ public abstract class ClientStreamHandler extends StreamHandler {
 						sendUploadError(uploadUid, StringUtils.rollUpExceptions(e));
 						throw new RedbackException("Error handling upload", e);
 					}
+				} else if(type.equals("tokenupdate")) {
+					String newToken = data.getString("token");
+					updateToken(newToken);
 				} else if(type.equals("heartbeat")) {
 					lastHeartbeat = System.currentTimeMillis();
 					heartbeatCount++;
@@ -258,6 +261,8 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	public abstract void receiveChatUpdate(DataMap data) throws RedbackException;
 	
 	public abstract void clientStreamClosed() throws RedbackException;
+	
+	public abstract void updateToken(String newToken) throws RedbackException;
 	
 	protected DataMap getStats() {
 		long now = System.currentTimeMillis();

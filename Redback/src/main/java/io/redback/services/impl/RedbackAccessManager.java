@@ -83,7 +83,7 @@ public class RedbackAccessManager extends AccessManager
 		{
 		    Algorithm algorithm = Algorithm.HMAC256(secret);
 			JWTVerifier verifier = JWT.require(algorithm)
-	                .withIssuer(issuer)
+	                //.withIssuer(issuer)
 	                .build();
 			verifier.verify(token);
 			

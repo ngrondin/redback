@@ -12,6 +12,7 @@ import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
+import io.redback.client.AccessManagementClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.exceptions.RedbackException;
@@ -26,6 +27,7 @@ public class ClientManager extends Thread {
 	protected SubscriptionManager subsManager;
 	protected FileClient fileClient;
 	protected DataClient dataClient;
+	protected AccessManagementClient accessManagementClient;
 	protected CollectionConfig deviceCollection;
 	protected CollectionConfig userCollection;
 	protected List<ClientHandler> clientHandlers;
@@ -41,6 +43,7 @@ public class ClientManager extends Thread {
 		clientHandlers = new ArrayList<ClientHandler>();
 		if(config.containsKey("fileservice")) fileClient = new FileClient(firebus, config.getString("fileservice"));
 		if(config.containsKey("dataservice")) dataClient = new DataClient(firebus, config.getString("dataservice")); 
+		if(config.containsKey("accessmanagementservice")) accessManagementClient = new AccessManagementClient(firebus, config.getString("accessmanagementservice"));		
 		deviceCollection = new CollectionConfig(config.getObject("devicecollection"), "rbcs_device");
 		userCollection = new CollectionConfig(config.getObject("usercollection"), "rbcs_user");
 		setName("rbClientHB");
@@ -59,6 +62,13 @@ public class ClientManager extends Thread {
 			return dataClient;
 		else
 			throw new RedbackException("Data service has not been defined in client service");
+	}
+	
+	public AccessManagementClient getAccessManagementClient() throws RedbackException {
+		if(accessManagementClient != null)
+			return accessManagementClient;
+		else
+			throw new RedbackException("Access Management service has not been defined in client service");
 	}
 	
 	public CollectionConfig getDeviceCollectionConfig() {

@@ -18,6 +18,7 @@ import io.redback.managers.clientmanager.SubscriptionManager.FilterSubscription;
 import io.redback.managers.clientmanager.SubscriptionManager.ObjectDomainPointer;
 import io.redback.managers.clientmanager.SubscriptionManager.ObjectUIDPointer;
 import io.redback.security.Session;
+import io.redback.security.UserProfile;
 import io.redback.services.ClientStreamHandler;
 
 public class ClientHandler extends ClientStreamHandler {
@@ -224,6 +225,14 @@ public class ClientHandler extends ClientStreamHandler {
 		sendChatUpdate(data);
 	}
 
+	public void updateToken(String newToken) throws RedbackException {
+		if(newToken == null) return;
+		UserProfile up = clientManager.getAccessManagementClient().validate(session, newToken);
+		if(up != null) {		
+			session.setToken(newToken);
+			session.setUserProfile(up);
+		}
+	}
 
 	public DataMap getStatus() {
 		DataMap status = new DataMap();
@@ -255,6 +264,8 @@ public class ClientHandler extends ClientStreamHandler {
 		status.put("subs", subs);
 		return status;
 	}
+
+
 
 
 }
