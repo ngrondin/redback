@@ -5,20 +5,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import io.firebus.Firebus;
-import io.firebus.Payload;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
+import io.firebus.utils.jwt.JWTValidator;
 import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
+import io.redback.client.GatewayClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.security.Role;
@@ -27,32 +26,33 @@ import io.redback.security.UserProfile;
 import io.redback.services.AccessManager;
 import io.redback.utils.CacheEntry;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.Convert;
 
 public class RedbackAccessManager extends AccessManager 
 {
-	protected String sysusername;
-	protected String secret;
-	protected String issuer;
-	protected String type;
-	protected String outboundService;
-	protected String idmUrl;
+	//protected String sysusername;
+	//protected String secret;
+	//protected String issuer;
+	//protected String type;
+	//protected String outboundService;
+	protected String idmUserProfileUrl;
+	protected String idmTokenUrl;
 	protected String idmClientId;
 	protected String idmClientSecret;
 	protected DataList hardUsers;
-	protected DataClient dataClient;
 	protected ConfigClient configClient;
+	protected DataClient dataClient;
 	protected CollectionConfig roleCollection;
 	protected CollectionConfig userCollection;
+	protected GatewayClient gatewayClient;
+	protected JWTValidator jwtValidator;
 	protected Map<String, Map<String, Role>> roles;
 	protected Map<String, CacheEntry<UserProfile>> cachedUserProfiles;
-
 
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
-		sysusername = config.getString("sysuser");
-		secret = config.getString("jwtsecret");
-		issuer = config.getString("jwtissuer");
+		jwtValidator = new JWTValidator();
 		if(config.containsKey("dataservice")) {
 			dataClient = new DataClient(firebus, config.getString("dataservice"));
 			roleCollection = new CollectionConfig(config.containsKey("rolecollection") ? config.getString("rolecollection") : "rbam_role");
@@ -60,167 +60,152 @@ public class RedbackAccessManager extends AccessManager
 				userCollection = new CollectionConfig(config.getString("usercollection"));
 		}
 		configClient = new ConfigClient(firebus, config.getString("configservice"));
+		if(config.containsKey("outboundservice")) {
+			gatewayClient = new GatewayClient(firebus, config.getString("outboundservice"));
+		}
 		if(config.containsKey("users")) {
-			type = "hardusers";
 			hardUsers = config.getList("users");
-		} else if(userCollection != null) {
-			type = "data";
-			userCollection = new CollectionConfig(config.containsKey("usercollection") ? config.getString("usercollection") : "rbam_user");
-		} else if(config.containsKey("idmurl") && config.containsKey("outboundservice")) {
-			type = "idm";
-			idmUrl = config.getString("idmurl");
-			idmClientId = config.getString("idmclientid");
-			idmClientSecret = config.getString("idmclientsecret");
-			outboundService = config.getString("outboundservice");
+		} 
+		if(config.containsKey("idm")) {
+			idmUserProfileUrl = config.getString("idm.userprofileurl");
+			idmTokenUrl = config.getString("idm.tokenurl");
+			idmClientId = config.getString("idm.clientid");
+			idmClientSecret = config.getString("idm.clientsecret");
 		}
 		roles = new HashMap<String, Map<String, Role>>();
 		cachedUserProfiles = new HashMap<String, CacheEntry<UserProfile>>();
 	}
-
-	protected UserProfile validateToken(Session session, String token) throws RedbackException
-	{
-		try 
-		{
-		    Algorithm algorithm = Algorithm.HMAC256(secret);
-			JWTVerifier verifier = JWT.require(algorithm)
-	                //.withIssuer(issuer)
-	                .build();
-			verifier.verify(token);
-			
-			DecodedJWT jwt = JWT.decode(token);
-			Claim usernameClaim = jwt.getClaim("email");
-			String username = usernameClaim.asString();
-			if(username != null) {
-				UserProfile profile = getUserProfile(session, username, jwt);
-				if(profile == null) 
-					profile = createEmptyProfile(username);
-				profile.setExpiry(jwt.getExpiresAt().getTime());
-				return profile;
-			} else {
-				throw new RedbackInvalidRequestException("token email is null");
+	
+	public void configure() {
+		cachedUserProfiles.clear();
+		roles.clear();
+		jwtValidator.clearAll();
+		DataMap jwtValidMap = config.getObject("jwtvalidator");
+		for(String issuer: jwtValidMap.keySet()) {
+			DataMap issuerConfig = jwtValidMap.getObject(issuer);
+			if(issuerConfig.containsKey("sharedsecret")) {
+				jwtValidator.tryAddSharedSecret(issuer, issuerConfig.getString("sharedsecret"));
 			}
-		} 
-		catch (RedbackException exception)
-		{
-			throw new RedbackException("Cannot retrieve the user profile", exception);
+			if(issuerConfig.containsKey("keysurl")) {
+				try {
+					DataMap resp = gatewayClient.get(issuerConfig.getString("keysurl"));
+					jwtValidator.addJWK(issuer, resp);
+				} catch(Exception e) {
+					Logger.severe("rb.am.jwtvalidator", e);
+				}
+			}
 		}
-		catch (Exception exception)
-		{
-			throw new RedbackException("JWT token is invalid", exception);
+	}
+
+	protected UserProfile validateToken(Session session, String token) throws RedbackException {
+		try {
+			DecodedJWT jwt = jwtValidator.decode(token);
+			jwtValidator.validate(jwt);
+			if(jwt.getClaim("email") == null) throw new RedbackInvalidRequestException("Email claim not provided");
+			UserProfile profile = getUserProfile(session, jwt);
+			profile.setExpiry(jwt.getExpiresAt().getTime());
+			return profile;
+		} catch (Exception exception) {
+			throw new RedbackException("Cannot validate token", exception);
 		}
 	}
 	
-	protected synchronized UserProfile getUserProfile(Session session, String username, DecodedJWT token) throws RedbackException
-	{
-		long now = System.currentTimeMillis();
+	protected String getSysUserToken(Session session) throws RedbackException {
+		if(idmTokenUrl == null || idmClientId == null || idmClientSecret == null || gatewayClient == null) 
+			throw new RedbackException("Missing configuration to retreive sysuser");
+		DataMap req = new DataMap();
+		req.put("client_id", idmClientId);
+		req.put("client_secret", idmClientSecret);
+		req.put("grant_type", "sysuser");
+		DataMap resp = gatewayClient.postForm(idmTokenUrl, req);
+		return resp.getString("access_token");
+	}
+
+	
+	protected synchronized UserProfile getUserProfile(Session session, DecodedJWT jwt) throws RedbackException {
+		String username = jwt.getClaim("email").asString();
 		CacheEntry<UserProfile> ce = cachedUserProfiles.get(username);
 		
-		if(ce != null && ce.hasExpired())
-		{
+		if(ce != null && ce.hasExpired()) {
 			cachedUserProfiles.remove(username);
 			ce = null;
 		}
-
-		if(ce != null)
-		{
-			return ce.get();
-		}
-		else
-		{
-			try
-			{
-				DataMap userConfig = null;
-				if(sysusername != null && username.equals(sysusername)) 
-				{
-					userConfig = new DataMap();
-					userConfig.put("username", sysusername);
-					DataList doms = new DataList();
-					doms.add("*");
-					userConfig.put("domains", doms);
-					DataList roles = new DataList();
-					roles.add("admin");
-					roles.add("system");
-					userConfig.put("roles", roles);
-				}
-				else if(!token.getClaim("roles").isNull() && !token.getClaim("domains").isNull() && !token.getClaim("attrs").isNull())
-				{
-					List<String> roles = token.getClaim("roles").asList(String.class);
-					List<String> domains = token.getClaim("domains").asList(String.class);
-					userConfig = new DataMap();
-					userConfig.put("username", username);
-					DataList domList = new DataList();
-					for(String dom: domains)
-						domList.add(dom);
-					userConfig.put("domains", domList);
-					DataList roleList = new DataList();
-					for(String role: roles)
-						roleList.add(role);
-					userConfig.put("roles", roleList);
-					Claim attrs = token.getClaim("attrs");
-					DataMap attrMap = new DataMap(attrs.asString());
-					userConfig.put("attributes", attrMap);
-				}
-				else if(type.equals("hardusers"))
-				{
+		if(ce != null)  return ce.get();
+		
+		try {
+			DataMap userConfig = new DataMap("username", jwt.getClaim("email").asString());
+			Claim roleClaim = jwt.getClaim("rol").isNull() ? jwt.getClaim("roles") : jwt.getClaim("rol");
+			Claim domainClaim = jwt.getClaim("dom").isNull() ? jwt.getClaim("domains") : jwt.getClaim("dom");
+			Claim attrClaim = jwt.getClaim("attr").isNull() ? jwt.getClaim("attrs") : jwt.getClaim("attr");
+			if(!roleClaim.isNull()) {
+				List<String> roles = roleClaim.asList(String.class);
+				DataList roleList = new DataList();
+				for(String role: roles)
+					roleList.add(role);
+				userConfig.put("roles", roleList);
+			}
+			if(!domainClaim.isNull()) {
+				List<String> domains = domainClaim.asList(String.class);
+				DataList domList = new DataList();
+				for(String dom: domains)
+					domList.add(dom);
+				userConfig.put("domains", domList);
+			}
+			if(!attrClaim.isNull()) {
+				Map<String, Object> attrs = attrClaim.asMap();
+				DataMap attrMap = Convert.mapToDataMap(attrs);
+				userConfig.put("attributes", attrMap);
+			}
+			
+			if(!userConfig.containsKey("roles") || !userConfig.containsKey("domains") || !userConfig.containsKey("attributes")) {
+				if(hardUsers != null) {
 					for(int i = 0; i < hardUsers.size(); i++)
 						if(hardUsers.getObject(i).containsKey("username") && hardUsers.getObject(i).getString("username").equals(username))
-							userConfig = hardUsers.getObject(i);
+							userConfig.merge(hardUsers.getObject(i));
 				}
-				else if(type.equals("data"))
-				{
+				
+				if(userCollection != null && dataClient != null) {
 					DataMap userResult = dataClient.getData(userCollection.getName(), userCollection.convertObjectToSpecific(new DataMap("username" , username)), null);
 					if(userResult != null && userResult.getList("result") != null && userResult.getList("result").size() > 0)
-						userConfig = userResult.getList("result").getObject(0);
+						userConfig.merge(userResult.getList("result").getObject(0));
 				}
-				else if(type.equals("idm")) {
-					DataMap req = new DataMap();
-					req.put("method", "post");
-					req.put("url", idmUrl);
+				
+				if(idmUserProfileUrl != null && idmClientId != null && idmClientSecret != null && gatewayClient != null) {
 					DataMap reqBody = new DataMap();
 					reqBody.put("user", username);
 					reqBody.put("client_id", idmClientId);
 					reqBody.put("client_secret", idmClientSecret);
-					req.put("body", reqBody);
-					try {
-						Payload respP = firebus.requestService(outboundService, new Payload(req));
-						userConfig = new DataMap(respP.getString());
-					} catch(Exception e) {
-						if(!e.getMessage().contains("Invalid user id"))
-							throw e;
-					}
-				}
-	
-				if(userConfig != null)
-				{
-					DataList rolesList = userConfig.getList("roles");
-					DataList domainsList = userConfig.getList("domains");
-					DataMap rights = new DataMap();
-					for(int i = 0; i < rolesList.size(); i++)
-					{
-						String roleName = rolesList.getString(i);
-						mergeRoleIntoRights(session, null, roleName, rights);						
-						for(int j = 0; j < domainsList.size(); j++)
-						{
-							String domain = domainsList.getString(j);
-							if(!(domain != null && domain.equals("*"))) {
-								mergeRoleIntoRights(session, domain, roleName, rights);
-							}
-						}
-					}
-					userConfig.put("rights", rights);
-					UserProfile userProfile = new UserProfile(userConfig);
-					ce = new CacheEntry<UserProfile>(userProfile, now + 900000);
-					cachedUserProfiles.put(username, ce);
-					return userProfile;
-				} else {
-					return null;
+					DataMap resp = gatewayClient.postForm(idmUserProfileUrl, reqBody);
+					userConfig.merge(resp);
 				}
 			}
-			catch(Exception e)
-			{
-				throw new RedbackException("Error getting user profile for " + username, e);
+
+			DataList rolesList = userConfig.getList("roles");
+			DataList domainsList = userConfig.getList("domains");
+			DataMap rights = new DataMap();
+			for(int i = 0; i < rolesList.size(); i++) {
+				String roleName = rolesList.getString(i);
+				mergeRoleIntoRights(session, null, roleName, rights);						
+				for(int j = 0; j < domainsList.size(); j++) {
+					String domain = domainsList.getString(j);
+					if(!(domain != null && domain.equals("*"))) {
+						mergeRoleIntoRights(session, domain, roleName, rights);
+					}
+				}
 			}
+			userConfig.put("rights", rights);
+			UserProfile userProfile = new UserProfile(userConfig);
+			long expiry = jwt.getExpiresAt().getTime();
+			userProfile.setExpiry(expiry);
+			ce = new CacheEntry<UserProfile>(userProfile, expiry);
+			cachedUserProfiles.put(username, ce);
+			return userProfile;
 		}
+		catch(Exception e)
+		{
+			throw new RedbackException("Error getting user profile for " + username, e);
+		}
+	
 	}
 	
 	
@@ -359,11 +344,6 @@ public class RedbackAccessManager extends AccessManager
 			ret.put("execute", s.contains("x"));
 			return ret;
 		} 
-	}
-	
-	public void configure() {
-		this.cachedUserProfiles.clear();
-		this.roles.clear();
 	}
 
 }

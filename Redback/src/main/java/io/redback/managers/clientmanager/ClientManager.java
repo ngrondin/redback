@@ -31,6 +31,7 @@ public class ClientManager extends Thread {
 	protected CollectionConfig deviceCollection;
 	protected CollectionConfig userCollection;
 	protected List<ClientHandler> clientHandlers;
+	protected DataMap serviceMap;
 	protected boolean quit;
 
 	
@@ -46,6 +47,7 @@ public class ClientManager extends Thread {
 		if(config.containsKey("accessmanagementservice")) accessManagementClient = new AccessManagementClient(firebus, config.getString("accessmanagementservice"));		
 		deviceCollection = new CollectionConfig(config.getObject("devicecollection"), "rbcs_device");
 		userCollection = new CollectionConfig(config.getObject("usercollection"), "rbcs_user");
+		serviceMap = config.getObject("servicemap");
 		setName("rbClientHB");
 		start();
 	}
@@ -77,6 +79,14 @@ public class ClientManager extends Thread {
 	
 	public CollectionConfig getUserCollectionConfig() {
 		return userCollection;
+	}
+	
+	public String getMappedServiceName(String serviceName) throws RedbackException {
+		if(serviceMap != null) {
+			String ret = serviceMap.getString(serviceName);
+			if(ret != null) return ret;
+		}
+		throw new RedbackException("Unknown service: " + serviceName);
 	}
 	
 	public Payload acceptClientConnection(Session session, Payload payload, StreamEndpoint streamEndpoint) throws RedbackException {

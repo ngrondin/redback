@@ -49,17 +49,11 @@ public abstract class AccessManager extends ServiceProvider
 			{
 				String token = request.getString("token");
 				UserProfile userProfile = validateToken(session, token);
-				
-				if(userProfile != null)
-				{
-					response.put("result", "ok");
-					response.put("userprofile", userProfile.getJSON());
-				}
-				else
-				{
-					response.put("result", "failed");
-					response.put("error", "User has no profile");						
-				}
+				response.put("result", "ok");
+				response.put("userprofile", userProfile.getJSON());
+			} else if(action.equals("getsysuser")) {
+				String sysUserToken = getSysUserToken(session);
+				response.put("token", sysUserToken);				
 			}
 		}
 		catch(Exception e)
@@ -78,6 +72,7 @@ public abstract class AccessManager extends ServiceProvider
 	}
 	
 
+	protected abstract String getSysUserToken(Session session) throws RedbackException;
 	
 	protected abstract UserProfile validateToken(Session session, String token) throws RedbackException;
 }

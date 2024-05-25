@@ -69,13 +69,14 @@ public class ClientHandler extends ClientStreamHandler {
 
 	public void requestService(String reqUid, String serviceName, DataMap request, int timeout) throws RedbackException {
 		try {
+			String mappedServiceName = clientManager.getMappedServiceName(serviceName);
 			Payload payload = new Payload();
 			payload.metadata.put("token", session.getToken());
 			if(session != null && session.getTimezone() != null)
 				payload.metadata.put("timezone", session.getTimezone());
 			payload.metadata.put("mime", "application/json");
 			payload.setData(request);
-			clientManager.firebus.requestService(serviceName, payload, new ServiceRequestor() {
+			clientManager.firebus.requestService(mappedServiceName, payload, new ServiceRequestor() {
 				public void response(Payload payload) {
 					try {
 						String mime = payload.metadata.get("mime");
@@ -104,13 +105,14 @@ public class ClientHandler extends ClientStreamHandler {
 
 	public void requestStream(String requid, String service, DataMap data, boolean autoNext) throws RedbackException {
 		try {
+			String mappedServiceName = clientManager.getMappedServiceName(service);
 			Payload payload = new Payload();
 			payload.metadata.put("token", session.getToken());
 			if(session != null && session.getTimezone() != null)
 				payload.metadata.put("timezone", session.getTimezone());
 			payload.metadata.put("mime", "application/json");
 			payload.setData(data);
-			StreamEndpoint sep = clientManager.firebus.requestStream(service, payload, requid, 10000);
+			StreamEndpoint sep = clientManager.firebus.requestStream(mappedServiceName, payload, requid, 10000);
 			streams.put(requid, sep);
 			sep.setHandler(new StreamHandler() {
 				public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {

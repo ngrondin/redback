@@ -2,6 +2,7 @@ package io.redback.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -20,5 +21,21 @@ public class Convert {
 		for(Object o: list) 
 			ret.add(o);
 		return ret;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static DataMap mapToDataMap(Map<String, ?> map) {
+		DataMap dataMap = new DataMap();
+		for(String key: map.keySet()) {
+			Object val = map.get(key);
+			if(val instanceof Map) {
+				dataMap.put(key, mapToDataMap((Map<String, ?>)val));
+			} else if(val instanceof List) {
+				dataMap.put(key, listToDataList((List<?>)val));
+			} else {
+				dataMap.put(key, val);
+			}
+		}
+		return dataMap;
 	}
 }

@@ -50,6 +50,7 @@ public class RedbackUIServer extends UIServer
 	protected DataClient dataClient;
 	protected CollectionConfig viewCollection;
 	protected CollectionConfig traceCollection;
+	protected DataMap serviceMap;
 	
 	public RedbackUIServer(String n, DataMap c, Firebus f) 
 	{
@@ -73,6 +74,7 @@ public class RedbackUIServer extends UIServer
 			}
 		});
 		traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(dataClient, config.getObject("tracecollection"), "rbt_trace") : null;
+		serviceMap = config.getObject("servicemap");
 	}
 	
 	public void configure() {
@@ -86,9 +88,10 @@ public class RedbackUIServer extends UIServer
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("global", config.getObject("globalvariables"));
 		context.put("version", version);
-		context.put("deployment",  config);
+		context.put("servicemap", serviceMap);
 		context.put("utils", new RedbackUtilsJSWrapper());
 		context.put("session", new SessionJSWrapper(session));
+		context.put("useclientforapi", config.getBoolean("useclientforapi"));
 		try {
 			DataMap appConfig = getAppConfig(session, name);
 			String page = appConfig.getString("page");
@@ -350,7 +353,7 @@ public class RedbackUIServer extends UIServer
 					varNames.add("canWrite");
 					varNames.add("canExecute");
 					varNames.add("config");
-					varNames.add("deployment");
+					varNames.add("servicemap");
 					varNames.add("id");
 					varNames.add("parents");
 					varNames.add("sb");

@@ -53,4 +53,18 @@ public class AccessManagementClient extends Client
 		}
 		return userProfile;
 	}
+	
+	public String getSysUserToken(Session session) throws RedbackException
+	{
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "getsysuser");
+			DataMap resp = requestDataMap(session, req);
+			String token = resp.getString("token");
+			return token;
+		} catch(Exception e) {
+			throw new RedbackException("Error validating token with access manager", e);
+		}
+	}
+	
 }

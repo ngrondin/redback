@@ -1,20 +1,11 @@
 package io.redback.security;
 
-import java.util.Date;
-
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-
 import io.firebus.data.DataMap;
-import io.firebus.logging.Logger;
 import io.redback.client.AccessManagementClient;
 import io.redback.exceptions.RedbackException;
 
 public class SysUserManager {
 	protected DataMap config;
-	protected String jwtSecret;
-	protected String jwtIssuer;
-	protected String username;
 	protected AccessManagementClient accessManagementClient;
 	protected UserProfile profile;
 	protected String token;
@@ -23,41 +14,17 @@ public class SysUserManager {
 	public SysUserManager(AccessManagementClient amClient, DataMap c) {
 		config = c;
 		accessManagementClient = amClient;
-		username = config.getString("sysusername");
-		jwtSecret = config.getString("jwtsecret");
-		jwtIssuer = config.getString("jwtissuer");
 	}
 	
 	public String getUsername() {
-		return username;
-	}
-	
-	private synchronized void validate(Session session) throws RedbackException {
-		long now = System.currentTimeMillis();
-		if(profile == null || token == null || expiry < now + 300000)
-		{
-			try
-			{
-				expiry = now + 3600000;
-				Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
-				token = JWT.create()
-						.withIssuer(jwtIssuer)
-						.withClaim("email", username)
-						.withExpiresAt(new Date(expiry))
-						.sign(algorithm);
-				profile = accessManagementClient.validate(session, token);
-				Logger.info("rb.sysuser.newtoken", new DataMap("token", token));
-			}
-			catch(Exception e)
-			{
-				throw new RedbackException("Error authenticating sys user", e);
-			}
-		}
-		
+		if(profile != null)
+			return profile.getUsername();
+		else 
+			return null;
 	}
 	
 	public UserProfile getProfile(Session session) throws RedbackException  {
-		validate(session);
+		retreive(session);
 		return profile;
 	}
 	
@@ -67,9 +34,20 @@ public class SysUserManager {
 	
 	public Session getSession(String sessionId) throws RedbackException {
 		Session session = new Session(sessionId);
-		validate(session);
+		retreive(session);
 		session.setUserProfile(profile);
 		session.setToken(token);
 		return session;
 	}
+	
+	private synchronized void retreive(Session session) throws RedbackException {
+		long now = System.currentTimeMillis();
+		if(profile == null || token == null || expiry < now + 60000) {
+			token = accessManagementClient.getSysUserToken(session);
+			profile = accessManagementClient.validate(session, token);
+			expiry = profile.getExpiry();
+		}
+	}
+	
+
 }

@@ -358,9 +358,13 @@ export class ClientWSService {
     }
   }
 
-
-
-
+  updateToken(token: string)  {
+    this.websocket.next({
+      type:"tokenupdate",
+      token: token
+    });
+  
+  }
 }
 
 

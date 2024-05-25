@@ -41,6 +41,7 @@
 			<artifactId>firebus-data</artifactId>
 			<version>${io.firebus.version}</version>
 		</dependency>	
+
 		<dependency>
 			<groupId>io.firebus</groupId>
 			<artifactId>firebus-core</artifactId>
@@ -75,7 +76,12 @@
 			<groupId>org.jxls</groupId>
 			<artifactId>jxls-jexcel</artifactId>
 			<version>1.0.9</version>
-		</dependency>	
+		</dependency>
+		<dependency>
+			<groupId>io.firebus</groupId>
+			<artifactId>firebus-utils</artifactId>
+			<version>1.3.4</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>

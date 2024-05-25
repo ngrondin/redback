@@ -15,7 +15,7 @@ var versionOrDefault = version != null ? version : 'default';
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%=global.googlekey%>&libraries=places"></script>
   <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
   <script src="https://cdn.quilljs.com/1.0.0/quill.js"></script>  
-  <link href="/<%=deployment.uiservicepath%>/resource/styles.css" rel="stylesheet">
+  <link href="/<%=servicemap.ui%>/resource/styles.css" rel="stylesheet">
   <script>
     var googlekey = "<%=global.googlekey%>";
   </script>
@@ -26,22 +26,22 @@ var versionOrDefault = version != null ? version : 'default';
     version="<%=versionOrDefault%>"
     username="<%=session.getUserProfile().getUsername()%>"
     userdisplay="<%=session.getUserProfile().getAttribute('fullname')%>"
-    uiservice="<%=deployment.uiservicepath%>"
-    objectservice="<%=deployment.objectservicepath%>"
-    fileservice="<%=deployment.fileservicepath%>"
-    domainservice="<%=deployment.domainservicepath%>"
-    reportservice="<%=deployment.reportservicepath%>"
-    processservice="<%=deployment.processservicepath%>"
-    userpreferenceservice="<%=deployment.userpreferenceservicepath%>"
-    chatservice="<%=deployment.chatservicepath%>"
-    aiservice="<%=deployment.aiservicepath%>"
-    clientservice="<%=deployment.clientservicepath%>"
-    usecsforapi="<%=deployment.useclientforapi%>">
+    uiservice="<%=servicemap.ui%>"
+    objectservice="<%=servicemap.object%>"
+    fileservice="<%=servicemap.file%>"
+    domainservice="<%=servicemap.domain%>"
+    reportservice="<%=servicemap.report%>"
+    processservice="<%=servicemap.process%>"
+    userpreferenceservice="<%=servicemap.userpreference%>"
+    chatservice="<%=servicemap.chat%>"
+    aiservice="<%=servicemap.ai%>"
+    clientservice="<%=servicemap.client%>"
+    usecsforapi="<%=useclientforapi%>">
   </app-root>
   
-  <script src="/<%=deployment.uiservicepath%>/resource/runtime.js" type="module"></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/polyfills.js" type="module"></script>
-  <script src="/<%=deployment.uiservicepath%>/resource/main.js" type="module"></script>
+  <script src="/<%=servicemap.ui%>/resource/runtime.js" type="module"></script>
+  <script src="/<%=servicemap.ui%>/resource/polyfills.js" type="module"></script>
+  <script src="/<%=servicemap.ui%>/resource/main.js" type="module"></script>
 
 </body>
 </html>

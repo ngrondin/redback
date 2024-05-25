@@ -37,37 +37,101 @@ export class ApiService {
   public aiService: string;
   public placesAutocompleteService: any;
 
+  public refreshToken: string;
+  public expiresAt: number;
+  public accessToken: string;
+  public refreshPath: string;
+
   constructor(
     private http: HttpClient,
     private clientWSService: ClientWSService
   ) { 
     try {
       this.placesAutocompleteService = new google.maps.places.AutocompleteService();
+      this.accessToken = localStorage.getItem("access_token");
+      this.expiresAt = parseInt(localStorage.getItem("expires_at"));
+      this.refreshToken = localStorage.getItem("refresh_token");
+      this.refreshPath = localStorage.getItem("refresh_path");
     } catch(error) {
       console.error(error);
     }
   }
 
+  private checkToken() {
+    return new Observable((observer) => {
+      let now = (new Date()).getTime();
+      if(this.expiresAt != null && now > this.expiresAt - 60000) {
+        console.log("Access Token has expired, atempting to renew it");
+        this.http.get<any>(this.baseUrl + this.refreshPath, {headers:{"accept":"application/json"}}).subscribe({
+          next: (value) => {
+            this.accessToken = value.access_token;
+            this.expiresAt = value.expires_at;
+            this.refreshToken = value.refresh_token;
+            this.refreshPath = value.refresh_path;
+            localStorage.setItem("access_token", this.accessToken);
+            localStorage.setItem("expires_at", this.expiresAt.toString());
+            localStorage.setItem("refresh_token", this.refreshToken);
+            localStorage.setItem("refresh_path", this.refreshPath);
+            this.clientWSService.updateToken(this.accessToken);
+            console.log("Access Token renewed: " + this.accessToken);
+            observer.next();
+          },
+          error: (err) => {
+            console.error("Error refreshing access token: " + err);
+            observer.error(err);
+          },
+          complete: () => observer.complete()
+        });
+      } else {
+        observer.next();
+        observer.complete();
+      }  
+    });
+  }
+
   private requestService(service: string, request: any, timeout?: number) {
-    if(service == null || service == '') {
-      throw "Undefined service";
-    } else if(this.clientWSService.isConnected() && this.useCSForAPI) {
-      return this.clientWSService.requestService(service, request, timeout);
-    } else {
-      let headers = new HttpHeaders()
-        .set("Content-Type", "application/json")
-        .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
-      if(timeout != null) headers.set("firebus-timeout", timeout.toString());
-      return this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true});
-    }
+    return new Observable<any>((observer) => {
+      this.checkToken().subscribe(() => {
+        if(service == null || service == '') {
+          observer.error("Undefined service");
+        } else if(this.clientWSService.isConnected() && this.useCSForAPI) {
+          this.clientWSService.requestService(service, request, timeout).subscribe({
+            next: (value) => observer.next(value),
+            error: (err) => observer.error(err),
+            complete: () => observer.complete()
+          })
+        } else {
+          let headers = new HttpHeaders()
+            .set("Content-Type", "application/json")
+            .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+          if(timeout != null) headers.set("firebus-timeout", timeout.toString());
+          return this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true}).subscribe({
+            next: (value) => observer.next(value),
+            error: (err) => observer.error(err),
+            complete: () => observer.complete()
+          });
+        }
+      });
+    });
   }
 
   private requestStream(service: string, request: any, autoNext: boolean) {
-    if(this.clientWSService.isConnected() && this.useCSForAPI) {
-      return this.clientWSService.requestStream(service, request, autoNext);
-    } else {
-      throw "Streams can only be requested with connected to the client servce";
-    }
+    return new Observable<any>((observer) => {
+      if(this.clientWSService.isConnected() && this.useCSForAPI) {
+        this.checkToken().subscribe({
+          error: (err) => observer.error(err),
+          complete: () => {
+            this.clientWSService.requestStream(service, request, autoNext).subscribe({
+              next: (value) => observer.next(value),
+              error: (err) => observer.error(err),
+              complete: () => observer.complete()   
+            });
+          }
+        });
+      } else {
+        observer.error("Streams can only be requested with connected to the client servce");
+      }
+    });
   }
 
   canStream() {
