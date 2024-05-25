@@ -25,6 +25,7 @@ public class Convert {
 	
 	@SuppressWarnings("unchecked")
 	public static DataMap mapToDataMap(Map<String, ?> map) {
+		if(map == null) return null;
 		DataMap dataMap = new DataMap();
 		for(String key: map.keySet()) {
 			Object val = map.get(key);

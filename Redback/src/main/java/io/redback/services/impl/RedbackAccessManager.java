@@ -152,9 +152,12 @@ public class RedbackAccessManager extends AccessManager
 				userConfig.put("domains", domList);
 			}
 			if(!attrClaim.isNull()) {
-				Map<String, Object> attrs = attrClaim.asMap();
-				DataMap attrMap = Convert.mapToDataMap(attrs);
-				userConfig.put("attributes", attrMap);
+				if(attrClaim.asMap() != null) {
+					Map<String, Object> attrs = attrClaim.asMap();
+					userConfig.put("attributes", Convert.mapToDataMap(attrs));					
+				} else if(attrClaim.asString() != null) {
+					userConfig.put("attributes", new DataMap(attrClaim.asString()));
+				}
 			}
 			
 			if(!userConfig.containsKey("roles") || !userConfig.containsKey("domains") || !userConfig.containsKey("attributes")) {
@@ -196,6 +199,8 @@ public class RedbackAccessManager extends AccessManager
 			userConfig.put("rights", rights);
 			UserProfile userProfile = new UserProfile(userConfig);
 			long expiry = jwt.getExpiresAt().getTime();
+			long maxExpiry = System.currentTimeMillis() + (15*60*1000);
+			if(expiry > maxExpiry) expiry = maxExpiry;
 			userProfile.setExpiry(expiry);
 			ce = new CacheEntry<UserProfile>(userProfile, expiry);
 			cachedUserProfiles.put(username, ce);
