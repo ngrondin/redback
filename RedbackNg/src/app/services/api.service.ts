@@ -105,7 +105,7 @@ export class ApiService {
             .set("Content-Type", "application/json")
             .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
           if(timeout != null) headers.set("firebus-timeout", timeout.toString());
-          return this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true}).subscribe({
+          this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true}).subscribe({
             next: (value) => observer.next(value),
             error: (err) => observer.error(err),
             complete: () => observer.complete()
@@ -134,6 +134,18 @@ export class ApiService {
     });
   }
 
+  private get(url: string) {
+    return new Observable<any>((observer) => {
+      this.checkToken().subscribe(() => {
+        this.http.get<any>(url, httpJSONOptions).subscribe({
+          next: (value) => observer.next(value),
+          error: (err) => observer.error(err),
+          complete: () => observer.complete()
+        });
+      });
+    });
+  }
+
   canStream() {
     return this.clientWSService.isConnected() && this.useCSForAPI;
   }
@@ -143,11 +155,17 @@ export class ApiService {
 
   getPreviewUrl(url: string): Observable<any> {
     let reqUrl = this.baseUrl + '/' + this.uiService + "/tools/urlpreview?url=" + encodeURIComponent(url);
-    return this.http.get<any>(reqUrl, httpJSONOptions);
+    return this.get(reqUrl);
   }
 
   getAppConfig(name: string) {
-    return this.http.get<any>(this.baseUrl + "/" + this.uiService + "/config/" + name, httpJSONOptions);
+    let reqUrl = this.baseUrl + "/" + this.uiService + "/config/" + name;
+    return this.get(reqUrl);
+  }
+
+  getView(name: string, domain: string) {
+    let reqUrl = this.baseUrl + "/" + this.uiService + "/view/" + (domain != null ? domain + '/' : '')  + name;
+    return this.get(reqUrl);
   }
 
  /********* Objects Service **********/  
