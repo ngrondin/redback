@@ -27,17 +27,19 @@ public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					try {
-						WritableCellFormat wcf = CellFormatter.createFormat(arguments.length >= 4 ? arguments[3] : null);
 						int col = ((Long)arguments[0]).intValue();
 						int row = ((Long)arguments[1]).intValue();
-						if(arguments[2] instanceof java.lang.Number) {
-							Number num = new Number(col, row, ((java.lang.Number)arguments[2]).doubleValue(), wcf);
+						Object val = arguments[2];
+						WritableCellFormat wcf = CellFormatter.createFormat(arguments.length >= 4 ? arguments[3] : null);
+						if(val instanceof java.lang.Number) {
+							double doubleVal = ((java.lang.Number)val).doubleValue();
+							Number num = new Number(col, row, doubleVal, wcf);
 							sheet.addCell(num);
-						} else if(arguments[2] instanceof String) {
-							Label lbl = new Label(col, row, ((String)arguments[2]), wcf);	
+						} else if(val instanceof String) {
+							Label lbl = new Label(col, row, (String)val, wcf);	
 							sheet.addCell(lbl);
-						} else if(arguments[2] instanceof Date) {
-							DateTime dt = new DateTime(col, row, ((Date)arguments[2]), wcf);
+						} else if(val instanceof Date) {
+							DateTime dt = new DateTime(col, row, (Date)val, wcf);
 							sheet.addCell(dt);
 						}
 						

@@ -5,6 +5,7 @@ import jxl.biff.DisplayFormat;
 import jxl.format.Alignment;
 import jxl.format.Colour;
 import jxl.format.VerticalAlignment;
+import jxl.write.DateFormat;
 import jxl.write.NumberFormat;
 import jxl.write.NumberFormats;
 import jxl.write.WritableCellFormat;
@@ -41,6 +42,12 @@ public class CellFormatter extends WritableCellFormat {
 					format = new NumberFormat(NumberFormat.CURRENCY_DOLLAR + "###,###.00", NumberFormat.COMPLEX_FORMAT); 
 				else if(formatStr.equals("percent"))
 					format = NumberFormats.PERCENT_FLOAT;
+				else if(formatStr.equals("datetime"))
+					format = new DateFormat(config.containsKey("datetimeformat") ? config.getString("datetimeformat") : "dd/MM/yyyy hh:mm");
+				else if(formatStr.equals("date"))
+					format = new DateFormat(config.containsKey("dateformat") ? config.getString("dateformat") : "dd/MM/yyyy");
+				else if(formatStr.equals("time"))
+					format = new DateFormat(config.containsKey("timeformat") ? config.getString("timeformat") : "hh:mm");
 			}
 			if(format != null) wcf = new WritableCellFormat(format);
 			else wcf = new WritableCellFormat();
