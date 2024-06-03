@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import io.firebus.data.DataMap;
 import io.firebus.script.Converter;
 import io.firebus.script.exceptions.ScriptValueException;
 import io.firebus.script.values.SNull;
@@ -91,7 +92,8 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		{
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					return rbObject.execute(name);
+					DataMap param = arguments.length > 0 && arguments[0] instanceof DataMap ? (DataMap)arguments[0] : null;
+					return rbObject.executeFunction(name, param);
 				}
 			};				
 		}

@@ -123,13 +123,13 @@ public class ClientManager extends Thread {
 	}
 
 	
-	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, String fcmToken, boolean nfcAvailable, String screenSize, String username) throws RedbackException {
+	public void registerDevice(String deviceId, String deviceModel, String os, String appVersion, String locationPermissions, boolean notifAuthorized, String fcmToken, boolean nfcAvailable, String screenSize, String username) throws RedbackException {
 		if(deviceCollection != null && dataClient != null) {
 			DataMap key = new DataMap("_id", deviceId);
 			DataMap resp = dataClient.getData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key));
 			DataMap existingData = resp.containsKey("result") && resp.getList("result").size() > 0 ? resp.getList("result").getObject(0) : null;
-			DataMap newData = new DataMap("model", deviceModel, "os", os, "app", appVersion, "locationpermissions", locationPermissions, "fcmtoken", fcmToken, "nfcavailable", nfcAvailable, "screen", screenSize, "username", username);
-			String[] keys = {"model", "os", "app", "locationpermissions", "fcmtoken", "nfcavailabile", "screen", "username"};
+			DataMap newData = new DataMap("model", deviceModel, "os", os, "app", appVersion, "locationpermissions", locationPermissions, "notifauthorized", notifAuthorized, "fcmtoken", fcmToken, "nfcavailable", nfcAvailable, "screen", screenSize, "username", username);
+			String[] keys = {"model", "os", "app", "locationpermissions", "notifauthorized", "fcmtoken", "nfcavailable", "screen", "username"};
 			DataMap diff = DataMapCompare.differences(newData, existingData, keys);
 			if(diff.keySet().size() > 0) {
 				DataList history = existingData != null ? existingData.getList("history") : null;

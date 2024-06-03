@@ -513,7 +513,7 @@ public class ObjectManager
 	public RedbackObject executeObjectFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
-		object.execute(function);
+		object.executeFunction(function, param);
 		return object;
 	}
 	

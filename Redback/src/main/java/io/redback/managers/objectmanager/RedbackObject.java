@@ -72,7 +72,7 @@ public class RedbackObject extends RedbackElement
 			}
 			postInitScriptContextUpdate();
 			updateScriptContext();
-			executeFunctionForEvent("onload");
+			executeFunction("onload", scriptContext);
 		}
 		else
 		{
@@ -153,11 +153,11 @@ public class RedbackObject extends RedbackElement
 					if(value != null) {
 						data.put(attributeName, value);
 						updatedAttributes.add(attributeName);	
-						executeAttributeFunctionForEvent(attributeName, "onupdate");
+						executeAttributeFunction(attributeName, "onupdate");
 					}
 				}
 				updateScriptContext();				
-				executeFunctionForEvent("oncreate");
+				executeFunction("oncreate", scriptContext);
 			}
 			catch(FunctionTimeoutException | FunctionErrorException | ScriptException e)
 			{
@@ -407,7 +407,7 @@ public class RedbackObject extends RedbackElement
 							scriptContext.put(name, actualValue.getObject());
 						ScriptContext attributeUpdateScriptContext = scriptContext.createChild();
 						attributeUpdateScriptContext.put("previousValue", currentValue.getObject());
-						executeAttributeFunctionForEvent(name, "onupdate", attributeUpdateScriptContext);
+						executeAttributeFunction(name, "onupdate", attributeUpdateScriptContext);
 					} catch(ScriptValueException e) {
 						throw new RedbackException("Error setting script context value", e);
 					}
@@ -524,7 +524,7 @@ public class RedbackObject extends RedbackElement
 		if(canDelete()) {
 			isDeleted = true;
 			lastUpdated = System.currentTimeMillis();
-			executeFunctionForEvent("ondelete");
+			executeFunction("ondelete", scriptContext);
 		} else {
 			throw new RedbackException("The object '" + config.getName() + ":" + getUID().getString() + "' cannot be deleted");
 		}
@@ -589,7 +589,7 @@ public class RedbackObject extends RedbackElement
 	{
 		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true) && canWrite)
 		{
-			executeFunctionForEvent("onsave");
+			executeFunction("onsave", scriptContext);
 		}
 	}
 	
@@ -598,10 +598,10 @@ public class RedbackObject extends RedbackElement
 		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true) && canWrite)
 		{
 			try {
-				executeFunctionForEvent("aftersave");
+				executeFunction("aftersave", scriptContext);
 				if(isNewObject)
 				{
-					executeFunctionForEvent("aftercreate");
+					executeFunction("aftercreate", scriptContext);
 					isNewObject = false;
 				}
 			} catch(Exception e) {
@@ -616,16 +616,73 @@ public class RedbackObject extends RedbackElement
 		
 	}
 	
-	public Object execute(String eventName) throws RedbackException
+	public Object executeFunction(String functionName) throws RedbackException
+	{
+		return executeFunction(functionName, (DataMap)null);
+	}
+	
+	public Object executeFunction(String functionName, DataMap param) throws RedbackException
 	{
 		if(canExecute)
 		{
-			return executeFunctionForEvent(eventName);
+			ScriptContext context = scriptContext;
+			if(param != null) {
+				try {
+					context = scriptContext.createChild();
+					context.put("param", param);
+				} catch(Exception e) {
+					throw new RedbackException("Error creating the script context", e);
+				}
+			} 
+			return executeFunction(functionName, context);
 		}
 		else
 		{
 			throw new RedbackException("User does not have the right to execute functions in object " + config.getName());
 		}
+	}
+
+	protected Object executeFunction(String functionName, ScriptContext context) throws RedbackException
+	{
+			Function function  = config.getScriptForEvent(functionName);
+			if(function != null) {
+				String name = getObjectConfig().getName() + ":" + getUID().getString() + "." + functionName;
+				return execute(function, name, context);
+			} else {
+				return null; //Return null instead of throwing an error so the object can automatically try to launch events even if they don't exist
+			}
+	}
+	
+	protected void executeAttributeFunction(String attributeName, String event) throws RedbackException
+	{
+		executeAttributeFunction(attributeName, event, scriptContext);
+	}
+
+	protected void executeAttributeFunction(String attributeName, String functionName, ScriptContext context) throws RedbackException
+	{
+		Function script  = config.getAttributeConfig(attributeName).getScriptForEvent(functionName);
+		if(script != null) {
+			String name = getObjectConfig().getName() + ":" + getUID().getString() + "." + attributeName + "." + functionName;
+			execute(script, name, context);
+		}
+	}
+	
+	protected Object execute(Function function, String functionName, ScriptContext context) throws RedbackException
+	{
+		Object retVal = null;
+		try
+		{
+			session.pushDomainLock(getDomain().getString());
+			session.pushScriptLevel();
+			retVal = function.call(context);
+			session.popScriptLevel();
+			session.popDomainLock();
+		} 
+		catch (ScriptException e)
+		{
+			throw new RedbackException("Problem occurred executing script " + functionName, e);
+		}		
+		return retVal;
 	}
 	
 	protected void traceEvent(String action, String attribute, String value, String function) throws RedbackException {
@@ -718,53 +775,7 @@ public class RedbackObject extends RedbackElement
 
 	}
 	
-	protected Object executeFunctionForEvent(String event) throws RedbackException
-	{
-		return executeFunctionForEvent(event, this.scriptContext);
-	}
 
-	protected Object executeFunctionForEvent(String event, ScriptContext context) throws RedbackException
-	{
-		Function function  = config.getScriptForEvent(event);
-		if(function != null) {
-			String name = getObjectConfig().getName() + ":" + getUID().getString() + "." + event;
-			return executeFunction(function, name, context);
-		} else {
-			return null;
-		}
-	}
-	
-	protected void executeAttributeFunctionForEvent(String attributeName, String event) throws RedbackException
-	{
-		executeAttributeFunctionForEvent(attributeName, event, this.scriptContext);
-	}
-
-	protected void executeAttributeFunctionForEvent(String attributeName, String event, ScriptContext context) throws RedbackException
-	{
-		Function script  = config.getAttributeConfig(attributeName).getScriptForEvent(event);
-		if(script != null) {
-			String name = getObjectConfig().getName() + ":" + getUID().getString() + "." + attributeName + "." + event;
-			executeFunction(script, name, context);
-		}
-	}
-	
-	protected Object executeFunction(Function function, String name, ScriptContext context) throws RedbackException
-	{
-		Object retVal = null;
-		try
-		{
-			session.pushDomainLock(getDomain().getString());
-			session.pushScriptLevel();
-			retVal = function.call(context);
-			session.popScriptLevel();
-			session.popDomainLock();
-		} 
-		catch (ScriptException e)
-		{
-			throw new RedbackException("Problem occurred executing script " + name, e);
-		}		
-		return retVal;
-	}
 	
 	public boolean filterApplies(DataMap objectFilter) {
 		return filterAppliesToDataView(objectFilter, data);
