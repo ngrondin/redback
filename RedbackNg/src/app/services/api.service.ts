@@ -1,7 +1,7 @@
 declare const google: any
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Observer, Subscriber } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ClientWSService } from './clientws.service';
 
@@ -42,6 +42,8 @@ export class ApiService {
   public accessToken: string;
   public refreshPath: string;
 
+  private refreshTokenObservers: Subscriber<any>[] = [];
+
   constructor(
     private http: HttpClient,
     private clientWSService: ClientWSService
@@ -60,28 +62,37 @@ export class ApiService {
   private checkToken() {
     return new Observable((observer) => {
       let now = (new Date()).getTime();
-      if(this.expiresAt != null && now > this.expiresAt - 60000) {
-        console.log("Access Token has expired, atempting to renew it");
-        this.http.get<any>(this.baseUrl + this.refreshPath, {headers:{"accept":"application/json"}}).subscribe({
-          next: (value) => {
-            this.accessToken = value.access_token;
-            this.expiresAt = value.expires_at;
-            this.refreshToken = value.refresh_token;
-            this.refreshPath = value.refresh_path;
-            localStorage.setItem("access_token", this.accessToken);
-            localStorage.setItem("expires_at", this.expiresAt.toString());
-            localStorage.setItem("refresh_token", this.refreshToken);
-            localStorage.setItem("refresh_path", this.refreshPath);
-            this.clientWSService.updateToken(this.accessToken);
-            console.log("Access Token renewed: " + this.accessToken);
-            observer.next();
-          },
-          error: (err) => {
-            console.error("Error refreshing access token: " + err);
-            observer.error(err);
-          },
-          complete: () => observer.complete()
-        });
+      if(this.expiresAt != null && now > this.expiresAt - (14*60000)) {
+        this.refreshTokenObservers.push(observer);
+        console.log("Access Token has expired");
+        if(this.refreshTokenObservers.length == 1) {
+          console.log("Refreshing tokens");
+          this.http.get<any>(this.baseUrl + this.refreshPath, {headers:{"accept":"application/json"}}).subscribe({
+            next: (value) => {
+              this.accessToken = value.access_token;
+              this.expiresAt = value.expires_at;
+              this.refreshToken = value.refresh_token;
+              this.refreshPath = value.refresh_path;
+              localStorage.setItem("access_token", this.accessToken);
+              localStorage.setItem("expires_at", this.expiresAt.toString());
+              localStorage.setItem("refresh_token", this.refreshToken);
+              localStorage.setItem("refresh_path", this.refreshPath);
+              this.clientWSService.updateToken(this.accessToken);
+              this.refreshTokenObservers.forEach(o => o.next())
+              console.log("Access Token renewed: " + this.accessToken);
+            },
+            error: (err) => {
+              this.refreshTokenObservers.forEach(o => o.error(err))
+              console.error("Error refreshing access token: " + err);
+            },
+            complete: () => {
+              this.refreshTokenObservers.forEach(o => o.complete())
+              this.refreshTokenObservers = [];
+            }
+          });
+        } else {
+          console.log("Tokens already refreshing");
+        }
       } else {
         observer.next();
         observer.complete();
@@ -94,7 +105,7 @@ export class ApiService {
       this.checkToken().subscribe(() => {
         if(service == null || service == '') {
           observer.error("Undefined service");
-        } else if(this.clientWSService.isConnected() && this.useCSForAPI) {
+        } else if(this.canStream()) {
           this.clientWSService.requestService(service, request, timeout).subscribe({
             next: (value) => observer.next(value),
             error: (err) => observer.error(err),
@@ -117,7 +128,7 @@ export class ApiService {
 
   private requestStream(service: string, request: any, autoNext: boolean) {
     return new Observable<any>((observer) => {
-      if(this.clientWSService.isConnected() && this.useCSForAPI) {
+      if(this.canStream()) {
         this.checkToken().subscribe({
           error: (err) => observer.error(err),
           complete: () => {
@@ -363,7 +374,7 @@ export class ApiService {
   /******* Files *********/
 
   uploadFile(file: File, object: string, uid: string) : Observable<any> {
-    if(this.clientWSService.isConnected() && this.useCSForAPI) {
+    if(this.canStream()) {
       return this.clientWSService.upload(file, object, uid);
     } else {
       let formData: FormData = new FormData();
