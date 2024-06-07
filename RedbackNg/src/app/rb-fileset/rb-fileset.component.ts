@@ -82,11 +82,13 @@ export class RbFilesetComponent extends RbSetComponent {
   }
 
   public uploadFile(file: File) {
-    this.apiService.uploadFile(file, this.relatedObject.objectname, this.relatedObject.uid).subscribe(
-      (prog) => this.uploadProgress = prog.value,
-      (error) => { },
-      () => this.afterUpload(null)
-    );
+    if(this.relatedObject != null) { 
+      this.apiService.uploadFile(file, this.relatedObject.objectname, this.relatedObject.uid).subscribe(
+        (prog) => this.uploadProgress = prog.value,
+        (error) => { },
+        () => this.afterUpload(null)
+      );
+    }
   }
   
   public afterUpload(resp: any) {

@@ -359,11 +359,12 @@ export class ClientWSService {
   }
 
   updateToken(token: string)  {
-    this.websocket.next({
-      type:"tokenupdate",
-      token: token
-    });
-  
+    if(this.connected) {
+      this.websocket.next({
+        type:"tokenupdate",
+        token: token
+      });
+    }
   }
 }
 

@@ -62,7 +62,7 @@ export class ApiService {
   private checkToken() {
     return new Observable((observer) => {
       let now = (new Date()).getTime();
-      if(this.expiresAt != null && now > this.expiresAt - (14*60000)) {
+      if(this.expiresAt != null && now > this.expiresAt - (60000)) {
         this.refreshTokenObservers.push(observer);
         console.log("Access Token has expired");
         if(this.refreshTokenObservers.length == 1) {

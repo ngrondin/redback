@@ -350,6 +350,7 @@ public class RedbackUIServer extends UIServer
 					varNames.add("utils");
 					varNames.add("version");
 					varNames.add("session");
+					varNames.add("useclientforapi");
 					varNames.add("canWrite");
 					varNames.add("canExecute");
 					varNames.add("config");
