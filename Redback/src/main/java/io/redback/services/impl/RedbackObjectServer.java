@@ -70,6 +70,10 @@ public class RedbackObjectServer extends ObjectServer
 	protected void delete(Session session, String objectName, String uid) throws RedbackException {
 		objectManager.deleteObject(session, objectName, uid);
 	}
+	
+	protected long count(Session session, String objectName, DataMap filter, String search) throws RedbackException {
+		return objectManager.countObjects(session, objectName, filter, search);
+	}
 
 	protected RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException {
 		return objectManager.executeObjectFunction(session, objectName, uid, function, param);

@@ -130,4 +130,9 @@ public class CollectionConfig {
 		DataMap canonicalResp = convertObjectToCanonical(resp);
 		return canonicalResp;
 	}
+	
+	public void deleteData(DataMap canonicalKey) throws RedbackException {
+		DataMap key = convertObjectToSpecific(canonicalKey);
+		dataClient.deleteData(getName(), key);
+	}
 }

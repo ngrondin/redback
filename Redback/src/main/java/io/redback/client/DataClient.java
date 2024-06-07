@@ -151,7 +151,21 @@ public class DataClient extends Client
 	{
 		DataTransaction tx = createDelete(object, key);
 		return runTransaction(tx);
-	}	
+	}
+	
+	public DataTransaction createCount(String object, DataMap filter) {
+		DataMap req = new DataMap();
+		req.put("object", object);
+		req.put("count", filter);
+		return new DataTransaction(req);
+	}
+	
+	public long countData(String object, DataMap filter) throws RedbackException
+	{
+		DataTransaction tx = createCount(object, filter);
+		DataMap resp = runTransaction(tx);
+		return resp.getNumber("result").longValue();
+	}
 	
 	public DataMap multi(List<DataTransaction> list) throws RedbackException
 	{

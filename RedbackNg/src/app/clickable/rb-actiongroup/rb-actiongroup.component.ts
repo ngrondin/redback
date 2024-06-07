@@ -20,8 +20,9 @@ export class RbActiongroupAction {
   label: string;
   confirm: string;
   focus: boolean;
+  show: string;
 
-  constructor(a: string, t: string, p: any, to:number, l: string, c: string, f: boolean) {
+  constructor(a: string, t: string, p: any, to:number, l: string, c: string, f: boolean, s: string) {
     this.action = a;
     this.target = t;
     this.param = p;
@@ -29,6 +30,7 @@ export class RbActiongroupAction {
     this.label = l;
     this.confirm = c;
     this.focus = f;
+    this.show = s;
   }
 }
 
@@ -76,11 +78,11 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
       this.domainActions = [];
       this.apiService.listScripts(category).subscribe(json => {
         for(var item of json.list) {
-          this.domainActions.push(new RbActiongroupAction('executeglobal', item.name, null, item.timeout, item.description, item.confirm, false));
+          this.domainActions.push(new RbActiongroupAction('executeglobal', item.name, null, item.timeout, item.description, item.confirm, false, item.show));
         }
         this.apiService.listDomainFunctions(category).subscribe(json => {
           for(var item of json.result) {
-            this.domainActions.push(new RbActiongroupAction('executedomain', item.name, null, item.timeout, item.description, item.confirm, false));
+            this.domainActions.push(new RbActiongroupAction('executedomain', item.name, null, item.timeout, item.description, item.confirm, false, null));
           }
           this.calcActionData();
         });
@@ -184,7 +186,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
     if(this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
-        this.actionData.push(new RbActiongroupAction("processaction", null, action.action, null, action.description, null, action.main));
+        this.actionData.push(new RbActiongroupAction("processaction", null, action.action, null, action.description, null, action.main, null));
       }
     }
     if(this.actions != null) {
@@ -192,7 +194,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject) == true))) {
           let swtch = this.userpref.getCurrentViewUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
-            this.actionData.push(new RbActiongroupAction(item.action, item.target, item.param, item.timeout, item.label, item.confirm, false));
+            this.actionData.push(new RbActiongroupAction(item.action, item.target, item.param, item.timeout, item.label, item.confirm, false, null));
           }
         }
       });
@@ -200,12 +202,14 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     if(this.scriptActions != null) {
       for(const item of this.scriptActions) {
         let param = {action: "'" + item.action + "'", objectname: "'" + this.rbObject?.objectname + "'", uid: "'" + this.rbObject?.uid + "'"};
-        this.actionData.push(new RbActiongroupAction("executeglobal", this.script, param, 10000, item.label, null, false));
+        this.actionData.push(new RbActiongroupAction("executeglobal", this.script, param, 10000, item.label, null, false, null));
       }
     }
     if(this.domainActions != null) {
       this.domainActions.forEach(item => {
-        this.actionData.push(item);
+        if(item.show == null || (item.show != null && Evaluator.eval(item.show, this.rbObject, this.relatedObject))) {
+          this.actionData.push(item);
+        }
       });
     }
   }

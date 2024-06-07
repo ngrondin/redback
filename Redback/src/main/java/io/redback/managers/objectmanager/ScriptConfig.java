@@ -17,6 +17,7 @@ public class ScriptConfig
 	protected String domain;
 	protected String description;
 	protected String accessCategory;
+	protected String showExpression;
 	protected String source;
 	protected long timeout;
 	protected Function function;
@@ -29,6 +30,7 @@ public class ScriptConfig
 		description = config.getString("description");
 		domain = config.getString("domain");
 		accessCategory = config.getString("accesscat");
+		showExpression = config.getString("showexpr");
 		timeout = config.containsKey("timeout") ? config.getNumber("timeout").longValue(): 10000;
 		List<String> scriptVars = new ArrayList<String>();
 		scriptVars.add("session");
@@ -68,6 +70,11 @@ public class ScriptConfig
 	public String getAccessCategory() 
 	{
 		return accessCategory;
+	}
+	
+	public String getShowExpression()
+	{
+		return showExpression;
 	}
 	
 	public long getTimeout() 

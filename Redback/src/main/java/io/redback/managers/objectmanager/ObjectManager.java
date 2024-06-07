@@ -30,6 +30,7 @@ import io.redback.client.GeoClient;
 import io.redback.client.IntegrationClient;
 import io.redback.client.NotificationClient;
 import io.redback.client.ProcessClient;
+import io.redback.client.QueueClient;
 import io.redback.client.ReportClient;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.FileClientJSWrapper;
@@ -37,6 +38,7 @@ import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
 import io.redback.client.js.ProcessClientJSWrapper;
+import io.redback.client.js.QueueClientJSWrapper;
 import io.redback.client.js.ReportClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackResourceNotFoundException;
@@ -84,6 +86,7 @@ public class ObjectManager
 	protected String notificationServiceName;
 	protected String domainServiceName;
 	protected String integrationServiceName;
+	protected String queueServiceName;
 	protected String objectUpdateChannel;
 	protected DataMap globalVariables;
 	protected ConfigCache<ObjectConfig> objectConfigs;
@@ -101,6 +104,7 @@ public class ObjectManager
 	protected FileClient fileClient;
 	protected ReportClient reportClient;
 	protected NotificationClient notificationClient;
+	protected QueueClient queueClient;
 	protected DomainClient domainClient;
 	protected IntegrationClient integrationClient;
 	protected boolean useMultiDBTransactions;
@@ -125,6 +129,7 @@ public class ObjectManager
 			reportServiceName = config.getString("reportservice");
 			notificationServiceName = config.getString("notificationservice");
 			domainServiceName = config.getString("domainservice");
+			queueServiceName = config.getString("queueservice");
 			integrationServiceName = config.getString("integrationservice");
 			objectUpdateChannel = config.getString("objectupdatechannel");
 			globalVariables = config.getObject("globalvariables");
@@ -140,6 +145,7 @@ public class ObjectManager
 			reportClient = new ReportClient(firebus, reportServiceName);
 			notificationClient = new NotificationClient(firebus, notificationServiceName);
 			domainClient = new DomainClient(firebus, domainServiceName);
+			queueClient = new QueueClient(firebus, queueServiceName);
 			integrationClient = new IntegrationClient(firebus, integrationServiceName);
 			ObjectManager om = this;
 			objectConfigs = new ConfigCache<ObjectConfig>(configClient, "rbo", "object", 3600000, new ConfigCache.ConfigFactory<ObjectConfig>() {
@@ -214,6 +220,11 @@ public class ObjectManager
 		return integrationClient;
 	}
 	
+	public QueueClient getQueueClient()
+	{
+		return queueClient;
+	}
+	
 	public SysUserManager getSysUserManager() {
 		return sysUserManager;
 	}
@@ -233,6 +244,7 @@ public class ObjectManager
 			context.put("fc", new FileClientJSWrapper(getFileClient(), session));
 			context.put("rc", new ReportClientJSWrapper(getReportClient(), session));
 			context.put("nc", new NotificationClientJSWrapper(getNotificationClient(), session));
+			context.put("qc", new QueueClientJSWrapper(getQueueClient(), session));
 			context.put("canRead", new SessionRightsJSFunction(session, "read"));
 			context.put("canWrite", new SessionRightsJSFunction(session, "write"));
 			context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
@@ -510,6 +522,27 @@ public class ObjectManager
 		}
 	}	
 	
+	public long countObjects(Session session, String objectName, DataMap filter, String searchText) throws RedbackException
+	{
+		ObjectConfig objectConfig = getConfigIfCanRead(session, objectName);
+		try
+		{
+			DataMap objectFilter = generateObjectFilter(session, objectName, filter, searchText);
+			if(objectConfig.isPersistent()) 
+			{
+				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
+				long count = dataClient.countData(objectName, dbFilter);
+				return count;
+			} else {
+				throw new RedbackException("Cannot count non-persistent objects");
+			}
+		}
+		catch(Exception e)
+		{
+			throw new RedbackException("Error getting object list", e);
+		}
+	}
+	
 	public RedbackObject executeObjectFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
@@ -582,7 +615,7 @@ public class ObjectManager
 		List<ScriptConfig> list = globalScripts.list(session, new DataMap("category", category));
 		for(ScriptConfig sc: list) {
 			if(session.getUserProfile().canExecute("rb.scripts." + sc.getName()) || session.getUserProfile().canExecute("rb.accesscat." + sc.getAccessCategory())) {
-				retList.add(new FunctionInfo(sc.getName(), sc.getDescription(), sc.getTimeout()));
+				retList.add(new FunctionInfo(sc.getName(), sc.getDescription(), sc.getShowExpression(), sc.getTimeout()));
 			}
 		}
 		return retList;

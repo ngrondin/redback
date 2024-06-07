@@ -161,7 +161,15 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				String uid = requestData.getString("uid");
 				delete(session, objectName, uid);
 				return new DataMap("result", "ok");
-			}					
+			}		
+			else if(action.equals("count"))
+			{
+				String objectName = requestData.getString("object");
+				DataMap filter = requestData.getObject("filter");
+				String searchText = requestData.getString("search");
+				long count = count(session, objectName, filter, searchText);
+				return new DataMap("result", count);
+			}			
 			else if(action.equals("execute"))
 			{
 				if(requestData.containsKey("object")) {
@@ -187,7 +195,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				List<FunctionInfo> list = listFunctions(session, category);
 				DataList respList = new DataList();
 				for(FunctionInfo fi: list)
-					respList.add(new DataMap("name", fi.name, "description", fi.description, "timeout", fi.timeout));
+					respList.add(new DataMap("name", fi.name, "description", fi.description, "show", fi.showExpression, "timeout", fi.timeout));
 				return new DataMap("list", respList);
 			}
 			else if(action.equals("aggregate"))
@@ -302,6 +310,8 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 
 	protected abstract void delete(Session session, String objectName, String uid) throws RedbackException;
 
+	protected abstract long count(Session session, String objectName, DataMap filter, String search) throws RedbackException;
+	
 	protected abstract RedbackObject execute(Session session, String objectName, String uid, String function, DataMap param) throws RedbackException;
 
 	protected abstract Object execute(Session session, String function, DataMap param) throws RedbackException;

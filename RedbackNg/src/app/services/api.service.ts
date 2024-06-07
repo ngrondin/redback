@@ -281,6 +281,16 @@ export class ApiService {
     return this.requestService(this.objectService, req);
   }
 
+  countObjects(name: string, filter: any, search: string): Observable<any> {
+    const req = {
+      action: 'count',
+      object: name,
+      filter: filter,
+    };
+    if(search != null) req['search'] = search;
+    return this.requestService(this.objectService, req);
+  }  
+
   executeObject(name: string, uid: string, func: string, param?: any, timeout?: number) {
     const req = {
       action: 'execute',
