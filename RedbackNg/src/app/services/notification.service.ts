@@ -59,10 +59,12 @@ export class NotificationService {
   }
 
   public load() : Observable<null> {
-    this.notifications = [];
-    this.page = 0;
-    this.fetchNextPage();
-    return new Observable<null>((observer) => this.loadObsever = observer);
+    if(this.apiService.processService != null && this.apiService.processService != "") {
+      this.notifications = [];
+      this.page = 0;
+      this.fetchNextPage();
+      return new Observable<null>((observer) => this.loadObsever = observer);  
+    }
   }
 
   private fetchNextPage() {

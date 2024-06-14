@@ -92,7 +92,6 @@ public class ObjectManager
 	protected ConfigCache<ObjectConfig> objectConfigs;
 	protected ConfigCache<ScriptConfig> globalScripts;
 	protected ConfigCache<PackConfig> packConfigs;
-	protected List<ScriptConfig> includeScripts;
 	protected HashMap<String, ExpressionMap> readRightsFilters = new HashMap<String, ExpressionMap>();
 	protected CollectionConfig traceCollection;
 	protected CollectionConfig scriptLogCollection;

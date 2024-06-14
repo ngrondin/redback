@@ -106,7 +106,7 @@ public class RedbackAccessManager extends AccessManager
 			profile.setExpiry(jwt.getExpiresAt().getTime());
 			return profile;
 		} catch (Exception exception) {
-			throw new RedbackException("Cannot validate token", exception);
+			throw new RedbackException("Cannot validate token: " + token, exception);
 		}
 	}
 	

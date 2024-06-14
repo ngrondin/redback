@@ -59,9 +59,13 @@ public class IntegrationNavigator extends Navigator
 		bodyNode.setData(new NavigatorAction("select", "body", null));
 
 		TreeItem responseNode = new TreeItem (rootNode, 1);
-		responseNode.setText ("response");
+		responseNode.setText ("Response");
 		responseNode.setData(new NavigatorAction("select", "response", null));
-		
+
+		TreeItem includeNode = new TreeItem (rootNode, 1);
+		includeNode.setText ("Include");
+		includeNode.setData(new NavigatorAction("select", "include", null));
+
 		TreeItem functionsNode = new TreeItem (rootNode, 1);
 		functionsNode.setText ("functions");
 		functionsNode.setData(new NavigatorAction("select", "functions", null));

@@ -102,33 +102,37 @@ export class ApiService {
 
   private requestService(service: string, request: any, timeout?: number) {
     return new Observable<any>((observer) => {
-      this.checkToken().subscribe(() => {
-        if(service == null || service == '') {
-          observer.error("Undefined service");
-        } else if(this.canStream()) {
-          this.clientWSService.requestService(service, request, timeout).subscribe({
-            next: (value) => observer.next(value),
-            error: (err) => observer.error(err),
-            complete: () => observer.complete()
-          })
-        } else {
-          let headers = new HttpHeaders()
-            .set("Content-Type", "application/json")
-            .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
-          if(timeout != null) headers.set("firebus-timeout", timeout.toString());
-          this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true}).subscribe({
-            next: (value) => observer.next(value),
-            error: (err) => observer.error(err),
-            complete: () => observer.complete()
-          });
-        }
-      });
+      if(service != null && service != "") {
+        this.checkToken().subscribe(() => {
+          if(service == null || service == '') {
+            observer.error("Undefined service");
+          } else if(this.canStream()) {
+            this.clientWSService.requestService(service, request, timeout).subscribe({
+              next: (value) => observer.next(value),
+              error: (err) => observer.error(err),
+              complete: () => observer.complete()
+            })
+          } else {
+            let headers = new HttpHeaders()
+              .set("Content-Type", "application/json")
+              .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+            if(timeout != null) headers.set("firebus-timeout", timeout.toString());
+            this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true}).subscribe({
+              next: (value) => observer.next(value),
+              error: (err) => observer.error(err),
+              complete: () => observer.complete()
+            });
+          }
+        });
+      } else {
+        observer.error("Service is undefined");
+      }
     });
   }
 
   private requestStream(service: string, request: any, autoNext: boolean) {
     return new Observable<any>((observer) => {
-      if(this.canStream()) {
+      if(this.canStream() && service != null && service != "") {
         this.checkToken().subscribe({
           error: (err) => observer.error(err),
           complete: () => {
@@ -140,7 +144,7 @@ export class ApiService {
           }
         });
       } else {
-        observer.error("Streams can only be requested with connected to the client servce");
+        observer.error("Streams can only be requested when connected to the client servce");
       }
     });
   }

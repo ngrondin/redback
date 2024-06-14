@@ -16,7 +16,6 @@ import io.redback.managers.integrationmanager.js.GatewayCallJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.security.js.UserProfileJSWrapper;
-import io.redback.utils.js.LoggerJSFunction;
 
 public class Client {
 	protected Session session;
@@ -42,13 +41,9 @@ public class Client {
 	}
 	
 	protected ScriptContext getBaseScriptContext() throws ScriptValueException {
-		ScriptContext baseScriptContext = integrationManager.getScriptFactory().createScriptContext();
-		baseScriptContext.put("log", new LoggerJSFunction());
+		ScriptContext baseScriptContext = config.baseScriptContext;
 		baseScriptContext.put("session", new SessionJSWrapper(session));
 		baseScriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
-		baseScriptContext.put("clientid", config.clientId);
-		baseScriptContext.put("clientsecret", config.clientSecrect);
-		baseScriptContext.put("baseurl", config.baseUrl);
 		baseScriptContext.put("clientdata", data);
 		baseScriptContext.put("fc", new FileClientJSWrapper(integrationManager.getFileClient(), session));
 		return baseScriptContext;

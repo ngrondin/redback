@@ -241,10 +241,12 @@ public class RedbackUIServer extends UIServer
 	{
 		DataList viewContent = new DataList();
 		DataList contentList = viewConfig.getList("content");
-		for(int i = 0; i < contentList.size(); i++) {
-			DataMap viewPart = generateViewPartFromComponentConfig(session, contentList.getObject(i), context); 
-			if(viewPart != null)
-				viewContent.add(viewPart);
+		if(contentList != null) {
+			for(int i = 0; i < contentList.size(); i++) {
+				DataMap viewPart = generateViewPartFromComponentConfig(session, contentList.getObject(i), context); 
+				if(viewPart != null)
+					viewContent.add(viewPart);
+			}			
 		}
 		return viewContent;
 	}

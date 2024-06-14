@@ -15,17 +15,19 @@
             (navigate)="navigateTo($event)">
         </rb-global-search>
         <rb-iconbutton-badge
-            *ngIf="configService.nlCommandModel != null"
+            *ngIf="configService.nlCommandModel != null && apiService.aiService != null && apiService.aiService != ''"
             [icon]="'robot_2'"
             [count]="0"
             (click)="toggleNLBox()">
         </rb-iconbutton-badge>          
         <rb-iconbutton-badge
+            *ngIf="apiService.chatService != null && apiService.chatService != ''"
             [icon]="'chat_bubble_outline'"
             [count]="chatService.unreadCount"
             (click)="toggleRightDrawer('chat')">
         </rb-iconbutton-badge>     
         <rb-iconbutton-badge
+            *ngIf="apiService.processService != null && apiService.processService != ''"
             [icon]="'notifications'"
             [count]="notificationService.exceptionCount"
             (click)="toggleRightDrawer('notifications')">

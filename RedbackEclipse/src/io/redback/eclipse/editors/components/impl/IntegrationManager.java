@@ -46,6 +46,8 @@ public class IntegrationManager extends Manager {
 			return new ScriptForm(_data, "body", this, sashForm, SWT.PUSH);
 		} else if(type.equals("response")) {
 			return new ScriptForm(_data, "response", this, sashForm, SWT.PUSH);
+		} else if(type.equals("include")) {
+			return new ScriptForm(_data, "include", this, sashForm, SWT.PUSH);
 		} else if(type.equals("function")) {
 			return new ScriptForm(_data.getObject("functions"), name, this, sashForm, SWT.PUSH);
 		} else {
