@@ -171,18 +171,29 @@ export class FilterService {
     }
   }
 
-  convertToData(filter: any) {
-    let data: any = {};
-    for(let key in filter) {
-      if(!key.startsWith("$") && key != "uid") {
-        let val: any = filter[key];
-        let dataval = (val !== null && typeof val == 'object' ? this.convertToData(val) : val);
-        if(!(dataval !== null && typeof dataval == 'object' && Object.keys(dataval).length == 0)) {
-          data[key] = dataval;
-        } 
+  convertToData(filterPart: any) {
+    if(typeof filterPart == "undefined") {
+      return undefined;
+    } else if(filterPart !== null && Array.isArray(filterPart)) {
+      let out: any[] = [];
+      for(let item of filterPart) {
+        let val = this.convertToData(item);
+        if(typeof val != "undefined") out.push(val);
       }
+      return out;
+    } else if(filterPart !== null && typeof filterPart == 'object') {
+      let out: any = {};
+      for(let key in filterPart) {
+        if(!key.startsWith("$") && key != "uid") {
+          let val = this.convertToData(filterPart[key]);
+          if(typeof val != "undefined") out[key] = val;
+        }
+      }
+      if(Object.keys(out).length == 0) return undefined;
+      else return out;
+    } else {
+      return filterPart;
     }
-    return data;
   }
   
 }

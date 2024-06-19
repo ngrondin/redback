@@ -50,15 +50,18 @@ public class ObjectConfig
 			scriptVars.add("canExecute");
 			scriptVars.add("uid");
 			
+			String[] vars = {};
 			DataList list = config.getList("attributes");
-			for(int i = 0; i < list.size(); i++)
-				scriptVars.add(list.getObject(i).getString("name"));
-			String[] vars = scriptVars.toArray(new String[] {});
-			
-			for(int i = 0; i < list.size(); i++)
-			{
-				DataMap attrCfg = list.getObject(i);
-				attributes.put(attrCfg.getString("name"), new AttributeConfig(objectManager, this, attrCfg));
+			if(list != null) {
+				for(int i = 0; i < list.size(); i++)
+					scriptVars.add(list.getObject(i).getString("name"));
+				vars = scriptVars.toArray(new String[] {});				
+
+				for(int i = 0; i < list.size(); i++)
+				{
+					DataMap attrCfg = list.getObject(i);
+					attributes.put(attrCfg.getString("name"), new AttributeConfig(objectManager, this, attrCfg));
+				}
 			}
 			
 			if(config.containsKey("datagen")) {
