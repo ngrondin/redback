@@ -64,6 +64,11 @@ export class NotificationService {
       this.page = 0;
       this.fetchNextPage();
       return new Observable<null>((observer) => this.loadObsever = observer);  
+    } else {
+      return new Observable<null>((observer) => {
+        observer.next(null); 
+        observer.complete();
+      });
     }
   }
 

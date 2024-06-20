@@ -23,16 +23,23 @@ export class ChatService {
   }
 
   load() : Observable<null> {
-    return new Observable<null>((observer) => {
-      this.loadUsers().subscribe(data => {
-        this.loadChats().subscribe(data => {
-          this.loadAllUnreadChatMessages().subscribe(() => {
-            observer.next();
-            observer.complete();
+    if(this.apiService.chatService != null && this.apiService.chatService != "") {
+      return new Observable<null>((observer) => {
+        this.loadUsers().subscribe(data => {
+          this.loadChats().subscribe(data => {
+            this.loadAllUnreadChatMessages().subscribe(() => {
+              observer.next();
+              observer.complete();
+            });
           });
-        });
-      })
-    });
+        })
+      });
+    } else {
+      return new Observable<null>((observer) => {
+        observer.next(null); 
+        observer.complete();
+      });
+    }
   }
 
   loadUsers(): Observable<ChatUser[]> {
