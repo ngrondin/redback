@@ -16,10 +16,12 @@ import jxl.write.WritableSheet;
 
 public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 	protected WritableSheet sheet;
+	protected CellFormatter cellFormatter;
 	
 	public ExcelSheetJSWrapper(WritableSheet s) {
 		super(new String[] {"setCell"});
 		sheet = s;
+		cellFormatter = new CellFormatter();
 	}
 	
 	public Object get(String key) {
@@ -30,7 +32,7 @@ public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 						int col = ((Long)arguments[0]).intValue();
 						int row = ((Long)arguments[1]).intValue();
 						Object val = arguments[2];
-						WritableCellFormat wcf = CellFormatter.createFormat(arguments.length >= 4 ? arguments[3] : null);
+						WritableCellFormat wcf = cellFormatter.createFormat(arguments.length >= 4 ? arguments[3] : null);
 						if(val instanceof java.lang.Number) {
 							double doubleVal = ((java.lang.Number)val).doubleValue();
 							Number num = new Number(col, row, doubleVal, wcf);

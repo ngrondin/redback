@@ -15,9 +15,9 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
 
 public class CellFormatter extends WritableCellFormat {
-	public static Map<String, WritableCellFormat> wcfCache = new HashMap<String, WritableCellFormat>();
+	public Map<String, WritableCellFormat> wcfCache = new HashMap<String, WritableCellFormat>();
 
-	public static WritableCellFormat createFormat(Object cfg) {
+	public WritableCellFormat createFormat(Object cfg) {
 		if(cfg instanceof String) 
 			return createFormat((String)cfg);
 		else if(cfg instanceof DataMap) 
@@ -26,7 +26,7 @@ public class CellFormatter extends WritableCellFormat {
 			return new WritableCellFormat();
 	}
 	
-	public static WritableCellFormat createFormat(String colorName) {
+	public WritableCellFormat createFormat(String colorName) {
 		WritableCellFormat wcf = wcfCache.get(colorName);
 		if(wcf == null) {
 			wcf = new WritableCellFormat();
@@ -40,7 +40,7 @@ public class CellFormatter extends WritableCellFormat {
 		return wcf;
 	}
 	
-	public static WritableCellFormat createFormat(DataMap config) {
+	public WritableCellFormat createFormat(DataMap config) {
 		String cacheKey = config.toString(true);
 		WritableCellFormat wcf = wcfCache.get(cacheKey);
 		if(wcf == null) {
@@ -104,7 +104,7 @@ public class CellFormatter extends WritableCellFormat {
 		return wcf;
 	}
 	
-	public static Colour getColor(String name) {
+	public Colour getColor(String name) {
 		Colour[] colours = Colour.getAllColours();
 		for(Colour c : colours) {
 			if(c.getDescription().equalsIgnoreCase(name))
