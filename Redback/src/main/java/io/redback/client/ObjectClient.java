@@ -113,6 +113,10 @@ public class ObjectClient extends Client
 
 	}
 
+	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter) throws RedbackException  {
+		return listAllObjects(session, objectName, filter, null, false, false);
+	}
+	
 	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
 		return listAllObjects(session, objectName, filter, sort, addRelated, false);
 	}

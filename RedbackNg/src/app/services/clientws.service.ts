@@ -5,6 +5,7 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { UUID } from 'angular2-uuid';
 import { Platform } from '@angular/cdk/platform';
 import * as pako from 'pako';
+import { SecurityService } from './security.service';
 
 export class Upload {
   uploaduid = UUID.UUID();
@@ -84,6 +85,7 @@ export class ClientWSService {
 
   constructor(
     private http: HttpClient,
+    private securityService: SecurityService,
     private platform: Platform
   ) {
     this.deviceId = localStorage.getItem("rbdeviceid");
@@ -91,6 +93,7 @@ export class ClientWSService {
       this.deviceId = UUID.UUID();
       localStorage.setItem("rbdeviceid", this.deviceId);
     }
+    this.securityService.observeToken().subscribe(accessToken => this.updateToken(accessToken));
   }
 
   get url() : string {
@@ -115,9 +118,16 @@ export class ClientWSService {
   }
 
   initWebsocketSubscribe() {
-    this.websocket.subscribe({
-      next: (msg) => this.receive(msg),
-      error: (err) => this.error(err)
+    this.securityService.checkToken().subscribe({
+      next:() => {
+        this.websocket.subscribe({
+          next: (msg) => this.receive(msg),
+          error: (err) => this.error(err)
+        });
+      },
+      error: (err) => {
+        setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
+      }
     });
   }
 

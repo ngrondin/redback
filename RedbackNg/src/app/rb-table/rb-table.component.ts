@@ -15,6 +15,7 @@ class TableColumnConfig {
   size: number;
   width: number;
   showExpr: string;
+  alt: {[key: string]: TableColumnConfig};
 
   constructor(json: any) {
     this.label = json.label;
@@ -28,6 +29,12 @@ class TableColumnConfig {
     this.size = json.size;
     this.width = (json.size != null ? (json.size * 15) + 15 : 250);
     this.showExpr = (json.show != null ? json.show : "true");
+    if(json.alt != null) {
+      this.alt = {};
+      for(const key in json.alt) {
+        this.alt[key] = new TableColumnConfig(json.alt[key]);
+      }
+    }
   }
 }
 
@@ -59,6 +66,18 @@ export class RbTableComponent extends RbDataObserverComponent {
   }
 
   onActivationEvent(state: boolean) {
+  }
+
+  getColumnsForObject(object: RbObject): TableColumnConfig[] {
+    let cols: TableColumnConfig[] = this.columns.map(col => {
+      if(col.type == 'alt') {
+        const val = object.get(col.attribute);
+        return col.alt[val];
+      } else {
+        return col;
+      }
+    });
+    return cols;
   }
 
   clickColumn(column: TableColumnConfig) {

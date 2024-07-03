@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-
 import io.firebus.data.DataEntity;
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
@@ -166,6 +166,17 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 						return null;
 					} catch(Exception e) {
 						throw new RuntimeException("Error parsing Mail date", e);
+					}
+				}
+			};	
+		} else if(key.equals("decodeCSV")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						DataList lines = StringUtils.decodeCSV(arguments[0].toString());
+						return lines;
+					} catch(Exception e) {
+						throw new RuntimeException("Error decoding CSV", e);
 					}
 				}
 			};				

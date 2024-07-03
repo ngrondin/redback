@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Observer, Subscriber } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ClientWSService } from './clientws.service';
+import { SecurityService } from './security.service';
 
 
 const httpJSONOptions = {
@@ -37,73 +38,24 @@ export class ApiService {
   public aiService: string;
   public placesAutocompleteService: any;
 
-  public refreshToken: string;
-  public expiresAt: number;
-  public accessToken: string;
-  public refreshPath: string;
-
-  private refreshTokenObservers: Subscriber<any>[] = [];
-
   constructor(
     private http: HttpClient,
-    private clientWSService: ClientWSService
+    private clientWSService: ClientWSService,
+    private securityService: SecurityService
   ) { 
     try {
       this.placesAutocompleteService = new google.maps.places.AutocompleteService();
-      this.accessToken = localStorage.getItem("access_token");
-      this.expiresAt = parseInt(localStorage.getItem("expires_at"));
-      this.refreshToken = localStorage.getItem("refresh_token");
-      this.refreshPath = localStorage.getItem("refresh_path");
+
     } catch(error) {
       console.error(error);
     }
   }
 
-  private checkToken() {
-    return new Observable((observer) => {
-      let now = (new Date()).getTime();
-      if(this.expiresAt != null && now > this.expiresAt - (60000)) {
-        this.refreshTokenObservers.push(observer);
-        console.log("Access Token has expired");
-        if(this.refreshTokenObservers.length == 1) {
-          console.log("Refreshing tokens");
-          this.http.get<any>(this.baseUrl + this.refreshPath, {headers:{"accept":"application/json"}}).subscribe({
-            next: (value) => {
-              this.accessToken = value.access_token;
-              this.expiresAt = value.expires_at;
-              this.refreshToken = value.refresh_token;
-              this.refreshPath = value.refresh_path;
-              localStorage.setItem("access_token", this.accessToken);
-              localStorage.setItem("expires_at", this.expiresAt.toString());
-              localStorage.setItem("refresh_token", this.refreshToken);
-              localStorage.setItem("refresh_path", this.refreshPath);
-              this.clientWSService.updateToken(this.accessToken);
-              this.refreshTokenObservers.forEach(o => o.next())
-              console.log("Access Token renewed: " + this.accessToken);
-            },
-            error: (err) => {
-              this.refreshTokenObservers.forEach(o => o.error(err))
-              console.error("Error refreshing access token: " + err);
-            },
-            complete: () => {
-              this.refreshTokenObservers.forEach(o => o.complete())
-              this.refreshTokenObservers = [];
-            }
-          });
-        } else {
-          console.log("Tokens already refreshing");
-        }
-      } else {
-        observer.next();
-        observer.complete();
-      }  
-    });
-  }
 
   private requestService(service: string, request: any, timeout?: number) {
     return new Observable<any>((observer) => {
       if(service != null && service != "") {
-        this.checkToken().subscribe(() => {
+        this.securityService.checkToken().subscribe(() => {
           if(service == null || service == '') {
             observer.error("Undefined service");
           } else if(this.canStream()) {
@@ -133,7 +85,7 @@ export class ApiService {
   private requestStream(service: string, request: any, autoNext: boolean) {
     return new Observable<any>((observer) => {
       if(this.canStream() && service != null && service != "") {
-        this.checkToken().subscribe({
+        this.securityService.checkToken().subscribe({
           error: (err) => observer.error(err),
           complete: () => {
             this.clientWSService.requestStream(service, request, autoNext).subscribe({
@@ -151,7 +103,7 @@ export class ApiService {
 
   private get(url: string) {
     return new Observable<any>((observer) => {
-      this.checkToken().subscribe(() => {
+      this.securityService.checkToken().subscribe(() => {
         this.http.get<any>(url, httpJSONOptions).subscribe({
           next: (value) => observer.next(value),
           error: (err) => observer.error(err),

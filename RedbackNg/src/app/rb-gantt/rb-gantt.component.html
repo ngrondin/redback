@@ -101,7 +101,7 @@
                 (rb-drag-dropzone)="dropped($event, lane, true)"
                 [rb-drag-changeform]="getSizeForObjectCallback">
                 <div
-                    class="rb-gantt-mainlabel">
+                    class="rb-gantt-lanelabel">
                     {{lane.label}}
                 </div>
                 <mat-icon>{{lane.icon}}</mat-icon>
@@ -135,10 +135,22 @@
                     [style.left.px]="spread.start"
                     [style.height.px]="spread.config.isBackground ? lane.height : spread.height"
                     [style.top.px]="spread.top"
-                    [style.background-color]="spread.color">
+                    [style.background-color]="spread.color"
+                    [style.color]="spread.labelcolor">
                     <div
-                        class="rb-gantt-smalllabel">
+                        *ngIf="spread.prelabel != null"
+                        class="rb-gantt-spreadprelabel">
+                        {{spread.prelabel}}
+                    </div>
+                    <div
+                        class="rb-gantt-spreadlabel"
+                        [style.text-align]="spread.prelabel == null && spread.postlabel == null ? 'left' : 'center'">
                         {{spread.label}}
+                    </div>
+                    <div
+                        *ngIf="spread.postlabel != null"
+                        class="rb-gantt-spreadpostlabel">
+                        {{spread.postlabel}}
                     </div>
                 </div>
             </div>

@@ -494,4 +494,54 @@ public class StringUtils
     	Date dt = mdf.parse(str);
     	return dt;
     }
+    
+    public static DataList decodeCSV(String str)  {
+    	DataList ret = new DataList();
+    	int endFirstLine = str.indexOf("\n");
+    	String headerLine = str.substring(0, endFirstLine).trim();
+		String[] headers = headerLine.split(",");
+		String body = str.substring(endFirstLine).trim();
+		
+		StringBuilder buffer = new StringBuilder();
+		DataMap map = new DataMap();
+		int col = 0;
+		boolean inQuote = false;
+		boolean escapeNext = false;
+		for(int ptr = 0; ptr < body.length(); ptr++) {
+			char c = body.charAt(ptr);
+			if(c == '\\' && escapeNext == false) {
+				escapeNext = true;
+			} else {
+				if(escapeNext) {
+					if(c == 'n') buffer.append("\n");
+					if(c == '"') buffer.append("\"");
+					escapeNext = false;
+				} else {
+					if(c == '"') {
+						inQuote = !inQuote;
+					} else {
+						buffer.append(c);
+					}
+				}
+			} 
+			if(!inQuote) {
+				boolean lastCharOfBody = ptr + 1 == body.length();
+				boolean lastCharOfLine = lastCharOfBody || body.charAt(ptr + 1) == '\n';
+				boolean lastCharOfField = lastCharOfLine || body.charAt(ptr + 1) == ',';
+				if(lastCharOfField) {
+					String val = buffer.toString();
+					if(col < headers.length) map.put(headers[col], val);    						
+					buffer = new StringBuilder();
+					col++;
+					if(lastCharOfLine) {
+						ret.add(map);
+						map = new DataMap();
+						col = 0;						
+					}
+					ptr++;
+				}			
+			}
+		}
+    	return ret;
+    }
 }

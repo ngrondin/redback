@@ -25,11 +25,12 @@ export class GanttLaneConfig {
     startAttribute: string;
     durationAttribute: string;
     endAttribute: string;
-    labelAttribute: string;
     laneAttribute: string;
-    laneLabelAttribute: string;
-    laneIconAttribute: string;
-    laneIconMap: any;
+    labelAttribute: string;
+    preLabelAttribute: string;
+    postLabelAttribute: string;
+    labelColor: string;
+    color: string;
     colorAttribute: string;
     colorMap: any;
     isBackground: boolean;
@@ -42,13 +43,14 @@ export class GanttLaneConfig {
       this.startAttribute = json.startattribute;
       this.durationAttribute = json.durationattribute;
       this.endAttribute = json.endattribute;
-      this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
       this.laneAttribute = json.laneattribute;
-      this.laneLabelAttribute = json.lanelabelattribute;
-      this.laneIconAttribute = json.laneliconattribute;
-      this.laneIconMap = json.laneiconmap;
+      this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
+      this.preLabelAttribute = subpref != null && subpref.prelabelattribute != null ? subpref.prelabelattribute : json.prelabelattribute;
+      this.postLabelAttribute = subpref != null && subpref.postlabelattribute != null ? subpref.postlabelattribute : json.postlabelattribute;
+      this.labelColor = json.labelcolor;
       this.isBackground = json.isbackground;
       this.canEdit = json.canedit;
+      this.color = json.color;
       this.colorAttribute = json.colorattribute;
       this.colorMap = json.colormap;
       this.modal = json.modal;
@@ -87,6 +89,8 @@ export class GanttLaneConfig {
   export class GanttSpread {
     id: string;
     label: string;
+    prelabel: string;
+    postlabel: string;
     start: number;
     width: number;
     top: number;
@@ -94,19 +98,23 @@ export class GanttLaneConfig {
     sublane: number;
     lane: string;
     color: string;
+    labelcolor: string;
     canEdit: Boolean;
     object: RbObject;
     config: GanttSeriesConfig;
   
-    constructor(i: string, l: string, s: number, w: number, h: number, ln: string, c: string, ce: Boolean, o: RbObject, cfg: GanttSeriesConfig) {
+    constructor(i: string, l: string, prel: string, postl: string, s: number, w: number, h: number, ln: string, c: string, lc: string, ce: Boolean, o: RbObject, cfg: GanttSeriesConfig) {
       this.id = i;
       this.label = l;
+      this.prelabel = prel;
+      this.postlabel = postl;
       this.start = s;
       this.width = w;
       this.height = h;
       this.sublane = 0;
       this.lane = ln;
       this.color = c;
+      this.labelcolor = lc;
       this.canEdit = ce;
       this.object = o;
       this.config = cfg;

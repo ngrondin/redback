@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
 import { DataService } from './services/data.service';
 import { ModalService } from './services/modal.service';
 import { ChatService } from './services/chat.service';
+import { SecurityService } from './services/security.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -42,6 +43,7 @@ export class AppComponent implements OnInit {
       private elementRef: ElementRef,
       private matIconRegistry: MatIconRegistry,
       private domSanitizer: DomSanitizer,
+      private securityService: SecurityService,
       private apiService: ApiService,
       private dataService: DataService,
       private clientWSService: ClientWSService,
@@ -85,6 +87,7 @@ export class AppComponent implements OnInit {
       currentUrl = currentUrl.substring(0, currentUrl.length - 1);
     }
     this.apiService.baseUrl = currentUrl;
+    this.securityService.baseUrl = currentUrl;
     this.clientWSService.baseUrl = currentUrl;
     window.redback.username = this.username;
     window.redback.api = this.apiService;

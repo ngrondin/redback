@@ -141,7 +141,7 @@
 }
 
 .rb-gantt-spreadbox {
-    border: 1px solid darkblue;
+    border: 1px solid var(--primary-dark-color);
     height: 1.6vw;
     top: 7px;
     background-color: white;
@@ -160,9 +160,10 @@
 .rb-gantt-spreadbackground {
     height: 2.5vw;
     z-index: 10;
+    color: lightgray;
 }
 
-.rb-gantt-mainlabel {
+.rb-gantt-lanelabel {
     display: inline-block;
     padding: 5px;
     flex: 1 1 auto;
@@ -170,15 +171,33 @@
     text-overflow: ellipsis;
 }
 
-.rb-gantt-smalllabel {
+.rb-gantt-spreadlabel {
     display: inline-block;
     padding: 5px;
     font-size: smaller;
     overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis;    
+    text-overflow: ellipsis; 
+    flex: 1 1 auto;   
 }
 
+.rb-gantt-spreadprelabel {
+    display: inline-block;
+    padding: 1px;
+    font-size: 0.6rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; 
+}
+
+.rb-gantt-spreadpostlabel {
+    display: inline-block;
+    padding: 1px;
+    font-size: 0.6rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; 
+}
 
 .rb-gantt-laneheight {
     height: 2.5vw;

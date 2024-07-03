@@ -20,7 +20,7 @@
             *ngFor="let object of list">
             <div
                 class="rb-table-rowitem"
-                *ngFor="let col of columns"
+                *ngFor="let col of getColumnsForObject(object)"
                 [style.width.px]="col.width">
                 <rb-string-input
                     *ngIf="col.type == 'input'"

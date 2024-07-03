@@ -242,18 +242,26 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                 startPX = 0;
               }
               let height = cfg.isBackground ? GanttLane.ganttLaneHeight : 28;
-              let label = cfg.isBackground ? "" : obj.get(cfg.labelAttribute);
-              let color = 'white';
-              if(cfg.colorAttribute != null) {
+              let label = obj.get(cfg.labelAttribute); 
+              let prelabel = cfg.preLabelAttribute != null ? obj.get(cfg.preLabelAttribute) : null;
+              let postlabel = cfg.postLabelAttribute != null ? obj.get(cfg.postLabelAttribute) : null;
+              let color = cfg.isBackground ? 'white' : 'var(--primary-light-color)';
+              if(cfg.color != null) {
+                color = cfg.color;
+              } else if(cfg.colorAttribute != null) {
                 if(cfg.colorMap != null) {
                   color = cfg.colorMap[obj.get(cfg.colorAttribute)];
                 } else {
                   color = obj.get(cfg.colorAttribute);
                 }
               }
+              let labelcolor = "#333";
+              if(cfg.labelColor != null) {
+                labelcolor = cfg.labelColor;
+              }
               let canEdit: Boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
               if(color != null) {
-                spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, height, laneId, color, canEdit, obj, cfg));
+                spreads.push(new GanttSpread(obj.uid, label, prelabel, postlabel, startPX, widthPX, height, laneId, color, labelcolor, canEdit, obj, cfg));
               }
             }
           }
@@ -265,14 +273,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   private getObjectDuration(cfg: GanttSeriesConfig, obj: RbObject): number {
-    let durationMS;
+    let durationMS = null;
     if(cfg.durationAttribute != null) {
       durationMS = parseInt(obj.get(cfg.durationAttribute));
     } else if(cfg.endAttribute != null) {
       durationMS = (new Date(obj.get(cfg.endAttribute))).getTime() - (new Date(obj.get(cfg.startAttribute))).getTime();
-    } else {
-      durationMS = 3600000;
-    }
+    } 
+    if(durationMS == null || isNaN(durationMS)) durationMS = 3600000;
     return durationMS;
   }
 
