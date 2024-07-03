@@ -147,6 +147,7 @@ import { RbStackedGraphComponent } from './graphs/rb-stacked-graph/rb-stacked-gr
 import { RbVbarGraphComponent } from './graphs/rb-vbar-graph/rb-vbar-graph.component';
 import { RbHbarGraphComponent } from './graphs/rb-hbar-graph/rb-hbar-graph.component';
 import { RbPopupGlobalSearchComponent } from './popups/rb-popup-globalsearch/rb-popup-globalsearch.component';
+import { RbGroupComponent } from './rb-group/rb-group.component';
 
 
 
@@ -307,7 +308,8 @@ window.redback = window.redback || {};
         RbStackedGraphComponent,
         RbVbarGraphComponent,
         RbHbarGraphComponent,
-        RbPopupGlobalSearchComponent
+        RbPopupGlobalSearchComponent,
+        RbGroupComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

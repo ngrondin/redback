@@ -58,6 +58,7 @@ import { RbStackedGraphComponent } from "app/graphs/rb-stacked-graph/rb-stacked-
 import { RbVbarGraphComponent } from "app/graphs/rb-vbar-graph/rb-vbar-graph.component";
 import { RbHbarGraphComponent } from "app/graphs/rb-hbar-graph/rb-hbar-graph.component";
 import { RbScrollComponent } from "app/rb-scroll/rb-scroll.component";
+import { RbGroupComponent } from "app/rb-group/rb-group.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -120,5 +121,6 @@ export const componentRegistry = {
     "percentinput": RbPercentInputComponent,
     "funnel":RbFunnelComponent,
     "listbutton": RbActionlistComponent,
-    "scroll":RbScrollComponent
+    "scroll":RbScrollComponent,
+    "group": RbGroupComponent
   }
