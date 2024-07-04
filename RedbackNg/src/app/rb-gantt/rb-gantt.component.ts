@@ -95,8 +95,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   onDragEvent(event: any) {
     if(this.lanesConfig.dragfilter != null && this.doDragFilter) {
-      if(event.type == 'start' && this.containsObject(event.object)) {
-        this.laneFilterObject = event.object;
+      if(event.type == 'start' /*&& this.containsObject(event.data)*/) {
+        this.laneFilterObject = event.data;
         this.redraw();
       } else if(event.type == 'end' && this.laneFilterObject != null) {
         this.laneFilterObject = null;

@@ -1,5 +1,7 @@
 :host {
-    padding-top: var(--v16px);
+    display: flex;
+    flex-direction: row;
+    align-items: end;
     color: var(--light-writing-color);
 }
 

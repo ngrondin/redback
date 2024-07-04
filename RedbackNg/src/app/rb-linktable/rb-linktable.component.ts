@@ -1,32 +1,39 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { Formatter, LinkConfig } from 'app/helpers';
+import { Evaluator, Formatter, LinkConfig } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 
 class LinkTableColumnConfig {
   label: string;
   attribute: string;
+  expression: string;
   displayAttribute: string;
-  type: string;
   format: string;
   size: number;
   width: number;
   showExpr: string;
   link: LinkConfig;
   modal: string;
+  alt: {[key: string]: LinkTableColumnConfig};
 
   constructor(json: any) {
     this.label = json.label;
     this.attribute = json.attribute;
+    this.expression = json.expression;
     this.displayAttribute = json.displayattribute;
-    this.type = json.type;
     this.format = json.format;
     this.size = json.size;
-    this.width = (json.size != null ? (json.size * 15) + 15 : 250);
+    this.width = (json.size != null ? (json.size * 0.88) : 10);
     this.showExpr = (json.show != null ? json.show : "true");
     this.link = json.link != null ? new LinkConfig(json.link) : null;
     this.modal = json.modal;
+    if(json.alt != null) {
+      this.alt = {};
+      for(const key in json.alt) {
+        this.alt[key] = new LinkTableColumnConfig(json.alt[key]);
+      }
+    }    
   }
 
   get isClickable() : boolean {
@@ -42,6 +49,7 @@ class LinkTableColumnConfig {
 export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('columns') _cols: any;
   @Input('view') view: string;
+  @Input('grid') grid: boolean = false;
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   columns: LinkTableColumnConfig[];
@@ -71,15 +79,29 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   onActivationEvent(state: boolean) {
   }
 
+  getColumnConfig(object: RbObject, column: LinkTableColumnConfig): LinkTableColumnConfig {
+    if(column.alt != null && column.attribute != null) {
+      return column.alt[object.get(column.attribute)];
+    } else {
+      return column;
+    }
+  }
+
   getValue(object: RbObject, column: LinkTableColumnConfig): string {
-    let val = object.get(column.attribute);
-    if(column.format != null) {
-      val = Formatter.format(val, column.format);
+    let cfg = this.getColumnConfig(object, column);
+    let val = null;
+    if(cfg.expression != null) {
+      val = Evaluator.eval(cfg.expression, object, null);
+    } else if(cfg.attribute != null) {
+      val = object.get(cfg.attribute);
+    }
+    if(cfg.format != null) {
+      val = Formatter.format(val, cfg.format);
     }
     return val;
   }
 
-  clickColumn(column: LinkTableColumnConfig) {
+  clickColumnHeader(column: LinkTableColumnConfig) {
     this.dataset.filterSort({
       filter: {},
       sort: {
@@ -91,13 +113,18 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     });
   }
 
+  isClickable(column: LinkTableColumnConfig, object: RbObject) {
+    return this.getColumnConfig(object, column).isClickable;
+  }
+
   clickLink(column: LinkTableColumnConfig, object: RbObject) {
-    if(column.link != null) {
-      let event = column.link.getNavigationEvent(object);
+    let cfg = this.getColumnConfig(object, column);
+    if(cfg.link != null) {
+      let event = cfg.link.getNavigationEvent(object);
       this.navigate.emit(event);
-    } else if(column.modal != null) {
+    } else if(cfg.modal != null) {
       this.dataset.select(object);
-      this.modalService.open(column.modal);
+      this.modalService.open(cfg.modal);
     }
 
   }

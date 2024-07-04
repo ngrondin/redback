@@ -21,14 +21,26 @@
     position: absolute;
     top: 0px;
     left: 0px;
+    height: var(--v24px);
+    color: darkgray;
+    border-top-left-radius: var(--v5px);
+    border-top-right-radius: var(--v5px);
+
+}
+
+.rb-linktable-header-grid {
+    color: white;
+    background-color: var(--primary-color);
 }
 
 .rb-linktable-colheader {
     display: flex;
     flex-direction: row;
-    margin: 0px var(--v10px) 0px 0px;
+    align-items: center;
+    /*margin: 0px var(--v10px) 0px 0px;*/
+    padding: 0px var(--v5px);
     font-size: 0.9rem;
-    color: darkgray;
+    border-right: 1px solid transparent;
     cursor: pointer;
 }
 
@@ -41,22 +53,28 @@
 .rb-linktable-body {
     display: flex;
     flex-direction: column;
+    border-width: 1px 0px 0px 1px;
 }
 
 .rb-linktable-row {
     display: flex;
     flex-direction: row;
-    align-items: end;
-    margin-bottom: var(--v20px);
+    align-items: stretch;
+    /*margin-bottom: var(--v20px);*/
 }
 
 .rb-linktable-rowitem {
     display: block;
     flex-direction: row;
-    margin: 0px var(--v10px) 0px 0px;
+    /*margin: 0px var(--v10px) 0px 0px;*/
+    padding: var(--v5px);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    border-width: 0px 1px 1px 0px;
+    border-color: transparent;
+    border-style: solid;
+    font-size: 0.95rem;
 }
 
 .rb-linktable-link {
@@ -66,5 +84,10 @@
 a.rb-linktable-link:hover {
     text-decoration: underline;
     cursor: pointer;
+}
+
+.rb-linktable-border {
+    border-color: lightgray;
+    border-style: solid;
 }
 

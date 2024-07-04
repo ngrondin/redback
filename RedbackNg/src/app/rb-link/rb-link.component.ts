@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, HostBinding } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 
 @Component({
@@ -9,7 +9,10 @@ import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 export class RbLinkComponent extends RbDataObserverComponent {
   @Input('attribute') attribute: string;
   @Input('view') view: string;
+  @Input('margin') margin: boolean = true;
 
+  @HostBinding('style.margin-bottom.vw') get bottommargin() { return this.margin ? 0.55 : 0; }
+  
   @Output() navigate: EventEmitter<any> = new EventEmitter();
 
   

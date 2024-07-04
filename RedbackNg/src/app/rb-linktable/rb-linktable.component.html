@@ -1,13 +1,13 @@
 <div
-    class="rb-linktable-header-container"
-    [style.left.px]="-scrollLeft">
+    [class]="'rb-linktable-header-container'">
     <div
-        class="rb-linktable-header">
+        [class]="'rb-linktable-header' + (grid ? ' rb-linktable-header-grid' : '')"
+        [style.left.px]="-scrollLeft">
         <div
             class="rb-linktable-colheader"
             *ngFor="let col of columns"
-            [style.width.px]="col.width"
-            (click)="clickColumn(col)">
+            [style.width.vw]="col.width"
+            (click)="clickColumnHeader(col)">
             {{col.label}}
         </div>
     </div>
@@ -15,22 +15,22 @@
 <rb-scroll
     (rbscroll)="onScroll($event)">                                                                                                                                                    
     <div
-        class="rb-linktable-body">
+        [class]="'rb-linktable-body' + (grid ? ' rb-linktable-border' : '')">
         <div
-            class="rb-linktable-row"
+            [class]="'rb-linktable-row'"
             *ngFor="let object of list">
             <div
-                class="rb-linktable-rowitem"
+                [class]="'rb-linktable-rowitem' + (grid ? ' rb-linktable-border' : '')"
                 *ngFor="let col of columns; index as i"
-                [style.width.px]="col.width">
+                [style.width.vw]="col.width">
                 <a
-                    *ngIf="col.isClickable"
+                    *ngIf="isClickable(col, object)"
                     class="rb-linktable-link"
                     (click)="clickLink(col, object)">
                     {{getValue(object, col)}}                
                 </a>
                 <span
-                    *ngIf="!col.isClickable">
+                    *ngIf="!isClickable(col, object)">
                     {{getValue(object, col)}}                
                 </span>                
             </div>

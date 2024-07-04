@@ -507,29 +507,26 @@ public class StringUtils
 		int col = 0;
 		boolean inQuote = false;
 		boolean escapeNext = false;
-		for(int ptr = 0; ptr < body.length(); ptr++) {
-			char c = body.charAt(ptr);
-			if(c == '\\' && escapeNext == false) {
-				escapeNext = true;
-			} else {
-				if(escapeNext) {
+		for(int ptr = 0; ptr <= body.length(); ptr++) {
+			char c = ptr < body.length() ? body.charAt(ptr) : 0;
+			if(inQuote) {
+				if(c == '\\' && escapeNext == false) {
+					escapeNext = true;
+				} else if(escapeNext) {
 					if(c == 'n') buffer.append("\n");
 					if(c == '"') buffer.append("\"");
 					escapeNext = false;
+				} else if(c == '"') {
+					inQuote = !inQuote;
 				} else {
-					if(c == '"') {
-						inQuote = !inQuote;
-					} else {
-						buffer.append(c);
-					}
-				}
-			} 
-			if(!inQuote) {
-				boolean lastCharOfBody = ptr + 1 == body.length();
-				boolean lastCharOfLine = lastCharOfBody || body.charAt(ptr + 1) == '\n';
-				boolean lastCharOfField = lastCharOfLine || body.charAt(ptr + 1) == ',';
+					buffer.append(c);
+				}				
+			} else {
+				boolean lastCharOfBody = ptr == body.length();
+				boolean lastCharOfLine = lastCharOfBody || c == '\n';
+				boolean lastCharOfField = lastCharOfLine || c == ',';
 				if(lastCharOfField) {
-					String val = buffer.toString();
+					String val = buffer.length() > 0 ? buffer.toString() : null;
 					if(col < headers.length) map.put(headers[col], val);    						
 					buffer = new StringBuilder();
 					col++;
@@ -538,8 +535,11 @@ public class StringUtils
 						map = new DataMap();
 						col = 0;						
 					}
-					ptr++;
-				}			
+				} else if(c == '"') {
+					inQuote = true;
+				} else {
+					buffer.append(c);
+				}
 			}
 		}
     	return ret;
