@@ -47,7 +47,7 @@ export class DragService {
     }
   }
 
-  public drop(el: ElementRef) {
+  public dropOn(el: ElementRef) {
     if(this.isDragging == true) {
       this.droppedOnElement = el;
     }

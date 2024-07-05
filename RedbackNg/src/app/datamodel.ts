@@ -19,6 +19,7 @@ export class RbObject {
     validation: any = {};
     flags: any = {};
     updatedAttributes: any = [];
+    deleted: boolean = false;
     dataService: DataService;
     lastUpdated: number;
     datasets: RbDatasetComponent[] = [];
@@ -194,7 +195,9 @@ export class RbObject {
     setValuesAndRelated(valueMap: any, relatedMap: any) {
         let ret: boolean = false;
         for(let key of Object.keys(valueMap)) {
-            ret = this._setValueAndRelated(key, valueMap[key], relatedMap[key]) || ret;
+            let val = valueMap[key];
+            let rel = relatedMap != null ? relatedMap[key] : null
+            ret = this._setValueAndRelated(key, val, rel) || ret;
         }
         this._afterSetValue(ret);
     }    

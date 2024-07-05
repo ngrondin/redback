@@ -12,6 +12,12 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
   isOverHTrack: boolean = false;
   draggingVThumb: boolean = false;
   draggingHThumb: boolean = false;
+  showVTrack: boolean = false;
+  showHTrack: boolean = false;
+  vThumbLength: number = 0;
+  hThumbLength: number = 0;
+  vThumbPosition: number = 0;
+  hThumbPosition: number = 0;
 
   @ViewChild('scroller', { read: ViewContainerRef, static: true }) scroller: ViewContainerRef;
   @ViewChild('content', { read: ViewContainerRef, static: true }) content: ViewContainerRef;
@@ -19,6 +25,8 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
   
   ngAfterContentInit() {
     this.contentInitiated = true;    
+    (new ResizeObserver((entries) => this.onResize(entries))).observe(this.scroller.element.nativeElement);
+    (new ResizeObserver((entries) => this.onResize(entries))).observe(this.content.element.nativeElement);
   }
 
   containerInit() {
@@ -33,58 +41,26 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
   onActivationEvent(state: boolean) {
   }
 
-  get showVTrack() {
-    if(!this.contentInitiated) return false;
-    let scrollerH = this.scroller.element.nativeElement.clientHeight;
-    let contentH = this.content.element.nativeElement.clientHeight;
-    return contentH > scrollerH;
-  }
-
-  get showHTrack() {
-    if(!this.contentInitiated) return false;
-    let scrollerW = this.scroller.element.nativeElement.clientWidth;
-    let contentW = this.content.element.nativeElement.clientWidth;
-    return contentW > scrollerW;
-  }
-
-  get vThumbLength() {
-    let scrollerH = this.scroller.element.nativeElement.clientHeight;
-    let contentH = this.content.element.nativeElement.clientHeight;
-    let res = scrollerH * (scrollerH / contentH);
-    if(res < 40) res = 40;
-    return res;
-  }
-
-  get hThumbLength() {
-    let scrollerW = this.scroller.element.nativeElement.clientWidth;
-    let contentW = this.content.element.nativeElement.clientWidth;
-    let res = scrollerW * (scrollerW / contentW);
-    if(res < 40) res = 40;
-    return res;
-  }
-
-  get vThumbPosition() {
-    if(!this.contentInitiated) return 0;
-    let scrollerH = this.scroller.element.nativeElement.clientHeight;
-    let contentH = this.content.element.nativeElement.clientHeight;
-    let scrollTop = this.scroller.element.nativeElement.scrollTop;
-    return scrollerH * (scrollTop / contentH);
-  }
-
-  get hThumbPosition() {
-    if(!this.contentInitiated) return 0;
-    let scrollerW = this.scroller.element.nativeElement.clientWidth;
-    let contentW = this.content.element.nativeElement.clientWidth;
-    let scrollLeft = this.scroller.element.nativeElement.scrollLeft;
-    return scrollerW * (scrollLeft / contentW);
-  }
-
   get vThumbBig() {
     return this.isOverVTrack || this.draggingVThumb;
   }
 
   get hThumbBig() {
     return this.isOverHTrack || this.draggingHThumb;
+  }
+
+  onResize(event: any) {
+    let scrollTop = this.scroller.element.nativeElement.scrollTop;
+    let scrollLeft = this.scroller.element.nativeElement.scrollLeft;
+    let scrollerH = this.scroller.element.nativeElement.clientHeight;
+    let scrollerW = this.scroller.element.nativeElement.clientWidth;
+    let contentH = this.content.element.nativeElement.clientHeight;
+    let contentW = this.content.element.nativeElement.clientWidth;
+    this.showVTrack = contentH > scrollerH;
+    this.showHTrack = contentW > scrollerW;
+    this.vThumbLength = Math.max(40, scrollerH * (scrollerH / contentH));
+    this.hThumbLength = Math.max(40, scrollerW * (scrollerW / contentW));
+    this.calcThumbPositions();
   }
 
   overVTrack() {
@@ -152,6 +128,18 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
 
   onScroll(event) {
     this.rbscroll.emit(event);
+    this.calcThumbPositions();
+  }
+
+  calcThumbPositions() {
+    let scrollTop = this.scroller.element.nativeElement.scrollTop;
+    let scrollLeft = this.scroller.element.nativeElement.scrollLeft;
+    let scrollerH = this.scroller.element.nativeElement.clientHeight;
+    let scrollerW = this.scroller.element.nativeElement.clientWidth;
+    let contentH = this.content.element.nativeElement.clientHeight;
+    let contentW = this.content.element.nativeElement.clientWidth;
+    this.vThumbPosition = scrollerH * (scrollTop / contentH);
+    this.hThumbPosition = scrollerW * (scrollLeft / contentW);
   }
 }
 

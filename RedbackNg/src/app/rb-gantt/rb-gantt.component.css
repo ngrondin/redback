@@ -6,6 +6,14 @@
     position: relative;
 }
 
+.rb-gantt-dropout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    overflow: hidden;
+    position: relative;
+}
+
 .rb-gantt-toolbar {
     display: flex;
     flex: 0 0 auto;

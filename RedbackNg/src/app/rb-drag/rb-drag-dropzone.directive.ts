@@ -14,13 +14,13 @@ export class RbDragDropzoneDirective {
   @Output('rb-drag-dropzone') dropped: EventEmitter<any> = new EventEmitter();
 
   @HostListener('mouseup', ['$event']) onMouseUp($event) {
-    if(this.dragService.isDragging) {
+    if(this.dragService.isDragging && this.dragService.droppedOnElement == null) {
+      this.dragService.dropOn(this.el);
       this.dropped.emit({
         data: this.dragService.data, 
         offset: this.dragService.offset,
         mouseEvent: $event
       });
-      this.dragService.drop(this.el);
     }
   }
 

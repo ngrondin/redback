@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChange } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 class TableColumnConfig {
   label: string;
@@ -45,6 +44,8 @@ class TableColumnConfig {
 })
 export class RbTableComponent extends RbDataObserverComponent {
   @Input('columns') _cols: any;
+  @Input('headersonemtpy') headersonempty: boolean = true;
+  @Input('emptymessage') emptymessage: string = null;
 
   columns: TableColumnConfig[];
 

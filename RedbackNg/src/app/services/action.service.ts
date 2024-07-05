@@ -162,8 +162,12 @@ export class ActionService {
 
   public execute(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
-      let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);
-      this.dataService.executeObjectFunction(dataset.selectedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
+      if(dataset != null && dataset.selectedObject != null) {
+        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);
+        this.dataService.executeObjectFunction(dataset.selectedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));  
+      } else {
+        observer.complete();
+      }
     });
   }
 
@@ -193,9 +197,11 @@ export class ActionService {
 
   public executeMaster(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
-      if(dataset.relatedObject != null) {
+      if(dataset != null && dataset.relatedObject != null) {
         let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.relatedObject, dataset.relatedObject, null, extraContext);
         this.dataService.executeObjectFunction(dataset.relatedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
+      } else {
+        observer.complete()
       }
     });
   }
@@ -204,11 +210,16 @@ export class ActionService {
     return new Observable((observer) => {
       let paramResolved = {};
       if(functionParams != null) {
-        paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);  
-      } else {
+        if(dataset != null) {
+          paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);  
+        } else {
+          paramResolved = functionParams;
+        }
+      } else if(dataset != null) {
         paramResolved = {
           "filter": dataset.resolvedFilter,
-          "selecteduid": (dataset.selectedObject != null ? dataset.selectedObject.uid : null)
+          "selecteduid": (dataset.selectedObject != null ? dataset.selectedObject.uid : null),
+          "selecteduids": (dataset.selectedObjects.map(o => o.uid))
         }
       }
       this.dataService.executeGlobalFunction(functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
@@ -235,7 +246,6 @@ export class ActionService {
 
   public executeClientScript(dataset:RbDatasetComponent, script: string) : Observable<null> {
     return new Observable((observer) => {
-      console.log("Executing client script");
       let func = Function("obj", "selectedObject", "relatedObject", script);
       func.call(window.redback, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);
       observer.next();

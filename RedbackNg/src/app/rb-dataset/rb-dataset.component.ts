@@ -26,7 +26,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public uid: string;
   private dataSubscription: Subscription;
   private _list: RbObject[] = [];
-  private _selectedObject: RbObject;
+  //private _selectedObject: RbObject;
+  private _selectedObjects: RbObject[] = [];
   public totalCount: number = -1;
   public searchString: string;
   public userFilter: any = null;
@@ -104,7 +105,11 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public get selectedObject(): RbObject {
-    return this._selectedObject;
+    return this._selectedObjects.length == 1 ? this._selectedObjects[0] : null;
+  }
+
+  public get selectedObjects() : RbObject[] {
+    return this._selectedObjects;
   }
 
   public set selectedObject(obj: RbObject) {
@@ -120,6 +125,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       && (this.master == null || (this.master != null && this.relatedObject != null))
       && (this.requiresuserfilter == false || this.userFilter != null)
       && !this._loading;
+  }
+
+  public isObjectSelected(object: RbObject) : boolean {
+    return this._selectedObjects.indexOf(object) != -1;
   }
 
   getObservable() : Observable<string>  {
@@ -153,7 +162,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       obj.removeSet(this);
     }
     this._list = [];
-    this._selectedObject = null;
+    this._selectedObjects = [];
     this.publishEvent('clear');
   }
 
@@ -225,14 +234,13 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.hasMorePages = false;
     }
     this.publishEvent('load');
-    //this.firstLoad = false;
     if(this._list.length == 0) {
-      this._selectedObject = null;
+      this._selectedObjects = [];
     } else if(this._list.length == 1) {
       this.select(this._list[0]);
     } else if(this._list.length > 1) {
       if(this.selectedObject != null && !this._list.includes(this.selectedObject)) {
-        this._selectedObject = null;
+        this._selectedObjects = [];
       }
     }
     if(this.nextPage == 1) { 
@@ -251,22 +259,48 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         object.addSet(this);
         this.publishEvent('load');
         if(this._list.length == 1) {
-          this._selectedObject = this._list[0];
+          this._selectedObjects = [this._list[0]];
         }  
       }
     }
   }
 
   public objectUpdated(object: RbObject) {
-    this.publishEvent('update');
+    if(object.deleted || !this.filterService.applies(this.resolvedFilter, object)) {
+      this.remove(object);
+    } else {
+      this.publishEvent('update');
+    }
   }
 
-  public select(item: RbObject) {
-    this._selectedObject = item;
-    if(this.dataTarget != null) {
-      this.dataTarget.selectedObject = item;
-    }
+  public select(object: RbObject) {
+    this._selectedObjects = [object];
+    if(this.dataTarget != null) this.dataTarget.selectedObject = object;
     this.publishEvent('select');
+  }
+
+  public addOneToSelection(object: RbObject) {
+    if(this._selectedObjects.length == 0) {
+      this.select(object);
+    } else {
+      this._selectedObjects.push(object);
+      if(this.dataTarget != null) this.dataTarget.selectedObject = null;
+      this.publishEvent('select');
+    }
+  }
+
+  public addRangeToSelection(object: RbObject) {
+    if(this._selectedObjects.length == 0) {
+      this.select(object);
+    } else {
+      let i1 = this._list.indexOf(this._selectedObjects[0]);
+      let i2 = this._list.indexOf(object);
+      let start = Math.min(i1, i2);
+      let end = Math.max(i1, i2);
+      this._selectedObjects = this._list.slice(start, end + 1);
+      if(this.dataTarget != null) this.dataTarget.selectedObject = null;
+      this.publishEvent('select');
+    }
   }
 
   public filterSort(event: any) : boolean {

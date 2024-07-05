@@ -136,13 +136,13 @@ export class FilterService {
           }
           if(fVal["$gt"] != null) {
             let fSubVal = fVal["$gt"];
-            let oValNum = oVal.getTime != null ? oVal.getTime() : this.isoDateRegExp.test(oVal) ? new Date(oVal).getTime() : parseFloat(oVal);
+            let oValNum = oVal != null && oVal.getTime != null ? oVal.getTime() : this.isoDateRegExp.test(oVal) ? new Date(oVal).getTime() : parseFloat(oVal);
             let fSubValNum = fSubVal.getTime != null ? fSubVal.getTime() : this.isoDateRegExp.test(fSubVal) ? new Date(fSubVal).getTime() : parseFloat(fSubVal);
             if(oValNum <= fSubValNum) ret = false;
           }
           if(fVal["$lt"] != null) {
             let fSubVal = fVal["$lt"];
-            let oValNum = oVal.getTime != null ? oVal.getTime() : this.isoDateRegExp.test(oVal) ? new Date(oVal).getTime() : parseFloat(oVal);
+            let oValNum = oVal != null && oVal.getTime != null ? oVal.getTime() : this.isoDateRegExp.test(oVal) ? new Date(oVal).getTime() : parseFloat(oVal);
             let fSubValNum = fSubVal.getTime != null ? fSubVal.getTime() : this.isoDateRegExp.test(fSubVal) ? new Date(fSubVal).getTime() : parseFloat(fSubVal);
             if(oValNum >= fSubValNum) ret = false;            
           }

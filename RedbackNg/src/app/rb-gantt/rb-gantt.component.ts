@@ -363,7 +363,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
   }
 
-  public dropped(event: any, lane: GanttLane, ignoreTime: boolean = false) {
+  public droppedOn(event: any, lane: GanttLane, ignoreTime: boolean = false) {
     let update: any = {};
     let related: any = {}
     let object: RbObject = event.data;
@@ -404,6 +404,15 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
 
     this.calc();
+  }
+
+  public droppedOut(event: any) {
+    let object: RbObject = event.data;
+    let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
+    let update: any = {};
+    update[config.startAttribute] = null;
+    update[config.laneAttribute] = null;
+    object.setValues(update);
   }
 
   public scroll(event) {

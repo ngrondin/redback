@@ -1,167 +1,171 @@
 <div
-    class="rb-gantt-toolbar">
+    class="rb-gantt-dropout"
+    (rb-drag-dropzone)="droppedOut($event)">
     <div
-        class="rb-gantt-custom-toolbar">
+        class="rb-gantt-toolbar">
         <div
-            #customtoolbar>
-        </div>
-    </div>
-    <rb-datetime-input
-        *ngIf="locktonow == false"
-        class="rb-gantt-header-dateinput"
-        [margin]="false"
-        [format]="'YYYY-MM-DD'"
-        [(value)]="startDate">
-    </rb-datetime-input>
-    <rb-button
-        [matMenuTriggerFor]="zoomMenu"
-        [icon]="'zoom_in'"
-        [margin]="false">
-    </rb-button>
-    <mat-menu #zoomMenu="matMenu">
-        <button mat-menu-item (click)="setZoom(86400000)">1 day</button>
-        <button mat-menu-item (click)="setZoom(259200000)">3 Days</button>
-        <button mat-menu-item (click)="setZoom(604800000)">7 Days</button>
-    </mat-menu>    
-    &nbsp;
-    <rb-button
-        [matMenuTriggerFor]="spanMenu"
-        [icon]="'swap_horiz'"
-        [margin]="false">   
-    </rb-button>
-    <mat-menu #spanMenu="matMenu">
-        <button mat-menu-item (click)="setSpan(259200000)">3 day</button>
-        <button mat-menu-item (click)="setSpan(604800000)">7 Days</button>
-        <button mat-menu-item (click)="setSpan(1209600000)">14 Days</button>
-    </mat-menu>    
-    &nbsp;
-    <rb-button
-        (click)="forceDatasetReload()"
-        [icon]="'refresh'"
-        [margin]="false">
-    </rb-button> 
-    &nbsp;
-    <rb-iconbutton
-        [matMenuTriggerFor]="settingsMenu"
-        [icon]="'more_vert'">
-    </rb-iconbutton>
-    <mat-menu #settingsMenu="matMenu">
-        <button 
-            mat-menu-item 
-            (click)="toggleDragFilter()">
-            {{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}
-        </button>
-    </mat-menu>         
-</div>
-<div
-    class="rb-gantt-header">
-    <div
-        class="rb-gantt-corner">
-    </div>
-    <div
-        class="rb-gantt-headertrackcontainer">
-        <div
-            class="rb-gantt-headertrack"
-            [style.width.px]="widthPX"
-            [style.left.px]="-scrollLeft">
+            class="rb-gantt-custom-toolbar">
             <div
-                class="rb-gantt-daytrack">
+                #customtoolbar>
+            </div>
+        </div>
+        <rb-datetime-input
+            *ngIf="locktonow == false"
+            class="rb-gantt-header-dateinput"
+            [margin]="false"
+            [format]="'YYYY-MM-DD'"
+            [(value)]="startDate">
+        </rb-datetime-input>
+        <rb-button
+            [matMenuTriggerFor]="zoomMenu"
+            [icon]="'zoom_in'"
+            [margin]="false">
+        </rb-button>
+        <mat-menu #zoomMenu="matMenu">
+            <button mat-menu-item (click)="setZoom(86400000)">1 day</button>
+            <button mat-menu-item (click)="setZoom(259200000)">3 Days</button>
+            <button mat-menu-item (click)="setZoom(604800000)">7 Days</button>
+        </mat-menu>    
+        &nbsp;
+        <rb-button
+            [matMenuTriggerFor]="spanMenu"
+            [icon]="'swap_horiz'"
+            [margin]="false">   
+        </rb-button>
+        <mat-menu #spanMenu="matMenu">
+            <button mat-menu-item (click)="setSpan(259200000)">3 day</button>
+            <button mat-menu-item (click)="setSpan(604800000)">7 Days</button>
+            <button mat-menu-item (click)="setSpan(1209600000)">14 Days</button>
+        </mat-menu>    
+        &nbsp;
+        <rb-button
+            (click)="forceDatasetReload()"
+            [icon]="'refresh'"
+            [margin]="false">
+        </rb-button> 
+        &nbsp;
+        <rb-iconbutton
+            [matMenuTriggerFor]="settingsMenu"
+            [icon]="'more_vert'">
+        </rb-iconbutton>
+        <mat-menu #settingsMenu="matMenu">
+            <button 
+                mat-menu-item 
+                (click)="toggleDragFilter()">
+                {{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}
+            </button>
+        </mat-menu>         
+    </div>
+    <div
+        class="rb-gantt-header">
+        <div
+            class="rb-gantt-corner">
+        </div>
+        <div
+            class="rb-gantt-headertrackcontainer">
+            <div
+                class="rb-gantt-headertrack"
+                [style.width.px]="widthPX"
+                [style.left.px]="-scrollLeft">
                 <div
-                    *ngFor="let mark of dayMarks"
-                    [style.left.px]="mark.px"
-                    class="rb-gantt-mark">
-                    &nbsp;{{mark.label}}
+                    class="rb-gantt-daytrack">
+                    <div
+                        *ngFor="let mark of dayMarks"
+                        [style.left.px]="mark.px"
+                        class="rb-gantt-mark">
+                        &nbsp;{{mark.label}}
+                    </div>
+                </div>
+                <div
+                    class="rb-gantt-hourtrack">
+                    <div
+                        *ngFor="let mark of hourMarks"
+                        [style.left.px]="mark.px"
+                        class="rb-gantt-mark">
+                        &nbsp;{{mark.label}}
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <div
+        class="rb-gantt-body">
+        <div
+            class="rb-gantt-laneheads">
             <div
-                class="rb-gantt-hourtrack">
+                class="rb-gantt-laneheadscontainer"
+                [style.top.px]="-scrollTop">
+                <div
+                    *ngFor="let lane of ganttData; let i = index"
+                    [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
+                    [style.height.px]="lane.height"
+                    [style.cursor]="lanesConfig.modal != null ? 'pointer' : ''"
+                    (click)="clickLane(lane)"
+                    (rb-drag-dropzone)="droppedOn($event, lane, true)"
+                    [rb-drag-changeform]="getSizeForObjectCallback">
+                    <div
+                        class="rb-gantt-lanelabel">
+                        {{lane.label}}
+                    </div>
+                    <mat-icon>{{lane.icon}}</mat-icon>
+                </div>
+            </div>
+        </div>
+        <rb-scroll
+            class="rb-gantt-lanescontainer"
+            (rbscroll)="scroll($event)">
+            <div
+                class="rb-gantt-lanes"
+                [style.width.px]="widthPX">
                 <div
                     *ngFor="let mark of hourMarks"
                     [style.left.px]="mark.px"
                     class="rb-gantt-mark">
-                    &nbsp;{{mark.label}}
+                </div>
+                <div
+                    *ngFor="let lane of ganttData; let i = index"
+                    [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
+                    [style.height.px]="lane.height"
+                    [style.width.px]="widthPX"
+                    (rb-drag-dropzone)="droppedOn($event, lane)"
+                    [rb-drag-changeform]="getSizeForObjectCallback">
+                    <div
+                        *ngFor="let spread of lane.spreads"
+                        [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox') + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '')"
+                        [rb-drag-object]="spread.canEdit ? spread.object : null"
+                        (click)="clickSpread(spread)"
+                        [style.width.px]="spread.width"
+                        [style.left.px]="spread.start"
+                        [style.height.px]="spread.config.isBackground ? lane.height : spread.height"
+                        [style.top.px]="spread.top"
+                        [style.background-color]="spread.color"
+                        [style.color]="spread.labelcolor">
+                        <div
+                            *ngIf="spread.prelabel != null"
+                            class="rb-gantt-spreadprelabel">
+                            {{spread.prelabel}}
+                        </div>
+                        <div
+                            class="rb-gantt-spreadlabel"
+                            [style.text-align]="spread.prelabel == null && spread.postlabel == null ? 'left' : 'center'">
+                            {{spread.label}}
+                        </div>
+                        <div
+                            *ngIf="spread.postlabel != null"
+                            class="rb-gantt-spreadpostlabel">
+                            {{spread.postlabel}}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </rb-scroll>
     </div>
-</div>
-<div
-    class="rb-gantt-body">
     <div
-        class="rb-gantt-laneheads">
-        <div
-            class="rb-gantt-laneheadscontainer"
-            [style.top.px]="-scrollTop">
-            <div
-                *ngFor="let lane of ganttData; let i = index"
-                [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
-                [style.height.px]="lane.height"
-                [style.cursor]="lanesConfig.modal != null ? 'pointer' : ''"
-                (click)="clickLane(lane)"
-                (rb-drag-dropzone)="dropped($event, lane, true)"
-                [rb-drag-changeform]="getSizeForObjectCallback">
-                <div
-                    class="rb-gantt-lanelabel">
-                    {{lane.label}}
-                </div>
-                <mat-icon>{{lane.icon}}</mat-icon>
-            </div>
-        </div>
+        class="rb-gantt-loadoverlay"
+        *ngIf="isLoading">
+        <mat-spinner
+            diameter="50">
+        </mat-spinner>
     </div>
-    <rb-scroll
-        class="rb-gantt-lanescontainer"
-        (rbscroll)="scroll($event)">
-        <div
-            class="rb-gantt-lanes"
-            [style.width.px]="widthPX">
-            <div
-                *ngFor="let mark of hourMarks"
-                [style.left.px]="mark.px"
-                class="rb-gantt-mark">
-            </div>
-            <div
-                *ngFor="let lane of ganttData; let i = index"
-                [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
-                [style.height.px]="lane.height"
-                [style.width.px]="widthPX"
-                (rb-drag-dropzone)="dropped($event, lane)"
-                [rb-drag-changeform]="getSizeForObjectCallback">
-                <div
-                    *ngFor="let spread of lane.spreads"
-                    [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox') + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '')"
-                    [rb-drag-object]="spread.canEdit ? spread.object : null"
-                    (click)="clickSpread(spread)"
-                    [style.width.px]="spread.width"
-                    [style.left.px]="spread.start"
-                    [style.height.px]="spread.config.isBackground ? lane.height : spread.height"
-                    [style.top.px]="spread.top"
-                    [style.background-color]="spread.color"
-                    [style.color]="spread.labelcolor">
-                    <div
-                        *ngIf="spread.prelabel != null"
-                        class="rb-gantt-spreadprelabel">
-                        {{spread.prelabel}}
-                    </div>
-                    <div
-                        class="rb-gantt-spreadlabel"
-                        [style.text-align]="spread.prelabel == null && spread.postlabel == null ? 'left' : 'center'">
-                        {{spread.label}}
-                    </div>
-                    <div
-                        *ngIf="spread.postlabel != null"
-                        class="rb-gantt-spreadpostlabel">
-                        {{spread.postlabel}}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </rb-scroll>
-</div>
-<div
-    class="rb-gantt-loadoverlay"
-    *ngIf="isLoading">
-    <mat-spinner
-        diameter="50">
-    </mat-spinner>
 </div>
 

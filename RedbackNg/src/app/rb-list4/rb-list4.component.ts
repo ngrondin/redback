@@ -79,6 +79,10 @@ export class RbList4Component extends RbDataObserverComponent {
     return this.meta1attribute != null || this.meta2attribute != null;
   }
 
+  isSelected(object: RbObject) : boolean {
+    return this.dataset.isObjectSelected(object);
+  }
+
   public redraw() {
     this.enhancedList = [];
     for(let obj of this.list) {
@@ -163,16 +167,22 @@ export class RbList4Component extends RbDataObserverComponent {
     return this.showrefresh;
   }
 
-  itemClicked(item: RbObject) {
-    this.dataset.select(item);
-    if(this.modal != null) {
-      this.modalService.open(this.modal);
-    } else if(this.link != null) {
-      let target = {
-        "object": this.rbObject.objectname,
-        "filter": {uid: "'" + this.rbObject.uid + "'"}
-      };
-      this.navigate.emit(target);
+  itemClicked(item: RbObject, event: any) {
+    if(event.ctrlKey == true) {
+      this.dataset.addOneToSelection(item);
+    } else if(event.shiftKey == true) {
+      this.dataset.addRangeToSelection(item);
+    } else {
+      this.dataset.select(item);
+      if(this.modal != null) {
+        this.modalService.open(this.modal);
+      } else if(this.link != null) {
+        let target = {
+          "object": this.rbObject.objectname,
+          "filter": {uid: "'" + this.rbObject.uid + "'"}
+        };
+        this.navigate.emit(target);
+      }  
     }
   }
 
