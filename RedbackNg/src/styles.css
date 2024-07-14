@@ -442,6 +442,10 @@ rb-tab {
 	height: var(--v24px);
 }
 
+.rb-input-trail-iconbutton {
+	margin-top: var(--v8px);
+}
+
 .rb-tip {
 	border: 1px solie #ccc;
 	display: block;

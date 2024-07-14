@@ -9,6 +9,7 @@ import { ClientWSService } from "app/services/clientws.service";
 import { ConfigService } from "app/services/config.service";
 import { DialogService } from "app/services/dialog.service";
 import { DragService } from "app/services/drag.service";
+import { NlactionService } from "app/services/nlaction.service";
 import { PopupService } from "app/services/popup.service";
 import { UserprefService } from "app/services/userpref.service";
 import { CookieService } from "ngx-cookie-service";
@@ -42,6 +43,7 @@ export abstract class AppRootComponent implements OnInit {
     apiService: ApiService;
     clientWSServer: ClientWSService;
     popupService: PopupService;
+    nlActionService: NlactionService;
 
     constructor(
     ) {
@@ -54,10 +56,12 @@ export abstract class AppRootComponent implements OnInit {
         this.apiService = AppInjector.get(ApiService);
         this.clientWSServer = AppInjector.get(ClientWSService);
         this.popupService = AppInjector.get(PopupService);
+        this.nlActionService = AppInjector.get(NlactionService);
         window.redback.navigateTo = (event) => this.navigateTo(event);
      }
   
     ngOnInit() {
+      this.nlActionService.navigateTo = (event: any) => this.navigateTo(event);
       this.subscription = this.events.subscribe((event) => {
         if(event == 'init' && this.initialView != null) {
           let iv = this.userprefService.getInitialView();

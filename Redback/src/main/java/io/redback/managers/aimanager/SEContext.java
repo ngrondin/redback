@@ -21,10 +21,14 @@ public class SEContext {
 		textResponse.append(s.trim());
 	}
 	
+	public void reset() {
+		stack.clear();
+	}
+
 	public void pushContextLevel(SEContextLevel ci) {
 		stack.add(ci);
 	}
-
+	
 	public SEContextLevel popContextLevel() {
 		if(stack.size() > 1) {
 			SEContextLevel oc = stack.get(stack.size() - 1);

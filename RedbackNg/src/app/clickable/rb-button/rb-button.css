@@ -21,6 +21,8 @@
     flex-direction: row;
     padding: var(--v8px) var(--v12px);
     color: var(--primary-dark-color);
+    height: 1vw;
+    align-items: center;
 }
 
 .rb-button-icon {

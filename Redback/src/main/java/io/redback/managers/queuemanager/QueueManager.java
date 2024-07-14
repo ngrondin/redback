@@ -45,7 +45,8 @@ public class QueueManager extends Thread {
 		data.put("lock", null);
 		data.put("failed", null);
 		collection.putData(key, data);
-		processMessage(msgUuid);
+		//processMessage(msgUuid);
+		this.notify();
 	}
 	
 	public void run() {

@@ -224,7 +224,8 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 					DataMap sub = list.getObject(i);
 					String key = sub.getString("key");
 					DataMap subResp = processServiceRequest(session, sub);
-					respMap.put(key, subResp);
+					if(key != null)
+						respMap.put(key, subResp);
 				}
 				return respMap;
 			}

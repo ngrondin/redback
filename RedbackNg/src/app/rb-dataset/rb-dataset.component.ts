@@ -245,7 +245,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     }
     if(this.nextPage == 1) { 
       if(this.fetchAll == false && this._list.length > 10) {
-        this.apiService.countObjects(this.objectname, this.resolvedFilter, this.searchString).subscribe(data => {this.totalCount = data.result});
+        this.apiService.countObjects(this.objectname, this.resolvedFilter, this.searchString).subscribe(data => {
+          this.totalCount = data.result
+        });
       } else {
         this.totalCount = this._list.length;
       }

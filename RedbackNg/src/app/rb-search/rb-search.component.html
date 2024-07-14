@@ -26,6 +26,7 @@
 </div>
 <rb-iconbutton 
     *ngIf="filterconfig != null"
+    class="rb-input-trail-iconbutton"
     [icon]="'filter_list'"
     [style.color]="hasFilter ? 'var(--primary-dark-color)' : 'var(--dark-writing-color)'"
     (click)="openFilterBuilder()">

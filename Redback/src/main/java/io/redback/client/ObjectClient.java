@@ -222,6 +222,14 @@ public class ObjectClient extends Client
 		return new MultiResponse(resp);
 	}
 	
+	public MultiResponse multi(Session session, DataList list) throws RedbackException {
+		DataMap req = new DataMap();
+		req.put("action", "multi");
+		req.put("multi", list);
+		DataMap resp = requestDataMap(session, req);
+		return new MultiResponse(resp);
+	}
+	
 	public List<RedbackAggregateRemote> aggregate(Session session, String objectname, DataMap filter, String search, DataList tuple, DataList metrics, DataMap sort, DataList base, boolean addRelated, int page, int pageSize) throws RedbackException {
 		AggregateRequest req = new AggregateRequest(objectname, filter, search, tuple, metrics, sort, base, addRelated, page, pageSize);
 		DataMap resp = requestDataMap(session, req.getDataMap());

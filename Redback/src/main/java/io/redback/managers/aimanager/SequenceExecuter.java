@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-
 import io.firebus.data.DataMap;
 import io.firebus.data.ZonedTime;
 import io.firebus.data.parse.DateParser;
@@ -53,9 +52,7 @@ public class SequenceExecuter {
 		for(int cur = 0; cur < seq.size(); cur++) {
 			String curToken = seq.get(cur);
 			if(curToken.startsWith("$")) {
-				List<String> params = new ArrayList<String>();
-				for(int i = cur + 1; i < seq.size() && !seq.get(i).startsWith("$"); i++)
-					params.add(seq.get(i));
+				List<String> params = getTokensUntil(seq, cur + 1, "$"); 
 				runCommand(context, curToken, params);
 				cur += params.size();					
 			}
@@ -78,6 +75,8 @@ public class SequenceExecuter {
 				action(context, params);
 			else if(command.equals("$pop"))
 				pop(context, params);				
+			else if(command.equals("$reset"))
+				reset(context);				
 			else if(command.equals("$respond"))
 				respond(context, params);		
 			else if(command.equals("$navto"))
@@ -111,19 +110,18 @@ public class SequenceExecuter {
 	
 	protected void update(SEContext context, List<String> params) throws RedbackException {
 		SEContextLevel cl = context.getContextLevel();
-		if(params.size() >= 2 && cl != null) {
-			String attribute = params.get(0);
-			Object value = getValue(context, params.subList(1, params.size()));
+		if(params.size() >= 2 && cl != null && params.get(0).startsWith("@")) {
+			DataMap data = createDataMap(context, params);
 			for(RedbackObjectRemote ror: listObjectsFromContext(context)) {
-				ror.set(attribute, value);
+				ror.set(data);
 			}
 		}
 	}
 	
 	protected void link(SEContext context, List<String> params) throws RedbackException {
 		SEContextLevel cl = context.getContextLevel();
-		if(params.size() >= 3 && cl != null) {
-			String attribute = params.get(0);
+		if(params.size() >= 3 && cl != null && params.get(0).startsWith("@")) {
+			String attribute = params.get(0).substring(1);
 			String relatedObjectName = params.get(1);
 			RedbackObjectRemote target = findObject(context, relatedObjectName, params.subList(2, params.size()), false);
 			for(RedbackObjectRemote ror: listObjectsFromContext(context)) {
@@ -146,6 +144,10 @@ public class SequenceExecuter {
 		}		
 	}
 	
+	protected void reset(SEContext context) throws RedbackException {
+		context.reset();
+	}
+	
 	protected void pop(SEContext context, List<String> params) throws RedbackException {
 		context.popContextLevel();
 	}
@@ -161,21 +163,32 @@ public class SequenceExecuter {
 			if(params.size() == 1) {
 				if(c instanceof ObjectContext) {
 					ObjectContext oc = (ObjectContext)c;
-					context.uiActions.add("navtouid");
+					context.uiActions.add("$navtouid");
 					context.uiActions.add(view);
 					context.uiActions.add(oc.uid);
 				} else if(c instanceof ListContext) {
 					ListContext lc = (ListContext)c;
-					context.uiActions.add("navtosearch");
-					context.uiActions.add(view);
-					context.uiActions.add(lc.search);
+					if(lc.search != null) {
+						context.uiActions.add("$navtosearch");
+						context.uiActions.add(view);
+						context.uiActions.add(lc.search);						
+					} else if( lc.list.size() > 0){
+						context.uiActions.add("$navtouids");
+						context.uiActions.add(view);
+						String[] uids = new String[lc.list.size()];
+						for(int i = 0; i < lc.list.size(); i++)
+							uids[i] = lc.list.get(i).getUid();							
+						context.uiActions.add(String.join(",", uids));							
+					} else {
+						context.addResponse("Can't find anything");
+					}
 				} else {
-					context.uiActions.add("navtosearch");
+					context.uiActions.add("$navto");
 					context.uiActions.add(view);
 				}
 			} else if(params.size() >= 2) {
 				Object val = getValue(context, params.subList(1, params.size()));
-				context.uiActions.add("navtosearch");
+				context.uiActions.add("$navtosearch");
 				context.uiActions.add(view);
 				context.uiActions.add(val.toString());
 			}		
@@ -197,12 +210,12 @@ public class SequenceExecuter {
 	protected List<RedbackObjectRemote> listObjects(SEContext context, String objectName, List<String> params, boolean addToContext) throws RedbackException {
 		DataMap filter = null;
 		String search = null;
-		if(params.size() == 1) {
-			search = getValue(context, params).toString();
-		} else if(params.size() >= 2) {
-			String key = params.get(0);
-			Object val = getValue(context, params.subList(1, params.size()));
-			filter = new DataMap(key, val);
+		if(params.size() > 0) {
+			if(params.get(0).startsWith("@")) {
+				filter = createDataMap(context, params);
+			} else {
+				search = getValue(context, params).toString();
+			}
 		}
 		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, filter, search, null, false, true, 0, 100);
 		if(addToContext)
@@ -221,25 +234,30 @@ public class SequenceExecuter {
 		return list;
 	}
 	
+	
+	protected DataMap createDataMap(SEContext context, List<String> tokens) throws RedbackException {
+		DataMap ret = new DataMap();
+		if(tokens.get(0).startsWith("@")) {
+			int i = 0;
+			while(i < tokens.size()) {
+				String key = tokens.get(i).substring(1);
+				List<String> valTokens = getTokensUntil(tokens, i + 1, "@");
+				Object val = getValue(context, valTokens);
+				ret.put(key, val);
+				i += 1 + valTokens.size();
+			}
+		}
+		return ret;
+	}
+	
 	protected Object getValue(SEContext context, List<String> tokens) throws RedbackException {
 		StringBuilder sb = new StringBuilder();
 		for(String token: tokens) {			
 			Object val = null;
 			if(token.startsWith("#")) {
-				int l = -1;
-				String attribute = token;
-				while(attribute.startsWith("#")) {
-					l++;
-					attribute = attribute.substring(1);
-				}
-				SEContextLevel cl = context.getContextLevel(l);
-				if(cl instanceof ObjectContext) {
-					ObjectContext oc = (ObjectContext)cl;
-					if(attribute.equals("uid"))
-						val = oc.object.getUid();
-					else
-						val = oc.object.getObject(attribute);
-				}
+				val = getValueFromContext(context, token);
+			} else if(token.startsWith(">") || token.startsWith("<")) {
+				val = getComparativeValue(token);
 			} else {
 				val = parseString(token);
 			}
@@ -247,10 +265,50 @@ public class SequenceExecuter {
 				return val;
 			} else {
 				if(sb.length() > 0) sb.append(" ");
-				sb.append(val.toString());
+				sb.append(val != null ? val.toString() : "null");
 			}
 		}
 		return sb.toString();
+	}
+	
+	protected Object getValueFromContext(SEContext context, String attribute) throws RedbackException {
+		Object val = null;
+		if(attribute.startsWith("#")) {
+			int l = -1;
+			while(attribute.startsWith("#")) {
+				l++;
+				attribute = attribute.substring(1);
+			}
+			SEContextLevel cl = context.getContextLevel(l);
+			if(cl instanceof ObjectContext) {
+				ObjectContext oc = (ObjectContext)cl;
+				val = attribute.equals("uid") ? oc.object.getUid() : oc.object.getObject(attribute);
+			} else if(cl instanceof ListContext) {
+				ListContext lc = (ListContext)cl;
+				List<Object> list = new ArrayList<Object>();
+				for(RedbackObjectRemote ror: lc.list) {
+					Object v = attribute.equals("uid") ? ror.getUid() : ror.getObject(attribute);
+					list.add(v);
+				}
+				val = list;
+			}
+		}
+		return val;
+	}
+	
+	protected Object getComparativeValue(String str) throws RedbackException {
+		Object val = null;
+		String key = str.startsWith(">") ? "$gt" : str.startsWith("<") ? "$lt" : "";
+		str = str.substring(1);
+		if(str.endsWith("d") || str.endsWith("h")) {
+			long multiplier = str.endsWith("d") ? 24*60*60*1000 : str.endsWith("h") ? 60*60*1000 : 1;
+			int u = Integer.parseInt(str.substring(0, str.length() - 1));
+			long ms = u * multiplier;
+			val = new Date(System.currentTimeMillis() + ms);
+		} else {
+			val = parseString(str);
+		}
+		return new DataMap(key, val);
 	}
 	
 	protected Object parseString(String str) {
@@ -282,4 +340,13 @@ public class SequenceExecuter {
 		}		
 	}
 
+
+
+	
+	protected List<String> getTokensUntil(List<String> tokens, int start, String c) {
+		List<String> ret = new ArrayList<String>();
+		for(int i = start; i < tokens.size() && !tokens.get(i).startsWith(c); i++)
+			ret.add(tokens.get(i));
+		return ret;
+	}
 }

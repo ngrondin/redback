@@ -3,6 +3,7 @@ import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { ApiService } from 'app/services/api.service';
 import { ConfigService } from 'app/services/config.service';
+import { NlactionService } from 'app/services/nlaction.service';
 
 @Component({
   selector: 'rb-nlbox',
@@ -22,7 +23,8 @@ export class RbNlboxComponent {
 
   constructor(
     private apiService: ApiService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private nlActionService: NlactionService
   ) {
   }
 
@@ -65,28 +67,36 @@ export class RbNlboxComponent {
       filter: contextDS != null ? contextDS.resolvedFilter : null,
       search: contextDS != null ? contextDS.searchString : null
     }
-    this.apiService.nlCommand(this.configService.nlCommandModel, this.currentText, context).subscribe(
-      (resp) => {
+    this.history.push({text:this.currentText.trim(), assistant:false});
+    this.historyPointer = -1; 
+    this.waiting = true; 
+    this.apiService.nlCommand(this.configService.nlCommandModel, this.currentText, context).subscribe({
+      next: (resp) => {
         let text = resp.text != null && resp.text != "" ? resp.text : "...";
         if(resp.text != null) {
           this.history.push({text:text, assistant:true});
         }
         if(resp.actions != null) {
-          this.processActions(resp.actions);
+          try {
+            this.nlActionService.processSequence(resp.actions);
+          } catch(err) {
+            console.error(err);
+          }
         }
         this.waiting = false;
       },
-      (err) => {
+      error: (err) => {
         this.history.push({text:"Something went wrong", assistant:true});
+        console.error(err);
+        this.waiting = false;
+      },
+      complete: () => {
         this.waiting = false;
       }
-    );
+    });
     setTimeout(() => {
-      this.history.push({text:this.currentText.trim(), assistant:false});
       this.currentText = "";
-      this.scrollToBottom(); 
-      this.waiting = true; 
-      this.historyPointer = -1; 
+      this.scrollToBottom();       
     }, 10);
   }
 
@@ -94,22 +104,6 @@ export class RbNlboxComponent {
     this.close.emit();
   }
 
-  processActions(actions: string[]) {
-    if(actions[0] == 'navtosearch' && actions.length >= 3) {
-      this.navigate.emit({
-        view: actions[1],
-        filter: {},
-        search: actions[2],
-        reset: true
-      });  
-    } else if(actions[0] == 'navtouid' && actions.length >= 3) {
-      this.navigate.emit({
-        view: actions[1],
-        filter: {uid: "'" + actions[2] + "'"},
-        reset: true
-      });  
-    }
-  }
 
   private scrollToBottom() {
     setTimeout(() => {

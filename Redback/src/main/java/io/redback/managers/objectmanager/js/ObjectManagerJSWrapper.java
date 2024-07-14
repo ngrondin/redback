@@ -189,8 +189,8 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 				public Object call(Object... arguments) throws RedbackException {
 					String objectName = (String)arguments[0];
 					DataMap filter = (DataMap)(arguments[1]);
-					if(arguments.length >= 3 && arguments[2] instanceof SCallable) {
-						SCallable callable = (SCallable)arguments[2];
+					if(arguments.length >= 3 && arguments[2] instanceof Function) {
+						Function callable = (Function)arguments[2];
 						try {
 							boolean hasMore = true;
 							int page = 0;
@@ -206,7 +206,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 								}
 							}
 						} catch(Exception e) {
-							throw new RuntimeException("Error iterating through list");
+							throw new RuntimeException("Error iterating through list", e);
 						}
 						
 					} else {

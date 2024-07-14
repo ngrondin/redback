@@ -60,6 +60,8 @@ export class ActionService {
         return this.showModal(target ?? param);
       } else if(_action == 'externallink') {
         return this.launchExternalLink(dataset, (target ?? param));
+      } else if(_action == 'refresh') {
+        return this.refresh(dataset);
       } else if(dataset.selectedObject != null) {
         return this.execute(dataset, _action, param, extraContext, timeout);
       }
@@ -258,6 +260,16 @@ export class ActionService {
       this.modalService.open(modalName);
       observer.next();
       observer.complete();  
+    });
+  }
+
+  public refresh(dataset: RbDatasetComponent): Observable<null> {
+    return new Observable((observer) => {
+      if(dataset != null) {
+        dataset.refreshData();
+      }
+      observer.next();
+      observer.complete();
     });
   }
 

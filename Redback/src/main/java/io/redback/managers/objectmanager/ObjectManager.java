@@ -530,7 +530,7 @@ public class ObjectManager
 			if(objectConfig.isPersistent()) 
 			{
 				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);
-				long count = dataClient.countData(objectName, dbFilter);
+				long count = dataClient.countData(objectConfig.getCollection(), dbFilter);
 				return count;
 			} else {
 				throw new RedbackException("Cannot count non-persistent objects '" + objectName + "'");
