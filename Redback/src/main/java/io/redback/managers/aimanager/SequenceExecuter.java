@@ -6,26 +6,37 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.data.ZonedTime;
 import io.firebus.data.parse.DateParser;
+import io.firebus.data.parse.DurationParser;
 import io.firebus.data.parse.NumberParser;
 import io.firebus.data.parse.TimeParser;
+import io.redback.client.ConfigClient;
 import io.redback.client.ObjectClient;
 import io.redback.client.ProcessAssignmentRemote;
 import io.redback.client.ProcessClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
+import io.redback.utils.ConfigCache;
 import io.redback.utils.NLCommandResponse;
 
 public class SequenceExecuter {
+	protected ConfigClient configClient;
 	protected ObjectClient objectClient;
 	protected ProcessClient processClient;
+	protected ConfigCache<DataMap> objectConfigs;
 	
-	public SequenceExecuter(ObjectClient oc, ProcessClient pc) {
+	public SequenceExecuter(ConfigClient cc, ObjectClient oc, ProcessClient pc) {
+		configClient = cc;
 		objectClient = oc;
 		processClient = pc;
+		objectConfigs = new ConfigCache<DataMap>(configClient, "rbo", "object", 3600000, new ConfigCache.ConfigFactory<DataMap>() {
+			public DataMap createConfig(DataMap map) throws Exception {
+				return map;
+			}});
 	}
 	
 	public NLCommandResponse runSequence(Session session, String seqStr, SEContextLevel cl) throws RedbackException {
@@ -111,10 +122,29 @@ public class SequenceExecuter {
 	protected void update(SEContext context, List<String> params) throws RedbackException {
 		SEContextLevel cl = context.getContextLevel();
 		if(params.size() >= 2 && cl != null && params.get(0).startsWith("@")) {
-			DataMap data = createDataMap(context, params);
-			for(RedbackObjectRemote ror: listObjectsFromContext(context)) {
-				ror.set(data);
+			List<RedbackObjectRemote> list = listObjectsFromContext(context);
+			String objectName = list.get(0).getObjectName();
+			if(list.size() > 0) {
+				DataMap data = new DataMap();
+				int i = 0;
+				while(i < params.size()) {
+					String key = params.get(i).substring(1);
+					List<String> valTokens = getTokensUntil(params, i + 1, "@");
+					DataMap relCfg = getAttributeRelationship(context, objectName, key);
+					if(relCfg != null) {
+						RedbackObjectRemote ror = findObject(context, relCfg.getString("name"), valTokens, false);
+						String link = relCfg.getString("linkattribute");
+						data.put(key, link.equals("uid") ? ror.getUid() : ror.getString(link));
+					} else {
+						data.put(key, getValue(context, valTokens));					
+					}
+					i += 1 + valTokens.size();
+				}
+				for(RedbackObjectRemote ror: list) {
+					ror.set(data);
+				}				
 			}
+
 		}
 	}
 	
@@ -212,7 +242,29 @@ public class SequenceExecuter {
 		String search = null;
 		if(params.size() > 0) {
 			if(params.get(0).startsWith("@")) {
-				filter = createDataMap(context, params);
+				filter = new DataMap();
+				int i = 0;
+				while(i < params.size()) {
+					String key = params.get(i).substring(1);
+					List<String> valTokens = getTokensUntil(params, i + 1, "@");
+					DataMap relCfg = getAttributeRelationship(context, objectName, key);
+					if(relCfg != null) {
+						List<RedbackObjectRemote> list = listObjects(context, relCfg.getString("name"), valTokens, false);
+						String link = relCfg.getString("linkattribute");
+						DataList inList = new DataList();
+						for(RedbackObjectRemote ror: list) 
+							inList.add(link.equals("uid") ? ror.getUid() : ror.getString(link));
+						filter.put(key, new DataMap("$in", inList));
+					} else {
+						Object val = getValue(context, valTokens);
+						if(val instanceof String) 
+							filter.put(key, new DataMap("$regex", val));
+						else
+							filter.put(key, val);
+					}				
+					i += 1 + valTokens.size();
+				}
+				
 			} else {
 				search = getValue(context, params).toString();
 			}
@@ -234,21 +286,6 @@ public class SequenceExecuter {
 		return list;
 	}
 	
-	
-	protected DataMap createDataMap(SEContext context, List<String> tokens) throws RedbackException {
-		DataMap ret = new DataMap();
-		if(tokens.get(0).startsWith("@")) {
-			int i = 0;
-			while(i < tokens.size()) {
-				String key = tokens.get(i).substring(1);
-				List<String> valTokens = getTokensUntil(tokens, i + 1, "@");
-				Object val = getValue(context, valTokens);
-				ret.put(key, val);
-				i += 1 + valTokens.size();
-			}
-		}
-		return ret;
-	}
 	
 	protected Object getValue(SEContext context, List<String> tokens) throws RedbackException {
 		StringBuilder sb = new StringBuilder();
@@ -300,11 +337,11 @@ public class SequenceExecuter {
 		Object val = null;
 		String key = str.startsWith(">") ? "$gt" : str.startsWith("<") ? "$lt" : "";
 		str = str.substring(1);
-		if(str.endsWith("d") || str.endsWith("h")) {
-			long multiplier = str.endsWith("d") ? 24*60*60*1000 : str.endsWith("h") ? 60*60*1000 : 1;
-			int u = Integer.parseInt(str.substring(0, str.length() - 1));
-			long ms = u * multiplier;
-			val = new Date(System.currentTimeMillis() + ms);
+		if(str.startsWith("now")) {
+			Object parsedVal = parseString(str.substring(3));
+			long dur = parsedVal != null && parsedVal instanceof Long ? (long)parsedVal : 0;
+			val = new Date(System.currentTimeMillis() + dur);
+			str = str.substring(3);
 		} else {
 			val = parseString(str);
 		}
@@ -328,25 +365,38 @@ public class SequenceExecuter {
 				if(timeValue != null) {
 					return timeValue;
 				} else {
-					Number numberValue = NumberParser.parse(str);
-					if(numberValue != null) {
-						return numberValue;
+					Long durationValue = DurationParser.parse(str);
+					if(durationValue != null) {
+						return durationValue;
 					} else {
-						return str;
-						
+						Number numberValue = NumberParser.parse(str);
+						if(numberValue != null) {
+							return numberValue;
+						} else {
+							return str;	
+						}						
 					}
 				}
 			}
 		}		
 	}
-
-
-
 	
 	protected List<String> getTokensUntil(List<String> tokens, int start, String c) {
 		List<String> ret = new ArrayList<String>();
 		for(int i = start; i < tokens.size() && !tokens.get(i).startsWith(c); i++)
 			ret.add(tokens.get(i));
 		return ret;
+	}
+	
+	protected DataMap getAttributeRelationship(SEContext context, String objectName, String attribute) throws RedbackException {
+		DataMap cfg = objectConfigs.get(context.session, objectName);
+		DataList attrList = cfg.getList("attributes");
+		for(int i = 0; i < attrList.size(); i++) {
+			DataMap attrCfg = attrList.getObject(i);
+			if(attrCfg.getString("name").equals(attribute)) {
+				return attrCfg.getObject("relatedobject");
+			}
+		}
+		return null;
 	}
 }

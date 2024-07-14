@@ -53,7 +53,7 @@ public class AIManager {
 			objectClient = new ObjectClient(firebus, objectServiceName);
 			processClient = new ProcessClient(firebus, processServiceName);
 			gatewayClient = new GatewayClient(firebus, gatewayServiceName);
-			sequenceExecuter = new SequenceExecuter(objectClient, processClient);
+			sequenceExecuter = new SequenceExecuter(configClient, objectClient, processClient);
 			urlMap = config.getObject("urlmap");
 			AIManager aim = this;
 			modelConfigs = new ConfigCache<ModelConfig>(configClient, "rbai", "model", 3600000, new ConfigCache.ConfigFactory<ModelConfig>() {
