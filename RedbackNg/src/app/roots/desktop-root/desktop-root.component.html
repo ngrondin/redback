@@ -11,8 +11,7 @@
         <div
             class="rb-toolbar-spacer">
         </div>
-        <rb-global-search
-            (navigate)="navigateTo($event)">
+        <rb-global-search>
         </rb-global-search>
         <rb-iconbutton-badge
             *ngIf="configService.nlCommandModel != null && apiService.aiService != null && apiService.aiService != ''"
@@ -52,8 +51,7 @@
         disableClose="true"
         opened>
         <rb-menu
-            [look]="userprefService.getGlobalPreferenceValue('uialt')"
-            (navigate)="navigateTo($event)">
+            [look]="userprefService.getGlobalPreferenceValue('uialt')">
         </rb-menu>
     </mat-sidenav>
     <mat-sidenav 
@@ -62,7 +60,6 @@
         position="end"> 
         <rb-notification-list
             *ngIf="rightDrawerShowing == 'notifications'"
-            (navigate)="navigateTo($event)"
             (close)="closeRightDrawer()">
         </rb-notification-list>
         <rb-chat
@@ -76,13 +73,9 @@
     </mat-sidenav>    
     <mat-sidenav-content>
         <rb-vsection>
-            <rb-view-header
-                [targetStack]="viewTargetStack"
-                (backTo)="backTo($event)">
+            <rb-view-header>
             </rb-view-header>
-            <rb-view-loader 
-                [target]="currentViewTarget"
-                (navigate)="navigateTo($event)">
+            <rb-view-loader>
             </rb-view-loader>
         </rb-vsection>
     </mat-sidenav-content>
@@ -95,7 +88,6 @@
 </div>
 <rb-nlbox
     *ngIf="showNLBox"
-    (navigate)="navigateTo($event)"
     (close)="toggleNLBox()">
 </rb-nlbox>
 <div

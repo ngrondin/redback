@@ -3,6 +3,7 @@ import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { ApiService } from 'app/services/api.service';
 import { ConfigService } from 'app/services/config.service';
+import { NavigateService } from 'app/services/navigate.service';
 import { NlactionService } from 'app/services/nlaction.service';
 
 @Component({
@@ -12,7 +13,7 @@ import { NlactionService } from 'app/services/nlaction.service';
 })
 export class RbNlboxComponent {
   @Output() close: EventEmitter<any> = new EventEmitter();
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('historyscroll') historyscroll: ElementRef;
 
@@ -24,7 +25,8 @@ export class RbNlboxComponent {
   constructor(
     private apiService: ApiService,
     private configService: ConfigService,
-    private nlActionService: NlactionService
+    private nlActionService: NlactionService,
+    //private navigateService: NavigateService
   ) {
   }
 

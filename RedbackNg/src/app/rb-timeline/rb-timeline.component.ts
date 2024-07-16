@@ -4,6 +4,7 @@ import { RbObject } from 'app/datamodel';
 import { Formatter } from 'app/helpers';
 import { TimelineEntry, TimelineSeriesConfig } from './rb-timeline-models';
 import { ModalService } from 'app/services/modal.service';
+import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
   selector: 'rb-timeline',
@@ -16,7 +17,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
   @Input('datefocus') datefocus: boolean = false;
   @Input('wide') wide: boolean = false;
   @Input('showmorelevel') showmorelevel: number = 1;
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
 
   entries: TimelineEntry[] = [];
@@ -25,7 +26,8 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
   maxLevel: number = 0;
 
   constructor(
-    private modalService: ModalService
+    private modalService: ModalService,
+    private navigateService: NavigateService
   ) { 
     super();
     this.dofilter = false;
@@ -109,7 +111,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
 
   public clickItem(entry: TimelineEntry) {
     if(entry.link != null) {
-      this.navigate.emit(entry.link?.getNavigationEvent(entry.object));
+      this.navigateService.navigateTo(entry.link?.getNavigationEvent(entry.object));
     } else if(entry.modal) {
       this.getDatasetForObject(entry.object).select(entry.object);
       this.modalService.open(entry.modal);

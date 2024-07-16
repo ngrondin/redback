@@ -3,8 +3,9 @@ import { SimpleChanges } from '@angular/core';
 import { EventEmitter, HostBinding, Output } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { NavigateData } from 'app/datamodel';
+import { NavigateService } from 'app/services/navigate.service';
 //import { hexToRgb } from '@swimlane/ngx-charts';
-import { ViewTarget } from 'app/datamodel';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -13,8 +14,7 @@ import { UserprefService } from 'app/services/userpref.service';
   styleUrls: ['./rb-view-header.component.css']
 })
 export class RbViewHeaderComponent implements OnInit {
-  @Input('targetStack') targetStack : ViewTarget[];
-  @Output('backTo') back: EventEmitter<any> = new EventEmitter();
+  @Input('target') target: string;
   @HostBinding('style.color') get foreColor() { return this.color != null ? this.color.fore : "darkblue";}
   @HostBinding('style.backgroundColor') get backColor() { return this.color != null ? this.color.back : "#ffffff";}
   @HostBinding('style.backgroundImage') get backImg() { return this.pattern != null && this.pattern.value != null ? this.sanitizer.bypassSecurityTrustStyle('url("' + this.setFillColor(this.pattern.value, this.darken(this.backColor)) +'")') : null;}
@@ -46,10 +46,12 @@ export class RbViewHeaderComponent implements OnInit {
 
   constructor(
     public userPref: UserprefService,
+    private navigateService: NavigateService,
     private sanitizer: DomSanitizer
   ) { }
 
   ngOnInit(): void {
+    
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -57,16 +59,21 @@ export class RbViewHeaderComponent implements OnInit {
     this.getPreferredPattern();
   }
 
-  get title() : string {
-    if(this.targetStack.length > 0) {
-      return this.targetStack[this.targetStack.length - 1].fulltitle;
-    } else {
-      return "";
-    }
+  get targetName(): string {
+    return this.target ?? "default";
   }
 
-  backTo(event) {
-    this.back.emit(event);
+  get title() : string {
+    let data = this.navigateService.getCurrentNavigateData(this.targetName);
+    return data != null ? data.fulltitle : "";
+  }
+
+  get targetStack(): NavigateData[] {
+    return this.navigateService.getCurrentNavigateStack(this.targetName);
+  }
+
+  backTo(index) {
+    this.navigateService.backTo(this.target ?? "default", index);
   }
 
   selectColor(color: any) {

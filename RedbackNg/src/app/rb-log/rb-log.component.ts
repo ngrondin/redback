@@ -4,6 +4,7 @@ import { RbObject } from 'app/datamodel';
 import { Formatter } from 'app/helpers';
 import { ActionService } from 'app/services/action.service';
 import { DataService } from 'app/services/data.service';
+import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
   selector: 'rb-log',
@@ -21,14 +22,15 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('linkuidattribute') linkuidattribute: string;
   
   @Output() posted: EventEmitter<any> = new EventEmitter();
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   public value: string; 
   public isEditable: boolean = false;
   private reachedBottom: boolean = false;
 
   constructor(
-    private dataService: DataService
+    private dataService: DataService,
+    private navigateService: NavigateService
   ) {
     super();
   }
@@ -104,7 +106,7 @@ export class RbLogComponent extends RbDataObserverComponent {
       let target = {};
       target['object'] = object.get(this.linkobjectattribute);
       target['filter'] = {uid: "'" + object.get(this.linkuidattribute) + "'"};
-      this.navigate.emit(target);
+      this.navigateService.navigateTo(target);
     }
 
   }

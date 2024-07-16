@@ -11,8 +11,7 @@
         <div
             class="rb-toolbar-spacer">
         </div>
-        <rb-global-search
-            (navigate)="navigateTo($event)">
+        <rb-global-search>
         </rb-global-search>
         <rb-clickable
             #usermenubutton
@@ -36,8 +35,7 @@
         <rb-menu
             [look]="userprefService.getGlobalPreferenceValue('uialt')"
             [lockmode]="'small'"
-            [showcontrols]="false"
-            (navigate)="navigateTo($event)">
+            [showcontrols]="false">
         </rb-menu>
     </mat-sidenav>
     <mat-sidenav 
@@ -51,13 +49,9 @@
     </mat-sidenav>    
     <mat-sidenav-content>
         <rb-vsection>
-            <rb-view-header
-                [targetStack]="viewTargetStack"
-                (backTo)="backTo($event)">
+            <rb-view-header>
             </rb-view-header>
-            <rb-view-loader 
-                [target]="currentViewTarget"
-                (navigate)="navigateTo($event)">
+            <rb-view-loader >
             </rb-view-loader>
         </rb-vsection>
     </mat-sidenav-content>

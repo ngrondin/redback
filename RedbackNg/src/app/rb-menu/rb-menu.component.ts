@@ -1,5 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@angular/core';
 import { MenuService } from 'app/services/menu.service';
+import { NavigateService } from 'app/services/navigate.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -8,7 +9,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./rb-menu.component.css']
 })
 export class RbMenuComponent implements OnInit {
-  @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
+  //@Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
   @Input('look') look: any = 'primary';
   @Input('showcontrols') showcontrols: boolean = true;
   @Input('lockmode') lockmode: string;
@@ -18,7 +19,8 @@ export class RbMenuComponent implements OnInit {
   subscription: Subscription;
 
   constructor(
-    private menuService: MenuService
+    private menuService: MenuService,
+    private navigateService: NavigateService
   ) { }
 
   ngOnInit(): void {
@@ -64,6 +66,6 @@ export class RbMenuComponent implements OnInit {
   }
 
   navigateTo(event: any) {
-    this.navigate.emit(event);
+    this.navigateService.navigateTo(event);
   }
 }

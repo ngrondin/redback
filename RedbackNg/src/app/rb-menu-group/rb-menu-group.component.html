@@ -46,15 +46,13 @@
             *ngIf="item.type == 'menugroup'"
             [config]="item"
             [mode]="mode"
-            [look]="look"
-            (navigate)="navigateTo($event)">
+            [look]="look">
         </rb-menu-group>
         <rb-menu-link
             *ngIf="item.type == 'menulink'"
             [config]="item"
             [mode]="mode"
-            [look]="look"
-            (navigate)="navigateTo($event)">
+            [look]="look">
         </rb-menu-link>
     </div>
 </div>

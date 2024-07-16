@@ -3,6 +3,7 @@ import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { FunnelEntry, FunnelGroup, FunnelGroupConfig, FunnelPhase, FunnelPhaseConfig, FunnelPhaseGroup, FunnelPhaseGroupConfig, FunnelSeriesConfig } from './rb-funnel-models';
 import { UserprefService } from 'app/services/userpref.service';
 import { ValueComparator } from 'app/helpers';
+import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
   selector: 'rb-funnel',
@@ -14,7 +15,7 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
   @Input('phases') phases: any;
   @Input('phasegroups') phasegroups: any;
   @Input('emptymessage') emptymessage: string = "Nothing to show";
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   phaseGroupConfig: FunnelPhaseGroupConfig = null;
   phasesConfig: FunnelPhaseConfig = null;
@@ -25,7 +26,8 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
   colorScheme = ['#EA6A47', '#B54051', '#40B569', '#ADABA7'];
 
   constructor(
-    private userPref: UserprefService
+    private userPref: UserprefService,
+    private navigateService: NavigateService
   ) {
     super();
   }
@@ -112,7 +114,7 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
       } else {
         target['filter'] = {uid: "'" + object.uid + "'"};
       }
-      this.navigate.emit(target);
+      this.navigateService.navigateTo(target);
     }
   }
 

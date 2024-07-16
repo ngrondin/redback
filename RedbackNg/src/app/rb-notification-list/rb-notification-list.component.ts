@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { RbNotification } from 'app/datamodel';
+import { NavigateService } from 'app/services/navigate.service';
 import { NotificationService } from 'app/services/notification.service';
 import { UserprefService } from 'app/services/userpref.service';
 
@@ -9,14 +10,15 @@ import { UserprefService } from 'app/services/userpref.service';
   styleUrls: ['./rb-notification-list.component.css']
 })
 export class RbNotificationListComponent implements OnInit {
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() close: EventEmitter<any> = new EventEmitter();
 
   selectedGroup: String = null;
   
   constructor(
     private notificationService: NotificationService,
-    private userprefService: UserprefService
+    private userprefService: UserprefService,
+    private navigateService: NavigateService
   ) { 
   }
   
@@ -51,7 +53,7 @@ export class RbNotificationListComponent implements OnInit {
 
   public selectNotification(notification: RbNotification) {
     if((notification.data.object != null || notification.data.objectname != null) && notification.data.uid != null) {
-      this.navigate.emit({
+      this.navigateService.navigateTo({
         object : notification.data.object || notification.data.objectname,
         filter : {
           uid : "'" + notification.data.uid + "'"

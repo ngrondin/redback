@@ -7,7 +7,7 @@ import { UserprefService } from 'app/services/userpref.service';
   styleUrls: ['./rb-preferences.component.css']
 })
 export class RbPreferencesComponent {
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() close: EventEmitter<any> = new EventEmitter();
 
   constructor(

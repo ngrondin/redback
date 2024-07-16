@@ -1,6 +1,7 @@
 import { EventEmitter, Input, Output } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { MenuService } from 'app/services/menu.service';
+import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
   selector: 'rb-menu-link',
@@ -11,14 +12,15 @@ export class RbMenuLinkComponent implements OnInit {
   @Input('config') config: any;
   @Input('mode') mode: any;
   @Input('look') look: any = 'primary';
-  @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
+  //@Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
 
   cmTop: number = 100;
   cmLeft: number = 100;
   cmShow: boolean = false;
 
   constructor(
-    private menuService: MenuService
+    private menuService: MenuService,
+    private navigateService: NavigateService
   ) { }
 
   ngOnInit(): void {
@@ -29,7 +31,7 @@ export class RbMenuLinkComponent implements OnInit {
   }
 
   click() {
-    this.navigate.emit({view: this.config.view, domain: this.config.domain, filter: {}, reset:true});
+    this.navigateService.navigateTo({view: this.config.view, domain: this.config.domain, filter: {}, reset:true});
   }
 
   rightclick(event: any) {

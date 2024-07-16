@@ -68,11 +68,11 @@ export class BuildService {
           loadedView.topSets.push(newInstance);
         }
         if(newInstance instanceof RbTabSectionComponent) {
-          loadedView.topTabs.push(newInstance);
+          loadedView.tabSections.push(newInstance);
         }        
-        if(outputs['navigate'] != null && newInstance['navigate'] != null && newInstance['navigate'].subscribe != null) {
+        /*if(outputs['navigate'] != null && newInstance['navigate'] != null && newInstance['navigate'].subscribe != null) {
           newInstance['navigate'].subscribe(e => loadedView.navigate.emit(e))
-        }
+        }*/
       }
       if(config['content'] != null) {
         if(newInstance instanceof RbContainerComponent && newInstance.container != null) {

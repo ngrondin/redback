@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { NavigateService } from 'app/services/navigate.service';
 //import { threadId } from 'worker_threads';
 
 @Component({
@@ -10,12 +11,14 @@ export class RbMenuGroupComponent implements OnInit {
   @Input('config') config: any;
   @Input('mode') mode: any;
   @Input('look') look: any = 'primary';
-  @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
+  //@Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
 
 
   _isOpen: boolean = false;
 
-  constructor() { }
+  constructor(
+    private navigateService: NavigateService
+  ) { }
 
   ngOnInit(): void {
   }
@@ -61,6 +64,6 @@ export class RbMenuGroupComponent implements OnInit {
   }
 
   navigateTo(event: any) {
-    this.navigate.emit(event);
+    this.navigateService.navigateTo(event);
   }
 }

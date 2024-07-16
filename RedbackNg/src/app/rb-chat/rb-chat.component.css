@@ -148,6 +148,8 @@
     color: var(--dark-writing-color);
     font-size: 0.9rem;
     margin-top: var(--v5px);
+    user-select: text;
+    -ms-user-select:text;
 }
 
 .rb-chat-user {

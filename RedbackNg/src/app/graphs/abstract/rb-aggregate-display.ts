@@ -5,6 +5,7 @@ import { AppInjector } from "app/app.module";
 import { RbAggregate } from "app/datamodel";
 import { ValueComparator, Converter, Formatter } from "app/helpers";
 import { FilterService } from "app/services/filter.service";
+import { NavigateService } from "app/services/navigate.service";
 
 @Component({template: ''})
 export abstract class RbAggregateDisplayComponent extends RbDataObserverComponent {
@@ -21,7 +22,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     @Input('height') height: number;
     @Input('colormap') colormap: any;
     
-    @Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
+    //@Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
 
     @HostBinding('style.width.px') get widthStyle() { return this.width != null ? this.width : null;}
     @HostBinding('style.height.px') get heightStyle() { return this.height != null ? this.height : null;}
@@ -32,10 +33,12 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     graphData: any[];
     hovering: boolean = false;
     private filterService: FilterService;
+    private navigateService: NavigateService;
   
     constructor() {
       super();
       this.filterService = AppInjector.get(FilterService);
+      this.navigateService = AppInjector.get(NavigateService);
     }
   
     dataObserverInit() {
@@ -170,7 +173,8 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
         label: (event.code ?? event.name),
         reset: true
       };
-      this.navigate.emit(target);
+      this.navigateService.navigateTo(target);
+      //this.navigate.emit(target);
     }
   
     refresh() {

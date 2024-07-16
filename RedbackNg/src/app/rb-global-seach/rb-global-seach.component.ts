@@ -6,6 +6,7 @@ import { FilterService } from 'app/services/filter.service';
 import { PopupService } from 'app/services/popup.service';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 import { RbPopupGlobalSearchComponent } from 'app/popups/rb-popup-globalsearch/rb-popup-globalsearch.component';
+import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
   selector: 'rb-global-search',
@@ -14,7 +15,7 @@ import { RbPopupGlobalSearchComponent } from 'app/popups/rb-popup-globalsearch/r
 })
 export class RbGlobalSeachComponent implements OnInit {
   @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   searchString: string;
   showResults: boolean = false;
@@ -24,7 +25,8 @@ export class RbGlobalSeachComponent implements OnInit {
     private dataService: DataService,
     private configService: ConfigService,
     private filterService: FilterService,
-    private popupService: PopupService
+    private popupService: PopupService,
+    private navigateService: NavigateService
   ) { }
 
   ngOnInit() {
@@ -72,7 +74,7 @@ export class RbGlobalSeachComponent implements OnInit {
     } else {
       event.object = object.objectname;
     }
-    this.navigate.emit(event);
+    this.navigateService.navigateTo(event);
     this.stopGlobalSearch();
   }
 }

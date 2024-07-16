@@ -4,22 +4,23 @@ import { ApiService } from 'app/services/api.service';
 import { DataService } from 'app/services/data.service';
 import { RbActivatorComponent } from 'app/abstract/rb-activator';
 import { Injector } from '@angular/core';
-import { DataTarget, ViewTarget } from 'app/datamodel';
+import { DataTarget, NavigateData } from 'app/datamodel';
 import { componentRegistry } from './rb-view-loader-registry';
 import { RbSetComponent } from 'app/abstract/rb-set';
 import { HttpClient } from '@angular/common/http';7
 import { BuildService } from 'app/services/build.service';
 import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
+import { NavigateService } from 'app/services/navigate.service';
 
 
 export class LoadedView extends RbActivatorComponent {
   rootComponentRefs: ComponentRef<Component>[] = [];
   topSets: RbSetComponent[] = [];
-  topTabs: RbTabSectionComponent[] = [];
+  tabSections: RbTabSectionComponent[] = [];
 
   constructor(
     public title: string,
-    public navigate: EventEmitter<any>
+    //public navigate: EventEmitter<any>
   ) {
     super();
   }
@@ -64,9 +65,10 @@ export class LoadedView extends RbActivatorComponent {
   }
 
   openTab(tabid: String) {
-    for(let tabsection of this.topTabs) {
+    for(let tabsection of this.tabSections) {
       for(let tab of tabsection.tabs) {
         if(tab.id == tabid || tab.label == tabid) {
+          console.log("Open tab");
           tabsection.selectTab(tab);
         }
       }
@@ -88,23 +90,18 @@ export class LoadedView extends RbActivatorComponent {
   styleUrls: ['./rb-view-loader.component.css']
 })
 export class RbViewLoaderComponent implements OnInit {
-
-  @Input('target') private target: ViewTarget;
+  @Input('name') name = 'default';
   @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
 
-  private currentView: string;
   public currentLoadedView: LoadedView = null;
   private viewCache: any = {};
   private factoryRegistry: any = {};
 
   constructor(
-    private injector: Injector,
-    private http: HttpClient,
     private apiService: ApiService,
-    private dataService: DataService,
     private componentFactoryResolver:ComponentFactoryResolver,
-    private buildService: BuildService
+    private buildService: BuildService,
+    private navigateService: NavigateService
   ) { 
   }
 
@@ -114,41 +111,36 @@ export class RbViewLoaderComponent implements OnInit {
       let factory = this.componentFactoryResolver.resolveComponentFactory(componentClass);
       this.factoryRegistry[key] = factory;
     }
+    this.navigateService.registerTarget(this.name, this);
   }
 
-  ngOnChanges(changes : SimpleChange) {
-    if("target" in changes && this.target != null) {
-      /*let url: string = this.apiService.baseUrl + '/' + this.apiService.uiService + '/view/' + (this.target.domain != null ? this.target.domain + '/' : '') + this.target.view;
-      this.http.get(url, { withCredentials: true, responseType: 'json' }).subscribe(
-        resp => {
-          this.showView(resp)
-        }
-      );*/
-      this.apiService.getView(this.target.view, this.target.domain).subscribe(resp => {
-        this.showView(resp)
+  navigateTo(navData: NavigateData): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.apiService.getView(navData.view, navData.domain).subscribe(resp => {
+        this.showView(navData, resp);
+        resolve();
       });
-      this.currentView = this.target.view;
-    } 
+    })
   }
 
-  showView(config: any) {
+  showView(navData: NavigateData, viewConfig: any) {
     if(this.currentLoadedView != null) {
       this.currentLoadedView.detachFrom(this.container);
     }
-    this.target.title = config.label;
-    let hash = JSON.stringify(config).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
+    navData.title = viewConfig.label;
+    let hash = JSON.stringify(viewConfig).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
       console.time('build');
-      entry = new LoadedView(config.label, this.navigate);
-      if(config['content'] != null) {
-        for(let item of config['content']) {
+      entry = new LoadedView(viewConfig.label/*, this.navigate*/);
+      if(viewConfig['content'] != null) {
+        for(let item of viewConfig['content']) {
           let context: any = {activator: entry};
           entry.rootComponentRefs.push(this.buildService.buildConfigRecursive(null, item, context, entry));
         }
       }
-      if(config.onload != null) {
-        Function(config.onload).call(window.redback);
+      if(viewConfig.onload != null) {
+        Function(viewConfig.onload).call(window.redback);
       }
       this.viewCache[hash] = entry;
       console.timeEnd('build');
@@ -156,11 +148,18 @@ export class RbViewLoaderComponent implements OnInit {
     if(entry != null) {
       this.currentLoadedView = entry;
       window.redback.currentLoadedView = entry;
-      entry.setTarget(this.target.dataTarget);
-      if(this.target.tab != null) entry.openTab(this.target.tab);
+      entry.setTarget(navData.dataTarget);
+      if(navData.tab != null) entry.openTab(navData.tab);
       entry.attachTo(this.container);
+      console.log('attach');
     }
   }
 
+  openTab(tabid: string) {
+    if(this.currentLoadedView != null) {
+      console.log('opentab');
+      this.currentLoadedView.openTab(tabid);
+    }
+  }
   
 }

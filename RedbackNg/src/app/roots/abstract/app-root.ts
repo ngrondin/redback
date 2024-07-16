@@ -2,13 +2,14 @@ import { OnInit, Input, ViewChild, HostListener, Component, ViewContainerRef } f
 import { MatSidenav } from "@angular/material/sidenav";
 import { DomSanitizer } from "@angular/platform-browser";
 import { AppInjector } from "app/app.module";
-import { ViewTarget } from "app/datamodel";
+
 import { RbUsermenuComponent } from "app/rb-usermenu/rb-usermenu.component";
 import { ApiService } from "app/services/api.service";
 import { ClientWSService } from "app/services/clientws.service";
 import { ConfigService } from "app/services/config.service";
 import { DialogService } from "app/services/dialog.service";
 import { DragService } from "app/services/drag.service";
+import { NavigateService } from "app/services/navigate.service";
 import { NlactionService } from "app/services/nlaction.service";
 import { PopupService } from "app/services/popup.service";
 import { UserprefService } from "app/services/userpref.service";
@@ -30,7 +31,7 @@ export abstract class AppRootComponent implements OnInit {
 
     rightDrawerShowing: string = null;
     subscription: Subscription;
-    viewTargetStack: ViewTarget[] = [];
+    
     title: string = "Welcome";
     showNLBox: boolean = false;
     
@@ -44,6 +45,7 @@ export abstract class AppRootComponent implements OnInit {
     clientWSServer: ClientWSService;
     popupService: PopupService;
     nlActionService: NlactionService;
+    navigateService: NavigateService;
 
     constructor(
     ) {
@@ -57,18 +59,21 @@ export abstract class AppRootComponent implements OnInit {
         this.clientWSServer = AppInjector.get(ClientWSService);
         this.popupService = AppInjector.get(PopupService);
         this.nlActionService = AppInjector.get(NlactionService);
-        window.redback.navigateTo = (event) => this.navigateTo(event);
+        this.navigateService = AppInjector.get(NavigateService);
+        
      }
   
     ngOnInit() {
-      this.nlActionService.navigateTo = (event: any) => this.navigateTo(event);
+      //this.nlActionService.navigateTo = (event: any) => this.navigateTo(event);
       this.subscription = this.events.subscribe((event) => {
         if(event == 'init' && this.initialView != null) {
           let iv = this.userprefService.getInitialView();
           if(iv != null) {
-            this.pushViewTarget(new ViewTarget(iv.domain, iv.view, null, null, {}, null), true);
+            this.navigateService.navigateTo({domain: iv.domain, view: iv.view})
+            //this.pushViewTarget(new ViewTarget(iv.domain, iv.view, null, null, {}, null), true);
           } else {
-            this.pushViewTarget(new ViewTarget(null, this.initialView, null, null, {}, null), true);
+            this.navigateService.navigateTo({view: this.initialView})
+            //this.pushViewTarget(new ViewTarget(null, this.initialView, null, null, {}, null), true);
           }
         }
       });
@@ -83,52 +88,12 @@ export abstract class AppRootComponent implements OnInit {
     }
   
     get currentTitle(): string {
-      if(this.currentViewTarget != null) {
-        return this.currentViewTarget.title;
-      } else {
-        return "Welcome";
-      }
+      let curNavData = this.navigateService.getCurrentNavigateData("default");
+      return curNavData != null ? curNavData.title : "Welcome";
     }
   
     setTitle($event) {
       this.title = $event;
-    }
-  
-    navigateTo($event) {
-      let objectConfig: any = this.configService.objectsConfig[$event.object];
-      let view: string = ($event.view != null ? $event.view : (objectConfig != null ? objectConfig.view : null));
-      if(view != null) {
-        let target = new ViewTarget($event.domain, view, $event.tab, $event.object, $event.filter, $event.search); 
-        if(objectConfig != null && $event.filter != null && $event.filter[objectConfig.labelattribute] != null) {
-          target.breadcrumbLabel = eval($event.filter[objectConfig.labelattribute]);
-        }
-        if($event.label != null) {
-          target.additionalTitle = $event.label;
-        }
-        this.pushViewTarget(target, $event.reset);
-        this.navigated();
-      }
-    }
-  
-    backTo($event) {
-      let i = this.viewTargetStack.indexOf($event);
-      this.viewTargetStack.splice(i + 1);
-    }
-  
-    pushViewTarget(target: ViewTarget, resetStack: boolean) {
-      if(resetStack) {
-        this.viewTargetStack = [];
-      }
-      this.viewTargetStack.push(target);
-      this.userprefService.setCurrentView(target.view);
-    }
-  
-    get currentViewTarget(): ViewTarget {
-      if(this.viewTargetStack.length > 0) {
-        return this.viewTargetStack[this.viewTargetStack.length - 1];
-      } else {
-        return null;
-      }
     }
 
     openUserMenu() {
@@ -140,7 +105,7 @@ export abstract class AppRootComponent implements OnInit {
         } else if(value == 'prefs') {
           this.toggleRightDrawer("prefs");
         } else {
-          this.navigateTo({view: value});
+          this.navigateService.navigateTo({view: value});
         }
       });
     }

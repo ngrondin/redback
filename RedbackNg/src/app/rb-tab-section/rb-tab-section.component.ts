@@ -54,7 +54,8 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     if(showtab == null || showtab == true) {
       this.tabs.push(tab);
       let lasttab = this.keeplasttab == true && this.id != null ? this.userpref.getCurrentViewUISwitch('tabsection', this.id) : null;
-      if((lasttab == null && tab.isdefault == true) || (lasttab != null && tab.label == lasttab)) {
+      if(this.activeTab == null && (lasttab == null && tab.isdefault == true) || (lasttab != null && tab.label == lasttab)) {
+        console.log("Select default tab (" + tab.label + ", " + tab.isdefault + ", " + lasttab);
         this.selectTab(tab);
       }
     }
@@ -62,6 +63,7 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
 
 
   public selectTab(tab: RbTabComponent) {
+    console.log("Select tab " + tab.label);
     if(this.activeTab != null && this.activeTab != tab) {
       this.activeTab.deactivate();
     }

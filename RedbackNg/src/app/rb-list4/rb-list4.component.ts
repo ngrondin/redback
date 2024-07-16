@@ -3,6 +3,7 @@ import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { Evaluator, Formatter } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
+import { NavigateService } from 'app/services/navigate.service';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -30,7 +31,7 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('allowdrag') allowdrag: boolean = false;
   @Input('showrefresh') showrefresh: boolean = true;
 
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   enhancedList: any[];
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
@@ -38,7 +39,8 @@ export class RbList4Component extends RbDataObserverComponent {
 
   constructor(
     public userprefService: UserprefService,
-    public modalService: ModalService
+    public modalService: ModalService,
+    public navigateService: NavigateService
   ) {
     super();
   }
@@ -181,7 +183,7 @@ export class RbList4Component extends RbDataObserverComponent {
           "object": this.rbObject.objectname,
           "filter": {uid: "'" + this.rbObject.uid + "'"}
         };
-        this.navigate.emit(target);
+        this.navigateService.navigateTo(target);
       }  
     }
   }

@@ -520,8 +520,20 @@ export class DataTarget {
       this.search = s;
     }
 }
+
+export class NavigateEvent {
+    target?: string;
+    object?: string;
+    view?: string;
+    domain?: string;
+    filter?: any;
+    search?: string;
+    tab?: string;
+    label?: string;
+    reset?: boolean;
+}
   
-export class ViewTarget {
+export class NavigateData {
     domain: string;
     view: string;
     tab: string;

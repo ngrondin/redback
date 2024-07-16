@@ -1,14 +1,17 @@
 import { Injectable } from '@angular/core';
+import { NavigateService } from './navigate.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NlactionService {
-  navigateTo: Function = null;
+  //navigateTo: Function = null;
 
-  constructor() { }
+  constructor(
+    private navigateService: NavigateService
+  ) { }
 
-  public processSequence(tokens: string[]) {
+  public async processSequence(tokens: string[])  {
     let cur = 0;
     for(cur = 0; cur < tokens.length; cur++) {
       let curToken = tokens[cur];
@@ -17,21 +20,22 @@ export class NlactionService {
         for(let i = cur + 1; i < tokens.length && !tokens[i].startsWith("$"); i++) {
           params.push(tokens[i]);
         }
-        this.runCommand(curToken.substring(1), params);
+        await this.runCommand(curToken.substring(1), params);
         cur += params.length;
+        await this.pause();
       }
     }
   }
 
-  runCommand(command: string, params: string[]) {
+  async runCommand(command: string, params: string[]) {
     if(command == 'navtouid' && params.length == 2) {
-      this.navigateTo({
+      await this.navigateService.navigateTo({
         view: params[0],
         filter: {uid: "'" + params[1] + "'"},
         reset: true
       });
     } else if(command == 'navtouids' && params.length == 2) {
-      this.navigateTo({
+      await this.navigateService.navigateTo({
         view: params[0],
         filter: {
           uid: {
@@ -41,18 +45,30 @@ export class NlactionService {
         reset: true
       });
     } else if(command == 'navtosearch' && params.length == 2) {
-      this.navigateTo({
+      await this.navigateService.navigateTo({
         view: params[0],
         filter: {},
         search: params[1],
         reset: true
       })
     } else if(command == 'navto' && params.length == 1) {
-      this.navigateTo({
+      await this.navigateService.navigateTo({
         view: params[0],
         filter: {},
         reset: true
       })
+    } else if(command == 'opentab' && params.length == 1) {
+      await this.navigateService.navigateTo({
+        tab: params[0]
+      })
     }
+  }
+
+  pause(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve();
+      }, 100);
+    })
   }
 }

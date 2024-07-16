@@ -4,6 +4,7 @@ import { LatLon, MapCircle, MapDot, MapObject, MapPin, MapPolygon, MapSeriesConf
 import { InitialsMaker } from 'app/helpers';
 import { ElementRef } from '@angular/core';
 import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
+import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
   selector: 'rb-map',
@@ -16,7 +17,7 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   @Input('labelattribute') labelattribute: string;
   @Input('descriptionattribute') descriptionattribute: string;
   @Input('dateattribute') dateattribute: string;
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('map', {static: true}) map: ElementRef;
 
@@ -62,7 +63,8 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   ];
 
   constructor(
-    private elementRef:ElementRef
+    private elementRef:ElementRef,
+    private navigateService: NavigateService
   ) {
     super();
     this.dofilter = false;
@@ -338,7 +340,7 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
 
   labelClick() {
     if(this.labelLink != null) {
-      this.navigate.emit(this.labelLink);
+      this.navigateService.navigateTo(this.labelLink);
     }
   }
 

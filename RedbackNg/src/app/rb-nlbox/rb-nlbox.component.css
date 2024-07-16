@@ -41,8 +41,6 @@
     display: flex;
     flex-direction: row;
     padding: var(--v10px) var(--v10px) var(--v10px) var(--v5px);
-    -ms-user-select:text;
-	user-select: text;
     color: #666;
     font-size: 0.95rem;
 }
@@ -56,7 +54,9 @@
 .rb-nlbox-text {
     display: flex;
     flex: 1 1 auto;
-    padding-left: var(--v5px)
+    user-select: text;
+    -ms-user-select:text;
+	  padding-left: var(--v5px)
 }
 
 .rb-nlbox-input {

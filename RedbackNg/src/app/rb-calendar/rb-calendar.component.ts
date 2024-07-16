@@ -8,6 +8,7 @@ import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 import { FilterService } from 'app/services/filter.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { CalendarSeriesConfig, CalendarEntry } from './rb-calendar-models';
+import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
   selector: 'rb-calendar',
@@ -17,7 +18,7 @@ import { CalendarSeriesConfig, CalendarEntry } from './rb-calendar-models';
 export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfig>  implements RbSearchTarget {
   @Input('layers') layers: any[];
   @Input('filter') filterConfig: any;
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   _mode: string;
   data: any = {};
@@ -45,7 +46,8 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
 
   constructor(
     private userprefService: UserprefService,
-    private filterService: FilterService
+    private filterService: FilterService,
+    private navigateService: NavigateService
   ) {
     super();
   }
@@ -304,7 +306,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
         filter: filter,
         search: ds.searchString
       };
-      this.navigate.emit(target);
+      this.navigateService.navigateTo(target);
     }
   }
 
@@ -322,7 +324,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       } else {
         target['filter'] = {uid: "'" + object.uid + "'"};
       }
-      this.navigate.emit(target);
+      this.navigateService.navigateTo(target);
     }
   }
 

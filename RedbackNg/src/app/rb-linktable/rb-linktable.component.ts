@@ -3,6 +3,7 @@ import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { Evaluator, Formatter, LinkConfig } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
+import { NavigateService } from 'app/services/navigate.service';
 
 class LinkTableColumnConfig {
   label: string;
@@ -50,7 +51,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('columns') _cols: any;
   @Input('view') view: string;
   @Input('grid') grid: boolean = false;
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   columns: LinkTableColumnConfig[];
   reachedBottom: boolean = false;
@@ -58,7 +59,8 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
 
   constructor(
-    private modalService: ModalService
+    private modalService: ModalService,
+    private navigateService: NavigateService
   ) {
     super();
   }
@@ -121,7 +123,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     let cfg = this.getColumnConfig(object, column);
     if(cfg.link != null) {
       let event = cfg.link.getNavigationEvent(object);
-      this.navigate.emit(event);
+      this.navigateService.navigateTo(event);
     } else if(cfg.modal != null) {
       this.dataset.select(object);
       this.modalService.open(cfg.modal);

@@ -1,5 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, Input, HostBinding } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
   selector: 'rb-link',
@@ -13,10 +14,12 @@ export class RbLinkComponent extends RbDataObserverComponent {
 
   @HostBinding('style.margin-bottom.vw') get bottommargin() { return this.margin ? 0.55 : 0; }
   
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   
-  constructor() {
+  constructor(
+    private navigateService: NavigateService
+  ) {
     super();
   }
 
@@ -51,7 +54,7 @@ export class RbLinkComponent extends RbDataObserverComponent {
       if(this.view != null) {
         target['view'] = this.view;
       } 
-      this.navigate.emit(target);
+      this.navigateService.navigateTo(target);
     }
   }
 }

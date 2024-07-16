@@ -15,7 +15,7 @@ import { DataService } from 'app/services/data.service';
   styleUrls: ['./rb-chat.component.css']
 })
 export class RbChatComponent implements OnInit {
-  @Output() navigate: EventEmitter<any> = new EventEmitter();
+  //@Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() close: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('createinput') createinput: ElementRef;
