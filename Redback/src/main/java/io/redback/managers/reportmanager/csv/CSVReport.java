@@ -39,6 +39,7 @@ public class CSVReport extends Report {
 	protected DataList columns;
 	protected ExpressionMap varsExpMap;
 	protected ScriptContext baseContext;
+	protected String separator;
 	protected byte[] bytes;
 	
 	public CSVReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
@@ -67,6 +68,7 @@ public class CSVReport extends Report {
 			if(c.containsKey("columns")) {
 				columns = c.getList("columns");
 			}
+			separator = c.containsKey("separator") ? c.getString("separator") : ",";
 			baseContext = reportManager.getScriptFactory().createScriptContext();
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising csv report", e);
@@ -96,11 +98,12 @@ public class CSVReport extends Report {
 				ScriptContext rowContext = baseContext.createChild();
 				rowContext.declare("object", new RedbackObjectRemoteJSWrapper(rors.get(i)));
 				for(int j = 0; j < columns.size(); j++) {
-					if(j > 0) sb.append(",");
+					if(j > 0) sb.append(separator);
 					DataMap colCfg = columns.getObject(j);
 					String exprStr = colCfg.getString("expression");
 					String attribute = colCfg.getString("attribute");
 					String format = colCfg.getString("format");
+					boolean quote = colCfg.getBoolean("quote");
 					Object value = null;
 					if(exprStr != null) {
 						Expression expr = exprCache.get(exprStr);
@@ -171,6 +174,8 @@ public class CSVReport extends Report {
 							valueStr = value.toString();
 						}
 					}
+					if(quote)
+						valueStr = "\"" + valueStr + "\"";
 					sb.append(valueStr);
 				}
 			}

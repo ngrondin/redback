@@ -21,6 +21,7 @@ import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.ConfigCache;
+import io.redback.utils.Convert;
 import io.redback.utils.NLCommandResponse;
 
 public class SequenceExecuter {
@@ -92,6 +93,8 @@ public class SequenceExecuter {
 				respond(context, params);		
 			else if(command.equals("$navto"))
 				navTo(context, params);		
+			else if(command.equals("$opentab"))
+				openTab(context, params);	
 		} catch(Exception e) {
 			//Just ignore exceptions
 		}
@@ -225,6 +228,14 @@ public class SequenceExecuter {
 		}
 	}
 	
+	protected void openTab(SEContext context, List<String> params) throws RedbackException {
+		if(params.size() >= 1) {
+			String tabId = params.get(0);
+			context.uiActions.add("$opentab");
+			context.uiActions.add(tabId);
+		}
+	}
+	
 	protected RedbackObjectRemote findObject(SEContext context, String objectName, List<String> params, boolean addToContext) throws RedbackException {
 		List<RedbackObjectRemote> list = listObjects(context, objectName, params, false);
 		if(list.size() > 0) {
@@ -259,6 +270,8 @@ public class SequenceExecuter {
 						Object val = getValue(context, valTokens);
 						if(val instanceof String) 
 							filter.put(key, new DataMap("$regex", val));
+						else if(val instanceof List)
+							filter.put(key, new DataMap("$in", Convert.listToDataList((List<?>)val)));
 						else
 							filter.put(key, val);
 					}				
