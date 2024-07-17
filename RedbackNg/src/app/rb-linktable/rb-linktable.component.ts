@@ -84,21 +84,22 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   getColumnConfig(object: RbObject, column: LinkTableColumnConfig): LinkTableColumnConfig {
     if(column.alt != null && column.attribute != null) {
       return column.alt[object.get(column.attribute)];
-    } else {
-      return column;
-    }
+    } 
+    return column;
   }
 
   getValue(object: RbObject, column: LinkTableColumnConfig): string {
     let cfg = this.getColumnConfig(object, column);
     let val = null;
-    if(cfg.expression != null) {
-      val = Evaluator.eval(cfg.expression, object, null);
-    } else if(cfg.attribute != null) {
-      val = object.get(cfg.attribute);
-    }
-    if(cfg.format != null) {
-      val = Formatter.format(val, cfg.format);
+    if(cfg != null) {
+      if(cfg.expression != null) {
+        val = Evaluator.eval(cfg.expression, object, null);
+      } else if(cfg.attribute != null) {
+        val = object.get(cfg.attribute);
+      }
+      if(cfg.format != null) {
+        val = Formatter.format(val, cfg.format);
+      }  
     }
     return val;
   }
@@ -116,19 +117,21 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   }
 
   isClickable(column: LinkTableColumnConfig, object: RbObject) {
-    return this.getColumnConfig(object, column).isClickable;
+    let cfg = this.getColumnConfig(object, column);
+    return cfg != null ? cfg.isClickable : false
   }
 
   clickLink(column: LinkTableColumnConfig, object: RbObject) {
     let cfg = this.getColumnConfig(object, column);
-    if(cfg.link != null) {
-      let event = cfg.link.getNavigationEvent(object);
-      this.navigateService.navigateTo(event);
-    } else if(cfg.modal != null) {
-      this.dataset.select(object);
-      this.modalService.open(cfg.modal);
+    if(cfg != null) {
+      if(cfg.link != null) {
+        let event = cfg.link.getNavigationEvent(object);
+        this.navigateService.navigateTo(event);
+      } else if(cfg.modal != null) {
+        this.dataset.select(object);
+        this.modalService.open(cfg.modal);
+      }  
     }
-
   }
 
   onScroll(event) {
