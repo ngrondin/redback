@@ -12,12 +12,14 @@ public class QueueClient extends Client {
 		super(fb, sn);
 	}
 	
-	public void enqueue(Session session, String service, DataMap message) throws RedbackException {
+	public void enqueue(Session session, String service, DataMap message, long timeout) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "enqueue");
 			req.put("service", service);
 			req.put("message", message);
+			if(timeout > 0)
+				req.put("timeout", timeout);
 			requestDataMap(session, req);
 		} catch(Exception e) {
 			throw new RedbackException("Error enqueing message", e);

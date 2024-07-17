@@ -25,7 +25,8 @@ public class QueueClientJSWrapper extends ObjectJSWrapper {
 				public Object call(Object... arguments) throws RedbackException {
 					String service = (String)arguments[0];
 					DataMap message = (DataMap)arguments[1];
-					queueClient.enqueue(session, service, message);
+					long timeout = arguments.length >= 3 ? (long)arguments[2] : 0;
+					queueClient.enqueue(session, service, message, timeout);
 					return null;
 				}
 			};

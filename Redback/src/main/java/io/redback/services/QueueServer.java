@@ -25,7 +25,8 @@ public abstract class QueueServer extends AuthenticatedServiceProvider {
 			if(action.equals("enqueue")) {
 				String service = requestData.getString("service");
 				DataMap message = requestData.getObject("message");
-				enqueue(session, service, message);
+				int requestTimeout = requestData.getNumber("timeout").intValue();
+				enqueue(session, service, message, requestTimeout);
 				return new Payload(new DataMap("result", "ok"));
 			} else {
 				throw new RedbackException("Invalid action: " + action);
@@ -39,5 +40,5 @@ public abstract class QueueServer extends AuthenticatedServiceProvider {
 		throw new RedbackException("All requests need to be authenticated");
 	}	
 	
-	protected abstract void enqueue(Session session, String service, DataMap message) throws RedbackException;
+	protected abstract void enqueue(Session session, String service, DataMap message, int timeout) throws RedbackException;
 }

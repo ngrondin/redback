@@ -497,10 +497,11 @@ public class StringUtils
     
     public static DataList decodeCSV(String str)  {
     	DataList ret = new DataList();
-    	int endFirstLine = str.indexOf("\n");
-    	String headerLine = str.substring(0, endFirstLine).trim();
+    	String strm = str.replaceAll("\r", "");
+    	int endFirstLine = strm.indexOf("\n");
+    	String headerLine = strm.substring(0, endFirstLine).trim();
 		String[] headers = headerLine.split(",");
-		String body = str.substring(endFirstLine).trim();
+		String body = strm.substring(endFirstLine).trim();
 		
 		StringBuilder buffer = new StringBuilder();
 		DataMap map = new DataMap();

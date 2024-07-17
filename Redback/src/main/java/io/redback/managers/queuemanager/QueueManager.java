@@ -30,7 +30,7 @@ public class QueueManager extends Thread {
 		start();
 	}
 	
-	public void enqueue(Session session, String service, DataMap message) throws RedbackException {
+	public synchronized void enqueue(Session session, String service, DataMap message, int requestTimeout) throws RedbackException {
 		String msgUuid = UUID.randomUUID().toString();
 		DataMap key = new DataMap("_id", msgUuid);
 		DataMap data = new DataMap();
@@ -42,11 +42,12 @@ public class QueueManager extends Thread {
 			data.put("timezone", session.getTimezone());
 		data.put("service", service);
 		data.put("message", message);
+		if(requestTimeout > 0)
+			data.put("timeout", requestTimeout);
 		data.put("lock", null);
 		data.put("failed", null);
 		collection.putData(key, data);
-		//processMessage(msgUuid);
-		this.notify();
+		notify();
 	}
 	
 	public void run() {
@@ -57,7 +58,7 @@ public class QueueManager extends Thread {
 					processMessage(msgUuid);
 				}
 				synchronized(this) {
-					this.wait(30000);
+					wait(30000);
 				}
 			} catch(Exception e) {
 				Logger.severe("rb.rbq.run", e);
@@ -70,6 +71,7 @@ public class QueueManager extends Thread {
 		if(msg != null) {
 			String service = msg.getString("service");
 			DataMap message = msg.getObject("message");
+			int requestTimeout = msg.getNumber("timeout").intValue();
 			Payload payload = new Payload(message);
 			payload.metadata.put("session", msg.getString("session"));
 			payload.metadata.put("token", msg.getString("token"));
@@ -78,7 +80,8 @@ public class QueueManager extends Thread {
 			if(msg.containsKey("domain"))
 				payload.metadata.put("domain", msg.getString("domain"));
 			try {
-				firebus.requestService(service, payload);
+				if(requestTimeout > 0) firebus.requestService(service, payload, requestTimeout);
+				else firebus.requestService(service, payload);
 				remove(msgUuid);
 			} catch(Exception e) {
 				setFailed(msgUuid);
