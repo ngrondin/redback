@@ -5,16 +5,16 @@
     </span>   
     <div
         class="rb-nlbox-spacer">
-        Assistant
+        {{label}}
     </div>
     <rb-iconbutton
         icon="clear"
         (click)="onClose()">
     </rb-iconbutton>
 </div>
-<div
-    #historyscroll
-    class="rb-nlbox-scroll">
+<rb-scroll
+    class="rb-nlbox-scroll"
+    #historyscroll>
     <div
         class="rb-nlbox-item"
         *ngFor="let item of history">
@@ -44,7 +44,7 @@
             class="rb-nlbox-dots">
         </div>
     </div>
-</div>
+</rb-scroll>
 <textarea
     class="rb-nlbox-input"
     [(ngModel)]="currentText"

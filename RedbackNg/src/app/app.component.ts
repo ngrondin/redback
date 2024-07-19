@@ -108,6 +108,8 @@ export class AppComponent implements OnInit {
     this.menuView = this.appname; //TODO: Fix this
     this.configService.setObjectsConfig(config['objects']);
     this.configService.setNLCommandModel(config["nlcommandmodel"]);
+    this.configService.setNLCommandLabel(config["nlcommandlabel"]);
+    this.configService.setChatLabel(config["chatlabel"]);
     this.configService.setPersonalViews(config["personalviews"]);
     this.iconsets = config["iconsets"];
     this.menuService.setFullMenuConfig(config['menu']);

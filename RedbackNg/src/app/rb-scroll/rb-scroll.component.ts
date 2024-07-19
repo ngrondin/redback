@@ -141,6 +141,12 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
     this.vThumbPosition = scrollerH * (scrollTop / contentH);
     this.hThumbPosition = scrollerW * (scrollLeft / contentW);
   }
+
+  public scrollToBottom() {
+    setTimeout(() => {
+      this.scroller.element.nativeElement.scrollTop = this.scroller.element.nativeElement.scrollHeight;
+    }, 10);
+  }
 }
 
 

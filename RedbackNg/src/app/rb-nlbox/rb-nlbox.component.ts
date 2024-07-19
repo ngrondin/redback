@@ -1,6 +1,7 @@
 import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { ApiService } from 'app/services/api.service';
 import { ConfigService } from 'app/services/config.service';
 import { NavigateService } from 'app/services/navigate.service';
@@ -13,9 +14,8 @@ import { NlactionService } from 'app/services/nlaction.service';
 })
 export class RbNlboxComponent {
   @Output() close: EventEmitter<any> = new EventEmitter();
-  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('historyscroll') historyscroll: ElementRef;
+  @ViewChild('historyscroll') historyscroll: RbScrollComponent;
 
   history: any[] = []
   historyPointer = -1;
@@ -26,8 +26,11 @@ export class RbNlboxComponent {
     private apiService: ApiService,
     private configService: ConfigService,
     private nlActionService: NlactionService,
-    //private navigateService: NavigateService
   ) {
+  }
+
+  get label(): string {
+    return this.configService.nlCommandLabel ?? "Assistant";
   }
 
   onKeyDown(event: any) {
@@ -108,11 +111,7 @@ export class RbNlboxComponent {
 
 
   private scrollToBottom() {
-    setTimeout(() => {
-      if(this.historyscroll != null) {
-        this.historyscroll.nativeElement.scrollTop = this.historyscroll.nativeElement.scrollHeight;
-      }
-    }, 10);
+    this.historyscroll.scrollToBottom();
   }
 
 }

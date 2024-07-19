@@ -8,6 +8,8 @@ export class ConfigService {
 
   public objectsConfig: any;
   public nlCommandModel: string;
+  public nlCommandLabel: string = "Assistant";
+  public chatLabel: string = "Chat";
   public personalViews: any[];
 
   constructor() { }
@@ -18,6 +20,14 @@ export class ConfigService {
 
   setNLCommandModel(m: string) {
     this.nlCommandModel = m;
+  }
+
+  setNLCommandLabel(l: string) {
+    this.nlCommandLabel = l;
+  }
+
+  setChatLabel(l: string) {
+    this.chatLabel = l;
   }
 
   setPersonalViews(list: any[]) {

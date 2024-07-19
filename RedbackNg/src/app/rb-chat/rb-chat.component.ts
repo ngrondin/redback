@@ -28,13 +28,18 @@ export class RbChatComponent implements OnInit {
   newChatName: string;
 
   constructor(
-    private chatService: ChatService
+    private chatService: ChatService,
+    private configService: ConfigService
   ) { 
 
   }
 
   ngOnInit(): void {
     this.chatService.load();
+  }
+
+  get label(): string {
+    return this.configService.chatLabel ?? "Chat";
   }
 
   get chats(): Chat[] {
