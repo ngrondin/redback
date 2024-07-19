@@ -13,6 +13,7 @@ import io.firebus.data.parse.DateParser;
 import io.firebus.data.parse.DurationParser;
 import io.firebus.data.parse.NumberParser;
 import io.firebus.data.parse.TimeParser;
+import io.firebus.logging.Logger;
 import io.redback.client.ConfigClient;
 import io.redback.client.ObjectClient;
 import io.redback.client.ProcessAssignmentRemote;
@@ -96,7 +97,7 @@ public class SequenceExecuter {
 			else if(command.equals("$opentab"))
 				openTab(context, params);	
 		} catch(Exception e) {
-			//Just ignore exceptions
+			Logger.severe("rb.ai.runcommand", e);
 		}
 	}
 	
@@ -186,7 +187,9 @@ public class SequenceExecuter {
 	}
 	
 	protected void respond(SEContext context, List<String> params) throws RedbackException {
-		context.addResponse(getValue(context, params).toString());
+		Object val = getValue(context, params);
+		if(val != null)
+			context.addResponse(val.toString());
 	}
 	
 	protected void navTo(SEContext context, List<String> params) throws RedbackException {
