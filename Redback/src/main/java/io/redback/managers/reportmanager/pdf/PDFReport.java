@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 import io.firebus.data.DataList;
@@ -27,7 +28,7 @@ public class PDFReport extends Report {
 	protected List<Unit> headerUnits;	
 	protected List<Unit> footerUnits;
 	protected float pageHeight = 792;
-	protected float pageWidth = 550;
+	protected float pageWidth = 612;
 	protected float marginTop = 50;
 	protected float marginBottom = 50;
 	protected float marginLeft = 50;
@@ -60,6 +61,16 @@ public class PDFReport extends Report {
 			if(layout.containsKey("margin")) {
 				marginTop = marginBottom = marginLeft = marginRight = layout.getNumber("margin").floatValue();
 			} 
+			if(layout.containsKey("page")) {
+				String page = layout.getString("page");
+				if(page.equals("portrait")) {
+					pageHeight = 792;
+					pageWidth = 612;
+				} else if(page.equals("landscape")) {
+					pageHeight = 612;
+					pageWidth = 792;					
+				}
+			}
 		}
 	}
 	
@@ -73,13 +84,11 @@ public class PDFReport extends Report {
 			if(headerUnits != null) {
 				for(int j = 0; j < headerUnits.size(); j++) 
 					header.addChild(headerUnits.get(j).produce(context));
-				marginTop = Math.max(marginTop * 0.4f, marginTop - header.height);
 			}				
 			Box footer = Box.VContainer(true);
 			if(footerUnits != null) {
 				for(int j = 0; j < footerUnits.size(); j++) 
 					footer.addChild(footerUnits.get(j).produce(context));		
-				marginBottom = Math.max(marginBottom * 0.4f, marginBottom - footer.height);
 			}
 			Box root = Box.VContainer(true);
 			for(int i = 0; i < rootUnits.size(); i++) 
@@ -130,7 +139,8 @@ public class PDFReport extends Report {
 	}
 	
 	protected void renderPage(Box content, Box header, Box footer, int pageNumber) throws IOException {
-		PDPage pdPage = new PDPage();
+		PDPage pdPage = new PDPage(new PDRectangle(pageWidth, pageHeight));
+		//PDPage pdPage = new PDPage();
 		document.addPage(pdPage);
 		PDPageContentStream contentStream = new PDPageContentStream(document, pdPage);
 		

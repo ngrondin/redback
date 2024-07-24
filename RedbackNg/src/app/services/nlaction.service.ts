@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { NavigateService } from './navigate.service';
+import { ActionService } from './action.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NlactionService {
-  //navigateTo: Function = null;
 
   constructor(
-    private navigateService: NavigateService
+    private navigateService: NavigateService,
+    private actionSevice: ActionService
   ) { }
 
   public async processSequence(tokens: string[])  {
@@ -57,10 +58,12 @@ export class NlactionService {
         filter: {},
         reset: true
       })
-    } else if(command == 'opentab' && params.length == 1) {
+    } else if(command == 'opentab' && params.length >= 1) {
       await this.navigateService.navigateTo({
-        tab: params[0]
+        tab: params.join(" ")
       })
+    } else if(command == 'launchreport' && params.length == 1) {
+
     }
   }
 

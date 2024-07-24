@@ -75,15 +75,16 @@ export class RbNlboxComponent {
     this.history.push({text:this.currentText.trim(), assistant:false});
     this.historyPointer = -1; 
     this.waiting = true; 
+    let lastCommand = this.currentText;
     this.apiService.nlCommand(this.configService.nlCommandModel, this.currentText, context).subscribe({
       next: (resp) => {
         let text = resp.text != null && resp.text != "" ? resp.text : "...";
         if(resp.text != null) {
-          this.history.push({text:text, assistant:true});
+          this.history.push({text:text, assistant:true, command: lastCommand, sequence: resp.sequence});
         }
-        if(resp.actions != null) {
+        if(resp.uiactions != null) {
           try {
-            this.nlActionService.processSequence(resp.actions);
+            this.nlActionService.processSequence(resp.uiactions);
           } catch(err) {
             console.error(err);
           }
@@ -109,6 +110,17 @@ export class RbNlboxComponent {
     this.close.emit();
   }
 
+  feedback(item: any, points: number) {
+    this.apiService.nlFeedback(this.configService.nlCommandModel, item.command, item.sequence, points).subscribe({
+      complete: () => {
+        console.log("Feedback given");
+      }
+    });
+  }
+
+  toggleShowActions(item: any) {
+    item.showsequence = !(item.showsequence ?? false);
+  }
 
   private scrollToBottom() {
     this.historyscroll.scrollToBottom();

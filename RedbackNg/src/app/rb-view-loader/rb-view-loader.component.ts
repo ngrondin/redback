@@ -67,7 +67,7 @@ export class LoadedView extends RbActivatorComponent {
   openTab(tabid: String) {
     for(let tabsection of this.tabSections) {
       for(let tab of tabsection.tabs) {
-        if(tab.id == tabid || tab.label == tabid) {
+        if(tab.id == tabid || tab.label.toLowerCase() == tabid.toLowerCase()) {
           console.log("Open tab");
           tabsection.selectTab(tab);
         }

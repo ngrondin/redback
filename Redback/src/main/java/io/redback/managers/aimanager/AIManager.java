@@ -2,6 +2,7 @@ package io.redback.managers.aimanager;
 
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import io.firebus.Firebus;
 import io.firebus.data.DataMap;
@@ -14,6 +15,7 @@ import io.redback.client.ProcessClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.security.Session;
+import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.NLCommandResponse;
 
@@ -35,6 +37,7 @@ public class AIManager {
 	protected GatewayClient gatewayClient;
 	protected SequenceExecuter sequenceExecuter;
 	protected DataMap urlMap;
+	protected CollectionConfig feedbackCollection;
 
 	public AIManager(String n, DataMap config, Firebus fb) throws RedbackException
 	{
@@ -55,6 +58,7 @@ public class AIManager {
 			gatewayClient = new GatewayClient(firebus, gatewayServiceName);
 			sequenceExecuter = new SequenceExecuter(configClient, objectClient, processClient);
 			urlMap = config.getObject("urlmap");
+			feedbackCollection = new CollectionConfig(dataClient, config.getObject("feedbackcollection"), "aifeedback");
 			AIManager aim = this;
 			modelConfigs = new ConfigCache<ModelConfig>(configClient, "rbai", "model", 3600000, new ConfigCache.ConfigFactory<ModelConfig>() {
 				public ModelConfig createConfig(DataMap map) throws Exception {
@@ -92,7 +96,7 @@ public class AIManager {
 			if(actionsStr != null)
 				nlcr = sequenceExecuter.runSequence(session, actionsStr, cl);
 			else
-				nlcr = new NLCommandResponse(null, null);
+				nlcr = new NLCommandResponse(null, actionsStr, null);
 			if(!(nlcr.text != null && nlcr.text.length() > 0)) 
 				nlcr.text = respText != null ? respText : "Ok.";
 			return nlcr;
@@ -100,4 +104,11 @@ public class AIManager {
 			throw new RedbackInvalidRequestException("Model " + model + " is not of type nlcommand");
 		}
 	}
+	
+	public void feedback(Session session, String model, String command, String sequence, int point) throws RedbackException {
+		DataMap key = new DataMap("_id", UUID.randomUUID().toString());
+		DataMap data = new DataMap("model", model, "command", command, "sequence", sequence, "points", point);
+		feedbackCollection.putData(key, data);
+	}
+
 }

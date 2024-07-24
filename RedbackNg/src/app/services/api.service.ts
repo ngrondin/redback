@@ -538,6 +538,16 @@ export class ApiService {
       context: context
     });
   }
+
+  nlFeedback(model: string, command: string, sequence: string, points: number): Observable<any> {
+    return this.requestService(this.aiService, {
+      action: 'feedback',
+      model: model,
+      command: command,
+      sequence: sequence,
+      points: points
+    });
+  }
 }
 
  

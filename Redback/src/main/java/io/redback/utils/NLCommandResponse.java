@@ -4,10 +4,12 @@ import java.util.List;
 
 public class NLCommandResponse {
 	public String text;
-	public List<String> actions;
+	public String sequence;
+	public List<String> uiactions;
 	
-	public NLCommandResponse(String t, List<String> a) {
+	public NLCommandResponse(String t, String seq, List<String> a) {
 		text = t;
-		actions = a;
+		sequence = seq;
+		uiactions = a;
 	}
 }

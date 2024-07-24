@@ -25,7 +25,7 @@ public abstract class QueueServer extends AuthenticatedServiceProvider {
 			if(action.equals("enqueue")) {
 				String service = requestData.getString("service");
 				DataMap message = requestData.getObject("message");
-				int requestTimeout = requestData.getNumber("timeout").intValue();
+				int requestTimeout = requestData.containsKey("timeout") ? requestData.getNumber("timeout").intValue() : 10000;
 				enqueue(session, service, message, requestTimeout);
 				return new Payload(new DataMap("result", "ok"));
 			} else {

@@ -24,4 +24,8 @@ public class RedbackAIServer extends AIServer {
 		return aiManager.runNLCommand(session, model, text, context);
 	}
 
+	protected void feedback(Session session, String model, String command, String sequence, int points) throws RedbackException {
+		aiManager.feedback(session, model, command, sequence, points);
+	}
+
 }

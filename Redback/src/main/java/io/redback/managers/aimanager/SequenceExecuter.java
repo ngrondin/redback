@@ -57,7 +57,7 @@ public class SequenceExecuter {
 		}
 		List<String> seq = Arrays.asList(seqStr.trim().split(" "));
 		runSequence(context, seq);
-		NLCommandResponse nlcr = new NLCommandResponse(context.textResponse.toString(), context.uiActions);
+		NLCommandResponse nlcr = new NLCommandResponse(context.textResponse.toString(), seqStr, context.uiActions);
 		return nlcr;
 	}
 
@@ -86,6 +86,8 @@ public class SequenceExecuter {
 				link(context, params);	
 			else if(command.equals("$action"))
 				action(context, params);
+			else if(command.equals("$execute"))
+				execute(context, params);
 			else if(command.equals("$pop"))
 				pop(context, params);				
 			else if(command.equals("$reset"))
@@ -96,6 +98,8 @@ public class SequenceExecuter {
 				navTo(context, params);		
 			else if(command.equals("$opentab"))
 				openTab(context, params);	
+			else if(command.equals("$launchreport"))
+				launchReport(context, params);
 		} catch(Exception e) {
 			Logger.severe("rb.ai.runcommand", e);
 		}
@@ -178,6 +182,21 @@ public class SequenceExecuter {
 		}		
 	}
 	
+	protected void execute(SEContext context, List<String> params) throws RedbackException {
+		if(params.size() >= 1) {
+			String scriptname = params.get(0);
+			DataMap data = new DataMap();
+			int i = 1;
+			while(i < params.size()) {
+				String key = params.get(i).substring(1);
+				List<String> valTokens = getTokensUntil(params, i + 1, "@");
+				data.put(key, getValue(context, valTokens));					
+				i += 1 + valTokens.size();
+			}
+			objectClient.execute(context.session, scriptname, data);
+		}
+	}
+	
 	protected void reset(SEContext context) throws RedbackException {
 		context.reset();
 	}
@@ -239,6 +258,14 @@ public class SequenceExecuter {
 		}
 	}
 	
+	protected void launchReport(SEContext context, List<String> params) throws RedbackException {
+		if(params.size() >= 1) {
+			String reportName = params.get(0);
+			context.uiActions.add("$launchreport");
+			context.uiActions.add(reportName);
+		}
+	}
+	
 	protected RedbackObjectRemote findObject(SEContext context, String objectName, List<String> params, boolean addToContext) throws RedbackException {
 		List<RedbackObjectRemote> list = listObjects(context, objectName, params, false);
 		if(list.size() > 0) {
@@ -272,7 +299,7 @@ public class SequenceExecuter {
 					} else {
 						Object val = getValue(context, valTokens);
 						if(val instanceof String) 
-							filter.put(key, new DataMap("$regex", val));
+							filter.put(key, new DataMap("$regex", "(?i)" + val));
 						else if(val instanceof List)
 							filter.put(key, new DataMap("$in", Convert.listToDataList((List<?>)val)));
 						else
@@ -325,7 +352,6 @@ public class SequenceExecuter {
 	}
 	
 	protected Object getValueFromContext(SEContext context, String attribute) throws RedbackException {
-		Object val = null;
 		if(attribute.startsWith("#")) {
 			int l = -1;
 			while(attribute.startsWith("#")) {
@@ -335,18 +361,23 @@ public class SequenceExecuter {
 			SEContextLevel cl = context.getContextLevel(l);
 			if(cl instanceof ObjectContext) {
 				ObjectContext oc = (ObjectContext)cl;
-				val = attribute.equals("uid") ? oc.object.getUid() : oc.object.getObject(attribute);
+				if(attribute.equals("uid")) return oc.object.getUid();
+				else return oc.object.getObject(attribute);
 			} else if(cl instanceof ListContext) {
 				ListContext lc = (ListContext)cl;
-				List<Object> list = new ArrayList<Object>();
-				for(RedbackObjectRemote ror: lc.list) {
-					Object v = attribute.equals("uid") ? ror.getUid() : ror.getObject(attribute);
-					list.add(v);
+				if(attribute.equals("_filter")) {
+					return lc.filter;
+				} else {
+					List<Object> list = new ArrayList<Object>();
+					for(RedbackObjectRemote ror: lc.list) {
+						Object v = attribute.equals("uid") ? ror.getUid() : ror.getObject(attribute);
+						list.add(v);
+					}
+					return list;					
 				}
-				val = list;
 			}
 		}
-		return val;
+		return null;
 	}
 	
 	protected Object getComparativeValue(String str) throws RedbackException {

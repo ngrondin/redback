@@ -39,26 +39,65 @@
     flex-basis: auto!important;
 }
 
+rb-scroll ::ng-deep .rb-scroll-content {
+  width: 100%;  
+}
+
 .rb-nlbox-item {
-    display: flex;
-    flex-direction: row;
-    padding: var(--v10px) var(--v10px) var(--v10px) var(--v5px);
-    color: #666;
-    font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.rb-nlbox-itemline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: var(--v10px) var(--v10px) var(--v10px) var(--v5px);
+}
+
+.rb-nlbox-item:hover{
+  background-color: rgb(237, 241, 251);
+}
+
+.rb-nlbox-item:hover .rb-nlbox-buttons {
+  display: flex;
 }
 
 .rb-nlbox-icon {
-    display: flex;
-    flex: 0 0 auto;
-    color: #ccc;
+  display: flex;
+  flex: 0 0 auto;
+  color: #ccc;
 }
 
 .rb-nlbox-text {
-    display: flex;
-    flex: 1 1 auto;
-    user-select: text;
-    -ms-user-select:text;
-	  padding-left: var(--v5px)
+  display: flex;
+  flex: 1 1 auto;
+  user-select: text;
+  -ms-user-select:text;
+  padding-left: var(--v5px);
+  color: #666;
+  font-size: 0.95rem;
+
+}
+
+.rb-nlbox-sequencetext {
+  display: flex;
+  flex: 1 1 auto;
+  user-select: text;
+  -ms-user-select:text;
+  color: #888;
+  font-size: 0.85rem;
+  font-style: italic;
+  padding-left: var(--v10px);
+}
+
+.rb-nlbox-buttons {
+  display: none;
+  flex-direction: row;
+  position: absolute;
+  right: 0px;
+  color: #aaa;
 }
 
 .rb-nlbox-input {

@@ -203,6 +203,7 @@ export class ClientWSService {
       }
     } catch(err) {
       console.error('WS receive error for message ' + ': ' + err);
+      console.log(data);
     }
   }
 

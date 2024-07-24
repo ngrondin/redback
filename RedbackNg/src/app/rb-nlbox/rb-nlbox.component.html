@@ -18,30 +18,60 @@
     <div
         class="rb-nlbox-item"
         *ngFor="let item of history">
-        <span 
-            *ngIf="item.assistant == true"
-            class="material-symbols-outlined rb-nlbox-icon">
-            robot_2
-        </span>           
-        <span 
-            *ngIf="item.assistant == false"
-            class="material-symbols-outlined rb-nlbox-icon">
-            person
-        </span>           
         <div
-            class="rb-nlbox-text">
-            {{item.text}}        
-        </div>        
+            class="rb-nlbox-itemline">
+            <span 
+                *ngIf="item.assistant == true"
+                class="material-symbols-outlined rb-nlbox-icon">
+                robot_2
+            </span>           
+            <span 
+                *ngIf="item.assistant == false"
+                class="material-symbols-outlined rb-nlbox-icon">
+                person
+            </span>           
+            <div
+                class="rb-nlbox-text">
+                {{item.text}}        
+            </div>   
+            <div
+                class="rb-nlbox-buttons"
+                *ngIf="item.assistant == true">
+                <rb-iconbutton
+                    icon="thumb_up"
+                    (click)="feedback(item, 1)">
+                </rb-iconbutton>
+                <rb-iconbutton
+                    icon="thumb_down"
+                    (click)="feedback(item, -1)">
+                </rb-iconbutton> 
+                <rb-iconbutton
+                    icon="visibility"
+                    (click)="toggleShowActions(item)">
+                </rb-iconbutton>                       
+            </div> 
+        </div>   
+        <div
+            class="rb-nlbox-itemline"
+            *ngIf="item.showsequence == true">
+            <div
+                class="rb-nlbox-sequencetext">
+                {{item.sequence}}        
+            </div>             
+        </div> 
     </div>
     <div
         *ngIf="waiting == true"
         class="rb-nlbox-item">
-        <span 
-            class="material-symbols-outlined rb-nlbox-icon">
-            robot_2
-        </span>  
         <div
-            class="rb-nlbox-dots">
+            class="rb-nlbox-itemline">
+            <span 
+                class="material-symbols-outlined rb-nlbox-icon">
+                robot_2
+            </span>  
+            <div
+                class="rb-nlbox-dots">
+            </div>
         </div>
     </div>
 </rb-scroll>

@@ -42,16 +42,26 @@ public abstract class AIServer extends AuthenticatedServiceProvider {
 					NLCommandResponse resp = nlCommand(session, model, text, context);
 					responseData = new DataMap("text", resp.text);
 					DataList list = new DataList();
-					if(resp.actions != null) {
-						for(String entry: resp.actions) {
+					if(resp.uiactions != null) {
+						for(String entry: resp.uiactions) {
 							list.add(entry);
 						}
-						responseData.put("actions", list);						
+						responseData.put("uiactions", list);	
+						responseData.put("sequence", resp.sequence);
 					}
+				}
+				else if(action.equals("feedback")) 
+				{
+					String model = request.getString("model");
+					String command = request.getString("command");
+					String sequence = request.getString("sequence");
+					int points = request.getNumber("points").intValue();
+					feedback(session, model, command, sequence, points);
+					responseData = new DataMap("result", "ok");
 				}
 				else
 				{
-					throw new RedbackException("Valid actions are 'nlcommand'");
+					throw new RedbackException("Valid actions are 'nlcommand' and 'feedback'");
 				}
 			}
 			response.setData(responseData);
@@ -64,5 +74,7 @@ public abstract class AIServer extends AuthenticatedServiceProvider {
 	}
 	
 	protected abstract NLCommandResponse nlCommand(Session session, String model, String text, DataMap context) throws RedbackException;
+	
+	protected abstract void feedback(Session session, String model, String command, String sequence, int points) throws RedbackException;
 
 }

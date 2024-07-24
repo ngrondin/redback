@@ -21,6 +21,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     @Input('width') width: number;
     @Input('height') height: number;
     @Input('colormap') colormap: any;
+    @Input('linkview') linkview: string;
     
     //@Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
 
@@ -167,14 +168,14 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
       }
       let aggregatesetfilter = this.aggregateset.mergeFilters();
       let filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
-      let target = {
+      let target: any = {
         object: this.aggregateset.objectname,
         filter: filter,
         label: (event.code ?? event.name),
         reset: true
       };
+      if(this.linkview != null) target.view = this.linkview;
       this.navigateService.navigateTo(target);
-      //this.navigate.emit(target);
     }
   
     refresh() {
