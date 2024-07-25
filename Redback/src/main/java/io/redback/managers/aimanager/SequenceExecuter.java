@@ -252,7 +252,8 @@ public class SequenceExecuter {
 	
 	protected void openTab(SEContext context, List<String> params) throws RedbackException {
 		if(params.size() >= 1) {
-			String tabId = params.get(0);
+			Object o = getValue(context, params);
+			String tabId = o != null ? o.toString() : "";
 			context.uiActions.add("$opentab");
 			context.uiActions.add(tabId);
 		}
