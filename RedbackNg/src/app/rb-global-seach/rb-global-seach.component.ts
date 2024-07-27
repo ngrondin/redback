@@ -72,7 +72,7 @@ export class RbGlobalSeachComponent implements OnInit {
     if(view != null) {
       event.view = view;
     } else {
-      event.object = object.objectname;
+      event.objectname = object.objectname;
     }
     this.navigateService.navigateTo(event);
     this.stopGlobalSearch();

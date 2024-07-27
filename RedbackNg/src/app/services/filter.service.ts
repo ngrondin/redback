@@ -29,8 +29,8 @@ export class FilterService {
 
   public resolveFilter(__inMap: any, obj: RbObject, selectedObject?: RbObject, relatedObject?: RbObject, extraContext?: any) : any {
     try {
-      let params: string[] = ["obj", "selectedObject", "relatedObject", "userpref", "uid"];
-      let args: any[] = [obj, selectedObject, relatedObject, this.userPrefService];
+      let params: string[] = ["obj", "object", "selectedObject", "relatedObject", "userpref", "uid"];
+      let args: any[] = [obj, obj, selectedObject, relatedObject, this.userPrefService];
 
       if(obj != null && typeof obj != 'undefined') {
         args.push(obj.uid);

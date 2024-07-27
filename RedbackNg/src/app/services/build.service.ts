@@ -9,8 +9,8 @@ import { RbFilesetComponent } from "app/rb-fileset/rb-fileset.component";
 import { RbModalComponent } from "app/rb-modal/rb-modal.component";
 import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.component";
 import { RbTabComponent } from "app/rb-tab/rb-tab.component";
+import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 import { componentRegistry } from 'app/rb-view-loader/rb-view-loader-registry';
-import { LoadedView } from 'app/rb-view-loader/rb-view-loader.component';
 
 
 @Injectable({

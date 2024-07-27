@@ -30,10 +30,9 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('navigate') link: string;
   @Input('allowdrag') allowdrag: boolean = false;
   @Input('showrefresh') showrefresh: boolean = true;
+  @Input('emptytext') emptytext: string = "No records";
 
-  //@Output() navigate: EventEmitter<any> = new EventEmitter();
-
-  enhancedList: any[];
+  enhancedList: any[] = []
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
   reachedBottom: boolean = false;
 
@@ -180,7 +179,7 @@ export class RbList4Component extends RbDataObserverComponent {
         this.modalService.open(this.modal);
       } else if(this.link != null) {
         let target = {
-          "object": this.rbObject.objectname,
+          "objectname": this.rbObject.objectname,
           "filter": {uid: "'" + this.rbObject.uid + "'"}
         };
         this.navigateService.navigateTo(target);

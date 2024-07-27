@@ -3,6 +3,7 @@ import { NavigateEvent, NavigateData } from 'app/datamodel';
 import { RbViewLoaderComponent } from 'app/rb-view-loader/rb-view-loader.component';
 import { ConfigService } from './config.service';
 import { UserprefService } from './userpref.service';
+import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 
 @Injectable({
   providedIn: 'root'
@@ -29,10 +30,10 @@ export class NavigateService {
 
   async navigateTo(event: NavigateEvent) {
     let target = this.targets[event.target ?? "default"];  
-    let objectConfig: any = this.configService.objectsConfig[event.object];
+    let objectConfig: any = this.configService.objectsConfig[event.objectname];
     let view: string = (event.view != null ? event.view : (objectConfig != null ? objectConfig.view : null));
     if(view != null) {
-      let data = new NavigateData(event.domain, view, event.tab, event.object, event.filter, event.search); 
+      let data = new NavigateData(event.domain, view, event.tab, event.objectname, event.filter, event.search, event.objectuid); 
       if(objectConfig != null && event.filter != null && event.filter[objectConfig.labelattribute] != null) {
         data.breadcrumbLabel = eval(event.filter[objectConfig.labelattribute]);
       }
@@ -48,7 +49,7 @@ export class NavigateService {
         this.userprefService.setCurrentView(data.view);
       }
     } else if(event.tab != null) {
-      target.component.openTab(event.tab);
+      target.component.currentLoadedView.openTab(event.tab);
     }
   }
 
@@ -62,8 +63,8 @@ export class NavigateService {
     }
   }
 
-  getCurrentNavigateData(target: string): NavigateData {
-    let targetObject = this.targets[target];
+  getCurrentNavigateData(target?: string): NavigateData {
+    let targetObject = this.targets[target ?? "default"];  
     if(targetObject != null) {
       if(targetObject.stack.length > 0) {
         return targetObject.stack[targetObject.stack.length - 1];
@@ -72,11 +73,16 @@ export class NavigateService {
     return null;
   }
 
-  getCurrentNavigateStack(target: string): NavigateData[] {
-    let targetObject = this.targets[target];
+  getCurrentNavigateStack(target?: string): NavigateData[] {
+    let targetObject = this.targets[target ?? "default"];  
     if(targetObject != null) {
       return targetObject.stack;
     }
     return [];
+  }
+
+  getCurrentLoadedView(target?: string): LoadedView {
+    let targetObject = this.targets[target ?? "default"]; 
+    return targetObject != null ? targetObject.component.currentLoadedView : null; 
   }
 }

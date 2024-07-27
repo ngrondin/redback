@@ -104,7 +104,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   clickCard(object: RbObject) {
     if(this.canClick) {
       let target = {};
-      target['object'] = object.get(this.linkobjectattribute);
+      target['objectname'] = object.get(this.linkobjectattribute);
       target['filter'] = {uid: "'" + object.get(this.linkuidattribute) + "'"};
       this.navigateService.navigateTo(target);
     }

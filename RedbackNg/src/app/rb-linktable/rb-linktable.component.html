@@ -24,15 +24,22 @@
                 *ngFor="let col of columns; index as i"
                 [style.width.vw]="col.width">
                 <a
-                    *ngIf="isClickable(col, object)"
+                    *ngIf="!isIcon(col, object) && isClickable(col, object)"
                     class="rb-linktable-link"
                     (click)="clickLink(col, object)">
-                    {{getValue(object, col)}}                
+                    {{getValue(col, object)}}                
                 </a>
                 <span
-                    *ngIf="!isClickable(col, object)">
-                    {{getValue(object, col)}}                
-                </span>                
+                    *ngIf="!isIcon(col, object) && !isClickable(col, object)">
+                    {{getValue(col, object)}}                
+                </span>
+                <div
+                    *ngIf="isIcon(col, object)"
+                    class="rb-linktable-icon">
+                    <mat-icon>
+                        {{icon(col, object)}}
+                    </mat-icon>         
+                </div>                
             </div>
         </div>    
     </div>

@@ -8,6 +8,8 @@ import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { Subscription } from 'rxjs';
 import { GanttLane, GanttLaneConfig, GanttMark, GanttSeriesConfig, GanttSpread } from './rb-gantt-models';
+import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
+import { DataService } from 'app/services/data.service';
 
 
 @Component({
@@ -20,7 +22,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('toolbar') toolbarConfig : any;
   @Input('locktonow') locktonow: boolean = false;
   @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar: ViewContainerRef;
-    
+  @ViewChild('mainscroll') mainscroll: RbScrollComponent;
   
   lanesConfig: GanttLaneConfig;
   seriesConfigs: GanttSeriesConfig[];
@@ -41,23 +43,20 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   dayMarks: GanttMark[];
   hourMarks: GanttMark[];
 
-  lastObjectCount: number = 0;
-  lastObjectUpdate: number = 0;
-  lastHash: string | Int32Array;
+  refocus: boolean = false;
+  blockNextRefocus: boolean = false;
 
   public getSizeForObjectCallback: Function;
   dragSubscription: Subscription;
   laneFilterObject: RbObject;
-
-  //buildService: BuildService;
   
   constructor(
     private modalService: ModalService,
     private dragService: DragService,
     private filterService: FilterService,
     private userprefService: UserprefService,
-    private injector: Injector,    
-    private buildService: BuildService
+    private buildService: BuildService,
+    private dataService: DataService
   ) {
     super();
   }
@@ -70,7 +69,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(this.lanes != null) {
       this.lanesConfig = new GanttLaneConfig(this.lanes, this.userPref);
     }
-    //this.buildService = this.injector.get<any>(BuildService);
     if(this.toolbarConfig != null) {
       for(var item of this.toolbarConfig) {
         var context: any = {};
@@ -88,9 +86,43 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onActivationEvent(event: any) {
-    this.scrollTop = 0;
-    this.scrollLeft = 0;
-    super.onActivationEvent(event);
+    console.log("Gantt activating, event is " + event);
+    if(this.active) {
+      this.scrollTop = 0;
+      this.scrollLeft = 0;
+      let target = null;
+      for(let cfg of this.seriesConfigs) {
+        let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
+        if(dataset.dataTarget != null && dataset.dataTarget.objectuid != null) {
+          target = {
+            cfg: cfg, 
+            objectname: dataset.objectname, 
+            uid: dataset.dataTarget.objectuid, 
+            object: dataset.list.find(o => o.uid == dataset.dataTarget.objectuid)
+          }
+        }
+      }
+      if(target != null && target.uid != null && target.object == null) {
+        console.log("Gantt actiavate with target that is not in the dataset");
+        this.dataService.fetch(target.objectname, target.uid).subscribe((obj) => {
+          let ms = (new Date(obj.get(target.cfg.startAttribute))).getTime();
+          this.startDate = new Date(ms - (3*60*60*1000));
+          super.onActivationEvent(event);
+        })
+      } else {
+        super.onActivationEvent(event);
+      }
+    } else {
+      super.onActivationEvent(event);
+    }
+  }
+
+  onDatasetEvent(event: any) {
+    //console.log(event);
+    if(event.endsWith('_select') && this.blockNextRefocus == false) {
+      this.refocus = true;
+    }
+    super.onDatasetEvent(event);
   }
 
   onDragEvent(event: any) {
@@ -148,26 +180,23 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let startDate = this.startDate;
     let endDate = new Date(this.startDate.getTime() + this.spanMS);
     let filter = {};
-    filter[cfg.startAttribute] = {
-      $gt: "'" + startDate.toISOString() + "'",
-      $lt: "'" + endDate.toISOString() + "'"
-    }
     if(cfg.endAttribute != null) {
-      let sFilter = filter;
-      let eFilter = {}
-      eFilter[cfg.endAttribute] = {
+      filter[cfg.startAttribute] = {
+        $lt: "'" + endDate.toISOString() + "'"
+      }
+      filter[cfg.endAttribute] = {
         $gt: "'" + startDate.toISOString() + "'",
-        $lt: "'" + endDate.toISOString() + "'"          
-      };
-      filter = {
-        $or:[sFilter, eFilter]
+      }
+    } else {
+      filter[cfg.startAttribute] = {
+        $gt: "'" + startDate.toISOString() + "'",
+        $lt: "'" + endDate.toISOString() + "'"
       }
     }
     return {filter:filter};
   }
 
   calc() {
-    //console.log("Gantt calc - " + (new Date()).getTime());
     this.calcParams();
     this.ganttData = this.getLanes();
     this.dayMarks = this.getDayMarks();
@@ -222,7 +251,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   private getSpreads(laneId: string) : GanttSpread[] {
     let spreads : GanttSpread[] = [];
     for(let cfg of this.seriesConfigs) {
-      let list: RbObject[] = this.lists != null ? this.lists[cfg.dataset] : this.list;
+      let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
+      let list: RbObject[] = dataset.list;
       for(var i in list) {
         let obj = list[i];
         if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.data) {
@@ -259,9 +289,18 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               if(cfg.labelColor != null) {
                 labelcolor = cfg.labelColor;
               }
-              let canEdit: Boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
+              let canEdit: boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
+              let selected: boolean = false;
+              if(cfg.isBackground == false && dataset.selectedObject == obj) {
+                selected = true;
+                if(this.refocus) {
+                  this.mainscroll.scrollToHPos(Math.max(0, startPX - 30));
+                  this.refocus = false;
+                  this.blockNextRefocus = false;
+                }
+              }
               if(color != null) {
-                spreads.push(new GanttSpread(obj.uid, label, prelabel, postlabel, startPX, widthPX, height, laneId, color, labelcolor, canEdit, obj, cfg));
+                spreads.push(new GanttSpread(obj.uid, label, prelabel, postlabel, startPX, widthPX, height, laneId, color, labelcolor, canEdit, selected, obj, cfg));
               }
             }
           }
@@ -350,6 +389,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public clickSpread(spread: GanttSpread) {
+    this.blockNextRefocus = true;
     this.select(spread.object);
     if(spread.config.modal != null) {
       this.modalService.open(spread.config.modal);

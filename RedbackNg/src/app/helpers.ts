@@ -1,7 +1,9 @@
 import { Directive, ElementRef, Input, Pipe, PipeTransform, Renderer2, inject } from "@angular/core";
 import { Observer } from "rxjs";
-import { RbObject, Time } from "./datamodel";
+import { NavigateData, NavigateEvent, RbObject, Time } from "./datamodel";
 import { UserprefService } from "./services/userpref.service";
+import { AppInjector } from "./app.module";
+import { FilterService } from "./services/filter.service";
 
 export class Translator {
     cfg: any;
@@ -400,31 +402,40 @@ export class FileReferenceResolver {
   }
 
 export class LinkConfig {
+    target: string;
     view: string;
     attribute: string;
     tab: string;
+    filtersingleobject: boolean;
+    reset: boolean;
+    
 
     constructor(json: any) {
+        this.target = json.target;
         this.view = json.view;
         this.attribute = json.attribute;
         this.tab = json.tab;
+        this.filtersingleobject = json.filtersingleobject ?? true;
+        this.reset = json.reset ?? false;
     }
 
-    getNavigationEvent(object: RbObject) {
-        let event: any = {};
+    getNavigationEvent(object: RbObject): NavigateEvent {
+        let event: NavigateEvent = {};
+        if(this.target != null) {
+            event.target = this.target;
+        }
         if(this.view != null) {
             event.view = this.view;
-        } else {
-            event.object = object.objectname;
-        }
-        if(this.attribute != null) {
-            event.filter = {uid: "'" + object.get(this.attribute) + "'"}
-        } else {
-            event.filter = {uid: "'" + object.uid + "'"}
         }
         if(this.tab != null) {
             event.tab = this.tab;
         }
+        event.objectname = object.objectname;
+        event.objectuid = this.attribute != null ? object.get(this.attribute) : object.uid;
+        if(this.filtersingleobject == true) {
+            event.filter = {uid: "'" + event.objectuid + "'"}
+        }
+        event.reset = this.reset;
         return event;
     }
 }

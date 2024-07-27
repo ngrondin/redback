@@ -1,87 +1,15 @@
 import { Component, ViewChild, ViewContainerRef, ComponentRef, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange, TypeDecorator } from '@angular/core';
 import { __asyncDelegator } from 'tslib';
 import { ApiService } from 'app/services/api.service';
-import { DataService } from 'app/services/data.service';
 import { RbActivatorComponent } from 'app/abstract/rb-activator';
-import { Injector } from '@angular/core';
 import { DataTarget, NavigateData } from 'app/datamodel';
 import { componentRegistry } from './rb-view-loader-registry';
 import { RbSetComponent } from 'app/abstract/rb-set';
-import { HttpClient } from '@angular/common/http';7
 import { BuildService } from 'app/services/build.service';
 import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
 import { NavigateService } from 'app/services/navigate.service';
+import { LoadedView } from './rb-view-loader-model';
 
-
-export class LoadedView extends RbActivatorComponent {
-  rootComponentRefs: ComponentRef<Component>[] = [];
-  topSets: RbSetComponent[] = [];
-  tabSections: RbTabSectionComponent[] = [];
-
-  constructor(
-    public title: string,
-    //public navigate: EventEmitter<any>
-  ) {
-    super();
-  }
-
-  activatorInit() {}
-
-  activatorDestroy() {}
-  
-  onDatasetEvent(event: string) {}
-
-  onActivationEvent(state: boolean) {}
-
-  attachTo(container: ViewContainerRef) {
-    for(let item of this.rootComponentRefs) {
-      container.insert(item.hostView);
-    }
-    this.activate();
-  }
-
-
-  detachFrom(container: ViewContainerRef) {
-    this.rootComponentRefs.forEach(item => {
-      container.detach(container.indexOf(item.hostView))
-    });
-    this.deactivate();
-  }
-
-  clearData() {
-    for(let set of this.topSets) {
-      set.clear();
-    }
-  }
-
-  setTarget(dataTarget: DataTarget) {
-    if(dataTarget != null) {
-      for(let dataset of this.topSets) {
-        if(dataset.ignoretarget == false && (dataTarget.objectname == null || (dataTarget.objectname != null && dataTarget.objectname == dataset.objectname))) {
-          dataset.setDataTarget(dataTarget);
-        }
-      }
-    }
-  }
-
-  openTab(tabid: String) {
-    for(let tabsection of this.tabSections) {
-      for(let tab of tabsection.tabs) {
-        if(tab.id == tabid || tab.label.toLowerCase() == tabid.toLowerCase()) {
-          console.log("Open tab");
-          tabsection.selectTab(tab);
-        }
-      }
-    }
-  }
-
-  forceRefresh() {
-    for(let dataset of this.topSets) {
-      dataset.refreshData();
-    }    
-  }
-
-}
 
 
 @Component({
@@ -132,7 +60,7 @@ export class RbViewLoaderComponent implements OnInit {
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
       console.time('build');
-      entry = new LoadedView(viewConfig.label/*, this.navigate*/);
+      entry = new LoadedView(viewConfig.label);
       if(viewConfig['content'] != null) {
         for(let item of viewConfig['content']) {
           let context: any = {activator: entry};
@@ -151,15 +79,14 @@ export class RbViewLoaderComponent implements OnInit {
       entry.setTarget(navData.dataTarget);
       if(navData.tab != null) entry.openTab(navData.tab);
       entry.attachTo(this.container);
-      console.log('attach');
     }
   }
 
-  openTab(tabid: string) {
+  /*openTab(tabid: string) {
     if(this.currentLoadedView != null) {
       console.log('opentab');
       this.currentLoadedView.openTab(tabid);
     }
-  }
+  }*/
   
 }

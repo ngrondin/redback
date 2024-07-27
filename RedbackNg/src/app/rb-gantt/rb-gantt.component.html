@@ -113,7 +113,8 @@
         </div>
         <rb-scroll
             class="rb-gantt-lanescontainer"
-            (rbscroll)="scroll($event)">
+            (rbscroll)="scroll($event)"
+            #mainscroll>
             <div
                 class="rb-gantt-lanes"
                 [style.width.px]="widthPX">
@@ -131,7 +132,7 @@
                     [rb-drag-changeform]="getSizeForObjectCallback">
                     <div
                         *ngFor="let spread of lane.spreads"
-                        [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox') + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '')"
+                        [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox') + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '')"
                         [rb-drag-object]="spread.canEdit ? spread.object : null"
                         (click)="clickSpread(spread)"
                         [style.width.px]="spread.width"

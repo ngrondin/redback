@@ -26,6 +26,7 @@ export class RbNlboxComponent {
     private apiService: ApiService,
     private configService: ConfigService,
     private nlActionService: NlactionService,
+    private navigateService: NavigateService
   ) {
   }
 
@@ -64,13 +65,19 @@ export class RbNlboxComponent {
   }
 
   post() {
-    let contextDS: RbDatasetComponent = window.redback?.currentLoadedView?.topSets[0];
-    let contextObj: RbObject = contextDS != null ? contextDS.selectedObject : null;
-    let context = {
-      objectname: contextDS != null ? contextDS.objectname : null,
-      uid: contextObj != null ? contextObj.uid : null,
-      filter: contextDS != null ? contextDS.resolvedFilter : null,
-      search: contextDS != null ? contextDS.searchString : null
+    let context = {};
+    let loadedView = this.navigateService.getCurrentLoadedView();
+    let datasets = loadedView.getTopActiveDatasets();
+    if(datasets.length > 0) {
+      let contextDS = datasets[0];
+      let contextObj: RbObject = contextDS != null ? contextDS.selectedObject : null;
+      context = {
+        objectname: contextDS.objectname,
+        uid: contextObj.uid,
+        filter: contextDS.resolvedFilter,
+        search: contextDS.searchString,
+        sort: contextDS.baseSort
+      }
     }
     this.history.push({text:this.currentText.trim(), assistant:false});
     this.historyPointer = -1; 

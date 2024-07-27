@@ -64,9 +64,10 @@
 }
 
 .rb-linktable-rowitem {
-    display: block;
+    display: flex;
     flex-direction: row;
-    /*margin: 0px var(--v10px) 0px 0px;*/
+    align-items: center;
+    /*justify-content: center;*/
     padding: var(--v5px);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -79,6 +80,14 @@
 
 .rb-linktable-link {
     color: var(--primary-dark-color);
+}
+
+.rb-linktable-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777!important;
+    flex: 1 1 auto;
 }
 
 a.rb-linktable-link:hover {

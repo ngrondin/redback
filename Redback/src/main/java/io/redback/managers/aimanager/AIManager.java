@@ -77,7 +77,7 @@ public class AIManager {
 			if(context.getString("uid") != null) {
 				cl = new ObjectContext(context.getString("objectname"), context.getString("uid"));
 			} else if(context.getObject("filter") != null ||  context.getString("search") != null) {
-				cl = new ListContext(context.getString("objectname"), context.getObject("filter"), context.getString("search"));
+				cl = new ListContext(context.getString("objectname"), context.getObject("filter"), context.getString("search"), context.getObject("sort"));
 			}
 			String actionsStr = null;
 			String respText = null;

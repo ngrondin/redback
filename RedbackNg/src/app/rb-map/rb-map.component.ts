@@ -218,7 +218,7 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
         let link = null;
         if(cfg.linkAttribute != null) {
           link = {
-            object: cfg.linkAttribute == 'uid' ? object.objectname : object.related[cfg.linkAttribute].objectname,
+            objectname: cfg.linkAttribute == 'uid' ? object.objectname : object.related[cfg.linkAttribute].objectname,
             filter: {uid: "'" + (cfg.linkAttribute == 'uid' ? object.uid : object.get(cfg.linkAttribute)) + "'"}
           };
         }

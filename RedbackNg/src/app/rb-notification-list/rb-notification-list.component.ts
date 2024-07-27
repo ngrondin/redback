@@ -54,7 +54,7 @@ export class RbNotificationListComponent implements OnInit {
   public selectNotification(notification: RbNotification) {
     if((notification.data.object != null || notification.data.objectname != null) && notification.data.uid != null) {
       this.navigateService.navigateTo({
-        object : notification.data.object || notification.data.objectname,
+        objectname : notification.data.object || notification.data.objectname,
         filter : {
           uid : "'" + notification.data.uid + "'"
         },

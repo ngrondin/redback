@@ -165,6 +165,12 @@
     cursor: grab;
 }
 
+.rb-gantt-spreadbox-selected {
+    border: 3px solid;
+    border-color: var(--primary-color);
+    margin: -3px;
+}
+
 .rb-gantt-spreadbackground {
     height: 2.5vw;
     z-index: 10;

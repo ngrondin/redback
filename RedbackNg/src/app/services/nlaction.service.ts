@@ -48,10 +48,21 @@ export class NlactionService {
     } else if(command == 'navtosearch' && params.length == 2) {
       await this.navigateService.navigateTo({
         view: params[0],
-        filter: {},
         search: params[1],
         reset: true
       })
+    } else if(command == 'navtofilter' && params.length == 2) {
+      await this.navigateService.navigateTo({
+        view: params[0],
+        filter: JSON.parse(params[1]),
+        reset: true
+      })      
+    } else if(command == 'navtocontext' && params.length == 2) {
+      await this.navigateService.navigateTo({
+        view: params[0],
+        objectuid: params[1],
+        reset: true
+      })      
     } else if(command == 'navto' && params.length == 1) {
       await this.navigateService.navigateTo({
         view: params[0],

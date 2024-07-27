@@ -99,11 +99,12 @@ export class GanttLaneConfig {
     lane: string;
     color: string;
     labelcolor: string;
-    canEdit: Boolean;
+    canEdit: boolean;
+    selected: boolean
     object: RbObject;
     config: GanttSeriesConfig;
   
-    constructor(i: string, l: string, prel: string, postl: string, s: number, w: number, h: number, ln: string, c: string, lc: string, ce: Boolean, o: RbObject, cfg: GanttSeriesConfig) {
+    constructor(i: string, l: string, prel: string, postl: string, s: number, w: number, h: number, ln: string, c: string, lc: string, ce: boolean, sel: boolean, o: RbObject, cfg: GanttSeriesConfig) {
       this.id = i;
       this.label = l;
       this.prelabel = prel;
@@ -116,6 +117,7 @@ export class GanttLaneConfig {
       this.color = c;
       this.labelcolor = lc;
       this.canEdit = ce;
+      this.selected = sel;
       this.object = o;
       this.config = cfg;
       this.setSubLane(0);

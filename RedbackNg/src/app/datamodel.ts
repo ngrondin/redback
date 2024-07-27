@@ -512,23 +512,26 @@ export class DataTarget {
     filter: any;
     sort: any;
     search: string;
-    selectedObject: RbObject;
+    objectuid: string;
+    //selectedObject: RbObject;
   
-    constructor(o: string, f: any, s: string) {
+    constructor(o: string, f: any, s: string, uid: string) {
       this.objectname = o
       this.filter = f;
       this.search = s;
+      this.objectuid = uid;
     }
 }
 
 export class NavigateEvent {
     target?: string;
-    object?: string;
     view?: string;
     domain?: string;
+    tab?: string;
+    objectname?: string;
     filter?: any;
     search?: string;
-    tab?: string;
+    objectuid?: string;
     label?: string;
     reset?: boolean;
 }
@@ -543,13 +546,13 @@ export class NavigateData {
     mode: string;
     dataTarget: DataTarget;
   
-    constructor(dom: string, v: string, t:string, o: string, f: any, s: string) {
+    constructor(dom: string, v: string, t:string, o: string, f: any, s: string, uid: string) {
       this.domain = dom;
       this.view = v;
       this.tab = t;
       this.title = null;
-      if(f != null) {
-        this.dataTarget = new DataTarget(o, f, s);
+      if(f != null || s != null || uid != null) {
+        this.dataTarget = new DataTarget(o, f, s, uid);
       }
     }
 

@@ -147,6 +147,18 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
       this.scroller.element.nativeElement.scrollTop = this.scroller.element.nativeElement.scrollHeight;
     }, 10);
   }
+
+  public scrollToHPos(left: number) {
+    setTimeout(() => {
+      this.scroller.element.nativeElement.scrollLeft = left;
+    }, 10);
+  }
+
+  public scrollToVPos(top: number) {
+    setTimeout(() => {
+      this.scroller.element.nativeElement.scrollTop = top;
+    }, 10);
+  }
 }
 
 

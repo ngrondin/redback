@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { Evaluator, Formatter, LinkConfig } from 'app/helpers';
@@ -16,6 +16,7 @@ class LinkTableColumnConfig {
   showExpr: string;
   link: LinkConfig;
   modal: string;
+  iconmap: any;
   alt: {[key: string]: LinkTableColumnConfig};
 
   constructor(json: any) {
@@ -29,6 +30,7 @@ class LinkTableColumnConfig {
     this.showExpr = (json.show != null ? json.show : "true");
     this.link = json.link != null ? new LinkConfig(json.link) : null;
     this.modal = json.modal;
+    this.iconmap = json.iconmap;
     if(json.alt != null) {
       this.alt = {};
       for(const key in json.alt) {
@@ -51,7 +53,6 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('columns') _cols: any;
   @Input('view') view: string;
   @Input('grid') grid: boolean = false;
-  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   columns: LinkTableColumnConfig[];
   reachedBottom: boolean = false;
@@ -79,6 +80,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   }
 
   onActivationEvent(state: boolean) {
+    this.scrollLeft = 0;
   }
 
   getColumnConfig(object: RbObject, column: LinkTableColumnConfig): LinkTableColumnConfig {
@@ -88,7 +90,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     return column;
   }
 
-  getValue(object: RbObject, column: LinkTableColumnConfig): string {
+  getValue(column: LinkTableColumnConfig, object: RbObject): string {
     let cfg = this.getColumnConfig(object, column);
     let val = null;
     if(cfg != null) {
@@ -134,9 +136,19 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     }
   }
 
+  isIcon(column: LinkTableColumnConfig, object: RbObject) {
+    let cfg = this.getColumnConfig(object, column);
+    return cfg.iconmap != null;
+  }
+
+  icon(column: LinkTableColumnConfig, object: RbObject) {
+    let cfg = this.getColumnConfig(object, column);
+    return cfg.iconmap != null ? cfg.iconmap[this.getValue(column, object)] : '';
+  }
+
   onScroll(event) {
     this.scrollLeft = event.target.scrollLeft;
-    if(event.currentTarget.scrollTop > Math.floor(event.currentTarget.scrollHeight - event.currentTarget.clientHeight - 10) && this.reachedBottom == false) {
+    if(event.currentTarget.scrollTop > Math.floor(event.currentTarget.scrollHeight - event.currentTarget.clientHeight - 30) && this.reachedBottom == false) {
       this.dataset.fetchNextPage();
       this.reachedBottom = true;
       setTimeout(() => {this.reachedBottom = false}, 1000);

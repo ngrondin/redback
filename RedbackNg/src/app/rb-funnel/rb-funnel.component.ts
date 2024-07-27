@@ -107,7 +107,7 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
       if(entry.config.linkView != null) {
         target['view'] = entry.config.linkView;
       } else {
-        target['object'] = object.objectname;
+        target['objectname'] = object.objectname;
       }
       if(entry.config.linkAttribute != null) {
         target['filter'] = {uid: "'" + object.get(entry.config.linkAttribute) + "'"};

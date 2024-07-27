@@ -302,7 +302,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       let filter = Object.assign({}, ds.mergedFilter);
       filter[cfg.dateAttribute] = day.filter;
       let target = {
-        object: ds.objectname,
+        objectname: ds.objectname,
         filter: filter,
         search: ds.searchString
       };
@@ -317,7 +317,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       if(item.config.linkView != null) {
         target['view'] = item.config.linkView;
       } else {
-        target['object'] = object.objectname;
+        target['objectname'] = object.objectname;
       }
       if(item.config.linkAttribute != null) {
         target['filter'] = {uid: "'" + object.get(item.config.linkAttribute) + "'"};

@@ -169,9 +169,9 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
       let aggregatesetfilter = this.aggregateset.mergeFilters();
       let filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
       let target: any = {
-        object: this.aggregateset.objectname,
+        objectname: this.aggregateset.objectname,
         filter: filter,
-        label: (event.code ?? event.name),
+        //label: (event.code ?? event.name),
         reset: true
       };
       if(this.linkview != null) target.view = this.linkview;

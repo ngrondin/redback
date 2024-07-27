@@ -39,7 +39,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             }
         }        
         this.dataCalcInit();
-        this.updateData();
+        //this.updateData();
     }
     
     dataObserverDestroy() {
@@ -53,7 +53,6 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     
     onDatasetEvent(event: any) {
         if(this.active) {
-            //console.log(event + " " + this.id + "  " + (new Date()).getTime());
             this.redraw()
         }
     }
