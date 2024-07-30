@@ -64,19 +64,17 @@ export abstract class AppRootComponent implements OnInit {
      }
   
     ngOnInit() {
-      //this.nlActionService.navigateTo = (event: any) => this.navigateTo(event);
       this.subscription = this.events.subscribe((event) => {
         if(event == 'init' && this.initialView != null) {
           let iv = this.userprefService.getInitialView();
           if(iv != null) {
             this.navigateService.navigateTo({domain: iv.domain, view: iv.view})
-            //this.pushViewTarget(new ViewTarget(iv.domain, iv.view, null, null, {}, null), true);
           } else {
             this.navigateService.navigateTo({view: this.initialView})
-            //this.pushViewTarget(new ViewTarget(null, this.initialView, null, null, {}, null), true);
           }
         }
       });
+      this.navigateService.getNavigateObservable().subscribe((navdata) => this.navigated());
     }
   
     ngOnDestroy() {
