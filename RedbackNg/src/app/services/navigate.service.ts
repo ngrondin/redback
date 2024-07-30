@@ -4,12 +4,14 @@ import { RbViewLoaderComponent } from 'app/rb-view-loader/rb-view-loader.compone
 import { ConfigService } from './config.service';
 import { UserprefService } from './userpref.service';
 import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
+import { Observable, Observer } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NavigateService {
   targets: {[key: string]: {component: RbViewLoaderComponent, stack: NavigateData[]}} = {};
+  navigateObservers: Observer<NavigateData>[] = [];
 
   constructor(
     private configService: ConfigService,
@@ -28,9 +30,15 @@ export class NavigateService {
     delete this.targets[key];
   }
 
+  getNavigateObservable() : Observable<NavigateData>  {
+    return new Observable<NavigateData>((observer) => {
+      this.navigateObservers.push(observer);
+    });
+  }
+
   async navigateTo(event: NavigateEvent) {
     let target = this.targets[event.target ?? "default"];  
-    let objectConfig: any = this.configService.objectsConfig[event.objectname];
+    let objectConfig: any = this.configService.getObjectConfig(event.objectname);
     let view: string = (event.view != null ? event.view : (objectConfig != null ? objectConfig.view : null));
     if(view != null) {
       let data = new NavigateData(event.domain, view, event.tab, event.objectname, event.filter, event.search, event.objectuid); 
@@ -47,6 +55,7 @@ export class NavigateService {
         target.stack.push(data);
         await target.component.navigateTo(data);
         this.userprefService.setCurrentView(data.view);
+        this.notifyObservers(data);
       }
     } else if(event.tab != null) {
       target.component.currentLoadedView.openTab(event.tab);
@@ -60,6 +69,7 @@ export class NavigateService {
       let data = targetObject.stack[index];
       targetObject.component.navigateTo(data);
       this.userprefService.setCurrentView(data.view);
+      this.notifyObservers(data);
     }
   }
 
@@ -84,5 +94,11 @@ export class NavigateService {
   getCurrentLoadedView(target?: string): LoadedView {
     let targetObject = this.targets[target ?? "default"]; 
     return targetObject != null ? targetObject.component.currentLoadedView : null; 
+  }
+
+  notifyObservers(navdata: NavigateData) {
+    for(const observer of this.navigateObservers) {
+      observer.next(navdata);
+    }
   }
 }

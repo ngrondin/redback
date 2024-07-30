@@ -45,10 +45,10 @@ export class NlactionService {
         }, 
         reset: true
       });
-    } else if(command == 'navtosearch' && params.length == 2) {
+    } else if(command == 'navtosearch' && params.length >= 2) {
       await this.navigateService.navigateTo({
         view: params[0],
-        search: params[1],
+        search: params.slice(1).join(" "),
         reset: true
       })
     } else if(command == 'navtofilter' && params.length == 2) {

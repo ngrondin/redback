@@ -248,8 +248,8 @@ export class ActionService {
 
   public executeClientScript(dataset:RbDatasetComponent, script: string) : Observable<null> {
     return new Observable((observer) => {
-      let func = Function("obj", "selectedObject", "relatedObject", script);
-      func.call(window.redback, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);
+      let func = Function("dataset", "obj", "selectedObject", "relatedObject", script);
+      func.call(window.redback, dataset, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);
       observer.next();
       observer.complete();  
     });    

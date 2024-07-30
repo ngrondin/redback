@@ -87,7 +87,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   onDataTargetEvent(dt: DataTarget) {
     console.log('dateset ' + this.id + ': ' + JSON.stringify(dt)); 
-    this.dataTarget = dt; 
     let refreshed = this.refreshData();
     if(!refreshed && this.dataTarget.objectuid != null) {
       console.log('dateset ' + this.id + ' not refreshed, directly selecting'); 
@@ -168,7 +167,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public fetchNextPage() {
     if(this.hasMorePages) {
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
-      const search = this.searchString;
+      const search = this.searchString != null ? this.searchString : this.dataTarget != null && this.dataTarget.search != null ? this.dataTarget.search : null;
       const addRel = this.fetchAll ? false : this.addrelated;
       let observable = null;
       if(this.fetchAll) {

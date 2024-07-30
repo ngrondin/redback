@@ -2,6 +2,7 @@ package io.redback.managers.reportmanager.pdf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 import io.firebus.data.DataList;
@@ -36,41 +38,48 @@ public class PDFReport extends Report {
 		
 	public PDFReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
 		super(s, rm, rc);
-		document = new PDDocument();
-		DataList content = rc.getData().getList("content");
-		rootUnits = new ArrayList<Unit>();
-		for(int i = 0; i < content.size(); i++) {
-			rootUnits.add(Unit.fromConfig(reportManager, rc, content.getObject(i)));
-		}
-		DataList header = rc.getData().getList("header");
-		if(header != null) {
-			headerUnits = new ArrayList<Unit>();
-			for(int i = 0; i < header.size(); i++) {
-				headerUnits.add(Unit.fromConfig(reportManager, rc, header.getObject(i)));
-			}		
-		}			
-		DataList footer = rc.getData().getList("footer");
-		if(footer != null) {
-			footerUnits = new ArrayList<Unit>();
-			for(int i = 0; i < footer.size(); i++) {
-				footerUnits.add(Unit.fromConfig(reportManager, rc, footer.getObject(i)));
-			}		
-		}
-		DataMap layout = rc.getData().getObject("layout");
-		if(layout != null) {
-			if(layout.containsKey("margin")) {
-				marginTop = marginBottom = marginLeft = marginRight = layout.getNumber("margin").floatValue();
-			} 
-			if(layout.containsKey("page")) {
-				String page = layout.getString("page");
-				if(page.equals("portrait")) {
-					pageHeight = 792;
-					pageWidth = 612;
-				} else if(page.equals("landscape")) {
-					pageHeight = 612;
-					pageWidth = 792;					
+		try {
+			document = new PDDocument();
+			InputStream is = getClass().getResourceAsStream("/io/redback/fonts/calibri.ttf");
+			if(is != null)
+				PDType0Font.load(document, is);
+			DataList content = rc.getData().getList("content");
+			rootUnits = new ArrayList<Unit>();
+			for(int i = 0; i < content.size(); i++) {
+				rootUnits.add(Unit.fromConfig(reportManager, rc, content.getObject(i)));
+			}
+			DataList header = rc.getData().getList("header");
+			if(header != null) {
+				headerUnits = new ArrayList<Unit>();
+				for(int i = 0; i < header.size(); i++) {
+					headerUnits.add(Unit.fromConfig(reportManager, rc, header.getObject(i)));
+				}		
+			}			
+			DataList footer = rc.getData().getList("footer");
+			if(footer != null) {
+				footerUnits = new ArrayList<Unit>();
+				for(int i = 0; i < footer.size(); i++) {
+					footerUnits.add(Unit.fromConfig(reportManager, rc, footer.getObject(i)));
+				}		
+			}
+			DataMap layout = rc.getData().getObject("layout");
+			if(layout != null) {
+				if(layout.containsKey("margin")) {
+					marginTop = marginBottom = marginLeft = marginRight = layout.getNumber("margin").floatValue();
+				} 
+				if(layout.containsKey("page")) {
+					String page = layout.getString("page");
+					if(page.equals("portrait")) {
+						pageHeight = 792;
+						pageWidth = 612;
+					} else if(page.equals("landscape")) {
+						pageHeight = 612;
+						pageWidth = 792;					
+					}
 				}
 			}
+		} catch(Exception e) {
+			throw new RedbackException("Error initiating pdf report", e);
 		}
 	}
 	

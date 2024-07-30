@@ -73,7 +73,7 @@ export class RbNlboxComponent {
       let contextObj: RbObject = contextDS != null ? contextDS.selectedObject : null;
       context = {
         objectname: contextDS.objectname,
-        uid: contextObj.uid,
+        uid: contextObj != null ? contextObj.uid : null,
         filter: contextDS.resolvedFilter,
         search: contextDS.searchString,
         sort: contextDS.baseSort

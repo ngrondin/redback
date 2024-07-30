@@ -106,11 +106,11 @@ public abstract class DataUnit extends Unit {
 			value = valueExpr.eval(jsContext);
 		} catch(Exception e) {}
 		String valueStr = value != null ? value.toString() : "";
-        StringBuilder sb = new StringBuilder();
+        /*StringBuilder sb = new StringBuilder();
         for (int i = 0; i < valueStr.length(); i++) 
             if (WinAnsiEncoding.INSTANCE.contains(valueStr.charAt(i))) 
                 sb.append(valueStr.charAt(i));
-        valueStr = sb.toString();        
+        valueStr = sb.toString(); */  
 		if(commaToLine) 
 			valueStr = valueStr.replaceAll(", ", "\r\n").replaceAll(",", "\r\n");
 		if(value != null && format != null) {

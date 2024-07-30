@@ -236,7 +236,7 @@ public class SequenceExecuter {
 					} else if(lc.list.size() > 0 && lc.filter != null){
 						context.uiActions.add("$navtofilter");
 						context.uiActions.add(view);
-						context.uiActions.add(lc.filter.toString(true, true));
+						context.uiActions.add(lc.getUnresolvedUIFilter().toString(true, true));
 					} else if(lc.list.size() > 0){
 						context.uiActions.add("$navtouids");
 						context.uiActions.add(view);
@@ -305,13 +305,12 @@ public class SequenceExecuter {
 	}
 	
 	protected List<RedbackObjectRemote> listObjects(SEContext context, String objectName, List<String> params, boolean addToContext) throws RedbackException {
-		DataMap filter = null;
+		DataMap filter = new DataMap();
 		String search = null;
 		if(params.size() > 0) {
-			if(params.get(0).startsWith("@")) {
-				filter = new DataMap();
-				int i = 0;
-				while(i < params.size()) {
+			int i = 0;
+			while(i < params.size()) {
+				if(params.get(i).startsWith("@")) {
 					String key = params.get(i).substring(1);
 					List<String> valTokens = getTokensUntil(params, i + 1, "@");
 					DataMap relCfg = getAttributeRelationship(context, objectName, key);
@@ -326,15 +325,19 @@ public class SequenceExecuter {
 						Object val = getValue(context, valTokens);
 						if(val instanceof List)
 							filter.put(key, new DataMap("$in", Convert.listToDataList((List<?>)val)));
-						else if(val != null)
-							filter.put(key, new DataMap("$regex", "(?i)" + val.toString()));
-							//filter.put(key, val);
+						else if(val instanceof String)
+							filter.put(key, new DataMap("$regex", "(?i)" + val));
+						else if(val instanceof Number)
+							filter.put(key, new DataMap("$regex", "(?i)" + val.toString()));						
+						else
+							filter.put(key, val);
 					}				
 					i += 1 + valTokens.size();
+				} else {
+					List<String> valTokens = getTokensUntil(params, 0, "@");
+					search = getValue(context, valTokens).toString();
+					i += valTokens.size();
 				}
-				
-			} else {
-				search = getValue(context, params).toString();
 			}
 		}
 		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, filter, search, null, false, true, 0, 100);

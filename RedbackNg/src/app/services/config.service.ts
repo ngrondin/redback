@@ -41,6 +41,13 @@ export class ConfigService {
     }
   }
 
+  getObjectConfig(objectname: string) : any {
+    if(this.objectsConfig != null && this.objectsConfig[objectname] != null) {
+      return this.objectsConfig[objectname]
+    }
+    return null;
+  }
+
   getLabel(obj: RbObject) : string {
     if(this.objectsConfig != null && this.objectsConfig[obj.objectname] != null) {
       let config = this.objectsConfig[obj.objectname];
