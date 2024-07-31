@@ -16,9 +16,9 @@ export class NlactionService {
     let cur = 0;
     for(cur = 0; cur < tokens.length; cur++) {
       let curToken = tokens[cur];
-      if(curToken.startsWith("$")) {
+      if(curToken != null && curToken.startsWith("$")) {
         let params = [];
-        for(let i = cur + 1; i < tokens.length && !tokens[i].startsWith("$"); i++) {
+        for(let i = cur + 1; i < tokens.length && !(tokens[i] != null && tokens[i].startsWith("$")); i++) {
           params.push(tokens[i]);
         }
         await this.runCommand(curToken.substring(1), params);
@@ -45,16 +45,11 @@ export class NlactionService {
         }, 
         reset: true
       });
-    } else if(command == 'navtosearch' && params.length >= 2) {
+    } else if(command == 'navtofilter' && params.length == 3) {
       await this.navigateService.navigateTo({
         view: params[0],
-        search: params.slice(1).join(" "),
-        reset: true
-      })
-    } else if(command == 'navtofilter' && params.length == 2) {
-      await this.navigateService.navigateTo({
-        view: params[0],
-        filter: JSON.parse(params[1]),
+        search: params[1],
+        filter: JSON.parse(params[2]),
         reset: true
       })      
     } else if(command == 'navtocontext' && params.length == 2) {

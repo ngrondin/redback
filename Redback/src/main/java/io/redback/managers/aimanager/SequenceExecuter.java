@@ -229,13 +229,10 @@ public class SequenceExecuter {
 						context.uiActions.add("$navtouid");
 						context.uiActions.add(view);
 						context.uiActions.add(lc.list.getFirst().getUid());
-					} else if(lc.list.size() > 0 && lc.search != null) {
-						context.uiActions.add("$navtosearch");
-						context.uiActions.add(view);
-						context.uiActions.add(lc.search);						
-					} else if(lc.list.size() > 0 && lc.filter != null){
+					} else if(lc.list.size() > 0 && (lc.search != null || lc.filter != null)) {
 						context.uiActions.add("$navtofilter");
 						context.uiActions.add(view);
+						context.uiActions.add(lc.search);						
 						context.uiActions.add(lc.getUnresolvedUIFilter().toString(true, true));
 					} else if(lc.list.size() > 0){
 						context.uiActions.add("$navtouids");
@@ -253,9 +250,10 @@ public class SequenceExecuter {
 				}
 			} else if(params.size() >= 2) {
 				Object val = getValue(context, params.subList(1, params.size()));
-				context.uiActions.add("$navtosearch");
+				context.uiActions.add("$navtofilter");
 				context.uiActions.add(view);
 				context.uiActions.add(val.toString());
+				context.uiActions.add(null);
 			}		
 		}
 	}
@@ -323,8 +321,8 @@ public class SequenceExecuter {
 						filter.put(key, new DataMap("$in", inList));
 					} else {
 						Object val = getValue(context, valTokens);
-						if(val instanceof List)
-							filter.put(key, new DataMap("$in", Convert.listToDataList((List<?>)val)));
+						if(val instanceof DataList)
+							filter.put(key, new DataMap("$in", (DataList)val));
 						else if(val instanceof String)
 							filter.put(key, new DataMap("$regex", "(?i)" + val));
 						else if(val instanceof Number)
@@ -340,7 +338,7 @@ public class SequenceExecuter {
 				}
 			}
 		}
-		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, filter, search, null, false, true, 0, 100);
+		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, filter, search, null, false, true, 0, 1000);
 		if(addToContext)
 			context.pushContextLevel(new ListContext(list, filter, search, null));
 		return list;
@@ -362,7 +360,7 @@ public class SequenceExecuter {
 		StringBuilder sb = new StringBuilder();
 		for(String token: tokens) {			
 			Object val = null;
-			if(token.startsWith("#")) {
+			if(token.startsWith("*")) {
 				val = getValueFromContext(context, token);
 			} else if(token.startsWith(">") || token.startsWith("<")) {
 				val = getComparativeValue(token);
@@ -380,16 +378,16 @@ public class SequenceExecuter {
 	}
 	
 	protected Object getValueFromContext(SEContext context, String attribute) throws RedbackException {
-		if(attribute.startsWith("#")) {
+		if(attribute.startsWith("*")) {
 			int l = -1;
-			while(attribute.startsWith("#")) {
+			while(attribute.startsWith("*")) {
 				l++;
 				attribute = attribute.substring(1);
 			}
 			SEContextLevel cl = context.getContextLevel(l);
 			if(cl instanceof ObjectContext) {
 				ObjectContext oc = (ObjectContext)cl;
-				if(attribute.equals("uid")) return oc.object.getUid();
+				if(attribute.equals("") || attribute.equals("uid")) return oc.object.getUid();
 				else return oc.object.getObject(attribute);
 			} else if(cl instanceof ListContext) {
 				ListContext lc = (ListContext)cl;
@@ -398,9 +396,9 @@ public class SequenceExecuter {
 				} else if(attribute.equals("_sort")) {
 						return lc.sort;
 				} else {
-					List<Object> list = new ArrayList<Object>();
+					DataList list = new DataList();
 					for(RedbackObjectRemote ror: lc.list) {
-						Object v = attribute.equals("uid") ? ror.getUid() : ror.getObject(attribute);
+						Object v = attribute.equals("") || attribute.equals("uid") ? ror.getUid() : ror.getObject(attribute);
 						list.add(v);
 					}
 					return list;					

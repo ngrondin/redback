@@ -6,9 +6,9 @@ var versionOrDefault = version != null ? version : 'default';
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title><%=config.label%></title>
+  <title><%=config.tabname != null ? config.tabname : config.label%></title>
   <meta name="viewport" content="width=device-width">
-  <link rel="icon" type="image/x-icon" href="<%=config.logo%>">
+  <link rel="icon" type="image/x-icon" href="<%=config.favicon != null ? config.favicon : config.logo%>">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />  
