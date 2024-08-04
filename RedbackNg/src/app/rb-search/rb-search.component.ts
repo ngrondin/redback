@@ -53,7 +53,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
 
   onActivationEvent(state: boolean) {
     if(this.active == true && this.dataset != null) {
-      this._value = this.dataset.searchString;
+      this._value = this.dataset.userSearch;
       this.filterValue = this.dataset.userFilter;
       this.sortValue = this.dataset.userSort;    
     }

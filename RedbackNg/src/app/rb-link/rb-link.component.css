@@ -1,9 +1,6 @@
 :host {
     display: flex;
     flex-direction: row;
-    align-items: end;
+    align-items: start;
     color: var(--light-writing-color);
-}
-
-.rb-link-button {
 }

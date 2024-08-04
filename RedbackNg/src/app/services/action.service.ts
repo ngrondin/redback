@@ -131,7 +131,7 @@ export class ActionService {
 
   public exportAll(dataset: RbDatasetComponent) : Observable<null> {
     return new Observable((observer) => {
-      this.dataService.export(dataset.objectname, dataset.resolvedFilter, dataset.searchString).subscribe(new ObserverProxy(observer));
+      this.dataService.export(dataset.objectname, dataset.resolvedFilter, dataset.userSearch).subscribe(new ObserverProxy(observer));
     });
   }
 

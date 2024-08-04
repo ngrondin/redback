@@ -71,7 +71,7 @@ public class QueueManager extends Thread {
 		if(msg != null) {
 			String service = msg.getString("service");
 			DataMap message = msg.getObject("message");
-			int requestTimeout = msg.getNumber("timeout").intValue();
+			int requestTimeout = msg.containsKey("timeout") ? msg.getNumber("timeout").intValue() : 10000;
 			Payload payload = new Payload(message);
 			payload.metadata.put("session", msg.getString("session"));
 			payload.metadata.put("token", msg.getString("token"));

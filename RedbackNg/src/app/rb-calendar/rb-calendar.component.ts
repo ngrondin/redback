@@ -304,7 +304,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       let target = {
         objectname: ds.objectname,
         filter: filter,
-        search: ds.searchString
+        search: ds.userSearch
       };
       this.navigateService.navigateTo(target);
     }

@@ -22,7 +22,9 @@
             <div
                 [class]="'rb-linktable-rowitem' + (grid ? ' rb-linktable-border' : '')"
                 *ngFor="let col of columns; index as i"
-                [style.width.vw]="col.width">
+                [style.width.vw]="col.width"
+                [style.background-color]="backColor(col, object)"
+                [style.color]="foreColor(col, object)">
                 <a
                     *ngIf="!isIcon(col, object) && isClickable(col, object)"
                     class="rb-linktable-link"

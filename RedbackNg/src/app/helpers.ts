@@ -439,3 +439,28 @@ export class LinkConfig {
         return event;
     }
 }
+
+export class ColorConfig {
+    attribute: string;
+    expression: string;
+    map: any;
+
+    constructor(json: any) {
+        this.attribute = json.attribute;
+        this.expression = json.expression;
+        this.map = json.map;
+    }
+
+    getColor(object: RbObject): string {
+        let val: string = null;
+        if(this.attribute != null) {
+            val = object.get(this.attribute);
+        } else if(this.expression != null) {
+            val = Evaluator.eval(this.expression, object, null);
+        }
+        if(this.map != null) {
+            val = this.map[val];
+        }
+        return val;
+    }
+}

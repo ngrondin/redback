@@ -173,7 +173,7 @@ export class ChatService {
     let msg = chat.messages.find(m => m.id == json.id);
     if(msg == null) {
       msg = new ChatMessage(json);
-      msg.from = this.chatUsers.find(u => json.from == u.username);
+      msg.from = this.findOrCreateUser(json.from);
       chat.messages.push(msg);
     }
     chat.messages.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -199,5 +199,14 @@ export class ChatService {
         }
       }
     }
+  }
+
+  private findOrCreateUser(username: string) {
+    let user = this.chatUsers.find(u => u.username == username);
+    if(user == null) {
+      user = new ChatUser({username: username, fullname: "Unknown User"});
+      this.chatUsers.push(user);
+    }
+    return user;
   }
 }

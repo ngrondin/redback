@@ -18,7 +18,7 @@ export class RbAggregatesetComponent extends RbSetComponent {
   @Input('base') base: any;
   
   public aggregates: RbAggregate[] = [];
-  public searchString: string;
+  public userSearch: string;
   public userFilter: any;
   public firstLoad: boolean = true;
   public _isLoading: boolean = false;

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
-import { Evaluator, Formatter, LinkConfig } from 'app/helpers';
+import { ColorConfig, Evaluator, Formatter, LinkConfig } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
 
@@ -17,6 +17,8 @@ class LinkTableColumnConfig {
   link: LinkConfig;
   modal: string;
   iconmap: any;
+  backColor: ColorConfig;
+  foreColor: ColorConfig;
   alt: {[key: string]: LinkTableColumnConfig};
 
   constructor(json: any) {
@@ -31,6 +33,8 @@ class LinkTableColumnConfig {
     this.link = json.link != null ? new LinkConfig(json.link) : null;
     this.modal = json.modal;
     this.iconmap = json.iconmap;
+    this.backColor = json.backcolor != null ? new ColorConfig(json.backcolor) : null;
+    this.foreColor = json.forecolor != null ? new ColorConfig(json.forecolor) : null;
     if(json.alt != null) {
       this.alt = {};
       for(const key in json.alt) {
@@ -118,7 +122,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     });
   }
 
-  isClickable(column: LinkTableColumnConfig, object: RbObject) {
+  isClickable(column: LinkTableColumnConfig, object: RbObject): boolean {
     let cfg = this.getColumnConfig(object, column);
     return cfg != null ? cfg.isClickable : false
   }
@@ -136,14 +140,24 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     }
   }
 
-  isIcon(column: LinkTableColumnConfig, object: RbObject) {
+  isIcon(column: LinkTableColumnConfig, object: RbObject): boolean {
     let cfg = this.getColumnConfig(object, column);
     return cfg.iconmap != null;
   }
 
-  icon(column: LinkTableColumnConfig, object: RbObject) {
+  icon(column: LinkTableColumnConfig, object: RbObject): string {
     let cfg = this.getColumnConfig(object, column);
     return cfg.iconmap != null ? cfg.iconmap[this.getValue(column, object)] : '';
+  }
+
+  backColor(column: LinkTableColumnConfig, object: RbObject) {
+    let cfg = this.getColumnConfig(object, column);
+    return cfg.backColor != null ? cfg.backColor.getColor(object) : null;
+  }
+
+  foreColor(column: LinkTableColumnConfig, object: RbObject) {
+    let cfg = this.getColumnConfig(object, column);
+    return cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
   }
 
   onScroll(event) {

@@ -585,6 +585,10 @@ export class ChatUser {
         this.fullname = json.fullname;
         this.available = json.available;
     }
+
+    get displayName() {
+        return this.fullname != null ? this.fullname : this.username;
+    }
 }
 
 export class ChatMessage {

@@ -116,10 +116,12 @@ export class RbChatComponent implements OnInit {
   }
 
   public post() {
-    this.chatService.sendMessage(this.selectedChat, this.textToSend).subscribe(msg => {
-      this.textToSend = null;
-      this.scrollToBottom();
-    })
+    if(this.textToSend != null && this.textToSend != '') {
+      this.chatService.sendMessage(this.selectedChat, this.textToSend).subscribe(msg => {
+        this.textToSend = null;
+        this.scrollToBottom();
+      })  
+    }
   }
 
   public formatDate(date: Date) : string {

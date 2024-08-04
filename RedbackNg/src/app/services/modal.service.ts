@@ -6,7 +6,7 @@ import { RbModalComponent } from 'app/rb-modal/rb-modal.component';
 })
 export class ModalService {
 
-  modals: any = {};
+  modals: {[key:string]: RbModalComponent} = {};
 
   constructor() { }
 
@@ -15,14 +15,20 @@ export class ModalService {
   }
 
   public open(name: string) {
-    if(this.modals[name] != null) {
+    if(this.modals[name] != null && !this.modals[name].isOpen) {
       this.modals[name].open();
     }
   }
 
   public close(name: string) {
-    if(this.modals[name] != null) {
+    if(this.modals[name] != null && this.modals[name].isOpen) {
       this.modals[name].close();
+    }
+  }
+
+  public closeAll() {
+    for(let name in this.modals) {
+      this.close(name);
     }
   }
 

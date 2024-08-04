@@ -8,11 +8,22 @@
         {{label}}
     </div>
     <rb-iconbutton
+        *ngIf="minimized == false"
+        icon="minimize"
+        (click)="clickMinimize()">
+    </rb-iconbutton>    
+    <rb-iconbutton
+        *ngIf="minimized == true"
+        icon="crop_3_2"
+        (click)="clickMinimize()">
+    </rb-iconbutton>      
+    <rb-iconbutton
         icon="clear"
-        (click)="onClose()">
+        (click)="clickClose()">
     </rb-iconbutton>
 </div>
 <rb-scroll
+    *ngIf="minimized == false"
     class="rb-nlbox-scroll"
     #historyscroll>
     <div
@@ -76,6 +87,7 @@
     </div>
 </rb-scroll>
 <textarea
+    *ngIf="minimized == false"
     class="rb-nlbox-input"
     [(ngModel)]="currentText"
     (keydown)="onKeyDown($event)"

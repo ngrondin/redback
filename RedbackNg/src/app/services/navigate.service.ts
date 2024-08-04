@@ -5,6 +5,7 @@ import { ConfigService } from './config.service';
 import { UserprefService } from './userpref.service';
 import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 import { Observable, Observer } from 'rxjs';
+import { ModalService } from './modal.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class NavigateService {
 
   constructor(
     private configService: ConfigService,
-    private userprefService: UserprefService
+    private userprefService: UserprefService,
+    private modalService: ModalService
   ) { 
     window.redback.navigateTo = (event) => this.navigateTo(event);
   }
@@ -53,6 +55,7 @@ export class NavigateService {
           target.stack = [];
         }
         target.stack.push(data);
+        this.modalService.closeAll();
         await target.component.navigateTo(data);
         this.userprefService.setCurrentView(data.view);
         this.notifyObservers(data);
@@ -67,6 +70,7 @@ export class NavigateService {
     if(targetObject != null) {
       targetObject.stack.splice(index + 1);
       let data = targetObject.stack[index];
+      this.modalService.closeAll();
       targetObject.component.navigateTo(data);
       this.userprefService.setCurrentView(data.view);
       this.notifyObservers(data);

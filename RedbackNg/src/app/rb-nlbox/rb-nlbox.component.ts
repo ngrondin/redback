@@ -21,6 +21,7 @@ export class RbNlboxComponent {
   historyPointer = -1;
   currentText: string = "";
   waiting: boolean = false;
+  minimized: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -75,7 +76,7 @@ export class RbNlboxComponent {
         objectname: contextDS.objectname,
         uid: contextObj != null ? contextObj.uid : null,
         filter: contextDS.resolvedFilter,
-        search: contextDS.searchString,
+        search: contextDS.userSearch != null ? contextDS.userSearch : contextDS.dataTarget != null ? contextDS.dataTarget.search : null,
         sort: contextDS.baseSort
       }
     }
@@ -113,8 +114,12 @@ export class RbNlboxComponent {
     }, 10);
   }
 
-  onClose() {
+  clickClose() {
     this.close.emit();
+  }
+
+  clickMinimize() {
+    this.minimized = !this.minimized;
   }
 
   feedback(item: any, points: number) {

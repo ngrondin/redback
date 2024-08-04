@@ -12,11 +12,9 @@ export class RbLinkComponent extends RbDataObserverComponent {
   @Input('view') view: string;
   @Input('margin') margin: boolean = true;
 
-  @HostBinding('style.margin-bottom.vw') get bottommargin() { return this.margin ? 0.55 : 0; }
-  
-  //@Output() navigate: EventEmitter<any> = new EventEmitter();
-
-  
+  @HostBinding('style.margin-top.vw') get topmargin() { return this.margin ? 1.25 : 0.5; }
+  //@HostBinding('style.margin-bottom.vw') get bottommargin() { return this.margin ? 0.55 : 0; }
+    
   constructor(
     private navigateService: NavigateService
   ) {
