@@ -1,6 +1,5 @@
 import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { RbObject } from 'app/datamodel';
-import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { ApiService } from 'app/services/api.service';
 import { ConfigService } from 'app/services/config.service';

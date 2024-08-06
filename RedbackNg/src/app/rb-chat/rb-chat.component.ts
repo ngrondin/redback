@@ -1,13 +1,9 @@
 import { Component, OnInit, EventEmitter, Output, ElementRef, ViewChild } from '@angular/core';
 import { Chat, ChatUser } from 'app/datamodel';
 import { Formatter } from 'app/helpers';
-import { ApiService } from 'app/services/api.service';
+import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { ChatService } from 'app/services/chat.service';
-import { ClientWSService } from 'app/services/clientws.service';
 import { ConfigService } from 'app/services/config.service';
-import { DataService } from 'app/services/data.service';
-
-
 
 @Component({
   selector: 'rb-chat',
@@ -15,11 +11,10 @@ import { DataService } from 'app/services/data.service';
   styleUrls: ['./rb-chat.component.css']
 })
 export class RbChatComponent implements OnInit {
-  //@Output() navigate: EventEmitter<any> = new EventEmitter();
   @Output() close: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('createinput') createinput: ElementRef;
-  @ViewChild('messagescroll') messagescroll: ElementRef;
+  @ViewChild('messagescroll') messagescroll: RbScrollComponent;
 
   selectedChat: Chat = null;
   creatingChat: boolean = false;
@@ -140,7 +135,8 @@ export class RbChatComponent implements OnInit {
   private scrollToBottom() {
     setTimeout(() => {
       if(this.messagescroll != null) {
-        this.messagescroll.nativeElement.scrollTop = this.messagescroll.nativeElement.scrollHeight;
+        this.messagescroll.scrollToBottom();
+        //this.messagescroll.nativeElement.scrollTop = this.messagescroll.nativeElement.scrollHeight;
       }
     }, 100);
   }

@@ -227,7 +227,8 @@ export class RbObject {
     }
 
     _adviseSetsOfChange() {
-        for(let set of this.datasets) {
+        let sets = [...this.datasets]; // this is because while calling the datasets, these can actually remove themselves which mutates the list
+        for(let set of sets) {
             set.objectUpdated(this);
         }
     }    

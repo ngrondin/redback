@@ -26,8 +26,8 @@ export class DataService {
   ) {
     this.allObjects = {};
     this.saveImmediatly = true;
-    this.clientWSService.getObjectUpdateObservable().subscribe(
-      json => {
+    this.clientWSService.getObjectUpdateObservable().subscribe({
+      next: (json) => {
         let list = Array.isArray(json) ? json : [json];
         const rbObjectArray = Object.values(list).map(json => this.receive(json));
         this.finalizeReceipt();
@@ -35,7 +35,7 @@ export class DataService {
           rbObjectArray.forEach(rbObject => observer.next(rbObject)) ;
         });              
       }
-    );
+    });
   }
 
 

@@ -129,6 +129,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       && !this._loading;
   }
 
+  public contains(obj: RbObject): boolean {
+    return this._list.indexOf(obj) > -1;
+  }
+
   public isObjectSelected(object: RbObject) : boolean {
     return this._selectedObjects.indexOf(object) != -1;
   }
@@ -224,7 +228,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   private setData(data: RbObject[]) {
     for(var i = 0; i < data.length; i++) {
       let obj: RbObject = data[i];
-      if(this._list.indexOf(obj) == -1) {
+      if(!this.contains(obj)) {
         this._list.push(obj);
         obj.addSet(this);
       }
@@ -276,9 +280,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public objectUpdated(object: RbObject) {
-    if(object.deleted || !this.filterService.applies(this.resolvedFilter, object)) {
+    let filterApplies = this.filterService.applies(this.resolvedFilter, object);
+    if(object.deleted || !filterApplies) {
       this.remove(object);
-    } else {
+    } else  {
       this.publishEvent('update');
     }
   }
@@ -356,8 +361,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public addObjectAndSelect(obj: RbObject) {
-    if(this._list.indexOf(obj) > -1) {
-      this._list.splice(this._list.indexOf(obj));
+    let index = this._list.indexOf(obj);
+    if(index > -1) {
+      this._list.splice(index);
     }
     if(this.addtoend == true) {
       this._list.push(obj);
@@ -375,8 +381,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public remove(obj: RbObject) {
-    if(this._list.indexOf(obj) > -1) {
-      this._list.splice(this._list.indexOf(obj), 1);
+    let index = this._list.indexOf(obj);
+    if(index > -1) {
+      this._list.splice(index, 1);
       obj.removeSet(this);
       this.publishEvent("removed");
     }

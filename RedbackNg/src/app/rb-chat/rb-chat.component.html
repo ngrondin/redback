@@ -81,10 +81,10 @@
         </rb-iconbutton>            
     </div>
     <!-- Messages -->
-    <div
-        #messagescroll
+    <rb-scroll
         *ngIf="conversationMode == 'messages'"
-        class="rb-chat-listcontainer hscroll">
+        class="rb-chat-scroll"
+        #messagescroll>
         <div
             *ngFor="let message of selectedChat.messages"
             class="rb-chat-listitem">
@@ -113,14 +113,15 @@
                 </div>
             </div>            
         </div>    
-    </div>
+    </rb-scroll>
     <div
         *ngIf="conversationMode == 'messages'"
         class="rb-chat-inputcontainer">
-        <input
+        <textarea
             class="rb-chat-input"
             (keydown)="chatInputKeydown($event)"
             [(ngModel)]="textToSend">
+        </textarea>
         <rb-iconbutton
             [icon]="'send'"
             (click)="post()">

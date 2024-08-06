@@ -36,6 +36,14 @@
     flex: 1 1 auto;
 }
 
+.rb-chat-scroll {
+    flex-basis: auto!important;
+}
+
+rb-scroll ::ng-deep .rb-scroll-content {
+    width: 100%;  
+  }
+
 .rb-chat-conversation {
     display: flex;
     flex: 1 1 auto;
@@ -202,6 +210,7 @@
     flex: 1 1 auto;
     border: none;
     outline: none;
+    resize: none;
 }
 
 .rb-chat-creating-input {
