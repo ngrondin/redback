@@ -2,6 +2,7 @@ package io.redback.managers.objectmanager.js;
 
 
 import io.redback.managers.objectmanager.RedbackAggregate;
+import io.redback.managers.objectmanager.Value;
 import io.redback.utils.js.ObjectJSWrapper;
 
 public class RedbackAggregateJSWrapper extends ObjectJSWrapper
@@ -29,7 +30,8 @@ public class RedbackAggregateJSWrapper extends ObjectJSWrapper
 		}
 		else
 		{
-			Object obj = rbAggregate.get(name).getObject();
+			Value val = rbAggregate.get(name);
+			Object obj = val != null ? val.getObject() : null;
 			if(obj == null)
 			{
 				try {

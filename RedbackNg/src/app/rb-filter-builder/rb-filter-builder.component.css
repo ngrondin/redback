@@ -22,18 +22,17 @@
 }
 
 .rb-fb-labelcol {
-    text-align: end;
     vertical-align: top;
-    padding: 25px 25px 5px 25px;
-    /*width: 1px;
-    white-space: nowrap;*/
+    padding-top: var(--v24px);
+    padding-right: var(--v24px);
 }
 
 .rb-fb-maincol {
     white-space: nowrap;
     display: flex;
     flex-direction: row;
-    padding: 5px;
+    padding-top: var(--v24px);
+
 }
 
 .rb-fb-buttoncol {
@@ -42,19 +41,23 @@
 }
 
 .rb-filter-builder-label {
-    padding-top: 15px;
+    /*padding-top: 15px;*/
+    height: var(--v36px);
+    display: table-cell;
+    vertical-align: middle;
 }
 
 .rb-filter-builder-icon {
-    padding-top: 15px;
+    /*padding-top: 15px;*/
 }
 
 .rb-filter-builder-multiselect-table {
-    padding: 20px 0px 10px 0px;
+    /*padding: 20px 0px 10px 0px;*/
 }
 
 .rb-filter-builder-multiselect-tablecell {
-    padding: 0px 10px 0px 0px;
+    padding-right: var(--v10px);
+    height: var(--v36px);
 }
 
 .rb-filter-builder-bottom {

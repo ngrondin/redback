@@ -110,10 +110,14 @@ public class RedbackAggregate extends RedbackElement
 	public Value get(String name) 
 	{
 		AttributeConfig attributeConfig = config.getAttributeConfig(name);
-		if(attributeConfig != null && dimensions.containsKey(name))
-			return dimensions.get(name);
-		else
-			return null;
+		if(attributeConfig != null) {
+			if(dimensions.containsKey(name)) {
+				return dimensions.get(name);
+			} else {
+				return new Value(null);
+			}
+		}
+		return null;
 	}
 	
 	public String getString(String name) throws RedbackException

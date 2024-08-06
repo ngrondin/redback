@@ -33,11 +33,12 @@
                     <tr
                         *ngFor="let filterConstruct of filterConstructs">
                         <td
-                            class="rb-fb-labelcol">
-                            <span
+                            class="rb-fb-labelcol"
+                            align="right">
+                            <div
                                 class="rb-filter-builder-label">
                                 {{filterConstruct.config.label}} : 
-                            </span>
+                            </div>
                         </td>
                         <td
                             class="rb-fb-maincol">
@@ -94,6 +95,7 @@
                                         class="rb-filter-builder-multiselect-tablecell">    
                                         <rb-switch-input
                                             [margin]="false"
+                                            [showicon]="false"
                                             [value]="filterConstruct.val1.includes(option.value)"
                                             (valueChange)="$event == true ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexOf(option.value), 1)"
                                             (valueChange)="changed = true">

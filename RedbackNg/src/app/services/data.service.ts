@@ -339,18 +339,16 @@ export class DataService {
   }
 
   aggregate(name: string, filter: any, search: string, tuple: any, metrics: any, base: any, page: number = 0, pageSize: number = 50) : Observable<RbAggregate[]> {
-    const apiObservable = this.apiService.aggregateObjects(name, filter, search, tuple, metrics, base, page, pageSize);
-    const dataObservable = new Observable<RbAggregate[]>((observer) => {
-      apiObservable.subscribe(
-        resp => {
+    return new Observable<RbAggregate[]>((observer) => {
+      this.apiService.aggregateObjects(name, filter, search, tuple, metrics, base, page, pageSize).subscribe({
+        next: (resp) => {
           const rbAggregateArray = Object.values(resp.list).map(json => new RbAggregate(json, this));
           observer.next(rbAggregateArray);
-          observer.complete();
         }, 
-        error => this.errorService.receiveHttpError(error)
-      )
+        complete: () => observer.complete(),
+        error: (error) => this.errorService.receiveHttpError(error)
+      })
     })
-    return dataObservable; 
   }
 
   export(name: string, filter: any, search: string) : Observable<any> {

@@ -33,6 +33,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public userSort: any = null;
   public mergedFilter: any;
   public resolvedFilter: any;
+  public resolvedSort: any;
+  public resolvedSearch: string;
   public nextPage: number;
   public pageSize: number;
   public hasMorePages: boolean = true;
@@ -139,8 +141,12 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   public refreshData(onlyIfFilterChanged = false) : boolean {
     if(this.canLoadData) {
-      let filterChanged = this.calcFilter();
-      if(onlyIfFilterChanged == false || (onlyIfFilterChanged == true && filterChanged == true)) {
+      let prevFilter = this.resolvedFilter;
+      let prevSearch = this.resolvedSearch;
+      this.resolveFilterSort();
+      let filterChanged = ValueComparator.notEqual(prevFilter, this.resolvedFilter);
+      let searchChanged = ValueComparator.notEqual(prevSearch, this.resolvedSearch);
+      if(filterChanged || searchChanged || !onlyIfFilterChanged) {
         this.clear();
         this.fetchNextPage();
         this.refreshOnActivate = false;
@@ -152,6 +158,28 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.refreshOnActivate = true;
       return false;
     }
+  }
+
+  private resolveFilterSort() {
+    let filter = {};
+    if(this.userFilter != null && this.userFilter["uid"] != null) {
+      filter = this.userFilter;
+    } else {
+      if(this.baseFilter != null) {
+        filter = this.baseFilter;
+      }
+      if(this.master != null && this.relatedObject != null) {
+        filter = this.filterService.mergeFilters(filter, this.master.relationship);
+      } 
+      if(this.userFilter != null) {
+        filter = this.filterService.mergeFilters(filter, this.userFilter);
+      }  
+    }
+    this.mergedFilter = filter;
+    this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
+    this.dataService.subscribeToCreation(this.uid, this.objectname, this.resolvedFilter);
+    this.resolvedSort = this.userSort != null ? this.userSort : this.baseSort;
+    this.resolvedSearch = this.userSearch;
   }
 
   public clear() {
@@ -191,28 +219,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       });
       this._loading = true;
     }
-  }
-
-  private calcFilter() : boolean {
-    let prevFilterStr = JSON.stringify(this.resolvedFilter);
-    let filter = {};
-    if(this.userFilter != null && this.userFilter["uid"] != null) {
-      filter = this.dataTarget.filter;
-    } else {
-      if(this.baseFilter != null) {
-        filter = this.baseFilter;
-      }
-      if(this.master != null && this.relatedObject != null) {
-        filter = this.filterService.mergeFilters(filter, this.master.relationship);
-      } 
-      if(this.userFilter != null) {
-        filter = this.filterService.mergeFilters(filter, this.userFilter);
-      }  
-    }
-    this.mergedFilter = filter;
-    this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
-    this.dataService.subscribeToCreation(this.uid, this.objectname, this.resolvedFilter);
-    return (JSON.stringify(this.resolvedFilter)) != prevFilterStr; //Has the filter changed?
   }
 
   private setData(data: RbObject[]) {
