@@ -117,6 +117,9 @@ export class Formatter {
         let dt = null;
         if(value instanceof Date) dt = value;
         else if(typeof value == 'string' && !isNaN(Date.parse(value))) dt = new Date(value);
+        if(dt != null && Formatter.userPrefService?.getGlobalPreferenceValue("timezone") == 'gmt') {
+            dt = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60 * 1000));
+        }
         let str = "";
         if(dt != null) {
             const dateFormat = Formatter.userPrefService?.getGlobalPreferenceValue("dateformat") ?? "iso";
@@ -136,6 +139,9 @@ export class Formatter {
         if(value instanceof Date) dt = value;
         else if(typeof value == 'string' && !isNaN(Date.parse(value))) dt = new Date(value);
         else if(typeof value == 'string' &&  value.startsWith('T')) dt = (new Time(value)).atDate(new Date());
+        if(dt != null && Formatter.userPrefService?.getGlobalPreferenceValue("timezone") == 'gmt') {
+            dt = new Date(dt.getTime() + (dt.getTimezoneOffset() * 60 * 1000));
+        }
         let str = "";
         if(dt != null) {
             const timeformat = Formatter.userPrefService?.getGlobalPreferenceValue("timeformat") ?? "iso";
@@ -404,6 +410,7 @@ export class FileReferenceResolver {
 export class LinkConfig {
     target: string;
     view: string;
+    objectname: string;
     attribute: string;
     tab: string;
     filtersingleobject: boolean;
@@ -413,6 +420,7 @@ export class LinkConfig {
     constructor(json: any) {
         this.target = json.target;
         this.view = json.view;
+        this.objectname = json.objectname;
         this.attribute = json.attribute;
         this.tab = json.tab;
         this.filtersingleobject = json.filtersingleobject ?? true;
@@ -430,7 +438,7 @@ export class LinkConfig {
         if(this.tab != null) {
             event.tab = this.tab;
         }
-        event.objectname = object.objectname;
+        event.objectname = this.objectname != null ? this.objectname : object.objectname;
         event.objectuid = this.attribute != null ? object.get(this.attribute) : object.uid;
         if(this.filtersingleobject == true) {
             event.filter = {uid: "'" + event.objectuid + "'"}

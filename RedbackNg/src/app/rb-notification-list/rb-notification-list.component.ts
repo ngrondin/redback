@@ -64,7 +64,7 @@ export class RbNotificationListComponent implements OnInit {
     if(notification.type == 'notification') {
       let firstAction = notification.actions[0];
       if(firstAction != null) {
-        this.notificationService.actionNotification(notification, firstAction.action).subscribe();
+        this.notificationService.actionNotification(notification, firstAction.action, firstAction.confirm).subscribe();
       }
     }
   }

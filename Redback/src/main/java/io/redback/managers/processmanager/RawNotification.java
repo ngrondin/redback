@@ -9,13 +9,15 @@ public class RawNotification {
 	public class Action {
 		public String action;
 		public String description;
+		public String confirm;
 		public String[] exclusiveToIds;
 		public boolean main;
 		
-		public Action(String a, String d, boolean m, String[] el)
+		public Action(String a, String d, String c, boolean m, String[] el)
 		{
 			action = a;
 			description = d;
+			confirm = c;
 			main = m;
 			exclusiveToIds = el;
 		}
@@ -42,9 +44,9 @@ public class RawNotification {
 		actions = new ArrayList<Action>();
 	}
 
-	public void addAction(String action, String desc, boolean m, String[] el)
+	public void addAction(String action, String desc, String conf, boolean m, String[] el)
 	{
-		Action a = new Action(action, desc, m, el);
+		Action a = new Action(action, desc, conf, m, el);
 		actions.add(a);
 	}
 	
@@ -101,7 +103,7 @@ public class RawNotification {
 					}
 				}
 				if(applies) {
-					notification.addAction(action.action, action.description, action.main);				
+					notification.addAction(action.action, action.description, action.confirm, action.main);				
 				}
 			}
 		}

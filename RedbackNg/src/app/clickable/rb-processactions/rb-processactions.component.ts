@@ -96,9 +96,9 @@ export class RbProcessactionsComponent extends RbDataButtonComponent  {
     }
   }
 
-  clickAction(action: string) {
+  clickAction(action: any) {
     let notif = this.notification;
-    this.notificationService.actionNotification(this.notification, action).subscribe(resp => {
+    this.notificationService.actionNotification(this.notification, action.action, action.confirm).subscribe(resp => {
       if(this.notification === notif) {
         this.notification = null;
       }

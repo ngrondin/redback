@@ -369,11 +369,13 @@ export class RbNotification {
 export class RbNotificationAction {
     action: string;
     description: string;
+    confirm: string;
     main: boolean;
 
     constructor(json: any) {
         this.action = json.action;
         this.description = json.description;
+        this.confirm = json.confirm;
         this.main = json.main;
     }
 }

@@ -186,7 +186,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     let relatedObject = this.dataset != null ? this.dataset.relatedObject : null;
     if(this.showprocessinteraction && this.notification != null) {
       for(var action of this.notification.actions) {
-        this.actionData.push(new RbActiongroupAction("processaction", null, action.action, null, action.description, null, action.main, null));
+        this.actionData.push(new RbActiongroupAction("processaction", action.action, null, null, action.description, action.confirm, action.main, null));
       }
     }
     if(this.actions != null) {
@@ -261,7 +261,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     if(action.action == 'processaction' && this.notification != null) {
       let notif = this.notification;
       this.running = true;
-      this.notificationService.actionNotification(this.notification, action.param).subscribe(() => {
+      this.notificationService.actionNotification(this.notification, action.target, action.confirm).subscribe(() => {
           if(this.notification === notif) {
             this.notification = null;
             this.notificationRetreived = false;

@@ -6,6 +6,7 @@ import { ApiService } from './api.service';
 import { ClientWSService } from './clientws.service';
 import { DataService } from './data.service';
 import { ErrorService } from './error.service';
+import { DialogService } from './dialog.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +27,8 @@ export class NotificationService {
     private apiService: ApiService,
     private clientWSService: ClientWSService,
     private dataService: DataService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private dialogService: DialogService
   ) {
     this.clientWSService.getNotificationObservable().subscribe(
       json => {
@@ -161,26 +163,35 @@ export class NotificationService {
     return obs;
   }
 
-  actionNotification(notification: RbNotification, action: string): Observable<null> {
-    const obs = new Observable<null>((observer) => {
-      this.apiService.actionAssignment(notification.pid, action).subscribe(
-        resp => {
-          if(resp != null && resp.rbobjectupdate != null && resp.rbobjectupdate.length > 0 && !this.clientWSService.isConnected()) {
-            for(let row of resp.rbobjectupdate) {
-              this.dataService.fetch(row.objectname, row.uid).subscribe(resp => {});
+  actionNotification(notification: RbNotification, action: string, confirm: string): Observable<null> {
+    if(confirm == null) {
+      return new Observable<null>((observer) => {
+        this.apiService.actionAssignment(notification.pid, action).subscribe({
+          next: (resp) => {
+            if(resp != null && resp.rbobjectupdate != null && resp.rbobjectupdate.length > 0 && !this.clientWSService.isConnected()) {
+              for(let row of resp.rbobjectupdate) {
+                this.dataService.fetch(row.objectname, row.uid).subscribe(resp => {});
+              }
             }
-          }
-          this.removeNotification(notification);
-          this.calcStats();
-          observer.next(null);
-          observer.complete();
-        },
-        error => {
-          this.errorService.receiveHttpError(error);
-          observer.error(error);
-        }
-      )
-    });
-    return obs;
+            this.removeNotification(notification);
+            this.calcStats();
+            observer.next(null);
+          },
+          error: error => {
+            this.errorService.receiveHttpError(error);
+            observer.error(error);
+          },
+          complete: () => observer.complete()
+        })
+      });
+    } else {
+      return new Observable((observer) => {
+        this.dialogService.openDialog(confirm, [
+          {label:"Ok", callback:() => this.actionNotification(notification, action, null).subscribe(() => observer.complete())}, 
+          {label:"Cancel", callback:() => observer.complete()}
+        ]);
+      })
+    }
+    
   }
 }

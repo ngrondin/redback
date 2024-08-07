@@ -17,11 +17,13 @@ export class PrefOption {
 export class GlobalPref {
   code: string;
   label: string;
+  icon: string;
   options: PrefOption[];
 
   constructor(json: any) {
     this.code = json.code;
     this.label = json.label;
+    this.icon = json.icon;
     this.options = [];
     if(json.options != null) {
       this.options = json.options.map(element => new PrefOption(element));

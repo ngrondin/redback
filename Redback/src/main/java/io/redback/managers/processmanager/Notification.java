@@ -11,12 +11,14 @@ public class Notification {
 	public class Action {
 		public String action;
 		public String description;
+		public String confirm;
 		public boolean main;
 		
-		public Action(String a, String d, boolean m)
+		public Action(String a, String d, String c, boolean m)
 		{
 			action = a;
 			description = d;
+			confirm = c;
 			main = m;
 		}
 	}	
@@ -44,9 +46,9 @@ public class Notification {
 		data = d;
 	}
 	
-	public void addAction(String action, String desc, boolean m)
+	public void addAction(String action, String desc, String conf, boolean m)
 	{
-		Action a = new Action(action, desc, m);
+		Action a = new Action(action, desc, conf, m);
 		actions.add(a);
 	}
 	
@@ -108,9 +110,9 @@ public class Notification {
 				DataMap actionMap = new DataMap();
 				actionMap.put("action", action.action);
 				actionMap.put("description", action.description);
+				actionMap.put("confirm", action.confirm);
 				actionMap.put("main", action.main);
 				actionList.add(actionMap);					
-				
 			}
 			map.put("actions", actionList);
 		}

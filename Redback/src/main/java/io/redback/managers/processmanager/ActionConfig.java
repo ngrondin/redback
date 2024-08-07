@@ -11,6 +11,7 @@ public class ActionConfig {
 	protected ProcessManager processManager;
 	protected String actionDescription;
 	protected String actionName;
+	protected String actionConfirm;
 	protected boolean main;
 	protected String nextNode;
 	protected String exclusiveStr;
@@ -23,6 +24,7 @@ public class ActionConfig {
 			processManager = pm;
 			actionName = c.getString("action");
 			actionDescription = c.getString("description");
+			actionConfirm = c.getString("confirm");
 			main = c.getBoolean("main");
 			nextNode = c.getString("nextnode");
 			if(c.containsKey("exclusive")) {
@@ -43,6 +45,11 @@ public class ActionConfig {
 	public String getActionDescription()
 	{
 		return actionDescription;
+	}
+	
+	public String getActionConfirm()
+	{
+		return actionConfirm;
 	}
 	
 	public boolean isMain() {

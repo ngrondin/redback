@@ -220,7 +220,7 @@ public class InteractionUnit extends ProcessUnit
 						}
 					}
 				}
-				notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.isMain(), exclusiveAppliesTo);
+				notification.addAction(actionConfig.getActionName(), actionConfig.getActionDescription(), actionConfig.getActionConfirm(), actionConfig.isMain(), exclusiveAppliesTo);
 			}
 			if(pi.getData() != null && pi.getData().containsKey("objectname") && pi.getData().containsKey("uid")) {
 				notification.addData("objectname", pi.getData().getString("objectname"));

@@ -2,6 +2,7 @@ export const defaultGlobalPrefs = [
     {
         code:"uialt", 
         label: "UI Styles", 
+        icon: "brush",
         options:[
             {
                 value:"primary", 
@@ -20,6 +21,7 @@ export const defaultGlobalPrefs = [
     {
         code:"notifgroup", 
         label: "Notification Grouping", 
+        icon: "notifications",
         options:[
             {
                 value:"nogroup", 
@@ -38,6 +40,7 @@ export const defaultGlobalPrefs = [
     {
         code:"dateformat", 
         label: "Date Format", 
+        icon: "calendar_month",
         options:[
             {
                 value:"iso", 
@@ -56,6 +59,7 @@ export const defaultGlobalPrefs = [
     {
         code:"timeformat", 
         label: "Time Format", 
+        icon: "schedule",
         options:[
             {
                 value:"iso", 
@@ -64,6 +68,21 @@ export const defaultGlobalPrefs = [
             {
                 value:"ampm", 
                 label: "AM/PM"
+            }
+        ]
+    },
+    {
+        code:"timezone", 
+        label: "Time Zone", 
+        icon: "public",
+        options:[
+            {
+                value:"local", 
+                label: "Local timezone"
+            }, 
+            {
+                value:"gmt", 
+                label: "GMT"
             }
         ]
     }

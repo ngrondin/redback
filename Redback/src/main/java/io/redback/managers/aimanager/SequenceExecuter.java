@@ -22,7 +22,6 @@ import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.ConfigCache;
-import io.redback.utils.Convert;
 import io.redback.utils.NLCommandResponse;
 
 public class SequenceExecuter {
@@ -304,13 +303,15 @@ public class SequenceExecuter {
 	
 	protected List<RedbackObjectRemote> listObjects(SEContext context, String objectName, List<String> params, boolean addToContext) throws RedbackException {
 		DataMap filter = new DataMap();
+		DataMap sort = null;
 		String search = null;
 		if(params.size() > 0) {
 			int i = 0;
 			while(i < params.size()) {
-				if(params.get(i).startsWith("@")) {
-					String key = params.get(i).substring(1);
-					List<String> valTokens = getTokensUntil(params, i + 1, "@");
+				String curToken = params.get(i);
+				if(curToken.startsWith("@")) {
+					String key = curToken.substring(1);
+					List<String> valTokens = getTokensUntil(params, i + 1, "@", "%");
 					DataMap relCfg = getAttributeRelationship(context, objectName, key);
 					if(relCfg != null) {
 						List<RedbackObjectRemote> list = listObjects(context, relCfg.getString("name"), valTokens, false);
@@ -331,14 +332,18 @@ public class SequenceExecuter {
 							filter.put(key, val);
 					}				
 					i += 1 + valTokens.size();
+				} else if(curToken.startsWith("%")) {
+					String col = curToken.substring(1);
+					sort = new DataMap("0", new DataMap("attribute", col, "dir", 1));
+					i++;
 				} else {
-					List<String> valTokens = getTokensUntil(params, 0, "@");
+					List<String> valTokens = getTokensUntil(params, i, "@", "%");
 					search = getValue(context, valTokens).toString();
 					i += valTokens.size();
 				}
 			}
 		}
-		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, filter, search, null, false, true, 0, 1000);
+		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, filter, search, sort, false, true, 0, 1000);
 		if(addToContext)
 			context.pushContextLevel(new ListContext(list, filter, search, null));
 		return list;
@@ -456,11 +461,18 @@ public class SequenceExecuter {
 		}		
 	}
 	
-	protected List<String> getTokensUntil(List<String> tokens, int start, String c) {
+	protected List<String> getTokensUntil(List<String> tokens, int start, String ...c) {
 		List<String> ret = new ArrayList<String>();
-		for(int i = start; i < tokens.size() && !tokens.get(i).startsWith(c); i++)
+		for(int i = start; i < tokens.size() && !startsWith(tokens.get(i), c); i++)
 			ret.add(tokens.get(i));
 		return ret;
+	}
+	
+	protected boolean startsWith(String token, String ...c) {
+		for(String onec: c)
+			if(token.startsWith(onec))
+				return true;
+		return false;
 	}
 	
 	protected DataMap getAttributeRelationship(SEContext context, String objectName, String attribute) throws RedbackException {
