@@ -29,6 +29,7 @@ export class GanttLaneConfig {
     labelAttribute: string;
     preLabelAttribute: string;
     postLabelAttribute: string;
+    prioritizePrePostLabel: boolean;
     labelColor: string;
     color: string;
     colorAttribute: string;
@@ -47,6 +48,7 @@ export class GanttLaneConfig {
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
       this.preLabelAttribute = subpref != null && subpref.prelabelattribute != null ? subpref.prelabelattribute : json.prelabelattribute;
       this.postLabelAttribute = subpref != null && subpref.postlabelattribute != null ? subpref.postlabelattribute : json.postlabelattribute;
+      this.prioritizePrePostLabel = json.prioritizeprepostlabel ?? false;
       this.labelColor = json.labelcolor;
       this.isBackground = json.isbackground;
       this.canEdit = json.canedit;

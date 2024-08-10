@@ -140,20 +140,24 @@
                         [style.height.px]="spread.config.isBackground ? lane.height : spread.height"
                         [style.top.px]="spread.top"
                         [style.background-color]="spread.color"
-                        [style.color]="spread.labelcolor">
+                        [style.color]="spread.labelcolor"
+                        [style.justify-content]="spread.prelabel != null || spread.postlabel != null ? 'space-between' : 'start'">
                         <div
                             *ngIf="spread.prelabel != null"
-                            class="rb-gantt-spreadprelabel">
+                            class="rb-gantt-spreadprelabel"
+                            [style.flex-shrink]="spread.config.prioritizePrePostLabel ? 0 : 1">
                             {{spread.prelabel}}
                         </div>
                         <div
                             class="rb-gantt-spreadlabel"
-                            [style.text-align]="spread.prelabel == null && spread.postlabel == null ? 'left' : 'center'">
+                            [style.text-align]="spread.prelabel == null && spread.postlabel == null ? 'left' : 'center'"
+                            [style.flex-shrink]="spread.config.prioritizePrePostLabel ? 1 : 0">
                             {{spread.label}}
                         </div>
                         <div
                             *ngIf="spread.postlabel != null"
-                            class="rb-gantt-spreadpostlabel">
+                            class="rb-gantt-spreadpostlabel"
+                            [style.flex-shrink]="spread.config.prioritizePrePostLabel ? 0 : 1">
                             {{spread.postlabel}}
                         </div>
                     </div>
