@@ -60,7 +60,7 @@ export class RbViewLoaderComponent implements OnInit {
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
       console.time('build');
-      entry = new LoadedView(viewConfig.label);
+      entry = new LoadedView(navData.view, viewConfig.label);
       if(viewConfig['content'] != null) {
         for(let item of viewConfig['content']) {
           let context: any = {activator: entry};

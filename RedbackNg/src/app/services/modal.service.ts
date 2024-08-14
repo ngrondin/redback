@@ -1,34 +1,47 @@
 import { Injectable } from '@angular/core';
 import { RbModalComponent } from 'app/rb-modal/rb-modal.component';
+import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ModalService {
-
-  modals: {[key:string]: RbModalComponent} = {};
+  currentView: string = null;
+  modals: {[view:string]: {[name:string]: RbModalComponent}} = {};
 
   constructor() { }
 
-  public register(name: string, modal: RbModalComponent) {
-    this.modals[name] = modal;
+  public register(name: string, view: string,  modal: RbModalComponent) {
+    if(this.modals[view] == null) this.modals[view] = {};
+    this.modals[view][name] = modal;
   }
 
-  public open(name: string) {
-    if(this.modals[name] != null && !this.modals[name].isOpen) {
-      this.modals[name].open();
+  public setCurrentView(view: string) {
+    this.currentView = view;
+    console.log("Current view is " + view);
+  }
+
+  public open(name: string, view: string = this.currentView) {
+    let currentViewModals = this.modals[view];
+    if(currentViewModals != null &&  currentViewModals[name] != null && !currentViewModals[name].isOpen) {
+      currentViewModals[name].open();
+      console.log("called open " + name + " in " + view);
     }
   }
 
-  public close(name: string) {
-    if(this.modals[name] != null && this.modals[name].isOpen) {
-      this.modals[name].close();
+  public close(name: string, view: string = this.currentView) {
+    let currentViewModals = this.modals[view];
+    if(currentViewModals != null && currentViewModals[name] != null && currentViewModals[name].isOpen) {
+      currentViewModals[name].close();
+      console.log("called close " + name + " in " + view);
     }
   }
 
   public closeAll() {
-    for(let name in this.modals) {
-      this.close(name);
+    for(let view in this.modals) {
+      for(let name in this.modals[view]) {
+        this.close(name, view);
+      }  
     }
   }
 

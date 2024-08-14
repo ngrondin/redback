@@ -13,6 +13,7 @@ export class LoadedView extends RbActivatorComponent {
     tabSections: RbTabSectionComponent[] = [];
   
     constructor(
+      public name: string,
       public title: string,
       //public navigate: EventEmitter<any>
     ) {

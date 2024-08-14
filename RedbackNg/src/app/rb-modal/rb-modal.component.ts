@@ -15,7 +15,7 @@ export class RbModalComponent extends RbActivatorComponent {
   @Input('name') name: string;
   @Input('title') title: string;
   @HostBinding('style.display') get visitility() {return this.isOpen ? 'flex' : 'none'; }
-  @HostListener('click', ['$event']) onMouseMove($event) {this.close() }
+  @HostListener('click', ['$event']) backgroundClick($event) {this.close() }
 
   isOpen: boolean = false;
   
@@ -27,7 +27,6 @@ export class RbModalComponent extends RbActivatorComponent {
 
   activatorInit() {
     this.isOpen = false;
-    this.modalService.register(this.name, this);
   }
 
   activatorDestroy() {
@@ -42,11 +41,13 @@ export class RbModalComponent extends RbActivatorComponent {
   public open() {
     this.isOpen = true;
     this.activate();
+    console.log("opened " + this.name);
   }
 
   public close() {
     this.isOpen = false;
     this.deactivate();
+    console.log("closed " + this.name);
   }
 
 

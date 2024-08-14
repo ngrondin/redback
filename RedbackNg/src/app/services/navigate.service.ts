@@ -58,6 +58,7 @@ export class NavigateService {
         this.modalService.closeAll();
         await target.component.navigateTo(data);
         this.userprefService.setCurrentView(data.view);
+        this.modalService.setCurrentView(data.view);
         this.notifyObservers(data);
       }
     } else if(event.tab != null) {
@@ -73,6 +74,7 @@ export class NavigateService {
       this.modalService.closeAll();
       targetObject.component.navigateTo(data);
       this.userprefService.setCurrentView(data.view);
+      this.modalService.setCurrentView(data.view);
       this.notifyObservers(data);
     }
   }

@@ -338,7 +338,8 @@ public class SequenceExecuter {
 					i++;
 				} else {
 					List<String> valTokens = getTokensUntil(params, i, "@", "%");
-					search = getValue(context, valTokens).toString();
+					Object val = getValue(context, valTokens);
+					if(val != null) search = val.toString();
 					i += valTokens.size();
 				}
 			}

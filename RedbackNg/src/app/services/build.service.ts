@@ -11,6 +11,7 @@ import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.compone
 import { RbTabComponent } from "app/rb-tab/rb-tab.component";
 import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 import { componentRegistry } from 'app/rb-view-loader/rb-view-loader-registry';
+import { ModalService } from './modal.service';
 
 
 @Injectable({
@@ -21,7 +22,8 @@ export class BuildService {
   
   constructor(
     private componentFactoryResolver:ComponentFactoryResolver,
-    private injector: Injector    
+    private injector: Injector,
+    private modalService: ModalService 
   ) { 
     for(let key of Object.keys(componentRegistry)) {
       let componentClass = componentRegistry[key];
@@ -69,10 +71,10 @@ export class BuildService {
         }
         if(newInstance instanceof RbTabSectionComponent) {
           loadedView.tabSections.push(newInstance);
+        }
+        if(newInstance instanceof RbModalComponent) {
+          this.modalService.register(newInstance.name, loadedView.name, newInstance);
         }        
-        /*if(outputs['navigate'] != null && newInstance['navigate'] != null && newInstance['navigate'].subscribe != null) {
-          newInstance['navigate'].subscribe(e => loadedView.navigate.emit(e))
-        }*/
       }
       if(config['content'] != null) {
         if(newInstance instanceof RbContainerComponent && newInstance.container != null) {
