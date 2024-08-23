@@ -12,17 +12,19 @@ export class DragService {
   draggingElement: ElementRef;
   innerHTML: String;
   data: any;
-  droppedOnElement: ElementRef;
+  droppedOutCallback: Function;
   mouseOrigin: XY;
   offset: XY;
   position: XY;
   size: XY;
+  droppedOnElement: ElementRef;
 
   constructor() { }
 
-  public prepareDrag(el: ElementRef, d: any, event: any) {
+  public prepareDrag(el: ElementRef, d: any, event: any, doCB: Function) {
     this.draggingElement = el;
     this.data = d;
+    this.droppedOutCallback = doCB;
     this.mouseOrigin = new XY(event.clientX, event.clientY);
     this.offset = new XY(event.offsetX, event.offsetY);
     this.position = new XY(event.clientX - this.offset.x, event.clientY - this.offset.y);
@@ -54,21 +56,25 @@ export class DragService {
   }
 
   public endDrag() {
+    this.data = null;
+    this.innerHTML = null;
+    this.mouseOrigin = null;
+    this.offset = null;
+    this.position = null;
+    this.size = null;       
     if(this.isDragging) {
       this.isDragging = false;
       if(this.draggingElement != null && this.draggingElement.nativeElement != null) {
         this.draggingElement.nativeElement.style.opacity = "";
       }
+      if(this.droppedOnElement == null && this.droppedOutCallback != null) {
+        this.droppedOutCallback();
+      }
       this.publishEvent({type:"end"});
     }
     this.droppedOnElement = null;
     this.draggingElement = null;
-    this.innerHTML = null;
-    this.data = null;
-    this.mouseOrigin = null;
-    this.offset = null;
-    this.position = null;
-    this.size = null;    
+    this.droppedOutCallback = null;
   }
 
   getObservable() : Observable<any>  {

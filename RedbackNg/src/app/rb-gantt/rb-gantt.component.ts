@@ -47,6 +47,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   blockNextRefocus: boolean = false;
 
   public getSizeForObjectCallback: Function;
+  public droppedOutCallback: Function;
   dragSubscription: Subscription;
   laneFilterObject: RbObject;
   
@@ -64,6 +65,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   dataCalcInit() {
     this.dragSubscription = this.dragService.getObservable().subscribe(event => this.onDragEvent(event));
     this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
+    this.droppedOutCallback = this.droppedOut.bind(this);
     this.spanMS = 259200000;
     this.zoomMS = 259200000;
     if(this.lanes != null) {
@@ -86,7 +88,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onActivationEvent(event: any) {
-    console.log("Gantt activating, event is " + event);
     if(this.active) {
       this.scrollTop = 0;
       this.scrollLeft = 0;
@@ -118,7 +119,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onDatasetEvent(event: any) {
-    //console.log(event);
     if(event.endsWith('_select') && this.blockNextRefocus == false) {
       this.refocus = true;
     }
@@ -127,14 +127,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   onDragEvent(event: any) {
     if(this.lanesConfig.dragfilter != null && this.doDragFilter) {
-      if(event.type == 'start' /*&& this.containsObject(event.data)*/) {
+      if(event.type == 'start') {
         this.laneFilterObject = event.data;
-        this.redraw();
       } else if(event.type == 'end' && this.laneFilterObject != null) {
         this.laneFilterObject = null;
-        this.redraw();
       }
     }
+    this.redraw();
   }
 
   get userPref() : any {
@@ -279,10 +278,15 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               if(cfg.color != null) {
                 color = cfg.color;
               } else if(cfg.colorAttribute != null) {
-                if(cfg.colorMap != null) {
-                  color = cfg.colorMap[obj.get(cfg.colorAttribute)];
-                } else {
-                  color = obj.get(cfg.colorAttribute);
+                let colorValue = obj.get(cfg.colorAttribute);
+                if(colorValue != null) {
+                  if(cfg.colorMap != null) {
+                    if(cfg.colorMap[colorValue] != null) {
+                      color = cfg.colorMap[colorValue];
+                    }
+                  } else {
+                    color = colorValue;
+                  }  
                 }
               }
               let labelcolor = "#333";
@@ -443,7 +447,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       this.datasetgroup.datasets[config.dataset].addObjectAndSelect(object);
     }
 
-    this.calc();
+    //this.calc();
   }
 
   public droppedOut(event: any) {

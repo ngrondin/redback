@@ -58,7 +58,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this._loading = false;
     this.hasMorePages = true;
     if(this.datasetgroup != null) {
-      this.datasetgroup.register((this.id || this.name), this);
+      this.datasetgroup.register((this.id || this.name || this.objectname), this);
     }
   }
 
@@ -394,7 +394,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       observer.next(event);
     }); 
     if(this.datasetgroup != null) {
-      this.datasetgroup.groupMemberEvent((this.id || this.name), event);
+      this.datasetgroup.groupMemberEvent((this.id || this.name || this.objectname), event);
     }
   }
 }
