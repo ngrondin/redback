@@ -6,7 +6,6 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.Function;
 import io.firebus.script.exceptions.ScriptException;
-import io.firebus.script.values.abs.SCallable;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackAggregate;
@@ -116,9 +115,10 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					String objectName = (String)arguments[0]; 
-					String domain = arguments.length == 2 ? null : (String)arguments[1]; 
-					DataMap data = (DataMap)(arguments.length == 2 ? arguments[1] : arguments[2]); 
-					RedbackObject rbo = objectManager.createObject(session, objectName, null, domain, data);
+					String domain = arguments.length >= 3 ? (String)arguments[1] : null; 
+					String uid = arguments.length >= 4 ? (String)arguments[2] : null;
+					DataMap data = (DataMap)(arguments[arguments.length - 1]); 
+					RedbackObject rbo = objectManager.createObject(session, objectName, uid, domain, data);
 					if(rbo != null)
 						return new RedbackObjectJSWrapper(rbo);
 					else
