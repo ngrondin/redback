@@ -37,6 +37,7 @@ export class GanttLaneConfig {
     isBackground: boolean;
     modal: string;
     canEdit: boolean;
+    show: Function;
   
     constructor(json: any, userpref: any) {
       super(json);
@@ -56,6 +57,7 @@ export class GanttLaneConfig {
       this.colorAttribute = json.colorattribute;
       this.colorMap = json.colormap;
       this.modal = json.modal;
+      this.show = json.show != null ? Function("dataset", "relatedObject", "return (" + json.show + ")") : null;
     }
   }
   

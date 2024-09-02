@@ -20,6 +20,7 @@ import { DataService } from 'app/services/data.service';
 export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('lanes') lanes : any;
   @Input('toolbar') toolbarConfig : any;
+  @Input('layers') layers: any[];
   @Input('locktonow') locktonow: boolean = false;
   @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar: ViewContainerRef;
   @ViewChild('mainscroll') mainscroll: RbScrollComponent;
@@ -251,60 +252,63 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let spreads : GanttSpread[] = [];
     for(let cfg of this.seriesConfigs) {
       let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
-      let list: RbObject[] = dataset.list;
-      for(var i in list) {
-        let obj = list[i];
-        if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.data) {
-          let startMS = (new Date(obj.get(cfg.startAttribute))).getTime();
-          let startPX: number = Math.round((startMS - this.startMS) * this.multiplier);
-          if(startPX < this.widthPX) {
-            let durationMS = this.getObjectDuration(cfg, obj);
-            if(startMS + durationMS > this.endMS) {
-              durationMS = this.endMS - startMS;
-            }
-            let endMS = startMS + durationMS;
-            let endPX = Math.round((endMS - this.startMS) * this.multiplier);
-            let widthPX = endPX - startPX;
-            if(startPX > -widthPX) {
-              if(startPX < 0) {
-                widthPX = widthPX + startPX;
-                startPX = 0;
+      let show = cfg.show == null || (cfg.show != null && cfg.show(null, dataset, dataset.relatedObject));
+      if(show) {
+        let list: RbObject[] = dataset.list;
+        for(var i in list) {
+          let obj = list[i];
+          if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.data) {
+            let startMS = (new Date(obj.get(cfg.startAttribute))).getTime();
+            let startPX: number = Math.round((startMS - this.startMS) * this.multiplier);
+            if(startPX < this.widthPX) {
+              let durationMS = this.getObjectDuration(cfg, obj);
+              if(startMS + durationMS > this.endMS) {
+                durationMS = this.endMS - startMS;
               }
-              let height = cfg.isBackground ? GanttLane.ganttLaneHeight : 28;
-              let label = obj.get(cfg.labelAttribute); 
-              let prelabel = cfg.preLabelAttribute != null ? obj.get(cfg.preLabelAttribute) : null;
-              let postlabel = cfg.postLabelAttribute != null ? obj.get(cfg.postLabelAttribute) : null;
-              let color = cfg.isBackground ? 'white' : 'var(--primary-light-color)';
-              if(cfg.color != null) {
-                color = cfg.color;
-              } else if(cfg.colorAttribute != null) {
-                let colorValue = obj.get(cfg.colorAttribute);
-                if(colorValue != null) {
-                  if(cfg.colorMap != null) {
-                    if(cfg.colorMap[colorValue] != null) {
-                      color = cfg.colorMap[colorValue];
-                    }
-                  } else {
-                    color = colorValue;
-                  }  
+              let endMS = startMS + durationMS;
+              let endPX = Math.round((endMS - this.startMS) * this.multiplier);
+              let widthPX = endPX - startPX;
+              if(startPX > -widthPX) {
+                if(startPX < 0) {
+                  widthPX = widthPX + startPX;
+                  startPX = 0;
                 }
-              }
-              let labelcolor = "#333";
-              if(cfg.labelColor != null) {
-                labelcolor = cfg.labelColor;
-              }
-              let canEdit: boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
-              let selected: boolean = false;
-              if(cfg.isBackground == false && dataset.selectedObject == obj) {
-                selected = true;
-                if(this.refocus) {
-                  this.mainscroll.scrollToHPos(Math.max(0, startPX - 30));
-                  this.refocus = false;
-                  this.blockNextRefocus = false;
+                let height = cfg.isBackground ? GanttLane.ganttLaneHeight : 28;
+                let label = obj.get(cfg.labelAttribute); 
+                let prelabel = cfg.preLabelAttribute != null ? obj.get(cfg.preLabelAttribute) : null;
+                let postlabel = cfg.postLabelAttribute != null ? obj.get(cfg.postLabelAttribute) : null;
+                let color = cfg.isBackground ? 'white' : 'var(--primary-light-color)';
+                if(cfg.color != null) {
+                  color = cfg.color;
+                } else if(cfg.colorAttribute != null) {
+                  let colorValue = obj.get(cfg.colorAttribute);
+                  if(colorValue != null) {
+                    if(cfg.colorMap != null) {
+                      if(cfg.colorMap[colorValue] != null) {
+                        color = cfg.colorMap[colorValue];
+                      }
+                    } else {
+                      color = colorValue;
+                    }  
+                  }
                 }
-              }
-              if(color != null) {
-                spreads.push(new GanttSpread(obj.uid, label, prelabel, postlabel, startPX, widthPX, height, laneId, color, labelcolor, canEdit, selected, obj, cfg));
+                let labelcolor = "#333";
+                if(cfg.labelColor != null) {
+                  labelcolor = cfg.labelColor;
+                }
+                let canEdit: boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
+                let selected: boolean = false;
+                if(cfg.isBackground == false && dataset.selectedObject == obj) {
+                  selected = true;
+                  if(this.refocus) {
+                    this.mainscroll.scrollToHPos(Math.max(0, startPX - 30));
+                    this.refocus = false;
+                    this.blockNextRefocus = false;
+                  }
+                }
+                if(color != null) {
+                  spreads.push(new GanttSpread(obj.uid, label, prelabel, postlabel, startPX, widthPX, height, laneId, color, labelcolor, canEdit, selected, obj, cfg));
+                }
               }
             }
           }
