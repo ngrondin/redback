@@ -3,7 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ApiService } from 'app/services/api.service';
 import { ReportService } from 'app/services/report.service';
-import { csvicon, excelicon, pdficon } from './reporticons.const';
+import { csvicon, excelicon, pdficon, txticon } from './reporticons.const';
 
 @Component({
   selector: 'rb-reportlist',
@@ -40,7 +40,7 @@ export class RbReportlistComponent implements OnInit {
   }
 
   public getIcon(type: string) : any {
-    let image: string = type == 'excel' ? excelicon : type == 'csv' ? csvicon : pdficon;
+    let image: string = type == 'excel' ? excelicon : type == 'csv' ? csvicon : type == 'pdf' ? pdficon : type == 'txt' ? txticon : '';
     return this.sanitizer.bypassSecurityTrustResourceUrl('data:image/png;base64,' + image);
   }
 
