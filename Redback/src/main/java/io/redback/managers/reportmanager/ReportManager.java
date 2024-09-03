@@ -19,6 +19,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.csv.CSVReport;
 import io.redback.managers.reportmanager.excel.ExcelReport;
 import io.redback.managers.reportmanager.pdf.PDFReport;
+import io.redback.managers.reportmanager.txt.TXTReport;
 import io.redback.security.Session;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.RedbackFileMetaData;
@@ -117,6 +118,8 @@ public class ReportManager implements Consumer {
 				report = new CSVReport(session, this, config);
 			else if(config.getType().equals("excel"))
 				report = new ExcelReport(session, this, config);
+			else if(config.getType().equals("txt"))
+				report = new TXTReport(session, this, config);
 			if(report != null)
 				report.produce(filter);
 			else 
