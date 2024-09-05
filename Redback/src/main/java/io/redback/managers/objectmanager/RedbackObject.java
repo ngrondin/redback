@@ -718,58 +718,59 @@ public class RedbackObject extends RedbackElement
 			object.put("uid", uid.getObject());
 			object.put("domain", domain.getObject());
 			object.put("ts", lastUpdated);
+			if(isDeleted()) {
+				object.put("deleted", true);
+			} else {
+				DataMap dataNode = new DataMap();
+				DataMap validatonNode = new DataMap();
+				DataMap relatedNode = new DataMap();
 
-			DataMap dataNode = new DataMap();
-			DataMap validatonNode = new DataMap();
-			DataMap relatedNode = new DataMap();
-
-			if(addValidation)
-				validatonNode.put("_candelete", this.canDelete());
-			
-			Iterator<String> it = config.getAttributeNames().iterator();
-			while(it.hasNext())
-			{
-				AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-				if(attributeConfig.isSub() == false) {
-					String attrName = attributeConfig.getName();
-					Value attrValue = get(attrName);
-	
-					if(addValidation) {
-						DataMap attributeValidation = new DataMap();
-						attributeValidation.put("editable", isEditable(attrName));
-						attributeValidation.put("mandatory", isMandatory(attrName));
-						attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
-						if(attributeConfig.hasRelatedObject())
-						{
-							DataMap relatedObjectValidation = new DataMap();
-							relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
-							relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
-							relatedObjectValidation.put("listfilter",  getRelatedListFilter(attributeConfig.getName()));
-							attributeValidation.put("related", relatedObjectValidation);
-						}
-						validatonNode.put(attrName, attributeValidation);
-					}
-					
-					if(addRelated  &&  attributeConfig.hasRelatedObject())
-					{
-						RedbackObject relatedObject = getRelated(attrName);
-						if(relatedObject != null)
-							relatedNode.put(attrName, relatedObject.getDataMap(false, false, cache));
-					}
-	
-					dataNode.put(attrName, attrValue.getObject());
-				}
-			}
-			object.put("data", dataNode);
-			
-			if(addValidation)
-				object.put("validation", validatonNode);
-			if(addRelated)
-				object.put("related", relatedNode);
+				if(addValidation)
+					validatonNode.put("_candelete", this.canDelete());
 				
+				Iterator<String> it = config.getAttributeNames().iterator();
+				while(it.hasNext())
+				{
+					AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
+					if(attributeConfig.isSub() == false) {
+						String attrName = attributeConfig.getName();
+						Value attrValue = get(attrName);
+		
+						if(addValidation) {
+							DataMap attributeValidation = new DataMap();
+							attributeValidation.put("editable", isEditable(attrName));
+							attributeValidation.put("mandatory", isMandatory(attrName));
+							attributeValidation.put("updatescript", attributeConfig.getScriptForEvent("onupdate") != null);
+							if(attributeConfig.hasRelatedObject())
+							{
+								DataMap relatedObjectValidation = new DataMap();
+								relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
+								relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
+								relatedObjectValidation.put("listfilter",  getRelatedListFilter(attributeConfig.getName()));
+								attributeValidation.put("related", relatedObjectValidation);
+							}
+							validatonNode.put(attrName, attributeValidation);
+						}
+						
+						if(addRelated  &&  attributeConfig.hasRelatedObject())
+						{
+							RedbackObject relatedObject = getRelated(attrName);
+							if(relatedObject != null)
+								relatedNode.put(attrName, relatedObject.getDataMap(false, false, cache));
+						}
+		
+						dataNode.put(attrName, attrValue.getObject());
+					}
+				}
+				object.put("data", dataNode);
+				
+				if(addValidation)
+					object.put("validation", validatonNode);
+				if(addRelated)
+					object.put("related", relatedNode);
+			}
 			if(cache)
 				cachedDataMap = object;
-			
 			return object;			
 		}
 

@@ -810,6 +810,7 @@ public class ObjectManager
 			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
 			for(RedbackObject rbObject: list) {
 				if(rbObject.isDeleted) {
+					updatedList.add(rbObject);
 					dbtxs.add(rbObject.getDBDeleteTransaction());
 					updates++;
 				} else if(rbObject.isUpdated()) {

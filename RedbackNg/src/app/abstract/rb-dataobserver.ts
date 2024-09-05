@@ -7,6 +7,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { DatasetListMap, DatasetMap, RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
 import { Subscription } from "rxjs";
 import { RbComponent } from "./rb-component";
+import { Evaluator } from "app/helpers";
 
 
 
@@ -18,6 +19,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('show') showExpr: string;
     @HostBinding('style.display') get visitility() { return this.show ? 'flex' : 'none'; }
     
+    public globalSubscription: Subscription;
     public datasetSubscription: Subscription;
     public datasetGroupSubscription: Subscription;
     public aggregatesetSubscription: Subscription;
@@ -28,6 +30,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     componentInit() {
+        this.globalSubscription = window.redback.getObservable().subscribe(event => this.internalDatasetEvent(event));
         if(this.dataset != null) {
             this.datasetSubscription = this.dataset.getObservable().subscribe(event => this.internalDatasetEvent(event));
         }
@@ -46,6 +49,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     componentDestroy() {
+        this.globalSubscription.unsubscribe();
         if(this.datasetSubscription != null) {
             this.datasetSubscription.unsubscribe();
         }
@@ -100,22 +104,6 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     evalShow() {
-        if(this.showExpr == 'true') {
-            this.show = true;
-        } else if(this.showExpr == 'false') {
-            this.show = false;
-        } else if(this.rbObject != null || this.relatedObject != null) {            
-            let str: string = decodeURIComponent(this.showExpr);
-            let object = this.rbObject;
-            let relatedObject = this.relatedObject;
-            //TODO: Should be changed to use Evaluator.eval
-            if(!((str.indexOf("object.") > -1 && object == null) || (str.indexOf("relatedObject.") > -1 && relatedObject == null))) {
-                this.show = eval(str);            
-            } else {
-                this.show = false;
-            }
-        } else {
-            this.show = false;
-        }
+        this.show = Evaluator.eval(decodeURIComponent(this.showExpr), this.rbObject, this.relatedObject) ?? false;
     }
   }

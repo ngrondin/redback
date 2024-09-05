@@ -1,0 +1,40 @@
+<div
+    *ngIf="control == 'separator'"
+    class="rb-hcollapse-header">
+    <div
+        class="rb-hcollapse-preline">
+    </div>
+    <div
+        class="rb-hcollapse-switch">
+        <mat-icon
+            *ngIf="isOpen"
+            (click)="toggle()">
+            keyboard_arrow_left
+        </mat-icon>
+        <mat-icon
+            *ngIf="!isOpen"
+            (click)="toggle()">
+            keyboard_arrow_right
+        </mat-icon>
+        <div
+            *ngIf="label != null"
+            class="rb-hcollapse-label">
+            {{label}}
+        </div>
+    </div>
+    <div
+        class="rb-hcollapse-postline">
+    </div>
+</div>
+<div
+    [class]="'rb-hcollapse-container' + (control == 'tab' ? ' rb-hcollapse-container-border' : '')"
+    [style.display]="isOpen ? 'flex' : 'none'">
+    <ng-content></ng-content>
+    <div #container></div>    
+</div>
+<div
+    *ngIf="control == 'tab'"
+    class="rb-hcollapse-tab"
+    (click)="toggle()">
+    <span>{{label ?? (isOpen ? 'Close' : 'Open')}}</span>
+</div>

@@ -267,7 +267,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
   
   private receiveNewlyCreatedData(object: RbObject) {
-    if(object.objectname == this.objectname && this.isLoading == false && this._list.includes(object) == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
+    if(object.objectname == this.objectname && object.deleted == false && this._list.includes(object) == false && this.isLoading == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
       if(this.filterService.applies(this.resolvedFilter, object)) {
         this._list.push(object);
         object.addSet(this);
@@ -283,9 +283,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     let filterApplies = this.filterService.applies(this.resolvedFilter, object);
     if(object.deleted || !filterApplies) {
       this.remove(object);
-    } else  {
-      this.publishEvent('update');
-    }
+    } 
+    this.publishEvent('update');
   }
 
   public selectUid(uid: string) {

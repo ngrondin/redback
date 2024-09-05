@@ -1,0 +1,20 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+}
+
+.rb-progress-bar {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    margin: var(--v5px);
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    height: 0.5vw;
+}
+
+.rb-progress-bar-fill {
+    background-color: var(--primary-color);
+    border-radius: 3px;
+}

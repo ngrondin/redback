@@ -59,6 +59,9 @@ import { RbVbarGraphComponent } from "app/graphs/rb-vbar-graph/rb-vbar-graph.com
 import { RbHbarGraphComponent } from "app/graphs/rb-hbar-graph/rb-hbar-graph.component";
 import { RbScrollComponent } from "app/rb-scroll/rb-scroll.component";
 import { RbGroupComponent } from "app/rb-group/rb-group.component";
+import { RbTextComponent } from "app/rb-text/rb-text.component";
+import { RbHcollapseComponent } from "app/rb-hcollapse/rb-hcollapse.component";
+import { RbProgressComponent } from "app/rb-progress/rb-progress.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -106,6 +109,7 @@ export const componentRegistry = {
     "table": RbTableComponent,
     "linktable": RbLinktableComponent,
     "vcollapse": RbVcollapseComponent,
+    "hcollapse": RbHcollapseComponent,
     "hseparator": RbHseparatorComponent,
     "vseparator": RbVseparatorComponent,
     "spacer": RbSpacerComponent,
@@ -122,5 +126,7 @@ export const componentRegistry = {
     "funnel":RbFunnelComponent,
     "listbutton": RbActionlistComponent,
     "scroll":RbScrollComponent,
-    "group": RbGroupComponent
+    "group": RbGroupComponent,
+    "text":RbTextComponent,
+    "progress": RbProgressComponent
   }

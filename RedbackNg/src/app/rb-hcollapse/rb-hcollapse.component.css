@@ -1,0 +1,68 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
+.rb-hcollapse-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rb-hcollapse-preline {
+    display: flex;
+    flex: 0 0 auto;
+    height: 20px;
+    border-right: 1px solid #e8e8e8;
+}
+
+.rb-hcollapse-postline {
+    display: flex;
+    flex: 1 1 auto;
+    border-right: 1px solid #e8e8e8;
+}
+
+.rb-hcollapse-label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.7rem;
+    color: lightgray;
+    align-items: center;
+}
+
+.rb-hcollapse-switch {
+    display: flex;
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+    color: lightgray;
+    cursor: pointer;
+}
+
+.rb-hcollapse-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-hcollapse-container-border {
+    border-right: 1px solid #cccccc;
+}
+
+.rb-hcollapse-tab {
+    display: flex;
+    align-items: center;
+    position:absolute;
+    right: -1.2vw;
+    width: 1.2vw;
+    bottom: 1vw;
+    text-orientation: sideways-right;
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    background-color: var(--primary-color);
+    color: var(--light-inverse-writing-color);
+    font-size: 0.8rem;
+    border-radius: 5px 0px 0px 5px;
+    padding: 0.3vw 0px;
+    cursor: pointer;
+    z-index: 100;
+}

@@ -58,6 +58,11 @@ export class RbObject {
                     }
                 }
             }
+
+            if(json.deleted == true) {
+                this.deleted = true;
+                isChanged = true;
+            }
     
             if(json.validation != null) {
                 this.validation._candelete = json.validation._candelete;
@@ -68,6 +73,7 @@ export class RbObject {
                 this.updatedAttributes = [];
                 this._adviseSetsOfChange();
             }
+
             this.lastUpdated = json.ts;
         }
     }
@@ -227,6 +233,7 @@ export class RbObject {
     }
 
     _adviseSetsOfChange() {
+        //console.log("object changed " + this.uid + "   deleted=" + this.deleted);
         let sets = [...this.datasets]; // this is because while calling the datasets, these can actually remove themselves which mutates the list
         for(let set of sets) {
             set.objectUpdated(this);

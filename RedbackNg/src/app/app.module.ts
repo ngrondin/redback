@@ -148,6 +148,9 @@ import { RbVbarGraphComponent } from './graphs/rb-vbar-graph/rb-vbar-graph.compo
 import { RbHbarGraphComponent } from './graphs/rb-hbar-graph/rb-hbar-graph.component';
 import { RbPopupGlobalSearchComponent } from './popups/rb-popup-globalsearch/rb-popup-globalsearch.component';
 import { RbGroupComponent } from './rb-group/rb-group.component';
+import { RbTextComponent } from './rb-text/rb-text.component';
+import { RbHcollapseComponent } from './rb-hcollapse/rb-hcollapse.component';
+import { RbProgressComponent } from './rb-progress/rb-progress.component';
 
 
 
@@ -309,7 +312,10 @@ window.redback = window.redback || {};
         RbVbarGraphComponent,
         RbHbarGraphComponent,
         RbPopupGlobalSearchComponent,
-        RbGroupComponent
+        RbGroupComponent,
+        RbTextComponent,
+        RbHcollapseComponent,
+        RbProgressComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

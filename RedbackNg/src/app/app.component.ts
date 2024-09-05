@@ -7,7 +7,7 @@ import { UserprefService } from './services/userpref.service';
 import { NotificationService } from './services/notification.service';
 import { ClientWSService } from './services/clientws.service';
 import { MenuService } from './services/menu.service';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { DataService } from './services/data.service';
 import { ModalService } from './services/modal.service';
 import { ChatService } from './services/chat.service';
@@ -94,6 +94,17 @@ export class AppComponent implements OnInit {
     window.redback.data = this.dataService;
     window.redback.modal = this.modalService;
     window.redback.notifications = this.notificationService;
+    window.redback.observers = [];
+    window.redback.getObservable = () => {
+      return new Observable<string>((observer) => {
+        window.redback.observers.push(observer);
+      });
+    }
+    window.redback.publishEvent = (event: string)=> {
+      window.redback.observers.forEach((observer) => {
+        observer.next(event);
+      }); 
+    }
   }
 
   ngOnInit(): void {
