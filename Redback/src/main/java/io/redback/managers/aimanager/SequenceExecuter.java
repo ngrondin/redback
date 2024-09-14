@@ -261,13 +261,27 @@ public class SequenceExecuter {
 		if(params.size() >= 1) {
 			String view = params.get(0);
 			SEContextLevel c = context.getContextLevel();
-			if(params.size() == 1) {
-				if(c instanceof ObjectContext) {
-					ObjectContext oc = (ObjectContext)c;
-					context.uiActions.add("$navtocontext");
-					context.uiActions.add(view);
-					context.uiActions.add(oc.uid);
+			if(c instanceof ObjectContext) {
+				ObjectContext oc = (ObjectContext)c;
+				DataMap filter = new DataMap();
+				if(params.size() == 1) {
+					filter.put("uid", "'" + oc.uid + "'");
+				} else if(params.size() > 1) {
+					int i = 1;
+					while(i < params.size()) {
+						String curToken = params.get(i);
+						if(curToken.startsWith("@")) {
+							String key = curToken.substring(1);
+							List<String> valTokens = getTokensUntil(params, i + 1, "@");
+							Object val = getValue(context, valTokens);
+							filter.put(key, val);
+							i += 1 + valTokens.size();
+						} 
+					}
 				}
+				context.uiActions.add("$navtocontext");
+				context.uiActions.add(view);
+				context.uiActions.add(filter.toString(true, true));
 			}
 		}
 	}

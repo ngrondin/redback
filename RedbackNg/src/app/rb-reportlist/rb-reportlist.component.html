@@ -1,36 +1,41 @@
 <div
+    class="rb-reportlist-header">
+    <span class="material-symbols-outlined rb-reportlist-topicon">
+        description
+    </span>   
+    <div
+        class="rb-reportlist-title">
+        Reports
+    </div>
+</div>
+<div
     class="rb-reportlist-container">
-    <rb-tab-section
-        #rlts
-        [grow]="0"
-        [shrink]="0">
-        <rb-tab
-            [tabsection]="rlts"
-            [label]="'Reports'"
-            [isdefault]="true"
-            [grow]="0"
-            [shrink]="0">
+    <div
+        class="rb-reportlist-list">
+        <rb-clickable
+            *ngFor="let report of reports"
+            (click)="launch(report)">
             <div
-                class="rb-reportlist-list">
-                <rb-clickable
-                    *ngFor="let report of reports"
-                    (click)="launch(report)">
-                    <div
-                        class="rb-reportlist-line">
-                        <img 
-                            class="rb-reportlist-icon" 
-                            [src]="getIcon(report.type)">
-                        <span>{{report.description || report.name}}</span>                        
-                    </div>
-                </rb-clickable>
+                class="rb-reportlist-line">
+                <div
+                    class="rb-reportlist-icon"
+                    [ngStyle]="{ 'background-image': 'url(' + getIcon(report.type) + ')'}">
+                </div>
+                <span>{{report.description || report.name}}</span>                        
             </div>
-            <div
-                class="rb-reportlist-spinner-conntainer"
-                *ngIf="isLoading">
-                <mat-spinner
-                    diameter="20">
-                </mat-spinner>
-            </div>	
-        </rb-tab>
-    </rb-tab-section>
+        </rb-clickable>
+    </div>
+    <div
+        class="rb-reportlist-empty"
+        *ngIf="reports.length == 0 && !isLoading">
+        No reports available
+    </div>
+    <div
+        class="rb-reportlist-spinner-conntainer"
+        *ngIf="isLoading">
+        <mat-spinner
+            diameter="20">
+        </mat-spinner>
+    </div>	
+
 </div>

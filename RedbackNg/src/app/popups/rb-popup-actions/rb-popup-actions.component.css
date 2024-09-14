@@ -1,10 +1,22 @@
 
 .rb-popup-actions-container {
-    padding: var(--v10px) var(--v20px);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: var(--v10px) var(--v10px);
+    flex: 1 1 auto;
+}
+
+.rb-popup-actions-label {
     color: var(--dark-writing-color);
     font-size: 0.95rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 1 1 auto;
+    margin: 0px var(--v10px);
+
+}
+
+.rb-popup-actions-icon {
+    color: var(--light-writing-color);
 }

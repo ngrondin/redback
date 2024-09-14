@@ -12,6 +12,8 @@ export class RbProgressComponent extends RbDataObserverComponent {
   @Input('object') _rbObject: RbObject;
   @Input('value') _value: any = null;
   @Input('variable') variable: any;
+  @Input('label') label: string = "Progress";
+  @Input('icon') icon: string = "progress_activity";
   @Input('size') size: number;
   @Input('grow') grow: number;
   @Input('margin') margin: boolean = true;

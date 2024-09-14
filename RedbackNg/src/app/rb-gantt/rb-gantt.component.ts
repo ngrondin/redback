@@ -95,21 +95,23 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       let target = null;
       for(let cfg of this.seriesConfigs) {
         let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
-        if(dataset.dataTarget != null && dataset.dataTarget.objectuid != null) {
+        if(dataset.dataTarget != null && dataset.dataTarget.select != null) {
           target = {
             cfg: cfg, 
             objectname: dataset.objectname, 
-            uid: dataset.dataTarget.objectuid, 
-            object: dataset.list.find(o => o.uid == dataset.dataTarget.objectuid)
+            filter: dataset.dataTarget.select, 
+            object: dataset.selectedObject
           }
         }
       }
-      if(target != null && target.uid != null && target.object == null) {
+      if(target != null && target.filter != null && target.object == null) {
         console.log("Gantt actiavate with target that is not in the dataset");
-        this.dataService.fetch(target.objectname, target.uid).subscribe((obj) => {
-          let ms = (new Date(obj.get(target.cfg.startAttribute))).getTime();
-          this.startDate = new Date(ms - (3*60*60*1000));
-          super.onActivationEvent(event);
+        this.dataService.fetchFirst(target.objectname, target.filter, null, null).subscribe((obj) => {
+          if(obj != null) {
+            let ms = (new Date(obj.get(target.cfg.startAttribute))).getTime();
+            this.startDate = new Date(ms - (3*60*60*1000));
+            super.onActivationEvent(event);  
+          }
         })
       } else {
         super.onActivationEvent(event);

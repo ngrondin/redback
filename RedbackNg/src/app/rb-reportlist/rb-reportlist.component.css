@@ -12,18 +12,36 @@
     overflow: auto;
 }
 
+.rb-reportlist-header {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+    background-color: var(--primary-color);
+    align-items: center;
+    height: var(--v36px);
+}
+
+.rb-reportlist-topicon {
+    margin-left: var(--v5px);
+    color: #ddd;
+}
+
+.rb-reportlist-title {
+    display: flex;
+    flex: 1 1 auto;
+    margin-left: var(--v5px);
+    color: #ddd;
+}
+
 
 .rb-reportlist-container {
     display: flex;
     flex-direction: column;
-    min-width: 300px;
-    min-height: 150px;
 }
 
 .rb-reportlist-list {
     display: flex;
     flex-direction: column;
-    padding: 16px 24px 10px 5px;
     color: #444444;
 }
 
@@ -31,20 +49,30 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 10px 0px 10px 0px;
+    padding: var(--v10px) 0px;
 }
 
 .rb-reportlist-line {
     display: flex;
     flex-direction: row;
     flex: 1 1 auto;
-    padding: var(--v10px) var(--v12px);
+    padding: var(--v14px) var(--v14px);
+    align-items: center;
 }
 
 .rb-reportlist-icon {
-    color: #888888;
-    max-height: 24px;
+    width: var(--v24px);
+    height: var(--v28px);
     margin-right: var(--v10px);
+    background-size: var(--v24px);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.rb-reportlist-empty {
+    font-size: 1rem;
+    color: var(--dark-writing-color);
+    padding: var(--v20px);
 }
 
 .rb-reportlist-spinner-conntainer {

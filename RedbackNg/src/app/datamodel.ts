@@ -233,7 +233,6 @@ export class RbObject {
     }
 
     _adviseSetsOfChange() {
-        //console.log("object changed " + this.uid + "   deleted=" + this.deleted);
         let sets = [...this.datasets]; // this is because while calling the datasets, these can actually remove themselves which mutates the list
         for(let set of sets) {
             set.objectUpdated(this);
@@ -376,12 +375,14 @@ export class RbNotification {
 export class RbNotificationAction {
     action: string;
     description: string;
+    icon: string;
     confirm: string;
     main: boolean;
 
     constructor(json: any) {
         this.action = json.action;
         this.description = json.description;
+        this.icon = json.icon;
         this.confirm = json.confirm;
         this.main = json.main;
     }
@@ -522,14 +523,13 @@ export class DataTarget {
     filter: any;
     sort: any;
     search: string;
-    objectuid: string;
-    //selectedObject: RbObject;
+    select: any;
   
-    constructor(o: string, f: any, s: string, uid: string) {
+    constructor(o: string, f: any, s: string, sl: any) {
       this.objectname = o
       this.filter = f;
       this.search = s;
-      this.objectuid = uid;
+      this.select = sl;
     }
 }
 
@@ -541,7 +541,7 @@ export class NavigateEvent {
     objectname?: string;
     filter?: any;
     search?: string;
-    objectuid?: string;
+    select?: any;
     label?: string;
     reset?: boolean;
 }
@@ -556,13 +556,13 @@ export class NavigateData {
     mode: string;
     dataTarget: DataTarget;
   
-    constructor(dom: string, v: string, t:string, o: string, f: any, s: string, uid: string) {
+    constructor(dom: string, v: string, t:string, o: string, f: any, s: string, sl: string) {
       this.domain = dom;
       this.view = v;
       this.tab = t;
       this.title = null;
-      if(f != null || s != null || uid != null) {
-        this.dataTarget = new DataTarget(o, f, s, uid);
+      if(f != null || s != null || sl != null) {
+        this.dataTarget = new DataTarget(o, f, s, sl);
       }
     }
 

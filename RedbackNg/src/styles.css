@@ -476,6 +476,10 @@ rb-fileset {
     overflow: hidden!important;
 }
 
+.mat-drawer {
+	z-index: 1!important;
+}
+
 .agm-map-container-inner {
     height: 100% !important;
 }

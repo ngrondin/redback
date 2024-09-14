@@ -4,11 +4,33 @@
     flex: 1 1 auto;
 }
 
+.rb-progress-bar-icon {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: var(--light-writing-color);
+}
+
+.rb-progress-bar-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    margin: var(--v5px);
+}
+
+.rb-progress-bar-label {
+    font-size: 0.75rem;
+    color: rgb(175, 175, 175);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+}
+
 .rb-progress-bar {
     display: flex;
     flex-direction: row;
     flex: 1 1 auto;
-    margin: var(--v5px);
+    margin: var(--v5px) 0px;
     border: 1px solid #ccc;
     border-radius: 3px;
     height: 0.5vw;

@@ -439,9 +439,11 @@ export class LinkConfig {
             event.tab = this.tab;
         }
         event.objectname = this.objectname != null ? this.objectname : object.objectname;
-        event.objectuid = this.attribute != null ? object.get(this.attribute) : object.uid;
+        let objectuid = this.attribute != null ? object.get(this.attribute) : object.uid;
         if(this.filtersingleobject == true) {
-            event.filter = {uid: "'" + event.objectuid + "'"}
+            event.filter = {uid: "'" + objectuid + "'"} //filter will be resolved in the dataset before fetching
+        } else {
+            event.select = {uid: objectuid} //select will be calculated on the object list (not resolved)
         }
         event.reset = this.reset;
         return event;

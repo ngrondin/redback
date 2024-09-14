@@ -15,12 +15,15 @@ public abstract class Provider
 	protected String serviceName;
 	protected Firebus firebus;
 	protected DataMap config;
+	protected boolean writeRequestLog = true; 
 	
 	public Provider(String n, DataMap c, Firebus f)
 	{
 		serviceName = n;
 		config = c;
 		firebus = f;
+		if(config.containsKey("requestlog")) writeRequestLog = config.getBoolean("requestlog");
+
 	}
 
 	protected Session getSession(Payload payload) {

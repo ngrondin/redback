@@ -11,7 +11,7 @@ import io.redback.security.Session;
 import io.redback.utils.Timer;
 
 public abstract class StreamProvider extends Provider implements io.firebus.interfaces.StreamProvider {
-	
+
 	public StreamProvider(String n, DataMap c, Firebus f) {
 		super(n, c, f);
 	}
@@ -21,7 +21,8 @@ public abstract class StreamProvider extends Provider implements io.firebus.inte
 			Timer timer = new Timer();
 			Session session = getSession(payload);
 			Payload acceptPayload = redbackAcceptStream(session, payload, streamEndpoint);
-			Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
+			if(writeRequestLog)
+				Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return acceptPayload;
 		} catch(Exception e) {
 			throw handleException("rb.stream", "Exception in redback stream '" + serviceName + "'", e);

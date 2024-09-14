@@ -585,6 +585,23 @@ public class RedbackObject extends RedbackElement
 		return traceTxs;
 	}
 	
+	public void afterCreate() throws RedbackException
+	{
+		if(isNewObject && canWrite)
+		{
+			executeFunction("aftercreate", scriptContext);
+		}
+	}
+	
+	public void afterUpdate() throws RedbackException
+	{
+		if(isDeleted != true && updatedAttributes.size() > 0 && canWrite)
+		{
+			executeFunction("afterupdate", scriptContext);
+		}
+	}
+
+	
 	public void onSave() throws RedbackException
 	{
 		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true) && canWrite)

@@ -1,8 +1,19 @@
-<div 
-    class="rb-progress-bar">
-    <div 
-        class="rb-progress-bar-fill"
-        [style.width.%]="value">
-
+<div
+    class="material-symbols-outlined rb-progress-bar-icon">
+    {{icon}}
+</div>
+<div
+    class="rb-progress-bar-content">
+    <div
+        class="rb-progress-bar-label">
+        {{label}}
     </div>
+    <div 
+        class="rb-progress-bar">
+        <div 
+            class="rb-progress-bar-fill"
+            [style.width.%]="value">
+
+        </div>
+    </div>  
 </div>

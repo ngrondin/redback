@@ -484,6 +484,7 @@ public class ObjectManager
 			String attributeName = it.next();
 			object.put(attributeName, new Value(updateData.get(attributeName)));
 		}
+		object.afterUpdate();
 		return object;
 	}
 	
@@ -510,6 +511,7 @@ public class ObjectManager
 			session.popScriptLevel();
 			Logger.fine("rb.object.create", new DataMap("object", object.getObjectConfig().getName(), "uid", object.getUID().getString()));
 		}
+		object.afterCreate();
 		return object;				
 	}
 	

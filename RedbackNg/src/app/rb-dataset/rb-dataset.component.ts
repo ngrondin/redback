@@ -77,6 +77,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     } else if(event == 'update') {
       this.publishEvent('update');
       this.refreshData(true);
+    } else if(event == 'globalupdate') {
+      this.refreshData();
     }
   }
 
@@ -92,9 +94,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.userFilter = dt.filter;
     this.userSearch = dt.search;
     let refreshed = this.refreshData();
-    if(!refreshed && dt.objectuid != null) {
-      console.log('dateset ' + this.id + ' not refreshed, directly selecting'); 
-      this.selectUid(dt.objectuid);
+    if(!refreshed && dt.select != null) {
+      this.selectByFilter(dt.select); //Dataset not refreshed, directly selecting the object (assuming it is already in the list)
     }
   }
 
@@ -249,8 +250,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     } else if(this._list.length == 1) {
       this.select(this._list[0]);
     } else if(this._list.length > 1) {
-      if(this.dataTarget != null && this.dataTarget.objectuid != null) {
-        this.selectUid(this.dataTarget.objectuid);
+      if(this.dataTarget != null && this.dataTarget.select != null) {
+        this.selectByFilter(this.dataTarget.select);
       } else if(this.selectedObject != null && !this._list.includes(this.selectedObject)) {
         this._selectedObjects = [];
       }
@@ -287,16 +288,17 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.publishEvent('update');
   }
 
-  public selectUid(uid: string) {
-    let obj = this._list.find(o => o.uid == uid);
-    if(obj != null) this.select(obj);
-    else console.log("Trying a select an object that is not in the dataset");
+  public selectByFilter(filter: any) {
+    this._selectedObjects = [];
+    for(var o of this._list) {
+      if(this.filterService.applies(filter, o)) this.addOneToSelection(o);
+    }
   }
 
   public select(object: RbObject) {
     this._selectedObjects = [object];
-    if(this.dataTarget != null) {
-      this.dataTarget.objectuid = object != null ? object.uid : null; //Null object means 'deselect everything'
+    if(this.dataTarget != null && object != null) {
+      this.dataTarget.select = {uid: object.uid};
     }
     this.publishEvent('select');
   }
@@ -306,9 +308,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.select(object);
     } else {
       this._selectedObjects.push(object);
-      if(this.dataTarget != null) {
-        this.dataTarget.objectuid = null;
-      }
       this.publishEvent('select');
     }
   }
@@ -322,9 +321,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       let start = Math.min(i1, i2);
       let end = Math.max(i1, i2);
       this._selectedObjects = this._list.slice(start, end + 1);
-      if(this.dataTarget != null) {
-        this.dataTarget.objectuid = null;
-      }
       this.publishEvent('select');
     }
   }

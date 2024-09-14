@@ -43,7 +43,7 @@ export class NavigateService {
     let objectConfig: any = this.configService.getObjectConfig(event.objectname);
     let view: string = (event.view != null ? event.view : (objectConfig != null ? objectConfig.view : null));
     if(view != null) {
-      let data = new NavigateData(event.domain, view, event.tab, event.objectname, event.filter, event.search, event.objectuid); 
+      let data = new NavigateData(event.domain, view, event.tab, event.objectname, event.filter, event.search, event.select); 
       if(objectConfig != null && event.filter != null && event.filter[objectConfig.labelattribute] != null) {
         data.breadcrumbLabel = eval(event.filter[objectConfig.labelattribute]);
       }

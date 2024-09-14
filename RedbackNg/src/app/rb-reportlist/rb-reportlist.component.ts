@@ -41,7 +41,7 @@ export class RbReportlistComponent implements OnInit {
 
   public getIcon(type: string) : any {
     let image: string = type == 'excel' ? excelicon : type == 'csv' ? csvicon : type == 'pdf' ? pdficon : type == 'txt' ? txticon : '';
-    return this.sanitizer.bypassSecurityTrustResourceUrl('data:image/png;base64,' + image);
+    return 'data:image/png;base64,' + image;
   }
 
 }

@@ -99,6 +99,23 @@ export class DataService {
     });
   }
 
+  fetchFirst(name: string, filter: any, search: string, sort: any) : Observable<RbObject> {
+    return new Observable((observer) => {
+      this.apiService.listObjects(name, filter, search, sort, 0, 1, false).subscribe(
+        resp => {
+          const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
+          this.finalizeReceipt();
+          observer.next(rbObjectArray.length == 1 ? rbObjectArray[0] : null);
+          observer.complete();            
+        }, 
+        error => {
+          this.errorService.receiveHttpError(error)
+          observer.error(error);
+        }
+      )
+    });
+  }
+
   fetchList(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean) : Observable<any> {
     return new Observable((observer) => {
       //console.log((new Date()).getTime() + " Requesting list " + name);

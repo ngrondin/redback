@@ -2,9 +2,20 @@
     class="rb-modal-frame"
     (click)="$event.stopPropagation()">
     <div
-        class="rb-modal-title"
+        class="rb-modal-header"
         *ngIf="title != null">
-        <span>{{title}}</span>
+        <span class="material-symbols-outlined rb-modal-topicon">
+            {{icon}}
+        </span>   
+        <div
+            class="rb-modal-title">
+            {{title}}
+        </div>
+        <rb-iconbutton
+            icon="clear"
+            (click)="close()">
+        </rb-iconbutton>
+
     </div>
     <div
         class="rb-modal-container">

@@ -1,7 +1,6 @@
 import { HostBinding } from '@angular/core';
 import { Component, OnInit, HostListener, Output, EventEmitter, Input } from '@angular/core';
 import { RbActivatorComponent } from 'app/abstract/rb-activator';
-import { RbContainerComponent } from 'app/abstract/rb-container';
 import { ModalService } from 'app/services/modal.service';
 
 @Component({
@@ -14,6 +13,7 @@ export class RbModalComponent extends RbActivatorComponent {
 
   @Input('name') name: string;
   @Input('title') title: string;
+  @Input('icon') icon: string;
   @HostBinding('style.display') get visitility() {return this.isOpen ? 'flex' : 'none'; }
   @HostListener('click', ['$event']) backgroundClick($event) {this.close() }
 
@@ -41,13 +41,11 @@ export class RbModalComponent extends RbActivatorComponent {
   public open() {
     this.isOpen = true;
     this.activate();
-    console.log("opened " + this.name);
   }
 
   public close() {
     this.isOpen = false;
     this.deactivate();
-    console.log("closed " + this.name);
   }
 
 
