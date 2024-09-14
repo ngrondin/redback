@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
+import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
 import io.firebus.data.ZonedTime;
 import io.firebus.data.parse.DateParser;
@@ -232,7 +234,7 @@ public class SequenceExecuter {
 						context.uiActions.add("$navtofilter");
 						context.uiActions.add(view);
 						context.uiActions.add(lc.search);						
-						context.uiActions.add(lc.getUnresolvedUIFilter().toString(true, true));
+						context.uiActions.add(lc.filter != null ? getUnresolvedUIFilter(lc.filter).toString(true, true) : null);
 					} else if(lc.list.size() > 0){
 						context.uiActions.add("$navtouids");
 						context.uiActions.add(view);
@@ -248,11 +250,11 @@ public class SequenceExecuter {
 					context.uiActions.add(view);
 				}
 			} else if(params.size() >= 2) {
-				Object val = getValue(context, params.subList(1, params.size()));
+				SearchFilterSort sfs = createSearchFilterSort(context, null, params.subList(1, params.size()), false);
 				context.uiActions.add("$navtofilter");
 				context.uiActions.add(view);
-				context.uiActions.add(val.toString());
-				context.uiActions.add(null);
+				context.uiActions.add(sfs.search);
+				context.uiActions.add(sfs.filter != null ? getUnresolvedUIFilter(sfs.filter).toString(true, true) : null);
 			}		
 		}
 	}
@@ -267,17 +269,7 @@ public class SequenceExecuter {
 				if(params.size() == 1) {
 					filter.put("uid", "'" + oc.uid + "'");
 				} else if(params.size() > 1) {
-					int i = 1;
-					while(i < params.size()) {
-						String curToken = params.get(i);
-						if(curToken.startsWith("@")) {
-							String key = curToken.substring(1);
-							List<String> valTokens = getTokensUntil(params, i + 1, "@");
-							Object val = getValue(context, valTokens);
-							filter.put(key, val);
-							i += 1 + valTokens.size();
-						} 
-					}
+					filter = createSearchFilterSort(context, null, params.subList(1, params.size()), false).filter;
 				}
 				context.uiActions.add("$navtocontext");
 				context.uiActions.add(view);
@@ -316,6 +308,18 @@ public class SequenceExecuter {
 	}
 	
 	protected List<RedbackObjectRemote> listObjects(SEContext context, String objectName, List<String> params, boolean addToContext) throws RedbackException {
+		SearchFilterSort sfs = createSearchFilterSort(context, objectName, params);
+		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, sfs.filter, sfs.search, sfs.sort, false, true, 0, 1000);
+		if(addToContext)
+			context.pushContextLevel(new ListContext(list, sfs.filter, sfs.search, null));
+		return list;
+	}
+	
+	protected SearchFilterSort createSearchFilterSort(SEContext context, String objectName, List<String> params) throws RedbackException {
+		return createSearchFilterSort(context, objectName, params, true);
+	}
+		
+	protected SearchFilterSort createSearchFilterSort(SEContext context, String objectName, List<String> params, boolean useRegex) throws RedbackException {
 		DataMap filter = new DataMap();
 		DataMap sort = null;
 		String search = null;
@@ -326,7 +330,7 @@ public class SequenceExecuter {
 				if(curToken.startsWith("@")) {
 					String key = curToken.substring(1);
 					List<String> valTokens = getTokensUntil(params, i + 1, "@", "%");
-					DataMap relCfg = getAttributeRelationship(context, objectName, key);
+					DataMap relCfg = objectName != null ? getAttributeRelationship(context, objectName, key) : null;
 					if(relCfg != null) {
 						List<RedbackObjectRemote> list = listObjects(context, relCfg.getString("name"), valTokens, false);
 						String link = relCfg.getString("linkattribute");
@@ -338,10 +342,14 @@ public class SequenceExecuter {
 						Object val = getValue(context, valTokens);
 						if(val instanceof DataList)
 							filter.put(key, new DataMap("$in", (DataList)val));
-						else if(val instanceof String)
+						else if(val instanceof String && useRegex)
 							filter.put(key, new DataMap("$regex", "(?i)" + val));
-						else if(val instanceof Number)
+						else if(val instanceof String && !useRegex)
+							filter.put(key, val);
+						else if(val instanceof Number && useRegex)
 							filter.put(key, new DataMap("$regex", "(?i)" + val.toString()));						
+						else if(val instanceof Number && !useRegex)
+							filter.put(key, val.toString());						
 						else
 							filter.put(key, val);
 					}				
@@ -358,10 +366,7 @@ public class SequenceExecuter {
 				}
 			}
 		}
-		List<RedbackObjectRemote> list = objectClient.listObjects(context.session, objectName, filter, search, sort, false, true, 0, 1000);
-		if(addToContext)
-			context.pushContextLevel(new ListContext(list, filter, search, null));
-		return list;
+		return new SearchFilterSort(search, filter, sort);
 	}
 	
 	protected List<RedbackObjectRemote> listObjectsFromContext(SEContext context) throws RedbackException {
@@ -499,6 +504,34 @@ public class SequenceExecuter {
 				return attrCfg.getObject("relatedobject");
 			}
 		}
+		return null;
+	}
+	
+	protected DataMap getUnresolvedUIFilter(DataMap filter) {
+		if(filter == null) return null;
+		return (DataMap)_getUnresolvedUIFilter(filter);
+	}
+	
+	private DataEntity _getUnresolvedUIFilter(DataEntity val) {
+		if(val instanceof DataList) {
+			DataList outList = new DataList();
+			DataList inList = (DataList)val;
+			for(int i = 0; i < inList.size(); i++)
+				outList.add(_getUnresolvedUIFilter(inList.get(i)));
+			return outList;
+		} else if(val instanceof DataMap) {
+			DataMap out = new DataMap();
+			DataMap in = (DataMap)val;
+			for(String key : in.keySet())
+				out.put(key, _getUnresolvedUIFilter(in.get(key)));
+			return out;
+		} else if(val instanceof DataLiteral) {
+			DataLiteral in = (DataLiteral)val;
+			if(in.getType() == DataLiteral.TYPE_STRING || in.getType() == DataLiteral.TYPE_DATE || in.getType() == DataLiteral.TYPE_TIME)
+				return new DataLiteral("'" + in.getString() + "'");
+			else
+				return new DataLiteral(in.getObject());
+		} 
 		return null;
 	}
 }
