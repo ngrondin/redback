@@ -6,6 +6,8 @@ import { ErrorService } from './error.service';
 import { ClientWSService } from './clientws.service';
 import { FilterService } from './filter.service';
 import { Hasher } from '../helpers';
+import { IMAGE_LOADER } from '@angular/common';
+import { DeferredFetchQueue } from 'app/deferredfetchqueue';
 
 
 
@@ -17,7 +19,7 @@ export class DataService {
   saveImmediatly: boolean;
   fetchCount: number = 0;
   objectCreateObservers: Observer<RbObject>[] = [];
-  deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue();
+  deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue(this.filterService);
 
   constructor(
     private apiService: ApiService,
@@ -209,67 +211,6 @@ export class DataService {
     });
   }
 
-  enqueueDeferredFetch(name: string, uid: string, forRelatedObject: RbObject) {
-    if(uid != null && this.deferredFetchQueue.get(name).uids.indexOf(uid) == -1) {
-      this.deferredFetchQueue.get(name).uids.push(uid);
-    }
-    this.deferredFetchQueue.addObject(forRelatedObject);
-  }
-
-  enqueueDeferredFetchList(name: string, filter: any, forRelatedObject: RbObject) {
-    let filterHash = Hasher.hash(filter);
-    if(filter != null && this.deferredFetchQueue.get(name).filters.find(f => f.hash == filterHash) == null) {
-      this.deferredFetchQueue.get(name).filters.push(new DeferredFilter(filter, filterHash));
-    }
-    this.deferredFetchQueue.addObject(forRelatedObject);
-  }
-
-  async finalizeReceipt() {
-    //if(this.fetchCount > 0) return;
-    let multi = [];
-    for(let objectname of Object.keys(this.deferredFetchQueue.items)) {
-      let fetchRequest = this.deferredFetchQueue.get(objectname);
-      let filter = null;
-      let count = 0;
-      if(fetchRequest.uids.length > 0) {
-        filter = {uid:{$in: fetchRequest.uids}};
-        count += fetchRequest.uids.length;
-        fetchRequest.uids.forEach(uid => console.log("link," + objectname + "," + uid));
-      }
-      if(fetchRequest.filters.length > 0) {
-        let subfilter = fetchRequest.filters.map(f => f.data);
-        filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
-        count += fetchRequest.filters.length * 2; //Times 2 in order to allow for domain overridden objects
-        fetchRequest.filters.forEach(f => console.log("link," + objectname + "," + f.data));
-      }
-      multi.push({
-        key: objectname,
-        action: "list",
-        object: objectname,
-        filter: filter,
-        page: 0,
-        pagesize: count,
-        options: {addvalidation: true, addrelated: false}
-      });
-    }
-    let objects = [...this.deferredFetchQueue.objects];
-    this.deferredFetchQueue.clear();
-    if(multi.length > 0) {
-      this.apiService.objectMulti(multi).subscribe(
-        resp => {
-          for(var objectname of Object.keys(resp)) {
-            const rbObjectArray = Object.values(resp[objectname].list).map(json => this.receive(json));
-          }
-          for(var object of objects) {
-            object.linkMissingRelated();
-          }
-          this.finalizeReceipt();
-
-        }
-      );
-    }
-  }
-
   receive(json: any) : RbObject {
     let rbObject : RbObject = this.get(json.objectname, json.uid);
     if(rbObject != null) {
@@ -280,6 +221,24 @@ export class DataService {
       this.clientWSService.subscribeToUniqueObjectUpdate(rbObject.objectname, rbObject.uid);
     }
     return rbObject;
+  }
+
+  async finalizeReceipt() {
+    if(this.fetchCount > 0) return;
+    let multi = this.deferredFetchQueue.getMulti();
+    if(multi.length > 0) {
+      this.apiService.objectMulti(multi).subscribe(
+        resp => {
+          let list = [];
+          for(var objectname of Object.keys(resp)) {
+            const rbObjectArray = Object.values(resp[objectname].list).map(json => this.receive(json));
+            list = list.concat(rbObjectArray);
+          }
+          this.deferredFetchQueue.resolve(list);
+          this.finalizeReceipt();
+        }
+      );
+    }
   }
 
   pushToServer(rbObject: RbObject) {
@@ -410,45 +369,5 @@ export class DataService {
     return new Observable<any>((observer) => {
       this.objectCreateObservers.push(observer);
     });
-  }
-
-
-}
-
-
-
-class DeferredFilter {
-  data: any;
-  hash: number;
-
-  constructor(d: string, h: number) {
-    this.data = d;
-    this.hash = h;
-  }
-}
-
-class DeferredFetchQueueItem {
-  uids: string[] = []; 
-  filters: DeferredFilter[] = []; 
-}
-
-class DeferredFetchQueue {
-  items: {[key: string]: DeferredFetchQueueItem} = {};
-  objects: RbObject[] = [];
-
-  get(name: string): DeferredFetchQueueItem {
-    if(this.items[name] == null) this.items[name] = new DeferredFetchQueueItem();
-    return this.items[name];
-  }
-
-  addObject(obj: RbObject) {
-    if(this.objects.indexOf(obj) == -1) {
-      this.objects.push(obj);
-    }
-  }
-
-  clear() {
-    this.items = {};
-    this.objects = [];
   }
 }

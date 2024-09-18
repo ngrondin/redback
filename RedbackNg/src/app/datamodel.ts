@@ -84,7 +84,7 @@ export class RbObject {
         }
     }
 
-    _linkMissingRelated() {
+    async _linkMissingRelated() {
         let isChanged: boolean = false;
         for(const attribute in this.data) {
             if(this.validation[attribute] != null && this.validation[attribute].related != null && this.related[attribute] == null && this.data[attribute] != null) {
@@ -94,10 +94,16 @@ export class RbObject {
                     if(relatedRule.link == 'uid') {
                         uid = this.data[attribute];
                         relatedObject = this.dataService.get(relatedRule.object, uid);
+                        if(relatedObject == null) {
+                            relatedObject = await this.dataService.deferredFetchQueue.fetchUid(relatedRule.object, uid);
+                        }
                     } else {
                         filter = {...relatedRule.listfilter};
                         filter[relatedRule.link] = this.data[attribute];
                         var relatedObjectOptions = this.dataService.list(relatedRule.object, filter);
+                        if(relatedObjectOptions.length == 0) {
+                            relatedObjectOptions = await this.dataService.deferredFetchQueue.fetchFilter(relatedRule.object, filter);
+                        }
                         var selectedPoints = 0;
                         for(var option of relatedObjectOptions) {
                             var point = option.domain == this.domain ? 3 : option.domain == 'root' ? 1 : 2;
@@ -110,7 +116,7 @@ export class RbObject {
                     if(relatedObject != null) {
                         isChanged = true
                         this.related[attribute] = relatedObject;
-                    } else {
+                    }/* else {
                         if(this.flags[attribute] == null || this.flags[attribute]['reqrel'] != true) {
                             if(uid != null) this.dataService.enqueueDeferredFetch(relatedRule.object, uid, this);
                             else this.dataService.enqueueDeferredFetchList(relatedRule.object, filter, this);
@@ -118,7 +124,7 @@ export class RbObject {
                         } else {
                             //console.log("Can't find related object for " + this.objectname + ":" + this.uid + "." + attribute + " = '" + this.data[attribute] + "'");
                         }
-                    }
+                    }*/
                 }
             } 
         }
