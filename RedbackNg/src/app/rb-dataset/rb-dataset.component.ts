@@ -123,10 +123,14 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     return this._loading;
   }
 
+  public get hasUserFilter(): boolean {
+    return this.userFilter != null && Object.keys(this.userFilter).length > 0;
+  }
+
   public get canLoadData() : boolean {
     return this.active 
       && (this.master == null || (this.master != null && this.relatedObject != null))
-      && (this.requiresuserfilter == false || this.userFilter != null)
+      && (this.requiresuserfilter == false || this.hasUserFilter)
       && !this._loading;
   }
 

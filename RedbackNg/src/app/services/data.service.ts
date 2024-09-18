@@ -234,13 +234,11 @@ export class DataService {
       if(fetchRequest.uids.length > 0) {
         filter = {uid:{$in: fetchRequest.uids}};
         count += fetchRequest.uids.length;
-        fetchRequest.uids.forEach(uid => console.log("link," + objectname + "," + uid));
       }
       if(fetchRequest.filters.length > 0) {
         let subfilter = fetchRequest.filters.map(f => f.data);
         filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
         count += fetchRequest.filters.length * 2; //Times 2 in order to allow for domain overridden objects
-        fetchRequest.filters.forEach(f => console.log("link," + objectname + "," + f.data));
       }
       multi.push({
         key: objectname,
