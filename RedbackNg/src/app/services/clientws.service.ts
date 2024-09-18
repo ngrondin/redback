@@ -257,7 +257,7 @@ export class ClientWSService {
         });
         this.websocket.next(subreq);    
         this.subscriptionRequestPending = false;
-      }, 500);
+      }, 2000);
     }
   }
 
@@ -290,10 +290,10 @@ export class ClientWSService {
   }
 
   subscribeToUniqueObjectUpdate(objectname: string, uid: string) {
-    if(this.uniqueObjectSubscriptions.find(item => item.objectname == objectname && item.uid == uid) == null) {
+    //if(this.uniqueObjectSubscriptions.find(item => item.objectname == objectname && item.uid == uid) == null) {
       this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
       this.sendSubscriptionRequests();
-    }
+    //}
   }
 
   subscribeToFilterObjectUpdate(objectname: String, filter: any, id: string) {

@@ -25,42 +25,39 @@ export class MenuService {
     }
   }
 
-  loadPreferences(): Observable<null> {
-    const obs = new Observable<null>((observer) => {
+  loadPreferences(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       if(this.apiService.userprefService != null) {
-        this.apiService.getUserPreference('user', 'menu').subscribe(
-          resp => {
+        this.apiService.getUserPreference('user', 'menu').subscribe({
+          next: (resp) => {
             this.personalMenu = resp;
-            this.apiService.getUserPreference('role', 'menu').subscribe(
-              resp => {
+            this.apiService.getUserPreference('role', 'menu').subscribe({
+              next: (resp) => {
                 this.groupMenu = resp
-                this.apiService.getUserPreference('user', 'defaultmenu').subscribe(
-                  resp => {
+                this.apiService.getUserPreference('user', 'defaultmenu').subscribe({
+                  next: (resp) => {
                     this.config = resp;
-                    observer.next();
-                    observer.complete();
+                    resolve();
                     this.publish();
                   },
-                  error => {
-                    observer.error(error);
+                  error: (error) => {
+                    reject(error);
                   }
-                );
+                });
               },
-              error => {
-                observer.error(error);
+              error: (error) => {
+                reject(error);
               }
-            );
+            });
           },
-          error => {
-            observer.error(error);
+          error: (error) => {
+            reject(error);
           }
-        )
+        })
       } else {
-        observer.next();
-        observer.complete();
+        resolve();
       }
     });
-    return obs; 
   }
 
   public getObservable(): Observable<any> {

@@ -22,24 +22,20 @@ export class ChatService {
     clientService.getChatObservable().subscribe(msg => this.receiveUpdate(msg));
   }
 
-  load() : Observable<null> {
-    if(this.apiService.chatService != null && this.apiService.chatService != "") {
-      return new Observable<null>((observer) => {
+  load() : Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if(this.apiService.chatService != null && this.apiService.chatService != "") {
         this.loadUsers().subscribe(data => {
           this.loadChats().subscribe(data => {
             this.loadAllUnreadChatMessages().subscribe(() => {
-              observer.next();
-              observer.complete();
+              resolve();
             });
           });
         })
-      });
-    } else {
-      return new Observable<null>((observer) => {
-        observer.next(null); 
-        observer.complete();
-      });
-    }
+      } else {
+        resolve();
+      }
+    });
   }
 
   loadUsers(): Observable<ChatUser[]> {

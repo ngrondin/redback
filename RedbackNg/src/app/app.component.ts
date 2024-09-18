@@ -33,7 +33,8 @@ export class AppComponent implements OnInit {
   menuView: string;
   iconsets: string[];
 
-  onloadFunction: Function;
+  //AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+  onloadFunction: any;
 
   events: Subject<string> = new Subject<string>();
   firstConnected: boolean = false;
@@ -134,28 +135,25 @@ export class AppComponent implements OnInit {
       });  
     }
     if(config['onload'] != null) {
-      this.onloadFunction = Function(config['onload']);
+      eval("this.onloadFunction = async function() {" + config['onload'] + "}"); // Didn't use Function as this needs to be async
     }
 
     this.clientWSService.initWebsocket().subscribe(connected => this.firstLoad());
     setTimeout(() => this.firstLoad(), 5000); //If the client websocket doesn't connect in 5s, fallback on http
   }
 
-  firstLoad() {
+  async firstLoad() {
     if(this.firstConnected == false) {
       this.firstConnected = true;
-      this.menuService.loadPreferences().subscribe(() => {
-        this.userprefService.load().subscribe(() => {
-          this.notificationService.load().subscribe(() => {
-            this.chatService.load().subscribe(() => {
-              if(this.onloadFunction != null) {
-                this.onloadFunction.call(window.redback);
-              }
-              this.events.next("init");  
-            })
-          })
-        })
-      })
+      await this.menuService.loadPreferences();
+      await this.userprefService.load();
+      await this.notificationService.load();
+      await this.chatService.load();
+      if(this.onloadFunction != null) {
+        await this.onloadFunction.call(window.redback);
+      }
+      console.log("Initiation view load");
+      this.events.next("init");
     }
   }
 }

@@ -171,7 +171,6 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
       let target: any = {
         objectname: this.aggregateset.objectname,
         filter: filter,
-        //label: (event.code ?? event.name),
         reset: true
       };
       if(this.linkview != null) target.view = this.linkview;

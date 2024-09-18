@@ -151,12 +151,12 @@ export class RbFilterBuilderComponent implements OnInit {
         fltr = this.filterService.mergeFilters(fltr, this.config.aggregateFilter);
       }
       fltr = this.filterService.resolveFilter(fltr, null, null, null);
-      this.dataService.aggregate(this.config.objectname, fltr, null, [fac.attribute], [{function:"count", name:"count"}], null, 0, 500).subscribe({
+      this.dataService.aggregate(this.config.objectname, fltr, null, [fac.attribute], [{function:"count", name:"_cnt"}], null, 0, 500).subscribe({
         next: (list) => {
           fac.options = list.map(agg => ({
             name: agg.getDimension(fac.attribute + "." + fac.displayAttribute) ?? 'Empty', 
             value: agg.getDimension(fac.attribute),
-            count:agg.getMetric("count")
+            count:agg.getMetric("_cnt")
           }));
           fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
         }

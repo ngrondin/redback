@@ -52,38 +52,36 @@ export class UserprefService {
     Formatter.userPrefService = this;
   }
 
-  public load() {
-    return new Observable<null>((observer) => {
+  public load(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       if(this.apiService.userprefService != null) {
-        this.apiService.getUserPreference('domain', 'uiswitch').subscribe(
-          resp => {
+        this.apiService.getUserPreference('domain', 'uiswitch').subscribe({
+          next: (resp) => {
             this.domainUISwitches = resp;
-            this.apiService.getUserPreference('role', 'uiswitch').subscribe(
-              resp => {
+            this.apiService.getUserPreference('role', 'uiswitch').subscribe({
+              next: (resp) => {
                 this.roleUISwitches = resp;
-                this.apiService.getUserPreference('user', 'uiswitch').subscribe(
-                  resp => {
+                this.apiService.getUserPreference('user', 'uiswitch').subscribe({
+                  next: (resp) => {
                     this.userUISwitches = resp;
-                    observer.next();
-                    observer.complete();
+                    resolve();
                   },
-                  error => {
-                    observer.error(error);
+                  error: error => {
+                    reject(error);
                   }
-                );
+                });
               },
-              error => {
-                observer.error(error);
+              error: error => {
+                reject(error);
               }
-            );
+            });
           },
-          error => {
-            observer.error(error);
+          error: error => {
+            reject(error);
           }
-        );         
+        });         
       } else {
-        observer.next();
-        observer.complete();
+        resolve();
       }
     });
   }

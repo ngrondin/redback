@@ -15,6 +15,7 @@ import { Hasher } from '../helpers';
 export class DataService {
   allObjects: { [objectname: string]: { [uid: string]: RbObject } };
   saveImmediatly: boolean;
+  fetchCount: number = 0;
   objectCreateObservers: Observer<RbObject>[] = [];
   deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue();
 
@@ -84,75 +85,84 @@ export class DataService {
 
   fetch(objectname: string, uid: string) : Observable<RbObject> {
     return new Observable<RbObject>((observer) => {
-      this.apiService.getObject(objectname, uid).subscribe(
-        resp => {
+      this.fetchCount++;
+      this.apiService.getObject(objectname, uid).subscribe({
+        next: resp => {
           const rbObject = this.receive(resp);
-          this.finalizeReceipt();
           observer.next(rbObject);
           observer.complete();
+          this.fetchCount--;
+          this.finalizeReceipt();
         },
-        error => {
+        error: error => {
           this.errorService.receiveHttpError(error)
           observer.error(error);
+          this.fetchCount--;
         }
-      );
+      });
     });
   }
 
   fetchFirst(name: string, filter: any, search: string, sort: any) : Observable<RbObject> {
     return new Observable((observer) => {
-      this.apiService.listObjects(name, filter, search, sort, 0, 1, false).subscribe(
-        resp => {
+      this.fetchCount++;
+      this.apiService.listObjects(name, filter, search, sort, 0, 1, false).subscribe({
+        next: resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
-          this.finalizeReceipt();
           observer.next(rbObjectArray.length == 1 ? rbObjectArray[0] : null);
-          observer.complete();            
+          observer.complete();      
+          this.fetchCount--;      
+          this.finalizeReceipt();
         }, 
-        error => {
+        error: error => {
           this.errorService.receiveHttpError(error)
           observer.error(error);
+          this.fetchCount--;
         }
-      )
+      })
     });
   }
 
   fetchList(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean) : Observable<any> {
     return new Observable((observer) => {
-      //console.log((new Date()).getTime() + " Requesting list " + name);
-      this.apiService.listObjects(name, filter, search, sort, page, pageSize, false).subscribe(
-        resp => {
-          //console.log((new Date()).getTime() + " Received list");
+      this.fetchCount++;
+      this.apiService.listObjects(name, filter, search, sort, page, pageSize, false).subscribe({
+        next: resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
-          this.finalizeReceipt();
           observer.next(rbObjectArray);
           observer.complete();
+          this.fetchCount--;
+          this.finalizeReceipt();
         }, 
-        error => {
+        error: error => {
           this.errorService.receiveHttpError(error)
           observer.error(error);
+          this.fetchCount--;
         }
-      )
+      })
     });
   }
 
   fetchEntireList(name: string, filter: any, search: string, sort: any) : Observable<any> {
     return new Observable((observer) => {
-      //console.log((new Date()).getTime() + " Requesting entire list " + name);
+      this.fetchCount++;
       if(this.apiService.canStream()) {
-        this.apiService.streamObjects(name, filter, search, sort).subscribe(
-          resp => {
+        this.apiService.streamObjects(name, filter, search, sort).subscribe({
+          next: resp => {
             const rbObjectArray = Object.values(resp.result).map(json => this.receive(json));
             observer.next(rbObjectArray);
           },
-          error => {
+          error: error => {
             this.errorService.receiveHttpError(error)
             observer.error(error);
+            this.fetchCount--;
           },
-          () => {
-            this.finalizeReceipt();
+          complete: () => {
             observer.complete();
+            this.fetchCount--;
+            this.finalizeReceipt();
           }
-        );
+        });
       } else {
         this._fetchEntireList(observer, name, filter, search, sort, 0, 500);
       }
@@ -160,39 +170,42 @@ export class DataService {
   }
 
   _fetchEntireList(observer: any, name: string, filter: any, search: string, sort: any, page: number, pageSize: number)  {
-    this.apiService.listObjects(name, filter, search, sort, page, pageSize, false).subscribe(
-      resp => {
+    this.apiService.listObjects(name, filter, search, sort, page, pageSize, false).subscribe({
+      next: resp => {
         const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
         observer.next(rbObjectArray);
         if(resp.list.length == pageSize) {
           this._fetchEntireList(observer, name, filter, search, sort, page + 1, pageSize);
         } else {
-          //console.log((new Date()).getTime() + " Received entire list");
-          this.finalizeReceipt();
           observer.complete();
+          this.fetchCount--;
+          this.finalizeReceipt();
         }
       }, 
-      error => {
+      error: error => {
         this.errorService.receiveHttpError(error)
         observer.error(error);
+        this.fetchCount--;
       }
-    )
+    })
   } 
 
   fetchRelatedList(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean) : Observable<any> {
     return new Observable((observer) => {
-      this.apiService.listRelatedObjects(name, uid, attribute, filter, search, sort, false).subscribe(
-        resp => {
+      this.apiService.listRelatedObjects(name, uid, attribute, filter, search, sort, false).subscribe({
+        next: resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
-          this.finalizeReceipt();
           observer.next(rbObjectArray);
           observer.complete();
+          this.fetchCount--;
+          this.finalizeReceipt();
         },
-        error => {
+        error: error => {
           this.errorService.receiveHttpError(error)
           observer.error(error);
+          this.fetchCount--;
         }
-      );
+      });
     });
   }
 
@@ -211,7 +224,8 @@ export class DataService {
     this.deferredFetchQueue.addObject(forRelatedObject);
   }
 
-  finalizeReceipt() {
+  async finalizeReceipt() {
+    //if(this.fetchCount > 0) return;
     let multi = [];
     for(let objectname of Object.keys(this.deferredFetchQueue.items)) {
       let fetchRequest = this.deferredFetchQueue.get(objectname);
@@ -220,11 +234,13 @@ export class DataService {
       if(fetchRequest.uids.length > 0) {
         filter = {uid:{$in: fetchRequest.uids}};
         count += fetchRequest.uids.length;
+        fetchRequest.uids.forEach(uid => console.log("link," + objectname + "," + uid));
       }
       if(fetchRequest.filters.length > 0) {
         let subfilter = fetchRequest.filters.map(f => f.data);
         filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
         count += fetchRequest.filters.length * 2; //Times 2 in order to allow for domain overridden objects
+        fetchRequest.filters.forEach(f => console.log("link," + objectname + "," + f.data));
       }
       multi.push({
         key: objectname,
@@ -239,18 +255,14 @@ export class DataService {
     let objects = [...this.deferredFetchQueue.objects];
     this.deferredFetchQueue.clear();
     if(multi.length > 0) {
-      //console.log((new Date()).getTime() + " Fetching enqueued: " + multi.map(i => i.key).join(','));
       this.apiService.objectMulti(multi).subscribe(
         resp => {
-          //console.log((new Date()).getTime() + " Received related multifetch");
           for(var objectname of Object.keys(resp)) {
             const rbObjectArray = Object.values(resp[objectname].list).map(json => this.receive(json));
           }
-          //console.log((new Date()).getTime() + " Re-running linkMissingRelated");
           for(var object of objects) {
             object.linkMissingRelated();
           }
-          //console.log((new Date()).getTime() + " Finished linkMissingRelated");
           this.finalizeReceipt();
 
         }

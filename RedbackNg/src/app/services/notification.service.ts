@@ -21,7 +21,7 @@ export class NotificationService {
   pageSize: number = 500;
   lastReceived: Date;
   private observers: Observer<any>[] = [];
-  private loadObsever: Observer<null>;
+  private loadPromiseResolver: any;
 
   constructor(
     private apiService: ApiService,
@@ -60,18 +60,17 @@ export class NotificationService {
     });
   }
 
-  public load() : Observable<null> {
-    if(this.apiService.processService != null && this.apiService.processService != "") {
-      this.notifications = [];
-      this.page = 0;
-      this.fetchNextPage();
-      return new Observable<null>((observer) => this.loadObsever = observer);  
-    } else {
-      return new Observable<null>((observer) => {
-        observer.next(null); 
-        observer.complete();
-      });
-    }
+  public load() : Promise<void> {
+    return new Promise<void>((resolve, promise) => {
+      if(this.apiService.processService != null && this.apiService.processService != "") {
+        this.notifications = [];
+        this.page = 0;
+        this.loadPromiseResolver = resolve;
+        this.fetchNextPage();
+      } else {
+        resolve();
+      }
+    });
   }
 
   private fetchNextPage() {
@@ -83,8 +82,7 @@ export class NotificationService {
         if(resp.result.length >= this.pageSize) {
           this.fetchNextPage();
         } else {
-          this.loadObsever.next(null);
-          this.loadObsever.complete();
+          this.loadPromiseResolver();
           this.calcStats();
         }
       },
