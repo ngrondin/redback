@@ -119,9 +119,9 @@ public class AttributeConfig
 		return config.getBoolean("notrace");
 	}
 	
-	public boolean isSub()
+	public boolean isInternal()
 	{
-		return config.getBoolean("sub");
+		return config.getBoolean("internal");
 	}
 	
 	public RelatedObjectConfig getRelatedObjectConfig()

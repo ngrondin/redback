@@ -45,7 +45,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 					response = "<html><body><script>window.location='" + redirect + "';</script></body></html>";
 				} else {
 					exchangeAuthCode(session, null, domain, code, state);
-					response = "<html><body>Logged in. Thank you.</body></html>";
+					response = "<html><body style=\"padding: 40vh 40vw; display: flex; flex-direction: row; font-family: calibri;\"><div style=\"font-size: 2.5rem; padding: 5px;\">&#x2705;</div><div><div style=\"font-size: 2rem;\">Logged in</div><div style=\"font-size:0.95rem\">You can now close this page</div></div></body></html>";
 				}
 				responsePayload = new Payload(response);
 			}

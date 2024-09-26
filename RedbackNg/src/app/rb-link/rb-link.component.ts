@@ -1,5 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, Input, HostBinding } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
+import { RbObject } from 'app/datamodel';
 import { NavigateService } from 'app/services/navigate.service';
 
 @Component({

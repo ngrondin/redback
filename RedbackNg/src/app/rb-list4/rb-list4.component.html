@@ -59,13 +59,13 @@
         *ngIf="list.length == 0 && isLoading == false">
         {{emptytext}}
     </div>	
-    <div
+    <!--<div
         class="rb-spinner-container"
         *ngIf="isLoading">
         <mat-spinner
             diameter="20">
         </mat-spinner>
-    </div>	
+    </div>	-->
 </rb-scroll>    
 <div
     *ngIf="showCount()"
@@ -74,7 +74,7 @@
 </div>
 <div
     *ngIf="showRefresh()"
-    class="rb-list-floating rb-list-floating-refresh"
+    class="rb-list-floating  rb-list-floating-refresh"
     (click)="refresh()">
-    <mat-icon>refresh</mat-icon>
+    <mat-icon class="rb-list-floating-refresh-icon">sync</mat-icon>
 </div>

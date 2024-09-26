@@ -1,18 +1,68 @@
 <div
+    class="rb-filter-builder-header">
+    <span class="material-symbols-outlined rb-filter-builder-topicon">
+        filter_list
+    </span>   
+    <div
+        class="rb-filter-builder-title">
+        {{canFilter && canSort ? 'Filter / Sort' : canFilter ? 'Filter' : 'Sort'}}
+    </div>
+</div>
+<div
     class="rb-filter-builder-container">
-    <rb-tab-section
-        #fbts
-        [grow]="0"
-        [shrink]="0">
-        <rb-tab
-            [tabsection]="fbts"
-            [label]="'Filter'"
-            [isdefault]="true"                
-            [grow]="0"
-            [shrink]="0">
-            <div
-                class="rb-filter-builder-content hscroll">
-                <table>
+    <div
+        *ngIf="modeCount > 1"
+        class="rb-filter-builder-menu">
+        <div
+            *ngIf="canSave"
+            class="rb-filter-builder-menuitem">
+            <rb-clickable
+                [focus]="mode == 'saved'"
+                (click)="selectMode('saved')">
+                <span
+                    class="rb-filter-builder-menulabel">
+                    Saved
+                </span>
+            </rb-clickable>
+        </div>
+        <div
+            *ngIf="canFilter"
+            class="rb-filter-builder-menuitem">
+            <rb-clickable
+                [focus]="mode == 'filter'"
+                (click)="selectMode('filter')">
+                <span
+                    class="rb-filter-builder-menulabel">
+                    Filter
+                </span>
+            </rb-clickable>            
+        </div>
+        <div
+            *ngIf="canSort"
+            class="rb-filter-builder-menuitem">
+            <rb-clickable
+                [focus]="mode == 'sort'"
+                (click)="selectMode('sort')">
+                <span
+                    class="rb-filter-builder-menulabel">
+                    Sort
+                </span>
+            </rb-clickable>            
+        </div>        
+    </div>
+    <div
+        class="rb-filter-builder-main">
+        <div
+            *ngIf="mode == 'saved'"
+            class="rb-filter-builder-content">
+            Saved Filters
+        </div>
+        <div
+            *ngIf="mode == 'filter'"
+            class="rb-filter-builder-content">
+            <rb-scroll>
+                <table
+                    class="rb-filter-build-maintable">
                     <tr>
                         <td
                             class="rb-fb-labelcol">
@@ -83,16 +133,15 @@
                                 <tr
                                     *ngFor="let option of filterConstruct.config.options">
                                     <td
-                                        class="rb-filter-builder-multiselect-tablecell">
+                                        class="rb-filter-builder-multiselect-tablecell-name">
                                         {{option.name}}
                                     </td>
                                     <td
-                                        class="rb-filter-builder-multiselect-tablecell"
-                                        style="font-size: 0.8rem;">
+                                        class="rb-filter-builder-multiselect-tablecell-count">
                                         {{option.count}}
                                     </td>
                                     <td
-                                        class="rb-filter-builder-multiselect-tablecell">    
+                                        class="rb-filter-builder-multiselect-tablecell-check">    
                                         <rb-switch-input
                                             [margin]="false"
                                             [showicon]="false"
@@ -122,19 +171,15 @@
                 
                         </td>
                     </tr>
-                </table>              
-            </div>
-        </rb-tab>
-        <rb-tab
-            *ngIf="sortConfig != null"
-            [tabsection]="fbts"
-            [label]="'Sort'"
-            [isdefault]="false"
-            [grow]="0"
-            [shrink]="0">
-            <div
-                class="rb-filter-builder-content hscroll">
-                <table>
+                </table>   
+            </rb-scroll>  
+        </div>
+        <div
+            *ngIf="mode == 'sort'"
+            class="rb-filter-builder-content">
+            <rb-scroll>
+                <table
+                    class="rb-filter-build-maintable">
                     <tr>
                         <td
                             class="rb-fb-labelcol">
@@ -163,51 +208,43 @@
                         </td>
                         <td
                             class="rb-fb-maincol">
-                            <button
-                                mat-button
-                                class="mat-mini mat-primary" 
+                            <rb-iconbutton
+                                [icon]="sortConstruct.direction == 1 ? 'arrow_upward' : 'arrow_downward'"
                                 (click)="toggleDir(sortConstruct)">
-                                <mat-icon 
-                                    *ngIf="sortConstruct.direction == 1"
-                                    class="md-hue-3" >
-                                    keyboard_arrow_up
-                                </mat-icon>
-                                <mat-icon 
-                                    *ngIf="sortConstruct.direction == -1"
-                                    class="md-hue-3" >
-                                    keyboard_arrow_down
-                                </mat-icon>
-                            </button>                           
+                            </rb-iconbutton>                           
                         </td>
-                        <td>
+                        <td
+                            class="rb-fb-buttoncol">
                             <rb-iconbutton
                                 [icon]="'remove_circle_outline'"
                                 (click)="removeSortItem(sortConstruct)">
                             </rb-iconbutton>                                                        
                         </td>   
                     </tr>             
-                </table>   
-            </div>
-        </rb-tab>
-    </rb-tab-section>
-    <div
-        class="rb-filter-builder-bottom">
-        <rb-button
-            *ngIf="changed"
-            (click)="clickOk()"
-            [focus]="true"
-            [label]="'Apply'">
-        </rb-button>
-        &nbsp;
-        <rb-button
-            *ngIf="!empty"
-            (click)="clickClear()"
-            [label]="'Clear'">
-        </rb-button>
-        &nbsp;
-        <rb-button
-            (click)="clickCancel()"
-            [label]="'Cancel'">
-        </rb-button>              
-    </div>
+                </table>
+            </rb-scroll>  
+        </div>    
+        <div
+            class="rb-filter-builder-bottom">
+            <rb-button
+                *ngIf="changed"
+                (click)="clickOk()"
+                [focus]="true"
+                [label]="'Apply'">
+            </rb-button>
+            &nbsp;
+            <rb-button
+                *ngIf="!empty"
+                (click)="clickClear()"
+                [label]="'Clear'">
+            </rb-button>
+            &nbsp;
+            <rb-button
+                (click)="clickCancel()"
+                [label]="'Cancel'">
+            </rb-button>              
+        </div>        
+    </div> 
 </div>
+
+

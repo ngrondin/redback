@@ -52,6 +52,11 @@ public class RelatedObjectConfig
 	{
 		return config.getString("linkattribute");
 	}
+	
+	public boolean shouldUIResolve()
+	{
+		return config.containsKey("uiresolve") ? config.getBoolean("uiresolve") : true;
+	}
 
 	public DataMap generateFilter(RedbackElement elem) throws RedbackException
 	{

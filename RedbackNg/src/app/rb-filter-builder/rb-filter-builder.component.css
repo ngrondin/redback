@@ -6,25 +6,84 @@
         0 5px 24px 4px rgba(0, 0, 0, 0.12);
     min-height: 200px;
     min-width: 500px;
-    padding: 10px;
     display: flex;
+    flex-direction: column;
+    border-radius: var(--v3px);
+    overflow: hidden;
+}
+
+.rb-filter-builder-header {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+    background-color: var(--primary-color);
+    align-items: center;
+    height: var(--v36px);
+}
+
+.rb-filter-builder-topicon {
+    margin-left: var(--v5px);
+    color: #ddd;
+}
+
+.rb-filter-builder-title {
+    display: flex;
+    flex: 1 1 auto;
+    margin-left: var(--v5px);
+    color: #ddd;
 }
 
 .rb-filter-builder-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex-grow: 1;
 }
 
+.rb-filter-builder-menu {
+    display: flex;
+    flex-direction: column;
+    padding: var(--v5px) 0px var(--v5px) var(--v3px);
+    border-right: 1px solid #ccc;
+}
+
+.rb-filter-builder-menuitem {
+    overflow: hidden;
+    border-radius: var(--v3px) 0px 0px var(--v3px);
+    /*margin: var(--v3px) 0px;*/
+}
+
+.rb-filter-builder-menulabel {
+    padding: var(--v10px) var(--v28px);
+    color: var(--primary-dark-color);
+}
+
+.rb-filter-builder-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: var(--v8px);
+}
+
 .rb-filter-builder-content {
-    overflow: auto;
     max-height: 30vw;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+.rb-filter-builder-content rb-scroll {
+    flex: 1 1 auto!important;
+}
+
+.rb-filter-build-maintable {
+    margin-right: var(--v24px);
 }
 
 .rb-fb-labelcol {
     vertical-align: top;
     padding-top: var(--v24px);
     padding-right: var(--v24px);
+    color: var(--light-writing-color);
 }
 
 .rb-fb-maincol {
@@ -32,12 +91,12 @@
     display: flex;
     flex-direction: row;
     padding-top: var(--v24px);
-
 }
 
 .rb-fb-buttoncol {
     vertical-align: top;
     padding-top: var(--v24px);
+    color: var(--light-writing-color);
 }
 
 .rb-filter-builder-label {
@@ -47,22 +106,28 @@
     vertical-align: middle;
 }
 
-.rb-filter-builder-icon {
-    /*padding-top: 15px;*/
+.rb-filter-builder-multiselect-tablecell-name {
+    padding-right: var(--v10px);
+    height: var(--v36px);
+    color: #222;
+    font-weight: 400;
 }
 
-.rb-filter-builder-multiselect-table {
-    /*padding: 20px 0px 10px 0px;*/
+.rb-filter-builder-multiselect-tablecell-count {
+    padding-right: var(--v10px);
+    height: var(--v36px);
+    font-size: 0.7rem;
+    color: #666;
 }
 
-.rb-filter-builder-multiselect-tablecell {
+.rb-filter-builder-multiselect-tablecell-check {
     padding-right: var(--v10px);
     height: var(--v36px);
 }
 
 .rb-filter-builder-bottom {
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     flex-direction: row;
     align-items: end;
     justify-content: flex-end;

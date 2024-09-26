@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NavigateEvent, NavigateData } from 'app/datamodel';
+import { NavigateEvent, NavigateData, DataTarget } from 'app/datamodel';
 import { RbViewLoaderComponent } from 'app/rb-view-loader/rb-view-loader.component';
 import { ConfigService } from './config.service';
 import { UserprefService } from './userpref.service';
@@ -43,23 +43,24 @@ export class NavigateService {
     let objectConfig: any = this.configService.getObjectConfig(event.objectname);
     let view: string = (event.view != null ? event.view : (objectConfig != null ? objectConfig.view : null));
     if(view != null) {
-      let data = new NavigateData(event.domain, view, event.tab, event.objectname, event.filter, event.search, event.select); 
+      let datatarget = new DataTarget(event.objectname, event.filter, event.search, event.select);
+      let navdata = new NavigateData(event.domain, view, event.tab, datatarget); 
       if(objectConfig != null && event.filter != null && event.filter[objectConfig.labelattribute] != null) {
-        data.breadcrumbLabel = eval(event.filter[objectConfig.labelattribute]);
+        navdata.breadcrumbLabel = eval(event.filter[objectConfig.labelattribute]);
       }
       if(event.label != null) {
-        data.additionalTitle = event.label;
+        navdata.additionalTitle = event.label;
       }
       if(target != null) {
         if(event.reset) {
           target.stack = [];
         }
-        target.stack.push(data);
+        target.stack.push(navdata);
         this.modalService.closeAll();
-        await target.component.navigateTo(data);
-        this.userprefService.setCurrentView(data.view);
-        this.modalService.setCurrentView(data.view);
-        this.notifyObservers(data);
+        await target.component.navigateTo(navdata);
+        this.userprefService.setCurrentView(navdata.view);
+        this.modalService.setCurrentView(navdata.view);
+        this.notifyObservers(navdata);
       }
     } else if(event.tab != null) {
       target.component.currentLoadedView.openTab(event.tab);

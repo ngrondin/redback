@@ -89,7 +89,7 @@ export class RbObject {
         for(const attribute in this.data) {
             if(this.validation[attribute] != null && this.validation[attribute].related != null && this.related[attribute] == null && this.data[attribute] != null) {
                 let relatedRule = this.validation[attribute].related;
-                if(relatedRule != null && this.related[attribute] == null) {
+                if(relatedRule != null && this.related[attribute] == null && relatedRule.uiresolve != false) {
                     let relatedObject = null, uid = null, filter = null;
                     if(relatedRule.link == 'uid') {
                         uid = this.data[attribute];
@@ -556,14 +556,12 @@ export class NavigateData {
     mode: string;
     dataTarget: DataTarget;
   
-    constructor(dom: string, v: string, t:string, o: string, f: any, s: string, sl: string) {
+    constructor(dom: string, v: string, t:string, d: DataTarget) {
       this.domain = dom;
       this.view = v;
       this.tab = t;
       this.title = null;
-      if(f != null || s != null || sl != null) {
-        this.dataTarget = new DataTarget(o, f, s, sl);
-      }
+      this.dataTarget = d;
     }
 
     get fulltitle() : string {

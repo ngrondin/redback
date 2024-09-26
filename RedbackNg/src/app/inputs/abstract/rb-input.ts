@@ -12,7 +12,6 @@ import { UserprefService } from 'app/services/userpref.service';
 @Component({template: ''})
 export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('attribute') attribute: string;    
-  @Input('object') _rbObject: RbObject;
   @Input('value') _value: any = null;
   @Input('variable') variable: any;
   @Input('label') label: string;
@@ -72,13 +71,13 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   ngOnChanges(changes: SimpleChanges) {
   }
 
-  get rbObject() : RbObject {
+  /*get rbObject() : RbObject {
     if(this.dataset != null) {
         return this.dataset.selectedObject;
     } else {
         return this._rbObject;
     }
-  }
+  }*/
 
   get value() : any {
     let val = null;

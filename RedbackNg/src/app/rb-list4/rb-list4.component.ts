@@ -169,7 +169,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   itemClicked(item: RbObject, event: any) {
-    if(event.ctrlKey == true) {
+    if(event.ctrlKey == true || event.metaKey == true) {
       this.dataset.addOneToSelection(item);
     } else if(event.shiftKey == true) {
       this.dataset.addRangeToSelection(item);
@@ -192,9 +192,9 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   onScroll(event) {
-    if(event.currentTarget.scrollTop > Math.floor(event.currentTarget.scrollHeight - event.currentTarget.clientHeight - 10) && this.reachedBottom == false) {
-      this.dataset.fetchNextPage();
+    if(event.currentTarget.scrollTop > (event.currentTarget.scrollHeight - (1.5*event.currentTarget.clientHeight)) && this.reachedBottom == false) {
       this.reachedBottom = true;
+      this.dataset.fetchNextPage();
       setTimeout(() => {this.reachedBottom = false}, 1000);
     }
   }

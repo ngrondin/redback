@@ -12,7 +12,6 @@ export class RbMenuLinkComponent implements OnInit {
   @Input('config') config: any;
   @Input('mode') mode: any;
   @Input('look') look: any = 'primary';
-  //@Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
 
   cmTop: number = 100;
   cmLeft: number = 100;
@@ -31,7 +30,7 @@ export class RbMenuLinkComponent implements OnInit {
   }
 
   click() {
-    this.navigateService.navigateTo({view: this.config.view, domain: this.config.domain, filter:{}, search:null, reset:true});
+    this.navigateService.navigateTo({view: this.config.view, domain: this.config.domain, filter:null, search:null, reset:true});
   }
 
   rightclick(event: any) {

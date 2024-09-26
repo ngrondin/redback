@@ -732,7 +732,7 @@ public class RedbackObject extends RedbackElement
 				while(it.hasNext())
 				{
 					AttributeConfig attributeConfig = config.getAttributeConfig(it.next());
-					if(attributeConfig.isSub() == false) {
+					if(attributeConfig.isInternal() == false) {
 						String attrName = attributeConfig.getName();
 						Value attrValue = get(attrName);
 		
@@ -747,6 +747,8 @@ public class RedbackObject extends RedbackElement
 								relatedObjectValidation.put("object",  attributeConfig.getRelatedObjectConfig().getObjectName());
 								relatedObjectValidation.put("link",  attributeConfig.getRelatedObjectConfig().getLinkAttributeName());
 								relatedObjectValidation.put("listfilter",  getRelatedListFilter(attributeConfig.getName()));
+								boolean shouldUIResolve = attributeConfig.getRelatedObjectConfig().shouldUIResolve();
+								if(!shouldUIResolve) relatedObjectValidation.put("uiresolve", shouldUIResolve);
 								attributeValidation.put("related", relatedObjectValidation);
 							}
 							validatonNode.put(attrName, attributeValidation);

@@ -12,8 +12,9 @@
         </div>
     </div>
 </div>
-<div
-    class="rb-table-body-container">                                                                                                                                                    
+<rb-scroll
+    (rbscroll)="onScroll($event)"
+    [grow]="0">                                                                                                                                                
     <div
         class="rb-table-body">
         <div
@@ -23,6 +24,13 @@
                 class="rb-table-rowitem"
                 *ngFor="let col of getColumnsForObject(object)"
                 [style.width.px]="col.width">
+                <rb-link
+                    *ngIf="col.type == 'link'"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [view]="col.linkview"
+                    [margin]="false">
+                </rb-link>
                 <rb-string-input
                     *ngIf="col.type == 'input'"
                     [size]="col.size"
@@ -113,5 +121,4 @@
             {{emptymessage}}
         </div>  
     </div>
-                                                                                                                                              
-</div>
+</rb-scroll>

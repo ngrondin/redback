@@ -12,6 +12,7 @@
     overflow: auto;
     -ms-overflow-style: none;  
     scrollbar-width: none;  
+    line-height: 0px;
 }
 
 .rb-scroll-scroller::-webkit-scrollbar {
@@ -21,6 +22,7 @@
 .rb-scroll-content {
     display: inline-block;
     position: relative;
+    line-height: normal;
 }
 
 .rb-scroll-vtrack {

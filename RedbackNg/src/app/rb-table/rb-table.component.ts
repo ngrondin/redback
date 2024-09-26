@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChange } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { LinkConfig } from 'app/helpers';
 
 class TableColumnConfig {
   label: string;
@@ -13,6 +14,7 @@ class TableColumnConfig {
   icon: string;
   size: number;
   width: number;
+  linkview: string;
   showExpr: string;
   alt: {[key: string]: TableColumnConfig};
 
@@ -27,6 +29,7 @@ class TableColumnConfig {
     this.icon = json.icon;
     this.size = json.size;
     this.width = (json.size != null ? (json.size * 15) + 15 : 250);
+    this.linkview = json.linkview;
     this.showExpr = (json.show != null ? json.show : "true");
     if(json.alt != null) {
       this.alt = {};
@@ -48,6 +51,7 @@ export class RbTableComponent extends RbDataObserverComponent {
   @Input('emptymessage') emptymessage: string = null;
 
   columns: TableColumnConfig[];
+  reachedBottom: boolean = false;
 
   constructor() {
     super();
@@ -99,5 +103,13 @@ export class RbTableComponent extends RbDataObserverComponent {
 
   canDelete(object: RbObject) {
     return object.canDelete()
+  }
+
+  onScroll(event) {
+    if(event.currentTarget.scrollTop > (event.currentTarget.scrollHeight - event.currentTarget.clientHeight) - 300 && this.reachedBottom == false) {
+      this.reachedBottom = true;
+      this.dataset.fetchNextPage();
+      setTimeout(() => {this.reachedBottom = false}, 1000);
+    }
   }
 }

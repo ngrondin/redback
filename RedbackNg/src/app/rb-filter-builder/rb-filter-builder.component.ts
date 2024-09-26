@@ -26,6 +26,7 @@ export class RbFilterBuilderComponent implements OnInit {
   _attributeToAddToFilter: any;
   _attributeToAddToSort: any;
   changed: boolean = false;
+  mode: string = "filter"
 
   datechoice: any = [
     { value: "last15", display: "Last 15 Minutes"},
@@ -124,6 +125,22 @@ export class RbFilterBuilderComponent implements OnInit {
     return this.filterConstructs.length == 0 && this.sortConstructs.length == 0;
   }
 
+  get modeCount() : number {
+    return (this.canSave ? 1 : 0) + (this.canFilter ? 1 : 0) + (this.canSort ? 1 : 0);
+  }
+
+  get canSave() : boolean {
+    return false;
+  }
+
+  get canFilter() : boolean {
+    return this.config.filterConfig != null;
+  }
+
+  get canSort() : boolean {
+    return this.config.sortConfig != null;
+  }
+
   removeFilterItem(fic: FilterItemConstruct) {
     this.filterConstructs.splice(this.filterConstructs.indexOf(fic), 1);
     this.changed = true;
@@ -162,6 +179,10 @@ export class RbFilterBuilderComponent implements OnInit {
         }
       });
     }    
+  }
+
+  selectMode(m) {
+    this.mode = m;
   }
 
   clickOk() {

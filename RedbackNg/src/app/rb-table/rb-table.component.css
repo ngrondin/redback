@@ -4,6 +4,7 @@
     overflow: hidden;
     width: fit-content;
     margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px);
+    flex: 0 1 auto;
 }
 
 .rb-table-header-container {
@@ -26,15 +27,16 @@
     cursor: pointer;
 }
 
-.rb-table-body-container {
+/*.rb-table-body-container {
     display: flex;
     flex-direction: column;
     overflow: auto;
-}
+}*/
 
 .rb-table-body {
     display: flex;
     flex-direction: column;
+    padding-right: var(--v16px);
 }
 
 .rb-table-row {

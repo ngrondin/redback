@@ -16,7 +16,7 @@ export class DataService {
   allObjects: { [objectname: string]: { [uid: string]: RbObject } };
   saveImmediatly: boolean;
   fetchCount: number = 0;
-  objectCreateObservers: Observer<RbObject>[] = [];
+  objectUpdateObservers: Observer<RbObject>[] = [];
   deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue();
 
   constructor(
@@ -32,7 +32,7 @@ export class DataService {
         let list = Array.isArray(json) ? json : [json];
         const rbObjectArray = Object.values(list).map(json => this.receive(json));
         this.finalizeReceipt();
-        this.objectCreateObservers.forEach((observer) => {
+        this.objectUpdateObservers.forEach((observer) => {
           rbObjectArray.forEach(rbObject => observer.next(rbObject)) ;
         });              
       }
@@ -43,7 +43,7 @@ export class DataService {
   clear() {
     this.allObjects = {};
     this.clientWSService.clearSubscriptions();
-    this.objectCreateObservers = []; 
+    this.objectUpdateObservers = []; 
   }
 
   get(objectname: string, uid: string) : RbObject {
@@ -404,9 +404,9 @@ export class DataService {
     this.clientWSService.subscribeToFilterObjectUpdate(object, filter, id);
   }
 
-  getCreationObservable() : Observable<any>  {
+  getObjectUpdateObservable() : Observable<any>  {
     return new Observable<any>((observer) => {
-      this.objectCreateObservers.push(observer);
+      this.objectUpdateObservers.push(observer);
     });
   }
 

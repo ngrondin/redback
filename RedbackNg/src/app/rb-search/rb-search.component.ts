@@ -102,7 +102,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     this.overlayRef = this.overlay.create({
       positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
       hasBackdrop: true,
-      backdropClass: 'cdk-overlay-transparent-backdrop'
+      //backdropClass: 'cdk-overlay-transparent-backdrop'
     });
     this.overlayRef.backdropClick().subscribe(() => {
       this.cancelFilterBuilder();

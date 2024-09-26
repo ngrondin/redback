@@ -16,6 +16,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('dataset') dataset: RbDatasetComponent;
     @Input('datasetgroup') datasetgroup: RbDatasetGroupComponent;
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
+    @Input('object') _rbObject: RbObject;
     @Input('show') showExpr: string;
     @HostBinding('style.display') get visitility() { return this.show ? 'flex' : 'none'; }
     
@@ -88,11 +89,11 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     get rbObject() : RbObject {
-        return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
+        return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : this._rbObject != null ? this._rbObject : null;
     }
 
     get selectedObject() : RbObject {
-        return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : null;
+        return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : this._rbObject != null ? this._rbObject : null;
     }
 
     get relatedObject() : RbObject {

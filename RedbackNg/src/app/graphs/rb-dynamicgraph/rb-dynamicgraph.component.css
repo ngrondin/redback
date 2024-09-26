@@ -2,7 +2,7 @@
     display: block;
     flex-direction: column;
     flex: 1 1 auto;
-    overflow: hidden;
+    /*overflow: hidden;*/
     position: relative;
     margin: 5px;
 }
