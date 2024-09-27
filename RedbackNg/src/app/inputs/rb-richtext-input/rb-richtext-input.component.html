@@ -1,6 +1,6 @@
 <div
     class="rb-richtext-quillcontainer"
-    [style.visibility]="mode == 'editor' ? 'visible' : 'collapse'">
+    [style.display]="mode == 'editor' ? 'flex' : 'none'">
     <div 
         [id]="'quilltoolbar_' + uniqueId">
         <select class="ql-size">
@@ -32,12 +32,12 @@
     </div>
     <div
         [id]="'quilleditor_' + uniqueId"
-        [style.visibility]="!readonly  ? 'visible' : 'collapse'">
+        [style.display]="!readonly  ? 'block' : 'none'">
     </div>
     <div
         [id]="'readonlydiv_' + uniqueId"
         class="rb-richtext-readonlyviewer"
-        [style.visibility]="readonly  ? 'visible' : 'collapse'"
+        [style.display]="readonly  ? 'block' : 'none'"
         [innerHTML]="safeHtml">
     </div>
 </div>

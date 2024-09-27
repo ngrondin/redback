@@ -52,7 +52,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
     if(this.codeSource != this.value) {
       this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), true);
     } 
-    let _safeHtml = this.domSanitizer.bypassSecurityTrustHtml(FileReferenceResolver.resolve(this.value, this.apiService.fileService));
+    let _safeHtml = this.domSanitizer.bypassSecurityTrustHtml(FileReferenceResolver.resolve(this.value ?? '', this.apiService.fileService));
     if(this.safeHtml != _safeHtml) {
       this.safeHtml = _safeHtml;
     }  
