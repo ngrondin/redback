@@ -154,7 +154,7 @@ public class CronTaskManager extends Thread {
 			req.metadata.put("session", session.id);
 			req.metadata.put("token", session.getToken());
 			req.metadata.put("mime", "application/json");
-			Logger.info("rb.cron.runtask", new DataMap("task", ctc.getName(), "token", session.getToken()));
+			Logger.info("rb.cron.runtask", new DataMap("task", ctc.getName()));
 			if(faf)
 				firebus.requestServiceAndForget(serviceName, req);
 			else
