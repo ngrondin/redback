@@ -3,6 +3,7 @@ import { RbObject } from 'app/datamodel';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { ApiService } from 'app/services/api.service';
 import { ConfigService } from 'app/services/config.service';
+import { LogService } from 'app/services/log.service';
 import { NavigateService } from 'app/services/navigate.service';
 import { NlactionService } from 'app/services/nlaction.service';
 
@@ -26,7 +27,8 @@ export class RbNlboxComponent {
     private apiService: ApiService,
     private configService: ConfigService,
     private nlActionService: NlactionService,
-    private navigateService: NavigateService
+    private navigateService: NavigateService,
+    private logService: LogService
   ) {
   }
 
@@ -124,7 +126,7 @@ export class RbNlboxComponent {
   feedback(item: any, points: number) {
     this.apiService.nlFeedback(this.configService.nlCommandModel, item.command, item.sequence, points).subscribe({
       complete: () => {
-        console.log("Feedback given");
+        this.logService.info("Feedback given");
       }
     });
   }

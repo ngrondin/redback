@@ -4,6 +4,7 @@ import { ApiService } from 'app/services/api.service';
 
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
+import { LogService } from 'app/services/log.service';
 
 @Component({
   selector: 'rb-filedrop',
@@ -18,7 +19,8 @@ export class RbFiledropComponent extends RbContainerComponent {
   hasFileOver: boolean = false;
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private logService: LogService
   ) {
     super();
   }
@@ -44,7 +46,7 @@ export class RbFiledropComponent extends RbContainerComponent {
     if(this.editable) {
       event.preventDefault();
       event.stopPropagation();
-      console.log("File dropped");
+      this.logService.info("File dropped");
       if (event.dataTransfer != null && event.dataTransfer.items) {
         for (var i = 0; i < event.dataTransfer.items.length; i++) {
           if (event.dataTransfer.items[i].kind === 'file') {

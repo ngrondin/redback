@@ -4,6 +4,7 @@ import { Formatter } from 'app/helpers';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { ChatService } from 'app/services/chat.service';
 import { ConfigService } from 'app/services/config.service';
+import { LogService } from 'app/services/log.service';
 
 @Component({
   selector: 'rb-chat',
@@ -24,7 +25,8 @@ export class RbChatComponent implements OnInit {
 
   constructor(
     private chatService: ChatService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private logService: LogService
   ) { 
 
   }
@@ -79,7 +81,7 @@ export class RbChatComponent implements OnInit {
       this.chatService.createChat(this.newChatName).subscribe(chat => {
         this.closeCreation();
       });
-      console.log(this.newChatName);
+      this.logService.info(this.newChatName);
     } else if(event.keyCode == 27) {
       this.closeCreation();
     }

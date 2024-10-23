@@ -11,6 +11,7 @@ import { RbPopupListComponent } from 'app/popups/rb-popup-list/rb-popup-list.com
 import { RbObject } from 'app/datamodel';
 import { FilterService } from 'app/services/filter.service';
 import { RbActionButtonComponent } from '../rb-actionbutton/rb-actionbutton.component';
+import { LogService } from 'app/services/log.service';
 
 @Component({
   selector: 'rb-actionlist',
@@ -28,7 +29,8 @@ export class RbActionlistComponent extends RbActionButtonComponent {
     actionService: ActionService,
     public userpref: UserprefService,
     public popupService: PopupService,
-    public filterService: FilterService
+    public filterService: FilterService,
+    public logService: LogService
   ) {
     super(actionService);
     this.label = 'Actions';
@@ -72,7 +74,7 @@ export class RbActionlistComponent extends RbActionButtonComponent {
   }
 
   public objectSelected(object: RbObject) {
-    console.log("Selected object " + object.uid);
+    this.logService.info("Selected object " + object.uid);
     this.closePopup();
     this.running = true;
     this.actionService.action(this.dataset, this.action, this.target, this.param, {pickedObject:object}, this.confirm, this.timeout).subscribe((rbObject) => {

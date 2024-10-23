@@ -187,8 +187,10 @@ public class SubscriptionManager {
 			List<FilterSubscription> list = map2.get(domain);
 			if(list != null)
 				for(FilterSubscription subs : list) 
-					if(!subscribers.contains(subs.clientHandler) && subs.matches(data.getObject("data")))
+					if(!subscribers.contains(subs.clientHandler) && subs.matches(data.getObject("data"))) {
 						subscribers.add(subs.clientHandler);
+						subscribe(subs.clientHandler, objectName, uid);	//This is done to avoid race conditions, i.e., fast updates for which the filter may not apply anymore  will come before the client has had the time to subscribe to the individual object	
+					}
 		}
 		return subscribers;
 	}

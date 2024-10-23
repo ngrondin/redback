@@ -12,6 +12,7 @@ import { RbTabComponent } from "app/rb-tab/rb-tab.component";
 import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 import { componentRegistry } from 'app/rb-view-loader/rb-view-loader-registry';
 import { ModalService } from './modal.service';
+import { LogService } from './log.service';
 
 
 @Injectable({
@@ -23,7 +24,8 @@ export class BuildService {
   constructor(
     private componentFactoryResolver:ComponentFactoryResolver,
     private injector: Injector,
-    private modalService: ModalService 
+    private modalService: ModalService,
+    private logService: LogService 
   ) { 
     for(let key of Object.keys(componentRegistry)) {
       let componentClass = componentRegistry[key];
@@ -99,7 +101,7 @@ export class BuildService {
             this.buildConfigRecursive(newContainer.container, childConfig, newContext, loadedView);
           };
         } else {
-          console.log('Type ' + config.type + ' has contents but is not a RbContainerComponent');
+          this.logService.info('Type ' + config.type + ' has contents but is not a RbContainerComponent');
         }
       }
     }

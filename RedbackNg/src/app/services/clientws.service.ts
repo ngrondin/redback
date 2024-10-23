@@ -6,6 +6,7 @@ import { UUID } from 'angular2-uuid';
 import { Platform } from '@angular/cdk/platform';
 import * as pako from 'pako';
 import { SecurityService } from './security.service';
+import { LogService } from './log.service';
 
 export class Upload {
   uploaduid = UUID.UUID();
@@ -84,8 +85,8 @@ export class ClientWSService {
 
 
   constructor(
-    private http: HttpClient,
     private securityService: SecurityService,
+    private logService: LogService,
     private platform: Platform
   ) {
     this.deviceId = localStorage.getItem("rbdeviceid");
@@ -140,7 +141,7 @@ export class ClientWSService {
     try {
       if(this.connected == false) {
         this.connected = true;
-        console.log("WS Connection Open");
+        this.logService.info("WS Connection Open");
         this.sendSubscriptionRequests();
         this.sendDeviceInfo();
         this.heartbeatFreq = 10000;
@@ -203,7 +204,7 @@ export class ClientWSService {
       }
     } catch(err) {
       console.error('WS receive error for message ' + ': ' + err);
-      console.log(data);
+      this.logService.info(data);
     }
   }
 
@@ -217,7 +218,7 @@ export class ClientWSService {
       this.connected = false;
       this.uniqueObjectSubscriptions.forEach(item => item.sent = false);
       Object.keys(this.filterObjectSubscriptions).forEach(key => this.filterObjectSubscriptions[key].sent = false);
-      console.log("WSS Connection closed");
+      this.logService.info("WSS Connection closed");
       this.stateObservers.forEach((observer) => observer.next(false));
     }
     setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
@@ -290,10 +291,8 @@ export class ClientWSService {
   }
 
   subscribeToUniqueObjectUpdate(objectname: string, uid: string) {
-    //if(this.uniqueObjectSubscriptions.find(item => item.objectname == objectname && item.uid == uid) == null) {
-      this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
-      this.sendSubscriptionRequests();
-    //}
+    this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
+    this.sendSubscriptionRequests();
   }
 
   subscribeToFilterObjectUpdate(objectname: String, filter: any, id: string) {

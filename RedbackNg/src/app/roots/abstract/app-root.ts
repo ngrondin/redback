@@ -9,6 +9,7 @@ import { ClientWSService } from "app/services/clientws.service";
 import { ConfigService } from "app/services/config.service";
 import { DialogService } from "app/services/dialog.service";
 import { DragService } from "app/services/drag.service";
+import { LogService } from "app/services/log.service";
 import { NavigateService } from "app/services/navigate.service";
 import { NlactionService } from "app/services/nlaction.service";
 import { PopupService } from "app/services/popup.service";
@@ -46,6 +47,7 @@ export abstract class AppRootComponent implements OnInit {
     popupService: PopupService;
     nlActionService: NlactionService;
     navigateService: NavigateService;
+    logService: LogService;
 
     constructor(
     ) {
@@ -60,7 +62,7 @@ export abstract class AppRootComponent implements OnInit {
         this.popupService = AppInjector.get(PopupService);
         this.nlActionService = AppInjector.get(NlactionService);
         this.navigateService = AppInjector.get(NavigateService);
-        
+        this.logService = AppInjector.get(LogService);
      }
   
     ngOnInit() {
@@ -102,6 +104,8 @@ export abstract class AppRootComponent implements OnInit {
           this.logout();
         } else if(value == 'prefs') {
           this.toggleRightDrawer("prefs");
+        } else if(value == 'logs') {
+          this.logService.export();
         } else {
           this.navigateService.navigateTo({view: value});
         }

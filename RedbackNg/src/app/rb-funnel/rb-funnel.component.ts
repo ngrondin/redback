@@ -137,7 +137,6 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
     let phaseKeyAttribute = phase.config.keyAttribute;
     let phaseKey = phase.object.get(phaseKeyAttribute);
     object.setValue(objectPhaseAttribute, phaseKey)
-    console.log($event);
   }
 }
 

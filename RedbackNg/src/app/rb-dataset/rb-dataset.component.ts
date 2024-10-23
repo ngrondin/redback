@@ -98,7 +98,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   onDataTargetEvent(dt: DataTarget) {
-    console.log('dateset ' + this.id + ': ' + JSON.stringify(dt)); 
     let fetched = this.filterSort({
       filter: dt.filter ?? this.defaultUserFilter, 
       sort: dt.sort ?? this.defaultUserSort, 
@@ -162,10 +161,12 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(this.canLoadData) {
       let prevFilter = this.resolvedFilter;
       let prevSearch = this.resolvedSearch;
+      let prevSort = this.resolvedSort;
       this.resolveFilterSort();
       let filterChanged = ValueComparator.notEqual(prevFilter, this.resolvedFilter);
       let searchChanged = ValueComparator.notEqual(prevSearch, this.resolvedSearch);
-      if(filterChanged || searchChanged || !onlyIfFilterChanged) {
+      let sortChanged = ValueComparator.notEqual(prevSort, this.resolvedSort);
+      if(filterChanged || searchChanged || sortChanged || !onlyIfFilterChanged) {
         this.clear(false);
         this.fetchNextPage();
         this.refreshOnActivate = false;
@@ -354,7 +355,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     let searchChange = 'search' in event && newSearch != this.userSearch;
     if(filterChange || sortChange || searchChange) {
       if(filterChange) this.userFilter = newFilter;
-      if(sortChange) this.userSort = newSearch;
+      if(sortChange) this.userSort = newSort;
       if(searchChange) this.userSearch = newSearch;
       fetched = this.refreshData();
       if(this.dataTarget != null && this.ignoretarget == false) {

@@ -15,6 +15,14 @@
     </div>
 </rb-clickable>
 <rb-clickable
+    *ngIf="showlog"
+    (click)="click('logs')">
+    <div
+        class="rb-usermenu-item">
+        Logs
+    </div>
+</rb-clickable>
+<rb-clickable
     *ngFor="let view of views"
     (click)="click(view.view)">
     <div

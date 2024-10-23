@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 import { ConfigService } from 'app/services/config.service';
+import { LogService } from 'app/services/log.service';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -12,7 +13,8 @@ export class RbUsermenuComponent extends RbPopupComponent {
 
   constructor(
     public userprefService: UserprefService,
-    public configService: ConfigService
+    public configService: ConfigService,
+    public logService: LogService
   ) {
     super();
   }
@@ -23,6 +25,10 @@ export class RbUsermenuComponent extends RbPopupComponent {
 
   public get userdisplay() : string {
     return this.userprefService.userdisplay;
+  }
+
+  public get showlog() : boolean {
+    return this.logService.level == 'DEBUG';
   }
 
   public get views() : any[] {

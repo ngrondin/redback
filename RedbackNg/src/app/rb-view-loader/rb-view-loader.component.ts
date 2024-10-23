@@ -81,12 +81,5 @@ export class RbViewLoaderComponent implements OnInit {
       entry.attachTo(this.container);
     }
   }
-
-  /*openTab(tabid: string) {
-    if(this.currentLoadedView != null) {
-      console.log('opentab');
-      this.currentLoadedView.openTab(tabid);
-    }
-  }*/
   
 }

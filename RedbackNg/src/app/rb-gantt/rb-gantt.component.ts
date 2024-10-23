@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { GanttLane, GanttLaneConfig, GanttMark, GanttSeriesConfig, GanttSpread } from './rb-gantt-models';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
+import { LogService } from 'app/services/log.service';
 
 
 @Component({
@@ -58,7 +59,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     private filterService: FilterService,
     private userprefService: UserprefService,
     private buildService: BuildService,
-    private dataService: DataService
+    private dataService: DataService,
+    private logService: LogService
   ) {
     super();
   }
@@ -105,7 +107,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
       }
       if(target != null && target.filter != null && target.object == null) {
-        console.log("Gantt actiavate with target that is not in the dataset");
+        this.logService.info("Gantt actiavate with target that is not in the dataset");
         this.dataService.fetchFirst(target.objectname, target.filter, null, null).subscribe((obj) => {
           if(obj != null) {
             let ms = (new Date(obj.get(target.cfg.startAttribute))).getTime();

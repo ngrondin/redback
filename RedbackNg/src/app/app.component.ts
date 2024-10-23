@@ -12,6 +12,7 @@ import { DataService } from './services/data.service';
 import { ModalService } from './services/modal.service';
 import { ChatService } from './services/chat.service';
 import { SecurityService } from './services/security.service';
+import { LogService } from './services/log.service';
 
 @Component({
   viewProviders: [MatIconRegistry],
@@ -53,7 +54,8 @@ export class AppComponent implements OnInit {
       private userprefService: UserprefService,
       private menuService: MenuService,
       private modalService: ModalService,
-      private chatService: ChatService
+      private chatService: ChatService,
+      private logService: LogService
    ) {
     var native = this.elementRef.nativeElement;
 
@@ -147,12 +149,13 @@ export class AppComponent implements OnInit {
       this.firstConnected = true;
       await this.menuService.loadPreferences();
       await this.userprefService.load();
+      this.logService.level = this.userprefService.getGlobalPreferenceValue("loglevel") ?? false;
       await this.notificationService.load();
       await this.chatService.load();
       if(this.onloadFunction != null) {
         await this.onloadFunction.call(window.redback);
       }
-      console.log("Initiation view load");
+      this.logService.info("Initiation view load");
       this.events.next("init");
     }
   }

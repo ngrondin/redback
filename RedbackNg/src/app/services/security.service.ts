@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observer, Subscriber } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
+import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class SecurityService {
 
   constructor(
     private http: HttpClient,
+    private logService: LogService
   ) { 
     this.accessToken = localStorage.getItem("access_token");
     this.expiresAt = parseInt(localStorage.getItem("expires_at"));
@@ -36,9 +38,9 @@ export class SecurityService {
       let now = (new Date()).getTime();
       if(this.expiresAt != null && now > this.expiresAt - (180000)) {
         this.refreshRequesters.push(observer);
-        console.log("Access Token has expired");
+        this.logService.info("Access Token has expired");
         if(this.refreshRequesters.length == 1) {
-          console.log("Refreshing tokens");
+          this.logService.info("Refreshing tokens");
           this.http.get<any>(this.baseUrl + this.refreshPath, {headers:{"accept":"application/json"}}).subscribe({
             next: (value) => {
               this.accessToken = value.access_token;
@@ -51,7 +53,7 @@ export class SecurityService {
               localStorage.setItem("refresh_path", this.refreshPath);
               this.tokenObservers.forEach(o => o.next(this.accessToken));
               this.refreshRequesters.forEach(o => o.next())
-              console.log("Access Token renewed: " + this.accessToken);
+              this.logService.info("Access Token renewed: " + this.accessToken);
             },
             error: (err) => {
               this.refreshRequesters.forEach(o => o.error(err));
@@ -64,7 +66,7 @@ export class SecurityService {
             }
           });
         } else {
-          console.log("Tokens already refreshing");
+          this.logService.info("Tokens already refreshing");
         }
       } else {
         observer.next();

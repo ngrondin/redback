@@ -273,7 +273,7 @@ export class DataService {
     if(rbObject != null) {
       rbObject.updateFromJSON(json);
     } else {
-      rbObject = new RbObject(json, this);
+      rbObject = new RbObject(json);
       this.put(rbObject);
       this.clientWSService.subscribeToUniqueObjectUpdate(rbObject.objectname, rbObject.uid);
     }
@@ -327,7 +327,7 @@ export class DataService {
 
   createInMemory(name: string, uid: string, data: any) : Observable<RbObject> {
     return new Observable<RbObject>((observer) => {
-      let newObj: RbObject = new RbObject({objectname: name, uid: uid, data: data}, this);
+      let newObj: RbObject = new RbObject({objectname: name, uid: uid, data: data});
       this.put(newObj);
       observer.next(newObj);
       observer.complete();

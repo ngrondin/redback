@@ -4,6 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HostBinding } from '@angular/core';
 import { RbInputComponent } from '../abstract/rb-input';
 import { HostListener } from '@angular/core';
+import { LogService } from 'app/services/log.service';
 
 @Component({
   selector: 'rb-file-input',
@@ -25,6 +26,7 @@ export class RbFileInputComponent extends RbInputComponent  {
 
   constructor(
     private apiService: ApiService,
+    private logService: LogService,
     private domSanitizer: DomSanitizer    
   ) {
     super();
@@ -67,7 +69,7 @@ export class RbFileInputComponent extends RbInputComponent  {
   public drop(event: any) {
     event.preventDefault();
     event.stopPropagation();
-    console.log("File dropped");
+    this.logService.info("File dropped");
     if (event.dataTransfer != null && event.dataTransfer.items) {
       for (var i = 0; i < event.dataTransfer.items.length; i++) {
         if (event.dataTransfer.items[i].kind === 'file') {

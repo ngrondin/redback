@@ -59,7 +59,6 @@ export class RbUrlInputComponent extends RbStringInputComponent {
 
   private getPreview() {
     this.apiService.getPreviewUrl(this.urlvalue).subscribe(data => {
-      console.log(data);
       this.commit(data);
     })
   }

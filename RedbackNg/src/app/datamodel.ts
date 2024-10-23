@@ -3,6 +3,8 @@ import { RbDatasetComponent } from './rb-dataset/rb-dataset.component';
 import { ValueComparator } from './helpers';
 import { NotificationService } from './services/notification.service';
 import { FileService } from './services/file.service';
+import { LogService } from './services/log.service';
+import { AppInjector } from './app.module';
 
 export class ObjectResp {
     objects: object;
@@ -21,11 +23,13 @@ export class RbObject {
     updatedAttributes: any = [];
     deleted: boolean = false;
     dataService: DataService;
+    logService: LogService;
     lastUpdated: number;
     datasets: RbDatasetComponent[] = [];
     
-    constructor(json: any, ds: DataService) {
-        this.dataService = ds;
+    constructor(json: any) {
+        this.dataService = AppInjector.get(DataService);
+        this.logService = AppInjector.get(LogService);
         this.uid = json.uid;
         this.objectname = json.objectname;
         this.domain = json.domain;
@@ -35,46 +39,50 @@ export class RbObject {
     updateFromJSON(json: any) {
         if(json.ts >= (this.lastUpdated ?? 0)) {
             const inData: any = json.data;
-            let isChanged: boolean = false;
-            for(const attribute in json.data) {
-                if(json.validation != null && json.validation[attribute] != null) {
-                    this.validation[attribute] = json.validation[attribute];
-                }
-    
-                if(ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
-                    isChanged = true;
-                    this.data[attribute] = json.data[attribute];
-                    if((this.validation[attribute] != null && this.validation[attribute].related != null) || this.related[attribute] !== undefined) {
-                        this.related[attribute] = null;
-                        this._setAttributeFlag(attribute, 'reqrel', false);
-                    } 
-                }
-    
-                if(json.related != null && json.related[attribute] != null) {
-                    let related = this.dataService.receive(json.related[attribute]);
-                    if(this.related[attribute] != related) {
-                        this.related[attribute] = related;
-                        isChanged = true;
-                    }
-                }
-            }
-
+            let changes = [];
+            
             if(json.deleted == true) {
                 this.deleted = true;
-                isChanged = true;
+                changes.push("_deleted");
+            } else {
+                for(const attribute in json.data) {
+                    if(json.validation != null && json.validation[attribute] != null) {
+                        this.validation[attribute] = json.validation[attribute];
+                    }
+        
+                    if(ValueComparator.notEqual(this.data[attribute], json.data[attribute])) {
+                        changes.push(attribute);
+                        this.data[attribute] = json.data[attribute];
+                        if((this.validation[attribute] != null && this.validation[attribute].related != null) || this.related[attribute] !== undefined) {
+                            this.related[attribute] = null;
+                            this._setAttributeFlag(attribute, 'reqrel', false);
+                        } 
+                    }
+        
+                    if(json.related != null && json.related[attribute] != null) {
+                        let related = this.dataService.receive(json.related[attribute]);
+                        if(this.related[attribute] != related) {
+                            this.related[attribute] = related;
+                            changes.push(attribute);
+                        }
+                    }
+                }    
             }
-    
+
             if(json.validation != null) {
                 this.validation._candelete = json.validation._candelete;
                 this._linkMissingRelated();
             }
     
-            if(isChanged) {
+            if(changes.length > 0) {
                 this.updatedAttributes = [];
                 this._adviseSetsOfChange();
+                this.logService.debug(`Update to object ${this.objectname}:${this.uid} accepted at ${json.ts}: ${changes.join(',')}`);
             }
 
             this.lastUpdated = json.ts;
+        } else {
+            this.logService.debug(`Update to object ${this.objectname}:${this.uid} rejected, came in late`);
         }
     }
 

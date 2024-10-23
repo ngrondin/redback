@@ -69,7 +69,6 @@ export class RbPopupAddressesComponent extends RbPopupComponent implements OnIni
     this.isLoading = false;
     this.list = json.map(item => item.description);
     this.cd.detectChanges();
-    //console.log("addresses set");
   }
 
   public select(value: String) {
