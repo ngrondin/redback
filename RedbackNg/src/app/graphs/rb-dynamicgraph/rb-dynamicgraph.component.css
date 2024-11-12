@@ -7,6 +7,10 @@
     margin: 5px;
 }
 
+.rb-chart-title {
+    text-align: center;
+}
+
 .rb-chart-container {
     min-height: 100px;
     min-width: 100px;

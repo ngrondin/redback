@@ -69,12 +69,15 @@
     align-items: center;
     /*justify-content: center;*/
     padding: var(--v5px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     border-width: 0px 1px 1px 0px;
     border-color: transparent;
     border-style: solid;
+}
+
+.rb-linktable-rowitem span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 0.95rem;
 }
 

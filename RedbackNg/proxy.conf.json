@@ -15,6 +15,10 @@
     "target": "http://localhost:8000",
     "secure": false
   },
+  "/rbui/img/*": {
+    "target": "http://localhost:8000",
+    "secure": false
+  },  
   "/rbui/tools/*": {
     "target": "http://localhost:8000",
     "secure": false

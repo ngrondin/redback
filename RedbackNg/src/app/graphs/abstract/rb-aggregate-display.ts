@@ -22,12 +22,11 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     @Input('height') height: number;
     @Input('colormap') colormap: any;
     @Input('linkview') linkview: string;
+    @Input('title') title: string;
     
-    //@Output('navigate') navigate: EventEmitter<any> = new EventEmitter();
+    @HostBinding('style.width') get styleWidth() { return (this.width != null ? ((0.88 * this.width) + 'vw'): null);}
+    @HostBinding('style.height') get styleHeight() { return (this.height != null ? ((0.88 * this.height) + 'vw'): null);}
 
-    @HostBinding('style.width.px') get widthStyle() { return this.width != null ? this.width : null;}
-    @HostBinding('style.height.px') get heightStyle() { return this.height != null ? this.height : null;}
-    
     colorScheme = {
       domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
     };
@@ -128,7 +127,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     }
 
     private processLabel(label: any, labelFormat: any = null) : any {
-      if(label == null) {
+      if(typeof label == 'undefined' || label == null) {
         return "";
       } else if(typeof label == 'string') {
         if(label.match(/^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:.\d{1,9})?(?:Z|[+-][01]\d:[0-5]\d)$/)) {

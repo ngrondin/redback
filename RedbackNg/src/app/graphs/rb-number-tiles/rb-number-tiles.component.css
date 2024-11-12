@@ -11,6 +11,10 @@ rb-graphs-tiles {
 	flex: 1 1 0;
 }
 
+.rb-number-tiles-title {
+    text-align: center;
+}
+
 .rb-chart-loadoverlay {
     position: absolute;
     top: 0px;

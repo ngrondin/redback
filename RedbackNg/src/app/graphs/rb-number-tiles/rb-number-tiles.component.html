@@ -1,3 +1,8 @@
+<div
+    *ngIf="title != null"
+    class="rb-number-tiles-title">
+    {{title}}
+</div>
 <rb-graphs-tiles
     [data]="graphData"
     [cols]="cols"

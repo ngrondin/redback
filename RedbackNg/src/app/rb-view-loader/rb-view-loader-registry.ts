@@ -62,6 +62,7 @@ import { RbGroupComponent } from "app/rb-group/rb-group.component";
 import { RbTextComponent } from "app/rb-text/rb-text.component";
 import { RbHcollapseComponent } from "app/rb-hcollapse/rb-hcollapse.component";
 import { RbProgressComponent } from "app/rb-progress/rb-progress.component";
+import { RbImageComponent } from "app/rb-image/rb-image.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -128,5 +129,6 @@ export const componentRegistry = {
     "scroll":RbScrollComponent,
     "group": RbGroupComponent,
     "text":RbTextComponent,
-    "progress": RbProgressComponent
+    "progress": RbProgressComponent,
+    "image":RbImageComponent
   }

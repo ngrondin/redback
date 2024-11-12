@@ -151,6 +151,7 @@ import { RbGroupComponent } from './rb-group/rb-group.component';
 import { RbTextComponent } from './rb-text/rb-text.component';
 import { RbHcollapseComponent } from './rb-hcollapse/rb-hcollapse.component';
 import { RbProgressComponent } from './rb-progress/rb-progress.component';
+import { RbImageComponent } from './rb-image/rb-image.component';
 
 
 
@@ -312,7 +313,8 @@ window.redback = window.redback || {};
         RbGroupComponent,
         RbTextComponent,
         RbHcollapseComponent,
-        RbProgressComponent
+        RbProgressComponent,
+        RbImageComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },
