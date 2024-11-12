@@ -6,6 +6,7 @@ import { ErrorService } from './error.service';
 import { ClientWSService } from './clientws.service';
 import { FilterService } from './filter.service';
 import { Hasher } from '../helpers';
+import { LogService } from './log.service';
 
 
 
@@ -23,7 +24,8 @@ export class DataService {
     private apiService: ApiService,
     private clientWSService: ClientWSService,
     private errorService: ErrorService,
-    private filterService: FilterService
+    private filterService: FilterService,
+    private logService: LogService
   ) {
     this.allObjects = {};
     this.saveImmediatly = true;
@@ -90,6 +92,8 @@ export class DataService {
         next: resp => {
           const rbObject = this.receive(resp);
           observer.next(rbObject);
+        },
+        complete: () => {
           observer.complete();
           this.fetchCount--;
           this.finalizeReceipt();
@@ -110,10 +114,12 @@ export class DataService {
         next: resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
           observer.next(rbObjectArray.length == 1 ? rbObjectArray[0] : null);
+        }, 
+        complete: () => {
           observer.complete();      
           this.fetchCount--;      
           this.finalizeReceipt();
-        }, 
+        },
         error: error => {
           this.errorService.receiveHttpError(error)
           observer.error(error);
@@ -130,10 +136,12 @@ export class DataService {
         next: resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
           observer.next(rbObjectArray);
+        }, 
+        complete: () => {
           observer.complete();
           this.fetchCount--;
           this.finalizeReceipt();
-        }, 
+        },
         error: error => {
           this.errorService.receiveHttpError(error)
           observer.error(error);
@@ -152,15 +160,15 @@ export class DataService {
             const rbObjectArray = Object.values(resp.result).map(json => this.receive(json));
             observer.next(rbObjectArray);
           },
-          error: error => {
-            this.errorService.receiveHttpError(error)
-            observer.error(error);
-            this.fetchCount--;
-          },
           complete: () => {
             observer.complete();
             this.fetchCount--;
             this.finalizeReceipt();
+          },
+          error: error => {
+            this.errorService.receiveHttpError(error)
+            observer.error(error);
+            this.fetchCount--;
           }
         });
       } else {
@@ -196,6 +204,8 @@ export class DataService {
         next: resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
           observer.next(rbObjectArray);
+        },
+        complete: () => {
           observer.complete();
           this.fetchCount--;
           this.finalizeReceipt();
@@ -224,8 +234,19 @@ export class DataService {
     this.deferredFetchQueue.addObject(forRelatedObject);
   }
 
+  receive(json: any) : RbObject {
+    let rbObject : RbObject = this.get(json.objectname, json.uid);
+    if(rbObject != null) {
+      rbObject.updateFromJSON(json);
+    } else {
+      rbObject = new RbObject(json);
+      this.put(rbObject);
+      this.clientWSService.subscribeToUniqueObjectUpdate(rbObject.objectname, rbObject.uid);
+    }
+    return rbObject;
+  }
+
   async finalizeReceipt() {
-    //if(this.fetchCount > 0) return;
     let multi = [];
     for(let objectname of Object.keys(this.deferredFetchQueue.items)) {
       let fetchRequest = this.deferredFetchQueue.get(objectname);
@@ -262,22 +283,11 @@ export class DataService {
             object.linkMissingRelated();
           }
           this.finalizeReceipt();
-
         }
       );
-    }
-  }
-
-  receive(json: any) : RbObject {
-    let rbObject : RbObject = this.get(json.objectname, json.uid);
-    if(rbObject != null) {
-      rbObject.updateFromJSON(json);
     } else {
-      rbObject = new RbObject(json);
-      this.put(rbObject);
-      this.clientWSService.subscribeToUniqueObjectUpdate(rbObject.objectname, rbObject.uid);
+      this.clientWSService.sendSubscriptionRequests();
     }
-    return rbObject;
   }
 
   pushToServer(rbObject: RbObject) {
@@ -367,13 +377,22 @@ export class DataService {
 
   aggregate(name: string, filter: any, search: string, tuple: any, metrics: any, base: any, page: number = 0, pageSize: number = 50) : Observable<RbAggregate[]> {
     return new Observable<RbAggregate[]>((observer) => {
+      this.fetchCount++;
       this.apiService.aggregateObjects(name, filter, search, tuple, metrics, base, page, pageSize).subscribe({
         next: (resp) => {
           const rbAggregateArray = Object.values(resp.list).map(json => new RbAggregate(json, this));
           observer.next(rbAggregateArray);
         }, 
-        complete: () => observer.complete(),
-        error: (error) => this.errorService.receiveHttpError(error)
+        complete: () => {
+          observer.complete();
+          this.fetchCount--;
+          this.finalizeReceipt();
+        },
+        error: (error) => {
+          this.errorService.receiveHttpError(error);
+          observer.error(error);
+          this.fetchCount--;
+        }
       })
     })
   }

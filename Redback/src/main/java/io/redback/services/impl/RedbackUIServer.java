@@ -1,9 +1,13 @@
 package io.redback.services.impl;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -371,6 +375,39 @@ public class RedbackUIServer extends UIServer
 		}
 		return script;
 	}	
+	
+	protected byte[] getImage(Session session, String name) throws RedbackException {
+		try {
+			byte[] bytes = null;
+			Reader reader = null;
+			InputStream is = null;
+			if(devpath != null)
+			{
+				File file = new File(devpath + File.separator + "rbui" + File.separator + "img" + File.separator + name);
+				if(file.exists())
+					is = new FileInputStream(file);
+			} 
+			else 
+			{
+	    		is = getClass().getResourceAsStream("/io/redback/config/rbui/img/" + name);
+			}
+	
+			if(is != null)
+			{
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				while(is.available() > 0) 
+					baos.write(is.read());
+				return baos.toByteArray();
+			}
+			else
+			{
+				return null;
+			}	
+
+		} catch(Exception e) {
+			throw new RedbackException("Error getting image", e);
+		}
+	}
 
 	protected byte[] getResource(Session session, String name, String version) throws RedbackException
 	{
@@ -468,4 +505,6 @@ public class RedbackUIServer extends UIServer
 	    }
 
 	}
+
+
 }

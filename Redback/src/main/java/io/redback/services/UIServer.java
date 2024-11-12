@@ -127,6 +127,12 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 					response.setData(getView(session, name));
 					response.metadata.put("mime", "application/json");						
 				}
+				else if(category.equals("img")) {
+					Logger.finer("rb.ui.getimg", new DataMap("name", name));
+					byte[] bytes = getImage(session, name);
+					Payload resp = new Payload(bytes);
+					return resp;
+				}
 				else if(category.equals("tools")) 
 				{
 					if(name.equals("urlpreview")) {
@@ -165,7 +171,9 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 
 	protected abstract DataMap getAppConfig(Session session, String name) throws RedbackException;
 	
-	protected abstract DataMap getView(Session session, String viewName);
+	protected abstract DataMap getView(Session session, String name) throws RedbackException;
+	
+	protected abstract byte[] getImage(Session session, String name) throws RedbackException;
 
 	protected abstract byte[] getResource(Session session, String name, String version) throws RedbackException;
 	
