@@ -42,7 +42,42 @@
  
     </mat-toolbar-row>
 </mat-toolbar>
-<mat-sidenav-container
+
+<div
+    class="rb-workarea">
+    <div
+        class="rb-workarea-menu">
+        <rb-menu
+            [look]="userprefService.getGlobalPreferenceValue('uialt')">
+        </rb-menu>
+    </div>
+    <div
+        class="rb-workarea-main">
+        <rb-vsection>
+            <rb-view-header>
+            </rb-view-header>
+            <rb-view-loader>
+            </rb-view-loader>
+        </rb-vsection>
+    </div>
+    <div
+        [class]="'rb-workarea-drawer ' + (drawerOpen ? 'rb-workarea-drawer-open' : '')">
+        <rb-notification-list
+            *ngIf="drawerShowing == 'notifications'"
+            (close)="closeRightDrawer()">
+        </rb-notification-list>
+        <rb-chat
+            *ngIf="drawerShowing == 'chat'"
+            (close)="closeRightDrawer()">
+        </rb-chat>
+        <rb-preferences
+            *ngIf="drawerShowing == 'prefs'"
+            (close)="closeRightDrawer()">
+        </rb-preferences>
+    </div>
+</div>
+
+<!--<mat-sidenav-container
     [hasBackdrop]="false"
     autosize>
     <mat-sidenav 
@@ -80,7 +115,7 @@
             </rb-view-loader>
         </rb-vsection>
     </mat-sidenav-content>
-</mat-sidenav-container>
+</mat-sidenav-container>-->
 <div
     class="rb-footer">
     <div

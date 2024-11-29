@@ -28,13 +28,15 @@ export abstract class AppRootComponent implements OnInit {
     @Input() events : Observable<string>;
 
     @ViewChild('usermenubutton', { read: ViewContainerRef }) userMenuContainerRef: ViewContainerRef;
-    @ViewChild("rightdrawer") rightdrawer: MatSidenav;
+    //@ViewChild("rightdrawer") rightdrawer: MatSidenav;
 
-    rightDrawerShowing: string = null;
+    drawerShowing: string = null;
+    drawerOpen: boolean = false;
     subscription: Subscription;
     
     title: string = "Welcome";
     showNLBox: boolean = false;
+    //showDrawer: boolean = false;
     
     configService : ConfigService;
     dragService: DragService;
@@ -118,14 +120,19 @@ export abstract class AppRootComponent implements OnInit {
     }
   
     toggleRightDrawer(type) {
-      if(this.rightdrawer.opened) {
-        this.rightdrawer.close();
-        if(this.rightDrawerShowing != type) {
-          setTimeout(() => this.toggleRightDrawer(type), 250);
-        } 
+      if(this.drawerOpen) {
+        if(this.drawerShowing == type) {
+          this.closeRightDrawer();
+        } else {
+          this.drawerOpen = false;
+          setTimeout(() => {
+            this.drawerShowing = type;
+            this.drawerOpen = true;
+          }, 250);
+        }
       } else {
-        this.rightDrawerShowing = type;
-        this.rightdrawer.open();
+        this.drawerShowing = type;
+        setTimeout(() => this.drawerOpen = true, 1);
       }
     }
 
@@ -134,12 +141,13 @@ export abstract class AppRootComponent implements OnInit {
     }
 
     closeRightDrawer() {
-      this.rightdrawer.close();
+      this.drawerOpen = false;
+      setTimeout(() => this.drawerShowing = null, 250);
     }
 
     navigated() {
-      if(this.rightdrawer.opened) {
-        this.rightdrawer.close();
+      if(this.drawerShowing != null) {
+        this.closeRightDrawer();
       }
     }
   
