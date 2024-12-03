@@ -64,5 +64,5 @@
     border-radius: 5px 0px 0px 5px;
     padding: 0.3vw 0px;
     cursor: pointer;
-    z-index: 100;
+    z-index: 1;
 }

@@ -83,7 +83,7 @@
     font-size: smaller;
     border-left: solid 1px lightgray;
     height: 100%;
-    z-index: 20;
+    z-index: 1;
 }
 
 .rb-gantt-body {
@@ -159,7 +159,7 @@
     -webkit-user-select: none; 
     user-select: none; 
     cursor: pointer;
-    z-index: 30;
+    z-index: 3;
 }
 
 .rb-gantt-spreadbox-editable {
@@ -174,7 +174,7 @@
 
 .rb-gantt-spreadbackground {
     height: 2.5vw;
-    z-index: 10;
+    z-index: 2;
     color: lightgray;
 }
 
@@ -258,6 +258,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 50;
+    z-index: 4;
     background-color: #eee8;
 }

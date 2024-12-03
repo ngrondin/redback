@@ -19,7 +19,7 @@ agm-map {
         0 5px 24px 4px rgba(0, 0, 0, 0.12);
     flex-direction: column;
     align-items: stretch;
-	z-index: 100;
+	z-index: 3;
 }
 
 .rb-map-label-panel {
@@ -33,7 +33,7 @@ agm-map {
     white-space: nowrap;
     font-size: 1.2rem;
     cursor: default;
-	z-index: 100;
+	z-index: 3;
 }
 
 .rb-map-label-button {
@@ -80,7 +80,7 @@ agm-map {
 	border-radius: 50%;
 	border-color: inherit;
 	animation: rb-map-animation-pulse 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-	z-index: 1;
+	z-index: 2;
 }
 
 .rb-mapicon-dot {
@@ -108,7 +108,7 @@ agm-map {
 	border-radius: 50%;
 	border-color: inherit;
 	animation: rb-map-animation-pulse 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-	z-index: -1;
+	z-index: 1;
 }
 
 

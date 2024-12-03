@@ -112,14 +112,14 @@ rb-scroll ::ng-deep .rb-scroll-content {
     flex: 0 0 auto;
     height: 0.29vw;
     margin: 0px 0px;
-    z-index: 100;
+    z-index: 1;
 }
 
 .rb-dfe-dropzone-active {
     background-color: #58a5ef88;
     margin: -0.58vw 0px;
     height: 1.46vw;
-    z-index: 100;
+    z-index: 1;
 }
 
 
@@ -127,7 +127,7 @@ rb-scroll ::ng-deep .rb-scroll-content {
     background-color: #004c8b88;
     margin: -0.58vw 0px;
     height: 1.46vw;
-    z-index: 100;
+    z-index: 1;
 }
 
 .rb-dfe-toolbox {

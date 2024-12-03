@@ -33,7 +33,7 @@
     height: 100%;
     width: 25px;
     background-color: transparent;
-    z-index: 100;
+    z-index: 1;
 }
 
 .rb-scroll-vthumb {
@@ -43,7 +43,7 @@
     width: 4px;
     background-color: #004c8b44;
     border-radius: 5px;
-    z-index: 101;
+    z-index: 2;
 }
 
 .rb-scroll-vthumb-active {
@@ -60,7 +60,7 @@
     width: 100%;
     height: 25px;
     background-color: transparent;
-    z-index: 100;
+    z-index: 1;
 }
 
 .rb-scroll-hthumb {
@@ -70,7 +70,7 @@
     height: 4px;
     background-color: #004c8b44;
     border-radius: 5px;
-    z-index: 101;
+    z-index: 2;
 }
 
 .rb-scroll-hthumb-active {

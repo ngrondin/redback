@@ -68,6 +68,7 @@
     box-shadow: #888 -10px 5px 15px -10px; 
     max-width: 0px;
     transition: max-width 500ms;
+    z-index: 10;
 }
 
 .rb-workarea-drawer-open {
@@ -101,7 +102,7 @@
     display: block;
     position: absolute;
     background: rgb(232, 235, 240);
-    z-index: 1000;
+    z-index: 100;
     border: solid 1px rgb(67, 86, 110);
     border-radius: 3px;
     pointer-events: none;
@@ -118,23 +119,4 @@ mat-toolbar-row {
     padding: 0 var(--v10px);
 }
 
-mat-sidenav-container {
-    display: flex;
-    flex: 1 1 auto;
 
-}
-
-mat-sidenav {
-    display: flex;
-    border-right: Solid 0px;
-    /*border-right: Solid 1px rgba(0,0,0,.12);*/
-}
-/*
-.rb-sidenav-alt1 {
-    background: #2b3360
-}*/
-
-mat-sidenav-content {
-    display: flex;
-    flex: 1 1 auto;
-}

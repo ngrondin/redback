@@ -62,7 +62,7 @@
     display: block;
     position: absolute;
     background: rgb(232, 235, 240);
-    z-index: 1000;
+    z-index: 100;
     border: solid 1px rgb(67, 86, 110);
     border-radius: 3px;
     pointer-events: none;
@@ -77,25 +77,4 @@ mat-toolbar {
 mat-toolbar-row {
     height: var(--v40px);
     padding: 0 var(--v10px);
-}
-
-mat-sidenav-container {
-    display: flex;
-    flex: 1 1 auto;
-
-}
-
-mat-sidenav {
-    display: flex;
-    border-right: Solid 0px;
-    /*border-right: Solid 1px rgba(0,0,0,.12);*/
-}
-/*
-.rb-sidenav-alt1 {
-    background: #2b3360
-}*/
-
-mat-sidenav-content {
-    display: flex;
-    flex: 1 1 auto;
 }
