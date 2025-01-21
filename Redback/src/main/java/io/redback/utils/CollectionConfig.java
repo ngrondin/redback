@@ -123,12 +123,16 @@ public class CollectionConfig {
 		return canonicalResp;
 	}
 	
-	public DataMap putData(DataMap canonicalKey, DataMap canonicalData) throws RedbackException {
+	public DataMap putData(DataMap canonicalKey, DataMap canonicalData, String operation) throws RedbackException {
 		DataMap key = convertObjectToSpecific(canonicalKey);
 		DataMap data = convertObjectToSpecific(canonicalData);
-		DataMap resp = dataClient.putData(getName(), key, data);
+		DataMap resp = dataClient.putData(getName(), key, data, operation);
 		DataMap canonicalResp = convertObjectToCanonical(resp);
 		return canonicalResp;
+	}
+	
+	public DataMap putData(DataMap canonicalKey, DataMap canonicalData) throws RedbackException {
+		return putData(canonicalKey, canonicalData, null);
 	}
 	
 	public void deleteData(DataMap canonicalKey) throws RedbackException {

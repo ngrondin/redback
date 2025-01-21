@@ -127,16 +127,26 @@ public class CronTaskManager extends Thread {
 	
 	protected boolean lockTask(CronTaskConfig ctc) throws RedbackException {
 		DataMap key = new DataMap("name", ctc.getName(), "lock", null);
-		DataMap data = new DataMap("lock", uuid);
-		dataClient.putData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(key), collectionConfig.convertObjectToSpecific(data), "update");
+		DataMap data = new DataMap("lock", uuid, "lockdate", new Date());
+		collectionConfig.putData(key, data, "update");
 		DataMap resp = collectionConfig.getData(new DataMap("name", ctc.getName()));
 		DataList result = resp.getList("result");
 		if(result.size() > 0) {
-			String lock = result.getObject(0).getString("lock");
-			if(lock != null && lock.equals(uuid))
+			DataMap lockData = result.getObject(0); 
+			String lock = lockData.getString("lock");
+			if(lock != null && lock.equals(uuid)) {
 				return true;
-			else 
+			} else { 
+				if(lock != null) {
+					Date lockDate = lockData.getDate("lockdate");
+					if(lockDate != null && lockDate.getTime() < System.currentTimeMillis() - ctc.getPeriod()) {
+						key = new DataMap("name", ctc.getName());
+						data = new DataMap("lock", null, "lockdate", null);
+						collectionConfig.putData(key, data);
+					}
+				}
 				return false;
+			}
 		} else {
 			collectionConfig.putData(key, data);
 			return true;
@@ -164,7 +174,7 @@ public class CronTaskManager extends Thread {
 	
 	protected void unlockTask(CronTaskConfig ctc, long nextRun) throws RedbackException {
 		DataMap key = new DataMap("name", ctc.getName());
-		DataMap data = new DataMap("lock", null, "nextrun", new Date(nextRun));
+		DataMap data = new DataMap("lock", null, "lockdate", null, "nextrun", new Date(nextRun));
 		collectionConfig.putData(key, data);
 		ctc.setNextRun(nextRun);
 	}
