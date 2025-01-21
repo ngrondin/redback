@@ -124,15 +124,15 @@ export abstract class AppRootComponent implements OnInit {
         if(this.drawerShowing == type) {
           this.closeRightDrawer();
         } else {
-          this.drawerOpen = false;
+          this.closeRightDrawer();
           setTimeout(() => {
             this.drawerShowing = type;
             this.drawerOpen = true;
-          }, 250);
+          }, 500);
         }
       } else {
         this.drawerShowing = type;
-        setTimeout(() => this.drawerOpen = true, 1);
+        this.drawerOpen = true
       }
     }
 
@@ -142,11 +142,10 @@ export abstract class AppRootComponent implements OnInit {
 
     closeRightDrawer() {
       this.drawerOpen = false;
-      setTimeout(() => this.drawerShowing = null, 250);
     }
 
     navigated() {
-      if(this.drawerShowing != null) {
+      if(this.drawerOpen) {
         this.closeRightDrawer();
       }
     }

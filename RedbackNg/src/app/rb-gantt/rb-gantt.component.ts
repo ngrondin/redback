@@ -447,6 +447,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       related[config.laneAttribute] = lane.object;
     }
     
+    this.blockNextRefocus = true;
     if(Object.keys(update).length > 0) {
       object.setValuesAndRelated(update, related);
     }
@@ -454,7 +455,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(this.datasetgroup.datasets[config.dataset].list.indexOf(object) == -1) {
       this.datasetgroup.datasets[config.dataset].addObjectAndSelect(object);
     }
-
     //this.calc();
   }
 

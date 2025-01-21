@@ -75,6 +75,7 @@
 
 .rb-workarea-drawer-open {
     max-width: 100vw;
+    transition: max-width 500ms;
 }
 
 .rb-footer {
