@@ -5,6 +5,8 @@ import { HostBinding } from '@angular/core';
 import { RbInputComponent } from '../abstract/rb-input';
 import { HostListener } from '@angular/core';
 import { LogService } from 'app/services/log.service';
+import { RbFileviewerComponent } from 'app/rb-fileviewer/rb-fileviewer.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'rb-file-input',
@@ -27,6 +29,7 @@ export class RbFileInputComponent extends RbInputComponent  {
   constructor(
     private apiService: ApiService,
     private logService: LogService,
+    public dialog: MatDialog,
     private domSanitizer: DomSanitizer    
   ) {
     super();
@@ -98,7 +101,18 @@ export class RbFileInputComponent extends RbInputComponent  {
     if(this.rbObject != null) {
       let val = this.rbObject.get(this.attribute);
       if(val.fileuid != null) {
-        window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + val.fileuid);
+        let isImg = val.mime != null && val.mime.startsWith("image/");
+        if(!isImg) {
+          window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + val.fileuid);
+        } else {
+          this.dialog.open(RbFileviewerComponent, {
+            data: {
+              fileUid: val.fileuid
+            },
+            autoFocus: false,
+            restoreFocus: false
+          });
+        }
       }
     }     
   }
