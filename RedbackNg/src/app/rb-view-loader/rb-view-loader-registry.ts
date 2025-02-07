@@ -63,6 +63,7 @@ import { RbTextComponent } from "app/rb-text/rb-text.component";
 import { RbHcollapseComponent } from "app/rb-hcollapse/rb-hcollapse.component";
 import { RbProgressComponent } from "app/rb-progress/rb-progress.component";
 import { RbImageComponent } from "app/rb-image/rb-image.component";
+import { RbTagsInputComponent } from "app/inputs/rb-tags-input/rb-tags.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -89,6 +90,7 @@ export const componentRegistry = {
     "codeinput": RbCodeInputComponent,
     "currencyinput": RbCurrencyInputComponent,
     "durationinput": RbDurationInputComponent,
+    "tagsinput": RbTagsInputComponent,
     "dynamicform": RbDynamicformComponent,
     "dynamicformeditor": RbDynamicformeditorComponent,
     "fileinput": RbFileInputComponent,

@@ -54,6 +54,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 				DataMap resp = new DataMap();
 				resp.put("fileuid", newFilemd.fileuid);
 				resp.put("thumbnail", newFilemd.thumbnail);
+				resp.put("mime", newFilemd.mime);
 				response = new Payload(resp);
 				response.metadata.put("mime", "application/json");
 			}

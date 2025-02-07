@@ -71,14 +71,6 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   ngOnChanges(changes: SimpleChanges) {
   }
 
-  /*get rbObject() : RbObject {
-    if(this.dataset != null) {
-        return this.dataset.selectedObject;
-    } else {
-        return this._rbObject;
-    }
-  }*/
-
   get value() : any {
     let val = null;
     if(this.attribute != null) {

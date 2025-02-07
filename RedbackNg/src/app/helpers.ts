@@ -336,7 +336,7 @@ export class HtmlParser {
         return {nodes, pos};
     }
 
-    public static stringify(nodes, indent = false, baseindent = 0) {
+    public static stringify(nodes, indent = false, baseindent = 0, wraphtml = false) {
         var str = "";
         var basepad = "".padStart(baseindent, "\t");
         for(var node of nodes) {
@@ -364,6 +364,9 @@ export class HtmlParser {
                 }  
             }
              
+        }
+        if(wraphtml && !(nodes.length == 1 && nodes[0].type == 'tag' && nodes[0].tag == 'html')) {
+            str = "<html>" + str + "</html>";
         }
         return str;
     }

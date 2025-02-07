@@ -6,6 +6,8 @@ import { RbFilesetComponent } from 'app/rb-fileset/rb-fileset.component';
 import { RbComponent } from 'app/abstract/rb-component';
 import { UserprefService } from 'app/services/userpref.service';
 import { Formatter } from 'app/helpers';
+import { MatDialog } from '@angular/material/dialog';
+import { RbFileviewerComponent } from 'app/rb-fileviewer/rb-fileviewer.component';
 
 @Component({
   selector: 'rb-filelist',
@@ -14,7 +16,7 @@ import { Formatter } from 'app/helpers';
 })
 export class RbFilelistComponent extends RbComponent {
   @Input('fileset') fileset: RbFilesetComponent;
-  @Input('downloadOnSelect') downloadOnSelect: boolean = true;
+  @Input('downloadOnSelect') downloadOnSelect: boolean = false;
   @Input('details') showDetails: boolean = true;
   
   
@@ -24,7 +26,8 @@ export class RbFilelistComponent extends RbComponent {
   constructor(
     private apiService: ApiService,
     private domSanitizer: DomSanitizer,
-    public userpref: UserprefService
+    public userpref: UserprefService,
+    public dialog: MatDialog
   ) {
     super();
   }
@@ -60,8 +63,17 @@ export class RbFilelistComponent extends RbComponent {
 
   select(file: RbFile) {
     this.fileset.select(file);
-    if(this.downloadOnSelect) {
+    let isImg = file.mime.startsWith("image/");
+    if(this.downloadOnSelect || !isImg) {
       window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + file.fileUid);
+    } else {
+      this.dialog.open(RbFileviewerComponent, {
+        data: {
+          fileUid: file.fileUid
+        },
+        autoFocus: false,
+        restoreFocus: false
+      });
     }
   }
 

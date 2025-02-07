@@ -1,0 +1,119 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    margin-right: 5px;
+}
+
+.rb-tags-icon {
+    flex: 0 0 auto;
+	color: grey;
+	margin-right: var(--v5px);
+    margin-top: var(--v16px);
+	font-size: 1.4rem;
+    width: var(--v24px);
+    height: var(--v24px);
+}
+
+.rb-tags-icon-mandatory {
+    color: red;
+}
+
+.rb-tags-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    position: relative;
+    align-items: center;
+}
+
+.rb-tags-label {
+    display: block;
+    position: absolute;
+    width: 100%;
+    top: 0px;
+    font-size: 0.75rem;
+    color: rgb(175, 175, 175);
+    z-index: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;  
+}
+
+.rb-tags-label-mandatory {
+    color: #ff000088;
+}
+
+.rb-tags-label-big {
+    font-size: 1.0rem;
+    margin-top: var(--v16px);
+    transition: margin 300ms, font-size 300ms;
+}
+
+.rb-tags-row {
+    display: flex;
+    flex-direction: row;
+    border-width: 0px 0px 1px 0px;
+    border-color: lightgrey;
+    border-style: solid;
+    width: 100%;
+}
+
+.rb-tags-tag {
+    display: block;
+    border-radius: var(--v5px);
+    background-color: var(--primary-color);
+    color: var(--light-inverse-writing-color);
+    height: 1vw;
+    margin: var(--v16px) var(--v2px) 0px var(--v2px);
+    padding: var(--v3px) var(--v5px);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.rb-tags-input {
+    display: flex;
+    font-size: 1rem;
+    background-color: transparent;
+    border-width: 0px;
+    outline: none;
+    margin-top: var(--v16px);
+    padding: var(--v3px) 0px;
+    width: 100%;
+    z-index: 1;
+    resize: none;
+    min-width: var(--v20px);
+}
+
+.rb-tags-mandatory {
+
+}
+
+.rb-tags-underline {
+    width: 0%;
+    height: 0px;
+    border-top: 3px solid var(--main-color);
+    margin-top: -2px;
+    z-index: 2;
+}
+
+.rb-tags-underline-editing {
+    width: 100%;
+    transition: width 200ms ease-out;
+}
+
+
+.rb-tags-button {
+    padding: 0px;
+    min-width: 32px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}

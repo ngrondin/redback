@@ -1,0 +1,13 @@
+<div
+    class="rb-fileviewer-imgcontainer">
+    <img
+        class="rb-fileviewer-img"
+        [src]="url"
+        [style.max-height]="maxHeight"
+        [style.max-width]="maxWidth">
+</div>
+<div
+    class="rb-fileviewer-zoom"
+    (click)="toggleZoom()">
+    <mat-icon class="rb-fileviewer-zoom-icon">fullscreen</mat-icon>
+</div>

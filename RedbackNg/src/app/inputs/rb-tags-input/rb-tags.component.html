@@ -1,0 +1,36 @@
+<mat-icon 
+    *ngIf="showicon" 
+    [class]="'rb-tags-icon' + (mandatoryalert ? ' rb-tags-icon-mandatory' : '') ">
+    {{icon}}
+</mat-icon>
+<div
+    class="rb-tags-container">
+    <span
+        [class]="'rb-tags-label' + (mandatoryalert ? ' rb-tags-label-mandatory' : '')  + (tags.length == 0 && !isEditing ? ' rb-tags-label-big' : '')">
+        {{label}}
+    </span>
+    <div
+        class="rb-tags-row">
+        <div
+            *ngFor="let tag of getDisplayTags()"
+            class="rb-tags-tag">
+            {{tag}}
+        </div>
+        <input 
+            #input
+            [class]="'rb-tags-input rb-tags-text-color' + (mandatoryalert ? ' rb-tags-mandatory' : '') + (flasherOn ? ' rb-tags-text-flash' : '')"
+            [(ngModel)]="displayvalue"
+            (focus)="onFocus($event)"
+            (blur)="onBlur($event)"
+            (keydown)="onKeydown($event)"
+            (keyup)="onKeyup($event)"
+            [readonly]="readonly"
+            autocomplete="off"
+            data-lpignore="true"
+            [type]="inputType">
+    
+    </div>    
+    <div
+        [class]="'rb-tags-underline' + (isEditing ? ' rb-tags-underline-editing' : '')">
+    </div> 
+</div>

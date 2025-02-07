@@ -14,6 +14,7 @@ declare var Quill: any;
 })
 export class RbRichtextInputComponent extends RbFieldInputComponent {
   @Input('allowswitch') allowswitch: boolean = false;
+  @Input('wraphtml') wraphtml: boolean = false;
   editor: any = null;
   codeconfig: any = {
     printMargin: false
@@ -74,6 +75,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
       this.editor.root.addEventListener("blur", ($event) => {
         this.onBlur($event);
       });  
+      this.onDatasetEvent('select');
     }
   }
 
@@ -96,11 +98,8 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   }
 
   public finishEditing() {
-    if(this.mode == 'editor') {
-      this.editedValue = (this.editor != null && this.editor.root != null ? this.editor.root.innerHTML : null);
-    } else {
-      this.editedValue = HtmlParser.stringify(HtmlParser.parse(this.codeSource));
-    }
+    let rawValue = this.mode == 'editor' ? (this.editor != null && this.editor.root != null ? this.editor.root.innerHTML : null) : this.codeSource;
+    this.editedValue = rawValue != null && rawValue != '' ? HtmlParser.stringify(HtmlParser.parse(rawValue), false, 0, this.wraphtml) : null;
     this.commit(this.editedValue);
     super.finishEditing();
   }

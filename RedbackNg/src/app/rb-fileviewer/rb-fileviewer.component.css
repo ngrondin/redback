@@ -1,0 +1,31 @@
+:host {
+    display: block;
+    overflow: hidden;
+}
+
+.rb-fileviewer-imgcontainer {
+    display: block;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: scroll;
+}
+
+.rb-fileviewer-img {
+    display: block;
+}
+
+.rb-fileviewer-zoom {
+    display: block;
+    position: absolute;
+    top: 0px;
+    color: wheat;
+    cursor: pointer;
+}
+
+.rb-fileviewer-zoom:hover {
+    color: white;
+}
+
+.rb-fileviewer-zoom-icon {
+
+}

@@ -152,6 +152,8 @@ import { RbTextComponent } from './rb-text/rb-text.component';
 import { RbHcollapseComponent } from './rb-hcollapse/rb-hcollapse.component';
 import { RbProgressComponent } from './rb-progress/rb-progress.component';
 import { RbImageComponent } from './rb-image/rb-image.component';
+import { RbTagsInputComponent } from './inputs/rb-tags-input/rb-tags.component';
+import { RbFileviewerComponent } from './rb-fileviewer/rb-fileviewer.component';
 
 
 
@@ -314,7 +316,9 @@ window.redback = window.redback || {};
         RbTextComponent,
         RbHcollapseComponent,
         RbProgressComponent,
-        RbImageComponent
+        RbImageComponent,
+        RbTagsInputComponent,
+        RbFileviewerComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

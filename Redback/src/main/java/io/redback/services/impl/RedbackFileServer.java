@@ -379,6 +379,7 @@ public class RedbackFileServer extends FileServer
 						DataMap resp = new DataMap();
 						resp.put("fileuid", filemd.fileuid);
 						resp.put("thumbnail", filemd.thumbnail);
+						resp.put("mime", filemd.mime);
 						ByteArrayInputStream bais = new ByteArrayInputStream(resp.toString().getBytes());
 						new StreamSender(bais, streamEndpoint);
 						Logger.info("rb.file.put", "Finished putting file");
