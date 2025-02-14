@@ -60,6 +60,8 @@ public abstract class Unit {
 			newUnit = new Text(rm, rc, c);
 		else if(type.equals("multilinetext"))
 			newUnit = new MultilineText(rm, rc, c);
+		else if(type.equals("html"))
+			newUnit = new HTML(rm, rc, c);
 		else if(type.equals("field"))
 			newUnit = new Field(rm, rc, c);
 		else if(type.equals("vlist"))

@@ -96,6 +96,26 @@ public abstract class DataUnit extends Unit {
 	    return lines;
 	}
 	
+	protected String cutToWidth(String text, float fontSize, float width) throws IOException {
+		if(width > 0) {
+			int pos = 0;
+			while(true) {
+				int nextPos = text.indexOf(" ", pos + 1);
+				if(nextPos == -1) nextPos = text.length();
+				float size = getStringWidth(fontSize, text.substring(0, nextPos));
+				if(size > width) {
+					return text.substring(0, pos);
+				} else if(nextPos == text.length()) {
+					return text;
+				} else {
+					pos = nextPos;
+				}
+			}			
+		} else {
+			return text;
+		}
+	}
+	
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
 		Session session = (Session)context.get("session");
 		Map<String, Object> jsContext = getJSContext(context);
