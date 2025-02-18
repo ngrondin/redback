@@ -15,11 +15,12 @@ import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
 import io.firebus.utils.jwt.JWTValidator;
+import io.firebus.utils.jwt.JWTValidatorException;
 import io.redback.client.ConfigClient;
 import io.redback.client.DataClient;
 import io.redback.client.GatewayClient;
 import io.redback.exceptions.RedbackException;
-import io.redback.exceptions.RedbackInvalidRequestException;
+import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.security.Role;
 import io.redback.security.Session;
 import io.redback.security.UserProfile;
@@ -98,16 +99,18 @@ public class RedbackAccessManager extends AccessManager
 	}
 
 	protected UserProfile validateToken(Session session, String token) throws RedbackException {
+		DecodedJWT jwt = null;
 		try {
-			DecodedJWT jwt = jwtValidator.decode(token);
+			jwt = jwtValidator.decode(token);
 			jwtValidator.validate(jwt);
-			if(jwt.getClaim("email") == null) throw new RedbackInvalidRequestException("Email claim not provided");
-			UserProfile profile = getUserProfile(session, jwt);
-			profile.setExpiry(jwt.getExpiresAt().getTime());
-			return profile;
-		} catch (Exception exception) {
-			throw new RedbackException("Cannot validate token: " + token, exception);
+		} catch (JWTValidatorException exception) {
+			throw new RedbackUnauthorisedException("Invalid token", exception);
 		}
+		if(jwt.getClaim("email") == null) 
+			throw new RedbackUnauthorisedException("Email claim not provided");
+		UserProfile profile = getUserProfile(session, jwt);
+		profile.setExpiry(jwt.getExpiresAt().getTime());
+		return profile;
 	}
 	
 	protected String getSysUserToken(Session session) throws RedbackException {

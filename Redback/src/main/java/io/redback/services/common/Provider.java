@@ -42,6 +42,8 @@ public abstract class Provider
 		}
 		if(errorCode == 0 || errorCode >= 500)
 			Logger.severe(event, msg, e);
+		if(errorCode == 401) 
+			Logger.security(event, msg, e);
 		else 
 			Logger.userError(event, StringUtils.rollUpExceptions(e) + ": " + msg);
 		return new FunctionErrorException(msg, e, errorCode);

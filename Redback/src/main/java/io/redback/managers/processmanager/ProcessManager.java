@@ -435,8 +435,11 @@ public class ProcessManager
 			filter.put(gmCollectionConfig.getField("username"), actionner.getId());
 			DataMap result = dataClient.getData(gmCollectionConfig.getName(), filter);
 			DataList resultList = result.getList("result");
-			for(int i = 0; i < resultList.size(); i++)
-				actionner.addGroup(resultList.getObject(i).getString(gmCollectionConfig.getField("group")));
+			for(int i = 0; i < resultList.size(); i++) {
+				String groupId = resultList.getObject(i).getString(gmCollectionConfig.getField("group"));
+				if(groupId != null)
+					actionner.addGroup(groupId);
+			}
 		} 
 		catch (Exception e) 
 		{

@@ -66,21 +66,21 @@ export class NotificationService {
         this.notifications = [];
         this.page = 0;
         this.loadPromiseResolver = resolve;
-        this.fetchNextPage();
+        this.fetchNextPage({"interaction.type":{$in:["exception", "notification"]}});
       } else {
         resolve();
       }
     });
   }
 
-  private fetchNextPage() {
-    this.apiService.listAssignments({}, this.page, this.pageSize).subscribe(
+  private fetchNextPage(filter) {
+    this.apiService.listAssignments(filter, this.page, this.pageSize).subscribe(
       resp => {
         for(let item of resp.result) {
           this.receiveNotification(item);
         }
         if(resp.result.length >= this.pageSize) {
-          this.fetchNextPage();
+          this.fetchNextPage(filter);
         } else {
           this.loadPromiseResolver();
           this.calcStats();
