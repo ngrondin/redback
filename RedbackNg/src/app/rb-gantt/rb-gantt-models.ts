@@ -5,6 +5,7 @@ import { RbObject } from "app/datamodel";
 export class GanttLaneConfig {
     dataset: string;
     labelAttribute: string;
+    imageAttribute: string;
     iconAttribute: string;
     iconMap: any;
     modal: string;
@@ -13,6 +14,7 @@ export class GanttLaneConfig {
     constructor(json: any, userpref: any) {
       this.dataset = json.dataset;
       this.labelAttribute = json.labelattribute;
+      this.imageAttribute = json.imageattribute;
       this.iconAttribute = json.iconattribute;
       this.iconMap = json.iconmap;
       this.modal = json.modal;
@@ -65,14 +67,16 @@ export class GanttLaneConfig {
     static ganttLaneHeight: number = 42;
     id: string;
     label: string;
+    image: string;
     icon: string;
     height: number;
     spreads: GanttSpread[];
     object: RbObject;
   
-    constructor(i: string, l: string, ic: string, o: RbObject) {
+    constructor(i: string, l: string, im: string, ic: string, o: RbObject) {
       this.id = i;
       this.label = l != null ? l : "";
+      this.image = im;
       this.icon = ic;
       this.object = o;
       this.height = GanttLane.ganttLaneHeight;
@@ -80,7 +84,7 @@ export class GanttLaneConfig {
   
     setSpreads(s: GanttSpread[]) {
       this.spreads = s;
-      let max: number = 0;
+      let max: number = this.image != null ? 1 : 0;
       for(let i = 0; i < this.spreads.length; i++) {
         if(this.spreads[i].sublane > max) {
           max = this.spreads[i].sublane;

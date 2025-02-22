@@ -236,11 +236,21 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
       if(show) {
         let label = obj.get(this.lanesConfig.labelAttribute);
-        let icon = obj.get(this.lanesConfig.iconAttribute);
-        if(this.lanesConfig.iconMap != null) {
-          icon = this.lanesConfig.iconMap[icon];
+        let image = null;
+        let icon = null;
+        if(this.lanesConfig.iconAttribute != null) {
+          icon = obj.get(this.lanesConfig.iconAttribute);
+          if(this.lanesConfig.iconMap != null) {
+            icon = this.lanesConfig.iconMap[icon];
+          }  
         }
-        let lane = new GanttLane(obj.uid, label, icon, obj);
+        if(this.lanesConfig.imageAttribute != null) {
+          let fileVal = obj.get(this.lanesConfig.imageAttribute);
+          if(fileVal != null && fileVal.thumbnail != null) {
+            image = "url(\'" + fileVal.thumbnail + "\')"
+          }
+        }
+        let lane = new GanttLane(obj.uid, label, image, icon, obj);
         let spreads: GanttSpread[] = this.getSpreads(obj.uid);
         lane.setSpreads(spreads);
         lanes.push(lane);

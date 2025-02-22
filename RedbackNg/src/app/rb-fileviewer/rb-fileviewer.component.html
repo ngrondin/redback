@@ -7,7 +7,15 @@
         [style.max-width]="maxWidth">
 </div>
 <div
-    class="rb-fileviewer-zoom"
-    (click)="toggleZoom()">
-    <mat-icon class="rb-fileviewer-zoom-icon">fullscreen</mat-icon>
+    class="rb-fileviewer-controls">
+    <div
+        class="rb-fileviewer-control"
+        (click)="toggleZoom()">
+        <mat-icon class="rb-fileviewer-zoom-icon">fullscreen</mat-icon>
+    </div>
+    <div
+        class="rb-fileviewer-control"
+        (click)="download()">
+        <mat-icon>download</mat-icon>
+    </div>    
 </div>

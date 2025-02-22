@@ -39,4 +39,15 @@ export class RbFileviewerComponent implements OnInit {
   public toggleZoom() {
     this.zoom = !this.zoom;
   }
+
+  public download() {
+    let url = this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + this.fileUid;
+    window.open(url);
+    /*const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = 'example.txt';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);*/
+  }
 }

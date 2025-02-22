@@ -48,7 +48,7 @@ export class FilterItemConstruct {
               this.val1 = 'nextday';
             } else {
               this.val1 = 'until';
-              this.val2 = s.substring(1, s.length - 1);
+              this.val3 = s.substring(1, s.length - 1);
             }
           }
         }
@@ -86,7 +86,7 @@ export class FilterItemConstruct {
         } else if(this.val1 == 'nextday') {
           return {"$lt":"(new Date((new Date()).getTime() + 86400000)).toISOString()"};
         } else if(this.val1 == 'until') {
-          return {"$lt":"'" + this.val2 + "'"};
+          return {"$lt":"'" + this.val3 + "'"};
         } else if(this.val1 == 'between') {
           return {"$gt":"'" + this.val2 + "'", "$lt":"'" + this.val3 + "'"};
         }

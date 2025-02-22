@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
 import { Evaluator, Formatter } from 'app/helpers';
+import { ApiService } from 'app/services/api.service';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
 import { UserprefService } from 'app/services/userpref.service';
@@ -24,6 +25,7 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('meta2attribute') meta2attribute: string;
   @Input('meta2expression') meta2expression: string;
   @Input('meta2format') meta2format: string;
+  @Input('imageattribute') imageattribute: string;
   @Input('colormap') colormap: any;
   @Input('colorattribute') colorattribute: string;
   @Input('modal') modal: string;
@@ -38,6 +40,7 @@ export class RbList4Component extends RbDataObserverComponent {
 
   constructor(
     public userprefService: UserprefService,
+    public apiService: ApiService,
     public modalService: ModalService,
     public navigateService: NavigateService
   ) {
@@ -80,6 +83,10 @@ export class RbList4Component extends RbDataObserverComponent {
     return this.meta1attribute != null || this.meta2attribute != null;
   }
 
+  public hasImage() : boolean {
+    return this.imageattribute != null;
+  }
+
   isSelected(object: RbObject) : boolean {
     return this.dataset.isObjectSelected(object);
   }
@@ -95,6 +102,12 @@ export class RbList4Component extends RbDataObserverComponent {
         meta2: this.getFieldValue(obj, "meta2")
       }
 
+      if(this.hasImage()) {
+        let fileVal = obj.get(this.imageattribute);
+        if(fileVal != null) {
+          data.image = 'url(\'' + fileVal.thumbnail + '\')';
+        }
+      }
       let thisColorAttribute = this.colorattribute;
       if(this.userPref != null && this.userPref.colorattribute != null) {
         thisColorAttribute = this.userPref.colorattribute;

@@ -121,7 +121,7 @@
                             </rb-datetime-input>  
 
                             <rb-datetime-input
-                                *ngIf="filterConstruct.config.type == 'date' &&  filterConstruct.val1 == 'between'"
+                                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'until' || filterConstruct.val1 == 'between')"
                                 [margin]="false"
                                 [(value)]=filterConstruct.val3
                                 (valueChange)="changed = true">

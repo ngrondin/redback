@@ -18,8 +18,8 @@ export class RbFileInputComponent extends RbInputComponent  {
   @Input('width') width: number;
   @Input('height') height: number;
   @Output() dropped: EventEmitter<any> = new EventEmitter();
-  @HostBinding('style.width') get hostWidth() { return (this.width != null ? ((0.88 * this.width) + 'vw'): 6);}
-  @HostBinding('style.height') get hostHeight() { return (this.height != null ? ((0.88 * this.height) + 'vw'): 6);}
+  @HostBinding('style.width') get hostWidth() { return (this.width != null ? ((0.88 * this.width) + 'vw'): '4.5vw');}
+  @HostBinding('style.height') get hostHeight() { return (this.height != null ? ((0.88 * this.height) + 'vw'): '3vw');}
 
   hasFileOver: boolean = false;
   defaultIcon: string = 'description';

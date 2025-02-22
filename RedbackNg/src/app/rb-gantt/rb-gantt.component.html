@@ -101,6 +101,11 @@
                 (rb-drag-dropzone)="droppedOn($event, lane, true)"
                 [rb-drag-changeform]="getSizeForObjectCallback">
                 <div
+                    class="rb-gantt-laneimage"
+                    *ngIf="lane.image != null"
+                    [style.background-image]="lane.image">
+                </div>                
+                <div
                     class="rb-gantt-lanelabel">
                     {{lane.label}}
                 </div>

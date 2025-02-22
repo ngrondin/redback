@@ -14,16 +14,28 @@
     display: block;
 }
 
-.rb-fileviewer-zoom {
+.rb-fileviewer-controls {
     display: block;
     position: absolute;
     top: 0px;
-    color: wheat;
-    cursor: pointer;
 }
 
-.rb-fileviewer-zoom:hover {
+.rb-fileviewer-control {
+    display: inline-block;
+    cursor: pointer;
+    color: wheat;
+    opacity: 0.5;
+    width: 1.5vw;
+    margin: 0.1vw;
+}
+
+.rb-fileviewer-control mat-icon {
+    font-size: 1.5rem
+}
+
+.rb-fileviewer-control:hover {
     color: white;
+    opacity: 1;
 }
 
 .rb-fileviewer-zoom-icon {

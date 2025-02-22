@@ -53,12 +53,32 @@ rb-scroll ::ng-deep .rb-scroll-content {
 	padding-left: -4px;
 }
 
-.rb-list-item-data {
+.rb-list-item-row {
+    display: flex;
+    flex: 1 1 auto;
+	flex-direction: row;
+    align-items: center;
+    margin: var(--v12px) var(--v20px);
+    min-height: 3.2vw;
+    overflow: hidden;
+}
+
+.rb-list-item-image {
+    width: 3vw;
+    height: 3vw;
+    margin-right: 0.5vw;
+    background-color: #f0f0f0;
+    border-radius: 30%;
+    border: 1px solid #ccc;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.rb-list-item-col {
     display: flex;
     flex: 1 1 auto;
 	flex-direction: column;
-    margin: var(--v12px) var(--v20px);
-    min-height: 3.2vw;
     overflow: hidden;
     justify-content: center;
 }
