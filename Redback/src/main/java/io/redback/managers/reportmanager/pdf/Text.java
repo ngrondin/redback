@@ -1,5 +1,6 @@
 package io.redback.managers.reportmanager.pdf;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class Text extends DataUnit {
 		String valueStr = getSringValue(context);
 		Box rb = Box.HContainer(false);
 		Box text = Box.Text(valueStr, bold ? boldFont : font, fontSize(context));
-		text.color = color;
+		text.color = color(context, Color.DARK_GRAY);
 		text.breakBefore = pagebreak;
 		rb.addChild(text);
 		overrideHeight(rb, context);

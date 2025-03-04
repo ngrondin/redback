@@ -17,7 +17,6 @@ public abstract class ContainerUnit extends Unit {
 	protected List<Unit> contentUnits;
 	protected boolean canBreak;
 	protected Expression showExpr;
-	protected Expression colorExpr;
 	protected Expression borderColorExpr;
 	
 	public ContainerUnit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException {
@@ -33,7 +32,6 @@ public abstract class ContainerUnit extends Unit {
 			canBreak = config.containsKey("canbreak") ? config.getBoolean("canbreak") : true;
 			jsParams = Arrays.asList(new String[] {"params", "object", "page"});
 			showExpr = config.containsKey("show") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_container_show", config.getString("show")) : null;
-			colorExpr = config.containsKey("color") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_container_color", config.getString("color")) : null;
 			borderColorExpr = config.containsKey("bordercolor") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_container_bordercolor", config.getString("bordercolor")) : null;
 		} catch(Exception e) {
 			throw new RedbackException("Error intialising container unit", e);
@@ -50,18 +48,6 @@ public abstract class ContainerUnit extends Unit {
 			}
 		} else {
 			return true;
-		}
-	}
-	
-	protected Color color(Map<String, Object> context) throws RedbackException {
-		if(colorExpr != null) {
-			try {
-				return Color.decode((String)colorExpr.eval(getJSContext(context)));
-			} catch(Exception e) {
-				return null;
-			}
-		} else {
-			return null;
 		}
 	}
 	

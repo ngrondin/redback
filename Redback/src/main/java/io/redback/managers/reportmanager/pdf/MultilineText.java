@@ -1,5 +1,6 @@
 package io.redback.managers.reportmanager.pdf;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -25,21 +26,21 @@ public class MultilineText extends DataUnit {
 		c.breakBefore = pagebreak;
 		float fs = fontSize(context);
 		overrideWidth(c, context);
-		overrideHeight(c, context);
 		for(int i = 0; i < lines.length; i++) {
 			if(c.width > 0) {
 				List<String> sublines = this.cutToLines(fs, lines[i], c.width);
 				for(String subline : sublines) {
 					Box rb = Box.Text(subline, font, fs);
-					rb.color = color;
+					rb.color = color(context, Color.DARK_GRAY);
 					c.addChild(rb);							
 				}
 			} else {
 				Box rb = Box.Text(lines[i], font, fs);
-				rb.color = color;
+				rb.color = color(context, Color.DARK_GRAY);
 				c.addChild(rb);					
 			}
 		}
+		overrideHeight(c, context);
 		return c;
 	}
 

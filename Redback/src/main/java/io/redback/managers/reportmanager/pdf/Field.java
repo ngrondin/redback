@@ -27,7 +27,7 @@ public class Field extends DataUnit {
 		Box rb2 = Box.Text(valueStr, font, fontSize(context));
 		rb2.height += 3;
 		overrideWidth(rb2, context);
-		rb2.color = color;
+		rb2.color = color(context, Color.DARK_GRAY);
 		Box c = Box.VContainer(false);
 		c.addChild(rb1);
 		c.addChild(rb2);

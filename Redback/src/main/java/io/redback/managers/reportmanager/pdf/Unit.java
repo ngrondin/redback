@@ -29,7 +29,7 @@ public abstract class Unit {
 	protected Expression heightExpr;
 	protected Expression minHeightExpr;
 	protected Expression maxHeightExpr;
-
+	protected Expression colorExpr;
 	
 	public Unit(ReportManager rm, ReportConfig rc, DataMap c) throws RedbackException  {
 		config = c;
@@ -38,12 +38,13 @@ public abstract class Unit {
 		jsFunctionNameRoot = "report_" + rc.getName() + "_" + StringUtils.base16(this.hashCode());
 		try {
 			pagebreak = config.containsKey("pagebreak") ? config.getBoolean("pagebreak") : false;
-			widthExpr = config.containsKey("width") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_width", config.getString("width")) : null;
-			minWidthExpr = config.containsKey("minwidth") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_minwidth", config.getString("minwidth")) : null;
-			maxWidthExpr = config.containsKey("maxwidth") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_maxwidth", config.getString("maxwidth")) : null;
-			heightExpr = config.containsKey("height") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_height", config.getString("height")) : null;
-			minHeightExpr = config.containsKey("minheight") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_minheight", config.getString("minheight")) : null;
-			maxHeightExpr = config.containsKey("maxheight") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_section_maxheight", config.getString("maxheight")) : null;
+			widthExpr = config.containsKey("width") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_unit_width", config.getString("width")) : null;
+			minWidthExpr = config.containsKey("minwidth") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_unit_minwidth", config.getString("minwidth")) : null;
+			maxWidthExpr = config.containsKey("maxwidth") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_unit_maxwidth", config.getString("maxwidth")) : null;
+			heightExpr = config.containsKey("height") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_unit_height", config.getString("height")) : null;
+			minHeightExpr = config.containsKey("minheight") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_unit_minheight", config.getString("minheight")) : null;
+			maxHeightExpr = config.containsKey("maxheight") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_unit_maxheight", config.getString("maxheight")) : null;
+			colorExpr = config.containsKey("color") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_unit_color", config.getString("color")) : null;
 		} catch(Exception e) {
 			throw new RedbackException("Error intialising unit", e);
 		}
@@ -64,6 +65,8 @@ public abstract class Unit {
 			newUnit = new HTML(rm, rc, c);
 		else if(type.equals("field"))
 			newUnit = new Field(rm, rc, c);
+		else if(type.equals("checkbox"))
+			newUnit = new Checkbox(rm, rc, c);
 		else if(type.equals("vlist"))
 			newUnit = new VList(rm, rc, c);
 		else if(type.equals("vsection"))
@@ -147,6 +150,23 @@ public abstract class Unit {
 			float maxWidth = evalFloat(maxWidthExpr, context, -1f);
 			if(minWidth > -1f && box.width < minWidth) box.width = minWidth;
 			if(maxWidth > -1f && box.width > maxWidth) box.width = maxWidth;
+		}
+	}
+	
+	protected Color color(Map<String, Object> context) throws RedbackException {
+		return color(context, null);
+	}
+
+	
+	protected Color color(Map<String, Object> context, Color def) throws RedbackException {
+		if(colorExpr != null) {
+			try {
+				return Color.decode((String)colorExpr.eval(getJSContext(context)));
+			} catch(Exception e) {
+				return null;
+			}
+		} else {
+			return def;
 		}
 	}
 	

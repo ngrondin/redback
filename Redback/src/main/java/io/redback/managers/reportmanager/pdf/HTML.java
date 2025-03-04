@@ -2,7 +2,6 @@ package io.redback.managers.reportmanager.pdf;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import io.firebus.data.DataMap;
@@ -86,7 +85,7 @@ public class HTML extends DataUnit {
 						remText = remText.substring(cutText.length());
 						if(remText.startsWith(" ")) remText = remText.substring(1);
 						Box rb = Box.Text(cutText, font, fs);
-						rb.color = color;
+						rb.color = color(context, Color.DARK_GRAY);
 						c.addChild(rb);
 					} else {
 						break;

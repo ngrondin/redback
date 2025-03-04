@@ -29,7 +29,6 @@ public abstract class DataUnit extends Unit {
 	protected PDFont font;
 	protected PDFont boldFont;
 	protected Expression fontSizeExpr;
-	protected Color color;
 	protected String format;
 	protected boolean commaToLine;
 
@@ -41,7 +40,7 @@ public abstract class DataUnit extends Unit {
 			font = PDType1Font.HELVETICA;
 			boldFont = PDType1Font.HELVETICA_BOLD;
 			fontSizeExpr = config.containsKey("fontsize") ? reportManager.getScriptFactory().createExpression(jsFunctionNameRoot + "_dataunit_fontsize", config.getString("fontsize")) : null;
-			color = config.containsKey("color") ? decodeColor(config.getString("color")) : Color.DARK_GRAY;
+			//color = config.containsKey("color") ? decodeColor(config.getString("color")) : Color.DARK_GRAY;
 			format = config.getString("format");
 			commaToLine = config.containsKey("commatoline") ? config.getBoolean("commatoline") : false;
 		} catch(Exception e) {
@@ -118,19 +117,9 @@ public abstract class DataUnit extends Unit {
 	
 	protected String getSringValue(Map<String, Object> context) throws RedbackException {
 		Session session = (Session)context.get("session");
-		Map<String, Object> jsContext = getJSContext(context);
-		jsContext.put("dataset", DataSet.convertToScript(context.get("dataset")));
-		jsContext.put("master", DataSet.convertToScript(context.get("master")));
-		Object value = null;
-		try {
-			value = valueExpr.eval(jsContext);
-		} catch(Exception e) {}
+		Object value = getValue(context);
 		String valueStr = value != null ? value.toString() : "";
-        /*StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < valueStr.length(); i++) 
-            if (WinAnsiEncoding.INSTANCE.contains(valueStr.charAt(i))) 
-                sb.append(valueStr.charAt(i));
-        valueStr = sb.toString(); */  
+
 		if(commaToLine) 
 			valueStr = valueStr.replaceAll(", ", "\r\n").replaceAll(",", "\r\n");
 		if(value != null && format != null) {
@@ -186,7 +175,17 @@ public abstract class DataUnit extends Unit {
 		return valueStr;
 	}
 	
-
+	protected Object getValue(Map<String, Object> context) throws RedbackException {
+		Map<String, Object> jsContext = getJSContext(context);
+		jsContext.put("dataset", DataSet.convertToScript(context.get("dataset")));
+		jsContext.put("master", DataSet.convertToScript(context.get("master")));
+		Object value = null;
+		try {
+			value = valueExpr.eval(jsContext);
+		} catch(Exception e) {}
+		return value;
+	}
+	
 	protected float fontSize(Map<String, Object> context) throws RedbackException {
 		if(fontSizeExpr != null) {
 			try {
