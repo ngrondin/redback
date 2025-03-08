@@ -63,6 +63,8 @@
     width: 100%;
     z-index: 1;
     resize: none;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .rb-input-mandatory {

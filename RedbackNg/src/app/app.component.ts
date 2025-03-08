@@ -67,7 +67,7 @@ export class AppComponent implements OnInit {
     this.apiService.uiService = native.getAttribute("uiservice");
     this.apiService.objectService = native.getAttribute("objectservice");
     this.apiService.fileService = native.getAttribute("fileservice");
-    this.apiService.domainService = native.getAttribute("domainservice");
+    //this.apiService.domainService = native.getAttribute("domainservice");
     this.apiService.reportService = native.getAttribute("reportservice");
     this.apiService.processService = native.getAttribute("processservice");
     this.apiService.userprefService = native.getAttribute("userpreferenceservice");

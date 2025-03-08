@@ -172,7 +172,7 @@ export class RbFilterBuilderComponent implements OnInit {
         next: (list) => {
           fac.options = list.map(agg => ({
             name: agg.getDimension(fac.attribute + "." + fac.displayAttribute) ?? 'Empty', 
-            value: agg.getDimension(fac.attribute),
+            value: agg.getDimension(fac.attribute) ?? null,
             count:agg.getMetric("_cnt")
           }));
           fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));

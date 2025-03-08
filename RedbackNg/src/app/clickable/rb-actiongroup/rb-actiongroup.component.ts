@@ -82,12 +82,12 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         for(var item of json.list) {
           this.domainActions.push(new RbActiongroupAction('executeglobal', item.name, null, item.timeout, item.description, item.icon, item.confirm, false, item.show));
         }
-        this.apiService.listDomainFunctions(category).subscribe(json => {
+        /*this.apiService.listDomainFunctions(category).subscribe(json => {
           for(var item of json.result) {
             this.domainActions.push(new RbActiongroupAction('executedomain', item.name, null, item.timeout, item.description, item.icon, item.confirm, false, null));
           }
           this.calcActionData();
-        });
+        });*/
       });
     } else {
       this.calcActionData();

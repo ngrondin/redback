@@ -29,7 +29,7 @@ export class ApiService {
   public uiService: string;
   public objectService: string;
   public fileService: string;
-  public domainService: string;
+  //public domainService: string;
   public reportService: string;
   public processService: string;
   public userprefService: string;
@@ -366,7 +366,7 @@ export class ApiService {
 
   /******* Domain *********/
 
-  listDomainFunctions(category: string): Observable<any> {
+  /*listDomainFunctions(category: string): Observable<any> {
     const req = {
       action: 'listfunctions',
       category: category
@@ -382,7 +382,7 @@ export class ApiService {
       param: param,
     };
     return this.requestService(this.domainService, req, timeout);
-  }
+  }*/
 
   /******* Reporting Service *********/
   

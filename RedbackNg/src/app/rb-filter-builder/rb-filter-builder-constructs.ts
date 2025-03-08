@@ -54,7 +54,7 @@ export class FilterItemConstruct {
         }
       } else if(this.config.type == 'multiselect') {
         if(v != null && typeof v == 'object' && v.hasOwnProperty("$in")) {
-          this.val1 = v["$in"].map(item => item.substring(1, item.length - 1));
+          this.val1 = v["$in"].map(item => item == "null" ? null : item.substring(1, item.length - 1));
         } else {
           this.val1 = [];
         }
@@ -91,7 +91,7 @@ export class FilterItemConstruct {
           return {"$gt":"'" + this.val2 + "'", "$lt":"'" + this.val3 + "'"};
         }
       } else if(this.config.type == 'multiselect') {
-        return {"$in": this.val1.map(item => "'" + item + "'")};
+        return {"$in": this.val1.map(item => item != null ? "'" + item + "'" : "null")};
       } else if(this.config.type == 'switch') {
         return this.val1 == true ? true : false;
       }

@@ -52,8 +52,8 @@ export class ActionService {
         return this.executeMaster(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executeglobal') {
         return this.executeGlobal(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
-      } else if(_action == 'executedomain') {
-        return this.executeDomain(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
+      /*} else if(_action == 'executedomain') {
+        return this.executeDomain(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);*/
       } else if(_action == 'clientscript') {
         return this.executeClientScript(dataset, param);
       } else if(_action == 'modal') {
@@ -228,7 +228,7 @@ export class ActionService {
     });
   }
 
-  public executeDomain(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
+  /*public executeDomain(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       let paramResolved = {};
       if(functionParams != null) {
@@ -244,7 +244,7 @@ export class ActionService {
         observer.error("No object selected");
       }
     });
-  }
+  }*/
 
   public executeClientScript(dataset:RbDatasetComponent, script: string) : Observable<null> {
     return new Observable((observer) => {
