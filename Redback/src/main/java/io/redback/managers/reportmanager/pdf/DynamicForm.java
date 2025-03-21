@@ -155,7 +155,7 @@ public class DynamicForm extends DataUnit {
 						DataList options = (DataList)ror.getObject(optionsAttribute);
 						for(int i = 0; i < options.size(); i++) {
 							DataMap option = options.getObject(i);
-							if(option.getString("value").equals(value)) {
+							if(value.equals(option.getString("value"))) {
 								item.answerString = option.getString("display");
 							}
 						}					
