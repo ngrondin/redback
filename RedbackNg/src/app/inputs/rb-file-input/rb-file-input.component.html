@@ -1,14 +1,14 @@
 <div
     class="rb-file-input-box"    
-    [ngClass]="(hasFileOver ? 'rb-file-input-active' : fileUid == null ? 'rb-file-input-border' : '')"
+    [ngClass]="(hasFileOver ? 'rb-file-input-active' : fileUid == null || shrinkborder == false ? 'rb-file-input-border' : '')"
     (click)="openFile()">
     <img
-        *ngIf="hasThumbnail()"
-        class="rb-file-input-img"
+        *ngIf="fileUid != null && hasThumbnail()"
+        [ngClass]="'rb-file-input-img' + (shrinkborder == true ? ' rb-file-input-border' : '')"
         [src]="displayvalue">
     <svg 
-        *ngIf="!hasThumbnail() && fileUid != null"
-        class="rb-file-fileicon"
+        *ngIf="fileUid != null && !hasThumbnail()"
+        [ngClass]="'rb-file-fileicon' + (shrinkborder == true ? ' rb-file-input-border' : '')"
         viewBox="0 0 153.3886 187.59438" >
         <defs
             id="defs18" />
