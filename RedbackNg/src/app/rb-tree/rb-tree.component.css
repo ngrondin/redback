@@ -36,3 +36,65 @@
     flex: 1 1 auto;
     padding: var(--v12px) var(--v2px)
 }
+
+
+.rb-tree-item-col {
+    display: flex;
+    flex: 1 1 auto;
+	flex-direction: column;
+    overflow: hidden;
+    justify-content: center;
+    padding: var(--v8px) var(--v12px) var(--v8px) 0px;
+}
+
+
+.rb-tree-item-metaline {
+    display: flex;
+    flex-direction: row;
+    height: var(--v16px);
+}
+
+.rb-tree-item-meta1 {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #888888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;    
+}
+
+.rb-tree-item-meta2 {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #666666;  
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: var(--v16px);
+}
+
+.rb-tree-item-metaspacer {
+    flex: 1 1 auto;
+}
+
+.rb-tree-item-main {
+    font-weight: 400;
+    line-height: var(--v24px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.0rem;
+}
+
+.rb-tree-item-sub {
+    color: #aaaaaa;
+    font-size: 0.75rem;
+    line-height: var(--v16px);
+    min-height: var(--v16px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* number of lines to show */
+            line-clamp: 2;
+    -webkit-box-orient: vertical;    
+}

@@ -12,6 +12,10 @@ import { UserprefService } from 'app/services/userpref.service';
 })
 export class RbTreeComponent  extends RbDataObserverComponent  {
   @Input('displayattribute') displayattribute: string;
+  @Input('mainattribute') mainattribute: string;
+  @Input('subattribute') subattribute: string;
+  @Input('meta1attribute') meta1attribute: string;
+  @Input('meta2attribute') meta2attribute: string;
   @Input('parentattribute') parentattribute: string;
   @Input('childattribute') childattribute: string;
   
@@ -53,9 +57,16 @@ export class RbTreeComponent  extends RbDataObserverComponent  {
   }
 
   recursiveRedraw(obj: RbObject) {
+    let main = obj.get(this.mainattribute ?? this.displayattribute);
+    let meta1 = this.meta1attribute != null ? obj.get(this.meta1attribute) : null;
+    let meta2 = this.meta2attribute != null ? obj.get(this.meta2attribute) : null;
+    let sub = this.subattribute != null ? obj.get(this.subattribute) : null;
     let ret = {
       object: obj,
-      label: obj.get(this.displayattribute), 
+      meta1: meta1,
+      meta2: meta2,
+      main: main,
+      sub: sub,
       open: this.open.indexOf(obj) > -1,
       children: []
     };

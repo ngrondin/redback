@@ -25,10 +25,38 @@
             </div>
             <rb-clickable
                 (click)="selectNode(node)">
-                <div
+                <div 
+                    class="rb-tree-item-col">
+                    <div
+                        class="rb-tree-item-metaline"
+                        *ngIf="node.meta1 != null || node.meta2 != null">
+                        <span
+                            class="rb-tree-item-meta1">
+                            {{node.meta1}}
+                        </span>
+                        <div
+                            class="rb-tree-item-metaspacer">
+                        </div>
+                        <span
+                            class="rb-tree-item-meta2">
+                            {{node.meta2}}
+                        </span>
+                    </div>
+                    <span
+                        class="rb-tree-item-main"
+                        *ngIf="node.main != null">
+                        {{node.main}}
+                    </span>
+                    <span
+                        class="rb-tree-item-sub"
+                        *ngIf="node.sub != null">
+                        {{node.sub}}
+                    </span>
+                </div>
+                <!--<div
                     class="rb-tree-label">
                     {{ node.label || 'No Label' }}
-                </div>
+                </div>-->
             </rb-clickable>
         </div>
  		<div 
