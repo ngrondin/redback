@@ -13,6 +13,8 @@ export class RbTextComponent extends RbDataObserverComponent {
   @Input('value') _value: any = null;
   @Input('variable') variable: any;
   @Input('margin') margin: boolean = true;
+  @Input('alert') alert: boolean = false;
+  @Input('icon') icon: string;
   
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
   
@@ -54,5 +56,13 @@ export class RbTextComponent extends RbDataObserverComponent {
       val = this._value;
     }
     return val;
+  }
+
+  get hasIcon() : boolean {
+    return this.icon != null;
+  }
+
+  public get alertOn(): boolean {
+    return this.alert;
   }
 }

@@ -1,5 +1,29 @@
 :host {
-    padding: var(--v5px);
+    display: flex;
+    flex-direction: row;
+    /*padding: var(--v5px);*/
     align-items: center;
     color: var(--dark-writing-color);
+}
+
+.rb-text-icon {
+    flex: 0 0 auto;
+	color: grey;
+	font-size: 1.4rem;
+    width: var(--v24px);
+    height: var(--v24px);
+    margin-right: var(--v5px);
+}
+
+.rb-text-text {
+    
+}
+
+.rb-text-icon-alert {
+    color: red;
+}
+
+.rb-text-text-alert {
+    color: red;
+    /*font-weight: 450;*/
 }
