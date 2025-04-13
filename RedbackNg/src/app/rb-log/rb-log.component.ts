@@ -22,7 +22,6 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('linkuidattribute') linkuidattribute: string;
   
   @Output() posted: EventEmitter<any> = new EventEmitter();
-  //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   public value: string; 
   public isEditable: boolean = false;
@@ -97,7 +96,10 @@ export class RbLogComponent extends RbDataObserverComponent {
     if(this.value != null && this.value.length > 0) {
       let data = Object.assign({}, this.dataset.resolvedFilter);
       data[this.entryattribute] = this.value;
-      this.dataService.create(this.dataset.objectname, null, data).subscribe(() => this.value = "");
+      this.dataService.create(this.dataset.objectname, null, data).subscribe((newObject) => {
+        this.dataset.addObjectAndSelect(newObject);
+        this.value = ""
+      });
     }
   }
 

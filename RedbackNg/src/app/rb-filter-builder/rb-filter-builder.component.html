@@ -1,11 +1,11 @@
 <div
     class="rb-filter-builder-header">
     <span class="material-symbols-outlined rb-filter-builder-topicon">
-        filter_list
+        {{isEditingSavedEntry ? 'search' : 'filter_list'}}
     </span>   
     <div
         class="rb-filter-builder-title">
-        {{canFilter && canSort ? 'Filter / Sort' : canFilter ? 'Filter' : 'Sort'}}
+        {{isEditingSavedEntry ? (editingSavedEntry.name ?? "Unnamed") : canFilter && canSort ? 'Filter / Sort' : canFilter ? 'Filter' : 'Sort'}}
     </div>
 </div>
 <div
@@ -14,23 +14,35 @@
         *ngIf="modeCount > 1"
         class="rb-filter-builder-menu">
         <div
-            *ngIf="canSave"
+            *ngIf="canSave && hasSavedEntries && !isEditingSavedEntry"
             class="rb-filter-builder-menuitem">
             <rb-clickable
-                [focus]="mode == 'saved'"
-                (click)="selectMode('saved')">
+                [focus]="tab == 'saved'"
+                (click)="selectTab('saved')">
                 <span
                     class="rb-filter-builder-menulabel">
                     Saved
                 </span>
             </rb-clickable>
-        </div>
+        </div>  
+        <div
+            *ngIf="canSave && isEditingSavedEntry"
+            class="rb-filter-builder-menuitem">
+            <rb-clickable
+                [focus]="tab == 'details'"
+                (click)="selectTab('details')">
+                <span
+                    class="rb-filter-builder-menulabel">
+                    Details
+                </span>
+            </rb-clickable>
+        </div>                
         <div
             *ngIf="canFilter"
             class="rb-filter-builder-menuitem">
             <rb-clickable
-                [focus]="mode == 'filter'"
-                (click)="selectMode('filter')">
+                [focus]="tab == 'filter'"
+                (click)="selectTab('filter')">
                 <span
                     class="rb-filter-builder-menulabel">
                     Filter
@@ -41,45 +53,83 @@
             *ngIf="canSort"
             class="rb-filter-builder-menuitem">
             <rb-clickable
-                [focus]="mode == 'sort'"
-                (click)="selectMode('sort')">
+                [focus]="tab == 'sort'"
+                (click)="selectTab('sort')">
                 <span
                     class="rb-filter-builder-menulabel">
                     Sort
                 </span>
             </rb-clickable>            
-        </div>        
+        </div> 
+              
     </div>
     <div
         class="rb-filter-builder-main">
         <div
-            *ngIf="mode == 'saved'"
+            *ngIf="tab == 'saved'"
             class="rb-filter-builder-content">
-            Saved Filters
-        </div>
+            <rb-scroll>
+                <div
+                    class="rb-filter-builder-col">
+                    <div
+                        *ngFor="let savedEntry of savedEntries"
+                        class="rb-filter-builder-saved-row">
+                        <rb-clickable
+                            (click)="clickSavedEntry(savedEntry)">
+                            <div
+                                class="rb-filter-builder-saved-name">
+                                <mat-icon>search</mat-icon>
+                                <p>{{savedEntry.name}}</p>
+                            </div>
+                        </rb-clickable>
+                        <div
+                            class="rb-filter-builder-saved-button">
+                            <rb-iconbutton
+                                (click)="clickSavedEntryEdit(savedEntry)"
+                                [icon]="'more_horiz'">
+                            </rb-iconbutton>                           
+                        </div>
+                                             
+                    </div>
+                </div>
+            </rb-scroll>  
+        </div>   
         <div
-            *ngIf="mode == 'filter'"
+            *ngIf="tab == 'details'"
             class="rb-filter-builder-content">
+            <rb-scroll>
+                <div>
+                    <rb-string-input
+                        [(value)]="editingSavedEntry.name"
+                        [size]="20"
+                        [icon]="'search'"
+                        [label]="'Name'"
+                        (change)="changed = true">
+                    </rb-string-input>
+                    <rb-switch-input
+                        [(value)]="editingSavedEntry.default"
+                        [label]="'Is Default'"
+                        (change)="changed = true">
+                    </rb-switch-input>
+                </div>
+            </rb-scroll>  
+        </div>                
+        <div
+            *ngIf="tab == 'filter'"
+            class="rb-filter-builder-content">
+            <rb-actiongroup
+                [label]="'Add Criteria'"
+                [actions]="addFilterActions"
+                (actionclicked)="addAttributeToFilter($event.param)">
+            </rb-actiongroup>  
             <rb-scroll>
                 <table
                     class="rb-filter-build-maintable">
-                    <tr>
-                        <td
-                            class="rb-fb-labelcol">
-                            Add filter for : 
-                        </td>
-                        <td>
-                            <rb-choice-input
-                                [choicelist]="availableAttributes"
-                                [label]="'Attributes'"
-                                [icon]="'search'"
-                                [margin]="false"
-                                [size]="12"
-                                [(value)]="attributeToAddToFilter"
-                                (valueChange)="changed = true">
-                            </rb-choice-input>
-                        </td>
-                    </tr>
+                    <div
+                        *ngIf="filterConstructs.length == 0"
+                        class="rb-filter-build-emptymessage">
+                        No filter specified<br>Add a criteria to start building a filter
+                    </div>
                     <tr
                         *ngFor="let filterConstruct of filterConstructs">
                         <td
@@ -87,7 +137,7 @@
                             align="right">
                             <div
                                 class="rb-filter-builder-label">
-                                {{filterConstruct.config.label}} : 
+                                {{filterConstruct.config.label}}
                             </div>
                         </td>
                         <td
@@ -127,6 +177,22 @@
                                 (valueChange)="changed = true">
                             </rb-datetime-input>  
 
+                            <rb-duration-input
+                                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'sincelast' || filterConstruct.val1 == 'rollwindow')"
+                                [margin]="false"
+                                [size]="8"
+                                [(value)]=filterConstruct.val2
+                                (valueChange)="changed = true">
+                            </rb-duration-input>  
+
+                            <rb-duration-input
+                                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'untilnext' || filterConstruct.val1 == 'rollwindow')"
+                                [margin]="false"
+                                [size]="8"
+                                [(value)]=filterConstruct.val3
+                                (valueChange)="changed = true">
+                            </rb-duration-input>                              
+
                             <table
                                 *ngIf="filterConstruct.config.type == 'multiselect'"
                                 class="rb-filter-builder-multiselect-table">
@@ -165,7 +231,7 @@
                         <td
                             class="rb-fb-buttoncol">
                             <rb-iconbutton
-                                [icon]="'remove_circle_outline'"
+                                [icon]="'delete'"
                                 (click)="removeFilterItem(filterConstruct)">
                             </rb-iconbutton>
                 
@@ -175,35 +241,28 @@
             </rb-scroll>  
         </div>
         <div
-            *ngIf="mode == 'sort'"
+            *ngIf="tab == 'sort'"
             class="rb-filter-builder-content">
+            <rb-actiongroup
+                [label]="'Add Attribute'"
+                [actions]="addSortActions"
+                (actionclicked)="addAttributeToSort($event.param)">
+            </rb-actiongroup>              
             <rb-scroll>
                 <table
                     class="rb-filter-build-maintable">
-                    <tr>
-                        <td
-                            class="rb-fb-labelcol">
-                            Sort on : 
-                        </td>
-                        <td
-                            colspan="2">
-                            <rb-choice-input
-                                [choicelist]="sortConfig.attributes"
-                                [label]="'Attributes'"
-                                [icon]="'sort'"
-                                [margin]="false"
-                                [size]="12"
-                                [(value)]="attributeToAddToSort">
-                            </rb-choice-input>
-                        </td>
-                    </tr>
+                    <div
+                        *ngIf="sortConstructs.length == 0"
+                        class="rb-filter-build-emptymessage">
+                        No sort specified<br>Add an attribute to start sorting
+                    </div>                    
                     <tr
                         *ngFor="let sortConstruct of sortConstructs">
                         <td
                             class="rb-fb-labelcol">
                             <span
                                 class="rb-filter-builder-label">
-                                {{sortConstruct.config.label}} : 
+                                {{sortConstruct.config.label}} 
                             </span>
                         </td>
                         <td
@@ -216,29 +275,38 @@
                         <td
                             class="rb-fb-buttoncol">
                             <rb-iconbutton
-                                [icon]="'remove_circle_outline'"
+                                [icon]="'delete'"
                                 (click)="removeSortItem(sortConstruct)">
                             </rb-iconbutton>                                                        
                         </td>   
                     </tr>             
                 </table>
             </rb-scroll>  
-        </div>    
+        </div>   
+        
         <div
             class="rb-filter-builder-bottom">
             <rb-button
-                *ngIf="changed"
-                (click)="clickOk()"
+                *ngIf="changed && !isEditingSavedEntry"
+                (click)="clickApply()"
                 [focus]="true"
                 [label]="'Apply'">
             </rb-button>
-            &nbsp;
             <rb-button
-                *ngIf="!empty"
+                *ngIf="canSave && !empty && changed"
+                (click)="clickSave()"
+                [label]="'Save'">
+            </rb-button>   
+            <rb-button
+                *ngIf="canSave && isEditingSavedEntry"
+                (click)="deleteSavedEntry()"
+                [label]="'Delete'">
+            </rb-button>                       
+            <rb-button
+                *ngIf="!empty && !isEditingSavedEntry"
                 (click)="clickClear()"
                 [label]="'Clear'">
             </rb-button>
-            &nbsp;
             <rb-button
                 (click)="clickCancel()"
                 [label]="'Cancel'">

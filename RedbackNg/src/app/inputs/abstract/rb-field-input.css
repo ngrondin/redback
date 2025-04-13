@@ -20,6 +20,10 @@
     color: red;
 }
 
+.rb-input-icon-alert {
+    color: red;
+}
+
 .rb-input-container {
     display: flex;
     flex-direction: column;
@@ -42,6 +46,10 @@
 }
 
 .rb-input-label-mandatory {
+    color: #ff000088;
+}
+
+.rb-input-label-alert {
     color: #ff000088;
 }
 
@@ -83,6 +91,12 @@
 
 .rb-input-mandatory {
 
+}
+
+.rb-input-alert {
+    color: red!important;
+    font-weight: 450;
+    border-bottom-color: #c00;
 }
 
 .rb-input-underline {

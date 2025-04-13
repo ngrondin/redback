@@ -115,6 +115,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     config.initialSort = this.sortValue;
     config.objectname = this.searchtarget.objectname;
     config.aggregateFilter = this.searchtarget.getBaseSearchFilter();
+    config.datasetid = this.dataset.id;
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);

@@ -30,7 +30,7 @@ public class ExcelReport extends Report {
 		}
 	}
 
-	public void produce(DataMap filter) throws RedbackException {
+	public void produce(String object, DataMap filter, String search) throws RedbackException {
 		try {
 			baos = new ByteArrayOutputStream();
 			WritableWorkbook workbook = Workbook.createWorkbook(baos);
@@ -38,7 +38,9 @@ public class ExcelReport extends Report {
 			context.put("session", new SessionJSWrapper(session));
 			context.put("wb", new ExcelWorkbookJSWrapper(workbook));
 			context.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));
+			context.put("filterobjectname", object);
 			context.put("filter", filter);
+			context.put("search", search);
 			script.call(context);
 			workbook.write();
 			workbook.close();

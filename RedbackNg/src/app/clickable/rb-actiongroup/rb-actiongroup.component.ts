@@ -1,4 +1,4 @@
-import { Component, ComponentRef, Input,  } from '@angular/core';
+import { Component, ComponentRef, EventEmitter, Input, Output,  } from '@angular/core';
 import { ApiService } from 'app/services/api.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { NotificationService } from 'app/services/notification.service';
@@ -49,6 +49,9 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
   @Input('script') script: string = null;
   @Input('round') round: boolean = false;
   @Input('hideonempty') hideonempty: boolean = false;
+
+  @Output('actionclicked') actionClicked = new EventEmitter();
+
   
   domainActions: RbActiongroupAction[];
   actionData: RbActiongroupAction[] = [];
@@ -82,12 +85,6 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         for(var item of json.list) {
           this.domainActions.push(new RbActiongroupAction('executeglobal', item.name, null, item.timeout, item.description, item.icon, item.confirm, false, item.show));
         }
-        /*this.apiService.listDomainFunctions(category).subscribe(json => {
-          for(var item of json.result) {
-            this.domainActions.push(new RbActiongroupAction('executedomain', item.name, null, item.timeout, item.description, item.icon, item.confirm, false, null));
-          }
-          this.calcActionData();
-        });*/
       });
     } else {
       this.calcActionData();
@@ -278,5 +275,6 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         this.running = false;
       });
     }
+    this.actionClicked.emit(action);
   }
 }

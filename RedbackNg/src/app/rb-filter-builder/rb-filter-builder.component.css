@@ -69,20 +69,58 @@
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
+    align-items: start;
 }
 
 .rb-filter-builder-content rb-scroll {
     flex: 1 1 auto!important;
 }
 
+.rb-filter-builder-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-filter-builder-saved-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.rb-filter-builder-saved-name {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    min-width: 15vw;
+    font-weight: 400;
+    margin: var(--v12px) var(--v5px);
+}
+
+.rb-filter-builder-saved-name mat-icon {
+    color: var(--light-writing-color);
+    margin-right: var(--v5px);
+}
+
+.rb-filter-builder-saved-name p {
+    line-height: 1.0rem;
+    margin: 0px
+}
+
+.rb-filter-builder-saved-button {
+    display: flex;
+    flex: 0 0 auto;
+    color: #bbb;
+}
+
 .rb-filter-build-maintable {
     margin-right: var(--v24px);
+    margin-left: var(--v8px);
 }
 
 .rb-fb-labelcol {
     vertical-align: top;
-    padding-top: var(--v24px);
-    padding-right: var(--v24px);
+    /*padding-top: var(--v24px);*/
+    padding-right: var(--v12px);
     color: var(--light-writing-color);
 }
 
@@ -90,12 +128,12 @@
     white-space: nowrap;
     display: flex;
     flex-direction: row;
-    padding-top: var(--v24px);
+    /*padding-top: var(--v24px);*/
 }
 
 .rb-fb-buttoncol {
     vertical-align: top;
-    padding-top: var(--v24px);
+    /*padding-top: var(--v24px);*/
     color: var(--light-writing-color);
 }
 
@@ -114,14 +152,14 @@
 }
 
 .rb-filter-builder-multiselect-tablecell-count {
-    padding-right: var(--v10px);
+    /*padding-right: var(--v10px);*/
     height: var(--v36px);
     font-size: 0.7rem;
     color: #666;
 }
 
 .rb-filter-builder-multiselect-tablecell-check {
-    padding-right: var(--v10px);
+    /*padding-right: var(--v10px);*/
     height: var(--v36px);
 }
 
@@ -131,4 +169,9 @@
     flex-direction: row;
     align-items: end;
     justify-content: flex-end;
+}
+
+.rb-filter-build-emptymessage {
+    color: #ccc;
+    font-size: 0.9rem;
 }

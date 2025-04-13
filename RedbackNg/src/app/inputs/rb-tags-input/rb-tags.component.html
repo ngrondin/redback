@@ -1,12 +1,12 @@
 <mat-icon 
     *ngIf="showicon" 
-    [class]="'rb-tags-icon' + (mandatoryalert ? ' rb-tags-icon-mandatory' : '') ">
+    [class]="'rb-tags-icon' + (mandatoryOn ? ' rb-tags-icon-mandatory' : '') + (alertOn ? ' rb-tags-icon-alert' : '') ">
     {{icon}}
 </mat-icon>
 <div
     class="rb-tags-container">
     <span
-        [class]="'rb-tags-label' + (mandatoryalert ? ' rb-tags-label-mandatory' : '')  + (tags.length == 0 && !isEditing ? ' rb-tags-label-big' : '')">
+        [class]="'rb-tags-label' + (mandatoryOn ? ' rb-tags-label-mandatory' : '')  + (alertOn ? ' rb-tags-label-alert' : '') + (tags.length == 0 && !isEditing ? ' rb-tags-label-big' : '')">
         {{label}}
     </span>
     <div
@@ -18,7 +18,7 @@
         </div>
         <input 
             #input
-            [class]="'rb-tags-input rb-tags-text-color' + (mandatoryalert ? ' rb-tags-mandatory' : '') + (flasherOn ? ' rb-tags-text-flash' : '')"
+            [class]="'rb-tags-input rb-tags-text-color' + (mandatoryOn ? ' rb-tags-mandatory' : '') + (alertOn ? ' rb-tags-mandatory' : '') + (flasherOn ? ' rb-tags-text-flash' : '')"
             [(ngModel)]="displayvalue"
             (focus)="onFocus($event)"
             (blur)="onBlur($event)"

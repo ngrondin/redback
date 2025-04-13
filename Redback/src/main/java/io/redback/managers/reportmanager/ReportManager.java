@@ -106,7 +106,7 @@ public class ReportManager implements Consumer {
 		return scriptFactory;
 	}
 
-	public Report produce(Session session, String name, DataMap filter) throws RedbackException {
+	public Report produce(Session session, String name, String object, DataMap filter, String search) throws RedbackException {
 		ReportConfig config = configs.get(session, name);
 		if(!includeLoaded)
 			loadIncludeScripts(session);		
@@ -121,15 +121,15 @@ public class ReportManager implements Consumer {
 			else if(config.getType().equals("txt"))
 				report = new TXTReport(session, this, config);
 			if(report != null)
-				report.produce(filter);
+				report.produce(object, filter, search);
 			else 
 				throw new RedbackException("Unknown report type");
 		} 
 		return report;
 	}
 	
-	public String produceAndStore(Session session, String name, DataMap filter) throws RedbackException {
-		Report report = produce(session, name, filter);
+	public String produceAndStore(Session session, String name, String object, DataMap filter, String search) throws RedbackException {
+		Report report = produce(session, name, object, filter, search);
 		if(report != null) {
 			RedbackFileMetaData filemd = fileClient.putFile(session, name + ".pdf", "application/pdf", session.getUserProfile().getUsername(), report.getBytes());
 			return filemd.fileuid;

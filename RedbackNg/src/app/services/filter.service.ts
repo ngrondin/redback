@@ -195,5 +195,49 @@ export class FilterService {
       return filterPart;
     }
   }
+
+  prefixDollarSign(filterPart: any) {
+    if(typeof filterPart == "undefined") {
+      return undefined;
+    } else if(filterPart !== null && Array.isArray(filterPart)) {
+      let out: any[] = [];
+      for(let item of filterPart) {
+        out.push(this.prefixDollarSign(item));
+      }
+      return out;
+    } else if(filterPart !== null && typeof filterPart == 'object') {
+      let out: any = {};
+      for(let key in filterPart) {
+        let newKey = (key.startsWith("$") ? '_' : '') + key;
+        out[newKey] = this.prefixDollarSign(filterPart[key]);
+      }
+      return out;
+    } else {
+      return filterPart;
+    }
+  }
+
+  removePrefixDollarSign(filterPart: any) {
+    if(typeof filterPart == "undefined") {
+      return undefined;
+    } else if(filterPart !== null && Array.isArray(filterPart)) {
+      let out: any[] = [];
+      for(let item of filterPart) {
+        out.push(this.removePrefixDollarSign(item));
+      }
+      return out;
+    } else if(filterPart !== null && typeof filterPart == 'object') {
+      let out: any = {};
+      for(let key in filterPart) {
+        let newKey = key.startsWith("_$") ? key.substring(1): key;
+        out[newKey] = this.removePrefixDollarSign(filterPart[key]);
+      }
+      return out;
+    } else {
+      return filterPart;
+    }
+  }
+
+
   
 }

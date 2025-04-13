@@ -19,6 +19,10 @@
     color: red;
 }
 
+.rb-tags-icon-alert {
+    color: red;
+}
+
 .rb-tags-container {
     display: flex;
     flex-direction: column;
@@ -41,6 +45,10 @@
 }
 
 .rb-tags-label-mandatory {
+    color: #ff000088;
+}
+
+.rb-tags-label-alert {
     color: #ff000088;
 }
 
@@ -86,6 +94,10 @@
 }
 
 .rb-tags-mandatory {
+
+}
+
+.rb-tags-alert {
 
 }
 

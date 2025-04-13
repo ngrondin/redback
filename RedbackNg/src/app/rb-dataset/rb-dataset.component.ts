@@ -66,8 +66,13 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     }
     let pref = this.id != null ? this.userprefService.getCurrentViewUISwitch('dataset', this.id) : null;
     if(pref != null) {
-      this.defaultUserFilter = this.userFilter = pref.defaultfilter;
-      this.defaultUserSort = this.userSort = pref.defaultsort;
+      let def = pref.saved.find(s => s.default == true);
+      if(def != null) {
+        this.defaultUserFilter = this.filterService.removePrefixDollarSign(def.filter);
+        this.defaultUserSort = def.sort;
+        if(this.userFilter == null) this.userFilter = this.defaultUserFilter;
+        if(this.userSort == null) this.userSort = this.defaultUserSort;
+      }
     }
   }
 
@@ -105,7 +110,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     });
     if(!fetched && dt.select != null) {
       this.selectByFilter(dt.select); //Dataset not refreshed, directly selecting the object (assuming it is already in the list)
-    }
+    }  
   }
 
   public get list() : RbObject[] {
@@ -137,7 +142,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public get canLoadData() : boolean {
-    return this.active 
+    return this.initiated
+      && this.active 
       && (this.master == null || (this.master != null && this.relatedObject != null))
       && (this.requiresuserfilter == false || this.hasUserFilter)
       && !this._loading;

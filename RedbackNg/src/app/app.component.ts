@@ -34,11 +34,11 @@ export class AppComponent implements OnInit {
   menuView: string;
   iconsets: string[];
 
-  //AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
   onloadFunction: any;
 
   events: Subject<string> = new Subject<string>();
   firstConnected: boolean = false;
+  appConfigLoadTries: number = 0;
   
 
   constructor(
@@ -67,7 +67,6 @@ export class AppComponent implements OnInit {
     this.apiService.uiService = native.getAttribute("uiservice");
     this.apiService.objectService = native.getAttribute("objectservice");
     this.apiService.fileService = native.getAttribute("fileservice");
-    //this.apiService.domainService = native.getAttribute("domainservice");
     this.apiService.reportService = native.getAttribute("reportservice");
     this.apiService.processService = native.getAttribute("processservice");
     this.apiService.userprefService = native.getAttribute("userpreferenceservice");
@@ -111,10 +110,23 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.apiService.getAppConfig(this.appname).subscribe(cfg => this.onAppConfig(cfg));
+    this.loadAppConfig();
   }  
 
+  loadAppConfig() {
+    this.apiService.getAppConfig(this.appname).subscribe({
+      next: cfg => this.onAppConfig(cfg),
+      error: err => {
+        this.appConfigLoadTries++;
+        if(this.appConfigLoadTries < 3) {
+          setTimeout(this.loadAppConfig, 1000);
+        }
+      }
+    });
+  }
+
   onAppConfig(config: any) {
+    this.appConfigLoadTries = 0;
     this.layout = config['layout'];
     this.apptitle = config['label'];
     this.logo = config['logo'];
@@ -140,7 +152,9 @@ export class AppComponent implements OnInit {
       eval("this.onloadFunction = async function() {" + config['onload'] + "}"); // Didn't use Function as this needs to be async
     }
 
-    this.clientWSService.initWebsocket().subscribe(connected => this.firstLoad());
+    this.clientWSService.initWebsocket().subscribe({
+      next: connected => this.firstLoad()
+    });
     setTimeout(() => this.firstLoad(), 5000); //If the client websocket doesn't connect in 5s, fallback on http
   }
 

@@ -33,19 +33,21 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 			String domain = request.getString("domain");
 			String category = request.getString("category");
 			String timezone = request.getString("timezone");
+			String object = request.getString("object");
 			DataMap filter = request.containsKey("filter") ? (request.get("filter") instanceof DataMap ? request.getObject("filter") : new DataMap(request.getString("filter"))) : null;
+			String search = request.getString("search");
 			if(action == null) 
 				action = "produce";
 			if(timezone != null)
 				session.setTimezone(timezone);
 			
 			if(action.equals("produce")) {
-				Report report = produce(session, reportName, filter);
+				Report report = produce(session, reportName, object, filter, search);
 				response = new Payload(report.getBytes());
 				response.metadata.put("mime", report.getMime());
 				response.metadata.put("filename", report.getFilename());
 			} else if(action.equals("producestore")) {
-				String fileUid = produceAndStore(session, reportName, filter);
+				String fileUid = produceAndStore(session, reportName, object, filter, search);
 				response = new Payload(new DataMap("fileuid", fileUid));
 			} else if(action.equals("list")) {
 				List<ReportInfo> reports = list(session, category);
@@ -76,9 +78,9 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 	
-	protected abstract Report produce(Session session, String name, DataMap filter) throws RedbackException;
+	protected abstract Report produce(Session session, String name, String object, DataMap filter, String search) throws RedbackException;
 	
-	protected abstract String produceAndStore(Session session, String name, DataMap filter) throws RedbackException;
+	protected abstract String produceAndStore(Session session, String name, String object, DataMap filter, String search) throws RedbackException;
 	
 	protected abstract List<ReportInfo> list(Session session, String category) throws RedbackException;
 	

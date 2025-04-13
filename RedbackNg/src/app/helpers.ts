@@ -1,9 +1,7 @@
 import { Directive, ElementRef, Input, Pipe, PipeTransform, Renderer2, inject } from "@angular/core";
 import { Observer } from "rxjs";
-import { NavigateData, NavigateEvent, RbObject, Time } from "./datamodel";
+import { NavigateEvent, RbObject, Time } from "./datamodel";
 import { UserprefService } from "./services/userpref.service";
-import { AppInjector } from "./app.module";
-import { FilterService } from "./services/filter.service";
 
 export class Translator {
     cfg: any;
@@ -477,3 +475,4 @@ export class ColorConfig {
         return val;
     }
 }
+

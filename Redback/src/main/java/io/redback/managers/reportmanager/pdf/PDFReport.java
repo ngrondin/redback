@@ -83,11 +83,13 @@ public class PDFReport extends Report {
 		}
 	}
 	
-	public void produce(DataMap filter) throws RedbackException {
+	public void produce(String object, DataMap filter, String search) throws RedbackException {
 		try {			
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("session", session);
+			context.put("filterobjectname", object);
 			context.put("filter", filter);
+			context.put("search", search);
 			context.put("document", document);
 			Box header = Box.VContainer(true);
 			if(headerUnits != null) {

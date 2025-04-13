@@ -52,8 +52,6 @@ export class ActionService {
         return this.executeMaster(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executeglobal') {
         return this.executeGlobal(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
-      /*} else if(_action == 'executedomain') {
-        return this.executeDomain(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);*/
       } else if(_action == 'clientscript') {
         return this.executeClientScript(dataset, param);
       } else if(_action == 'modal') {
@@ -62,8 +60,10 @@ export class ActionService {
         return this.launchExternalLink(dataset, (target ?? param));
       } else if(_action == 'refresh') {
         return this.refresh(dataset);
-      } else if(dataset.selectedObject != null) {
+      } else if(dataset != null && dataset.selectedObject != null) {
         return this.execute(dataset, _action, param, extraContext, timeout);
+      } else {
+        return new Observable((observer) => {observer.complete()});
       }
     } else {
       return new Observable((observer) => {
@@ -138,7 +138,7 @@ export class ActionService {
   public report(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
     return new Observable((observer) => {
       if(dataset.selectedObject != null) {
-        this.reportService.launchReport(reportName, null, {"uid": dataset.selectedObject.uid});
+        this.reportService.launchReport(reportName, null, dataset.objectname, {"uid": dataset.selectedObject.uid}, null);
       }
       observer.next();
       observer.complete(); 
@@ -147,7 +147,7 @@ export class ActionService {
 
   public reportAll(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
     return new Observable((observer) => {
-      this.reportService.launchReport(reportName, null, dataset.resolvedFilter);
+      this.reportService.launchReport(reportName, null, dataset.objectname, dataset.resolvedFilter, dataset.userSearch);
       observer.next();
       observer.complete();   
     });
@@ -156,7 +156,7 @@ export class ActionService {
   public reportList(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
     return new Observable((observer) => {
       const selectedFilter = dataset.selectedObject != null ? {"uid": dataset.selectedObject.uid} : null;
-      this.reportService.popupReportList(reportName, selectedFilter, dataset.resolvedFilter);
+      this.reportService.popupReportList(reportName, dataset.objectname, selectedFilter, dataset.resolvedFilter, dataset.userSearch);
       observer.next();
       observer.complete();
     });
@@ -227,24 +227,6 @@ export class ActionService {
       this.dataService.executeGlobalFunction(functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
     });
   }
-
-  /*public executeDomain(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
-    return new Observable((observer) => {
-      let paramResolved = {};
-      if(functionParams != null) {
-        paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);  
-      } else {
-        paramResolved = {
-          "uid": dataset.selectedObject.uid
-        }
-      }
-      if(dataset.selectedObject != null) {
-        this.apiService.executeDomain(functionName, dataset.selectedObject.domain, paramResolved, timeout).subscribe(new ObserverProxy(observer, null, error => this.errorService.receiveHttpError(error)));
-      } else {
-        observer.error("No object selected");
-      }
-    });
-  }*/
 
   public executeClientScript(dataset:RbDatasetComponent, script: string) : Observable<null> {
     return new Observable((observer) => {

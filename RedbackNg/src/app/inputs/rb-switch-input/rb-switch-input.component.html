@@ -1,12 +1,12 @@
 <mat-icon 
     *ngIf="showicon" 
-    [class]="'rb-switch-icon' + (mandatoryalert ? ' rb-switch-icon-mandatory' : '') ">
+    [class]="'rb-switch-icon' + (mandatoryOn ? ' rb-switch-icon-mandatory' : '') + (alertOn ? ' rb-switch-icon-alert' : '') ">
     {{icon}}
 </mat-icon>
 <div
     class="rb-switch-container">
     <div
-        [class]="'rb-switch-label' + (mandatoryalert ? ' rb-switch-label-mandatory' : '') ">
+        [class]="'rb-switch-label' + (mandatoryOn ? ' rb-switch-label-mandatory' : '') + (alertOn ? ' rb-switch-label-alert' : '') ">
         {{label}}
     </div>
     <mat-slide-toggle

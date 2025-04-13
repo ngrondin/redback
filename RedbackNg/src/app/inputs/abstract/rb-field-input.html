@@ -1,17 +1,17 @@
 <mat-icon 
     *ngIf="showicon" 
-    [class]="'rb-input-icon' + (mandatoryalert ? ' rb-input-icon-mandatory' : '') ">
+    [class]="'rb-input-icon' + (mandatoryOn ? ' rb-input-icon-mandatory' : '') + (alertOn ? ' rb-input-icon-alert' : '')">
     {{icon}}
 </mat-icon>
 <div
     class="rb-input-container">
     <span
-        [class]="'rb-input-label' + (mandatoryalert ? ' rb-input-label-mandatory' : '')  + ((displayvalue === null || displayvalue === '' || displayvalue === undefined) && !isEditing ? ' rb-input-label-big' : '')">
+        [class]="'rb-input-label' + (mandatoryOn ? ' rb-input-label-mandatory' : '') + (alertOn ? ' rb-input-label-alert' : '') + ((displayvalue === null || displayvalue === '' || displayvalue === undefined) && !isEditing ? ' rb-input-label-big' : '')">
         {{label}}
     </span>    
     <input 
         #input
-        [class]="'rb-input-input rb-input-text-color' + (mandatoryalert ? ' rb-input-mandatory' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
+        [class]="'rb-input-input rb-input-text-color' + (mandatoryOn ? ' rb-input-mandatory' : '') + (alertOn ? ' rb-input-alert' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
         [(ngModel)]="displayvalue"
         (focus)="onFocus($event)"
         (blur)="onBlur($event)"

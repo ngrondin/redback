@@ -6,6 +6,7 @@
     sortConfig: any;
     initialSort: any;
     objectname: string;
+    datasetid: string;
   }
   
   

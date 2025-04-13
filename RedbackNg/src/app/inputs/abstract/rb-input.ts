@@ -22,6 +22,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('grow') grow: number;
   @Input('editable') editable: boolean = true;
   @Input('mandatory') mandatory: boolean = false;
+  @Input('alert') alert: boolean = false;
   @Output('valueChange') valueChange = new EventEmitter();
   
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
@@ -121,7 +122,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     }
   }
 
-  public get mandatoryalert(): boolean {
+  public get mandatoryOn(): boolean {
     if(this.value == null) {
       if(this.attribute != null) {
         if(this.rbObject != null) {
@@ -141,6 +142,10 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     } else {
       return false;
     }
+  }
+
+  public get alertOn(): boolean {
+    return this.alert;
   }
 
   public flash() {

@@ -11,11 +11,8 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
-import io.redback.managers.reportmanager.excel.js.ExcelWorkbookJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
-import jxl.Workbook;
-import jxl.write.WritableWorkbook;
 
 public class TXTReport extends Report {
 	protected ByteArrayOutputStream baos;
@@ -30,13 +27,15 @@ public class TXTReport extends Report {
 		}
 	}
 
-	public void produce(DataMap filter) throws RedbackException {
+	public void produce(String object, DataMap filter, String search) throws RedbackException {
 		try {
 			baos = new ByteArrayOutputStream();
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("session", new SessionJSWrapper(session));
 			context.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));
+			context.put("filterobjectname", object);
 			context.put("filter", filter);
+			context.put("search", search);
 			Object out = script.call(context);
 			baos.write(out.toString().getBytes());
 		} catch(Exception e) {

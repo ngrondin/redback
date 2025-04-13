@@ -18,7 +18,7 @@ public abstract class Report {
 		reportConfig = rc;
 	}
 	
-	public abstract void produce(DataMap filter) throws RedbackException;
+	public abstract void produce(String object, DataMap filter, String search) throws RedbackException;
 	
 	public abstract String getMime();
 	

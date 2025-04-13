@@ -15,18 +15,23 @@ export class ReportService {
     public dialog: MatDialog
   ) { }
 
-  public popupReportList(category: String, selectedFilter: any, allFilter: any) {
+  public popupReportList(category: String, objectname: String, selectedFilter: any, allFilter: any, search: string) {
     let dialogRef = this.dialog.open(RbReportlistComponent, {
       data: {
         category: category,
+        objectname: objectname,
         selectedFilter: selectedFilter,
-        allFilter: allFilter
+        allFilter: allFilter,
+        search: search
       }
     });
   }
 
-  public launchReport(name: String, domain: String, filter: any) {
-    let query = 'report=' + name + '&filter=' + JSON.stringify(filter);
+  public launchReport(name: String, domain: String, object: String, filter: any, search: string) {
+    let query = 'report=' + name + '&object=' + object + '&filter=' + JSON.stringify(filter);
+    if(search != null) {
+      query = query + '$search=' + search;
+    }
     if(domain != null) {
       query = query + '&domain=' + domain;
     }

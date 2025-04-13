@@ -75,11 +75,13 @@ public class CSVReport extends Report {
 		}
 	}
 
-	public void produce(DataMap filter) throws RedbackException {
+	public void produce(String filterObject, DataMap filter, String search) throws RedbackException {
 		try {
 			ObjectClient oc = reportManager.getObjectClient();
 			Map<String, Expression> exprCache = new HashMap<String, Expression>();
+			baseContext.declare("filterobjectname", filterObject);
 			baseContext.declare("filter", filter);
+			baseContext.declare("search", search);
 			baseContext.declare("oc", new ObjectClientJSWrapper(oc, this.session));
 			if(varsExpMap != null) {
 				DataMap vars = varsExpMap.eval(baseContext);

@@ -58,7 +58,10 @@ public class DataSet extends ContainerUnit {
 			List<?> currentMasterDataset = (List<?>)context.get("dataset");
 			Map<String, Object> jsContext = new HashMap<String, Object>();
 			jsContext.put("master", convertToScript(currentObject));
+			jsContext.put("filterobjectname", context.get("filterobjectname"));
 			jsContext.put("filter", context.get("filter"));
+			jsContext.put("search",  context.get("search"));
+			jsContext.put("vars", context.get("vars"));
 			ObjectClient oc = reportManager.getObjectClient();
 			DataMap filter = (filterExp != null ? (DataMap)filterExp.eval(jsContext) : filterExpMap.eval(jsContext));
 			DataMap sort = (sortExp != null ? (DataMap)sortExp.eval(jsContext) : sortExpMap != null ? sortExpMap.eval(jsContext) : null);
