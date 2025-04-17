@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
+import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.interfaces.StreamHandler;
 import io.firebus.logging.Logger;
 
@@ -24,7 +25,7 @@ public class ReceivingStreamPipeline<T> implements StreamHandler, DataStreamNext
 		sep.setHandler(this);
 	}
 
-	public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+	public void receiveStreamData(Payload payload) {
 		try {
 			List<T> list = converter.convert(payload);
 			buffer.addAll(list);
@@ -35,10 +36,14 @@ public class ReceivingStreamPipeline<T> implements StreamHandler, DataStreamNext
 		}
 	}
 
-	public void streamClosed(StreamEndpoint streamEndpoint) {
+	public void streamClosed() {
 		//System.out.println("RSP sep closed, buffer=" + buffer.size());
 		if(buffer.size() == 0)
 			dataStream.complete();
+	}
+
+	public void streamError(FunctionErrorException error) {
+		
 	}
 
 	public void sendNext() {
@@ -52,4 +57,5 @@ public class ReceivingStreamPipeline<T> implements StreamHandler, DataStreamNext
 			dataStream.complete();
 		}
 	}
+
 }

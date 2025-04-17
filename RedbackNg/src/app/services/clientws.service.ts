@@ -186,7 +186,7 @@ export class ClientWSService {
             } else if(msg.type == 'streamerror') {
               observer.error(msg.error);
             }
-            delete this.requestObservers[msg.requid];
+            delete this.streamObservers[msg.requid];
           }
         }
       } else if(msg.type == 'uploadctl') {

@@ -5,6 +5,7 @@ import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.interfaces.StreamHandler;
 import io.firebus.logging.Level;
 import io.firebus.logging.Logger;
@@ -20,7 +21,7 @@ public class StreamDataTest {
 				public int c = 0;
 				public int i = 0;
 				public long start = 0;
-				public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+				public void receiveStreamData(Payload payload) {
 					try {
 						DataMap data = payload.getDataMap();
 						DataList list = data.getList("result");
@@ -36,13 +37,19 @@ public class StreamDataTest {
 					}
 				}
 
-				public void streamClosed(StreamEndpoint streamEndpoint) {
-					streamEndpoint.close();
+				public void streamClosed() {
+					sep.close();
 					long dur = System.currentTimeMillis() - start;
 					System.out.println(dur);
 					System.out.println(i);
 					System.out.println(c);
 				}
+
+				public void streamError(FunctionErrorException error) {
+					
+				}
+				
+				
 			});
 		} catch(Exception e) {
 			System.err.println(e.getMessage());

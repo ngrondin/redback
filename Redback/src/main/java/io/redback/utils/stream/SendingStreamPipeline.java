@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
+import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.interfaces.StreamHandler;
 import io.firebus.logging.Logger;
 
@@ -64,7 +65,7 @@ public class SendingStreamPipeline<T> implements StreamHandler {
 		} 
 	}
 
-	public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+	public void receiveStreamData(Payload payload) {
 		try {
 			String s = payload.getString();
 			if(s.equals("next")) {
@@ -76,7 +77,11 @@ public class SendingStreamPipeline<T> implements StreamHandler {
 		}
 	}
 	
-	public void streamClosed(StreamEndpoint streamEndpoint) {
+	public void streamClosed() {
+	}
+	
+	public void streamError(FunctionErrorException error) {
+		
 	}
 	
 	public DataStream<T> getDataStream() {

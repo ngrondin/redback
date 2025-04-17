@@ -267,7 +267,7 @@ public class RedbackFileServer extends FileServer
 				req.put("action", "put");
 				StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(req), 5000);
 				new StreamSender(fis, sep, new StreamSender.CompletionListener() {
-					public void completed() {
+					public void completed(byte[] bytes) {
 						try {
 							sep.close();
 							fis.close();
@@ -278,7 +278,7 @@ public class RedbackFileServer extends FileServer
 					}
 
 					public void error(String message) {
-						completed();					
+						//completed();					
 					}					
 				});
 			} else if(defaultFileService != null) {
@@ -362,6 +362,7 @@ public class RedbackFileServer extends FileServer
 		getMetadata(fileUid);
 		StreamEndpoint fileSep = getFileStreamEndpoint(fileUid);
 		new StreamPipe(streamEndpoint, fileSep);	
+		new StreamPipe(fileSep, streamEndpoint);
 	}
 
 	public void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException {
@@ -370,22 +371,17 @@ public class RedbackFileServer extends FileServer
 			final File file = new File(tempFilename);
 			FileOutputStream fos = new FileOutputStream(file);
 			new StreamReceiver(fos, streamEndpoint, new StreamReceiver.CompletionListener() {
-				public void completed() {
-					try {
-						fos.close();
-						RedbackFileMetaData filemd = putFile(session, filename, mime != null ? mime : getMimeType(filename), session.getUserProfile().getUsername(), file);
-						if(objectname != null && objectuid != null)
-							linkFileTo(session, filemd.fileuid, objectname, objectuid);
-						DataMap resp = new DataMap();
-						resp.put("fileuid", filemd.fileuid);
-						resp.put("thumbnail", filemd.thumbnail);
-						resp.put("mime", filemd.mime);
-						ByteArrayInputStream bais = new ByteArrayInputStream(resp.toString().getBytes());
-						new StreamSender(bais, streamEndpoint);
-						Logger.info("rb.file.put", "Finished putting file");
-					} catch(Exception e) {
-						Logger.severe("rb.file.put", "Error putting file", e);
-					}	
+				public byte[] completed() throws Exception {
+					fos.close();
+					RedbackFileMetaData filemd = putFile(session, filename, mime != null ? mime : getMimeType(filename), session.getUserProfile().getUsername(), file);
+					if(objectname != null && objectuid != null)
+						linkFileTo(session, filemd.fileuid, objectname, objectuid);
+					DataMap resp = new DataMap();
+					resp.put("fileuid", filemd.fileuid);
+					resp.put("thumbnail", filemd.thumbnail);
+					resp.put("mime", filemd.mime);
+					byte[] completionBytes = resp.toString().getBytes();
+					return completionBytes;
 				}
 	
 				public void error(String message) {

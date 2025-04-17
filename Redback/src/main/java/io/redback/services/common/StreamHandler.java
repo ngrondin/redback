@@ -2,6 +2,7 @@ package io.redback.services.common;
 
 import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
+import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
@@ -17,24 +18,24 @@ public abstract class StreamHandler implements io.firebus.interfaces.StreamHandl
 		streamEndpoint.setHandler(this);
 	}
 	
-	public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
-		if(streamEndpoint == this.streamEndpoint) {
-			try {
-				receiveData(payload);
-			} catch(Exception e) {
-				logException("rb.streamhandler.receive", "Error receiving stream data", e);
-			}
-		}	
+	public void receiveStreamData(Payload payload) {
+		try {
+			receiveData(payload);
+		} catch(Exception e) {
+			logException("rb.streamhandler.receive", "Error receiving stream data", e);
+		}
 	}
 
-	public void streamClosed(StreamEndpoint streamEndpoint) {
-		if(streamEndpoint == this.streamEndpoint) {
-			try {
-				closed();
-			} catch(Exception e) {
-				logException("rb.streamhandler.closed", "Error closing stream", e);
-			}
+	public void streamClosed() {
+		try {
+			closed();
+		} catch(Exception e) {
+			logException("rb.streamhandler.closed", "Error closing stream", e);
 		}
+	}
+	
+	public void streamError(FunctionErrorException error) { 
+		logException("rb.streamhandler.error", "Received error from stream", error);
 	}
 	
 	public void sendStreamData(Payload payload) {

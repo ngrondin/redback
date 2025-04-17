@@ -1,7 +1,7 @@
 package io.redback.exceptions;
 
 import io.firebus.exceptions.FunctionErrorException;
-import io.firebus.script.exceptions.ScriptPassthroughException;
+import io.firebus.script.exceptions.ScriptThrownException;
 
 public class RedbackException extends Exception 
 {
@@ -20,13 +20,16 @@ public class RedbackException extends Exception
 	public int getErrorCode() 
 	{
 		Throwable c = getCause();
-		while(c != null && !(c instanceof RedbackException || c instanceof FunctionErrorException))
+		while(c != null && !(c instanceof RedbackException || c instanceof FunctionErrorException || c instanceof ScriptThrownException))
 			c = c.getCause();
 		
 		if(c != null && c instanceof RedbackException) {
 			return ((RedbackException)c).getErrorCode();
 		} else if(c != null && c instanceof FunctionErrorException) {
 			return ((FunctionErrorException)c).getErrorCode();
+		} else if(c != null && c instanceof ScriptThrownException) {
+			return 400;
+			
 		} else {
 			return 500;
 		}

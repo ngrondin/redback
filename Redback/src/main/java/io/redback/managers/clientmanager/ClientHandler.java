@@ -42,6 +42,10 @@ public class ClientHandler extends ClientStreamHandler {
 	
 	public void clientStreamClosed() throws RedbackException {
 		try {
+			for(String uid: streams.keySet()) 
+				streams.get(uid).close();
+			for(String uid: uploads.keySet()) 
+				uploads.get(uid).close();
 			clientManager.onClientLeave(this);
 			Logger.info("rb.client.disconnect", new DataMap("gatewayconnid", gatewayConnectionId, "stats", getStats()));			
 		} catch(Exception e) {
@@ -115,19 +119,25 @@ public class ClientHandler extends ClientStreamHandler {
 			StreamEndpoint sep = clientManager.firebus.requestStream(mappedServiceName, payload, requid, 10000);
 			streams.put(requid, sep);
 			sep.setHandler(new StreamHandler() {
-				public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+				public void receiveStreamData(Payload payload) {
 					try {
 						DataMap data = payload.getDataMap();
 						sendStreamData(requid, data);
 						if(autoNext)
 							streamEndpoint.send(new Payload("next"));
 					} catch(Exception e) {
+						sep.close();
 						sendStreamError(requid, new FunctionErrorException("Error receiving stream data", e));
 					}
 				}
 
-				public void streamClosed(StreamEndpoint streamEndpoint) {
+				public void streamClosed() {
+					streams.remove(requid);
 					sendStreamComplete(requid);
+				}
+				
+				public void streamError(FunctionErrorException error) { 
+					sendStreamError(requid, error);
 				}
 			});
 
@@ -141,6 +151,8 @@ public class ClientHandler extends ClientStreamHandler {
 		StreamEndpoint sep = streams.get(requid);
 		if(sep != null) {
 			sep.send(new Payload("next"));
+		} else {
+			throw new RedbackException("Request UID not found");
 		}
 	}	
 
@@ -149,32 +161,35 @@ public class ClientHandler extends ClientStreamHandler {
 			StreamEndpoint sep = clientManager.getFileClient().putFileStream(session, filename, filesize, mime);
 			uploads.put(uploaduid, sep);
 			sep.setHandler(new StreamHandler() {
-				public void receiveStreamData(Payload payload, StreamEndpoint streamEndpoint) {
+				public void receiveStreamData(Payload payload) {
 					try {
 						String ctl = payload.metadata.get("ctl");
 						if(ctl.equals("next")) {
 							sendUploadNext(uploaduid);
 						} else if(ctl.equals("error")){
 							sendUploadError(uploaduid, payload.metadata.get("error"));
+							sep.close();
 						} else if(ctl.equals("complete")) {
-							// Don't close yet as we're waiting for a response with the file meta
-						} else if(ctl.equals("chunk")) { //This is the meta response after upload
 							DataMap result = payload.getDataMap();
 							if(object != null && uid != null)
 								clientManager.getFileClient().linkFileTo(session, result.getString("fileuid"), object, uid);
 							sendUploadResult(uploaduid, result);
 							sep.close();
-							uploads.remove(uploaduid);
 						} else {
 							throw new RedbackException("Error in client upload, unexpected response");
 						}
 					} catch(Exception e) {
+						sep.close();
 						sendUploadError(uploaduid, e.getMessage());
-					}
+					} 
 				}
 
-				public void streamClosed(StreamEndpoint streamEndpoint) {
+				public void streamClosed() {
 					uploads.remove(uploaduid);
+				}
+				
+				public void streamError(FunctionErrorException error) { 
+					sendUploadError(uploaduid, error.getMessage());
 				}
 			});
 			sendUploadNext(uploaduid);
@@ -206,8 +221,6 @@ public class ClientHandler extends ClientStreamHandler {
 			throw new RedbackException("Upload UID not found");
 		}			
 	}
-
-
 	
 	public void receiveObjectData(DataList list) throws RedbackException {
 		DataMap wrapper = new DataMap();
