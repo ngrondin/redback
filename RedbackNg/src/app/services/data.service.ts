@@ -220,18 +220,11 @@ export class DataService {
   }
 
   enqueueDeferredFetch(name: string, uid: string, forRelatedObject: RbObject) {
-    if(uid != null && this.deferredFetchQueue.get(name).uids.indexOf(uid) == -1) {
-      this.deferredFetchQueue.get(name).uids.push(uid);
-    }
-    this.deferredFetchQueue.addObject(forRelatedObject);
+    this.deferredFetchQueue.get(name).addUid(uid, forRelatedObject);
   }
 
   enqueueDeferredFetchList(name: string, filter: any, forRelatedObject: RbObject) {
-    let filterHash = Hasher.hash(filter);
-    if(filter != null && this.deferredFetchQueue.get(name).filters.find(f => f.hash == filterHash) == null) {
-      this.deferredFetchQueue.get(name).filters.push(new DeferredFilter(filter, filterHash));
-    }
-    this.deferredFetchQueue.addObject(forRelatedObject);
+    this.deferredFetchQueue.get(name).addFilter(filter, forRelatedObject);
   }
 
   receive(json: any) : RbObject {
@@ -248,7 +241,10 @@ export class DataService {
 
   async finalizeReceipt() {
     let multi = [];
-    for(let objectname of Object.keys(this.deferredFetchQueue.items)) {
+    let relatedobjects = [];
+    let objectnames = Object.keys(this.deferredFetchQueue.items);
+    if(objectnames.length > 0) {
+      let objectname = objectnames[0];
       let fetchRequest = this.deferredFetchQueue.get(objectname);
       let filter = null;
       let count = 0;
@@ -270,19 +266,26 @@ export class DataService {
         pagesize: count,
         options: {addvalidation: true, addrelated: false}
       });
-    }
-    let objects = [...this.deferredFetchQueue.objects];
-    this.deferredFetchQueue.clear();
-    if(multi.length > 0) {
-      this.apiService.objectMulti(multi).subscribe(
-        resp => {
-          for(var objectname of Object.keys(resp)) {
-            const rbObjectArray = Object.values(resp[objectname].list).map(json => this.receive(json));
+      relatedobjects = [...fetchRequest.relatedObjects];
+      this.deferredFetchQueue.clear(objectname);
+      this.apiService.streamObjects(objectname, filter, null, null).subscribe(
+      //this.apiService.objectMulti(multi).subscribe(
+        {
+          next: resp => {
+            resp.result.forEach(json => this.receive(json));
+            /*for(var objectname of Object.keys(resp)) {
+              const rbObjectArray = Object.values(resp[objectname].list).map(json => this.receive(json));
+            }*/
+          },
+          complete: () => {
+            for(var object of relatedobjects) {
+              object.linkMissingRelated();
+            }
+            this.finalizeReceipt();
+          },
+          error: error => {
+            this.logService.error(error);
           }
-          for(var object of objects) {
-            object.linkMissingRelated();
-          }
-          this.finalizeReceipt();
         }
       );
     } else {
@@ -447,25 +450,41 @@ class DeferredFilter {
 class DeferredFetchQueueItem {
   uids: string[] = []; 
   filters: DeferredFilter[] = []; 
+  relatedObjects: RbObject[] = [];
+
+  addUid(uid: string, relatedObject: RbObject) {
+    if(uid != null && this.uids.indexOf(uid) == -1) {
+      this.uids.push(uid);
+    }
+    this.addRelatedObject(relatedObject);
+  }
+
+  addFilter(filter: any, relatedObject: RbObject) {
+    let filterHash = Hasher.hash(filter);
+    if(filter != null && this.filters.find(f => f.hash == filterHash) == null) {
+      this.filters.push(new DeferredFilter(filter, filterHash));
+    }
+    this.addRelatedObject(relatedObject);
+  }
+
+  addRelatedObject(obj: RbObject) {
+    if(this.relatedObjects.indexOf(obj) == -1) {
+      this.relatedObjects.push(obj);
+    }
+  }
 }
 
 class DeferredFetchQueue {
   items: {[key: string]: DeferredFetchQueueItem} = {};
-  objects: RbObject[] = [];
-
+  
   get(name: string): DeferredFetchQueueItem {
     if(this.items[name] == null) this.items[name] = new DeferredFetchQueueItem();
     return this.items[name];
   }
 
-  addObject(obj: RbObject) {
-    if(this.objects.indexOf(obj) == -1) {
-      this.objects.push(obj);
+  clear(name: string) {
+    if(this.items[name] != null) {
+      delete this.items[name];
     }
-  }
-
-  clear() {
-    this.items = {};
-    this.objects = [];
   }
 }

@@ -11,6 +11,11 @@ export class LogService {
   constructor(
   ) { }
 
+  error(str: string) {
+    console.error(str);
+    this.addEntry("ERROR", str);
+  }
+
   info(str: string) {
     console.log(str);
     this.addEntry("INFO", str);

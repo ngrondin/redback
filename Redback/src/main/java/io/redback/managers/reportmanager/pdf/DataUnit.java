@@ -1,6 +1,5 @@
 package io.redback.managers.reportmanager.pdf;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.ZoneId;
@@ -15,7 +14,6 @@ import java.util.Map;
 
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.encoding.WinAnsiEncoding;
 
 import io.firebus.data.DataMap;
 import io.firebus.script.Expression;
@@ -52,7 +50,7 @@ public abstract class DataUnit extends Unit {
 	public abstract Box produce(Map<String, Object> context) throws IOException, RedbackException;
 	
 	protected float getStringWidth(float fontSize, String text) throws IOException {
-		return text != null ? font.getStringWidth(text) / 1000f * fontSize : 0;
+		return Utils.textWidth(font, fontSize, text);
 	}
 	
 	protected float getFontHeight(float fontSize) {
@@ -196,5 +194,9 @@ public abstract class DataUnit extends Unit {
 		} else {
 			return 12f;
 		}
+	}
+	
+	protected String cleanString(String str) {
+		return str;
 	}
 }

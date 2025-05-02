@@ -190,7 +190,7 @@ public class PDFReport extends Report {
 		} else if(reportBox.type.equals("text")) {
 			if(reportBox.text != null) {
 				String txt = reportBox.text;
-				while(txt.length() > 0 && (reportBox.font.getStringWidth(txt) / 1000f * reportBox.fontSize) > reportBox.width)
+				while(txt.length() > 0 && (Utils.textWidth(reportBox.font, reportBox.fontSize, txt) / 1000f * reportBox.fontSize) > reportBox.width)
 					txt = txt.substring(0, txt.length() - 1);
 				stream.beginText(); 
 				stream.setNonStrokingColor(reportBox.color);
