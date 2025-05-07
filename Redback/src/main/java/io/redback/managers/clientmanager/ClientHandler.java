@@ -14,6 +14,7 @@ import io.firebus.interfaces.ServiceRequestor;
 import io.firebus.interfaces.StreamHandler;
 import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.managers.clientmanager.SubscriptionManager.FilterSubscription;
 import io.redback.managers.clientmanager.SubscriptionManager.ObjectDomainPointer;
 import io.redback.managers.clientmanager.SubscriptionManager.ObjectUIDPointer;
@@ -40,7 +41,7 @@ public class ClientHandler extends ClientStreamHandler {
 		Logger.info("rb.client.connect", new DataMap("firebusnode", clientManager.firebus.getNodeId(), "gatewaynode", gatewayNode, "gatewayconnid", gatewayConnectionId));
 	}
 	
-	public void clientStreamClosed() throws RedbackException {
+	public synchronized void clientStreamClosed() throws RedbackException {
 		try {
 			for(String uid: streams.keySet()) 
 				streams.get(uid).close();
@@ -117,7 +118,7 @@ public class ClientHandler extends ClientStreamHandler {
 			payload.metadata.put("mime", "application/json");
 			payload.setData(data);
 			StreamEndpoint sep = clientManager.firebus.requestStream(mappedServiceName, payload, requid, 10000);
-			streams.put(requid, sep);
+			registerStream(requid, sep);
 			sep.setHandler(new StreamHandler() {
 				public void receiveStreamData(Payload payload) {
 					try {
@@ -132,7 +133,7 @@ public class ClientHandler extends ClientStreamHandler {
 				}
 
 				public void streamClosed() {
-					streams.remove(requid);
+					deregisterStream(requid);
 					sendStreamComplete(requid);
 				}
 				
@@ -152,14 +153,14 @@ public class ClientHandler extends ClientStreamHandler {
 		if(sep != null) {
 			sep.send(new Payload("next"));
 		} else {
-			throw new RedbackException("Request UID not found");
+			throw new RedbackInvalidRequestException("Request UID not found");
 		}
 	}	
 
 	public void startUpload(String uploaduid, String filename, int filesize, String mime, String object, String uid) throws RedbackException {
 		try {
 			StreamEndpoint sep = clientManager.getFileClient().putFileStream(session, filename, filesize, mime);
-			uploads.put(uploaduid, sep);
+			registerUpload(uploaduid, sep);
 			sep.setHandler(new StreamHandler() {
 				public void receiveStreamData(Payload payload) {
 					try {
@@ -185,7 +186,7 @@ public class ClientHandler extends ClientStreamHandler {
 				}
 
 				public void streamClosed() {
-					uploads.remove(uploaduid);
+					deregisterUpload(uploaduid);
 				}
 				
 				public void streamError(FunctionErrorException error) { 
@@ -218,7 +219,7 @@ public class ClientHandler extends ClientStreamHandler {
 		if(sep != null) {
 			return sep;
 		} else {
-			throw new RedbackException("Upload UID not found");
+			throw new RedbackInvalidRequestException("Upload UID not found");
 		}			
 	}
 	
@@ -248,7 +249,23 @@ public class ClientHandler extends ClientStreamHandler {
 			session.setUserProfile(up);
 		}
 	}
+	
+	protected synchronized void registerStream(String uid, StreamEndpoint ep) {
+		streams.put(uid, ep);
+	}
 
+	protected synchronized void deregisterStream(String uid) {
+		streams.remove(uid);
+	}
+	
+	protected synchronized void registerUpload(String uid, StreamEndpoint ep) {
+		uploads.put(uid, ep);
+	}
+
+	protected synchronized void deregisterUpload(String uid) {
+		uploads.remove(uid);
+	}
+	
 	public DataMap getStatus() {
 		DataMap status = new DataMap();
 		status.put("username", session.getUserProfile().getUsername());
