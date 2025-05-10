@@ -27,8 +27,6 @@ import io.redback.utils.ImageUtils;
 import io.redback.utils.RedbackFile;
 
 public class DynamicForm extends DataUnit {
-	//protected PDFont font;
-	//protected float fontSize;
 	protected float width;
 	protected String orderAttribute;
 	protected String valueAttribute;
@@ -191,16 +189,18 @@ public class DynamicForm extends DataUnit {
 			if(item.answerWidth > maxAnswerWidth) maxAnswerWidth = item.answerWidth;
 		}
 		float marginWidth = 5;
-		float totalWidth = 490 - (2 * marginWidth);
+		float totalWidth = width > -1 ? width : 490;
+		float innerWidth = totalWidth - (2 * marginWidth);
 		float minLabelWidth = 180;
-		float minAnswerWidth = 12;
+		float minAnswerWidth = 20;
+		float midSpace = 20;
 		float labelWidth = 0;
 		float answerWidth = 0;
 		if(maxLabelWidth + maxAnswerWidth > totalWidth) {
 			float remLabelWidth = Math.max(0, maxLabelWidth - minLabelWidth);
 			float remAnswerWidth = Math.max(0, maxAnswerWidth - minAnswerWidth);
-			labelWidth = minLabelWidth + ((remLabelWidth / (remLabelWidth + remAnswerWidth)) * (totalWidth - minLabelWidth - minAnswerWidth));
-			answerWidth = minAnswerWidth + ((remAnswerWidth / (remLabelWidth + remAnswerWidth)) * (totalWidth - minLabelWidth - minAnswerWidth));
+			labelWidth = minLabelWidth + ((remLabelWidth / (remLabelWidth + remAnswerWidth)) * (innerWidth - minLabelWidth - minAnswerWidth - midSpace));
+			answerWidth = minAnswerWidth + ((remAnswerWidth / (remLabelWidth + remAnswerWidth)) * (innerWidth - minLabelWidth - minAnswerWidth - midSpace));
 		} else {
 			labelWidth = Math.max(maxLabelWidth, minLabelWidth);
 			answerWidth = Math.max(maxAnswerWidth, minAnswerWidth);
@@ -214,8 +214,7 @@ public class DynamicForm extends DataUnit {
 			if(!item.catOrder.equals(lastCatOrder) && !item.cat.equals("")) {
 				Box catRb = Box.VContainer(false);
 				catRb.color = Color.decode("#0277bc");
-				if(width > -1)
-					catRb.width = width;
+				catRb.width = totalWidth;
 				Box catTextRb = Box.Text(item.cat, font, fontSize);
 				catTextRb.height = 12;
 				catTextRb.color = Color.WHITE;
@@ -245,30 +244,33 @@ public class DynamicForm extends DataUnit {
 				Box labelAnswerRowRb = Box.HContainer(false);
 				labelAnswerRowRb.addChild(Box.Empty(marginWidth, 5));
 				Box labelColRb = Box.VContainer(false);
-				float thisLabelwidth = item.type.equals("infoonly") ? totalWidth : labelWidth;
+				float thisLabelwidth = item.type.equals("infoonly") ? innerWidth : item.type.equals("checkbox") ? (innerWidth - midSpace - 12) : labelWidth;
 				cutLinesToColumn(labelColRb, fontSize, Color.decode("#666666"), item.label, thisLabelwidth);
 				labelColRb.width = thisLabelwidth;
 				if(item.detail != null) {
-					cutLinesToColumn(labelColRb, fontSize - 4, Color.lightGray, item.detail, labelWidth);
+					cutLinesToColumn(labelColRb, fontSize - 4, Color.lightGray, item.detail, thisLabelwidth);
 				}
 				labelAnswerRowRb.addChild(labelColRb);
-				labelAnswerRowRb.addChild(Box.Empty(20, 5));
 
-				
 				if(item.answerString != null) {
+					labelAnswerRowRb.addChild(Box.Empty(midSpace, 5));
 					Box col = Box.VContainer(false);
+					col.width = answerWidth;
 					cutLinesToColumn(col, fontSize, null, item.answerString, answerWidth);
 					labelAnswerRowRb.addChild(col);
 				} else if(item.answerBool != null) {
+					labelAnswerRowRb.addChild(Box.Empty(midSpace, 5));
 					Box rb = Box.Checkbox(item.answerBool, 12, 12);
 					labelAnswerRowRb.addChild(rb);
 				} else if(item.answerFileUid != null) {
+					labelAnswerRowRb.addChild(Box.Empty(midSpace, 5));
 					FileClient fc = reportManager.getFileClient();
 					RedbackFile file = fc.getFile(session, item.answerFileUid);
 					Box rb = reportBoxFromFile(file, (int)item.answerWidth);
 					labelAnswerRowRb.addChild(rb);
 				}
 
+				labelAnswerRowRb.addChild(Box.Empty(marginWidth, 5));
 				formItemRb.addChild(labelAnswerRowRb);
 
 				if(item.type.equals("files") || item.type.equals("photos")) {

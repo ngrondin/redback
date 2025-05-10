@@ -79,9 +79,7 @@ public class Box {
 		rb.font = font;
 		rb.fontSize = fontSize;
 		rb.canBreak = false;
-		try {
-			rb.width = Utils.textWidth(font, fontSize, text) / 1000f * fontSize;
-		} catch(Exception e) {}
+		rb.width = Utils.textWidth(font, fontSize, text);
 		rb.height = 2f * (font.getFontDescriptor().getCapHeight()) / 1000 * fontSize;;
 		rb.color = Color.DARK_GRAY;
 		return rb;
