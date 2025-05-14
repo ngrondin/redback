@@ -229,8 +229,10 @@ public class RedbackGeoServer extends GeoServer
 		try {
 			DataMap resp = null;
 			String reqStr = request.toString(true);
+			String reqHash = StringUtils.hash(reqStr);
 			if(dataClient != null) {
-				DataMap cachedResult = dataClient.getData(cacheCollection.getName(), new DataMap("request", reqStr), null);
+				DataMap filter = new DataMap("reqhash", reqHash);
+				DataMap cachedResult = dataClient.getData(cacheCollection.getName(), filter, null);
 				if(cachedResult.getList("result").size() > 0)
 					resp = cachedResult.getList("result").getObject(0).getObject("response");
 			}
@@ -242,8 +244,13 @@ public class RedbackGeoServer extends GeoServer
 	
 	protected void putCacheForRequest(DataMap request, DataMap response) throws RedbackException {
 		try {
-			if(dataClient != null && response != null)
-				dataClient.putData(cacheCollection.getName(), new DataMap("request", request.toString(true)), new DataMap("response", response));
+			if(dataClient != null && response != null) {
+				String reqStr = request.toString(true);
+				String reqHash = StringUtils.hash(reqStr);
+				DataMap key = new DataMap("reqhash", reqHash);
+				DataMap data = new DataMap("request", reqStr, "response", response);
+				dataClient.putData(cacheCollection.getName(), key, data);
+			}
 		} catch(Exception e) {
 			throw new RedbackException("Error requesting external geo service", e);
 		}		

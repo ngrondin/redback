@@ -7,10 +7,12 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -386,8 +388,23 @@ public class StringUtils
 		}
 		return ret;		
 	}
-		
 	
+	public static String hash(String s) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-1");
+			md.update(s.getBytes());
+			byte[] hashBytes = md.digest();
+			Formatter formatter = new Formatter();
+		    for (byte b : hashBytes) 
+		        formatter.format("%02x", b);
+		    String hashStr = formatter.toString();
+		    formatter.close();
+			return hashStr;
+		} catch(Exception e) {
+			return "";
+		}
+	}
+		
 	public static String convertObjectToCSVField(Object obj) {
 		String ret = "";
 		if(obj instanceof String) {
@@ -407,10 +424,10 @@ public class StringUtils
 			else
 				ret = "false";
 		} else if(obj instanceof DataMap) {
-			ret = ((DataMap)obj).toString(0, true);
+			ret = ((DataMap)obj).toString(true);
 			ret = "\"" + ret.replaceAll("\"", "\"\"") + "\"";
 		} else if(obj instanceof DataList) {
-			ret = ((DataList)obj).toString(0, true);
+			ret = ((DataList)obj).toString(true);
 			ret = "\"" + ret.replaceAll("\"", "\"\"") + "\"";
 		}
 		return ret;

@@ -89,6 +89,12 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 					return StringUtils.encode((String)arguments[0]);
 				}
 			};
+		} else if(key.equals("hash")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return StringUtils.hash((String)arguments[0]);
+				}
+			};			
 		} else if(key.equals("getTimezoneOffset")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
