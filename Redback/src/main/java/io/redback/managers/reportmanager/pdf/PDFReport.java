@@ -189,7 +189,7 @@ public class PDFReport extends Report {
 
 		} else if(reportBox.type.equals("text")) {
 			if(reportBox.text != null) {
-				String txt = reportBox.text.replaceAll("\t", "");
+				String txt = reportBox.text.replaceAll("\t", "").replaceAll("\u00A0", "").replaceAll("\uFEFF", "");
 				while(txt.length() > 0 && Utils.textWidth(reportBox.font, reportBox.fontSize, txt) > reportBox.width)
 					txt = txt.substring(0, txt.length() - 1);
 				stream.beginText(); 

@@ -36,11 +36,12 @@ public class ExcelReport extends Report {
 			WritableWorkbook workbook = Workbook.createWorkbook(baos);
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("session", new SessionJSWrapper(session));
-			context.put("wb", new ExcelWorkbookJSWrapper(workbook));
+			context.put("wb", new ExcelWorkbookJSWrapper(session, workbook));
 			context.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));
 			context.put("filterobjectname", object);
 			context.put("filter", filter);
 			context.put("search", search);
+			context.put("timezone", session.getTimezone());
 			script.call(context);
 			workbook.write();
 			workbook.close();

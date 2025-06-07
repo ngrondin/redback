@@ -4,13 +4,16 @@ import java.util.List;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.script.Function;
 import io.redback.client.ObjectClient;
 import io.redback.client.RedbackObjectRemote;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.security.Session;
 import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.Converter;
 import io.redback.utils.js.ObjectJSWrapper;
+import io.redback.utils.stream.ProcessingDataStream;
 
 public class ObjectClientJSWrapper extends ObjectJSWrapper {
 	protected ObjectClient objectClient;
@@ -70,6 +73,22 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 						filter.put("domain", domainLock);
 					List<RedbackObjectRemote> list = objectClient.listAllObjects(session, objectname, filter, sort, addRelated);
 					return RedbackObjectRemoteJSWrapper.convertList(list);
+				}
+			};
+		} else if(key.equals("streamObjects")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)(arguments[1]);
+					DataMap sort = (DataMap)(arguments[2]);
+					Function callable = (Function)arguments[3];
+					ProcessingDataStream<RedbackObjectRemote> stream = new ProcessingDataStream<RedbackObjectRemote>(new ProcessingDataStream.Processor<RedbackObjectRemote>() {
+						public void process(RedbackObjectRemote object) throws Exception {
+							callable.call(new RedbackObjectRemoteJSWrapper(object));
+						}});
+					objectClient.streamObjects(session, objectname, filter, sort, false, 50, stream);
+					stream.waitUntilDone();
+					return null;
 				}
 			};
 		} else if(key.equals("createObject")) {

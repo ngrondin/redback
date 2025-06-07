@@ -4,6 +4,8 @@ import java.util.Date;
 
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.excel.CellFormatter;
+import io.redback.security.Session;
+import io.redback.utils.DateUtils;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
 import jxl.CellView;
@@ -15,12 +17,14 @@ import jxl.write.WritableSheet;
 
 
 public class ExcelSheetJSWrapper extends ObjectJSWrapper {
+	protected Session session;
 	protected WritableSheet sheet;
 	protected CellFormatter cellFormatter;
 	
-	public ExcelSheetJSWrapper(WritableSheet s) {
+	public ExcelSheetJSWrapper(Session sess, WritableSheet sh) {
 		super(new String[] {"setCell"});
-		sheet = s;
+		session = sess;
+		sheet = sh;
 		cellFormatter = new CellFormatter();
 	}
 	
@@ -41,7 +45,8 @@ public class ExcelSheetJSWrapper extends ObjectJSWrapper {
 							Label lbl = new Label(col, row, (String)val, wcf);	
 							sheet.addCell(lbl);
 						} else if(val instanceof Date) {
-							DateTime dt = new DateTime(col, row, (Date)val, wcf);
+							Date convertedDate = DateUtils.convertDateToTimezone((Date)val, session.getTimezone());
+							DateTime dt = new DateTime(col, row, convertedDate, wcf, DateTime.GMT);
 							sheet.addCell(dt);
 						}
 						
