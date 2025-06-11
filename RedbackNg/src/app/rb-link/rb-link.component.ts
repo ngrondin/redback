@@ -12,6 +12,7 @@ export class RbLinkComponent extends RbDataObserverComponent {
   @Input('attribute') attribute: string;
   @Input('view') view: string;
   @Input('margin') margin: boolean = true;
+  @Input('filtersingleobject') filtersingleobject: boolean = true;
 
   @HostBinding('style.margin-top.vw') get topmargin() { return this.margin ? 1.25 : 0.5; }
   //@HostBinding('style.margin-bottom.vw') get bottommargin() { return this.margin ? 0.55 : 0; }
@@ -36,24 +37,30 @@ export class RbLinkComponent extends RbDataObserverComponent {
 
   public navigateTo() {
     if(this.rbObject != null && this.attribute != null) {
-      let target = {};
+      let event = {};
+      let objectuid = null;
       if(this.attribute == 'uid') {
-        target['objectname'] = this.rbObject.objectname;
-        target['filter'] = {uid: "'" + this.rbObject.uid + "'"};
+        event['objectname'] = this.rbObject.objectname;
+        objectuid = this.rbObject.uid;
       } else {
         let related = this.rbObject.getRelated(this.attribute);
         if(related != null) {
-          target['objectname'] = related.objectname;
-          target['filter'] = {uid: "'" + related.uid + "'"};
+          event['objectname'] = related.objectname;
+          objectuid = related.uid;
         } else {
           let relatedUid = this.rbObject.get(this.attribute);
-          target['filter'] = {uid: "'" + relatedUid + "'"};
+          objectuid = relatedUid;
         }
       }
+      if(this.filtersingleobject) {
+        event["filter"] = {uid: "'" + objectuid + "'"}
+      } else {
+        event["select"] = {uid: objectuid}
+      }
       if(this.view != null) {
-        target['view'] = this.view;
+        event['view'] = this.view;
       } 
-      this.navigateService.navigateTo(target);
+      this.navigateService.navigateTo(event);
     }
   }
 }

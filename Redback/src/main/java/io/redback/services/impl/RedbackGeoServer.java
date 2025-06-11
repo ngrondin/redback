@@ -7,6 +7,7 @@ import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
 import io.redback.services.GeoServer;
@@ -193,6 +194,7 @@ public class RedbackGeoServer extends GeoServer
 		try {
 			DataMap response = getCacheForRequest(request);
 			if(response == null) {
+				Logger.info("geocachemiss", request);
 				long now = System.currentTimeMillis();
 				if(now < lastCall + minBetweenCalls)
 					Thread.sleep(minBetweenCalls - (now - lastCall));				
