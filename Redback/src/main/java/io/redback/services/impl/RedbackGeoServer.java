@@ -194,7 +194,7 @@ public class RedbackGeoServer extends GeoServer
 		try {
 			DataMap response = getCacheForRequest(request);
 			if(response == null) {
-				Logger.info("geocachemiss", request);
+				Logger.info("rb.geo.cachemiss", request);
 				long now = System.currentTimeMillis();
 				if(now < lastCall + minBetweenCalls)
 					Thread.sleep(minBetweenCalls - (now - lastCall));				

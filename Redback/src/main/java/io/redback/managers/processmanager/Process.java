@@ -104,57 +104,28 @@ public class Process
 	public void action(Actionner actionner, ProcessInstance pi, String action, Date date, DataMap data) throws RedbackException
 	{
 		Logger.fine("rb.process.action.start", new DataMap("process", name, "action", action, "pid", pi.getId()));
-		String currentNodeId = pi.getCurrentNode();
-		if(currentNodeId != null)
-		{
-			ProcessUnit currentNode = nodes.get(currentNodeId);
-			if(currentNode instanceof InteractionUnit)
-			{
-				((InteractionUnit)currentNode).action(actionner, pi, action, date, data);
-				if(pi.getCurrentNode() != null)
-					execute(pi);
-			}
-			else
-			{
-				throw new RedbackInvalidRequestException("Current node is not an interaction node");
-			}
-		}
-		else
-		{
-			if(pi.isComplete())
-				throw new RedbackInvalidRequestException("Process instance " + pi.getId() + " is complete");
-			else
-				throw new RedbackInvalidRequestException("Process instance " + pi.getId() + " has not been start yet");
-		}	
+		getCurrentInteractionUnit(actionner, pi).action(actionner, pi, action, date, data);
+		if(pi.getCurrentNode() != null)
+			execute(pi);
 		Logger.fine("rb.process.action.finish", new DataMap("process", name, "action", action, "pid", pi.getId()));
 	}
 	
 	public void interrupt(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
 		Logger.fine("rb.process.interrupt.start", new DataMap("process", name, "pid", pi.getId()));
-		String currentNodeId = pi.getCurrentNode();
-		if(currentNodeId != null)
-		{
-			ProcessUnit currentNode = nodes.get(currentNodeId);
-			if(currentNode instanceof InteractionUnit)
-			{
-				((InteractionUnit)currentNode).interrupt(actionner,  pi);
-				if(pi.getCurrentNode() != null && pi.getCurrentNode() != currentNodeId)
-					execute(pi);
-			}
-			else
-			{
-				throw new RedbackInvalidRequestException("Current node is not an interaction node");
-			}
-		}
-		else
-		{
-			if(pi.isComplete())
-				throw new RedbackInvalidRequestException("Process instance " + pi.getId() + " is complete");
-			else
-				throw new RedbackInvalidRequestException("Process instance " + pi.getId() + " has not been start yet");
-		}	
+		getCurrentInteractionUnit(actionner, pi).interrupt(actionner,  pi);
+		if(pi.getCurrentNode() != null)
+			execute(pi);
 		Logger.fine("rb.process.interrupt.finish", new DataMap("process", name, "pid", pi.getId()));
+	}
+	
+	public void timeout(Actionner actionner, ProcessInstance pi) throws RedbackException
+	{
+		Logger.fine("rb.process.timeout.start", new DataMap("process", name, "pid", pi.getId()));
+		getCurrentInteractionUnit(actionner, pi).timeout(actionner,  pi);
+		if(pi.getCurrentNode() != null)
+			execute(pi);
+		Logger.fine("rb.process.timeout.finish", new DataMap("process", name, "pid", pi.getId()));
 	}
 	
 	protected void execute(ProcessInstance pi) throws RedbackException
@@ -193,6 +164,31 @@ public class Process
 			else
 				throw new RedbackInvalidRequestException("Process instance " + pi.getId() + " has not been start yet");
 		}	
+	}
+	
+	
+	protected InteractionUnit getCurrentInteractionUnit(Actionner actionner, ProcessInstance pi) throws RedbackException
+	{
+		String currentNodeId = pi.getCurrentNode();
+		if(currentNodeId != null)
+		{
+			ProcessUnit currentNode = nodes.get(currentNodeId);
+			if(currentNode instanceof InteractionUnit)
+			{
+				return ((InteractionUnit)currentNode);
+			}
+			else
+			{
+				throw new RedbackInvalidRequestException("Current node is not an interaction node");
+			}
+		}
+		else
+		{
+			if(pi.isComplete())
+				throw new RedbackInvalidRequestException("Process instance " + pi.getId() + " is complete");
+			else
+				throw new RedbackInvalidRequestException("Process instance " + pi.getId() + " has not been start yet");
+		}
 	}
 
 }

@@ -231,6 +231,11 @@ public class ProcessInstance
 		updated = true;
 	}
 	
+	public Date getInteractionTimeout()
+	{
+		return interactionDetails != null ? interactionDetails.getDate("timeout") : null;
+	}
+	
 	public void addAssignee(Assignee a)
 	{
 		assignees.add(a.getJSON());

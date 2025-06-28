@@ -273,12 +273,12 @@ public class RedbackFileServer extends FileServer
 							fis.close();
 							file.delete();
 						} catch(Exception e2) {
-							Logger.severe("rb.file.store", "Error sending file to storage service", e2);
+							Logger.severe("rb.file.store.complete", "Error sending file to storage service", e2);
 						}
 					}
 
-					public void error(String message) {
-						//completed();					
+					public void error(Throwable error) {
+						Logger.severe("rb.file.store", "Error sending file to storage service", error);
 					}					
 				});
 			} else if(defaultFileService != null) {
@@ -384,8 +384,8 @@ public class RedbackFileServer extends FileServer
 					return completionBytes;
 				}
 	
-				public void error(String message) {
-					Logger.severe("rb.file.put", "Error putting file", null);
+				public void error(Throwable error) {
+					Logger.severe("rb.file.put", "Error putting file", error);
 				}
 			});
 		} catch(Exception e) {

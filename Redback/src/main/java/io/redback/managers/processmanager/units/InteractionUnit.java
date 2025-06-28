@@ -30,11 +30,15 @@ public class InteractionUnit extends ProcessUnit
 	protected String assigneeType;
 	protected ArrayList<AssigneeConfig> assigneeConfigs;
 	protected ArrayList<ActionConfig> actionConfigs;
+	protected String code;
+	protected String type;
 	protected String nextNodeInterruption;
 	protected DataMap notificationConfig;
 	protected Expression labelExpression;
 	protected Expression messageExpression;
 	protected Expression contextLabelExpression;
+	protected long timeout;
+	protected String timeoutAction;
 
 	public InteractionUnit(ProcessManager pm, Process p, DataMap config) throws RedbackException 
 	{
@@ -55,9 +59,13 @@ public class InteractionUnit extends ProcessUnit
 					actionConfigs.add(new ActionConfig(processManager, p, this, list.getObject(i)));
 			}
 			notificationConfig = config.getObject("notification");
+			code = notificationConfig.getString("code");
+			type = notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception";
 			labelExpression = pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_labelexpr", notificationConfig.containsKey("label") ? notificationConfig.getString("label") : "'No Label'");
 			messageExpression = pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_msgexpr", notificationConfig.containsKey("message") ? notificationConfig.getString("message") : "'No Message'");
 			contextLabelExpression =  pm.getScriptFactory().createExpression(jsFunctionNameRoot + "_clexpr", notificationConfig.containsKey("contextlabel") ? notificationConfig.getString("contextlabel") : "null");
+			timeout = notificationConfig.containsKey("timeout") ? notificationConfig.getNumber("timeout").longValue() : 0;
+			timeoutAction = notificationConfig.getString("timeoutaction");
 			nextNodeInterruption = config.getString("interruption");
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising interaction unit", e);
@@ -68,8 +76,11 @@ public class InteractionUnit extends ProcessUnit
 	{
 		Logger.finer("rb.process.interaction.start", null);
 		DataMap interactionDetails = new DataMap();
-		interactionDetails.put("code", notificationConfig.getString("code"));
-		interactionDetails.put("type", notificationConfig.containsKey("type") ? notificationConfig.getString("type") : "exception");
+		interactionDetails.put("code", code);
+		interactionDetails.put("type", type);
+		if(timeout > 0 && timeoutAction != null) {
+			interactionDetails.put("timeout", new Date(System.currentTimeMillis() + timeout));			
+		}
 		pi.setInteractionDetails(interactionDetails);
 		List<Assignee> assignees = getAssignes(pi);
 		for(Assignee assignee : assignees)
@@ -91,12 +102,19 @@ public class InteractionUnit extends ProcessUnit
 	{
 		Logger.finer("rb.process.interaction.interrupt.start", null);
 		if(nextNodeInterruption != null) {
-			pi.clearAssignees();
-			pi.clearInteractionDetails();
-			sendCompletion(pi);
-			pi.setCurrentNode(nextNodeInterruption);
+			clearThenGoToNode(pi, nextNodeInterruption);
 		}
 		Logger.finer("rb.process.interaction.interrupt.finish", null);
+	}
+	
+	public void timeout(Actionner actionner, ProcessInstance pi) throws RedbackException
+	{
+		Logger.finer("rb.process.interaction.timeout.start", null);
+		Date timeout = pi.getInteractionTimeout();
+		if(timeout != null && timeout.getTime() < System.currentTimeMillis() && timeoutAction != null) {
+			action(actionner, pi, timeoutAction, new Date(), null);
+		}
+		Logger.finer("rb.process.interaction.timeout.finish", null);
 	}
 
 	public void action(Actionner actionner, ProcessInstance pi, String action, Date date, DataMap data) throws RedbackException
@@ -112,11 +130,8 @@ public class InteractionUnit extends ProcessUnit
 				{
 					Logger.fine("rb.process.interaction.action", new DataMap("action", action));
 					foundAction = true;
-					pi.clearAssignees();
-					pi.clearInteractionDetails();
 					pi.setLastAction(actionner, date, action);
-					sendCompletion(pi);
-					pi.setCurrentNode(actionConfig.getNextNode());
+					clearThenGoToNode(pi, actionConfig.getNextNode());
 				}
 			}
 
@@ -143,6 +158,14 @@ public class InteractionUnit extends ProcessUnit
 		{
 			return null;
 		}
+	}
+	
+	private void clearThenGoToNode(ProcessInstance pi, String node) throws RedbackException 
+	{
+		pi.clearAssignees();
+		pi.clearInteractionDetails();
+		sendCompletion(pi);
+		pi.setCurrentNode(node);
 	}
 	
 	private void sendCompletion(ProcessInstance pi) throws RedbackException 

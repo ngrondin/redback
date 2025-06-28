@@ -135,6 +135,10 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 					responseData = new DataMap();
 					responseData.put("count", count);
 				}
+				else if(action.equals("cron"))
+				{
+					runCron(session);
+				}
 				else if(action.equals("noop"))
 				{
 					//Do nothing, this is used to log request
@@ -186,5 +190,7 @@ public abstract class ProcessServer extends AuthenticatedServiceProvider
 	protected abstract List<Notification> getAssignments(Session session, DataMap filter, DataList viewdata, int page, int pageSize) throws RedbackException;
 	
 	protected abstract int getAssignmentCount(Session session, DataMap filter) throws RedbackException;
+	
+	protected abstract void runCron(Session session) throws RedbackException;
 	
 }

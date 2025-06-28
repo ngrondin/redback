@@ -43,6 +43,8 @@ public class ProcessInteractionForm extends ProcessForm implements SelectionList
 		new TextField(_data, "notification.label", "Label (!)", col1, SWT.NONE);
 		new TextField(_data, "notification.message", "Message (!)", col1, SWT.NONE);
 		new TextField(_data, "notification.contextlabel", "Context Label (!)", col1, SWT.NONE);
+		new TextField(_data, "notification.timeout", "Timeout (ms)", col1, SWT.NONE);
+		new TextField(_data, "notification.timeoutaction", "Timeout action", col1, SWT.NONE);
 
 		Composite col2 = new Composite(this, SWT.NONE);
 		col2.setLayout(new RowLayout(SWT.VERTICAL));

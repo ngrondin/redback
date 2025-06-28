@@ -83,4 +83,9 @@ public class RedbackProcessServer extends ProcessServer
 		return count;
 	}
 
+	protected void runCron(Session session) throws RedbackException {
+		Actionner actionner = new Actionner(session);
+		processManager.runCron(actionner);
+	}
+
 }

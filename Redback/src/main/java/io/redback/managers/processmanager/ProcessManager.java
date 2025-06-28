@@ -374,12 +374,22 @@ public class ProcessManager
 		{
 			process.interrupt(actionner, pi);
 		}
-		else
-		/*{
-			throw new RedbackInvalidRequestException("The process " + pid + " is not on an interaction node");
-		}*/
 		Logger.finer("rb.process.interrupt.end", new DataMap("name", pi.getProcessName(), "pid", pid));
 	}
+	
+	
+	public void runCron(Actionner actionner) throws RedbackException
+	{
+		DataMap fullFilter = new DataMap("complete", false, "interaction.timeout", new DataMap("$lt", new Date()));
+		List<ProcessInstance> instances = findProcesses(actionner, fullFilter, 0, 50);
+		for(ProcessInstance pi: instances) {
+			Process process = getProcess(actionner.getSession(), pi.getProcessName());
+			ProcessUnit pu = process.getNode(pi.getCurrentNode());
+			if(pu instanceof InteractionUnit)
+				process.timeout(actionner, pi);
+				//((InteractionUnit)pu).timeout(actionner, pi);
+		}
+	} 
 	
 	public ArrayList<ProcessInstance> findProcesses(Actionner actionner, DataMap filter, int page, int pageSize) throws RedbackException
 	{
@@ -422,6 +432,7 @@ public class ProcessManager
 		Logger.finer("rb.process.find.end", null);
 		return list;
 	}
+
 	
 	protected void loadGroupsOf(Actionner actionner) throws RedbackException
 	{
