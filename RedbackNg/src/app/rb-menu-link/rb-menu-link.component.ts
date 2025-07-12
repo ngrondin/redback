@@ -30,7 +30,7 @@ export class RbMenuLinkComponent implements OnInit {
   }
 
   click() {
-    this.navigateService.navigateTo({view: this.config.view, domain: this.config.domain, filter:null, search:null, reset:true});
+    this.navigateService.navigateTo({view: this.config.view, domain: this.config.domain, filter: this.config.filter, search:null, reset:true});
   }
 
   rightclick(event: any) {

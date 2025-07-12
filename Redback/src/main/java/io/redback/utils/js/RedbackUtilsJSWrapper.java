@@ -3,6 +3,7 @@ package io.redback.utils.js;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
@@ -10,6 +11,7 @@ import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.services.impl.RedbackUIServer;
+import io.redback.utils.CronExpression;
 import io.redback.utils.StringUtils;
 
 public class RedbackUtilsJSWrapper extends ObjectJSWrapper
@@ -185,7 +187,21 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 						throw new RuntimeException("Error decoding CSV", e);
 					}
 				}
-			};				
+			};	
+		} else if(key.equals("cronExpressionNext")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						String expression = arguments[0].toString();
+						Date ref = arguments.length > 1 && arguments[1] instanceof Date ? (Date)arguments[1] : new Date();
+						CronExpression ce = new CronExpression(expression);
+						Date next = ce.getNextValidTimeAfter(ref);
+						return next;
+					} catch(Exception e) {
+						throw new RuntimeException("Error in cron expression", e);
+					}
+				}	
+			};
 		} else {	
 			return null;
 		}

@@ -7,6 +7,8 @@ import { ValueComparator } from 'app/helpers';
 import { FilterConfig, SortConfig, FilterAttributeConfig, SortAttributeConfig, FilterBuilderConfig } from './rb-filter-builder-configs';
 import { FilterItemConstruct, SavedEntry, SortItemConstruct } from './rb-filter-builder-constructs';
 import { UserprefService } from 'app/services/userpref.service';
+import { MenuService } from 'app/services/menu.service';
+import { NavigateService } from 'app/services/navigate.service';
 
 
 
@@ -51,7 +53,9 @@ export class RbFilterBuilderComponent implements OnInit {
     public overlayRef: OverlayRef,
     public dataService: DataService,
     private userprefService: UserprefService,
-    private filterService: FilterService
+    private filterService: FilterService,
+    private menuService: MenuService,
+    private navigateService: NavigateService
   ) { 
     this.filter = this.config.initialFilter;
     if(this.config.filterConfig != null) {
@@ -232,6 +236,23 @@ export class RbFilterBuilderComponent implements OnInit {
     this.sort = entry.sort;
     this.decompile();
     this.tab = 'details';
+  }
+
+  createMenuLink() {
+    let entry = this.editingSavedEntry;
+    if(entry != null) {
+      let currentView = this.navigateService.getCurrentLoadedView();
+      let menuLink = {
+        type: "menulink",
+        view: currentView.name,
+        icon: "filter",
+        label: entry.name,
+        filter: this.filterService.prefixDollarSign(entry.filter)
+      }
+      this.menuService.addToPersonalMenu(menuLink);
+    }
+    this.editingSavedEntry = null;
+    this.tab = 'saved';
   }
 
   deleteSavedEntry() {

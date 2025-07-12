@@ -293,10 +293,15 @@
                 [label]="'Apply'">
             </rb-button>
             <rb-button
+                *ngIf="canSave && isEditingSavedEntry && editingSavedEntry.name != null"
+                (click)="createMenuLink()"
+                [label]="'Create Menu Link'">
+            </rb-button>             
+            <rb-button
                 *ngIf="canSave && !empty && changed"
                 (click)="clickSave()"
                 [label]="'Save'">
-            </rb-button>   
+            </rb-button>               
             <rb-button
                 *ngIf="canSave && isEditingSavedEntry"
                 (click)="deleteSavedEntry()"

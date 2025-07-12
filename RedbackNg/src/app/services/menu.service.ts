@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Observer } from 'rxjs';
 import { ApiService } from './api.service';
+import { FilterService } from './filter.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class MenuService {
 
   constructor(
     private apiService: ApiService,
-    private http: HttpClient
+    private http: HttpClient,
+    private filterService: FilterService
   ) {
   }
 
@@ -30,10 +32,10 @@ export class MenuService {
       if(this.apiService.userprefService != null) {
         this.apiService.getUserPreference('user', 'menu').subscribe({
           next: (resp) => {
-            this.personalMenu = resp;
+            this.personalMenu = this.filterService.removePrefixDollarSign(resp);
             this.apiService.getUserPreference('role', 'menu').subscribe({
               next: (resp) => {
-                this.groupMenu = resp
+                this.groupMenu = this.filterService.removePrefixDollarSign(resp)
                 this.apiService.getUserPreference('user', 'defaultmenu').subscribe({
                   next: (resp) => {
                     this.config = resp;
@@ -81,7 +83,7 @@ export class MenuService {
       menu.content = [];
     }
     for(var i = 0; i < menu.content.length; i++) {
-      if(menu.content[i].view == item.view) {
+      if(menu.content[i].view == item.view && menu.content[i].filter == item.filter) {
         exists = true;
       }
     }
@@ -108,16 +110,12 @@ export class MenuService {
       this.personalMenu = {};
     }
     this.addToMenu(this.personalMenu, item);
-    if(this.apiService.userprefService != null) {
-      this.apiService.putUserPreference('user', 'menu', this.personalMenu).subscribe(resp => {});
-    }
+    this.saveMenu('user', this.personalMenu);
   }
 
   removeFromPersonalMenu(item: any) {
     this.removeFromMenu(this.personalMenu, item);
-    if(this.apiService.userprefService != null) {
-      this.apiService.putUserPreference('user', 'menu', this.personalMenu).subscribe(resp => {});
-    }
+    this.saveMenu('user', this.personalMenu);
   }
 
   addToGroupMenu(item: any) {
@@ -125,15 +123,18 @@ export class MenuService {
       this.groupMenu = {};
     }
     this.addToMenu(this.groupMenu, item);
-    if(this.apiService.userprefService != null) {
-      this.apiService.putUserPreference('role', 'menu', this.groupMenu).subscribe(resp => {});
-    }
+    this.saveMenu('role', this.groupMenu);
   }
 
   removeFromGroupMenu(item: any) {
     this.removeFromMenu(this.groupMenu, item);
+    this.saveMenu('role', this.groupMenu);
+  }
+
+  saveMenu(type: string, content: any) {
     if(this.apiService.userprefService != null) {
-      this.apiService.putUserPreference('role', 'menu', this.groupMenu).subscribe(resp => {});
+      let toStore = this.filterService.prefixDollarSign(content);
+      this.apiService.putUserPreference(type, 'menu', toStore).subscribe(resp => {});
     }
   }
 
