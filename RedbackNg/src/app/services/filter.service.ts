@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { UserprefService } from './userpref.service';
+import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,8 @@ export class FilterService {
   isoDateRegExp: RegExp = /^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,9})?(?:Z|[+-][01]\d:[0-5]\d)$/;
   
   constructor(
-    private userPrefService: UserprefService
+    private userPrefService: UserprefService,
+    private logService: LogService
   ) { }
 
   public mergeFilters(map1: any, map2: any) : any {
@@ -91,7 +93,7 @@ export class FilterService {
         let func = Function(...[...params, source]);
         ret = func.call(window.redback, ...args); 
       } catch(err) {
-        console.error(err);
+        this.logService.error("Error evaluating expression :" + err);
       }  
     }
     return ret;

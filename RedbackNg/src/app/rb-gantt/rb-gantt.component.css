@@ -83,7 +83,6 @@
     font-size: smaller;
     border-left: solid 1px lightgray;
     height: 100%;
-    z-index: 1;
     pointer-events: none;
 }
 
@@ -187,7 +186,6 @@
     -webkit-user-select: none; 
     user-select: none; 
     cursor: pointer;
-    z-index: 3;
 }
 
 .rb-gantt-spreadbox-editable {
@@ -202,7 +200,6 @@
 
 .rb-gantt-spreadbackground {
     height: 2.5vw;
-    z-index: 2;
     color: lightgray;
 }
 
@@ -248,11 +245,11 @@
 }
 
 .rb-gantt-lanecolor1 {
-    background-color: #e4e4e4;
+    background-color: #e8e8e8c0;
 }
 
 .rb-gantt-lanecolor2 {
-    background-color: #e0e0e0;
+    background-color: #e0e0e0c0;
 }
 
 .rb-gantt-backgroundcolor1 {
@@ -263,12 +260,6 @@
     background-color: #f4f4f4;
 }
 
-/*.rb-gantt-button {
-    margin: 0.3vw!important;
-    line-height: 1.5vw!important;
-    height: 2vw;
-}*/
-
 .rb-gantt-loadoverlay {
     position: absolute;
     top: 0px;
@@ -278,6 +269,5 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 4;
     background-color: #eee8;
 }

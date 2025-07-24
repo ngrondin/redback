@@ -101,7 +101,7 @@ export class BuildService {
             this.buildConfigRecursive(newContainer.container, childConfig, newContext, loadedView);
           };
         } else {
-          this.logService.info('Type ' + config.type + ' has contents but is not a RbContainerComponent');
+          this.logService.error('Type ' + config.type + ' has contents but is not a RbContainerComponent');
         }
       }
     }

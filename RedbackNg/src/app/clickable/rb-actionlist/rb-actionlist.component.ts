@@ -74,7 +74,7 @@ export class RbActionlistComponent extends RbActionButtonComponent {
   }
 
   public objectSelected(object: RbObject) {
-    this.logService.info("Selected object " + object.uid);
+    this.logService.info("Action list selected object " + object.uid);
     this.closePopup();
     this.running = true;
     this.actionService.action(this.dataset, this.action, this.target, this.param, {pickedObject:object}, this.confirm, this.timeout).subscribe((rbObject) => {

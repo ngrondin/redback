@@ -5,6 +5,7 @@ import { Observable, Observer, Subscriber } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ClientWSService } from './clientws.service';
 import { SecurityService } from './security.service';
+import { LogService } from './log.service';
 
 
 const httpJSONOptions = {
@@ -41,13 +42,13 @@ export class ApiService {
   constructor(
     private http: HttpClient,
     private clientWSService: ClientWSService,
-    private securityService: SecurityService
+    private securityService: SecurityService,
+    private logService: LogService
   ) { 
     try {
       this.placesAutocompleteService = new google.maps.places.AutocompleteService();
-
     } catch(error) {
-      console.error(error);
+      this.logService.error("Error setting up google autocomplete service :" + error);
     }
   }
 
@@ -55,25 +56,26 @@ export class ApiService {
   private requestService(service: string, request: any, timeout?: number) {
     return new Observable<any>((observer) => {
       if(service != null && service != "") {
-        this.securityService.checkToken().subscribe(() => {
-          if(service == null || service == '') {
-            observer.error("Undefined service");
-          } else if(this.canStream()) {
-            this.clientWSService.requestService(service, request, timeout).subscribe({
-              next: (value) => observer.next(value),
-              error: (err) => observer.error(err),
-              complete: () => observer.complete()
-            })
-          } else {
-            let headers = new HttpHeaders()
-              .set("Content-Type", "application/json")
-              .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
-            if(timeout != null) headers.set("firebus-timeout", timeout.toString());
-            this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true}).subscribe({
-              next: (value) => observer.next(value),
-              error: (err) => observer.error(err),
-              complete: () => observer.complete()
-            });
+        this.securityService.checkToken().subscribe({
+          error: (err) => observer.error(err),
+          complete: () => {
+            if(this.canStream()) {
+              this.clientWSService.requestService(service, request, timeout).subscribe({
+                next: (value) => observer.next(value),
+                error: (err) => observer.error(err),
+                complete: () => observer.complete()
+              })
+            } else {
+              let headers = new HttpHeaders()
+                .set("Content-Type", "application/json")
+                .set("firebus-timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+              if(timeout != null) headers.set("firebus-timeout", timeout.toString());
+              this.http.post<any>(this.baseUrl + '/' + service, request, {headers: headers, withCredentials: true}).subscribe({
+                next: (value) => observer.next(value),
+                error: (err) => observer.error(err),
+                complete: () => observer.complete()
+              });
+            }
           }
         });
       } else {
@@ -103,12 +105,16 @@ export class ApiService {
 
   private get(url: string) {
     return new Observable<any>((observer) => {
-      this.securityService.checkToken().subscribe(() => {
-        this.http.get<any>(url, httpJSONOptions).subscribe({
-          next: (value) => observer.next(value),
-          error: (err) => observer.error(err),
-          complete: () => observer.complete()
-        });
+      this.securityService.checkToken().subscribe({
+        error: (err) => observer.error(err),
+        complete: () => {
+          this.logService.info("Getting: " + url);
+          this.http.get<any>(url, httpJSONOptions).subscribe({
+            next: (value) => observer.next(value),
+            error: (err) => observer.error(err.message),
+            complete: () => observer.complete()
+          });
+        }
       });
     });
   }

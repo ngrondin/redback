@@ -6,30 +6,32 @@ import { UserprefService } from './userpref.service';
 import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 import { Observable, Observer } from 'rxjs';
 import { ModalService } from './modal.service';
+import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NavigateService {
-  targets: {[key: string]: {component: RbViewLoaderComponent, stack: NavigateData[]}} = {};
+  targetViewLoaders: {[key: string]: {component: RbViewLoaderComponent, stack: NavigateData[]}} = {};
   navigateObservers: Observer<NavigateData>[] = [];
 
   constructor(
     private configService: ConfigService,
     private userprefService: UserprefService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private logService: LogService
   ) { 
     window.redback.navigateTo = (event) => this.navigateTo(event);
   }
 
   registerTarget(name: string, comp: RbViewLoaderComponent) {
     let key = name ?? "default";
-    this.targets[key] = {component: comp, stack:[]};
+    this.targetViewLoaders[key] = {component: comp, stack:[]};
   }
 
   deregisterTarget(name: string){
     let key = name ?? "default";
-    delete this.targets[key];
+    delete this.targetViewLoaders[key];
   }
 
   getNavigateObservable() : Observable<NavigateData>  {
@@ -39,7 +41,7 @@ export class NavigateService {
   }
 
   async navigateTo(event: NavigateEvent) {
-    let target = this.targets[event.target ?? "default"];  
+    let targetViewLoader = this.targetViewLoaders[event.target ?? "default"];  
     let objectConfig: any = this.configService.getObjectConfig(event.objectname);
     let view: string = (event.view != null ? event.view : (objectConfig != null ? objectConfig.view : null));
     if(view != null) {
@@ -51,37 +53,42 @@ export class NavigateService {
       if(event.label != null) {
         navdata.additionalTitle = event.label;
       }
-      if(target != null) {
+      if(targetViewLoader != null) {
         if(event.reset) {
-          target.stack = [];
+          targetViewLoader.stack = [];
         }
-        target.stack.push(navdata);
-        this.modalService.closeAll();
-        await target.component.navigateTo(navdata);
-        this.userprefService.setCurrentView(navdata.view);
-        this.modalService.setCurrentView(navdata.view);
-        this.notifyObservers(navdata);
+        targetViewLoader.stack.push(navdata);
+        await this.executeViewNavigation(targetViewLoader, navdata);
       }
     } else if(event.tab != null) {
-      target.component.currentLoadedView.openTab(event.tab);
+      targetViewLoader.component.currentLoadedView.openTab(event.tab);
     }
   }
 
-  backTo(target: string, index: number) {
-    let targetObject = this.targets[target];
-    if(targetObject != null) {
-      targetObject.stack.splice(index + 1);
-      let data = targetObject.stack[index];
-      this.modalService.closeAll();
-      targetObject.component.navigateTo(data);
-      this.userprefService.setCurrentView(data.view);
-      this.modalService.setCurrentView(data.view);
-      this.notifyObservers(data);
+  async backTo(target: string, index: number) {
+    let targetViewLoader = this.targetViewLoaders[target];
+    if(targetViewLoader != null) {
+      targetViewLoader.stack.splice(index + 1);
+      let navdata = targetViewLoader.stack[index];
+      await this.executeViewNavigation(targetViewLoader, navdata);
+    }
+  }
+
+  async executeViewNavigation(targetViewLoader, navdata) {
+    this.modalService.closeAll();
+    try {
+      await targetViewLoader.component.navigateTo(navdata);
+      this.userprefService.setCurrentView(navdata.view);
+      this.modalService.setCurrentView(navdata.view);
+      this.notifyObservers(navdata);
+      this.logService.info("View is :" + navdata.view);
+    } catch (err) {
+      this.logService.error("Error navigating :" + err);
     }
   }
 
   getCurrentNavigateData(target?: string): NavigateData {
-    let targetObject = this.targets[target ?? "default"];  
+    let targetObject = this.targetViewLoaders[target ?? "default"];  
     if(targetObject != null) {
       if(targetObject.stack.length > 0) {
         return targetObject.stack[targetObject.stack.length - 1];
@@ -91,7 +98,7 @@ export class NavigateService {
   }
 
   getCurrentNavigateStack(target?: string): NavigateData[] {
-    let targetObject = this.targets[target ?? "default"];  
+    let targetObject = this.targetViewLoaders[target ?? "default"];  
     if(targetObject != null) {
       return targetObject.stack;
     }
@@ -99,7 +106,7 @@ export class NavigateService {
   }
 
   getCurrentLoadedView(target?: string): LoadedView {
-    let targetObject = this.targets[target ?? "default"]; 
+    let targetObject = this.targetViewLoaders[target ?? "default"]; 
     return targetObject != null ? targetObject.component.currentLoadedView : null; 
   }
 

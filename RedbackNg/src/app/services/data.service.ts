@@ -269,13 +269,9 @@ export class DataService {
       relatedobjects = [...fetchRequest.relatedObjects];
       this.deferredFetchQueue.clear(objectname);
       this.apiService.streamObjects(objectname, filter, null, null).subscribe(
-      //this.apiService.objectMulti(multi).subscribe(
         {
           next: resp => {
             resp.result.forEach(json => this.receive(json));
-            /*for(var objectname of Object.keys(resp)) {
-              const rbObjectArray = Object.values(resp[objectname].list).map(json => this.receive(json));
-            }*/
           },
           complete: () => {
             for(var object of relatedobjects) {
@@ -284,7 +280,7 @@ export class DataService {
             this.finalizeReceipt();
           },
           error: error => {
-            this.logService.error(error);
+            this.logService.error("Error finalizing receipt :" + error);
           }
         }
       );

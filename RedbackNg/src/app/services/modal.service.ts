@@ -21,14 +21,13 @@ export class ModalService {
 
   public setCurrentView(view: string) {
     this.currentView = view;
-    this.logService.info("Current view is " + view);
   }
 
   public open(name: string, view: string = this.currentView) {
     let currentViewModals = this.modals[view];
     if(currentViewModals != null &&  currentViewModals[name] != null && !currentViewModals[name].isOpen) {
       currentViewModals[name].open();
-      this.logService.info("called open " + name + " in " + view);
+      this.logService.info("Modal called open " + name + " in " + view);
     }
   }
 
@@ -36,7 +35,7 @@ export class ModalService {
     let currentViewModals = this.modals[view];
     if(currentViewModals != null && currentViewModals[name] != null && currentViewModals[name].isOpen) {
       currentViewModals[name].close();
-      this.logService.info("called close " + name + " in " + view);
+      this.logService.info("Modal called close " + name + " in " + view);
     }
   }
 

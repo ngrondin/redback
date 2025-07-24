@@ -22,9 +22,13 @@ export class SecurityService {
     private logService: LogService
   ) { 
     this.accessToken = localStorage.getItem("access_token");
-    this.expiresAt = parseInt(localStorage.getItem("expires_at"));
     this.refreshToken = localStorage.getItem("refresh_token");
     this.refreshPath = localStorage.getItem("refresh_path");
+    let expAtStr = localStorage.getItem("expires_at");
+    if(expAtStr != null) {
+      let expAtInt = parseInt(expAtStr);
+      this.expiresAt = !isNaN(expAtInt) ? expAtInt : null;
+    }
   }
 
   public observeToken(): Observable<string> {
@@ -58,7 +62,7 @@ export class SecurityService {
             error: (err) => {
               this.refreshRequesters.forEach(o => o.error(err));
               this.refreshRequesters = [];
-              console.error("Error refreshing access token: " + err.toString());
+              this.logService.error("Error refreshing access token: " + err.toString());
             },
             complete: () => {
               this.refreshRequesters.forEach(o => o.complete())

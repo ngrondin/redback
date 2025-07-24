@@ -107,7 +107,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
       }
       if(target != null && target.filter != null && target.object == null) {
-        this.logService.info("Gantt actiavate with target that is not in the dataset");
+        this.logService.info("Gantt actiavated with target that is not in the dataset");
         this.dataService.fetchFirst(target.objectname, target.filter, null, null).subscribe((obj) => {
           if(obj != null) {
             let ms = (new Date(obj.get(target.cfg.startAttribute))).getTime();
@@ -264,7 +264,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   private getSpreads(laneId: string) : GanttSpread[] {
     let spreads : GanttSpread[] = [];
-    for(let cfg of this.seriesConfigs) {
+    let seriesConfigs = this.seriesConfigs.sort((a, b) => b.isBackground && !a.isBackground ? 1 : 0); //Background first
+    for(let cfg of seriesConfigs) {
       let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
       let show = cfg.show == null || (cfg.show != null && cfg.show(null, dataset, dataset.relatedObject));
       if(show) {

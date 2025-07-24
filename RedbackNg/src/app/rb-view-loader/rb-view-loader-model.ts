@@ -32,7 +32,7 @@ export class LoadedView extends RbActivatorComponent {
       for(let item of this.rootComponentRefs) {
         container.insert(item.hostView);
       }
-      setTimeout(() => this.activate(), 1);
+      setTimeout(() => this.activate(), 10);
     }
   
   
@@ -40,7 +40,7 @@ export class LoadedView extends RbActivatorComponent {
       this.rootComponentRefs.forEach(item => {
         container.detach(container.indexOf(item.hostView))
       });
-      setTimeout(() => this.deactivate(), 1);
+      setTimeout(() => this.deactivate(), 9);
     }
   
     clearData() {

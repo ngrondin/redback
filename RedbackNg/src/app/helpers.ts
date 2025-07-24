@@ -267,7 +267,11 @@ export class Evaluator {
         } else if(expr == 'false' || expr == false) {
             return false;
         } else if(typeof expr == 'string' && !((expr.indexOf("object.") > -1 && object == null) || (expr.indexOf("relatedObject.") > -1 && relatedObject == null))) {
-            return eval(expr);            
+            try {
+                return eval(expr);            
+            } catch(err) {
+                return null;
+            }
         } else {
             return null;
         }

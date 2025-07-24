@@ -95,14 +95,14 @@ export class RbNlboxComponent {
           try {
             this.nlActionService.processSequence(resp.uiactions);
           } catch(err) {
-            console.error(err);
+            this.logService.error("Error processing nl sequence :" + err);
           }
         }
         this.waiting = false;
       },
       error: (err) => {
         this.history.push({text:"Something went wrong", assistant:true});
-        console.error(err);
+        this.logService.info("Error posting nl command: " + err);
         this.waiting = false;
       },
       complete: () => {

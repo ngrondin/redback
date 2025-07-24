@@ -15,7 +15,7 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
   
   tabs: RbTabComponent[] = [];
-  activeTab: RbTabComponent;
+  selectedTab: RbTabComponent;
 
   cmTop: number = 100;
   cmLeft: number = 100;
@@ -39,12 +39,12 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
 
   onActivationEvent(state: any) {
     if(state == true) {
-      if(this.activeTab != null) {
-        this.activeTab.activate();
+      if(this.selectedTab != null) {
+        this.selectedTab.activate();
       }
     } else {
-      if(this.activeTab != null) {
-        this.activeTab.deactivate();
+      if(this.selectedTab != null) {
+        this.selectedTab.deactivate();
       }
     }    
   }
@@ -54,28 +54,30 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     if(showtab == null || showtab == true) {
       this.tabs.push(tab);
       let lasttab = this.keeplasttab == true && this.id != null ? this.userpref.getCurrentViewUISwitch('tabsection', this.id) : null;
-      if(this.activeTab == null && (lasttab == null && tab.isdefault == true) || (lasttab != null && tab.label == lasttab)) {
+      if(this.selectedTab == null && (lasttab == null && tab.isdefault == true) || (lasttab != null && tab.label == lasttab)) {
         this.selectTab(tab);
+        if(this.active) {
+          this.selectedTab.activate();
+        }
       }
     }
   }
 
-
   public selectTab(tab: RbTabComponent) {
-    if(this.activeTab != null && this.activeTab != tab) {
-      this.activeTab.deactivate();
+    if(this.selectedTab != null && this.selectedTab != tab) {
+      this.selectedTab.deactivate();
     }
-    this.activeTab = tab;
+    this.selectedTab = tab;
     if(this.keeplasttab == true && this.id != null) {
       this.userpref.setUISwitch('user', 'tabsection', this.id, tab.label);
     }
     if(this.active == true) {
-      this.activeTab.activate();
+      this.selectedTab.activate();
     }
   }
 
   public isTabActive(tab: RbTabComponent): boolean {
-    return (this.active && this.activeTab != null && this.activeTab == tab);
+    return (this.active && this.selectedTab != null && this.selectedTab == tab);
   }
 
   openPopup(event: any, tab: RbTabComponent) {
@@ -93,8 +95,8 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     this.userpref.setUISwitch('domain', 'tab', this.cmTab.label, false);
     if(this.tabs.indexOf(this.cmTab) > -1) {
       this.tabs.splice(this.tabs.indexOf(this.cmTab), 1);
-      if(this.activeTab == this.cmTab) {
-        this.activeTab = null;
+      if(this.selectedTab == this.cmTab) {
+        this.selectedTab = null;
         this.cmTab.deactivate();
       }
     }

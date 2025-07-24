@@ -203,8 +203,7 @@ export class ClientWSService {
         this.clientPingObservers.forEach((observer) => observer.next(msg.username))
       }
     } catch(err) {
-      console.error('WS receive error for message ' + ': ' + err);
-      this.logService.info(data);
+      this.logService.error('WS receive error : ' + err);
     }
   }
 

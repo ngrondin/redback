@@ -81,7 +81,7 @@ export class RbChatComponent implements OnInit {
       this.chatService.createChat(this.newChatName).subscribe(chat => {
         this.closeCreation();
       });
-      this.logService.info(this.newChatName);
+      this.logService.info("Creating chat " + this.newChatName);
     } else if(event.keyCode == 27) {
       this.closeCreation();
     }

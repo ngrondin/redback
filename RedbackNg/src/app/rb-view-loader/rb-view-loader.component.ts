@@ -9,6 +9,7 @@ import { BuildService } from 'app/services/build.service';
 import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
 import { NavigateService } from 'app/services/navigate.service';
 import { LoadedView } from './rb-view-loader-model';
+import { LogService } from 'app/services/log.service';
 
 
 
@@ -29,7 +30,8 @@ export class RbViewLoaderComponent implements OnInit {
     private apiService: ApiService,
     private componentFactoryResolver:ComponentFactoryResolver,
     private buildService: BuildService,
-    private navigateService: NavigateService
+    private navigateService: NavigateService,
+    private logService: LogService
   ) { 
   }
 
@@ -44,9 +46,13 @@ export class RbViewLoaderComponent implements OnInit {
 
   navigateTo(navData: NavigateData): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.apiService.getView(navData.view, navData.domain).subscribe(resp => {
-        this.showView(navData, resp);
-        resolve();
+      this.apiService.getView(navData.view, navData.domain).subscribe({
+        next: (resp) => {
+          this.showView(navData, resp);
+          resolve();
+        },
+        error: (err) => reject(err),
+        complete: () => resolve()
       });
     })
   }
@@ -59,7 +65,7 @@ export class RbViewLoaderComponent implements OnInit {
     let hash = JSON.stringify(viewConfig).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
-      console.time('build');
+      //console.time('build');
       entry = new LoadedView(navData.view, viewConfig.label);
       if(viewConfig['content'] != null) {
         for(let item of viewConfig['content']) {
@@ -71,7 +77,7 @@ export class RbViewLoaderComponent implements OnInit {
         Function(viewConfig.onload).call(window.redback);
       }
       this.viewCache[hash] = entry;
-      console.timeEnd('build');
+      //console.timeEnd('build');
     }
     if(entry != null) {
       this.currentLoadedView = entry;
@@ -80,6 +86,7 @@ export class RbViewLoaderComponent implements OnInit {
       if(navData.tab != null) entry.openTab(navData.tab);
       entry.attachTo(this.container);
     }
+    this.logService.info("Loaded view " + navData.view);
   }
   
 }

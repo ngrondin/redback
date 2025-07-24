@@ -85,7 +85,6 @@ export class RbSearchComponent extends RbFieldInputComponent {
     if(fetched == true) {
       this.queuedSearch = null;
     } else {
-      console.error("Search blocked");
       this.searchAfterDelay();
     }
   }

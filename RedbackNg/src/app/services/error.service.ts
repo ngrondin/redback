@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -7,7 +8,8 @@ import { ToastrService } from 'ngx-toastr';
 export class ErrorService {
 
   constructor(
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private logService: LogService
   ) { }
 
   receiveHttpError(error: any) {
@@ -18,7 +20,7 @@ export class ErrorService {
       }
     }
     if(typeof msg == 'string') {
-      console.error(msg);  
+      this.logService.error(msg);
       let parts = msg.split(" : ");
       this.toastr.error(parts[parts.length - 1], 'Error', {disableTimeOut: true});
     } else {
