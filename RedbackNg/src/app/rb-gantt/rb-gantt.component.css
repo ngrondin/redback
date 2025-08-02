@@ -169,6 +169,7 @@
 .rb-gantt-spread {
     display: flex;
     flex-direction: row;
+    /*flex-wrap: wrap;*/
     align-items: center;
     justify-content: start;
     position: absolute;
@@ -213,6 +214,7 @@
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
+    /*height: 100%;*/
 }
 
 .rb-gantt-spreadprelabel {
@@ -225,6 +227,7 @@
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
+    /*height: 100%;*/
 }
 
 .rb-gantt-spreadpostlabel {
@@ -237,6 +240,7 @@
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
+    /*height: 100%;*/
 }
 
 .rb-gantt-laneheight {

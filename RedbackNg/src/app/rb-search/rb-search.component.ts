@@ -16,6 +16,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
   @Input('filter') filterconfig: any;
   @Input('sort') sortconfig: any;
   @Input('searchtarget') searchtarget: RbSearchTarget;
+  @Input('targetdatasetid') targetdatasetid: string; // Only usefull when search is linked to a datasetgroup
   
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;
@@ -42,7 +43,12 @@ export class RbSearchComponent extends RbFieldInputComponent {
       if(this.dataset != null) {
         this.searchtarget = this.dataset;
       } else if(this.datasetgroup != null) {
-        this.searchtarget = this.datasetgroup;
+        if(this.targetdatasetid != null) {
+          this.searchtarget = this.datasetgroup.datasets[this.targetdatasetid];
+        } 
+        if(this.searchtarget == null) { //Didn't find the specified dataset id
+          this.searchtarget = this.datasetgroup;
+        }
       }
     }
   }
@@ -101,7 +107,6 @@ export class RbSearchComponent extends RbFieldInputComponent {
     this.overlayRef = this.overlay.create({
       positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
       hasBackdrop: true,
-      //backdropClass: 'cdk-overlay-transparent-backdrop'
     });
     this.overlayRef.backdropClick().subscribe(() => {
       this.cancelFilterBuilder();
@@ -114,7 +119,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     config.initialSort = this.sortValue;
     config.objectname = this.searchtarget.objectname;
     config.aggregateFilter = this.searchtarget.getBaseSearchFilter();
-    config.datasetid = this.dataset.id;
+    config.datasetid = this.dataset != null ? this.dataset.id : null; //Should be using the searchTarget
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);

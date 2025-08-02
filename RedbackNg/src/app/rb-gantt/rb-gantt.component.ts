@@ -76,7 +76,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
     if(this.toolbarConfig != null) {
       for(var item of this.toolbarConfig) {
-        var context: any = {};
+        var context: any = {dataset: this.dataset, datasetgroup: this.datasetgroup};
         this.buildService.buildConfigRecursive(this.toolbar, item, context);
       }
     }

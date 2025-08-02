@@ -14,6 +14,7 @@ class TableColumnConfig {
   icon: string;
   size: number;
   width: number;
+  editable: boolean;
   linkview: string;
   showExpr: string;
   alt: {[key: string]: TableColumnConfig};
@@ -29,6 +30,7 @@ class TableColumnConfig {
     this.icon = json.icon;
     this.size = json.size;
     this.width = (json.size != null ? (json.size * 15) + 15 : 250);
+    this.editable = (json.editable != null ? json.editable : true);
     this.linkview = json.linkview;
     this.showExpr = (json.show != null ? json.show : "true");
     if(json.alt != null) {
@@ -48,6 +50,7 @@ class TableColumnConfig {
 export class RbTableComponent extends RbDataObserverComponent {
   @Input('columns') _cols: any;
   @Input('headersonemtpy') headersonempty: boolean = true;
+  @Input('candeleterows') candeleterows: boolean = true;
   @Input('emptymessage') emptymessage: string = null;
 
   columns: TableColumnConfig[];
@@ -102,7 +105,7 @@ export class RbTableComponent extends RbDataObserverComponent {
   }
 
   canDelete(object: RbObject) {
-    return object.canDelete()
+    return this.candeleterows && object.canDelete()
   }
 
   onScroll(event) {
