@@ -93,7 +93,16 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 						throw new RedbackException("Error in aggregateObjects", e);
 					}
 				}
-			};			
+			};
+		} else if(key.equals("countObjects")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)arguments[1];
+					long count = objectManager.countObjects(session, objectname, filter, null);
+					return count;
+				}
+			};				
 		} else if(key.equals("updateObject")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

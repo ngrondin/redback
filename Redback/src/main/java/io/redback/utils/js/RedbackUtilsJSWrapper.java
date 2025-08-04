@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
@@ -173,7 +175,7 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 						Thread.sleep(ms);
 						return null;
 					} catch(Exception e) {
-						throw new RuntimeException("Error parsing Mail date", e);
+						throw new RuntimeException("Error sleeping", e);
 					}
 				}
 			};	
@@ -202,6 +204,41 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 					}
 				}	
 			};
+		} else if(key.equals("regexMatch")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						String expression = arguments[0].toString();
+						String input = arguments[0].toString();
+						Pattern pattern = Pattern.compile(expression);
+						Matcher matcher = pattern.matcher(input);
+						return matcher.matches();
+					} catch(Exception e) {
+						throw new RuntimeException("Error while running regex match", e);
+					}
+				}	
+			};
+		} else if(key.equals("regexGroups")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						String expression = arguments[0].toString();
+						String input = arguments[1].toString();
+						Pattern pattern = Pattern.compile(expression);
+						Matcher matcher = pattern.matcher(input);
+						DataList list = new DataList();
+						if(matcher.find()) {
+							int count = matcher.groupCount();
+							for(int i = 1; i <= count; i++) {
+								list.add(matcher.group(i));
+							}
+						}
+						return list;
+					} catch(Exception e) {
+						throw new RuntimeException("Error while running regex group", e);
+					}
+				}	
+			};				
 		} else {	
 			return null;
 		}
