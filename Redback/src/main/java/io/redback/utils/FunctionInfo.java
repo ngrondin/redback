@@ -5,6 +5,7 @@ public class FunctionInfo {
 	public String description;
 	public String showExpression;
 	public long timeout;
+	public String icon;
 	
 	public FunctionInfo(String n, String d, long to) {
 		name = n;
@@ -18,6 +19,14 @@ public class FunctionInfo {
 		description = d;
 		showExpression = se;
 		timeout = to;
+	}
+	
+	public FunctionInfo(String n, String d, String se, long to, String i) {
+		name = n;
+		description = d;
+		showExpression = se;
+		timeout = to;
+		icon = i;
 	}
 
 }

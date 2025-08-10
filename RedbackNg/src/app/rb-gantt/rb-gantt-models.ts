@@ -29,9 +29,7 @@ export class GanttLaneConfig {
     endAttribute: string;
     laneAttribute: string;
     labelAttribute: string;
-    preLabelAttribute: string;
-    postLabelAttribute: string;
-    prioritizePrePostLabel: boolean;
+    centerLabel: boolean;
     labelColor: string;
     color: string;
     colorAttribute: string;
@@ -49,9 +47,7 @@ export class GanttLaneConfig {
       this.endAttribute = json.endattribute;
       this.laneAttribute = json.laneattribute;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
-      this.preLabelAttribute = subpref != null && subpref.prelabelattribute != null ? subpref.prelabelattribute : json.prelabelattribute;
-      this.postLabelAttribute = subpref != null && subpref.postlabelattribute != null ? subpref.postlabelattribute : json.postlabelattribute;
-      this.prioritizePrePostLabel = json.prioritizeprepostlabel ?? false;
+      this.centerLabel = json.centerlabel ?? false;
       this.labelColor = json.labelcolor;
       this.isBackground = json.isbackground;
       this.canEdit = json.canedit;
@@ -63,6 +59,25 @@ export class GanttLaneConfig {
     }
   }
   
+  export class GanttOverlayConfig {
+    dataset: string;
+    startAttribute: string;
+    durationAttribute: string;
+    endAttribute: string;
+    labelAttribute: string;
+    color: string;
+  
+    constructor(json: any, userpref: any) {
+      let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
+      this.dataset = json.dataset;
+      this.startAttribute = json.startattribute;
+      this.durationAttribute = json.durationattribute;
+      this.endAttribute = json.endattribute;
+      this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
+      this.color = json.color;
+    }
+  }
+
   export class GanttLane {
     static ganttLaneHeight: number = 42;
     id: string;
@@ -92,13 +107,19 @@ export class GanttLaneConfig {
       }
       this.height = GanttLane.ganttLaneHeight * (max + 1);
     }
+
+    backgroundSpreads() {
+      return this.spreads.filter(s => s.config.isBackground == true);
+    }
+
+    foregroundSpreads() {
+      return this.spreads.filter(s => s.config.isBackground == false);
+    }
   }
   
   export class GanttSpread {
     id: string;
     label: string;
-    prelabel: string;
-    postlabel: string;
     start: number;
     width: number;
     top: number;
@@ -112,11 +133,9 @@ export class GanttLaneConfig {
     object: RbObject;
     config: GanttSeriesConfig;
   
-    constructor(i: string, l: string, prel: string, postl: string, s: number, w: number, h: number, ln: string, c: string, lc: string, ce: boolean, sel: boolean, o: RbObject, cfg: GanttSeriesConfig) {
+    constructor(i: string, l: string, s: number, w: number, h: number, ln: string, c: string, lc: string, ce: boolean, sel: boolean, o: RbObject, cfg: GanttSeriesConfig) {
       this.id = i;
       this.label = l;
-      this.prelabel = prel;
-      this.postlabel = postl;
       this.start = s;
       this.width = w;
       this.height = h;
@@ -136,7 +155,42 @@ export class GanttLaneConfig {
       this.top = (this.sublane * GanttLane.ganttLaneHeight) + (GanttLane.ganttLaneHeight - this.height) / 2;
     }
   }
+
+  export class GanttOverlayLane {
+    static ganttLaneHeight: number = 42;
+    id: string;
+    label: string;
+    height: number;
+    spreads: GanttOverlaySpread[];
   
+    constructor(i: string, l: string) {
+      this.id = i;
+      this.label = l != null ? l : "";
+      this.height = GanttLane.ganttLaneHeight;
+    }
+
+    setSpreads(s: GanttOverlaySpread[]) {
+      this.spreads = s;
+    }
+  }
+
+  export class GanttOverlaySpread {
+    id: string;
+    start: number;
+    width: number;
+    color: string;
+    object: RbObject;
+    config: GanttOverlayConfig;
+  
+    constructor(i: string, s: number, w: number, c: string, o: RbObject, cfg: GanttOverlayConfig) {
+      this.id = i;
+      this.start = s;
+      this.width = w;
+      this.color = c;
+      this.object = o;
+      this.config = cfg;
+    }
+  }
   export class GanttMark {
     px: number;
     label: string;

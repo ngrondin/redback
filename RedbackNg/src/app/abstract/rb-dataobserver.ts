@@ -18,6 +18,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
     @Input('object') _rbObject: RbObject;
     @Input('show') showExpr: string;
+    @Input('targetdatasetid') targetdatasetid: string; // Only usefull when search is linked to a datasetgroup
     @HostBinding('style.display') get visitility() { return this.show ? 'flex' : 'none'; }
     
     public globalSubscription: Subscription;
@@ -89,11 +90,23 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     get rbObject() : RbObject {
-        return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : this._rbObject != null ? this._rbObject : null;
+        return this.selectedObject;
     }
 
     get selectedObject() : RbObject {
-        return this.dataset != null ? this.dataset.selectedObject : this.datasetgroup != null ? this.datasetgroup.selectedObject : this._rbObject != null ? this._rbObject : null;
+        if(this.dataset != null) {
+            return this.dataset.selectedObject;
+        } else if(this.datasetgroup != null) {
+            if(this.targetdatasetid != null) {
+                return this.datasetgroup.datasets[this.targetdatasetid].selectedObject;
+            } else {
+                return this.datasetgroup.selectedObject;
+            }
+        } else if(this._rbObject != null) {
+            return this._rbObject;
+        } else {
+            return null;
+        }
     }
 
     get relatedObject() : RbObject {

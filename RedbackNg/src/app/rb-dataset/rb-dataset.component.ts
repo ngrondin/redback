@@ -385,6 +385,11 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public addObjectAndSelect(obj: RbObject) {
+    this.add(obj);
+    this.select(obj);
+  }
+
+  public add(obj: RbObject) {
     let index = this._list.indexOf(obj);
     if(index > -1) {
       this._list.splice(index);
@@ -396,7 +401,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     }
     obj.addSet(this);
     this.publishEvent("load");
-    this.select(obj);
   }
 
   public removeSelected() {

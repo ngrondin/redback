@@ -209,7 +209,7 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 				public Object call(Object... arguments) throws RedbackException {
 					try {
 						String expression = arguments[0].toString();
-						String input = arguments[0].toString();
+						String input = arguments[1].toString();
 						Pattern pattern = Pattern.compile(expression);
 						Matcher matcher = pattern.matcher(input);
 						return matcher.matches();

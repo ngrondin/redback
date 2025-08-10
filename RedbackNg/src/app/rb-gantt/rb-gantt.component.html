@@ -57,6 +57,15 @@
     class="rb-gantt-header">
     <div
         class="rb-gantt-corner">
+        <div
+            *ngFor="let overlaylane of overlayData; let i = index"
+            class="rb-gantt-overlay-lanehead"
+            (click)="clickOverlayLaneIndex(i)">
+            <span>{{overlaylane.label}}</span>
+        </div>
+        <div
+            class="rb-gantt-corner-space">
+        </div>
     </div>
     <div
         class="rb-gantt-headertrackcontainer">
@@ -64,6 +73,19 @@
             class="rb-gantt-headertrack"
             [style.width.px]="widthPX"
             [style.left.px]="-scrollLeft">
+            <div
+                *ngFor="let overlaylane of overlayData"
+                class="rb-gantt-overlaytrack">
+                <div
+                    *ngFor="let overlayspread of overlaylane.spreads"
+                    [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
+                    [style.width.px]="overlayspread.width"
+                    [style.left.px]="overlayspread.start"
+                    [style.top.px]="overlayspread.top"
+                    [style.background-color]="overlayspread.color"
+                    [style.justify-content]="'start'">
+                </div>                
+            </div>
             <div
                 class="rb-gantt-daytrack">
                 <div
@@ -136,37 +158,49 @@
                 (rb-drag-dropzone)="droppedOn($event, lane)"
                 [rb-drag-changeform]="getSizeForObjectCallback">
                 <div
-                    *ngFor="let spread of lane.spreads"
-                    [class]="'rb-gantt-spread ' + (spread.config.isBackground ? 'rb-gantt-spreadbackground ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2') : 'rb-gantt-spreadbox') + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '')"
+                    *ngFor="let spread of lane.backgroundSpreads()"
+                    [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
+                    [style.width.px]="spread.width"
+                    [style.left.px]="spread.start"
+                    [style.height.px]="lane.height"
+                    [style.top.px]="spread.top"
+                    [style.background-color]="spread.color"
+                    [style.justify-content]="spread.config.centerLabel ? 'center' : 'start'"
+                    [style.color]="spread.labelcolor">
+                    <div
+                        class="rb-gantt-spreadlabel">
+                        {{spread.label}}
+                    </div>                    
+                </div>
+                <div
+                    *ngFor="let overlayspread of selectedOverlaySpreads()"
+                    [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
+                    [style.width.px]="overlayspread.width"
+                    [style.left.px]="overlayspread.start"
+                    [style.height.px]="lane.height"
+                    [style.top.px]="overlayspread.top"
+                    [style.background-color]="overlayspread.color"
+                    [style.opacity]="0.5"
+                    [style.justify-content]="'start'">
+                </div>                  
+                <div
+                    *ngFor="let spread of lane.foregroundSpreads()"
+                    [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '')"
                     [rb-drag-object]="spread.canEdit ? spread.object : null"
                     [rb-drag-droppedout]="droppedOutCallback"
                     (click)="clickSpread(spread)"
                     [style.width.px]="spread.width"
                     [style.left.px]="spread.start"
-                    [style.height.px]="spread.config.isBackground ? lane.height : spread.height"
+                    [style.height.px]="spread.height"
                     [style.top.px]="spread.top"
                     [style.background-color]="spread.color"
                     [style.color]="spread.labelcolor"
-                    [style.justify-content]="spread.prelabel != null || spread.postlabel != null ? 'space-between' : 'start'">
+                    [style.justify-content]="spread.config.centerLabel == true ? 'center' : 'start'">
                     <div
-                        *ngIf="spread.prelabel != null"
-                        class="rb-gantt-spreadprelabel"
-                        [style.flex-shrink]="spread.config.prioritizePrePostLabel ? 0 : 1">
-                        {{spread.prelabel}}
-                    </div>
-                    <div
-                        class="rb-gantt-spreadlabel"
-                        [style.text-align]="spread.prelabel == null && spread.postlabel == null ? 'left' : 'center'"
-                        [style.flex-shrink]="spread.config.prioritizePrePostLabel ? 1 : 0">
+                        class="rb-gantt-spreadlabel">
                         {{spread.label}}
                     </div>
-                    <div
-                        *ngIf="spread.postlabel != null"
-                        class="rb-gantt-spreadpostlabel"
-                        [style.flex-shrink]="spread.config.prioritizePrePostLabel ? 0 : 1">
-                        {{spread.postlabel}}
-                    </div>
-                </div>
+                </div>                
             </div>
         </div>
     </rb-scroll>

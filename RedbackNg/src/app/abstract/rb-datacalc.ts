@@ -75,6 +75,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
                 fetched = fetched && this.dataset.filterSort(filterSort);
               }
             }
+            fetched = fetched && this.updateOtherData();
             if(!fetched) {
                 this.redraw();
             }
@@ -83,6 +84,10 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             this.redraw();
             return false;
         }        
+    }
+
+    updateOtherData() : boolean {
+        return true;
     }
 
     forceDatasetReload() {
@@ -175,6 +180,8 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
         }
         return false;
     }
+
+    
 
     abstract dataCalcInit();
 

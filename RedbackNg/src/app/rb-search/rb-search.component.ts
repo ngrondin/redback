@@ -16,7 +16,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
   @Input('filter') filterconfig: any;
   @Input('sort') sortconfig: any;
   @Input('searchtarget') searchtarget: RbSearchTarget;
-  @Input('targetdatasetid') targetdatasetid: string; // Only usefull when search is linked to a datasetgroup
+
   
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;

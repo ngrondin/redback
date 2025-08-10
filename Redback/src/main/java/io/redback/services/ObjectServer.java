@@ -195,7 +195,7 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				List<FunctionInfo> list = listFunctions(session, category);
 				DataList respList = new DataList();
 				for(FunctionInfo fi: list)
-					respList.add(new DataMap("name", fi.name, "description", fi.description, "show", fi.showExpression, "timeout", fi.timeout));
+					respList.add(new DataMap("name", fi.name, "description", fi.description, "show", fi.showExpression, "timeout", fi.timeout, "icon", fi.icon));
 				return new DataMap("list", respList);
 			}
 			else if(action.equals("aggregate"))

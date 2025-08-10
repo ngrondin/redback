@@ -614,7 +614,7 @@ public class ObjectManager
 		List<ScriptConfig> list = globalScripts.list(session, new DataMap("category", category));
 		for(ScriptConfig sc: list) {
 			if(session.getUserProfile().canExecute("rb.scripts." + sc.getName()) || session.getUserProfile().canExecute("rb.accesscat." + sc.getAccessCategory())) {
-				retList.add(new FunctionInfo(sc.getName(), sc.getDescription(), sc.getShowExpression(), sc.getTimeout()));
+				retList.add(new FunctionInfo(sc.getName(), sc.getDescription(), sc.getShowExpression(), sc.getTimeout(), sc.getIcon()));
 			}
 		}
 		return retList;

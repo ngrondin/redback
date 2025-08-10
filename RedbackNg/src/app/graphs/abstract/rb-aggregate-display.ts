@@ -88,10 +88,13 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
             cats.push(cat);
             let label = this.processLabel(agg.getDimension(this.categories.labelattribute), this.categories.labelformat);
             let series = this.getSeriesDataForCategory(cat);
-            this.graphData.push({code: cat, name: label, label: label, series: series});
+            let sum = series.reduce((acc, item) => acc + item.value, 0);
+            this.graphData.push({code: cat, name: label, label: label, series: series, sum: sum});
           }
         }
-        this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, 'code')); 
+        let sortKey = this.categories.sortby != null ? this.categories.sortby : 'code';
+        let sortDir = this.categories.sortdir != null ? this.categories.sortdir : 1;
+        this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir)); 
       } else {
         this.graphData = this.getSeriesDataForCategory(null);
       } 

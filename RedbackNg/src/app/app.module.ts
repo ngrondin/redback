@@ -154,6 +154,7 @@ import { RbProgressComponent } from './rb-progress/rb-progress.component';
 import { RbImageComponent } from './rb-image/rb-image.component';
 import { RbTagsInputComponent } from './inputs/rb-tags-input/rb-tags.component';
 import { RbFileviewerComponent } from './rb-fileviewer/rb-fileviewer.component';
+import { RbSelectorComponent } from './rb-selector/rb-selector.component';
 
 
 
@@ -318,7 +319,8 @@ window.redback = window.redback || {};
         RbProgressComponent,
         RbImageComponent,
         RbTagsInputComponent,
-        RbFileviewerComponent
+        RbFileviewerComponent,
+        RbSelectorComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

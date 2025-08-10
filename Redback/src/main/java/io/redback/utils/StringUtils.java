@@ -517,7 +517,12 @@ public class StringUtils
     	String strm = str.replaceAll("\r", "");
     	int endFirstLine = strm.indexOf("\n");
     	String headerLine = strm.substring(0, endFirstLine).trim();
-		String[] headers = headerLine.split(",");
+    	char[] seps = {',', '|', '\t'};
+    	char sep = ',';
+    	for(char s : seps) 
+    		if(headerLine.indexOf(s) > -1)
+    			sep = s;
+		String[] headers = headerLine.split(Pattern.quote(String.valueOf(sep)));
 		String body = strm.substring(endFirstLine).trim();
 		
 		StringBuilder buffer = new StringBuilder();
@@ -542,7 +547,7 @@ public class StringUtils
 			} else {
 				boolean lastCharOfBody = ptr == body.length();
 				boolean lastCharOfLine = lastCharOfBody || c == '\n';
-				boolean lastCharOfField = lastCharOfLine || c == ',';
+				boolean lastCharOfField = lastCharOfLine || c == sep;
 				if(lastCharOfField) {
 					String val = buffer.length() > 0 ? buffer.toString() : null;
 					if(col < headers.length) map.put(headers[col], val);    						
