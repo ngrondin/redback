@@ -65,6 +65,7 @@ import { RbProgressComponent } from "app/rb-progress/rb-progress.component";
 import { RbImageComponent } from "app/rb-image/rb-image.component";
 import { RbTagsInputComponent } from "app/inputs/rb-tags-input/rb-tags.component";
 import { RbSelectorComponent } from "app/rb-selector/rb-selector.component";
+import { RbMultiRelatedInputComponent } from "app/inputs/rb-multi-related-input/rb-multi-related-input.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -78,6 +79,7 @@ export const componentRegistry = {
     "input": RbStringInputComponent,
     "numberinput":RbNumberInputComponent,
     "relatedinput": RbRelatedInputComponent,
+    "multirelatedinput": RbMultiRelatedInputComponent,
     "hierarchyinput": RbHierarchyInputComponent,
     "list3": RbListComponent,
     "list4": RbList4Component,

@@ -191,12 +191,20 @@ export class GanttLaneConfig {
       this.config = cfg;
     }
   }
+
+  export enum GanttMarkType {
+    Day, Major, Minor
+  }
   export class GanttMark {
     px: number;
-    label: string;
+    dayLabel: string;
+    timeLabel: string;
+    type: GanttMarkType;
   
-    constructor(p: number, l: string) {
+    constructor(p: number, dl: string, tl: string, t: GanttMarkType) {
       this.px = p;
-      this.label = l;
+      this.dayLabel = dl;
+      this.timeLabel = tl;
+      this.type = t;
     }
   }

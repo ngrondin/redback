@@ -1,0 +1,36 @@
+<mat-icon 
+    *ngIf="showicon" 
+    [class]="'rb-input-icon' + (mandatoryOn ? ' rb-input-icon-mandatory' : '') + (alertOn ? ' rb-input-icon-alert' : '')">
+    {{icon}}
+</mat-icon>
+<div
+    class="rb-multirelatedinput-container">
+    <span
+        [class]="'rb-input-label' + (mandatoryOn ? ' rb-input-label-mandatory' : '') + (alertOn ? ' rb-input-label-alert' : '') + (getMultiValues().length == 0 && !isEditing ? ' rb-input-label-big' : '')">
+        {{label}}
+    </span>  
+    <div
+        class="rb-multirelatedinput-valuecontainer">
+        <span
+            *ngFor="let value of getMultiValues()"
+            class="rb-multirelatedinput-value">
+            {{value}}
+        </span>
+        <input 
+            #input
+            [class]="'rb-multirelatedinput-input rb-input-text-color' + (mandatoryOn ? ' rb-input-mandatory' : '') + (alertOn ? ' rb-input-alert' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
+            [(ngModel)]="displayvalue"
+            (focus)="onFocus($event)"
+            (blur)="onBlur($event)"
+            (keydown)="onKeydown($event)"
+            (keyup)="onKeyup($event)"
+            [readonly]="readonly"
+            autocomplete="off"
+            data-lpignore="true"
+            [type]="inputType">
+    </div>  
+
+    <div
+        [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
+    </div> 
+</div>

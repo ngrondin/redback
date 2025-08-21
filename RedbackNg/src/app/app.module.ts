@@ -155,6 +155,8 @@ import { RbImageComponent } from './rb-image/rb-image.component';
 import { RbTagsInputComponent } from './inputs/rb-tags-input/rb-tags.component';
 import { RbFileviewerComponent } from './rb-fileviewer/rb-fileviewer.component';
 import { RbSelectorComponent } from './rb-selector/rb-selector.component';
+import { RbMultiRelatedInputComponent } from './inputs/rb-multi-related-input/rb-multi-related-input.component';
+import { FileiconComponent } from './utils/fileicon/fileicon.component';
 
 
 
@@ -320,7 +322,9 @@ window.redback = window.redback || {};
         RbImageComponent,
         RbTagsInputComponent,
         RbFileviewerComponent,
-        RbSelectorComponent
+        RbSelectorComponent,
+        RbMultiRelatedInputComponent,
+        FileiconComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

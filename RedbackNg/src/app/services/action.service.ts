@@ -27,7 +27,7 @@ export class ActionService {
   ) { }
 
 
-  public action(dataset: RbDatasetComponent, action: string, target: string, param: any, extraContext?: any, confirm?: string, timeout?: number) : Observable<null> {
+  public action(dataset: RbDatasetComponent, action: string, target: string, param: any, extraContext?: any, confirm?: string, timeout?: number) : Observable<any> {
     if(confirm == null) {
       let _action: string = action.toLowerCase();
       if(_action == 'create') {

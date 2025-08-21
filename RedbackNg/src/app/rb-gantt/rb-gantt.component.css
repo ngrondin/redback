@@ -109,9 +109,14 @@
     align-items: center;
     position: absolute;
     font-size: smaller;
-    border-left: solid 1px lightgray;
+    border-left: solid 1px #ddd;
     height: 100%;
     pointer-events: none;
+}
+
+.rb-gantt-mark-minor {
+    border-left-style: dashed;
+    border-color: #cdcdcd;
 }
 
 .rb-gantt-body {

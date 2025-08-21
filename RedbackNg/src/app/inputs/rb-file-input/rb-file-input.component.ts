@@ -58,6 +58,14 @@ export class RbFileInputComponent extends RbInputComponent  {
     return null;
   } 
 
+    get mime() : String{
+    if(this.rbObject != null) {
+      let val = this.rbObject.get(this.attribute);
+      if(val != null)
+        return val.mime;
+    } 
+    return null;
+  } 
 
   hasThumbnail(): boolean {
     if(this.rbObject != null) {

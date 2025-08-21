@@ -484,3 +484,7 @@ rb-fileset {
     height: 100% !important;
 }
 
+.rb-file-fileicon {
+    width: var(--v36px);
+    cursor: pointer;
+}

@@ -1,0 +1,37 @@
+.rb-multirelatedinput-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    position: relative;
+    align-items: center;
+    overflow: hidden;
+}
+
+.rb-multirelatedinput-valuecontainer {
+    display: flex;
+    flex-direction: row;
+    border-width: 0px 0px 1px 0px;
+    border-color: lightgrey;
+    border-style: solid;
+    width:100%;
+    margin-top: var(--v16px);
+    gap: 0.5vw;
+}
+
+.rb-multirelatedinput-input {
+    display: flex;
+    flex: 1 1 0px;
+    font-size: 1rem;
+    background-color: transparent;
+    outline: none;
+    padding: var(--v3px) 0px;
+    z-index: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-width: 0px;
+}
+
+.rb-multirelatedinput-value {
+    flex: 0 1 auto;
+    white-space: nowrap;
+}

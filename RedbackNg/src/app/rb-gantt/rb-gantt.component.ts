@@ -7,7 +7,7 @@ import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { Subscription } from 'rxjs';
-import { GanttLane, GanttLaneConfig, GanttMark, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread } from './rb-gantt-models';
+import { GanttLane, GanttLaneConfig, GanttMark, GanttMarkType, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread } from './rb-gantt-models';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
@@ -33,7 +33,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   _startDate: Date = new Date();
   spanMS: number;
   zoomMS: number;
-  markIntervalMS: number;
+  markMajorIntervalMS: number;
+  markMinorIntervalMS: number;
   startMS: number;
   endMS: number;
   multiplier: number;
@@ -44,8 +45,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   dayNames: String[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   ganttData: GanttLane[];
-  dayMarks: GanttMark[];
-  hourMarks: GanttMark[];
+  marks: GanttMark[] = [];
   overlayData: GanttOverlayLane[];
   selectedOverlayLaneIndex = -1;
 
@@ -172,6 +172,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return GanttLane.ganttLaneHeight;
   }
 
+  get dayMarks() : GanttMark[] {
+    return this.marks.filter(m => m.type == GanttMarkType.Day);
+  }
+
+  get majorMarks() : GanttMark[] {
+    return this.marks.filter(m => m.type == GanttMarkType.Day || m.type == GanttMarkType.Major);
+  }
+
   get isLoading() : boolean {
     return this.dataset != null ? this.dataset.isLoading : this.datasetgroup != null ? this.datasetgroup.isLoading : false;
   }
@@ -231,8 +239,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.calcParams();
     this.ganttData = this.getLanes();
     this.overlayData = this.getOverlayLanes();
-    this.dayMarks = this.getDayMarks();
-    this.hourMarks = this.getHourMarks();
+    this.marks = this.getMarks();
     this.recalcPlanned = false;
   }
 
@@ -244,9 +251,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.endMS = this.startMS + this.spanMS;
     this.multiplier = window.innerWidth / this.zoomMS;
     this.widthPX = this.spanMS * this.multiplier;
-    this.markIntervalMS = 3600000;
-    while(this.markIntervalMS * this.multiplier < 40) {
-      this.markIntervalMS *= 2;
+    this.markMajorIntervalMS = 3600000;
+    this.markMinorIntervalMS = 900000;
+    while(this.markMajorIntervalMS * this.multiplier < 40) {
+      this.markMajorIntervalMS *= 2;
+      this.markMinorIntervalMS = this.markMajorIntervalMS;
     }
   }
 
@@ -432,40 +441,26 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
   }
 
-  private getHourMarks() : GanttMark[] {
+  private getMarks() : GanttMark[] {
     let marks: GanttMark[] = [];
     let lastMidnight = (new Date(this.startMS));
     lastMidnight.setHours(0);
     lastMidnight.setMinutes(0);
     lastMidnight.setSeconds(0);
     lastMidnight.setMilliseconds(0);
-    let cur = lastMidnight.getTime();
+    let lastMidnightMS = lastMidnight.getTime();
+    let cur = lastMidnightMS;
     while(cur < this.endMS) {
       let curDate: Date = new Date(cur);
+      let sinceFirstMidnight = cur - lastMidnightMS;
       let pos = Math.round((cur - this.startMS) * this.multiplier);
       if(pos > 0) {
-        let mark = new GanttMark(pos, curDate.getHours() + ":00");
-        marks.push(mark);
+        let dayLabel: string = this.dayNames[curDate.getDay()] + ", " + curDate.getDate() + " " + this.monthNames[curDate.getMonth()] + " " + curDate.getFullYear();
+        let timeLabel: string = curDate.getHours() + ":00";
+        let type: GanttMarkType = sinceFirstMidnight % 86400000 == 0 ? GanttMarkType.Day : sinceFirstMidnight % this.markMajorIntervalMS == 0 ? GanttMarkType.Major : GanttMarkType.Minor;
+        marks.push(new GanttMark(pos, dayLabel, timeLabel, type));
       }
-      cur = cur + this.markIntervalMS;
-    }
-    return marks;
-  }
-
-  private getDayMarks() : GanttMark[] {
-    let marks: GanttMark[] = [];
-    let lastMidnight = (new Date(this.startMS));
-    lastMidnight.setHours(0);
-    lastMidnight.setMinutes(0);
-    lastMidnight.setSeconds(0);
-    lastMidnight.setMilliseconds(0);
-    let cur = lastMidnight.getTime();
-    while(cur < this.endMS) {
-      let curDate: Date = new Date(cur);
-      let pos = Math.round((cur - this.startMS) * this.multiplier);
-      let mark = new GanttMark(pos, this.dayNames[curDate.getDay()] + ", " + curDate.getDate() + " " + this.monthNames[curDate.getMonth()] + " " + curDate.getFullYear());
-      marks.push(mark);
-      cur = cur + 86400000;
+      cur = cur + this.markMinorIntervalMS;
     }
     return marks;
   }

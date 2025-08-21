@@ -171,10 +171,12 @@ public abstract class FileServer extends AuthenticatedDualProvider
 		try {
 			DataMap request = payload.getDataMap();
 			String action = request.getString("action");
+			Payload acceptPayload = null;
 			if(action.equals("get")) {
 				String fileuid = request.getString("fileuid");
 				if(fileuid != null) {
-					acceptGetStream(session, streamEndpoint, fileuid);
+					RedbackFileMetaData fmd = acceptGetStream(session, streamEndpoint, fileuid);
+					acceptPayload = new Payload(new DataMap("filename", fmd.fileName, "mime", fmd.mime));
 				} else { // For backwards compatibility, to be removed
 					String objectname = request.getString("object");
 					String objectuid = request.getString("uid");
@@ -194,7 +196,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 				String objectuid = request.getString("uid");
 				acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
 			}
-			return null;			
+			return acceptPayload;			
 		} catch(DataException e) {
 			throw new RedbackException("Error in file server", e);
 		}
@@ -227,7 +229,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 
 	public abstract RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException;
 	
-	public abstract void acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException;
+	public abstract RedbackFileMetaData acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException;
 	
 	public abstract void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException;
 	

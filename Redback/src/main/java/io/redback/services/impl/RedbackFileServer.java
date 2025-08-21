@@ -358,11 +358,12 @@ public class RedbackFileServer extends FileServer
 		return type;
 	}
 
-	public void acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException {
-		getMetadata(fileUid);
+	public RedbackFileMetaData acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException {
+		RedbackFileMetaData md = getMetadata(fileUid);
 		StreamEndpoint fileSep = getFileStreamEndpoint(fileUid);
 		new StreamPipe(streamEndpoint, fileSep);	
 		new StreamPipe(fileSep, streamEndpoint);
+		return md;
 	}
 
 	public void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException {

@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -515,16 +516,32 @@ public class StringUtils
     public static DataList decodeCSV(String str)  {
     	DataList ret = new DataList();
     	String strm = str.replaceAll("\r", "");
-    	int endFirstLine = strm.indexOf("\n");
-    	String headerLine = strm.substring(0, endFirstLine).trim();
-    	char[] seps = {',', '|', '\t'};
+    	if(isUTF7(strm))
+    		strm = decodeUTF7(strm);
+    	String[] headers = null;
+    	boolean firstLineFound = false;
+    	int startFirstLine = 0;
+    	int endFirstLine = 0;
     	char sep = ',';
-    	for(char s : seps) 
-    		if(headerLine.indexOf(s) > -1)
-    			sep = s;
-		String[] headers = headerLine.split(Pattern.quote(String.valueOf(sep)));
+    	char[] seps = {',', '|', '\t', ';'};
+    	while(!firstLineFound) {
+        	endFirstLine = strm.indexOf("\n", startFirstLine);
+        	String headerLine = strm.substring(startFirstLine, endFirstLine).trim();
+        	for(char s : seps) 
+        		if(headerLine.indexOf(s) > -1)
+        			sep = s;
+    		headers = headerLine.split(Pattern.quote(String.valueOf(sep)));
+    		if(headers.length > 0) {
+        		firstLineFound = true;
+        		for(String header: headers)
+        			if(header.length() == 0) 
+        				firstLineFound = false;
+    		}
+    		if(!firstLineFound)
+    			startFirstLine = endFirstLine + 1;
+    	}
+
 		String body = strm.substring(endFirstLine).trim();
-		
 		StringBuilder buffer = new StringBuilder();
 		DataMap map = new DataMap();
 		int col = 0;
@@ -566,5 +583,39 @@ public class StringUtils
 			}
 		}
     	return ret;
+    }
+    
+    public static boolean isUTF7(String str) {
+		Pattern pattern = Pattern.compile("(\\+[A-Za-z0-9=]{2,4}-)");
+		Matcher matcher = pattern.matcher(str);
+		if(matcher.find()) {
+			int count = matcher.groupCount();
+			return count >= 1;			
+		} else {
+			return false;
+		}
+    }
+    
+    public static String decodeUTF7(String str) {
+    	StringBuilder sb = new StringBuilder();
+    	int lastStart = 0;
+    	int nextPlus = 0;
+    	while((nextPlus = str.indexOf("+", lastStart)) > -1) {
+    		sb.append(str.substring(lastStart, nextPlus));
+    		int nextMinus = str.indexOf("-", nextPlus);
+    		if(nextMinus == -1) {
+    			return str; //Failed
+    		} else if(nextMinus == nextPlus + 1) {
+    			sb.append("+");
+    		} else {
+    			String sub = str.substring(nextPlus + 1, nextMinus);
+    			byte[] bytes = Base64.getDecoder().decode(sub);
+    			int l = (bytes.length / 2) * 2;
+    			String s = new String(bytes, 0, l, Charset.forName("UTF-16"));
+    			sb.append(s);
+    		}
+    		lastStart = nextMinus + 1;
+    	}
+    	return sb.toString();
     }
 }

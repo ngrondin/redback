@@ -19,7 +19,8 @@
         [margin]="false">
     </rb-button>
     <mat-menu #zoomMenu="matMenu">
-        <button mat-menu-item (click)="setZoom(86400000)">1 day</button>
+        <button mat-menu-item (click)="setZoom(43200000)">12 Hours</button>
+        <button mat-menu-item (click)="setZoom(86400000)">1 Day</button>
         <button mat-menu-item (click)="setZoom(259200000)">3 Days</button>
         <button mat-menu-item (click)="setZoom(604800000)">7 Days</button>
     </mat-menu>    
@@ -30,7 +31,7 @@
         [margin]="false">   
     </rb-button>
     <mat-menu #spanMenu="matMenu">
-        <button mat-menu-item (click)="setSpan(259200000)">3 day</button>
+        <button mat-menu-item (click)="setSpan(259200000)">3 Days</button>
         <button mat-menu-item (click)="setSpan(604800000)">7 Days</button>
         <button mat-menu-item (click)="setSpan(1209600000)">14 Days</button>
     </mat-menu>    
@@ -92,16 +93,16 @@
                     *ngFor="let mark of dayMarks"
                     [style.left.px]="mark.px"
                     class="rb-gantt-mark">
-                    &nbsp;{{mark.label}}
+                    &nbsp;{{mark.dayLabel}}
                 </div>
             </div>
             <div
                 class="rb-gantt-hourtrack">
                 <div
-                    *ngFor="let mark of hourMarks"
+                    *ngFor="let mark of majorMarks"
                     [style.left.px]="mark.px"
                     class="rb-gantt-mark">
-                    &nbsp;{{mark.label}}
+                    &nbsp;{{mark.timeLabel}}
                 </div>
             </div>
         </div>
@@ -145,11 +146,11 @@
         <div
             class="rb-gantt-lanes"
             [style.width.px]="widthPX">
-            <div
-                *ngFor="let mark of hourMarks"
+            <!--<div
+                *ngFor="let mark of marks"
                 [style.left.px]="mark.px"
-                class="rb-gantt-mark">
-            </div>
+                [class]="'rb-gantt-mark' + (mark.type == 2 ? ' rb-gantt-mark-minor' : '')">
+            </div>-->
             <div
                 *ngFor="let lane of ganttData; let i = index"
                 [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
@@ -172,6 +173,11 @@
                         {{spread.label}}
                     </div>                    
                 </div>
+                <div
+                    *ngFor="let mark of marks"
+                    [style.left.px]="mark.px"
+                    [class]="'rb-gantt-mark' + (mark.type == 2 ? ' rb-gantt-mark-minor' : '')">
+                </div>                
                 <div
                     *ngFor="let overlayspread of selectedOverlaySpreads()"
                     [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
