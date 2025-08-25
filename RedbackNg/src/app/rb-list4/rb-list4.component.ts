@@ -80,7 +80,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public hasMetaLine() : boolean {
-    return this.meta1attribute != null || this.meta2attribute != null;
+    return this.meta1attribute != null || this.meta1expression != null || this.meta2attribute != null || this.meta2expression != null;
   }
 
   public hasImage() : boolean {

@@ -112,6 +112,7 @@
     border-left: solid 1px #ddd;
     height: 100%;
     pointer-events: none;
+    /*z-index: -2;*/
 }
 
 .rb-gantt-mark-minor {
@@ -170,6 +171,17 @@
     overflow: hidden;
 }
 
+.rb-gantt-lanesublabel {
+    display: inline-block;
+    padding: 5px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-size: 0.75rem;
+    color: var(--light-writing-color);
+}
+
 .rb-gantt-laneicon {
     display: flex;
     flex: 0 0 auto;
@@ -196,6 +208,7 @@
     position: relative;
     background-color: grey;
     border-top: 1px solid lightgray;
+    /*z-index: -4;*/
 }
 
 
@@ -235,6 +248,7 @@
 .rb-gantt-spreadbackground {
     height: 1.9vw;
     color: lightgray;
+    /*z-index: -3;*/
 }
 
 .rb-gantt-spreadlabel {
@@ -295,6 +309,15 @@
 
 .rb-gantt-backgroundcolor2 {
     background-color: #f4f4f4;
+}
+
+.rb-gantt-overlay-spread {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    overflow: hidden;
+    height: 100%;
+    /*z-index: -1;*/
 }
 
 .rb-gantt-loadoverlay {

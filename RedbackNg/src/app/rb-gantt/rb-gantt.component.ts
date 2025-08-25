@@ -273,6 +273,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
       if(show) {
         let label = obj.get(this.lanesConfig.labelAttribute);
+        let sub = null;
         let image = null;
         let icon = null;
         if(this.lanesConfig.iconAttribute != null) {
@@ -287,7 +288,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
             image = "url(\'" + fileVal.thumbnail + "\')"
           }
         }
-        let lane = new GanttLane(obj.uid, label, image, icon, obj);
+        if(this.lanesConfig.subAttribute != null) {
+          sub = obj.get(this.lanesConfig.subAttribute);
+        }        
+        let lane = new GanttLane(obj.uid, label, sub, image, icon, obj);
         let spreads: GanttSpread[] = this.getSpreads(obj.uid);
         lane.setSpreads(spreads);
         lanes.push(lane);

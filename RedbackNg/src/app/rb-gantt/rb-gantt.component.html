@@ -132,7 +132,13 @@
                     class="rb-gantt-lanelabel">
                     {{lane.label}}
                 </div>
+                <div
+                    *ngIf="lane.sub != null"
+                    class="rb-gantt-lanesublabel">
+                    {{lane.sub}}
+                </div>                
                 <mat-icon
+                    *ngIf="lane.icon != null"
                     class="rb-gantt-laneicon">
                     {{lane.icon}}
                 </mat-icon>
@@ -150,6 +156,16 @@
                 *ngFor="let mark of marks"
                 [style.left.px]="mark.px"
                 [class]="'rb-gantt-mark' + (mark.type == 2 ? ' rb-gantt-mark-minor' : '')">
+            </div>
+            <div
+                *ngFor="let overlayspread of selectedOverlaySpreads()"
+                [class]="'rb-gantt-overlay-spread'"
+                [style.width.px]="overlayspread.width"
+                [style.left.px]="overlayspread.start"
+                [style.top.px]="overlayspread.top"
+                [style.background-color]="overlayspread.color"
+                [style.opacity]="0.5"
+                [style.justify-content]="'start'">
             </div>-->
             <div
                 *ngFor="let lane of ganttData; let i = index"
@@ -177,7 +193,7 @@
                     *ngFor="let mark of marks"
                     [style.left.px]="mark.px"
                     [class]="'rb-gantt-mark' + (mark.type == 2 ? ' rb-gantt-mark-minor' : '')">
-                </div>                
+                </div>               
                 <div
                     *ngFor="let overlayspread of selectedOverlaySpreads()"
                     [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
@@ -188,7 +204,7 @@
                     [style.background-color]="overlayspread.color"
                     [style.opacity]="0.5"
                     [style.justify-content]="'start'">
-                </div>                  
+                </div>
                 <div
                     *ngFor="let spread of lane.foregroundSpreads()"
                     [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '')"
