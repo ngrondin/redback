@@ -64,6 +64,30 @@
     padding: var(--v8px);
 }
 
+.rb-filter-builder-topbuttons {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-filter-builder-group {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e4e4e4;
+    border-radius: var(--v5px);
+    margin: var(--v16px) var(--v8px);
+    padding: var(--v5px);
+    position: relative;
+}
+
+.rb-filter-builder-groupname {
+    color: var(--light-writing-color);
+    position: absolute;
+    top: -0.5vw;
+    left: 0.2vw;
+    background-color: #fff;
+    font-size: 0.8rem;
+}
+
 .rb-filter-builder-content {
     max-height: 30vw;
     display: flex;
@@ -119,7 +143,7 @@
 
 .rb-fb-labelcol {
     vertical-align: top;
-    /*padding-top: var(--v24px);*/
+    padding-top: var(--v16px);
     padding-right: var(--v12px);
     color: var(--light-writing-color);
 }
@@ -133,15 +157,19 @@
 
 .rb-fb-buttoncol {
     vertical-align: top;
-    /*padding-top: var(--v24px);*/
+    padding-top: var(--v12px);
     color: var(--light-writing-color);
 }
 
 .rb-filter-builder-label {
-    /*padding-top: 15px;*/
-    height: var(--v36px);
+    /*padding-top: var(--v16px);*/
+    /*height: var(--v36px);*/
     display: table-cell;
     vertical-align: middle;
+}
+
+.rb-filter-builder-multiselect-table {
+    padding-top: var(--v8px);
 }
 
 .rb-filter-builder-multiselect-tablecell-name {

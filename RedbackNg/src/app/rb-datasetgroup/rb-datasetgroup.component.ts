@@ -24,8 +24,6 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
   datasets: DatasetMap = {};
   _selectedObject: RbObject;
   private observers: Observer<string>[] = [];
-
-  objectname: string = null;
   
   constructor() {
     super();
@@ -130,5 +128,30 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
     } else {
       return null;
     }
+  }
+
+  //Getters used mainly for SearchTarget
+  public getId(): string {
+    throw this.id;
+  }
+
+  public getSearchTargetType(): string {
+    return "datasetgroup";
+  }
+
+  public getObjectName(): string {
+    return null;
+  }
+
+  public getBaseFilter(): any {
+    return null;
+  }
+
+  public getUserFilter() {
+    return null;
+  }
+
+  public getUserSort() {
+    return null;
   }
 }

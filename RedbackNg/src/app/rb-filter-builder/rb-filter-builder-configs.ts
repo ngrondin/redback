@@ -1,12 +1,9 @@
+import { RbSearchTarget } from "app/rb-search/rb-search-target";
 
   export class FilterBuilderConfig {
-    aggregateFilter: any;
     filterConfig: any;
-    initialFilter: any;
     sortConfig: any;
-    initialSort: any;
-    objectname: string;
-    datasetid: string;
+    searchTarget: RbSearchTarget
   }
   
   
@@ -40,18 +37,21 @@
     public label: string;
     public type: string;
     public displayAttribute: string;
+    public objectName: string;
+    public valueAttribute: string;
+    public filter: any;
     public options: any[] = [];
-    public appliesToObject: string;
   
     constructor(json: any) {
       this.attribute = json.attribute;
       this.label = json.label;
       this.type = json.type;
       this.displayAttribute = json.displayattribute;
-      this.appliesToObject = json.appliestoobject;
+      this.objectName = json.object;
+      this.valueAttribute = json.valueattribute;
+      this.filter = json.filter;
     }
   }
-
 
 
 export class SortConfig {

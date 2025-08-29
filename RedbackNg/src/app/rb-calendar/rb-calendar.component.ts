@@ -339,7 +339,27 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     }
   }
 
-  public getBaseSearchFilter(): any {
+
+  //Getter for SearchTarget
+
+  public getId(): string {
+    return null;
+  }
+
+  public getSearchTargetType(): string {
+    return "calendar";
+  }
+  public getObjectName(): string {
+    return null;
+  }
+  public getUserFilter() {
+    return null
+  }
+  public getUserSort() {
+    return null;
+  }
+
+  public getBaseFilter(): any {
     let filter = {};
     filter[this.activeSeries[0].dateAttribute] = {
       $gt: "'" + this.startDate.toISOString() + "'",
@@ -347,7 +367,6 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     }
     return filter;
   }
-
 }
 
 

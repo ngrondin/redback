@@ -56,6 +56,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.uid = "" + Math.floor(Math.random() * 10000);
   }
 
+
   setInit() {
     this.dataSubscription = this.dataService.getObjectUpdateObservable().subscribe(object => this.receiveUpdatedObject(object));
     this.pageSize = this.fetchAll == true ? 250 : 50;
@@ -372,10 +373,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     return fetched;
   } 
 
-  public getBaseSearchFilter(): any {
-    return this.baseFilter;
-  }
-
   public create() {
     this.dataService.create(this.objectname, null, this.resolvedFilter).subscribe(newObject => this.addObjectAndSelect(newObject));
   }
@@ -424,5 +421,30 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(this.datasetgroup != null) {
       this.datasetgroup.groupMemberEvent((this.id || this.name || this.objectname), event);
     }
+  }
+
+  //Getters used mainly for SearchTarget
+  public getId(): string {
+    return this.id;
+  }
+
+  public getObjectName(): string {
+    return this.objectname;
+  }
+
+  public getSearchTargetType(): string {
+    return "dataset";
+  }
+
+  public getBaseFilter(): any {
+    return this.baseFilter;
+  }
+
+  public getUserFilter() {
+    return this.userFilter;
+  }
+
+  public getUserSort() {
+    return this.userSort;
   }
 }

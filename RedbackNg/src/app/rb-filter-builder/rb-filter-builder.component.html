@@ -1,11 +1,11 @@
 <div
     class="rb-filter-builder-header">
     <span class="material-symbols-outlined rb-filter-builder-topicon">
-        {{isEditingSavedEntry ? 'search' : 'filter_list'}}
+        {{isEditingEntry ? 'search' : 'filter_list'}}
     </span>   
     <div
         class="rb-filter-builder-title">
-        {{isEditingSavedEntry ? (editingSavedEntry.name ?? "Unnamed") : canFilter && canSort ? 'Filter / Sort' : canFilter ? 'Filter' : 'Sort'}}
+        {{isEditingEntry ? (editingEntry.name ?? "Unnamed") : canFilter && canSort ? 'Filter / Sort' : canFilter ? 'Filter' : 'Sort'}}
     </div>
 </div>
 <div
@@ -14,7 +14,7 @@
         *ngIf="modeCount > 1"
         class="rb-filter-builder-menu">
         <div
-            *ngIf="canSave && hasSavedEntries && !isEditingSavedEntry"
+            *ngIf="canSave && hasSavedEntries && !isEditingEntry"
             class="rb-filter-builder-menuitem">
             <rb-clickable
                 [focus]="tab == 'saved'"
@@ -26,7 +26,7 @@
             </rb-clickable>
         </div>  
         <div
-            *ngIf="canSave && isEditingSavedEntry"
+            *ngIf="canSave && isEditingEntry"
             class="rb-filter-builder-menuitem">
             <rb-clickable
                 [focus]="tab == 'details'"
@@ -85,7 +85,7 @@
                         <div
                             class="rb-filter-builder-saved-button">
                             <rb-iconbutton
-                                (click)="clickSavedEntryEdit(savedEntry)"
+                                (click)="clickEditSavedEntry(savedEntry)"
                                 [icon]="'more_horiz'">
                             </rb-iconbutton>                           
                         </div>
@@ -94,152 +94,201 @@
                 </div>
             </rb-scroll>  
         </div>   
+
         <div
             *ngIf="tab == 'details'"
             class="rb-filter-builder-content">
             <rb-scroll>
                 <div>
                     <rb-string-input
-                        [(value)]="editingSavedEntry.name"
+                        [(value)]="editingEntry.name"
                         [size]="20"
                         [icon]="'search'"
                         [label]="'Name'"
                         (change)="changed = true">
                     </rb-string-input>
                     <rb-switch-input
-                        [(value)]="editingSavedEntry.default"
+                        [(value)]="editingEntry.default"
                         [label]="'Is Default'"
                         (change)="changed = true">
                     </rb-switch-input>
                 </div>
             </rb-scroll>  
         </div>                
+
         <div
             *ngIf="tab == 'filter'"
             class="rb-filter-builder-content">
-            <rb-actiongroup
-                [label]="'Add Criteria'"
-                [actions]="addFilterActions"
-                (actionclicked)="addAttributeToFilter($event.param)">
-            </rb-actiongroup>  
+            <div
+                class="rb-filter-builder-topbuttons">
+                <rb-actiongroup
+                    *ngIf="uniongroupsMode == false"
+                    [label]="'Add Criteria'"
+                    [actions]="addFilterActions"
+                    (actionclicked)="addAttributeToFilterGroup(null, $event.param)">
+                </rb-actiongroup> 
+                <rb-button
+                    *ngIf="uniongroupsMode == true"
+                    [label]="'Add Group'"
+                    (click)="addFilterGroup()">
+                </rb-button>             
+                <rb-switch-input
+                    [(value)]="uniongroupsMode"
+                    [label]="'Union Groups'"
+                    [showicon]="false"
+                    [labelafter]="true"
+                    [margin]="false">
+                </rb-switch-input>
+            </div>
             <rb-scroll>
-                <table
-                    class="rb-filter-build-maintable">
+                <div
+                    *ngFor="let group of filterConstructs; let i = index"
+                    [class]="uniongroupsMode == true ? 'rb-filter-builder-group' : ''">
+                    <span
+                        *ngIf="uniongroupsMode == true"
+                        class="rb-filter-builder-groupname">
+                        {{'Case ' + (i + 1)}}
+                    </span>
                     <div
-                        *ngIf="filterConstructs.length == 0"
-                        class="rb-filter-build-emptymessage">
-                        No filter specified<br>Add a criteria to start building a filter
-                    </div>
-                    <tr
-                        *ngFor="let filterConstruct of filterConstructs">
-                        <td
-                            class="rb-fb-labelcol"
-                            align="right">
-                            <div
-                                class="rb-filter-builder-label">
-                                {{filterConstruct.config.label}}
-                            </div>
-                        </td>
-                        <td
-                            class="rb-fb-maincol">
+                        class="rb-filter-builder-topbuttons">
+                        <rb-actiongroup
+                            *ngIf="uniongroupsMode == true"
+                            [label]="'Add Criteria'"
+                            [actions]="addFilterActions"
+                            (actionclicked)="addAttributeToFilterGroup(group, $event.param)">
+                        </rb-actiongroup>   
+                        <rb-button
+                            *ngIf="uniongroupsMode == true && i > 0"
+                            [label]="'Remove Group'"
+                            (click)="removeFilterGroup(group)">
+                        </rb-button>                          
+                    </div>                   
+                    <table
+                        class="rb-filter-build-maintable">
+                        <div
+                            *ngIf="group.length == 0"
+                            class="rb-filter-build-emptymessage">
+                            No filter specified<br>Add a criteria to start building a filter
+                        </div>
+                        <tr
+                            *ngFor="let filterConstruct of group">
+                            <td
+                                class="rb-fb-labelcol"
+                                align="right">
+                                <div
+                                    class="rb-filter-builder-label">
+                                    {{filterConstruct.config.label}}
+                                </div>
+                            </td>
+                            <td
+                                class="rb-fb-maincol">
 
-                            <rb-string-input
-                                *ngIf="filterConstruct.config.type == 'string'"
-                                [label]="null"
-                                [size]="15"
-                                [margin]="false"
-                                [(value)]="filterConstruct.val1"
-                                (valueChange)="changed = true">
-                            </rb-string-input>
+                                <rb-string-input
+                                    *ngIf="filterConstruct.config.type == 'string'"
+                                    [label]="null"
+                                    [size]="15"
+                                    [margin]="false"
+                                    [(value)]="filterConstruct.val1"
+                                    (valueChange)="changed = true">
+                                </rb-string-input>
 
-                            <rb-choice-input
-                                *ngIf="filterConstruct.config.type == 'date'"
-                                [choicelist]="datechoice"
-                                [label]="null"
-                                [icon]="'date_range'"
-                                [size]="12"
-                                [margin]="false"
-                                [(value)]="filterConstruct.val1"
-                                (valueChange)="changed = true">
-                            </rb-choice-input>
+                                <rb-choice-input
+                                    *ngIf="filterConstruct.config.type == 'date'"
+                                    [choicelist]="datechoice"
+                                    [label]="null"
+                                    [icon]="'date_range'"
+                                    [size]="12"
+                                    [margin]="false"
+                                    [(value)]="filterConstruct.val1"
+                                    (valueChange)="changed = true">
+                                </rb-choice-input>
 
-                            <rb-datetime-input
-                                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'since' || filterConstruct.val1 == 'between')"
-                                [margin]="false"
-                                [(value)]=filterConstruct.val2
-                                (valueChange)="changed = true">
-                            </rb-datetime-input>  
+                                <rb-datetime-input
+                                    *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'since' || filterConstruct.val1 == 'between')"
+                                    [margin]="false"
+                                    [(value)]=filterConstruct.val2
+                                    (valueChange)="changed = true">
+                                </rb-datetime-input>  
 
-                            <rb-datetime-input
-                                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'until' || filterConstruct.val1 == 'between')"
-                                [margin]="false"
-                                [(value)]=filterConstruct.val3
-                                (valueChange)="changed = true">
-                            </rb-datetime-input>  
+                                <rb-datetime-input
+                                    *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'until' || filterConstruct.val1 == 'between')"
+                                    [margin]="false"
+                                    [(value)]=filterConstruct.val3
+                                    (valueChange)="changed = true">
+                                </rb-datetime-input>  
 
-                            <rb-duration-input
-                                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'sincelast' || filterConstruct.val1 == 'rollwindow')"
-                                [margin]="false"
-                                [size]="8"
-                                [(value)]=filterConstruct.val2
-                                (valueChange)="changed = true">
-                            </rb-duration-input>  
+                                <rb-duration-input
+                                    *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'sincelast' || filterConstruct.val1 == 'rollwindow')"
+                                    [margin]="false"
+                                    [size]="8"
+                                    [(value)]=filterConstruct.val2
+                                    (valueChange)="changed = true">
+                                </rb-duration-input>  
 
-                            <rb-duration-input
-                                *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'untilnext' || filterConstruct.val1 == 'rollwindow')"
-                                [margin]="false"
-                                [size]="8"
-                                [(value)]=filterConstruct.val3
-                                (valueChange)="changed = true">
-                            </rb-duration-input>                              
+                                <rb-duration-input
+                                    *ngIf="filterConstruct.config.type == 'date' &&  (filterConstruct.val1 == 'untilnext' || filterConstruct.val1 == 'rollwindow')"
+                                    [margin]="false"
+                                    [size]="8"
+                                    [(value)]=filterConstruct.val3
+                                    (valueChange)="changed = true">
+                                </rb-duration-input>                              
 
-                            <table
-                                *ngIf="filterConstruct.config.type == 'multiselect'"
-                                class="rb-filter-builder-multiselect-table">
-                                <tr
-                                    *ngFor="let option of filterConstruct.config.options">
-                                    <td
-                                        class="rb-filter-builder-multiselect-tablecell-name">
-                                        {{option.name}}
-                                    </td>
-                                    <td
-                                        class="rb-filter-builder-multiselect-tablecell-count">
-                                        {{option.count}}
-                                    </td>
-                                    <td
-                                        class="rb-filter-builder-multiselect-tablecell-check">    
-                                        <rb-switch-input
-                                            [margin]="false"
-                                            [showicon]="false"
-                                            [value]="filterConstruct.val1.includes(option.value)"
-                                            (valueChange)="$event == true ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexOf(option.value), 1)"
-                                            (valueChange)="changed = true">
-                                        </rb-switch-input>
-                                    </td>
-                                </tr>
-                            </table>
+                                <table
+                                    *ngIf="filterConstruct.config.type == 'multiselect' || filterConstruct.config.type == 'relatedmultiselect'"
+                                    class="rb-filter-builder-multiselect-table">
+                                    <tr
+                                        *ngFor="let option of filterConstruct.config.options">
+                                        <td
+                                            class="rb-filter-builder-multiselect-tablecell-name">
+                                            {{option.name}}
+                                        </td>
+                                        <td
+                                            *ngIf="option.count != null"
+                                            class="rb-filter-builder-multiselect-tablecell-count">
+                                            {{option.count}}
+                                        </td>
+                                        <td
+                                            class="rb-filter-builder-multiselect-tablecell-check">    
+                                            <rb-switch-input
+                                                [margin]="false"
+                                                [showicon]="false"
+                                                [value]="filterConstruct.val1.includes(option.value)"
+                                                (valueChange)="$event == true ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexOf(option.value), 1)"
+                                                (valueChange)="changed = true">
+                                            </rb-switch-input>
+                                        </td>
+                                    </tr>
+                                </table>
 
-                            <rb-switch-input
-                                *ngIf="filterConstruct.config.type == 'switch'"
-                                [label]="null"
-                                [size]="0"
-                                [margin]="true"
-                                [(value)]="filterConstruct.val1"
-                                (valueChange)="changed = true">
-                            </rb-switch-input>
-                        </td>
-                        <td
-                            class="rb-fb-buttoncol">
-                            <rb-iconbutton
-                                [icon]="'delete'"
-                                (click)="removeFilterItem(filterConstruct)">
-                            </rb-iconbutton>
-                
-                        </td>
-                    </tr>
-                </table>   
+                                <rb-switch-input
+                                    *ngIf="filterConstruct.config.type == 'switch'"
+                                    [label]="null"
+                                    [size]="0"
+                                    [margin]="true"
+                                    [(value)]="filterConstruct.val1"
+                                    (valueChange)="changed = true">
+                                </rb-switch-input>
+
+                                <ng-template
+                                    *ngIf="filterConstruct.config.type == 'group'"
+                                    [ngTemplateOutlet]="filterGroupNode"
+                                    [ngTemplateOutletContext]="{ node: filterConstruct.group }">
+                                </ng-template>
+                            </td>
+                            <td
+                                class="rb-fb-buttoncol">
+                                <rb-iconbutton
+                                    [icon]="'delete'"
+                                    (click)="removeFilterItemFromGroup(group, filterConstruct)">
+                                </rb-iconbutton>
+                    
+                            </td>
+                        </tr>
+                    </table>                    
+                </div>
             </rb-scroll>  
         </div>
+
         <div
             *ngIf="tab == 'sort'"
             class="rb-filter-builder-content">
@@ -287,28 +336,33 @@
         <div
             class="rb-filter-builder-bottom">
             <rb-button
-                *ngIf="changed && !isEditingSavedEntry"
+                *ngIf="changed && !isEditingEntry"
                 (click)="clickApply()"
                 [focus]="true"
                 [label]="'Apply'">
             </rb-button>
             <rb-button
-                *ngIf="canSave && isEditingSavedEntry && editingSavedEntry.name != null"
+                *ngIf="isEditingEntry && editingEntry.name != null"
                 (click)="createMenuLink()"
                 [label]="'Create Menu Link'">
-            </rb-button>             
+            </rb-button>  
             <rb-button
-                *ngIf="canSave && !empty && changed"
+                *ngIf="isEditingEntry && editingEntry.name != null"
+                (click)="clickOk()"
+                [label]="'Ok'">
+            </rb-button>                        
+            <rb-button
+                *ngIf="canSave && !isEditingEntry && changed"
                 (click)="clickSave()"
                 [label]="'Save'">
             </rb-button>               
             <rb-button
-                *ngIf="canSave && isEditingSavedEntry"
+                *ngIf="isEditingEntry && editingEntry.persisted"
                 (click)="deleteSavedEntry()"
                 [label]="'Delete'">
             </rb-button>                       
             <rb-button
-                *ngIf="!empty && !isEditingSavedEntry"
+                *ngIf="!empty && !isEditingEntry"
                 (click)="clickClear()"
                 [label]="'Clear'">
             </rb-button>
@@ -321,3 +375,8 @@
 </div>
 
 
+<ng-template 
+    #filterGroupNode 
+    let-node="filterConstructs">
+ 
+</ng-template>

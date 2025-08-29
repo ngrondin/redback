@@ -18,7 +18,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
     @Input('object') _rbObject: RbObject;
     @Input('show') showExpr: string;
-    @Input('targetdatasetid') targetdatasetid: string; // Only usefull when search is linked to a datasetgroup
+    @Input('targetdatasetid') targetdatasetid: string; // Only usefull when observer is linked to a datasetgroup and you want to specify which dataset
     @HostBinding('style.display') get visitility() { return this.show ? 'flex' : 'none'; }
     
     public globalSubscription: Subscription;

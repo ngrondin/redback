@@ -16,15 +16,19 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('mainattribute') mainattribute: string;
   @Input('mainexpression') mainexpression: string;
   @Input('mainformat') mainformat: string;
+  @Input('maincolor') maincolor: string;
   @Input('subattribute') subattribute: string;
   @Input('subexpression') subexpression: string;
   @Input('subformat') subformat: string;
+  @Input('subcolor') subcolor: string;
   @Input('meta1attribute') meta1attribute: string;
   @Input('meta1expression') meta1expression: string;
   @Input('meta1format') meta1format: string;
+  @Input('meta1color') meta1color: string;
   @Input('meta2attribute') meta2attribute: string;
   @Input('meta2expression') meta2expression: string;
   @Input('meta2format') meta2format: string;
+  @Input('meta2color') meta2color: string;
   @Input('imageattribute') imageattribute: string;
   @Input('colormap') colormap: any;
   @Input('colorattribute') colorattribute: string;
@@ -138,6 +142,7 @@ export class RbList4Component extends RbDataObserverComponent {
     const fieldAttr = field + "attribute";
     const fieldExpr = field + "expression";
     const fieldFormat = field + "format";
+    const fieldColorExpression = field + "color";
     const prefAttr = this.getUserPref(fieldAttr);
     const prefExpr = this.getUserPref(fieldExpr);
     const raw = 
@@ -155,7 +160,9 @@ export class RbList4Component extends RbDataObserverComponent {
     } else {
       const explicitFormat = this.getUserPref(fieldFormat) ?? this[fieldFormat];
       const text = explicitFormat != null ? Formatter.format(raw, explicitFormat) : this.autoFormatText(raw);
-      return {value: text, type: 'text'};
+      const colorExpression = this.getUserPref(fieldColorExpression) ?? this[fieldColorExpression];
+      const color = colorExpression != null ? Evaluator.eval(colorExpression, obj, null) : null;
+      return {value: text, type: 'text', color: color};
     }
   }
 

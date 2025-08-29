@@ -85,6 +85,34 @@ export class FilterService {
     return __outMap;
   }
 
+public unresolveFilter(__inMap: any) : any {
+  let __outMap: any = {};
+  for (const __key in __inMap) {
+    let __value = __inMap[__key];
+    if(__value == null) {
+      __value = null;
+    } else if(typeof __value == "string") {
+      __value = "'" + __value + "'";
+    } else if(typeof __value == "object" ) {
+      if(Array.isArray(__value)) {
+        let __outArray = [];
+        for(const __valueItem of __value) {
+          if(typeof __valueItem == "object") {
+            __outArray.push(this.unresolveFilter(__valueItem));
+          } else if(typeof __valueItem == "string") {
+            __outArray.push("'" + __valueItem + "'");
+          }
+        }
+        __value = __outArray;
+      } else {
+        __value = this.unresolveFilter(__value);
+      }
+    }
+    __outMap[__key] = __value;
+  }
+  return __outMap;
+}
+  
   private evalExpression(expr, params: string[], args: any[]): any {
     var ret = null;
     if(expr != null && expr != "") {

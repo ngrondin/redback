@@ -70,7 +70,7 @@ export class FilterItemConstruct {
             this.val1 = 'until';
           }
         }
-      } else if(this.config.type == 'multiselect') {
+      } else if(this.config.type == 'multiselect' || this.config.type == 'relatedmultiselect') {
         if(v != null && typeof v == 'object' && v.hasOwnProperty("$in")) {
           this.val1 = v["$in"].map(item => item == "null" ? null : item.substring(1, item.length - 1));
         } else {
@@ -110,7 +110,7 @@ export class FilterItemConstruct {
         } else if(this.val1 == 'rollwindow') {
           return {"$gt": dateCriteriaStartMinus + this.val2 + dateCriteriaEnd, "$lt": dateCriteriaStartPlus + this.val3 + dateCriteriaEnd};
         }
-      } else if(this.config.type == 'multiselect') {
+      } else if(this.config.type == 'multiselect' || this.config.type == 'relatedmultiselect') {
         return {"$in": this.val1.map(item => item != null ? "'" + item + "'" : "null")};
       } else if(this.config.type == 'switch') {
         return this.val1 == true ? true : false;
@@ -155,11 +155,13 @@ export class SortItemConstruct {
     public filter: any;
     public sort: any;
     public default: boolean;
+    public persisted: boolean;
 
-    constructor(n: string, f: any, s: any, d: boolean) {
+    constructor(n: string, f: any, s: any, d: boolean, p: boolean) {
       this.name = n;
       this.filter = f;
       this.sort = s;
       this.default = d;
+      this.persisted = p;
     }
   }

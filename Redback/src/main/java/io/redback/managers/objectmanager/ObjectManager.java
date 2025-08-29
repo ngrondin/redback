@@ -671,12 +671,14 @@ public class ObjectManager
 				DataMap dbFilter = generateDBFilter(session, objectConfig, objectFilter);						
 				DataList dbTuple = new DataList();
 				for(int i = 0; i < tuple.size(); i++) {
+					String attributeName = tuple.get(i) instanceof DataMap ? tuple.getObject(i).getString("attribute") : tuple.getString(i);
+					String dbField = attributeName.equals("uid") ? objectConfig.getUIDDBKey() : objectConfig.getAttributeConfig(attributeName).getDBKey();
 					if(tuple.get(i) instanceof DataMap) {
 						DataMap tupleItem = (DataMap)tuple.getObject(i).getCopy();
-						tupleItem.put("attribute", objectConfig.getAttributeConfig(tupleItem.getString("attribute")).getDBKey());
+						tupleItem.put("attribute", dbField);
 						dbTuple.add(tupleItem);
 					} else {
-						dbTuple.add(objectConfig.getAttributeConfig(tuple.getString(i)).getDBKey());
+						dbTuple.add(dbField);
 					}
 				}
 				DataList dbMetrics = new DataList();

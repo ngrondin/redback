@@ -114,17 +114,12 @@ export class RbSearchComponent extends RbFieldInputComponent {
 
     let config: FilterBuilderConfig = new FilterBuilderConfig();
     config.filterConfig = this.filterconfig;
-    config.initialFilter = this.filterValue;
     config.sortConfig = this.sortconfig;
-    config.initialSort = this.sortValue;
-    config.objectname = this.searchtarget.objectname;
-    config.aggregateFilter = this.searchtarget.getBaseSearchFilter();
-    config.datasetid = this.dataset != null ? this.dataset.id : null; //Should be using the searchTarget
+    config.searchTarget = this.searchtarget;
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);
     let inj : PortalInjector = new PortalInjector(this.injector, injectorTokens);
-
     const popupPortal = new ComponentPortal(RbFilterBuilderComponent, this.viewContainerRef, inj);
     this.filterBuilderComponentRef = this.overlayRef.attach(popupPortal);
     this.filterBuilderComponentRef.instance.done.subscribe(event => {

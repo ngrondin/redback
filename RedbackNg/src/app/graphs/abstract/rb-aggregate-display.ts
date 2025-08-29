@@ -22,6 +22,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     @Input('height') height: number;
     @Input('colormap') colormap: any;
     @Input('linkview') linkview: string;
+    @Input('linkfilter') linkfilter: string;
     @Input('title') title: string;
     
     @HostBinding('style.width') get styleWidth() { return (this.width != null ? ((0.88 * this.width) + 'vw'): null);}
@@ -154,28 +155,40 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     }
   
     public onClick(event: any) {
-      let dimensionFilter = {};
-      if(event.code != null && event.code != "" && this.series.dimension != null) {
-        dimensionFilter[this.series.dimension] = "'" + event.code + "'";
-      }
-      if(event.name != null && event.name != "") { //For backwards compatibility (remove when dynamic graph is removed)
-        const aggregate = this.aggregates.find(agg => agg.getDimension(this.series.labelattribute) == event.name);
-        if(aggregate != null) {
-          const code = aggregate.getDimension(this.series.dimension);
-          dimensionFilter[this.series.dimension] = "'" + code + "'";
+      let objectname = this.linkview == null ? this.aggregateset.objectname : null;
+      let view = this.linkview;
+      let filter = null;
+
+      if(this.linkfilter != null) {
+        filter = this.filterService.resolveFilter(this.linkfilter, null, null, null, {cat: event.cat, code: event.code});
+        filter = this.filterService.unresolveFilter(filter);
+      } else {
+        let dimensionFilter = {};
+        if(event.code != null && event.code != "" && this.series.dimension != null) {
+          dimensionFilter[this.series.dimension] = "'" + event.code + "'";
         }
+        if(event.name != null && event.name != "") { //For backwards compatibility (remove when dynamic graph is removed)
+          const aggregate = this.aggregates.find(agg => agg.getDimension(this.series.labelattribute) == event.name);
+          if(aggregate != null) {
+            const code = aggregate.getDimension(this.series.dimension);
+            dimensionFilter[this.series.dimension] = "'" + code + "'";
+          }
+        }
+        if(event.cat != null && event.cat != "" && this.categories.dimension != null) {
+          dimensionFilter[this.categories.dimension] = "'" + event.cat + "'";
+        }
+        let aggregatesetfilter = this.aggregateset.mergeFilters();
+        filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
       }
-      if(event.cat != null && event.cat != "" && this.categories.dimension != null) {
-        dimensionFilter[this.categories.dimension] = "'" + event.cat + "'";
-      }
-      let aggregatesetfilter = this.aggregateset.mergeFilters();
-      let filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
       let target: any = {
-        objectname: this.aggregateset.objectname,
         filter: filter,
         reset: true
       };
-      if(this.linkview != null) target.view = this.linkview;
+      if(view != null) {
+        target.view = view;
+      } else {
+        target.objectname = objectname;
+      }
       this.navigateService.navigateTo(target);
     }
   

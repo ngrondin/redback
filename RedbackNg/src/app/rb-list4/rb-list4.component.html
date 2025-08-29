@@ -21,7 +21,8 @@
                             class="rb-list-item-metaline"
                             *ngIf="hasMetaLine()">
                             <span
-                                class="rb-list-item-meta1">
+                                class="rb-list-item-meta1"
+                                [style.color]="item.meta1.color">
                                 {{item.meta1.value}}
                             </span>
                             <div
@@ -29,7 +30,8 @@
                             </div>
                             <span
                                 *ngIf="item.meta2.type == 'text' || item.meta2.type == 'badge'"
-                                [ngClass]="'rb-list-item-meta2' + (item.meta2.type == 'badge' ? ' rb-list-item-meta2-badge' : '')">
+                                [ngClass]="'rb-list-item-meta2' + (item.meta2.type == 'badge' ? ' rb-list-item-meta2-badge' : '')"
+                                [style.color]="item.meta2.color">
                                 {{item.meta2.value}}
                             </span>
                             <div
@@ -43,12 +45,14 @@
                         </div>
                         <span
                             class="rb-list-item-main"
-                            *ngIf="hasMainLine()">
+                            *ngIf="hasMainLine()"
+                            [style.color]="item.main.color">
                             {{item.main.value}}
                         </span>
                         <span
                             class="rb-list-item-sub"
-                            *ngIf="hasSubLine()">
+                            *ngIf="hasSubLine()"
+                            [style.color]="item.sub.color">
                             {{item.sub.value}}
                         </span>
                     </div>

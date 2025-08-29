@@ -1,8 +1,17 @@
 
 export interface RbSearchTarget {
-    objectname: string;
 
     filterSort(event: any) : boolean;
 
-    getBaseSearchFilter() : any;    
+    getId() : string;
+
+    getSearchTargetType(): string;
+
+    getObjectName(): string;
+
+    getUserFilter() : any;
+
+    getUserSort() : any;
+
+    getBaseFilter() : any;    
 }

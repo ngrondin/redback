@@ -9,6 +9,7 @@ import { FilterItemConstruct, SavedEntry, SortItemConstruct } from './rb-filter-
 import { UserprefService } from 'app/services/userpref.service';
 import { MenuService } from 'app/services/menu.service';
 import { NavigateService } from 'app/services/navigate.service';
+import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 
 
 
@@ -21,10 +22,11 @@ export class RbFilterBuilderComponent implements OnInit {
 
   @Output() done: EventEmitter<any> = new EventEmitter();
 
+  searchTarget: RbSearchTarget;
   userPref: any = {};
   filterConfig: FilterConfig;
   filter: any = {};
-  filterConstructs: FilterItemConstruct[] = []
+  filterConstructs: FilterItemConstruct[][] = [[]];
   sortConfig: SortConfig;
   sort: any = {};
   sortConstructs: SortItemConstruct[] = [];
@@ -33,7 +35,8 @@ export class RbFilterBuilderComponent implements OnInit {
   _attributeToAddToSort: any;
   changed: boolean = false;
   tab: string = "filter";
-  editingSavedEntry: SavedEntry;
+  editingEntry: SavedEntry;
+  uniongroupsMode: boolean = false;
 
   datechoice: any = [
     { value: "lasthour", display: "Last Hour"},
@@ -57,11 +60,12 @@ export class RbFilterBuilderComponent implements OnInit {
     private menuService: MenuService,
     private navigateService: NavigateService
   ) { 
-    this.filter = this.config.initialFilter;
+    this.searchTarget = this.config.searchTarget;
+    this.filter = this.searchTarget.getUserFilter();
     if(this.config.filterConfig != null) {
       this.filterConfig = new FilterConfig(this.config.filterConfig);
     }
-    this.sort = this.config.initialSort;
+    this.sort = this.searchTarget.getUserSort();
     if(this.config.sortConfig != null) {
       this.sortConfig = new SortConfig(this.config.sortConfig);
     }
@@ -69,13 +73,12 @@ export class RbFilterBuilderComponent implements OnInit {
 
   ngOnInit() {
     this.decompile();
-
-    if(this.config.datasetid != null) {
-      this.userPref = this.userprefService.getCurrentViewUISwitch('dataset', this.config.datasetid);
+    if(this.canSave) {
+      this.userPref = this.userprefService.getCurrentViewUISwitch('dataset', this.searchTarget.getId());
       if(this.userPref != null && this.userPref.saved != null) {
         this.savedEntries = this.userPref.saved.map(e => {
           let filter = this.filterService.removePrefixDollarSign(e.filter);
-          return new SavedEntry(e.name, filter, e.sort, e.default ?? false);
+          return new SavedEntry(e.name, filter, e.sort, e.default ?? false, true);
         });
       }
     }
@@ -96,7 +99,7 @@ export class RbFilterBuilderComponent implements OnInit {
 
 
   get empty() : boolean {
-    return this.filterConstructs.length == 0 && this.sortConstructs.length == 0;
+    return this.filterConstructs.length == 1 && this.filterConstructs[0].length == 0 && this.sortConstructs.length == 0;
   }
 
   get modeCount() : number {
@@ -104,15 +107,15 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   get canSave() : boolean {
-    return this.config.datasetid != null;
+    return this.searchTarget.getSearchTargetType() == "dataset" && this.searchTarget.getId != null;
   }
 
   get hasSavedEntries() : boolean {
     return this.savedEntries.length > 0;
   }
 
-  get isEditingSavedEntry() : boolean {
-    return this.editingSavedEntry != null;
+  get isEditingEntry() : boolean {
+    return this.editingEntry != null;
   }
 
   get canFilter() : boolean {
@@ -122,12 +125,17 @@ export class RbFilterBuilderComponent implements OnInit {
   get canSort() : boolean {
     return this.config.sortConfig != null;
   }
+
+  addFilterGroup() {
+    this.filterConstructs.push([]);
+  }
  
-  addAttributeToFilter(attribute: string) {
+  addAttributeToFilterGroup(group: FilterItemConstruct[], attribute: string) {
     let fac = this.filterConfig.attributes.find(ac => ac.attribute == attribute);
     let fic = new FilterItemConstruct(fac, null);
-    this.filterConstructs.push(fic);
-    this.getAggregatesFor(fac);
+    if(group == null) group = this.filterConstructs[0];
+    group.push(fic);
+    this.loadOptionsFor(fac);
     this.changed = true;
   }
 
@@ -138,8 +146,12 @@ export class RbFilterBuilderComponent implements OnInit {
     this.changed = true;
   }
 
-  removeFilterItem(fic: FilterItemConstruct) {
-    this.filterConstructs.splice(this.filterConstructs.indexOf(fic), 1);
+  removeFilterGroup(group: FilterItemConstruct[]) {
+    this.filterConstructs.splice(this.filterConstructs.indexOf(group));
+  }
+
+  removeFilterItemFromGroup(group: FilterItemConstruct[], fic: FilterItemConstruct) {
+    group.splice(group.indexOf(fic), 1);
     this.changed = true;
   }
 
@@ -158,7 +170,7 @@ export class RbFilterBuilderComponent implements OnInit {
     this.changed = true;
   }
 
-  getAggregatesFor(fac: FilterAttributeConfig) {
+  loadOptionsFor(fac: FilterAttributeConfig) {
     if(fac.type == 'multiselect') {
       let fltr = {};
       for (const key in this.filter) {
@@ -166,21 +178,39 @@ export class RbFilterBuilderComponent implements OnInit {
           fltr[key] = this.filter[key];
         }
       }
-      if(this.filterConfig.useBaseFilter == true && this.config.aggregateFilter != null) {
-        fltr = this.filterService.mergeFilters(fltr, this.config.aggregateFilter);
+      let baseFilter = this.searchTarget.getBaseFilter();
+      if(this.filterConfig.useBaseFilter == true && baseFilter != null) {
+        fltr = this.filterService.mergeFilters(fltr, baseFilter);
       }
       fltr = this.filterService.resolveFilter(fltr, null, null, null);
-      this.dataService.aggregate(this.config.objectname, fltr, null, [fac.attribute], [{function:"count", name:"_cnt"}], null, 0, 2000).subscribe({
-        next: (list) => {
-          fac.options = list.map(agg => ({
-            name: agg.getDimension(fac.attribute + "." + fac.displayAttribute) ?? 'Empty', 
-            value: agg.getDimension(fac.attribute) ?? null,
-            count:agg.getMetric("_cnt")
-          }));
-          fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
-        }
-      });
-    }    
+      let objectname = fac.objectName ?? this.searchTarget.getObjectName();
+      if(objectname != null) {
+        this.dataService.aggregate(objectname, fltr, null, [fac.attribute], [{function:"count", name:"_cnt"}], null, 0, 2000).subscribe({
+          next: (list) => {
+            fac.options = list.map(agg => ({
+              name: agg.getDimension(fac.attribute + "." + fac.displayAttribute) ?? 'Empty', 
+              value: agg.getDimension(fac.attribute) ?? null,
+              count:agg.getMetric("_cnt")
+            }));
+            fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
+          }
+        });
+      }
+    } else if(fac.type == 'relatedmultiselect') {
+      if(fac.objectName != null && fac.valueAttribute != null) {
+        let fltr = fac.filter || {};
+        fltr = this.filterService.resolveFilter(fltr, null, null, null);
+        this.dataService.fetchList(fac.objectName, fltr, null, null, 0, 500, false).subscribe({
+          next: (list) => {
+            fac.options = list.map(o => ({
+              name: o.get(fac.displayAttribute) ?? 'Empty', 
+              value: o.get(fac.valueAttribute) ?? null
+            }));
+            fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
+          }
+        })
+      }
+    }  
   }
 
   selectTab(t) {
@@ -193,22 +223,26 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   clickSave() {
-    if(this.editingSavedEntry == null) {
-      this.editingSavedEntry = new SavedEntry(null, {}, {}, false);
+    if(this.editingEntry == null) {
+      this.editingEntry = new SavedEntry(null, {}, {}, false, false);
       this.tab = 'details';
-    } else {
+    } 
+  }
+
+  clickOk() {
+    if(this.editingEntry != null) {
       this.compile();
-      this.editingSavedEntry.name = this.editingSavedEntry.name ?? "Unnamed";
-      this.editingSavedEntry.filter = this.filter;
-      this.editingSavedEntry.sort = this.sort;
-      if(!this.savedEntries.includes(this.editingSavedEntry)) {
-        this.savedEntries.push(this.editingSavedEntry);
+      this.editingEntry.name = this.editingEntry.name ?? "Unnamed";
+      this.editingEntry.filter = this.filter;
+      this.editingEntry.sort = this.sort;
+      if(!this.savedEntries.includes(this.editingEntry)) {
+        this.savedEntries.push(this.editingEntry);
       }
-      if(this.editingSavedEntry.default == true) {
-        this.savedEntries.filter(e => e != this.editingSavedEntry).forEach(e => e.default = false);
+      if(this.editingEntry.default == true) {
+        this.savedEntries.filter(e => e != this.editingEntry).forEach(e => e.default = false);
       }
       this.commitSavedEntries();
-      this.editingSavedEntry = null;
+      this.editingEntry = null;
       this.tab = 'saved';
     }
   }
@@ -218,9 +252,9 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   clickCancel() {
-    if(this.editingSavedEntry != null) {
-      this.editingSavedEntry = null;
-      this.tab = 'saved';
+    if(this.editingEntry != null) {
+      this.editingEntry = null;
+      this.tab =  this.savedEntries.length > 0 ? 'saved' : 'filter';
     } else {
       this.overlayRef.dispose();
     }
@@ -230,8 +264,8 @@ export class RbFilterBuilderComponent implements OnInit {
     this.done.emit({filter: entry.filter, sort: entry.sort});
   }
 
-  clickSavedEntryEdit(entry: SavedEntry) {
-    this.editingSavedEntry = entry;
+  clickEditSavedEntry(entry: SavedEntry) {
+    this.editingEntry = entry;
     this.filter = entry.filter;
     this.sort = entry.sort;
     this.decompile();
@@ -239,7 +273,7 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   createMenuLink() {
-    let entry = this.editingSavedEntry;
+    let entry = this.editingEntry;
     if(entry != null) {
       let currentView = this.navigateService.getCurrentLoadedView();
       let menuLink = {
@@ -251,14 +285,14 @@ export class RbFilterBuilderComponent implements OnInit {
       }
       this.menuService.addToPersonalMenu(menuLink);
     }
-    this.editingSavedEntry = null;
+    this.editingEntry = null;
     this.tab = 'saved';
   }
 
   deleteSavedEntry() {
-    this.savedEntries.splice(this.savedEntries.indexOf(this.editingSavedEntry), 1);
+    this.savedEntries.splice(this.savedEntries.indexOf(this.editingEntry), 1);
     this.commitSavedEntries();
-    this.editingSavedEntry = null;
+    this.editingEntry = null;
     this.tab =  this.savedEntries.length > 0 ? 'saved' : 'filter';
   }
 
@@ -268,13 +302,19 @@ export class RbFilterBuilderComponent implements OnInit {
 
   decompile() {
     if(this.filter != null) {
+      let orList = this.filter.hasOwnProperty("$or") ? this.filter["$or"] : [this.filter];
       this.filterConstructs = [];
-      for(let key in this.filter) {
-        let fac: FilterAttributeConfig = this.filterConfig.getAttributeConfig(key);
-        let fic = new FilterItemConstruct(fac, this.filter[key]);
-        this.filterConstructs.push(fic);
-        this.getAggregatesFor(fac);
+      for(var subfilter of orList) {
+        let list = [];
+        for(let key in subfilter) {
+          let fac: FilterAttributeConfig = this.filterConfig.getAttributeConfig(key);
+          let fic = new FilterItemConstruct(fac, subfilter[key]);
+          list.push(fic);
+          this.loadOptionsFor(fac);
+        }
+        this.filterConstructs.push(list);
       }
+      if(this.filterConstructs.length > 1) this.uniongroupsMode = true;
     }
 
     if(this.sort != null) {
@@ -289,14 +329,16 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   compile() {
-    if(this.filterConstructs.length > 0) {
-      this.filter = {};
-      for(let fic of this.filterConstructs) {
-        this.filter[fic.config.attribute] = fic.getFilterValue();
-      }  
-    } else {
-      this.filter = null;
+    let orList = [];
+    for(var group of this.filterConstructs) {
+      let flt = {};
+      for(let fic of group) {
+        flt[fic.config.attribute] = fic.getFilterValue();
+      }
+      orList.push(flt);
     }
+    this.filter = orList.length > 1 ? {$or: orList} : orList.length == 1 ? orList[0] : null;
+
     if(this.sortConstructs.length > 0) {
       this.sort = {};
       for(let sic of this.sortConstructs) {
@@ -308,15 +350,16 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   commitSavedEntries() {
-    if(this.config.datasetid != null) {
+    if(this.canSave) {
       if(this.userPref == null) this.userPref = {};
       this.userPref.saved = this.savedEntries.map(e => ({
         name: e.name, 
         filter: this.filterService.prefixDollarSign(e.filter),
         sort: e.sort, 
-        default: e.default ?? false
+        default: e.default ?? false,
+        persisted: true
       }));
-      this.userprefService.setUISwitch("user", "dataset", this.config.datasetid, this.userPref);
+      this.userprefService.setUISwitch("user", "dataset", this.searchTarget.getId(), this.userPref);
     }
   }
 
