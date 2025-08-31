@@ -65,7 +65,6 @@ export class RbViewLoaderComponent implements OnInit {
     let hash = JSON.stringify(viewConfig).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
-      //console.time('build');
       entry = new LoadedView(navData.view, viewConfig.label);
       if(viewConfig['content'] != null) {
         for(let item of viewConfig['content']) {
@@ -77,7 +76,6 @@ export class RbViewLoaderComponent implements OnInit {
         Function(viewConfig.onload).call(window.redback);
       }
       this.viewCache[hash] = entry;
-      //console.timeEnd('build');
     }
     if(entry != null) {
       this.currentLoadedView = entry;
@@ -86,7 +84,7 @@ export class RbViewLoaderComponent implements OnInit {
       if(navData.tab != null) entry.openTab(navData.tab);
       entry.attachTo(this.container);
     }
-    this.logService.info("Loaded view " + navData.view);
+    this.logService.info("ViewLoader - Loaded view " + navData.view);
   }
   
 }

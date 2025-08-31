@@ -77,13 +77,14 @@ export class NavigateService {
   async executeViewNavigation(targetViewLoader, navdata) {
     this.modalService.closeAll();
     try {
+      this.logService.debug("NavService: Navigating to " + JSON.stringify(navdata));
       await targetViewLoader.component.navigateTo(navdata);
       this.userprefService.setCurrentView(navdata.view);
       this.modalService.setCurrentView(navdata.view);
       this.notifyObservers(navdata);
-      this.logService.info("View is :" + navdata.view);
+      this.logService.debug("NavService: View is " + navdata.view);
     } catch (err) {
-      this.logService.error("Error navigating :" + err);
+      this.logService.error("NavService: Error navigating :" + err);
     }
   }
 

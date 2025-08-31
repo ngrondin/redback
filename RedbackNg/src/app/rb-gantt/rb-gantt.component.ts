@@ -240,7 +240,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.ganttData = this.getLanes();
     this.overlayData = this.getOverlayLanes();
     this.marks = this.getMarks();
-    this.recalcPlanned = false;
   }
 
   private calcParams() {

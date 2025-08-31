@@ -3,6 +3,8 @@ import { Component, Input } from "@angular/core";
 import { RbObject } from "app/datamodel";
 import { RbDataObserverComponent } from "./rb-dataobserver";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
+import { LogService } from "app/services/log.service";
+import { AppInjector } from "app/app.module";
 
 export class SeriesConfig {
     active: boolean = true;
@@ -24,11 +26,12 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     recalcInterval: number = -1;
     minRecalcTime: number = -1;
     recalcPlanned: boolean = false;
-
+    private _logService: LogService;
     
     constructor(
     ) {
         super();
+        this._logService = AppInjector.get(LogService);
     }
     
     dataObserverInit() {
@@ -100,6 +103,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
 
     redraw() {
+        this._logService.debug("DataCalc " + this.id + ": Redraw (" + !this.recalcPlanned + ")");
         if(this.recalcPlanned == false) {
           this.recalcPlanned = true;
           let now = new Date().getTime();
@@ -111,9 +115,10 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
           }
           let tillNextCalc = Math.max(nextCalc, now) - now
           setTimeout(() => {
-              this.calc();
-              this.recalcPlanned = false;
-              this.lastRecalc = (new Date()).getTime();
+            this._logService.debug("DataCalc " + this.id + ": calc");
+            this.calc();
+            this.recalcPlanned = false;
+            this.lastRecalc = (new Date()).getTime();
           }, tillNextCalc);
         }
       }

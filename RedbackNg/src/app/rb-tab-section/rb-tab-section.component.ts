@@ -2,6 +2,7 @@ import { Input, ViewContainerRef } from '@angular/core';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { RbTabComponent } from 'app/rb-tab/rb-tab.component';
+import { LogService } from 'app/services/log.service';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -23,7 +24,8 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   cmTab: RbTabComponent;
 
   constructor(
-    public userpref: UserprefService
+    public userpref: UserprefService,
+    public logService: LogService
   ) {
     super();
   }
@@ -38,6 +40,7 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   }
 
   onActivationEvent(state: any) {
+    this.logService.debug("TabSection " + this.id + ": Activation event " + state + " (selectedTab:" + this.selectedTab + ")");
     if(state == true) {
       if(this.selectedTab != null) {
         this.selectedTab.activate();

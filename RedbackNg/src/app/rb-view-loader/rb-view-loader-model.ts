@@ -1,9 +1,11 @@
 import { ComponentRef, Component, ViewContainerRef } from "@angular/core";
 import { RbActivatorComponent } from "app/abstract/rb-activator";
 import { RbSetComponent } from "app/abstract/rb-set";
+import { AppInjector } from "app/app.module";
 import { DataTarget } from "app/datamodel";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.component";
+import { LogService } from "app/services/log.service";
 
 
 
@@ -11,13 +13,14 @@ export class LoadedView extends RbActivatorComponent {
     rootComponentRefs: ComponentRef<Component>[] = [];
     topSets: RbSetComponent[] = [];
     tabSections: RbTabSectionComponent[] = [];
+    logService: LogService;
   
     constructor(
       public name: string,
       public title: string,
-      //public navigate: EventEmitter<any>
     ) {
       super();
+      this.logService = AppInjector.get(LogService);
     }
   
     activatorInit() {}
@@ -32,7 +35,10 @@ export class LoadedView extends RbActivatorComponent {
       for(let item of this.rootComponentRefs) {
         container.insert(item.hostView);
       }
-      setTimeout(() => this.activate(), 10);
+      setTimeout(() => {
+        this.logService.debug("LoadedView: activating")
+        this.activate();
+      }, 10);
     }
   
   

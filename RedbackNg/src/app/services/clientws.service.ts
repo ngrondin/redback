@@ -142,7 +142,7 @@ export class ClientWSService {
       if(this.connected == false) {
         this.connected = true;
         this.logService.info("WS Connection Open");
-        this.sendSubscriptionRequests();
+        this.sendUnsentSubscriptionRequests();
         this.sendDeviceInfo();
         this.heartbeatFreq = 10000;
         this.stateObservers.forEach((observer) => observer.next(true));
@@ -242,19 +242,26 @@ export class ClientWSService {
     this.websocket.next(req);
   }
 
-  sendSubscriptionRequests() {
+  sendUnsentSubscriptionRequests() {
+    let start = (new Date()).getTime();
     let subreq = {type: "subscribe", list: []};
-    this.uniqueObjectSubscriptions.filter(item => item.sent == false).forEach(item => {
-      subreq.list.push({"objectname": item.objectname, "uid": item.uid});
-      item.sent = true;
+    this.uniqueObjectSubscriptions.forEach(item => {
+      if(item.sent == false) {
+        subreq.list.push({"objectname": item.objectname, "uid": item.uid});
+        item.sent = true;
+      }
     });
-    Object.keys(this.filterObjectSubscriptions).filter(key => this.filterObjectSubscriptions[key].sent == false).forEach(key => {
-      subreq.list.push({"objectname": this.filterObjectSubscriptions[key].objectname, "filter": this.filterObjectSubscriptions[key].filter, "id": key});
-      this.filterObjectSubscriptions[key].sent = true;
+    Object.keys(this.filterObjectSubscriptions).forEach(key => {
+      let item = this.filterObjectSubscriptions[key];
+      if(item.sent == false) {
+        subreq.list.push({"objectname": item.objectname, "filter": item.filter, "id": key});
+        item.sent = true;
+      }
     });
+    let end = (new Date()).getTime();
     this.websocket.next(subreq);    
     this.subscriptionRequestPending = false;
-    this.logService.debug("Sent subscription requests");
+    this.logService.debug(`ClientWS: Sent ${subreq.list.length} subscription requests in ${end - start}ms`);
   }
 
   getStateObservable() : Observable<any>  {
@@ -287,12 +294,12 @@ export class ClientWSService {
 
   subscribeToUniqueObjectUpdate(objectname: string, uid: string) {
     this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
-    this.logService.debug(`Subscribing to object ${objectname}:${uid}`);
+    this.logService.debug(`ClientWS: Subscribing to object ${objectname}:${uid}`);
   }
 
   subscribeToFilterObjectUpdate(objectname: String, filter: any, id: string) {
     this.filterObjectSubscriptions[id] = {objectname: objectname, filter: filter, sent:false};
-    this.logService.debug(`Subscribing to filter ${objectname}:${JSON.stringify(filter)}`);
+    this.logService.debug(`ClientWS: Subscribing to filter ${objectname}:${JSON.stringify(filter)}`);
   }
 
   clearSubscriptions() {

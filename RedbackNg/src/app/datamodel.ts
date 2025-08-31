@@ -77,12 +77,12 @@ export class RbObject {
             if(changes.length > 0) {
                 this.updatedAttributes = [];
                 this._adviseSetsOfChange();
-                this.logService.debug(`Update to object ${this.objectname}:${this.uid} accepted at ${json.ts}: ${changes.join(',')}`);
+                this.logService.debug(`RBObject ${this.objectname}:${this.uid}: Update accepted at ${json.ts}: ${changes.join(',')}`);
             }
 
             this.lastUpdated = json.ts;
         } else {
-            this.logService.debug(`Update to object ${this.objectname}:${this.uid} rejected, came in late`);
+            this.logService.debug(`RbObject ${this.objectname}:${this.uid}: Update rejected, came in late`);
         }
     }
 

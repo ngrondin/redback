@@ -285,8 +285,8 @@ export class DataService {
         }
       );
     } else {
-      this.clientWSService.sendSubscriptionRequests();
-    }
+      this.clientWSService.sendUnsentSubscriptionRequests(); 
+    } 
   }
 
   pushToServer(rbObject: RbObject) {

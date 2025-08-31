@@ -163,7 +163,7 @@ export class AppComponent implements OnInit {
       this.firstConnected = true;
       await this.menuService.loadPreferences();
       await this.userprefService.load();
-      this.logService.level = this.userprefService.getGlobalPreferenceValue("loglevel") ?? false;
+      this.logService.level = this.userprefService.getGlobalPreferenceValue("loglevel") ?? 'INFO';
       await this.notificationService.load();
       await this.chatService.load();
       if(this.onloadFunction != null) {

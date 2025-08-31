@@ -12,23 +12,33 @@ export class LogService {
   ) { }
 
   error(str: string) {
-    console.error(str);
-    this.addEntry("ERROR", str);
+    this._err(str);
+    this._addEntry("ERROR", str);
   }
 
   info(str: string) {
-    console.log(str);
-    this.addEntry("INFO", str);
+    this._log(str);
+    this._addEntry("INFO", str);
   }
 
   debug(str: string) {
     if(this.level == 'DEBUG') {
-      console.log(str);
-      this.addEntry("DEBUG", str);
+      this._log(str);
+      this._addEntry("DEBUG", str);
     }
   }
 
-  addEntry(level: string, msg: string) {
+  _log(str: string) {
+    let ts = (new Date()).getTime();
+    console.log(ts + ": " + str);
+  }
+
+  _err(str: string) {
+    let ts = (new Date()).getTime();
+    console.error(ts + ": " + str);
+  }
+
+  _addEntry(level: string, msg: string) {
     if(this.entries.length > 2100) {
       this.entries = this.entries.slice(this.entries.length - 2000, this.entries.length);
     }
