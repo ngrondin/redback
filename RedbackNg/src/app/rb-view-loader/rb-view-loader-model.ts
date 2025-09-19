@@ -32,21 +32,21 @@ export class LoadedView extends RbActivatorComponent {
     onActivationEvent(state: boolean) {}
   
     attachTo(container: ViewContainerRef) {
+      this.logService.debug("LoadedView: attaching to container");
       for(let item of this.rootComponentRefs) {
         container.insert(item.hostView);
       }
-      setTimeout(() => {
-        this.logService.debug("LoadedView: activating")
-        this.activate();
-      }, 10);
-    }
-  
+      this.logService.debug("LoadedView: activating")
+      this.activate();
+    }  
   
     detachFrom(container: ViewContainerRef) {
+      this.logService.debug("LoadedView: deactivating")
+      this.deactivate();
+      this.logService.debug("LoadedView: detaching from container");
       this.rootComponentRefs.forEach(item => {
         container.detach(container.indexOf(item.hostView))
       });
-      setTimeout(() => this.deactivate(), 9);
     }
   
     clearData() {

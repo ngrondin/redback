@@ -181,7 +181,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     }
   }
 
-
+  /*** Deprecated, should rather use the tip directive */
   @HostListener('mouseenter', ['$event']) onEnter(event: any) {
     this.mouseIsOver = true;
     if(this.tip != null) {

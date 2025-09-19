@@ -515,18 +515,24 @@ public class StringUtils
     
     public static DataList decodeCSV(String str)  {
     	DataList ret = new DataList();
-    	String strm = str.replaceAll("\r", "");
+    	String strm = str.replaceAll("\r", "").replaceAll(String.valueOf((char)65279), "");
     	if(isUTF7(strm))
     		strm = decodeUTF7(strm);
     	String[] headers = null;
     	boolean firstLineFound = false;
+    	boolean linesEnclosedWithQuotes = false;
     	int startFirstLine = 0;
     	int endFirstLine = 0;
     	char sep = ',';
     	char[] seps = {',', '|', '\t', ';'};
     	while(!firstLineFound) {
+    		linesEnclosedWithQuotes = false;
         	endFirstLine = strm.indexOf("\n", startFirstLine);
         	String headerLine = strm.substring(startFirstLine, endFirstLine).trim();
+        	if(headerLine.startsWith("\"") && headerLine.endsWith("\"")) {
+        		linesEnclosedWithQuotes = true;
+        		headerLine = headerLine.substring(1, headerLine.length() - 1);
+        	}
         	for(char s : seps) 
         		if(headerLine.indexOf(s) > -1)
         			sep = s;
@@ -542,6 +548,7 @@ public class StringUtils
     	}
 
 		String body = strm.substring(endFirstLine).trim();
+		if(linesEnclosedWithQuotes) body = body.substring(1).replaceAll("\"\n\"", "\n");
 		StringBuilder buffer = new StringBuilder();
 		DataMap map = new DataMap();
 		int col = 0;

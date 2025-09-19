@@ -10,11 +10,11 @@
         <mat-icon 
             *ngIf="icon.indexOf(':') >= 0"
             [svgIcon]="icon"
-            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+            [class]="'rb-menu-group-icon material-symbols-outlined rb-menu-group-icon-' + look">
         </mat-icon>
         <mat-icon
             *ngIf="icon.indexOf(':') == -1"
-            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+            [class]="'rb-menu-group-icon material-symbols-outlined rb-menu-group-icon-' + look">
             {{icon}}
         </mat-icon>
         <span 
@@ -25,12 +25,12 @@
         </span>
         <mat-icon 
             *ngIf="mode == 'large' && !isOpen"
-            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+            [class]="'rb-menu-group-icon material-symbols-outlined rb-menu-group-icon-' + look">
             keyboard_arrow_down
         </mat-icon>
         <mat-icon 
             *ngIf="mode == 'large' && isOpen"
-            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look">
+            [class]="'rb-menu-group-icon material-symbols-outlined rb-menu-group-icon-' + look">
             keyboard_arrow_up
         </mat-icon>
     </div>

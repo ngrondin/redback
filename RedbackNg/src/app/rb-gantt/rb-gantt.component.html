@@ -11,12 +11,14 @@
         class="rb-gantt-header-dateinput"
         [margin]="false"
         [format]="'YYYY-MM-DD'"
-        [(value)]="startDate">
+        [(value)]="startDate"
+        [tip]="'Set the start of the gantt view'">
     </rb-datetime-input>
     <rb-button
         [matMenuTriggerFor]="zoomMenu"
         [icon]="'zoom_in'"
-        [margin]="false">
+        [margin]="false"
+        [tip]="'Change the time zoom of the Gantt'">
     </rb-button>
     <mat-menu #zoomMenu="matMenu">
         <button mat-menu-item (click)="setZoom(43200000)">12 Hours</button>
@@ -28,7 +30,8 @@
     <rb-button
         [matMenuTriggerFor]="spanMenu"
         [icon]="'swap_horiz'"
-        [margin]="false">   
+        [margin]="false"
+        [tip]="'Change the time span of the Gantt'">   
     </rb-button>
     <mat-menu #spanMenu="matMenu">
         <button mat-menu-item (click)="setSpan(259200000)">3 Days</button>
@@ -39,7 +42,8 @@
     <rb-button
         (click)="forceDatasetReload()"
         [icon]="'refresh'"
-        [margin]="false">
+        [margin]="false"
+        [tip]="'Reload the Gantt\'s data'">
     </rb-button> 
     &nbsp;
     <rb-iconbutton
@@ -47,11 +51,21 @@
         [icon]="'more_vert'">
     </rb-iconbutton>
     <mat-menu #settingsMenu="matMenu">
-        <button 
-            mat-menu-item 
+        <rb-clickable 
             (click)="toggleDragFilter()">
-            {{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}
-        </button>
+            <span
+                class="rb-gantt-menuitem">
+                {{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}
+            </span>
+        </rb-clickable>        
+        <rb-clickable 
+            *ngFor="let alt of availLabelAlts"
+            (click)="useLabels(alt.name)">
+            <span
+                class="rb-gantt-menuitem">
+                {{alt.label}}
+            </span>
+        </rb-clickable>        
     </mat-menu>         
 </div>
 <div
@@ -139,7 +153,7 @@
                 </div>                
                 <mat-icon
                     *ngIf="lane.icon != null"
-                    class="rb-gantt-laneicon">
+                    class="rb-gantt-laneicon material-symbols-outlined">
                     {{lane.icon}}
                 </mat-icon>
             </div>
@@ -151,78 +165,81 @@
         #mainscroll>
         <div
             class="rb-gantt-lanes"
-            [style.width.px]="widthPX">
-            <!--<div
-                *ngFor="let mark of marks"
-                [style.left.px]="mark.px"
-                [class]="'rb-gantt-mark' + (mark.type == 2 ? ' rb-gantt-mark-minor' : '')">
+            [style.width.px]="widthPX"
+            [style.height.px]="heightPX">
+            <div
+                class="rb-gantt-laneslayer">
+                <div
+                    *ngFor="let lane of ganttData; let i = index"
+                    [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
+                    [style.height.px]="lane.height"
+                    [style.width.px]="widthPX">
+                    <div
+                        *ngFor="let spread of lane.backgroundSpreads()"
+                        [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
+                        [style.width.px]="spread.width"
+                        [style.left.px]="spread.start"
+                        [style.height.px]="lane.height"
+                        [style.top.px]="spread.top"
+                        [style.background-color]="spread.color"
+                        [style.justify-content]="spread.config.centerLabel ? 'center' : 'start'"
+                        [style.color]="spread.labelcolor">
+                        <div
+                            class="rb-gantt-spreadlabel">
+                            {{spread.label}}
+                        </div>                    
+                    </div>
+                </div> 
             </div>
             <div
-                *ngFor="let overlayspread of selectedOverlaySpreads()"
-                [class]="'rb-gantt-overlay-spread'"
-                [style.width.px]="overlayspread.width"
-                [style.left.px]="overlayspread.start"
-                [style.top.px]="overlayspread.top"
-                [style.background-color]="overlayspread.color"
-                [style.opacity]="0.5"
-                [style.justify-content]="'start'">
-            </div>-->
-            <div
-                *ngFor="let lane of ganttData; let i = index"
-                [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
-                [style.height.px]="lane.height"
-                [style.width.px]="widthPX"
-                (rb-drag-dropzone)="droppedOn($event, lane)"
-                [rb-drag-changeform]="getSizeForObjectCallback">
-                <div
-                    *ngFor="let spread of lane.backgroundSpreads()"
-                    [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
-                    [style.width.px]="spread.width"
-                    [style.left.px]="spread.start"
-                    [style.height.px]="lane.height"
-                    [style.top.px]="spread.top"
-                    [style.background-color]="spread.color"
-                    [style.justify-content]="spread.config.centerLabel ? 'center' : 'start'"
-                    [style.color]="spread.labelcolor">
-                    <div
-                        class="rb-gantt-spreadlabel">
-                        {{spread.label}}
-                    </div>                    
-                </div>
+                class="rb-gantt-laneslayer">
                 <div
                     *ngFor="let mark of marks"
                     [style.left.px]="mark.px"
                     [class]="'rb-gantt-mark' + (mark.type == 2 ? ' rb-gantt-mark-minor' : '')">
-                </div>               
+                </div>
+            </div>
+            <div
+                class="rb-gantt-laneslayer">
                 <div
                     *ngFor="let overlayspread of selectedOverlaySpreads()"
-                    [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
+                    [class]="'rb-gantt-overlay-spread'"
                     [style.width.px]="overlayspread.width"
                     [style.left.px]="overlayspread.start"
-                    [style.height.px]="lane.height"
                     [style.top.px]="overlayspread.top"
                     [style.background-color]="overlayspread.color"
                     [style.opacity]="0.5"
                     [style.justify-content]="'start'">
                 </div>
+            </div>
+            <div
+                class="rb-gantt-laneslayer">
                 <div
-                    *ngFor="let spread of lane.foregroundSpreads()"
-                    [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '')"
-                    [rb-drag-object]="spread.canEdit ? spread.object : null"
-                    [rb-drag-droppedout]="droppedOutCallback"
-                    (click)="clickSpread(spread)"
-                    [style.width.px]="spread.width"
-                    [style.left.px]="spread.start"
-                    [style.height.px]="spread.height"
-                    [style.top.px]="spread.top"
-                    [style.background-color]="spread.color"
-                    [style.color]="spread.labelcolor"
-                    [style.justify-content]="spread.config.centerLabel == true ? 'center' : 'start'">
+                    *ngFor="let lane of ganttData; let i = index"
+                    [class]="'rb-gantt-lane'"
+                    [style.height.px]="lane.height"
+                    [style.width.px]="widthPX"
+                    (rb-drag-dropzone)="droppedOn($event, lane)"
+                    [rb-drag-changeform]="getSizeForObjectCallback">
                     <div
-                        class="rb-gantt-spreadlabel">
-                        {{spread.label}}
-                    </div>
-                </div>                
+                        *ngFor="let spread of lane.foregroundSpreads()"
+                        [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '')"
+                        [rb-drag-object]="spread.canEdit ? spread.object : null"
+                        [rb-drag-droppedout]="droppedOutCallback"
+                        (click)="clickSpread(spread)"
+                        [style.width.px]="spread.width"
+                        [style.left.px]="spread.start"
+                        [style.height.px]="spread.height"
+                        [style.top.px]="spread.top"
+                        [style.background-color]="spread.color"
+                        [style.color]="spread.labelcolor"
+                        [style.justify-content]="spread.config.centerLabel == true ? 'center' : 'start'">
+                        <div
+                            class="rb-gantt-spreadlabel">
+                            {{spread.label}}
+                        </div>
+                    </div>                
+                </div>
             </div>
         </div>
     </rb-scroll>

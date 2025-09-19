@@ -32,7 +32,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
   public onFocus(event: any) {
     if(!this.isEditing) {
       this.startEditing();
-      if(this.isEditing) {
+      if(this.isEditing && event.target.select != null) {
         event.target.select();
       }
     }

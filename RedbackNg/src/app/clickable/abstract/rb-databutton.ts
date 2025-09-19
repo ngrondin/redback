@@ -9,6 +9,7 @@ export class RbDataButtonComponent extends RbDataObserverComponent {
   @Input('enabled') _enabled: boolean = true;
   @Input('focus') _focus: boolean = false;
   @Input('margin') margin: boolean = true;
+  @Input('hover') hover: string;
 
   @ViewChild('button', { read: ViewContainerRef }) buttonContainerRef: ViewContainerRef;
 

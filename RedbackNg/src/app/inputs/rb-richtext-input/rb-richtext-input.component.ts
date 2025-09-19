@@ -33,13 +33,18 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
     this.domSanitizer = AppInjector.get(DomSanitizer); 
   }
 
+  inputInit() {
+    super.inputInit();    
+  }
+
   ngAfterViewInit() {
     setTimeout(() => this.initiateQuill(), 100);
+    //this.initiateQuill();
   }
 
   onActivationEvent(state: boolean) {
     super.onActivationEvent(state);
-    this.initiateQuill();
+    //this.initiateQuill();
   }
 
 
@@ -60,7 +65,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   }
 
   initiateQuill() {
-    if(this.active && this.editor == null) {
+    if(/*this.active && */this.editor == null) {
       this.editor = new Quill('#quilleditor_' + this.uniqueId, {
         modules: {
           toolbar: {

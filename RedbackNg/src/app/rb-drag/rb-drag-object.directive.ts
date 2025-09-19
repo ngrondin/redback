@@ -17,7 +17,9 @@ export class RbDragObjectDirective {
     let i = Math.floor(Math.random() * 100);
     if($event.which == 1 && this.data != null) {
       this.dragService.prepareDrag(this.el, this.data, $event, () => {
-        this.droppedout({data: this.data, mouseEvent: $event});
+        if(this.droppedout != null) {
+          this.droppedout({data: this.data, mouseEvent: $event});
+        }
       }); 
     }
   }

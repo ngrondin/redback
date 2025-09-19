@@ -1,15 +1,18 @@
 import { Component } from "@angular/core";
 import { EventEmitter, HostBinding, HostListener, Input, Output } from "@angular/core";
+import { RbComponent } from "app/abstract/rb-component";
 import { RbDataObserverComponent } from "app/abstract/rb-dataobserver";
 import { AppInjector } from "app/app.module";
 import { RbAggregate } from "app/datamodel";
 import { ValueComparator, Converter, Formatter } from "app/helpers";
+import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
+import { ApiService } from "app/services/api.service";
 import { FilterService } from "app/services/filter.service";
 import { NavigateService } from "app/services/navigate.service";
+import { Subscription } from "rxjs";
 
 @Component({template: ''})
-export abstract class RbAggregateDisplayComponent extends RbDataObserverComponent {
-    //@Input('label') label: String;
+export abstract class RbAggregateDisplayComponent extends RbComponent {
     @Input('series') series: any;
     @Input('categories') categories: any;
     @Input('value') value: any;
@@ -24,6 +27,9 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     @Input('linkview') linkview: string;
     @Input('linkfilter') linkfilter: string;
     @Input('title') title: string;
+    @Input('aggregateset') aggregateset: RbAggregatesetComponent;
+    @Input('script') script: string;
+    @Input('scriptparam') scriptparam: any;
     
     @HostBinding('style.width') get styleWidth() { return (this.width != null ? ((0.88 * this.width) + 'vw'): null);}
     @HostBinding('style.height') get styleHeight() { return (this.height != null ? ((0.88 * this.height) + 'vw'): null);}
@@ -31,32 +37,39 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     colorScheme = {
       domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
     };
-    graphData: any[];
+    graphData: any[] = [];
     hovering: boolean = false;
     private filterService: FilterService;
     private navigateService: NavigateService;
+    private apiService: ApiService;
+    private aggregatesetSubscription: Subscription;
+    private _isLoading: boolean = false;
+    
   
     constructor() {
       super();
       this.filterService = AppInjector.get(FilterService);
       this.navigateService = AppInjector.get(NavigateService);
+      this.apiService = AppInjector.get(ApiService);
     }
   
-    dataObserverInit() {
-      setTimeout(() => this.calcGraphData(), 1); // because the graph needs the parent to be fully drawn to calculate its dimensions
+    componentInit() {
+      if(this.aggregateset != null) {
+        this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.getGraphData());
+      } 
+      this.onActivationEvent(this.active);
     }
   
-    dataObserverDestroy() {
+    componentDestroy() {
+      if(this.aggregatesetSubscription != null) {
+        this.aggregatesetSubscription.unsubscribe();
+      } 
     }
   
     onActivationEvent(state: boolean) {
-      if(state == true) {
-        setTimeout(() => this.calcGraphData(), 1);
+      if(this.active) {
+        this.getGraphData();
       }
-    }
-  
-    onDatasetEvent(event: string) {
-      this.calcGraphData();
     }
   
     get aggregates(): RbAggregate[] {
@@ -78,8 +91,25 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
     get showRefresh(): boolean {
       return this.hovering == true;
     }
+
+    get isLoading(): boolean {
+      return this.aggregateset != null ? this.aggregateset.isLoading : this._isLoading;
+    }
+
+    getGraphData() {
+      this._isLoading = true;
+      if(this.script != null) {
+        let param = this.filterService.resolveFilter(this.scriptparam, null, null, null, {});
+        this.apiService.executeGlobal(this.script, param).subscribe(resp => {
+          if(resp.data != null) this.graphData = resp.data;
+          this._isLoading = false;
+        });
+      } else if(this.aggregates != null) {
+        this.calcAggregateData();
+      }
+    }
   
-    calcGraphData() {
+    calcAggregateData() {
       this.graphData = [];
       if(this.categories != null) {
         let cats: String[] = [];
@@ -88,7 +118,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
           if(cats.indexOf(cat) == -1) {
             cats.push(cat);
             let label = this.processLabel(agg.getDimension(this.categories.labelattribute), this.categories.labelformat);
-            let series = this.getSeriesDataForCategory(cat);
+            let series = this.calcSeriesDataForCategory(cat);
             let sum = series.reduce((acc, item) => acc + item.value, 0);
             this.graphData.push({code: cat, name: label, label: label, series: series, sum: sum});
           }
@@ -97,11 +127,11 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
         let sortDir = this.categories.sortdir != null ? this.categories.sortdir : 1;
         this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir)); 
       } else {
-        this.graphData = this.getSeriesDataForCategory(null);
+        this.graphData = this.calcSeriesDataForCategory(null);
       } 
     }
   
-    getSeriesDataForCategory(cat: String) : any[] {
+    calcSeriesDataForCategory(cat: String) : any[] {
       let series: any[] = [];
       for(let agg of this.aggregates) {
         let thisCat: String = this.categories != null ? this.nullToEmptyString(agg.getDimension(this.categories.dimension)) : null;
@@ -162,7 +192,7 @@ export abstract class RbAggregateDisplayComponent extends RbDataObserverComponen
       if(this.linkfilter != null) {
         filter = this.filterService.resolveFilter(this.linkfilter, null, null, null, {cat: event.cat, code: event.code});
         filter = this.filterService.unresolveFilter(filter);
-      } else {
+      } else if(this.aggregateset != null) {
         let dimensionFilter = {};
         if(event.code != null && event.code != "" && this.series.dimension != null) {
           dimensionFilter[this.series.dimension] = "'" + event.code + "'";

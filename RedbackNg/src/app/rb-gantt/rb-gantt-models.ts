@@ -31,6 +31,7 @@ export class GanttLaneConfig {
     endAttribute: string;
     laneAttribute: string;
     labelAttribute: string;
+    labelAlts: any[];
     centerLabel: boolean;
     labelColor: string;
     color: string;
@@ -48,6 +49,7 @@ export class GanttLaneConfig {
       this.durationAttribute = json.durationattribute;
       this.endAttribute = json.endattribute;
       this.laneAttribute = json.laneattribute;
+      this.labelAlts = json.labelalts;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
       this.centerLabel = json.centerlabel ?? false;
       this.labelColor = json.labelcolor;

@@ -39,15 +39,18 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   endMS: number;
   multiplier: number;
   widthPX: number;
+  heightPX: number;
   doDragFilter: boolean = false;
   scrollTop: number;
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   dayNames: String[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  labelAlts: any[] = [];
   ganttData: GanttLane[];
   marks: GanttMark[] = [];
   overlayData: GanttOverlayLane[];
   selectedOverlayLaneIndex = -1;
+  selectedLabelAlt: string = null;
 
   refocus: boolean = false;
   blockNextRefocus: boolean = false;
@@ -75,6 +78,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.droppedOutCallback = this.droppedOut.bind(this);
     this.spanMS = 259200000;
     this.zoomMS = 259200000;
+    for(var cfg of this.seriesConfigs)
+      for(var alt of (cfg.labelAlts ?? []))
+        this.labelAlts.push({name: alt.name, label: "Use Label '" + alt.name + "'"});
+    if(this.labelAlts.length > 0) this.labelAlts.push({name: null, label:"Use Standard Label"});
+
     if(this.lanes != null) {
       this.lanesConfig = new GanttLaneConfig(this.lanes, this.userPref);
     }
@@ -184,6 +192,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return this.dataset != null ? this.dataset.isLoading : this.datasetgroup != null ? this.datasetgroup.isLoading : false;
   }
 
+  get availLabelAlts() : any[] {
+    return this.labelAlts.filter(a => a.name != this.selectedLabelAlt);
+  }
+
   setZoom(ms: number) {
     this.zoomMS = ms;
     this.updateData(false);
@@ -196,6 +208,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   toggleDragFilter() {
     this.doDragFilter = !this.doDragFilter;
+  }
+
+  useLabels(name: string) {
+    this.selectedLabelAlt = name;
+    this.updateData(false);
   }
 
   updateOtherData() {
@@ -259,6 +276,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   private getLanes() {
+    this.heightPX = 0;
     let lanes : GanttLane[] = [];
     let laneFilter: any = null;
     if(this.doDragFilter && this.laneFilterObject != null && this.lanesConfig.dragfilter != null) {
@@ -294,6 +312,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         let spreads: GanttSpread[] = this.getSpreads(obj.uid);
         lane.setSpreads(spreads);
         lanes.push(lane);
+        this.heightPX += lane.height + 1; //+1 for borders
       }
     }
     if(lanes.length > 0) {
@@ -317,6 +336,12 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
             if(startPX != null && widthPX != null) {
               let height = cfg.isBackground ? GanttLane.ganttLaneHeight : 28;
               let label = obj.get(cfg.labelAttribute); 
+              if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
+                let alt = cfg.labelAlts.find(a => a.name == this.selectedLabelAlt);
+                if(alt != null) {
+                  label = obj.get(alt.attribute);
+                }
+              }
               let color = cfg.isBackground ? 'white' : 'var(--primary-light-color)';
               if(cfg.color != null) {
                 color = cfg.color;

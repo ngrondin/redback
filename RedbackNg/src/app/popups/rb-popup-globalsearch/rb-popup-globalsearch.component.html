@@ -11,10 +11,12 @@
                     class="rb-globalsearch-listicon">
                     <mat-icon 
                         *ngIf="item.getObjectIcon().indexOf(':') >= 0"
+                        class="material-symbols-outlined"
                         [svgIcon]="item.getObjectIcon()">
                     </mat-icon>
                     <mat-icon
-                        *ngIf="item.getObjectIcon().indexOf(':') == -1">
+                        *ngIf="item.getObjectIcon().indexOf(':') == -1"
+                        class="material-symbols-outlined">
                         {{item.getObjectIcon()}}
                     </mat-icon>                        
                 </div>

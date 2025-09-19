@@ -64,7 +64,8 @@ export class BuildService {
           val = config[input];
         }
         if(val != null) {
-          newInstance[inputs[input]] = val;
+          //newInstance[inputs[input]] = val;
+          newComponentRef.setInput(input, val);
         }
       };
       if(loadedView != null) {

@@ -85,7 +85,8 @@
                         [style.backgroundColor]="item.color"
                         (click)="clickItem(item)">
                         <mat-icon
-                            *ngIf="item.icon != null">
+                            *ngIf="item.icon != null"
+                            class="material-symbols-outlined">
                             {{item.icon}}
                         </mat-icon>
                         <p>

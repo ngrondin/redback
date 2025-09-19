@@ -30,6 +30,7 @@ export class RbList4Component extends RbDataObserverComponent {
   @Input('meta2format') meta2format: string;
   @Input('meta2color') meta2color: string;
   @Input('imageattribute') imageattribute: string;
+  @Input('color') color: string;
   @Input('colormap') colormap: any;
   @Input('colorattribute') colorattribute: string;
   @Input('modal') modal: string;
@@ -112,15 +113,15 @@ export class RbList4Component extends RbDataObserverComponent {
           data.image = 'url(\'' + fileVal.thumbnail + '\')';
         }
       }
-      let thisColorAttribute = this.colorattribute;
-      if(this.userPref != null && this.userPref.colorattribute != null) {
-        thisColorAttribute = this.userPref.colorattribute;
-      } 
-      let thisColorMap = this.colormap;
-      if(this.userPref != null && this.userPref.colormap != null) {
-        thisColorMap = this.userPref.colormap;
-      }
-      if(thisColorAttribute != null) {
+
+
+      let thisColorExpression = this.getUserParam("color");
+      let thisColorAttribute = this.getUserParam("colorattribute");
+      let thisColorMap = this.getUserParam("colormap");
+
+      if(thisColorExpression != null) {
+        data.color = Evaluator.eval(thisColorExpression, obj, null);
+      } else if(thisColorAttribute != null) {
         data.color = thisColorMap != null ? thisColorMap[obj.get(thisColorAttribute)] : obj.get(thisColorAttribute);
       } else {
         data.color = "transparent";
@@ -174,6 +175,14 @@ export class RbList4Component extends RbDataObserverComponent {
     } else {
       return txt.toString();
     }
+  }
+
+  private getUserParam(param: string) : any {
+      let val = this[param];
+      if(this.userPref != null && this.userPref[param] != null) {
+        val = this.userPref[param];
+      }
+      return val;
   }
 
   showCount() : boolean {

@@ -488,3 +488,32 @@ rb-fileset {
     width: var(--v36px);
     cursor: pointer;
 }
+
+.mat-mdc-menu-content {
+	padding: 0px!important;
+}
+
+.rb-hover-container {
+	position: relative;
+}
+
+.rb-hoverbox {
+  visibility: hidden; /* Hide the text initially */
+  opacity: 0; /* For a smooth fade-in effect */
+  position: absolute; /* Position relative to the container */
+  top: 100%; /* Place it below the container */
+  left: 0;
+  width: 150px; /* Adjust as needed */
+  background-color: black;
+  color: #bbb;
+  padding: 5px;
+  border-radius: 5px;
+  transition: visibility 0s, opacity 0.3s ease-in-out; 
+  transition-delay: 0s
+}
+
+.rb-hover-container:hover .rb-hoverbox {
+  visibility: visible; /* Show the text on hover */
+  opacity: 0.7; /* Fade it in */
+  transition-delay: 1s
+}

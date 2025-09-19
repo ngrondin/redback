@@ -76,46 +76,6 @@
         </rb-preferences>
     </div>
 </div>
-
-<!--<mat-sidenav-container
-    [hasBackdrop]="false"
-    autosize>
-    <mat-sidenav 
-        mode="side" 
-        position="start"
-        disableClose="true"
-        opened>
-        <rb-menu
-            [look]="userprefService.getGlobalPreferenceValue('uialt')">
-        </rb-menu>
-    </mat-sidenav>
-    <mat-sidenav 
-        #rightdrawer
-        tabindex="0"
-        mode="over" 
-        position="end"> 
-        <rb-notification-list
-            *ngIf="rightDrawerShowing == 'notifications'"
-            (close)="closeRightDrawer()">
-        </rb-notification-list>
-        <rb-chat
-            *ngIf="rightDrawerShowing == 'chat'"
-            (close)="closeRightDrawer()">
-        </rb-chat>
-        <rb-preferences
-            *ngIf="rightDrawerShowing == 'prefs'"
-            (close)="closeRightDrawer()">
-        </rb-preferences>
-    </mat-sidenav>    
-    <mat-sidenav-content>
-        <rb-vsection>
-            <rb-view-header>
-            </rb-view-header>
-            <rb-view-loader>
-            </rb-view-loader>
-        </rb-vsection>
-    </mat-sidenav-content>
-</mat-sidenav-container>-->
 <div
     class="rb-footer">
     <div

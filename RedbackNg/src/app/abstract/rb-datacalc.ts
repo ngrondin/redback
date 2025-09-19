@@ -49,6 +49,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
     
     onActivationEvent(event: any) {
+        this._logService.debug("DataCalc " + this.id + ": Activation (" + event + ")");
         if(this.active) {
             this.updateData();
         }
@@ -103,7 +104,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
 
     redraw() {
-        this._logService.debug("DataCalc " + this.id + ": Redraw (" + !this.recalcPlanned + ")");
+        //this._logService.debug("DataCalc " + this.id + ": Redraw (" + !this.recalcPlanned + ")");
         if(this.recalcPlanned == false) {
           this.recalcPlanned = true;
           let now = new Date().getTime();
@@ -115,10 +116,17 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
           }
           let tillNextCalc = Math.max(nextCalc, now) - now
           setTimeout(() => {
-            this._logService.debug("DataCalc " + this.id + ": calc");
-            this.calc();
-            this.recalcPlanned = false;
-            this.lastRecalc = (new Date()).getTime();
+            try {
+                var start = (new Date()).getTime();
+                this._logService.debug("DataCalc " + this.id + ": start calc");
+                this.calc();
+                this.recalcPlanned = false;
+                this.lastRecalc = (new Date()).getTime();
+                let end = (new Date()).getTime();
+                this._logService.debug("DataCalc " + this.id + ": finished calc in " + (end-start) + "ms");
+            } catch(err) {
+                this._logService.error(err);
+            }
           }, tillNextCalc);
         }
       }

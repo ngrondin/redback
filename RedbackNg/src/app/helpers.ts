@@ -480,3 +480,38 @@ export class ColorConfig {
     }
 }
 
+export class ColorTool {
+
+    public static decode(str: string): number[] {
+        const cleanedHex = str.startsWith("#") ? str.slice(1) : str;
+        const bigint = parseInt(cleanedHex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return [r, g, b];
+    }
+
+    public static encode(values: number[]): string {
+        if(values.length == 3) {
+            const bigint = (values[0] << 16) + (values[1] << 8) + values[2];
+            const str = "#" + bigint.toString(16).padStart(6, "0");
+            return str;
+        } else {
+            return null;
+        }
+    }
+
+    public static lightenTo(color: string, intensity: number, spread: number): string {
+        let values = ColorTool.decode(color);
+        let min = Math.min(...values);
+        let max = Math.max(...values);
+        let initialSpread = max - min;
+        let scale = initialSpread > 0 ? spread / initialSpread : 0;
+        let targetMin = intensity - spread;
+        let newValues = values.map(v => Math.round(targetMin + ((v-min) * scale)));
+        let newColor = ColorTool.encode(newValues);
+        return newColor;
+    }
+
+    
+}

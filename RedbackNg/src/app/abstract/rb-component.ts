@@ -18,10 +18,10 @@ export abstract class RbComponent implements OnInit {
     ngOnInit(): void {
       if(this.activator != null) {
         this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => this.onActivationEvent(state));
-      } else {
-      }
+      } 
       this.componentInit();
       this.initiated = true;
+      this.onActivationEvent(this.active);
     }
 
     ngOnDestroy(): void {

@@ -197,6 +197,7 @@ export class ClientWSService {
         }
       } else if(msg.type == 'serverkeepalive') {
         this.websocket.next({type:"clientisalive"});
+        this.logService.debug("WSS Received serverkeepalive")
       } else if(msg.type == 'chatupdate') {
         this.chatObservers.forEach((observer) => observer.next(msg.data));
       } else if(msg.type == 'clientpong') {
@@ -226,7 +227,10 @@ export class ClientWSService {
   heartbeat() {
     if(this.heartbeatFreq > 0) {
       this.websocket.next({type:"heartbeat"});
-      setTimeout(() => {this.heartbeat()}, this.heartbeatFreq);
+      setTimeout(() => {
+        this.heartbeat();
+        this.logService.debug("WSS Heartbeat send");
+      }, this.heartbeatFreq);
     }
   }
 
@@ -261,7 +265,7 @@ export class ClientWSService {
     let end = (new Date()).getTime();
     this.websocket.next(subreq);    
     this.subscriptionRequestPending = false;
-    this.logService.debug(`ClientWS: Sent ${subreq.list.length} subscription requests in ${end - start}ms`);
+    //this.logService.debug(`ClientWS: Sent ${subreq.list.length} subscription requests in ${end - start}ms`);
   }
 
   getStateObservable() : Observable<any>  {

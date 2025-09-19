@@ -1,6 +1,6 @@
 <div
     #button
-    [class]="'rb-button-frame' + (!enabled ? ' rb-button-frame-disabled' : '')">
+    [class]="'rb-button-frame ' + (!enabled ? ' rb-button-frame-disabled' : '')">
     <rb-clickable
         [enabled]="enabled"
         [focus]="focus"
@@ -9,14 +9,14 @@
             class="rb-button-content-wrapper">
             <mat-icon 
                 *ngIf="icon != null"
-                class="rb-button-icon"
+                class="rb-button-icon material-symbols-outlined"
                 [fontIcon]="icon">
             </mat-icon>
             <span
                 *ngIf="label != null"
                 class="rb-button-label">
                 {{label}}
-            </span>        
+            </span>
         </div>
-    </rb-clickable>    
+    </rb-clickable>       
 </div>

@@ -142,22 +142,22 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
   isIcon(column: LinkTableColumnConfig, object: RbObject): boolean {
     let cfg = this.getColumnConfig(object, column);
-    return cfg.iconmap != null;
+    return cfg != null && cfg.iconmap != null;
   }
 
   icon(column: LinkTableColumnConfig, object: RbObject): string {
     let cfg = this.getColumnConfig(object, column);
-    return cfg.iconmap != null ? cfg.iconmap[this.getValue(column, object)] : '';
+    return cfg != null && cfg.iconmap != null ? cfg.iconmap[this.getValue(column, object)] : '';
   }
 
   backColor(column: LinkTableColumnConfig, object: RbObject) {
     let cfg = this.getColumnConfig(object, column);
-    return cfg.backColor != null ? cfg.backColor.getColor(object) : null;
+    return cfg != null && cfg.backColor != null ? cfg.backColor.getColor(object) : null;
   }
 
   foreColor(column: LinkTableColumnConfig, object: RbObject) {
     let cfg = this.getColumnConfig(object, column);
-    return cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
+    return cfg != null && cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
   }
 
   onScroll(event) {

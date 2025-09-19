@@ -36,7 +36,7 @@ export class RbAggregatesetComponent extends RbSetComponent {
 
 
   setInit() {
-    this.refreshData();
+    //this.refreshData();
   }
 
   setDestroy() {

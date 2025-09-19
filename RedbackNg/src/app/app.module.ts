@@ -157,6 +157,7 @@ import { RbFileviewerComponent } from './rb-fileviewer/rb-fileviewer.component';
 import { RbSelectorComponent } from './rb-selector/rb-selector.component';
 import { RbMultiRelatedInputComponent } from './inputs/rb-multi-related-input/rb-multi-related-input.component';
 import { FileiconComponent } from './utils/fileicon/fileicon.component';
+import { RbTipDirective } from './utils/tip/rb-tip.directive';
 
 
 
@@ -324,7 +325,8 @@ window.redback = window.redback || {};
         RbFileviewerComponent,
         RbSelectorComponent,
         RbMultiRelatedInputComponent,
-        FileiconComponent
+        FileiconComponent,
+        RbTipDirective
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },
