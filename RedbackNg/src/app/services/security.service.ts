@@ -73,7 +73,7 @@ export class SecurityService {
           this.logService.info("Tokens already refreshing");
         }
       } else {
-        observer.next();
+        observer.next(null);
         observer.complete();
       }  
     });

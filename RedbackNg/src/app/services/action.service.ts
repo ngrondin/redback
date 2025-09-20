@@ -140,7 +140,7 @@ export class ActionService {
       if(dataset.selectedObject != null) {
         this.reportService.launchReport(reportName, null, dataset.objectname, {"uid": dataset.selectedObject.uid}, null);
       }
-      observer.next();
+      observer.next(null);
       observer.complete(); 
     });
   }
@@ -148,7 +148,7 @@ export class ActionService {
   public reportAll(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
     return new Observable((observer) => {
       this.reportService.launchReport(reportName, null, dataset.objectname, dataset.resolvedFilter, dataset.userSearch);
-      observer.next();
+      observer.next(null);
       observer.complete();   
     });
   }
@@ -157,7 +157,7 @@ export class ActionService {
     return new Observable((observer) => {
       const selectedFilter = dataset.selectedObject != null ? {"uid": dataset.selectedObject.uid} : null;
       this.reportService.popupReportList(reportName, dataset.objectname, selectedFilter, dataset.resolvedFilter, dataset.userSearch);
-      observer.next();
+      observer.next(null);
       observer.complete();
     });
   }
@@ -184,7 +184,7 @@ export class ActionService {
             resp => {
               doneCount++;
               if(doneCount == dataset.list.length) {
-                observer.next();
+                observer.next(null);
                 observer.complete();
               }
             },
@@ -232,7 +232,7 @@ export class ActionService {
     return new Observable((observer) => {
       let func = Function("dataset", "obj", "selectedObject", "relatedObject", script);
       func.call(window.redback, dataset, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);
-      observer.next();
+      observer.next(null);
       observer.complete();  
     });    
   }
@@ -240,7 +240,7 @@ export class ActionService {
   public showModal(modalName: string) : Observable<null> {
     return new Observable((observer) => {
       this.modalService.open(modalName);
-      observer.next();
+      observer.next(null);
       observer.complete();  
     });
   }
@@ -250,7 +250,7 @@ export class ActionService {
       if(dataset != null) {
         dataset.refreshData();
       }
-      observer.next();
+      observer.next(null);
       observer.complete();
     });
   }
@@ -260,7 +260,7 @@ export class ActionService {
       let object = dataset.selectedObject;
       let url = eval(linkExpression);
       window.open(url);
-      observer.next();
+      observer.next(null);
       observer.complete();  
     });
   }

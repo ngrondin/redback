@@ -219,13 +219,13 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         this.notificationService.getNotificationFor(this.rbObject.objectname, this.rbObject.uid).subscribe(notif => {
           this.notification = notif;
           this.notificationRetreived = true;
-          observer.next();
+          observer.next(null);
           observer.complete();
         }, (error) => {
           observer.error(error);
         });
       } else {
-        observer.next();
+        observer.next(null);
         observer.complete();
       }
     });
@@ -242,13 +242,13 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         }
         this.apiService.executeGlobal(this.script, param).subscribe(resp => {
           this.scriptActions = resp.data.list;
-          observer.next();
+          observer.next(null);
           observer.complete();
         }, (error) => {
           observer.error(error);
         });
       } else {
-        observer.next();
+        observer.next(null);
         observer.complete();
       }
     });

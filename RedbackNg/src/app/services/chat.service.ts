@@ -89,7 +89,7 @@ export class ChatService {
           }
         }
         this.calcStats();    
-        observer.next();
+        observer.next(null);
         observer.complete();
       });
     });

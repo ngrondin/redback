@@ -9,4 +9,6 @@ import { RbAggregateDisplayComponent } from '../abstract/rb-aggregate-display';
 export class RbVbarGraphComponent extends RbAggregateDisplayComponent {
   @Input('legendposition') legendposition: string = 'right';
   @Input('verticalxlabels') verticalxlabels: boolean = false;
+  @Input('valuetargetlegend') valuetargetlegend: any;
+  @Input('singlecolor') singlecolor: string = null;
 }

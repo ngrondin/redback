@@ -348,7 +348,7 @@ export class DataService {
       this.apiService.executeObject(rbObject.objectname, rbObject.uid, func, param, timeout).subscribe(
         resp => {
           if(!this.clientWSService.isConnected()) this.receive(resp);
-          observer.next();
+          observer.next(null);
           observer.complete();
         },
         error => {
@@ -363,7 +363,7 @@ export class DataService {
     return new Observable<null>((observer) => {
       this.apiService.executeGlobal(func, param, timeout).subscribe(
         resp => {
-          observer.next();
+          observer.next(null);
           observer.complete();
         },
         error => {
@@ -407,7 +407,7 @@ export class DataService {
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          observer.next();
+          observer.next(null);
           observer.complete();
         },
         error => {
