@@ -22,6 +22,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   @Input('fetchall') fetchAll: boolean = false;
   @Input('addrelated') addrelated: boolean = true;
   @Input('addtoend') addtoend: boolean = false;
+  @Input('muteevents') muteevents: string[] = [];
 
 
   public uid: string;
@@ -415,11 +416,15 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   private publishEvent(event: string) {
-    this.observers.forEach((observer) => {
-      observer.next(event);
-    }); 
-    if(this.datasetgroup != null) {
-      this.datasetgroup.groupMemberEvent((this.id || this.name || this.objectname), event);
+    if(this.muteevents.indexOf(event) == -1) {
+      this.observers.forEach((observer) => {
+        observer.next(event);
+      }); 
+      if(this.datasetgroup != null) {
+        this.datasetgroup.groupMemberEvent((this.id || this.name || this.objectname), event);
+      }  
+    } else {
+      console.log(event + " muted");
     }
   }
 

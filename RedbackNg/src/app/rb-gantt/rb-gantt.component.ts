@@ -11,6 +11,7 @@ import { GanttLane, GanttLaneConfig, GanttMark, GanttMarkType, GanttOverlayConfi
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
+import { Evaluator } from 'app/helpers';
 
 
 @Component({
@@ -142,9 +143,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onDatasetEvent(event: any) {
+    console.log(event);
     if(event.endsWith('_select') && this.blockNextRefocus == false) {
       this.refocus = true;
-    }
+    } 
     super.onDatasetEvent(event);
   }
 
@@ -356,6 +358,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                     color = colorValue;
                   }  
                 }
+              } else if(cfg.colorExpression != null) {
+                color = Evaluator.eval(cfg.colorExpression, obj, null);
               }
               let labelcolor = "#333";
               if(cfg.labelColor != null) {

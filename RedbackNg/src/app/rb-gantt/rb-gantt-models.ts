@@ -37,6 +37,7 @@ export class GanttLaneConfig {
     color: string;
     colorAttribute: string;
     colorMap: any;
+    colorExpression: string;
     isBackground: boolean;
     modal: string;
     canEdit: boolean;
@@ -58,6 +59,7 @@ export class GanttLaneConfig {
       this.color = json.color;
       this.colorAttribute = json.colorattribute;
       this.colorMap = json.colormap;
+      this.colorExpression = json.colorexpression;
       this.modal = json.modal;
       this.show = json.show != null ? Function("dataset", "relatedObject", "return (" + json.show + ")") : null;
     }
