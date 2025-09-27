@@ -695,8 +695,19 @@ public class ObjectManager
 							if(!function.equals("count"))
 							{
 								String attribute = metric.getString("attribute");
-								if(attribute != null)
-									dbMetric.put("field", objectConfig.getAttributeConfig(attribute).getDBKey());
+								if(attribute != null) {
+									String subfield = null;
+									if(attribute.contains(".")) {
+										subfield = attribute.substring(attribute.indexOf(".") + 1);
+										attribute = attribute.substring(0, attribute.indexOf("."));
+									}
+									AttributeConfig attCfg = objectConfig.getAttributeConfig(attribute);
+									String dbField = null;
+									if(attCfg != null) {
+										dbField = attCfg.getDBKey() + (subfield != null ? ("." + subfield) : "");
+										dbMetric.put("field", dbField);
+									}
+								}
 							}
 							dbMetric.put("name", metricName);
 							dbMetrics.add(metric);

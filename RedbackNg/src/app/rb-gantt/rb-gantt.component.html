@@ -57,7 +57,15 @@
                 class="rb-gantt-menuitem">
                 {{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}
             </span>
-        </rb-clickable>        
+        </rb-clickable>
+        <rb-clickable 
+            *ngIf="allowoverlapgroup"
+            (click)="toggleGroupOverlaps()">
+            <span
+                class="rb-gantt-menuitem">
+                {{ groupOverlaps ? 'Ungroup Overlaps' : 'Group Overlaps'}}
+            </span>
+        </rb-clickable>                  
         <rb-clickable 
             *ngFor="let alt of availLabelAlts"
             (click)="useLabels(alt.name)">
@@ -132,7 +140,7 @@
             <div
                 *ngFor="let lane of ganttData; let i = index"
                 [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
-                [style.height.px]="lane.height"
+                [style.height.vw]="lane.height"
                 [style.cursor]="lanesConfig.modal != null ? 'pointer' : ''"
                 (click)="clickLane(lane)"
                 (rb-drag-dropzone)="droppedOn($event, lane, true)"
@@ -166,20 +174,20 @@
         <div
             class="rb-gantt-lanes"
             [style.width.px]="widthPX"
-            [style.height.px]="heightPX">
+            [style.height.vw]="heightVW">
             <div
                 class="rb-gantt-laneslayer">
                 <div
                     *ngFor="let lane of ganttData; let i = index"
                     [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
-                    [style.height.px]="lane.height"
+                    [style.height.vw]="lane.height"
                     [style.width.px]="widthPX">
                     <div
                         *ngFor="let spread of lane.backgroundSpreads()"
                         [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
                         [style.width.px]="spread.width"
                         [style.left.px]="spread.start"
-                        [style.height.px]="lane.height"
+                        [style.height.vw]="lane.height"
                         [style.top.px]="spread.top"
                         [style.background-color]="spread.color"
                         [style.justify-content]="spread.config.centerLabel ? 'center' : 'start'"
@@ -217,7 +225,7 @@
                 <div
                     *ngFor="let lane of ganttData; let i = index"
                     [class]="'rb-gantt-lane'"
-                    [style.height.px]="lane.height"
+                    [style.height.vw]="lane.height"
                     [style.width.px]="widthPX"
                     (rb-drag-dropzone)="droppedOn($event, lane)"
                     [rb-drag-changeform]="getSizeForObjectCallback">
@@ -228,9 +236,9 @@
                         [rb-drag-droppedout]="droppedOutCallback"
                         (click)="clickSpread(spread)"
                         [style.width.px]="spread.width"
+                        [style.height.vw]="spread.height"
                         [style.left.px]="spread.start"
-                        [style.height.px]="spread.height"
-                        [style.top.px]="spread.top"
+                        [style.top.vw]="spread.top"
                         [style.background-color]="spread.color"
                         [style.color]="spread.labelcolor"
                         [style.justify-content]="spread.config.centerLabel == true ? 'center' : 'start'">

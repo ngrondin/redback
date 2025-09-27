@@ -20,8 +20,8 @@
             [class]="'rb-linktable-row'"
             *ngFor="let object of list">
             <div
-                [class]="'rb-linktable-rowitem' + (grid ? ' rb-linktable-border' : '')"
                 *ngFor="let col of columns; index as i"
+                [class]="'rb-linktable-rowitem' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border' : '')"
                 [style.width.vw]="col.width"
                 [style.background-color]="backColor(col, object)"
                 [style.color]="foreColor(col, object)">

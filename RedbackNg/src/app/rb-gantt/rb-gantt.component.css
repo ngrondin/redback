@@ -149,7 +149,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    border-top: 1px solid lightgray;
+    border-top: var(--v1px) solid lightgray;
     padding: 0px 0.5vw;
 }
 
@@ -167,7 +167,7 @@
 
 .rb-gantt-lanelabel {
     display: inline-block;
-    padding: 5px;
+    padding: var(--v5px);
     flex: 1 1 auto;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -176,7 +176,7 @@
 
 .rb-gantt-lanesublabel {
     display: inline-block;
-    padding: 5px;
+    padding: var(--v5px);
     flex: 0 0 auto;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -220,7 +220,7 @@
     display: flex;
     flex-direction: row;
     position: relative;
-    border-top-width: 1px;
+    border-top-width: var(--v1px);
     border-top-style: solid;
     border-top-color: transparent;
     /*background-color: grey;
@@ -241,10 +241,10 @@
 
 .rb-gantt-spreadbox {
     border: 1px solid var(--primary-dark-color);
-    height: 1.6vw;
-    top: 7px;
+    /*height: 1.6vw;*/
+    top: var(--v5px); /*7px*/
     background-color: white;
-    border-radius: 3px;
+    border-radius: var(--v3px);
     -webkit-touch-callout: none; 
     -webkit-user-select: none; 
     user-select: none; 
@@ -256,9 +256,9 @@
 }
 
 .rb-gantt-spreadbox-selected {
-    border: 3px solid;
+    border: var(--v3px) solid;
     border-color: var(--primary-dark2-color);
-    margin: -2px;
+    margin: -0.12vw;
 }
 
 .rb-gantt-spreadbackground {
@@ -268,7 +268,7 @@
 
 .rb-gantt-spreadlabel {
     display: inline-block;
-    margin: 5px;
+    margin: var(--v5px);
     font-size: smaller;
     overflow: hidden;
     white-space: nowrap;

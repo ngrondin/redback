@@ -74,6 +74,10 @@
     border-style: solid;
 }
 
+.rb-linktable-rowitem-alighright {
+    justify-content: end;
+}
+
 .rb-linktable-rowitem span {
     overflow: hidden;
     text-overflow: ellipsis;

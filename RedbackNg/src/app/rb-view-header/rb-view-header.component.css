@@ -7,7 +7,7 @@
 }
 
 .rb-vh-textcontainer {
-    margin: 8px;
+    margin: var(--v8px);
     display: flex;
     flex-direction: row;
     align-items: flex-end;

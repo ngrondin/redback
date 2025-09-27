@@ -1,6 +1,9 @@
 import { SeriesConfig } from "app/abstract/rb-datacalc";
 import { RbObject } from "app/datamodel";
 
+//export const GanttLaneHeight: number = 2.47; //VW, was in PX 42;
+export const GanttSpreadHeight: number = 1.64; //VW   
+export const GanttSpreadMargin: number = 0.41; //VW   
 
 export class GanttLaneConfig {
     dataset: string;
@@ -85,7 +88,6 @@ export class GanttLaneConfig {
   }
 
   export class GanttLane {
-    static ganttLaneHeight: number = 42;
     id: string;
     label: string;
     sub: string;
@@ -102,7 +104,7 @@ export class GanttLaneConfig {
       this.image = im;
       this.icon = ic;
       this.object = o;
-      this.height = GanttLane.ganttLaneHeight;
+      this.height = GanttSpreadHeight + (2*GanttSpreadMargin);
     }
   
     setSpreads(s: GanttSpread[]) {
@@ -113,7 +115,7 @@ export class GanttLaneConfig {
           max = this.spreads[i].sublane;
         }
       }
-      this.height = GanttLane.ganttLaneHeight * (max + 1);
+      this.height = ((max + 1) * (GanttSpreadHeight + GanttSpreadMargin)) + GanttSpreadMargin;
     }
 
     backgroundSpreads() {
@@ -141,12 +143,12 @@ export class GanttLaneConfig {
     object: RbObject;
     config: GanttSeriesConfig;
   
-    constructor(i: string, l: string, s: number, w: number, h: number, ln: string, c: string, lc: string, ce: boolean, sel: boolean, o: RbObject, cfg: GanttSeriesConfig) {
+    constructor(i: string, l: string, s: number, w: number, ln: string, c: string, lc: string, ce: boolean, sel: boolean, o: RbObject, cfg: GanttSeriesConfig) {
       this.id = i;
       this.label = l;
       this.start = s;
       this.width = w;
-      this.height = h;
+      this.height = GanttSpreadHeight;
       this.sublane = 0;
       this.lane = ln;
       this.color = c;
@@ -160,12 +162,11 @@ export class GanttLaneConfig {
   
     setSubLane(sl: number) {
       this.sublane = sl;
-      this.top = (this.sublane * GanttLane.ganttLaneHeight) + (GanttLane.ganttLaneHeight - this.height) / 2;
+      this.top = GanttSpreadMargin + (this.sublane * (GanttSpreadHeight + GanttSpreadMargin));
     }
   }
 
   export class GanttOverlayLane {
-    static ganttLaneHeight: number = 42;
     id: string;
     label: string;
     height: number;
@@ -174,7 +175,7 @@ export class GanttLaneConfig {
     constructor(i: string, l: string) {
       this.id = i;
       this.label = l != null ? l : "";
-      this.height = GanttLane.ganttLaneHeight;
+      this.height = GanttSpreadHeight;
     }
 
     setSpreads(s: GanttOverlaySpread[]) {

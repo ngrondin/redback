@@ -11,6 +11,7 @@ class LinkTableColumnConfig {
   expression: string;
   displayAttribute: string;
   format: string;
+  align: string;
   size: number;
   width: number;
   showExpr: string;
@@ -27,6 +28,7 @@ class LinkTableColumnConfig {
     this.expression = json.expression;
     this.displayAttribute = json.displayattribute;
     this.format = json.format;
+    this.align = json.align;
     this.size = json.size;
     this.width = (json.size != null ? (json.size * 0.88) : 10);
     this.showExpr = (json.show != null ? json.show : "true");

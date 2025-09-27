@@ -6,7 +6,7 @@
 .rb-button-frame {
     display: flex;
     flex-direction: row;
-    border: 1px solid var(--primary-dark-color);
+    border: var(--v1px) solid var(--primary-dark-color);
     border-radius: var(--v5px);
     font-weight: 500;
     font-size: 0.9rem;

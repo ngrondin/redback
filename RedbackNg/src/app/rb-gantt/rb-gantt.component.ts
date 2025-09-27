@@ -7,7 +7,7 @@ import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { Subscription } from 'rxjs';
-import { GanttLane, GanttLaneConfig, GanttMark, GanttMarkType, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread } from './rb-gantt-models';
+import { GanttLane, GanttLaneConfig, GanttMark, GanttMarkType, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread, GanttSpreadHeight } from './rb-gantt-models';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
@@ -25,6 +25,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('layers') layers: any[];
   @Input('toolbar') toolbarConfig : any;
   @Input('locktonow') locktonow: boolean = false;
+  @Input('allowoverlapgroup') allowoverlapgroup: boolean = false;
   @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar: ViewContainerRef;
   @ViewChild('mainscroll') mainscroll: RbScrollComponent;
   
@@ -40,8 +41,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   endMS: number;
   multiplier: number;
   widthPX: number;
-  heightPX: number;
+  heightVW: number;
   doDragFilter: boolean = false;
+  groupOverlaps: boolean = false;
   scrollTop: number;
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -178,10 +180,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.updateData(true);
   }
 
-  get laneHeight() : number {
-    return GanttLane.ganttLaneHeight;
-  }
-
   get dayMarks() : GanttMark[] {
     return this.marks.filter(m => m.type == GanttMarkType.Day);
   }
@@ -195,7 +193,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   get availLabelAlts() : any[] {
-    return this.labelAlts.filter(a => a.name != this.selectedLabelAlt);
+    return this.groupOverlaps == false ? this.labelAlts.filter(a => a.name != this.selectedLabelAlt) : [];
   }
 
   setZoom(ms: number) {
@@ -212,9 +210,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.doDragFilter = !this.doDragFilter;
   }
 
+  toggleGroupOverlaps() {
+    this.groupOverlaps = !this.groupOverlaps;
+    this.redraw();
+  }
+
   useLabels(name: string) {
     this.selectedLabelAlt = name;
-    this.updateData(false);
+    this.redraw();
   }
 
   updateOtherData() {
@@ -278,7 +281,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   private getLanes() {
-    this.heightPX = 0;
+    this.heightVW = 0;
     let lanes : GanttLane[] = [];
     let laneFilter: any = null;
     if(this.doDragFilter && this.laneFilterObject != null && this.lanesConfig.dragfilter != null) {
@@ -314,7 +317,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         let spreads: GanttSpread[] = this.getSpreads(obj.uid);
         lane.setSpreads(spreads);
         lanes.push(lane);
-        this.heightPX += lane.height + 1; //+1 for borders
+        this.heightVW += lane.height + 0.06; //+1 for borders
       }
     }
     if(lanes.length > 0) {
@@ -336,7 +339,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.data) {
             let [startPX, widthPX] = this.getStartAndWidthPX(obj, cfg.startAttribute, cfg.endAttribute, cfg.durationAttribute);
             if(startPX != null && widthPX != null) {
-              let height = cfg.isBackground ? GanttLane.ganttLaneHeight : 28;
               let label = obj.get(cfg.labelAttribute); 
               if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
                 let alt = cfg.labelAlts.find(a => a.name == this.selectedLabelAlt);
@@ -376,15 +378,50 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                 }
               }
               if(color != null) {
-                spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, height, laneId, color, labelcolor, canEdit, selected, obj, cfg));
+                spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, labelcolor, canEdit, selected, obj, cfg));
               }
             }
           }
         }
       }
     }
+    if(this.groupOverlaps) {
+      spreads = this.groupOverlappingSpreads(spreads);
+    } 
     this.adjustSpreadTops(spreads);
     return spreads;
+  }
+
+  private groupOverlappingSpreads(spreads) {
+    let out = [];
+    let groups = [];
+    let groupmap = {};
+    for(var spread of spreads) {
+      if(spread.config.isBackground == false) {
+        let found = false;
+        for(var group of groups) {
+          if(spread.config == group.config && spread.start < group.start + group.width && group.start < spread.start + spread.width) {
+            let newstart = Math.min(group.start, spread.start);
+            let newend = Math.max(group.start + group.width, spread.start + spread.width);
+            group.start = newstart;
+            group.width = newend - newstart;
+            groupmap[group.id] = groupmap[group.id] + 1;
+            group.label = groupmap[group.id] + " items";
+            found = true;
+            break;
+          }
+        }
+        if(!found) {
+          let group = new GanttSpread(groups.length.toString(), "1 item", spread.start, spread.width, spread.laneId, 'var(--primary-light-color)', '#333', false, false, null, spread.config);
+          groupmap[group.id] = 1
+          groups.push(group);
+          out.push(group);
+        }  
+      } else {
+        out.push(spread);
+      }
+    }
+    return out;
   }
 
   private getOverlayLanes() {
@@ -594,7 +631,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let durationMS = this.getObjectDuration(obj, cfg.startAttribute, cfg.endAttribute, cfg.durationAttribute);
     return {
       x: Math.round(durationMS * this.multiplier),
-      y: 28
+      y: window.innerWidth * GanttSpreadHeight / 100
     };
   }
 }

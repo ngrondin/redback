@@ -1,6 +1,8 @@
 import { Directive, ElementRef, Input, Pipe, PipeTransform, Renderer2, inject } from "@angular/core";
 import { Observer } from "rxjs";
+import { AppInjector } from "./app.module";
 import { NavigateEvent, RbObject, Time } from "./datamodel";
+import { FilterService } from "./services/filter.service";
 import { UserprefService } from "./services/userpref.service";
 
 export class Translator {
@@ -418,6 +420,7 @@ export class LinkConfig {
     objectname: string;
     attribute: string;
     tab: string;
+    filter: any;
     filtersingleobject: boolean;
     reset: boolean;
     
@@ -428,6 +431,7 @@ export class LinkConfig {
         this.objectname = json.objectname;
         this.attribute = json.attribute;
         this.tab = json.tab;
+        this.filter = json.filter;
         this.filtersingleobject = json.filtersingleobject ?? true;
         this.reset = json.reset ?? false;
     }
@@ -445,7 +449,11 @@ export class LinkConfig {
         }
         event.objectname = this.objectname != null ? this.objectname : object.objectname;
         let objectuid = this.attribute != null ? object.get(this.attribute) : object.uid;
-        if(this.filtersingleobject == true) {
+        if(this.filter != null) {
+            let filterService: FilterService = AppInjector.get(FilterService);
+            let filter = filterService.resolveFilter(this.filter, object, object, null, null);
+            event.filter = filterService.unresolveFilter(filter);
+        } else if(this.filtersingleobject == true) {
             event.filter = {uid: "'" + objectuid + "'"} //filter will be resolved in the dataset before fetching
         } else {
             event.select = {uid: objectuid} //select will be calculated on the object list (not resolved)
