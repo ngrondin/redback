@@ -423,9 +423,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       if(this.datasetgroup != null) {
         this.datasetgroup.groupMemberEvent((this.id || this.name || this.objectname), event);
       }  
-    } else {
+    } /*else {
       console.log(event + " muted");
-    }
+    }*/
   }
 
   //Getters used mainly for SearchTarget

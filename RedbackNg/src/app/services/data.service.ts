@@ -19,6 +19,7 @@ export class DataService {
   fetchCount: number = 0;
   objectUpdateObservers: Observer<RbObject>[] = [];
   deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue();
+  runningFinalization: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -219,12 +220,12 @@ export class DataService {
     });
   }
 
-  enqueueDeferredFetch(name: string, uid: string, forRelatedObject: RbObject) {
-    this.deferredFetchQueue.get(name).addUid(uid, forRelatedObject);
+  enqueueDeferredFetch(name: string, uid: string, callback: DefferredCallback) {
+    this.deferredFetchQueue.get(name).addUid(uid, callback);
   }
 
-  enqueueDeferredFetchList(name: string, filter: any, forRelatedObject: RbObject) {
-    this.deferredFetchQueue.get(name).addFilter(filter, forRelatedObject);
+  enqueueDeferredFetchList(name: string, filter: any, callback: DefferredCallback) {
+    this.deferredFetchQueue.get(name).addFilter(filter, callback);
   }
 
   receive(json: any) : RbObject {
@@ -240,53 +241,55 @@ export class DataService {
   }
 
   async finalizeReceipt() {
-    let multi = [];
-    let relatedobjects = [];
-    let objectnames = Object.keys(this.deferredFetchQueue.items);
-    if(objectnames.length > 0) {
-      let objectname = objectnames[0];
-      let fetchRequest = this.deferredFetchQueue.get(objectname);
-      let filter = null;
-      let count = 0;
-      if(fetchRequest.uids.length > 0) {
-        filter = {uid:{$in: fetchRequest.uids}};
-        count += fetchRequest.uids.length;
-      }
-      if(fetchRequest.filters.length > 0) {
-        let subfilter = fetchRequest.filters.map(f => f.data);
-        filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
-        count += fetchRequest.filters.length * 2; //Times 2 in order to allow for domain overridden objects
-      }
-      multi.push({
-        key: objectname,
-        action: "list",
-        object: objectname,
-        filter: filter,
-        page: 0,
-        pagesize: count,
-        options: {addvalidation: true, addrelated: false}
-      });
-      relatedobjects = [...fetchRequest.relatedObjects];
-      this.deferredFetchQueue.clear(objectname);
-      this.apiService.streamObjects(objectname, filter, null, null).subscribe(
-        {
-          next: resp => {
-            resp.result.forEach(json => this.receive(json));
-          },
-          complete: () => {
-            for(var object of relatedobjects) {
-              object.linkMissingRelated();
-            }
-            this.finalizeReceipt();
-          },
-          error: error => {
-            this.logService.error("Error finalizing receipt :" + error);
-          }
+    if(!this.runningFinalization) {
+      this.runningFinalization = true;
+      let objectnames = Object.keys(this.deferredFetchQueue.objects);
+      if(objectnames.length > 0) {
+        let objectname = objectnames[0];
+        let deferredObject = this.deferredFetchQueue.get(objectname);
+        this.logService.debug("Executing deferred request " + objectname + ":" + deferredObject.id);
+        let filter = null;
+        let count = 0;
+        let uids = Object.keys(deferredObject.uids);
+        if(uids.length > 0) {
+          filter = {uid:{$in: uids}};
+          count += uids.length;
         }
-      );
-    } else {
-      this.clientWSService.sendUnsentSubscriptionRequests(); 
-    } 
+        if(deferredObject.filters.length > 0) {
+          let subfilter = deferredObject.filters.map(f => f.data);
+          filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
+          count += deferredObject.filters.length * 2; //Times 2 in order to allow for domain overridden objects
+        }
+        this.deferredFetchQueue.clear(objectname);
+        this.apiService.streamObjects(objectname, filter, null, null).subscribe(
+          {
+            next: resp => {
+              resp.result.forEach(json => {
+                let obj = this.receive(json);
+                let callbacks = [];
+                let deferredUid = deferredObject.uids[obj.uid];
+                if(deferredUid != null) callbacks.push(...deferredUid.callbacks);
+                let deferredFilters = deferredObject.filters.filter(f => this.filterService.applies(f.data, obj));
+                deferredFilters.forEach(df => callbacks.push(...df.callbacks));
+                callbacks.forEach(cb => cb(obj));
+              });
+            },
+            complete: () => {
+              this.logService.debug("Finalized for deferred object " + objectname + ":" + deferredObject.id);
+              this.runningFinalization = false;
+              this.finalizeReceipt();
+            },
+            error: error => {
+              this.logService.error("Error finalizing receipt for " + objectname + " :" + error);
+              this.runningFinalization = false;
+            }
+          }
+        );
+      } else {
+        this.clientWSService.sendUnsentSubscriptionRequests(); 
+        this.runningFinalization = false;
+      } 
+    }
   }
 
   pushToServer(rbObject: RbObject) {
@@ -431,11 +434,20 @@ export class DataService {
 
 }
 
+type DefferredCallback = (object: RbObject) => void;
+let objId = 0;
 
+class DeferredUid {
+  callbacks: DefferredCallback[] = [];
+
+  constructor() {
+  }
+}
 
 class DeferredFilter {
   data: any;
   hash: number;
+  callbacks: DefferredCallback[] = [];
 
   constructor(d: string, h: number) {
     this.data = d;
@@ -443,44 +455,44 @@ class DeferredFilter {
   }
 }
 
-class DeferredFetchQueueItem {
-  uids: string[] = []; 
+class DefferedObject {
+  id: number = objId++;
+  uids: {[key: string]: DeferredUid} = {};
   filters: DeferredFilter[] = []; 
-  relatedObjects: RbObject[] = [];
 
-  addUid(uid: string, relatedObject: RbObject) {
-    if(uid != null && this.uids.indexOf(uid) == -1) {
-      this.uids.push(uid);
+  addUid(uid: string, callback: DefferredCallback) {
+    let deferredUid = this.uids[uid];
+    if(deferredUid == null) {
+      deferredUid = new DeferredUid();
+      this.uids[uid] = deferredUid;
     }
-    this.addRelatedObject(relatedObject);
+    deferredUid.callbacks.push(callback);
   }
 
-  addFilter(filter: any, relatedObject: RbObject) {
+  addFilter(filter: any, callback: DefferredCallback) {
     let filterHash = Hasher.hash(filter);
-    if(filter != null && this.filters.find(f => f.hash == filterHash) == null) {
-      this.filters.push(new DeferredFilter(filter, filterHash));
+    let deferredFilter = this.filters.find(f => f.hash == filterHash);
+    if(deferredFilter == null) {
+      deferredFilter = new DeferredFilter(filter, filterHash);
+      this.filters.push(deferredFilter);
     }
-    this.addRelatedObject(relatedObject);
+    deferredFilter.callbacks.push(callback);
   }
 
-  addRelatedObject(obj: RbObject) {
-    if(this.relatedObjects.indexOf(obj) == -1) {
-      this.relatedObjects.push(obj);
-    }
-  }
+
 }
 
 class DeferredFetchQueue {
-  items: {[key: string]: DeferredFetchQueueItem} = {};
+  objects: {[key: string]: DefferedObject} = {};
   
-  get(name: string): DeferredFetchQueueItem {
-    if(this.items[name] == null) this.items[name] = new DeferredFetchQueueItem();
-    return this.items[name];
+  get(name: string): DefferedObject {
+    if(this.objects[name] == null) this.objects[name] = new DefferedObject();
+    return this.objects[name];
   }
 
   clear(name: string) {
-    if(this.items[name] != null) {
-      delete this.items[name];
+    if(this.objects[name] != null) {
+      delete this.objects[name];
     }
   }
 }

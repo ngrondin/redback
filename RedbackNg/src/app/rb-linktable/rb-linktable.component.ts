@@ -4,8 +4,10 @@ import { RbObject } from 'app/datamodel';
 import { ColorConfig, Evaluator, Formatter, LinkConfig } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
+import { UserprefService } from 'app/services/userpref.service';
 
 class LinkTableColumnConfig {
+  id: string;
   label: string;
   attribute: string;
   expression: string;
@@ -22,7 +24,8 @@ class LinkTableColumnConfig {
   foreColor: ColorConfig;
   alt: {[key: string]: LinkTableColumnConfig};
 
-  constructor(json: any) {
+  constructor(json: any, userpref: any) {
+    this.id = json.id;
     this.label = json.label;
     this.attribute = json.attribute;
     this.expression = json.expression;
@@ -40,7 +43,7 @@ class LinkTableColumnConfig {
     if(json.alt != null) {
       this.alt = {};
       for(const key in json.alt) {
-        this.alt[key] = new LinkTableColumnConfig(json.alt[key]);
+        this.alt[key] = new LinkTableColumnConfig(json.alt[key], userpref);
       }
     }    
   }
@@ -67,7 +70,8 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
   constructor(
     private modalService: ModalService,
-    private navigateService: NavigateService
+    private navigateService: NavigateService,
+    public userprefService: UserprefService,
   ) {
     super();
   }
@@ -75,7 +79,10 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   dataObserverInit() {
     this.columns = [];
     for(let item of this._cols) {
-      this.columns.push(new LinkTableColumnConfig(item));
+      let colPref = this.userPref != null && this.userPref.cols != null ? this.userPref.cols[item.id] : null;
+      if(!(colPref == false || (colPref != null && colPref.hide == true))) {
+        this.columns.push(new LinkTableColumnConfig(item, colPref));
+      }
     }
   }
 
@@ -87,6 +94,10 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
   onActivationEvent(state: boolean) {
     this.scrollLeft = 0;
+  }
+
+  get userPref() : any {
+    return this.id != null ? this.userprefService.getCurrentViewUISwitch("linktable", this.id) : null;
   }
 
   getColumnConfig(object: RbObject, column: LinkTableColumnConfig): LinkTableColumnConfig {

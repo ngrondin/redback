@@ -298,12 +298,12 @@ export class ClientWSService {
 
   subscribeToUniqueObjectUpdate(objectname: string, uid: string) {
     this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
-    this.logService.debug(`ClientWS: Subscribing to object ${objectname}:${uid}`);
+    //this.logService.debug(`ClientWS: Subscribing to object ${objectname}:${uid}`);
   }
 
   subscribeToFilterObjectUpdate(objectname: String, filter: any, id: string) {
     this.filterObjectSubscriptions[id] = {objectname: objectname, filter: filter, sent:false};
-    this.logService.debug(`ClientWS: Subscribing to filter ${objectname}:${JSON.stringify(filter)}`);
+    //this.logService.debug(`ClientWS: Subscribing to filter ${objectname}:${JSON.stringify(filter)}`);
   }
 
   clearSubscriptions() {

@@ -55,7 +55,6 @@ export class RbObject {
                         this.data[attribute] = json.data[attribute];
                         if((this.validation[attribute] != null && this.validation[attribute].related != null) || this.related[attribute] !== undefined) {
                             this.related[attribute] = null;
-                            this._setAttributeFlag(attribute, 'reqrel', false);
                         } 
                     }
         
@@ -77,7 +76,7 @@ export class RbObject {
             if(changes.length > 0) {
                 this.updatedAttributes = [];
                 this._adviseSetsOfChange();
-                this.logService.debug(`RBObject ${this.objectname}:${this.uid}: Update accepted at ${json.ts}: ${changes.join(',')}`);
+                //this.logService.debug(`RBObject ${this.objectname}:${this.uid}: Update accepted at ${json.ts}: ${changes.join(',')}`);
             }
 
             this.lastUpdated = json.ts;
@@ -86,56 +85,49 @@ export class RbObject {
         }
     }
 
-    linkMissingRelated() {
-        if(this._linkMissingRelated()) {
-            this._adviseSetsOfChange();
-        }
-    }
-
     _linkMissingRelated() {
-        let isChanged: boolean = false;
         for(const attribute in this.data) {
             if(this.validation[attribute] != null && this.validation[attribute].related != null && this.related[attribute] == null && this.data[attribute] != null) {
                 let relatedRule = this.validation[attribute].related;
-                if(relatedRule != null && this.related[attribute] == null && relatedRule.uiresolve != false) {
-                    let relatedObject = null, uid = null, filter = null;
-                    if(relatedRule.link == 'uid') {
-                        uid = this.data[attribute];
-                        relatedObject = this.dataService.get(relatedRule.object, uid);
-                    } else {
-                        filter = {...relatedRule.listfilter};
-                        filter[relatedRule.link] = this.data[attribute];
-                        var relatedObjectOptions = this.dataService.list(relatedRule.object, filter);
-                        var selectedPoints = 0;
-                        for(var option of relatedObjectOptions) {
-                            var point = option.domain == this.domain ? 3 : option.domain == 'root' ? 1 : 2;
-                            if(point > selectedPoints) {
-                                selectedPoints = point;
-                                relatedObject = option;
+                if(relatedRule != null && relatedRule.uiresolve != false) {
+                    let dataValue = this.data[attribute];
+                    let isArray = Array.isArray(dataValue);
+                    if(isArray) this.related[attribute] = [];
+                    let array = isArray ? dataValue : [dataValue];
+                    for(var value of array) {
+                        let relatedObject = null, uid = null, filter = null;
+                        if(relatedRule.link == 'uid') {
+                            uid = value;
+                            relatedObject = this.dataService.get(relatedRule.object, uid);
+                        } else {
+                            filter = {...relatedRule.listfilter};
+                            filter[relatedRule.link] = value;
+                            var relatedObjectOptions = this.dataService.list(relatedRule.object, filter);
+                            var selectedPoints = 0;
+                            for(var option of relatedObjectOptions) {
+                                var point = option.domain == this.domain ? 3 : option.domain == 'root' ? 1 : 2;
+                                if(point > selectedPoints) {
+                                    selectedPoints = point;
+                                    relatedObject = option;
+                                }
                             }
                         }
-                    }
-                    if(relatedObject != null) {
-                        isChanged = true
-                        this.related[attribute] = relatedObject;
-                    } else {
-                        if(this.flags[attribute] == null || this.flags[attribute]['reqrel'] != true) {
-                            if(uid != null) this.dataService.enqueueDeferredFetch(relatedRule.object, uid, this);
-                            else this.dataService.enqueueDeferredFetchList(relatedRule.object, filter, this);
-                            this._setAttributeFlag(attribute, 'reqrel', true);
+                        if(relatedObject != null) {
+                            if(isArray) this.related[attribute].push(relatedObject);
+                            else this.related[attribute] = relatedObject;
                         } else {
-                            //console.log("Can't find related object for " + this.objectname + ":" + this.uid + "." + attribute + " = '" + this.data[attribute] + "'");
+                            let callback = (object) => {
+                                if(isArray) this.related[attribute].push(object);
+                                else this.related[attribute] = object;
+                                this._adviseSetsOfChange();
+                            };
+                            if(uid != null) this.dataService.enqueueDeferredFetch(relatedRule.object, uid, callback);
+                            else this.dataService.enqueueDeferredFetchList(relatedRule.object, filter, callback);
                         }
                     }
                 }
             } 
         }
-        return isChanged;
-    }
-
-    _setAttributeFlag(attribute, flag, value) {
-        if(this.flags[attribute] == null) this.flags[attribute] = {};
-        this.flags[attribute][flag] = value;
     }
 
     refresh() {
