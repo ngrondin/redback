@@ -29,7 +29,10 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
       let check = this.value; //this is to force a check if changed
       let arr = this.rbObject.get(this.attribute);
       if(Array.isArray(arr)) {
-        return arr;
+        let relarr = this.rbObject.related[this.attribute];
+        if(relarr != null && Array.isArray(relarr)) {
+          return relarr.map(i => i.get(this.displayattribute));
+        }
       }
     }
     return [];
@@ -51,7 +54,7 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
   }
 
   public initEditedValue() {
-    this.editedValue = null;
+    this.editedValue = "";
   }
 
   public getPopupClass() {
@@ -71,14 +74,19 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
 
   public onKeyTyped(keyCode: number) {
     super.onKeyTyped(keyCode);
-    if((keyCode == 8 || keyCode == 27) && this.editedValue == "") {
-      this.finishEditingWithSelection(null);
+    if(keyCode == 8 && this.editedValue == "") {
+      let arr = this.rbObject.get(this.attribute);
+      if(arr.length > 0) {
+        this.rbObject.setValue(this.attribute, arr.slice(0, arr.length - 1));
+      } else {
+        this.finishEditingWithSelection(null);
+      }
     } 
   }
 
  public finishEditingWithSelection(value: any) {
     super.finishEditingWithSelection(value);
-    let arr = this.rbObject.get(this.attribute);
+    let arr = [...this.rbObject.get(this.attribute)];
     if(!Array.isArray(arr)) {
         arr = [];
     }

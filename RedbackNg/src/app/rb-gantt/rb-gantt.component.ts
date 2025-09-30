@@ -12,6 +12,7 @@ import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
 import { Evaluator } from 'app/helpers';
+import { AppInjector } from 'app/app.module';
 
 
 @Component({
@@ -145,7 +146,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onDatasetEvent(event: any) {
-    console.log(event);
     if(event.endsWith('_select') && this.blockNextRefocus == false) {
       this.refocus = true;
     } 
@@ -260,6 +260,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   calc() {
     this.calcParams();
     this.ganttData = this.getLanes();
+    this.logService.debug("Gantt " + this.id + ": calc, lanes: " + this.ganttData.length);
     this.overlayData = this.getOverlayLanes();
     this.marks = this.getMarks();
   }

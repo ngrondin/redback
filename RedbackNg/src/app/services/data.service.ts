@@ -19,6 +19,7 @@ export class DataService {
   fetchCount: number = 0;
   objectUpdateObservers: Observer<RbObject>[] = [];
   deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue();
+  runningFinalization: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -240,46 +241,55 @@ export class DataService {
   }
 
   async finalizeReceipt() {
-    let objectnames = Object.keys(this.deferredFetchQueue.objects);
-    if(objectnames.length > 0) {
-      let objectname = objectnames[0];
-      let deferredObject = this.deferredFetchQueue.get(objectname);
-      let filter = null;
-      let count = 0;
-      if(deferredObject.uids.length > 0) {
-        filter = {uid:{$in: deferredObject.uids.map(u => u.uid)}};
-        count += deferredObject.uids.length;
-      }
-      if(deferredObject.filters.length > 0) {
-        let subfilter = deferredObject.filters.map(f => f.data);
-        filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
-        count += deferredObject.filters.length * 2; //Times 2 in order to allow for domain overridden objects
-      }
-      this.deferredFetchQueue.clear(objectname);
-      this.apiService.streamObjects(objectname, filter, null, null).subscribe(
-        {
-          next: resp => {
-            resp.result.forEach(json => {
-              let obj = this.receive(json);
-              let callbacks = [];
-              let deferredUid = deferredObject.uids.find(u => u.uid == obj.uid);
-              if(deferredUid != null) callbacks.push(...deferredUid.callbacks);
-              let deferredFilters = deferredObject.filters.filter(f => this.filterService.applies(f.data, obj));
-              deferredFilters.forEach(df => callbacks.push(...df.callbacks));
-              callbacks.forEach(cb => cb(obj));
-            });
-          },
-          complete: () => {
-            this.finalizeReceipt();
-          },
-          error: error => {
-            this.logService.error("Error finalizing receipt :" + error);
-          }
+    if(!this.runningFinalization) {
+      this.runningFinalization = true;
+      let objectnames = Object.keys(this.deferredFetchQueue.objects);
+      if(objectnames.length > 0) {
+        let objectname = objectnames[0];
+        let deferredObject = this.deferredFetchQueue.get(objectname);
+        this.logService.debug("Executing deferred request " + objectname + ":" + deferredObject.id);
+        let filter = null;
+        let count = 0;
+        let uids = Object.keys(deferredObject.uids);
+        if(uids.length > 0) {
+          filter = {uid:{$in: uids}};
+          count += uids.length;
         }
-      );
-    } else {
-      this.clientWSService.sendUnsentSubscriptionRequests(); 
-    } 
+        if(deferredObject.filters.length > 0) {
+          let subfilter = deferredObject.filters.map(f => f.data);
+          filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
+          count += deferredObject.filters.length * 2; //Times 2 in order to allow for domain overridden objects
+        }
+        this.deferredFetchQueue.clear(objectname);
+        this.apiService.streamObjects(objectname, filter, null, null).subscribe(
+          {
+            next: resp => {
+              resp.result.forEach(json => {
+                let obj = this.receive(json);
+                let callbacks = [];
+                let deferredUid = deferredObject.uids[obj.uid];
+                if(deferredUid != null) callbacks.push(...deferredUid.callbacks);
+                let deferredFilters = deferredObject.filters.filter(f => this.filterService.applies(f.data, obj));
+                deferredFilters.forEach(df => callbacks.push(...df.callbacks));
+                callbacks.forEach(cb => cb(obj));
+              });
+            },
+            complete: () => {
+              this.logService.debug("Finalized for deferred object " + objectname + ":" + deferredObject.id);
+              this.runningFinalization = false;
+              this.finalizeReceipt();
+            },
+            error: error => {
+              this.logService.error("Error finalizing receipt for " + objectname + " :" + error);
+              this.runningFinalization = false;
+            }
+          }
+        );
+      } else {
+        this.clientWSService.sendUnsentSubscriptionRequests(); 
+        this.runningFinalization = false;
+      } 
+    }
   }
 
   pushToServer(rbObject: RbObject) {
@@ -425,13 +435,12 @@ export class DataService {
 }
 
 type DefferredCallback = (object: RbObject) => void;
+let objId = 0;
 
 class DeferredUid {
-  uid: string;
   callbacks: DefferredCallback[] = [];
 
-  constructor(u: string) {
-    this.uid = u;
+  constructor() {
   }
 }
 
@@ -447,14 +456,15 @@ class DeferredFilter {
 }
 
 class DefferedObject {
-  uids: DeferredUid[] = []; 
+  id: number = objId++;
+  uids: {[key: string]: DeferredUid} = {};
   filters: DeferredFilter[] = []; 
 
   addUid(uid: string, callback: DefferredCallback) {
-    let deferredUid = this.uids.find(u => u.uid == uid);
+    let deferredUid = this.uids[uid];
     if(deferredUid == null) {
-      deferredUid = new DeferredUid(uid);
-      this.uids.push(deferredUid);
+      deferredUid = new DeferredUid();
+      this.uids[uid] = deferredUid;
     }
     deferredUid.callbacks.push(callback);
   }
