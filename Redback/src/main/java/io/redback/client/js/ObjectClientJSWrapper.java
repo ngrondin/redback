@@ -11,8 +11,8 @@ import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.security.Session;
 import io.redback.utils.js.CallableJSWrapper;
-import io.redback.utils.js.Converter;
 import io.redback.utils.js.ObjectJSWrapper;
+import io.redback.utils.stream.ChunkProcessingDataStream;
 import io.redback.utils.stream.ProcessingDataStream;
 
 public class ObjectClientJSWrapper extends ObjectJSWrapper {
@@ -91,6 +91,24 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 					return null;
 				}
 			};
+		} else if(key.equals("streamObjectChunks")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)(arguments[1]);
+					DataMap sort = (DataMap)(arguments[2]);
+					long chunkSize = (long)arguments[3];
+					Function callable = (Function)arguments[4];
+					ChunkProcessingDataStream<RedbackObjectRemote> stream = new ChunkProcessingDataStream<RedbackObjectRemote>((int)chunkSize, new ChunkProcessingDataStream.Processor<RedbackObjectRemote>() {
+						public void process(List<RedbackObjectRemote> list) throws Exception {
+							List<RedbackObjectRemoteJSWrapper> jsList = RedbackObjectRemoteJSWrapper.convertList(list);
+							callable.call(jsList);
+						}});
+					objectClient.streamObjects(session, objectname, filter, sort, false, 50, stream);
+					stream.waitUntilDone();
+					return null;
+				}
+			};			
 		} else if(key.equals("createObject")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

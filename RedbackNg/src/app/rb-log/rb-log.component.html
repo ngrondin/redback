@@ -38,6 +38,11 @@
             class="rb-log-entry"
             [innerHTML]="getEntryForItem(item)">
         </div>
+        <div
+            *ngIf="hasCategory(item)"
+            class="rb-log-category">
+            {{getCategoryForItem(item)}}
+        </div>
     </div >
 
 </div>

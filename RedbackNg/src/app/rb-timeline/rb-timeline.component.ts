@@ -17,7 +17,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
   @Input('datefocus') datefocus: boolean = false;
   @Input('wide') wide: boolean = false;
   @Input('showmorelevel') showmorelevel: number = 1;
-  //@Output() navigate: EventEmitter<any> = new EventEmitter();
+
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
 
   entries: TimelineEntry[] = [];
@@ -34,7 +34,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
   }
 
   dataCalcInit() {
-    this.showLevel = (this.showmorelevel - 1) ?? 0;
+    this.showLevel = this.showmorelevel - 1;
   }
 
   dataCalcDestroy() {

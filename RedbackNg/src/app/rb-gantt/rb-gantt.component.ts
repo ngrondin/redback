@@ -394,26 +394,39 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   private groupOverlappingSpreads(spreads) {
+    let nextid = 0;
     let out = [];
     let groups = [];
     let groupmap = {};
     for(var spread of spreads) {
       if(spread.config.isBackground == false) {
-        let found = false;
-        for(var group of groups) {
+        let firstGroupFound = null;
+        for(var i = 0; i < groups.length; i++) {
+          var group = groups[i];
           if(spread.config == group.config && spread.start < group.start + group.width && group.start < spread.start + spread.width) {
-            let newstart = Math.min(group.start, spread.start);
-            let newend = Math.max(group.start + group.width, spread.start + spread.width);
-            group.start = newstart;
-            group.width = newend - newstart;
-            groupmap[group.id] = groupmap[group.id] + 1;
-            group.label = groupmap[group.id] + " items";
-            found = true;
-            break;
+            if(firstGroupFound == null) {
+              firstGroupFound = group;
+              let newstart = Math.min(group.start, spread.start);
+              let newend = Math.max(group.start + group.width, spread.start + spread.width);
+              group.start = newstart;
+              group.width = newend - newstart;
+              groupmap[group.id] = groupmap[group.id] + 1;
+              group.label = groupmap[group.id] + " items";
+            } else {
+              let newstart = Math.min(group.start, firstGroupFound.start);
+              let newend = Math.max(group.start + group.width, firstGroupFound.start + firstGroupFound.width);
+              firstGroupFound.start = newstart;
+              firstGroupFound.width = newend - newstart;
+              groupmap[firstGroupFound.id] = groupmap[firstGroupFound.id] + groupmap[group.id];
+              firstGroupFound.label = groupmap[firstGroupFound.id] + " items";
+              groups.splice(i, 1);
+              i--;
+            }
           }
         }
-        if(!found) {
-          let group = new GanttSpread(groups.length.toString(), "1 item", spread.start, spread.width, spread.laneId, 'var(--primary-light-color)', '#333', false, false, null, spread.config);
+        if(firstGroupFound == null) {
+          let id = nextid++;
+          let group = new GanttSpread(id.toString(), "1 item", spread.start, spread.width, spread.laneId, 'var(--primary-light-color)', '#333', false, false, null, spread.config);
           groupmap[group.id] = 1
           groups.push(group);
           out.push(group);

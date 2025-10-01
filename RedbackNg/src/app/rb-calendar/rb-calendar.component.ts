@@ -9,6 +9,7 @@ import { FilterService } from 'app/services/filter.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { CalendarSeriesConfig, CalendarEntry } from './rb-calendar-models';
 import { NavigateService } from 'app/services/navigate.service';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'rb-calendar',
@@ -17,7 +18,7 @@ import { NavigateService } from 'app/services/navigate.service';
 })
 export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfig>  implements RbSearchTarget {
   @Input('layers') layers: any[];
-  @Input('filter') filterConfig: any;
+  @Input('filter') _filterConfig: any;
   //@Output() navigate: EventEmitter<any> = new EventEmitter();
 
   _mode: string;
@@ -155,6 +156,13 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     }
     this.userprefService.setUISwitch('user', 'calendar', this.id, {layer: val});
     this.updateData(true);
+  }
+
+  get filterConfig(): any {
+    let activeObjectNames = this._activeDatasets.map(ds => this.datasetgroup.datasets[ds].objectname);
+    let fc = {...this._filterConfig};
+    fc.attributes = fc.attributes.filter(a => activeObjectNames.indexOf(a.object) > -1);
+    return fc;
   }
 
   findStartOfTheWeek(dt: Date) : Date {
@@ -349,12 +357,20 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   public getSearchTargetType(): string {
     return "calendar";
   }
+  
   public getObjectName(): string {
     return null;
   }
+
   public getUserFilter() {
-    return null
+    let filter = {};
+    let datasets = this._activeDatasets.map(ds => this.datasetgroup.datasets[ds]);
+    for(var ds of datasets) {
+      filter = this.filterService.mergeFilters(filter, ds.userFilter);
+    }
+    return filter;    
   }
+
   public getUserSort() {
     return null;
   }

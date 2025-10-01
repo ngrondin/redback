@@ -23,6 +23,12 @@ public class UserProfileJSWrapper extends ObjectJSWrapper
 					return userProfile.getUsername();
 				}
 			};
+		} else if(key.equals("getRoles")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return userProfile.getRoles();
+				}
+			};			
 		} else if(key.equals("getAttribute")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

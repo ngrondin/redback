@@ -6,6 +6,7 @@ import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { Observable, Subscription } from 'rxjs';
 import { Observer } from 'rxjs';
 import { RbSearchTarget } from 'app/rb-search/rb-search-target';
+import { FilterService } from 'app/services/filter.service';
 
 export type DatasetMap = {
   [key: string]: RbDatasetComponent;
@@ -25,7 +26,9 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
   _selectedObject: RbObject;
   private observers: Observer<string>[] = [];
   
-  constructor() {
+  constructor(
+    public filterService: FilterService
+  ) {
     super();
   }
   
@@ -148,7 +151,11 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
   }
 
   public getUserFilter() {
-    return null;
+    let filter = {};
+    for(var dsId of Object.keys(this.datasets)) {
+      filter = this.filterService.mergeFilters(filter, this.datasets[dsId].userFilter);
+    }
+    return filter;
   }
 
   public getUserSort() {

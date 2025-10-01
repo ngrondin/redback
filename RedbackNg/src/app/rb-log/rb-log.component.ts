@@ -17,6 +17,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('dateattribute') dateattribute: string;
   @Input('entryattribute') entryattribute: string;
   @Input('categoryattribute') categoryattribute: string;
+  @Input('categories') categories: any;
   @Input('editable') editable: any;
   @Input('linkobjectattribute') linkobjectattribute: string;
   @Input('linkuidattribute') linkuidattribute: string;
@@ -60,6 +61,10 @@ export class RbLogComponent extends RbDataObserverComponent {
     return this.linkobjectattribute != null && this.linkuidattribute != null;
   }
 
+  hasCategory(object: RbObject): boolean {
+    return this.categoryattribute != null && object.get(this.categoryattribute) != null;
+  }
+
   getUserForItem(object: RbObject) : string {
     let str: string = object.get(this.userattribute); 
     if(str == null || (str != null && str.length == 0)) {
@@ -84,6 +89,14 @@ export class RbLogComponent extends RbDataObserverComponent {
       str = "";
     } else {
       str = str.split('\r\n').join('<br>').split('\n').join('<br>').split('\t').join('&nbsp;&nbsp;');
+    }
+    return str;
+  }
+
+  getCategoryForItem(object: RbObject) : string {
+    let str:string = null;
+    if(this.categoryattribute != null) {
+      str = object.get(this.categoryattribute); 
     }
     return str;
   }

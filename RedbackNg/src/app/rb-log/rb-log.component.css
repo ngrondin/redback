@@ -27,8 +27,8 @@
     display: flex;
     flex-direction: column;
     border-radius: 3px;
-    margin: 8px 0px 5px 0px;
-    padding: var(--v12px);
+    margin: var(--v8px) 0px var(--v5px) 0px;
+    padding: var(--v10px);
     background-color: #fcfcfc;
     border: 1px solid #dfdfdf;
     -ms-user-select:text;
@@ -43,12 +43,10 @@
 .rb-log-header {
     display: flex;
     flex-direction: row;
-    height: 24px;
 }
 
 .rb-log-name {
     display: inline-block;
-    height:24px;
     color: #aaa;
     font-size: 0.8rem;
     flex: 1 1 auto;
@@ -59,13 +57,20 @@
 
 .rb-log-date {
     display: inline-block;
-    height:24px;
     color: #aaa;
     font-size: 0.8rem;
     flex: 0 0 auto;
-    margin-left: 10px;
+    margin-left: var(--v10px);
 }
 
 .rb-log-entry {
     display: flex;
+    margin: var(--v5px) 0px;
+}
+
+.rb-log-category {
+    display: inline-block;
+    color: #aaa;
+    font-size: 0.8rem;
+    flex: 0 0 auto;
 }

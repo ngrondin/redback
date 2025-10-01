@@ -15,6 +15,8 @@ import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.Converter;
 import io.redback.utils.js.ObjectJSWrapper;
 import io.redback.utils.stream.AccumulatingDataStream;
+import io.redback.utils.stream.ChunkProcessingDataStream;
+import io.redback.utils.stream.ProcessingDataStream;
 
 public class ObjectManagerJSWrapper extends ObjectJSWrapper
 {
@@ -66,7 +68,41 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					List<RedbackObject> list = stream.getList();
 					return RedbackObjectJSWrapper.convertList(list);
 				}
-			};		
+			};	
+		} else if(key.equals("streamObjects")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)(arguments[1]);
+					DataMap sort = (DataMap)(arguments[2]);
+					Function callable = (Function)arguments[3];
+					ProcessingDataStream<RedbackObject> stream = new ProcessingDataStream<RedbackObject>(new ProcessingDataStream.Processor<RedbackObject>() {
+						public void process(RedbackObject object) throws Exception {
+							callable.call(new RedbackObjectJSWrapper(object));
+						}});
+					objectManager.streamObjects(session, objectname, filter, null, sort, 50, 0, stream);
+					stream.waitUntilDone();
+					return null;
+				}
+			};
+		} else if(key.equals("streamObjectChunks")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String objectname = (String)arguments[0];
+					DataMap filter = (DataMap)(arguments[1]);
+					DataMap sort = (DataMap)(arguments[2]);
+					long chunkSize = (long)arguments[3];
+					Function callable = (Function)arguments[4];
+					ChunkProcessingDataStream<RedbackObject> stream = new ChunkProcessingDataStream<RedbackObject>((int)chunkSize, new ChunkProcessingDataStream.Processor<RedbackObject>() {
+						public void process(List<RedbackObject> list) throws Exception {
+							List<RedbackObjectJSWrapper> jsList = RedbackObjectJSWrapper.convertList(list);
+							callable.call(jsList);
+						}});
+					objectManager.streamObjects(session, objectname, filter, null, sort, 50, 0, stream);
+					stream.waitUntilDone();
+					return null;
+				}
+			};				
 		} else if(key.equals("getRelatedObjectList")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

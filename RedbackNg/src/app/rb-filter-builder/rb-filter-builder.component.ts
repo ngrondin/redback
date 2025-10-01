@@ -308,9 +308,11 @@ export class RbFilterBuilderComponent implements OnInit {
         let list = [];
         for(let key in subfilter) {
           let fac: FilterAttributeConfig = this.filterConfig.getAttributeConfig(key);
-          let fic = new FilterItemConstruct(fac, subfilter[key]);
-          list.push(fic);
-          this.loadOptionsFor(fac);
+          if(fac != null) {
+            let fic = new FilterItemConstruct(fac, subfilter[key]);
+            list.push(fic);
+            this.loadOptionsFor(fac);
+          }
         }
         this.filterConstructs.push(list);
       }
