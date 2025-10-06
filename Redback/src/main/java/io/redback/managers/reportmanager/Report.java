@@ -1,10 +1,12 @@
 package io.redback.managers.reportmanager;
 
+import java.util.List;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 
-import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
+import io.redback.utils.ReportFilter;
 
 public abstract class Report {
 	protected Session session;
@@ -18,7 +20,7 @@ public abstract class Report {
 		reportConfig = rc;
 	}
 	
-	public abstract void produce(String object, DataMap filter, String search) throws RedbackException;
+	public abstract void produce(List<ReportFilter> filters) throws RedbackException;
 	
 	public abstract String getMime();
 	

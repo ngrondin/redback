@@ -61,7 +61,6 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
         }
     }
 
-
     get activeSeries() : T[] {
         return this.seriesConfigs.filter(item => item.active);
     }
@@ -73,10 +72,12 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             let fetched = true;
             for(let cfg of this.activeSeries) {
               let filterSort = this.getFilterSortForSeries(cfg);
-              if(this.datasetgroup != null) {
-                fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort);
-              } else {
-                fetched = fetched && this.dataset.filterSort(filterSort);
+              if(filterSort != null) {
+                if(this.datasetgroup != null) {
+                    fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort);
+                } else {
+                    fetched = fetched && this.dataset.filterSort(filterSort);
+                }
               }
             }
             fetched = fetched && this.updateOtherData();

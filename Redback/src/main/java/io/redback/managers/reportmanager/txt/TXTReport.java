@@ -2,9 +2,9 @@ package io.redback.managers.reportmanager.txt;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import io.firebus.data.DataMap;
 import io.firebus.script.Function;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.exceptions.RedbackException;
@@ -13,6 +13,7 @@ import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
+import io.redback.utils.ReportFilter;
 
 public class TXTReport extends Report {
 	protected ByteArrayOutputStream baos;
@@ -27,15 +28,19 @@ public class TXTReport extends Report {
 		}
 	}
 
-	public void produce(String object, DataMap filter, String search) throws RedbackException {
+	public void produce(List<ReportFilter> filters) throws RedbackException {
 		try {
 			baos = new ByteArrayOutputStream();
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("session", new SessionJSWrapper(session));
 			context.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));
-			context.put("filterobjectname", object);
-			context.put("filter", filter);
-			context.put("search", search);
+			if(filters.size() >= 1) {
+				context.put("filterobjectname", filters.get(0).object);
+				context.put("filter", filters.get(0).filter);
+				context.put("search", filters.get(0).search);
+				context.put("uid", filters.get(0).uid);
+			}
+			context.put("sets", ReportFilter.convertToDataList(filters));
 			Object out = script.call(context);
 			baos.write(out.toString().getBytes());
 		} catch(Exception e) {

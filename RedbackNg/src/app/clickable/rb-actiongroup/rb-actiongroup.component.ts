@@ -271,7 +271,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         });
     } else {
       this.running = true;
-      this.actionService.action(this.dataset, action.action, action.target, action.param, null, action.confirm, action.timeout).subscribe().add(() => {
+      this.actionService.action(this.dataset, this.datasetgroup, action.action, action.target, action.param, null, action.confirm, action.timeout).subscribe().add(() => {
         this.running = false;
       });
     }

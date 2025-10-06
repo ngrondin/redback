@@ -1,5 +1,6 @@
 package io.redback.utils.js;
 
+import java.awt.image.BufferedImage;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -238,7 +239,16 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 						throw new RuntimeException("Error while running regex group", e);
 					}
 				}	
-			};				
+			};	
+		} else if(key.equals("createImage")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					long w = (long)arguments[0];
+					long h = (long)arguments[1];
+					BufferedImage image = new BufferedImage((int)w, (int)h, BufferedImage.TYPE_INT_ARGB);
+					return new BufferedImageJSWrapper(image);
+				}	
+			};			
 		} else {	
 			return null;
 		}

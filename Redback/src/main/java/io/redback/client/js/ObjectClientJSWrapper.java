@@ -141,12 +141,19 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 		} else if(key.equals("execute")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					String objectname = (String)arguments[0];
-					String uid = (String)arguments[1];
-					String function = (String)arguments[2];
-					DataMap data = arguments.length > 3 ? (DataMap)(arguments[3]) : null;
-					objectClient.execute(session, objectname, uid, function, data);
-					return null;
+					Object ret = null;
+					if(arguments.length >= 3) {
+						String objectname = (String)arguments[0];
+						String uid = (String)arguments[1];
+						String function = (String)arguments[2];
+						DataMap data = arguments.length > 3 ? (DataMap)(arguments[3]) : null;
+						ret = objectClient.execute(session, objectname, uid, function, data);						
+					} else if(arguments.length >= 1) {
+						String function = (String)arguments[0];
+						DataMap data = arguments.length > 1 ? (DataMap)(arguments[1]) : null;
+						ret = objectClient.execute(session, function, data);						
+					}
+					return ret;
 				}
 			};		
 		} else if(key.equals("multi")) {

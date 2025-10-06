@@ -49,6 +49,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   dayNames: String[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  _zooms: any[] = [{label:"12 Hours", val:43200000}, {label:"1 Day", val:86400000}, {label:"2 Days", val:172800000}, {label:"3 Days", val:259200000}, {label:"7 Days", val:604800000}];
+  _spans: any[] = [{label:"12 Hours", val:43200000}, {label:"1 Day", val:86400000}, {label:"3 Days", val:259200000}, {label:"7 Days", val:604800000}, {label:"14 Days", val:1209600000}];
   labelAlts: any[] = [];
   ganttData: GanttLane[];
   marks: GanttMark[] = [];
@@ -81,7 +83,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
     this.droppedOutCallback = this.droppedOut.bind(this);
     this.spanMS = 259200000;
-    this.zoomMS = 259200000;
+    this.zoomMS = 172800000;
     for(var cfg of this.seriesConfigs)
       for(var alt of (cfg.labelAlts ?? []))
         this.labelAlts.push({name: alt.name, label: "Use Label '" + alt.name + "'"});
@@ -150,6 +152,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       this.refocus = true;
     } 
     super.onDatasetEvent(event);
+    if(event == 'group_' + this.lanesConfig.dataset + '_load') {
+      super.updateData(true)
+    } 
   }
 
   onDragEvent(event: any) {
@@ -196,6 +201,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return this.groupOverlaps == false ? this.labelAlts.filter(a => a.name != this.selectedLabelAlt) : [];
   }
 
+  get zooms() : any[] {
+    return this._zooms.filter(z => z.val <= this.spanMS);
+  }
+
+  get spans() : any[] {
+    return this._spans;
+  }
+
   setZoom(ms: number) {
     this.zoomMS = ms;
     this.updateData(false);
@@ -203,6 +216,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   setSpan(ms: number) {
     this.spanMS = ms;
+    if(this.zoomMS > this.spanMS) this.zoomMS = this.spanMS;
     this.updateData(true);
   }
 
@@ -223,7 +237,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   updateOtherData() {
     let fetched = true;
     for(var cfg of this.overlayConfigs) {
-      let filterSort = this.getFilterSort(cfg.startAttribute, cfg.endAttribute);
+      let filterSort = this.getFilterSort(cfg.startAttribute, cfg.endAttribute, null);
       if(this.datasetgroup != null) {
         fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort);
       } else {
@@ -234,10 +248,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   getFilterSortForSeries(cfg: GanttSeriesConfig) : any {
-    return this.getFilterSort(cfg.startAttribute, cfg.endAttribute);
+    return this.getFilterSort(cfg.startAttribute, cfg.endAttribute, cfg.laneAttribute);
   }
 
-  getFilterSort(startAttribute: string, endAttribute: string) {
+  getFilterSort(startAttribute: string, endAttribute: string, laneAttribute: string) {
     let startDate = this.startDate;
     let endDate = new Date(this.startDate.getTime() + this.spanMS);
     let filter = {};
@@ -253,6 +267,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         $gt: "'" + startDate.toISOString() + "'",
         $lt: "'" + endDate.toISOString() + "'"
       }
+    }
+    if(laneAttribute != null) {
+      let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
+      if(list.length == 0) return null;
+      filter[laneAttribute] = {$in: list.map(obj => "'" + obj.uid + "'")}
     }
     return {filter:filter};
   }
@@ -271,7 +290,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
     this.startMS = this.startDate != null ? this.startDate.getTime() : (new Date()).getTime();
     this.endMS = this.startMS + this.spanMS;
-    this.multiplier = window.innerWidth / this.zoomMS;
+    this.multiplier = this.mainscroll.element.nativeElement.offsetWidth / this.zoomMS;
     this.widthPX = this.spanMS * this.multiplier;
     this.markMajorIntervalMS = 3600000;
     this.markMinorIntervalMS = 900000;

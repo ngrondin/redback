@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, EventEmitter, HostListener, Output, ViewChild, ViewContainerRef } from '@angular/core';
+import { AfterContentInit, Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, ViewContainerRef } from '@angular/core';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 
 @Component({
@@ -23,6 +23,12 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
   @ViewChild('content', { read: ViewContainerRef, static: true }) content: ViewContainerRef;
   @Output() rbscroll: EventEmitter<any> = new EventEmitter();
   
+  constructor(
+    public element: ElementRef
+  ) {
+    super();
+  }
+
   ngAfterContentInit() {
     this.contentInitiated = true;    
     (new ResizeObserver((entries) => this.onResize(entries))).observe(this.scroller.element.nativeElement);

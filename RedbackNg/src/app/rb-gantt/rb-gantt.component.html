@@ -10,8 +10,9 @@
         *ngIf="locktonow == false"
         class="rb-gantt-header-dateinput"
         [margin]="false"
-        [format]="'YYYY-MM-DD'"
+        [format]="'YYYY-MM-DD HH:MI'"
         [(value)]="startDate"
+        [size]="12"
         [tip]="'Set the start of the gantt view'">
     </rb-datetime-input>
     <rb-button
@@ -21,10 +22,14 @@
         [tip]="'Change the time zoom of the Gantt'">
     </rb-button>
     <mat-menu #zoomMenu="matMenu">
-        <button mat-menu-item (click)="setZoom(43200000)">12 Hours</button>
-        <button mat-menu-item (click)="setZoom(86400000)">1 Day</button>
-        <button mat-menu-item (click)="setZoom(259200000)">3 Days</button>
-        <button mat-menu-item (click)="setZoom(604800000)">7 Days</button>
+        <button 
+            mat-menu-item 
+            *ngFor="let item of zooms" 
+            (click)="setZoom(item.val)"
+            [style.background-color]="zoomMS == item.val ? 'var(--primary-color)' : null"
+            [style.color]="zoomMS == item.val ? 'white' : 'inherit'">
+            {{item.label}}
+        </button>
     </mat-menu>    
     &nbsp;
     <rb-button
@@ -34,9 +39,14 @@
         [tip]="'Change the time span of the Gantt'">   
     </rb-button>
     <mat-menu #spanMenu="matMenu">
-        <button mat-menu-item (click)="setSpan(259200000)">3 Days</button>
-        <button mat-menu-item (click)="setSpan(604800000)">7 Days</button>
-        <button mat-menu-item (click)="setSpan(1209600000)">14 Days</button>
+        <button 
+            mat-menu-item 
+            *ngFor="let item of spans" 
+            (click)="setSpan(item.val)"
+            [style.background-color]="spanMS == item.val ? 'var(--primary-color)' : null"
+            [style.color]="spanMS == item.val ? 'white' : 'inherit'">
+            {{item.label}}
+        </button>
     </mat-menu>    
     &nbsp;
     <rb-button
@@ -174,7 +184,8 @@
         <div
             class="rb-gantt-lanes"
             [style.width.px]="widthPX"
-            [style.height.vw]="heightVW">
+            [style.height.vw]="heightVW"
+            #lanescontainer>
             <div
                 class="rb-gantt-laneslayer">
                 <div

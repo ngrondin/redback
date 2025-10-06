@@ -9,9 +9,6 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
   styleUrls: ['./rb-vsection.component.css']
 })
 export class RbVsectionComponent extends RbContainerComponent implements OnInit {
-  constructor() {
-    super();
-  }
 
   containerInit() {
   }

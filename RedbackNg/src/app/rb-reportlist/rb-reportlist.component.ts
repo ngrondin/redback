@@ -31,11 +31,12 @@ export class RbReportlistComponent implements OnInit {
   }
 
   public launch(report: any) {
-    if(this.data.selectedFilter != null) {
-      this.reportService.launchReport(report.name, report.domain, this.data.objectname, this.data.selectedFilter, null);
+    this.reportService.launchReport(report.name, report.domain, this.data.filterData);
+    /*if(this.data.selectedFilter != null) {
+      this.reportService.launchReport(report.name, report.domain, this.data.filterData);
     } else if(this.data.allFilter != null) {
       this.reportService.launchReport(report.name, report.domain, this.data.objectname, this.data.allFilter, this.data.search);
-    }
+    }*/
     this.dialogRef.close();
   }
 

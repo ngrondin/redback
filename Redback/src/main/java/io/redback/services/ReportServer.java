@@ -1,19 +1,21 @@
 package io.redback.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
-import io.firebus.information.ServiceInformation;
-import io.firebus.logging.Logger;
 import io.firebus.data.DataException;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.information.ServiceInformation;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
+import io.redback.utils.ReportFilter;
 
 public abstract class ReportServer extends AuthenticatedServiceProvider {
 
@@ -36,18 +38,31 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 			String object = request.getString("object");
 			DataMap filter = request.containsKey("filter") ? (request.get("filter") instanceof DataMap ? request.getObject("filter") : new DataMap(request.getString("filter"))) : null;
 			String search = request.getString("search");
+			String uid = request.getString("uid");
+			DataList sets = request.containsKey("sets") ? (request.get("sets") instanceof DataList ? request.getList("sets") : new DataList(request.getString("sets"))) : null;
+			List<ReportFilter> reportFilters = new ArrayList<ReportFilter>();
+			if(sets != null) {
+				for(int i = 0; i < sets.size(); i++) {
+					DataMap setItem = sets.getObject(i);
+					ReportFilter reportFilter = new ReportFilter(setItem.getString("object"), setItem.getObject("filter"), setItem.getString("search"), setItem.getString("uid"));
+					reportFilters.add(reportFilter);
+				}
+			} else {
+				ReportFilter reportFilter = new ReportFilter(object, filter, search, uid);
+				reportFilters.add(reportFilter);
+			}
 			if(action == null) 
 				action = "produce";
 			if(timezone != null)
 				session.setTimezone(timezone);
 			
 			if(action.equals("produce")) {
-				Report report = produce(session, reportName, object, filter, search);
+				Report report = produce(session, reportName, reportFilters);
 				response = new Payload(report.getBytes());
 				response.metadata.put("mime", report.getMime());
 				response.metadata.put("filename", report.getFilename());
 			} else if(action.equals("producestore")) {
-				String fileUid = produceAndStore(session, reportName, object, filter, search);
+				String fileUid = produceAndStore(session, reportName, reportFilters);
 				response = new Payload(new DataMap("fileuid", fileUid));
 			} else if(action.equals("list")) {
 				List<ReportInfo> reports = list(session, category);
@@ -78,9 +93,9 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 	
-	protected abstract Report produce(Session session, String name, String object, DataMap filter, String search) throws RedbackException;
+	protected abstract Report produce(Session session, String name, List<ReportFilter> filters) throws RedbackException;
 	
-	protected abstract String produceAndStore(Session session, String name, String object, DataMap filter, String search) throws RedbackException;
+	protected abstract String produceAndStore(Session session, String name, List<ReportFilter> filters) throws RedbackException;
 	
 	protected abstract List<ReportInfo> list(Session session, String category) throws RedbackException;
 	

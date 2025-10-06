@@ -10,6 +10,7 @@ import { FilterService } from './filter.service';
 import { ModalService } from './modal.service';
 import { ReportService } from './report.service';
 import { RbObject } from 'app/datamodel';
+import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,7 @@ export class ActionService {
   ) { }
 
 
-  public action(dataset: RbDatasetComponent, action: string, target: string, param: any, extraContext?: any, confirm?: string, timeout?: number) : Observable<any> {
+  public action(dataset: RbDatasetComponent, datasetgroup: RbDatasetGroupComponent, action: string, target: string, param: any, extraContext?: any, confirm?: string, timeout?: number) : Observable<any> {
     if(confirm == null) {
       let _action: string = action.toLowerCase();
       if(_action == 'create') {
@@ -43,7 +44,7 @@ export class ActionService {
       } else if(_action == 'reportall') {
         return this.reportAll(dataset, (target ?? param));
       } else if(_action == 'reportlist') {
-        return this.reportList(dataset, (target ?? param));
+        return this.reportList(dataset, datasetgroup, (target ?? param));
       } else if(_action == 'execute') {
         return this.execute(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executeall') {
@@ -69,7 +70,7 @@ export class ActionService {
       return new Observable((observer) => {
         this.dialogService.openDialog(confirm, [
           {label:"Ok", callback:() => {
-            this.action(dataset, action, target, param, extraContext, null, timeout).subscribe(() => observer.complete());
+            this.action(dataset, datasetgroup, action, target, param, extraContext, null, timeout).subscribe(() => observer.complete());
           }}, 
           {label:"Cancel", callback:() => {
             observer.complete();
@@ -138,7 +139,8 @@ export class ActionService {
   public report(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
     return new Observable((observer) => {
       if(dataset.selectedObject != null) {
-        this.reportService.launchReport(reportName, null, dataset.objectname, {"uid": dataset.selectedObject.uid}, null);
+        let filterData = {object: dataset.objectname, filter: {uid:dataset.selectedObject.uid}, uid: dataset.selectedObject.uid};
+        this.reportService.launchReport(reportName, null, filterData);
       }
       observer.next(null);
       observer.complete(); 
@@ -147,16 +149,28 @@ export class ActionService {
 
   public reportAll(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
     return new Observable((observer) => {
-      this.reportService.launchReport(reportName, null, dataset.objectname, dataset.resolvedFilter, dataset.userSearch);
+      let filterData = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
+      this.reportService.launchReport(reportName, null, filterData);
       observer.next(null);
       observer.complete();   
     });
   }
 
-  public reportList(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
+  public reportList(dataset: RbDatasetComponent, datasetgroup: RbDatasetGroupComponent, category: string) : Observable<null> {
     return new Observable((observer) => {
-      const selectedFilter = dataset.selectedObject != null ? {"uid": dataset.selectedObject.uid} : null;
-      this.reportService.popupReportList(reportName, dataset.objectname, selectedFilter, dataset.resolvedFilter, dataset.userSearch);
+      let filterData = null;
+      if(datasetgroup != null) {
+        filterData = Object.keys(datasetgroup.datasets).map(ds => {
+          let dataset = datasetgroup.datasets[ds];
+          let fd = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
+          if(dataset.selectedObject != null) fd['uid'] = dataset.selectedObject.uid;
+          return fd;
+        });
+      } else if(dataset != null) {
+        filterData = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
+        if(dataset.selectedObject != null) filterData.uid = dataset.selectedObject.uid;
+      }
+      this.reportService.popupReportList(category, filterData);
       observer.next(null);
       observer.complete();
     });

@@ -10,6 +10,7 @@ import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
 import io.redback.services.ReportServer;
+import io.redback.utils.ReportFilter;
 
 public class RedbackReportServer extends ReportServer {
 	
@@ -24,12 +25,12 @@ public class RedbackReportServer extends ReportServer {
 		reportManager.clearCaches();	
 	}
 
-	protected Report produce(Session session, String name, String object, DataMap filter, String search) throws RedbackException {
-		return reportManager.produce(session, name, object, filter, search);
+	protected Report produce(Session session, String name, List<ReportFilter> filters) throws RedbackException {
+		return reportManager.produce(session, name, filters);
 	}
 
-	protected String produceAndStore(Session session, String name, String object, DataMap filter, String search) throws RedbackException {
-		return reportManager.produceAndStore(session, name, object, filter, search);
+	protected String produceAndStore(Session session, String name, List<ReportFilter> filters) throws RedbackException {
+		return reportManager.produceAndStore(session, name, filters);
 	}
 
 	protected List<ReportInfo> list(Session session, String category) throws RedbackException {

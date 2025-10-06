@@ -1,4 +1,4 @@
-import { Input, ViewChild } from "@angular/core";
+import { ElementRef, Input, ViewChild } from "@angular/core";
 import { Component } from "@angular/core";
 import { HostBinding } from "@angular/core";
 import { OnInit, AfterViewInit, ViewContainerRef } from "@angular/core";
@@ -20,10 +20,6 @@ export abstract class RbContainerComponent extends RbDataObserverComponent {
     @HostBinding('style.height') get containerheight() { return (this.height != null ? ((0.88 * this.height) + 'vw'): null);}
     @HostBinding('style.background-color') get backgroundColor() { return this.color != null ? this.color : null;}
 
-    constructor() {
-        super();
-    }
-  
     dataObserverInit(): void {
         this.containerInit();
     }

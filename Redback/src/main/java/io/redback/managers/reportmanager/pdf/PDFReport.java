@@ -18,17 +18,21 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
+import io.redback.utils.ReportFilter;
 
 public class PDFReport extends Report {
 	protected PDDocument document;
 	protected List<Unit> rootUnits;
 	protected List<Unit> headerUnits;	
 	protected List<Unit> footerUnits;
+	protected float pageLongSide = 792;
+	protected float pageShortSide = 612;
 	protected float pageHeight = 792;
 	protected float pageWidth = 612;
 	protected float marginTop = 50;
@@ -67,15 +71,31 @@ public class PDFReport extends Report {
 				if(layout.containsKey("margin")) {
 					marginTop = marginBottom = marginLeft = marginRight = layout.getNumber("margin").floatValue();
 				} 
+				if(layout.containsKey("size")) {
+					String size = layout.getString("size");
+					if(size.equals("A4")) {
+						pageLongSide = 841;
+						pageShortSide = 595;
+					} else if(size.equals("A3")) {
+						pageLongSide = 1190;
+						pageShortSide = 841;
+					} else if(size.equals("letter")) {
+						pageLongSide = 792;
+						pageShortSide = 612;
+					} 
+				}
 				if(layout.containsKey("page")) {
 					String page = layout.getString("page");
 					if(page.equals("portrait")) {
-						pageHeight = 792;
-						pageWidth = 612;
+						pageHeight = pageLongSide;
+						pageWidth = pageShortSide;
 					} else if(page.equals("landscape")) {
-						pageHeight = 612;
-						pageWidth = 792;					
+						pageHeight = pageShortSide;
+						pageWidth = pageLongSide;					
 					}
+				} else {
+					pageHeight = pageLongSide;
+					pageWidth = pageShortSide;
 				}
 			}
 		} catch(Exception e) {
@@ -83,13 +103,18 @@ public class PDFReport extends Report {
 		}
 	}
 	
-	public void produce(String object, DataMap filter, String search) throws RedbackException {
+	public void produce(List<ReportFilter> filters) throws RedbackException {
 		try {			
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("session", session);
-			context.put("filterobjectname", object);
-			context.put("filter", filter);
-			context.put("search", search);
+			context.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));	
+			if(filters.size() >= 1) {
+				context.put("filterobjectname", filters.get(0).object);
+				context.put("filter", filters.get(0).filter);
+				context.put("search", filters.get(0).search);
+				context.put("uid", filters.get(0).uid);
+			}
+			context.put("sets", ReportFilter.convertToDataList(filters));
 			context.put("document", document);
 			Box header = Box.VContainer(true);
 			if(headerUnits != null) {
@@ -144,6 +169,7 @@ public class PDFReport extends Report {
 						pages.add(remainder);
 					i++;
 				}
+				if(top.height == 0) break; //It couldn't cut what's left
 			}			
 		}
 		return pages;

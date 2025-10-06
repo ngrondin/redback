@@ -114,8 +114,8 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
     return null;
   }
 
-  public groupMemberEvent(name: string, event: string) {
-    this.publishEvent('group_' + name + "_" + event);
+  public groupMemberEvent(id: string, event: string) {
+    this.publishEvent('group_' + id + "_" + event);
   }
 
   public publishEvent(event: string) {

@@ -1,8 +1,9 @@
-import { AfterViewInit } from "@angular/core";
+import { AfterViewInit, ElementRef } from "@angular/core";
 import { Component } from "@angular/core";
 import { Input, OnInit } from "@angular/core";
 import { Subscription } from "rxjs";
 import { RbActivatorComponent } from "./rb-activator";
+import { AppInjector } from "app/app.module";
 
 @Component({template: ''})
 export abstract class RbComponent implements OnInit {
@@ -12,8 +13,7 @@ export abstract class RbComponent implements OnInit {
     public initiated: boolean = false;
     private activatorSubscription: Subscription;
 
-    constructor() { 
-    }
+    constructor() {}
   
     ngOnInit(): void {
       if(this.activator != null) {

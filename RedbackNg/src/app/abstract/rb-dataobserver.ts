@@ -27,10 +27,6 @@ export abstract class RbDataObserverComponent extends RbComponent {
     public aggregatesetSubscription: Subscription;
     public show: boolean = true;
 
-    constructor() {
-        super();
-    }
-
     componentInit() {
         this.globalSubscription = window.redback.getObservable().subscribe(event => this.internalDatasetEvent(event));
         if(this.dataset != null) {

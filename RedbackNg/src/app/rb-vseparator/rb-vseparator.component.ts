@@ -8,10 +8,6 @@ import { RbComponent } from 'app/abstract/rb-component';
 })
 export class RbVseparatorComponent extends RbComponent {
   
-  constructor() {
-    super();
-  }
-
   componentInit() {
   }
 

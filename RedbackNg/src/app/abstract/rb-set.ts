@@ -12,10 +12,6 @@ export abstract class RbSetComponent extends RbContainerComponent {
     @Input('ignoretarget') ignoretarget: boolean = false;
   
     dataTarget: DataTarget;
-    
-    constructor() {
-        super();
-    }
   
     containerInit(): void {
         this.setInit();

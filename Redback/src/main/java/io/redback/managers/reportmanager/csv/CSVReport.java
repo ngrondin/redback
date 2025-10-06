@@ -28,6 +28,7 @@ import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
+import io.redback.utils.ReportFilter;
 
 public class CSVReport extends Report {
 	protected String object;
@@ -75,13 +76,17 @@ public class CSVReport extends Report {
 		}
 	}
 
-	public void produce(String filterObject, DataMap filter, String search) throws RedbackException {
+	public void produce(List<ReportFilter> filters) throws RedbackException {
 		try {
 			ObjectClient oc = reportManager.getObjectClient();
 			Map<String, Expression> exprCache = new HashMap<String, Expression>();
-			baseContext.declare("filterobjectname", filterObject);
-			baseContext.declare("filter", filter);
-			baseContext.declare("search", search);
+			if(filters.size() >= 1) {
+				baseContext.declare("filterobjectname", filters.get(0).object);
+				baseContext.declare("filter", filters.get(0).filter);
+				baseContext.declare("search", filters.get(0).search);
+				baseContext.declare("uid", filters.get(0).uid);
+			}
+			baseContext.declare("sets", ReportFilter.convertToDataList(filters));
 			baseContext.declare("oc", new ObjectClientJSWrapper(oc, this.session));
 			if(varsExpMap != null) {
 				DataMap vars = varsExpMap.eval(baseContext);
