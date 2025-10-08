@@ -37,8 +37,8 @@ export class RbTreeComponent  extends RbDataObserverComponent  {
     
   }
 
-  onDatasetEvent(event: string) {
-    if(event == 'load' || event == 'removed' || event == 'clear' || event == 'update') {
+  onDatasetEvent(event: any) {
+    if(event.event == 'load' || event.event == 'removed' || event.event == 'clear' || event.event == 'update') {
       this.redraw();
     }
   }

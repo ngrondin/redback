@@ -36,9 +36,9 @@ export class RbFilesetComponent extends RbSetComponent {
 
   onDatasetEvent(event: any) {
     if(this.active == true) {
-      if(event == 'select' || event == 'load') {
+      if(event.event == 'select' || event.event == 'load') {
         this.refreshData();
-      } else if(event == 'clear') {
+      } else if(event.event == 'clear') {
         this.clear();
       }
     }

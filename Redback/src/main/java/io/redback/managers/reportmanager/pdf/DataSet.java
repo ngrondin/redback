@@ -60,6 +60,7 @@ public class DataSet extends ContainerUnit {
 			jsContext.put("master", convertToScript(currentObject));
 			jsContext.put("filterobjectname", context.get("filterobjectname"));
 			jsContext.put("filter", context.get("filter"));
+			jsContext.put("uid", context.get("uid"));
 			jsContext.put("search",  context.get("search"));
 			jsContext.put("vars", context.get("vars"));
 			ObjectClient oc = reportManager.getObjectClient();

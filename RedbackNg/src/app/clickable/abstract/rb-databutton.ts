@@ -24,10 +24,13 @@ export class RbDataButtonComponent extends RbDataObserverComponent {
 
   dataObserverInit() {
   }
+
   dataObserverDestroy() {
   }
-  onDatasetEvent(event: string) {
+
+  onDatasetEvent(event: any) {
   }
+
   onActivationEvent(state: boolean) {
   }
 

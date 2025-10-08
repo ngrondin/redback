@@ -20,7 +20,7 @@ export class RbVcollapseComponent extends RbContainerComponent {
   containerDestroy() {
   }
 
-  onDatasetEvent(event: string) {
+  onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {

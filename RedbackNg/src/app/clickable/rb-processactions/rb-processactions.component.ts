@@ -32,7 +32,7 @@ export class RbProcessactionsComponent extends RbDataButtonComponent  {
   }
 
   onDatasetEvent(event: any) {
-    if(event == 'select') {
+    if(event.event == 'select') {
       this.getNotification();
     }
   }

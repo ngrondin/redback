@@ -40,7 +40,7 @@ export class RbListComponent extends RbDataObserverComponent {
   dataObserverDestroy() {
   }
 
-  onDatasetEvent(event: string) {
+  onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {

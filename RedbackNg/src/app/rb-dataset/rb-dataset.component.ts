@@ -9,6 +9,7 @@ import { ValueComparator } from 'app/helpers';
 import { RbSetComponent } from 'app/abstract/rb-set';
 import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 import { UserprefService } from 'app/services/userpref.service';
+import { LogService } from 'app/services/log.service';
 
 
 @Component({
@@ -23,6 +24,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   @Input('addrelated') addrelated: boolean = true;
   @Input('addtoend') addtoend: boolean = false;
   @Input('muteevents') muteevents: string[] = [];
+  @Input('eventscript') _eventscript: string;
 
 
   public uid: string;
@@ -43,20 +45,22 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public pageSize: number;
   public hasMorePages: boolean = true;
   public _loading: boolean = false;
-  private observers: Observer<string>[] = [];
+  private observers: Observer<any>[] = [];
   public refreshOnActivate: boolean = true;
+  private eventScript: Function;
 
 
   constructor(
     private dataService: DataService,
     private apiService: ApiService,
     private filterService: FilterService,
+    private logService: LogService,
     private userprefService: UserprefService
   ) {
     super();
     this.uid = "" + Math.floor(Math.random() * 10000);
-  }
 
+  }
 
   setInit() {
     this.dataSubscription = this.dataService.getObjectUpdateObservable().subscribe(object => this.receiveUpdatedObject(object));
@@ -76,6 +80,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         if(this.userSort == null) this.userSort = this.defaultUserSort;
       }
     }
+    if(this._eventscript != null) {
+      this.eventScript = Function("event", this._eventscript);
+    }
+    this.publishEvent('init');
   }
 
   setDestroy() {
@@ -83,18 +91,20 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.dataSubscription.unsubscribe();
   }
 
-  onDatasetEvent(event: string) {
-    if(event == 'select') {
-      this.refreshData();
-    } else if(event == 'load') {
+  onDatasetEvent(event: any) {
+    if(event.datasetgroup == null) { //When a dataset is part of a datasetgroup, it will receive events from other datasets. Need to filter them out.
+      if(event.event == 'select') {
+        this.refreshData();
+      } else if(event.event == 'load') {
 
-    } else if(event == 'clear') {
-      this.clear();
-    } else if(event == 'update') {
-      this.publishEvent('update');
-      this.refreshData(true);
-    } else if(event == 'globalupdate') {
-      this.refreshData();
+      } else if(event.event == 'clear') {
+        this.clear();
+      } else if(event.event == 'update') {
+        this.publishEvent('update');
+        this.refreshData(true);
+      } else if(event.event == 'globalupdate') {
+        this.refreshData();
+      }
     }
   }
 
@@ -417,20 +427,29 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   private publishEvent(event: string) {
     if(this.muteevents.indexOf(event) == -1) {
+      let evt = {
+        event: event,
+        dataset: this
+      }
       this.observers.forEach((observer) => {
-        observer.next(event);
+        observer.next(evt);
       }); 
       if(this.datasetgroup != null) {
-        this.datasetgroup.groupMemberEvent((this.id || this.name || this.objectname), event);
+        this.datasetgroup.groupMemberEvent(evt);
       }  
-    } /*else {
-      console.log(event + " muted");
-    }*/
+      if(this.eventScript != null) {
+        try {
+          this.eventScript.call(window.redback, evt);
+        } catch(err) {
+          this.logService.error(err);
+        }
+      }
+    }
   }
 
   //Getters used mainly for SearchTarget
   public getId(): string {
-    return this.id;
+    return this.id || this.name || this.objectname; //name and objectname are for backwards compatibility
   }
 
   public getObjectName(): string {

@@ -27,7 +27,7 @@ export class RbTabComponent extends RbActivatorComponent implements OnInit {
   activatorDestroy() {
   }
 
-  onDatasetEvent(event: string) {
+  onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {

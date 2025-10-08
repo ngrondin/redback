@@ -24,7 +24,7 @@ export type DatasetListMap = {
 export class RbDatasetGroupComponent extends RbContainerComponent implements RbSearchTarget {
   datasets: DatasetMap = {};
   _selectedObject: RbObject;
-  private observers: Observer<string>[] = [];
+  private observers: Observer<any>[] = [];
   
   constructor(
     public filterService: FilterService
@@ -98,7 +98,7 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
         ds.select(null);
       }
     }
-    this.publishEvent('groupselect');
+    //this.publishEvent({event: 'groupselect', datasetgroup: this});
   }
 
   public filterSort(event: any) : boolean {
@@ -114,11 +114,12 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
     return null;
   }
 
-  public groupMemberEvent(id: string, event: string) {
-    this.publishEvent('group_' + id + "_" + event);
+  public groupMemberEvent(event: any) {
+    event.datasetgroup = this;
+    this.forwardEvent(event);
   }
 
-  public publishEvent(event: string) {
+  public forwardEvent(event: any) {
     this.observers.forEach((observer) => {
       observer.next(event);
     });     

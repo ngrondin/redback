@@ -92,11 +92,11 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
     super.onActivationEvent(event);
   }
 
-  onDatasetEvent(event: string) {
-    if(this.active && event.endsWith('select')) {
+  onDatasetEvent(event: any) {
+    if(this.active && event.event == 'select') {
       let selectedLatLon = this.selectedObject != null ? this.getObjectLatLon(this.selectedObject, this.getSeriesConfigForObject(this.selectedObject)) : null;
       this.reframe(selectedLatLon);
-    } else if(this.active && event.endsWith('load')) {
+    } else if(this.active && event.event == 'load') {
       this.reframe();
     }
     super.onDatasetEvent(event);

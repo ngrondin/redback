@@ -113,6 +113,7 @@ public abstract class Unit {
 		jsContext.put("setfilters",  context.get("sets"));
 		jsContext.put("filterobjectname", context.get("filterobjectname"));
 		jsContext.put("filter", context.get("filter"));
+		jsContext.put("uid", context.get("uid"));
 		jsContext.put("object", DataSet.convertToScript(context.get("object")));
 		jsContext.put("page", context.get("page"));
 		jsContext.put("vars", context.get("vars"));

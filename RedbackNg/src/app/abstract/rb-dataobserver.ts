@@ -60,7 +60,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
         this.dataObserverDestroy();
     }
 
-    private internalDatasetEvent(event: string) {
+    private internalDatasetEvent(event: any) {
         if(this.showExpr != null) {
             this.evalShow();
         }
@@ -71,7 +71,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
 
     abstract dataObserverDestroy();
 
-    abstract onDatasetEvent(event: string);
+    abstract onDatasetEvent(event: any);
 
     get list(): RbObject[] {
         return this.dataset != null ? this.dataset.list : null;

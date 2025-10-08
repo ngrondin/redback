@@ -148,11 +148,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onDatasetEvent(event: any) {
-    if(event.endsWith('_select') && this.blockNextRefocus == false) {
+    if(event.event == 'select' && this.blockNextRefocus == false) {
       this.refocus = true;
     } 
     super.onDatasetEvent(event);
-    if(event == 'group_' + this.lanesConfig.dataset + '_load') {
+    if(event.dataset.getId() == this.lanesConfig.dataset) {
       super.updateData(true)
     } 
   }

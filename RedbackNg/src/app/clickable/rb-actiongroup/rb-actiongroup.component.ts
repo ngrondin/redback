@@ -98,15 +98,15 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
   }
 
   onDatasetEvent(event: any) {
-    if(event == 'select') {
+    if(event.event == 'select') {
       this.getNotification().subscribe(() => {
         this.getScriptActions().subscribe(() => {
           this.calcActionData();
         })
       });
-    } else if(event == 'update') {
+    } else if(event.event == 'update') {
       this.calcActionData();
-    } else if(event == 'clear') {
+    } else if(event.event == 'clear') {
       this.notification = null;
       this.calcActionData();
     }

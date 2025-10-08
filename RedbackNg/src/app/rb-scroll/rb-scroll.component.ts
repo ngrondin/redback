@@ -41,7 +41,7 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
   containerDestroy() {
   }
 
-  onDatasetEvent(event: string) {
+  onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {

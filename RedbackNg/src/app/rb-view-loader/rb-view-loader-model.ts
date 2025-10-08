@@ -27,7 +27,7 @@ export class LoadedView extends RbActivatorComponent {
   
     activatorDestroy() {}
     
-    onDatasetEvent(event: string) {}
+    onDatasetEvent(event: any) {}
   
     onActivationEvent(state: boolean) {}
   

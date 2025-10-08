@@ -48,12 +48,11 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   }
 
 
-  onDatasetEvent(event: string) {
+  onDatasetEvent(event: any) {
     if(this.editor != null) {
       if(this.editor.root != null && this.editor.root.innerHTML != this.value) {
         this.editor.root.innerHTML = this.value;  
       }
-      //this.editor.enable(!this.readonly);
     }
     if(this.codeSource != this.value) {
       this.codeSource = HtmlParser.stringify(HtmlParser.parse(this.value), true);
@@ -80,7 +79,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
       this.editor.root.addEventListener("blur", ($event) => {
         this.onBlur($event);
       });  
-      this.onDatasetEvent('select');
+      this.onDatasetEvent({event: 'select', dataset: this.dataset});
     }
   }
 

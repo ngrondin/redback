@@ -24,7 +24,7 @@ export class RbTextComponent extends RbDataObserverComponent {
   dataObserverDestroy() {
   }
 
-  onDatasetEvent(event: string) {
+  onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {

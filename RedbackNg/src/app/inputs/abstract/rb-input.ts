@@ -63,7 +63,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   dataObserverDestroy() {
   }
 
-  onDatasetEvent(event: string) {
+  onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {

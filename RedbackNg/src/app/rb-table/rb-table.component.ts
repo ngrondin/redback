@@ -70,7 +70,7 @@ export class RbTableComponent extends RbDataObserverComponent {
   dataObserverDestroy() {
   }
 
-  onDatasetEvent(event: string) {
+  onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {

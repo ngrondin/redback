@@ -53,8 +53,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     }
   }
 
-  onDatasetEvent(event: string) {
-
+  onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {
