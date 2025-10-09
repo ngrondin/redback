@@ -35,13 +35,23 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					if(arguments[0] != null && arguments[1] != null) {
-						RedbackObject rbo = objectManager.getObject(session, arguments[0].toString(), arguments[1].toString());
+						String objectName = arguments[0].toString();
+						RedbackObject rbo = null;
+						if(arguments[1] instanceof String) {
+							String uid = arguments[1].toString();
+							rbo = objectManager.getObject(session, objectName, uid);
+						} else if(arguments[1] instanceof DataMap) {
+							DataMap filter = (DataMap)arguments[1];
+							List<RedbackObject> list = objectManager.listObjects(session, objectName, filter, null, null, false, 0, 1);
+							if(list.size() > 0) 
+								rbo = list.get(0);
+						}
 						if(rbo != null)
-							return new RedbackObjectJSWrapper(rbo);					
+							return new RedbackObjectJSWrapper(rbo);		
 					}
 					return null;
 				}
-			};
+			};		
 		} else if(key.equals("getObjectList") || key.equals("listObjects")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

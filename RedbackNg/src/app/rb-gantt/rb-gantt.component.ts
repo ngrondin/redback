@@ -448,12 +448,12 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           let group = new GanttSpread(id.toString(), "1 item", spread.start, spread.width, spread.laneId, 'var(--primary-light-color)', '#333', false, false, null, spread.config);
           groupmap[group.id] = 1
           groups.push(group);
-          out.push(group);
         }  
       } else {
         out.push(spread);
       }
     }
+    groups.forEach(g => out.push(g));
     return out;
   }
 
