@@ -25,7 +25,7 @@ public class ExcelReport extends Report {
 	public ExcelReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
 		super(s, rm, rc);
 		try	{
-			script = rm.getScriptFactory().createFunction(rc.getName(), new String[] {"oc", "wb", "filter"}, rc.getData().getString("content"));
+			script = rm.getScriptFactory().createFunction(rc.getName(), new String[] {"session", "timezone", "oc", "wb", "filter", "search", "uid", "sets"}, rc.getData().getString("content"));
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising excel report", e);
 		}

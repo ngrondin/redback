@@ -12,13 +12,20 @@ export class RbTextComponent extends RbDataObserverComponent {
   @Input('object') _rbObject: RbObject;
   @Input('value') _value: any = null;
   @Input('variable') variable: any;
+  @Input('expression') _expression: any;
   @Input('margin') margin: boolean = true;
   @Input('alert') alert: boolean = false;
   @Input('icon') icon: string;
+  @Input('color') _color: string;
   
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
   
+  expression: Function;
+
   dataObserverInit() {
+    if(this._expression != null) {
+      this.expression = new Function("dataset", "obj", "selectedObject", "relatedObject", "return (" + this._expression + ")");
+    }
   }
 
   dataObserverDestroy() {
@@ -52,6 +59,8 @@ export class RbTextComponent extends RbDataObserverComponent {
       }
     } else if(this.variable != null) {
       val = window.redback[this.variable];
+    } else if(this.expression != null) {
+      val = this.expression.call(window.redback, this.dataset, this.dataset.selectedObject, this.dataset.selectedObject, this.dataset.relatedObject);
     } else {
       val = this._value;
     }
@@ -64,5 +73,9 @@ export class RbTextComponent extends RbDataObserverComponent {
 
   public get alertOn(): boolean {
     return this.alert;
+  }
+
+  public get color(): string {
+    return this._color;
   }
 }

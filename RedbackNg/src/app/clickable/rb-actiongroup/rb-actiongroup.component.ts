@@ -190,7 +190,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     }
     if(this.actions != null) {
       this.actions.forEach(item => {
-        if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject) == true))) {
+        if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject, this.dataset) == true))) {
           let swtch = this.userpref.getCurrentViewUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
             this.actionData.push(new RbActiongroupAction(item.action, item.target, item.param, item.timeout, item.label, item.icon, item.confirm, false, null));
@@ -206,7 +206,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     }
     if(this.domainActions != null) {
       this.domainActions.forEach(item => {
-        if(item.show == null || (item.show != null && Evaluator.eval(item.show, this.rbObject, this.relatedObject))) {
+        if(item.show == null || (item.show != null && Evaluator.eval(item.show, this.rbObject, this.relatedObject, this.dataset))) {
           this.actionData.push(item);
         }
       });

@@ -126,6 +126,9 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         let sortKey = this.categories.sortby != null ? this.categories.sortby : 'code';
         let sortDir = this.categories.sortdir != null ? this.categories.sortdir : 1;
         this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir)); 
+        if(this.categories.top != null) {
+          this.graphData = this.graphData.filter((value, index, array) => index < this.categories.top);
+        }          
       } else {
         this.graphData = this.calcSeriesDataForCategory(null);
       } 

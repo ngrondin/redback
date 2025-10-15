@@ -21,6 +21,7 @@ public class ScriptConfig
 	protected String source;
 	protected long timeout;
 	protected String icon;
+	protected String confirm;
 	protected Function function;
 
 	public ScriptConfig(ScriptFactory sf, DataMap cfg) throws RedbackException
@@ -34,6 +35,7 @@ public class ScriptConfig
 		showExpression = config.getString("showexpr");
 		timeout = config.containsKey("timeout") ? config.getNumber("timeout").longValue(): 10000;
 		icon = config.getString("icon");
+		confirm = config.getString("confirm");
 		List<String> scriptVars = new ArrayList<String>();
 		scriptVars.add("session");
 		scriptVars.add("userprofile");
@@ -87,6 +89,11 @@ public class ScriptConfig
 	public String getIcon() 
 	{
 		return icon;
+	}
+	
+	public String getConfirm() 
+	{
+		return confirm;
 	}
 	
 	public String getSource()

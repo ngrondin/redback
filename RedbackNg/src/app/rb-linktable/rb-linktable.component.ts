@@ -112,7 +112,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     let val = null;
     if(cfg != null) {
       if(cfg.expression != null) {
-        val = Evaluator.eval(cfg.expression, object, null);
+        val = Evaluator.eval(cfg.expression, object, null, this.dataset);
       } else if(cfg.attribute != null) {
         val = object.get(cfg.attribute);
       }

@@ -114,6 +114,6 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     evalShow() {
-        this.show = Evaluator.eval(decodeURIComponent(this.showExpr), this.rbObject, this.relatedObject) ?? false;
+        this.show = Evaluator.eval(decodeURIComponent(this.showExpr), this.rbObject, this.relatedObject, this.dataset) ?? false;
     }
   }

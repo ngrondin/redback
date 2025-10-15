@@ -366,7 +366,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                   label = obj.get(alt.attribute);
                 }
               }
-              let color = cfg.isBackground ? 'white' : 'var(--primary-light-color)';
+              let color = null;
               if(cfg.color != null) {
                 color = cfg.color;
               } else if(cfg.colorAttribute != null) {
@@ -381,7 +381,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                   }  
                 }
               } else if(cfg.colorExpression != null) {
-                color = Evaluator.eval(cfg.colorExpression, obj, null);
+                color = Evaluator.eval(cfg.colorExpression, obj, null, null);
+              }
+              if(color == null) {
+                color = cfg.isBackground ? 'white' : 'var(--primary-light-color)';
               }
               let labelcolor = "#333";
               if(cfg.labelColor != null) {

@@ -120,7 +120,7 @@ export class RbList4Component extends RbDataObserverComponent {
       let thisColorMap = this.getUserParam("colormap");
 
       if(thisColorExpression != null) {
-        data.color = Evaluator.eval(thisColorExpression, obj, null);
+        data.color = Evaluator.eval(thisColorExpression, obj, null, this.dataset);
       } else if(thisColorAttribute != null) {
         data.color = thisColorMap != null ? thisColorMap[obj.get(thisColorAttribute)] : obj.get(thisColorAttribute);
       } else {
@@ -148,21 +148,21 @@ export class RbList4Component extends RbDataObserverComponent {
     const prefExpr = this.getUserPref(fieldExpr);
     const raw = 
       prefAttr != null ? obj.get(prefAttr) : 
-      prefExpr != null ? Evaluator.eval(prefExpr, obj, null) :
+      prefExpr != null ? Evaluator.eval(prefExpr, obj, null, this.dataset) :
       this[fieldAttr] != null ? obj.get(this[fieldAttr]) :
-      this[fieldExpr] != null ? Evaluator.eval(this[fieldExpr], obj, null) :
+      this[fieldExpr] != null ? Evaluator.eval(this[fieldExpr], obj, null, this.dataset) :
       null;
 
     let isTrueFalse = (raw === true || raw === false);
     if(isTrueFalse) {
       return {value: raw, type: 'bool'};
-    } else if(raw !== null && !isNaN(raw)) { 
+    } else if(raw !== null && raw !== "" && !isNaN(raw)) { 
       return {value: raw, type: 'badge'};
     } else {
       const explicitFormat = this.getUserPref(fieldFormat) ?? this[fieldFormat];
       const text = explicitFormat != null ? Formatter.format(raw, explicitFormat) : this.autoFormatText(raw);
       const colorExpression = this.getUserPref(fieldColorExpression) ?? this[fieldColorExpression];
-      const color = colorExpression != null ? Evaluator.eval(colorExpression, obj, null) : null;
+      const color = colorExpression != null ? Evaluator.eval(colorExpression, obj, null, this.dataset) : null;
       return {value: text, type: 'text', color: color};
     }
   }

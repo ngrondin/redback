@@ -10,11 +10,13 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -624,5 +626,26 @@ public class StringUtils
     		lastStart = nextMinus + 1;
     	}
     	return sb.toString();
+    }
+    
+    public static DataList getUniqueLinesForColumns(DataList data, DataList cols) {
+    	DataList out = new DataList();
+    	HashSet<Integer> set = new HashSet<Integer>();
+    	for(int i = 0; i < data.size(); i++) {
+    		DataMap obj = data.getObject(i);
+    		DataMap outObj = new DataMap();
+    		int hash = 0;
+    		for(int j = 0; j < cols.size(); j++) {
+    			String col = cols.getString(j);
+    			String val = obj.getString(col);
+    			if(val != null) hash ^= val.hashCode();
+    			outObj.put(col, val);
+    		}
+    		if(!set.contains(hash)) {
+        		out.add(outObj);
+        		set.add(hash);
+    		}
+    	}
+    	return out;
     }
 }

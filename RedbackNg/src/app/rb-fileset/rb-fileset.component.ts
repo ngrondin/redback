@@ -67,7 +67,7 @@ export class RbFilesetComponent extends RbSetComponent {
   }
 
   public refreshData() {
-    this.editable = Evaluator.eval(this.editableExpr, this.relatedObject, this.dataset != null ? this.dataset.relatedObject : null) ?? true;
+    this.editable = Evaluator.eval(this.editableExpr, this.relatedObject, this.dataset != null ? this.dataset.relatedObject : null, this.dataset) ?? true;
     if(this.active && this.relatedObject != null) {
       this.fileService.list(this.relatedObject.objectname, this.relatedObject.uid).subscribe(
         data => this.setData(data)

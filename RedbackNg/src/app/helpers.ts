@@ -4,6 +4,7 @@ import { AppInjector } from "./app.module";
 import { NavigateEvent, RbObject, Time } from "./datamodel";
 import { FilterService } from "./services/filter.service";
 import { UserprefService } from "./services/userpref.service";
+import { RbDatasetComponent } from "./rb-dataset/rb-dataset.component";
 
 export class Translator {
     cfg: any;
@@ -261,7 +262,7 @@ export class ObserverProxy implements Observer<any> {
 }
 
 export class Evaluator {
-    public static eval(expr: any, object: RbObject, relatedObject: RbObject) {
+    public static eval(expr: any, object: RbObject, relatedObject: RbObject, dataset: RbDatasetComponent) {
         if(expr == null) {
             return null;
         } else if(expr == 'true' || expr == true) {
@@ -479,7 +480,7 @@ export class ColorConfig {
         if(this.attribute != null) {
             val = object.get(this.attribute);
         } else if(this.expression != null) {
-            val = Evaluator.eval(this.expression, object, null);
+            val = Evaluator.eval(this.expression, object, null, null);
         }
         if(this.map != null) {
             val = this.map[val];
