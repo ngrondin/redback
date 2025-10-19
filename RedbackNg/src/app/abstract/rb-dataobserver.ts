@@ -93,7 +93,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
         if(this.dataset != null) {
             return this.dataset.selectedObject;
         } else if(this.datasetgroup != null) {
-            if(this.targetdatasetid != null) {
+            if(this.targetdatasetid != null && this.datasetgroup.datasets[this.targetdatasetid] != null) {
                 return this.datasetgroup.datasets[this.targetdatasetid].selectedObject;
             } else {
                 return this.datasetgroup.selectedObject;

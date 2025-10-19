@@ -67,6 +67,11 @@ export class Formatter {
             return this.formatTime(val);
         } else if(format == 'currency') {
             return this.formatCurrency(val);
+        } else if(format == 'integer') {
+            return this.formatInteger(val);
+        } else if(format.startsWith('decimal(')) {
+            var decimals = parseInt(format.substring(8, format.length - 1));
+            return this.formatDecimal(val, decimals);
         } else {
             return val;
         }
@@ -176,6 +181,17 @@ export class Formatter {
         const formatter = new Intl.NumberFormat('en-US', {style: 'currency',  currency: 'USD'});
         return formatter.format(value);  
     }
+
+    static formatInteger(value: number) : string {
+        if(value == null) return "";
+        return Math.round(value).toString();
+    }
+
+    static formatDecimal(value: number, decimals: number) : string {
+        if(value == null) return "";
+        return value.toFixed(decimals);
+    }
+
 }
 
 @Pipe({name: 'rbDate'})
@@ -437,7 +453,7 @@ export class LinkConfig {
         this.reset = json.reset ?? false;
     }
 
-    getNavigationEvent(object: RbObject): NavigateEvent {
+    getNavigationEvent(object: RbObject, dataset: RbDatasetComponent): NavigateEvent {
         let event: NavigateEvent = {};
         if(this.target != null) {
             event.target = this.target;
@@ -449,10 +465,10 @@ export class LinkConfig {
             event.tab = this.tab;
         }
         event.objectname = this.objectname != null ? this.objectname : object.objectname;
-        let objectuid = this.attribute != null ? object.get(this.attribute) : object.uid;
+        let objectuid = object != null ? (this.attribute != null ? object.get(this.attribute) : object.uid) : null;
         if(this.filter != null) {
             let filterService: FilterService = AppInjector.get(FilterService);
-            let filter = filterService.resolveFilter(this.filter, object, object, null, null);
+            let filter = filterService.resolveFilter(this.filter, object, dataset, null, null, null);
             event.filter = filterService.unresolveFilter(filter);
         } else if(this.filtersingleobject == true) {
             event.filter = {uid: "'" + objectuid + "'"} //filter will be resolved in the dataset before fetching

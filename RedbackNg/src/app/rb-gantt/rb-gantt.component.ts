@@ -27,6 +27,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('toolbar') toolbarConfig : any;
   @Input('locktonow') locktonow: boolean = false;
   @Input('allowoverlapgroup') allowoverlapgroup: boolean = false;
+  @Input('headerwidth') _headerwidth: number = 17;
   @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar: ViewContainerRef;
   @ViewChild('mainscroll') mainscroll: RbScrollComponent;
   
@@ -209,6 +210,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return this._spans;
   }
 
+  get headerWidth() : number {
+    return (0.88 * this._headerwidth);
+  }
+
   setZoom(ms: number) {
     this.zoomMS = ms;
     this.updateData(false);
@@ -268,7 +273,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         $lt: "'" + endDate.toISOString() + "'"
       }
     }
-    if(laneAttribute != null) {
+    if(laneAttribute != null && laneAttribute != "uid") {
       let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
       if(list.length == 0) return null;
       filter[laneAttribute] = {$in: list.map(obj => "'" + obj.uid + "'")}
@@ -340,9 +345,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         this.heightVW += lane.height + 0.06; //+1 for borders
       }
     }
-    if(lanes.length > 0) {
+    /*if(lanes.length > 0) { //Let the dataset sort the lanes
       lanes.sort((a, b) => (a != null && b != null ? a.label.localeCompare(b.label) : 0));
-    }
+    }*/ 
     return lanes;
   }
 
@@ -559,7 +564,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       let curDate: Date = new Date(cur);
       let sinceFirstMidnight = cur - lastMidnightMS;
       let pos = Math.round((cur - this.startMS) * this.multiplier);
-      if(pos > 0) {
+      if(pos >= 0) {
         let dayLabel: string = this.dayNames[curDate.getDay()] + ", " + curDate.getDate() + " " + this.monthNames[curDate.getMonth()] + " " + curDate.getFullYear();
         let timeLabel: string = curDate.getHours() + ":00";
         let type: GanttMarkType = sinceFirstMidnight % 86400000 == 0 ? GanttMarkType.Day : sinceFirstMidnight % this.markMajorIntervalMS == 0 ? GanttMarkType.Major : GanttMarkType.Minor;

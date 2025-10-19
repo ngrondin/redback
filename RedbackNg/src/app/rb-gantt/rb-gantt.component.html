@@ -93,11 +93,13 @@
         <div
             *ngFor="let overlaylane of overlayData; let i = index"
             class="rb-gantt-overlay-lanehead"
+            [style.width.vw]="headerWidth"
             (click)="clickOverlayLaneIndex(i)">
             <span>{{overlaylane.label}}</span>
         </div>
         <div
-            class="rb-gantt-corner-space">
+            class="rb-gantt-corner-space"
+            [style.width.vw]="headerWidth">
         </div>
     </div>
     <div
@@ -143,7 +145,8 @@
 <div
     class="rb-gantt-body">
     <div
-        class="rb-gantt-laneheads">
+        class="rb-gantt-laneheads"
+        [style.width.vw]="headerWidth">
         <div
             class="rb-gantt-laneheadscontainer"
             [style.top.px]="-scrollTop">

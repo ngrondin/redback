@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { RbObject } from 'app/datamodel';
 import { UserprefService } from './userpref.service';
 import { LogService } from './log.service';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 @Injectable({
   providedIn: 'root'
@@ -29,10 +30,10 @@ export class FilterService {
 
 
 
-  public resolveFilter(__inMap: any, obj: RbObject, selectedObject?: RbObject, relatedObject?: RbObject, extraContext?: any) : any {
+  public resolveFilter(__inMap: any, obj: RbObject, dataset?: RbDatasetComponent, relatedObject?: RbObject, relatedDataset?: RbDatasetComponent, extraContext?: any) : any {
     try {
-      let params: string[] = ["obj", "object", "selectedObject", "relatedObject", "userpref", "uid"];
-      let args: any[] = [obj, obj, selectedObject, relatedObject, this.userPrefService];
+      let params: string[] = ["obj", "object", "selectedObject", "dataset", "relatedObject", "relatedDataset", "userpref", "uid"];
+      let args: any[] = [obj, obj, obj, dataset, relatedObject, relatedDataset, this.userPrefService];
 
       if(obj != null && typeof obj != 'undefined') {
         args.push(obj.uid);

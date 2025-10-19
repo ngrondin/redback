@@ -47,3 +47,27 @@
         </div>    
     </div>
 </rb-scroll>
+<div
+    *ngIf="showFooter()"
+    [class]="'rb-linktable-footer-container'">
+    <div
+        [class]="'rb-linktable-footer' + (grid ? ' rb-linktable-footer-grid' : '')"
+        [style.left.px]="-scrollLeft">
+        <div
+            *ngFor="let col of columns"
+            [class]="'rb-linktable-colfooter' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-colfooter-grid' : '')"
+            [style.visibility]="col.sum ? 'visible' : 'hidden'"
+            [style.width.vw]="col.width">
+            <a
+                *ngIf="isSumClickable(col)"
+                class="rb-linktable-link"
+                (click)="clickSumLink(col)">
+                {{getSum(col)}}               
+            </a>
+            <span
+                *ngIf="!isSumClickable(col)">
+                {{getSum(col)}}             
+            </span>            
+        </div>
+    </div>
+</div>

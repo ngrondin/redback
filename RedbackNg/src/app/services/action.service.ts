@@ -97,7 +97,7 @@ export class ActionService {
   private calcCreateData(dataset: RbDatasetComponent, param: any, extraContext: any) : any {
     let data = dataset.resolvedFilter;
     if(param != null) {
-      let paramResolvedFilter: any = this.filterService.resolveFilter(param, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);
+      let paramResolvedFilter: any = this.filterService.resolveFilter(param, dataset.selectedObject, dataset, dataset.relatedObject, null, extraContext);
       data = this.filterService.mergeFilters(data, paramResolvedFilter)
     }
     data = this.filterService.convertToData(data);
@@ -179,7 +179,7 @@ export class ActionService {
   public execute(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       if(dataset != null && dataset.selectedObject != null) {
-        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);
+        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, extraContext);
         this.dataService.executeObjectFunction(dataset.selectedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));  
       } else {
         observer.complete();
@@ -193,7 +193,7 @@ export class ActionService {
       let doneCount: number = 0;
       dataset.list.forEach((object) => {
         setTimeout(() => {
-          let paramResolved: any = this.filterService.resolveFilter(functionParams, object, dataset.selectedObject, dataset.relatedObject, extraContext);
+          let paramResolved: any = this.filterService.resolveFilter(functionParams, object, dataset, dataset.relatedObject, null, extraContext);
           this.dataService.executeObjectFunction(object, functionName, paramResolved, timeout).subscribe(
             resp => {
               doneCount++;
@@ -214,7 +214,7 @@ export class ActionService {
   public executeMaster(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       if(dataset != null && dataset.relatedObject != null) {
-        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.relatedObject, dataset.relatedObject, null, extraContext);
+        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.relatedObject, dataset, null, null, extraContext);
         this.dataService.executeObjectFunction(dataset.relatedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
       } else {
         observer.complete()
@@ -227,7 +227,7 @@ export class ActionService {
       let paramResolved = {};
       if(functionParams != null) {
         if(dataset != null) {
-          paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject, extraContext);  
+          paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, extraContext);  
         } else {
           paramResolved = functionParams;
         }

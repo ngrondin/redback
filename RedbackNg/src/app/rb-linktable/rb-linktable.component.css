@@ -44,6 +44,14 @@
     cursor: pointer;
 }
 
+rb-scroll {
+    flex: 0 1 auto!important;
+}
+
+rb-scroll ::ng-deep .rb-scroll-scroller {
+    flex: 0 1 auto!important; 
+}
+
 .rb-linktable-body-container {
     display: flex;
     flex-direction: column;
@@ -87,6 +95,9 @@
 
 .rb-linktable-link {
     color: var(--primary-dark-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .rb-linktable-icon {
@@ -107,3 +118,43 @@ a.rb-linktable-link:hover {
     border-style: solid;
 }
 
+.rb-linktable-footer-container {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    overflow-x: hidden;
+    height: var(--v24px);
+    position: relative;
+}
+
+.rb-linktable-footer {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: var(--v24px);
+    color: darkgray;
+    border-width: 0px 1px 0px 0px;
+    border-style: solid;
+}
+
+.rb-linktable-footer-grid {
+    border-color: lightgray;
+}
+
+.rb-linktable-colfooter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px var(--v5px);
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--dark-writing-color);
+    border-style: solid;
+    border-width: 0px 0px 1px 1px;
+}
+
+.rb-linktable-colfooter-grid {
+    border-color: lightgray;
+}

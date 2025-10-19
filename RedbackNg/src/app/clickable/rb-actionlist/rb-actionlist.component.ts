@@ -61,7 +61,7 @@ export class RbActionlistComponent extends RbActionButtonComponent {
     let config = {
       objectname: this.object,
       displayattribute: this.displayattribute,
-      filter: this.filterService.resolveFilter(this.basefilter, this.dataset.selectedObject, this.dataset.selectedObject, this.dataset.relatedObject)
+      filter: this.filterService.resolveFilter(this.basefilter, this.dataset.selectedObject, this.dataset, this.dataset.relatedObject)
     }
     this.popupComponentRef = this.popupService.openPopup(this.buttonContainerRef, RbPopupListComponent, config);
     this.popupComponentRef.instance.selected.subscribe(object => this.objectSelected(object));

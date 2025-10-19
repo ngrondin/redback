@@ -19,6 +19,8 @@ class LinkTableColumnConfig {
   showExpr: string;
   link: LinkConfig;
   modal: string;
+  sum: boolean;
+  sumlink: LinkConfig;
   iconmap: any;
   backColor: ColorConfig;
   foreColor: ColorConfig;
@@ -37,6 +39,8 @@ class LinkTableColumnConfig {
     this.showExpr = (json.show != null ? json.show : "true");
     this.link = json.link != null ? new LinkConfig(json.link) : null;
     this.modal = json.modal;
+    this.sum = json.sum;
+    this.sumlink = json.sumlink != null ? new LinkConfig(json.sumlink) : null;
     this.iconmap = json.iconmap;
     this.backColor = json.backcolor != null ? new ColorConfig(json.backcolor) : null;
     this.foreColor = json.forecolor != null ? new ColorConfig(json.forecolor) : null;
@@ -50,6 +54,10 @@ class LinkTableColumnConfig {
 
   get isClickable() : boolean {
     return this.link != null || this.modal != null;
+  }
+
+  get isSumClickable() : boolean {
+    return this.sumlink != null;
   }
 }
 
@@ -123,9 +131,24 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     return val;
   }
 
+  getSum(column: LinkTableColumnConfig): any {
+    if(column.sum && !this.dataset.hasMorePages) {
+      var ret = 0;
+      for(var o of this.dataset.list) {
+        var val = parseFloat(column.expression != null ? Evaluator.eval(column.expression, o, null, this.dataset) : o.get(column.attribute));
+        ret += !isNaN(val) ? val : 0;
+      }
+      if(column.format != null) {
+        ret = Formatter.format(ret, column.format);
+      } 
+      return ret; 
+    }
+    return "...";
+  }
+
   clickColumnHeader(column: LinkTableColumnConfig) {
     this.dataset.filterSort({
-      filter: {},
+      /*filter: {},*/
       sort: {
         "0": {
           "attribute":column.attribute,
@@ -144,7 +167,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     let cfg = this.getColumnConfig(object, column);
     if(cfg != null) {
       if(cfg.link != null) {
-        let event = cfg.link.getNavigationEvent(object);
+        let event = cfg.link.getNavigationEvent(object, this.dataset);
         this.navigateService.navigateTo(event);
       } else if(cfg.modal != null) {
         this.dataset.select(object);
@@ -163,6 +186,19 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     return cfg != null && cfg.iconmap != null ? cfg.iconmap[this.getValue(column, object)] : '';
   }
 
+  isSumClickable(column: LinkTableColumnConfig): boolean {
+    return column != null ? column.isSumClickable : false
+  }
+
+  clickSumLink(column: LinkTableColumnConfig) {
+    if(column.sumlink != null) {
+      let event = column.sumlink.getNavigationEvent(null, this.dataset);
+      this.navigateService.navigateTo(event);
+    } else if(column.modal != null) {
+      this.modalService.open(column.modal);
+    }  
+  }
+
   backColor(column: LinkTableColumnConfig, object: RbObject) {
     let cfg = this.getColumnConfig(object, column);
     return cfg != null && cfg.backColor != null ? cfg.backColor.getColor(object) : null;
@@ -171,6 +207,10 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   foreColor(column: LinkTableColumnConfig, object: RbObject) {
     let cfg = this.getColumnConfig(object, column);
     return cfg != null && cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
+  }
+
+  showFooter(): boolean {
+    return this.columns.reduce((acc, col) => acc || col.sum == true, false);
   }
 
   onScroll(event) {

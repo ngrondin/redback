@@ -111,7 +111,7 @@ export class RbTimelineComponent extends RbDataCalcComponent<TimelineSeriesConfi
 
   public clickItem(entry: TimelineEntry) {
     if(entry.link != null) {
-      this.navigateService.navigateTo(entry.link?.getNavigationEvent(entry.object));
+      this.navigateService.navigateTo(entry.link?.getNavigationEvent(entry.object, null)); //Need to find a way to pass the dataset
     } else if(entry.modal) {
       this.getDatasetForObject(entry.object).select(entry.object);
       this.modalService.open(entry.modal);

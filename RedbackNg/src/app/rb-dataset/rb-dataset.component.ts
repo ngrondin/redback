@@ -21,6 +21,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   @Input('basesort') baseSort: any;
   @Input('name') name: string; //To be deprecated
   @Input('fetchall') fetchAll: boolean = false;
+  @Input('autoselect') autoSelect: boolean = true;
   @Input('addrelated') addrelated: boolean = true;
   @Input('addtoend') addtoend: boolean = false;
   @Input('muteevents') muteevents: string[] = [];
@@ -214,7 +215,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       }  
     }
     this.mergedFilter = filter;
-    this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.selectedObject, this.relatedObject);
+    this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.dataset, this.relatedObject);
     this.dataService.subscribeToCreation(this.uid, this.objectname, this.resolvedFilter);
     this.resolvedSort = this.userSort != null ? this.userSort : this.baseSort;
     this.resolvedSearch = this.userSearch;
@@ -286,7 +287,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(this._list.length == 0) {
       this._selectedObjects = [];
     } else if(this._list.length == 1) {
-      this.select(this._list[0]);
+      if(this.autoSelect) {
+        this.select(this._list[0]);
+      }
     } else if(this._list.length > 1) {
       if(this.dataTarget != null && this.dataTarget.select != null) {
         this.selectByFilter(this.dataTarget.select);

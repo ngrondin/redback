@@ -159,10 +159,14 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   }
 
   get filterConfig(): any {
-    let activeObjectNames = this._activeDatasets.map(ds => this.datasetgroup.datasets[ds].objectname);
-    let fc = {...this._filterConfig};
-    fc.attributes = fc.attributes.filter(a => activeObjectNames.indexOf(a.object) > -1);
-    return fc;
+    if(this._filterConfig != null) {
+      let activeObjectNames = this._activeDatasets.map(ds => this.datasetgroup.datasets[ds].objectname);
+      let fc = {...this._filterConfig};
+      fc.attributes = fc.attributes.filter(a => activeObjectNames.indexOf(a.object) > -1);
+      return fc;
+    } else {
+      return {};
+    }
   }
 
   findStartOfTheWeek(dt: Date) : Date {
