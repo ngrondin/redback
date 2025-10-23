@@ -66,6 +66,7 @@ import { RbImageComponent } from "app/rb-image/rb-image.component";
 import { RbTagsInputComponent } from "app/inputs/rb-tags-input/rb-tags.component";
 import { RbSelectorComponent } from "app/rb-selector/rb-selector.component";
 import { RbMultiRelatedInputComponent } from "app/inputs/rb-multi-related-input/rb-multi-related-input.component";
+import { RbColorInputComponent } from "app/inputs/rb-color-input/rb-color-input.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -105,6 +106,7 @@ export const componentRegistry = {
     "datepicker": RbDatetimeInputComponent,
     "dateinput": RbTextareaInputComponent,
     "urlinput": RbUrlInputComponent,
+    "colorinput": RbColorInputComponent,
     "gantt": RbGanttComponent,
     "link": RbLinkComponent,
     "log": RbLogComponent,

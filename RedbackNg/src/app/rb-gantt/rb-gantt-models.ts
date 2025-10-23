@@ -34,6 +34,7 @@ export class GanttLaneConfig {
     endAttribute: string;
     laneAttribute: string;
     labelAttribute: string;
+    labelExpression: string;
     labelAlts: any[];
     centerLabel: boolean;
     labelColor: string;
@@ -55,6 +56,7 @@ export class GanttLaneConfig {
       this.laneAttribute = json.laneattribute;
       this.labelAlts = json.labelalts;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
+      this.labelExpression = json.labelexpression;
       this.centerLabel = json.centerlabel ?? false;
       this.labelColor = json.labelcolor;
       this.isBackground = json.isbackground;
@@ -128,14 +130,15 @@ export class GanttLaneConfig {
   }
   
   export class GanttSpread {
-    id: string;
+    id: string; //currently only used for groupings
+    lane: string;
     label: string;
     start: number;
     width: number;
-    top: number;
+    offsetTop: number;
+    laneTop: number;
     height: number;
     sublane: number;
-    lane: string;
     color: string;
     labelcolor: string;
     canEdit: boolean;
@@ -143,27 +146,28 @@ export class GanttLaneConfig {
     object: RbObject;
     config: GanttSeriesConfig;
   
-    constructor(i: string, l: string, s: number, w: number, ln: string, c: string, lc: string, ce: boolean, sel: boolean, o: RbObject, cfg: GanttSeriesConfig) {
-      this.id = i;
+    constructor(ln: string, l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, ce: boolean, sel: boolean, o: RbObject, cfg: GanttSeriesConfig) {
+      this.lane = ln;
       this.label = l;
       this.start = s;
       this.width = w;
-      this.height = GanttSpreadHeight;
-      this.sublane = 0;
-      this.lane = ln;
+      this.offsetTop = ost;
+      this.sublane = sl;
+      this.laneTop = GanttSpreadMargin + (this.sublane * (GanttSpreadHeight + GanttSpreadMargin));
       this.color = c;
       this.labelcolor = lc;
       this.canEdit = ce;
       this.selected = sel;
       this.object = o;
       this.config = cfg;
-      this.setSubLane(0);
+      this.height = GanttSpreadHeight;
+      //this.setSubLane(0);
     }
   
-    setSubLane(sl: number) {
+    /*setSubLane(sl: number) {
       this.sublane = sl;
       this.top = GanttSpreadMargin + (this.sublane * (GanttSpreadHeight + GanttSpreadMargin));
-    }
+    }*/
   }
 
   export class GanttOverlayLane {

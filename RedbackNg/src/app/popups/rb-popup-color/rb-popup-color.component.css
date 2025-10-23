@@ -1,0 +1,22 @@
+:host {
+    max-width: 12vw;
+}
+
+.rb-popup-color-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.rb-popup-color-colorbox {
+    width: var(--v24px);
+    height: var(--v24px);
+    margin: var(--v8px);
+    cursor: pointer;
+}
+
+.rb-popup-color-colorbox:hover {
+    width: var(--v28px);
+    height: var(--v28px);
+    margin: var(--v6px);
+}

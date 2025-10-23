@@ -176,7 +176,7 @@
                     *ngIf="lane.icon != null"
                     class="rb-gantt-laneicon material-symbols-outlined">
                     {{lane.icon}}
-                </mat-icon>
+                </mat-icon>                
             </div>
         </div>
     </div>
@@ -202,7 +202,7 @@
                         [style.width.px]="spread.width"
                         [style.left.px]="spread.start"
                         [style.height.vw]="lane.height"
-                        [style.top.px]="spread.top"
+                        [style.top.px]="spread.laneTop"
                         [style.background-color]="spread.color"
                         [style.justify-content]="spread.config.centerLabel ? 'center' : 'start'"
                         [style.color]="spread.labelcolor">
@@ -252,7 +252,7 @@
                         [style.width.px]="spread.width"
                         [style.height.vw]="spread.height"
                         [style.left.px]="spread.start"
-                        [style.top.vw]="spread.top"
+                        [style.top.vw]="spread.laneTop"
                         [style.background-color]="spread.color"
                         [style.color]="spread.labelcolor"
                         [style.justify-content]="spread.config.centerLabel == true ? 'center' : 'start'">

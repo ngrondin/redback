@@ -96,6 +96,7 @@ export class AppComponent implements OnInit {
     window.redback.data = this.dataService;
     window.redback.modal = this.modalService;
     window.redback.notifications = this.notificationService;
+    window.redback.userpref = this.userprefService;
     window.redback.observers = [];
     window.redback.getObservable = () => {
       return new Observable<string>((observer) => {

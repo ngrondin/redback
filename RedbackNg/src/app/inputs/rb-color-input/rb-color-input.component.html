@@ -1,0 +1,18 @@
+<mat-icon 
+    *ngIf="showicon" 
+    [class]="'rb-input-icon material-symbols-outlined ' + (mandatoryOn ? ' rb-input-icon-mandatory' : '') + (alertOn ? ' rb-input-icon-alert' : '')">
+    {{icon}}
+</mat-icon>
+<div
+    class="rb-input-container">
+    <span
+        [class]="'rb-input-label' + (mandatoryOn ? ' rb-input-label-mandatory' : '') + (alertOn ? ' rb-input-label-alert' : '')">
+        {{label}}
+    </span>    
+    <div
+        #colorbox
+        class="rb-color-input-colorbox"
+        [style.background]="color"
+        (click)="openPicker()">
+    </div>
+</div>

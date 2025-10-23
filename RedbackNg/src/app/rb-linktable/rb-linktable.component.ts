@@ -5,61 +5,9 @@ import { ColorConfig, Evaluator, Formatter, LinkConfig } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
 import { UserprefService } from 'app/services/userpref.service';
+import { LinkTableColumnConfig, LinkTableGroupConfig } from './rb-linktable-models';
 
-class LinkTableColumnConfig {
-  id: string;
-  label: string;
-  attribute: string;
-  expression: string;
-  displayAttribute: string;
-  format: string;
-  align: string;
-  size: number;
-  width: number;
-  showExpr: string;
-  link: LinkConfig;
-  modal: string;
-  sum: boolean;
-  sumlink: LinkConfig;
-  iconmap: any;
-  backColor: ColorConfig;
-  foreColor: ColorConfig;
-  alt: {[key: string]: LinkTableColumnConfig};
 
-  constructor(json: any, userpref: any) {
-    this.id = json.id;
-    this.label = json.label;
-    this.attribute = json.attribute;
-    this.expression = json.expression;
-    this.displayAttribute = json.displayattribute;
-    this.format = json.format;
-    this.align = json.align;
-    this.size = json.size;
-    this.width = (json.size != null ? (json.size * 0.88) : 10);
-    this.showExpr = (json.show != null ? json.show : "true");
-    this.link = json.link != null ? new LinkConfig(json.link) : null;
-    this.modal = json.modal;
-    this.sum = json.sum;
-    this.sumlink = json.sumlink != null ? new LinkConfig(json.sumlink) : null;
-    this.iconmap = json.iconmap;
-    this.backColor = json.backcolor != null ? new ColorConfig(json.backcolor) : null;
-    this.foreColor = json.forecolor != null ? new ColorConfig(json.forecolor) : null;
-    if(json.alt != null) {
-      this.alt = {};
-      for(const key in json.alt) {
-        this.alt[key] = new LinkTableColumnConfig(json.alt[key], userpref);
-      }
-    }    
-  }
-
-  get isClickable() : boolean {
-    return this.link != null || this.modal != null;
-  }
-
-  get isSumClickable() : boolean {
-    return this.sumlink != null;
-  }
-}
 
 @Component({
   selector: 'rb-linktable',
@@ -68,14 +16,18 @@ class LinkTableColumnConfig {
 })
 export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('columns') _cols: any;
+  @Input('group') _grp: any;
   @Input('view') view: string;
   @Input('grid') grid: boolean = false;
 
   columns: LinkTableColumnConfig[];
+  group: LinkTableGroupConfig;
   reachedBottom: boolean = false;
   scrollLeft: number;
-
-
+  groups: any;
+  sums: any[];
+  openGroups: string[] = [null];
+  
   constructor(
     private modalService: ModalService,
     private navigateService: NavigateService,
@@ -92,63 +44,116 @@ export class RbLinktableComponent extends RbDataObserverComponent {
         this.columns.push(new LinkTableColumnConfig(item, colPref));
       }
     }
+    if(this._grp != null) {
+      this.group = new LinkTableGroupConfig(this._grp);
+    }
   }
 
   dataObserverDestroy() {
   }
 
   onDatasetEvent(event: any) {
+    this.calc();
   }
 
   onActivationEvent(state: boolean) {
     this.scrollLeft = 0;
+    this.calc();
   }
 
   get userPref() : any {
     return this.id != null ? this.userprefService.getCurrentViewUISwitch("linktable", this.id) : null;
   }
 
-  getColumnConfig(object: RbObject, column: LinkTableColumnConfig): LinkTableColumnConfig {
+  get hasGroup(): boolean {
+    return this.group != null;
+  }
+
+  get groupKeys(): string[] {
+    return Object.keys(this.groups);
+  }
+
+  calc() {
+    this.groups = {};
+    let totalsums = this.columns.map(c => 0);
+    for(let object of this.list) {
+      let grpKey = null;
+      if(this.group != null) {
+        if(this.group.expression != null) {
+          grpKey = Evaluator.eval(this.group.expression, object, null, this.dataset);
+        } else if(this.group.attribute != null) {
+          grpKey = object.get(this.group.attribute);
+        }
+      }
+      if(this.groups[grpKey] == null) this.groups[grpKey] = {sums:this.columns.map(c => 0), lines: []};
+      let grp = this.groups[grpKey];
+      let cols = [];
+      for(let c = 0; c < this.columns.length; c++) {
+        let cfg = this.getColumnConfig(object, this.columns[c]);
+        if(cfg != null) {
+          let val = null;
+          if(cfg.expression != null) {
+            val = Evaluator.eval(cfg.expression, object, null, this.dataset);
+          } else if(cfg.attribute != null) {
+            val = object.get(cfg.attribute);
+          }
+          let formatVal = cfg.format != null ? Formatter.format(val, cfg.format) : val;
+          let foreColor = cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
+          let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
+          let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
+          let col = {value: val, formattedValue: formatVal, align: cfg.align, width: cfg.width, backColor: backColor, foreColor: foreColor, icon: icon, link: cfg.link, model: cfg.modal};
+          if(!isNaN(val)) {
+            grp.sums[c] += val;
+            totalsums[c] += val;
+          }
+          cols.push(col);  
+        } else {
+          cols.push({formattedValue: null});
+        }
+      }
+      if(this.openGroups.indexOf(grpKey) > -1)
+        grp.lines.push({object: object, cols: cols});
+    }
+    for(var grpKey of Object.keys(this.groups)) {
+      this.groups[grpKey].sums = this.calcSumLines(this.groups[grpKey].sums);
+    }
+    this.sums = this.calcSumLines(totalsums);
+  }
+
+  calcSumLines(sums: number[]): any[] {
+    let ret = [];
+    let c = 0;
+    let firstWidth = -0.06;
+    while(c < this.columns.length && this.columns[c].sum != true) {
+      firstWidth += this.columns[c].width + 0.06;
+      c++;
+    }
+    ret.push({width: firstWidth});
+    while(c < this.columns.length) {
+      let cfg = this.columns[c];
+      if(cfg.sum) {
+        let formatVal = cfg.format != null ? Formatter.format(sums[c], cfg.format) : sums[c];
+        ret.push({width: cfg.width, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink});  
+      } else {
+        ret.push({width: cfg.width});  
+      }
+      c++;
+    }
+    return ret;
+  }
+
+  getColumnConfig(object: RbObject, column: LinkTableColumnConfig): any {
     if(column.alt != null && column.attribute != null) {
-      return column.alt[object.get(column.attribute)];
+      var val = object.get(column.attribute);
+      if(column.alt[val] != null)
+        return column.alt[val];
     } 
     return column;
   }
 
-  getValue(column: LinkTableColumnConfig, object: RbObject): string {
-    let cfg = this.getColumnConfig(object, column);
-    let val = null;
-    if(cfg != null) {
-      if(cfg.expression != null) {
-        val = Evaluator.eval(cfg.expression, object, null, this.dataset);
-      } else if(cfg.attribute != null) {
-        val = object.get(cfg.attribute);
-      }
-      if(cfg.format != null) {
-        val = Formatter.format(val, cfg.format);
-      }  
-    }
-    return val;
-  }
-
-  getSum(column: LinkTableColumnConfig): any {
-    if(column.sum && !this.dataset.hasMorePages) {
-      var ret = 0;
-      for(var o of this.dataset.list) {
-        var val = parseFloat(column.expression != null ? Evaluator.eval(column.expression, o, null, this.dataset) : o.get(column.attribute));
-        ret += !isNaN(val) ? val : 0;
-      }
-      if(column.format != null) {
-        ret = Formatter.format(ret, column.format);
-      } 
-      return ret; 
-    }
-    return "...";
-  }
 
   clickColumnHeader(column: LinkTableColumnConfig) {
     this.dataset.filterSort({
-      /*filter: {},*/
       sort: {
         "0": {
           "attribute":column.attribute,
@@ -158,55 +163,28 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     });
   }
 
-  isClickable(column: LinkTableColumnConfig, object: RbObject): boolean {
-    let cfg = this.getColumnConfig(object, column);
-    return cfg != null ? cfg.isClickable : false
+
+  clickLink(link: LinkConfig, object: RbObject) {
+    let event = link.getNavigationEvent(object, this.dataset);
+    this.navigateService.navigateTo(event);
   }
 
-  clickLink(column: LinkTableColumnConfig, object: RbObject) {
-    let cfg = this.getColumnConfig(object, column);
-    if(cfg != null) {
-      if(cfg.link != null) {
-        let event = cfg.link.getNavigationEvent(object, this.dataset);
-        this.navigateService.navigateTo(event);
-      } else if(cfg.modal != null) {
-        this.dataset.select(object);
-        this.modalService.open(cfg.modal);
-      }  
+  clickModal(modal: string) {
+    this.modalService.open(modal);
+  }
+
+  clickSumLink(link: LinkConfig) {
+    let event = link.getNavigationEvent(null, this.dataset);
+    this.navigateService.navigateTo(event);
+  }
+
+  toggleGroup(groupKey) {
+    if(this.openGroups.indexOf(groupKey) > -1) {
+      this.openGroups.splice(this.openGroups.indexOf(groupKey), 1);
+    } else {
+      this.openGroups.push(groupKey);
     }
-  }
-
-  isIcon(column: LinkTableColumnConfig, object: RbObject): boolean {
-    let cfg = this.getColumnConfig(object, column);
-    return cfg != null && cfg.iconmap != null;
-  }
-
-  icon(column: LinkTableColumnConfig, object: RbObject): string {
-    let cfg = this.getColumnConfig(object, column);
-    return cfg != null && cfg.iconmap != null ? cfg.iconmap[this.getValue(column, object)] : '';
-  }
-
-  isSumClickable(column: LinkTableColumnConfig): boolean {
-    return column != null ? column.isSumClickable : false
-  }
-
-  clickSumLink(column: LinkTableColumnConfig) {
-    if(column.sumlink != null) {
-      let event = column.sumlink.getNavigationEvent(null, this.dataset);
-      this.navigateService.navigateTo(event);
-    } else if(column.modal != null) {
-      this.modalService.open(column.modal);
-    }  
-  }
-
-  backColor(column: LinkTableColumnConfig, object: RbObject) {
-    let cfg = this.getColumnConfig(object, column);
-    return cfg != null && cfg.backColor != null ? cfg.backColor.getColor(object) : null;
-  }
-
-  foreColor(column: LinkTableColumnConfig, object: RbObject) {
-    let cfg = this.getColumnConfig(object, column);
-    return cfg != null && cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
+    this.calc();
   }
 
   showFooter(): boolean {

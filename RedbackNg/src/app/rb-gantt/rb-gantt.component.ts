@@ -41,7 +41,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   markMinorIntervalMS: number;
   startMS: number;
   endMS: number;
-  multiplier: number;
+  pxPerMS: number;
   widthPX: number;
   heightVW: number;
   doDragFilter: boolean = false;
@@ -295,18 +295,18 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
     this.startMS = this.startDate != null ? this.startDate.getTime() : (new Date()).getTime();
     this.endMS = this.startMS + this.spanMS;
-    this.multiplier = this.mainscroll.element.nativeElement.offsetWidth / this.zoomMS;
-    this.widthPX = this.spanMS * this.multiplier;
+    this.pxPerMS = this.mainscroll.element.nativeElement.offsetWidth / this.zoomMS;
+    this.widthPX = this.spanMS * this.pxPerMS;
     this.markMajorIntervalMS = 3600000;
     this.markMinorIntervalMS = 900000;
-    while(this.markMajorIntervalMS * this.multiplier < 40) {
+    while(this.markMajorIntervalMS * this.pxPerMS < 40) {
       this.markMajorIntervalMS *= 2;
       this.markMinorIntervalMS = this.markMajorIntervalMS;
     }
   }
 
   private getLanes() {
-    this.heightVW = 0;
+    let accHeight = 0;
     let lanes : GanttLane[] = [];
     let laneFilter: any = null;
     if(this.doDragFilter && this.laneFilterObject != null && this.lanesConfig.dragfilter != null) {
@@ -339,19 +339,20 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           sub = obj.get(this.lanesConfig.subAttribute);
         }        
         let lane = new GanttLane(obj.uid, label, sub, image, icon, obj);
-        let spreads: GanttSpread[] = this.getSpreads(obj.uid);
+        let spreads: GanttSpread[] = this.getSpreads(obj.uid, accHeight);
         lane.setSpreads(spreads);
         lanes.push(lane);
-        this.heightVW += lane.height + 0.06; //+1 for borders
+        accHeight += lane.height + 0.06; //+1 for borders
       }
     }
     /*if(lanes.length > 0) { //Let the dataset sort the lanes
       lanes.sort((a, b) => (a != null && b != null ? a.label.localeCompare(b.label) : 0));
     }*/ 
+    this.heightVW = accHeight;
     return lanes;
   }
 
-  private getSpreads(laneId: string) : GanttSpread[] {
+  private getSpreads(laneId: string, offsetTop: number) : GanttSpread[] {
     let spreads : GanttSpread[] = [];
     let seriesConfigs = this.seriesConfigs.sort((a, b) => b.isBackground && !a.isBackground ? 1 : 0); //Background first
     for(let cfg of seriesConfigs) {
@@ -364,11 +365,20 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.data) {
             let [startPX, widthPX] = this.getStartAndWidthPX(obj, cfg.startAttribute, cfg.endAttribute, cfg.durationAttribute);
             if(startPX != null && widthPX != null) {
-              let label = obj.get(cfg.labelAttribute); 
+              let label = null;
+              if(cfg.labelAttribute != null) {
+                label = obj.get(cfg.labelAttribute); 
+              } else if(cfg.labelExpression != null) {
+                label = Evaluator.eval(cfg.labelExpression, obj, null, null);
+              }
               if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
                 let alt = cfg.labelAlts.find(a => a.name == this.selectedLabelAlt);
                 if(alt != null) {
-                  label = obj.get(alt.attribute);
+                  if(alt.attribute != null) {
+                    label = obj.get(alt.attribute);
+                  } else if(alt.expression != null) {
+                    label = Evaluator.eval(alt.expression, obj, null, null);
+                  }
                 }
               }
               let color = null;
@@ -396,17 +406,29 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                 labelcolor = cfg.labelColor;
               }
               let canEdit: boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
-              let selected: boolean = false;
-              if(cfg.isBackground == false && dataset.selectedObject == obj) {
-                selected = true;
-                if(this.refocus) {
-                  this.mainscroll.scrollToHPos(Math.max(0, startPX - 30));
-                  this.refocus = false;
-                  this.blockNextRefocus = false;
-                }
+              let sublane = 0;
+              if(!cfg.isBackground) {
+                let hasOverlap: boolean;
+                do {
+                  hasOverlap = false;
+                  for(var os of spreads) {
+                    if(!os.config.isBackground && startPX < os.start + os.width && os.start < startPX + widthPX && sublane == os.sublane) {
+                      hasOverlap = true;
+                    }
+                  }
+                  if(hasOverlap) sublane++;
+                } while(hasOverlap);
               }
-              if(color != null) {
-                spreads.push(new GanttSpread(obj.uid, label, startPX, widthPX, laneId, color, labelcolor, canEdit, selected, obj, cfg));
+              let selected: boolean = cfg.isBackground == false && dataset.selectedObject == obj;
+              let spread = new GanttSpread(laneId, label, startPX, widthPX, offsetTop, sublane, color, labelcolor, canEdit, selected, obj, cfg);
+              spreads.push(spread);
+              if(selected && this.refocus) {
+                this.mainscroll.scrollToHPos(Math.max(0, startPX - 30));
+                let topVW = offsetTop + spread.laneTop;
+                let topPX = topVW * document.documentElement.clientWidth / 100;
+                this.mainscroll.scrollToVPos(Math.max(0, topPX - 30));
+                this.refocus = false;
+                this.blockNextRefocus = false;
               }
             }
           }
@@ -416,7 +438,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(this.groupOverlaps) {
       spreads = this.groupOverlappingSpreads(spreads);
     } 
-    this.adjustSpreadTops(spreads);
     return spreads;
   }
 
@@ -453,7 +474,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
         if(firstGroupFound == null) {
           let id = nextid++;
-          let group = new GanttSpread(id.toString(), "1 item", spread.start, spread.width, spread.laneId, 'var(--primary-light-color)', '#333', false, false, null, spread.config);
+          let group = new GanttSpread(spread.laneId, "1 item", spread.start, spread.width, 0, 0, 'var(--primary-light-color)', '#333', false, false, null, spread.config);
+          group.id = id.toString();
           groupmap[group.id] = 1
           groups.push(group);
         }  
@@ -498,14 +520,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   private getStartAndWidthPX(obj: RbObject, startAttribute: string, endAttribute: string, durationAttribute: string) {
     let startMS = (new Date(obj.get(startAttribute))).getTime();
-    let startPX: number = Math.round((startMS - this.startMS) * this.multiplier);
+    let startPX: number = Math.round((startMS - this.startMS) * this.pxPerMS);
     if(startPX < this.widthPX) {
       let durationMS = this.getObjectDuration(obj, startAttribute, endAttribute, durationAttribute);
       if(startMS + durationMS > this.endMS) {
         durationMS = this.endMS - startMS;
       }
       let endMS = startMS + durationMS;
-      let endPX = Math.round((endMS - this.startMS) * this.multiplier);
+      let endPX = Math.round((endMS - this.startMS) * this.pxPerMS);
       let widthPX = endPX - startPX;
       if(startPX > -widthPX) {
         if(startPX < 0) {
@@ -532,25 +554,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return durationMS;
   }
 
-  private adjustSpreadTops(spreads: GanttSpread[]) {
-    for(var i = 0; i < spreads.length; i++) {
-      let s: GanttSpread = spreads[i];
-      if(!s.config.isBackground) {
-        let hasOverlap: boolean;
-        do {
-          hasOverlap = false;
-          for(var j = 0; j < spreads.length && j < i; j++) {
-            let os: GanttSpread = spreads[j];
-            if(!os.config.isBackground && s.start < os.start + os.width && os.start < s.start + s.width && s.sublane == os.sublane) {
-              hasOverlap = true;
-            }
-          }
-          if(hasOverlap) s.setSubLane(s.sublane + 1);
-        } while(hasOverlap);
-      }
-    }
-  }
-
   private getMarks() : GanttMark[] {
     let marks: GanttMark[] = [];
     let lastMidnight = (new Date(this.startMS));
@@ -563,7 +566,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     while(cur < this.endMS) {
       let curDate: Date = new Date(cur);
       let sinceFirstMidnight = cur - lastMidnightMS;
-      let pos = Math.round((cur - this.startMS) * this.multiplier);
+      let pos = Math.round((cur - this.startMS) * this.pxPerMS);
       if(pos >= 0) {
         let dayLabel: string = this.dayNames[curDate.getDay()] + ", " + curDate.getDate() + " " + this.monthNames[curDate.getMonth()] + " " + curDate.getFullYear();
         let timeLabel: string = curDate.getHours() + ":00";
@@ -625,7 +628,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         left = left + tgt.offsetLeft;
         tgt = tgt.offsetParent;
       }
-      let newStartMS = this.startMS + (left / this.multiplier);
+      let newStartMS = this.startMS + (left / this.pxPerMS);
       let newStart = (new Date(newStartMS)).toISOString();
       if(previousStart != newStart) {
         update[config.startAttribute] = newStart;
@@ -671,7 +674,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(obj);
     let durationMS = this.getObjectDuration(obj, cfg.startAttribute, cfg.endAttribute, cfg.durationAttribute);
     return {
-      x: Math.round(durationMS * this.multiplier),
+      x: Math.round(durationMS * this.pxPerMS),
       y: window.innerWidth * GanttSpreadHeight / 100
     };
   }

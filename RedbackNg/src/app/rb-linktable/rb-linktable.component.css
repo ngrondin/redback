@@ -4,6 +4,7 @@
     overflow: hidden;
     margin: var(--v12px) var(--v16px) var(--v12px) var(--v16px);
     flex: 1 1 0;
+    align-items: start;
 }
 
 .rb-linktable-header-container {
@@ -11,6 +12,7 @@
     flex-direction: column;
     flex: 0 0 auto;
     overflow-x: hidden;
+    width: 100%;
     height: var(--v24px);
     position: relative;
 }
@@ -25,6 +27,7 @@
     color: darkgray;
     border-top-left-radius: var(--v5px);
     border-top-right-radius: var(--v5px);
+    border-left: 0.06vw solid transparent;
 
 }
 
@@ -37,15 +40,18 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    /*margin: 0px var(--v10px) 0px 0px;*/
-    padding: 0px var(--v5px);
     font-size: 0.9rem;
-    border-right: 1px solid transparent;
     cursor: pointer;
+    border-right: 0.06vw solid transparent;
+}
+
+.rb-linktable-colheader span {
+    padding: 0px var(--v5px);
 }
 
 rb-scroll {
     flex: 0 1 auto!important;
+    max-width: 100%;
 }
 
 rb-scroll ::ng-deep .rb-scroll-scroller {
@@ -61,23 +67,31 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
 .rb-linktable-body {
     display: flex;
     flex-direction: column;
-    border-width: 1px 0px 0px 1px;
+    border-width: 0.06vw 0.06vw 0px 0px ;
 }
 
 .rb-linktable-row {
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    /*margin-bottom: var(--v20px);*/
+}
+
+.rb-linktable-grouprow {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    background-color: #f0f0f0;
+}
+
+.rb-linktable-grouprow:hover {
+    background-color: #e0e0e0;
 }
 
 .rb-linktable-rowitem {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    /*justify-content: center;*/
-    padding: var(--v5px);
-    border-width: 0px 1px 1px 0px;
+    align-items: center;    
+    border-width: 0px 0px 0.06vw 0.06vw;
     border-color: transparent;
     border-style: solid;
 }
@@ -91,13 +105,21 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.95rem;
+    padding: var(--v5px);
 }
 
-.rb-linktable-link {
+.rb-linktable-rowitem a {
     color: var(--primary-dark-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 0.95rem;
+    padding: var(--v5px);
+}
+
+.rb-linktable-rowitem a:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .rb-linktable-icon {
@@ -106,11 +128,6 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     justify-content: center;
     color: #777!important;
     flex: 1 1 auto;
-}
-
-a.rb-linktable-link:hover {
-    text-decoration: underline;
-    cursor: pointer;
 }
 
 .rb-linktable-border {
@@ -123,6 +140,7 @@ a.rb-linktable-link:hover {
     flex-direction: column;
     flex: 0 0 auto;
     overflow-x: hidden;
+    width: 100%;
     height: var(--v24px);
     position: relative;
 }
@@ -135,24 +153,47 @@ a.rb-linktable-link:hover {
     left: 0px;
     height: var(--v24px);
     color: darkgray;
-    border-width: 0px 1px 0px 0px;
+    border-width: 0px 0.06vw 0px 0px;
     border-style: solid;
 }
 
 .rb-linktable-footer-grid {
-    border-color: lightgray;
+    border-right-color: lightgray;
+    border-left-color: transparent;
 }
 
 .rb-linktable-colfooter {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0px var(--v5px);
-    font-size: 0.9rem;
+    border-width: 0px 0px 0.06vw 0.06vw;
+    border-color: transparent;
+    border-style: solid;    
+}
+
+.rb-linktable-colfooter span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
     font-weight: bold;
     color: var(--dark-writing-color);
-    border-style: solid;
-    border-width: 0px 0px 1px 1px;
+    padding: var(--v5px);
+}
+
+.rb-linktable-colfooter a {
+    color: var(--primary-dark-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: bold;
+    padding: var(--v5px);
+}
+
+.rb-linktable-colfooter a:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .rb-linktable-colfooter-grid {

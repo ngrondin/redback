@@ -1,0 +1,9 @@
+
+.rb-color-input-colorbox{
+    width: 100%;
+    height: var(--v24px);
+    margin-top: var(--v16px);
+    cursor: pointer;
+    border: var(--v1px) solid #ddd;
+    border-radius: var(--v2px);
+}

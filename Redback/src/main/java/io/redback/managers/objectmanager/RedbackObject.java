@@ -136,7 +136,7 @@ public class RedbackObject extends RedbackElement
 				if(session.hasTxStore())
 					session.getTxStore().add(key, this);
 				postInitScriptContextUpdate();
-				traceEvent("objectcreate", null, null, null);
+				traceEvent("objectcreate", null, null, null, null);
 
 				Iterator<String> it = config.getAttributeNames().iterator();
 				while(it.hasNext())
@@ -392,21 +392,21 @@ public class RedbackObject extends RedbackElement
 				else
 					actualValue = new Value(null);
 			}
-			Value currentValue = get(name);
-			if(!currentValue.equals(actualValue))
+			Value previousValue = get(name);
+			if(!previousValue.equals(actualValue))
 			{
 				if(canWrite  &&  (isEditable(name) || isNewObject))
 				{
 					data.put(name, actualValue);
 					updatedAttributes.add(name);
 					if(!attributeConfig.noTrace())
-						traceEvent("objectupdate", name, actualValue.toString(), null);
+						traceEvent("objectupdate", name, actualValue.getObject(), previousValue.getObject(), null);
 					lastUpdated = System.currentTimeMillis();
 					try {
 						if(attributeConfig.getExpression() == null) 
 							scriptContext.put(name, actualValue.getObject());
 						ScriptContext attributeUpdateScriptContext = scriptContext.createChild();
-						attributeUpdateScriptContext.put("previousValue", currentValue.getObject());
+						attributeUpdateScriptContext.put("previousValue", previousValue.getObject());
 						executeAttributeFunction(name, "onupdate", attributeUpdateScriptContext);
 					} catch(ScriptValueException e) {
 						throw new RedbackException("Error setting script context value", e);
@@ -685,15 +685,16 @@ public class RedbackObject extends RedbackElement
 		return retVal;
 	}
 	
-	protected void traceEvent(String action, String attribute, String value, String function) throws RedbackException {
+	protected void traceEvent(String action, String attribute, Object value, Object prevValue, String function) throws RedbackException {
 		if(config.traceUpdates()
 				&& objectManager.traceCollection != null 
 				&& !session.getUserProfile().getUsername().equals(objectManager.sysUserManager.getUsername())
 				&& !session.isInScript()) {
-			DataMap event = new DataMap("action", action);
+			DataMap event = new DataMap("sessionid", session.getId(), "action", action);
 			if(attribute != null) {
 				event.put("attribute", attribute);
-				event.put("value", get(attribute).getObject());
+				event.put("value", value);
+				event.put("prevvalue", prevValue);
 			}
 			if(function != null) {
 				event.put("function", function);
