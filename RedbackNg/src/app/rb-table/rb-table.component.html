@@ -104,7 +104,17 @@
                     [editable]="col.editable"
                     [show]="col.showExpr"
                     [margin]="false">
-                </rb-switch-input>                
+                </rb-switch-input>     
+                <rb-color-input
+                    *ngIf="col.type == 'colorinput'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [icon]="col.icon"
+                    [editable]="col.editable"
+                    [show]="col.showExpr"
+                    [margin]="false">
+                </rb-color-input>                               
             </div>
             <div
                 class="rb-table-rowbutton">
