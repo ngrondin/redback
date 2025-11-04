@@ -70,7 +70,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   }
 
   get groupKeys(): string[] {
-    return Object.keys(this.groups);
+    return Object.keys(this.groups).sort();
   }
 
   calc() {

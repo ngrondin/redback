@@ -16,6 +16,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('dataset') dataset: RbDatasetComponent;
     @Input('datasetgroup') datasetgroup: RbDatasetGroupComponent;
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
+    @Input('datasetevents') datasetevents: string[] = null;
     @Input('object') _rbObject: RbObject;
     @Input('show') showExpr: string;
     @Input('targetdatasetid') targetdatasetid: string; // Only usefull when observer is linked to a datasetgroup and you want to specify which dataset
@@ -61,10 +62,12 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     private internalDatasetEvent(event: any) {
-        if(this.showExpr != null) {
-            this.evalShow();
+        if(this.datasetevents == null || (this.datasetevents != null && this.datasetevents.indexOf(event.event) > -1)) {
+            if(this.showExpr != null) {
+                this.evalShow();
+            }
+            this.onDatasetEvent(event);    
         }
-        this.onDatasetEvent(event);
     }
 
     abstract dataObserverInit();

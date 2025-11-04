@@ -9,14 +9,17 @@ import { RbPopupComponent } from '../rb-popup/rb-popup.component';
 })
 export class RbPopupColorComponent extends RbPopupComponent implements OnInit {
   colors = [
-    // Neutral Tones (6 shades)
-    '#FFFFFF', '#F7F7F7', '#E0E0E0', '#9E9E9E', '#424242', '#1E1E1E',
-    // Warm Hues (6 shades)
-    '#FF5733', '#FFC300', '#F1963B', '#D58D8D', '#9A6324', '#B44446',
-    // Cool Hues (6 shades)
-    '#007BFF', '#20C997', '#42d4f4', '#6F42C1', '#A78BFA', '#0E0E0E',
-    // Muted & Earthy Tones (6 shades)
-    '#A47864', '#7D8A74', '#B3CED6', '#C0C5CE', '#D0D3D4', '#E2725B'
+
+    ["#990000", "#cc0000", "#e06666", "#ea9999", "#f4cccc"],
+    ["#b45f06", "#e69138", "#f6b26b", "#f9cb9c", "#fce5cd"],    
+    ["#bf9000", "#f1c232", "#ffd966", "#ffe599", "#fff2cc"],
+    ["#38761d", "#6aa84f", "#93c47d", "#b6d7a8", "#d9ead3"],
+    ["#00a8ee", "#31b6ee", "#37b8ee", "#8ed2ee", "#d9e8ee"],
+    ["#1155cc", "#3c78d8", "#6d9eeb", "#a4c2f4", "#c9daf8"],
+    ["#351c75", "#674ea7", "#8e7cc3", "#b4a7d6", "#d9d2e9"],
+    ["#741b47", "#a64d79", "#c27ba0", "#d5a6bd", "#ead1dc"],
+    ["#000000", "#666666", "#b7b7b7", "#efefef", "#ffffff"]
+
   ];
 
   constructor(

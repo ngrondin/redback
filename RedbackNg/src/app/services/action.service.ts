@@ -9,8 +9,9 @@ import { ErrorService } from './error.service';
 import { FilterService } from './filter.service';
 import { ModalService } from './modal.service';
 import { ReportService } from './report.service';
-import { RbObject } from 'app/datamodel';
 import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
+import { LinkConfig } from 'app/helpers';
+import { NavigateService } from './navigate.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,8 @@ export class ActionService {
     private reportService: ReportService,
     private modalService: ModalService,
     private errorService: ErrorService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private navigateService: NavigateService
   ) { }
 
 
@@ -57,6 +59,8 @@ export class ActionService {
         return this.executeClientScript(dataset, param);
       } else if(_action == 'modal') {
         return this.showModal(target ?? param);
+      } else if(_action == 'navigate') {
+        return this.navigate(dataset, param);
       } else if(_action == 'externallink') {
         return this.launchExternalLink(dataset, (target ?? param));
       } else if(_action == 'refresh') {
@@ -254,6 +258,16 @@ export class ActionService {
   public showModal(modalName: string) : Observable<null> {
     return new Observable((observer) => {
       this.modalService.open(modalName);
+      observer.next(null);
+      observer.complete();  
+    });
+  }
+
+  public navigate(dataset: RbDatasetComponent, param: any) : Observable<null> {
+    return new Observable((observer) => {
+      let link = new LinkConfig(param);
+      let event = link.getNavigationEvent(dataset.selectedObject, dataset);
+      this.navigateService.navigateTo(event);
       observer.next(null);
       observer.complete();  
     });

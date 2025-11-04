@@ -13,6 +13,7 @@ import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
 import { Evaluator } from 'app/helpers';
 import { AppInjector } from 'app/app.module';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 
 @Component({
@@ -122,7 +123,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       let target = null;
       for(let cfg of this.seriesConfigs) {
         let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
-        if(dataset.dataTarget != null && dataset.dataTarget.select != null) {
+        if(dataset != null && dataset.dataTarget != null && dataset.dataTarget.select != null) {
           target = {
             cfg: cfg, 
             objectname: dataset.objectname, 
@@ -153,7 +154,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       this.refocus = true;
     } 
     super.onDatasetEvent(event);
-    if(event.dataset.getId() == this.lanesConfig.dataset) {
+    if(event.dataset.getId() == this.lanesConfig.dataset && event.event != 'select') {
       super.updateData(true)
     } 
   }
@@ -242,7 +243,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   updateOtherData() {
     let fetched = true;
     for(var cfg of this.overlayConfigs) {
-      let filterSort = this.getFilterSort(cfg.startAttribute, cfg.endAttribute, null);
+      let filterSort = this.getFilterSort(cfg.dataset, cfg.startAttribute, cfg.endAttribute, null);
       if(this.datasetgroup != null) {
         fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort);
       } else {
@@ -253,13 +254,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   getFilterSortForSeries(cfg: GanttSeriesConfig) : any {
-    return this.getFilterSort(cfg.startAttribute, cfg.endAttribute, cfg.laneAttribute);
+    return this.getFilterSort(cfg.dataset, cfg.startAttribute, cfg.endAttribute, cfg.laneAttribute);
   }
 
-  getFilterSort(startAttribute: string, endAttribute: string, laneAttribute: string) {
+  getFilterSort(datasetId: string, startAttribute: string, endAttribute: string, laneAttribute: string) {
+    let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[datasetId] : this.dataset;
     let startDate = this.startDate;
     let endDate = new Date(this.startDate.getTime() + this.spanMS);
-    let filter = {};
+    let filter = dataset.userFilter != null ? {...dataset.userFilter} : {};
     if(endAttribute != null) {
       filter[startAttribute] = {
         $lt: "'" + endDate.toISOString() + "'"

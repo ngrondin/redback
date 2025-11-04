@@ -54,11 +54,28 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 				public Object call(Object... arguments) throws RedbackException {
 					String objectname = (String)arguments[0];
 					DataMap filter = (DataMap)(arguments[1]);
-					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
-					boolean addRelated = arguments.length > 3 ? (boolean)(arguments[3]) : false;
+					String search = null;
+					DataMap sort = null;
+					boolean addRelated = false;
+					if(arguments.length > 2) {
+						if(arguments[2] instanceof DataMap) {
+							sort = (DataMap)(arguments[2]);
+							if(arguments.length > 3) {
+								addRelated = (boolean)(arguments[3]);
+							}
+						} else if(arguments[2] instanceof String) {
+							search = arguments[2].toString();
+							if(arguments.length > 3) {
+								sort = (DataMap)(arguments[2]);
+								if(arguments.length > 4) {
+									addRelated = (boolean)(arguments[4]);
+								}
+							}
+						}
+					}					
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					List<RedbackObjectRemote> list = objectClient.listObjects(session, objectname, filter, sort, addRelated);
+					List<RedbackObjectRemote> list = objectClient.listObjects(session, objectname, filter, search, sort, addRelated, false, 0, 50);
 					return RedbackObjectRemoteJSWrapper.convertList(list);
 				}
 			};
@@ -67,11 +84,28 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 				public Object call(Object... arguments) throws RedbackException {
 					String objectname = (String)arguments[0];
 					DataMap filter = (DataMap)(arguments[1]);
-					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
-					boolean addRelated = arguments.length > 3 ? (boolean)(arguments[3]) : false;
+					String search = null;
+					DataMap sort = null;
+					boolean addRelated = false;
+					if(arguments.length > 2) {
+						if(arguments[2] instanceof DataMap) {
+							sort = (DataMap)(arguments[2]);
+							if(arguments.length > 3) {
+								addRelated = (boolean)(arguments[3]);
+							}
+						} else if(arguments[2] instanceof String) {
+							search = arguments[2].toString();
+							if(arguments.length > 3) {
+								sort = (DataMap)(arguments[2]);
+								if(arguments.length > 4) {
+									addRelated = (boolean)(arguments[4]);
+								}
+							}
+						}
+					}
 					if(domainLock != null)
 						filter.put("domain", domainLock);
-					List<RedbackObjectRemote> list = objectClient.listAllObjects(session, objectname, filter, sort, addRelated);
+					List<RedbackObjectRemote> list = objectClient.listAllObjects(session, objectname, filter, search, sort, addRelated, false);
 					return RedbackObjectRemoteJSWrapper.convertList(list);
 				}
 			};

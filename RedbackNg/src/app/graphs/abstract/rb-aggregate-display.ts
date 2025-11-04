@@ -6,6 +6,7 @@ import { AppInjector } from "app/app.module";
 import { RbAggregate } from "app/datamodel";
 import { ValueComparator, Converter, Formatter } from "app/helpers";
 import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
+import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { ApiService } from "app/services/api.service";
 import { FilterService } from "app/services/filter.service";
 import { NavigateService } from "app/services/navigate.service";
@@ -28,6 +29,8 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     @Input('linkfilter') linkfilter: string;
     @Input('title') title: string;
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
+    @Input('dataset') dataset: RbDatasetComponent;
+    @Input('datasetevents') datasetevents: string[] = ['load', 'update', 'clear', 'select'];
     @Input('script') script: string;
     @Input('scriptparam') scriptparam: any;
     
@@ -43,7 +46,10 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     private navigateService: NavigateService;
     private apiService: ApiService;
     private aggregatesetSubscription: Subscription;
+    public datasetSubscription: Subscription;
     private _isLoading: boolean = false;
+    private lastCalc = null;
+    private calcSched = null;
     
   
     constructor() {
@@ -56,14 +62,22 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     componentInit() {
       if(this.aggregateset != null) {
         this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.getGraphData());
-      } 
+      } else if(this.dataset != null) {
+        this.datasetSubscription = this.dataset.getObservable().subscribe(event => {
+          if(this.datasetevents.indexOf(event.event) > -1) {
+            this.getGraphData();
+          }
+        });
+      }
       this.onActivationEvent(this.active);
     }
   
     componentDestroy() {
       if(this.aggregatesetSubscription != null) {
         this.aggregatesetSubscription.unsubscribe();
-      } 
+      } else if(this.dataset != null) {
+        this.datasetSubscription.unsubscribe();
+      }
     }
   
     onActivationEvent(state: boolean) {
@@ -97,15 +111,30 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     }
 
     getGraphData() {
-      this._isLoading = true;
-      if(this.script != null) {
-        let param = this.filterService.resolveFilter(this.scriptparam, null, null, null, null, {});
-        this.apiService.executeGlobal(this.script, param).subscribe(resp => {
-          if(resp.data != null) this.graphData = resp.data;
-          this._isLoading = false;
-        });
-      } else if(this.aggregates != null) {
-        this.calcAggregateData();
+      let now = new Date();
+      if(this.lastCalc == null || (this.lastCalc != null && this.lastCalc.getTime() < now.getTime() - 1000)) {
+        this.lastCalc = now;
+        this._isLoading = true;
+        if(this.script != null) {
+          let param = this.filterService.resolveFilter(this.scriptparam, this.dataset != null ? this.dataset.selectedObject : null, this.dataset, null, null, {});
+          this.apiService.executeGlobal(this.script, param).subscribe({
+            next: (resp) => {
+              if(resp.data != null) this.graphData = resp.data;
+            },
+            error: (err) => {},
+            complete: () => {
+              this._isLoading = false;
+            }
+           });
+        } else if(this.aggregates != null) {
+          this.calcAggregateData();
+        }
+
+      } else if(this.calcSched == null) {
+        this.calcSched = setTimeout(() => {
+          this.calcSched = null;
+          this.getGraphData();
+        }, 1000);
       }
     }
   

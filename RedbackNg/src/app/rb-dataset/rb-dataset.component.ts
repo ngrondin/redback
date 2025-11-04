@@ -170,8 +170,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     return this._selectedObjects.indexOf(object) != -1;
   }
 
-  getObservable() : Observable<string>  {
-    return new Observable<string>((observer) => {
+  getObservable() : Observable<any>  {
+    return new Observable<any>((observer) => {
       this.observers.push(observer);
     });
   }

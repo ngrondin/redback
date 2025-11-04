@@ -24,7 +24,7 @@ export class LinkTableColumnConfig {
       this.id = json.id;
       this.label = json.label;
       this.attribute = json.attribute;
-      this.expression = json.expression;
+      this.expression = userpref != null && userpref.exression != null ? userpref.expression : json.expression;
       this.displayAttribute = json.displayattribute;
       this.format = json.format;
       this.align = json.align;
@@ -36,8 +36,8 @@ export class LinkTableColumnConfig {
       this.sum = json.sum;
       this.sumlink = json.sumlink != null ? new LinkConfig(json.sumlink) : null;
       this.iconmap = json.iconmap;
-      this.backColor = json.backcolor != null ? new ColorConfig(json.backcolor) : null;
-      this.foreColor = json.forecolor != null ? new ColorConfig(json.forecolor) : null;
+      this.backColor = userpref != null && userpref.backcolor != null ? new ColorConfig(userpref.backcolor) : (json.backcolor != null ? new ColorConfig(json.backcolor) : null);
+      this.foreColor = userpref != null && userpref.foreColor != null ? new ColorConfig(userpref.foreColor) : (json.foreColor != null ? new ColorConfig(json.foreColor) : null);
       if(json.alt != null) {
         this.alt = {};
         for(const key in json.alt) {

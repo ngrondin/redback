@@ -114,16 +114,20 @@ public class ObjectClient extends Client
 	}
 
 	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter) throws RedbackException  {
-		return listAllObjects(session, objectName, filter, null, false, false);
+		return listAllObjects(session, objectName, filter, null, null, false, false);
 	}
 	
 	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, DataMap sort, boolean addRelated) throws RedbackException  {
-		return listAllObjects(session, objectName, filter, sort, addRelated, false);
+		return listAllObjects(session, objectName, filter, null, sort, addRelated, false);
 	}
 	
 	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException  {
+		return listAllObjects(session, objectName, filter, null, sort, addRelated, false);
+	}
+	
+	public List<RedbackObjectRemote>  listAllObjects(Session session, String objectName, DataMap filter, String search, DataMap sort, boolean addRelated, boolean addValidation) throws RedbackException  {
 		AccumulatingDataStream<RedbackObjectRemote> stream = new AccumulatingDataStream<RedbackObjectRemote>();
-		streamObjects(session, objectName, filter, sort, addValidation || addRelated, -1, stream);
+		streamObjects(session, objectName, filter, search, sort, addValidation || addRelated, -1, stream);
 		List<RedbackObjectRemote> list = stream.getList();
 		if(addRelated) {
 			RemoteObjectRelater relater = new RemoteObjectRelater(session, this);
@@ -131,12 +135,17 @@ public class ObjectClient extends Client
 		}
 		return list;
 	}
-	
+
 	public void streamObjects(Session session, String objectname, DataMap filter, DataMap sort, boolean addValidation, int chunkSize, DataStream<RedbackObjectRemote> stream) throws RedbackException  {
+		streamObjects(session, objectname, filter, null, sort, addValidation, chunkSize, stream);
+	}
+	
+	public void streamObjects(Session session, String objectname, DataMap filter, String search, DataMap sort, boolean addValidation, int chunkSize, DataStream<RedbackObjectRemote> stream) throws RedbackException  {
 		DataMap req = new DataMap();
 		req.put("action", "list");
 		req.put("object", objectname);
 		req.put("filter", filter != null ? filter : new DataMap());
+		req.put("search", search);
 		if(sort != null) req.put("sort", sort);
 		if(chunkSize != -1) req.put("chunksize", chunkSize);
 		if(addValidation) {

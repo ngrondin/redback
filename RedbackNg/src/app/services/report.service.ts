@@ -38,7 +38,7 @@ export class ReportService {
         query = query + "&filter=" + JSON.stringify(filterData.filter);
       }
           if(filterData.search != null) {
-        query = query + '$search=' + filterData.search;
+        query = query + '&search=' + filterData.search;
       }
     }
     if(domain != null) {

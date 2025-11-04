@@ -1,9 +1,13 @@
 <div
     class="rb-popup-color-container">
     <div
-        *ngFor="let color of colors"
-        class="rb-popup-color-colorbox"
-        [style.background]="color"
-        (click)="clickedColor(color)">
+        *ngFor="let colorline of colors"
+        class="rb-popup-color-colorline">
+        <div
+            *ngFor="let color of colorline"
+            class="rb-popup-color-colorbox"
+            [style.background]="color"
+            (click)="clickedColor(color)">
+        </div>    
     </div>
 </div>

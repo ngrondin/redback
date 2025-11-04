@@ -1,5 +1,5 @@
 :host {
-    max-width: 12vw;
+    /*max-width: 12vw;*/
 }
 
 .rb-popup-color-container {
@@ -8,15 +8,20 @@
     flex-direction: row;
 }
 
+.rb-popup-color-colorline {
+    display: flex;
+    flex-direction: column
+}
+
 .rb-popup-color-colorbox {
-    width: var(--v24px);
-    height: var(--v24px);
-    margin: var(--v8px);
+    width: var(--v20px);
+    height: var(--v20px);
+    margin: var(--v5px);
     cursor: pointer;
 }
 
 .rb-popup-color-colorbox:hover {
-    width: var(--v28px);
-    height: var(--v28px);
-    margin: var(--v6px);
+    width: var(--v24px);
+    height: var(--v24px);
+    margin: var(--v3px);
 }

@@ -73,10 +73,12 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             for(let cfg of this.activeSeries) {
               let filterSort = this.getFilterSortForSeries(cfg);
               if(filterSort != null) {
-                if(this.datasetgroup != null) {
+                if(this.datasetgroup != null && this.datasetgroup.datasets[cfg.dataset] != null) {
                     fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort);
-                } else {
+                } else if(this.dataset != null) {
                     fetched = fetched && this.dataset.filterSort(filterSort);
+                } else {
+                    fetched = false;
                 }
               }
             }
