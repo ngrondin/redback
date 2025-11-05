@@ -325,8 +325,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     let filterApplies = this.filterService.applies(this.resolvedFilter, object);
     if(object.deleted || !filterApplies) {
       this.remove(object);
-    } 
-    this.publishEvent('update');
+    } else {
+      this.publishEvent('update');
+    }
   }
 
   public selectByFilter(filter: any) {

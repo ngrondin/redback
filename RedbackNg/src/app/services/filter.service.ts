@@ -144,46 +144,49 @@ public unresolveFilter(__inMap: any) : any {
         }
       } else {
         let oVal = object.get(key);
-        if(typeof fVal == 'object' && fVal !== null) {
-          if(fVal["$in"] != null) {
-            let fSubVal = fVal["$in"];
-            let subRet = false;
-            for(let fSubValItem of fSubVal) {
-              if(this.valueAreEqual(fSubValItem, oVal)) subRet = true;
+        let unresolvedRelated = (oVal == null && key.indexOf('.') > -1 && object.get(key.substring(0, key.indexOf('.'))) != null);
+        if(!unresolvedRelated) { //Filter applies by default when a related is not yet resolved
+          if(typeof fVal == 'object' && fVal !== null) {
+            if(fVal["$in"] != null) {
+              let fSubVal = fVal["$in"];
+              let subRet = false;
+              for(let fSubValItem of fSubVal) {
+                if(this.valueAreEqual(fSubValItem, oVal)) subRet = true;
+              }
+              if(subRet == false) ret = false;
             }
-            if(subRet == false) ret = false;
-          }
-          if(fVal["$nin"] != null) {
-            let fSubVal = fVal["$nin"];
-            for(let fSubValItem of fSubVal) {
-              if(this.valueAreEqual(fSubValItem, oVal)) ret = false;
+            if(fVal["$nin"] != null) {
+              let fSubVal = fVal["$nin"];
+              for(let fSubValItem of fSubVal) {
+                if(this.valueAreEqual(fSubValItem, oVal)) ret = false;
+              }
             }
-          }
-          if(fVal["$eq"] != null) {
-            if(!this.valueAreEqual(fVal["$eq"], oVal)) ret = false;
-          }
-          if(fVal["$ne"] != null) {
-            if(this.valueAreEqual(fVal["$ne"], oVal)) ret = false;
-          }
-          if(fVal["$gt"] != null) {
-            let fSubVal = fVal["$gt"];
-            let oValNum = oVal != null && oVal.getTime != null ? oVal.getTime() : this.isoDateRegExp.test(oVal) ? new Date(oVal).getTime() : parseFloat(oVal);
-            let fSubValNum = fSubVal.getTime != null ? fSubVal.getTime() : this.isoDateRegExp.test(fSubVal) ? new Date(fSubVal).getTime() : parseFloat(fSubVal);
-            if(oValNum <= fSubValNum) ret = false;
-          }
-          if(fVal["$lt"] != null) {
-            let fSubVal = fVal["$lt"];
-            let oValNum = oVal != null && oVal.getTime != null ? oVal.getTime() : this.isoDateRegExp.test(oVal) ? new Date(oVal).getTime() : parseFloat(oVal);
-            let fSubValNum = fSubVal.getTime != null ? fSubVal.getTime() : this.isoDateRegExp.test(fSubVal) ? new Date(fSubVal).getTime() : parseFloat(fSubVal);
-            if(oValNum >= fSubValNum) ret = false;            
-          }
-          if(fVal["$regex"] != null) {
-            let fSubVal = fVal["$regex"];
-            let expr = eval(fSubVal);
-            if(!expr.test(oVal)) ret = false;
-          }
-        } else {
-          if(!this.valueAreEqual(fVal, oVal)) ret = false;
+            if(fVal["$eq"] != null) {
+              if(!this.valueAreEqual(fVal["$eq"], oVal)) ret = false;
+            }
+            if(fVal["$ne"] != null) {
+              if(this.valueAreEqual(fVal["$ne"], oVal)) ret = false;
+            }
+            if(fVal["$gt"] != null) {
+              let fSubVal = fVal["$gt"];
+              let oValNum = oVal != null && oVal.getTime != null ? oVal.getTime() : this.isoDateRegExp.test(oVal) ? new Date(oVal).getTime() : parseFloat(oVal);
+              let fSubValNum = fSubVal.getTime != null ? fSubVal.getTime() : this.isoDateRegExp.test(fSubVal) ? new Date(fSubVal).getTime() : parseFloat(fSubVal);
+              if(oValNum <= fSubValNum) ret = false;
+            }
+            if(fVal["$lt"] != null) {
+              let fSubVal = fVal["$lt"];
+              let oValNum = oVal != null && oVal.getTime != null ? oVal.getTime() : this.isoDateRegExp.test(oVal) ? new Date(oVal).getTime() : parseFloat(oVal);
+              let fSubValNum = fSubVal.getTime != null ? fSubVal.getTime() : this.isoDateRegExp.test(fSubVal) ? new Date(fSubVal).getTime() : parseFloat(fSubVal);
+              if(oValNum >= fSubValNum) ret = false;            
+            }
+            if(fVal["$regex"] != null) {
+              let fSubVal = fVal["$regex"];
+              let expr = eval(fSubVal);
+              if(!expr.test(oVal)) ret = false;
+            }
+          } else {
+            if(!this.valueAreEqual(fVal, oVal)) ret = false;
+          }  
         }
       }
     }

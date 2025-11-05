@@ -667,7 +667,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     object.setValues(update);
   }
 
-  public scroll(event) {
+  public onScroll(event) {
     this.scrollLeft = event.target.scrollLeft;
     this.scrollTop = event.target.scrollTop;
   }
