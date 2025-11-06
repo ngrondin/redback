@@ -32,36 +32,39 @@ export class NlactionService {
     if(command == 'navtouid' && params.length == 2) {
       await this.navigateService.navigateTo({
         view: params[0],
-        filter: {uid: "'" + params[1] + "'"},
-        reset: true
+        reset: true,
+        datatargets: [{
+          filter: {uid: "'" + params[1] + "'"}
+        }],
       });
     } else if(command == 'navtouids' && params.length == 2) {
       await this.navigateService.navigateTo({
         view: params[0],
-        filter: {
-          uid: {
-            $in: params[1].split(',').map(a => "'" + a + "'")
-          }
-        }, 
-        reset: true
+        reset: true,
+        datatargets: [{
+          filter: {uid: {$in: params[1].split(',').map(a => "'" + a + "'")}}
+        }], 
       });
     } else if(command == 'navtofilter' && params.length == 3) {
       await this.navigateService.navigateTo({
         view: params[0],
-        search: params[1],
-        filter: JSON.parse(params[2]),
-        reset: true
+        reset: true,
+        datatargets: [{
+          search: params[1],
+          filter: JSON.parse(params[2])
+        }]
       })      
     } else if(command == 'navtocontext' && params.length == 2) {
       await this.navigateService.navigateTo({
         view: params[0],
-        select: JSON.parse(params[1]),
-        reset: true
+        reset: true,
+        datatargets: [{
+          select: JSON.parse(params[1])
+        }]
       })      
     } else if(command == 'navto' && params.length == 1) {
       await this.navigateService.navigateTo({
         view: params[0],
-        filter: {},
         reset: true
       })
     } else if(command == 'opentab' && params.length >= 1) {

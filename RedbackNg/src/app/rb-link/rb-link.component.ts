@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, Input, HostBinding } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { RbObject } from 'app/datamodel';
+import { NavigateEvent, RbObject } from 'app/datamodel';
 import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
@@ -37,15 +37,15 @@ export class RbLinkComponent extends RbDataObserverComponent {
 
   public navigateTo() {
     if(this.rbObject != null && this.attribute != null) {
-      let event = {};
+      let event = new NavigateEvent();
       let objectuid = null;
       if(this.attribute == 'uid') {
-        event['objectname'] = this.rbObject.objectname;
+        event.objectname = this.rbObject.objectname;
         objectuid = this.rbObject.uid;
       } else {
         let related = this.rbObject.getRelated(this.attribute);
         if(related != null) {
-          event['objectname'] = related.objectname;
+          event.objectname = related.objectname;
           objectuid = related.uid;
         } else {
           let relatedUid = this.rbObject.get(this.attribute);
@@ -53,12 +53,12 @@ export class RbLinkComponent extends RbDataObserverComponent {
         }
       }
       if(this.filtersingleobject) {
-        event["filter"] = {uid: "'" + objectuid + "'"}
+        event.datatargets.push({filter: {uid: "'" + objectuid + "'"}});
       } else {
-        event["select"] = {uid: objectuid}
+        event.datatargets.push({select: {uid: objectuid}});
       }
       if(this.view != null) {
-        event['view'] = this.view;
+        event.view = this.view;
       } 
       this.navigateService.navigateTo(event);
     }

@@ -4,6 +4,7 @@ import { FunnelEntry, FunnelGroup, FunnelGroupConfig, FunnelPhase, FunnelPhaseCo
 import { UserprefService } from 'app/services/userpref.service';
 import { ValueComparator } from 'app/helpers';
 import { NavigateService } from 'app/services/navigate.service';
+import { NavigateEvent } from 'app/datamodel';
 
 @Component({
   selector: 'rb-funnel',
@@ -100,21 +101,17 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
   }
 
 
-  click(entry: FunnelEntry) {
-    let object = entry.object;
+  click(item: FunnelEntry) {
+    let object = item.object;
     if(object != null) {
-      let target = {};
-      if(entry.config.linkView != null) {
-        target['view'] = entry.config.linkView;
-      } else {
-        target['objectname'] = object.objectname;
+      let navEvent: NavigateEvent = {
+        view: item.config.linkView,
+        objectname: object.objectname,
+        datatargets: [{
+          filter: {uid: "'" + (item.config.linkAttribute != null ? object.get(item.config.linkAttribute) : object.uid) + "'"}
+        }]
       }
-      if(entry.config.linkAttribute != null) {
-        target['filter'] = {uid: "'" + object.get(entry.config.linkAttribute) + "'"};
-      } else {
-        target['filter'] = {uid: "'" + object.uid + "'"};
-      }
-      this.navigateService.navigateTo(target);
+      this.navigateService.navigateTo(navEvent);
     }
   }
 

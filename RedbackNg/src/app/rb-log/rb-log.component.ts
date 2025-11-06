@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { RbObject } from 'app/datamodel';
+import { NavigateEvent, RbObject } from 'app/datamodel';
 import { Formatter } from 'app/helpers';
 import { ActionService } from 'app/services/action.service';
 import { DataService } from 'app/services/data.service';
@@ -118,10 +118,13 @@ export class RbLogComponent extends RbDataObserverComponent {
 
   clickCard(object: RbObject) {
     if(this.canClick) {
-      let target = {};
-      target['objectname'] = object.get(this.linkobjectattribute);
-      target['filter'] = {uid: "'" + object.get(this.linkuidattribute) + "'"};
-      this.navigateService.navigateTo(target);
+      let navEvent: NavigateEvent = {
+        objectname: object.get(this.linkobjectattribute),
+        datatargets: [{
+          filter: {uid: "'" + object.get(this.linkuidattribute) + "'"}
+        }]
+      }
+      this.navigateService.navigateTo(navEvent);
     }
 
   }

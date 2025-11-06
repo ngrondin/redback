@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ComponentRef, ViewContainerRef, ViewChild } from '@angular/core';
-import { RbObject } from 'app/datamodel';
+import { NavigateEvent, RbObject } from 'app/datamodel';
 import { DataService } from 'app/services/data.service';
 import { ConfigService } from 'app/services/config.service';
 import { FilterService } from 'app/services/filter.service';
@@ -64,16 +64,13 @@ export class RbGlobalSeachComponent implements OnInit {
   }
 
   navigateToObject(object: RbObject, view: string) {
-    let event: any = {
-      filter : {
-        uid : "'" + object.uid + "'"
-      }
+    let event: NavigateEvent = {
+      view: view,
+      objectname: object.objectname,
+      datatargets: [{
+        filter:{uid : "'" + object.uid + "'"}
+      }]
     };
-    if(view != null) {
-      event.view = view;
-    } else {
-      event.objectname = object.objectname;
-    }
     this.navigateService.navigateTo(event);
     this.stopGlobalSearch();
   }

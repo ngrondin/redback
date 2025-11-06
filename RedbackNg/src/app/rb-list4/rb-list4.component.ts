@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { RbObject } from 'app/datamodel';
+import { NavigateEvent, RbObject } from 'app/datamodel';
 import { Evaluator, Formatter } from 'app/helpers';
 import { ApiService } from 'app/services/api.service';
 import { ModalService } from 'app/services/modal.service';
@@ -207,11 +207,13 @@ export class RbList4Component extends RbDataObserverComponent {
       if(this.modal != null) {
         this.modalService.open(this.modal);
       } else if(this.link != null) {
-        let target = {
-          "objectname": this.rbObject.objectname,
-          "filter": {uid: "'" + this.rbObject.uid + "'"}
+        let navEvent: NavigateEvent = {
+          objectname: this.rbObject.objectname,
+          datatargets:[{
+            filter: {uid: "'" + this.rbObject.uid + "'"}
+          }]
         };
-        this.navigateService.navigateTo(target);
+        this.navigateService.navigateTo(navEvent);
       }  
     }
   }

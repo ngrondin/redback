@@ -454,7 +454,7 @@ export class LinkConfig {
     }
 
     getNavigationEvent(object: RbObject, dataset: RbDatasetComponent): NavigateEvent {
-        let event: NavigateEvent = {};
+        let event: NavigateEvent = new NavigateEvent();
         if(this.target != null) {
             event.target = this.target;
         }
@@ -469,11 +469,11 @@ export class LinkConfig {
         if(this.filter != null) {
             let filterService: FilterService = AppInjector.get(FilterService);
             let filter = filterService.resolveFilter(this.filter, object, dataset, null, null, null);
-            event.filter = filterService.unresolveFilter(filter);
+            event.datatargets = [{filter: filterService.unresolveFilter(filter)}];
         } else if(this.filtersingleobject == true) {
-            event.filter = {uid: "'" + objectuid + "'"} //filter will be resolved in the dataset before fetching
+            event.datatargets = [{filter: {uid: "'" + objectuid + "'"}}]; //filter will be resolved in the dataset before fetching
         } else {
-            event.select = {uid: objectuid} //select will be calculated on the object list (not resolved)
+            event.datatargets = [{select: {uid: objectuid}}]; //select will be calculated on the object list (not resolved)
         }
         event.reset = this.reset;
         return event;

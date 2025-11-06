@@ -63,7 +63,7 @@ export class RbMenuGroupComponent implements OnInit {
     this._isOpen = false;
   }
 
-  navigateTo(event: any) {
+  /*navigateTo(event: any) {
     this.navigateService.navigateTo(event);
-  }
+  }*/
 }

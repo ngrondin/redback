@@ -55,10 +55,10 @@ export class LoadedView extends RbActivatorComponent {
       }
     }
   
-    setTarget(dataTarget: DataTarget) {
-      if(dataTarget != null) {
+    setTarget(dataTargets: DataTarget[]) {
+      for(let dataTarget of dataTargets) {
         for(let dataset of this.topSets) {
-          if(dataset.ignoretarget == false && (dataTarget.objectname == null || (dataTarget.objectname != null && dataTarget.objectname == dataset.objectname))) {
+          if(dataTarget.appliesTo(dataset)) {
             dataset.setDataTarget(dataTarget);
           }
         }

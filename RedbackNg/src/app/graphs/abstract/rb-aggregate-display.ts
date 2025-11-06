@@ -3,7 +3,7 @@ import { EventEmitter, HostBinding, HostListener, Input, Output } from "@angular
 import { RbComponent } from "app/abstract/rb-component";
 import { RbDataObserverComponent } from "app/abstract/rb-dataobserver";
 import { AppInjector } from "app/app.module";
-import { RbAggregate } from "app/datamodel";
+import { NavigateEvent, RbAggregate } from "app/datamodel";
 import { ValueComparator, Converter, Formatter } from "app/helpers";
 import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
@@ -242,16 +242,21 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         let aggregatesetfilter = this.aggregateset.mergeFilters();
         filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
       }
-      let target: any = {
-        filter: filter,
+      let navEvent: NavigateEvent = {
+        datatargets: [
+          {
+            objectname: objectname,
+            filter: filter
+          }
+        ],
         reset: true
       };
       if(view != null) {
-        target.view = view;
+        navEvent.view = view;
       } else {
-        target.objectname = objectname;
+        navEvent.objectname = objectname;
       }
-      this.navigateService.navigateTo(target);
+      this.navigateService.navigateTo(navEvent);
     }
   
     refresh() {

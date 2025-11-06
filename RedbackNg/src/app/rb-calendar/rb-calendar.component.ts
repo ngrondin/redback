@@ -1,7 +1,7 @@
 import { EventEmitter, Input, Output } from '@angular/core';
 import { Component } from '@angular/core';
 import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
-import { RbObject } from 'app/datamodel';
+import { NavigateEvent, RbObject } from 'app/datamodel';
 import { ValueComparator } from 'app/helpers';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { RbSearchTarget } from 'app/rb-search/rb-search-target';
@@ -313,30 +313,25 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       let ds: RbDatasetComponent = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
       let filter = Object.assign({}, ds.mergedFilter);
       filter[cfg.dateAttribute] = day.filter;
-      let target = {
+      let navEvent: NavigateEvent = {
         objectname: ds.objectname,
-        filter: filter,
-        search: ds.userSearch
+        datatargets: [{filter: filter, search: ds.userSearch}]
       };
-      this.navigateService.navigateTo(target);
+      this.navigateService.navigateTo(navEvent);
     }
   }
 
   clickItem(item: CalendarEntry) {
     let object = item.object;
     if(object != null) {
-      let target = {};
-      if(item.config.linkView != null) {
-        target['view'] = item.config.linkView;
-      } else {
-        target['objectname'] = object.objectname;
+      let navEvent: NavigateEvent = {
+        view: item.config.linkView,
+        objectname: object.objectname,
+        datatargets: [{
+          filter: {uid: "'" + (item.config.linkAttribute != null ? object.get(item.config.linkAttribute) : object.uid) + "'"}
+        }]
       }
-      if(item.config.linkAttribute != null) {
-        target['filter'] = {uid: "'" + object.get(item.config.linkAttribute) + "'"};
-      } else {
-        target['filter'] = {uid: "'" + object.uid + "'"};
-      }
-      this.navigateService.navigateTo(target);
+      this.navigateService.navigateTo(navEvent);
     }
   }
 

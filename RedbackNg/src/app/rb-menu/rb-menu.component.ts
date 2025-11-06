@@ -65,7 +65,7 @@ export class RbMenuComponent implements OnInit {
     });   
   }
 
-  navigateTo(event: any) {
+  /*navigateTo(event: any) {
     this.navigateService.navigateTo(event);
-  }
+  }*/
 }

@@ -5,6 +5,7 @@ import { NotificationService } from './services/notification.service';
 import { FileService } from './services/file.service';
 import { LogService } from './services/log.service';
 import { AppInjector } from './app.module';
+import { RbSetComponent } from './abstract/rb-set';
 
 export class ObjectResp {
     objects: object;
@@ -518,32 +519,25 @@ export class Time {
 }
 
 
-export class DataTarget {
-    objectname: string;
-    filter: any;
-    sort: any;
-    search: string;
-    select: any;
-  
-    constructor(o: string, f: any, s: string, sl: any) {
-      this.objectname = o
-      this.filter = f;
-      this.search = s;
-      this.select = sl;
-    }
-}
+
 
 export class NavigateEvent {
     target?: string;
-    view?: string;
     domain?: string;
+    view?: string;
+    objectname?: string;
     tab?: string;
+    label?: string;
+    reset?: boolean;
+    datatargets?: NavigateEventDataTarget[];
+}
+
+export class NavigateEventDataTarget {
+    datasetid?: string;
     objectname?: string;
     filter?: any;
     search?: string;
     select?: any;
-    label?: string;
-    reset?: boolean;
 }
   
 export class NavigateData {
@@ -554,14 +548,18 @@ export class NavigateData {
     additionalTitle: string;
     _breadcrumbLabel: string;
     mode: string;
-    dataTarget: DataTarget;
+    dataTargets: DataTarget[];
   
-    constructor(dom: string, v: string, t:string, d: DataTarget) {
+    constructor(dom: string, v: string, t:string) {
       this.domain = dom;
       this.view = v;
       this.tab = t;
       this.title = null;
-      this.dataTarget = d;
+      this.dataTargets = [];
+    }
+
+    addDataTarget(dt: DataTarget) {
+        this.dataTargets.push(dt);
     }
 
     get fulltitle() : string {
@@ -578,6 +576,30 @@ export class NavigateData {
   
     set breadcrumbLabel(v: string) {
       this._breadcrumbLabel = v;
+    }
+}
+
+export class DataTarget {
+    datasetid: string;
+    objectname: string;
+    filter: any;
+    sort: any;
+    search: string;
+    select: any;
+  
+    constructor(i: string, o: string, f: any, s: string, sl: any) {
+      this.datasetid = i;
+      this.objectname = o
+      this.filter = f;
+      this.search = s;
+      this.select = sl;
+    }
+
+    appliesTo(dataset: RbSetComponent) : boolean {
+        if(dataset.ignoretarget == true) return false;
+        if(this.datasetid != null && this.datasetid != dataset.id) return false;
+        if(this.objectname != null && this.objectname != dataset.objectname) return false;
+        return true;
     }
 }
 

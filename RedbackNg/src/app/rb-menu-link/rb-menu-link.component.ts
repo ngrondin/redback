@@ -1,5 +1,6 @@
 import { EventEmitter, Input, Output } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
+import { NavigateEvent } from 'app/datamodel';
 import { MenuService } from 'app/services/menu.service';
 import { NavigateService } from 'app/services/navigate.service';
 
@@ -30,7 +31,15 @@ export class RbMenuLinkComponent implements OnInit {
   }
 
   click() {
-    this.navigateService.navigateTo({view: this.config.view, domain: this.config.domain, filter: this.config.filter, search:null, reset:true});
+    let navEvent: NavigateEvent = {
+      domain: this.config.domain,
+      view: this.config.view,
+      reset: true,
+      datatargets: [{
+        filter: this.config.filter,
+      }]
+    }
+    this.navigateService.navigateTo(navEvent);
   }
 
   rightclick(event: any) {

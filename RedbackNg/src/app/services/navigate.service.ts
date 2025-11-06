@@ -42,13 +42,18 @@ export class NavigateService {
 
   async navigateTo(event: NavigateEvent) {
     let targetViewLoader = this.targetViewLoaders[event.target ?? "default"];  
-    let objectConfig: any = this.configService.getObjectConfig(event.objectname);
+    let objectConfig: any = event.objectname != null ? this.configService.getObjectConfig(event.objectname) : null;
     let view: string = (event.view != null ? event.view : (objectConfig != null ? objectConfig.view : null));
     if(view != null) {
-      let datatarget = new DataTarget(event.objectname, event.filter, event.search, event.select);
-      let navdata = new NavigateData(event.domain, view, event.tab, datatarget); 
-      if(objectConfig != null && event.filter != null && event.filter[objectConfig.labelattribute] != null) {
-        navdata.breadcrumbLabel = eval(event.filter[objectConfig.labelattribute]);
+      let navdata = new NavigateData(event.domain, view, event.tab); 
+      if(event.datatargets != null) {
+        for(let eventtarget of event.datatargets) {
+          let datatarget = new DataTarget(eventtarget.datasetid, eventtarget.objectname || event.objectname, eventtarget.filter, eventtarget.search, eventtarget.select);
+          navdata.addDataTarget(datatarget);  
+        }      
+      }
+      if(objectConfig != null && navdata.dataTargets.length == 1 && navdata.dataTargets[0].filter != null && navdata.dataTargets[0].filter[objectConfig.labelattribute] != null) {
+        navdata.breadcrumbLabel = eval(navdata.dataTargets[0].filter[objectConfig.labelattribute]);
       }
       if(event.label != null) {
         navdata.additionalTitle = event.label;
