@@ -122,7 +122,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       search: dt.search
     });
     if(!fetched && dt.select != null) {
-      this.selectByFilter(dt.select); //Dataset not refreshed, directly selecting the object (assuming it is already in the list)
+      this.selectByFilter(dt.select); 
     }  
   }
 
@@ -365,6 +365,11 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this._selectedObjects = this._list.slice(start, end + 1);
       this.publishEvent('select');
     }
+  }
+
+  public clearSelection() {
+    this._selectedObjects = [];
+    this.publishEvent('select');
   }
 
   public filterSort(event: any) : boolean {

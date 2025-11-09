@@ -53,9 +53,9 @@ export class RbLinkComponent extends RbDataObserverComponent {
         }
       }
       if(this.filtersingleobject) {
-        event.datatargets.push({filter: {uid: "'" + objectuid + "'"}});
+        event.datatargets = [{filter: {uid: "'" + objectuid + "'"}}];
       } else {
-        event.datatargets.push({select: {uid: objectuid}});
+        event.datatargets = [{select: {uid: objectuid}}];
       }
       if(this.view != null) {
         event.view = this.view;

@@ -537,6 +537,7 @@ export class NavigateEventDataTarget {
     objectname?: string;
     filter?: any;
     search?: string;
+    sort?: any;
     select?: any;
 }
   
@@ -587,11 +588,12 @@ export class DataTarget {
     search: string;
     select: any;
   
-    constructor(i: string, o: string, f: any, s: string, sl: any) {
+    constructor(i: string, o: string, f: any, s: string, so: any, sl: any) {
       this.datasetid = i;
       this.objectname = o
       this.filter = f;
       this.search = s;
+      this.sort = so;
       this.select = sl;
     }
 

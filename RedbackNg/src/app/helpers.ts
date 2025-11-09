@@ -435,49 +435,84 @@ export class LinkConfig {
     target: string;
     view: string;
     objectname: string;
-    attribute: string;
     tab: string;
-    filter: any;
-    filtersingleobject: boolean;
     reset: boolean;
+    datatargets: LinkConfigDataTarget[];
     
-
     constructor(json: any) {
         this.target = json.target;
         this.view = json.view;
         this.objectname = json.objectname;
-        this.attribute = json.attribute;
         this.tab = json.tab;
-        this.filter = json.filter;
-        this.filtersingleobject = json.filtersingleobject ?? true;
         this.reset = json.reset ?? false;
+        this.datatargets = [];
+        if(json.attribute != null || json.objectname != null || json.filter != null || json.filtersingleobject != null || json.select != null) { //This is a deprecated notation
+            this.datatargets.push({
+                attribute: json.attribute,
+                objectname: json.objectname,
+                datasetid: json.datasetid,
+                filter: json.filter,
+                filtersingleobject: json.filtersingleobject ?? true,
+                sort: json.sort,
+                select: json.select
+            });
+        }  
+        if(json.datatargets != null) {
+            for(var item of json.datatargets) {
+                this.datatargets.push({
+                    attribute: item.attribute,
+                    objectname: item.objectname,
+                    datasetid: item.datasetid,
+                    filter: item.filter,
+                    filtersingleobject: item.filtersingleobject ?? true,
+                    sort: item.sort,
+                    select: item.select
+                });
+            }  
+        }    
     }
 
     getNavigationEvent(object: RbObject, dataset: RbDatasetComponent): NavigateEvent {
-        let event: NavigateEvent = new NavigateEvent();
-        if(this.target != null) {
-            event.target = this.target;
+        let event: NavigateEvent = {
+            target: this.target,
+            view: this.view,
+            tab: this.tab,
+            reset: this.reset,
+            datatargets: []
+        };
+        event.objectname = this.view == null && this.objectname != null ? this.objectname : null;
+        for(var datatarget of this.datatargets) {
+            let objectuid = object != null ? (datatarget.attribute != null ? object.get(datatarget.attribute) : object.uid) : null;
+            let filter = null;
+            let sort = null;
+            let select = null;
+            if(datatarget.filter != null) {
+                let filterService: FilterService = AppInjector.get(FilterService);
+                let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, null, null, null);
+                filter = filterService.unresolveFilter(rfilter);  //Unresolving this as the DataSet will resolve it
+                sort = datatarget.sort;
+            } else if(datatarget.select != null) {
+                let filterService: FilterService = AppInjector.get(FilterService);
+                select = filterService.resolveFilter(datatarget.select, object, dataset, null, null, null);
+            } else if(datatarget.filtersingleobject == false) {
+                select = {uid: objectuid};
+            } else if(datatarget.filtersingleobject == true) {
+                filter = {uid: "'" + objectuid + "'"};
+            } 
+            event.datatargets.push({objectname: datatarget.objectname, datasetid: datatarget.datasetid, filter: filter, sort: sort, select: select}); 
         }
-        if(this.view != null) {
-            event.view = this.view;
-        }
-        if(this.tab != null) {
-            event.tab = this.tab;
-        }
-        event.objectname = this.objectname != null ? this.objectname : object.objectname;
-        let objectuid = object != null ? (this.attribute != null ? object.get(this.attribute) : object.uid) : null;
-        if(this.filter != null) {
-            let filterService: FilterService = AppInjector.get(FilterService);
-            let filter = filterService.resolveFilter(this.filter, object, dataset, null, null, null);
-            event.datatargets = [{filter: filterService.unresolveFilter(filter)}];
-        } else if(this.filtersingleobject == true) {
-            event.datatargets = [{filter: {uid: "'" + objectuid + "'"}}]; //filter will be resolved in the dataset before fetching
-        } else {
-            event.datatargets = [{select: {uid: objectuid}}]; //select will be calculated on the object list (not resolved)
-        }
-        event.reset = this.reset;
         return event;
     }
+}
+
+export class LinkConfigDataTarget{
+    attribute: string;
+    objectname: string;
+    datasetid: string;
+    filter: any;
+    filtersingleobject: boolean;
+    sort: any;
+    select: any;
 }
 
 export class ColorConfig {

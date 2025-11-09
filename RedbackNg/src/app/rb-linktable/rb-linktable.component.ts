@@ -24,7 +24,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   group: LinkTableGroupConfig;
   reachedBottom: boolean = false;
   scrollLeft: number;
-  groups: any;
+  groups: any = {};
   sums: any[];
   openGroups: string[] = [null];
   

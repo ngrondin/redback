@@ -60,8 +60,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   selectedOverlayLaneIndex = -1;
   selectedLabelAlt: string = null;
 
-  refocus: boolean = false;
-  blockNextRefocus: boolean = false;
+  //blockNextRefocus: boolean = false;
+  doFocus = false;
+  focusStartPX = null;
+  focusTopPX = null;
 
   public getSizeForObjectCallback: Function;
   public droppedOutCallback: Function;
@@ -128,19 +130,25 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
             cfg: cfg, 
             objectname: dataset.objectname, 
             filter: dataset.dataTarget.select, 
-            object: dataset.selectedObject
+            currentlyInSet: dataset.selectedObjects.length > 0
           }
         }
       }
-      if(target != null && target.filter != null && target.object == null) {
-        this.logService.info("Gantt actiavated with target that is not in the dataset");
-        this.dataService.fetchFirst(target.objectname, target.filter, null, null).subscribe((obj) => {
-          if(obj != null) {
-            let ms = (new Date(obj.get(target.cfg.startAttribute))).getTime();
-            this.startDate = new Date(ms - (3*60*60*1000));
-            super.onActivationEvent(event);  
-          }
-        })
+      if(target != null && target.filter != null) {
+        this.doFocus = true;
+        if(!target.currentlyInSet) {
+          this.logService.info("Gantt actiavated with target that is not in the dataset");
+          this.dataService.fetchEntireList(target.objectname, target.filter, null, null).subscribe((objs) => {
+            if(objs.length > 0) {
+              let starts = objs.map(obj => (new Date(obj.get(target.cfg.startAttribute))).getTime());
+              let ms = Math.min(...starts);
+              this.startDate = new Date(ms - (3*60*60*1000));
+              super.onActivationEvent(event);  
+            }
+          });
+        } else {
+          super.onActivationEvent(event);
+        }
       } else {
         super.onActivationEvent(event);
       }
@@ -150,9 +158,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onDatasetEvent(event: any) {
-    if(event.event == 'select' && this.blockNextRefocus == false) {
-      this.refocus = true;
-    } 
     super.onDatasetEvent(event);
     if(event.dataset.getId() == this.lanesConfig.dataset && event.event != 'select') {
       super.updateData(true)
@@ -289,6 +294,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.logService.debug("Gantt " + this.id + ": calc, lanes: " + this.ganttData.length);
     this.overlayData = this.getOverlayLanes();
     this.marks = this.getMarks();
+    if(this.doFocus == true) {
+      this.focus();
+    }
   }
 
   private calcParams() {
@@ -305,6 +313,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       this.markMajorIntervalMS *= 2;
       this.markMinorIntervalMS = this.markMajorIntervalMS;
     }
+    this.focusStartPX = null;
+    this.focusTopPX = null;
   }
 
   private getLanes() {
@@ -347,9 +357,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         accHeight += lane.height + 0.06; //+1 for borders
       }
     }
-    /*if(lanes.length > 0) { //Let the dataset sort the lanes
-      lanes.sort((a, b) => (a != null && b != null ? a.label.localeCompare(b.label) : 0));
-    }*/ 
     this.heightVW = accHeight;
     return lanes;
   }
@@ -421,16 +428,15 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                   if(hasOverlap) sublane++;
                 } while(hasOverlap);
               }
-              let selected: boolean = cfg.isBackground == false && dataset.selectedObject == obj;
+              let selected: boolean = cfg.isBackground == false && dataset.isObjectSelected(obj);
               let spread = new GanttSpread(laneId, label, startPX, widthPX, offsetTop, sublane, color, labelcolor, canEdit, selected, obj, cfg);
               spreads.push(spread);
-              if(selected && this.refocus) {
-                this.mainscroll.scrollToHPos(Math.max(0, startPX - 30));
+              if(selected) {
+                let fs = startPX;
+                if(this.focusStartPX == null || (this.focusStartPX != null && fs < this.focusStartPX)) this.focusStartPX = fs;
                 let topVW = offsetTop + spread.laneTop;
-                let topPX = topVW * document.documentElement.clientWidth / 100;
-                this.mainscroll.scrollToVPos(Math.max(0, topPX - 30));
-                this.refocus = false;
-                this.blockNextRefocus = false;
+                let ft = (topVW * document.documentElement.clientWidth / 100);
+                if(this.focusTopPX == null || (this.focusTopPX != null && ft < this.focusTopPX)) this.focusTopPX = ft;
               }
             }
           }
@@ -580,6 +586,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return marks;
   }
 
+  private focus() {
+    if(this.focusStartPX != null && this.focusTopPX != null) {
+      this.mainscroll.scrollToHPos(Math.max(0, this.focusStartPX - 30));
+      this.mainscroll.scrollToVPos(Math.max(0, this.focusTopPX - 30));
+      this.doFocus = false;
+    }
+  }
+
   public selectedOverlaySpreads() : GanttOverlaySpread[] {
     return this.selectedOverlayLaneIndex > -1 && this.selectedOverlayLaneIndex < this.overlayData.length ? this.overlayData[this.selectedOverlayLaneIndex].spreads : []
   }
@@ -593,7 +607,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public clickSpread(spread: GanttSpread) {
-    this.blockNextRefocus = true;
     this.select(spread.object);
     if(spread.config.modal != null) {
       this.modalService.open(spread.config.modal);
@@ -604,6 +617,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.select(lane.object);
     if(this.lanesConfig.modal != null) {
       this.modalService.open(this.lanesConfig.modal);
+    }
+  }
+
+  public clickBackground() {
+    for(let cfg of this.seriesConfigs) {
+        let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
+        dataset.clearSelection();
     }
   }
 
@@ -647,7 +667,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       related[config.laneAttribute] = lane.object;
     }
     
-    this.blockNextRefocus = true;
+    //this.blockNextRefocus = true;
     if(Object.keys(update).length > 0) {
       object.setValuesAndRelated(update, related);
     }

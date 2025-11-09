@@ -55,14 +55,30 @@ export class LoadedView extends RbActivatorComponent {
       }
     }
   
-    setTarget(dataTargets: DataTarget[]) {
-      for(let dataTarget of dataTargets) {
-        for(let dataset of this.topSets) {
-          if(dataTarget.appliesTo(dataset)) {
-            dataset.setDataTarget(dataTarget);
+    /** This function will match targets with only one dataset. Any unmatched dataset 
+     * will have a new created empty target in order to save its state for return navigation */
+    setTarget(dataTargets: DataTarget[]) : DataTarget[] {
+      let targets = [...dataTargets];
+      let newTargets = [];
+      for(let dataset of this.topSets.filter(s => s.ignoretarget == false)) {
+        let found = false;
+        for(let target of targets) {
+          if(target.appliesTo(dataset)) {
+            dataset.setDataTarget(target);
+            target.datasetid = dataset.id;
+            targets.splice(targets.indexOf(target), 1);
+            found = true;
+            break;
           }
         }
+        if(!found) {
+          let newTarget = new DataTarget(null, null, null, null, null, null);
+          dataset.setDataTarget(newTarget);
+          newTarget.datasetid = dataset.id;
+          newTargets.push(newTarget);
+        }
       }
+      return newTargets;
     }
   
     openTab(tabid: String) {

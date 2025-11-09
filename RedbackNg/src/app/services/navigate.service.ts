@@ -48,7 +48,7 @@ export class NavigateService {
       let navdata = new NavigateData(event.domain, view, event.tab); 
       if(event.datatargets != null) {
         for(let eventtarget of event.datatargets) {
-          let datatarget = new DataTarget(eventtarget.datasetid, eventtarget.objectname || event.objectname, eventtarget.filter, eventtarget.search, eventtarget.select);
+          let datatarget = new DataTarget(eventtarget.datasetid, eventtarget.objectname || event.objectname, eventtarget.filter, eventtarget.search, eventtarget.sort, eventtarget.select);
           navdata.addDataTarget(datatarget);  
         }      
       }
