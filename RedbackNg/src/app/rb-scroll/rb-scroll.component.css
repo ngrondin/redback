@@ -13,6 +13,7 @@
     -ms-overflow-style: none;  
     scrollbar-width: none;  
     line-height: 0px;
+    overflow-anchor: none;
 }
 
 .rb-scroll-scroller::-webkit-scrollbar {

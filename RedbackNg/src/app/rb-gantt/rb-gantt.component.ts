@@ -246,13 +246,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   updateOtherData() {
-    let fetched = true;
+    let fetched = false;
     for(var cfg of this.overlayConfigs) {
       let filterSort = this.getFilterSort(cfg.dataset, cfg.startAttribute, cfg.endAttribute, null);
       if(this.datasetgroup != null) {
-        fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort);
+        fetched = this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort) || fetched;
       } else {
-        fetched = fetched && this.dataset.filterSort(filterSort);
+        fetched = this.dataset.filterSort(filterSort) || fetched;
       }
     }
     return fetched;
@@ -291,8 +291,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   calc() {
     this.calcParams();
     this.ganttData = this.getLanes();
-    this.logService.debug("Gantt " + this.id + ": calc, lanes: " + this.ganttData.length);
     this.overlayData = this.getOverlayLanes();
+    this.logService.debug("Gantt " + this.id + ": calc, lanes: " + this.ganttData.length + ", overlays: " + this.overlayData.length);
     this.marks = this.getMarks();
     if(this.doFocus == true) {
       this.focus();
@@ -667,15 +667,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       related[config.laneAttribute] = lane.object;
     }
     
-    //this.blockNextRefocus = true;
     if(Object.keys(update).length > 0) {
       object.setValuesAndRelated(update, related);
     }
 
-    if(this.datasetgroup.datasets[config.dataset].list.indexOf(object) == -1) {
-      this.datasetgroup.datasets[config.dataset].add(object);
+    let targetDataset = this.datasetgroup != null ? this.datasetgroup.datasets[config.dataset] : this.dataset;
+    if(targetDataset != null && targetDataset.list.indexOf(object) == -1) {
+      targetDataset.add(object);
     }
-    //this.calc();
   }
 
   public droppedOut(event: any) {

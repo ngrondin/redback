@@ -8,6 +8,7 @@ type DialogCallbackFunction = () => void;
 
 export class DialogOption {
   label: string;
+  focus: boolean = false;
   callback: DialogCallbackFunction;
 }
 

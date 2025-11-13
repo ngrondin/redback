@@ -171,7 +171,9 @@ export class Formatter {
             str = str.replace('MMM', Formatter.months[dt.getMonth()]);
             str = str.replace('MM', (dt.getMonth() + 1).toString().padStart(2, "0"));
             str = str.replace('DD', (dt.getDate()).toString().padStart(2, "0"));
+            str = str.replace('D', (dt.getDate()).toString());
             str = str.replace('HH', (dt.getHours()).toString().padStart(2, "0"));
+            str = str.replace('H', (dt.getHours()).toString());
             str = str.replace('mm', (dt.getMinutes()).toString().padStart(2, "0"));
         }
         return str;
@@ -491,14 +493,18 @@ export class LinkConfig {
                 let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, null, null, null);
                 filter = filterService.unresolveFilter(rfilter);  //Unresolving this as the DataSet will resolve it
                 sort = datatarget.sort;
-            } else if(datatarget.select != null) {
+            } 
+            if(datatarget.select != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
                 select = filterService.resolveFilter(datatarget.select, object, dataset, null, null, null);
-            } else if(datatarget.filtersingleobject == false) {
-                select = {uid: objectuid};
-            } else if(datatarget.filtersingleobject == true) {
-                filter = {uid: "'" + objectuid + "'"};
             } 
+            if(datatarget.filter == null && datatarget.select == null) {
+                if(datatarget.filtersingleobject == false) {
+                    select = {uid: objectuid};
+                } else if(datatarget.filtersingleobject == true) {
+                    filter = {uid: "'" + objectuid + "'"};
+                } 
+            }
             event.datatargets.push({objectname: datatarget.objectname, datasetid: datatarget.datasetid, filter: filter, sort: sort, select: select}); 
         }
         return event;

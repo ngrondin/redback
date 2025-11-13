@@ -208,10 +208,12 @@ export class RbDynamicformeditorComponent extends RbDataCalcComponent<DynamicFor
       [
         {
           label: "Yes", 
+          focus: true,
           callback: () => this._delete(entity)
         }, 
         {
-          label: "No", 
+          label: "No",
+          focus: false, 
           callback: () => {}
         }
       ]

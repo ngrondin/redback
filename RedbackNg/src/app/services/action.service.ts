@@ -73,10 +73,10 @@ export class ActionService {
     } else {
       return new Observable((observer) => {
         this.dialogService.openDialog(confirm, [
-          {label:"Ok", callback:() => {
+          {label:"Ok", focus: true, callback:() => {
             this.action(dataset, datasetgroup, action, target, param, extraContext, null, timeout).subscribe(() => observer.complete());
           }}, 
-          {label:"Cancel", callback:() => {
+          {label:"Cancel", focus: false, callback:() => {
             observer.complete();
           }}
         ]);
@@ -116,12 +116,14 @@ export class ActionService {
           [
             {
               label: "Yes", 
+              focus: true,
               callback: () => {
                 this.dataService.delete(dataset.selectedObject).subscribe(new ObserverProxy(observer, () => dataset.removeSelected()));
               }
             }, 
             {
               label: "No", 
+              focus: false,
               callback: () => {
                 observer.complete();
               }
@@ -242,7 +244,22 @@ export class ActionService {
           "selecteduids": (dataset.selectedObjects.map(o => o.uid))
         }
       }
-      this.dataService.executeGlobalFunction(functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
+      this.dataService.executeGlobalFunction(functionName, paramResolved, timeout).subscribe({
+        next: (result: any) => {
+          if(result.data != null && result.data.action != null) {
+            this.action(dataset, null, result.data.action, result.data.target, result.data.param, result.data.extraContext, result.data.confirm, result.data.timeout).subscribe({
+              next: (val) => {observer.next(val);},
+              error: (err) => {observer.error(err);},
+              complete: () => {observer.complete();}
+            })
+          } else {
+            observer.next(result);
+            observer.complete();
+          }
+        },
+        error: (error) => {observer.error(error);},
+        complete: () => {}
+      });
     });
   }
 

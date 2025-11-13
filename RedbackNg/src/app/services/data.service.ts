@@ -348,32 +348,34 @@ export class DataService {
 
   executeObjectFunction(rbObject: RbObject, func: string, param: string, timeout: number) : Observable<null> {
     return new Observable<null>((observer) => {
-      this.apiService.executeObject(rbObject.objectname, rbObject.uid, func, param, timeout).subscribe(
-        resp => {
+      this.apiService.executeObject(rbObject.objectname, rbObject.uid, func, param, timeout).subscribe({
+        next: (resp) => {
           if(!this.clientWSService.isConnected()) this.receive(resp);
           observer.next(null);
           observer.complete();
         },
-        error => {
+        error: (error) => {
           this.errorService.receiveHttpError(error);
           observer.error(error);
-        }
-      );
+        },
+        complete: () => {}
+      });
     });
   }
   
   executeGlobalFunction(func: string, param: any, timeout: number) : Observable<null> {
     return new Observable<null>((observer) => {
-      this.apiService.executeGlobal(func, param, timeout).subscribe(
-        resp => {
-          observer.next(null);
+      this.apiService.executeGlobal(func, param, timeout).subscribe({
+        next: (resp) => {
+          observer.next(resp);
           observer.complete();
         },
-        error => {
+        error: (error) => {
           this.errorService.receiveHttpError(error);
           observer.error(error);
-        }
-      );
+        },
+        complete: () => {}
+      });
     });
   }
 

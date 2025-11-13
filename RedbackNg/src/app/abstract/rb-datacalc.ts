@@ -21,7 +21,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     @Input('dofilter') dofilter: boolean = true;
 
     seriesConfigs: T[] = [];
-    filterDone: boolean = false;
+    initialFilteringDone: boolean = false;
     lastRecalc: number = -1;
     recalcInterval: number = -1;
     minRecalcTime: number = -1;
@@ -57,7 +57,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     
     onDatasetEvent(event: any) {
         if(this.active) {
-            //this._logService.debug("DataCalc " + this.id + ": Dataset Event (" + event.event + ")");
+            this._logService.debug("DataCalc " + this.id + ": Dataset Event (" + event.dataset.id + "." + event.event + ", list=" + event.dataset.list.length + (event.event == 'load' ? ", filter=" + JSON.stringify(event.dataset.resolvedFilter) : "") + ")");
             this.redraw()
         }
     }
@@ -68,22 +68,22 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
 
     updateData(forceFilter: boolean = false) : boolean {
-        if(this.dofilter && (!this.filterDone || forceFilter)) {
-            this.filterDone = true;
-            let fetched = true;
+        if(this.dofilter && (!this.initialFilteringDone || forceFilter)) {
+            this.initialFilteringDone = true;
+            let fetched = false;
             for(let cfg of this.activeSeries) {
               let filterSort = this.getFilterSortForSeries(cfg);
               if(filterSort != null) {
                 if(this.datasetgroup != null && this.datasetgroup.datasets[cfg.dataset] != null) {
-                    fetched = fetched && this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort);
+                    fetched = this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort) || fetched;
                 } else if(this.dataset != null) {
-                    fetched = fetched && this.dataset.filterSort(filterSort);
+                    fetched = this.dataset.filterSort(filterSort) || fetched;
                 } else {
                     fetched = false;
                 }
               }
             }
-            fetched = fetched && this.updateOtherData();
+            fetched = this.updateOtherData() || fetched;
             if(!fetched) {
                 this.redraw();
             }

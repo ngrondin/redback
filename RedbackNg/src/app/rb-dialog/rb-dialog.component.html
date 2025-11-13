@@ -7,11 +7,11 @@
     <div
         class="rb-dialog-option"
         *ngFor="let option of options">
-        <button
-            mat-stroked-button
-            class="rb-dialog-button"
+        <rb-button
+            [label]="option.label"
+            [focus]="option.focus"
+            [margin]="false"
             (click)="clickOption(option)">
-            {{option.label}}
-        </button>    
+        </rb-button>    
     </div>
 </div>

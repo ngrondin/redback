@@ -185,8 +185,8 @@ export class NotificationService {
     } else {
       return new Observable((observer) => {
         this.dialogService.openDialog(confirm, [
-          {label:"Ok", callback:() => this.actionNotification(notification, action, null).subscribe(() => observer.complete())}, 
-          {label:"Cancel", callback:() => observer.complete()}
+          {label:"Ok", focus: true, callback:() => this.actionNotification(notification, action, null).subscribe(() => observer.complete())}, 
+          {label:"Cancel", focus: false, callback:() => observer.complete()}
         ]);
       })
     }

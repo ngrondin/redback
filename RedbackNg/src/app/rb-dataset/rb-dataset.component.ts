@@ -21,7 +21,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   @Input('basesort') baseSort: any;
   @Input('name') name: string; //To be deprecated
   @Input('fetchall') fetchAll: boolean = false;
-  @Input('autoselect') autoSelect: boolean = true;
+  @Input('autoselect') autoSelect: string = "whensingle";
   @Input('addrelated') addrelated: boolean = true;
   @Input('addtoend') addtoend: boolean = false;
   @Input('muteevents') muteevents: string[] = [];
@@ -159,7 +159,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       && this.active 
       && (this.master == null || (this.master != null && this.relatedObject != null))
       && (this.requiresuserfilter == false || this.hasUserFilter)
-      && !this._loading;
+      /*&& !this._loading;*/
   }
 
   public contains(obj: RbObject): boolean {
@@ -178,6 +178,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   public refreshData(onlyIfFilterChanged = false) : boolean {
     if(this.canLoadData) {
+      //console.log("RefreshData start " + this.id + " " + JSON.stringify(this.resolvedFilter))
       let prevFilter = this.resolvedFilter;
       let prevSearch = this.resolvedSearch;
       let prevSort = this.resolvedSort;
@@ -185,6 +186,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       let filterChanged = ValueComparator.notEqual(prevFilter, this.resolvedFilter);
       let searchChanged = ValueComparator.notEqual(prevSearch, this.resolvedSearch);
       let sortChanged = ValueComparator.notEqual(prevSort, this.resolvedSort);
+      //console.log("RefreshData middle " + this.id + " " + JSON.stringify(this.resolvedFilter))
       if(filterChanged || searchChanged || sortChanged || !onlyIfFilterChanged) {
         this.clear(false);
         this.fetchNextPage();
@@ -219,6 +221,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.dataService.subscribeToCreation(this.uid, this.objectname, this.resolvedFilter);
     this.resolvedSort = this.userSort != null ? this.userSort : this.baseSort;
     this.resolvedSearch = this.userSearch;
+    //console.log("ResolveFilterSort " + this.id + " " + JSON.stringify(this.resolvedFilter))
   }
 
   public clear(resetResolved = true) {
@@ -240,6 +243,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   public fetchNextPage() {
     if(this.hasMorePages) {
+      //console.log("FetchNextPage " + this.id + " " + JSON.stringify(this.resolvedFilter))
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
       const search = this.userSearch != null ? this.userSearch : this.dataTarget != null && this.dataTarget.search != null ? this.dataTarget.search : null;
       const addRel = this.fetchAll ? false : this.addrelated;
@@ -287,14 +291,17 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(this._list.length == 0) {
       this._selectedObjects = [];
     } else if(this._list.length == 1) {
-      if(this.autoSelect) {
+      if(this.autoSelect == "whensingle" || this.autoSelect == "first") {
         this.select(this._list[0]);
       }
     } else if(this._list.length > 1) {
       if(this.dataTarget != null && this.dataTarget.select != null) {
         this.selectByFilter(this.dataTarget.select);
-      } else if(this.selectedObject != null && !this._list.includes(this.selectedObject)) {
-        this._selectedObjects = [];
+      } else if(this._selectedObjects.length > 0) {
+        this._selectedObjects = this._selectedObjects.filter(o => this._list.includes(o));
+      }
+      if(this._selectedObjects.length == 0 && this.autoSelect == "first") {
+        this.select(this._list[0]);
       }
     }
     if(this.nextPage == 1) { 
@@ -373,6 +380,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public filterSort(event: any) : boolean {
+    //console.log("FilterSort " + this.id + " " + JSON.stringify(event))
     let fetched = false;
     let newFilter = event.filter;// ?? this.defaultUserFilter;
     let newSort = event.sort;// ?? this.defaultUserSort;
@@ -380,7 +388,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     let filterChange = 'filter' in event && ValueComparator.notEqual(newFilter, this.userFilter);
     let sortChange = 'sort' in event && ValueComparator.notEqual(newSort, this.userSort);
     let searchChange = 'search' in event && newSearch != this.userSearch;
-    if(filterChange || sortChange || searchChange) {
+    let change = filterChange || sortChange || searchChange;
+    if(change) {
       if(filterChange) this.userFilter = newFilter;
       if(sortChange) this.userSort = newSort;
       if(searchChange) this.userSearch = newSearch;

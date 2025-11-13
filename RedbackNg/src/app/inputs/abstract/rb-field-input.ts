@@ -96,7 +96,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
     if(this.attribute != null && this.dataset != null && this.rbObject == null) {
       let text = this.dataset.list.length == 0 ? 'No record currently exist to edit. ' : 'No record has currently been selected to edit. ';
       text = text + 'Do you want to create a new one?';
-      this.dialogService.openDialog(text, [{label: "Yes", callback: () => this.dataset.create()}, {label: "No", callback: () => {}}]);
+      this.dialogService.openDialog(text, [{label: "Yes", focus:true, callback: () => this.dataset.create()}, {label: "No", focus: false, callback: () => {}}]);
     } else if(!this.readonly) {
       this.originalValue = this.value;
       this.isEditing = true;
