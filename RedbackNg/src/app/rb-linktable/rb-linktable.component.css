@@ -27,7 +27,7 @@
     color: darkgray;
     border-top-left-radius: var(--v5px);
     border-top-right-radius: var(--v5px);
-    border-left: 0.06vw solid transparent;
+    /*border-left: 0.06vw solid transparent;*/
 
 }
 
@@ -42,7 +42,7 @@
     align-items: center;
     font-size: 0.9rem;
     cursor: pointer;
-    border-right: 0.06vw solid transparent;
+    /*border-right: 0.06vw solid transparent;*/
 }
 
 .rb-linktable-colheader span {
@@ -67,6 +67,11 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
 .rb-linktable-body {
     display: flex;
     flex-direction: column;
+}
+
+.rb-linktable-body-border-on {
+    border-color: lightgray;
+    border-style: solid;
     border-width: 0.06vw 0.06vw 0px 0px ;
 }
 
@@ -90,10 +95,25 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
 .rb-linktable-rowitem {
     display: flex;
     flex-direction: row;
-    align-items: center;    
-    border-width: 0px 0px 0.06vw 0.06vw;
-    border-color: transparent;
+    align-items: stretch;
+    justify-content: stretch;    
+    border: none;
+    overflow: hidden;
+}
+
+.rb-linktable-border {
+    display: flex;
+    flex-direction: row;
+    align-items: center; 
+    flex: 1 1 auto;
+    border-color: lightgray;
     border-style: solid;
+    border-width: 0px;
+    overflow: hidden;
+}
+
+.rb-linktable-border-on {
+    border-width: 0px 0px 0.06vw 0.06vw;
 }
 
 .rb-linktable-rowitem-alighright {
@@ -130,10 +150,7 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     flex: 1 1 auto;
 }
 
-.rb-linktable-border {
-    border-color: lightgray;
-    border-style: solid;
-}
+
 
 .rb-linktable-footer-container {
     display: flex;
@@ -151,7 +168,7 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     position: absolute;
     top: 0px;
     left: 0px;
-    height: var(--v24px);
+    /*height: var(--v24px);*/
     color: darkgray;
     border-width: 0px 0.06vw 0px 0px;
     border-style: solid;
@@ -166,9 +183,6 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     display: flex;
     flex-direction: row;
     align-items: center;
-    border-width: 0px 0px 0.06vw 0.06vw;
-    border-color: transparent;
-    border-style: solid;    
 }
 
 .rb-linktable-colfooter span {
@@ -178,7 +192,7 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     font-size: 0.95rem;
     font-weight: bold;
     color: var(--dark-writing-color);
-    padding: var(--v5px);
+    padding: 0 var(--v5px);
 }
 
 .rb-linktable-colfooter a {
@@ -188,7 +202,7 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     white-space: nowrap;
     font-size: 0.95rem;
     font-weight: bold;
-    padding: var(--v5px);
+    padding: 0 var(--v5px);
 }
 
 .rb-linktable-colfooter a:hover {

@@ -123,9 +123,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   calcSumLines(sums: number[]): any[] {
     let ret = [];
     let c = 0;
-    let firstWidth = -0.06;
+    let firstWidth = 0;//-0.06;
     while(c < this.columns.length && this.columns[c].sum != true) {
-      firstWidth += this.columns[c].width + 0.06;
+      firstWidth += this.columns[c].width/* + 0.06*/;
       c++;
     }
     ret.push({width: firstWidth});

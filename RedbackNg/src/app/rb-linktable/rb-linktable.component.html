@@ -15,7 +15,7 @@
 <rb-scroll
     (rbscroll)="onScroll($event)">                                                                                                                                                    
     <div
-        [class]="'rb-linktable-body' + (grid ? ' rb-linktable-border' : '')">
+        [class]="'rb-linktable-body' + (grid ? ' rb-linktable-body-border-on' : '')">
         <div
             *ngFor="let groupKey of groupKeys"
             class="rb-linktable-group">
@@ -43,32 +43,35 @@
                 *ngFor="let line of groups[groupKey].lines">
                 <div
                     *ngFor="let col of line.cols; index as i"
-                    [class]="'rb-linktable-rowitem' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border' : '')"
+                    [class]="'rb-linktable-rowitem'"
                     [style.width.vw]="col.width"
                     [style.background-color]="col.backColor"
                     [style.color]="col.foreColor">
-                    <a
-                        *ngIf="col.icon == null && col.link != null"
-                        (click)="clickLink(col.link, line.object)">
-                        {{col.formattedValue}}                
-                    </a>
-                    <a
-                        *ngIf="col.icon == null && col.modal != null"
-                        (click)="clickModal(col.modal)">
-                        {{col.formattedValue}}                
-                    </a>
-                    <span
-                        *ngIf="col.icon == null && col.link == null">
-                        {{col.formattedValue}}                
-                    </span>
                     <div
-                        *ngIf="col.icon != null"
-                        class="rb-linktable-icon">
-                        <mat-icon
-                            class="material-symbols-outlined">
-                            {{col.icon}}
-                        </mat-icon>         
-                    </div>                
+                        [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border-on' : '')">
+                        <a
+                            *ngIf="col.icon == null && col.link != null"
+                            (click)="clickLink(col.link, line.object)">
+                            {{col.formattedValue}}                
+                        </a>
+                        <a
+                            *ngIf="col.icon == null && col.modal != null"
+                            (click)="clickModal(col.modal)">
+                            {{col.formattedValue}}                
+                        </a>
+                        <span
+                            *ngIf="col.icon == null && col.link == null">
+                            {{col.formattedValue}}                
+                        </span>
+                        <div
+                            *ngIf="col.icon != null"
+                            class="rb-linktable-icon">
+                            <mat-icon
+                                class="material-symbols-outlined">
+                                {{col.icon}}
+                            </mat-icon>         
+                        </div>  
+                    </div>              
                 </div>
             </div>          
         </div>
@@ -82,18 +85,21 @@
         [style.left.px]="-scrollLeft">
         <div
             *ngFor="let col of sums"
-            [class]="'rb-linktable-colfooter' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-colfooter-grid' : '')"
+            [class]="'rb-linktable-colfooter'"
             [style.visibility]="col.formattedValue != null ? 'visible' : 'hidden'"
             [style.width.vw]="col.width">
-            <a
-                *ngIf="col.link != null"
-                (click)="clickSumLink(col.link)">
-                {{col.formattedValue}}
-            </a>
-            <span
-                *ngIf="col.link == null">
-                {{col.formattedValue}}            
-            </span>            
+            <div
+                [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border-on' : '')">
+                <a
+                    *ngIf="col.link != null"
+                    (click)="clickSumLink(col.link)">
+                    {{col.formattedValue}}
+                </a>
+                <span
+                    *ngIf="col.link == null">
+                    {{col.formattedValue}}            
+                </span>  
+            </div>          
         </div>
     </div>
 </div>

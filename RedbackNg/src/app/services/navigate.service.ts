@@ -45,7 +45,7 @@ export class NavigateService {
     let objectConfig: any = event.objectname != null ? this.configService.getObjectConfig(event.objectname) : null;
     let view: string = (event.view != null ? event.view : (objectConfig != null ? objectConfig.view : null));
     if(view != null) {
-      let navdata = new NavigateData(event.domain, view, event.tab); 
+      let navdata = new NavigateData(event.domain, view, event.tab, event.modal); 
       if(event.datatargets != null) {
         for(let eventtarget of event.datatargets) {
           let datatarget = new DataTarget(eventtarget.datasetid, eventtarget.objectname || event.objectname, eventtarget.filter, eventtarget.search, eventtarget.sort, eventtarget.select);
@@ -87,6 +87,9 @@ export class NavigateService {
       this.userprefService.setCurrentView(navdata.view);
       this.modalService.setCurrentView(navdata.view);
       this.notifyObservers(navdata);
+      if(navdata.modal != null) {
+        setTimeout(() => this.modalService.open(navdata.modal), 100);
+      }
       this.logService.debug("NavService: View is " + navdata.view);
     } catch (err) {
       this.logService.error("NavService: Error navigating :" + err);

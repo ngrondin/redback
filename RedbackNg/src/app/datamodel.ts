@@ -527,6 +527,7 @@ export class NavigateEvent {
     view?: string;
     objectname?: string;
     tab?: string;
+    modal?: string;
     label?: string;
     reset?: boolean;
     datatargets?: NavigateEventDataTarget[];
@@ -545,16 +546,18 @@ export class NavigateData {
     domain: string;
     view: string;
     tab: string;
+    modal: string;
     title: string;
     additionalTitle: string;
     _breadcrumbLabel: string;
     mode: string;
     dataTargets: DataTarget[];
   
-    constructor(dom: string, v: string, t:string) {
+    constructor(dom: string, v: string, t:string, m: string) {
       this.domain = dom;
       this.view = v;
       this.tab = t;
+      this.modal = m;
       this.title = null;
       this.dataTargets = [];
     }

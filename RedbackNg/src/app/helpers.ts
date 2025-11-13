@@ -438,6 +438,7 @@ export class LinkConfig {
     view: string;
     objectname: string;
     tab: string;
+    modal: string;
     reset: boolean;
     datatargets: LinkConfigDataTarget[];
     
@@ -446,6 +447,7 @@ export class LinkConfig {
         this.view = json.view;
         this.objectname = json.objectname;
         this.tab = json.tab;
+        this.modal = json.modal;
         this.reset = json.reset ?? false;
         this.datatargets = [];
         if(json.attribute != null || json.objectname != null || json.filter != null || json.filtersingleobject != null || json.select != null) { //This is a deprecated notation
@@ -479,6 +481,7 @@ export class LinkConfig {
             target: this.target,
             view: this.view,
             tab: this.tab,
+            modal: this.modal,
             reset: this.reset,
             datatargets: []
         };
