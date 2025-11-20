@@ -1,5 +1,6 @@
 import { SeriesConfig } from "app/abstract/rb-datacalc";
 import { RbObject } from "app/datamodel";
+import { LinkConfig } from "app/helpers";
 
 //export const GanttLaneHeight: number = 2.47; //VW, was in PX 42;
 export const GanttSpreadHeight: number = 1.64; //VW   
@@ -13,6 +14,7 @@ export class GanttLaneConfig {
     iconAttribute: string;
     iconMap: any;
     modal: string;
+    link: LinkConfig;
     dragfilter: any;
   
     constructor(json: any, userpref: any) {
@@ -23,6 +25,7 @@ export class GanttLaneConfig {
       this.iconAttribute = json.iconattribute;
       this.iconMap = json.iconmap;
       this.modal = json.modal;
+      this.link = json.link != null ? new LinkConfig(json.link) : null;
       this.dragfilter = json.dragfilter;
     }
   }
@@ -42,8 +45,11 @@ export class GanttLaneConfig {
     colorAttribute: string;
     colorMap: any;
     colorExpression: string;
+    indicatorAttribute: string;
+    indicatorExpression: string;    
     isBackground: boolean;
     modal: string;
+    link: LinkConfig;
     canEdit: boolean;
     show: Function;
   
@@ -65,7 +71,10 @@ export class GanttLaneConfig {
       this.colorAttribute = json.colorattribute;
       this.colorMap = json.colormap;
       this.colorExpression = json.colorexpression;
+      this.indicatorAttribute = json.indicatorattribute;
+      this.indicatorExpression = json.indicatorexpression;
       this.modal = json.modal;
+      this.link = json.link != null ? new LinkConfig(json.link) : null;
       this.show = json.show != null ? Function("dataset", "relatedObject", "return (" + json.show + ")") : null;
     }
   }
@@ -142,11 +151,12 @@ export class GanttLaneConfig {
     color: string;
     labelcolor: string;
     canEdit: boolean;
-    selected: boolean
+    selected: boolean;
+    indicator: boolean;
     object: RbObject;
     config: GanttSeriesConfig;
   
-    constructor(ln: string, l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, ce: boolean, sel: boolean, o: RbObject, cfg: GanttSeriesConfig) {
+    constructor(ln: string, l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, ce: boolean, sel: boolean, ind: boolean, o: RbObject, cfg: GanttSeriesConfig) {
       this.lane = ln;
       this.label = l;
       this.start = s;
@@ -158,16 +168,11 @@ export class GanttLaneConfig {
       this.labelcolor = lc;
       this.canEdit = ce;
       this.selected = sel;
+      this.indicator = ind;
       this.object = o;
       this.config = cfg;
       this.height = GanttSpreadHeight;
-      //this.setSubLane(0);
     }
-  
-    /*setSubLane(sl: number) {
-      this.sublane = sl;
-      this.top = GanttSpreadMargin + (this.sublane * (GanttSpreadHeight + GanttSpreadMargin));
-    }*/
   }
 
   export class GanttOverlayLane {

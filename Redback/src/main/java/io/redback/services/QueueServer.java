@@ -1,5 +1,7 @@
 package io.redback.services;
 
+import java.util.Date;
+
 import io.firebus.Firebus;
 import io.firebus.Payload;
 import io.firebus.data.DataMap;
@@ -26,7 +28,9 @@ public abstract class QueueServer extends AuthenticatedServiceProvider {
 				String service = requestData.getString("service");
 				DataMap message = requestData.getObject("message");
 				int requestTimeout = requestData.containsKey("timeout") ? requestData.getNumber("timeout").intValue() : 10000;
-				enqueue(session, service, message, requestTimeout);
+				Date schedule = requestData.containsKey("schedule") ? requestData.getDate("schedule") : null;
+				String uniqueKey = requestData.containsKey("uniquekey") ? requestData.getString("uniquekey") : null;
+				enqueue(session, service, message, requestTimeout, schedule, uniqueKey);
 				return new Payload(new DataMap("result", "ok"));
 			} else {
 				throw new RedbackException("Invalid action: " + action);
@@ -40,5 +44,5 @@ public abstract class QueueServer extends AuthenticatedServiceProvider {
 		throw new RedbackException("All requests need to be authenticated");
 	}	
 	
-	protected abstract void enqueue(Session session, String service, DataMap message, int timeout) throws RedbackException;
+	protected abstract void enqueue(Session session, String service, DataMap message, int timeout, Date schedule, String uniqueKey) throws RedbackException;
 }

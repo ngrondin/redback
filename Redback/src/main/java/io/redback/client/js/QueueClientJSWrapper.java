@@ -1,5 +1,7 @@
 package io.redback.client.js;
 
+import java.util.Date;
+
 import io.firebus.data.DataMap;
 import io.redback.client.QueueClient;
 import io.redback.exceptions.RedbackException;
@@ -26,7 +28,9 @@ public class QueueClientJSWrapper extends ObjectJSWrapper {
 					String service = (String)arguments[0];
 					DataMap message = (DataMap)arguments[1];
 					long timeout = arguments.length >= 3 ? (long)arguments[2] : 0;
-					queueClient.enqueue(session, service, message, timeout);
+					Date schedule = arguments.length >= 4 ? (Date)arguments[3] : null;
+					String uniqueKey = arguments.length >= 5 ? (String)arguments[4] : null;
+					queueClient.enqueue(session, service, message, timeout, schedule, uniqueKey);
 					return null;
 				}
 			};

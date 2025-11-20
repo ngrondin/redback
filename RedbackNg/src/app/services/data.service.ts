@@ -260,7 +260,6 @@ export class DataService {
           filter = {$or: (filter != null ? subfilter.concat(filter) : subfilter)};  
           count += deferredObject.filters.length * 2; //Times 2 in order to allow for domain overridden objects
         }
-        this.deferredFetchQueue.clear(objectname);
         this.apiService.streamObjects(objectname, filter, null, null).subscribe(
           {
             next: resp => {
@@ -276,12 +275,14 @@ export class DataService {
             },
             complete: () => {
               this.logService.debug("Finalized for deferred object " + objectname + ":" + deferredObject.id);
+              this.deferredFetchQueue.clear(objectname);
               this.runningFinalization = false;
               this.finalizeReceipt();
             },
             error: error => {
               this.logService.error("Error finalizing receipt for " + objectname + " :" + error);
               this.runningFinalization = false;
+              this.finalizeReceipt();
             }
           }
         );

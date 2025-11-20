@@ -14,6 +14,7 @@ import { LogService } from 'app/services/log.service';
 import { Evaluator } from 'app/helpers';
 import { AppInjector } from 'app/app.module';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { NavigateService } from 'app/services/navigate.service';
 
 
 @Component({
@@ -72,6 +73,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   
   constructor(
     private modalService: ModalService,
+    private navigateService: NavigateService,
     private dragService: DragService,
     private filterService: FilterService,
     private userprefService: UserprefService,
@@ -122,11 +124,30 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(this.active) {
       this.scrollTop = 0;
       this.scrollLeft = 0;
-      let target = null;
+      let selectionTarget = null;
       for(let cfg of this.seriesConfigs) {
         let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
+        //Retrieve the start of the Gantt from any of the datasets
+        if(dataset.resolvedFilter != null) {
+          let start = null;
+          let end = null;
+          if(cfg.endAttribute != null) {
+            start = dataset.resolvedFilter[cfg.endAttribute]?.['$gt'];
+            end = dataset.resolvedFilter[cfg.startAttribute]?.['$lt'];
+          } else {
+            start = dataset.resolvedFilter[cfg.startAttribute]?.['$gt'];
+            end = dataset.resolvedFilter[cfg.startAttribute]?.['$lt'];
+          } 
+          if(start != null && end != null) {
+            this._startDate = new Date(start);
+            this.spanMS = ((new Date(end)).getTime() - this._startDate.getTime());
+            if(this.zoomMS > this.spanMS) this.zoomMS = this.spanMS;
+            console.log("Retrieved the Gantt start: " + start + "  -  " + end + ", span: " + this.spanMS + ", zoom: " + this.zoomMS);
+          }
+        }
+        //Retrieve the selection target from any of the datasets
         if(dataset != null && dataset.dataTarget != null && dataset.dataTarget.select != null) {
-          target = {
+          selectionTarget = {
             cfg: cfg, 
             objectname: dataset.objectname, 
             filter: dataset.dataTarget.select, 
@@ -134,13 +155,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           }
         }
       }
-      if(target != null && target.filter != null) {
+      if(selectionTarget != null && selectionTarget.filter != null) {
         this.doFocus = true;
-        if(!target.currentlyInSet) {
+        if(!selectionTarget.currentlyInSet) {
           this.logService.info("Gantt actiavated with target that is not in the dataset");
-          this.dataService.fetchEntireList(target.objectname, target.filter, null, null).subscribe((objs) => {
+          this.dataService.fetchEntireList(selectionTarget.objectname, selectionTarget.filter, null, null).subscribe((objs) => {
             if(objs.length > 0) {
-              let starts = objs.map(obj => (new Date(obj.get(target.cfg.startAttribute))).getTime());
+              let starts = objs.map(obj => (new Date(obj.get(selectionTarget.cfg.startAttribute))).getTime());
               let ms = Math.min(...starts);
               this.startDate = new Date(ms - (3*60*60*1000));
               super.onActivationEvent(event);  
@@ -159,7 +180,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   onDatasetEvent(event: any) {
     super.onDatasetEvent(event);
-    if(event.dataset.getId() == this.lanesConfig.dataset && event.event != 'select') {
+    if(this.active && event.dataset.getId() == this.lanesConfig.dataset && event.event == 'load') {
       super.updateData(true)
     } 
   }
@@ -218,6 +239,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   get headerWidth() : number {
     return (0.88 * this._headerwidth);
+  }
+
+  get extraContext() : any {
+    return {
+      ganttstart: this.startDate.toISOString(), 
+      ganttend: (new Date(this.startDate.getTime() + this.spanMS)).toISOString()
+    };
   }
 
   setZoom(ms: number) {
@@ -429,7 +457,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                 } while(hasOverlap);
               }
               let selected: boolean = cfg.isBackground == false && dataset.isObjectSelected(obj);
-              let spread = new GanttSpread(laneId, label, startPX, widthPX, offsetTop, sublane, color, labelcolor, canEdit, selected, obj, cfg);
+              let indicator: boolean = false;
+              if(cfg.indicatorAttribute != null) {
+                indicator = obj.get(cfg.indicatorAttribute); 
+              } else if(cfg.indicatorExpression != null) {
+                indicator = Evaluator.eval(cfg.indicatorExpression, obj, null, null);
+              }
+              let spread = new GanttSpread(laneId, label, startPX, widthPX, offsetTop, sublane, color, labelcolor, canEdit, selected, indicator, obj, cfg);
               spreads.push(spread);
               if(selected) {
                 let fs = startPX;
@@ -482,7 +516,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
         if(firstGroupFound == null) {
           let id = nextid++;
-          let group = new GanttSpread(spread.laneId, "1 item", spread.start, spread.width, 0, 0, 'var(--primary-light-color)', '#333', false, false, null, spread.config);
+          let group = new GanttSpread(spread.laneId, "1 item", spread.start, spread.width, 0, 0, 'var(--primary-light-color)', '#333', false, false, false, null, spread.config);
           group.id = id.toString();
           groupmap[group.id] = 1
           groups.push(group);
@@ -610,14 +644,20 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.select(spread.object);
     if(spread.config.modal != null) {
       this.modalService.open(spread.config.modal);
-    }
+    } else if(spread.config.link != null) {
+      let navEvent = this.lanesConfig.link.getNavigationEvent(spread.object, this.getDatasetForObject(spread.object), this.extraContext);
+      this.navigateService.navigateTo(navEvent);
+    } 
   }
 
   public clickLane(lane: GanttLane) {
     this.select(lane.object);
     if(this.lanesConfig.modal != null) {
       this.modalService.open(this.lanesConfig.modal);
-    }
+    } else if(this.lanesConfig.link != null) {
+      let navEvent = this.lanesConfig.link.getNavigationEvent(lane.object, this.getDatasetForObject(lane.object), this.extraContext);
+      this.navigateService.navigateTo(navEvent);
+    }  
   }
 
   public clickBackground() {

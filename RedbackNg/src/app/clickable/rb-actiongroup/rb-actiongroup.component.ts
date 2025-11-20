@@ -85,6 +85,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         for(var item of json.list) {
           this.domainActions.push(new RbActiongroupAction('executeglobal', item.name, null, item.timeout, item.description, item.icon, item.confirm, false, item.show));
         }
+        this.calcActionData();
       });
     } else {
       this.calcActionData();

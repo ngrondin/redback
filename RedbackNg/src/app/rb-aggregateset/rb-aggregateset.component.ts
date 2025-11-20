@@ -100,7 +100,7 @@ export class RbAggregatesetComponent extends RbSetComponent {
 
   public fetchNextPage() {
     if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
-      const filter = this.filterService.resolveFilter(this.mergeFilters(), this.relatedObject, this.dataset, this.dataset.relatedObject);
+      const filter = this.filterService.resolveFilter(this.mergeFilters(), this.relatedObject, this.dataset, this.dataset?.relatedObject);
       this.dataService.aggregate(this.objectname, filter, null, this.tuple, this.metrics, this.base, this.nextPage).subscribe(
         data => this.setAggregates(data)
       );

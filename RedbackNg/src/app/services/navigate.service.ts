@@ -67,6 +67,8 @@ export class NavigateService {
       }
     } else if(event.tab != null) {
       targetViewLoader.component.currentLoadedView.openTab(event.tab);
+    } else if(event.modal != null) {
+      setTimeout(() => this.modalService.open(event.modal), 100);
     }
   }
 

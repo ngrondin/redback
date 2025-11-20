@@ -476,7 +476,7 @@ export class LinkConfig {
         }    
     }
 
-    getNavigationEvent(object: RbObject, dataset: RbDatasetComponent): NavigateEvent {
+    getNavigationEvent(object: RbObject, dataset: RbDatasetComponent, extraContext?: any): NavigateEvent {
         let event: NavigateEvent = {
             target: this.target,
             view: this.view,
@@ -493,13 +493,13 @@ export class LinkConfig {
             let select = null;
             if(datatarget.filter != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
-                let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, null, null, null);
+                let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, null, null, extraContext);
                 filter = filterService.unresolveFilter(rfilter);  //Unresolving this as the DataSet will resolve it
                 sort = datatarget.sort;
             } 
             if(datatarget.select != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
-                select = filterService.resolveFilter(datatarget.select, object, dataset, null, null, null);
+                select = filterService.resolveFilter(datatarget.select, object, dataset, null, null, extraContext);
             } 
             if(datatarget.filter == null && datatarget.select == null) {
                 if(datatarget.filtersingleobject == false) {

@@ -1,5 +1,7 @@
 package io.redback.services.impl;
 
+import java.util.Date;
+
 import io.firebus.Firebus;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
@@ -15,8 +17,8 @@ public class RedbackQueueServer extends QueueServer {
 		queueManager = new QueueManager(c, f);
 	}
 
-	protected void enqueue(Session session, String service, DataMap message, int timeout) throws RedbackException {
-		queueManager.enqueue(session, service, message, timeout);
+	protected void enqueue(Session session, String service, DataMap message, int timeout, Date schedule, String uniqueKey) throws RedbackException {
+		queueManager.enqueue(session, service, message, timeout, schedule, uniqueKey);
 		
 	}
 

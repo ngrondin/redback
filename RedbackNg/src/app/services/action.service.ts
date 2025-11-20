@@ -265,8 +265,8 @@ export class ActionService {
 
   public executeClientScript(dataset:RbDatasetComponent, script: string) : Observable<null> {
     return new Observable((observer) => {
-      let func = Function("dataset", "obj", "selectedObject", "relatedObject", script);
-      func.call(window.redback, dataset, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);
+      let func = Function("dataset", "obj", "object", "selectedObject", "relatedObject", script);
+      func.call(window.redback, dataset, dataset.selectedObject, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);
       observer.next(null);
       observer.complete();  
     });    

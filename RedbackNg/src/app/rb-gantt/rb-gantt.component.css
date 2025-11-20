@@ -19,6 +19,7 @@
     display: flex;
     flex: 0 0 auto;
     justify-content: flex-end;
+    align-items: center;
     padding: 4px;
     z-index: 3;
 }
@@ -28,6 +29,7 @@
     flex-direction: row;
     flex: 1 1 auto;
     justify-content: flex-start;
+    align-items: center;
 }
 
 .rb-gantt-header {
@@ -303,6 +305,17 @@
     flex-shrink: 1;
     flex-basis: auto;
     /*height: 100%;*/
+}
+
+.rb-gantt-cornerindicator {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0.3vw;
+    height: 0.3vw;
+    background-color: red;
+    border-bottom-left-radius: 0.3vw;
 }
 
 .rb-gantt-laneheight {

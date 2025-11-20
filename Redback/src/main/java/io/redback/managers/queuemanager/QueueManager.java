@@ -30,9 +30,13 @@ public class QueueManager extends Thread {
 		start();
 	}
 	
-	public synchronized void enqueue(Session session, String service, DataMap message, int requestTimeout) throws RedbackException {
-		String msgUuid = UUID.randomUUID().toString();
-		DataMap key = new DataMap("_id", msgUuid);
+	public synchronized void enqueue(Session session, String service, DataMap message, int requestTimeout, Date schedule, String uniqueKey) throws RedbackException {
+		String uuid = null;
+		if(uniqueKey != null) 
+			uuid = getUUIDofUniqueKey(uniqueKey);
+		if(uuid == null)
+			uuid = UUID.randomUUID().toString();
+		DataMap key = new DataMap("_id", uuid);
 		DataMap data = new DataMap();
 		data.put("session", session.id);
 		data.put("token", session.token);
@@ -44,10 +48,15 @@ public class QueueManager extends Thread {
 		data.put("message", message);
 		if(requestTimeout > 0)
 			data.put("timeout", requestTimeout);
+		if(schedule != null) 
+			data.put("schedule", schedule);
+		if(uniqueKey != null)
+			data.put("uniquekey", uniqueKey);
 		data.put("lock", null);
 		data.put("failed", null);
 		collection.putData(key, data);
-		notify();
+		if(schedule == null)
+			notify();
 	}
 	
 	public void run() {
@@ -58,7 +67,7 @@ public class QueueManager extends Thread {
 					processMessage(msgUuid);
 				}
 				synchronized(this) {
-					wait(30000);
+					wait(10000);
 				}
 			} catch(Exception e) {
 				Logger.severe("rb.rbq.run", e);
@@ -66,8 +75,21 @@ public class QueueManager extends Thread {
 		}
 	}
 	
+	protected String getNextUuid() throws RedbackException {
+		DataList scheduleOrClauses = new DataList();
+		scheduleOrClauses.add(new DataMap("schedule", null));
+		scheduleOrClauses.add(new DataMap("schedule", new DataMap("$lt", new Date())));
+		DataMap resp = collection.getData(new DataMap("lock", null, "failed", null, "$or", scheduleOrClauses), 0, 1);
+		DataList list = resp.getList("result");
+		if(list.size() > 0) {
+			return list.getObject(0).getString("_id");
+		} else {
+			return null;
+		}
+	}
+	
 	protected void processMessage(String msgUuid) throws RedbackException {
-		DataMap msg = get(msgUuid);
+		DataMap msg = lockAndGet(msgUuid);
 		if(msg != null) {
 			String service = msg.getString("service");
 			DataMap message = msg.getObject("message");
@@ -89,21 +111,20 @@ public class QueueManager extends Thread {
 		}
 	}
 	
-	protected String getNextUuid() throws RedbackException {
-		DataMap resp = collection.getData(new DataMap("lock", null, "failed", null, 0, 1));
-		DataList list = resp.getList("result");
-		if(list.size() > 0) {
-			return list.getObject(0).getString("_id");
+	protected DataMap lockAndGet(String msgUuid) throws RedbackException {
+		collection.putData(new DataMap("_id", msgUuid, "lock", null, "failed", null), new DataMap("lock", uuid));
+		DataMap checkResp = collection.getData(new DataMap("_id", msgUuid, "lock", uuid));
+		if(checkResp.getList("result").size() > 0) {
+			return checkResp.getList("result").getObject(0);
 		} else {
 			return null;
 		}
 	}
 	
-	protected DataMap get(String msgUuid) throws RedbackException {
-		collection.putData(new DataMap("_id", msgUuid, "lock", null, "failed", null), new DataMap("lock", uuid));
-		DataMap checkResp = collection.getData(new DataMap("_id", msgUuid, "lock", uuid));
-		if(checkResp.getList("result").size() > 0) {
-			return checkResp.getList("result").getObject(0);
+	protected String getUUIDofUniqueKey(String uniqueKey) throws RedbackException {
+		DataMap resp = collection.getData(new DataMap("uniquekey", uniqueKey));
+		if(resp.getList("result").size() > 0) {
+			return resp.getList("result").getObject(0).getString("_id");
 		} else {
 			return null;
 		}
@@ -114,6 +135,6 @@ public class QueueManager extends Thread {
 	}
 	
 	protected void setFailed(String msgUuid) throws RedbackException {
-		collection.putData(new DataMap("_id", msgUuid), new DataMap("failed", new Date()));
+		collection.putData(new DataMap("_id", msgUuid), new DataMap("lock", null, "failed", new Date()));
 	}
 }
