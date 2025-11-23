@@ -81,5 +81,8 @@
     *ngIf="showRefresh()"
     class="rb-list-floating  rb-list-floating-refresh"
     (click)="refresh()">
-    <mat-icon class="rb-list-floating-refresh-icon">sync</mat-icon>
+    <rb-icon
+        class="rb-list-floating-refresh-icon"
+        [icon]="'sync'">
+    </rb-icon>
 </div>

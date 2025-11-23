@@ -172,12 +172,12 @@
                     *ngIf="lane.sub != null"
                     class="rb-gantt-lanesublabel">
                     {{lane.sub}}
-                </div>                
-                <mat-icon
+                </div>                       
+                <rb-icon
                     *ngIf="lane.icon != null"
-                    class="rb-gantt-laneicon material-symbols-outlined">
-                    {{lane.icon}}
-                </mat-icon>                
+                    [class]="'rb-gantt-laneicon'"
+                    [icon]="lane.icon">
+                </rb-icon>                
             </div>
         </div>
     </div>

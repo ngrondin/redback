@@ -12,7 +12,7 @@
                     *ngIf="iconattribute != null"
                     class="rb-list-item-icon"
                     [style.color]="getColorFor(item)">
-                    <mat-icon>{{getIconFor(item)}}</mat-icon>
+                    <rb-icon [icon]="getIconFor(item)"></rb-icon>
                 </div>
                 <div
                     class="rb-list-item-datablock">

@@ -121,10 +121,10 @@
             *ngIf="getTypeOf(object) == 'files' || getTypeOf(object) == 'photos' || getTypeOf(object) == 'videos'">
             <div
                 class="rb-df-inputwrapper">
-                <mat-icon
-                    class="rb-df-input-icon material-symbols-outlined">
-                    attach_file
-                </mat-icon>
+                <rb-icon
+                    [class]="'rb-df-input-icon'"
+                    [icon]="'attach_file'">
+                </rb-icon> 
                 <div
                     class="rb-df-lineinput-vert">
                     <div
@@ -151,10 +151,10 @@
             *ngIf="getTypeOf(object) == 'signature'">
             <div
                 class="rb-df-inputwrapper">
-                <mat-icon
-                    class="rb-df-input-icon material-symbols-outlined">
-                    gesture
-                </mat-icon>
+                <rb-icon
+                    [class]="'rb-df-input-icon'"
+                    [icon]="'gesture'">
+                </rb-icon> 
                 <div
                     class="rb-df-lineinput-vert">
                     <div
@@ -224,10 +224,10 @@
             *ngIf="getTypeOf(object) == 'infoonly'">
             <div
                 class="rb-df-inputwrapper">
-                <mat-icon
-                    class="rb-df-input-icon material-symbols-outlined">
-                    info
-                </mat-icon>
+                <rb-icon
+                    [class]="'rb-df-input-icon'"
+                    [icon]="'info'">
+                </rb-icon>                
                 <div
                     class="rb-df-lineinput-vert">
                     <div

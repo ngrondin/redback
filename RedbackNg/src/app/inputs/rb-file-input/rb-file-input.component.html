@@ -10,11 +10,11 @@
         *ngIf="fileUid != null && !hasThumbnail()"
         [mime]="mime">
     </rb-fileicon>
-    <mat-icon
+    <rb-icon
         *ngIf="fileUid == null"
-        class="rb-file-input-icon rb-file-lightgrey material-symbols-outlined">
-        download
-    </mat-icon>   
+        [class]="'rb-file-input-icon rb-file-lightgrey'"
+        [icon]="'download'">
+    </rb-icon> 
     <div
         *ngIf="fileUid == null"
         class="rb-file-tiptext rb-file-lightgrey">

@@ -1,0 +1,34 @@
+:host {
+    width: var(--v28px);
+    height: var(--v20px);
+    position: relative;
+}
+
+.rb-switch-slider {
+    position: absolute;
+    top: var(--v5px);
+    left: 0px;
+    width: var(--v28px);
+    height: var(--v10px);
+    background-color: #ddd;
+    border-radius: var(--v5px);;
+}
+
+.rb-switch-knob {
+    position: absolute;
+    top: var(--v0px);
+    left: 0px;
+    width: var(--v20px);
+    height: var(--v20px);
+    background-color: #bbb;
+    border-radius: 50%;
+}
+
+.rb-switch-slider-on {
+    background-color: var(--primary-light-color);
+}
+
+.rb-switch-knob-on {
+    background-color: var(--primary-color);
+    left: var(--v8px);
+}

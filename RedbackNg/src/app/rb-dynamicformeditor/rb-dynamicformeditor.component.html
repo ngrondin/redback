@@ -15,12 +15,12 @@
                 <div
                     class="rb-dfe-cat-header-edit"
                     (click)="edit(cat)">
-                    <mat-icon>more_vert</mat-icon>
+                    <rb-icon [icon]="'more_vert'"></rb-icon>
                 </div>  
                 <div
                     class="rb-dfe-cat-header-delete"
                     (click)="delete(cat)">
-                    <mat-icon>close</mat-icon>
+                    <rb-icon [icon]="'close'"></rb-icon>
                 </div>                     
             </div>
             <div
@@ -37,10 +37,9 @@
                     <div
                         class="rb-dfe-item"
                         [rb-drag-object]="item">
-                        <mat-icon
-                            class="material-symbols-outlined">
-                            {{item.icon}}
-                        </mat-icon>
+                        <rb-icon
+                            [icon]="item.icon">
+                        </rb-icon>
                         <div
                             class="rb-dfe-item-label">
                             <span>{{item.label}}</span>
@@ -48,12 +47,12 @@
                         <div
                             class="rb-dfe-item-edit"
                             (click)="edit(item)">
-                            <mat-icon>more_vert</mat-icon>
+                            <rb-icon [icon]="'more_vert'"></rb-icon>
                         </div>  
                         <div
                             class="rb-dfe-item-delete"
                             (click)="delete(item)">
-                            <mat-icon>close</mat-icon>
+                            <rb-icon [icon]="'close'"></rb-icon>
                         </div>                              
                     </div>
                     <div
@@ -79,7 +78,7 @@
         [class]="'rb-dfe-toolbox-box rb-dfe-toolbox-' + type.is"
         *ngFor="let type of types"
         [rb-drag-object]="type">
-        <mat-icon>{{type.icon}}</mat-icon>
+        <rb-icon [icon]="type.icon"></rb-icon>
         <span>{{type.name}}</span>
     </div>
 </div>

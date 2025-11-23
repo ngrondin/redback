@@ -66,10 +66,9 @@
                         <div
                             *ngIf="col.icon != null"
                             class="rb-linktable-icon">
-                            <mat-icon
-                                class="material-symbols-outlined">
-                                {{col.icon}}
-                            </mat-icon>         
+                            <rb-icon
+                                [icon]="col.icon">
+                            </rb-icon>
                         </div>  
                     </div>              
                 </div>

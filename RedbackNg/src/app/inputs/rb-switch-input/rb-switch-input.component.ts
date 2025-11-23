@@ -10,10 +10,9 @@ import { RbInputComponent } from '../abstract/rb-input';
 export class RbSwitchInputComponent extends RbInputComponent {
   @Input('margin') margin: boolean = true;
   @Input('labelafter') labelafter: boolean = false;
+  @Input('mode') mode: string = 'checkbox';
   @HostBinding('class.rb-switch-margin') get marginclass() { return this.margin }
   
-  mode = 'checkbox';
-
   constructor() {
     super();
     this.defaultSize = null;

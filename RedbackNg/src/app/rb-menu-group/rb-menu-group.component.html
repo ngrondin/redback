@@ -12,27 +12,27 @@
             [svgIcon]="icon"
             [class]="'rb-menu-group-icon material-symbols-outlined rb-menu-group-icon-' + look">
         </mat-icon>
-        <mat-icon
+        <rb-icon
             *ngIf="icon.indexOf(':') == -1"
-            [class]="'rb-menu-group-icon material-symbols-outlined rb-menu-group-icon-' + look">
-            {{icon}}
-        </mat-icon>
+            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look"
+            [icon]="icon">
+        </rb-icon>          
         <span 
             flex
             [class]="'rb-menu-group-text rb-menu-group-text-' + look"
             *ngIf="mode == 'large'">
             {{label}}
         </span>
-        <mat-icon 
+        <rb-icon
             *ngIf="mode == 'large' && !isOpen"
-            [class]="'rb-menu-group-icon material-symbols-outlined rb-menu-group-icon-' + look">
-            keyboard_arrow_down
-        </mat-icon>
-        <mat-icon 
+            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look"
+            [icon]="'keyboard_arrow_down'">
+        </rb-icon>  
+        <rb-icon
             *ngIf="mode == 'large' && isOpen"
-            [class]="'rb-menu-group-icon material-symbols-outlined rb-menu-group-icon-' + look">
-            keyboard_arrow_up
-        </mat-icon>
+            [class]="'rb-menu-group-icon rb-menu-group-icon-' + look"
+            [icon]="'keyboard_arrow_up'">
+        </rb-icon>  
     </div>
 </rb-clickable> 
 <div

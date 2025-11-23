@@ -1,8 +1,8 @@
-<mat-icon 
-    *ngIf="hasIcon" 
-    [class]="'rb-text-icon material-symbols-outlined' + (alertOn ? ' rb-text-icon-alert' : '')">
-    {{icon}}
-</mat-icon>
+<rb-icon
+    *ngIf="hasIcon"
+    [class]="'rb-text-icon' + (alertOn ? ' rb-input-icon-alert' : '')"
+    [icon]="icon">
+</rb-icon>
 <div
     [class]="'rb-text-text' + (alertOn ? ' rb-text-text-alert' : '')"
     [style.color]="color">

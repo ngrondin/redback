@@ -6,16 +6,10 @@
     </div>
     <div
         class="rb-hcollapse-switch">
-        <mat-icon
-            *ngIf="isOpen"
+        <rb-icon
+            [icon]="isOpen ? 'keyboard_arrow_left' : 'keyboard_arrow_right'"
             (click)="toggle()">
-            keyboard_arrow_left
-        </mat-icon>
-        <mat-icon
-            *ngIf="!isOpen"
-            (click)="toggle()">
-            keyboard_arrow_right
-        </mat-icon>
+        </rb-icon>
         <div
             *ngIf="label != null"
             class="rb-hcollapse-label">

@@ -18,7 +18,7 @@
     </rb-choice-input>
     <rb-spacer></rb-spacer>
     <rb-iconbutton
-        [icon]="'arrow_back_ios'"
+        [icon]="'arrow_back_ios_new'"
         (click)="previous()">
     </rb-iconbutton>
     <rb-iconbutton
@@ -84,11 +84,10 @@
                         class="rb-cal-item"
                         [style.backgroundColor]="item.color"
                         (click)="clickItem(item)">
-                        <mat-icon
+                        <rb-icon
                             *ngIf="item.icon != null"
-                            class="material-symbols-outlined">
-                            {{item.icon}}
-                        </mat-icon>
+                            [icon]="item.icon">
+                        </rb-icon>         
                         <p>
                             {{item.label}}
                         </p>

@@ -33,6 +33,7 @@
 .rb-switch-label {
     flex-grow: 1;
     margin-right: var(--v8px);
+    margin-left: var(--v8px);
 }
 
 .rb-switch-label-mandatory {
@@ -42,3 +43,17 @@
 .rb-switch-label-alert {
     color: red;
 }
+
+/*mat-slide-toggle {
+    width: var(--v40px);
+    height: var(--v40px);
+}
+
+mat-checkbox {
+    width: var(--v40px);
+    height: var(--v40px);    
+}*/
+
+/*rb-checkbox {
+    margin: 0 var(--v10px);
+}*/

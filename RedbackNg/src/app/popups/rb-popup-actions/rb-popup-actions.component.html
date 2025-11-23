@@ -9,11 +9,11 @@
     (click)="clickAction(action)">
     <div
         class="rb-popup-actions-container">
-        <span
+        <rb-icon
             *ngIf="action.icon != null" 
-            class="material-symbols-outlined rb-popup-actions-icon">
-            {{action.icon}}
-        </span>   
+            [class]="'rb-popup-actions-icon'"
+            [icon]="action.icon">
+        </rb-icon>        
         <div
             class="rb-popup-actions-label">
             {{action.label}}

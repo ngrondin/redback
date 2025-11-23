@@ -11,7 +11,7 @@
     color: var(--dark-writing-color);
 }
 
-.rb-cal-toolbar button {
+.rb-cal-toolbar rb-iconbutton {
     color: grey;
 }
 

@@ -73,5 +73,26 @@ public class FilterProcessor {
 		
 		return ret;
 	}
+	
+	public static boolean isComparativeOperator(DataMap map) {
+		boolean ret = true;
+		Iterator<String> it = map.keySet().iterator();
+		while(it.hasNext()) {
+			String key = it.next();
+			if(!(
+					key.equals("$eq")  ||  
+					key.equals("$gt")  ||  
+					key.equals("$gte")  ||  
+					key.equals("$lt")  ||  
+					key.equals("$lte")  ||  
+					key.equals("$ne") || 
+					key.equals("$regex") || 
+					key.equals("$where") ||
+					key.equals("$in") ||
+					key.equals("$nin")
+			)) ret = false;
+		}
+		return ret;
+	}
 
 }

@@ -160,6 +160,9 @@ import { FileiconComponent } from './utils/fileicon/fileicon.component';
 import { RbTipDirective } from './utils/tip/rb-tip.directive';
 import { RbColorInputComponent } from './inputs/rb-color-input/rb-color-input.component';
 import { RbPopupColorComponent } from './popups/rb-popup-color/rb-popup-color.component';
+import { RbIconComponent } from './rb-icon/rb-icon.component';
+import { RbCheckboxComponent } from './rb-checkbox/rb-checkbox.component';
+import { RbSwitchComponent } from './rb-switch/rb-switch.component';
 
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -328,7 +331,10 @@ window.redback = window.redback || {};
         FileiconComponent,
         RbTipDirective,
         RbColorInputComponent,
-        RbPopupColorComponent
+        RbPopupColorComponent,
+        RbIconComponent,
+        RbCheckboxComponent,
+        RbSwitchComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

@@ -3,12 +3,11 @@
     <div
         *ngIf="showreload"
         class="rb-tile-refresh">
-        <mat-icon
+        <rb-icon
             *ngIf="hovering"
-            class="material-symbols-outlined"
-            (click)="refresh()">
-            refresh
-        </mat-icon>
+            (click)="refresh()"
+            [icon]="'refresh'">
+        </rb-icon>   
     </div>
     <div
         class="rb-tile-title">

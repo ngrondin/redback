@@ -1,24 +1,25 @@
 <div
     class="rb-nlbox-header">
-    <span class="material-symbols-outlined rb-nlbox-topicon">
-        robot_2
-    </span>   
+    <rb-icon
+        [class]="'rb-nlbox-topicon'"
+        [icon]="'robot_2'">
+    </rb-icon>     
     <div
         class="rb-nlbox-spacer">
         {{label}}
     </div>
     <rb-iconbutton
         *ngIf="minimized == false"
-        icon="minimize"
+        [icon]="'minimize'"
         (click)="clickMinimize()">
     </rb-iconbutton>    
     <rb-iconbutton
         *ngIf="minimized == true"
-        icon="crop_3_2"
+        [icon]="'crop_3_2'"
         (click)="clickMinimize()">
     </rb-iconbutton>      
     <rb-iconbutton
-        icon="clear"
+        [icon]="'clear'"
         (click)="clickClose()">
     </rb-iconbutton>
 </div>
@@ -31,16 +32,16 @@
         *ngFor="let item of history">
         <div
             class="rb-nlbox-itemline">
-            <span 
+            <rb-icon
                 *ngIf="item.assistant == true"
-                class="material-symbols-outlined rb-nlbox-icon">
-                robot_2
-            </span>           
-            <span 
+                [class]="'rb-nlbox-icon'"
+                [icon]="'robot_2'">
+            </rb-icon>             
+            <rb-icon
                 *ngIf="item.assistant == false"
-                class="material-symbols-outlined rb-nlbox-icon">
-                person
-            </span>           
+                [class]="'rb-nlbox-icon'"
+                [icon]="'person'">
+            </rb-icon>                             
             <div
                 class="rb-nlbox-text">
                 {{item.text}}        
@@ -76,10 +77,10 @@
         class="rb-nlbox-item">
         <div
             class="rb-nlbox-itemline">
-            <span 
-                class="material-symbols-outlined rb-nlbox-icon">
-                robot_2
-            </span>  
+            <rb-icon
+                [class]="'rb-nlbox-icon'"
+                [icon]="'robot_2'">
+            </rb-icon>             
             <div
                 class="rb-nlbox-dots">
             </div>

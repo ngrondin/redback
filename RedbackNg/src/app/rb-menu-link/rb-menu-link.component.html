@@ -11,12 +11,12 @@
             *ngIf="config.icon.indexOf(':') >= 0"
             [svgIcon]="config.icon"
             [class]="'rb-menu-link-icon material-symbols-outlined rb-menu-link-icon-' + look">
-        </mat-icon>
-        <mat-icon
+        </mat-icon> 
+        <rb-icon
             *ngIf="config.icon.indexOf(':') == -1"
-            [class]="'rb-menu-link-icon material-symbols-outlined rb-menu-link-icon-' + look">
-            {{config.icon}}
-        </mat-icon>
+            [class]="'rb-menu-link-icon rb-menu-link-icon-' + look"
+            [icon]="config.icon">
+        </rb-icon>  
         <span 
             flex
             [class]="'rb-menu-link-text rb-menu-link-text-' + look"

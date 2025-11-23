@@ -49,11 +49,11 @@
         <div
             [class]="'rb-tl-detail' + (entry.isClickable ? ' rb-tl-detail-link' : '')"
             (click)="clickItem(entry)">
-            <mat-icon 
-                *ngIf="entry.icon != null" 
-                [class]="'rb-tl-icon material-symbols-outlined'">
-                {{entry.icon}}
-            </mat-icon>
+            <rb-icon
+                *ngIf="entry.icon != null"
+                [class]="'rb-tl-icon'"
+                [icon]="entry.icon">
+            </rb-icon>
             <div
                 [class]="'rb-tl-detailcol ' + (wide ? 'rb-tl-detailcol-wide' : 'rb-tl-detailcol-narrow')">
                 <div

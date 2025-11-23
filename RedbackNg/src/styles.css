@@ -519,3 +519,8 @@ rb-fileset {
   opacity: 0.7; /* Fade it in */
   transition-delay: 1s
 }
+
+div[data-lastpass-icon-root]  {
+	display: none !important; /* Hides the root container of the icon */
+	visibility: hidden !important;
+}

@@ -9,14 +9,9 @@
                 *ngIf="node.children.length > 0"
                 class="rb-tree-node-expandbutton"
                 (click)="toggleNode(node)">
-                <mat-icon
-                    *ngIf="node.open">
-                    expand_more
-                </mat-icon>
-                <mat-icon
-                    *ngIf="!node.open">
-                    chevron_right
-                </mat-icon>
+                <rb-icon
+                    [icon]="node.open ? 'expand_more' : 'chevron_right'">
+                </rb-icon>
             </rb-clickable>
             <div
                 *ngIf="node.children.length == 0"

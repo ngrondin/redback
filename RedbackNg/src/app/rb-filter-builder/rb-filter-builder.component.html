@@ -1,8 +1,9 @@
 <div
     class="rb-filter-builder-header">
-    <span class="material-symbols-outlined rb-filter-builder-topicon">
-        {{isEditingEntry ? 'search' : 'filter_list'}}
-    </span>   
+    <rb-icon
+        [class]="'rb-filter-builder-topicon'"
+        [icon]="isEditingEntry ? 'search' : 'filter_list'">
+    </rb-icon>       
     <div
         class="rb-filter-builder-title">
         {{isEditingEntry ? (editingEntry.name ?? "Unnamed") : canFilter && canSort ? 'Filter / Sort' : canFilter ? 'Filter' : 'Sort'}}
@@ -78,7 +79,7 @@
                             (click)="clickSavedEntry(savedEntry)">
                             <div
                                 class="rb-filter-builder-saved-name">
-                                <mat-icon>search</mat-icon>
+                                <rb-icon [icon]="'search'"></rb-icon>
                                 <p>{{savedEntry.name}}</p>
                             </div>
                         </rb-clickable>

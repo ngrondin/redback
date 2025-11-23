@@ -5,16 +5,10 @@
     </div>
     <div
         class="rb-vcollapse-switch">
-        <mat-icon
-            *ngIf="isOpen"
-            (click)="toggle()">
-            keyboard_arrow_up
-        </mat-icon>
-        <mat-icon
-            *ngIf="!isOpen"
-            (click)="toggle()">
-            keyboard_arrow_down
-        </mat-icon>
+        <rb-icon
+            (click)="toggle()"
+            [icon]="isOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'">
+        </rb-icon>
         <div
             *ngIf="label != null"
             class="rb-vcollapse-label">

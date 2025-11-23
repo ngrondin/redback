@@ -11,11 +11,16 @@
     <div
         class="rb-fileviewer-control"
         (click)="toggleZoom()">
-        <mat-icon class="rb-fileviewer-zoom-icon">fullscreen</mat-icon>
+        <rb-icon 
+            class="rb-fileviewer-zoom-icon"
+            [icon]="'fullscreen'">
+        </rb-icon>
     </div>
     <div
         class="rb-fileviewer-control"
         (click)="download()">
-        <mat-icon>download</mat-icon>
+        <rb-icon 
+            [icon]="'download'">
+        </rb-icon>
     </div>    
 </div>

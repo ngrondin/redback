@@ -10,10 +10,10 @@
             (click)="select(file)">
             <div
                 class="rb-files-imgbox">
-                <mat-icon
-                    *ngIf="file.thumbnail == null">
-                    attach_file
-                </mat-icon>
+                <rb-icon 
+                    *ngIf="file.thumbnail == null"
+                    [icon]="'attach_file'">
+                </rb-icon>
                 <img
                     class="rb-files-img"
                     [src]="getBase64Thumbnail(file)"
@@ -38,10 +38,10 @@
             <div
                 class="rb-files-delete"
                 *ngIf="hovering == file && editable == true">
-                <mat-icon
-                    (click)="delete($event, file)">
-                    clear
-                </mat-icon>
+                <rb-icon 
+                    (click)="delete($event, file)"
+                    [icon]="'clear'">
+                </rb-icon>
             </div>              
         </div>         
     </div>

@@ -4,9 +4,10 @@
     <div
         class="rb-modal-header"
         *ngIf="title != null">
-        <span class="material-symbols-outlined rb-modal-topicon">
-            {{icon}}
-        </span>   
+        <rb-icon
+            [class]="'rb-modal-topicon'"
+            [icon]="icon">
+        </rb-icon>        
         <div
             class="rb-modal-title">
             {{title}}

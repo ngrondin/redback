@@ -1,8 +1,8 @@
-<mat-icon 
-    *ngIf="showicon" 
-    [class]="'rb-switch-icon material-symbols-outlined' + (mandatoryOn ? ' rb-switch-icon-mandatory' : '') + (alertOn ? ' rb-switch-icon-alert' : '') ">
-    {{icon}}
-</mat-icon>
+<rb-icon
+    *ngIf="showicon"
+    [class]="'rb-switch-icon' + (mandatoryOn ? ' rb-input-icon-mandatory' : '') + (alertOn ? ' rb-input-icon-alert' : '')"
+    [icon]="icon">
+</rb-icon>
 <div
     class="rb-switch-container">
     <div
@@ -10,21 +10,18 @@
         [class]="'rb-switch-label' + (mandatoryOn ? ' rb-switch-label-mandatory' : '') + (alertOn ? ' rb-switch-label-alert' : '') ">
         {{label}}
     </div>
-    <mat-slide-toggle
-        matInput 
+    <rb-checkbox
+        *ngIf="mode == 'checkbox'"
+        [checked]="displayvalue"
+        [disabled]="readonly"
+        (change)="toggle()">
+    </rb-checkbox>
+    <rb-switch
         *ngIf="mode == 'slider'"
         [checked]="displayvalue"
         [disabled]="readonly"
         (change)="toggle()">
-    </mat-slide-toggle>
-    <mat-checkbox
-        matInput 
-        *ngIf="mode == 'checkbox'"
-        [checked]="displayvalue"
-        [disabled]="readonly"
-        (change)="toggle()"
-        color="primary">
-    </mat-checkbox>
+    </rb-switch>
     <div
         *ngIf="labelafter"
         [class]="'rb-switch-label' + (mandatoryOn ? ' rb-switch-label-mandatory' : '') + (alertOn ? ' rb-switch-label-alert' : '') ">

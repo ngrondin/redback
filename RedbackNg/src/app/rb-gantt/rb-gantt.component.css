@@ -190,6 +190,7 @@
 .rb-gantt-laneicon {
     display: flex;
     flex: 0 0 auto;
+    color: var(--light-writing-color);
 }
 
 .rb-gantt-lanescontainer {

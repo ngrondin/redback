@@ -9,16 +9,9 @@
                 class="rb-globalsearch-listcontent">
                 <div
                     class="rb-globalsearch-listicon">
-                    <mat-icon 
-                        *ngIf="item.getObjectIcon().indexOf(':') >= 0"
-                        class="material-symbols-outlined"
-                        [svgIcon]="item.getObjectIcon()">
-                    </mat-icon>
-                    <mat-icon
-                        *ngIf="item.getObjectIcon().indexOf(':') == -1"
-                        class="material-symbols-outlined">
-                        {{item.getObjectIcon()}}
-                    </mat-icon>                        
+                    <rb-icon
+                        [icon]="item.getObjectIcon()">
+                    </rb-icon>                      
                 </div>
                 <div
                     class="rb-globalsearch-listtextcol">

@@ -12,8 +12,8 @@
             class="rb-list-expand-button"
             *ngIf="isHierarchical"
             (click)="colapse(item)">
-                <mat-icon>expand_less</mat-icon>
-            </button>
+            <rb-icon [icon]="'expand_less'"></rb-icon>
+        </button>
     </mat-list-item>    
     <mat-list-item
         *ngFor="let item of list">
@@ -28,8 +28,8 @@
             [ngClass]="'rb-list-expand-button' + (getHighlighted() == item ? ' rb-list-select-button-hightlight' : '')"
             *ngIf="isHierarchical"
             (click)="expand(item)">
-                <mat-icon>expand_more</mat-icon>
-            </button>
+            <rb-icon [icon]="'expand_more'"></rb-icon>
+        </button>
     </mat-list-item>
 </mat-list>
 <div

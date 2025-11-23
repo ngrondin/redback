@@ -3,7 +3,7 @@
     flex-direction: row;
     align-items: center;
     background-color: white;
-    border-bottom: 1px solid lightgrey;
+    border-bottom: 0.06vw solid lightgrey;
 }
 
 .rb-vh-textcontainer {
@@ -42,7 +42,7 @@
 
 .rb-vh-bc-link {
     cursor: pointer;
-    font-size: 14px;
+    font-size: 0.8vw;
 }
 
 .rb-vh-menu-container {

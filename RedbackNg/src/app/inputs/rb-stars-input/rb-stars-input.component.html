@@ -2,12 +2,7 @@
     class="rb-stars-block"
     *ngFor="let p of position"
     (click)="select(p)">
-    <mat-icon
-        *ngIf="displayvalue &gt;= p">
-        star
-    </mat-icon>
-    <mat-icon
-        *ngIf="displayvalue &lt; p">
-        star_border
-    </mat-icon>
+    <rb-icon
+        [icon]="displayvalue &gt;= p ? 'star' : 'star_border'">
+    </rb-icon>    
 </div>

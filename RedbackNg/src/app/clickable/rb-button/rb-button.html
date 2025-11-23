@@ -7,11 +7,10 @@
         [running]="running">
         <div
             class="rb-button-content-wrapper">
-            <mat-icon 
+            <rb-icon
                 *ngIf="icon != null"
-                class="rb-button-icon material-symbols-outlined"
-                [fontIcon]="icon">
-            </mat-icon>
+                [icon]="icon">
+            </rb-icon>
             <span
                 *ngIf="label != null"
                 class="rb-button-label">

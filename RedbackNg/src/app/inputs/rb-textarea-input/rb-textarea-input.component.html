@@ -1,8 +1,8 @@
-<mat-icon 
-    *ngIf="showicon" 
-    [class]="'rb-input-icon material-symbols-outlined' + (mandatoryOn ? ' rb-input-icon-mandatory' : '') + (alertOn ? ' rb-input-icon-alert' : '') ">
-    {{icon}}
-</mat-icon>
+<rb-icon
+    *ngIf="showicon"
+    [class]="'rb-input-icon' + (mandatoryOn ? ' rb-input-icon-mandatory' : '') + (alertOn ? ' rb-input-icon-alert' : '')"
+    [icon]="icon">
+</rb-icon>
 <div
     class="rb-input-container">
     <span
