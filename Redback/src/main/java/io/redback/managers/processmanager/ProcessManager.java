@@ -210,7 +210,7 @@ public class ProcessManager
 	
 	protected ProcessInstance getProcessInstance(Actionner actionner, String pid) throws RedbackException
 	{
-		ProcessInstance pi = actionner.getSession().hasTxStore() ? (ProcessInstance)actionner.getSession().getTxStore().get(pid) : null;
+		ProcessInstance pi = actionner.getSession().hasTxStore() ? (ProcessInstance)actionner.getSession().getTxStore().get("process", pid) : null;
 		if(pi == null)
 		{
 			try 
@@ -402,7 +402,7 @@ public class ProcessManager
 			if(!actionner.getId().equals(sysUserManager.getUsername()))
 				fullFilterMap.put("domain", actionner.getDomainFilterClause());
 			DataFilter fullFilter = new DataFilter(fullFilterMap);
-			List<Object> txList = actionner.getSession().getTxStore().getAll();
+			List<Object> txList = actionner.getSession().getTxStore().getAll("process");
 			for(Object o: txList) {
 				ProcessInstance pi = (ProcessInstance)o;
 				if(fullFilter.apply(pi.getJSON())) {
@@ -416,7 +416,7 @@ public class ProcessManager
 			for(int i = 0; i < resultList.size(); i++)
 			{
 				String pid = resultList.getObject(i).getString("_id");
-				ProcessInstance pi = actionner.getSession().hasTxStore() ? (ProcessInstance)actionner.getSession().getTxStore().get(pid) : null;
+				ProcessInstance pi = actionner.getSession().hasTxStore() ? (ProcessInstance)actionner.getSession().getTxStore().get("process", pid) : null;
 				if(pi == null)
 				{
 					pi = new ProcessInstance(actionner, this, resultList.getObject(i));
@@ -535,7 +535,7 @@ public class ProcessManager
 	{
 		if(session.hasTxStore()) {
 			List<ProcessInstance> list = new ArrayList<ProcessInstance>();
-			for(Object pi : session.getTxStore().getAll())
+			for(Object pi : session.getTxStore().getAll("process"))
 				list.add((ProcessInstance)pi);
 
 			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();

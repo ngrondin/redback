@@ -70,6 +70,13 @@
             </span>
         </rb-clickable>
         <rb-clickable 
+            (click)="toggleHideEmptyLanes()">
+            <span
+                class="rb-gantt-menuitem">
+                {{ showEmptyLanes ? 'Hide Empty Lanes' : 'Show Empty Lanes'}}
+            </span>
+        </rb-clickable>        
+        <rb-clickable 
             *ngIf="allowoverlapgroup"
             (click)="toggleGroupOverlaps()">
             <span

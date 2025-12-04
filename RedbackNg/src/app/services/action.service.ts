@@ -79,7 +79,10 @@ export class ActionService {
           {label:"Cancel", focus: false, callback:() => {
             observer.complete();
           }}
-        ]);
+        ], 
+        () => {
+          observer.complete();
+        });
       })
     }
   }

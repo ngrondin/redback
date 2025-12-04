@@ -3,8 +3,8 @@ import { EventEmitter, HostBinding, HostListener, Input, Output } from "@angular
 import { RbComponent } from "app/abstract/rb-component";
 import { RbDataObserverComponent } from "app/abstract/rb-dataobserver";
 import { AppInjector } from "app/app.module";
-import { NavigateEvent, RbAggregate } from "app/datamodel";
-import { ValueComparator, Converter, Formatter } from "app/helpers";
+import { NavigateEvent, RbAggregate, RbObject } from "app/datamodel";
+import { ValueComparator, Converter, Formatter, VirtualSelector } from "app/helpers";
 import { RbAggregatesetComponent } from "app/rb-aggregateset/rb-aggregateset.component";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { ApiService } from "app/services/api.service";
@@ -24,6 +24,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     @Input('shrink') shrink: number;
     @Input('width') width: number;
     @Input('height') height: number;
+    @Input('showrefresh') showrefresh: boolean = false;
     @Input('colormap') colormap: any;
     @Input('linkview') linkview: string;
     @Input('linkfilter') linkfilter: string;
@@ -31,9 +32,13 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
     @Input('dataset') dataset: RbDatasetComponent;
     @Input('datasetevents') datasetevents: string[] = ['load', 'update', 'clear', 'select'];
+    @Input('virtualselector') virtualselector: VirtualSelector;
     @Input('script') script: string;
     @Input('scriptparam') scriptparam: any;
     
+    @HostBinding('style.flex-grow') get flexgrow() { return this.sizeIsSet ? 0 : this.grow != null ? this.grow : 1;}
+    @HostBinding('style.flex-shrink') get flexshrink() { return this.sizeIsSet ? null : this.shrink != null ? this.shrink : 1;}
+    @HostBinding('style.flex-basis') get flexbasis() { return this.sizeIsSet ? "auto" : 0;}
     @HostBinding('style.width') get styleWidth() { return (this.width != null ? ((0.88 * this.width) + 'vw'): null);}
     @HostBinding('style.height') get styleHeight() { return (this.height != null ? ((0.88 * this.height) + 'vw'): null);}
 
@@ -64,7 +69,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.getGraphData());
       } else if(this.dataset != null) {
         this.datasetSubscription = this.dataset.getObservable().subscribe(event => {
-          if(this.datasetevents.indexOf(event.event) > -1) {
+          if(this.datasetevents.indexOf(event.event) > -1 && this.active) {
             this.getGraphData();
           }
         });
@@ -84,6 +89,10 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
       if(this.active) {
         this.getGraphData();
       }
+    }
+
+    get sizeIsSet() {
+      return this.width != null || this.height != null;
     }
   
     get aggregates(): RbAggregate[] {
@@ -110,13 +119,23 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
       return this.aggregateset != null ? this.aggregateset.isLoading : this._isLoading;
     }
 
+    get selectedObject() : RbObject {
+        if(this.virtualselector != null) {
+            return this.virtualselector.selectedObject;
+        } else if(this.dataset != null) {
+            return this.dataset.selectedObject;
+        } else {
+            return null;
+        }
+    }
+
     getGraphData() {
       let now = new Date();
       if(this.lastCalc == null || (this.lastCalc != null && this.lastCalc.getTime() < now.getTime() - 1000)) {
         this.lastCalc = now;
         this._isLoading = true;
         if(this.script != null) {
-          let param = this.filterService.resolveFilter(this.scriptparam, this.dataset != null ? this.dataset.selectedObject : null, this.dataset, null, null, {});
+          let param = this.filterService.resolveFilter(this.scriptparam, this.selectedObject, this.dataset, null, null, {});
           this.apiService.executeGlobal(this.script, param).subscribe({
             next: (resp) => {
               if(resp.data != null) this.graphData = resp.data;
@@ -260,7 +279,10 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     }
   
     refresh() {
-      this.aggregateset.refreshData();
+      if(this.aggregateset != null) {
+        this.aggregateset.refreshData();
+      }
+      this.getGraphData();
     }
   
     @HostListener('mouseenter', ['$event']) onMouseEnter($event) {

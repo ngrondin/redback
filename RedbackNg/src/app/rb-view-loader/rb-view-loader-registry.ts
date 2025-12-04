@@ -68,6 +68,7 @@ import { RbSelectorComponent } from "app/rb-selector/rb-selector.component";
 import { RbMultiRelatedInputComponent } from "app/inputs/rb-multi-related-input/rb-multi-related-input.component";
 import { RbColorInputComponent } from "app/inputs/rb-color-input/rb-color-input.component";
 import { RbIconComponent } from "app/rb-icon/rb-icon.component";
+import { RbRepeaterComponent } from "app/rb-repeater/rb-repeater.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -105,7 +106,7 @@ export const componentRegistry = {
     "textarea": RbTextareaInputComponent,
     'richtext': RbRichtextInputComponent,
     "datepicker": RbDatetimeInputComponent,
-    "dateinput": RbTextareaInputComponent,
+    "dateinput": RbDatetimeInputComponent,
     "urlinput": RbUrlInputComponent,
     "colorinput": RbColorInputComponent,
     "gantt": RbGanttComponent,
@@ -140,5 +141,6 @@ export const componentRegistry = {
     "progress": RbProgressComponent,
     "image":RbImageComponent,
     "icon":RbIconComponent,
-    "selector":RbSelectorComponent
+    "selector":RbSelectorComponent,
+    "repeater":RbRepeaterComponent
   }

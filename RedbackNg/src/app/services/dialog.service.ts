@@ -24,11 +24,12 @@ export class DialogService {
     public dialog: MatDialog
   ) { }
 
-  public openDialog(text: string, options: DialogOption[] ) {
+  public openDialog(text: string, options: DialogOption[], closecallback?: DialogCallbackFunction) {
     let dialogRef = this.dialog.open(RbDialogComponent, {
       data: {
         text: text,
-        options: options
+        options: options,
+        onclose: closecallback
       },
       autoFocus: false,
       restoreFocus: false

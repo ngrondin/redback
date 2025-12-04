@@ -11,6 +11,7 @@ import { DialogOption } from 'app/services/dialog.service';
 export class RbDialogComponent implements OnInit {
   text: string;
   options: DialogOption[];
+  optionselected: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<RbDialogComponent>,
@@ -22,7 +23,14 @@ export class RbDialogComponent implements OnInit {
     this.options = this.data.options;
   }
 
+  ngOnDestroy(): void {
+    if(this.optionselected == false && this.data.onclose != null) {
+      this.data.onclose();
+    }
+  }
+
   clickOption(option: DialogOption) {
+    this.optionselected = true;
     this.dialogRef.close();
     option.callback();
   }

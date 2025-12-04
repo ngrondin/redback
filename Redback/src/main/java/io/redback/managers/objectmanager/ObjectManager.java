@@ -55,6 +55,7 @@ import io.redback.security.js.UserProfileJSWrapper;
 import io.redback.utils.Cache;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
+import io.redback.utils.FilterProcessor;
 import io.redback.utils.FunctionInfo;
 import io.redback.utils.StringUtils;
 import io.redback.utils.TxStore;
@@ -381,7 +382,7 @@ public class ObjectManager
 	{
 		ObjectConfig objectConfig = getConfigIfCanRead(session, objectName);
 		String key = objectName + ":" + id;
-		RedbackObject object = session.hasTxStore() ? (RedbackObject)session.getTxStore().get(key) : null;
+		RedbackObject object = session.hasTxStore() ? (RedbackObject)session.getTxStore().get("object", key) : null;
 		if(object == null)
 		{
 			try
@@ -814,23 +815,29 @@ public class ObjectManager
 	public void commitCurrentTransaction(Session session) throws RedbackException
 	{
 		if(session.hasTxStore()) {
-			int updates = 0;
-			List<RedbackObject> list = new ArrayList<RedbackObject>();
-			for(Object o : session.getTxStore().getAll())
-				list.add((RedbackObject)o);
+			for(Object c : session.getTxStore().getAll("callqueue")) {
+				try {
+					Function function = (Function)c;
+					function.call();
+				} catch(Exception e) {
+					Logger.severe("rb.object.commit.error", e);
+				}
+			}
 
+			int i = 0;
 			List<RedbackObject> updatedList = new ArrayList<RedbackObject>();
+			List<RedbackObject> deletedList = new ArrayList<RedbackObject>();
 			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
-			for(RedbackObject rbObject: list) {
+			List<Object> txList = session.getTxStore().getAll("object");
+			while(i < txList.size()) { //This is so the list can grow as onSaves are being done (creation of new objects onSave)
+				RedbackObject rbObject = (RedbackObject)txList.get(i++);
 				if(rbObject.isDeleted) {
-					updatedList.add(rbObject);
+					deletedList.add(rbObject);
 					dbtxs.add(rbObject.getDBDeleteTransaction());
-					updates++;
 				} else if(rbObject.isUpdated()) {
 					updatedList.add(rbObject);
 					rbObject.onSave();
 					dbtxs.add(rbObject.getDBUpdateTransaction());
-					updates++;
 				}
 				dbtxs.addAll(rbObject.getDBTraceTransactions());
 			}
@@ -845,17 +852,15 @@ public class ObjectManager
 				}
 			}
 			
-			for(RedbackObject rbObject: list) {
-				if(rbObject.isDeleted) {
-					rbObject.afterDelete();
-				} else if(rbObject.isUpdated()) {
-					rbObject.afterSave();
-				}
-			}	
+			for(RedbackObject rbObject: deletedList) 
+				rbObject.afterDelete();
+			
+			for(RedbackObject rbObject: updatedList) 
+				rbObject.afterSave();
 			
 			signal(updatedList);
-			session.setStat("objects", list.size());
-			session.setStat("updates", updates);
+			session.setStat("objects", i /*list.size()*/);
+			session.setStat("updates", updatedList.size());
 		}
 	}
 
@@ -863,7 +868,7 @@ public class ObjectManager
 	{
 		RedbackObjectList objectList = new RedbackObjectList();
 		if(session.getTxStore() != null) {
-			List<Object> txList = session.getTxStore().getAll();
+			List<Object> txList = session.getTxStore().getAll("object");
 			for(Object o: txList) {
 				RedbackObject rbo = (RedbackObject)o;
 				if(rbo.getObjectConfig().getName().equals(objectConfig.getName()) && rbo.filterApplies(objectFilter) && !rbo.filterOriginallyApplied(objectFilter))
@@ -907,7 +912,7 @@ public class ObjectManager
 	protected RedbackObject convertDBDataToObjectIfStillApplies(Session session, ObjectConfig objectConfig, DataMap objectFilter, DataMap dbData) throws RedbackException 
 	{
 		String key = objectConfig.getName() + ":" + dbData.getString(objectConfig.getUIDDBKey());
-		RedbackObject rbo = session.hasTxStore() ? (RedbackObject)session.getTxStore().get(key) : null; 
+		RedbackObject rbo = session.hasTxStore() ? (RedbackObject)session.getTxStore().get("object", key) : null; 
 		if(rbo != null) {
 			if(rbo.isDeleted || !rbo.filterApplies(objectFilter))
 				rbo = null;
@@ -992,17 +997,7 @@ public class ObjectManager
 		while(it.hasNext())
 		{
 			String key = it.next();
-			if(key.equals("$eq")  ||  key.equals("$gt")  ||  key.equals("$gte")  ||  key.equals("$lt")  ||  key.equals("$lte")  ||  key.equals("$ne") || key.equals("$regex") || key.equals("$where"))
-			{
-				dbFilter.put(key, objectFilter.get(key));
-			}
-			else if(key.equals("$in")  ||  key.equals("$nin"))
-			{
-				DataList list = objectFilter.getList(key);
-				if(list == null) list = new DataList();
-				dbFilter.put(key, list);
-			}
-			else if(key.equals("$or") || key.equals("$and"))
+			if(key.equals("$or") || key.equals("$and"))
 			{
 				DataList list = objectFilter.getList(key);
 				DataList dbList = new DataList();
@@ -1012,7 +1007,7 @@ public class ObjectManager
 				}
 				dbFilter.put(key, dbList);
 			}
-			else if(key.contains(".")) 
+			else if(key.contains(".")) //This branch should be deprecated
 			{
 				String rootAttribute = key.substring(0, key.indexOf("."));
 				String remainder = key.substring(key.indexOf(".") + 1);
@@ -1038,22 +1033,32 @@ public class ObjectManager
 			}
 			else
 			{
-				String attributeDBKey = null; 
 				AttributeConfig attributeConfig = objectConfig.getAttributeConfig(key);
-				if(key.equals("uid"))
-					attributeDBKey = objectConfig.getUIDDBKey();
-				else if(key.equals("domain"))
-					attributeDBKey = objectConfig.getDomainDBKey();
-				else if(attributeConfig != null)
-					attributeDBKey = attributeConfig.getDBKey();
-				
+				String attributeDBKey = key.equals("uid") ? objectConfig.getUIDDBKey() : key.equals("domain") ? objectConfig.getDomainDBKey() : attributeConfig != null ? attributeConfig.getDBKey() : null; 
 				if(attributeDBKey != null)
 				{
 					DataEntity objectFilterValue = objectFilter.get(key);
 					DataEntity dbFilterValue = null;
 					if(objectFilterValue instanceof DataMap)
 					{
-						dbFilterValue = generateDBFilterRecurring(session, objectConfig, (DataMap)objectFilterValue);
+						DataMap objectFilterValueMap = (DataMap)objectFilterValue;
+						if(FilterProcessor.isComparativeOperator(objectFilterValueMap)) {
+							dbFilterValue = objectFilterValueMap;
+						} else if(attributeConfig.hasRelatedObject()) {		
+							RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+							ObjectConfig relatedObjectConfig = getConfigIfCanRead(session, roc.getObjectName());
+							DataMap subFilter = generateDBFilterRecurring(session, relatedObjectConfig, objectFilterValueMap);
+							List<RedbackObject> list = listObjects(session, relatedObjectConfig.getName(), subFilter, null, null, false, 0, 1000);
+							DataList inList = new DataList();
+							for(int k = 0; k < list.size(); k++) {
+								RedbackObject resultObject = list.get(k);
+								Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
+								inList.add(resultObjectLinkValue.getObject());
+							}
+							dbFilterValue = new DataMap("$in", inList);
+						} else {
+							dbFilterValue = objectFilterValueMap;
+						}
 					}
 					else if(objectFilterValue instanceof DataLiteral)
 					{

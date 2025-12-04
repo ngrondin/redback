@@ -525,11 +525,13 @@ export class LinkConfigDataTarget{
 }
 
 export class ColorConfig {
+    value: string;
     attribute: string;
     expression: string;
     map: any;
 
     constructor(json: any) {
+        this.value = json.value;
         this.attribute = json.attribute;
         this.expression = json.expression;
         this.map = json.map;
@@ -537,8 +539,10 @@ export class ColorConfig {
 
     getColor(object: RbObject): string {
         let val: string = null;
-        if(this.attribute != null) {
-            val = object.get(this.attribute);
+        if(this.value != null) {
+            val = this.value;
+        } else if(this.attribute != null) {
+            val = object != null ? object.get(this.attribute) : null;
         } else if(this.expression != null) {
             val = Evaluator.eval(this.expression, object, null, null);
         }
@@ -583,4 +587,8 @@ export class ColorTool {
     }
 
     
+}
+
+export class VirtualSelector {
+    selectedObject: RbObject = null;
 }

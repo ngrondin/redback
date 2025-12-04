@@ -4,6 +4,7 @@
 	flex-wrap: nowrap;
 	flex: 1 1 0;
 	border: 0px Solid;
+    position: relative;
 }
 
 .rb-chart-loadoverlay {
@@ -17,4 +18,11 @@
     justify-content: center;
     z-index: 1;
     background-color: #eee8;
+}
+
+rb-iconbutton {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    color: grey;
 }

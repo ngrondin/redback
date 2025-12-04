@@ -11,14 +11,21 @@ export abstract class RbComponent implements OnInit {
     @Input('activator') activator: RbActivatorComponent;
 
     public initiated: boolean = false;
+    public active: boolean = false;
     private activatorSubscription: Subscription;
 
     constructor() {}
   
     ngOnInit(): void {
       if(this.activator != null) {
-        this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => this.onActivationEvent(state));
-      } 
+        this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => {
+          this.active = state;
+          this.onActivationEvent(state);
+        });
+        this.active = this.activator.activatorOn;
+      } else {
+        this.active = true;
+      }
       this.componentInit();
       this.initiated = true;
       this.onActivationEvent(this.active);
@@ -31,9 +38,9 @@ export abstract class RbComponent implements OnInit {
         this.componentDestroy();
     }
 
-    get active() : boolean {
+    /*get active() : boolean {
       return this.activator != null ? this.activator.activatorOn : true;
-    }
+    }*/
 
     abstract componentInit();
 

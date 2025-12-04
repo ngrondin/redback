@@ -11,12 +11,12 @@
     </span>  
     <div
         class="rb-multirelatedinput-valuecontainer">
-        <span
+        <div
             *ngFor="let value of getMultiValues(); index as i"
-            class="rb-multirelatedinput-value">
-            <span *ngIf="i > 0">,</span>
+            [class]="'rb-multirelatedinput-value' + (tagmode ? ' rb-multirelatedinput-value-tag' : '')">
+            <span *ngIf="i > 0 && !tagmode">,</span>
             {{value}}
-        </span>
+        </div>
         <input 
             #input
             [class]="'rb-multirelatedinput-input rb-input-text-color' + (mandatoryOn ? ' rb-input-mandatory' : '') + (alertOn ? ' rb-input-alert' : '') + (flasherOn ? ' rb-input-text-flash' : '')"

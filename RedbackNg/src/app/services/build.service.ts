@@ -13,6 +13,7 @@ import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 import { componentRegistry } from 'app/rb-view-loader/rb-view-loader-registry';
 import { ModalService } from './modal.service';
 import { LogService } from './log.service';
+import { VirtualSelector } from 'app/helpers';
 
 
 @Injectable({
@@ -52,6 +53,8 @@ export class BuildService {
           val = context['dataset'];
         } else if(input == 'datasetgroup' && context['datasetgroup'] != null && context['datasetgroup'] instanceof RbDatasetGroupComponent) {
           val = context['datasetgroup'];
+        } else if(input == 'virtualselector' && context['virtualselector'] != null) {
+          val = context['virtualselector'];
         } else if(input == 'fileset' && context['fileset'] != null && context['fileset'] instanceof RbFilesetComponent) {
           val = context['fileset'];
         } else if(input == 'aggregateset' && context['aggregateset'] != null && context['aggregateset'] instanceof RbAggregatesetComponent) {

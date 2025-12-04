@@ -1,6 +1,7 @@
 import { Component, OnInit, Output, EventEmitter, Input, HostBinding } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { NavigateEvent, RbObject } from 'app/datamodel';
+import { LinkConfig } from 'app/helpers';
 import { NavigateService } from 'app/services/navigate.service';
 
 @Component({
@@ -10,11 +11,12 @@ import { NavigateService } from 'app/services/navigate.service';
 })
 export class RbLinkComponent extends RbDataObserverComponent {
   @Input('attribute') attribute: string;
+  @Input('datatargets') datatargets: any[];
   @Input('view') view: string;
   @Input('margin') margin: boolean = true;
   @Input('filtersingleobject') filtersingleobject: boolean = true;
 
-  @HostBinding('style.margin-top.vw') get topmargin() { return this.margin ? 1.25 : 0.5; }
+  @HostBinding('style.margin-top.vw') get topmargin() { return this.margin ? 1.25 : 0; }
   //@HostBinding('style.margin-bottom.vw') get bottommargin() { return this.margin ? 0.55 : 0; }
     
   constructor(
@@ -36,30 +38,31 @@ export class RbLinkComponent extends RbDataObserverComponent {
   }
 
   public navigateTo() {
-    if(this.rbObject != null && this.attribute != null) {
-      let event = new NavigateEvent();
-      let objectuid = null;
-      if(this.attribute == 'uid') {
-        event.objectname = this.rbObject.objectname;
-        objectuid = this.rbObject.uid;
-      } else {
-        let related = this.rbObject.getRelated(this.attribute);
-        if(related != null) {
-          event.objectname = related.objectname;
-          objectuid = related.uid;
+    if(this.rbObject != null) {
+      let cfg = {
+        view: this.view,
+        datatargets: this.datatargets
+      };
+      if(this.datatargets == null) {
+        let objectname = this.rbObject.objectname;
+        let objectuid = this.rbObject.uid;
+        if(this.attribute != null) {
+          let related = this.rbObject.getRelated(this.attribute);
+          if(related != null) {
+            objectname = related.objectname;
+            objectuid = related.uid;
+          } else {
+            objectuid = this.rbObject.get(this.attribute);
+          }
+        }
+        if(this.filtersingleobject) {
+          cfg.datatargets = [{objectname: objectname, filter: {uid: "'" + objectuid + "'"}}];
         } else {
-          let relatedUid = this.rbObject.get(this.attribute);
-          objectuid = relatedUid;
+          cfg.datatargets = [{objectname: objectname, select: {uid: objectuid}}];
         }
       }
-      if(this.filtersingleobject) {
-        event.datatargets = [{filter: {uid: "'" + objectuid + "'"}}];
-      } else {
-        event.datatargets = [{select: {uid: objectuid}}];
-      }
-      if(this.view != null) {
-        event.view = this.view;
-      } 
+      let linkcfg = new LinkConfig(cfg);
+      let event = linkcfg.getNavigationEvent(this.rbObject, this.dataset, {});
       this.navigateService.navigateTo(event);
     }
   }

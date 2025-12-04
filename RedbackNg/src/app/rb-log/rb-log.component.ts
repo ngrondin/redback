@@ -129,6 +129,10 @@ export class RbLogComponent extends RbDataObserverComponent {
 
   }
 
+  deleteItem(object: RbObject) {
+    this.dataset.delete(object);
+  }
+
   public evalEditable() {
     if(this.editable == null || this.editable == true || this.editable == 'true') {
       this.isEditable = true;

@@ -58,7 +58,7 @@ public class ProcessInstance
 		traceEvents = new ArrayList<DataMap>();
 		createScriptBindings();
 		if(inboundActionner.getSession().hasTxStore())
-			inboundActionner.getSession().getTxStore().add(id.toString(), this);
+			inboundActionner.getSession().getTxStore().add("process", id.toString(), this);
 		updated = true;
 	}
 	
@@ -90,7 +90,7 @@ public class ProcessInstance
 		traceEvents = new ArrayList<DataMap>();
 		createScriptBindings();
 		if(inboundActionner.getSession().hasTxStore())
-			inboundActionner.getSession().getTxStore().add(id.toString(), this);
+			inboundActionner.getSession().getTxStore().add("process", id.toString(), this);
 		updated = false;
 	}
 	

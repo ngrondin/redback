@@ -315,8 +315,9 @@
     right: 0;
     width: 0.3vw;
     height: 0.3vw;
-    background-color: red;
-    border-bottom-left-radius: 0.3vw;
+    background-color: rgb(181, 6, 6);
+    border-radius: 0.3vw;
+    margin: var(--v1px);
 }
 
 .rb-gantt-laneheight {

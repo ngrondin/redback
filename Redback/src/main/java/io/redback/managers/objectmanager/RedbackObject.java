@@ -57,7 +57,7 @@ public class RedbackObject extends RedbackElement
 			domain = new Value(config.isDomainManaged() ? dbData.getString(config.getDomainDBKey()) : "root");
 			key = config.getName() + ":" + uid.getString();
 			if(session.hasTxStore())
-				session.getTxStore().add(key, this);
+				session.getTxStore().add("object", key, this);
 			Iterator<String> it = config.getAttributeNames().iterator();
 			while(it.hasNext())
 			{
@@ -134,7 +134,7 @@ public class RedbackObject extends RedbackElement
 
 				key = config.getName() + ":" + uid.getString();
 				if(session.hasTxStore())
-					session.getTxStore().add(key, this);
+					session.getTxStore().add("object", key, this);
 				postInitScriptContextUpdate();
 				traceEvent("objectcreate", null, null, null, null);
 

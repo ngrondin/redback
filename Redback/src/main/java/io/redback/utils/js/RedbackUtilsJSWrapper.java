@@ -203,7 +203,34 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 						throw new RuntimeException("Error decoding CSV", e);
 					}
 				}
-			};			
+			};
+		} else if(key.equals("columnToUniqueArray")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						DataList data = (DataList)arguments[0];
+						String col = (String)arguments[1];
+						DataList out = StringUtils.columnToUniqueArray(data, col);
+						return out;
+					} catch(Exception e) {
+						throw new RuntimeException("Error decoding CSV", e);
+					}
+				}
+			};		
+		} else if(key.equals("groupLinesByKey")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					try {
+						DataList data = (DataList)arguments[0];
+						String key = (String)arguments[1];
+						DataList cols = (DataList)arguments[2];
+						DataMap out = StringUtils.groupLinesByKey(data, key, cols);
+						return out;
+					} catch(Exception e) {
+						throw new RuntimeException("Error decoding CSV", e);
+					}
+				}
+			};				
 		} else if(key.equals("cronExpressionNext")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

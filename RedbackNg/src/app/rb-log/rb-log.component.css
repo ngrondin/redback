@@ -45,6 +45,17 @@
     flex-direction: row;
 }
 
+.rb-log-bodyrow {
+    display: flex;
+    flex-direction: row;
+}
+
+.rb-log-bodycol {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+}
+
 .rb-log-name {
     display: inline-block;
     color: #aaa;
@@ -73,4 +84,14 @@
     color: #aaa;
     font-size: 0.8rem;
     flex: 0 0 auto;
+}
+
+.rb-log-options {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+}
+
+rb-iconbutton {
+    color: var(--light-writing-color);
 }

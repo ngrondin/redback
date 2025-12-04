@@ -1,6 +1,6 @@
 import { SeriesConfig } from "app/abstract/rb-datacalc";
 import { RbObject } from "app/datamodel";
-import { LinkConfig } from "app/helpers";
+import { ColorConfig, LinkConfig } from "app/helpers";
 
 //export const GanttLaneHeight: number = 2.47; //VW, was in PX 42;
 export const GanttSpreadHeight: number = 1.64; //VW   
@@ -41,7 +41,7 @@ export class GanttLaneConfig {
     labelAlts: any[];
     centerLabel: boolean;
     labelColor: string;
-    color: string;
+    color: ColorConfig;
     colorAttribute: string;
     colorMap: any;
     colorExpression: string;
@@ -51,6 +51,8 @@ export class GanttLaneConfig {
     modal: string;
     link: LinkConfig;
     canEdit: boolean;
+    applyLaneFilter: boolean;
+    applyDateFilter: boolean;
     show: Function;
   
     constructor(json: any, userpref: any) {
@@ -67,14 +69,17 @@ export class GanttLaneConfig {
       this.labelColor = json.labelcolor;
       this.isBackground = json.isbackground;
       this.canEdit = json.canedit;
-      this.color = json.color;
-      this.colorAttribute = json.colorattribute;
-      this.colorMap = json.colormap;
-      this.colorExpression = json.colorexpression;
+      if(json.color != null && typeof json.color === 'object') {
+        this.color = new ColorConfig(json.color);
+      } else if(json.color != null || json.colorattribute != null || json.colormap != null || json.colorexpression != null) {
+        this.color = new ColorConfig({color: json.color, attribute: json.colorattribute, map: json.colormap, expression: json.colorexpression});
+      }
       this.indicatorAttribute = json.indicatorattribute;
       this.indicatorExpression = json.indicatorexpression;
       this.modal = json.modal;
       this.link = json.link != null ? new LinkConfig(json.link) : null;
+      this.applyLaneFilter = json.applylanefilter != null ? json.applylanefilter : true;
+      this.applyDateFilter = json.applydatefilter != null ? json.applydatefilter : true;
       this.show = json.show != null ? Function("dataset", "relatedObject", "return (" + json.show + ")") : null;
     }
   }
@@ -84,8 +89,9 @@ export class GanttLaneConfig {
     startAttribute: string;
     durationAttribute: string;
     endAttribute: string;
+    label: string;
     labelAttribute: string;
-    color: string;
+    color: ColorConfig;
   
     constructor(json: any, userpref: any) {
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
@@ -93,8 +99,13 @@ export class GanttLaneConfig {
       this.startAttribute = json.startattribute;
       this.durationAttribute = json.durationattribute;
       this.endAttribute = json.endattribute;
+      this.label = json.label;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
-      this.color = json.color;
+      if(json.color != null && typeof json.color === 'object') {
+        this.color = new ColorConfig(json.color);
+      } else if(json.color != null || json.colorattribute != null || json.colormap != null || json.colorexpression != null) {
+        this.color = new ColorConfig({color: json.color, attribute: json.colorattribute, map: json.colormap, expression: json.colorexpression});
+      }
     }
   }
 

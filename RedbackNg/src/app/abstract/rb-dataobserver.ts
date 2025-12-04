@@ -7,15 +7,14 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { DatasetListMap, DatasetMap, RbDatasetGroupComponent } from "app/rb-datasetgroup/rb-datasetgroup.component";
 import { Subscription } from "rxjs";
 import { RbComponent } from "./rb-component";
-import { Evaluator } from "app/helpers";
-
-
+import { Evaluator, VirtualSelector } from "app/helpers";
 
 @Component({template: ''})
 export abstract class RbDataObserverComponent extends RbComponent {
     @Input('dataset') dataset: RbDatasetComponent;
     @Input('datasetgroup') datasetgroup: RbDatasetGroupComponent;
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
+    @Input('virtualselector') virtualselector: VirtualSelector;
     @Input('datasetevents') datasetevents: string[] = null;
     @Input('object') _rbObject: RbObject;
     @Input('show') showExpr: string;
@@ -93,7 +92,9 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     get selectedObject() : RbObject {
-        if(this.dataset != null) {
+        if(this.virtualselector != null) {
+            return this.virtualselector.selectedObject;
+        } else if(this.dataset != null) {
             return this.dataset.selectedObject;
         } else if(this.datasetgroup != null) {
             if(this.targetdatasetid != null && this.datasetgroup.datasets[this.targetdatasetid] != null) {

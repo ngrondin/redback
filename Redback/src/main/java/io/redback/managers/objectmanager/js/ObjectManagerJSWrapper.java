@@ -270,6 +270,19 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					return null;
 				}
 			};
+		} else if(key.equals("defer")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String key = (String)arguments[0];
+					Function function = (Function)arguments[1];
+					if(session.getTxStore() != null) {
+						session.getTxStore().add("callqueue", key, function);						
+					} else {
+						throw new RuntimeException("Can't defer, session does not have a txstore");
+					}
+					return null;
+				}
+			};				
 		} else if(key.equals("clearObjectConfig")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

@@ -69,6 +69,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     updateData(forceFilter: boolean = false) : boolean {
         if(this.dofilter && (!this.initialFilteringDone || forceFilter)) {
+            this._logService.debug("DataCalc " + this.id + ": updateData");
             this.initialFilteringDone = true;
             let fetched = false;
             for(let cfg of this.activeSeries) {

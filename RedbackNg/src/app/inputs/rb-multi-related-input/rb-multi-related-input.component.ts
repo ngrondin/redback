@@ -14,6 +14,7 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
   @Input('sortattribute') sortattribute: string;
   @Input('parentattribute') parentattribute: string;
   @Input('childattribute') childattribute: string;
+  @Input('tagmode') tagmode: boolean = false;
 
   highlightedObject: RbObject;
   defaultIcon: string = 'description';
@@ -62,13 +63,21 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
   }
 
   public getPopupConfig() {
+    let filter = null;
+    let arr = this.rbObject.get(this.attribute);
+    if(arr != null && arr.length > 0) {
+      let link = this.rbObject.validation[this.attribute].related.link;
+      filter = {};
+      filter[link] = {$nin: arr};
+    }
     return {
       rbObject: this.rbObject, 
       attribute: this.attribute, 
       displayattribute: this.displayattribute, 
       sortattribute: this.sortattribute,
       parentattribute: this.parentattribute, 
-      childattribute: this.childattribute
+      childattribute: this.childattribute,
+      filter: filter
     };
   }
 
@@ -86,7 +95,7 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
 
  public finishEditingWithSelection(value: any) {
     super.finishEditingWithSelection(value);
-    let arr = [...this.rbObject.get(this.attribute)];
+    let arr = [...(this.rbObject.get(this.attribute) || [])];
     if(!Array.isArray(arr)) {
         arr = [];
     }

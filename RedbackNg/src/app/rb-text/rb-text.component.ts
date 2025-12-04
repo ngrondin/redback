@@ -1,6 +1,7 @@
 import { Component, HostBinding, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { Evaluator } from 'app/helpers';
 
 @Component({
   selector: 'rb-text',
@@ -13,19 +14,17 @@ export class RbTextComponent extends RbDataObserverComponent {
   @Input('value') _value: any = null;
   @Input('variable') variable: any;
   @Input('expression') _expression: any;
+  @Input('size') size: number;
   @Input('margin') margin: boolean = true;
   @Input('alert') alert: boolean = false;
   @Input('icon') icon: string;
   @Input('color') _color: string;
   
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
-  
-  expression: Function;
+  @HostBinding('style.width') get styleWidth() { return this.size != null ? ((0.88 * this.size) + 'vw'): null;}
+
 
   dataObserverInit() {
-    if(this._expression != null) {
-      this.expression = new Function("dataset", "obj", "selectedObject", "relatedObject", "return (" + this._expression + ")");
-    }
   }
 
   dataObserverDestroy() {
@@ -59,8 +58,8 @@ export class RbTextComponent extends RbDataObserverComponent {
       }
     } else if(this.variable != null) {
       val = window.redback[this.variable];
-    } else if(this.expression != null) {
-      val = this.expression.call(window.redback, this.dataset, this.dataset.selectedObject, this.dataset.selectedObject, this.dataset.relatedObject);
+    } else if(this._expression != null) {
+      val = Evaluator.eval(this._expression, this.selectedObject, this.dataset.relatedObject, this.dataset);
     } else {
       val = this._value;
     }

@@ -10,7 +10,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
@@ -531,7 +530,7 @@ public class StringUtils
     		linesEnclosedWithQuotes = false;
         	endFirstLine = strm.indexOf("\n", startFirstLine);
         	String headerLine = strm.substring(startFirstLine, endFirstLine).trim();
-        	if(headerLine.startsWith("\"") && headerLine.endsWith("\"")) {
+        	if(headerLine.startsWith("\"") && headerLine.endsWith("\"") && headerLine.substring(0, headerLine.length() - 1).indexOf("\"") == -1) {
         		linesEnclosedWithQuotes = true;
         		headerLine = headerLine.substring(1, headerLine.length() - 1);
         	}
@@ -541,9 +540,11 @@ public class StringUtils
     		headers = headerLine.split(Pattern.quote(String.valueOf(sep)));
     		if(headers.length > 0) {
         		firstLineFound = true;
-        		for(String header: headers)
-        			if(header.length() == 0) 
+        		for(int i = 0; i < headers.length; i++)
+        			if(headers[i].length() == 0) 
         				firstLineFound = false;
+        			else if(headers[i].startsWith("\"") && headers[i].endsWith("\""))
+        				headers[i] = headers[i].substring(1, headers[i].length() - 1);
     		}
     		if(!firstLineFound)
     			startFirstLine = endFirstLine + 1;
@@ -644,6 +645,44 @@ public class StringUtils
     		if(!set.contains(hash)) {
         		out.add(outObj);
         		set.add(hash);
+    		}
+    	}
+    	return out;
+    }
+    
+    public static DataList columnToUniqueArray(DataList data, String col) {
+    	HashSet<String> set = new HashSet<String>();
+    	for(int i = 0; i < data.size(); i++) {
+    		DataMap obj = data.getObject(i);
+    		String val = obj.getString(col);
+    		set.add(val);
+    	}
+    	DataList out = new DataList();
+    	for(String s: set)
+    		out.add(s);
+    	return out;
+    }
+    
+    public static DataMap groupLinesByKey(DataList data, String keycol, DataList cols) {
+    	DataMap out = new DataMap();
+    	for(int i = 0; i < data.size(); i++) {
+    		DataMap obj = data.getObject(i);
+    		String key = obj.getString(keycol);
+    		if(key != null) {
+        		if(!out.containsKey(key)) 
+        			out.put(key, new DataList());
+        		DataList keyList = out.getList(key);
+        		if(cols != null) {
+            		DataMap valMap = new DataMap();
+              		for(int j = 0; j < cols.size(); j++) {
+            			String col = cols.getString(j);
+            			String val = obj.getString(col);
+            			valMap.put(col, val);
+            		}
+              		keyList.add(valMap);    			        			
+        		} else {
+        			keyList.add(obj);
+        		}
     		}
     	}
     	return out;

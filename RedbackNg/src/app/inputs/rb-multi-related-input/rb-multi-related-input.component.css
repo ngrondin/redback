@@ -32,8 +32,17 @@
 }
 
 .rb-multirelatedinput-value {
+    display: block;
     flex: 0 1 auto;
     white-space: nowrap;
-    color: #333;
     padding: var(--v3px) 0px;
+}
+
+.rb-multirelatedinput-value-tag {
+    border-radius: var(--v5px);
+    background-color: var(--primary-color);
+    color: var(--light-inverse-writing-color);
+    margin: var(--v2px);
+    padding: var(--v3px) var(--v5px);
+    font-size: 0.85rem;
 }

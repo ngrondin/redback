@@ -163,6 +163,7 @@ import { RbPopupColorComponent } from './popups/rb-popup-color/rb-popup-color.co
 import { RbIconComponent } from './rb-icon/rb-icon.component';
 import { RbCheckboxComponent } from './rb-checkbox/rb-checkbox.component';
 import { RbSwitchComponent } from './rb-switch/rb-switch.component';
+import { RbRepeaterComponent } from './rb-repeater/rb-repeater.component';
 
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -334,7 +335,8 @@ window.redback = window.redback || {};
         RbPopupColorComponent,
         RbIconComponent,
         RbCheckboxComponent,
-        RbSwitchComponent
+        RbSwitchComponent,
+        RbRepeaterComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

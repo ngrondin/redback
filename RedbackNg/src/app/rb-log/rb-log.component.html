@@ -35,14 +35,28 @@
             </div>
         </div>
         <div
-            class="rb-log-entry"
-            [innerHTML]="getEntryForItem(item)">
-        </div>
-        <div
-            *ngIf="hasCategory(item)"
-            class="rb-log-category">
-            {{getCategoryForItem(item)}}
+            class="rb-log-bodyrow">
+            <div
+                class="rb-log-bodycol">
+                <div
+                    class="rb-log-entry"
+                    [innerHTML]="getEntryForItem(item)">
+                </div>
+                <div
+                    *ngIf="hasCategory(item)"
+                    class="rb-log-category">
+                    {{getCategoryForItem(item)}}
+                </div>                
+            </div>
+            <div
+                *ngIf="item.canDelete()"
+                class="rb-log-options">
+                <rb-iconbutton
+                    *ngIf="item.canDelete()"
+                    [icon]="'close_small'"
+                    (click)="deleteItem(item)">
+                </rb-iconbutton>    
+            </div>
         </div>
     </div >
-
 </div>

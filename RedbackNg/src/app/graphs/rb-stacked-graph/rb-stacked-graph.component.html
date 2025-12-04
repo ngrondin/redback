@@ -18,3 +18,8 @@
         diameter="50">
     </mat-spinner>
 </div>
+<rb-iconbutton
+    *ngIf="showrefresh == true"
+    [icon]="'refresh'"
+    (click)="refresh()">
+</rb-iconbutton>

@@ -17,3 +17,10 @@
     z-index: 1;
     background-color: #eee8;
 }
+
+rb-iconbutton {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    color: grey;
+}
