@@ -73,7 +73,7 @@ export class RbAggregatesetComponent extends RbSetComponent {
   }
 
   public refreshData() {
-    if(this.active) {
+    if(this.active && this._isLoading == false) {
       this.clear();
       this.fetchNextPage();  
     }

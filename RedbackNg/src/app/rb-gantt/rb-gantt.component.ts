@@ -71,7 +71,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   public getSizeForObjectCallback: Function;
   public droppedOutCallback: Function;
   dragSubscription: Subscription;
-  laneFilterObject: RbObject;
+  draggingObject: RbObject;
   
   constructor(
     private modalService: ModalService,
@@ -192,12 +192,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onDragEvent(event: any) {
-    if(this.lanesConfig.dragfilter != null && this.doDragFilter) {
-      if(event.type == 'start') {
-        this.laneFilterObject = event.data;
-      } else if(event.type == 'end' && this.laneFilterObject != null) {
-        this.laneFilterObject = null;
-      }
+    if(event.type == 'start') {
+      this.draggingObject = event.data;
+    } else if(event.type == 'end') {
+      this.draggingObject = null;
     }
     this.redraw();
   }
@@ -368,8 +366,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let accHeight = 0;
     let lanes : GanttLane[] = [];
     let laneFilter: any = null;
-    if(this.doDragFilter && this.laneFilterObject != null && this.lanesConfig.dragfilter != null) {
-      laneFilter =  this.filterService.resolveFilter(this.lanesConfig.dragfilter, this.laneFilterObject, null, null);
+    if(this.doDragFilter && this.draggingObject != null && this.lanesConfig.dragfilter != null) {
+      laneFilter =  this.filterService.resolveFilter(this.lanesConfig.dragfilter, this.draggingObject, null, null);
     };
     let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
     for(let obj of list) {
@@ -417,7 +415,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         let list: RbObject[] = dataset.list;
         for(var i in list) {
           let obj = list[i];
-          if(obj.get(cfg.laneAttribute) == laneId && obj != this.dragService.data) {
+          if(obj.get(cfg.laneAttribute) == laneId) {
             let [startPX, widthPX] = this.getStartAndWidthPX(obj, cfg.startAttribute, cfg.endAttribute, cfg.durationAttribute);
             if(startPX != null && widthPX != null) {
               let label = null;
@@ -462,7 +460,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               } else if(cfg.indicatorExpression != null) {
                 indicator = Evaluator.eval(cfg.indicatorExpression, obj, null, null);
               }
-              let spread = new GanttSpread(laneId, label, startPX, widthPX, offsetTop, sublane, color, labelcolor, canEdit, selected, indicator, obj, cfg);
+              let dragging = (obj == this.draggingObject);
+              if(dragging) console.log("Dragging");
+              let spread = new GanttSpread(laneId, label, startPX, widthPX, offsetTop, sublane, color, labelcolor, canEdit, selected, indicator, dragging, obj, cfg);
               spreads.push(spread);
               if(selected) {
                 let fs = startPX;
@@ -515,7 +515,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
         if(firstGroupFound == null) {
           let id = nextid++;
-          let group = new GanttSpread(spread.laneId, "1 item", spread.start, spread.width, 0, 0, 'var(--primary-light-color)', '#333', false, false, false, null, spread.config);
+          let group = new GanttSpread(spread.laneId, "1 item", spread.start, spread.width, 0, 0, 'var(--primary-light-color)', '#333', false, false, false, false, null, spread.config);
           group.id = id.toString();
           groupmap[group.id] = 1
           groups.push(group);

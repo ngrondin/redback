@@ -122,7 +122,7 @@ public unresolveFilter(__inMap: any) : any {
         let func = Function(...[...params, source]);
         ret = func.call(window.redback, ...args); 
       } catch(err) {
-        this.logService.error("Error evaluating expression :" + err);
+        this.logService.error("Error evaluating expression '" + expr + "':" + err);
       }  
     }
     return ret;

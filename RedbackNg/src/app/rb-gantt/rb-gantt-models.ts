@@ -145,7 +145,7 @@ export class GanttLaneConfig {
     }
 
     foregroundSpreads() {
-      return this.spreads.filter(s => s.config.isBackground == false);
+      return this.spreads.filter(s => s.config.isBackground == false && s.dragging == false);
     }
   }
   
@@ -164,10 +164,11 @@ export class GanttLaneConfig {
     canEdit: boolean;
     selected: boolean;
     indicator: boolean;
+    dragging: boolean;
     object: RbObject;
     config: GanttSeriesConfig;
   
-    constructor(ln: string, l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, ce: boolean, sel: boolean, ind: boolean, o: RbObject, cfg: GanttSeriesConfig) {
+    constructor(ln: string, l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, ce: boolean, sel: boolean, ind: boolean, drg: boolean, o: RbObject, cfg: GanttSeriesConfig) {
       this.lane = ln;
       this.label = l;
       this.start = s;
@@ -180,6 +181,7 @@ export class GanttLaneConfig {
       this.canEdit = ce;
       this.selected = sel;
       this.indicator = ind;
+      this.dragging = drg;
       this.object = o;
       this.config = cfg;
       this.height = GanttSpreadHeight;

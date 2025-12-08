@@ -74,7 +74,11 @@ export class ActionService {
       return new Observable((observer) => {
         this.dialogService.openDialog(confirm, [
           {label:"Ok", focus: true, callback:() => {
-            this.action(dataset, datasetgroup, action, target, param, extraContext, null, timeout).subscribe(() => observer.complete());
+            this.action(dataset, datasetgroup, action, target, param, extraContext, null, timeout).subscribe({
+              next: (val) => observer.next(val),
+              error: (err) => observer.error(err),
+              complete: () => observer.complete()
+            });
           }}, 
           {label:"Cancel", focus: false, callback:() => {
             observer.complete();

@@ -74,7 +74,6 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
           }
         });
       }
-      this.onActivationEvent(this.active);
     }
   
     componentDestroy() {
