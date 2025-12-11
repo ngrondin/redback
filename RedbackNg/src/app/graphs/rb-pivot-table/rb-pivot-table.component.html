@@ -1,0 +1,18 @@
+<div
+    *ngIf="title != null"
+    class="rb-number-tiles-title">
+    {{title}}
+</div>
+<rb-pivot
+    [data]="graphData"
+    [colormap]="colormap"
+    [format]="format"
+    (selectitem)="onClick($event)">
+</rb-pivot>
+<div
+    class="rb-chart-loadoverlay"
+    *ngIf="isLoading">
+    <mat-spinner
+        diameter="50">
+    </mat-spinner>
+</div>

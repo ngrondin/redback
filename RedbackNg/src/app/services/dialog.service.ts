@@ -42,23 +42,25 @@ export class DialogService {
     let top = 0;
     let left = 0;
     while(tgt != null) {
-      top = top + tgt.offsetTop;
-      left = left + tgt.offsetLeft;
+      top = top + tgt.offsetTop - tgt.scrollTop;
+      left = left + tgt.offsetLeft - tgt.scrollLeft;
       tgt = tgt.offsetParent;
     }
     let div = document.createElement("div");
     div.innerHTML = text;
     div.className = "rb-tip";
-    if(position == "below") {
-      div.style.top = (top + related.clientHeight) + "px";
-      div.style.left = (left + 0) + "px";
-      div.style["max-width"] = Math.max(150, related.clientWidth) + "px";
-    } else if(position == "right") {
-      div.style.top = (top ) + "px";
-      div.style.left = (left + related.clientWidth) + "px";
-    } 
-    document.body.appendChild(div);
-    this.tooltipElement = div;
+    if(top > 0 && left > 0) {
+      if(position == "below") {
+        div.style.top = (top + related.clientHeight) + "px";
+        div.style.left = (left + 0) + "px";
+        div.style["max-width"] = Math.max(150, related.clientWidth) + "px";
+      } else if(position == "right") {
+        div.style.top = (top ) + "px";
+        div.style.left = (left + related.clientWidth) + "px";
+      } 
+      document.body.appendChild(div);
+      this.tooltipElement = div;
+    }
   }
 
   public hideTooltip() {

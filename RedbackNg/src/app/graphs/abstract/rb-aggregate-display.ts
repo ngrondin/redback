@@ -31,7 +31,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     @Input('title') title: string;
     @Input('aggregateset') aggregateset: RbAggregatesetComponent;
     @Input('dataset') dataset: RbDatasetComponent;
-    @Input('datasetevents') datasetevents: string[] = ['load', 'update', 'clear', 'select'];
+    @Input('datasetevents') datasetevents: string[] = null;
     @Input('virtualselector') virtualselector: VirtualSelector;
     @Input('script') script: string;
     @Input('scriptparam') scriptparam: any;
@@ -50,6 +50,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     private filterService: FilterService;
     private navigateService: NavigateService;
     private apiService: ApiService;
+    public globalSubscription: Subscription;
     private aggregatesetSubscription: Subscription;
     public datasetSubscription: Subscription;
     private _isLoading: boolean = false;
@@ -65,14 +66,11 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     }
   
     componentInit() {
+      this.globalSubscription = window.redback.getObservable().subscribe(event => this.internalDataEvent(event));
       if(this.aggregateset != null) {
-        this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.getGraphData());
+        this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.internalDataEvent(event));
       } else if(this.dataset != null) {
-        this.datasetSubscription = this.dataset.getObservable().subscribe(event => {
-          if(this.datasetevents.indexOf(event.event) > -1 && this.active) {
-            this.getGraphData();
-          }
-        });
+        this.datasetSubscription = this.dataset.getObservable().subscribe(event => this.internalDataEvent(event));
       }
     }
   
@@ -86,6 +84,12 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
   
     onActivationEvent(state: boolean) {
       if(this.active) {
+        this.getGraphData();
+      }
+    }
+
+    private internalDataEvent(event: any) {
+      if(this.datasetevents == null || (this.datasetevents != null && this.datasetevents.indexOf(event.event) > -1)) {
         this.getGraphData();
       }
     }

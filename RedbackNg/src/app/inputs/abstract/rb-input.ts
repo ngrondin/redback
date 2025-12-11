@@ -174,6 +174,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
         }
       } else if(this.variable != null) {
         window.redback[this.variable] = val;
+        window.redback.publishEvent({event:"global", variable: this.variable});
       } else {
         this._value = val;
       }      

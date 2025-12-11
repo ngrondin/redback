@@ -276,6 +276,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					String key = (String)arguments[0];
 					Function function = (Function)arguments[1];
 					if(session.getTxStore() != null) {
+						session.getTxStore().remove("callqueue", key);
 						session.getTxStore().add("callqueue", key, function);						
 					} else {
 						throw new RuntimeException("Can't defer, session does not have a txstore");

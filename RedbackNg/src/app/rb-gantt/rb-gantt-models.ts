@@ -42,15 +42,13 @@ export class GanttLaneConfig {
     centerLabel: boolean;
     labelColor: string;
     color: ColorConfig;
-    colorAttribute: string;
-    colorMap: any;
-    colorExpression: string;
     indicatorAttribute: string;
     indicatorExpression: string;    
     isBackground: boolean;
+    canEdit: boolean;
+    isGhost: boolean;
     modal: string;
     link: LinkConfig;
-    canEdit: boolean;
     applyLaneFilter: boolean;
     applyDateFilter: boolean;
     show: Function;
@@ -67,12 +65,13 @@ export class GanttLaneConfig {
       this.labelExpression = json.labelexpression;
       this.centerLabel = json.centerlabel ?? false;
       this.labelColor = json.labelcolor;
-      this.isBackground = json.isbackground;
-      this.canEdit = json.canedit;
+      this.isBackground = json.isbackground ?? false;
+      this.canEdit = json.canedit ?? true;
+      this.isGhost = json.ghost ?? false;
       if(json.color != null && typeof json.color === 'object') {
         this.color = new ColorConfig(json.color);
       } else if(json.color != null || json.colorattribute != null || json.colormap != null || json.colorexpression != null) {
-        this.color = new ColorConfig({color: json.color, attribute: json.colorattribute, map: json.colormap, expression: json.colorexpression});
+        this.color = new ColorConfig({value: json.color, attribute: json.colorattribute, map: json.colormap, expression: json.colorexpression});
       }
       this.indicatorAttribute = json.indicatorattribute;
       this.indicatorExpression = json.indicatorexpression;
@@ -165,10 +164,12 @@ export class GanttLaneConfig {
     selected: boolean;
     indicator: boolean;
     dragging: boolean;
+    ghost: boolean;
+    tip: string;
     object: RbObject;
     config: GanttSeriesConfig;
   
-    constructor(ln: string, l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, ce: boolean, sel: boolean, ind: boolean, drg: boolean, o: RbObject, cfg: GanttSeriesConfig) {
+    constructor(ln: string, l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, o: RbObject, cfg: GanttSeriesConfig) {
       this.lane = ln;
       this.label = l;
       this.start = s;
@@ -178,10 +179,12 @@ export class GanttLaneConfig {
       this.laneTop = GanttSpreadMargin + (this.sublane * (GanttSpreadHeight + GanttSpreadMargin));
       this.color = c;
       this.labelcolor = lc;
-      this.canEdit = ce;
-      this.selected = sel;
-      this.indicator = ind;
-      this.dragging = drg;
+      this.canEdit = true;
+      this.selected = false;
+      this.indicator = false;
+      this.dragging = false;
+      this.ghost = false;
+      this.tip = null;
       this.object = o;
       this.config = cfg;
       this.height = GanttSpreadHeight;
@@ -224,7 +227,7 @@ export class GanttLaneConfig {
   }
 
   export enum GanttMarkType {
-    Day, Major, Minor
+    Day, Major, Minor, Now
   }
   export class GanttMark {
     px: number;

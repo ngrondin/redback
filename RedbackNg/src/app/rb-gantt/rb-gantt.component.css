@@ -124,6 +124,11 @@
     border-color: #cdcdcd;
 }
 
+.rb-gantt-mark-now {
+    border-left-style: solid;
+    border-color: #ff9595; 
+}
+
 .rb-gantt-body {
     display: flex;
     flex-direction: row;
@@ -267,6 +272,10 @@
 .rb-gantt-spreadbackground {
     height: 1.9vw;
     color: lightgray;
+}
+
+.rb-gantt-spread-ghost {
+    filter:opacity(.25);
 }
 
 .rb-gantt-spreadlabel {

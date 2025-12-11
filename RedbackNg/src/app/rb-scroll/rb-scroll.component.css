@@ -14,6 +14,7 @@
     scrollbar-width: none;  
     line-height: 0px;
     overflow-anchor: none;
+    position: relative;
 }
 
 .rb-scroll-scroller::-webkit-scrollbar {

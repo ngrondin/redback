@@ -9,6 +9,7 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
 export class RbVcollapseComponent extends RbContainerComponent {
   open: boolean = false;
   @Input('label') label: string = null;
+  @Input('reverseicon') reverseicon: boolean = false;
 
   constructor() {
     super();
@@ -28,6 +29,10 @@ export class RbVcollapseComponent extends RbContainerComponent {
 
   public get isOpen(): boolean {
     return this.open;
+  }
+
+  public get iconSwitch(): boolean {
+    return this.reverseicon ? !this.open : this.open;
   }
 
   public toggle() {

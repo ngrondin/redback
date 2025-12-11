@@ -26,6 +26,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('layers') layers: any[];
   @Input('toolbar') toolbarConfig : any;
   @Input('locktonow') locktonow: boolean = false;
+  @Input('allowpastdrop') allowpastdrop: boolean = true;
   @Input('allowoverlapgroup') allowoverlapgroup: boolean = false;
   @Input('headerwidth') _headerwidth: number = 17;
   @Input('startvariable') startVariable: string = null;
@@ -62,7 +63,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   selectedOverlayLaneIndex = -1;
   selectedLabelAlt: string = null;
 
-  //blockNextRefocus: boolean = false;
   doFocus = false;
   showEmptyLanes = true;
   focusStartPX = null;
@@ -72,6 +72,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   public droppedOutCallback: Function;
   dragSubscription: Subscription;
   draggingObject: RbObject;
+
+  canvas = null
+  graphctx = null;
   
   constructor(
     private modalService: ModalService,
@@ -112,6 +115,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         this.buildService.buildConfigRecursive(this.toolbar, item, context);
       }
     }
+    this.canvas = document.createElement("canvas");
+    this.graphctx = this.canvas.getContext("2d");
   }
 
   dataCalcDestroy() {
@@ -127,9 +132,12 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       this.logService.debug("Gantt " + this.id + ": Activation (" + this.active + ")");
       this.scrollTop = 0;
       this.scrollLeft = 0;
-      if(this.startVariable != null) this._startDate = window.redback[this.startVariable];
+      if(this.startVariable != null) {
+        let dtvar = window.redback[this.startVariable];
+        this._startDate = typeof dtvar == 'string' ? new Date(dtvar) : dtvar.getTime != null ? dtvar : this._startDate;
+      }
       if(this.spanVariable != null) this.spanMS = window.redback[this.spanVariable];
-      if(this.zoomVariable != null) this.zoomMS = window.redback[this.zoomVariable];
+      if(this.zoomVariable != null) this.zoomMS = Math.min(this.spanMS, window.redback[this.zoomVariable]);
       let selectionTarget = null;
       for(let cfg of this.seriesConfigs) {
         let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
@@ -394,7 +402,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }        
         let lane = new GanttLane(obj.uid, label, sub, image, icon, obj);
         let spreads: GanttSpread[] = this.getSpreads(obj.uid, accHeight);
-        if(this.showEmptyLanes || spreads.length > 0) {
+        if(this.showEmptyLanes || spreads.filter(s => !s.ghost && !s.config.isBackground).length > 0) {
           lane.setSpreads(spreads);
           lanes.push(lane);
           accHeight += lane.height + 0.06; //+1 for borders
@@ -424,6 +432,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               } else if(cfg.labelExpression != null) {
                 label = Evaluator.eval(cfg.labelExpression, obj, null, null);
               }
+              let labelWidth = this.graphctx.measureText(label).width;
               if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
                 let alt = cfg.labelAlts.find(a => a.name == this.selectedLabelAlt);
                 if(alt != null) {
@@ -439,7 +448,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               if(cfg.labelColor != null) {
                 labelcolor = cfg.labelColor;
               }
-              let canEdit: boolean = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
               let sublane = 0;
               if(!cfg.isBackground) {
                 let hasOverlap: boolean;
@@ -453,18 +461,21 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                   if(hasOverlap) sublane++;
                 } while(hasOverlap);
               }
-              let selected: boolean = cfg.isBackground == false && dataset.isObjectSelected(obj);
               let indicator: boolean = false;
               if(cfg.indicatorAttribute != null) {
                 indicator = obj.get(cfg.indicatorAttribute); 
               } else if(cfg.indicatorExpression != null) {
                 indicator = Evaluator.eval(cfg.indicatorExpression, obj, null, null);
               }
-              let dragging = (obj == this.draggingObject);
-              if(dragging) console.log("Dragging");
-              let spread = new GanttSpread(laneId, label, startPX, widthPX, offsetTop, sublane, color, labelcolor, canEdit, selected, indicator, dragging, obj, cfg);
+              let spread = new GanttSpread(laneId, label, startPX, widthPX, offsetTop, sublane, color, labelcolor, obj, cfg);
+              spread.canEdit = cfg.canEdit && (obj.canEdit(cfg.startAttribute) || obj.canEdit(cfg.laneAttribute));
+              spread.selected = cfg.isBackground == false && dataset.isObjectSelected(obj);
+              spread.indicator = indicator;
+              spread.dragging = (obj == this.draggingObject);
+              spread.ghost = cfg.isGhost;
+              spread.tip = labelWidth > widthPX ? label : null;
               spreads.push(spread);
-              if(selected) {
+              if(spread.selected) {
                 let fs = startPX;
                 if(this.focusStartPX == null || (this.focusStartPX != null && fs < this.focusStartPX)) this.focusStartPX = fs;
                 let topVW = offsetTop + spread.laneTop;
@@ -515,7 +526,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
         if(firstGroupFound == null) {
           let id = nextid++;
-          let group = new GanttSpread(spread.laneId, "1 item", spread.start, spread.width, 0, 0, 'var(--primary-light-color)', '#333', false, false, false, false, null, spread.config);
+          let group = new GanttSpread(spread.laneId, "1 item", spread.start, spread.width, 0, 0, 'var(--primary-light-color)', '#333', null, spread.config);
           group.id = id.toString();
           groupmap[group.id] = 1
           groups.push(group);
@@ -612,6 +623,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
       cur = cur + this.markMinorIntervalMS;
     }
+    let nowPos = Math.round((new Date().getTime() - this.startMS) * this.pxPerMS);
+    if(nowPos > 0 && nowPos < this.spanMS) {
+      marks.push(new GanttMark(nowPos, null, null, GanttMarkType.Now));
+    }
     return marks;
   }
 
@@ -686,9 +701,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         tgt = tgt.offsetParent;
       }
       let newStartMS = this.startMS + (left / this.pxPerMS);
-      let newStart = (new Date(newStartMS)).toISOString();
-      if(previousStart != newStart) {
-        update[config.startAttribute] = newStart;
+      let newStart = new Date(newStartMS);
+      let newStartStr = newStart.toISOString();
+      if(this.allowpastdrop == false && newStartMS < (new Date()).getTime()) return;
+      if(previousStart != newStartStr) {
+        update[config.startAttribute] = newStartStr;
         if(config.durationAttribute == null && config.endAttribute != null) {
           let newEnd = (new Date(newStartMS + previousDuration)).toISOString();
           update[config.endAttribute] = newEnd;

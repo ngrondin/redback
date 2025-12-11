@@ -27,6 +27,14 @@ public class TxStore<T> {
 		}
 	}
 	
+	public void remove(String cat, String key) {
+		if(all.containsKey(cat)) {
+			Object o = map.get(cat).remove(key);
+			if(o != null)
+				all.get(cat).remove(o);
+		}
+	}
+	
 	/*public void updated(String key) {
 		T item = map.get(key);
 		updated(item);

@@ -815,7 +815,9 @@ public class ObjectManager
 	public void commitCurrentTransaction(Session session) throws RedbackException
 	{
 		if(session.hasTxStore()) {
-			for(Object c : session.getTxStore().getAll("callqueue")) {
+			List<Object> callQueue = session.getTxStore().getAll("callqueue");
+			while(callQueue.size() > 0) {
+				Object c = callQueue.removeFirst();
 				try {
 					Function function = (Function)c;
 					function.call();

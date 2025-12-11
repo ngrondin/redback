@@ -192,12 +192,6 @@ export class RbSelectorComponent extends RbDataObserverComponent {
     this.editedValue = "";
   }
 
-
-  /*public commit(val: any, related: RbObject = null) {
-    console.log("Selector selected");
-
-  }*/
-
   get icon(): string {
     return this._icon != null ? this._icon : "list";
   }
