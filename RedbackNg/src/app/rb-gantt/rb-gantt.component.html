@@ -255,10 +255,10 @@
                     <div
                         *ngFor="let spread of lane.foregroundSpreads()"
                         [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '') + (spread.ghost ? ' rb-gantt-spread-ghost' : '')"
-                        [rb-drag-object]="spread.canEdit ? spread.object : null"
+                        [rb-drag-getdata]="getDataToDrag"
                         [rb-drag-droppedout]="droppedOutCallback"
                         [tip]="spread.tip"
-                        (click)="clickSpread(spread); $event.stopPropagation();"
+                        (click)="clickSpread(spread, $event); $event.stopPropagation();"
                         [style.width.px]="spread.width"
                         [style.height.vw]="spread.height"
                         [style.left.px]="spread.start"

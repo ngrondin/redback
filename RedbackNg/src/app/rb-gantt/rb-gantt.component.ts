@@ -70,6 +70,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   public getSizeForObjectCallback: Function;
   public droppedOutCallback: Function;
+  public getDataToDragCallback: Function;
   dragSubscription: Subscription;
   draggingObject: RbObject;
 
@@ -93,6 +94,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.dragSubscription = this.dragService.getObservable().subscribe(event => this.onDragEvent(event));
     this.getSizeForObjectCallback = this.getSizeForObject.bind(this);
     this.droppedOutCallback = this.droppedOut.bind(this);
+    this.getDataToDragCallback = this.getDataToDrag.bind(this);
     this.spanMS = 259200000;
     this.zoomMS = 172800000;
     for(var cfg of this.seriesConfigs)
@@ -650,14 +652,28 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     } 
   }
 
-  public clickSpread(spread: GanttSpread) {
-    this.select(spread.object);
-    if(spread.config.modal != null) {
-      this.modalService.open(spread.config.modal);
-    } else if(spread.config.link != null) {
-      let navEvent = this.lanesConfig.link.getNavigationEvent(spread.object, this.getDatasetForObject(spread.object), this.extraContext);
-      this.navigateService.navigateTo(navEvent);
-    } 
+  public addOneToSelection(object: RbObject) {
+    if(this.datasetgroup != null) {
+      this.datasetgroup.addOneToSelection(object);
+    } else if(this.dataset != null) {
+      this.dataset.addOneToSelection(object);
+    }
+  }
+
+  public clickSpread(spread: GanttSpread, event: any) {
+    if(event.ctrlKey == true || event.metaKey == true) {
+      this.addOneToSelection(spread.object);
+    } else if(event.shiftKey == true) {
+      this.addOneToSelection(spread.object);
+    } else {
+      this.select(spread.object);
+      if(spread.config.modal != null) {
+        this.modalService.open(spread.config.modal);
+      } else if(spread.config.link != null) {
+        let navEvent = this.lanesConfig.link.getNavigationEvent(spread.object, this.getDatasetForObject(spread.object), this.extraContext);
+        this.navigateService.navigateTo(navEvent);
+      } 
+    }
   }
 
   public clickLane(lane: GanttLane) {
@@ -685,57 +701,82 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
   }
 
-  public droppedOn(event: any, lane: GanttLane, ignoreTime: boolean = false) {
-    let update: any = {};
-    let related: any = {}
-    let object: RbObject = event.data;
-    let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
+  public getDataToDrag(object: RbObject) : any {
+    let ret: RbObject | RbObject[] = object;
+    let dataset = this.getDatasetForObject(object);
+    if(dataset.selectedObjects.length > 0) {
+      ret = [object].concat(dataset.selectedObjects);
+    }
+    return ret;
+  }
 
-    if(ignoreTime == false) {
-      let previousStart = object.get(config.startAttribute);
-      let previousDuration = this.getObjectDuration(object, config.startAttribute, config.endAttribute, config.durationAttribute);
+  public droppedOn(event: any, lane: GanttLane, ignoreTime: boolean = false) {
+    let arr: RbObject[] = Array.isArray(event.data) ? event.data : [event.data];
+    let mainObject: RbObject = arr[0];
+    let config: GanttSeriesConfig = this.getSeriesConfigForObject(mainObject);
+    let newStartMS = null;
+    let timeDiffMS = null;
+
+    if(!ignoreTime) {
       let tgt = event.mouseEvent.target;
       let left = event.mouseEvent.offsetX - event.offset.x;
       while(tgt.className.indexOf("rb-gantt-lane") == -1) {
         left = left + tgt.offsetLeft;
         tgt = tgt.offsetParent;
       }
-      let newStartMS = this.startMS + (left / this.pxPerMS);
-      let newStart = new Date(newStartMS);
-      let newStartStr = newStart.toISOString();
-      if(this.allowpastdrop == false && newStartMS < (new Date()).getTime()) return;
-      if(previousStart != newStartStr) {
-        update[config.startAttribute] = newStartStr;
-        if(config.durationAttribute == null && config.endAttribute != null) {
-          let newEnd = (new Date(newStartMS + previousDuration)).toISOString();
-          update[config.endAttribute] = newEnd;
-        } 
+      newStartMS = this.startMS + (left / this.pxPerMS);
+      let prevStartStr = mainObject.get(config.startAttribute);
+      if(prevStartStr != null) {
+        timeDiffMS = newStartMS - (new Date(prevStartStr)).getTime();
       }
     }
 
-    let previousLaneId = object.get(config.laneAttribute);
-    if(previousLaneId != lane.id) {
-      update[config.laneAttribute] = lane.id;
-      related[config.laneAttribute] = lane.object;
-    }
-    
-    if(Object.keys(update).length > 0) {
-      object.setValuesAndRelated(update, related);
-    }
-
-    let targetDataset = this.datasetgroup != null ? this.datasetgroup.datasets[config.dataset] : this.dataset;
-    if(targetDataset != null && targetDataset.list.indexOf(object) == -1) {
-      targetDataset.add(object);
+    for(var object of arr) {
+      let update: any = {};
+      let related: any = {}
+      if(newStartMS != null) {
+        let previousStart = object.get(config.startAttribute);
+        let previousDuration = this.getObjectDuration(object, config.startAttribute, config.endAttribute, config.durationAttribute);
+        let thisStartMS = previousStart != null && timeDiffMS != null ? new Date(previousStart).getTime() + timeDiffMS : newStartMS;
+        let thisStart = new Date(thisStartMS);
+        let thisStartStr = thisStart.toISOString();
+        if(this.allowpastdrop == false && newStartMS < (new Date()).getTime()) break;
+        if(previousStart != thisStartStr) {
+          update[config.startAttribute] = thisStartStr;
+          if(config.durationAttribute == null && config.endAttribute != null) {
+            let thisEnd = (new Date(thisStartMS + previousDuration)).toISOString();
+            update[config.endAttribute] = thisEnd;
+          } 
+        }
+      }
+  
+      let previousLaneId = object.get(config.laneAttribute);
+      if(previousLaneId != lane.id) {
+        update[config.laneAttribute] = lane.id;
+        related[config.laneAttribute] = lane.object;
+      }
+      
+      if(Object.keys(update).length > 0) {
+        object.setValuesAndRelated(update, related);
+      }
+  
+      let targetDataset = this.datasetgroup != null ? this.datasetgroup.datasets[config.dataset] : this.dataset;
+      if(targetDataset != null && targetDataset.list.indexOf(object) == -1) {
+        targetDataset.add(object);
+      }
+  
     }
   }
 
   public droppedOut(event: any) {
-    let object: RbObject = event.data;
-    let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
-    let update: any = {};
-    update[config.startAttribute] = null;
-    update[config.laneAttribute] = null;
-    object.setValues(update);
+    let arr = Array.isArray(event.data) ? event.data : [event.data];
+    for(var object of arr) {
+      let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
+      let update: any = {};
+      update[config.startAttribute] = null;
+      update[config.laneAttribute] = null;
+      object.setValues(update);  
+    }
   }
 
   public onScroll(event) {
@@ -743,7 +784,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.scrollTop = event.target.scrollTop;
   }
 
-  public getSizeForObject(obj: RbObject) : any {
+  public getSizeForObject(data: any) : any {
+    let obj = Array.isArray(data) ? data[0] : data;
     let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(obj);
     let durationMS = this.getObjectDuration(obj, cfg.startAttribute, cfg.endAttribute, cfg.durationAttribute);
     return {

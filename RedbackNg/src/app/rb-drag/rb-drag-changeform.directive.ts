@@ -6,7 +6,7 @@ import { DragService } from 'app/services/drag.service';
   selector: '[rb-drag-changeform]'
 })
 export class RbDragChangeformDirective {
-  @Input('rb-drag-changeform') changeFormFunc: (object) => {};
+  @Input('rb-drag-changeform') changeFormFunc: (data) => {};
 
   constructor(
     private el: ElementRef,

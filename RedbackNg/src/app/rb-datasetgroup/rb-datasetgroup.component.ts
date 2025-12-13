@@ -98,6 +98,16 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
     }
   }
 
+  public addOneToSelection(obj: RbObject) {
+    this._selectedObject = obj;
+    for(let id of Object.keys(this.datasets)) {
+      let ds: RbDatasetComponent = this.datasets[id];
+      if(ds.objectname == obj.objectname && ds.list.indexOf(obj) > -1) {
+        ds.addOneToSelection(obj);
+      }
+    }
+  }
+
   public filterSort(event: any) : boolean {
     let fetched = true;
     for(let id of Object.keys(this.datasets)) {
