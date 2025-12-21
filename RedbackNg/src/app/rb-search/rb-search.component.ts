@@ -23,7 +23,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
 
   public filterValue: any;
   public sortValue: any;
-  public queuedSearch: string = null;
+  public searchTimer: any = null;
 
   constructor(    
     public injector: Injector,
@@ -66,38 +66,26 @@ export class RbSearchComponent extends RbFieldInputComponent {
 
   public setDisplayValue(val: any) {
     this.editedValue = val;
-    if(this.editedValue !== this.queuedSearch) {
-      this.searchAfterDelay();
-      this.queuedSearch = this.editedValue;
-    }
+    this.searchAfterDelay(this.editedValue);
   }
 
   public get hasFilter() {
     return this.filterValue != null || this.sortValue != null;
   }
 
-  searchAfterDelay() {
-    let searchValue = this.editedValue;
-    setTimeout(()=> {
-      if(this.editedValue == searchValue) {
-        this.search();
-      }
-    }, 500);    
+  searchAfterDelay(val: string) {
+    if(this.searchTimer != null) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.search(val), 500);
   }
 
-  search() {
-    let fetched = this.searchtarget.filterSort({search: this.editedValue});
-    if(fetched == true) {
-      this.queuedSearch = null;
-    } else {
-      this.searchAfterDelay();
+  search(val: string) {
+    let fetched = this.searchtarget.filterSort({search: val});
+    if(!fetched) {
+      this.searchAfterDelay(val);
     }
   }
 
   finishEditing() {
-    if(this.queuedSearch != null) {
-      this.search();
-    }
     this.commit(this.editedValue);
     super.finishEditing();
   }

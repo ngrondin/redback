@@ -380,3 +380,14 @@
     color: var(--dark-writing-color);
     flex: 1 1 auto;
 }
+
+.rb-gantt-dragselect {
+    position: absolute;
+    background-color: #ddd4;
+    border: 1px solid var(--primary-color);
+}
+
+.rb-gantt-emptymessage {
+    padding: 3vw 0;
+    color: var(--light-writing-color);
+}

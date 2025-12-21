@@ -108,6 +108,13 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
     }
   }
 
+  public clearSelection() {
+    for(let id of Object.keys(this.datasets)) {
+      let ds: RbDatasetComponent = this.datasets[id];
+      ds.clearSelection();
+    }
+  }
+
   public filterSort(event: any) : boolean {
     let fetched = true;
     for(let id of Object.keys(this.datasets)) {

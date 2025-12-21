@@ -42,6 +42,7 @@ export class RbList4Component extends RbDataObserverComponent {
   enhancedList: any[] = []
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
   reachedBottom: boolean = false;
+  enhanceDragDataCallback: Function;
 
   constructor(
     public userprefService: UserprefService,
@@ -53,6 +54,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   dataObserverInit() {
+    this.enhanceDragDataCallback = this.enhanceDragData.bind(this);
   }
 
   dataObserverDestroy() {
@@ -216,6 +218,10 @@ export class RbList4Component extends RbDataObserverComponent {
         this.navigateService.navigateTo(navEvent);
       }  
     }
+  }
+
+  public enhanceDragData(object: RbObject) : any {
+    return [object].concat(this.dataset.selectedObjects.filter(o => o.uid != object.uid));
   }
 
   refresh() {

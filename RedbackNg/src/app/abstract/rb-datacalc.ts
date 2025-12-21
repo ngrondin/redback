@@ -156,29 +156,27 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
 
     getSeriesConfigForObject(object: RbObject) : T {
-        if(this.datasetgroup != null) {
-            for(let cfg of this.seriesConfigs) {
-                if(this.datasetgroup.datasets[cfg.dataset].objectname == object.objectname) {
-                    return cfg;
-                }
+        for(var cfg of this.seriesConfigs) {
+            let dataset = this.getDatasetForConfig(cfg);
+            if(dataset.contains(object)) {
+                return cfg;
             }
-        } else {
-            return this.seriesConfigs[0];
         }
         return null;
     }
 
     getDatasetForObject(object: RbObject) : RbDatasetComponent {
-        if(this.datasetgroup != null) {
-            for(let cfg of this.seriesConfigs) {
-                if(this.datasetgroup.datasets[cfg.dataset].objectname == object.objectname) {
-                    return this.datasetgroup.datasets[cfg.dataset];
-                }
+        for(var cfg of this.seriesConfigs) {
+            let dataset = this.getDatasetForConfig(cfg);
+            if(dataset.contains(object)) {
+                return dataset;
             }
-        } else {
-            return this.dataset;
         }
         return null;
+    }
+
+    getDatasetForConfig(cfg: SeriesConfig) {
+        return this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
     }
 
     containsObject(object: RbObject) : boolean {

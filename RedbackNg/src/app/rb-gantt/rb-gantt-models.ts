@@ -1,14 +1,17 @@
 import { SeriesConfig } from "app/abstract/rb-datacalc";
 import { RbObject } from "app/datamodel";
-import { ColorConfig, LinkConfig } from "app/helpers";
+import { ColorConfig, Evaluator, LinkConfig } from "app/helpers";
+import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
 //export const GanttLaneHeight: number = 2.47; //VW, was in PX 42;
 export const GanttSpreadHeight: number = 1.64; //VW   
 export const GanttSpreadMargin: number = 0.41; //VW   
 
-export class GanttLaneConfig {
+  export class GanttLaneConfig {
     dataset: string;
+    linkAttributes: string[];
     labelAttribute: string;
+    labelExpression: string;
     subAttribute: string;
     imageAttribute: string;
     iconAttribute: string;
@@ -19,7 +22,9 @@ export class GanttLaneConfig {
   
     constructor(json: any, userpref: any) {
       this.dataset = json.dataset;
+      this.linkAttributes = json.linkattributes ?? ["uid"];
       this.labelAttribute = json.labelattribute;
+      this.labelExpression = json.labelexpression;
       this.subAttribute = json.subattribute;
       this.imageAttribute = json.imageattribute;
       this.iconAttribute = json.iconattribute;
@@ -29,13 +34,15 @@ export class GanttLaneConfig {
       this.dragfilter = json.dragfilter;
     }
   }
-  
-  export class GanttSeriesConfig extends SeriesConfig {
-    dataset: string;
+
+  export abstract class GanttTimeBasedConfig extends SeriesConfig {
     startAttribute: string;
     durationAttribute: string;
     endAttribute: string;
-    laneAttribute: string;
+  }
+  
+  export class GanttSeriesConfig extends GanttTimeBasedConfig {
+    laneAttributes: string[];
     labelAttribute: string;
     labelExpression: string;
     labelAlts: any[];
@@ -59,7 +66,7 @@ export class GanttLaneConfig {
       this.startAttribute = json.startattribute;
       this.durationAttribute = json.durationattribute;
       this.endAttribute = json.endattribute;
-      this.laneAttribute = json.laneattribute;
+      this.laneAttributes = json.laneattribute != null ? [json.laneattribute] : json.laneattributes != null ? json.laneattributes : null;
       this.labelAlts = json.labelalts;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
       this.labelExpression = json.labelexpression;
@@ -83,16 +90,13 @@ export class GanttLaneConfig {
     }
   }
   
-  export class GanttOverlayConfig {
-    dataset: string;
-    startAttribute: string;
-    durationAttribute: string;
-    endAttribute: string;
+  export class GanttOverlayConfig extends GanttTimeBasedConfig {
     label: string;
     labelAttribute: string;
     color: ColorConfig;
   
     constructor(json: any, userpref: any) {
+      super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
       this.dataset = json.dataset;
       this.startAttribute = json.startattribute;
@@ -109,7 +113,7 @@ export class GanttLaneConfig {
   }
 
   export class GanttLane {
-    id: string;
+    linkValues: string[];
     label: string;
     sub: string;
     image: string;
@@ -117,15 +121,34 @@ export class GanttLaneConfig {
     height: number;
     spreads: GanttSpread[];
     object: RbObject;
-  
-    constructor(i: string, l: string, s: string, im: string, ic: string, o: RbObject) {
-      this.id = i;
-      this.label = l != null ? l : "";
-      this.sub = s;
-      this.image = im;
-      this.icon = ic;
-      this.object = o;
+    config: GanttLaneConfig;
+
+    constructor(obj: RbObject, cfg: GanttLaneConfig) {
+      this.object = obj;
+      this.config = cfg;
       this.height = GanttSpreadHeight + (2*GanttSpreadMargin);
+      let label = null;
+      if(cfg.labelAttribute != null) {
+        this.label = obj.get(cfg.labelAttribute); 
+      } else if(cfg.labelExpression != null) {
+        this.label = Evaluator.eval(cfg.labelExpression, obj, null, null);
+      }
+      if(this.config.iconAttribute != null) {
+        this.icon = obj.get(this.config.iconAttribute);
+        if(this.config.iconMap != null) {
+          this.icon = this.config.iconMap[this.icon];
+        }  
+      }
+      if(this.config.imageAttribute != null) {
+        let fileVal = obj.get(this.config.imageAttribute);
+        if(fileVal != null && fileVal.thumbnail != null) {
+          this.image = "url(\'" + fileVal.thumbnail + "\')"
+        }
+      }
+      if(this.config.subAttribute != null) {
+        this.sub = obj.get(this.config.subAttribute);
+      }   
+      this.linkValues = this.config.linkAttributes.map(la => this.object.get(la));
     }
   
     setSpreads(s: GanttSpread[]) {
@@ -144,15 +167,15 @@ export class GanttLaneConfig {
     }
 
     foregroundSpreads() {
-      return this.spreads.filter(s => s.config.isBackground == false && s.dragging == false);
+      return this.spreads.filter(s => s.config.isBackground == false/* && s.dragging == false*/);
     }
   }
   
   export class GanttSpread {
     id: string; //currently only used for groupings
-    lane: string;
     label: string;
     start: number;
+    end: number;
     width: number;
     offsetTop: number;
     laneTop: number;
@@ -161,33 +184,43 @@ export class GanttLaneConfig {
     color: string;
     labelcolor: string;
     canEdit: boolean;
-    selected: boolean;
     indicator: boolean;
     dragging: boolean;
-    ghost: boolean;
     tip: string;
     object: RbObject;
+    dataset: RbDatasetComponent;
     config: GanttSeriesConfig;
   
-    constructor(ln: string, l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, o: RbObject, cfg: GanttSeriesConfig) {
-      this.lane = ln;
+    constructor(l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, o: RbObject, ds: RbDatasetComponent, cfg: GanttSeriesConfig) {
       this.label = l;
       this.start = s;
       this.width = w;
+      this.end = s + w;
       this.offsetTop = ost;
       this.sublane = sl;
       this.laneTop = GanttSpreadMargin + (this.sublane * (GanttSpreadHeight + GanttSpreadMargin));
       this.color = c;
       this.labelcolor = lc;
-      this.canEdit = true;
-      this.selected = false;
+      this.canEdit = o != null ? cfg.canEdit && (o.canEdit(cfg.startAttribute) || cfg.laneAttributes.reduce((acc, la) => acc && o.canEdit(la), true)) : false;
       this.indicator = false;
       this.dragging = false;
-      this.ghost = false;
       this.tip = null;
       this.object = o;
+      this.dataset = ds;
       this.config = cfg;
       this.height = GanttSpreadHeight;
+    }
+
+    get laneValues(): string[] {
+      return this.config.laneAttributes.map(la => this.object.get(la));
+    }
+
+    get ghost(): boolean {
+      return this.config.isGhost;
+    }
+
+    get selected(): boolean {
+      return this.config.isBackground == false && this.dataset.isObjectSelected(this.object);
     }
   }
 

@@ -165,7 +165,7 @@
                 [style.cursor]="lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
                 (click)="clickLane(lane)"
                 (rb-drag-dropzone)="droppedOn($event, lane, true)"
-                [rb-drag-changeform]="getSizeForObjectCallback">
+                [rb-drag-changeform]="getDragSizeForObjectCallback">
                 <div
                     class="rb-gantt-laneimage"
                     *ngIf="lane.image != null"
@@ -197,6 +197,9 @@
             [style.width.px]="widthPX"
             [style.height.vw]="heightVW"
             (click)="clickBackground()"
+            (mousedown)="mouseDownBackground($event)"
+            (mouseup)="mouseUpBackground($event)"
+            (mousemove)="mouseMoveBackground($event)"
             #lanescontainer>
             <div
                 class="rb-gantt-laneslayer">
@@ -251,14 +254,16 @@
                     [style.height.vw]="lane.height"
                     [style.width.px]="widthPX"
                     (rb-drag-dropzone)="droppedOn($event, lane)"
-                    [rb-drag-changeform]="getSizeForObjectCallback">
+                    [rb-drag-changeform]="getDragSizeForObjectCallback">
                     <div
                         *ngFor="let spread of lane.foregroundSpreads()"
                         [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '') + (spread.ghost ? ' rb-gantt-spread-ghost' : '')"
-                        [rb-drag-getdata]="getDataToDrag"
+                        [rb-drag-object]="spread.canEdit ? spread.object : null"
+                        [rb-drag-enhancedata]="enhanceDragDataCallback"
                         [rb-drag-droppedout]="droppedOutCallback"
                         [tip]="spread.tip"
                         (click)="clickSpread(spread, $event); $event.stopPropagation();"
+                        [style.visibility]="spread.dragging ? 'hidden' : 'visible'"
                         [style.width.px]="spread.width"
                         [style.height.vw]="spread.height"
                         [style.left.px]="spread.start"
@@ -277,9 +282,26 @@
                     </div>                
                 </div>
             </div>
+            <div
+                class="rb-gantt-laneslayer"
+                *ngIf="isEmpty">
+                <div
+                    class="rb-gantt-emptymessage">
+                    {{emptyMessage}}
+                </div>
+            </div>            
+            <div
+                class="rb-gantt-dragselect"
+                *ngIf="dragSelecting == true"
+                [style.top.px]="dragSelectTopLeft.y"
+                [style.left.px]="dragSelectTopLeft.x"
+                [style.width.px]="dragSelectSize.x"
+                [style.height.px]="dragSelectSize.y">
+            </div>            
         </div>
     </rb-scroll>
 </div>
+
 <div
     class="rb-gantt-loadoverlay"
     *ngIf="isLoading">

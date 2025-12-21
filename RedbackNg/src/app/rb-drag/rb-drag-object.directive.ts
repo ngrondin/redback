@@ -6,7 +6,7 @@ import { DragService } from 'app/services/drag.service';
 })
 export class RbDragObjectDirective {
   @Input('rb-drag-object') object: any;
-  @Input('rb-drag-getdata') getData: any;
+  @Input('rb-drag-enhancedata') enhanceData: any;
   @Input('rb-drag-droppedout') droppedout: any;
 
   constructor(
@@ -16,13 +16,14 @@ export class RbDragObjectDirective {
     
   @HostListener('mousedown', ['$event']) onMouseDown($event) {
     let i = Math.floor(Math.random() * 100);
-    let data = this.object != null ? this.object : this.getData != null ? this.getData() : null;
+    let data = this.enhanceData != null ? this.enhanceData(this.object) : this.object;
     if($event.which == 1 && data != null) {
       this.dragService.prepareDrag(this.el, data, $event, () => {
         if(this.droppedout != null) {
           this.droppedout({data: data, mouseEvent: $event});
         }
       }); 
+      $event.stopPropagation();
     }
   }
 
