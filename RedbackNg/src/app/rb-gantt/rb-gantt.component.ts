@@ -724,11 +724,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
 
   public mouseDownBackground(event: any) {
-    this.clearSelection();
-    this.dragSelecting = true;
-    this.dragSelectStart = this.getXYRelativeToTarget(event, "rb-gantt-lanes");
-    this.dragSelectTopLeft = this.dragSelectStart;
-    this.dragSelectSize = new XY(0, 0);
+    if(event.button == 0) {
+      this.clearSelection();
+      this.dragSelecting = true;
+      this.dragSelectStart = this.getXYRelativeToTarget(event, "rb-gantt-lanes");
+      this.dragSelectTopLeft = this.dragSelectStart;
+      this.dragSelectSize = new XY(0, 0);
+    }
   }
 
   public mouseMoveBackground(event: any) {
@@ -763,7 +765,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   public droppedOn(event: any, lane: GanttLane, ignoreTime: boolean = false) {
     let arr: RbObject[] = Array.isArray(event.data) ? event.data : [event.data];
     let masterObject: RbObject = arr[0];
-    let config: GanttSeriesConfig = this.getSeriesConfigForObject(masterObject);
+    let config: GanttSeriesConfig = this.getBestSeriesConfigForObject(masterObject);
     let masterPreviousLaneValues = config.laneAttributes.map(la => masterObject.get(la));
     let masterChangedLanes = !this.linkValuesMatch(masterPreviousLaneValues, lane.linkValues);
     let masterNewStartMS = null;
@@ -842,12 +844,16 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   public getDragSizeForObject(data: any) : any {
     let obj = Array.isArray(data) ? data[0] : data;
-    let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(obj);
-    let [startMS, endMS, durationMS] = this.getObjectStartEndDur(obj, cfg);
-    return {
-      x: Math.round(durationMS * this.pxPerMS),
-      y: window.innerWidth * GanttSpreadHeight / 100
-    };
+    let cfg: GanttSeriesConfig = this.getBestSeriesConfigForObject(obj);
+    if(cfg != null) {
+      let [startMS, endMS, durationMS] = this.getObjectStartEndDur(obj, cfg);
+      return {
+        x: Math.round(durationMS * this.pxPerMS),
+        y: window.innerWidth * GanttSpreadHeight / 100
+      };
+    } else {
+      return {x: 100, y: 20};
+    }
   }
 
   public onScroll(event) {
@@ -856,6 +862,18 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   //Utils
+
+  getBestSeriesConfigForObject(object: RbObject) : GanttSeriesConfig {
+    let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(object);
+    if(cfg == null) { // This will happen when a drag comes from an external dataset
+      for(var c of this.seriesConfigs) {
+          let dataset = this.getDatasetForConfig(c);
+          if(dataset.objectname == object.objectname) cfg = c;
+      }
+    }
+    return cfg;
+  }
+
 
   linkValuesMatch(a: string[], b: string[]) {
     if(a.length != b.length) return false;

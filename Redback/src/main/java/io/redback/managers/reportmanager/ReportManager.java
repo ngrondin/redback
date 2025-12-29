@@ -24,6 +24,7 @@ import io.redback.security.Session;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.RedbackFileMetaData;
 import io.redback.utils.ReportFilter;
+import io.redback.utils.js.LoggerJSFunction;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
 
 public class ReportManager implements Consumer {
@@ -63,6 +64,7 @@ public class ReportManager implements Consumer {
 			listsQueried = new HashMap<Integer, List<ReportConfig>>();
 			firebus.registerConsumer("_rb_domain_cache_clear", this, 10);
 			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
+			scriptFactory.setInRootScope("log", new LoggerJSFunction());
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising Report Manager", e);
 		}
