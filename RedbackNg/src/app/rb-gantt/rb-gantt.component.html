@@ -77,6 +77,15 @@
             </span>
         </rb-clickable>        
         <rb-clickable 
+            *ngIf="allowpastdrop == false"
+            (click)="toggleOverridePastDrop()">
+            <span
+                class="rb-gantt-menuitem">
+                {{ overrideAllowPastDrop ? 'Prevent Past Planning' : 'Enable Past Planning'}}
+            </span>
+        </rb-clickable>        
+
+        <rb-clickable 
             *ngIf="allowoverlapgroup"
             (click)="toggleGroupOverlaps()">
             <span

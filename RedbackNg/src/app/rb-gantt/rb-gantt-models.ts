@@ -1,6 +1,6 @@
 import { SeriesConfig } from "app/abstract/rb-datacalc";
 import { RbObject } from "app/datamodel";
-import { ColorConfig, Evaluator, LinkConfig } from "app/helpers";
+import { ColorConfig, Evaluator, LinkConfig, VAEConfig } from "app/helpers";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
 //export const GanttLaneHeight: number = 2.47; //VW, was in PX 42;
@@ -36,9 +36,20 @@ export const GanttSpreadMargin: number = 0.41; //VW
   }
 
   export abstract class GanttTimeBasedConfig extends SeriesConfig {
-    startAttribute: string;
-    durationAttribute: string;
-    endAttribute: string;
+    start: VAEConfig;
+    duration: VAEConfig;
+    end: VAEConfig;
+
+    constructor(json: any) {
+      super(json);
+      this.start = json.startattribute != null ? new VAEConfig({attribute: json.startattribute}) : new VAEConfig(json.start);
+      this.duration = json.durationattribute  != null ? new VAEConfig({attribute: json.durationattribute}) : json.duration != null ? new VAEConfig(json.duration) : null;
+      this.end = json.endattribute  != null ? new VAEConfig({attribute: json.endattribute}) : json.end != null ? new VAEConfig(json.end) : null;
+    }
+
+    get timeFromAttributes() : boolean {
+      return this.start != null && this.start.attribute != null && ((this.duration != null && this.duration.attribute != null) || (this.end != null && this.end.attribute != null));
+    }
   }
   
   export class GanttSeriesConfig extends GanttTimeBasedConfig {
@@ -63,9 +74,6 @@ export const GanttSpreadMargin: number = 0.41; //VW
     constructor(json: any, userpref: any) {
       super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
-      this.startAttribute = json.startattribute;
-      this.durationAttribute = json.durationattribute;
-      this.endAttribute = json.endattribute;
       this.laneAttributes = json.laneattribute != null ? [json.laneattribute] : json.laneattributes != null ? json.laneattributes : null;
       this.labelAlts = json.labelalts;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
@@ -99,9 +107,9 @@ export const GanttSpreadMargin: number = 0.41; //VW
       super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
       this.dataset = json.dataset;
-      this.startAttribute = json.startattribute;
+      /*this.startAttribute = json.startattribute;
       this.durationAttribute = json.durationattribute;
-      this.endAttribute = json.endattribute;
+      this.endAttribute = json.endattribute;*/
       this.label = json.label;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
       if(json.color != null && typeof json.color === 'object') {
@@ -201,7 +209,7 @@ export const GanttSpreadMargin: number = 0.41; //VW
       this.laneTop = GanttSpreadMargin + (this.sublane * (GanttSpreadHeight + GanttSpreadMargin));
       this.color = c;
       this.labelcolor = lc;
-      this.canEdit = o != null ? cfg.canEdit && (o.canEdit(cfg.startAttribute) || cfg.laneAttributes.reduce((acc, la) => acc && o.canEdit(la), true)) : false;
+      this.canEdit = o != null ? cfg.canEdit && (cfg.start.attribute != null && o.canEdit(cfg.start.attribute) || cfg.laneAttributes.reduce((acc, la) => acc && o.canEdit(la), true)) : false;
       this.indicator = false;
       this.dragging = false;
       this.tip = null;

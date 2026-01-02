@@ -23,8 +23,8 @@ export class RbDragObjectDirective {
           this.droppedout({data: data, mouseEvent: $event});
         }
       }); 
-      $event.stopPropagation();
     }
+    $event.stopPropagation();
   }
 
   

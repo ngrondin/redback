@@ -51,6 +51,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   heightVW: number;
   doDragFilter: boolean = false;
   groupOverlaps: boolean = false;
+  overrideAllowPastDrop: boolean = false;
   scrollTop: number;
   scrollLeft: number;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -150,15 +151,15 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       for(let cfg of this.seriesConfigs) {
         let dataset = this.getDatasetForConfig(cfg);
         //Retrieve the start of the Gantt from any of the datasets
-        if(dataset.resolvedFilter != null) {
+        if(cfg.timeFromAttributes && dataset.resolvedFilter != null) {
           let start = null;
           let end = null;
-          if(cfg.endAttribute != null) {
-            start = dataset.resolvedFilter[cfg.endAttribute]?.['$gt'];
-            end = dataset.resolvedFilter[cfg.startAttribute]?.['$lt'];
+          if(cfg.end != null) {
+            start = dataset.resolvedFilter[cfg.end.attribute]?.['$gt'];
+            end = dataset.resolvedFilter[cfg.start.attribute]?.['$lt'];
           } else {
-            start = dataset.resolvedFilter[cfg.startAttribute]?.['$gt'];
-            end = dataset.resolvedFilter[cfg.startAttribute]?.['$lt'];
+            start = dataset.resolvedFilter[cfg.start.attribute]?.['$gt'];
+            end = dataset.resolvedFilter[cfg.start.attribute]?.['$lt'];
           } 
           if(start != null && end != null) {
             this._startDate = new Date(start);
@@ -166,7 +167,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
             if(this.zoomMS > this.spanMS) this.zoomMS = this.spanMS;
             console.log("Retrieved the Gantt start: " + start + "  -  " + end + ", span: " + this.spanMS + ", zoom: " + this.zoomMS);
           }
-        }
+        }  
         //Retrieve the selection target from any of the datasets
         if(dataset != null && dataset.dataTarget != null && dataset.dataTarget.select != null) {
           selectionTarget = {
@@ -306,6 +307,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.redraw();
   }
 
+  toggleOverridePastDrop() {
+    this.overrideAllowPastDrop = !this.overrideAllowPastDrop;
+  }
+
   useLabels(name: string) {
     this.selectedLabelAlt = name;
     this.redraw();
@@ -314,19 +319,21 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   updateOtherData() {
     let fetched = false;
     for(var cfg of this.overlayConfigs) {
-      let filterSort = this.getFilterSort(cfg.dataset, cfg.startAttribute, cfg.endAttribute, null);
-      if(this.datasetgroup != null) {
-        fetched = this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort) || fetched;
-      } else {
-        fetched = this.dataset.filterSort(filterSort) || fetched;
+      if(cfg.timeFromAttributes) {
+        let filterSort = this.getFilterSort(cfg.dataset, cfg.start.attribute, cfg.end.attribute, null);
+        if(this.datasetgroup != null) {
+          fetched = this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort) || fetched;
+        } else {
+          fetched = this.dataset.filterSort(filterSort) || fetched;
+        }  
       }
     }
     return fetched;
   }
 
   getFilterSortForSeries(cfg: GanttSeriesConfig) : any {
-    let startAttribute = cfg.applyDateFilter ? cfg.startAttribute : null;
-    let endAttribute = cfg.applyDateFilter ? cfg.endAttribute : null;
+    let startAttribute = cfg.applyDateFilter ? cfg.start.attribute : null;
+    let endAttribute = cfg.applyDateFilter ? cfg.end?.attribute : null;
     let laneAttributes = cfg.applyLaneFilter ? cfg.laneAttributes : null;
     return this.getFilterSort(cfg.dataset, startAttribute, endAttribute, laneAttributes);
   }
@@ -600,14 +607,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   private getObjectStartEndDur(obj: RbObject, cfg: GanttTimeBasedConfig) {
-    let startMS = (new Date(obj.get(cfg.startAttribute))).getTime();
+    let startMS = (new Date(cfg.start.getValue(obj))).getTime();
     let durationMS = null;
     let endMS = null;
-    if(cfg.durationAttribute != null) {
-      durationMS = parseInt(obj.get(cfg.durationAttribute));
+    if(cfg.duration != null) {
+      durationMS = parseInt(cfg.duration.getValue(obj));
       endMS = startMS + durationMS;
-    } else if(cfg.endAttribute != null) {
-      endMS = (new Date(obj.get(cfg.endAttribute))).getTime();
+    } else if(cfg.end != null) {
+      endMS = (new Date(cfg.end.getValue(obj))).getTime();
       durationMS = endMS - startMS;
     } 
     if(durationMS == null || isNaN(durationMS)) durationMS = 3600000;
@@ -756,7 +763,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   public enhanceDragData(object: RbObject) : any {
     let ret: RbObject | RbObject[] = object;
     let dataset = this.getDatasetForObject(object);
-    if(dataset.selectedObjects.length > 0 && dataset.selectedObjects.includes(object)) {
+    if(dataset != null && dataset.selectedObjects.length > 0 && dataset.selectedObjects.includes(object)) {
       ret = [object].concat(dataset.selectedObjects.filter(o => o.uid != object.uid));
     } 
     return ret;
@@ -765,8 +772,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   public droppedOn(event: any, lane: GanttLane, ignoreTime: boolean = false) {
     let arr: RbObject[] = Array.isArray(event.data) ? event.data : [event.data];
     let masterObject: RbObject = arr[0];
-    let config: GanttSeriesConfig = this.getBestSeriesConfigForObject(masterObject);
-    let masterPreviousLaneValues = config.laneAttributes.map(la => masterObject.get(la));
+    let cfg: GanttSeriesConfig = this.getBestSeriesConfigForObject(masterObject);
+    if(cfg.timeFromAttributes == false) return;
+    let masterPreviousLaneValues = cfg.laneAttributes.map(la => masterObject.get(la));
     let masterChangedLanes = !this.linkValuesMatch(masterPreviousLaneValues, lane.linkValues);
     let masterNewStartMS = null;
     let timeDiffMS = null;
@@ -781,7 +789,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       } else {
         masterNewStartMS = Math.round(this.startMS + (left / this.pxPerMS));
       }
-      let prevStartStr = masterObject.get(config.startAttribute);
+      let prevStartStr = masterObject.get(cfg.start.attribute);
       if(prevStartStr != null) {
         timeDiffMS = Math.round(masterNewStartMS - (new Date(prevStartStr)).getTime());
       }
@@ -790,28 +798,32 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     for(var object of arr) {
       let update: any = {};
       let related: any = {}
+      let spread = this.spreadMap[`${object.objectname}.${object.uid}`]
       if(masterNewStartMS != null) {
-        let [previousStart, previousEnd, previousDuration] = this.getObjectStartEndDur(object, config);
+        let [previousStart, previousEnd, previousDuration] = this.getObjectStartEndDur(object, cfg);
         let thisStartMS = previousStart != null && timeDiffMS != null ? new Date(previousStart).getTime() + timeDiffMS : masterNewStartMS;
         let thisStart = new Date(thisStartMS);
         let thisStartStr = thisStart.toISOString();
-        if(this.allowpastdrop == false && thisStartMS < (new Date()).getTime()) break;
+        if(this.allowpastdrop == false && this.overrideAllowPastDrop == false && thisStartMS < (new Date()).getTime()) {
+          if(spread != null) spread.dragging = false;
+          break;
+        }
         if(previousStart != thisStartStr) {
-          update[config.startAttribute] = thisStartStr;
-          if(config.durationAttribute == null && config.endAttribute != null) {
+          update[cfg.start.attribute] = thisStartStr;
+          if(cfg.duration == null && cfg.end != null) {
             let thisEnd = (new Date(thisStartMS + previousDuration)).toISOString();
-            update[config.endAttribute] = thisEnd;
+            update[cfg.end.attribute] = thisEnd;
           } 
         }
       }
   
       if(masterChangedLanes) {
-        let previousLinkValues = config.laneAttributes.map(la => object.get(la));
+        let previousLinkValues = cfg.laneAttributes.map(la => object.get(la));
         if(!this.linkValuesMatch(previousLinkValues, lane.linkValues)) {
           for(var i = 0; i < lane.linkValues.length; i++) {
-            update[config.laneAttributes[i]] = lane.linkValues[i];
+            update[cfg.laneAttributes[i]] = lane.linkValues[i];
             if(lane.config.linkAttributes[i] == "uid") {
-              related[config.laneAttributes[i]] = lane.object;
+              related[cfg.laneAttributes[i]] = lane.object;
             }
           }
         }
@@ -821,24 +833,25 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         object.setValuesAndRelated(update, related);
       }
   
-      let targetDataset = this.datasetgroup != null ? this.datasetgroup.datasets[config.dataset] : this.dataset;
+      let targetDataset = this.datasetgroup != null ? this.datasetgroup.datasets[cfg.dataset] : this.dataset;
       if(targetDataset != null && targetDataset.list.indexOf(object) == -1) {
         targetDataset.add(object);
       }
-  
     }
   }
 
   public droppedOut(event: any) {
     let arr = Array.isArray(event.data) ? event.data : [event.data];
     for(var object of arr) {
-      let config: GanttSeriesConfig = this.getSeriesConfigForObject(object);
-      let update: any = {};
-      update[config.startAttribute] = null;
-      for(var la of config.laneAttributes) {
-        update[la] = null;
+      let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(object);
+      if(cfg.timeFromAttributes) {
+        let update: any = {};
+        update[cfg.start.attribute] = null;
+        for(var la of cfg.laneAttributes) {
+          update[la] = null;
+        }
+        object.setValues(update);    
       }
-      object.setValues(update);  
     }
   }
 
