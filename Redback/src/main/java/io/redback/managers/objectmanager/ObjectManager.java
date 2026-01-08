@@ -646,11 +646,11 @@ public class ObjectManager
 	}
 	
 	public void elevateSession(Session session) throws RedbackException {
-		session.setElevatedUserProfile(sysUserManager.getProfile(session));
+		session.elevate(sysUserManager.getToken(session), sysUserManager.getProfile(session));
 	}
 	
 	public void demoteSession(Session session) throws RedbackException {
-		session.setElevatedUserProfile(null);
+		session.demote();
 	}
 	
 	

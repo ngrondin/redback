@@ -8,9 +8,13 @@ import io.firebus.Payload;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
+import io.redback.client.AccessManagementClient;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.security.Session;
+import io.redback.security.SysUserManager;
+import io.redback.security.UserProfile;
 import io.redback.utils.CollectionConfig;
 
 public class QueueManager extends Thread {
@@ -19,6 +23,8 @@ public class QueueManager extends Thread {
 	protected DataMap config;
 	protected DataClient dataClient;
 	protected CollectionConfig collection;
+	protected AccessManagementClient accessManagementClient;
+	protected SysUserManager sysUserManager;
 	
 	public QueueManager(DataMap c, Firebus f) {
 		uuid = UUID.randomUUID().toString();
@@ -26,6 +32,8 @@ public class QueueManager extends Thread {
 		config = c;
 		dataClient = new DataClient(firebus, config.getString("dataservice"));
 		collection = new CollectionConfig(dataClient, config.getObject("collection"), "rbq_message");
+		accessManagementClient = new AccessManagementClient(firebus, config.getString("accessmanagementservice"));
+		sysUserManager = new SysUserManager(accessManagementClient, config);
 		setName("rbQueue");
 		start();
 	}
@@ -91,17 +99,18 @@ public class QueueManager extends Thread {
 	protected void processMessage(String msgUuid) throws RedbackException {
 		DataMap msg = lockAndGet(msgUuid);
 		if(msg != null) {
-			String service = msg.getString("service");
-			DataMap message = msg.getObject("message");
-			int requestTimeout = msg.containsKey("timeout") ? msg.getNumber("timeout").intValue() : 10000;
-			Payload payload = new Payload(message);
-			payload.metadata.put("session", msg.getString("session"));
-			payload.metadata.put("token", msg.getString("token"));
-			if(msg.containsKey("timezone"))
-				payload.metadata.put("timezone", msg.getString("timezone"));
-			if(msg.containsKey("domain"))
-				payload.metadata.put("domain", msg.getString("domain"));
 			try {
+				String service = msg.getString("service");
+				DataMap message = msg.getObject("message");
+				int requestTimeout = msg.containsKey("timeout") ? msg.getNumber("timeout").intValue() : 10000;
+				String token = checkToken(msg.getString("token"));
+				Payload payload = new Payload(message);
+				payload.metadata.put("session", msg.getString("session"));
+				payload.metadata.put("token", token);
+				if(msg.containsKey("timezone"))
+					payload.metadata.put("timezone", msg.getString("timezone"));
+				if(msg.containsKey("domain"))
+					payload.metadata.put("domain", msg.getString("domain"));
 				if(requestTimeout > 0) firebus.requestService(service, payload, requestTimeout);
 				else firebus.requestService(service, payload);
 				remove(msgUuid);
@@ -136,5 +145,19 @@ public class QueueManager extends Thread {
 	
 	protected void setFailed(String msgUuid) throws RedbackException {
 		collection.putData(new DataMap("_id", msgUuid), new DataMap("lock", null, "failed", new Date()));
+	}
+	
+	protected String checkToken(String token) throws RedbackException {
+		UserProfile up = accessManagementClient.validate(new Session(), token);
+		if(up.getExpiry() > System.currentTimeMillis() + 10000) {
+			return token;
+		} else {
+			Session sysUserSession = sysUserManager.getSession();
+			if(up.getUsername().equals(sysUserSession.getUserProfile().getUsername())) {
+				return sysUserSession.getToken();				
+			} else {
+				throw new RedbackUnauthorisedException("Queue message token expired");
+			}
+		}
 	}
 }

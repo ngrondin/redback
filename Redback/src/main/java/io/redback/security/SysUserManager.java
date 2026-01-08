@@ -23,6 +23,11 @@ public class SysUserManager {
 			return null;
 	}
 	
+	public String getToken(Session session) throws RedbackException {
+		retreive(session);
+		return token;
+	}
+	
 	public UserProfile getProfile(Session session) throws RedbackException  {
 		retreive(session);
 		return profile;

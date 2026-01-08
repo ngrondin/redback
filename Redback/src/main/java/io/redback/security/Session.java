@@ -16,6 +16,7 @@ public class Session
 	public String id;
 	public String token;
 	public UserProfile userProfile;
+	public String elevatedUserToken;
 	public UserProfile elevatedUserProfile;
 	public String timezone;
 	public String domainLock;
@@ -69,9 +70,16 @@ public class Session
 		userProfile = up;
 	}
 	
-	public void setElevatedUserProfile(UserProfile up)
+	public void elevate(String t, UserProfile up) 
 	{
+		elevatedUserToken = t;
 		elevatedUserProfile = up;
+	}
+	
+	public void demote()
+	{
+		elevatedUserToken = null;
+		elevatedUserProfile = null;		
 	}
 	
 	public void setToken(String t)
@@ -208,5 +216,9 @@ public class Session
 		return scriptLevel > 0;
 	}
 	
+	public boolean isElevated() 
+	{
+		return elevatedUserToken != null && elevatedUserProfile != null;
+	}
 	
 }

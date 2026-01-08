@@ -163,7 +163,10 @@ public class Client {
 	{
 		if(session != null && payload != null) {
 			payload.metadata.put("session", session.id);
-			payload.metadata.put("token", session.token);
+			if(session.isElevated())
+				payload.metadata.put("token", session.elevatedUserToken);
+			else
+				payload.metadata.put("token", session.token);
 			if(session.getTimezone() != null) 
 				payload.metadata.put("timezone", session.getTimezone());
 			if(session.getDomainLock() != null)

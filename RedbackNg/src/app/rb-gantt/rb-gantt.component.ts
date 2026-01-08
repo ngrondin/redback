@@ -211,15 +211,16 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   onDragEvent(event: any) {
-    if(event.type == 'start') {
+    if(event.type == 'start' && !this.doDragFilter) {
       for(var obj of (Array.isArray(event.data) ? event.data : [event.data])) {
         if(obj != null && obj instanceof RbObject) {
           var spread = this.spreadMap[`${obj.objectname}.${obj.uid}`];
-          if(spread != null) {
-            spread.dragging = true;
-          }
+          if(spread != null) spread.dragging = true;          
         }
       }
+    }
+    if(this.doDragFilter) {
+      this.redraw();
     }
   }
 
@@ -413,7 +414,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let laneFilter: any = null;
     if(this.doDragFilter && this.dragService.isDragging && this.lanesConfig.dragfilter != null) {
       let draggingObject = Array.isArray(this.dragService.data) ? this.dragService.data[0] : this.dragService.data;
-      laneFilter =  this.filterService.resolveFilter(this.lanesConfig.dragfilter, draggingObject, null, null);
+      laneFilter = this.filterService.resolveFilter(this.lanesConfig.dragfilter, draggingObject, null, null);
     };
     let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
     for(let obj of list) {
@@ -489,6 +490,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               let spread = new GanttSpread(label, startPX, widthPX, offsetTop, sublane, color, labelcolor, obj, dataset, cfg);
               spread.indicator = indicator;
               spread.tip = labelWidth > widthPX ? label : null;
+              spread.dragging = this.dragService.isDragging && this.isObjectDragging(obj);
               spreads.push(spread);
               this.spreadMap[`${obj.objectname}.${obj.uid}`] = spread;
               if(spread.selected) {
@@ -906,5 +908,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       tgt = tgt.offsetParent;
     }
     return new XY(x, y);
+  }
+
+  isObjectDragging(obj: RbObject) : boolean {
+    return this.dragService.data == obj || (Array.isArray(this.dragService.data) && this.dragService.data.indexOf(obj) > -1);
   }
 }
