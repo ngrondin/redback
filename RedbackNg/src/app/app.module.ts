@@ -165,6 +165,7 @@ import { RbCheckboxComponent } from './rb-checkbox/rb-checkbox.component';
 import { RbSwitchComponent } from './rb-switch/rb-switch.component';
 import { RbRepeaterComponent } from './rb-repeater/rb-repeater.component';
 import { RbPivotTableComponent } from './graphs/rb-pivot-table/rb-pivot-table.component';
+import { RbAboutComponent } from './rb-about/rb-about.component';
 
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -338,7 +339,8 @@ window.redback = window.redback || {};
         RbCheckboxComponent,
         RbSwitchComponent,
         RbRepeaterComponent,
-        RbPivotTableComponent
+        RbPivotTableComponent,
+        RbAboutComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

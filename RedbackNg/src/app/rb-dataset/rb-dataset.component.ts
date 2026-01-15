@@ -101,7 +101,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       } else if(event.event == 'clear') {
         this.clear();
       } else if(event.event == 'update') {
-        this.publishEvent('update');
+        if(this.canLoadData) this.publishEvent('update'); //Child data may need to be redrawn when parent is updated. Only do it if dataset is ready
         this.refreshData(true);
       } else if(event.event == 'globalupdate') {
         this.refreshData();
@@ -159,7 +159,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       && this.active 
       && (this.master == null || (this.master != null && this.relatedObject != null))
       && (this.requiresuserfilter == false || this.hasUserFilter)
-      /*&& !this._loading;*/
   }
 
   public contains(obj: RbObject): boolean {
@@ -178,7 +177,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   public refreshData(onlyIfFilterChanged = false) : boolean {
     if(this.canLoadData) {
-      //console.log("RefreshData start " + this.id + " " + JSON.stringify(this.resolvedFilter))
+      this.logService.debug("Dataset " + this.id + ": RefreshData ()");
       let prevFilter = this.resolvedFilter;
       let prevSearch = this.resolvedSearch;
       let prevSort = this.resolvedSort;
@@ -186,7 +185,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       let filterChanged = ValueComparator.notEqual(prevFilter, this.resolvedFilter);
       let searchChanged = ValueComparator.notEqual(prevSearch, this.resolvedSearch);
       let sortChanged = ValueComparator.notEqual(prevSort, this.resolvedSort);
-      //console.log("RefreshData middle " + this.id + " " + JSON.stringify(this.resolvedFilter))
       if(filterChanged || searchChanged || sortChanged || !onlyIfFilterChanged) {
         this.clear(false);
         this.fetchNextPage();
@@ -221,7 +219,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.dataService.subscribeToCreation(this.uid, this.objectname, this.resolvedFilter);
     this.resolvedSort = this.userSort != null ? this.userSort : this.baseSort;
     this.resolvedSearch = this.userSearch;
-    //console.log("ResolveFilterSort " + this.id + " " + JSON.stringify(this.resolvedFilter))
   }
 
   public clear(resetResolved = true) {
@@ -242,8 +239,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public fetchNextPage() {
+    this.logService.debug("Dataset " + this.id + ": FetchNextPage (hasMorePages=" + this.hasMorePages + ", fetchAll=" + this.fetchAll + ", resolvedFilter=" + JSON.stringify(this.resolvedFilter) + ")");
     if(this.hasMorePages) {
-      //console.log("FetchNextPage " + this.id + " " + JSON.stringify(this.resolvedFilter))
       const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
       const search = this.userSearch != null ? this.userSearch : this.dataTarget != null && this.dataTarget.search != null ? this.dataTarget.search : null;
       const addRel = this.fetchAll ? false : this.addrelated;
@@ -283,6 +280,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   private loadComplete(success) {
+    this.logService.debug("Dataset " + this.id + ": LoadComplete (success=" + success + ")");
     this._loading = false;
     if(this.fetchAll) {
       this.hasMorePages = false;
@@ -316,7 +314,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
   
   private receiveUpdatedObject(object: RbObject) {
-    if(object.objectname == this.objectname && object.deleted == false && this._list.includes(object) == false && this.isLoading == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
+    if(object.objectname == this.objectname && object.deleted == false && this.resolvedFilter != null && this._list.includes(object) == false && this.isLoading == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
       if(this.filterService.applies(this.resolvedFilter, object)) {
         this._list.push(object);
         object.addSet(this);
@@ -380,7 +378,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public filterSort(event: any) : boolean {
-    //console.log("FilterSort " + this.id + " " + JSON.stringify(event))
+    this.logService.debug("Dataset " + this.id + ": FilterSort ()");
     let fetched = false;
     let newFilter = event.filter;// ?? this.defaultUserFilter;
     let newSort = event.sort;// ?? this.defaultUserSort;

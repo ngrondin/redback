@@ -21,6 +21,10 @@ export class DragService {
 
   constructor() { }
 
+  public get hasDropped() : boolean {
+    return this.isDragging && this.droppedOnElement != null;
+  }
+
   public prepareDrag(el: ElementRef, d: any, event: any, doCB: Function) {
     this.draggingElement = el;
     this.data = d;

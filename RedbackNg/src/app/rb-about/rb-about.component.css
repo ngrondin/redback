@@ -1,0 +1,56 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background-color: #0004;
+}
+
+.rb-about-frame {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2), 0 13px 19px 2px rgba(0, 0, 0, 0.14), 0 5px 24px 4px rgba(0, 0, 0, 0.12);
+    /*padding: 10px;*/
+    max-width: 70%;
+    max-height: 70%;
+    overflow: hidden;
+}
+
+.rb-about-container {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.rb-about-header {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+    background-color: var(--primary-color);
+    color: #ddd;
+    align-items: center;
+}
+
+.rb-about-title {
+    display: flex;
+    flex: 1 1 auto;
+    margin-left: var(--v5px);
+}
+
+.rb-about-topicon {
+    margin-left: var(--v5px);
+}
+
+.rb-about-item {
+    margin: var(--v12px) var(--v20px)
+}

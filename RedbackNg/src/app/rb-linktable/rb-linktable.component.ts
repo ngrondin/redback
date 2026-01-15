@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { RbObject } from 'app/datamodel';
+import { RbObject, RELATED_LOADING } from 'app/datamodel';
 import { ColorConfig, Evaluator, Formatter, LinkConfig } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
@@ -92,17 +92,22 @@ export class RbLinktableComponent extends RbDataObserverComponent {
         let cfg = this.getColumnConfig(object, this.columns[c]);
         if(cfg != null) {
           let val = null;
+          let loading = false;
           if(cfg.expression != null) {
             val = Evaluator.eval(cfg.expression, object, null, this.dataset);
           } else if(cfg.attribute != null) {
             val = object.get(cfg.attribute);
           }
+          if(val === RELATED_LOADING) {
+            val = null;
+            loading = true;
+          }
           let formatVal = cfg.format != null ? Formatter.format(val, cfg.format) : val;
           let foreColor = cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
           let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
           let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
-          let col = {value: val, formattedValue: formatVal, align: cfg.align, width: cfg.width, backColor: backColor, foreColor: foreColor, icon: icon, link: cfg.link, model: cfg.modal};
-          if(!isNaN(val)) {
+          let col = {value: val, formattedValue: formatVal, align: cfg.align, width: cfg.width, backColor: backColor, foreColor: foreColor, icon: icon, link: cfg.link, model: cfg.modal, loading: loading};
+          if(val !== RELATED_LOADING && !isNaN(val)) {
             grp.sums[c] += val;
             totalsums[c] += val;
           }

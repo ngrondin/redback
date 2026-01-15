@@ -24,6 +24,7 @@ public class Session
 	public ScriptContext scriptContext;
 	public int scriptLevel = 0;
 	public TxStore<Object> txStore;
+	public boolean blockTxStore;
 	public DataMap stats;
 	public DataMap data;
 
@@ -61,6 +62,7 @@ public class Session
 		}
 		token = t;
 		userProfile = up;	
+		blockTxStore = false;
 		stats = new DataMap();
 		data = new DataMap();
 	}
@@ -183,7 +185,17 @@ public class Session
 	
 	public boolean hasTxStore() 
 	{
-		return txStore != null;
+		return !blockTxStore && txStore != null;
+	}
+	
+	public void blockTxStore()
+	{
+		blockTxStore = true;
+	}
+	
+	public void unblockTxStore()
+	{
+		blockTxStore = false;
 	}
 	
 	public void setData(String k, Object v) 

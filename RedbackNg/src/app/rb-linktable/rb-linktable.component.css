@@ -150,7 +150,11 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     flex: 1 1 auto;
 }
 
-
+.rb-linktable-loading {
+    width: 100%;
+    max-width: 5vw;
+    height: var(--v16px);
+}
 
 .rb-linktable-footer-container {
     display: flex;

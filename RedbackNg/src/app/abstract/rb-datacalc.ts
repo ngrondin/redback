@@ -26,6 +26,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     recalcInterval: number = -1;
     minRecalcTime: number = -1;
     recalcPlanned: boolean = false;
+    blockRecalc: boolean = false;
     private _logService: LogService;
     
     constructor(
@@ -109,8 +110,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
 
     redraw() {
-        //this._logService.debug("DataCalc " + this.id + ": Redraw (" + !this.recalcPlanned + ")");
-        if(this.recalcPlanned == false) {
+        if(this.recalcPlanned == false && this.blockRecalc == false) {
           this.recalcPlanned = true;
           let now = new Date().getTime();
           let nextCalc = now;
@@ -120,21 +120,25 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             nextCalc = this.lastRecalc + this.minRecalcTime;
           }
           let tillNextCalc = Math.max(nextCalc, now) - now
-          setTimeout(() => {
-            try {
-                var start = (new Date()).getTime();
-                this._logService.debug("DataCalc " + this.id + ": start calc");
-                this.calc();
-                this.recalcPlanned = false;
-                this.lastRecalc = (new Date()).getTime();
-                let end = (new Date()).getTime();
-                this._logService.debug("DataCalc " + this.id + ": finished calc in " + (end-start) + "ms");
-            } catch(err) {
-                this._logService.error(err);
-            }
-          }, tillNextCalc);
+          if(tillNextCalc == 0) this._calc();
+          else setTimeout(() => this._calc(), tillNextCalc);
         }
-      }
+    }
+
+    _calc() {
+        try {
+            this._logService.debug("DataCalc " + this.id + ": start calc");
+            var start = (new Date()).getTime();
+            this.calc();
+            let end = (new Date()).getTime();
+            this.lastRecalc = end;
+            this._logService.debug("DataCalc " + this.id + ": finished calc in " + (end-start) + "ms");
+        } catch(err) {
+            this._logService.error(err);
+            
+        }
+        this.recalcPlanned = false;
+    }
 
     iterateAllLists(callback: (object: RbObject, config: T) => void) {
         for(let seriesConfig of this.seriesConfigs) {

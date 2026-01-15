@@ -1,7 +1,9 @@
 import { OnInit, Input, ViewChild, HostListener, Component, ViewContainerRef } from "@angular/core";
+import { MatDialog } from "@angular/material/dialog";
 import { MatSidenav } from "@angular/material/sidenav";
 import { DomSanitizer } from "@angular/platform-browser";
 import { AppInjector } from "app/app.module";
+import { RbAboutComponent } from "app/rb-about/rb-about.component";
 
 import { RbUsermenuComponent } from "app/rb-usermenu/rb-usermenu.component";
 import { ApiService } from "app/services/api.service";
@@ -50,6 +52,7 @@ export abstract class AppRootComponent implements OnInit {
     nlActionService: NlactionService;
     navigateService: NavigateService;
     logService: LogService;
+    dialog: MatDialog;
 
     constructor(
     ) {
@@ -65,6 +68,7 @@ export abstract class AppRootComponent implements OnInit {
         this.nlActionService = AppInjector.get(NlactionService);
         this.navigateService = AppInjector.get(NavigateService);
         this.logService = AppInjector.get(LogService);
+        this.dialog = AppInjector.get(MatDialog);
      }
   
     ngOnInit() {
@@ -108,6 +112,8 @@ export abstract class AppRootComponent implements OnInit {
           this.toggleRightDrawer("prefs");
         } else if(value == 'logs') {
           this.logService.export();
+        } else if(value == 'about') {
+          this.openAbout();
         } else {
           this.navigateService.navigateTo({view: value});
         }
@@ -148,6 +154,14 @@ export abstract class AppRootComponent implements OnInit {
       if(this.drawerOpen) {
         this.closeRightDrawer();
       }
+    }
+
+    openAbout() {
+      this.dialog.open(RbAboutComponent, {
+        data: {},
+        autoFocus: false,
+        restoreFocus: false
+      });
     }
   
     @HostListener('mouseup', ['$event']) onMouseUp($event) {

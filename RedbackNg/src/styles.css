@@ -514,6 +514,23 @@ rb-fileset {
   transition-delay: 0s
 }
 
+.rb-loadingbox {
+    border-radius: 4px;
+    background-color: #e0e0e0; 
+    background: linear-gradient(90deg, #e0e0e088 25%, #f5f5f5 50%, #e0e0e088 75%);
+    background-size: 200% 100%; 
+    animation: shimmer 1.5s infinite linear; 
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0; /* Start position off-screen to the left */
+    }
+    100% {
+        background-position: 200% 0; /* End position off-screen to the right */
+    }
+}
+
 .rb-hover-container:hover .rb-hoverbox {
   visibility: visible; /* Show the text on hover */
   opacity: 0.7; /* Fade it in */

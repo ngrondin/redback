@@ -50,26 +50,30 @@
                     <div
                         [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border-on' : '')">
                         <a
-                            *ngIf="col.icon == null && col.link != null"
+                            *ngIf="col.icon == null && col.link != null && !col.loading"
                             (click)="clickLink(col.link, line.object)">
                             {{col.formattedValue}}                
                         </a>
                         <a
-                            *ngIf="col.icon == null && col.modal != null"
+                            *ngIf="col.icon == null && col.modal != null && !col.loading"
                             (click)="clickModal(col.modal)">
                             {{col.formattedValue}}                
                         </a>
                         <span
-                            *ngIf="col.icon == null && col.link == null">
+                            *ngIf="col.icon == null && col.link == null && !col.loading">
                             {{col.formattedValue}}                
                         </span>
                         <div
-                            *ngIf="col.icon != null"
+                            *ngIf="col.icon != null && !col.loading"
                             class="rb-linktable-icon">
                             <rb-icon
                                 [icon]="col.icon">
                             </rb-icon>
                         </div>  
+                        <div
+                            *ngIf="col.loading"
+                            class="rb-loadingbox rb-linktable-loading">
+                        </div>
                     </div>              
                 </div>
             </div>          

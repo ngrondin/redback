@@ -7,10 +7,15 @@ import { LogService } from './services/log.service';
 import { AppInjector } from './app.module';
 import { RbSetComponent } from './abstract/rb-set';
 
+export const RELATED_LOADING = Symbol('RelatedLoading');
+
 export class ObjectResp {
     objects: object;
 }
 
+export class RbObjectTransaction {
+    objects: RbObject[] = [];
+}
 
 export class RbObject {
     objectname: string;
@@ -20,7 +25,7 @@ export class RbObject {
     data: any = {};
     related: any = {};
     validation: any = {};
-    flags: any = {};
+    loadingRelated: any = [];
     updatedAttributes: any = [];
     deleted: boolean = false;
     dataService: DataService;
@@ -118,12 +123,14 @@ export class RbObject {
                             else this.related[attribute] = relatedObject;
                         } else {
                             let callback = (object) => {
+                                this.loadingRelated = this.loadingRelated.filter(a => a != attribute);
                                 if(isArray) this.related[attribute].push(object);
                                 else this.related[attribute] = object;
                                 this._adviseSetsOfChange();
                             };
                             if(uid != null) this.dataService.enqueueDeferredFetch(relatedRule.object, uid, callback);
                             else this.dataService.enqueueDeferredFetchList(relatedRule.object, filter, callback);
+                            this.loadingRelated.push(attribute);
                         }
                     }
                 }
@@ -147,6 +154,8 @@ export class RbObject {
                 if(this.related[base] != null) {
                     let rest = attr.substring(attr.indexOf('.') + 1);
                     ret = this.related[base].get(rest);
+                } else if(this.loadingRelated.includes(base)) {
+                    ret = RELATED_LOADING;
                 } else if(typeof this.data[base] == 'object') {
                     let parts = attr.split(".");
                     let cur = this.data[base];
@@ -185,28 +194,28 @@ export class RbObject {
         return (this.validation != null && this.validation._candelete == true);
     }
 
-    setValue(attribute: string, value: any) {
+    setValue(attribute: string, value: any, tx?: RbObjectTransaction) {
         let ret = this._setValueAndRelated(attribute, value, null);
-        this._afterSetValue(ret);
+        this._afterSetValue(ret, tx);
     }
 
-    setValues(map: any) {
-        this.setValuesAndRelated(map, null);
+    setValues(map: any, tx?: RbObjectTransaction) {
+        this.setValuesAndRelated(map, null, tx);
     }
 
-    setValueAndRelated(attribute: string, value: any, related: RbObject) {
+    setValueAndRelated(attribute: string, value: any, related: RbObject, tx?: RbObjectTransaction) {
         let ret = this._setValueAndRelated(attribute, value, related);
-        this._afterSetValue(ret);        
+        this._afterSetValue(ret, tx);
     }
 
-    setValuesAndRelated(valueMap: any, relatedMap: any) {
+    setValuesAndRelated(valueMap: any, relatedMap: any, tx?: RbObjectTransaction) {
         let ret: boolean = false;
         for(let key of Object.keys(valueMap)) {
             let val = valueMap[key];
             let rel = relatedMap != null ? relatedMap[key] : null
             ret = this._setValueAndRelated(key, val, rel) || ret;
         }
-        this._afterSetValue(ret);
+        this._afterSetValue(ret, tx);
     }    
 
     _setValueAndRelated(attribute: string, value: any, related: RbObject) : boolean {
@@ -224,12 +233,14 @@ export class RbObject {
         return false;
     }
 
-    _afterSetValue(updated: boolean) {
+    _afterSetValue(updated: boolean, tx?: RbObjectTransaction) {
         if(updated) {
             this._adviseSetsOfChange();
-            if(this.dataService.saveImmediatly) {
+            if(tx == null) {
                 this.dataService.pushToServer(this);
-            }            
+            } else {
+                tx.objects.push(this);
+            }           
         }
     }
 

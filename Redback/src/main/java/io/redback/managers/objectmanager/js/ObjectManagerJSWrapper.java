@@ -86,12 +86,14 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = (DataMap)(arguments[1]);
 					DataMap sort = (DataMap)(arguments[2]);
 					Function callable = (Function)arguments[3];
+					session.blockTxStore();
 					ProcessingDataStream<RedbackObject> stream = new ProcessingDataStream<RedbackObject>(new ProcessingDataStream.Processor<RedbackObject>() {
 						public void process(RedbackObject object) throws Exception {
 							callable.call(new RedbackObjectJSWrapper(object));
 						}});
 					objectManager.streamObjects(session, objectname, filter, null, sort, 50, 0, stream);
 					stream.waitUntilDone();
+					session.unblockTxStore();
 					return null;
 				}
 			};
@@ -103,6 +105,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap sort = (DataMap)(arguments[2]);
 					long chunkSize = (long)arguments[3];
 					Function callable = (Function)arguments[4];
+					session.blockTxStore();
 					ChunkProcessingDataStream<RedbackObject> stream = new ChunkProcessingDataStream<RedbackObject>((int)chunkSize, new ChunkProcessingDataStream.Processor<RedbackObject>() {
 						public void process(List<RedbackObject> list) throws Exception {
 							List<RedbackObjectJSWrapper> jsList = RedbackObjectJSWrapper.convertList(list);
@@ -110,6 +113,7 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 						}});
 					objectManager.streamObjects(session, objectname, filter, null, sort, 50, 0, stream);
 					stream.waitUntilDone();
+					session.unblockTxStore();
 					return null;
 				}
 			};				

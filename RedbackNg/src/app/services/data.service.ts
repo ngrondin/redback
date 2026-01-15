@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable, of, Observer } from 'rxjs';
-import { RbObject, RbFile, RbAggregate } from '../datamodel';
+import { RbObject, RbFile, RbAggregate, RbObjectTransaction } from '../datamodel';
 import { ErrorService } from './error.service';
 import { ClientWSService } from './clientws.service';
 import { FilterService } from './filter.service';
@@ -15,7 +15,6 @@ import { LogService } from './log.service';
 })
 export class DataService {
   allObjects: { [objectname: string]: { [uid: string]: RbObject } };
-  saveImmediatly: boolean;
   fetchCount: number = 0;
   objectUpdateObservers: Observer<RbObject>[] = [];
   deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue();
@@ -29,19 +28,14 @@ export class DataService {
     private logService: LogService
   ) {
     this.allObjects = {};
-    this.saveImmediatly = true;
     this.clientWSService.getObjectUpdateObservable().subscribe({
       next: (json) => {
         let list = Array.isArray(json) ? json : [json];
-        const rbObjectArray = Object.values(list).map(json => this.receive(json));
-        this.finalizeReceipt();
-        this.objectUpdateObservers.forEach((observer) => {
-          rbObjectArray.forEach(rbObject => observer.next(rbObject)) ;
-        });              
+        list.forEach(json => this.receive(json));
+        this.finalizeReceipt();            
       }
     });
   }
-
 
   clear() {
     this.allObjects = {};
@@ -59,6 +53,11 @@ export class DataService {
   put(rbObject: RbObject) {
     if(this.allObjects[rbObject.objectname] == null) this.allObjects[rbObject.objectname] = {};
     this.allObjects[rbObject.objectname][rbObject.uid] = rbObject;
+  }
+
+  remove(rbObject: RbObject) {
+    var objMap = this.allObjects[rbObject.objectname];
+    if(objMap != null) delete objMap[rbObject.uid];
   }
 
   list(objectname: string, filter: any) : RbObject[] {
@@ -237,7 +236,13 @@ export class DataService {
       this.put(rbObject);
       this.clientWSService.subscribeToUniqueObjectUpdate(rbObject.objectname, rbObject.uid);
     }
-    return rbObject;
+    if(rbObject.deleted) {
+      this.remove(rbObject);
+      return null;
+    } else {
+      this.objectUpdateObservers.forEach((observer) => observer.next(rbObject));
+      return rbObject;
+    }
   }
 
   async finalizeReceipt() {
@@ -264,13 +269,17 @@ export class DataService {
           {
             next: resp => {
               resp.result.forEach(json => {
-                let obj = this.receive(json);
-                let callbacks = [];
-                let deferredUid = deferredObject.uids[obj.uid];
-                if(deferredUid != null) callbacks.push(...deferredUid.callbacks);
-                let deferredFilters = deferredObject.filters.filter(f => this.filterService.applies(f.data, obj));
-                deferredFilters.forEach(df => callbacks.push(...df.callbacks));
-                callbacks.forEach(cb => cb(obj));
+                try {
+                  let obj = this.receive(json);
+                  let callbacks = [];
+                  let deferredUid = deferredObject.uids[obj.uid];
+                  if(deferredUid != null) callbacks.push(...deferredUid.callbacks);
+                  let deferredFilters = deferredObject.filters.filter(f => this.filterService.applies(f.data, obj));
+                  deferredFilters.forEach(df => callbacks.push(...df.callbacks));
+                  callbacks.forEach(cb => cb(obj));
+                } catch(error) {
+                  this.logService.error("Error finalizing receipt for " + objectname + ": " + error);
+                }
               });
             },
             complete: () => {
@@ -280,7 +289,7 @@ export class DataService {
               this.finalizeReceipt();
             },
             error: error => {
-              this.logService.error("Error finalizing receipt for " + objectname + " :" + error);
+              this.logService.error("Error finalizing receipt for " + objectname + ": " + error);
               this.runningFinalization = false;
               this.finalizeReceipt();
             }
@@ -307,6 +316,29 @@ export class DataService {
         rbObject.refresh();
       }
     );
+  }
+
+  pushTransactionToServer(tx: RbObjectTransaction) {
+    if(tx.objects.length == 1) {
+      this.pushToServer(tx.objects[0]);
+    } else if(tx.objects.length > 1) {
+      let multi = [];
+      for(let object of tx.objects) {
+        let upd: any = {};
+        for(const attribute of object.updatedAttributes) {
+            upd[attribute] = object.data[attribute];
+        }
+        multi.push({key: object.uid, action:"update", object: object.objectname, uid: object.uid, data: upd});
+      }
+      this.apiService.objectMulti(multi).subscribe({
+        next: (resp) => {
+          var objects = Object.keys(resp).map(key => this.receive(resp[key]))
+        },
+        error: (error) => {
+          this.errorService.receiveHttpError(error)
+        }
+      })
+    }
   }
 
   create(name: string, uid: string, data: any) : Observable<RbObject> {
@@ -401,6 +433,8 @@ export class DataService {
       })
     })
   }
+
+
 
   export(name: string, filter: any, search: string) : Observable<any> {
     return new Observable<null>((observer) => {

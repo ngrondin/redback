@@ -102,14 +102,12 @@ export const GanttSpreadMargin: number = 0.41; //VW
     label: string;
     labelAttribute: string;
     color: ColorConfig;
+    applyDateFilter: boolean;
   
     constructor(json: any, userpref: any) {
       super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
       this.dataset = json.dataset;
-      /*this.startAttribute = json.startattribute;
-      this.durationAttribute = json.durationattribute;
-      this.endAttribute = json.endattribute;*/
       this.label = json.label;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
       if(json.color != null && typeof json.color === 'object') {
@@ -117,6 +115,7 @@ export const GanttSpreadMargin: number = 0.41; //VW
       } else if(json.color != null || json.colorattribute != null || json.colormap != null || json.colorexpression != null) {
         this.color = new ColorConfig({color: json.color, attribute: json.colorattribute, map: json.colormap, expression: json.colorexpression});
       }
+      this.applyDateFilter = json.applydatefilter != null ? json.applydatefilter : true;
     }
   }
 

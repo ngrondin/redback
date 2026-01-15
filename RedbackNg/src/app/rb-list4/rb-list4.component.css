@@ -134,6 +134,11 @@ rb-scroll ::ng-deep .rb-scroll-content {
     
 }
 
+.rb-list-item-meta-loading {
+    width: 20%;
+    height: var(--v16px); 
+}
+
 .rb-list-item-metaspacer {
     flex: 1 1 auto;
 }
@@ -148,6 +153,12 @@ rb-scroll ::ng-deep .rb-scroll-content {
     font-size: 1.0rem;
 }
 
+.rb-list-item-main-loading {
+    width: 100%;
+    height: var(--v24px); 
+    margin: var(--v5px) 0;
+}
+
 .rb-list-item-sub {
     color: #aaaaaa;
     font-size: 0.75rem;
@@ -159,6 +170,11 @@ rb-scroll ::ng-deep .rb-scroll-content {
     -webkit-line-clamp: 2; /* number of lines to show */
             line-clamp: 2;
     -webkit-box-orient: vertical;    
+}
+
+.rb-list-item-sub-loading {
+    width: 100%;
+    height: var(--v16px); 
 }
 
 .rb-list-divider {
@@ -223,3 +239,4 @@ rb-scroll ::ng-deep .rb-scroll-content {
     color: var(--primary-color);
     -webkit-text-stroke: 0px var(--primary-color);
 }
+

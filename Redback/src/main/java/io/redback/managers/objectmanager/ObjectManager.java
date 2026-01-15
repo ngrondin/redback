@@ -827,12 +827,14 @@ public class ObjectManager
 			}
 
 			int i = 0;
+			List<RedbackObject> objectList = new ArrayList<RedbackObject>();
 			List<RedbackObject> updatedList = new ArrayList<RedbackObject>();
 			List<RedbackObject> deletedList = new ArrayList<RedbackObject>();
 			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
 			List<Object> txList = session.getTxStore().getAll("object");
 			while(i < txList.size()) { //This is so the list can grow as onSaves are being done (creation of new objects onSave)
 				RedbackObject rbObject = (RedbackObject)txList.get(i++);
+				objectList.add(rbObject);
 				if(rbObject.isDeleted) {
 					deletedList.add(rbObject);
 					dbtxs.add(rbObject.getDBDeleteTransaction());
@@ -860,8 +862,8 @@ public class ObjectManager
 			for(RedbackObject rbObject: updatedList) 
 				rbObject.afterSave();
 			
-			signal(updatedList);
-			session.setStat("objects", i /*list.size()*/);
+			signal(objectList);
+			session.setStat("objects", objectList.size());
 			session.setStat("updates", updatedList.size());
 		}
 	}

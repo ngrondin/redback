@@ -1,0 +1,27 @@
+<div
+    class="rb-about-frame"
+    (click)="$event.stopPropagation()">
+    <div
+        class="rb-about-header">
+        <rb-icon
+            [class]="'rb-about-topicon'"
+            [icon]="'info'">
+        </rb-icon>        
+        <div
+            class="rb-about-title">
+            About
+        </div>
+    </div>
+    <div
+        class="rb-about-container">
+        <div
+            class="rb-about-item">
+            Client Version: {{clientVersion}}
+        </div>
+        <div
+            class="rb-about-item">
+            Angular Version: {{angularVersion}}
+        </div>
+        
+    </div>
+</div>

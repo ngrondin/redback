@@ -7,6 +7,7 @@ import { Platform } from '@angular/cdk/platform';
 import * as pako from 'pako';
 import { SecurityService } from './security.service';
 import { LogService } from './log.service';
+import packageJson from '../../../package.json'; 
 
 export class Upload {
   uploaduid = UUID.UUID();
@@ -240,7 +241,10 @@ export class ClientWSService {
       data:{
        deviceid: this.deviceId,
        devicemodel: this.platform.BLINK ? "blink" : this.platform.EDGE ? "edge" : this.platform.FIREFOX ? "firefox" : this.platform.SAFARI ? "safari" : this.platform.TRIDENT ? "trident" : this.platform.WEBKIT ? "webkit" : "unknown",
-       screensize: window.innerWidth + "x" + window.innerHeight 
+       appversion: packageJson.version,
+       os: "web",
+       screensize: window.innerWidth + "x" + window.innerHeight ,
+       
       }
     };
     this.websocket.next(req);

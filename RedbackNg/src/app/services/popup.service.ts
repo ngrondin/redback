@@ -20,21 +20,25 @@ export class PopupService {
     if(this.overlay != null) {
       this.closePopup();
     }
-
-    let position: any = this.getPositionOf(anchorElementRef.element.nativeElement);
-    let direction = 'down';
+    let positionStrategy: any;
     let maxHeight = 200;
-    let positionData = null;
-    if(position.top > (window.innerHeight / 2)) {
-      direction = 'up';
-      maxHeight = position.top;
-      positionData = [{ originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' }];
+    if(anchorElementRef != null) {
+      let position: any = this.getPositionOf(anchorElementRef.element.nativeElement);
+      let direction = 'down';
+      let positionData = null;
+      if(position.top > (window.innerHeight / 2)) {
+        direction = 'up';
+        maxHeight = position.top;
+        positionData = [{ originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' }];
+      } else {
+        maxHeight = (window.innerHeight - position.top - anchorElementRef.element.nativeElement.clientHeight - 40);
+        positionData = [{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top' }];
+      }
+      positionStrategy = this.overlay.position().flexibleConnectedTo(anchorElementRef.element).withPositions(positionData);
     } else {
-      maxHeight = (window.innerHeight - position.top - anchorElementRef.element.nativeElement.clientHeight - 40);
-      positionData = [{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top' }];
+      positionStrategy = this.overlay.position().global();
     }
 
-    let positionStrategy: any = this.overlay.position().flexibleConnectedTo(anchorElementRef.element).withPositions(positionData);
     this.overlayRef = this.overlay.create({
       positionStrategy: positionStrategy,
       hasBackdrop: true,

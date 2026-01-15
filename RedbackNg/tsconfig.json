@@ -21,7 +21,9 @@
     "types": [
       "googlemaps"
     ],
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true    
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

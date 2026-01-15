@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { NavigateEvent, RbObject } from 'app/datamodel';
+import { NavigateEvent, RbObject, RELATED_LOADING } from 'app/datamodel';
 import { Evaluator, Formatter } from 'app/helpers';
 import { ApiService } from 'app/services/api.service';
 import { ModalService } from 'app/services/modal.service';
@@ -116,7 +116,6 @@ export class RbList4Component extends RbDataObserverComponent {
         }
       }
 
-
       let thisColorExpression = this.getUserParam("color");
       let thisColorAttribute = this.getUserParam("colorattribute");
       let thisColorMap = this.getUserParam("colormap");
@@ -129,7 +128,7 @@ export class RbList4Component extends RbDataObserverComponent {
         data.color = "transparent";
       }
       
-      if(data.main.value == null || data.main.value == "") {
+      if(data.main.type != 'loading' && (data.main.value == null || data.main.value == "")) {
         if(data.sub.value != null && data.sub.value != "") {
           data.main.value = data.sub.value;
           data.sub.value = "";
@@ -155,8 +154,9 @@ export class RbList4Component extends RbDataObserverComponent {
       this[fieldExpr] != null ? Evaluator.eval(this[fieldExpr], obj, null, this.dataset) :
       null;
 
-    let isTrueFalse = (raw === true || raw === false);
-    if(isTrueFalse) {
+    if(raw == RELATED_LOADING) {
+      return {value: null, type: 'loading'};
+    } else if(raw === true || raw === false) {
       return {value: raw, type: 'bool'};
     } else if(raw !== null && raw !== "" && !isNaN(raw)) { 
       return {value: raw, type: 'badge'};

@@ -108,7 +108,7 @@
     <div
         class="rb-gantt-corner">
         <div
-            *ngFor="let overlaylane of overlayData; let i = index"
+            *ngFor="let overlaylane of overlays; let i = index"
             class="rb-gantt-overlay-lanehead"
             [style.width.vw]="headerWidth"
             (click)="clickOverlayLaneIndex(i)">
@@ -126,7 +126,7 @@
             [style.width.px]="widthPX"
             [style.left.px]="-scrollLeft">
             <div
-                *ngFor="let overlaylane of overlayData"
+                *ngFor="let overlaylane of overlays"
                 class="rb-gantt-overlaytrack">
                 <div
                     *ngFor="let overlayspread of overlaylane.spreads"
@@ -168,7 +168,7 @@
             class="rb-gantt-laneheadscontainer"
             [style.top.px]="-scrollTop">
             <div
-                *ngFor="let lane of ganttData; let i = index"
+                *ngFor="let lane of lanes; let i = index"
                 [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
                 [style.height.vw]="lane.height"
                 [style.cursor]="lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
@@ -213,7 +213,7 @@
             <div
                 class="rb-gantt-laneslayer">
                 <div
-                    *ngFor="let lane of ganttData; let i = index"
+                    *ngFor="let lane of lanes; let i = index"
                     [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
                     [style.height.vw]="lane.height"
                     [style.width.px]="widthPX">
@@ -258,7 +258,7 @@
             <div
                 class="rb-gantt-laneslayer">
                 <div
-                    *ngFor="let lane of ganttData; let i = index"
+                    *ngFor="let lane of lanes; let i = index"
                     [class]="'rb-gantt-lane'"
                     [style.height.vw]="lane.height"
                     [style.width.px]="widthPX"
