@@ -2,8 +2,7 @@
     display: flex;
     flex-direction: row;
     align-items: stretch;
-    margin-right: 5px;
-    /*margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)*/
+    margin-right: var(--v5px);
 }
 
 .rb-input-icon {

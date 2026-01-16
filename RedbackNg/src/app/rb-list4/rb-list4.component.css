@@ -4,23 +4,12 @@
 	overflow: hidden;
 	flex-direction: column;
     flex: 1 1 auto;
-    width: 17.5vw;
+    width: min(17.5vw, 336px);
 }
-
-/*:host > .rb-list-container > mat-action-list > .rb-list-repeater > button {
-	height: auto!important;
-}*/
 
 rb-scroll ::ng-deep .rb-scroll-content {
-    width: 17.5vw;  
+    width: min(17.5vw, 336px);
 }
-
-/*.rb-list-container {
-    display: flex;
-	flex-direction: column;
-    flex: 1 1 auto;
-    width: 17.5vw;  
-}*/
 
 .rb-list-repeater {
     display:flex;
@@ -33,24 +22,24 @@ rb-scroll ::ng-deep .rb-scroll-content {
 }
 
 .rb-list-item {
-    border-left: 4px Solid transparent;
+    border-left: var(--v4px) Solid transparent;
 }
 
 .rb-list-item-active {
-	border-left: 4px Solid #7985cb;
-	padding-left: -4px;
+	border-left: var(--v4px) Solid #7985cb;
+	padding-left: var(--vm4px);
     background-color: #eceef8;
 }
 
 .rb-list-item-active-alt1 {
-	border-left: 4px Solid #7985cb;
-	padding-left: -4px;
+	border-left: var(--v4px) Solid #7985cb;
+	padding-left: var(--vm4px);
     background-color: #eceef8;
 }
 
 .rb-list-item-active-alt2 {
-	border-left: 4px Solid red;
-	padding-left: -4px;
+	border-left: var(--v4px) Solid red;
+	padding-left: var(--vm4px);
 }
 
 .rb-list-item-row {
@@ -59,14 +48,14 @@ rb-scroll ::ng-deep .rb-scroll-content {
 	flex-direction: row;
     align-items: center;
     margin: var(--v12px) var(--v20px);
-    min-height: 3.2vw;
+    min-height: min(3.2vw, 61px);
     overflow: hidden;
 }
 
 .rb-list-item-image {
-    width: 3vw;
-    height: 3vw;
-    margin-right: 0.5vw;
+    width: min(3vw, 57px);
+    height: min(3vw, 57px);
+    margin-right: var(--v10px);
     background-color: #f0f0f0;
     border-radius: 30%;
     border: 1px solid #ccc;
@@ -112,7 +101,7 @@ rb-scroll ::ng-deep .rb-scroll-content {
 .rb-list-item-meta2-badge {
     color: white;  
     background-color: lightgray;
-    border-radius: 8px;
+    border-radius: var(--v8px);
     text-align: center;
     padding: 0px 3px 0px 3px;
 }
@@ -184,7 +173,7 @@ rb-scroll ::ng-deep .rb-scroll-content {
 }
 
 .rb-list-divider-line {
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: var(--v1px) solid #e0e0e0;
     width: 90%;
 }
 
@@ -194,7 +183,7 @@ rb-scroll ::ng-deep .rb-scroll-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px;
+    padding: var(--v10px);
 }
 
 .rb-list-floating {
@@ -211,14 +200,14 @@ rb-scroll ::ng-deep .rb-scroll-content {
     height: var(--v16px);
     background: #eee;
     color: var(--primary-dark-color);
-    padding: 1px 5px 1px 5px;
+    padding: var(--v1px) var(--v5px) var(--v1px) var(--v5px);
     border: 1px solid var(--primary-color);
-    border-radius: 12px;
+    border-radius: var(--v12px);
     opacity: 0.7;
 }
 
 .rb-list-floating-refresh {
-    left: 10px;
+    left: var(--v10px);
     bottom: 0px;
     cursor: pointer;
     width: fit-content;
@@ -231,8 +220,8 @@ rb-scroll ::ng-deep .rb-scroll-content {
     color: var(--primary-color);
     width: fit-content;
     height: fit-content;
-    -webkit-text-stroke: 1px #fff;
-    text-shadow: 0px 0px 5px white;
+    -webkit-text-stroke: var(--v1px) #fff;
+    text-shadow: 0px 0px var(--v5px) white;
 }
 
 .rb-list-floating-refresh-icon:hover {

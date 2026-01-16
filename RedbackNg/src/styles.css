@@ -12,8 +12,7 @@
 	--light-writing-color: #808080;
 	--dark-inverse-writing-color: #d2d2d2;
 	--light-inverse-writing-color: #eeeeee;
-	--bw: 100vw;
-	--v1px: 0.06vw;
+	/*--v1px: 0.06vw;
 	--v2px: 0.12vw;
 	--v3px: 0.18vw;
 	--v5px: 0.29vw;
@@ -29,13 +28,34 @@
 	--v32px: 1.88vw;
 	--v36px: 2.11vw;
 	--v40px: 2.35vw;
-	--v48px: 2.82vw;
-	--scale: calc(100vw / 17020px);
+	--v48px: 2.82vw;*/
+	--vm4px: max(-0.208vw, -4px);
+	--v1px: min(0.052vw, 1px);
+	--v2px: min(0.104vw, 2px);
+	--v3px: min(0.156vw, 3px);
+	--v4px: min(0.208vw, 4px);
+	--v5px: min(0.260vw, 5px);
+	--v6px: min(0.312vw, 6px);
+	--v8px: min(0.417vw, 8px);
+	--v10px: min(0.521vw, 10px);
+	--v12px: min(0.625vw, 12px);
+	--v14px: min(0.729vw, 14px);
+	--v16px: min(0.833vw, 16px);
+	--v20px: min(1.042vw, 20px);
+	--v24px: min(1.250vw, 24px);
+	--v28px: min(1.458vw, 28px);
+	--v32px: min(1.667vw, 32px);
+	--v36px: min(1.875vw, 36px);
+	--v40px: min(2.083vw, 40px);
+	--v48px: min(2.500vw, 48px);
+	--v58px: min(3.021vw, 58px);
+	--v72px: min(3.75vw, 72px);
+	--v192px: min(10vw, 192px);
 }
 
 html {
 	height: 100%;
-	font-size: 0.95vw;
+	font-size: var(--v16px);
     font-family: Roboto, "Helvetica Neue", sans-serif; 
 }
 

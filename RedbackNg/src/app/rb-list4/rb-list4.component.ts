@@ -1,11 +1,54 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { NavigateEvent, RbObject, RELATED_LOADING } from 'app/datamodel';
-import { Evaluator, Formatter } from 'app/helpers';
+import { ColorConfig, Evaluator, Formatter, RecalcPlanner, VAEConfig } from 'app/helpers';
 import { ApiService } from 'app/services/api.service';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
 import { UserprefService } from 'app/services/userpref.service';
+
+const IsoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
+
+class ListFieldConfig {
+  text: VAEConfig;
+  color: ColorConfig;
+  format: string
+
+  constructor(attribute: string, expression: string, colorexpression: string, format: string) {
+    this.text = new VAEConfig({attribute: attribute, expression: expression});
+    this.color = new ColorConfig({expression: colorexpression});
+    this.format = format;
+  }
+
+  get hasText(): boolean {
+    return this.text.attribute != null || this.text.function != null;
+  }
+
+  getValue(object: RbObject): any {
+    let raw = this.text.getValue(object);
+    if(raw == RELATED_LOADING) {
+      return {value: null, type: 'loading'};
+    } else if(raw === true || raw === false) {
+      return {value: raw, type: 'bool'};
+    } else if(raw !== null && raw !== "" && !isNaN(raw)) { 
+      return {value: raw, type: 'badge'};
+    } else {
+      const text = this.format != null ? Formatter.format(raw, this.format) : this.autoFormatText(raw);
+      const color = this.color.getColor(object);
+      return {value: text, type: 'text', color: color};
+    }
+  }
+
+  private autoFormatText(txt: any) : string {
+    if(txt === null || txt === undefined) {
+      return "";
+    } else if(IsoDateRegExp.test(txt)) {
+      return Formatter.formatDateTime(new Date(txt));
+    } else {
+      return txt.toString();
+    }
+  }
+}
 
 @Component({
   selector: 'rb-list4',
@@ -44,6 +87,14 @@ export class RbList4Component extends RbDataObserverComponent {
   reachedBottom: boolean = false;
   enhanceDragDataCallback: Function;
 
+  main: ListFieldConfig;
+  sub: ListFieldConfig;
+  meta1: ListFieldConfig;
+  meta2: ListFieldConfig;
+  backColor: ColorConfig;
+
+  recalcPlanner: RecalcPlanner;
+
   constructor(
     public userprefService: UserprefService,
     public apiService: ApiService,
@@ -54,20 +105,30 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   dataObserverInit() {
+    this.recalcPlanner = new RecalcPlanner(this.calcList.bind(this));
     this.enhanceDragDataCallback = this.enhanceDragData.bind(this);
+    this.main = new ListFieldConfig(this.getUserParam("mainattribute"), this.getUserParam("mainexpression"), this.getUserParam("maincolor"), this.getUserParam("mainformat"));
+    this.sub = new ListFieldConfig(this.getUserParam("subattribute"), this.getUserParam("subexpression"), this.getUserParam("subcolor"), this.getUserParam("subformat"));
+    this.meta1 = new ListFieldConfig(this.getUserParam("meta1attribute"), this.getUserParam("meta1expression"), this.getUserParam("meta1color"), this.getUserParam("meta1format"));
+    this.meta2 = new ListFieldConfig(this.getUserParam("meta2attribute"), this.getUserParam("meta2expression"), this.getUserParam("meta2color"), this.getUserParam("meta2format"));
+    this.backColor = new ColorConfig({expression: this.getUserParam("color"), attribute: this.getUserParam("colorattribute"), map: this.getUserParam("colormap")});
   }
 
   dataObserverDestroy() {
   }
 
   onDatasetEvent(event: any) {
-    if(event.event == 'load' || event.event == 'removed' || event.event == 'clear' || event.event == 'update') {
-      this.redraw();
+    if(this.active) {
+      if(event.event == 'load' || event.event == 'removed' || event.event == 'clear' || event.event == 'update') {
+        this.redraw();
+      }
     }
   }
 
   onActivationEvent(state: boolean) {
-    this.redraw();
+    if(this.active) {
+      this.redraw();
+    }
   }
 
   get userPref() : any {
@@ -79,15 +140,15 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public hasMainLine() : boolean {
-    return this.mainattribute != null || this.mainexpression != null;
+    return this.main.hasText;
   }
 
   public hasSubLine() : boolean {
-    return this.subattribute != null || this.subexpression != null;
+    return this.sub.hasText;
   }
 
   public hasMetaLine() : boolean {
-    return this.meta1attribute != null || this.meta1expression != null || this.meta2attribute != null || this.meta2expression != null;
+    return this.meta1.hasText || this.meta2.hasText;
   }
 
   public hasImage() : boolean {
@@ -99,14 +160,19 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public redraw() {
+    this.recalcPlanner.request();
+  }
+
+  public calcList() {
     this.enhancedList = [];
     for(let obj of this.list) {
       let data: any = {
         object: obj,
-        main: this.getFieldValue(obj, "main"),
-        sub: this.getFieldValue(obj, "sub"),
-        meta1: this.getFieldValue(obj, "meta1"),
-        meta2: this.getFieldValue(obj, "meta2")
+        main: this.main.getValue(obj),
+        sub: this.sub.getValue(obj),
+        meta1: this.meta1.getValue(obj),
+        meta2: this.meta2.getValue(obj),
+        color: this.backColor.getColor(obj) || 'transparent'
       }
 
       if(this.hasImage()) {
@@ -114,18 +180,6 @@ export class RbList4Component extends RbDataObserverComponent {
         if(fileVal != null) {
           data.image = 'url(\'' + fileVal.thumbnail + '\')';
         }
-      }
-
-      let thisColorExpression = this.getUserParam("color");
-      let thisColorAttribute = this.getUserParam("colorattribute");
-      let thisColorMap = this.getUserParam("colormap");
-
-      if(thisColorExpression != null) {
-        data.color = Evaluator.eval(thisColorExpression, obj, null, this.dataset);
-      } else if(thisColorAttribute != null) {
-        data.color = thisColorMap != null ? thisColorMap[obj.get(thisColorAttribute)] : obj.get(thisColorAttribute);
-      } else {
-        data.color = "transparent";
       }
       
       if(data.main.type != 'loading' && (data.main.value == null || data.main.value == "")) {
@@ -137,45 +191,6 @@ export class RbList4Component extends RbDataObserverComponent {
         }
       }       
       this.enhancedList.push(data);                 
-    }
-  }
-
-  private getFieldValue(obj: RbObject, field: string) : any {
-    const fieldAttr = field + "attribute";
-    const fieldExpr = field + "expression";
-    const fieldFormat = field + "format";
-    const fieldColorExpression = field + "color";
-    const prefAttr = this.getUserPref(fieldAttr);
-    const prefExpr = this.getUserPref(fieldExpr);
-    const raw = 
-      prefAttr != null ? obj.get(prefAttr) : 
-      prefExpr != null ? Evaluator.eval(prefExpr, obj, null, this.dataset) :
-      this[fieldAttr] != null ? obj.get(this[fieldAttr]) :
-      this[fieldExpr] != null ? Evaluator.eval(this[fieldExpr], obj, null, this.dataset) :
-      null;
-
-    if(raw == RELATED_LOADING) {
-      return {value: null, type: 'loading'};
-    } else if(raw === true || raw === false) {
-      return {value: raw, type: 'bool'};
-    } else if(raw !== null && raw !== "" && !isNaN(raw)) { 
-      return {value: raw, type: 'badge'};
-    } else {
-      const explicitFormat = this.getUserPref(fieldFormat) ?? this[fieldFormat];
-      const text = explicitFormat != null ? Formatter.format(raw, explicitFormat) : this.autoFormatText(raw);
-      const colorExpression = this.getUserPref(fieldColorExpression) ?? this[fieldColorExpression];
-      const color = colorExpression != null ? Evaluator.eval(colorExpression, obj, null, this.dataset) : null;
-      return {value: text, type: 'text', color: color};
-    }
-  }
-
-  private autoFormatText(txt: any) : string {
-    if(txt === null || txt === undefined) {
-      return "";
-    } else if(this.isoDateRegExp.test(txt)) {
-      return Formatter.formatDateTime(new Date(txt));
-    } else {
-      return txt.toString();
     }
   }
 

@@ -43,7 +43,6 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             }
         }        
         this.dataCalcInit();
-        //this.updateData();
     }
     
     dataObserverDestroy() {
@@ -58,7 +57,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     
     onDatasetEvent(event: any) {
         if(this.active) {
-            this._logService.debug("DataCalc " + this.id + ": Dataset Event (" + event.dataset.id + "." + event.event + ", list=" + event.dataset.list.length + (event.event == 'load' ? ", filter=" + JSON.stringify(event.dataset.resolvedFilter) : "") + ")");
+            this._logService.debug("DataCalc " + this.id + ": Dataset Event (" + event.dataset.id + "." + event.event + ", list=" + event.dataset.list.length + (event.event == 'load' ? ", filter=" + JSON.stringify(event.dataset.resolvedFilter) : "") + (event.object != null ? ", uid=" + event.object.uid : "") + ")");
             this.redraw()
         }
     }
@@ -127,12 +126,12 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     _calc() {
         try {
-            this._logService.debug("DataCalc " + this.id + ": start calc");
+            //this._logService.debug("DataCalc " + this.id + ": start calc");
             var start = (new Date()).getTime();
             this.calc();
             let end = (new Date()).getTime();
             this.lastRecalc = end;
-            this._logService.debug("DataCalc " + this.id + ": finished calc in " + (end-start) + "ms");
+            //this._logService.debug("DataCalc " + this.id + ": finished calc in " + (end-start) + "ms");
         } catch(err) {
             this._logService.error(err);
             

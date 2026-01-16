@@ -177,7 +177,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   public refreshData(onlyIfFilterChanged = false) : boolean {
     if(this.canLoadData) {
-      this.logService.debug("Dataset " + this.id + ": RefreshData ()");
+      //this.logService.debug("Dataset " + this.id + ": RefreshData ()");
       let prevFilter = this.resolvedFilter;
       let prevSearch = this.resolvedSearch;
       let prevSort = this.resolvedSort;
@@ -316,9 +316,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   private receiveUpdatedObject(object: RbObject) {
     if(object.objectname == this.objectname && object.deleted == false && this.resolvedFilter != null && this._list.includes(object) == false && this.isLoading == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
       if(this.filterService.applies(this.resolvedFilter, object)) {
+        //this.logService.debug("Dataset " + this.id + ": ReceivedUpdateObject (uid: " + object.uid + ", filter: " + JSON.stringify(this.resolvedFilter) + ")");
         this._list.push(object);
         object.addSet(this);
-        this.publishEvent('load');
+        this.publishEvent('load', object);
         if(this._list.length == 1) {
           this._selectedObjects = [this._list[0]];
         }  
@@ -331,7 +332,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(object.deleted || !filterApplies) {
       this.remove(object);
     } else {
-      this.publishEvent('update');
+      this.publishEvent('update', object);
     }
   }
 
@@ -347,7 +348,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(this.dataTarget != null && object != null) {
       this.dataTarget.select = {uid: object.uid};
     }
-    this.publishEvent('select');
+    this.publishEvent('select', object);
   }
 
   public addOneToSelection(object: RbObject) {
@@ -355,7 +356,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.select(object);
     } else {
       this._selectedObjects.push(object);
-      this.publishEvent('select');
+      this.publishEvent('select', object);
     }
   }
 
@@ -368,7 +369,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       let start = Math.min(i1, i2);
       let end = Math.max(i1, i2);
       this._selectedObjects = this._list.slice(start, end + 1);
-      this.publishEvent('select');
+      this.publishEvent('select', object);
     }
   }
 
@@ -378,7 +379,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public filterSort(event: any) : boolean {
-    this.logService.debug("Dataset " + this.id + ": FilterSort ()");
+    //this.logService.debug("Dataset " + this.id + ": FilterSort ()");
     let fetched = false;
     let newFilter = event.filter;// ?? this.defaultUserFilter;
     let newSort = event.sort;// ?? this.defaultUserSort;
@@ -424,7 +425,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this._list.unshift(obj);
     }
     obj.addSet(this);
-    this.publishEvent("load");
+    this.publishEvent("load", obj);
   }
 
   public removeSelected() {
@@ -437,15 +438,16 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(index > -1) {
       this._list.splice(index, 1);
       obj.removeSet(this);
-      this.publishEvent("removed");
+      this.publishEvent("removed", obj);
     }
   }
 
-  private publishEvent(event: string) {
+  private publishEvent(event: string, object?: RbObject) {
     if(this.muteevents.indexOf(event) == -1) {
       let evt = {
         event: event,
-        dataset: this
+        dataset: this,
+        object: object
       }
       this.observers.forEach((observer) => {
         observer.next(evt);

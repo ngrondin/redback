@@ -228,6 +228,7 @@ export class DataService {
   }
 
   receive(json: any) : RbObject {
+    //this.logService.debug("Data Service : receive (object: " + json.objectname + ", uid: " + json.uid + ")");
     let rbObject : RbObject = this.get(json.objectname, json.uid);
     if(rbObject != null) {
       rbObject.updateFromJSON(json);

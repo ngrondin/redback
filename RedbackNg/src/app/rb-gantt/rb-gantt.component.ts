@@ -7,7 +7,7 @@ import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { Subscription } from 'rxjs';
-import { GanttLane, GanttLaneConfig, GanttMark, GanttMarkType, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread, GanttSpreadHeight, GanttTimeBasedConfig } from './rb-gantt-models';
+import { GanttLane, GanttLaneConfig, GanttMark, GanttMarkType, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread, GanttTimeBasedConfig } from './rb-gantt-models';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
@@ -48,7 +48,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   endMS: number;
   pxPerMS: number;
   widthPX: number;
-  heightVW: number;
+  heightPX: number;
+  spreadHeightPX: number;
+  spreadMarginPX: number;
   doDragFilter: boolean = false;
   groupOverlaps: boolean = false;
   overrideAllowPastDrop: boolean = false;
@@ -271,8 +273,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return this._spans;
   }
 
-  get headerWidth() : number {
-    return (0.88 * this._headerwidth);
+  get headerWidth() : string {
+    return 'min(' + (0.88 * this._headerwidth) + 'vw, ' + (17 * this._headerwidth) + 'px)';
   }
 
   get extraContext() : any {
@@ -402,11 +404,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
     this.startMS = this.startDate != null ? this.startDate.getTime() : (new Date()).getTime();
     this.endMS = this.startMS + this.spanMS;
-    this.pxPerMS = (this.mainscroll != null ? this.mainscroll.element.nativeElement.offsetWidth : 1700) / this.zoomMS
+    let clientWidthPX = this.mainscroll != null ? this.mainscroll.element.nativeElement.offsetWidth : 1920;
+    this.pxPerMS = clientWidthPX / this.zoomMS
     this.widthPX = this.spanMS * this.pxPerMS;
+    this.spreadHeightPX = Math.min(0.0167 * window.innerWidth, 32);
+    this.spreadMarginPX = Math.min(0.0041 * window.innerWidth, 8);
     this.markMajorIntervalMS = 3600000;
     this.markMinorIntervalMS = 900000;
-    while(this.markMajorIntervalMS * this.pxPerMS < 40) {
+    while(this.markMajorIntervalMS * this.pxPerMS < 50) {
       this.markMajorIntervalMS *= 2;
       this.markMinorIntervalMS = this.markMajorIntervalMS;
     }
@@ -416,6 +421,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   private calcLanes() {
     let accHeight = 0;
+    let laneHeight = this.spreadHeightPX + (2*this.spreadMarginPX);
     this.lanes = [];
     this.spreads = [];
     this.spreadMap = {};
@@ -428,16 +434,16 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     for(let obj of list) {
       let show = laneFilter != null && !this.filterService.applies(laneFilter, obj) ? false : true;
       if(show) {     
-        let lane = new GanttLane(obj, this.lanesConfig);
+        let lane = new GanttLane(obj, this.lanesConfig, laneHeight);
         let spreads: GanttSpread[] = this.calcSpreads(lane.linkValues, accHeight);
         if(this.showEmptyLanes || spreads.filter(s => !s.ghost && !s.config.isBackground).length > 0) {
           lane.setSpreads(spreads);
           this.lanes.push(lane);
-          accHeight += lane.height + 0.06; //+1 for borders
+          accHeight += lane.height + 1; //+ 0.06; //+1 for borders
         }
       }
     }
-    this.heightVW = accHeight;
+    this.heightPX = accHeight;
     return this.lanes;
   }
 
@@ -500,7 +506,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               } else if(cfg.indicatorExpression != null) {
                 indicator = Evaluator.eval(cfg.indicatorExpression, obj, null, null);
               }
-              let spread = new GanttSpread(label, startPX, widthPX, offsetTop, sublane, color, labelcolor, obj, dataset, cfg);
+              let spread = new GanttSpread(label, startPX, widthPX, this.spreadHeightPX, this.spreadMarginPX, offsetTop, sublane, color, labelcolor, obj, dataset, cfg);
               spread.indicator = indicator;
               spread.tip = labelWidth > widthPX ? label : null;
               spread.dragging = this.isObjectDragging(obj);
@@ -558,7 +564,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
         if(firstGroupFound == null) {
           let id = nextid++;
-          let group = new GanttSpread("1 item", spread.start, spread.width, 0, 0, 'var(--primary-light-color)', '#333', null, null, spread.config);
+          let group = new GanttSpread("1 item", spread.start, spread.width, this.spreadHeightPX, this.spreadMarginPX, 0, 0, 'var(--primary-light-color)', '#333', null, null, spread.config);
           group.id = id.toString();
           groupmap[group.id] = 1
           groups.push(group);
@@ -589,7 +595,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
         if(spreads.length > 0) {
           let label = cfg.label != null ? cfg.label : (cfg.labelAttribute != null ? spreads[0].object.get(cfg.labelAttribute) : null);
-          let lane = new GanttOverlayLane(null, label);
+          let lane = new GanttOverlayLane(null, label, this.spreadHeightPX);
           lane.setSpreads(spreads);
           lanes.push(lane);
         }
@@ -694,13 +700,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     dataset.addOneToSelection(object);
   }
 
-  public selectArea(start: number, end: number, topVW: number, bottomVW: number) {
+  public selectArea(start: number, end: number, top: number, bottom: number) {
     this.clearSelection();
     for(var lane of this.lanes) {
       for(var s of lane.foregroundSpreads()) {
         let stop = s.offsetTop + s.laneTop;
         let sbot = stop + s.height;
-        if(s.start > start && (s.start + s.width) < end && stop > topVW && sbot < bottomVW) {
+        if(s.start > start && (s.start + s.width) < end && stop > top && sbot < bottom) {
           this.addOneToSelection(s.object);
         }
       }
@@ -768,9 +774,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(this.dragSelecting && this.dragSelectSize.x > 0 && this.dragSelectSize.y > 0) {
       let start = this.dragSelectTopLeft.x;
       let end = this.dragSelectTopLeft.x + this.dragSelectSize.x;
-      let topVW = 100 *this.dragSelectTopLeft.y / document.documentElement.clientWidth;
-      let bottomVW = 100 * (this.dragSelectTopLeft.y + this.dragSelectSize.y) / document.documentElement.clientWidth;
-      this.selectArea(start, end, topVW, bottomVW);
+      /*let topVW = 100 * this.dragSelectTopLeft.y / document.documentElement.clientWidth;
+      let bottomVW = 100 * (this.dragSelectTopLeft.y + this.dragSelectSize.y) / document.documentElement.clientWidth;*/
+      let top = this.dragSelectTopLeft.y;
+      let bottom = this.dragSelectTopLeft.y + this.dragSelectSize.y;
+      this.selectArea(start, end, top, bottom);
       event.stopPropagation();
     }
     this.dragSelecting = false;
@@ -896,7 +904,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       let [startMS, endMS, durationMS] = this.getObjectStartEndDur(obj, cfg);
       return {
         x: Math.round(durationMS * this.pxPerMS),
-        y: window.innerWidth * GanttSpreadHeight / 100
+        y: this.spreadHeightPX
       };
     } else {
       return {x: 100, y: 20};

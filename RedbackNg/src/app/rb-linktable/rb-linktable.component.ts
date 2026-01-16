@@ -106,7 +106,8 @@ export class RbLinktableComponent extends RbDataObserverComponent {
           let foreColor = cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
           let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
           let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
-          let col = {value: val, formattedValue: formatVal, align: cfg.align, width: cfg.width, backColor: backColor, foreColor: foreColor, icon: icon, link: cfg.link, model: cfg.modal, loading: loading};
+          let width = 'min(' + (cfg.width * 0.88) + 'vw, ' + (cfg.width * 16.896) + 'px)';
+          let col = {value: val, formattedValue: formatVal, align: cfg.align, width: width, backColor: backColor, foreColor: foreColor, icon: icon, link: cfg.link, model: cfg.modal, loading: loading};
           if(val !== RELATED_LOADING && !isNaN(val)) {
             grp.sums[c] += val;
             totalsums[c] += val;

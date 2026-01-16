@@ -21,7 +21,7 @@ export class RbTextComponent extends RbDataObserverComponent {
   @Input('color') _color: string;
   
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
-  @HostBinding('style.width') get styleWidth() { return this.size != null ? ((0.88 * this.size) + 'vw'): null;}
+  @HostBinding('style.width') get styleWidth() { return this.size != null ? ('min(' + (0.88 * this.size) + 'vw, ' + (17 * this.size) + 'px)'): null;}
 
 
   dataObserverInit() {

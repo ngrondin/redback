@@ -110,13 +110,13 @@
         <div
             *ngFor="let overlaylane of overlays; let i = index"
             class="rb-gantt-overlay-lanehead"
-            [style.width.vw]="headerWidth"
+            [style.width]="headerWidth"
             (click)="clickOverlayLaneIndex(i)">
             <span>{{overlaylane.label}}</span>
         </div>
         <div
             class="rb-gantt-corner-space"
-            [style.width.vw]="headerWidth">
+            [style.width]="headerWidth">
         </div>
     </div>
     <div
@@ -163,14 +163,14 @@
     class="rb-gantt-body">
     <div
         class="rb-gantt-laneheads"
-        [style.width.vw]="headerWidth">
+        [style.width]="headerWidth">
         <div
             class="rb-gantt-laneheadscontainer"
             [style.top.px]="-scrollTop">
             <div
                 *ngFor="let lane of lanes; let i = index"
                 [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
-                [style.height.vw]="lane.height"
+                [style.height.px]="lane.height"
                 [style.cursor]="lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
                 (click)="clickLane(lane)"
                 (rb-drag-dropzone)="droppedOn($event, lane, true)"
@@ -204,7 +204,7 @@
         <div
             class="rb-gantt-lanes"
             [style.width.px]="widthPX"
-            [style.height.vw]="heightVW"
+            [style.height.px]="heightPX"
             (click)="clickBackground()"
             (mousedown)="mouseDownBackground($event)"
             (mouseup)="mouseUpBackground($event)"
@@ -215,14 +215,14 @@
                 <div
                     *ngFor="let lane of lanes; let i = index"
                     [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
-                    [style.height.vw]="lane.height"
+                    [style.height.px]="lane.height"
                     [style.width.px]="widthPX">
                     <div
                         *ngFor="let spread of lane.backgroundSpreads()"
                         [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
                         [style.width.px]="spread.width"
                         [style.left.px]="spread.start"
-                        [style.height.vw]="lane.height"
+                        [style.height.px]="lane.height"
                         [style.top.px]="spread.laneTop"
                         [style.background-color]="spread.color"
                         [style.justify-content]="spread.config.centerLabel ? 'center' : 'start'"
@@ -260,7 +260,7 @@
                 <div
                     *ngFor="let lane of lanes; let i = index"
                     [class]="'rb-gantt-lane'"
-                    [style.height.vw]="lane.height"
+                    [style.height.px]="lane.height"
                     [style.width.px]="widthPX"
                     (rb-drag-dropzone)="droppedOn($event, lane)"
                     [rb-drag-changeform]="getDragSizeForObjectCallback">
@@ -274,9 +274,9 @@
                         (click)="clickSpread(spread, $event); $event.stopPropagation();"
                         [style.visibility]="spread.dragging ? 'hidden' : 'visible'"
                         [style.width.px]="spread.width"
-                        [style.height.vw]="spread.height"
+                        [style.height.px]="spread.height"
                         [style.left.px]="spread.start"
-                        [style.top.vw]="spread.laneTop"
+                        [style.top.px]="spread.laneTop"
                         [style.background-color]="spread.color"
                         [style.color]="spread.labelcolor"
                         [style.justify-content]="spread.config.centerLabel == true ? 'center' : 'start'">

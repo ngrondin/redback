@@ -26,8 +26,8 @@ export abstract class RbContainerComponent extends RbDataObserverComponent {
     @HostBinding('style.flex-basis') get flexbasis() { return this.sizeIsSet ? null : this.basis != null ? this.basis : this.grow == 0 ? "auto" : 0;}
     @HostBinding('style.justify-content') get justifycontent() { return this.mainalign; }
     @HostBinding('style.align-items') get alignitems() { return this.crossalign; }
-    @HostBinding('style.width') get containerwidth() { return (this.width != null ? ((0.88 * this.width) + 'vw'): null);}
-    @HostBinding('style.height') get containerheight() { return (this.height != null ? ((0.88 * this.height) + 'vw'): null);}
+    @HostBinding('style.width') get containerwidth() { return (this.width != null ? ('min(' + (0.88 * this.width) + 'vw, ' + (17 * this.width) + 'px)'): null);}
+    @HostBinding('style.height') get containerheight() { return (this.height != null ? ('min(' + (0.88 * this.height) + 'vw, ' + (17 * this.height) + 'px)'): null);}
     @HostBinding('style.background-color') get backgroundColor() { return this.color != null ? this.color : null;}
 
     dataObserverInit(): void {

@@ -82,7 +82,6 @@ export class RbObject {
             if(changes.length > 0) {
                 this.updatedAttributes = [];
                 this._adviseSetsOfChange();
-                //this.logService.debug(`RBObject ${this.objectname}:${this.uid}: Update accepted at ${json.ts}: ${changes.join(',')}`);
             }
 
             this.lastUpdated = json.ts;

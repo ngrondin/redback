@@ -1,10 +1,10 @@
 :host {
-    min-width: 400px;
-    min-height: 200px;
+    /*min-width: 400px;
+    min-height: 200px;*/
     display: flex;
     flex-direction: column;
-    border: solid 1px grey;
-    margin: 6px;
+    border: solid var(--v1px) grey;
+    margin: var(--v6px);
 }
 
 .editor {

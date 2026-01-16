@@ -4,8 +4,8 @@ import { ColorConfig, Evaluator, LinkConfig, VAEConfig } from "app/helpers";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
 //export const GanttLaneHeight: number = 2.47; //VW, was in PX 42;
-export const GanttSpreadHeight: number = 1.64; //VW   
-export const GanttSpreadMargin: number = 0.41; //VW   
+//export const GanttSpreadHeight: number = 1.64; //VW   
+//export const GanttSpreadMargin: number = 0.41; //VW   
 
   export class GanttLaneConfig {
     dataset: string;
@@ -125,16 +125,18 @@ export const GanttSpreadMargin: number = 0.41; //VW
     sub: string;
     image: string;
     icon: string;
+    unitHeight: number;
     height: number;
     spreads: GanttSpread[];
     object: RbObject;
     config: GanttLaneConfig;
 
-    constructor(obj: RbObject, cfg: GanttLaneConfig) {
+    constructor(obj: RbObject, cfg: GanttLaneConfig, uh: number) {
       this.object = obj;
       this.config = cfg;
-      this.height = GanttSpreadHeight + (2*GanttSpreadMargin);
-      let label = null;
+      this.unitHeight = uh;
+      this.height = this.unitHeight;
+      //let label = null;
       if(cfg.labelAttribute != null) {
         this.label = obj.get(cfg.labelAttribute); 
       } else if(cfg.labelExpression != null) {
@@ -166,7 +168,8 @@ export const GanttSpreadMargin: number = 0.41; //VW
           max = this.spreads[i].sublane;
         }
       }
-      this.height = ((max + 1) * (GanttSpreadHeight + GanttSpreadMargin)) + GanttSpreadMargin;
+      this.height = (max + 1) * this.unitHeight;
+      //this.height = ((max + 1) * (GanttSpreadHeight + GanttSpreadMargin)) + GanttSpreadMargin;
     }
 
     backgroundSpreads() {
@@ -184,9 +187,10 @@ export const GanttSpreadMargin: number = 0.41; //VW
     start: number;
     end: number;
     width: number;
+    height: number;
+    margin: number;
     offsetTop: number;
     laneTop: number;
-    height: number;
     sublane: number;
     color: string;
     labelcolor: string;
@@ -198,14 +202,16 @@ export const GanttSpreadMargin: number = 0.41; //VW
     dataset: RbDatasetComponent;
     config: GanttSeriesConfig;
   
-    constructor(l: string, s: number, w: number, ost: number, sl: number, c: string, lc: string, o: RbObject, ds: RbDatasetComponent, cfg: GanttSeriesConfig) {
+    constructor(l: string, s: number, w: number, h: number, m: number, ost: number, sl: number, c: string, lc: string, o: RbObject, ds: RbDatasetComponent, cfg: GanttSeriesConfig) {
       this.label = l;
       this.start = s;
       this.width = w;
       this.end = s + w;
+      this.height = h;
+      this.margin = m;
       this.offsetTop = ost;
       this.sublane = sl;
-      this.laneTop = GanttSpreadMargin + (this.sublane * (GanttSpreadHeight + GanttSpreadMargin));
+      this.laneTop = (this.sublane * h) + (cfg.isBackground == false ? (this.sublane + 1) * m : 0);
       this.color = c;
       this.labelcolor = lc;
       this.canEdit = o != null ? cfg.canEdit && (cfg.start.attribute != null && o.canEdit(cfg.start.attribute) || cfg.laneAttributes.reduce((acc, la) => acc && o.canEdit(la), true)) : false;
@@ -215,7 +221,6 @@ export const GanttSpreadMargin: number = 0.41; //VW
       this.object = o;
       this.dataset = ds;
       this.config = cfg;
-      this.height = GanttSpreadHeight;
     }
 
     get laneValues(): string[] {
@@ -237,10 +242,10 @@ export const GanttSpreadMargin: number = 0.41; //VW
     height: number;
     spreads: GanttOverlaySpread[];
   
-    constructor(i: string, l: string) {
+    constructor(i: string, l: string, h: number) {
       this.id = i;
       this.label = l != null ? l : "";
-      this.height = GanttSpreadHeight;
+      this.height = h;
     }
 
     setSpreads(s: GanttOverlaySpread[]) {

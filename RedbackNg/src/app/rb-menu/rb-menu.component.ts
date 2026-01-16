@@ -41,19 +41,16 @@ export class RbMenuComponent implements OnInit {
   public get mode(): string {
     return this.lockmode || (this._mode || 'large');
   }
-
-  /*@HostBinding('style.width.px')
-  get width(): number { 
-    var width = this.mode == 'large' ? 
-      (5 * Math.floor(document.body.clientWidth * 15 / 500)) : // This weird calculation is to allow the sidenav to align to the closes 5px -- weirdness of material
-      (5 * Math.floor(document.body.clientWidth * 46 / 8510));
-    return width;
-  }*/
-
+/*
   @HostBinding('style.min-width.vw')
   get width(): number { 
     return this.mode == 'large' ? 10 : null;
   }   
+*/
+  @HostBinding('style.min-width')
+  get width(): string { 
+    return this.mode == 'large' ? 'var(--v192px)' : null;
+  } 
 
   public toggleMenuMode() {
     let newMode = this._mode == 'small' ? 'large' : 'small';

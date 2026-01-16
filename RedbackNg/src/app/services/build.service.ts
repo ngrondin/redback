@@ -14,6 +14,8 @@ import { componentRegistry } from 'app/rb-view-loader/rb-view-loader-registry';
 import { ModalService } from './modal.service';
 import { LogService } from './log.service';
 import { VirtualSelector } from 'app/helpers';
+import { RbVcollapseComponent } from 'app/rb-vcollapse/rb-vcollapse.component';
+import { RbHcollapseComponent } from 'app/rb-hcollapse/rb-hcollapse.component';
 
 
 @Injectable({
@@ -97,6 +99,10 @@ export class BuildService {
             newContext['activator'] = newInstance;
           } else if(newInstance instanceof RbModalComponent) {
             newContext['activator'] = newInstance;
+          } else if(newInstance instanceof RbVcollapseComponent) {
+            newContext['activator'] = newInstance;
+          } else if(newInstance instanceof RbHcollapseComponent) {
+            newContext['activator'] = newInstance;                        
           } else if(newInstance instanceof RbTabSectionComponent) {
             newContext['tabsection'] = newInstance;
           }

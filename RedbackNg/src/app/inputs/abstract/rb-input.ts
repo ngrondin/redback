@@ -26,7 +26,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   @Output('valueChange') valueChange = new EventEmitter();
   
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
-  @HostBinding('style.width') get styleWidth() { return (this.size != null ? ((0.88 * this.size) + 'vw'): this.defaultSize != null ? ((0.88 * this.defaultSize) + 'vw'): null);}
+  @HostBinding('style.width') get styleWidth() { return (this.size != null ? ('min(' + (0.88 * this.size) + 'vw, ' + (17 * this.size) + 'px)'): this.defaultSize != null ? ('min(' + (0.88 * this.defaultSize) + 'vw, ' + (17 * this.defaultSize) + 'px)'): null);}
 
   previousValue: any;
   previousObject: RbObject;

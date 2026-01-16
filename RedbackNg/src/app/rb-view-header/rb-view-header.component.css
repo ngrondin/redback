@@ -14,7 +14,7 @@
 }
 
 .rb-vh-title { 
-    font-size: 1vw;
+    font-size: var(--v20px);
     font-weight: 500;
 }
 
@@ -24,13 +24,13 @@
 
 .rb-vh-more {
     color: lightgray;
-    width: 2.12vw;
-    height: 2.12vw;
-    line-height: 2.12vw;
+    width: var(--v40px);
+    height: var(--v40px);
+    line-height: var(--v40px);
 }
 
  mat-icon {
-    font-size: 1vw!important;
+    font-size: var(--v20px)!important;
     width: var(--v24px);
     height: var(--v24px);
 }
@@ -42,7 +42,7 @@
 
 .rb-vh-bc-link {
     cursor: pointer;
-    font-size: 0.8vw;
+    font-size: var(--v16px);
 }
 
 .rb-vh-menu-container {

@@ -39,7 +39,7 @@ export class LogService {
   }
 
   _addEntry(level: string, msg: string) {
-    if(this.entries.length > 2100) {
+    if(this.entries.length > 21000) {
       this.entries = this.entries.slice(this.entries.length - 2000, this.entries.length);
     }
     this.entries.push({

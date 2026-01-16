@@ -39,8 +39,8 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     @HostBinding('style.flex-grow') get flexgrow() { return this.sizeIsSet ? 0 : this.grow != null ? this.grow : 1;}
     @HostBinding('style.flex-shrink') get flexshrink() { return this.sizeIsSet ? null : this.shrink != null ? this.shrink : 1;}
     @HostBinding('style.flex-basis') get flexbasis() { return this.sizeIsSet ? "auto" : 0;}
-    @HostBinding('style.width') get styleWidth() { return (this.width != null ? ((0.88 * this.width) + 'vw'): null);}
-    @HostBinding('style.height') get styleHeight() { return (this.height != null ? ((0.88 * this.height) + 'vw'): null);}
+    @HostBinding('style.width') get styleWidth() { return (this.width != null ? ('min(' + (0.88 * this.width) + 'vw, ' + (17 * this.width) + 'px)'): null);}
+    @HostBinding('style.height') get styleHeight() { return (this.height != null ? ('min(' + (0.88 * this.height) + 'vw, ' + (17 * this.height) + 'px)'): null);}
 
     colorScheme = {
       domain: ['#1C4E80', '#0091D5', '#A5D8DD', '#EA6A47', '#7E909A', '#202020']
@@ -89,7 +89,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     }
 
     private internalDataEvent(event: any) {
-      if(this.datasetevents == null || (this.datasetevents != null && this.datasetevents.indexOf(event.event) > -1)) {
+      if(this.active && (this.datasetevents == null || (this.datasetevents != null && this.datasetevents.indexOf(event.event) > -1))) {
         this.getGraphData();
       }
     }

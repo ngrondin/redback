@@ -6,7 +6,7 @@
         <div
             class="rb-linktable-colheader"
             *ngFor="let col of columns"
-            [style.width.vw]="col.width"
+            [style.width]="col.width"
             (click)="clickColumnHeader(col)">
             <span>{{col.label}}</span>
         </div>
@@ -25,7 +25,7 @@
                 <div
                     *ngFor="let col of groups[groupKey].sums; index as i"
                     [class]="'rb-linktable-rowitem' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border' : '')"
-                    [style.width.vw]="col.width"
+                    [style.width]="col.width"
                     (click)="toggleGroup(groupKey)">
                     <span
                         *ngIf="i == 0">
@@ -44,7 +44,7 @@
                 <div
                     *ngFor="let col of line.cols; index as i"
                     [class]="'rb-linktable-rowitem'"
-                    [style.width.vw]="col.width"
+                    [style.width]="col.width"
                     [style.background-color]="col.backColor"
                     [style.color]="col.foreColor">
                     <div
@@ -90,7 +90,7 @@
             *ngFor="let col of sums"
             [class]="'rb-linktable-colfooter'"
             [style.visibility]="col.formattedValue != null ? 'visible' : 'hidden'"
-            [style.width.vw]="col.width">
+            [style.width]="col.width">
             <div
                 [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border-on' : '')">
                 <a

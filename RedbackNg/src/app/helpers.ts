@@ -5,6 +5,7 @@ import { NavigateEvent, RbObject, Time } from "./datamodel";
 import { FilterService } from "./services/filter.service";
 import { UserprefService } from "./services/userpref.service";
 import { RbDatasetComponent } from "./rb-dataset/rb-dataset.component";
+import { LogService } from "./services/log.service";
 
 export class Translator {
     cfg: any;
@@ -196,6 +197,8 @@ export class Formatter {
 
 }
 
+globalThis.Formatter = Formatter;
+
 @Pipe({name: 'rbDate'})
 export class RbDatePipe implements PipeTransform {
   transform(value: Date): string {
@@ -296,6 +299,20 @@ export class Evaluator {
         } else {
             return null;
         }
+    }
+
+    public static createFunction(expr: string) : Function {
+        let func = null;
+        if(expr != null) {
+            try {
+                func = new Function("object", "relatedObject", "dataset", "return (" + expr + ");");
+            } catch(err) {
+                let logService = AppInjector.get(LogService);
+                logService.error("Error creating expression function for '" + expr + "': " + err.message);
+                func = new Function("object", "relatedObject", "dataset", "return null;");
+            }
+        } 
+        return func;
     }
 }
 
@@ -527,12 +544,14 @@ export class LinkConfigDataTarget{
 export class VAEConfig {
     value: string;
     attribute: string;
-    expression: string; 
+    expression: string;
+    function: Function;
     
     constructor(json: any) {
         this.value = json.value;
         this.attribute = json.attribute;
         this.expression = json.expression;
+        this.function = json.expression != null ? Evaluator.createFunction(json.expression) : null;
     }
 
     getValue(object: RbObject): any {
@@ -541,8 +560,14 @@ export class VAEConfig {
             val = this.value;
         } else if(this.attribute != null) {
             val = object != null ? object.get(this.attribute) : null;
-        } else if(this.expression != null) {
-            val = Evaluator.eval(this.expression, object, null, null);
+        } else if(this.function != null) {
+            try {
+                val = this.function(object, null, null);
+            } catch(error) {
+                let logService = AppInjector.get(LogService);
+                logService.error("Error in expression '" + this.expression + "': " + error.message);
+                val = null;
+            }
         }
         return val;
     }
@@ -568,6 +593,7 @@ export class ColorConfig extends VAEConfig {
 export class ColorTool {
 
     public static decode(str: string): number[] {
+        if(str == null) return null;
         const cleanedHex = str.startsWith("#") ? str.slice(1) : str;
         const bigint = parseInt(cleanedHex, 16);
         const r = (bigint >> 16) & 255;
@@ -588,6 +614,7 @@ export class ColorTool {
 
     public static lightenTo(color: string, intensity: number, spread: number): string {
         let values = ColorTool.decode(color);
+        if(values == null) return null;
         let min = Math.min(...values);
         let max = Math.max(...values);
         let initialSpread = max - min;
@@ -597,10 +624,40 @@ export class ColorTool {
         let newColor = ColorTool.encode(newValues);
         return newColor;
     }
-
-    
 }
+
+globalThis.ColorTool = ColorTool;
 
 export class VirtualSelector {
     selectedObject: RbObject = null;
+}
+
+export class RecalcPlanner {
+    recalc: Function;
+    planned: boolean;
+    lastRecalc: number;
+
+    constructor(f: Function) {
+        this.recalc = f;
+        this.planned = false;
+        this.lastRecalc = null;
+    }
+
+    request() {
+        if(this.planned == false) {
+            this.planned = true;
+            requestAnimationFrame(this.doFrame.bind(this));
+        }
+    }
+
+    doFrame(ts) {
+        const now = Date.now();
+        if(this.lastRecalc == null || (this.lastRecalc != null && now - this.lastRecalc > 100)) {
+            this.recalc();
+            this.lastRecalc = now;
+            this.planned = false;
+        } else {
+            requestAnimationFrame(this.doFrame.bind(this));
+        }
+    }
 }

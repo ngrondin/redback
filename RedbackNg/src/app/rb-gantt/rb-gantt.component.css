@@ -37,11 +37,9 @@
     flex-direction: row;
     flex: 0 0 auto;
     z-index: 2;
-    /*height: 3.7vw;*/
 }
 
 .rb-gantt-header-dateinput {
-    /*margin: -10px 15px -20px 10px;*/
     padding: 0px;
 }
 
@@ -52,22 +50,19 @@
 
 .rb-gantt-overlay-lanehead {
     display: flex;
-    height: 1.9vw;
-    /*width: 15vw;*/
+    height: var(--v36px);
     flex-direction: row;
     justify-content: end;
     align-items: center;
 }
 
 .rb-gantt-overlay-lanehead span {
-    padding-right: 0.8vw;
+    padding-right: var(--v16px);
     cursor: pointer;
-
 }
 
 .rb-gantt-corner-space {
-    height: 3.8vw;
-   /* width: 15vw;*/
+    height: var(--v72px);
 }
 
 .rb-gantt-headertrackcontainer {
@@ -76,9 +71,9 @@
     flex-direction: row;
     position: relative;
     overflow: hidden;
-    border-top: solid 1px lightgray;
-    border-right: solid 1px lightgray;
-    border-left: solid 1px lightgray;
+    border-top: solid var(--v1px) lightgray;
+    border-right: solid var(--v1px) lightgray;
+    border-left: solid var(--v1px) lightgray;
 }
 
 .rb-gantt-headertrack {
@@ -91,21 +86,21 @@
     display:flex;
     position: relative;
     align-items: center;
-    height: 1.9vw;
+    height: var(--v36px);
     border-bottom: 1px solid lightgray;
 }
 
 .rb-gantt-daytrack {
     display:flex;
     position: relative;
-    height: 1.9vw;
+    height: var(--v36px);
 }
 
 .rb-gantt-hourtrack {
     display: flex;
     position: relative;
-    height: 1.9vw;
-    border-top: 1px solid lightgray;
+    height: var(--v36px);
+    border-top: var(--v1px) solid lightgray;
 }
 
 .rb-gantt-mark {
@@ -114,7 +109,7 @@
     align-items: center;
     position: absolute;
     font-size: smaller;
-    border-left: solid 1px #ddd;
+    border-left: solid var(--v1px) #ddd;
     height: 100%;
     pointer-events: none;
 }
@@ -134,7 +129,7 @@
     flex-direction: row;
     flex: 1 1 auto;
     overflow: hidden;
-    border-bottom: 1px solid lightgray;
+    border-bottom: var(--v1px) solid lightgray;
     z-index: 1;
 }
 
@@ -142,7 +137,6 @@
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
-    /*width: 15vw;*/
 }
 
 .rb-gantt-laneheadscontainer {
@@ -161,12 +155,12 @@
 }
 
 .rb-gantt-laneimage {
-    width: 3vw;
-    height: 3vw;
-    margin-right: 0.3vw;
+    width: var(--v58px);
+    height: var(--v58px);
+    margin-right: var(--v6px);
     background-color: #f0f0f0;
     border-radius: 30%;
-    border: 1px solid #ccc;
+    border: var(--v1px) solid #ccc;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -203,7 +197,7 @@
     flex-direction: column;
     flex: 1 1 auto;
     position: relative;
-    width: 5.9vw;
+    width: min(5.9vw, 113px);
 }
 
 .rb-gantt-lanes {
@@ -231,15 +225,13 @@
     border-top-width: var(--v1px);
     border-top-style: solid;
     border-top-color: transparent;
-    /*background-color: grey;
-    border-top: 1px solid lightgray;*/
+
 }
 
 
 .rb-gantt-spread {
     display: flex;
     flex-direction: row;
-    /*flex-wrap: wrap;*/
     align-items: center;
     justify-content: start;
     position: absolute;
@@ -249,8 +241,7 @@
 
 .rb-gantt-spreadbox {
     border: 1px solid var(--primary-dark-color);
-    /*height: 1.6vw;*/
-    top: var(--v5px); /*7px*/
+    top: var(--v5px); 
     background-color: white;
     border-radius: var(--v3px);
     -webkit-touch-callout: none; 
@@ -270,7 +261,7 @@
 }
 
 .rb-gantt-spreadbackground {
-    height: 1.9vw;
+    height: var(--v36px);
     color: lightgray;
 }
 
@@ -288,12 +279,11 @@
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
-    /*height: 100%;*/
 }
 
 .rb-gantt-spreadprelabel {
     display: inline-block;
-    margin: 1px;
+    margin: var(--v1px);
     font-size: 0.6rem;
     overflow: hidden;
     white-space: nowrap;
@@ -301,12 +291,11 @@
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
-    /*height: 100%;*/
 }
 
 .rb-gantt-spreadpostlabel {
     display: inline-block;
-    margin: 1px;
+    margin: var(--v1px);
     font-size: 0.6rem;
     overflow: hidden;
     white-space: nowrap;
@@ -314,7 +303,6 @@
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
-    /*height: 100%;*/
 }
 
 .rb-gantt-cornerindicator {
@@ -322,15 +310,15 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 0.3vw;
-    height: 0.3vw;
+    width: var(--v6px);
+    height: var(--v6px);
     background-color: rgb(181, 6, 6);
-    border-radius: 0.3vw;
+    border-radius: var(--v6px);
     margin: var(--v1px);
 }
 
 .rb-gantt-laneheight {
-    height: 2.5vw;
+    height: var(--v48px);
     flex: 0 0 auto;
 }
 
@@ -388,6 +376,6 @@
 }
 
 .rb-gantt-emptymessage {
-    padding: 3vw 0;
+    padding: var(--v58px) 0;
     color: var(--light-writing-color);
 }
