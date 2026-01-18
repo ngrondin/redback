@@ -68,7 +68,7 @@ export class RbMapComponent extends RbDataCalcComponent<MapSeriesConfig> {
   ) {
     super();
     this.dofilter = false;
-    this.recalcInterval = 1250;
+    //this.recalcInterval = 1250;
   }
 
   dataCalcInit() {

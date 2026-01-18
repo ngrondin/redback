@@ -142,7 +142,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
   }
 
   get enabled() : boolean {
-    return this.actionData.length > 0;
+    return this._enabled && this.actionData.length > 0;
   }
 
   get focus() : boolean {

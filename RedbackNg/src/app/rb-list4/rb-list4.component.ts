@@ -236,7 +236,11 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   public enhanceDragData(object: RbObject) : any {
-    return [object].concat(this.dataset.selectedObjects.filter(o => o.uid != object.uid));
+    if(object != null) {
+      return [object].concat(this.dataset.selectedObjects.filter(o => o.uid != object.uid));
+    } else {
+      return null
+    }
   }
 
   refresh() {

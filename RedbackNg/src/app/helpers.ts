@@ -1,7 +1,7 @@
 import { Directive, ElementRef, Input, Pipe, PipeTransform, Renderer2, inject } from "@angular/core";
 import { Observer } from "rxjs";
 import { AppInjector } from "./app.module";
-import { NavigateEvent, RbObject, Time } from "./datamodel";
+import { NavigateEvent, RbObject, Time, XY } from "./datamodel";
 import { FilterService } from "./services/filter.service";
 import { UserprefService } from "./services/userpref.service";
 import { RbDatasetComponent } from "./rb-dataset/rb-dataset.component";
@@ -659,5 +659,51 @@ export class RecalcPlanner {
         } else {
             requestAnimationFrame(this.doFrame.bind(this));
         }
+    }
+}
+
+export class CanvasTool {
+
+    public static drawPolyline(graphctx, startx, starty, startdir, endx, endy, enddir) {
+        let sr = new XY(startx + (startdir == 'left' ? -10 : startdir == 'right' ? 10 : 0), starty + (startdir == 'top' ? -10 : startdir == 'bottom' ? 10 : 0));
+        let er = new XY(endx + (enddir == 'left' ? -10 : enddir == 'right' ? 10 : 0), endy + (enddir == 'top' ? -10 : enddir == 'bottom' ? 10 : 0));
+        let mid1 = new XY(sr.x, sr.y);
+        let mid2 = new XY(er.x, er.y);
+        let bothhoriz = (startdir == 'left' || startdir == 'right') && (enddir == 'left' || enddir == 'right');
+        let samedir = startdir == enddir;
+        if(bothhoriz) {
+            if(samedir) {
+                let midx = startdir == 'left' ? Math.min(sr.x, er.x) : Math.max(sr.x, er.x);
+                mid1 = new XY(midx, sr.y);
+                mid2 = new XY(midx, er.y);
+            } else if((startdir == 'right' && sr.x > er.x) || (startdir == 'left' && sr.x < er.x)) {
+                let midy = Math.round((sr.y + er.y) / 2);
+                mid1 = new XY(sr.x, midy);
+                mid2 = new XY(er.x, midy);
+            } else {
+                let midx = Math.round((sr.x + er.x) / 2);
+                mid1 = new XY(midx, sr.y);
+                mid2 = new XY(midx, er.y);                
+            }
+        } else {
+            let midy = Math.round((sr.y + er.y) / 2);
+            mid1 = new XY(sr.x, midy);
+            mid2 = new XY(er.x, midy);
+        }
+        graphctx.fillStyle = "#ab0505";
+        graphctx.strokeStyle = "#ab0505";
+        graphctx.beginPath();
+        graphctx.arc(startx, starty, 4, 0, 6.28);
+        graphctx.fill();
+        graphctx.arc(endx, endy, 4, 0, 6.28);
+        graphctx.fill();
+        graphctx.beginPath();
+        graphctx.moveTo(startx, starty);
+        graphctx.lineTo(sr.x, sr.y); 
+        graphctx.lineTo(mid1.x, mid1.y); 
+        graphctx.lineTo(mid2.x, mid2.y); 
+        graphctx.lineTo(er.x, er.y); 
+        graphctx.lineTo(endx, endy); 
+        graphctx.stroke(); 
     }
 }

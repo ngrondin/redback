@@ -5,6 +5,7 @@ import { RbDataObserverComponent } from "./rb-dataobserver";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { LogService } from "app/services/log.service";
 import { AppInjector } from "app/app.module";
+import { RecalcPlanner } from "app/helpers";
 
 export class SeriesConfig {
     active: boolean = true;
@@ -22,11 +23,13 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     seriesConfigs: T[] = [];
     initialFilteringDone: boolean = false;
-    lastRecalc: number = -1;
+    /*lastRecalc: number = -1;
     recalcInterval: number = -1;
     minRecalcTime: number = -1;
-    recalcPlanned: boolean = false;
+    recalcPlanned: boolean = false;*/
     blockRecalc: boolean = false;
+    recalcPlanner: RecalcPlanner;
+    
     private _logService: LogService;
     
     constructor(
@@ -36,6 +39,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
     
     dataObserverInit() {
+        this.recalcPlanner = new RecalcPlanner(this.calc.bind(this));
         if(this.series != null) {
             this.seriesConfigs = [];
             for(let item of this.series) {
@@ -109,6 +113,12 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     }
 
     redraw() {
+        if(!this.blockRecalc) {
+            this.recalcPlanner.request();
+        }
+    }
+
+    /*redraw() {
         if(this.recalcPlanned == false && this.blockRecalc == false) {
           this.recalcPlanned = true;
           let now = new Date().getTime();
@@ -122,9 +132,9 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
           if(tillNextCalc == 0) this._calc();
           else setTimeout(() => this._calc(), tillNextCalc);
         }
-    }
+    }*/
 
-    _calc() {
+    /*_calc() {
         try {
             //this._logService.debug("DataCalc " + this.id + ": start calc");
             var start = (new Date()).getTime();
@@ -137,7 +147,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             
         }
         this.recalcPlanned = false;
-    }
+    }*/
 
     iterateAllLists(callback: (object: RbObject, config: T) => void) {
         for(let seriesConfig of this.seriesConfigs) {

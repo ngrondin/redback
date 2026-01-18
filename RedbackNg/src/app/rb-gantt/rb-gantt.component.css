@@ -375,6 +375,14 @@
     border: 1px solid var(--primary-color);
 }
 
+.rb-gantt-canvaslayer {
+    pointer-events: none;
+}
+
+.rb-gantt-canvas {
+    pointer-events: none;
+}
+
 .rb-gantt-emptymessage {
     padding: var(--v58px) 0;
     color: var(--light-writing-color);

@@ -3,10 +3,6 @@ import { RbObject } from "app/datamodel";
 import { ColorConfig, Evaluator, LinkConfig, VAEConfig } from "app/helpers";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
-//export const GanttLaneHeight: number = 2.47; //VW, was in PX 42;
-//export const GanttSpreadHeight: number = 1.64; //VW   
-//export const GanttSpreadMargin: number = 0.41; //VW   
-
   export class GanttLaneConfig {
     dataset: string;
     linkAttributes: string[];
@@ -62,6 +58,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     color: ColorConfig;
     indicatorAttribute: string;
     indicatorExpression: string;    
+    dependencyAttribute: string;
     isBackground: boolean;
     canEdit: boolean;
     isGhost: boolean;
@@ -90,6 +87,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       }
       this.indicatorAttribute = json.indicatorattribute;
       this.indicatorExpression = json.indicatorexpression;
+      this.dependencyAttribute = json.dependencyattribute;
       this.modal = json.modal;
       this.link = json.link != null ? new LinkConfig(json.link) : null;
       this.applyLaneFilter = json.applylanefilter != null ? json.applylanefilter : true;
@@ -125,18 +123,19 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     sub: string;
     image: string;
     icon: string;
-    unitHeight: number;
+    spreadHeight: number;
+    spreadMargin: number;
     height: number;
     spreads: GanttSpread[];
     object: RbObject;
     config: GanttLaneConfig;
 
-    constructor(obj: RbObject, cfg: GanttLaneConfig, uh: number) {
+    constructor(obj: RbObject, cfg: GanttLaneConfig, sh: number, sm: number) {
       this.object = obj;
       this.config = cfg;
-      this.unitHeight = uh;
-      this.height = this.unitHeight;
-      //let label = null;
+      this.spreadHeight = sh;
+      this.spreadMargin = sm;
+      this.height = sh + (2*sm);
       if(cfg.labelAttribute != null) {
         this.label = obj.get(cfg.labelAttribute); 
       } else if(cfg.labelExpression != null) {
@@ -168,8 +167,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
           max = this.spreads[i].sublane;
         }
       }
-      this.height = (max + 1) * this.unitHeight;
-      //this.height = ((max + 1) * (GanttSpreadHeight + GanttSpreadMargin)) + GanttSpreadMargin;
+      this.height = ((max + 1) * (this.spreadHeight + this.spreadMargin)) + this.spreadMargin;
     }
 
     backgroundSpreads() {
@@ -177,7 +175,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     }
 
     foregroundSpreads() {
-      return this.spreads.filter(s => s.config.isBackground == false/* && s.dragging == false*/);
+      return this.spreads.filter(s => s.config.isBackground == false);
     }
   }
   
@@ -198,6 +196,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     indicator: boolean;
     dragging: boolean;
     tip: string;
+    dependencies: GanttDependency[];
     object: RbObject;
     dataset: RbDatasetComponent;
     config: GanttSeriesConfig;
@@ -218,6 +217,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.indicator = false;
       this.dragging = false;
       this.tip = null;
+      this.dependencies = [];
       this.object = o;
       this.dataset = ds;
       this.config = cfg;
@@ -232,7 +232,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     }
 
     get selected(): boolean {
-      return this.config.isBackground == false && this.dataset.isObjectSelected(this.object);
+      return this.config != null && this.config.isBackground == false && this.dataset != null && this.dataset.isObjectSelected(this.object);
     }
   }
 
@@ -286,4 +286,13 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.timeLabel = tl;
       this.type = t;
     }
+  }
+
+  export enum GanttDependencyType {
+    SS, FS, SF, DU
+  }
+  export class GanttDependency {
+    spread: GanttSpread;
+    type: GanttDependencyType;
+
   }

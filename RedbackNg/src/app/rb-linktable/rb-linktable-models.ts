@@ -48,6 +48,10 @@ export class LinkTableColumnConfig {
         }
       }    
     }
+
+    get widthStr() : string {
+      return 'min(' + (this.width * 0.88) + 'vw, ' + (this.width * 16.896) + 'px)';
+    }
   
     get isClickable() : boolean {
       return this.link != null || this.modal != null;

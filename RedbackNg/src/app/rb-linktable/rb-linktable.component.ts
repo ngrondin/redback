@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject, RELATED_LOADING } from 'app/datamodel';
-import { ColorConfig, Evaluator, Formatter, LinkConfig } from 'app/helpers';
+import { ColorConfig, Evaluator, Formatter, LinkConfig, RecalcPlanner } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
 import { UserprefService } from 'app/services/userpref.service';
@@ -27,6 +27,8 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   groups: any = {};
   sums: any[];
   openGroups: string[] = [null];
+
+  recalcPlanner: RecalcPlanner;
   
   constructor(
     private modalService: ModalService,
@@ -37,6 +39,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   }
 
   dataObserverInit() {
+    this.recalcPlanner = new RecalcPlanner(this.calc.bind(this));
     this.columns = [];
     for(let item of this._cols) {
       let colPref = this.userPref != null && this.userPref.cols != null ? this.userPref.cols[item.id] : null;
@@ -53,12 +56,12 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   }
 
   onDatasetEvent(event: any) {
-    this.calc();
+    this.redraw();
   }
 
   onActivationEvent(state: boolean) {
     this.scrollLeft = 0;
-    this.calc();
+    this.redraw();
   }
 
   get userPref() : any {
@@ -71,6 +74,10 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
   get groupKeys(): string[] {
     return Object.keys(this.groups).sort();
+  }
+
+  redraw() {
+    this.recalcPlanner.request();
   }
 
   calc() {
@@ -106,8 +113,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
           let foreColor = cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
           let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
           let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
-          let width = 'min(' + (cfg.width * 0.88) + 'vw, ' + (cfg.width * 16.896) + 'px)';
-          let col = {value: val, formattedValue: formatVal, align: cfg.align, width: width, backColor: backColor, foreColor: foreColor, icon: icon, link: cfg.link, model: cfg.modal, loading: loading};
+          let col = {value: val, formattedValue: formatVal, align: cfg.align, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, icon: icon, link: cfg.link, model: cfg.modal, loading: loading};
           if(val !== RELATED_LOADING && !isNaN(val)) {
             grp.sums[c] += val;
             totalsums[c] += val;
@@ -131,17 +137,17 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     let c = 0;
     let firstWidth = 0;//-0.06;
     while(c < this.columns.length && this.columns[c].sum != true) {
-      firstWidth += this.columns[c].width/* + 0.06*/;
+      firstWidth += this.columns[c].width;
       c++;
     }
-    ret.push({width: firstWidth});
+    ret.push({widthStr: 'min(' + (firstWidth * 0.88) + 'vw, ' + (firstWidth * 16.896) + 'px)'});
     while(c < this.columns.length) {
       let cfg = this.columns[c];
       if(cfg.sum) {
         let formatVal = cfg.format != null ? Formatter.format(sums[c], cfg.format) : sums[c];
-        ret.push({width: cfg.width, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink});  
+        ret.push({widthStr: cfg.widthStr, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink});  
       } else {
-        ret.push({width: cfg.width});  
+        ret.push({widthStr: cfg.widthStr});  
       }
       c++;
     }
@@ -190,7 +196,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     } else {
       this.openGroups.push(groupKey);
     }
-    this.calc();
+    this.redraw();
   }
 
   showFooter(): boolean {
