@@ -114,14 +114,18 @@ public class IntegrationManager {
 		String accessToken = clientData.getString("access_token");
 		long expiry = clientData.containsKey("expiry") ? clientData.getNumber("expiry").longValue() : 0;
 		if(checkToken && (accessToken == null || accessToken.equals("") || expiry < System.currentTimeMillis())) {
+			String clientId = config.clientId != null ? config.clientId : clientData.getString("client_id"); //This is because some non-standard integrations have dynamic client_id
+			String clientSecret = config.clientSecrect != null ? config.clientSecrect : clientData.getString("client_secret");
 			String refreshToken = clientData.getString("refresh_token");
 			if(refreshToken != null && !refreshToken.equals("")) {
 				DataMap form = new DataMap();
-				form.put("client_id", config.clientId);
-				form.put("client_secret", config.clientSecrect);
+				form.put("client_id", clientId);
+				form.put("client_secret", clientSecret);
 				form.put("grant_type", "refresh_token");
 				form.put("refresh_token", refreshToken);
-				form.put("redirect_uri", getRedirectUri(config.name));
+				if(config.loginUrl != null) {
+					form.put("redirect_uri", getRedirectUri(config.name));
+				}					
 				DataMap refreshResp = gatewayClient.postForm(config.tokenUrl, form);
 				if(refreshResp != null) {
 					if(refreshResp.getString("refresh_token") != null)

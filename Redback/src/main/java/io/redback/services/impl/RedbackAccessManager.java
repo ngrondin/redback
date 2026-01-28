@@ -31,11 +31,6 @@ import io.redback.utils.Convert;
 
 public class RedbackAccessManager extends AccessManager 
 {
-	//protected String sysusername;
-	//protected String secret;
-	//protected String issuer;
-	//protected String type;
-	//protected String outboundService;
 	protected String idmUserProfileUrl;
 	protected String idmTokenUrl;
 	protected String idmClientId;
@@ -78,6 +73,7 @@ public class RedbackAccessManager extends AccessManager
 	}
 	
 	public void configure() {
+		super.configure();
 		cachedUserProfiles.clear();
 		roles.clear();
 		jwtValidator.clearAll();
@@ -91,6 +87,7 @@ public class RedbackAccessManager extends AccessManager
 				try {
 					DataMap resp = gatewayClient.get(issuerConfig.getString("keysurl"));
 					jwtValidator.addJWK(issuer, resp);
+					Logger.info("rb.am.jwtvalidator", "Retreived keys for " + issuer);
 				} catch(Exception e) {
 					Logger.severe("rb.am.jwtvalidator", e);
 				}

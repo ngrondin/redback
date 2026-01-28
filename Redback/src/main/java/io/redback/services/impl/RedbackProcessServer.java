@@ -26,6 +26,7 @@ public class RedbackProcessServer extends ProcessServer
 	}
 	
 	public void configure() {
+		super.configure();
 		processManager.refreshAllConfigs();		
 	}	
 	

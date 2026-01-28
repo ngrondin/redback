@@ -1,12 +1,9 @@
 package io.redback.services.impl;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -82,6 +79,7 @@ public class RedbackUIServer extends UIServer
 	}
 	
 	public void configure() {
+		super.configure();
 		viewConfigs.clear();
 		menuConfigs.clear();
 	}

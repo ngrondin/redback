@@ -65,6 +65,7 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
   public getPopupConfig() {
     let filter = null;
     let arr = this.rbObject.get(this.attribute);
+    if(arr != null && !Array.isArray(arr)) arr = [arr];
     if(arr != null && arr.length > 0) {
       let link = this.rbObject.validation[this.attribute].related.link;
       filter = {};
@@ -93,7 +94,7 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
     } 
   }
 
- public finishEditingWithSelection(value: any) {
+  public finishEditingWithSelection(value: any) {
     super.finishEditingWithSelection(value);
     let arr = [...(this.rbObject.get(this.attribute) || [])];
     if(!Array.isArray(arr)) {

@@ -254,7 +254,19 @@ export class ValueComparator{
         } else {
           return -1 * dir;
         }
-      }
+    }
+
+    public static sort(a: any, b: any): number {
+        if(a == null) {
+            return 1;
+        } else if(b == null) {
+            return -1
+        } else if(!isNaN(a) && !isNaN(b)) {
+            return a - b;
+        } else {
+            return a.toString().localeCompare(b.toString());
+        }
+    }
 }
 
 export class ObserverProxy implements Observer<any> {

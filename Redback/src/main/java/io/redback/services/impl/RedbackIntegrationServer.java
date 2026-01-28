@@ -20,6 +20,7 @@ public class RedbackIntegrationServer extends IntegrationServer {
 	}
 	
 	public void configure() {
+		super.configure();
 		integrationManager.configure();
 	}
 

@@ -12,10 +12,13 @@
     <div
         class="rb-multirelatedinput-valuecontainer">
         <div
-            *ngFor="let value of getMultiValues(); index as i"
-            [class]="'rb-multirelatedinput-value' + (tagmode ? ' rb-multirelatedinput-value-tag' : '')">
-            <span *ngIf="i > 0 && !tagmode">,</span>
-            {{value}}
+            class="rb-multirelatedinput-valuegroup">
+            <div
+                *ngFor="let value of getMultiValues(); index as i"
+                [class]="'rb-multirelatedinput-value' + (tagmode ? ' rb-multirelatedinput-value-tag' : '')">
+                <span *ngIf="i > 0 && !tagmode">,</span>
+                {{value}}
+            </div>
         </div>
         <input 
             #input

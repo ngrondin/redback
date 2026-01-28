@@ -20,6 +20,7 @@ public abstract class StreamProvider extends Provider implements io.firebus.inte
 		try {
 			Timer timer = new Timer();
 			Session session = getSession(payload);
+			checkStarted();
 			Payload acceptPayload = redbackAcceptStream(session, payload, streamEndpoint);
 			if(writeRequestLog)
 				Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));

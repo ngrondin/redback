@@ -17,10 +17,12 @@ public class RedbackCronServer extends CronServer
 	}
 	
 	public void configure() {
+		super.configure();
 		cronTaskManager.clearCaches();
 	}
 
 	public void start() {
+		super.start();
 		if(enableCron)
 			cronTaskManager.start();
 	}	

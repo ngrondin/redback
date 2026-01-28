@@ -21,6 +21,7 @@ public abstract class DualProvider extends Provider implements io.firebus.interf
 		try {
 			Timer timer = new Timer();
 			Session session = getSession(payload);
+			checkStarted();
 			Payload response = redbackService(session, payload);
 			if(writeRequestLog)
 				Logger.info("rb.service", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
@@ -34,6 +35,7 @@ public abstract class DualProvider extends Provider implements io.firebus.interf
 		try {
 			Timer timer = new Timer();
 			Session session = getSession(payload);
+			checkStarted();
 			Payload acceptPayload = redbackAcceptStream(session, payload, streamEndpoint);
 			if(writeRequestLog)
 				Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));

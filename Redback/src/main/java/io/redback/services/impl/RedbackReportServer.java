@@ -22,6 +22,7 @@ public class RedbackReportServer extends ReportServer {
 	}
 	
 	public void configure() {
+		super.configure();
 		reportManager.clearCaches();	
 	}
 

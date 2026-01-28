@@ -15,10 +15,6 @@ public class RedbackAIServer extends AIServer {
 		super(n, c, f);
 		aiManager = new AIManager(n, config, firebus);
 	}
-	
-	public void configure() {
-
-	}	
 
 	protected NLCommandResponse nlCommand(Session session, String model, String text, DataMap context) throws RedbackException {
 		return aiManager.runNLCommand(session, model, text, context);

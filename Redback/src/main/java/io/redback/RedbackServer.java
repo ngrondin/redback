@@ -10,7 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -102,12 +104,16 @@ public class RedbackServer
 
 		Logger.fine("Adding services to container");
 		services = new HashMap<String, BusFunction>();
+		Map<Integer, List<BusFunction>> servicePriorityMap = new HashMap<Integer, List<BusFunction>>();
 		DataList serviceConfigs = config.getList("services");
 		for(int i = 0; i < serviceConfigs.size(); i++)
 		{
 			DataMap serviceConfig = serviceConfigs.getObject(i); 
 			String className = serviceConfig.getString("class");
 			String name = serviceConfig.getString("name");
+			int priority = serviceConfig.containsKey("priority") ? serviceConfig.getNumber("priority").intValue() : 10;
+			if(!servicePriorityMap.containsKey(priority)) 
+				servicePriorityMap.put(priority, new ArrayList<BusFunction>());
 			int concurrent = serviceConfig.containsKey("concurrent") ? serviceConfig.getNumber("concurrent").intValue() : 10;
 			DataMap deploymentConfig = serviceConfig.getObject("config");
 			if(className != null && name != null)
@@ -187,6 +193,7 @@ public class RedbackServer
 						if(service instanceof Consumer)
 							firebus.registerConsumer(name, ((Consumer)service), concurrent);
 						services.put(name, service);
+						servicePriorityMap.get(priority).add(service);
 					}
 				}
 				catch(ClassNotFoundException e)
@@ -204,13 +211,26 @@ public class RedbackServer
 			}
 		}
 		
-		configureAllServices();
-		startAllServices();
+		List<Integer> priorityList = new ArrayList<>(servicePriorityMap.keySet()); 
+		Collections.sort(priorityList);
+		for(int p : priorityList) {
+			for(BusFunction func: servicePriorityMap.get(p))
+				if(func instanceof Provider)
+					((Provider)func).configure();
+			for(BusFunction func: servicePriorityMap.get(p))
+				if(func instanceof Provider)
+					((Provider)func).start();
+		}
+
+		
+		/*configureAllServices();
+		startAllServices();*/
 		new Watchdog(firebus);
 		long end = System.currentTimeMillis();
 		Logger.info("Redback server started in " + (end - start) + "ms");
 	}
 	
+
 	protected void configureAllServices() {
 		for(String name: services.keySet()) {
 			BusFunction func = services.get(name);
@@ -219,13 +239,13 @@ public class RedbackServer
 		}		
 	}
 
-	protected void startAllServices() {
+	/*protected void startAllServices() {
 		for(String name: services.keySet()) {
 			BusFunction func = services.get(name);
 			if(func instanceof Provider)
 				((Provider)func).start();
 		}		
-	}
+	}*/
 	
 	public Firebus getFirebus() {
 		return firebus;

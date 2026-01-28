@@ -27,6 +27,7 @@ public class RedbackObjectServer extends ObjectServer
 	}
 	
 	public void configure() {
+		super.configure();
 		objectManager.refreshAllConfigs();
 	}	
 	

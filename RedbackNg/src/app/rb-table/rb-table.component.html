@@ -19,7 +19,15 @@
         class="rb-table-body">
         <div
             class="rb-table-row"
-            *ngFor="let object of list">
+            *ngFor="let object of orderedList"
+            [rb-drag-object]="canOrder ? object : null"
+            (rb-drag-dropzone)="droppedOn($event, object)">
+            <rb-icon
+                class="rb-table-dragindicator"
+                *ngIf="canOrder"
+                [icon]="'drag_indicator'"
+                [color]="'lightgrey'">
+            </rb-icon>
             <div
                 class="rb-table-rowitem"
                 *ngFor="let col of getColumnsForObject(object)"
@@ -95,6 +103,20 @@
                     [show]="col.showExpr"
                     [margin]="false">
                 </rb-related-input>
+                <rb-multi-related-input
+                    *ngIf="col.type == 'multirelatedinput'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [displayattribute]="col.displayAttribute"
+                    [parentattribute]="col.parentAttribute"
+                    [childattribute]="col.childAttribute"
+                    [icon]="col.icon"
+                    [editable]="col.editable"
+                    [show]="col.showExpr"
+                    [tagmode]="false"
+                    [margin]="false">
+                </rb-multi-related-input>                
                 <rb-switch-input
                     *ngIf="col.type == 'switch'"
                     [size]="col.size"

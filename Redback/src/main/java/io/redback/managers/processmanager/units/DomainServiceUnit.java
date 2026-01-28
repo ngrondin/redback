@@ -1,16 +1,13 @@
 package io.redback.managers.processmanager.units;
 
-import io.firebus.Payload;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
-import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
 import io.redback.managers.processmanager.Process;
 import io.redback.managers.processmanager.ProcessInstance;
 import io.redback.managers.processmanager.ProcessManager;
 import io.redback.managers.processmanager.ProcessUnit;
-import io.redback.security.Session;
 
 public class DomainServiceUnit extends ProcessUnit 
 {
@@ -37,7 +34,8 @@ public class DomainServiceUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.domain.start", null);
+		Logger.warning("rb.process.domain", new DataMap("warning","deprecated", "process", pi.getProcessName()));
+		/*Logger.finer("rb.process.domain.start", null);
 		if(processManager.getDomainServiceName() != null)
 		{
 			Session sysUserSession = pi.getOutboundActionner().getSession();
@@ -66,7 +64,7 @@ public class DomainServiceUnit extends ProcessUnit
 				Logger.warning("rb.process.domain", "Error executing domain function", e);
 			}
 			Logger.finer("rb.process.domain.finish", null);
-		}
+		}*/
 		pi.setCurrentNode(nextNode);
 	}
 

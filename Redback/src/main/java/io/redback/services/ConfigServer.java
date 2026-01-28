@@ -14,6 +14,8 @@ public abstract class ConfigServer extends ServiceProvider
 	public ConfigServer(String n, DataMap c, Firebus f) 
 	{
 		super(n, c, f);
+		configured = true;
+		started = true;
 	}
 
 	public Payload redbackService(Session session, Payload payload) throws RedbackException

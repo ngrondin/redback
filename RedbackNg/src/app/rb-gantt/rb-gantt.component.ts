@@ -11,7 +11,7 @@ import { GanttDependencyType, GanttLane, GanttLaneConfig, GanttMark, GanttMarkTy
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
-import { CanvasTool, Evaluator } from 'app/helpers';
+import { CanvasTool, Evaluator, ValueComparator } from 'app/helpers';
 import { NavigateService } from 'app/services/navigate.service';
 
 
@@ -187,9 +187,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           this.logService.info("Gantt actiavated with target that is not in the dataset");
           this.dataService.fetchEntireList(selectionTarget.objectname, selectionTarget.filter, null, null).subscribe((objs) => {
             if(objs.length > 0) {
-              let starts = objs.map(obj => (new Date(obj.get(selectionTarget.cfg.startAttribute))).getTime());
+              let starts = objs.map(obj => (new Date(obj.get(selectionTarget.cfg.start.attribute))).getTime());
               let ms = Math.min(...starts);
               this._startDate = new Date(ms - (3*60*60*1000));
+              this.logService.info("Setting start date to " + this._startDate);
+              this.updateData(true);
               super.onActivationEvent(event);  
             }
           });
@@ -440,6 +442,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       laneFilter = this.filterService.resolveFilter(this.lanesConfig.dragfilter, draggingObject, null, null);
     };
     let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
+    if(this.lanesConfig.orderAttribute != null) {
+      list.sort((a, b) => ValueComparator.sort(a.get(this.lanesConfig.orderAttribute), b.get(this.lanesConfig.orderAttribute)));
+    }
     for(let obj of list) {
       let show = laneFilter != null && !this.filterService.applies(laneFilter, obj) ? false : true;
       if(show) {     
@@ -875,6 +880,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(tx.objects.length > 0) {
       this.dataService.pushTransactionToServer(tx);
     }
+    //Don't recalc here, the recalc will be done on the end drag event;
   }
 
   public droppedOut(event: any) {

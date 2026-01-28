@@ -35,9 +35,8 @@ public class QueueManager extends Thread {
 		accessManagementClient = new AccessManagementClient(firebus, config.getString("accessmanagementservice"));
 		sysUserManager = new SysUserManager(accessManagementClient, config);
 		setName("rbQueue");
-		start();
 	}
-	
+		
 	public synchronized void enqueue(Session session, String service, DataMap message, int requestTimeout, Date schedule, String uniqueKey) throws RedbackException {
 		String uuid = null;
 		if(uniqueKey != null) 

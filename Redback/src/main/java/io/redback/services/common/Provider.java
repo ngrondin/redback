@@ -16,6 +16,9 @@ public abstract class Provider
 	protected Firebus firebus;
 	protected DataMap config;
 	protected boolean writeRequestLog = true; 
+	protected boolean configured = true;
+	protected boolean started = false;
+	protected final Object startingLock = new Object();
 	
 	public Provider(String n, DataMap c, Firebus f)
 	{
@@ -49,13 +52,25 @@ public abstract class Provider
 		return new FunctionErrorException(msg, e, errorCode);
 	}
 
+	protected void checkStarted() {
+		if(started) return;
+		synchronized(startingLock) {
+			try {
+				startingLock.wait();
+			} catch (InterruptedException e) {}
+		}
+	}
 
 	public void configure() {
-		
+		configured = true;
 	}
 	
 	public void start() {
-		
+		started = true;
+		synchronized(startingLock) {
+			startingLock.notify();
+		}
+		Logger.info(serviceName + " started");
 	}
 	
 	public DataMap getStatus() {

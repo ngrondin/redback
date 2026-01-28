@@ -18,6 +18,15 @@
     /*gap: 0.5vw;*/
 }
 
+.rb-multirelatedinput-valuegroup {
+    display: flex;
+    flex-direction: row;
+    flex: 0 1 auto;
+    overflow: hidden;
+    min-width: 0px;
+    max-width: 95%;
+}
+
 .rb-multirelatedinput-input {
     display: flex;
     flex: 1 1 0px;
@@ -29,6 +38,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     border-width: 0px;
+    min-width: var(--v10px);
 }
 
 .rb-multirelatedinput-value {

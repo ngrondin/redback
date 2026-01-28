@@ -20,6 +20,7 @@ public abstract class ServiceProvider extends Provider implements io.firebus.int
 		try {
 			Timer timer = new Timer();
 			Session session = getSession(payload);
+			checkStarted();
 			Payload response = redbackService(session, payload);
 			if(writeRequestLog)
 				Logger.info("rb.service", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
