@@ -29,9 +29,14 @@
 	overflow: hidden;
 }
 
-.rb-tabsection-tabheader-label {
+.rb-tabsection-tabheader-label-primary {
 	padding: var(--v8px) var(--v12px);
     color: var(--primary-dark-color);
+}
+
+.rb-tabsection-tabheader-label-secondary {
+	padding: var(--v8px) var(--v12px);
+    color: var(--primary-dark2-color);
 }
 
 .rb-tabsection-divider {

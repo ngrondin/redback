@@ -12,6 +12,7 @@ import { UserprefService } from 'app/services/userpref.service';
 })
 export class RbTabSectionComponent extends RbContainerComponent implements OnInit {
   @Input('keeplasttab') keeplasttab : boolean = false;
+  @Input('secondary') secondary: boolean = false;
 
   @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
   

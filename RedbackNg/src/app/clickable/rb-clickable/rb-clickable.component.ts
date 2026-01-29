@@ -9,6 +9,7 @@ export class RbClickableComponent {
   @Input('enabled') enabled = true;
   @Input('focus') focus = false;
   @Input('running') running = false;
+  @Input('focuscolor') focusColor = null;
   hovering: boolean = false;
   clicked: boolean = false;
   clickTop: number = 0;

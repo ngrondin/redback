@@ -1,6 +1,7 @@
 <div 
     *ngIf="focus && enabled"
-    class="rb-clickable-back">
+    class="rb-clickable-back"
+    [style.background-color]="focusColor">
 </div>
 <div 
     *ngIf="hovering && enabled"

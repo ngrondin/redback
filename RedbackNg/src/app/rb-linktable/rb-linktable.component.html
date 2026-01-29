@@ -90,7 +90,7 @@
             *ngFor="let col of sums"
             [class]="'rb-linktable-colfooter'"
             [style.visibility]="col.formattedValue != null ? 'visible' : 'hidden'"
-            [style.width]="col.widthStr">
+            [style.width]="col.width">
             <div
                 [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border-on' : '')">
                 <a

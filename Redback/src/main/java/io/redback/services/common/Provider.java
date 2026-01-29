@@ -68,7 +68,7 @@ public abstract class Provider
 	public void start() {
 		started = true;
 		synchronized(startingLock) {
-			startingLock.notify();
+			startingLock.notifyAll();
 		}
 		Logger.info(serviceName + " started");
 	}

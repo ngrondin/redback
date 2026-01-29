@@ -140,14 +140,14 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       firstWidth += this.columns[c].width;
       c++;
     }
-    ret.push({widthStr: 'min(' + (firstWidth * 0.88) + 'vw, ' + (firstWidth * 16.896) + 'px)'});
+    ret.push({width: 'min(' + (firstWidth * 0.88) + 'vw, ' + (firstWidth * 16.896) + 'px)'});
     while(c < this.columns.length) {
       let cfg = this.columns[c];
       if(cfg.sum) {
         let formatVal = cfg.format != null ? Formatter.format(sums[c], cfg.format) : sums[c];
-        ret.push({widthStr: cfg.widthStr, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink});  
+        ret.push({width: cfg.widthStr, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink});  
       } else {
-        ret.push({widthStr: cfg.widthStr});  
+        ret.push({width: cfg.widthStr});  
       }
       c++;
     }

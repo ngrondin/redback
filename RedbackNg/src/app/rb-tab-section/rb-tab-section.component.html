@@ -14,10 +14,11 @@
             <rb-clickable
                 *ngIf="tab.show == true"
                 [focus]="isTabActive(tab)"
+                [focuscolor]="secondary ? '#4D88B9' : null"
                 (click)="selectTab(tab)"
                 (contextmenu)="openPopup($event, tab)">
                 <span
-                    class="rb-tabsection-tabheader-label">
+                    [class]="secondary ? 'rb-tabsection-tabheader-label-secondary' : 'rb-tabsection-tabheader-label-primary'">
                     {{tab.label}}
                 </span>
             </rb-clickable>
