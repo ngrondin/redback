@@ -1,5 +1,7 @@
 package io.redback.security;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import io.firebus.data.DataList;
@@ -22,7 +24,7 @@ public class Session
 	public String domainLock;
 	public int domainLockLevel = 0;
 	public ScriptContext scriptContext;
-	public int scriptLevel = 0;
+	public List<String> scriptStack;
 	public TxStore<Object> txStore;
 	public boolean blockTxStore;
 	public DataMap stats;
@@ -65,6 +67,7 @@ public class Session
 		blockTxStore = false;
 		stats = new DataMap();
 		data = new DataMap();
+		scriptStack = new ArrayList<String>();
 	}
 	
 	public void setUserProfile(UserProfile up) 
@@ -213,19 +216,23 @@ public class Session
 		return stats;
 	}
 	
-	public void pushScriptLevel() 
+	public void pushScriptLevel(String scriptName) 
 	{
-		scriptLevel++;
+		scriptStack.add(scriptName);
 	}
 	
 	public void popScriptLevel() 
 	{
-		scriptLevel--;
+		scriptStack.removeLast();
 	}
 	
 	public boolean isInScript() 
 	{
-		return scriptLevel > 0;
+		return scriptStack.size() > 0;
+	}
+	
+	public List<String> getScriptStack() {
+		return scriptStack;
 	}
 	
 	public boolean isElevated() 

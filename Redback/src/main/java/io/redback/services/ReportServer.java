@@ -24,7 +24,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 	}
 
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
-		Logger.finer("rb.report.start", null);
+		Logger.finer("rb.report.start");
 		Payload response = null;
 		try
 		{
@@ -80,7 +80,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		{
 			throw new RedbackException("Error in report server", e);
 		}		
-		Logger.finer("rb.report.finish", null);
+		Logger.finer("rb.report.finish");
 		return response;	
 	}
 

@@ -40,7 +40,7 @@ public class FirebusRequestUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.firebusrequest.start", null);
+		Logger.finer("rb.process.firebusrequest.start");
 		Session sysUserSession = pi.getOutboundActionner().getSession();
 		ScriptContext context = pi.getScriptContext();
 		DataMap data = inputExpressionMap.eval(context);
@@ -60,7 +60,7 @@ public class FirebusRequestUnit extends ProcessUnit
 			throw new RedbackException("Error executing firebus service '" + firebusServiceName + "' ",  e);
 		}
 		pi.setCurrentNode(nextNode);
-		Logger.finer("rb.process.firebusrequest.finish", null);
+		Logger.finer("rb.process.firebusrequest.finish");
 	}
 
 }

@@ -117,7 +117,7 @@ public class RedbackNotificationServer extends NotificationServer {
 			        });
 			        
 			        String bodyType = StringUtils.isHtml(email.body) ? "text/html; charset=utf-8" : "text/plain";
-			        Logger.fine("rb.notif.sendemail", null);
+			        Logger.fine("rb.notif.sendemail");
 			        Message msg = new MimeMessage(mailSession);
 			        msg.setFrom(email.from);
 			        if(email.reply != null)

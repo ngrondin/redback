@@ -26,7 +26,7 @@ public abstract class ServiceProvider extends Provider implements io.firebus.int
 				Logger.info("rb.service", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return response;
 		} catch(Exception e) {
-			throw handleException("rb.service", "Exception in redback service '" + serviceName + "'", e);
+			throw handleException("rb.service", "Exception in redback service '" + serviceName + "'", payload.getDataMapOrNull(), e);
 		}
 	}
 	

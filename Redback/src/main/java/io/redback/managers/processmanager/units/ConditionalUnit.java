@@ -32,7 +32,7 @@ public class ConditionalUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.consitional.start", null);
+		Logger.finer("rb.process.consitional.start");
 		try
 		{
 			boolean bool = (Boolean)expression.eval(pi.getScriptContext());
@@ -45,7 +45,7 @@ public class ConditionalUnit extends ProcessUnit
 		{
 			throw new RedbackException("Error executing a process condition", e);
 		}		
-		Logger.finer("rb.process.consitional.finish", null);
+		Logger.finer("rb.process.consitional.finish");
 	}
 
 }

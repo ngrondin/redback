@@ -27,7 +27,7 @@ public abstract class DualProvider extends Provider implements io.firebus.interf
 				Logger.info("rb.service", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return response;
 		} catch(Exception e) {
-			throw handleException("rb.service", "Exception in redback service '" + serviceName + "'", e);
+			throw handleException("rb.service", "Exception in redback service '" + serviceName + "'", payload.getDataMapOrNull(), e);
 		}
 	}
 	
@@ -41,7 +41,7 @@ public abstract class DualProvider extends Provider implements io.firebus.interf
 				Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return acceptPayload;
 		} catch(Exception e) {
-			throw handleException("rb.stream", "Exception in redback stream '" + serviceName + "'", e);
+			throw handleException("rb.stream", "Exception in redback stream '" + serviceName + "'", payload.getDataMapOrNull(), e);
 		} 
 	}
 	

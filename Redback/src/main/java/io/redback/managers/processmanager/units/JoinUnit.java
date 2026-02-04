@@ -20,9 +20,9 @@ public class JoinUnit extends ProcessUnit
 	
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.join.start", null);
+		Logger.finer("rb.process.join.start");
 		pi.setCurrentNode(nextNode);
-		Logger.finer("rb.process.join.finish", null);
+		Logger.finer("rb.process.join.finish");
 	}
 
 }

@@ -30,6 +30,7 @@
 	--v40px: 2.35vw;
 	--v48px: 2.82vw;*/
 	--vm4px: max(-0.208vw, -4px);
+	--vm3px: min(-0.156vw, -3px);
 	--v1px: min(0.052vw, 1px);
 	--v2px: min(0.104vw, 2px);
 	--v3px: min(0.156vw, 3px);
@@ -513,6 +514,14 @@ rb-fileset {
 
 .mat-mdc-menu-content {
 	padding: 0px!important;
+}
+
+.mat-mdc-menu-item {
+	min-height: var(--v40px)!important;
+}
+
+.mdc-list-item__primary-text{
+	font-size: 0.95rem!important;
 }
 
 .rb-hover-container {

@@ -494,7 +494,7 @@ public class ObjectManager
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
 		if(initialData != null)
 		{
-			session.pushScriptLevel();
+			session.pushScriptLevel("_createobject");
 			for(String attributeName: initialData.keySet())
 			{
 				boolean isFilter = false;
@@ -570,7 +570,7 @@ public class ObjectManager
 						context.put("ic", new IntegrationClientJSWrapper(getIntegrationClient(), session));
 					}
 					Function function = scriptCfg.getFunction();
-					session.pushScriptLevel();
+					session.pushScriptLevel(functionName);
 					ret = function.call(context);
 					session.popScriptLevel();
 				} catch(Exception e) {
@@ -997,82 +997,84 @@ public class ObjectManager
 	protected DataMap generateDBFilterRecurring(Session session, ObjectConfig objectConfig, DataMap objectFilter) throws DataException, RedbackException
 	{
 		DataMap dbFilter = new DataMap();
-		Iterator<String> it = objectFilter.keySet().iterator();
-		while(it.hasNext())
-		{
-			String key = it.next();
-			if(key.equals("$or") || key.equals("$and"))
+		if(objectFilter != null) {
+			Iterator<String> it = objectFilter.keySet().iterator();
+			while(it.hasNext())
 			{
-				DataList list = objectFilter.getList(key);
-				DataList dbList = new DataList();
-				for(int i = 0; i < list.size(); i++)
+				String key = it.next();
+				if(key.equals("$or") || key.equals("$and"))
 				{
-					dbList.add(generateDBFilterRecurring(session, objectConfig, list.getObject(i)));
-				}
-				dbFilter.put(key, dbList);
-			}
-			else if(key.contains(".")) //This branch should be deprecated
-			{
-				String rootAttribute = key.substring(0, key.indexOf("."));
-				String remainder = key.substring(key.indexOf(".") + 1);
-				AttributeConfig attributeConfig = objectConfig.getAttributeConfig(rootAttribute);
-				if(attributeConfig.hasRelatedObject())
-				{
+					DataList list = objectFilter.getList(key);
 					DataList dbList = new DataList();
-					RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-					ObjectConfig nextObjectConfig = objectConfigs.get(session, roc.getObjectName());
-					List<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, null, false, 0, 1000);
-					if(list.size() > 0) {
-						for(int k = 0; k < list.size(); k++)
-						{
-							RedbackObject resultObject = list.get(k);
-							Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
-							dbList.add(resultObjectLinkValue.getObject());
-						}
-						dbFilter.put(rootAttribute, new DataMap("$in", dbList));
-					} else {
-						dbFilter.put(rootAttribute, "");
-					}
-				}
-			}
-			else
-			{
-				AttributeConfig attributeConfig = objectConfig.getAttributeConfig(key);
-				String attributeDBKey = key.equals("uid") ? objectConfig.getUIDDBKey() : key.equals("domain") ? objectConfig.getDomainDBKey() : attributeConfig != null ? attributeConfig.getDBKey() : null; 
-				if(attributeDBKey != null)
-				{
-					DataEntity objectFilterValue = objectFilter.get(key);
-					DataEntity dbFilterValue = null;
-					if(objectFilterValue instanceof DataMap)
+					for(int i = 0; i < list.size(); i++)
 					{
-						DataMap objectFilterValueMap = (DataMap)objectFilterValue;
-						if(FilterProcessor.isComparativeOperator(objectFilterValueMap)) {
-							dbFilterValue = objectFilterValueMap;
-						} else if(attributeConfig.hasRelatedObject()) {		
-							RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-							ObjectConfig relatedObjectConfig = getConfigIfCanRead(session, roc.getObjectName());
-							DataMap subFilter = generateDBFilterRecurring(session, relatedObjectConfig, objectFilterValueMap);
-							List<RedbackObject> list = listObjects(session, relatedObjectConfig.getName(), subFilter, null, null, false, 0, 1000);
-							DataList inList = new DataList();
-							for(int k = 0; k < list.size(); k++) {
+						dbList.add(generateDBFilterRecurring(session, objectConfig, list.getObject(i)));
+					}
+					dbFilter.put(key, dbList);
+				}
+				else if(key.contains(".")) //This branch should be deprecated
+				{
+					String rootAttribute = key.substring(0, key.indexOf("."));
+					String remainder = key.substring(key.indexOf(".") + 1);
+					AttributeConfig attributeConfig = objectConfig.getAttributeConfig(rootAttribute);
+					if(attributeConfig.hasRelatedObject())
+					{
+						DataList dbList = new DataList();
+						RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+						ObjectConfig nextObjectConfig = objectConfigs.get(session, roc.getObjectName());
+						List<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, null, false, 0, 1000);
+						if(list.size() > 0) {
+							for(int k = 0; k < list.size(); k++)
+							{
 								RedbackObject resultObject = list.get(k);
 								Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
-								inList.add(resultObjectLinkValue.getObject());
+								dbList.add(resultObjectLinkValue.getObject());
 							}
-							dbFilterValue = new DataMap("$in", inList);
+							dbFilter.put(rootAttribute, new DataMap("$in", dbList));
 						} else {
-							dbFilterValue = objectFilterValueMap;
+							dbFilter.put(rootAttribute, "");
 						}
 					}
-					else if(objectFilterValue instanceof DataLiteral)
+				}
+				else
+				{
+					AttributeConfig attributeConfig = objectConfig.getAttributeConfig(key);
+					String attributeDBKey = key.equals("uid") ? objectConfig.getUIDDBKey() : key.equals("domain") ? objectConfig.getDomainDBKey() : attributeConfig != null ? attributeConfig.getDBKey() : null; 
+					if(attributeDBKey != null)
 					{
-						String objectFilterValueString = ((DataLiteral)objectFilterValue).getString();
-						if(objectFilterValueString != null  &&  objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
-							dbFilterValue =  new DataMap("$regex",  objectFilterValueString.substring(1, objectFilterValueString.length() - 1));
-						else
-							dbFilterValue = ((DataLiteral)objectFilterValue).getCopy();
+						DataEntity objectFilterValue = objectFilter.get(key);
+						DataEntity dbFilterValue = null;
+						if(objectFilterValue instanceof DataMap)
+						{
+							DataMap objectFilterValueMap = (DataMap)objectFilterValue;
+							if(FilterProcessor.isComparativeOperator(objectFilterValueMap)) {
+								dbFilterValue = objectFilterValueMap;
+							} else if(attributeConfig.hasRelatedObject()) {		
+								RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+								ObjectConfig relatedObjectConfig = getConfigIfCanRead(session, roc.getObjectName());
+								DataMap subFilter = generateDBFilterRecurring(session, relatedObjectConfig, objectFilterValueMap);
+								List<RedbackObject> list = listObjects(session, relatedObjectConfig.getName(), subFilter, null, null, false, 0, 1000);
+								DataList inList = new DataList();
+								for(int k = 0; k < list.size(); k++) {
+									RedbackObject resultObject = list.get(k);
+									Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
+									inList.add(resultObjectLinkValue.getObject());
+								}
+								dbFilterValue = new DataMap("$in", inList);
+							} else {
+								dbFilterValue = objectFilterValueMap;
+							}
+						}
+						else if(objectFilterValue instanceof DataLiteral)
+						{
+							String objectFilterValueString = ((DataLiteral)objectFilterValue).getString();
+							if(objectFilterValueString != null  &&  objectFilterValueString.startsWith("*")  &&  objectFilterValueString.endsWith("*")  &&  objectFilterValueString.length() >= 2)
+								dbFilterValue =  new DataMap("$regex",  objectFilterValueString.substring(1, objectFilterValueString.length() - 1));
+							else
+								dbFilterValue = ((DataLiteral)objectFilterValue).getCopy();
+						}
+						dbFilter.put(attributeDBKey, dbFilterValue);
 					}
-					dbFilter.put(attributeDBKey, dbFilterValue);
 				}
 			}
 		}

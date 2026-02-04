@@ -39,7 +39,7 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.updateobject.start", null);
+		Logger.finer("rb.process.updateobject.start");
 		try {
 			if(processManager.getObjectServiceName() != null)
 			{
@@ -68,7 +68,7 @@ public class RedbackObjectUpdateUnit extends ProcessUnit
 				{
 					throw new RedbackException("Error updating Redback object '" + objectName + "'",  e);
 				}
-				Logger.finer("rb.process.updateobject.finish", null);
+				Logger.finer("rb.process.updateobject.finish");
 
 			}
 			pi.setCurrentNode(nextNode);

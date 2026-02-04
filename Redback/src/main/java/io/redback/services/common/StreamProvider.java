@@ -26,7 +26,7 @@ public abstract class StreamProvider extends Provider implements io.firebus.inte
 				Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return acceptPayload;
 		} catch(Exception e) {
-			throw handleException("rb.stream", "Exception in redback stream '" + serviceName + "'", e);
+			throw handleException("rb.stream", "Exception in redback stream '" + serviceName + "'", payload.getDataMapOrNull(), e);
 		} 
 	}
 

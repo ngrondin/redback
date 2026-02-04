@@ -127,8 +127,7 @@ public class ProcessManager
 			try {
 				loadAppProcesses(session);
 			} catch(Exception e) {
-				Logger.severe("rb.process.refreshconfig", null, e);
-				//logger.severe(StringUtils.rollUpExceptions(e));
+				Logger.severe("rb.process.refreshconfig", e);
 			}
 		}
 	}
@@ -429,7 +428,7 @@ public class ProcessManager
 		{
 			throw new RedbackException("Error retreiving process instance", e);
 		} 	
-		Logger.finer("rb.process.find.end", null);
+		Logger.finer("rb.process.find.end");
 		return list;
 	}
 

@@ -37,18 +37,19 @@ public abstract class Provider
 		return session;
 	}
 	
-	protected FunctionErrorException handleException(String event, String msg, Exception e) {
+	protected FunctionErrorException handleException(String event, String msg, DataMap request, Exception e) {
 		int errorCode = 0;
 		if(e instanceof RedbackException) {
 			RedbackException rbe = (RedbackException)e;
 			errorCode = rbe.getErrorCode();
 		}
+		DataMap data = new DataMap("req", request);
 		if(errorCode == 0 || errorCode >= 500)
-			Logger.severe(event, msg, e);
+			Logger.severe(event, msg, data, e);
 		else if(errorCode == 401) 
-			Logger.security(event, msg, e);
+			Logger.security(event, msg, data, e);
 		else 
-			Logger.userError(event, StringUtils.rollUpExceptions(e));
+			Logger.userError(event, StringUtils.rollUpExceptions(e), data);
 		return new FunctionErrorException(msg, e, errorCode);
 	}
 

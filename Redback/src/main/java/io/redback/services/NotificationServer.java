@@ -26,7 +26,7 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 
 	public Payload redbackAuthenticatedService(Session session, Payload payload) throws RedbackException {
 		try {
-			Logger.finer("rb.notif.start", null);
+			Logger.finer("rb.notif.start");
 
 			Payload response = null;
 			DataMap request = payload.getDataMap();
@@ -72,7 +72,7 @@ public abstract class NotificationServer extends AuthenticatedServiceProvider {
 				throw new RedbackException("No valid action was provided");
 			}
 	
-			Logger.finer("rb.geo.finish", null);
+			Logger.finer("rb.geo.finish");
 			return response;	
 		} catch(DataException e) {
 			throw new RedbackException("Error in Notification server", e);

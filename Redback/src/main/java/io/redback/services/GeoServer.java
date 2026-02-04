@@ -28,7 +28,7 @@ public abstract class GeoServer extends ServiceProvider
 	}
 
 	public Payload redbackService(Session session, Payload payload) throws RedbackException {
-		Logger.finer("rb.geo.start", null);
+		Logger.finer("rb.geo.start");
 		Payload response = new Payload();
 		try
 		{
@@ -112,7 +112,7 @@ public abstract class GeoServer extends ServiceProvider
 			throw new RedbackException("Exception in geo service", e);
 		}		
 
-		Logger.finer("rb.geo.finish", null);
+		Logger.finer("rb.geo.finish");
 		return response;			
 		
 	}

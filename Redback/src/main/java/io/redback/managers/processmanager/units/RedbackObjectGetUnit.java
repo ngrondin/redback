@@ -37,7 +37,7 @@ public class RedbackObjectGetUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.getobject.start", null);
+		Logger.finer("rb.process.getobject.start");
 		try {
 			if(processManager.getObjectServiceName() != null)
 			{
@@ -64,7 +64,7 @@ public class RedbackObjectGetUnit extends ProcessUnit
 				{
 					throw new RedbackException("Error getting Redback object '" + objectName + "'",  e);
 				}
-				Logger.finer("rb.process.getobject.finish", null);
+				Logger.finer("rb.process.getobject.finish");
 			}
 			pi.setCurrentNode(nextNode);
 		} catch(Exception e) {

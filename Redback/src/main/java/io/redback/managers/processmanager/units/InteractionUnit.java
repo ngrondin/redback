@@ -74,7 +74,7 @@ public class InteractionUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.interaction.start", null);
+		Logger.finer("rb.process.interaction.start");
 		DataMap interactionDetails = new DataMap();
 		interactionDetails.put("code", code);
 		interactionDetails.put("type", type);
@@ -94,32 +94,32 @@ public class InteractionUnit extends ProcessUnit
 				sendMap.put(username, rn.getNotificationForActionner(new Actionner(username)));
 			pi.getProcessManager().sendNotification(sendMap);
 		}
-		Logger.finer("rb.process.interaction.finish", null);
+		Logger.finer("rb.process.interaction.finish");
 		
 	}
 	
 	public void interrupt(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.interaction.interrupt.start", null);
+		Logger.finer("rb.process.interaction.interrupt.start");
 		if(nextNodeInterruption != null) {
 			clearThenGoToNode(pi, nextNodeInterruption);
 		}
-		Logger.finer("rb.process.interaction.interrupt.finish", null);
+		Logger.finer("rb.process.interaction.interrupt.finish");
 	}
 	
 	public void timeout(Actionner actionner, ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.interaction.timeout.start", null);
+		Logger.finer("rb.process.interaction.timeout.start");
 		Date timeout = pi.getInteractionTimeout();
 		if(timeout != null && timeout.getTime() < System.currentTimeMillis() && timeoutAction != null) {
 			action(actionner, pi, timeoutAction, new Date(), null);
 		}
-		Logger.finer("rb.process.interaction.timeout.finish", null);
+		Logger.finer("rb.process.interaction.timeout.finish");
 	}
 
 	public void action(Actionner actionner, ProcessInstance pi, String action, Date date, DataMap data) throws RedbackException
 	{
-		Logger.finer("rb.process.interaction.action.start", null);
+		Logger.finer("rb.process.interaction.action.start");
 		boolean foundAction = false;
 		if(isAssignee(actionner, pi))
 		{
@@ -144,7 +144,7 @@ public class InteractionUnit extends ProcessUnit
 		{
 			throw new RedbackInvalidRequestException("Actionning user or process is not a current assignee");
 		}		
-		Logger.finer("rb.process.interaction.action.finish", null);
+		Logger.finer("rb.process.interaction.action.finish");
 	}
 	
 	public Notification getNotificationForActionner(Actionner actionner, ProcessInstance pi) throws RedbackException

@@ -31,7 +31,7 @@ public class ActionUnit extends ProcessUnit
 	
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.action.start", null);
+		Logger.finer("rb.process.action.start");
 		Actionner actionner = pi.getOutboundActionner();
 		DataMap filter = new DataMap();
 		if(process != null) 
@@ -59,7 +59,7 @@ public class ActionUnit extends ProcessUnit
 		}	
 
 		pi.setCurrentNode(nextNode);
-		Logger.finer("rb.process.action.finish", null);
+		Logger.finer("rb.process.action.finish");
 	}
 
 }

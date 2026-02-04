@@ -287,7 +287,14 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					}
 					return null;
 				}
-			};				
+			};	
+		} else if(key.equals("getCallStack")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					List<String> stack = session.getScriptStack();
+					return stack;					
+				}
+			};			
 		} else if(key.equals("clearObjectConfig")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

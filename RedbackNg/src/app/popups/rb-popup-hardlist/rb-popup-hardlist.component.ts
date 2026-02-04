@@ -5,7 +5,7 @@ import { CONTAINER_DATA } from 'app/tokens';
 import { RbPopupComponent } from '../rb-popup/rb-popup.component';
 
 @Component({
-  selector: 'app-rb-popup-hardlist',
+  selector: 'rb-popup-hardlist',
   templateUrl: './rb-popup-hardlist.component.html',
   styleUrls: ['./rb-popup-hardlist.component.css', '../rb-popup/rb-popup.component.css']
 })

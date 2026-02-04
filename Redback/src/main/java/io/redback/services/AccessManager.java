@@ -37,7 +37,7 @@ public abstract class AccessManager extends ServiceProvider
 
 	public Payload redbackService(Session session, Payload payload) throws RedbackException 
 	{
-		Logger.finer("rb.access.start", null);
+		Logger.finer("rb.access.start");
 		Payload responsePayload = new Payload();
 		DataMap response = new DataMap();
 		try
@@ -62,7 +62,7 @@ public abstract class AccessManager extends ServiceProvider
 		}
 		
 		responsePayload.setData(response);
-		Logger.finer("rb.access.finish", null);
+		Logger.finer("rb.access.finish");
 		return responsePayload;
 	}
 

@@ -22,7 +22,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 	{
 		try
 		{
-			Logger.finer("rb.ui.start", null);
+			Logger.finer("rb.ui.start");
 			Payload response = new Payload();
 			String get = extractGetString(payload);
 			if(get != null)
@@ -62,7 +62,7 @@ public abstract class UIServer extends AuthenticatedServiceProvider
 					response.metadata.put("httpcode", "401");
 				}
 			}
-			Logger.finer("rb.ui.finish", null);
+			Logger.finer("rb.ui.finish");
 			return response;
 		}
 		catch(DataException e)

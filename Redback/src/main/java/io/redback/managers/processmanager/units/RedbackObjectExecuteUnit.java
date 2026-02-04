@@ -45,7 +45,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 
 	public void execute(ProcessInstance pi) throws RedbackException
 	{
-		Logger.finer("rb.process.objectexecute.start", null);
+		Logger.finer("rb.process.objectexecute.start");
 		try {
 			if(processManager.getObjectServiceName() != null)
 			{
@@ -62,7 +62,7 @@ public class RedbackObjectExecuteUnit extends ProcessUnit
 				}
 				DataMap respOutput = outputExpressionMap.eval(context);
 				pi.setData(respOutput);				
-				Logger.finer("rb.process.objectexecute.finish", null);
+				Logger.finer("rb.process.objectexecute.finish");
 			}
 			pi.setCurrentNode(nextNode);
 		} catch(Exception e) {

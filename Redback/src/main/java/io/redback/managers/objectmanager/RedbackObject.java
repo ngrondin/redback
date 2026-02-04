@@ -398,6 +398,7 @@ public class RedbackObject extends RedbackElement
 				if(canWrite  &&  (isEditable(name) || isNewObject))
 				{
 					data.put(name, actualValue);
+					related.remove(name);
 					updatedAttributes.add(name);
 					if(!attributeConfig.noTrace())
 						traceEvent("objectupdate", name, actualValue.getObject(), previousValue.getObject(), null);
@@ -673,7 +674,7 @@ public class RedbackObject extends RedbackElement
 		try
 		{
 			session.pushDomainLock(getDomain().getString());
-			session.pushScriptLevel();
+			session.pushScriptLevel(functionName);
 			retVal = function.call(context);
 			session.popScriptLevel();
 			session.popDomainLock();
