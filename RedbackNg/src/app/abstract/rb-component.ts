@@ -20,7 +20,7 @@ export abstract class RbComponent implements OnInit {
       if(this.activator != null) {
         this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => {
           this.active = state;
-          this.onActivationEvent(state);
+          this.internalActivationEvent(state);
         });
         this.active = this.activator.activatorOn;
       } else {
@@ -28,7 +28,7 @@ export abstract class RbComponent implements OnInit {
       }
       this.componentInit();
       this.initiated = true;
-      this.onActivationEvent(this.active);
+      this.internalActivationEvent(this.active);
     }
 
     ngOnDestroy(): void {
@@ -38,9 +38,9 @@ export abstract class RbComponent implements OnInit {
         this.componentDestroy();
     }
 
-    /*get active() : boolean {
-      return this.activator != null ? this.activator.activatorOn : true;
-    }*/
+    internalActivationEvent(state: boolean) {
+      this.onActivationEvent(state);
+    }
 
     abstract componentInit();
 

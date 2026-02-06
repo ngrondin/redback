@@ -60,7 +60,16 @@ export abstract class RbDataObserverComponent extends RbComponent {
         this.dataObserverDestroy();
     }
 
-    private internalDatasetEvent(event: any) {
+    internalActivationEvent(state: boolean) {
+        if(state == true) {
+            if(this.showExpr != null) {
+                this.evalShow();
+            }
+        }
+        super.internalActivationEvent(state);
+    }
+
+    internalDatasetEvent(event: any) {
         if(this.datasetevents == null || (this.datasetevents != null && this.datasetevents.indexOf(event.event) > -1)) {
             if(this.showExpr != null) {
                 this.evalShow();

@@ -821,8 +821,9 @@ public class ObjectManager
 				try {
 					Function function = (Function)c;
 					function.call();
-				} catch(Exception e) {
-					Logger.severe("rb.object.commit.error", e);
+				} catch(ScriptException e) {
+					throw new RedbackException("Error calling deferred scripts", e);
+					//Logger.severe("rb.object.commit.error", e);
 				}
 			}
 
