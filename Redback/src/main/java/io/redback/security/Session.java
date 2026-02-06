@@ -235,6 +235,10 @@ public class Session
 		return scriptStack;
 	}
 	
+	public String getCurrentScript() {
+		return scriptStack.size() > 0 ? scriptStack.get(scriptStack.size() - 1) : null;
+	}
+	
 	public boolean isElevated() 
 	{
 		return elevatedUserToken != null && elevatedUserProfile != null;

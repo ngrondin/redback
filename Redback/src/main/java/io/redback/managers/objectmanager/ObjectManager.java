@@ -494,7 +494,7 @@ public class ObjectManager
 		RedbackObject object = new RedbackObject(session, this, objectConfig, uid, domain);
 		if(initialData != null)
 		{
-			session.pushScriptLevel("_createobject");
+			session.pushScriptLevel(objectName + "._createobject");
 			for(String attributeName: initialData.keySet())
 			{
 				boolean isFilter = false;
@@ -812,21 +812,23 @@ public class ObjectManager
 			session.setTxStore(new TxStore<Object>());
 	}
 	
-	public void commitCurrentTransaction(Session session) throws RedbackException
+	public void commitCurrentTransaction(Session session, boolean isFinal) throws RedbackException
 	{
 		if(session.hasTxStore()) {
 			List<Object> callQueue = session.getTxStore().getAll("callqueue");
 			while(callQueue.size() > 0) {
 				Object c = callQueue.removeFirst();
 				try {
-					Function function = (Function)c;
-					function.call();
+					DeferredCall call = (DeferredCall)c;
+					session.pushScriptLevel(call.scriptName);
+					call.function.call();
+					session.popScriptLevel();
 				} catch(ScriptException e) {
 					throw new RedbackException("Error calling deferred scripts", e);
-					//Logger.severe("rb.object.commit.error", e);
 				}
 			}
-
+			session.getTxStore().clear("callqueue");
+			
 			int i = 0;
 			List<RedbackObject> objectList = new ArrayList<RedbackObject>();
 			List<RedbackObject> updatedList = new ArrayList<RedbackObject>();
@@ -846,6 +848,7 @@ public class ObjectManager
 				}
 				dbtxs.addAll(rbObject.getDBTraceTransactions());
 			}
+			session.getTxStore().clear("object");
 			
 			if(dbtxs.size() > 0) {
 				if(this.useMultiDBTransactions) {
@@ -866,6 +869,16 @@ public class ObjectManager
 			signal(objectList);
 			session.setStat("objects", objectList.size());
 			session.setStat("updates", updatedList.size());
+			
+			if(!isFinal) { //Refilling the TxStore as commit may be used mid-transaction
+				for(RedbackObject object: objectList) { 
+					if(!object.isDeleted) {
+						if(object.isUpdated()) object.commitUpdates();
+						String key = object.getObjectConfig().getName() + ":" + object.getUID().getString();
+						session.getTxStore().add("object", key, object);
+					}
+				}
+			}
 		}
 	}
 

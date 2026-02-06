@@ -37,7 +37,7 @@ public class RedbackObjectServer extends ObjectServer
 	}
 
 	protected void commitTransaction(Session session) throws RedbackException {
-		objectManager.commitCurrentTransaction(session);
+		objectManager.commitCurrentTransaction(session, true);
 	}
 	
 	protected RedbackObject get(Session session, String objectName, String uid) throws RedbackException {

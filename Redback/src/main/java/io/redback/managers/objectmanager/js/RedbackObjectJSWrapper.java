@@ -113,6 +113,10 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		{
 			return Converter.tryConvertIn(rbObject.isNew());
 		}
+		else if(name.equals("isDeleted"))
+		{
+			return Converter.tryConvertIn(rbObject.isDeleted());
+		}		
 		else
 		{
 			try {

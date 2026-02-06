@@ -310,7 +310,7 @@ public class RedbackObject extends RedbackElement
 							}
 							if(selected == null && resultList.size() > 0)
 								selected = resultList.get(0);
-							return selected;
+							related.put(name, selected);
 						}
 					}
 					catch(RedbackException e)
@@ -461,6 +461,13 @@ public class RedbackObject extends RedbackElement
 	public void clear(String name) throws ScriptException, RedbackException
 	{
 		put(name, new Value(null));
+	}
+	
+	public void commitUpdates() {
+		this.updatedAttributes.clear();
+		this.originalData = new HashMap<String, Value>();
+		for(String key : this.data.keySet()) 
+			originalData.put(key, this.data.get(key));
 	}
 	
 	public boolean isEditable(String name) throws RedbackException

@@ -7,6 +7,7 @@ import io.firebus.data.DataMap;
 import io.firebus.script.Function;
 import io.firebus.script.exceptions.ScriptException;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.objectmanager.DeferredCall;
 import io.redback.managers.objectmanager.ObjectManager;
 import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
@@ -280,14 +281,24 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					String key = (String)arguments[0];
 					Function function = (Function)arguments[1];
 					if(session.getTxStore() != null) {
+						DeferredCall call = new DeferredCall(session.getCurrentScript(), function);
 						session.getTxStore().remove("callqueue", key);
-						session.getTxStore().add("callqueue", key, function);						
+						session.getTxStore().add("callqueue", key, call);						
 					} else {
 						throw new RuntimeException("Can't defer, session does not have a txstore");
 					}
 					return null;
 				}
 			};	
+		} else if(key.equals("commit")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					if(session.getTxStore() != null) {
+						objectManager.commitCurrentTransaction(session, false);					
+					}
+					return null;
+				}
+			};				
 		} else if(key.equals("getCallStack")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
