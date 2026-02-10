@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject, RELATED_LOADING } from 'app/datamodel';
 import { ColorConfig, Evaluator, Formatter, LinkConfig, RecalcPlanner } from 'app/helpers';
@@ -19,7 +19,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('group') _grp: any;
   @Input('view') view: string;
   @Input('grid') grid: boolean = false;
-
+  @Input('flexfill') flexfill: boolean = true;
+  @HostBinding('style.flex') get fillSpace() { return this.flexfill ? "1 1 0" : "0 0 auto";}
+  
   columns: LinkTableColumnConfig[];
   group: LinkTableGroupConfig;
   reachedBottom: boolean = false;

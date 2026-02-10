@@ -21,6 +21,9 @@
     position: relative;
 }
 
+.rb-files-item:hover {
+    background-color: #eee;
+}
 
 .rb-files-item-active {
 	border-left: 4px Solid #7985cb;
@@ -85,10 +88,10 @@
 .rb-files-delete {
     display: block;
     position: absolute;
-    top: 5px;
-    right: -5px;
-    width: var(--v16px);;
-    height: var(--v16px);;
+    top: 0px;
+    right: 0px;
+    width: var(--v24px);;
+    height: var(--v24px);;
     background-color: #ffffffaa;
     border-radius: 50%;
     border: 2px solid #888;

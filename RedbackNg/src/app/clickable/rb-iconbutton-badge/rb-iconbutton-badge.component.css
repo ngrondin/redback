@@ -19,14 +19,14 @@
     position: absolute;
     top: 0px;
     right: 45%;
-    height: 1.4vw;
-    min-width: 1.1vw;
-    border-radius: 0.7vw;
+    height: var(--v24px);
+    min-width: var(--v24px);
+    border-radius: var(--v12px);
     background-color: red;
     font-size: 0.8rem;
     text-align: center;
     line-height: 200%;
-    padding-left: 3px;
-    padding-right: 3px;
+    padding-left: var(--v3px);
+    padding-right: var(--v3px);
     pointer-events: none;
 }

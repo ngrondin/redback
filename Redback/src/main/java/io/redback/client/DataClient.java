@@ -23,6 +23,10 @@ public class DataClient extends Client
 		protected DataTransaction(DataMap r) {
 			req = r;
 		}
+		
+		public DataMap getRequest() {
+			return req;
+		}
 	}
 	
 	public DataClient(Firebus fb, String sn) 

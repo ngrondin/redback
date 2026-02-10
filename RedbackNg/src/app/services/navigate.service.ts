@@ -89,7 +89,9 @@ export class NavigateService {
       this.userprefService.setCurrentView(navdata.view);
       this.modalService.setCurrentView(navdata.view);
       this.notifyObservers(navdata);
-      if(navdata.modal != null) {
+      if(navdata.tab != null) {
+        setTimeout(() => targetViewLoader.component.currentLoadedView.openTab(navdata.tab), 100);
+      } else if(navdata.modal != null) {
         setTimeout(() => this.modalService.open(navdata.modal), 100);
       }
       this.logService.debug("NavService: View is " + navdata.view);

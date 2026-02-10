@@ -14,6 +14,7 @@ import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
+import io.firebus.interfaces.Consumer;
 import io.firebus.logging.Logger;
 import io.firebus.script.Function;
 import io.firebus.script.ScriptContext;
@@ -76,6 +77,7 @@ public class ObjectManager
 	protected boolean loadAllOnInit;
 	protected int preCompile;
 	protected boolean includeLoaded;
+	protected boolean settingsLoaded;
 	protected String configServiceName;
 	protected String accessManagerServiceName;
 	protected String dataServiceName;
@@ -94,9 +96,11 @@ public class ObjectManager
 	protected ConfigCache<ScriptConfig> globalScripts;
 	protected ConfigCache<PackConfig> packConfigs;
 	protected HashMap<String, ExpressionMap> readRightsFilters = new HashMap<String, ExpressionMap>();
+	protected CollectionConfig settingsCollection;
 	protected CollectionConfig traceCollection;
 	protected CollectionConfig scriptLogCollection;
 	protected AccessManagementClient accessManagementClient;
+	protected Settings settings;
 	protected DataClient dataClient;
 	protected ConfigClient configClient;
 	protected ProcessClient processClient;
@@ -117,6 +121,7 @@ public class ObjectManager
 			name = n;
 			firebus = fb;
 			includeLoaded = false;
+			settingsLoaded = false;
 			loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
 			preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
 			configServiceName = config.getString("configservice");
@@ -133,10 +138,9 @@ public class ObjectManager
 			integrationServiceName = config.getString("integrationservice");
 			objectUpdateChannel = config.getString("objectupdatechannel");
 			globalVariables = config.getObject("globalvariables");
-			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(config.getObject("tracecollection")) : null;
-			scriptLogCollection = config.containsKey("scriptlogcollection") ? new CollectionConfig(config.getObject("scriptlogcollection")) : null;
 			useMultiDBTransactions = config.containsKey("multidbtransactions") ? config.getBoolean("multidbtransactions") : false;
 			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
+			settings = new Settings();
 			dataClient = new DataClient(firebus, dataServiceName);
 			configClient = new ConfigClient(firebus, configServiceName);
 			processClient = new ProcessClient(firebus, processServiceName);
@@ -147,6 +151,9 @@ public class ObjectManager
 			domainClient = new DomainClient(firebus, domainServiceName);
 			queueClient = new QueueClient(firebus, queueServiceName);
 			integrationClient = new IntegrationClient(firebus, integrationServiceName);
+			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(dataClient, config.getObject("tracecollection"), null) : null;
+			settingsCollection = config.containsKey("settingscollection") ? new CollectionConfig(dataClient, config.getObject("settingscollection"), null) : null;
+			scriptLogCollection = config.containsKey("scriptlogcollection") ? new CollectionConfig(dataClient, config.getObject("scriptlogcollection"), null) : null;
 			ObjectManager om = this;
 			objectConfigs = new ConfigCache<ObjectConfig>(configClient, "rbo", "object", 3600000, new ConfigCache.ConfigFactory<ObjectConfig>() {
 				public ObjectConfig createConfig(DataMap map) throws Exception {
@@ -165,6 +172,12 @@ public class ObjectManager
 			scriptFactory.setGlobals(globalVariables);
 			scriptFactory.setInRootScope("log", new LoggerJSFunction());
 			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
+			firebus.registerConsumer("_rb_config_rbos_settings_clear", new Consumer() {
+				public void consume(Payload payload) {
+					settingsLoaded = false;
+					loadSettings();
+				}
+			}, 1);
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising Object Manager", e);
 		}
@@ -248,6 +261,7 @@ public class ObjectManager
 			context.put("canRead", new SessionRightsJSFunction(session, "read"));
 			context.put("canWrite", new SessionRightsJSFunction(session, "write"));
 			context.put("canExecute", new SessionRightsJSFunction(session, "execute"));
+			context.put("settings", settings.getSettingsContextForSession(session));
 		} catch(ScriptValueException e) {
 			throw new RedbackException("Error creating script context", e);
 		}
@@ -257,15 +271,13 @@ public class ObjectManager
 	public void refreshAllConfigs()
 	{	
 		includeLoaded = false;
+		settingsLoaded = false;
 		objectConfigs.clear();
 		globalScripts.clear();
 		packConfigs.clear();
 		readRightsFilters.clear();
-		try {
-			loadAllIncludeScripts(new Session());
-		} catch(Exception e) {
-			Logger.severe("rb.object.loadinclude", e);
-		}
+		loadAllIncludeScripts();
+		loadSettings();
 	}
 	
 	public void clearDomainObjectConfig(Session session, String object, String domain) throws RedbackException {
@@ -276,22 +288,41 @@ public class ObjectManager
 		globalScripts.clear(object, domain);
 	}
 
-	protected synchronized void loadAllIncludeScripts(Session session) throws RedbackException
+	protected synchronized void loadAllIncludeScripts()
 	{
-		if(includeLoaded == false) {
-			DataMap result = configClient.listConfigs(session, "rbo", "include");
-			DataList resultList = result.getList("result");
-			for(int i = 0; i < resultList.size(); i++)
-			{
-				DataMap cfg = resultList.getObject(i);
-				try {
-					scriptFactory.executeInRootScope("include_" + cfg.getString("name"), cfg.getString("script"));
-				} catch(ScriptException e) {
-					throw new RedbackException("Error loading include scripts", e);
+		try {
+			if(includeLoaded == false) {
+				DataMap result = configClient.listConfigs(new Session(), "rbo", "include");
+				DataList resultList = result.getList("result");
+				for(int i = 0; i < resultList.size(); i++)
+				{
+					DataMap cfg = resultList.getObject(i);
+					try {
+						scriptFactory.executeInRootScope("include_" + cfg.getString("name"), cfg.getString("script"));
+					} catch(ScriptException e) {
+						throw new RedbackException("Error loading include scripts", e);
+					}
 				}
+				includeLoaded = true;
 			}
-			includeLoaded = true;
-		}
+		} catch(Exception e) {
+			Logger.severe("rb.object.loadinclude", e);
+		}			
+	}
+	
+	protected synchronized void loadSettings()
+	{
+		try {
+			if(settingsLoaded == false && settingsCollection != null) {
+				DataMap result = settingsCollection.getData(new DataMap());
+				DataList resultList = result.getList("result");
+				settings.load(resultList);
+				settingsLoaded = true;
+			}
+			Logger.info("rb.object.loadsettings");
+		} catch(Exception e) {
+			Logger.severe("rb.object.loadsettings", e);
+		}	
 	}
 
 	
@@ -815,6 +846,7 @@ public class ObjectManager
 	public void commitCurrentTransaction(Session session, boolean isFinal) throws RedbackException
 	{
 		if(session.hasTxStore()) {
+			boolean reloadSettings = false;
 			List<Object> callQueue = session.getTxStore().getAll("callqueue");
 			while(callQueue.size() > 0) {
 				Object c = callQueue.removeFirst();
@@ -845,6 +877,8 @@ public class ObjectManager
 					updatedList.add(rbObject);
 					rbObject.onSave();
 					dbtxs.add(rbObject.getDBUpdateTransaction());
+					if(settingsCollection != null && rbObject.getObjectConfig().getCollection().equals(settingsCollection.getName()))
+						reloadSettings = true;
 				}
 				dbtxs.addAll(rbObject.getDBTraceTransactions());
 			}
@@ -869,7 +903,7 @@ public class ObjectManager
 			signal(objectList);
 			session.setStat("objects", objectList.size());
 			session.setStat("updates", updatedList.size());
-			
+			if(reloadSettings) this.sendSettingsClear();
 			if(!isFinal) { //Refilling the TxStore as commit may be used mid-transaction
 				for(RedbackObject object: objectList) { 
 					if(!object.isDeleted) {
@@ -1214,6 +1248,11 @@ public class ObjectManager
 				Logger.severe("rb.object.signal.error", e);
 			}
 		}		
+	}
+	
+	protected void sendSettingsClear() 
+	{
+		firebus.publish("_rb_config_rbos_settings_clear", new Payload());
 	}
 
 }

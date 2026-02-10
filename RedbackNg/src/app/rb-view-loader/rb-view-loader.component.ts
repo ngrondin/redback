@@ -1,12 +1,9 @@
 import { Component, ViewChild, ViewContainerRef, ComponentRef, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange, TypeDecorator } from '@angular/core';
 import { __asyncDelegator } from 'tslib';
 import { ApiService } from 'app/services/api.service';
-import { RbActivatorComponent } from 'app/abstract/rb-activator';
-import { DataTarget, NavigateData } from 'app/datamodel';
+import { NavigateData } from 'app/datamodel';
 import { componentRegistry } from './rb-view-loader-registry';
-import { RbSetComponent } from 'app/abstract/rb-set';
 import { BuildService } from 'app/services/build.service';
-import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.component';
 import { NavigateService } from 'app/services/navigate.service';
 import { LoadedView } from './rb-view-loader-model';
 import { LogService } from 'app/services/log.service';
@@ -82,7 +79,7 @@ export class RbViewLoaderComponent implements OnInit {
       window.redback.currentLoadedView = entry;
       let newEmptyTargets = entry.setTarget(navData.dataTargets);
       newEmptyTargets.forEach(target => navData.dataTargets.push(target));      
-      if(navData.tab != null) entry.openTab(navData.tab);
+      //if(navData.tab != null) entry.openTab(navData.tab);
       entry.attachTo(this.container);
     }
     this.logService.info("ViewLoader - Loaded view " + navData.view);
