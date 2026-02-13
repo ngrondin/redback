@@ -35,6 +35,9 @@ public class ObjectAttributeRelatedForm extends Form
 			ScriptField sf = new ScriptField(_data, "listfilter", "List Filter Script", this, SWT.NONE);
 			sf.setLayoutData(new RowData(500, 200));
 		}
+		new TextField(_data, "reverseattribute", "Reverse Attribute", this, SWT.NONE);
+		new TextField(_data, "reversemapattribute", "Reverse Map Attribute", this, SWT.NONE);
+		
 	}
 
 	public void onFieldUpdate(String attribute, Object oldValue, Object newValue) {
