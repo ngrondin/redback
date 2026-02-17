@@ -111,39 +111,47 @@ public class IntegrationManager {
 		DataMap clientData = getClientData(session, name, domain);
 		String cconfigName = clientData.getString("client");
 		ClientConfig config = clientConfigs.get(session, cconfigName);
-		String accessToken = clientData.getString("access_token");
-		long expiry = clientData.containsKey("expiry") ? clientData.getNumber("expiry").longValue() : 0;
-		if(checkToken && (accessToken == null || accessToken.equals("") || expiry < System.currentTimeMillis())) {
-			String clientId = config.clientId != null ? config.clientId : clientData.getString("client_id"); //This is because some non-standard integrations have dynamic client_id
-			String clientSecret = config.clientSecrect != null ? config.clientSecrect : clientData.getString("client_secret");
-			String refreshToken = clientData.getString("refresh_token");
-			if(refreshToken != null && !refreshToken.equals("")) {
-				DataMap form = new DataMap();
-				form.put("client_id", clientId);
-				form.put("client_secret", clientSecret);
-				form.put("grant_type", "refresh_token");
-				form.put("refresh_token", refreshToken);
-				if(config.loginUrl != null) {
-					form.put("redirect_uri", getRedirectUri(config.name));
-				}					
-				DataMap refreshResp = gatewayClient.postForm(config.tokenUrl, form);
-				if(refreshResp != null) {
-					if(refreshResp.getString("refresh_token") != null)
-						clientData.put("refresh_token", refreshResp.getString("refresh_token"));
-					if(refreshResp.getString("access_token") != null)
-						clientData.put("access_token", refreshResp.getString("access_token"));
-					if(refreshResp.getNumber("expires_in") != null)
-						clientData.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
-					clientData.put("lastupdate", new Date());
-					DataMap key = new DataMap();
-					key.put("name", name);
-					key.put("domain", domain);
-					dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key), clientData);
+		String authType = clientData.getString("authtype") != null ? clientData.getString("authtype") : "oauth";
+		if(authType.equals("oauth")) {
+			String accessToken = clientData.getString("access_token");
+			long expiry = clientData.containsKey("expiry") ? clientData.getNumber("expiry").longValue() : 0;
+			if(checkToken && (accessToken == null || accessToken.equals("") || expiry < System.currentTimeMillis())) {
+				String clientId = config.clientId != null ? config.clientId : clientData.getString("client_id"); //This is because some non-standard integrations have dynamic client_id
+				String clientSecret = config.clientSecrect != null ? config.clientSecrect : clientData.getString("client_secret");
+				String refreshToken = clientData.getString("refresh_token");
+				if(refreshToken != null && !refreshToken.equals("")) {
+					DataMap form = new DataMap();
+					form.put("client_id", clientId);
+					form.put("client_secret", clientSecret);
+					form.put("grant_type", "refresh_token");
+					form.put("refresh_token", refreshToken);
+					if(config.loginUrl != null) {
+						form.put("redirect_uri", getRedirectUri(config.name));
+					}					
+					DataMap refreshResp = gatewayClient.postForm(config.tokenUrl, form);
+					if(refreshResp != null) {
+						if(refreshResp.getString("refresh_token") != null)
+							clientData.put("refresh_token", refreshResp.getString("refresh_token"));
+						if(refreshResp.getString("access_token") != null)
+							clientData.put("access_token", refreshResp.getString("access_token"));
+						if(refreshResp.getNumber("expires_in") != null)
+							clientData.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
+						clientData.put("lastupdate", new Date());
+						DataMap key = new DataMap();
+						key.put("name", name);
+						key.put("domain", domain);
+						dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key), clientData);
+					} else {
+						throw new RedbackException("Error refreshing tokens");
+					}				
 				} else {
-					throw new RedbackException("Error refreshing tokens");
-				}				
-			} else {
-				throw new RedbackException("No availabile refresh token");
+					throw new RedbackException("No availabile refresh token");
+				}
+			}
+		} else if(authType.equals("key")) {
+			String key = clientData.getString("key");
+			if(key == null) {
+				throw new RedbackException("No availabile access key");
 			}
 		}
 		Client client = new Client(session, this, config, clientData, gatewayClient);

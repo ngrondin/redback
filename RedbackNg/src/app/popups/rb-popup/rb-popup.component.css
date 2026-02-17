@@ -7,7 +7,7 @@
     display: block;
     flex-direction: column;
     align-items: stretch;
-    min-width: 6vw;
-    max-height: 20vw;
+    min-width: min(6vw, 115px);
+    max-height: min(20vw, 386px);
     overflow: auto;
 }

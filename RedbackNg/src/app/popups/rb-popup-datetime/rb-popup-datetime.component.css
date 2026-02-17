@@ -78,9 +78,9 @@
 .rb-datetime-clock-back {
     background-color:#eeeeee;
     border-radius: 50%;
-    height: 12vw;
+    height: min(12vw, 230px);
     position: relative;
-    width: 12vw;
+    width: min(12vw, 230px);
     margin: var(--v10px);
     cursor: pointer;
 }

@@ -53,6 +53,16 @@ public class RelatedObjectConfig
 		return config.getString("linkattribute");
 	}
 	
+	public String getReverseAttributeName()
+	{
+		return config.getString("reverseattribute");
+	}
+	
+	public String getReverseMapAttributeName()
+	{
+		return config.getString("reversemapattribute");
+	}
+	
 	public boolean shouldUIResolve()
 	{
 		return config.containsKey("uiresolve") ? config.getBoolean("uiresolve") : true;

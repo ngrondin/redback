@@ -261,19 +261,24 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     if(action.action == 'processaction' && this.notification != null) {
       let notif = this.notification;
       this.running = true;
-      this.notificationService.actionNotification(this.notification, action.target, action.confirm).subscribe(() => {
+      this.notificationService.actionNotification(this.notification, action.target, action.confirm).subscribe({
+        complete: () => {
           if(this.notification === notif) {
             this.notification = null;
             this.notificationRetreived = false;
           }
-        }).add(() => {
           this.running = false;
           this.calcActionData();
-        });
+        },
+        error: (err) => {
+          this.running = false;
+        }
+      });
     } else {
       this.running = true;
-      this.actionService.action(this.dataset, this.datasetgroup, action.action, action.target, action.param, null, action.confirm, action.timeout).subscribe().add(() => {
-        this.running = false;
+      this.actionService.action(this.dataset, this.datasetgroup, action.action, action.target, action.param, null, action.confirm, action.timeout).subscribe({
+        error: (err) => this.running = false,
+        complete: () => this.running = false,
       });
     }
     this.actionClicked.emit(action);

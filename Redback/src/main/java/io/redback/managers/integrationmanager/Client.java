@@ -16,6 +16,7 @@ import io.redback.managers.integrationmanager.js.GatewayCallJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.security.js.UserProfileJSWrapper;
+import io.redback.utils.js.FirebusJSWrapper;
 
 public class Client {
 	protected Session session;
@@ -45,6 +46,7 @@ public class Client {
 		baseScriptContext.put("session", new SessionJSWrapper(session));
 		baseScriptContext.put("userprofile", new UserProfileJSWrapper(session.getUserProfile()));
 		baseScriptContext.put("clientdata", data);
+		baseScriptContext.put("firebus", new FirebusJSWrapper(integrationManager.firebus, session));
 		baseScriptContext.put("fc", new FileClientJSWrapper(integrationManager.getFileClient(), session));
 		return baseScriptContext;
 	}

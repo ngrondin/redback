@@ -32,8 +32,8 @@
 
 .rb-switch-label {
     flex-grow: 1;
-    margin-right: var(--v8px);
-    margin-left: var(--v8px);
+    margin-right: var(--v12px);
+    /*margin-left: var(--v8px);*/
 }
 
 .rb-switch-label-mandatory {

@@ -14,6 +14,7 @@ import io.firebus.data.DataMap;
 import io.firebus.information.ServiceInformation;
 import io.firebus.information.StreamInformation;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedDualProvider;
 import io.redback.utils.RedbackFile;
@@ -195,6 +196,8 @@ public abstract class FileServer extends AuthenticatedDualProvider
 				String objectname = request.getString("object");
 				String objectuid = request.getString("uid");
 				acceptListFilesForStream(session, streamEndpoint, objectname, objectuid);
+			} else {
+				throw new RedbackInvalidRequestException("Invalid file server action '" + action + "'");
 			}
 			return acceptPayload;			
 		} catch(DataException e) {

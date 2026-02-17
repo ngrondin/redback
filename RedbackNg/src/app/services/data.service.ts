@@ -336,7 +336,7 @@ export class DataService {
           var objects = Object.keys(resp).map(key => this.receive(resp[key]))
         },
         error: (error) => {
-          this.errorService.receiveHttpError(error)
+          this.errorService.receiveHttpError(error);
         }
       })
     }
@@ -351,7 +351,10 @@ export class DataService {
           observer.next(newObj);
           observer.complete();
         },
-        error => this.errorService.receiveHttpError(error)
+        error => {
+          this.errorService.receiveHttpError(error);
+          observer.error(error);
+        }
       );
     })
     return dataObservable;     
@@ -365,7 +368,10 @@ export class DataService {
           observer.next(resp);
           observer.complete();
         },
-        error => this.errorService.receiveHttpError(error)
+        error => {
+          this.errorService.receiveHttpError(error);
+          observer.error(error);
+        }
       );
     })
     return dataObservable;     

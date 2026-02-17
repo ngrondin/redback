@@ -16,8 +16,7 @@ export class RbLinkComponent extends RbDataObserverComponent {
   @Input('margin') margin: boolean = true;
   @Input('filtersingleobject') filtersingleobject: boolean = true;
 
-  @HostBinding('style.margin-top.vw') get topmargin() { return this.margin ? 1.25 : 0; }
-  //@HostBinding('style.margin-bottom.vw') get bottommargin() { return this.margin ? 0.55 : 0; }
+  @HostBinding('style.margin-top') get topmargin() { return this.margin ? 'min(1.144vw, 22px)' : '0px'; }
     
   constructor(
     private navigateService: NavigateService

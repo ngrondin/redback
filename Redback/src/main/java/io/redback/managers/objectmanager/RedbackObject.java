@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import io.firebus.data.DataFilter;
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
@@ -283,45 +284,50 @@ public class RedbackObject extends RedbackElement
 	public RedbackObject getRelated(String name)
 	{
 		AttributeConfig attributeConfig = config.getAttributeConfig(name);
-		 if(attributeConfig != null)
-		 {
-			if(attributeConfig.hasRelatedObject()  &&  data.get(name) != null  &&   !data.get(name).isNull())
+		if(attributeConfig != null && attributeConfig.hasRelatedObject()  &&  data.get(name) != null  &&   !data.get(name).isNull())
+		{
+			if(related.get(name) == null)
 			{
-				if(related.get(name) == null)
+				try
 				{
-					try
-					{
-						RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-						if(roc.getLinkAttributeName().equals("uid"))
-						{
-							related.put(name, objectManager.getObject(session, roc.getObjectName(), get(name).getString()));
-						}
-						else
-						{
-							List<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilter(name), null, null, false, 0, 50);
-							RedbackObject selected = null;
-							int selectedPoints = 0;
-							for(RedbackObject o : resultList) {
-								int points = o.getDomain().equals(this.getDomain()) ? 2 : o.getDomain().equals("root") ? 1 : 0;
-								if(points > selectedPoints) {
-									selectedPoints = points;
-									selected = o;
-								}
-							}
-							if(selected == null && resultList.size() > 0)
-								selected = resultList.get(0);
-							related.put(name, selected);
-						}
-					}
-					catch(RedbackException e)
-					{
-						//TODO: Handle somehow!
-					}
+					RedbackObject relObject = fetchRelated(name, data.get(name));
+					if(relObject != null)
+						related.put(name, relObject);
 				}
-				return related.get(name);
+				catch(RedbackException e)
+				{
+					//TODO: Handle somehow!
+				}
 			}
+			return related.get(name);
 		}
-		 return null;
+		return null;
+	}
+	
+	protected RedbackObject fetchRelated(String attributeName, Value linkValue) throws RedbackException
+	{
+		AttributeConfig attributeConfig = config.getAttributeConfig(attributeName);
+		RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+		RedbackObject object = null;
+		if(roc.getLinkAttributeName().equals("uid") && !linkValue.isNull())
+		{
+			object = objectManager.getObject(session, roc.getObjectName(), linkValue.getString());
+		}
+		else if(!linkValue.isNull())
+		{
+			List<RedbackObject> resultList = objectManager.listObjects(session, roc.getObjectName(), getRelatedFindFilterForLinkValue(attributeName, linkValue), null, null, false, 0, 50);
+			int selectedPoints = 0;
+			for(RedbackObject o : resultList) {
+				int points = o.getDomain().equals(this.getDomain()) ? 2 : o.getDomain().equals("root") ? 1 : 0;
+				if(points > selectedPoints) {
+					selectedPoints = points;
+					object = o;
+				}
+			}
+			if(object == null && resultList.size() > 0)
+				object = resultList.get(0);
+		}
+		return object;
 	}
 	
 	public List<RedbackObject> getRelatedList(String attributeName, DataMap additionalFilter, String searchText, DataMap sort) throws RedbackException
@@ -346,6 +352,11 @@ public class RedbackObject extends RedbackElement
 	
 	public DataMap getRelatedFindFilter(String attributeName) throws RedbackException
 	{
+		return getRelatedFindFilterForLinkValue(attributeName, get(attributeName));
+	}
+	
+	protected DataMap getRelatedFindFilterForLinkValue(String attributeName, Value linkValue) throws RedbackException
+	{
 		DataMap filter = null;
 		RelatedObjectConfig roc = config.getAttributeConfig(attributeName).getRelatedObjectConfig();
 		if(roc != null)
@@ -353,14 +364,14 @@ public class RedbackObject extends RedbackElement
 			String linkAttribute = roc.getLinkAttributeName();
 			if(linkAttribute.equals("uid")) 
 			{
-				filter = new DataMap("uid", get(attributeName).getObject());
+				filter = new DataMap("uid", linkValue.getObject());
 			}
 			else
 			{
 				filter = getRelatedListFilter(attributeName);
 				if(filter == null)
 					filter = new DataMap();
-				filter.put(roc.getLinkAttributeName(), get(attributeName).getObject());
+				filter.put(roc.getLinkAttributeName(), linkValue.getObject());
 			}
 		}
 		return filter;
@@ -402,6 +413,8 @@ public class RedbackObject extends RedbackElement
 					updatedAttributes.add(name);
 					if(!attributeConfig.noTrace())
 						traceEvent("objectupdate", name, actualValue.getObject(), previousValue.getObject(), null);
+					if(attributeConfig.getRelatedObjectConfig() != null && attributeConfig.getRelatedObjectConfig().getReverseAttributeName() != null)
+						updateReverseLinks(name, actualValue, previousValue);
 					lastUpdated = System.currentTimeMillis();
 					try {
 						if(attributeConfig.getExpression() == null) 
@@ -531,6 +544,11 @@ public class RedbackObject extends RedbackElement
 	{
 		if(canDelete()) {
 			isDeleted = true;
+			for(String attribute: getAttributeNames()) {
+				AttributeConfig attrCfg = getObjectConfig().getAttributeConfig(attribute);
+				if(attrCfg.hasRelatedObject() && attrCfg.getRelatedObjectConfig().getReverseAttributeName() != null)
+					this.updateReverseLinks(attribute, new Value(null), get(attribute));
+			}
 			lastUpdated = System.currentTimeMillis();
 			executeFunction("ondelete", scriptContext);
 		} else {
@@ -708,6 +726,49 @@ public class RedbackObject extends RedbackElement
 				event.put("function", function);
 			}
 			this.traceEvents.add(event);
+		}
+	}
+	
+	protected void updateReverseLinks(String attribute, Value newLinkValue, Value oldLinkValue) throws RedbackException 
+	{
+		AttributeConfig attributeConfig = getObjectConfig().getAttributeConfig(attribute);
+		RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
+		String reverseAttribute = roc.getReverseAttributeName();
+		String reverseMapAttribute = roc.getReverseMapAttributeName();
+		String revLinkVal = uid.getString();
+		if(roc != null && reverseAttribute != null) {
+			if(!oldLinkValue.isNull()) {
+				RedbackObject relObject = fetchRelated(attribute, oldLinkValue);
+				Object reverseValue = relObject.get(reverseAttribute).getObject();
+				if(reverseMapAttribute != null) {
+					DataMap map = reverseValue != null && reverseValue instanceof DataMap ? (DataMap)reverseValue : new DataMap();
+					String mapKey = get(reverseMapAttribute).getString();
+					map.remove(mapKey);
+					relObject.put(reverseAttribute, new Value(map));
+				} else if(reverseMapAttribute == null) {
+					DataList list = reverseValue != null && reverseValue instanceof DataList ? (DataList)reverseValue : new DataList();
+					if(list.contains(revLinkVal)) {
+						list.remove(list.indexOf(revLinkVal));
+						relObject.put(reverseAttribute, new Value(list));
+					}
+				}
+			}
+			if(!newLinkValue.isNull()) {
+				RedbackObject relObject = fetchRelated(attribute, newLinkValue);
+				Object reverseValue = relObject.get(reverseAttribute).getObject();
+				if(reverseMapAttribute != null) {
+					DataMap map = reverseValue != null && reverseValue instanceof DataMap ? (DataMap)reverseValue : new DataMap();
+					String mapKey = get(reverseMapAttribute).getString();
+					map.put(mapKey, revLinkVal);
+					relObject.put(reverseAttribute, new Value(map));
+				} else if(reverseMapAttribute == null) {
+					DataList list = reverseValue != null && reverseValue instanceof DataList ? (DataList)reverseValue : new DataList();
+					if(!list.contains(revLinkVal)) {
+						list.add(revLinkVal);
+						relObject.put(reverseAttribute, new Value(list));
+					}
+				}
+			}
 		}
 	}
 	

@@ -606,6 +606,7 @@ export class ColorTool {
 
     public static decode(str: string): number[] {
         if(str == null) return null;
+        if(!str.startsWith("#") && str.length != 7) return null;
         const cleanedHex = str.startsWith("#") ? str.slice(1) : str;
         const bigint = parseInt(cleanedHex, 16);
         const r = (bigint >> 16) & 255;
@@ -635,6 +636,13 @@ export class ColorTool {
         let newValues = values.map(v => Math.round(targetMin + ((v-min) * scale)));
         let newColor = ColorTool.encode(newValues);
         return newColor;
+    }
+
+    public static contrastWith(backcolor: string, dark: string, light: string) {
+        let rgb = ColorTool.decode(backcolor);
+        if(rgb == null) return dark;
+        let intensity = (rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114);
+        return intensity > 120 ? dark : light;
     }
 }
 

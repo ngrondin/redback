@@ -11,7 +11,7 @@ import { GanttDependencyType, GanttLane, GanttLaneConfig, GanttMark, GanttMarkTy
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
-import { CanvasTool, Evaluator, ValueComparator } from 'app/helpers';
+import { CanvasTool, ColorTool, Evaluator, ValueComparator } from 'app/helpers';
 import { NavigateService } from 'app/services/navigate.service';
 
 
@@ -496,10 +496,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                 }
               }
               let color = cfg.color?.getColor(obj) || (cfg.isBackground ? 'white' : 'var(--primary-light-color)');
-              let labelcolor = "#333";
-              if(cfg.labelColor != null) {
-                labelcolor = cfg.labelColor;
-              }
+              let labelcolor = cfg.labelColor || ColorTool.contrastWith(color, "#333", "#d8d8d8");
               let sublane = 0;
               if(!cfg.isBackground) {
                 let hasOverlap: boolean;
