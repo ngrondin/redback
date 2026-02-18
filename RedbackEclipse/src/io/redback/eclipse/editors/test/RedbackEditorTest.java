@@ -24,7 +24,7 @@ import io.redback.eclipse.editors.RedbackConfigEditor;
 public class RedbackEditorTest {
 	public static void main(String[] args) {
 		try {
-			IFileEditorInput fei = new TestFileEditorInput("/home/nicolas/Source/redbackwms/src/main/resources/io/redback/config/rbo/object/assignment.json");
+			IFileEditorInput fei = new TestFileEditorInput("testdata/rbo/object/assignment.json");
 			//IFileEditorInput fei = new TestFileEditorInput("/home/nicolas/Source/redbackwms/src/main/resources/io/redback/config/rbin/client/gmail.json");
 			//IFileEditorInput fei = new TestFileEditorInput("/home/nicolas/Source/redbackwms/src/main/resources/io/redback/config/rbpm/process/workorder.json");
 			//IFileEditorInput fei = new TestFileEditorInput("/home/nicolas/Source/redbackwms/src/main/resources/io/redback/config/rbin/client/xero.json");

@@ -1,0 +1,725 @@
+{
+	"trace":true,
+	"name":"assignment",
+	"domaindbkey":"domain",
+	"uiddbkey":"_id",
+	"attributes":[
+		{
+			"idgenerator":"assignmentcode",
+			"search":true,
+			"editable":"false",
+			"name":"code",
+			"dbkey":"code"
+		},
+		{
+			"search":true,
+			"editable":"true",
+			"name":"contextlabel",
+			"dbkey":"contextlabel"
+		},
+		{
+			"search":true,
+			"editable":"true",
+			"name":"tasklabel",
+			"dbkey":"tasklabel"
+		},
+		{
+			"search":true,
+			"editable":"true",
+			"name":"positionlabel",
+			"dbkey":"positionlabel"
+		},
+		{
+			"expression":"self.contextlabel + \" \" + self.tasklabel + (self.positionlabel != null ? \", \" + self.positionlabel : \"\")",
+			"editable":"false",
+			"name":"fulllabel"
+		},
+		{
+			"expression":"self.tasklabel + (self.positionlabel != null ? \", \" + self.positionlabel : \"\")",
+			"editable":"false",
+			"name":"label"
+		},
+		{
+			"expression":"self.contextlabel + \" \" + self.tasklabel",
+			"name":"veryshortlabel"
+		},
+		{
+			"default":"'created'",
+			"search":true,
+			"editable":"canWrite('rb.field.status')",
+			"name":"status",
+			"scripts":{
+				"onupdate":"if(canWrite('rb.objects.statushistory')) {\n\tom.createObject('statushistory', self.domain, {object:'assignment', objectuid:self.uid, status:self.status, date:(new Date())});\n}\nself.lastnotified = null;\nself.warning = null;\nself.calcInteractionCache();\nif(self.status == 'cancelled') self.calclabel();\n"
+			},
+			"relatedobject":{
+				"linkattribute":"value",
+				"listfilter":{
+					"object":"'assignment'"
+				},
+				"name":"statusmaster"
+			},
+			"dbkey":"status"
+		},
+		{
+			"search":false,
+			"editable":false,
+			"name":"workorder",
+			"scripts":{
+				"onupdate":"if(self.task == null) {\n\tvar tasks = om.getObjectList('task', {workorder: self.workorder});\r\n\tif(tasks.length == 1) {\r\n\t\tself.task = tasks[0].uid;\r\n\t}\n}"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"workorder"
+			},
+			"dbkey":"workorder"
+		},
+		{
+			"search":false,
+			"editable":"status == 'created'",
+			"name":"task",
+			"scripts":{
+				"onupdate":"var rt = self.getRelated('task');\nif(rt != null) {\n\tself.ownerorg = rt.ownerorg;\n\tself.customer = rt.customer;\n\tself.routine = rt.routine;\r\n\tself.location = rt.location;\n\tself.address = rt.address;\n\tself.geometry = rt.geometry;\r\n\tself.eq = rt.eq;\r\n\tself.structure = rt.structure;\r\n\tself.priority = rt.priority;\r\n\tself.muststartbefore = rt.muststartbefore;\r\n\tself.mustfinishby = rt.mustfinishby;\n\tif(self.schedstart == null) {\n\t\tself.schedstart = rt.planstart;\n\t}\n\tif(self.schedfinish == null) {\n\t\tself.schedfinish = rt.planfinish;\n\t}\n\tif(self.duration == null) {\n\t\tself.duration = rt.planduration;\n\t}\n\tif(self.position == null) {\n\t\tvar others = om.listObjects('assignment', {task: self.task, uid: {$ne: self.uid}, status:{$nin:['cancelled']}});\n\t\tself.position = others.length;\n\t}\n} \r\nself.calclabel();"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"workorder":"workorder"
+				},
+				"name":"task"
+			},
+			"dbkey":"task"
+		},
+		{
+			"default":"'person'",
+			"editable":"status == 'created' || status == 'sched'",
+			"name":"type",
+			"scripts":{
+				"onupdate":"self.calclabel();"
+			},
+			"relatedobject":{
+				"linkattribute":"value",
+				"listfilter":{
+					"object":"'assignment'"
+				},
+				"name":"typemaster"
+			},
+			"dbkey":"type"
+		},
+		{
+			"default":"0",
+			"editable":"status == 'created'",
+			"name":"sequence",
+			"dbkey":"sequence"
+		},
+		{
+			"editable":"status == 'created'",
+			"name":"position",
+			"scripts":{
+				"onupdate":"self.calclabel();"
+			},
+			"dbkey":"position"
+		},
+		{
+			"editable":"status == 'created' || craft == null",
+			"name":"craft",
+			"scripts":{
+				"onupdate":"self.calclabel();"
+			},
+			"relatedobject":{
+				"linkattribute":"code",
+				"listfilter":{
+				},
+				"name":"craft"
+			},
+			"dbkey":"craft"
+		},
+		{
+			"editable":"status == 'created' || craft == null",
+			"name":"qualification",
+			"relatedobject":{
+				"linkattribute":"code",
+				"listfilter":{
+				},
+				"name":"qualification"
+			},
+			"dbkey":"qualification"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"assignee",
+			"scripts":{
+				"onupdate":"if(self.assignee != null) {\n\tself.assignedcrew = null;\n\tself.assignedeq = null;\n}\nvar matreslist = om.getObjectList('matres', {task: self.task, storetype: 'personal', status:{$nin:['fulfilled']}});\r\nif(matreslist.length > 0) {\r\n\tvar assignees = mapToStringArray(om.getObjectList('assignment', {task: self.task, sequence: self.sequence}), 'assignee');\r\n\tvar stores = mapToStringArray(om.getObjectList('store', {person: {$in:assignees}, 'type': 'personal'}), 'uid');\r\n\r\n\tfor(var i = 0; i < matreslist.length; i++) {\r\n\t\tvar matres = matreslist[i];\r\n\t\tif(matres.store == null || stores.indexOf(matres.store) == -1) {\r\n\t\t\tif(stores.length > 0) {\r\n\t\t\t\tmatres.store = stores[0];\r\n\t\t\t} else {\r\n\t\t\t\tmatres.store = null;\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}\nself.calcInteractionCache();\n"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"assignable":"true",
+					"status":"'active'"
+				},
+				"name":"person"
+			},
+			"dbkey":"assignee"
+		},
+		{
+			"editable":"status == 'created' || craft == null",
+			"name":"crewtype",
+			"scripts":{
+				"onupdate":"self.calclabel();"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"crewtype"
+			},
+			"dbkey":"crewtype"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"assignedcrew",
+			"scripts":{
+				"onupdate":"if(self.assignedcrew != null) {\n\tself.assignee = null;\n\tself.assignedeq = null;\n}\nself.calcInteractionCache();"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":"(function() {\n\tvar filter = {assignable: true};\n\tif(self.crewtype != null) filter.crewtype = self.crewtype;\n\treturn filter;\n})()",
+				"name":"crew"
+			},
+			"dbkey":"assignedcrew"
+		},
+		{
+			"editable":"status == 'created' || eqitem == null",
+			"name":"eqitem",
+			"scripts":{
+				"onupdate":"self.calclabel();"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"equipment":"true"
+				},
+				"name":"item"
+			},
+			"dbkey":"eqitem"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"assignedeq",
+			"scripts":{
+				"onupdate":"if(self.assignedeq != null) {\n\tself.assignee = null;\n\tself.assignedcrew = null;\n}\nself.calcInteractionCache();"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":"(function() {\n\tvar filter = {assignable: true};\n\tif(self.eqitem != null) filter.item = self.eqitem;\n\treturn filter;\n})()",
+				"name":"eq"
+			},
+			"dbkey":"assignedeq"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"schedstart",
+			"scripts":{
+				"onupdate":"if(self.schedmaster != null) {\r\n\tvar master = self.getRelated('schedmaster');\r\n\tself.schedstart = master.schedstart;\r\n}\r\n\r\nvar newschedfinish = dateAddDuration(self.schedstart, self.duration);\r\nupdateDate(self, 'schedfinish', newschedfinish);\r\nvar task = self.getRelated('task');\r\ntask.calcscheddates();\r\nif(self.workorder != null)\r\n\tself.getRelated('workorder').calcscheddates();\r\n\r\nvar slaveassignments = [];\r\nif(task.lockassignsched == true) {\r\n\tslaveassignments = om.getObjectList('assignment', {task: self.task, sequence: self.sequence, status:{'$in':['sched', 'ready']}});\r\n} else {\r\n\tslaveassignments = om.getObjectList('assignment', {task: self.task, sequence: self.sequence, schedmaster: self.uid, status:{'$in':['sched', 'ready']}});\r\n}\r\n\r\nfor(var i = 0; i < slaveassignments.length; i++) {\r\n\tif(slaveassignments[i].uid != self.uid) {\r\n\t\tslaveassignments[i].schedstart = self.schedstart\r\n\t}\r\n}\r\n\t\r\nvar matreslist = om.getObjectList('matres', {task: self.task});\r\nfor(var i = 0; i < matreslist.length; i++) {\r\n\tmatreslist[i].date = self.schedstart\r\n}\r\n\r\nvar prlist = om.getObjectList('pr', {task: self.task});\r\nfor(var i = 0; i < prlist.length; i++) {\r\n\tprlist[i].reqdate = self.schedstart\r\n}\r\n\nif(self.receivelead != null && self.schedstart != null) {\n\tself.mustreceiveby = (new Date(self.schedstart.getTime() - self.receivelead)).toISOString();\n}\n\nif(self.acceptlead != null && self.schedstart != null) {\n\tself.mustacceptby = (new Date(self.schedstart.getTime() - self.acceptlead)).toISOString();\n}\n\nif(self.enforcestarttime == true && self.schedstart != null) {\n\tvar tol = self.starttimetolerance != null ? parseInt(self.starttimetolerance) : 0;\n\tself.muststartafter = (new Date(self.schedstart.getTime() - tol)).toISOString();\n}\n\nself.calcInteractionCache();"
+			},
+			"dbkey":"schedstart"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received'  || status == 'accepted'",
+			"name":"schedfinish",
+			"scripts":{
+				"onupdate":"if(self.duration != null) {\n\tvar newschedstart = dateAddDuration(self.schedfinish, -1 * self.duration);\r\n\tupdateDate(self, 'schedstart', newschedstart);\r\n} \r\n"
+			},
+			"dbkey":"schedfinish"
+		},
+		{
+			"editable":"true",
+			"name":"actualstart",
+			"dbkey":"actualstart"
+		},
+		{
+			"editable":"true",
+			"name":"actualfinish",
+			"dbkey":"actualfinish"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received'  || status == 'accepted' || canWrite('rb.field.duration')",
+			"name":"duration",
+			"scripts":{
+				"onupdate":"if(self.duration != null) {\n\tif(self.duration >= 0) {\n\t\tif(self.schedstart != null) {\n\t\t\tvar newschedfinish = dateAddDuration(self.schedstart, self.duration);\n\t\t\tupdateDate(self, 'schedfinish', newschedfinish);\n\t\t}\n\t} else {\n\t\tthrow('Duration cannot be less than 0');\n\t}\n}"
+			},
+			"dbkey":"duration"
+		},
+		{
+			"editable":"status == 'plan'",
+			"name":"ownerorg",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"isinternal":"true"
+				},
+				"name":"org"
+			},
+			"dbkey":"ownerorg"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created'",
+			"name":"customer",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"iscustomer":true,
+					"status":"'active'"
+				},
+				"name":"org"
+			},
+			"dbkey":"customer"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created'",
+			"name":"routine",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"status":"'active'"
+				},
+				"name":"routine"
+			},
+			"dbkey":"routine"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created'",
+			"name":"location",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"status":"'active'"
+				},
+				"name":"location"
+			},
+			"dbkey":"location"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created'",
+			"name":"address",
+			"dbkey":"address"
+		},
+		{
+			"editable":"status == 'created'",
+			"name":"geometry",
+			"dbkey":"geometry"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created'",
+			"name":"eq",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"eq"
+			},
+			"dbkey":"eq"
+		},
+		{
+			"search":true,
+			"editable":"status == 'created'",
+			"name":"structure",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"status":"'active'"
+				},
+				"name":"structure"
+			},
+			"dbkey":"structure"
+		},
+		{
+			"editable":"status == 'created'",
+			"name":"priority",
+			"dbkey":"priority"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"mustreceiveby",
+			"dbkey":"mustreceiveby"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"mustacceptby",
+			"dbkey":"mustacceptby"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"muststartafter",
+			"dbkey":"muststartafter"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"muststartbefore",
+			"dbkey":"muststartbefore"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"mustfinishby",
+			"dbkey":"mustfinishby"
+		},
+		{
+			"search":true,
+			"editable":"true",
+			"name":"reqcodes",
+			"dbkey":"reqcodes"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched'",
+			"name":"assignmentgroup",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"group"
+			},
+			"dbkey":"assignmentgroup"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched'",
+			"name":"dispatchgroup",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"group"
+			},
+			"dbkey":"dispatchgroup"
+		},
+		{
+			"editable":"status == 'created'",
+			"name":"original",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"task":"task"
+				},
+				"name":"assignment"
+			},
+			"dbkey":"original"
+		},
+		{
+			"editable":"status == 'created'",
+			"name":"actionmastercraft",
+			"relatedobject":{
+				"linkattribute":"code",
+				"listfilter":{
+				},
+				"name":"craft"
+			},
+			"dbkey":"actionmastercraft"
+		},
+		{
+			"editable":"status == 'created'",
+			"name":"schedmastercraft",
+			"relatedobject":{
+				"linkattribute":"code",
+				"listfilter":{
+				},
+				"name":"craft"
+			},
+			"dbkey":"schedmastercraft"
+		},
+		{
+			"editable":"status == 'created'",
+			"name":"schedmastereqitem",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"equipment":"true"
+				},
+				"name":"item"
+			},
+			"dbkey":"schedmastereqitem"
+		},
+		{
+			"editable":"status == 'incomplete' || status == 'comp'",
+			"name":"followup",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+					"task":"task"
+				},
+				"name":"assignment"
+			},
+			"dbkey":"followup"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched'",
+			"name":"schedmaster",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":"{\n\ttask: self.task,\n\tuid:{$ne: self.uid},\n\tstatus: {$nin: ['cancelled']}\n}",
+				"name":"assignment"
+			},
+			"dbkey":"schedmaster"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched'",
+			"name":"actionmaster",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":"{\n\ttask: self.task,\n\tuid:{$ne: self.uid},\n\tstatus: {$nin: ['cancelled']}\n}",
+				"name":"assignment"
+			},
+			"dbkey":"actionmaster"
+		},
+		{
+			"editable":"status == 'sched' || status == 'ready'",
+			"name":"availability",
+			"scripts":{
+				"onupdate":"var avail = self.getRelated('availability');\nif(avail != null)\n\tself.assignee = avail.person;\nelse\n\tself.assignee = null;"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"availability"
+			},
+			"dbkey":"availability"
+		},
+		{
+			"editable":"true",
+			"name":"receivelead",
+			"scripts":{
+				"onupdate":"if(self.receivelead != null && self.schedstart != null) {\n\tself.mustreceiveby = (new Date(self.schedstart.getTime() - self.receivelead)).toISOString();\n}"
+			},
+			"dbkey":"receivelead"
+		},
+		{
+			"default":false,
+			"editable":"true",
+			"name":"doaccept",
+			"dbkey":"doaccept"
+		},
+		{
+			"editable":"true",
+			"name":"acceptlead",
+			"scripts":{
+				"onupdate":"if(self.acceptlead != null && self.schedstart != null) {\n\tself.mustacceptby = (new Date(self.schedstart.getTime() - self.acceptlead)).toISOString();\n}"
+			},
+			"dbkey":"acceptlead"
+		},
+		{
+			"default":false,
+			"editable":"true",
+			"name":"doprestart",
+			"dbkey":"doprestart"
+		},
+		{
+			"default":"false",
+			"editable":"true",
+			"name":"requirecode",
+			"dbkey":"requirecode"
+		},
+		{
+			"default":"false",
+			"editable":"true",
+			"name":"requireworklog",
+			"dbkey":"requireworklog"
+		},
+		{
+			"default":"false",
+			"editable":"true",
+			"name":"autostart",
+			"dbkey":"autostart"
+		},
+		{
+			"default":"false",
+			"editable":"true",
+			"name":"enforcelocation",
+			"dbkey":"enforcelocation"
+		},
+		{
+			"default":"false",
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"enforcestarttime",
+			"scripts":{
+				"onupdate":"if(self.enforcestarttime == true && self.schedstart != null) {\n\tvar tol = self.starttimetolerance != null ? parseInt(self.starttimetolerance) : 0;\n\tself.muststartafter = (new Date(self.schedstart.getTime() - tol)).toISOString();\n}"
+			},
+			"dbkey":"enforcestarttime"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"starttimetolerance",
+			"scripts":{
+				"onupdate":"if(self.enforcestarttime == true && self.schedstart != null) {\n\tvar tol = self.starttimetolerance != null ? parseInt(self.starttimetolerance) : 0;\n\tself.muststartafter = (new Date(self.schedstart.getTime() - tol)).toISOString();\n}"
+			},
+			"dbkey":"starttimetolerance"
+		},
+		{
+			"default":"false",
+			"editable":"true",
+			"name":"enforcefinishlocation",
+			"dbkey":"enforcefinishlocation"
+		},
+		{
+			"default":"false",
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"enforcefinishtime",
+			"scripts":{
+				"onupdate":"if(self.enforcefinishtime == true && self.schedfinish != null) {\n\tvar tol = self.finishtimetolerance != null ? parseInt(self.finishtimetolerance) : 0;\n\tself.mustfinishby = (new Date(self.schedfinish.getTime() + tol)).toISOString();\n}"
+			},
+			"dbkey":"enforcefinishtime"
+		},
+		{
+			"editable":"status == 'created' || status == 'sched' || status == 'ready' || status == 'received' || status == 'accepted'",
+			"name":"finishtimetolerance",
+			"scripts":{
+				"onupdate":"if(self.enforcefinishtime == true && self.schedfinish != null) {\n\tvar tol = self.finishtimetolerance != null ? parseInt(self.finishtimetolerance) : 0;\n\tself.mustfinishby = (new Date(self.schedfinish.getTime() + tol)).toISOString();\n}"
+			},
+			"dbkey":"finishtimetolerance"
+		},
+		{
+			"default":"false",
+			"editable":"true",
+			"name":"autocomplete",
+			"dbkey":"autocomplete"
+		},
+		{
+			"search":true,
+			"editable":"true",
+			"name":"warning",
+			"relatedobject":{
+				"linkattribute":"value",
+				"listfilter":{
+					"type":"'assignment_warning'"
+				},
+				"name":"lov"
+			},
+			"dbkey":"warning"
+		},
+		{
+			"search":false,
+			"expression":"self.warning != null && self.status != 'comp' && self.status != 'closed' ? 'warn' : self.status",
+			"editable":"false",
+			"name":"statusandwarn"
+		},
+		{
+			"default":"'no'",
+			"editable":true,
+			"name":"downloaded",
+			"dbkey":"downloaded"
+		},
+		{
+			"default":"[]",
+			"editable":"true",
+			"name":"parallel",
+			"dbkey":"parallel"
+		},
+		{
+			"editable":"true",
+			"name":"next",
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"assignment"
+			},
+			"dbkey":"next"
+		},
+		{
+			"editable":"true",
+			"name":"previous",
+			"scripts":{
+				"onupdate":"qc.enqueue('rbos', {action:'execute', object: 'assignment', uid: self.uid, function:'calctravelfromprevious'});"
+			},
+			"relatedobject":{
+				"linkattribute":"uid",
+				"listfilter":{
+				},
+				"name":"assignment"
+			},
+			"dbkey":"previous"
+		},
+		{
+			"editable":"true",
+			"name":"travelfromprevious",
+			"dbkey":"travelfromprevious"
+		},
+		{
+			"editable":"true",
+			"name":"traveltonext",
+			"dbkey":"traveltonext"
+		},
+		{
+			"default":"[]",
+			"editable":"true",
+			"name":"samelocsametime",
+			"dbkey":"samelocsametime"
+		},
+		{
+			"editable":"true",
+			"name":"lastnotified",
+			"dbkey":"lastnotified"
+		},
+		{
+			"editable":"canWrite('rb.field.status')",
+			"name":"laststart",
+			"scripts":{
+				"onupdate":"if(self.laststart != null && self.duration != null) {\n\tself.expnextstop = new Date(self.laststart.getTime() + parseInt(self.duration));\n}"
+			},
+			"dbkey":"laststart"
+		},
+		{
+			"editable":"canWrite('rb.field.status')",
+			"name":"laststop",
+			"dbkey":"laststop"
+		},
+		{
+			"editable":"canWrite('rb.field.status')",
+			"name":"expnextstop",
+			"dbkey":"expnextstop"
+		},
+		{
+			"default":0,
+			"editable":"true",
+			"name":"restarts",
+			"dbkey":"restarts"
+		},
+		{
+			"editable":"true",
+			"name":"tags",
+			"dbkey":"tags"
+		}
+	],
+	"_id":"33",
+	"collection":"assignment",
+	"uidgenerator":"guid",
+	"scripts":{
+		"attachfiles":"if(self.assignee != null) {\n\tif(self.workorder != null) {\n\t\tattachki(om, fc, 'person', self.assignee, 'workorder', self.workorder);\n\t} else {\n\t\tattachki(om, fc, 'person', self.assignee, 'task', self.task);\n\t}\n}\n\nif(self.assignedeq != null) {\n\tif(self.workorder != null) {\n\t\tattachki(om, fc, 'eq', self.assignedeq, 'workorder', self.workorder);\n\t} else {\n\t\tattachki(om, fc, 'eq', self.assignedeq, 'task', self.task);\n\t}\n}",
+		"calcinitialscheddate":"if(self.schedstart == null || self.schedfinish == null) {\n\tvar task = self.getRelated('task');\n\tif(task != null) {\n\t\tself.schedstart = task.planstart;\n\t\tself.duration = task.planduration;\n\t}\n}",
+		"calctravelfromprevious":"\/\/log('info', 'calcfromprevious');\nif(self.previous != null && self.travelfromprevious == null) {\n\tvar previous = self.related.previous;\n\tif(self.geometry != null && previous.geometry != null) {\n\t\tvar route = geo.travel(self.geometry, previous.geometry);\n\t\tself.travelfromprevious = {distance: route.distance, duration: route.duration};\n\t\tprevious.traveltonext = {distance: route.distance, duration: route.duration};\n\t} else {\n\t\tself.travelfromprevious = 0;\n\t\tprevious.traveltonext = 0;\n\t}\n}",
+		"calcInteractionCache":"var horizon = 28800000;\nvar otherUids = [];\nif(self.parallel != null) otherUids = otherUids.concat(self.parallel);\nif(self.previous != null) otherUids.push(self.previous);\nif(self.next != null) otherUids.push(self.next);\nif(self.samelocsametime != null) otherUids = otherUids.concat(self.samelocsametime);\nvar statusList = ['sched', 'ready', 'received', 'accepted', 'prestart', 'started', 'suspended'];\nvar selfCanInteract = statusList.indexOf(self.status) > -1 && self.schedstart != null && self.schedfinish != null && (self.assignee != null || self.assignedcrew != null || self.assignedeq != null);\nvar listOfOthers = [];\nif(selfCanInteract) {\n\tvar interactionFilter = {\n\t\tuid: {$ne: self.uid},\n\t\tstatus: {$in: statusList},\n\t\t$or:[\n\t\t\t{\n\t\t\t\tuid:{$in: otherUids},\n\t\t\t},\n\t\t\t{\n\t\t\t\tassignee: self.assignee, \n\t\t\t\tassignedcrew: self.assignedcrew, \n\t\t\t\tassignedeq: self.assignedeq, \n\t\t\t\tschedstart: {$lt:(new Date(self.schedstart.getTime() + horizon))}, \n\t\t\t\tschedfinish:{$gt:(new Date(self.schedfinish.getTime() - horizon))}\n\t\t\t},\n\t\t\t{\n\t\t\t\tlocation: self.location,\n\t\t\t\tschedstart: {$lt:(new Date(self.schedfinish.getTime()))}, \n\t\t\t\tschedfinish:{$gt:(new Date(self.schedstart.getTime()))}\n\t\t\t}\t\t\t\n\t\t]\n\t};\n\tlistOfOthers = om.listObjects('assignment', interactionFilter);\n} else if(otherUids.length > 0) {\n\tvar interactionFilter = {\n\t\tuid:{$in: otherUids},\n\t\tstatus: {$in: statusList}\n\t};\n\tlistOfOthers = om.listObjects('assignment', interactionFilter);\t\n}\n\nfor(var other of listOfOthers) {\n\tother.parallel = [...(other.parallel || [])].filter(item => item != self.uid);\n\tif(other.previous == self.uid) {\n\t\tother.previous = self.previous;\n\t\tother.travelfromprevious = null;\n\t}\n\tif(other.next == self.uid) {\n\t\tother.next = self.next;\n\t\tother.traveltonext = null;\n\t}\n\tother.samelocsametime = [...(other.samelocsametime || [])].filter(item => item != self.uid);\n}\nself.parallel = [];\nself.next = null;\nself.previous = null;\nself.travelfromprevious = null;\nself.traveltonext = null;\nself.samelocsametime = [];\n\nif(selfCanInteract) {\n\tvar previousAssignment = null;\n\tvar nextAssignment = null;\n\tfor(var other of listOfOthers) {\n        if((self.assignee != null && other.assignee == self.assignee) || (self.assignedcrew != null && other.assignedcrew == self.assignedcrew) || (self.assignedeq != null && other.assignedeq == self.assignedeq)) {\n            if(other.schedstart.getTime() < (self.schedfinish.getTime() - 60000) && other.schedfinish.getTime() > (self.schedstart.getTime() + 60000)) {\n                var otherParallel = (other.parallel != null ? [...other.parallel] : []);\n                otherParallel.push(self.uid);\n                other.parallel = otherParallel\n                var selfParallel = (self.parallel != null ? [...self.parallel] : []);\n                selfParallel.push(other.uid);\n                self.parallel = selfParallel;\n            }\n            if(other.schedfinish.getTime() <= self.schedstart.getTime() && other.schedfinish.getTime() > self.schedstart.getTime() - horizon) {\n                if(previousAssignment == null) previousAssignment = other;\n                else if(other.schedfinish.getTime() > previousAssignment.schedfinish.getTime()) previousAssignment = other;\n            }\n            if(other.schedstart.getTime() >= self.schedfinish.getTime() && other.schedstart.getTime() < self.schedfinish.getTime() + horizon) {\n                if(nextAssignment == null) nextAssignment = other;\n                else if(other.schedstart.getTime() < nextAssignment.schedstart.getTime()) nextAssignment = other;\n            }    \n        } \n\t\tif(self.location != null && other.location == self.location) {\n\t\t\tif(other.schedstart.getTime() < (self.schedfinish.getTime() - 60000) && other.schedfinish.getTime() > (self.schedstart.getTime() + 60000)) {\n                var otherSLST = (other.samelocsametime != null ? [...other.samelocsametime] : []);\n                otherSLST.push(self.uid);\n                other.samelocsametime = otherSLST\n                var selfSLST = (self.samelocsametime != null ? [...self.samelocsametime] : []);\n                selfSLST.push(other.uid);\n                self.samelocsametime = selfSLST;\n            }\n\t\t}\n\t}\n\tif(nextAssignment != null) {\n\t\tnextAssignment.previous = self.uid;\n\t\tself.next = nextAssignment.uid;\n\t}\n\tif(previousAssignment != null) {\n\t\tpreviousAssignment.next = self.uid;\n\t\tself.previous = previousAssignment.uid;\n\t}\n}\nself.determinewarning();\nfor(var other of listOfOthers) {\n\tother.determinewarning();\n}",
+		"calclabel":"if(self.task != null && self.position != null && self.type != null) {\n\tvar task = self.getRelated('task');\n\ttask.calcassignmentlabels();\n}\n",
+		"genact":"\/\/log('info', 'ass genact  laststart : ' + self.laststart + '   laststop : ' + self.laststop);\nif(self.laststart != null  &&  self.laststop != null) {\n\tvar task = self.getRelated('task');\n\tvar wo = self.getRelated('workorder');\n\tvar location = wo != null ? wo.getRelated('location') : task.getRelated('location');\n\tvar person = self.getRelated('assignee');\n\tvar org = (person != null ? person.getRelated('org') : null);\n\tvar orgisvendor = (org != null ? org.isvendor : false);\n\tvar orguid = (org != null ? org.uid : null);\n\tvar wotypes = wo != null ? mapToStringArray(getHierarchy(wo.getRelated('type')), 'value') : null;\n\tvar tasktypes = task != null ? mapToStringArray(getHierarchy(task.getRelated('type')), 'value') : null;\n\t\n\tvar rules = getRules(\n\t\tom,\n\t\t'genrule',\n\t\t{\n\t\t\tdomain: self.domain,\n\t\t\tinputtype: 'assignment'\n\t\t},\n\t\t{\n\t\t\tifwotype: wotypes,\n\t\t\tiftasktype: tasktypes,\n\t\t\tiflocation: mapToStringArray(getHierarchy(location), 'uid'),\n\t\t\tifcraft: self.craft,\n\t\t\tifcrewtype: self.crewtype,\n\t\t\tifitem: self.eqitem,\n\t\t\tifisvendor: orgisvendor,\n\t\t\tifvendor: orguid\n\t\t}\n\t);\n\t\n\tfor(var i = 0; i < rules.length; i++) {\n\t\tvar rule = rules[i];\n\t\tvar duration = Math.round((self.laststop.getTime() - self.laststart.getTime()) \/ 1000) * 1000;\n\t\tif(rule.outputtype == 'labact' && self.assignee != null) {\n\t\t\tvar data = {\n\t\t\t\ttask:self.task, \n\t\t\t\tworkorder:self.workorder, \n\t\t\t\tassignment: self.uid,\n\t\t\t\tperson:self.assignee, \n\t\t\t\tstart:self.laststart, \n\t\t\t\tsequence: (self.restarts || 0),\n\t\t\t\tduration:duration\n\t\t\t};\n\t\t\tif(om.getObjectList('labactual', data).length == 0)\n\t\t\t\tom.createObject('labactual', self.domain, data);\n\t\t\t\n\t\t} else if(rule.outputtype == 'labact' && self.assignedcrew != null) {\n\t\t\tvar crewassignments = om.getObjectList('crewassignment', {crew: self.assignedcrew});\n\t\t\tfor(var j = 0; j < crewassignments.length; j++) {\n\t\t\t\tvar data = {\n\t\t\t\t\ttask:self.task, \n\t\t\t\t\tworkorder:self.workorder, \n\t\t\t\t\tassignment: self.uid,\n\t\t\t\t\tperson:crewassignments[j].person, \n\t\t\t\t\tstart:self.laststart, \n\t\t\t\t\tsequence: (self.restarts || 0),\n\t\t\t\t\tduration:duration\n\t\t\t\t};\n\t\t\t\tif(om.getObjectList('labactual', data).length == 0)\n\t\t\t\t\tom.createObject('labactual', self.domain, data);\n\t\t\t}\n\t\t\t\n\t\t} else if(rule.outputtype == 'servact') {\n\t\t\tvar quantity = 1;\n\t\t\tvar item = rule.getRelated('thenitem');\n\t\t\tif(item != null && item.uom == 'HR') {\n\t\t\t\tquantity = parseFloat((duration \/ 3600000).toFixed(2));\n\t\t\t}\n\t\t\tvar data = {\n\t\t\t\ttask:self.task, \n\t\t\t\tworkorder:self.workorder, \n\t\t\t\titem:rule.thenitem, \n\t\t\t\tquantity:quantity,\n\t\t\t\tvendor: (rule.thenorg != null ? rule.thenorg : (org != null ? org.uid : null)),\n\t\t\t\ttxdate: self.laststop\n\t\t\t};\n\t\t\tif(om.getObjectList('servactual', data).length == 0)\n\t\t\t\tom.createObject('servactual', self.domain, data);\n\n\t\t} else if(rule.outputtype == 'eqact' && self.assignedeq != null) {\n\t\t\tvar data = {\n\t\t\t\ttask:self.task, \n\t\t\t\tworkorder:self.workorder, \n\t\t\t\tassignment: self.uid,\n\t\t\t\teq:self.assignedeq, \n\t\t\t\tstart:self.laststart, \n\t\t\t\tduration:duration\n\t\t\t};\n\t\t\tif(om.getObjectList('eqactual', data).length == 0)\n\t\t\t\tom.createObject('eqactual', self.domain, data);\n\t\t} \n\n\t}\n\tself.laststart = null;\n\tself.laststop = null;\n}",
+		"actionready":"if(self.assignee != null || self.assignedeq != null) {\r\n\tvar assignment = pc.getAssignment({'data.objectname':'assignment', 'data.uid':self.uid, });\r\n\tif(assignment != null) {\n\t\tassignment.action('ready');\r\n\t\t\/\/pc.actionProcess(assignment.pid, \"ready\");\r\n\t}\t\r\n}\r\n",
+		"genctl":"if(self.wo != null) {\r\n\t\/\/log('info', 'Starting genctl on assignment');\r\n\tvar task = self.getRelated('task');\r\n\tvar wo = self.getRelated('workorder');\r\n\tvar labreq = self.getRelated('labreq');\r\n\tvar person = self.getRelated('assignee');\r\n\tvar org = (person != null ? person.getRelated('org') : null);\r\n\tvar orgisvendor = (org != null ? org.isvendor : false);\r\n\tvar orguid = (orgisvendor == true ? org.uid : null);\r\n\n\tvar rules = getRules(\n\t\tom,\n\t\t'grouprule',\n\t\t{\n\t\t\tdomain: self.domain,\n\t\t\tactive: true\n\t\t},\n\t\t{\n\t\t\tifresponsibility: 'assignment',\n\t\t\tiflocation: mapToStringArray(getHierarchy(self.getRelated('location')), 'uid'),\n\t\t\tifwotype: mapToStringArray(getHierarchy(task.getRelated('type')), 'value'),\n\t\t\tifisvendor: orgisvendor,\n\t\t\tifvendor: orguid,\n\t\t\tifcraft: labreq.craft\n\t\t}\n\t);\n\r\n\tfor(var i = 0; i < rules.length; i++) {\r\n\t\tvar rule = rules[i];\r\n\t\tif(rule.outputtype == 'pr') {\r\n\t\t\tvar vendor = (rule.thenorg != null && rule.thenorg != '') ? rule.thenorg : org.uid;\r\n\t\t\tvar data = {task:task.uid, workorder:wo.uid, vendor:vendor, item:rule.thenitem, reqdate:self.schedstart, qty:\"1\", assignment:self.uid};\r\n\t\t\tif(om.getObjectList('pr', data).length == 0)\r\n\t\t\t\tom.createObject('pr', self.domain, data);\t\t\r\n\t\t}                \r\n\t}\r\n}",
+		"applyassignmentrules":"var task = self.getRelated('task');\nvar location = self.getRelated('location');\nvar customer = self.getRelated('customer');\n\nvar softRules = {\n    ifassignmenttype: self.type,\n    iftasktype: mapToStringArray(getHierarchy(task.getRelated('type')), 'value'),\n    ifcustomer: mapToStringArray(getHierarchy(customer), 'uid'),\n    iflocation: mapToStringArray(getHierarchy(location), 'uid'),\n    ifroutine: task.routine,\n    ifcraft: self.craft,\n    ifeqitem: self.eqitem,\n    ifcrewtype: self.crewtype,\n    ifposition: (self.position + 1).toString()\n}\n\n\/\/ Scheduling Master rule\nif(self.status == 'created' || self.status == 'sched') {\n\tvar smrule = getRule(om, 'assignmentrule', {domain: self.domain, type: 'schedmaster'}, softRules);\n\tif(smrule != null) {\n\t\tif(smrule.thenisschedmaster == true) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, uid:{$ne: self.uid}});\n\t\t\tfor(var i = 0; i < others.length; i++) {\n\t\t\t\tothers[i].schedmaster = self.uid;\n\t\t\t}\n\t\t} else if(smrule.thenschedmastercraft != null) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, craft: smrule.thenschedmastercraft, uid:{$ne: self.uid}});\n\t\t\tif(others.length > 0) {\n\t\t\t\tself.schedmaster = others[0].uid;\n\t\t\t}\t\t\n\t\t} else if(smrule.thenschedmastereqitem != null) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, eqitem: smrule.thenschedmastereqitem, uid:{$ne: self.uid}});\n\t\t\tif(others.length > 0) {\n\t\t\t\tself.schedmaster = others[0].uid;\n\t\t\t}\t\t\n\t\t} else if(smrule.thenschedmastercrewtype != null) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, crewtype: smrule.thenschedmastercrewtype, uid:{$ne: self.uid}});\n\t\t\tif(others.length > 0) {\n\t\t\t\tself.schedmaster = others[0].uid;\n\t\t\t}\t\t\n\t\t}  else if(smrule.thenschedmasterposition != null) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, position: smrule.thenschedmasterposition - 1, uid:{$ne: self.uid}});\n\t\t\tif(others.length > 0) {\n\t\t\t\tself.schedmaster = others[0].uid;\n\t\t\t}\t\t\n\t\t}\n\t}\n}\n\n\/\/Action Master rule\nif(self.status == 'created' || self.status == 'sched') {\n\tvar amrule = getRule(om, 'assignmentrule', {domain: self.domain, type: 'actionmaster'}, softRules);\n\tif(amrule != null) {\n\t\tif(amrule.thenisactionmaster == true) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, uid:{$ne: self.uid}});\n\t\t\tfor(var i = 0; i < others.length; i++) {\n\t\t\t\tothers[i].actionmaster = self.uid;\n\t\t\t}\n\t\t} else if(amrule.thenactionmastercraft != null) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, craft: amrule.thenactionmastercraft, uid:{$ne: self.uid}});\n\t\t\tif(others.length > 0) {\n\t\t\t\tself.actionmaster = others[0].uid;\n\t\t\t}\t\t\n\t\t} else if(amrule.thenactionmastercrewtype != null) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, crewtype: amrule.thenactionmastercrewtype, uid:{$ne: self.uid}});\n\t\t\tif(others.length > 0) {\n\t\t\t\tself.actionmaster = others[0].uid;\n\t\t\t}\t\t\n\t\t} else if(amrule.thenactionmasterposition != null) {\n\t\t\tvar others = om.listObjects('assignment', {task: self.task, position: amrule.thenactionmasterposition - 1, uid:{$ne: self.uid}});\n\t\t\tif(others.length > 0) {\n\t\t\t\tself.actionmaster = others[0].uid;\n\t\t\t}\t\t\n\t\t}\n\t}\n}\n\n\/\/Start rule\nif(self.status == 'created') {\n\tvar startrule = getRule(om, 'assignmentrule', {domain: self.domain, type: 'start'}, softRules);\n\tif(startrule != null) {\n\t\tself.doprestart = startrule.thendoprestart;\n\t\tself.doaccept = startrule.thendoaccept;\n\t\tself.acceptlead = startrule.thenacceptwarnlead;\n\t\tself.receivelead = startrule.thenreceivewarnlead;\t\n\t\tself.autostart = startrule.thenautostart;\n\t\tself.enforcelocation = startrule.thenenforcelocation;\n\t\tself.enforcestarttime = startrule.thenenforcetime;\n\t\tself.starttimetolerance = startrule.thentimetolerance;\n\t}\n}\n\n\/\/Assignee rule\nif(self.status == 'created' || self.status == 'sched' || self.status == 'ready' || self.status == 'accepted' || self.status == 'received') {\n\tvar asrule = getRule(om, 'assignmentrule', {domain: self.domain, type: 'assignee'}, softRules);\n\tif(asrule != null) {\n\t\tif(asrule.thenassignee != null) {\n      self.type = 'person';\n\t\t\tvar person = om.getObject('person', asrule.thenassignee);\n\t\t\tif(person != null && person.status == 'active') {\n\t\t\t\tvar leavelist = om.listObjects('leave', {person: asrule.thenassignee, from:{$lt: task.planstart.toISOString()}, to:{$gt: task.planstart.toISOString()}, status:\"approved\"});\n\t\t\t\tif(leavelist.length == 0) {\n\t\t\t\t\tself.assignee = asrule.thenassignee;\n\t\t\t\t}\n\t\t\t}\n\t\t} else if(asrule.thenassignedcrew != null) {\n      self.type = 'crew';\n\t\t\tself.assignedcrew = asrule.thenassignedcrew;\n\t\t} else if(asrule.thenassginedeq != null) {\n      self.type = 'eq';\n\t\t\tself.assignedeq = asrule.assignedeq;\t\t\t\n\t\t}\n\t\tif(asrule.thenduration != null && self.thenduration != \"\") {\n\t\t\tself.duration = parseInt(asrule.thenduration);\n\t\t}\n\t\tself.schedstart =  task.planstart;\n\t} \n}\n\n\/\/Completion rule\nif(self.status == 'created') {\n\tvar comprule = getRule(om, 'assignmentrule', {domain: self.domain, type: 'completion'}, softRules);\n\tif(comprule != null) {\n\t\tself.requirecode = comprule.thenneedscode;\n\t\tself.requireworklog = comprule.thenneedsworklog;\n\t\tself.autocomplete = comprule.thenautocomplete;\n\t\tself.enforcefinishlocation = comprule.thenenforcelocation;\n\t\tself.enforcefinishtime = comprule.thenenforcetime;\n\t\tself.finishtimetolerance = comprule.thentimetolerance;\t\n\t}\n} ",
+		"onsave":"",
+		"determinewarning":"var now = new Date();\nvar fivedays = new Date(now.getTime() + (5 * 24 * 60 * 60 * 1000));\nvar isReadyReceivedAccepted = self.status == 'ready' || self.status == 'received' || self.status == 'accepted';\nvar isPersonAssignment = self.type == 'person';\nvar isAssigned = (self.type == 'person' && self.assignee != null) || (self.type == 'crew' && self.assignedcrew != null) || (self.type == 'eq' && self.assignedeq != null);\nvar hasSchedStart = self.schedstart != null && self.schedstart.getTime != null;\nvar hasMustAcceptBy = self.mustacceptby != null && self.mustacceptby.getTime != null;\nvar hasMustReceiveBy = self.mustreceiveby != null && self.mustreceiveby.getTime != null;\nvar schedStartPast = hasSchedStart && self.schedstart.getTime() < now.getTime();\nvar schedStartInNextDay = hasSchedStart && self.schedstart.getTime() < (now.getTime() + 86400000);\nvar schedStartInNextFiveDays = hasSchedStart && self.schedstart.getTime() < fivedays.getTime();\nvar mustAcceptByPast = hasMustAcceptBy && self.mustacceptby.getTime() < now.getTime();\nvar mustReceiveByPast = hasMustReceiveBy && self.mustreceiveby.getTime() < now.getTime();\nvar expNextStopPast = self.expnextstop != null && self.expnextstop.getTime != null && self.expnextstop.getTime() < now.getTime();\n\nif(isReadyReceivedAccepted && schedStartPast) {\n    self.warning = 'notstarted';\n} else if(isPersonAssignment && self.status == 'received' && mustAcceptByPast) {\n    self.warning = 'notaccepted'\n    notify(self.assignee, 'Upcoming Assignment', \"You have an assignment starting soon that you haven't accepted yet.\");\n    self.lastnotified = now;\n} else if(isPersonAssignment && self.status == 'ready' && mustReceiveByPast) {\n    self.warning = 'notreceived'\n    notify(self.assignee, 'New Assignment', \"You have a new assignment that you haven't received yet\");\n    self.lastnotified = now;\n} else if(isPersonAssignment && self.status == 'ready' && !hasMustReceiveBy && schedStartInNextDay) {\n    self.warning = 'notreceived'\n} else if(self.status == 'started' && expNextStopPast) {\n    self.warning = 'longrunning'\n} else if(self.parallel != null && self.parallel.length > 0) {\n\tself.warning = 'parallel';\n} else if(self.status == 'sched' && isAssigned && schedStartInNextFiveDays) {\n\tself.warning = 'notready';\n} else if(self.status == 'sched' && !isAssigned && schedStartInNextFiveDays) {\n    self.warning = 'unassigned';\n} else {\n\tself.warning = null;\n}\n\nfunction notify(personUid, subject, body) {\n    var person = om.getObject('person', personUid);\n    if(person != null) {\n        try { \n            nc.sendfcmmessage(person.username, subject, body); \n        } catch(err) {}\n    }\n}",
+		"genprestartforms":"\/\/log('info', 'Starting generating forms on assignment pre-start');\r\nvar task = self.getRelated('task');\r\n\r\nvar rules = getRules(\r\n\tom,\r\n\t'formrule',\r\n\t{\r\n\t\tdomain: self.domain,\r\n\t\ttype: 'assignprestartgen'\r\n\t},\r\n\t{\n\t\tifcustomer: mapToStringArray(getHierarchy(task.getRelated('customer')), 'uid'),\r\n\t\tiflocation: mapToStringArray(getHierarchy(task.getRelated('location')), 'uid'),\r\n\t\tiftasktype: mapToStringArray(getHierarchy(task.getRelated('type')), 'value'),\r\n\t\tifeqitem: self.eqitem,\r\n\t\tifcraft: self.craft\r\n\t}\r\n);\r\n\r\nfor(var i = 0; i < rules.length; i++) {\r\n\tom.createObject(\"form\", self.domain, {\r\n\t\t\"task\": task.uid, \r\n\t\t\"workorder\": self.workorder,\n\t\t\"customer\": self.customer,\n\t\t\"location\": self.location,\n\t\t\"structure\": self.structure, \n\t\t\"eq\": self.eq,\n\t\t\"formmaster\": rules[i].formmaster\r\n\t});\r\n}",
+		"aftercreate":"pc.initiate('assignment', self.domain, {'objectname':'assignment', 'uid':self.uid, 'workorder':self.workorder, 'task':self.task, 'label':self.label, 'groupkey':'task.' + self.task});\r\n",
+		"aftersave":"if((self.status == 'ready' || self.status == 'received' || self.status == 'accepted') && self.isAttributeUpdated('assignee')) {\n\tpc.interruptProcesses({'data.objectname':'assignment', 'data.uid':self.uid,});\n}\r\n",
+		"cancomplete":"if(self.requirecode == true) {\n\tvar codes = om.listObjects('resultcode', {assignment: self.uid});\n\tif(codes.length == 0) {\n\t\tthrow(\"At least one result code is required to be captured\");\n\t}\n}\n\nif(self.requireworklog == true) {\n\tvar logs = om.listObjects('worklog', {assignment: self.uid});\n\tif(logs.length == 0) {\n\t\tthrow(\"At least one worklog is required to be captured\");\n\t}\n}",
+		"determinedispatchgroup":"\/\/log('info', 'Starting determine dispatch group on assignment');\nvar rule = getRule(\r\n\tom,\r\n\t'grouprule',\r\n\t{\r\n\t\tdomain: self.domain,\n\t\tactive: true\r\n\t},\r\n\t{\n\t\tifresponsibility: 'dispatch',\n\t\tiflocation: mapToStringArray(getHierarchy(self.getRelated('location')), 'uid'),\r\n\t\tiftasktype: mapToStringArray(getHierarchy(self.getRelated('task').getRelated('type')), 'value'),\n        ifownerorg: mapToStringArray(getHierarchy(self.getRelated('ownerorg')), 'uid')\r\n\t}\r\n);\r\n\r\nif(rule != null) {\r\n\tself.dispatchgroup = rule.group;\r\n}",
+		"determineassignmentgroup":"\/\/log('info', 'Starting determine assignment group on assignment');\r\nvar rule = getRule(\n\tom,\n\t'grouprule',\n\t{\n\t\tdomain: self.domain,\n\t\tactive: true,\n\t\tifresponsibility: 'assignment'\n\t},\n\t{\n\t\tiflocation: mapToStringArray(getHierarchy(self.getRelated('location')), 'uid'),\n\t\tiftasktype: mapToStringArray(getHierarchy(self.getRelated('task').getRelated('type')), 'value'),\n        ifownerorg: mapToStringArray(getHierarchy(self.getRelated('ownerorg')), 'uid')\n\t}\n);\n\nif(rule != null) {\n\tself.assignmentgroup = rule.group;\n}\r\n",
+		"actionconfirm":"if(self.craft != null || self.eqitem != null) {\r\n\tvar assignment = pc.getAssignment({'data.objectname':'assignment', 'data.uid':self.uid,});\r\n\tif(assignment != null) {\n\t\tassignment.action('confirm');\r\n\t\t\/\/pc.actionProcess(assignment.pid, \"confirm\");\r\n\t}\t\r\n}\r\n",
+		"genfollowup":"var fu = om.createObject('assignment', self.domain, {\r\n\t'task': self.task, \r\n\t'workorder': self.workorder,\r\n\t'original': self.uid,\r\n\t'duration': self.duration,\r\n\t'reqcodes': self.reqcodes,\n\t'craft': self.craft,\n\t'crewtype': self.crewtype,\n\t'eqitem': self.eqitem,\r\n\t'assignmentgroup': self.assignmentgroup,\r\n\t'dispatchgroup': self.dispatchgroup,\r\n\t'position':self.position, \r\n\t'sequence': (parseInt(self.sequence) + 1)\r\n});\r\nself.followup = fu.uid;"
+	},
+	"group":"control"
+}
