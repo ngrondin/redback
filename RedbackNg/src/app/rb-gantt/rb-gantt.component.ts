@@ -738,11 +738,12 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public clickLane(lane: GanttLane) {
-    this.select(lane.object);
+    let laneDataset = this.datasetgroup != null ? this.datasetgroup.datasets[this.lanesConfig.dataset] : this.dataset;
+    laneDataset.select(lane.object);
     if(this.lanesConfig.modal != null) {
       this.modalService.open(this.lanesConfig.modal);
     } else if(this.lanesConfig.link != null) {
-      let navEvent = this.lanesConfig.link.getNavigationEvent(lane.object, this.getDatasetForObject(lane.object), this.extraContext);
+      let navEvent = this.lanesConfig.link.getNavigationEvent(lane.object, laneDataset, this.extraContext);
       this.navigateService.navigateTo(navEvent);
     }  
   }

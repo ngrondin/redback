@@ -1,8 +1,8 @@
 :host {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    
+    align-items: end;
+    height: var(--v42px);
 }
 
 
@@ -10,6 +10,7 @@
     flex: 0 0 auto;
 	color: grey;
 	margin-right: var(--v5px);
+    margin-bottom: var(--v2px);
 	font-size: 1.4rem;
     width: var(--v24px);
     height: var(--v24px);
@@ -28,6 +29,7 @@
     flex-grow: 1;
     flex-direction: row;
     align-items: center;
+    margin-bottom: var(--v4px);
 }
 
 .rb-switch-label {

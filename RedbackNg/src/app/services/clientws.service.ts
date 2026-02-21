@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
@@ -229,8 +228,10 @@ export class ClientWSService {
     if(this.heartbeatFreq > 0) {
       this.websocket.next({type:"heartbeat"});
       setTimeout(() => {
-        this.heartbeat();
-        this.logService.debug("WSS Heartbeat send");
+        this.logService.debug("WSS Heartbeat send, pending requests");
+        let pending = Object.keys(this.requestObservers).length;
+        if(pending > 0) this.logService.info("Pending WS Requests: " + pending); 
+        this.heartbeat();        
       }, this.heartbeatFreq);
     }
   }

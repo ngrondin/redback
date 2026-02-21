@@ -6,9 +6,9 @@
         <div
             class="rb-table-colheader"
             *ngFor="let col of columns"
-            [style.width.px]="col.width"
+            [style.width]="col.width"
             (click)="clickColumn(col)">
-            {{col.label}}
+            <span>{{col.label}}</span>
         </div>
     </div>
 </div>
@@ -31,7 +31,7 @@
             <div
                 class="rb-table-rowitem"
                 *ngFor="let col of getColumnsForObject(object)"
-                [style.width.px]="col.width">
+                [style.width]="col.width">
                 <rb-link
                     *ngIf="col.type == 'link'"
                     [object]="object"
@@ -143,6 +143,7 @@
                 <rb-iconbutton
                     *ngIf="canDelete(object)"
                     [icon]="'clear'"
+                    [color]="'grey'"
                     (click)="deleteObject(object)">
                 </rb-iconbutton>        
             </div>

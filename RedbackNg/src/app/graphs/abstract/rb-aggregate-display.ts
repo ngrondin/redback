@@ -239,12 +239,12 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     }
   
     public onClick(event: any) {
-      let objectname = this.linkview == null ? this.aggregateset.objectname : null;
+      let objectname = this.linkview == null && this.aggregateset != null ? this.aggregateset.objectname : null;
       let view = this.linkview;
       let filter = null;
 
       if(this.linkfilter != null) {
-        filter = this.filterService.resolveFilter(this.linkfilter, null, null, null, null, {cat: event.cat, code: event.code});
+        filter = this.filterService.resolveFilter(this.linkfilter, this.selectedObject, this.dataset, null, null, {cat: event.cat, code: event.code});
         filter = this.filterService.unresolveFilter(filter);
       } else if(this.aggregateset != null) {
         let dimensionFilter = {};
@@ -271,7 +271,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
             filter: filter
           }
         ],
-        reset: true
+        reset: false
       };
       if(view != null) {
         navEvent.view = view;

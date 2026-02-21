@@ -20,11 +20,14 @@
 .rb-table-colheader {
     display: flex;
     flex-direction: row;
-    padding-left: 30px;
-    margin-right: -20px;
+    margin: 0px var(--v10px) 0px 0px;
     font-size: 0.9rem;
     color: darkgray;
     cursor: pointer;
+}
+
+.rb-table-colheader span {
+    padding-left: var(--v20px);
 }
 
 .rb-table-body {
@@ -36,8 +39,8 @@
 .rb-table-row {
     display: flex;
     flex-direction: row;
-    align-items: end;
-    padding: var(--v10px);
+    align-items: start;
+    padding: var(--v10px) 0px;
 }
 
 .rb-table-rowitem {
@@ -47,6 +50,7 @@
 }
 
 .rb-table-rowbutton {
+    margin-top: var(--v10px);
     margin-left: var(--v10px);
 }
 

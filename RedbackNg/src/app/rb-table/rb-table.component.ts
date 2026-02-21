@@ -14,7 +14,7 @@ class TableColumnConfig {
   format: string;
   icon: string;
   size: number;
-  width: number;
+  width: string;
   editable: boolean;
   linkview: string;
   showExpr: string;
@@ -29,8 +29,9 @@ class TableColumnConfig {
     this.type = json.type;
     this.format = json.format;
     this.icon = json.icon;
-    this.size = json.size;
-    this.width = (json.size != null ? (json.size * 15) + 15 : 250);
+    this.size = json.size ?? 17;
+    this.width = 'min(' + (0.88 * this.size) + 'vw, ' + (17 * this.size) + 'px)';
+    //this.width = (json.size != null ? (json.size * 15) + 15 : 250);
     this.editable = (json.editable != null ? json.editable : true);
     this.linkview = json.linkview;
     this.showExpr = (json.show != null ? json.show : "true");

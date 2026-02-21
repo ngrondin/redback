@@ -6,7 +6,7 @@
 <div
     class="rb-switch-container">
     <div
-        *ngIf="!labelafter"
+        *ngIf="!labelafter && label != null"
         [class]="'rb-switch-label' + (mandatoryOn ? ' rb-switch-label-mandatory' : '') + (alertOn ? ' rb-switch-label-alert' : '') ">
         {{label}}
     </div>
@@ -23,7 +23,7 @@
         (change)="toggle()">
     </rb-switch>
     <div
-        *ngIf="labelafter"
+        *ngIf="labelafter && label != null"
         [class]="'rb-switch-label' + (mandatoryOn ? ' rb-switch-label-mandatory' : '') + (alertOn ? ' rb-switch-label-alert' : '') ">
         {{label}}
     </div>    

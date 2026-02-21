@@ -1,6 +1,6 @@
 {
   "name": "redback-ng",
-  "version": "1.16.39",
+  "version": "1.16.40",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

@@ -9,6 +9,7 @@ import { RbComponent } from 'app/abstract/rb-component';
 export class RbIconbuttonComponent extends RbComponent {
   @Input('icon') icon: string; 
   @Input('focus') focus: boolean = false;
+  @Input('color') color;
 
   componentInit() {
   }
