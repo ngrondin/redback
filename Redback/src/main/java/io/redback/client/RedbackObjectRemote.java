@@ -111,7 +111,7 @@ public class RedbackObjectRemote {
 	public RedbackObjectRemote getRelated(String attribute, boolean resolveIfMissing) throws RedbackException {
 		RedbackObjectRemote rror = null;
 		DataEntity val = get(attribute);
-		if(!val.equals(null)) { 
+		if(val != null && !val.equals(null)) { 
 			rror = related.get(attribute);
 			if(rror == null && resolveIfMissing) {
 				rror = objectClient.getRelatedObject(session, getObjectName(), getUid(), attribute);

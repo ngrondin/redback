@@ -23,10 +23,6 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     seriesConfigs: T[] = [];
     initialFilteringDone: boolean = false;
-    /*lastRecalc: number = -1;
-    recalcInterval: number = -1;
-    minRecalcTime: number = -1;
-    recalcPlanned: boolean = false;*/
     blockRecalc: boolean = false;
     recalcPlanner: RecalcPlanner;
     
@@ -84,7 +80,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
                 } else if(this.dataset != null) {
                     fetched = this.dataset.filterSort(filterSort) || fetched;
                 } else {
-                    fetched = false;
+                    fetched = false || fetched;
                 }
               }
             }
@@ -117,37 +113,6 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
             this.recalcPlanner.request();
         }
     }
-
-    /*redraw() {
-        if(this.recalcPlanned == false && this.blockRecalc == false) {
-          this.recalcPlanned = true;
-          let now = new Date().getTime();
-          let nextCalc = now;
-          if(this.recalcInterval > -1) {
-            nextCalc = this.lastRecalc + (this.recalcInterval * Math.ceil((now - this.lastRecalc) / this.recalcInterval));
-          } else if(this.minRecalcTime > -1) {
-            nextCalc = this.lastRecalc + this.minRecalcTime;
-          }
-          let tillNextCalc = Math.max(nextCalc, now) - now
-          if(tillNextCalc == 0) this._calc();
-          else setTimeout(() => this._calc(), tillNextCalc);
-        }
-    }*/
-
-    /*_calc() {
-        try {
-            //this._logService.debug("DataCalc " + this.id + ": start calc");
-            var start = (new Date()).getTime();
-            this.calc();
-            let end = (new Date()).getTime();
-            this.lastRecalc = end;
-            //this._logService.debug("DataCalc " + this.id + ": finished calc in " + (end-start) + "ms");
-        } catch(err) {
-            this._logService.error(err);
-            
-        }
-        this.recalcPlanned = false;
-    }*/
 
     iterateAllLists(callback: (object: RbObject, config: T) => void) {
         for(let seriesConfig of this.seriesConfigs) {

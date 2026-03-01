@@ -81,35 +81,46 @@ export class RbFileInputComponent extends RbInputComponent  {
   public drop(event: any) {
     event.preventDefault();
     event.stopPropagation();
-    this.logService.info("File dropped");
+    this.logService.info("File dropped, items " + event.dataTransfer?.item?.length + ", files " + event.dataTransfer?.files?.length);
     if (event.dataTransfer != null && event.dataTransfer.items) {
       for (var i = 0; i < event.dataTransfer.items.length; i++) {
         if (event.dataTransfer.items[i].kind === 'file') {
           var file = event.dataTransfer.items[i].getAsFile();
-          this.apiService.uploadFile(file, null, null).subscribe(
-            (resp) => {
-              if(resp.type == "result") this.fileUploaded(resp.result);
-            },
-            (error) => { }
-          );
+          this.uploadFile(file);
         }
       }
     }
     this.hasFileOver = false;
   }
 
-  upload(evetn: any) {
-
+  uploadFile(file: File) {
+    this.apiService.uploadFile(file, null, null).subscribe(
+      (resp) => {
+        if(resp.type == "result") this.fileUploaded(resp.result);
+      },
+      (error) => { }
+    );
   }
 
   fileUploaded(res: any) {
     this.commit(res);
   }
 
+  click() {
+    if(this.rbObject != null) {
+      let val = this.rbObject.get(this.attribute);
+      if(val != null && val.fileuid != null) {
+        this.openFile();
+      } else {
+        this.chooseFile();
+      }
+    }
+  }
+
   openFile() {
     if(this.rbObject != null) {
       let val = this.rbObject.get(this.attribute);
-      if(val.fileuid != null) {
+      if(val != null && val.fileuid != null) {
         let isImg = val.mime != null && val.mime.startsWith("image/");
         if(!isImg) {
           window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + val.fileuid);
@@ -124,6 +135,18 @@ export class RbFileInputComponent extends RbInputComponent  {
         }
       }
     }     
+  }
+
+  chooseFile() {
+    var input = document.createElement("input");
+    input.type = 'file';
+    input.onchange = (event) => {
+      var files = event.target['files'];
+      for(var file of files) {
+        this.uploadFile(file);
+      }
+    }
+    input.click();
   }
 
   @HostListener('dragover', ['$event'])

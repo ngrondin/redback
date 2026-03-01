@@ -18,8 +18,7 @@ public class BufferedImageJSWrapper  extends ObjectJSWrapper {
 	private Graphics2D graphics;
 
 	public BufferedImageJSWrapper(BufferedImage i) {
-		super(new String[] {"rect", 
-				"text"});
+		super(new String[] {"rect", "text"});
 		image = i;
 		graphics = (Graphics2D) image.getGraphics();
 	}

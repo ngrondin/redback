@@ -15,6 +15,7 @@ import io.firebus.data.DataMap;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.logging.Logger;
+import io.firebus.script.Converter;
 import io.firebus.script.Expression;
 import io.firebus.script.Function;
 import io.firebus.script.ScriptContext;
@@ -644,10 +645,10 @@ public class RedbackObject extends RedbackElement
 	
 	public Object executeFunction(String functionName) throws RedbackException
 	{
-		return executeFunction(functionName, (DataMap)null);
+		return executeFunction(functionName, null);
 	}
 	
-	public Object executeFunction(String functionName, DataMap param) throws RedbackException
+	public Object executeFunction(String functionName, Object param) throws RedbackException
 	{
 		if(canExecute)
 		{
@@ -655,7 +656,7 @@ public class RedbackObject extends RedbackElement
 			if(param != null) {
 				try {
 					context = scriptContext.createChild();
-					context.put("param", param);
+					context.put("param", Converter.convertIn(param));
 				} catch(Exception e) {
 					throw new RedbackException("Error creating the script context", e);
 				}

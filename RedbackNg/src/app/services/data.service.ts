@@ -200,6 +200,7 @@ export class DataService {
 
   fetchRelatedList(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean) : Observable<any> {
     return new Observable((observer) => {
+      this.fetchCount++;
       this.apiService.listRelatedObjects(name, uid, attribute, filter, search, sort, false).subscribe({
         next: resp => {
           const rbObjectArray = Object.values(resp.list).map(json => this.receive(json));
@@ -247,7 +248,7 @@ export class DataService {
   }
 
   async finalizeReceipt() {
-    if(!this.runningFinalization) {
+    if(this.fetchCount == 0 && !this.runningFinalization) {
       this.runningFinalization = true;
       let objectnames = Object.keys(this.deferredFetchQueue.objects);
       if(objectnames.length > 0) {

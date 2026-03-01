@@ -1,5 +1,6 @@
 package io.redback.managers.objectmanager;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -172,6 +173,16 @@ public class ObjectManager
 			scriptFactory.setGlobals(globalVariables);
 			scriptFactory.setInRootScope("log", new LoggerJSFunction());
 			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
+			if(config.containsKey("scriptobjects")) {
+				DataList scriptObjects = config.getList("scriptobjects");
+				for(int i = 0; i < scriptObjects.size(); i++) {
+					DataMap scriptObject = scriptObjects.getObject(i);
+					Class<?> cls = Class.forName(scriptObject.getString("class"));
+					Constructor<?> cons = cls.getConstructor();
+					Object jsObj = cons.newInstance();
+					scriptFactory.setInRootScope(scriptObject.getString("name"), jsObj);
+				}
+			}
 			firebus.registerConsumer("_rb_config_rbos_settings_clear", new Consumer() {
 				public void consume(Payload payload) {
 					settingsLoaded = false;
@@ -574,14 +585,14 @@ public class ObjectManager
 		}
 	}
 	
-	public RedbackObject executeObjectFunction(Session session, String objectName, String id, String function, DataMap param) throws RedbackException
+	public RedbackObject executeObjectFunction(Session session, String objectName, String id, String function, Object param) throws RedbackException
 	{
 		RedbackObject object = getObject(session, objectName, id);
 		object.executeFunction(function, param);
 		return object;
 	}
 	
-	public Object executeFunction(Session session, String functionName, DataMap param) throws RedbackException
+	public Object executeFunction(Session session, String functionName, Object param) throws RedbackException
 	{
 		Object ret = null;
 		ScriptConfig scriptCfg = globalScripts.get(session, functionName, false);
@@ -590,7 +601,7 @@ public class ObjectManager
 				DomainScriptLogger domainScriptLogger = null;	
 				try {
 					ScriptContext context = session.getScriptContext().createChild();
-					context.put("param", param);
+					context.put("param", io.redback.utils.js.Converter.convertIn(param));
 					if(scriptCfg.getDomain() != null) {
 						session.pushDomainLock(scriptCfg.getDomain());
 						domainScriptLogger = new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info");

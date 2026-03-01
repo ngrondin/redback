@@ -52,6 +52,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   heightPX: number;
   spreadHeightPX: number;
   spreadMarginPX: number;
+  headerWidthPX: number;
   doDragFilter: boolean = false;
   groupOverlaps: boolean = false;
   overrideAllowPastDrop: boolean = false;
@@ -108,6 +109,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.enhanceDragDataCallback = this.enhanceDragData.bind(this);
     this.spanMS = 259200000;
     this.zoomMS = 172800000;
+    this.headerWidthPX = Math.min(0.88 * this._headerwidth * window.innerWidth, 17 * this._headerwidth);
     for(var cfg of this.seriesConfigs)
       for(var alt of (cfg.labelAlts ?? []))
         this.labelAlts.push({name: alt.name, label: "Use Label '" + alt.name + "'"});
@@ -168,7 +170,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
             this._startDate = new Date(start);
             this.spanMS = ((new Date(end)).getTime() - this._startDate.getTime());
             if(this.zoomMS > this.spanMS) this.zoomMS = this.spanMS;
-            console.log("Retrieved the Gantt start: " + start + "  -  " + end + ", span: " + this.spanMS + ", zoom: " + this.zoomMS);
           }
         }  
         //Retrieve the selection target from any of the datasets
@@ -191,7 +192,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               let ms = Math.min(...starts);
               this._startDate = new Date(ms - (3*60*60*1000));
               this.logService.info("Setting start date to " + this._startDate);
-              this.updateData(true);
+              this.initialFilteringDone = false;
               super.onActivationEvent(event);  
             }
           });
@@ -278,9 +279,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return this._spans;
   }
 
-  get headerWidth() : string {
+  /*get headerWidth() : string {
     return 'min(' + (0.88 * this._headerwidth) + 'vw, ' + (17 * this._headerwidth) + 'px)';
-  }
+  }*/
 
   get extraContext() : any {
     return {
@@ -375,6 +376,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
     if(laneAttributes != null && !(laneAttributes.length == 1 && laneAttributes[0] == 'uid')) {
       let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
+      if(list.length == 0) return null; //Don't fetch if lanes are empty or not loaded yet.
       if(laneAttributes.length == 1) {
         filter[laneAttributes[0]] = {$in: list.map(obj => "'" + obj.get(this.lanesConfig.linkAttributes[0]) + "'")}
       } else {
@@ -789,6 +791,24 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       event.stopPropagation();
     }
     this.dragSelecting = false;
+  }
+
+  public mouseDownHeaderbar(event: any) {
+    let controller = this;
+    let startClientX = event.clientX;
+    let startHeaderWidthPX = this.headerWidthPX;
+    var whileMove = function(event) {
+      let clientDelta = event.clientX - startClientX;
+      controller.headerWidthPX = startHeaderWidthPX + clientDelta;
+    }
+    var endMove = function () {
+      window.removeEventListener('mousemove', whileMove);
+      window.removeEventListener('mouseup', endMove);
+      controller.redraw();
+    };
+    event.stopPropagation(); 
+    window.addEventListener('mousemove', whileMove);
+    window.addEventListener('mouseup', endMove);   
   }
 
   public enhanceDragData(object: RbObject) : any {

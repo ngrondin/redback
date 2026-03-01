@@ -135,15 +135,19 @@
 
 .rb-gantt-laneheads {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex: 0 0 auto;
+    z-index: 1;
 }
 
 .rb-gantt-laneheadscontainer {
     display: flex;
     flex: 1 1 auto;
+    height: fit-content;
     flex-direction: column;
     position: relative;
+    overflow-x: hidden;
+    z-index: 0
 }
 
 .rb-gantt-lanehead {
@@ -192,12 +196,33 @@
     color: var(--light-writing-color);
 }
 
+.rb-gantt-headerbar {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color:lightgray;
+    width: var(--v1px);
+    position: relative;
+    overflow: visible;
+}
+
+.rb-gantt-headerbarthumb {
+    background-color: #bbb;
+    width: var(--v8px);
+    height: var(--v40px);
+    cursor: ew-resize;
+    border-radius: var(--v4px);
+}
+
 .rb-gantt-lanescontainer {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
     position: relative;
     width: min(5.9vw, 113px);
+    z-index: 0;
 }
 
 .rb-gantt-lanes {

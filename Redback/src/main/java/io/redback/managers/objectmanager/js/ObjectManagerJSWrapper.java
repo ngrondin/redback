@@ -200,8 +200,8 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					Object ret = null;
 					if(arguments.length == 1 && arguments[0] instanceof String) {
 						ret = objectManager.executeFunction(session, (String)arguments[0], null);						
-					} else if(arguments.length == 2 && arguments[0] instanceof String && arguments[1] instanceof DataMap) {
-						ret = objectManager.executeFunction(session, (String)arguments[0], (DataMap)(arguments[1]));	
+					} else if(arguments.length == 2 && arguments[0] instanceof String) {
+						ret = objectManager.executeFunction(session, (String)arguments[0], arguments[1]);	
 					}
 					return ret;
 				}

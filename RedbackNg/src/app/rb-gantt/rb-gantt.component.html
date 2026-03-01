@@ -110,13 +110,13 @@
         <div
             *ngFor="let overlaylane of overlays; let i = index"
             class="rb-gantt-overlay-lanehead"
-            [style.width]="headerWidth"
+            [style.width.px]="headerWidthPX"
             (click)="clickOverlayLaneIndex(i)">
             <span>{{overlaylane.label}}</span>
         </div>
         <div
             class="rb-gantt-corner-space"
-            [style.width]="headerWidth">
+            [style.width.px]="headerWidthPX">
         </div>
     </div>
     <div
@@ -163,7 +163,7 @@
     class="rb-gantt-body">
     <div
         class="rb-gantt-laneheads"
-        [style.width]="headerWidth">
+        [style.width.px]="headerWidthPX">
         <div
             class="rb-gantt-laneheadscontainer"
             [style.top.px]="-scrollTop">
@@ -196,6 +196,13 @@
                 </rb-icon>                
             </div>
         </div>
+        <div
+            class="rb-gantt-headerbar"
+            (mousedown)="mouseDownHeaderbar($event)">
+            <div
+                class="rb-gantt-headerbarthumb">
+            </div>
+        </div>         
     </div>
     <rb-scroll
         class="rb-gantt-lanescontainer"

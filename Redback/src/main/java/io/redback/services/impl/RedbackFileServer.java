@@ -368,7 +368,6 @@ public class RedbackFileServer extends FileServer
 
 	public void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException {
 		try {
-			System.out.println("FS accepting put");
 			String tempFilename = UUID.randomUUID().toString();
 			final File file = new File(tempFilename);
 			FileOutputStream fos = new FileOutputStream(file);
@@ -388,6 +387,10 @@ public class RedbackFileServer extends FileServer
 	
 				public void error(Throwable error) {
 					Logger.severe("rb.file.put", "Error putting file", error);
+					try {
+						fos.close();
+						file.delete();
+					} catch(Exception e) {}
 				}
 			});
 		} catch(Exception e) {

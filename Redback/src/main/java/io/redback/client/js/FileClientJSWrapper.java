@@ -82,6 +82,14 @@ public class FileClientJSWrapper extends ObjectJSWrapper {
 					return ret;
 				}
 			};	
+		} else if(key.equals("getFileBytes")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String fileUid = arguments[0].toString();
+					RedbackFile file = fileClient.getFile(session, fileUid);
+					return file.bytes;
+				}
+			};				
 		} else if(key.equals("putFile")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
