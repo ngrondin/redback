@@ -1,7 +1,10 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.pipelines;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.DataStreamNextHandler;
 
 public class MultiStreamPipeline<T> implements DataStreamNextHandler {
 	protected DataStream<T> targetStream;

@@ -17,8 +17,8 @@ import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedDualProvider;
 import io.redback.utils.FunctionInfo;
 import io.redback.utils.stream.DataStream;
-import io.redback.utils.stream.SendingConverter;
-import io.redback.utils.stream.SendingStreamPipeline;
+import io.redback.utils.stream.converters.SendingConverter;
+import io.redback.utils.stream.pipelines.SendingStreamPipeline;
 
 public abstract class ObjectServer extends AuthenticatedDualProvider 
 {

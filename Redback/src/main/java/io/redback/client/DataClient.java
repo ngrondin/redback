@@ -11,8 +11,8 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 import io.redback.utils.stream.DataStream;
-import io.redback.utils.stream.ReceivingConverter;
-import io.redback.utils.stream.ReceivingStreamPipeline;
+import io.redback.utils.stream.converters.ReceivingConverter;
+import io.redback.utils.stream.pipelines.ReceivingStreamPipeline;
 
 public class DataClient extends Client
 {

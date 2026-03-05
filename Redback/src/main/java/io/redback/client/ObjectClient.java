@@ -17,10 +17,10 @@ import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.managers.objectmanager.requests.MultiResponse;
 import io.redback.managers.objectmanager.requests.UpdateRequest;
 import io.redback.security.Session;
-import io.redback.utils.stream.AccumulatingDataStream;
 import io.redback.utils.stream.DataStream;
-import io.redback.utils.stream.ReceivingConverter;
-import io.redback.utils.stream.ReceivingStreamPipeline;
+import io.redback.utils.stream.converters.ReceivingConverter;
+import io.redback.utils.stream.impl.AccumulatingDataStream;
+import io.redback.utils.stream.pipelines.ReceivingStreamPipeline;
 
 public class ObjectClient extends Client
 {

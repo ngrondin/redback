@@ -1,4 +1,4 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.converters;
 
 import io.firebus.data.DataException;
 import io.redback.exceptions.RedbackException;

@@ -1,9 +1,12 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.pipelines;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.logging.Logger;
+import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.DataStreamNextHandler;
+import io.redback.utils.stream.converters.ChunkConverter;
 
 public class ChunkConverterStreamPipeline<TARGET, SOURCE> implements DataStreamNextHandler {
 	protected List<TARGET> targetBuffer;

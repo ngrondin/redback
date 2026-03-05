@@ -1,6 +1,9 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.source;
 
 import java.util.List;
+
+import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.DataStreamNextHandler;
 
 public class StaticStreamSource<T> implements DataStreamNextHandler {
 	protected DataStream<T> dataStream;

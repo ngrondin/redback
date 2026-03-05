@@ -1,10 +1,11 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
+import io.redback.utils.stream.DataStream;
 
 
 public class ChunkProcessingDataStream<T> extends DataStream<T> {

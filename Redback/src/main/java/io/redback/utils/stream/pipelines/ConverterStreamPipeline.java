@@ -1,6 +1,9 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.pipelines;
 
 import io.firebus.logging.Logger;
+import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.DataStreamNextHandler;
+import io.redback.utils.stream.converters.Converter;
 
 public class ConverterStreamPipeline<TARGET, SOURCE> implements DataStreamNextHandler {
 	protected DataStream<TARGET> targetStream;

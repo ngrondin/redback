@@ -64,11 +64,11 @@ import io.redback.utils.TxStore;
 import io.redback.utils.js.FirebusJSWrapper;
 import io.redback.utils.js.LoggerJSFunction;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
-import io.redback.utils.stream.Converter;
-import io.redback.utils.stream.ConverterStreamPipeline;
 import io.redback.utils.stream.DataStream;
-import io.redback.utils.stream.MultiStreamPipeline;
-import io.redback.utils.stream.StaticStreamSource;
+import io.redback.utils.stream.converters.Converter;
+import io.redback.utils.stream.pipelines.ConverterStreamPipeline;
+import io.redback.utils.stream.pipelines.MultiStreamPipeline;
+import io.redback.utils.stream.source.StaticStreamSource;
 
 public class ObjectManager
 {

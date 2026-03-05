@@ -12,8 +12,8 @@ import io.redback.managers.objectmanager.requests.MultiRequest;
 import io.redback.security.Session;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
-import io.redback.utils.stream.ChunkProcessingDataStream;
-import io.redback.utils.stream.ProcessingDataStream;
+import io.redback.utils.stream.impl.ChunkProcessingDataStream;
+import io.redback.utils.stream.impl.ProcessingDataStream;
 
 public class ObjectClientJSWrapper extends ObjectJSWrapper {
 	protected ObjectClient objectClient;

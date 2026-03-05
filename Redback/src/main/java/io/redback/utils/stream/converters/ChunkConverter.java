@@ -1,4 +1,4 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.converters;
 
 import java.util.List;
 

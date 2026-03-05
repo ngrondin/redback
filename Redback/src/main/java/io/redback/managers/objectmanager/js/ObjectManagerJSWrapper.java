@@ -15,9 +15,9 @@ import io.redback.security.Session;
 import io.redback.utils.js.CallableJSWrapper;
 import io.redback.utils.js.Converter;
 import io.redback.utils.js.ObjectJSWrapper;
-import io.redback.utils.stream.AccumulatingDataStream;
-import io.redback.utils.stream.ChunkProcessingDataStream;
-import io.redback.utils.stream.ProcessingDataStream;
+import io.redback.utils.stream.impl.AccumulatingDataStream;
+import io.redback.utils.stream.impl.ChunkProcessingDataStream;
+import io.redback.utils.stream.impl.ProcessingDataStream;
 
 public class ObjectManagerJSWrapper extends ObjectJSWrapper
 {

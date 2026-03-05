@@ -1,7 +1,8 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.impl;
 
 import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
+import io.redback.utils.stream.DataStream;
 
 
 public class ProcessingDataStream<T> extends DataStream<T> {

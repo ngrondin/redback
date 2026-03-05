@@ -1,4 +1,4 @@
-package io.redback.utils.stream;
+package io.redback.utils.stream.pipelines;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,8 @@ import io.firebus.StreamEndpoint;
 import io.firebus.exceptions.FunctionErrorException;
 import io.firebus.interfaces.StreamHandler;
 import io.firebus.logging.Logger;
+import io.redback.utils.stream.DataStream;
+import io.redback.utils.stream.converters.SendingConverter;
 
 public class SendingStreamPipeline<T> implements StreamHandler {
 	protected List<T> buffer;
