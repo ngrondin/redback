@@ -52,6 +52,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   
   export class GanttSeriesConfig extends GanttTimeBasedConfig {
     laneAttributes: string[];
+    laneForeignAttributes: string[];
     labelAttribute: string;
     labelExpression: string;
     labelAlts: any[];
@@ -74,6 +75,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
       this.laneAttributes = json.laneattribute != null ? [json.laneattribute] : json.laneattributes != null ? json.laneattributes : null;
+      this.laneForeignAttributes = json.laneforeignattribute != null ? [json.laneforeignattribute] : json.laneforeignattributes != null ? json.laneforeignattributes : null;
       this.labelAlts = json.labelalts;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
       this.labelExpression = json.labelexpression;
@@ -120,7 +122,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   }
 
   export class GanttLane {
-    linkValues: string[];
+    //linkValues: string[];
     label: string;
     sub: string;
     image: string;
@@ -158,7 +160,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       if(this.config.subAttribute != null) {
         this.sub = obj.get(this.config.subAttribute);
       }   
-      this.linkValues = this.config.linkAttributes.map(la => this.object.get(la));
+      //this.linkValues = this.config.linkAttributes.map(la => this.object.get(la));
     }
   
     setSpreads(s: GanttSpread[]) {
@@ -178,6 +180,12 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
     foregroundSpreads() {
       return this.spreads.filter(s => s.config.isBackground == false);
+    }
+
+    getLinkValuesForSeries(cfg: GanttSeriesConfig) : string[] {
+      let linkAttributes = cfg.laneForeignAttributes || this.config.linkAttributes;
+      let linkValues = linkAttributes.map(la => this.object.get(la));
+      return linkValues;
     }
   }
   

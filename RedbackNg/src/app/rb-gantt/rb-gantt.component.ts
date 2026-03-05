@@ -336,7 +336,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       if(cfg.timeFromAttributes) {
         let startAttribute = cfg.applyDateFilter ? cfg.start.attribute : null;
         let endAttribute = cfg.applyDateFilter ? cfg.end.attribute : null;
-        let filterSort = this.getFilterSort(cfg.dataset, startAttribute, endAttribute, null);
+        let filterSort = this.getFilterSort(cfg.dataset, startAttribute, endAttribute, null, null);
         if(this.datasetgroup != null) {
           fetched = this.datasetgroup.datasets[cfg.dataset].filterSort(filterSort) || fetched;
         } else {
@@ -351,10 +351,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let startAttribute = cfg.applyDateFilter ? cfg.start.attribute : null;
     let endAttribute = cfg.applyDateFilter ? cfg.end?.attribute : null;
     let laneAttributes = cfg.applyLaneFilter ? cfg.laneAttributes : null;
-    return this.getFilterSort(cfg.dataset, startAttribute, endAttribute, laneAttributes);
+    let laneForeignAttributes = cfg.applyLaneFilter ? cfg.laneForeignAttributes || this.lanesConfig.linkAttributes : null;
+    return this.getFilterSort(cfg.dataset, startAttribute, endAttribute, laneAttributes, laneForeignAttributes);
   }
 
-  getFilterSort(datasetId: string, startAttribute: string, endAttribute: string, laneAttributes: string[]) {
+  getFilterSort(datasetId: string, startAttribute: string, endAttribute: string, laneAttributes: string[], laneForeignAttributes: string[]) {
     let dataset = this.datasetgroup != null ? this.datasetgroup.datasets[datasetId] : this.dataset;
     let startDate = this.startDate;
     let endDate = new Date(this.startDate.getTime() + this.spanMS);
@@ -375,16 +376,16 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
     }
     if(laneAttributes != null && !(laneAttributes.length == 1 && laneAttributes[0] == 'uid')) {
-      let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
-      if(list.length == 0) return null; //Don't fetch if lanes are empty or not loaded yet.
+      let laneList: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
+      if(laneList.length == 0) return null; //Don't fetch if lanes are empty or not loaded yet.
       if(laneAttributes.length == 1) {
-        filter[laneAttributes[0]] = {$in: list.map(obj => "'" + obj.get(this.lanesConfig.linkAttributes[0]) + "'")}
+        filter[laneAttributes[0]] = {$in: laneList.map(lane => "'" + lane.get(laneForeignAttributes[0]) + "'")}
       } else {
         var orlist = [];
-        for(var obj of list) {
+        for(var lane of laneList) {
           var clause = {};
           for(var i = 0; i < laneAttributes.length; i++) {
-            clause[laneAttributes[i]] = "'" + obj.get(this.lanesConfig.linkAttributes[i]) + "'";
+            clause[laneAttributes[i]] = "'" + lane.get(laneForeignAttributes[i]) + "'";
           }
           orlist.push(clause);
         }
@@ -451,7 +452,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       let show = laneFilter != null && !this.filterService.applies(laneFilter, obj) ? false : true;
       if(show) {     
         let lane = new GanttLane(obj, this.lanesConfig, this.spreadHeightPX, this.spreadMarginPX);
-        let spreads: GanttSpread[] = this.calcSpreads(lane.linkValues, accHeight);
+        let spreads: GanttSpread[] = this.calcSpreads(lane, accHeight);
         if(this.showEmptyLanes || spreads.filter(s => !s.ghost && !s.config.isBackground).length > 0) {
           lane.setSpreads(spreads);
           this.lanes.push(lane);
@@ -462,9 +463,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.heightPX = accHeight;
   }
 
-  private calcSpreads(laneValues: string[], offsetTop: number) : GanttSpread[] {
+  private calcSpreads(lane: GanttLane, offsetTop: number) : GanttSpread[] {
     let laneSpreads : GanttSpread[] = [];
     for(let cfg of this.seriesConfigs) {
+      let laneValues = lane.getLinkValuesForSeries(cfg);
       let dataset = this.getDatasetForConfig(cfg);
       let show = cfg.show == null || (cfg.show != null && cfg.show(null, dataset, dataset.relatedObject));
       if(show) {
@@ -825,8 +827,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let masterObject: RbObject = arr[0];
     let cfg: GanttSeriesConfig = this.getBestSeriesConfigForObject(masterObject);
     if(cfg.timeFromAttributes == false) return;
+    let laneLinkAttributes = (cfg.laneForeignAttributes || this.lanesConfig.linkAttributes);
+    let laneLinkValue = lane.getLinkValuesForSeries(cfg)
     let masterPreviousLaneValues = cfg.laneAttributes.map(la => masterObject.get(la));
-    let masterChangedLanes = !this.linkValuesMatch(masterPreviousLaneValues, lane.linkValues);
+    let masterChangedLanes = !this.linkValuesMatch(masterPreviousLaneValues, laneLinkValue);
     let masterNewStartMS = null;
     let timeDiffMS = null;
     let tx = new RbObjectTransaction();
@@ -871,13 +875,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
   
       if(masterChangedLanes) {
-        let previousLinkValues = cfg.laneAttributes.map(la => object.get(la));
-        if(!this.linkValuesMatch(previousLinkValues, lane.linkValues)) {
-          for(var i = 0; i < lane.linkValues.length; i++) {
+        let objectPreviousLinkValues = cfg.laneAttributes.map(la => object.get(la));
+        if(!this.linkValuesMatch(objectPreviousLinkValues, laneLinkValue)) {
+          for(var i = 0; i < laneLinkValue.length; i++) {
             let attribute = cfg.laneAttributes[i];
             if(object.canEdit(attribute)) {
-              update[attribute] = lane.linkValues[i];
-              if(lane.config.linkAttributes[i] == "uid") {
+              update[attribute] = laneLinkValue[i];
+              if(laneLinkAttributes[i] == "uid") {
                 related[attribute] = lane.object;
               }
             }
