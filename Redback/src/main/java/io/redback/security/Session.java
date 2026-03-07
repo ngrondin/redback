@@ -188,17 +188,7 @@ public class Session
 	
 	public boolean hasTxStore() 
 	{
-		return !blockTxStore && txStore != null;
-	}
-	
-	public void blockTxStore()
-	{
-		blockTxStore = true;
-	}
-	
-	public void unblockTxStore()
-	{
-		blockTxStore = false;
+		return txStore != null;
 	}
 	
 	public void setData(String k, Object v) 

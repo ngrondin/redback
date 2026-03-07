@@ -74,8 +74,8 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap sort = arguments.length > 2 ? (DataMap)(arguments[2]) : null;
 					String search = arguments.length > 3 ? (String)arguments[3] : null;
 					int chunkSize = arguments.length > 4 ? (Integer)arguments[4] : 50;
-					AccumulatingDataStream<RedbackObject> stream = new AccumulatingDataStream<RedbackObject>();
-					objectManager.streamObjects(session, objectName, filter, search, sort, chunkSize, 0, stream);
+					AccumulatingDataStream<RedbackObject> stream = new AccumulatingDataStream<RedbackObject>(5000);
+					objectManager.streamObjects(session, objectName, filter, search, sort, chunkSize, 0, true, stream);
 					List<RedbackObject> list = stream.getList();
 					return RedbackObjectJSWrapper.convertList(list);
 				}
@@ -87,14 +87,12 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap filter = (DataMap)(arguments[1]);
 					DataMap sort = (DataMap)(arguments[2]);
 					Function callable = (Function)arguments[3];
-					session.blockTxStore();
 					ProcessingDataStream<RedbackObject> stream = new ProcessingDataStream<RedbackObject>(new ProcessingDataStream.Processor<RedbackObject>() {
 						public void process(RedbackObject object) throws Exception {
 							callable.call(new RedbackObjectJSWrapper(object));
 						}});
-					objectManager.streamObjects(session, objectname, filter, null, sort, 50, 0, stream);
+					objectManager.streamObjects(session, objectname, filter, null, sort, 50, 0, false, stream);
 					stream.waitUntilDone();
-					session.unblockTxStore();
 					return null;
 				}
 			};
@@ -106,15 +104,13 @@ public class ObjectManagerJSWrapper extends ObjectJSWrapper
 					DataMap sort = (DataMap)(arguments[2]);
 					long chunkSize = (long)arguments[3];
 					Function callable = (Function)arguments[4];
-					session.blockTxStore();
 					ChunkProcessingDataStream<RedbackObject> stream = new ChunkProcessingDataStream<RedbackObject>((int)chunkSize, new ChunkProcessingDataStream.Processor<RedbackObject>() {
 						public void process(List<RedbackObject> list) throws Exception {
 							List<RedbackObjectJSWrapper> jsList = RedbackObjectJSWrapper.convertList(list);
 							callable.call(jsList);
 						}});
-					objectManager.streamObjects(session, objectname, filter, null, sort, 50, 0, stream);
+					objectManager.streamObjects(session, objectname, filter, null, sort, 50, 0, false, stream);
 					stream.waitUntilDone();
-					session.unblockTxStore();
 					return null;
 				}
 			};				

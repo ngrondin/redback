@@ -62,7 +62,7 @@ public class PackStream extends DataStream<RedbackObject> implements DataStreamN
 		try {
 			if(phase == 1 && i < queries.size()) {
 				DataMap query = queries.get(i++);
-				objectManager.streamObjects(session, query.getString("objectname"), query.getObject("filter"), null, null, -1, 0, this);
+				objectManager.streamObjects(session, query.getString("objectname"), query.getObject("filter"), null, null, -1, 0, false, this);
 			} else {
 				upStream.complete();
 			}

@@ -10,11 +10,25 @@ import io.redback.utils.stream.DataStream;
 
 public class AccumulatingDataStream<T> extends DataStream<T> {
 	protected List<T> list = new ArrayList<T>();
+	protected int max;
 	protected boolean complete = false;
+	protected boolean overflow = false;
+	
+	public AccumulatingDataStream(int m) {
+		max = m;
+	}
 	
 	public void received(T item) {
-		if(item != null)
-			list.add(item);
+		if(item != null) {
+			if(list.size() <= max) {
+				list.add(item);
+			} else {
+				synchronized(this) {
+					overflow = true;
+					this.notify();
+				}
+			}
+		}
 		requestNext();
 	}
 
@@ -32,10 +46,13 @@ public class AccumulatingDataStream<T> extends DataStream<T> {
 	public List<T> getList() throws RedbackException {
 		try {
 			synchronized(this) {
-				if(!complete)
-					this.wait(15000);
-				return list;
+				while(!complete && !overflow) {
+					this.wait(15000);									
+				}
+				if(overflow) 
+					throw new RedbackException("AccumulatingDataStream Overflow");
 			}
+			return list;
 		} catch(Exception e) {
 			throw new RedbackException("Error accumulating stream data", e);
 		}

@@ -58,8 +58,6 @@ public class RedbackObject extends RedbackElement
 			uid = new Value(dbData.getString(config.getUIDDBKey()));
 			domain = new Value(config.isDomainManaged() ? dbData.getString(config.getDomainDBKey()) : "root");
 			key = config.getName() + ":" + uid.getString();
-			if(session.hasTxStore())
-				session.getTxStore().add("object", key, this);
 			Iterator<String> it = config.getAttributeNames().iterator();
 			while(it.hasNext())
 			{
@@ -135,7 +133,7 @@ public class RedbackObject extends RedbackElement
 				}
 
 				key = config.getName() + ":" + uid.getString();
-				if(session.hasTxStore())
+				if(session.hasTxStore()) 
 					session.getTxStore().add("object", key, this);
 				postInitScriptContextUpdate();
 				traceEvent("objectcreate", null, null, null, null);
@@ -416,6 +414,8 @@ public class RedbackObject extends RedbackElement
 						traceEvent("objectupdate", name, actualValue.getObject(), previousValue.getObject(), null);
 					if(attributeConfig.getRelatedObjectConfig() != null && attributeConfig.getRelatedObjectConfig().getReverseAttributeName() != null)
 						updateReverseLinks(name, actualValue, previousValue);
+					if(session.hasTxStore()) 
+						session.getTxStore().add("object", key, this);
 					lastUpdated = System.currentTimeMillis();
 					try {
 						if(attributeConfig.getExpression() == null) 
@@ -550,6 +550,8 @@ public class RedbackObject extends RedbackElement
 				if(attrCfg.hasRelatedObject() && attrCfg.getRelatedObjectConfig().getReverseAttributeName() != null)
 					this.updateReverseLinks(attribute, new Value(null), get(attribute));
 			}
+			if(session.hasTxStore()) 
+				session.getTxStore().add("object", key, this);
 			lastUpdated = System.currentTimeMillis();
 			executeFunction("ondelete", scriptContext);
 		} else {
