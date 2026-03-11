@@ -69,8 +69,16 @@ textarea {
 
 /******** Inputs **********/
 
+
+
+
 .rb-input-margin {
 	margin: var(--v12px) var(--v5px) var(--v12px) var(--v16px)
+}
+
+.rb-switch-fieldheight {
+    align-items: end!important;
+    height: var(--v42px);
 }
 
 .rb-switch-margin {

@@ -1,16 +1,14 @@
 :host {
     display: flex;
     flex-direction: row;
-    align-items: end;
-    height: var(--v42px);
+    align-items: center;
 }
-
 
 .rb-switch-icon {
     flex: 0 0 auto;
 	color: grey;
 	margin-right: var(--v5px);
-    margin-bottom: var(--v2px);
+    /*margin-bottom: var(--v2px);*/
 	font-size: 1.4rem;
     width: var(--v24px);
     height: var(--v24px);
@@ -29,12 +27,13 @@
     flex-grow: 1;
     flex-direction: row;
     align-items: center;
-    margin-bottom: var(--v4px);
+    /*margin-bottom: var(--v4px);*/
+    height: var(--v24px);
 }
 
 .rb-switch-label {
     flex-grow: 1;
-    margin-right: var(--v12px);
+    margin: 0px var(--v6px);
     /*margin-left: var(--v8px);*/
 }
 

@@ -138,7 +138,8 @@
                     [label]="'Union Groups'"
                     [showicon]="false"
                     [labelafter]="true"
-                    [margin]="false">
+                    [margin]="false"
+                    [fieldheight]="false">
                 </rb-switch-input>
             </div>
             <rb-scroll>
@@ -252,6 +253,7 @@
                                             class="rb-filter-builder-multiselect-tablecell-check">    
                                             <rb-switch-input
                                                 [margin]="false"
+                                                [fieldheight]="false"
                                                 [showicon]="false"
                                                 [value]="filterConstruct.val1.includes(option.value)"
                                                 (valueChange)="$event == true ? filterConstruct.val1.push(option.value) : filterConstruct.val1.splice(filterConstruct.val1.indexOf(option.value), 1)"
