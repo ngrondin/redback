@@ -1,5 +1,6 @@
 package io.redback.utils.js;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,10 +71,18 @@ public class Converter {
 	public static Object convertOut(SValue v) throws ScriptException {
 		 if(v instanceof SArray) {
 			SArray a = (SArray)v;
-			DataList list = new DataList();
-			for(int i = 0; i < a.getSize(); i++)
-				list.add(convertOut(a.get(i)));
-			return list;
+            SValue v1 = a.getSize() > 0 ? a.get(0) : null;
+            if(v1 != null && v1 instanceof RedbackObjectJSWrapper) {
+                List<Object> list = new ArrayList<Object>();
+                for(int i = 0; i < a.getSize(); i++)
+                    list.add(convertOut(a.get(i)));
+                return list;    
+            } else {
+            	DataList list = new DataList();
+    			for(int i = 0; i < a.getSize(); i++)
+    				list.add(convertOut(a.get(i)));
+    			return list;
+            }
 		} else if(v instanceof SInternalObject) {
 			SObject o = (SInternalObject)v;
 			DataMap map = new DataMap();

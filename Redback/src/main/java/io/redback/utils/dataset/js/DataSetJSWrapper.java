@@ -24,27 +24,13 @@ public class DataSetJSWrapper  extends ObjectJSWrapper {
 	}
 
 	public Object get(String key) throws RedbackException {
-		if(key.equals("getRowCount")) {
-			return new CallableJSWrapper() {
-				public Object call(Object... arguments) throws RedbackException {
-					return dataset.getRowCount();
-				}
-			};
-		} else if(key.equals("getColumnNames")) {
+		if(key.equals("getColumnNames")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					List<String> cols = Arrays.asList(dataset.getColumnNames());
 					return cols;
 				}
 			};
-		} else if(key.equals("addRow")) {
-			return new CallableJSWrapper() {
-				public Object call(Object... arguments) throws RedbackException {
-					dataset.addRow(arguments);
-					return null;
-				}
-			};
-
 		} else if(key.equals("hasNext")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

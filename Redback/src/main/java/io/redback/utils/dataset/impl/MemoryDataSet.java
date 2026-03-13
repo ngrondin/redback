@@ -1,4 +1,4 @@
-package io.redback.utils.dataset;
+package io.redback.utils.dataset.impl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -7,6 +7,7 @@ import java.util.Set;
 
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.redback.utils.dataset.DataSet;
 
 public class MemoryDataSet implements DataSet {
 	protected String[] headers;

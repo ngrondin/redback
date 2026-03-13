@@ -17,8 +17,8 @@ import io.redback.exceptions.RedbackException;
 import io.redback.services.impl.RedbackUIServer;
 import io.redback.utils.CronExpression;
 import io.redback.utils.StringUtils;
-import io.redback.utils.dataset.CSVDataSet;
 import io.redback.utils.dataset.DataSet;
+import io.redback.utils.dataset.impl.CSVDataSet;
 import io.redback.utils.dataset.js.DataSetJSWrapper;
 
 public class RedbackUtilsJSWrapper extends ObjectJSWrapper

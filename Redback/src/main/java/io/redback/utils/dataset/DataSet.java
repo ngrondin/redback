@@ -5,11 +5,7 @@ import io.firebus.data.DataMap;
 
 public interface DataSet {
 	
-	public int getRowCount();
-	
 	public String[] getColumnNames();
-	
-	public void addRow(Object ...vals);
 	
 	public boolean hasNext();
 	
