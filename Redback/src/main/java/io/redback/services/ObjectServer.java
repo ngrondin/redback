@@ -215,17 +215,26 @@ public abstract class ObjectServer extends AuthenticatedDualProvider
 				for(RedbackAggregate agg: aggregates)
 					respList.add(agg.getDataMap(addRelated));
 				responseData.put("list", respList);
-				return responseData;			}
+				return responseData;			
+			}
 			else if(action.equals("multi")) 
 			{
 				DataList list = requestData.getList("multi");
+				boolean stopOnError = requestData.containsKey("stoponerror") ? requestData.getBoolean("stoponerror") : true;
 				DataMap respMap = new DataMap();
 				for(int i = 0; i < list.size(); i++) {
 					DataMap sub = list.getObject(i);
 					String key = sub.getString("key");
-					DataMap subResp = processServiceRequest(session, sub);
-					if(key != null)
-						respMap.put(key, subResp);
+					try {
+						DataMap subResp = processServiceRequest(session, sub);
+						if(key != null) respMap.put(key, subResp);
+					} catch(Exception e) {
+						if(stopOnError) {
+							throw e;
+						} else {
+							if(key != null) respMap.put(key, new DataMap("error", e.getMessage()));
+						}
+					}
 				}
 				return respMap;
 			}
