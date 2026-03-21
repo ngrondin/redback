@@ -522,13 +522,13 @@ export class LinkConfig {
             let select = null;
             if(datatarget.filter != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
-                let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, null, null, extraContext);
+                let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, null, null, null, extraContext);
                 filter = filterService.unresolveFilter(rfilter);  //Unresolving this as the DataSet will resolve it
                 sort = datatarget.sort;
             } 
             if(datatarget.select != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
-                select = filterService.resolveFilter(datatarget.select, object, dataset, null, null, extraContext);
+                select = filterService.resolveFilter(datatarget.select, object, dataset, null, null, null, extraContext);
             } 
             if(datatarget.filter == null && datatarget.select == null) {
                 if(datatarget.filtersingleobject == false) {

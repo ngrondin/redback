@@ -138,7 +138,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         this.lastCalc = now;
         this._isLoading = true;
         if(this.script != null) {
-          let param = this.filterService.resolveFilter(this.scriptparam, this.selectedObject, this.dataset, null, null, {});
+          let param = this.filterService.resolveFilter(this.scriptparam, this.selectedObject, this.dataset, null, null, null, {});
           this.apiService.executeGlobal(this.script, param).subscribe({
             next: (resp) => {
               if(resp.data != null) this.graphData = resp.data;
@@ -244,7 +244,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
       let filter = null;
 
       if(this.linkfilter != null) {
-        filter = this.filterService.resolveFilter(this.linkfilter, this.selectedObject, this.dataset, null, null, {cat: event.cat, code: event.code});
+        filter = this.filterService.resolveFilter(this.linkfilter, this.selectedObject, this.dataset, null, null, null, {cat: event.cat, code: event.code});
         filter = this.filterService.unresolveFilter(filter);
       } else if(this.aggregateset != null) {
         let dimensionFilter = {};

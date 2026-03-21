@@ -54,7 +54,7 @@ export class ActionService {
       } else if(_action == 'executemaster') {
         return this.executeMaster(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executeglobal') {
-        return this.executeGlobal(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
+        return this.executeGlobal(dataset, datasetgroup, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'clientscript') {
         return this.executeClientScript(dataset, param);
       } else if(_action == 'modal') {
@@ -108,7 +108,7 @@ export class ActionService {
   private calcCreateData(dataset: RbDatasetComponent, param: any, extraContext: any) : any {
     let data = dataset.resolvedFilter;
     if(param != null) {
-      let paramResolvedFilter: any = this.filterService.resolveFilter(param, dataset.selectedObject, dataset, dataset.relatedObject, null, extraContext);
+      let paramResolvedFilter: any = this.filterService.resolveFilter(param, dataset.selectedObject, dataset, dataset.relatedObject, null, null, extraContext);
       data = this.filterService.mergeFilters(data, paramResolvedFilter)
     }
     data = this.filterService.convertToData(data);
@@ -192,7 +192,7 @@ export class ActionService {
   public execute(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       if(dataset != null && dataset.selectedObject != null) {
-        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, extraContext);
+        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, null, extraContext);
         this.dataService.executeObjectFunction(dataset.selectedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));  
       } else {
         observer.complete();
@@ -206,7 +206,7 @@ export class ActionService {
       let doneCount: number = 0;
       dataset.list.forEach((object) => {
         setTimeout(() => {
-          let paramResolved: any = this.filterService.resolveFilter(functionParams, object, dataset, dataset.relatedObject, null, extraContext);
+          let paramResolved: any = this.filterService.resolveFilter(functionParams, object, dataset, dataset.relatedObject, null, null, extraContext);
           this.dataService.executeObjectFunction(object, functionName, paramResolved, timeout).subscribe(
             resp => {
               doneCount++;
@@ -227,7 +227,7 @@ export class ActionService {
   public executeMaster(dataset: RbDatasetComponent, functionName: string, functionParams: string, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       if(dataset != null && dataset.relatedObject != null) {
-        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.relatedObject, dataset, null, null, extraContext);
+        let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.relatedObject, dataset, null, null, null, extraContext);
         this.dataService.executeObjectFunction(dataset.relatedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
       } else {
         observer.complete()
@@ -235,12 +235,14 @@ export class ActionService {
     });
   }
 
-  public executeGlobal(dataset: RbDatasetComponent, functionName: string, functionParams: any, extraContext: any, timeout: number) : Observable<null> {
+  public executeGlobal(dataset: RbDatasetComponent, datasetgroup: RbDatasetGroupComponent, functionName: string, functionParams: any, extraContext: any, timeout: number) : Observable<null> {
     return new Observable((observer) => {
       let paramResolved = {};
       if(functionParams != null) {
         if(dataset != null) {
-          paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, extraContext);  
+          paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, null, extraContext);  
+        } else if(datasetgroup != null) {
+          paramResolved = this.filterService.resolveFilter(functionParams, null, null, null, null, datasetgroup, extraContext);            
         } else {
           paramResolved = functionParams;
         }
@@ -250,6 +252,16 @@ export class ActionService {
           "selecteduid": (dataset.selectedObject != null ? dataset.selectedObject.uid : null),
           "selecteduids": (dataset.selectedObjects.map(o => o.uid))
         }
+      } else if(datasetgroup != null) {
+        paramResolved = Object.keys(datasetgroup.datasets).reduce((acc, key) => {
+          let dataset = datasetgroup.datasets[key];
+          acc[key] = {
+            "filter": dataset.resolvedFilter,
+            "selecteduid": (dataset.selectedObject != null ? dataset.selectedObject.uid : null),
+            "selecteduids": (dataset.selectedObjects.map(o => o.uid))
+          };
+          return acc;
+        }, {})
       }
       this.dataService.executeGlobalFunction(functionName, paramResolved, timeout).subscribe({
         next: (result: any) => {

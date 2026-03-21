@@ -442,7 +442,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let laneFilter: any = null;
     if(this.doDragFilter && this.dragService.isDragging && this.lanesConfig.dragfilter != null) {
       let draggingObject = Array.isArray(this.dragService.data) ? this.dragService.data[0] : this.dragService.data;
-      laneFilter = this.filterService.resolveFilter(this.lanesConfig.dragfilter, draggingObject, null, null);
+      laneFilter = this.filterService.resolveFilter(this.lanesConfig.dragfilter, draggingObject);
     };
     let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
     if(this.lanesConfig.orderAttribute != null) {

@@ -3,6 +3,7 @@ import { RbObject } from 'app/datamodel';
 import { UserprefService } from './userpref.service';
 import { LogService } from './log.service';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
 
 @Injectable({
   providedIn: 'root'
@@ -30,10 +31,10 @@ export class FilterService {
 
 
 
-  public resolveFilter(__inMap: any, obj: RbObject, dataset?: RbDatasetComponent, relatedObject?: RbObject, relatedDataset?: RbDatasetComponent, extraContext?: any) : any {
+  public resolveFilter(__inMap: any, obj: RbObject, dataset?: RbDatasetComponent, relatedObject?: RbObject, relatedDataset?: RbDatasetComponent, datasetgroup?: RbDatasetGroupComponent, extraContext?: any) : any {
     try {
-      let params: string[] = ["obj", "object", "selectedObject", "dataset", "relatedObject", "relatedDataset", "userpref", "uid"];
-      let args: any[] = [obj, obj, obj, dataset, relatedObject, relatedDataset, this.userPrefService];
+      let params: string[] = ["obj", "object", "selectedObject", "dataset", "relatedObject", "relatedDataset", "datasetgroup", "userpref", "uid"];
+      let args: any[] = [obj, obj, obj, dataset, relatedObject, relatedDataset, datasetgroup, this.userPrefService];
 
       if(obj != null && typeof obj != 'undefined') {
         args.push(obj.uid);

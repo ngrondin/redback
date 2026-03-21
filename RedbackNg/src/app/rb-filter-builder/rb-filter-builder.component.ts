@@ -182,7 +182,7 @@ export class RbFilterBuilderComponent implements OnInit {
       if(this.filterConfig.useBaseFilter == true && baseFilter != null) {
         fltr = this.filterService.mergeFilters(fltr, baseFilter);
       }
-      fltr = this.filterService.resolveFilter(fltr, null, null, null);
+      fltr = this.filterService.resolveFilter(fltr, null);
       let objectname = fac.objectName ?? this.searchTarget.getObjectName();
       if(objectname != null) {
         this.dataService.aggregate(objectname, fltr, null, [fac.attribute], [{function:"count", name:"_cnt"}], null, 0, 2000).subscribe({
@@ -199,7 +199,7 @@ export class RbFilterBuilderComponent implements OnInit {
     } else if(fac.type == 'relatedmultiselect') {
       if(fac.objectName != null && fac.valueAttribute != null) {
         let fltr = fac.filter || {};
-        fltr = this.filterService.resolveFilter(fltr, null, null, null);
+        fltr = this.filterService.resolveFilter(fltr, null);
         this.dataService.fetchList(fac.objectName, fltr, null, null, 0, 500, false).subscribe({
           next: (list) => {
             fac.options = list.map(o => ({
