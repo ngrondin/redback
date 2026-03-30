@@ -38,7 +38,6 @@ public class IntegrationManager {
 	protected FileClient fileClient;
 	protected CollectionConfig clientDataCollection;
 	protected ConfigCache<ClientConfig> clientConfigs;
-	protected String publicUrl;
 
 	public IntegrationManager(String n, DataMap config, Firebus fb) throws RedbackException {
 		try {
@@ -63,7 +62,6 @@ public class IntegrationManager {
 				public ClientConfig createConfig(DataMap map) throws Exception {
 					return new ClientConfig(im, map);
 				}});
-			publicUrl = config.getString("publicurl");
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising Integration Manager", e);
 		}
@@ -81,8 +79,8 @@ public class IntegrationManager {
 		clientConfigs.clear();
 	}
 	
-	protected String getRedirectUri(String client) {
-		return publicUrl + "/" + client;
+	protected String getRedirectUri(String host, String clientName) {
+		return host + "/" + name + "/" + clientName;
 	}
 	
 	protected DataMap getClientData(Session session, String name, String domain) throws RedbackException {
@@ -103,10 +101,6 @@ public class IntegrationManager {
 		}
 	}
 
-	protected Client getClient(Session session, String name, String domain) throws RedbackException {
-		return getClient(session, name, domain, true);
-	}
-	
 	protected Client getClient(Session session, String name, String domain, boolean checkToken) throws RedbackException {
 		DataMap clientData = getClientData(session, name, domain);
 		String cconfigName = clientData.getString("client");
@@ -125,8 +119,8 @@ public class IntegrationManager {
 					form.put("client_secret", clientSecret);
 					form.put("grant_type", "refresh_token");
 					form.put("refresh_token", refreshToken);
-					if(config.loginUrl != null) {
-						form.put("redirect_uri", getRedirectUri(config.name));
+					if(config.loginUrl != null && session.getDataAsString("host") != null) {
+						form.put("redirect_uri", getRedirectUri(session.getDataAsString("host"), config.name));
 					}					
 					DataMap refreshResp = gatewayClient.postForm(config.tokenUrl, form);
 					if(refreshResp != null) {
@@ -159,7 +153,7 @@ public class IntegrationManager {
 	}
 	
 	public DataMap get(Session session, String name, String domain, String objectName, String uid, DataMap options) throws RedbackException {
-		Client client = getClient(session, name, domain);
+		Client client = getClient(session, name, domain, true);
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("action", "get");
 		context.put("object", objectName);
@@ -169,7 +163,7 @@ public class IntegrationManager {
 	}
 
 	public List<DataMap> list(Session session, String name, String domain, String objectName, DataMap filter, DataMap options, int page, int pageSize) throws RedbackException {
-		Client client = getClient(session, name, domain);
+		Client client = getClient(session, name, domain, true);
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("action", "list");
 		context.put("object", objectName);
@@ -187,7 +181,7 @@ public class IntegrationManager {
 	}
 
 	public DataMap update(Session session, String name, String domain, String objectName, String uid, DataEntity data, DataMap options) throws RedbackException {
-		Client client = getClient(session, name, domain);
+		Client client = getClient(session, name, domain, true);
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("action", "update");
 		context.put("object", objectName);
@@ -198,7 +192,7 @@ public class IntegrationManager {
 	}
 
 	public DataMap create(Session session, String name, String domain, String objectName, DataEntity data, DataMap options) throws RedbackException {
-		Client client = getClient(session, name, domain);
+		Client client = getClient(session, name, domain, true);
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("action", "create");
 		context.put("object", objectName);
@@ -208,7 +202,7 @@ public class IntegrationManager {
 	}
 
 	public void delete(Session session, String name, String domain, String objectName, String uid, DataMap options) throws RedbackException {
-		Client client = getClient(session, name, domain);
+		Client client = getClient(session, name, domain, true);
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("action", "delete");
 		context.put("object", objectName);
@@ -218,13 +212,15 @@ public class IntegrationManager {
 	}
 	
 	public Object execute(Session session, String name, String domain, String function, DataEntity data, DataMap options) throws RedbackException {
-		Client client = getClient(session, name, domain);
+		Client client = getClient(session, name, domain, true);
 		return client.executeFunction(function, data, options);
 	}
 
 	public String getLoginUrl(Session session, String name, String domain) throws RedbackException {
 		Client client = getClient(session, name, domain, false);
-		String url = client.config.loginUrl + "?response_type=code&redirect_uri=" + getRedirectUri(client.config.name) + "&client_id=" + client.config.clientId +"&scope=" + client.config.scope + (client.config.extraLoginParams != null ? "&" + client.config.extraLoginParams : "") + "&state=" + name;
+		String host = session.getDataAsString("host");
+		String redirect = getRedirectUri(host, client.config.name);
+		String url = client.config.loginUrl + "?response_type=code&redirect_uri=" + redirect + "&client_id=" + client.config.clientId +"&scope=" + client.config.scope + (client.config.extraLoginParams != null ? "&" + client.config.extraLoginParams : "") + "&state=" + name;
 		return url; 
 	}
 
@@ -236,7 +232,7 @@ public class IntegrationManager {
 		form.put("client_secret", client.config.clientSecrect);
 		form.put("grant_type", "authorization_code");
 		form.put("code", code);
-		form.put("redirect_uri", getRedirectUri(client.config.name));
+		form.put("redirect_uri", getRedirectUri((String)session.getDataAsString("host"), client.config.name));
 		DataMap refreshResp = gatewayClient.postForm(client.config.tokenUrl, form);
 		if(refreshResp != null) {
 			DataMap clientData = new DataMap();

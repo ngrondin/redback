@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
+import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
 import io.firebus.script.ScriptContext;
 import io.redback.exceptions.RedbackException;
@@ -199,6 +201,11 @@ public class Session
 	public Object getData(String k) 
 	{
 		return data.get(k);
+	}
+	
+	public String getDataAsString(String k) {
+		DataEntity e = data.get(k);
+		return e instanceof DataLiteral ? ((DataLiteral)e).getString() : e.toString(true);
 	}
 
 	public DataMap getStats() 

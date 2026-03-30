@@ -33,6 +33,7 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 			String action = request.getString("action");
 			String objectName = request.getString("object");
 			DataMap options = request.getObject("options");
+			session.setData("host", payload.metadata.get("scheme") + "://" + payload.metadata.get("host"));
 			if(get != null) 
 			{
 				String code = request.getString("code");
