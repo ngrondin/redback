@@ -16,12 +16,19 @@
     border: 1px solid #ccc;
 }
 
+.rb-button-iconmode {
+    display: flex;
+    flex-direction: row;
+    border: none;
+    border-radius: 50%;;
+    overflow: hidden;
+}
+
 .rb-button-content-wrapper {
     display: flex;
     flex-direction: row;
-    padding: var(--v8px) var(--v12px);
+    padding: var(--v8px) var(--v8px);
     color: var(--primary-dark-color);
-    height: var(--v20px);
     align-items: center;
 }
 
@@ -30,5 +37,6 @@
 }
 
 .rb-button-label {
-    
+    padding: 0 var(--v4px);
+    line-height: var(--v24px);
 }

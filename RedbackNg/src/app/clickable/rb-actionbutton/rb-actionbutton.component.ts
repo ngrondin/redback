@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { RbButtonComponent } from 'app/clickable/rb-button/rb-button';
 import { ActionService } from 'app/services/action.service';
 import { RbDataButtonComponent } from '../abstract/rb-databutton';
+import { ErrorService } from 'app/services/error.service';
 
 @Component({
   selector: 'rb-actionbutton',
@@ -25,7 +26,7 @@ export class RbActionButtonComponent extends RbDataButtonComponent {
     this.running = true;
     this.actionService.action(this.dataset, this.datasetgroup, this.action, this.target, this.param, null, this.confirm, this.timeout).subscribe({
       next: (val) => {},
-      error: (err) => {},
+      error: (err) => {this.running = false},
       complete: () => {this.running = false;}
     })
   }

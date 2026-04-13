@@ -19,13 +19,12 @@ export class ErrorService {
         msg = msg.error != null ? msg.error : msg.text != null ? msg.text: null;
       }
     }
-    if(typeof msg == 'string') {
+    this.showError(typeof msg == 'string' ? msg : "No details");
+  }
+
+  showError(msg: string) {
       this.logService.error(msg);
       let parts = msg.split(" : ");
       this.toastr.error(parts[parts.length - 1], 'Error', {disableTimeOut: true});
-    } else {
-      msg = "No details";
-    }
-      
   }
 }

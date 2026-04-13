@@ -1,6 +1,6 @@
 <div
     #button
-    [class]="'rb-button-frame ' + (!enabled ? ' rb-button-frame-disabled' : '')">
+    [class]="mode == 'iconbutton' ? 'rb-button-iconmode' : ('rb-button-frame ' + (!enabled ? ' rb-button-frame-disabled' : ''))">
     <rb-clickable
         [enabled]="enabled"
         [focus]="focus"
@@ -12,7 +12,7 @@
                 [icon]="icon">
             </rb-icon>
             <span
-                *ngIf="label != null"
+                *ngIf="label != null && mode != 'iconbutton'"
                 class="rb-button-label">
                 {{label}}
             </span>
