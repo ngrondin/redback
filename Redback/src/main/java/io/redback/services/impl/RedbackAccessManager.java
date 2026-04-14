@@ -159,7 +159,7 @@ public class RedbackAccessManager extends AccessManager
 					userConfig.put("attributes", new DataMap(attrClaim.asString()));
 				}
 			}
-			
+
 			if(!userConfig.containsKey("roles") || !userConfig.containsKey("domains") || !userConfig.containsKey("attributes")) {
 				if(hardUsers != null) {
 					for(int i = 0; i < hardUsers.size(); i++)
@@ -174,17 +174,23 @@ public class RedbackAccessManager extends AccessManager
 				}
 				
 				if(idmUserProfileUrl != null && idmClientId != null && idmClientSecret != null && gatewayClient != null) {
-					DataMap reqBody = new DataMap();
-					reqBody.put("user", username);
-					reqBody.put("client_id", idmClientId);
-					reqBody.put("client_secret", idmClientSecret);
-					DataMap resp = gatewayClient.postForm(idmUserProfileUrl, reqBody);
-					userConfig.merge(resp);
+					try {
+						DataMap reqBody = new DataMap();
+						reqBody.put("user", username);
+						reqBody.put("client_id", idmClientId);
+						reqBody.put("client_secret", idmClientSecret);
+						DataMap resp = gatewayClient.postForm(idmUserProfileUrl, reqBody);
+						userConfig.merge(resp);
+					} catch(RedbackException e) {
+						if(e.getErrorCode() != 400) { // User not found in IDM
+							throw e;							
+						} 
+					}
 				}
 			}
 
-			DataList rolesList = userConfig.getList("roles");
-			DataList domainsList = userConfig.getList("domains");
+			DataList rolesList = userConfig.containsKey("roles") ? userConfig.getList("roles") : new DataList();
+			DataList domainsList = userConfig.containsKey("domains") ? userConfig.getList("domains") : new DataList();
 			DataMap rights = new DataMap();
 			for(int i = 0; i < rolesList.size(); i++) {
 				String roleName = rolesList.getString(i);
