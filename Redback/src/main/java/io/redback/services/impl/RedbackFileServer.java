@@ -194,9 +194,11 @@ public class RedbackFileServer extends FileServer
 				for(int i = 0; i < linkData.getList("result").size(); i++) {
 					DataMap linkItem = linkData.getList("result").getObject(i);
 					RedbackFileMetaData filemd = tempMap.get(linkItem.getString("fileuid"));
-					RedbackObjectIdentifier objectIdentifier = new RedbackObjectIdentifier(linkItem.getString("object"), linkItem.getString("objectuid"));
-					if(!map.containsKey(objectIdentifier)) map.put(objectIdentifier, new ArrayList<RedbackFileMetaData>());
-					map.get(objectIdentifier).add(filemd);
+					if(filemd != null) {
+						RedbackObjectIdentifier objectIdentifier = new RedbackObjectIdentifier(linkItem.getString("object"), linkItem.getString("objectuid"));
+						if(!map.containsKey(objectIdentifier)) map.put(objectIdentifier, new ArrayList<RedbackFileMetaData>());
+						map.get(objectIdentifier).add(filemd);
+					}
 				}				
 			}
 		} else {
