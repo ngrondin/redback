@@ -16,11 +16,16 @@
         class="rb-about-container">
         <div
             class="rb-about-item">
-            Client Version: {{clientVersion}}
+            Client: {{clientVersion}}
         </div>
         <div
             class="rb-about-item">
-            Angular Version: {{angularVersion}}
+            Angular: {{angularVersion}}
+        </div>
+        <div
+            *ngFor="let key of serverVersionKeys"
+            class="rb-about-item">
+            {{key}}: {{serverVersions[key]}}
         </div>
         
     </div>

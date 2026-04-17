@@ -261,7 +261,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         if(event.cat != null && event.cat != "" && this.categories.dimension != null) {
           dimensionFilter[this.categories.dimension] = "'" + event.cat + "'";
         }
-        let aggregatesetfilter = this.aggregateset.mergeFilters();
+        let aggregatesetfilter = this.filterService.unresolveFilter(this.aggregateset.resolvedFilter);
         filter = this.filterService.mergeFilters(aggregatesetfilter, dimensionFilter);
       }
       let navEvent: NavigateEvent = {

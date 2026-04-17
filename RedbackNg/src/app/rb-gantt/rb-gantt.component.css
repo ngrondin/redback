@@ -158,6 +158,10 @@
     padding: 0px 0.5vw;
 }
 
+.rb-gantt-lanedragindicator {
+    cursor:grab;
+}
+
 .rb-gantt-laneimage {
     width: var(--v58px);
     height: var(--v58px);

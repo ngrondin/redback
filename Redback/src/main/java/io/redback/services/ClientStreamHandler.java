@@ -229,6 +229,13 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		sendClientData(msg);		
 	}
 	
+	public void sendServerVersions(DataMap versions) {
+		DataMap msg = new DataMap();
+		msg.put("type", "versions");
+		msg.put("versions", versions);
+		sendClientData(msg);
+	}
+	
 	public void sendChatUpdate(DataMap data) {
 		DataMap msg = new DataMap();
 		msg.put("type", "chatupdate");

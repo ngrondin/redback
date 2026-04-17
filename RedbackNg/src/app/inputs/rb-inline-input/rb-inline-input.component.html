@@ -1,0 +1,21 @@
+<div
+    class="rb-inlineinput-frame"
+    (click)="clickInlineInput()">
+    <span
+        *ngIf="!showInput">
+        {{displayvalue}}
+    </span>
+    <input 
+        #input
+        *ngIf="showInput"
+        [class]="'rb-inlineinput-input rb-inlineinput-text-color' + (mandatoryOn ? ' rb-inlineinput-mandatory' : '') + (alertOn ? ' rb-inlineinput-alert' : '') + (flasherOn ? ' rb-inlineinput-text-flash' : '')"
+        [(ngModel)]="displayvalue"
+        (focus)="onFocus($event)"
+        (blur)="onBlur($event)"
+        (keydown)="onKeydown($event)"
+        (keyup)="onKeyup($event)"
+        [readonly]="readonly"
+        autocomplete="off"
+        data-lpignore="true"
+        [type]="inputType">
+</div>

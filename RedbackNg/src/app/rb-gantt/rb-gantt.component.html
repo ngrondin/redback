@@ -1,3 +1,4 @@
+<!--Toolbar-->
 <div
     class="rb-gantt-toolbar">
     <div
@@ -103,6 +104,7 @@
         </rb-clickable>        
     </mat-menu>         
 </div>
+<!--Overlays and track-->
 <div
     class="rb-gantt-header">
     <div
@@ -161,6 +163,7 @@
 </div>
 <div
     class="rb-gantt-body">
+    <!-- Lane Heads -->
     <div
         class="rb-gantt-laneheads"
         [style.width.px]="headerWidthPX">
@@ -173,17 +176,31 @@
                 [style.height.px]="lane.height"
                 [style.cursor]="lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
                 (click)="clickLane(lane)"
+                [rb-drag-object]="lanesConfig.editable == true ? lane : null"
                 (rb-drag-dropzone)="droppedOn($event, lane, true)"
                 [rb-drag-changeform]="getDragSizeForObjectCallback">
+                <rb-icon
+                    class="rb-gantt-lanedragindicator"
+                    *ngIf="lanesConfig.editable == true"
+                    [icon]="'drag_indicator'"
+                    [color]="'lightgrey'">
+                </rb-icon>                
                 <div
                     class="rb-gantt-laneimage"
                     *ngIf="lane.image != null"
                     [style.background-image]="lane.image">
                 </div>                
                 <div
+                    *ngIf="lanesConfig.editable == false"
                     class="rb-gantt-lanelabel">
                     {{lane.label}}
                 </div>
+                <rb-inline-input
+                    *ngIf="lanesConfig.editable == true"
+                    [attribute]="lanesConfig.labelAttribute"
+                    [object]="lane.object"
+                    [margin]="false">
+                </rb-inline-input>
                 <div
                     *ngIf="lane.sub != null"
                     class="rb-gantt-lanesublabel">
@@ -193,8 +210,20 @@
                     *ngIf="lane.icon != null"
                     [class]="'rb-gantt-laneicon'"
                     [icon]="lane.icon">
-                </rb-icon>                
+                </rb-icon>  
+                <rb-iconbutton
+                    *ngIf="lanesConfig.editable == true"
+                    [icon]="'clear'"
+                    [color]="'lightgrey'"
+                    (click)="deleteLane(lane)">
+                </rb-iconbutton>              
             </div>
+            <rb-iconbutton
+                *ngIf="lanesConfig.editable == true"
+                [icon]="'add'"
+                [color]="'lightgrey'"
+                (click)="addLane()">
+            </rb-iconbutton>                
         </div>
         <div
             class="rb-gantt-headerbar"
@@ -204,6 +233,7 @@
             </div>
         </div>         
     </div>
+    <!-- Main body -->
     <rb-scroll
         class="rb-gantt-lanescontainer"
         (rbscroll)="onScroll($event)"

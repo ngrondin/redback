@@ -1,10 +1,14 @@
 package io.redback.managers.clientmanager;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -141,6 +145,25 @@ public class ClientManager extends Thread {
 			diff.put("lastlogin", new Date());
 			dataClient.putData(deviceCollection.getName(), deviceCollection.convertObjectToSpecific(key), deviceCollection.convertObjectToSpecific(diff));
 		}
+	}
+	
+	public DataMap getServerVersions() throws RedbackException {
+		InputStream stream = getClass().getResourceAsStream("/versions.properties");
+		if (stream != null) {
+			Properties props = new Properties();
+			try {
+				props.load(stream);
+				stream.close();
+				DataMap map = new DataMap();
+				Iterator<Object> it = props.keys().asIterator();
+				while(it.hasNext()) {
+					String key = (String)it.next();
+					map.put(key, props.get(key));
+				}
+				return map;
+			} catch (IOException e) { }			
+		}
+		return null;
 	}
 	
 	public DataMap getFlagsForDevice(String deviceId) throws RedbackException {

@@ -752,6 +752,15 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }  
   }
 
+  public deleteLane(lane: GanttLane) {
+    this.dataService.delete(lane.object).subscribe(result => {});
+  }
+
+  public addLane() {
+    var dataset = this.getDatasetForLanesConfig();
+    dataset.create();
+  }
+
   public clickBackground() {
 
   }
@@ -823,6 +832,15 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public droppedOn(event: any, lane: GanttLane, ignoreTime: boolean = false) {
+    let firstObj = Array.isArray(event.data) ? event.data[0] : event.data;
+    if(firstObj instanceof RbObject) {
+      this.objectsDroppedOnLane(event, lane, ignoreTime);
+    } else if(firstObj instanceof GanttLane) {
+      this.laneDroppedOnLane(firstObj, lane);
+    }
+  }
+
+  public objectsDroppedOnLane(event: any, lane: GanttLane, ignoreTime: boolean = false) {
     let arr: RbObject[] = Array.isArray(event.data) ? event.data : [event.data];
     let masterObject: RbObject = arr[0];
     let cfg: GanttSeriesConfig = this.getBestSeriesConfigForObject(masterObject);
@@ -899,10 +917,30 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
     }
     this.blockRecalc = false;
-    if(tx.objects.length > 0) {
+    this.dataService.pushTransactionToServer(tx);
+    //Don't recalc here, the recalc will be done on the end drag event;
+  }
+
+  public laneDroppedOnLane(droppedLane: GanttLane, lane: GanttLane, ignoreTime: boolean = false) {
+    if(this.lanesConfig.orderAttribute != null) {
+      let tx = new RbObjectTransaction();
+      let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
+      list.sort((a, b) => ValueComparator.sort(a.get(this.lanesConfig.orderAttribute), b.get(this.lanesConfig.orderAttribute)));
+      if(list.map(o => o.get(this.lanesConfig.orderAttribute)).filter(v => v == null).length > 0) {
+        for(let i = 0; i < list.length; i++) {
+          list[i].setValue(this.lanesConfig.orderAttribute, i, tx);
+        }
+      }
+
+      let allOrderValues = list.map(o => o.get(this.lanesConfig.orderAttribute));
+      let newList = list.filter(o => o != droppedLane.object);
+      let index = newList.indexOf(lane.object);
+      newList.splice(index, 0, droppedLane.object);
+      for(let i = 0; i < newList.length; i++) {
+        newList[i].setValue(this.lanesConfig.orderAttribute, allOrderValues[i], tx);
+      }
       this.dataService.pushTransactionToServer(tx);
     }
-    //Don't recalc here, the recalc will be done on the end drag event;
   }
 
   public droppedOut(event: any) {
@@ -931,15 +969,22 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   public getDragSizeForObject(data: any) : any {
     let obj = Array.isArray(data) ? data[0] : data;
-    let cfg: GanttSeriesConfig = this.getBestSeriesConfigForObject(obj);
-    if(cfg != null) {
-      let [startMS, endMS, durationMS] = this.getObjectStartEndDur(obj, cfg);
+    if(obj instanceof RbObject) {
+      let cfg: GanttSeriesConfig = this.getBestSeriesConfigForObject(obj);
+      if(cfg != null) {
+        let [startMS, endMS, durationMS] = this.getObjectStartEndDur(obj, cfg);
+        return {
+          x: Math.round(durationMS * this.pxPerMS),
+          y: this.spreadHeightPX
+        };
+      } else {
+        return {x: 100, y: 20};
+      }
+    } else if(obj instanceof GanttLane) {
       return {
-        x: Math.round(durationMS * this.pxPerMS),
-        y: this.spreadHeightPX
+        x: this.headerWidthPX, 
+        y: obj.height
       };
-    } else {
-      return {x: 100, y: 20};
     }
   }
 
@@ -998,6 +1043,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
     }
     return cfg;
+  }
+
+  getDatasetForLanesConfig() {
+      return this.datasetgroup != null ? this.datasetgroup.datasets[this.lanesConfig.dataset] : this.dataset;
   }
 
   linkValuesMatch(a: string[], b: string[]) {

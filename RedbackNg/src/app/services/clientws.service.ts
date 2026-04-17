@@ -81,6 +81,7 @@ export class ClientWSService {
   public filterObjectSubscriptions: any = {};
   public subscriptionRequestPending: boolean = false;
   public connected: boolean = false;
+  public versions: any = {};
   public heartbeatFreq: number = 0;
 
 
@@ -200,6 +201,8 @@ export class ClientWSService {
         this.logService.debug("WSS Received serverkeepalive")
       } else if(msg.type == 'chatupdate') {
         this.chatObservers.forEach((observer) => observer.next(msg.data));
+      } else if(msg.type == 'versions') {
+        this.versions = msg.versions;
       } else if(msg.type == 'clientpong') {
         this.clientPingObservers.forEach((observer) => observer.next(msg.username))
       }

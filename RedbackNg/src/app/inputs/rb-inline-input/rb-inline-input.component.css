@@ -1,0 +1,46 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.rb-inlineinput-frame {
+    display: flex;
+    flex: 1 1 auto;
+    border-width: var(--v1px);
+    border-style: solid;
+    border-color: transparent;
+    height: var(--v28px);
+    align-items: center;
+    padding: 0px var(--v3px);
+    overflow: hidden;
+}
+
+.rb-inlineinput-frame span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rb-inlineinput-frame:hover {
+    border-color: lightgrey;
+}
+
+.rb-inlineinput-input {
+    display: flex;
+    font-size: 1rem;
+    border-width: 0px;
+    background-color: transparent;
+    outline: none;
+    z-index: 1;
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rb-inlineinput-alert {
+    color: red!important;
+    font-weight: 450;
+    border-bottom-color: #c00;
+}

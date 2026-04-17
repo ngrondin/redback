@@ -70,6 +70,7 @@ import { RbColorInputComponent } from "app/inputs/rb-color-input/rb-color-input.
 import { RbIconComponent } from "app/rb-icon/rb-icon.component";
 import { RbRepeaterComponent } from "app/rb-repeater/rb-repeater.component";
 import { RbPivotTableComponent } from "app/graphs/rb-pivot-table/rb-pivot-table.component";
+import { RbInlineInputComponent } from "app/inputs/rb-inline-input/rb-inline-input.component";
 
 export const componentRegistry = {
     "dataset": RbDatasetComponent,
@@ -85,6 +86,7 @@ export const componentRegistry = {
     "relatedinput": RbRelatedInputComponent,
     "multirelatedinput": RbMultiRelatedInputComponent,
     "hierarchyinput": RbHierarchyInputComponent,
+    "inlineinput": RbInlineInputComponent,
     "list3": RbListComponent,
     "list4": RbList4Component,
     "tree": RbTreeComponent,

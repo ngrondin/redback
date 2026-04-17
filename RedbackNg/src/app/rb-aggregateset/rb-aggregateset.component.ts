@@ -17,6 +17,7 @@ export class RbAggregatesetComponent extends RbSetComponent {
   @Input('metrics') metrics: any;
   @Input('base') base: any;
   
+  public resolvedFilter: any = null;
   public aggregates: RbAggregate[] = [];
   public userSearch: string;
   public userFilter: any;
@@ -100,8 +101,8 @@ export class RbAggregatesetComponent extends RbSetComponent {
 
   public fetchNextPage() {
     if(this.master == null || (this.master != null && this.master.relationship && this.relatedObject != null)) {
-      const filter = this.filterService.resolveFilter(this.mergeFilters(), this.relatedObject, this.dataset, this.dataset?.relatedObject);
-      this.dataService.aggregate(this.objectname, filter, null, this.tuple, this.metrics, this.base, this.nextPage).subscribe(
+      this.resolvedFilter = this.filterService.resolveFilter(this.mergeFilters(), this.relatedObject, this.dataset, this.dataset?.relatedObject);
+      this.dataService.aggregate(this.objectname, this.resolvedFilter, null, this.tuple, this.metrics, this.base, this.nextPage).subscribe(
         data => this.setAggregates(data)
       );
       this._isLoading = true;
