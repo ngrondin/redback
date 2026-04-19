@@ -8,8 +8,9 @@ import java.util.Set;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.utils.dataset.DataSet;
+import io.redback.utils.dataset.RandomAccessDataSet;
 
-public class MemoryDataSet implements DataSet {
+public class MemoryDataSet implements RandomAccessDataSet {
 	protected String[] headers;
 	protected List<Object[]> data;
 	protected int cur;
@@ -51,9 +52,13 @@ public class MemoryDataSet implements DataSet {
 	}
 	
 	public DataMap getRow() {
+		return getRow(cur);
+	}
+	
+	public DataMap getRow(int rowIndex) {
 		DataMap row = new DataMap();
 		for(int i = 0; i < headers.length; i++)
-			row.put(headers[i], data.get(cur)[i]);
+			row.put(headers[i], data.get(rowIndex)[i]);
 		return row;
 	}
 

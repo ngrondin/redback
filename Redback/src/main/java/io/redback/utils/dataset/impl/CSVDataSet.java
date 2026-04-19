@@ -1,11 +1,14 @@
 package io.redback.utils.dataset.impl;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 import io.redback.utils.StringUtils;
 
 public class CSVDataSet extends MemoryDataSet {
-
 	
 	public CSVDataSet(String str) {
     	String strm = str.replaceAll("\r", "").replaceAll(String.valueOf((char)65279), "");
@@ -84,5 +87,10 @@ public class CSVDataSet extends MemoryDataSet {
 			}
 		}
 		cur = 0;
+	}
+	
+	public static CSVDataSet fromFile(String path) throws IOException {
+		String content = new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
+		return new CSVDataSet(content);
 	}
 }
