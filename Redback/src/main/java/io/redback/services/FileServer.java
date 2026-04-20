@@ -83,7 +83,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 					
 					if(action.equals("get"))
 					{
-						RedbackFile file = getFile(request.getString("fileuid"));
+						RedbackFile file = getFile(session, request.getString("fileuid"));
 						response = new Payload(file.bytes);
 						response.metadata.put("mime", file.metadata.mime);
 						response.metadata.put("filename", file.metadata.fileName);
@@ -93,7 +93,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 					} 
 					else if(action.equals("getmetadata")) 
 					{
-						RedbackFileMetaData filemd = this.getMetadata(request.getString("fileuid"));
+						RedbackFileMetaData filemd = this.getMetadata(session, request.getString("fileuid"));
 						response = new Payload(filemd.getDataMap(addThumbnail));
 						response.metadata.put("mime", "application/json");
 					} 
@@ -218,9 +218,9 @@ public abstract class FileServer extends AuthenticatedDualProvider
 		return 10000;
 	}
 
-	public abstract RedbackFile getFile(String fileUid) throws RedbackException;
+	public abstract RedbackFile getFile(Session session, String fileUid) throws RedbackException;
 
-	public abstract RedbackFileMetaData getMetadata(String fileUid) throws RedbackException;
+	public abstract RedbackFileMetaData getMetadata(Session session, String fileUid) throws RedbackException;
 
 	public abstract List<RedbackFileMetaData> listFilesFor(Session session, String object, String uid, int page, int pageSize) throws RedbackException;
 	
@@ -232,6 +232,8 @@ public abstract class FileServer extends AuthenticatedDualProvider
 
 	public abstract RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException;
 	
+	public abstract void deleteFile(Session session, String fileUid) throws RedbackException;
+
 	public abstract RedbackFileMetaData acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException;
 	
 	public abstract void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException;

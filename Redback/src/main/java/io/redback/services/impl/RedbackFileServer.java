@@ -20,12 +20,15 @@ import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.exceptions.FunctionErrorException;
+import io.firebus.exceptions.FunctionTimeoutException;
 import io.firebus.logging.Logger;
 import io.firebus.utils.StreamPipe;
 import io.firebus.utils.StreamReceiver;
 import io.firebus.utils.StreamSender;
 import io.redback.client.DataClient;
 import io.redback.exceptions.RedbackException;
+import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.security.Session;
 import io.redback.services.FileServer;
 import io.redback.utils.CollectionConfig;
@@ -64,25 +67,22 @@ public class RedbackFileServer extends FileServer
 			linkCollection = new CollectionConfig(dataClient, config.getObject("linkcollection"), "rbfs_link");
 	}
 
-	public RedbackFileMetaData getMetadata(String fileUid) throws RedbackException
+	public RedbackFileMetaData getMetadata(Session session, String fileUid) throws RedbackException
 	{
 		try {
 			DataMap resp = dataClient.getData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), fileUid), null);
-			if(resp.getList("result").size() > 0)
-			{
+			if(resp.getList("result").size() > 0) {
 				DataMap fileInfo = fileCollection.convertObjectToCanonical(resp.getList("result").getObject(0));
 				return new RedbackFileMetaData(fileInfo);
-			}
-			else
-			{
-				throw new RedbackException("File not found " + fileUid);
+			} else {
+				throw new RedbackInvalidRequestException("File not found " + fileUid);
 			}
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
 		}
 	}
 	
-	public RedbackFileMetaData getMetadata(File file) throws RedbackException
+	public RedbackFileMetaData getMetadata(Session session, File file) throws RedbackException
 	{
 		try {
 			RedbackFileMetaData filemd = null;
@@ -117,10 +117,10 @@ public class RedbackFileServer extends FileServer
 		}
 	}
 	
-	public RedbackFile getFile(String fileUid) throws RedbackException
+	public RedbackFile getFile(Session session, String fileUid) throws RedbackException
 	{
 		try {
-			RedbackFileMetaData filemd = getMetadata(fileUid);
+			RedbackFileMetaData filemd = getMetadata(session, fileUid);
 			if(defaultFileStream != null) {
 				StreamEndpoint sep = getFileStreamEndpoint(fileUid);
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -132,9 +132,11 @@ public class RedbackFileServer extends FileServer
 			} else {
 				return null;
 			}
-		} catch(Exception e) {
+		} catch(FunctionErrorException | FunctionTimeoutException e) {
+			if(e instanceof FunctionErrorException && ((FunctionErrorException)e).getErrorCode() >= 400 && ((FunctionErrorException)e).getErrorCode() < 500)
+				this.deleteFile(null, fileUid);
 			throw new RedbackException("Error getting file", e);
-		}
+		} 		
 	}
 	
 	public StreamEndpoint getFileStreamEndpoint(String fileUid) throws RedbackException
@@ -145,9 +147,11 @@ public class RedbackFileServer extends FileServer
 			streamReq.put("filename", fileUid);
 			StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(streamReq), 5000);
 			return sep;
-		} catch(Exception e) {
+		} catch(FunctionErrorException | FunctionTimeoutException e) {
+			if(e instanceof FunctionErrorException && ((FunctionErrorException)e).getErrorCode() >= 400 && ((FunctionErrorException)e).getErrorCode() < 500)
+				this.deleteFile(null, fileUid);
 			throw new RedbackException("Error getting file stream", e);
-		}
+		} 
 	}
 	
 	public List<RedbackFileMetaData> listFilesFor(Session session, String object, String uid, int page, int pageSize) throws RedbackException {
@@ -230,7 +234,7 @@ public class RedbackFileServer extends FileServer
 	public RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, File file) throws RedbackException
 	{
 		try {
-			RedbackFileMetaData filemd = getMetadata(file);
+			RedbackFileMetaData filemd = getMetadata(session, file);
 		    if(filemd.fileuid == null) 
 		    {
 				filemd.fileuid = getNewId(session);
@@ -338,6 +342,19 @@ public class RedbackFileServer extends FileServer
 		
 	}
 	
+	public void deleteFile(Session session, String fileUid) throws RedbackException {
+		try {
+			if(linkCollection != null) {
+				DataMap key = new DataMap(linkCollection.getField("fileuid"), fileUid);
+				dataClient.deleteData(linkCollection.getName(), key);
+			} 
+			DataMap key = new DataMap(fileCollection.getField("fileuid"), fileUid);
+			dataClient.deleteData(fileCollection.getName(), key);			
+		} catch(Exception e) {
+			throw new RedbackException("Error deleting file");
+		}		
+	}
+	
 	public String getNewId(Session session) throws RedbackException {
 		try {
 			Payload idRequest = new Payload(idName);
@@ -361,7 +378,7 @@ public class RedbackFileServer extends FileServer
 	}
 
 	public RedbackFileMetaData acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException {
-		RedbackFileMetaData md = getMetadata(fileUid);
+		RedbackFileMetaData md = getMetadata(session, fileUid);
 		StreamEndpoint fileSep = getFileStreamEndpoint(fileUid);
 		new StreamPipe(streamEndpoint, fileSep);	
 		new StreamPipe(fileSep, streamEndpoint);
@@ -415,6 +432,8 @@ public class RedbackFileServer extends FileServer
 		}
 
 	}
+
+
 
 
 }
