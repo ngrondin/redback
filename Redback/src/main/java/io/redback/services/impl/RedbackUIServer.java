@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -36,6 +35,7 @@ import io.redback.utils.ConfigCache;
 import io.redback.utils.HTML;
 import io.redback.utils.HTMLMetaParser;
 import io.redback.utils.KeyEscaper;
+import io.redback.utils.ResolvedRights;
 import io.redback.utils.StringUtils;
 import io.redback.utils.js.HTMLJSWrapper;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
@@ -182,8 +182,8 @@ public class RedbackUIServer extends UIServer
 				return menu;
 			}
 		} else if(menuConfig.getString("type").equals("menulink")) {
-			DataMap viewConfig = getViewConfigIfCanRead(session, menuConfig.getString("view"));
-			if(viewConfig != null) {
+			DataMap viewConfig = getViewConfig(session, menuConfig.getString("view"));
+			if(viewConfig != null && getViewRights(session, viewConfig).read) {
 				return new DataMap("type", menuConfig.getString("type"), "view", menuConfig.getString("view"), "icon", menuConfig.getString("icon"), "label", menuConfig.getString("label"));
 			}
 		}
@@ -192,22 +192,18 @@ public class RedbackUIServer extends UIServer
 
 	protected DataMap getView(Session session, String viewName)
 	{
-		return getView(session, viewName, null);
-	}
-
-	protected DataMap getView(Session session, String viewName, Map<String, Object> context) 
-	{
 		DataMap view = new DataMap();
 		try {
-			DataMap viewConfig = getViewConfigIfCanRead(session, viewName);
-			if(viewConfig != null) {
+			DataMap viewConfig = getViewConfig(session, viewName);
+			ResolvedRights rights = getViewRights(session, viewConfig);
+			if(rights.read) {
 				view.put("label", viewConfig.getString("label"));
 				view.put("onload", viewConfig.getString("onload"));
-				view.put("content", getViewContent(session, viewConfig, context));	
+				view.put("content", getViewContent(session, viewConfig, rights));	
 				if(traceCollection != null && dataClient != null) {
 					dataClient.publishData(traceCollection.getName(), 
-							traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
-							traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", null, "action", "getview", "view", viewName)));
+						traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
+						traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", null, "action", "getview", "view", viewName)));
 				}
 			} else {
 				view.put("error", "No access to view " + viewName);
@@ -219,33 +215,54 @@ public class RedbackUIServer extends UIServer
 		return view;
 	}
 	
-	protected DataMap getViewConfigIfCanRead(Session session, String name) throws RedbackException {
-		DataMap viewConfig = viewConfigs.get(session, name, false);
+
+	protected DataList getViewContent(Session session, String viewName, ResolvedRights parentRights) throws RedbackException 
+	{
+		DataMap viewConfig = getViewConfig(session, viewName);
 		if(viewConfig != null) {
+			ResolvedRights rights = getViewRights(session, viewConfig).and(parentRights);
+			return getViewContent(session, viewConfig, rights);
+		} else { 
+			return new DataList();
+		}
+	}
+	
+	protected DataMap getViewConfig(Session session, String name) throws RedbackException {
+		DataMap viewConfig = viewConfigs.get(session, name, false);
+		return viewConfig;
+		/*if(viewConfig != null) {
 			String accessCat = viewConfig.getString("accesscat");
 			if(session.getUserProfile().canRead("rb.views." + name) || session.getUserProfile().canRead("rb.accesscat." + accessCat)) {
 				return viewConfig;
 			} 
 		}
-		return null;
-	}
-
-	protected DataList getViewContent(Session session, String viewName, Map<String, Object> context) throws RedbackException 
-	{
-		DataMap viewConfig = getViewConfigIfCanRead(session, viewName);
-		if(viewConfig != null)
-			return getViewContent(session, viewConfig, context);
-		else 
-			return new DataList();
+		return null;*/
 	}
 	
-	protected DataList getViewContent(Session session, DataMap viewConfig, Map<String, Object> context) throws RedbackException 
+	protected ResolvedRights getViewRights(Session session, DataMap viewConfig) throws RedbackException
+	{
+		String viewName = viewConfig.getString("name");
+		String rightKey = "rb.views." + viewName;
+		boolean read = session.getUserProfile().canRead(rightKey);
+		boolean write = session.getUserProfile().canWrite(rightKey);
+		boolean execute = session.getUserProfile().canExecute(rightKey);
+		String accessCat = viewConfig.getString("accesscat");
+		if(accessCat != null) {
+			String accessCatRightKey = "rb.accesscat." + accessCat;
+			read = read || session.getUserProfile().canRead(accessCatRightKey);
+			write = write || session.getUserProfile().canWrite(accessCatRightKey);
+			execute = execute || session.getUserProfile().canExecute(accessCatRightKey);
+		}
+		return new ResolvedRights(read, write, execute);
+	}
+
+	protected DataList getViewContent(Session session, DataMap viewConfig, ResolvedRights rights) throws RedbackException 
 	{
 		DataList viewContent = new DataList();
 		DataList contentList = viewConfig.getList("content");
 		if(contentList != null) {
 			for(int i = 0; i < contentList.size(); i++) {
-				DataMap viewPart = generateViewPartFromComponentConfig(session, contentList.getObject(i), context); 
+				DataMap viewPart = generateViewPartFromComponentConfig(session, contentList.getObject(i), rights); 
 				if(viewPart != null)
 					viewContent.add(viewPart);
 			}			
@@ -253,12 +270,24 @@ public class RedbackUIServer extends UIServer
 		return viewContent;
 	}
 
-	protected DataMap generateViewPartFromComponentConfig(Session session, DataMap componentConfig, Map<String, Object> context) throws RedbackException
+	protected DataMap generateViewPartFromComponentConfig(Session session, DataMap componentConfig, ResolvedRights parentRights) throws RedbackException
 	{
 		DataMap viewPart = new DataMap();
 		String type = componentConfig.getString("type");
-		String accessCat = componentConfig.getString("accesscat");
-		if(type != null && !type.equals("view") && (accessCat == null || (accessCat != null && session.getUserProfile().canRead("rb.accesscat." + accessCat))))
+		ResolvedRights rights = parentRights;
+		if(componentConfig.containsKey("accesscat")) {
+			String accessCatRightKey = "rb.accesscat." + componentConfig.getString("accesscat");
+			rights.read = rights.read & session.getUserProfile().canRead(accessCatRightKey);
+			rights.write = rights.write & session.getUserProfile().canWrite(accessCatRightKey);
+			rights.execute = rights.execute & session.getUserProfile().canExecute(accessCatRightKey);
+		}
+		boolean requirementsMet = type != null && !type.equals("view") && rights.read;
+		if(componentConfig.containsKey("requirewrite") && componentConfig.getBoolean("requirewrite") == true) 
+			requirementsMet = requirementsMet && rights.write;
+		if(componentConfig.containsKey("requireexecute") && componentConfig.getBoolean("requireexecute") == true) 
+			requirementsMet = requirementsMet && rights.execute;
+		
+		if(requirementsMet)
 		{
 			Iterator<String> it = componentConfig.keySet().iterator();
 			while(it.hasNext()) {
@@ -278,12 +307,12 @@ public class RedbackUIServer extends UIServer
 					DataMap childComponentConfig = componentContentList.getObject(i);
 					String childType = childComponentConfig.getString("type");
 					if(childType.equals("view")) {
-						DataList childViewContent = getViewContent(session, childComponentConfig.getString("name"), context);
+						DataList childViewContent = getViewContent(session, childComponentConfig.getString("name"), rights);
 						for(int j = 0; j < childViewContent.size(); j++)
 							viewPartContentList.add(childViewContent.getObject(j));
 						
 					} else {
-						DataMap childViewPart = generateViewPartFromComponentConfig(session, childComponentConfig, context);
+						DataMap childViewPart = generateViewPartFromComponentConfig(session, childComponentConfig, rights);
 						if(childViewPart != null)
 							viewPartContentList.add(childViewPart);
 					}
@@ -376,8 +405,8 @@ public class RedbackUIServer extends UIServer
 	
 	protected byte[] getImage(Session session, String name) throws RedbackException {
 		try {
-			byte[] bytes = null;
-			Reader reader = null;
+			//byte[] bytes = null;
+			//Reader reader = null;
 			InputStream is = null;
 			if(devpath != null)
 			{
