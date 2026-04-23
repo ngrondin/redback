@@ -46,6 +46,7 @@
 .rb-gantt-corner {
     display: flex;
     flex-direction: column;
+    border-bottom: 1px solid lightgray;
 }
 
 .rb-gantt-overlay-lanehead {
@@ -154,7 +155,9 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    border-top: var(--v1px) solid lightgray;
+    /*border-bottom-width: var(--v1px);*/
+    border-bottom-style: solid;
+    border-bottom-color: lightgray;
     padding: 0px 0.5vw;
 }
 
@@ -251,9 +254,9 @@
     display: flex;
     flex-direction: row;
     position: relative;
-    border-top-width: var(--v1px);
-    border-top-style: solid;
-    border-top-color: transparent;
+    /*border-bottom-width: var(--v1px);*/
+    border-bottom-style: solid;
+    border-bottom-color: transparent;
 
 }
 
@@ -355,12 +358,12 @@
 }
 
 .rb-gantt-lanecolor1 {
-    border-top-color: lightgray;
+    border-bottom-color: lightgray;
     background-color: #e8e8e8c0;
 }
 
 .rb-gantt-lanecolor2 {
-    border-top-color: lightgray;
+    border-bottom-color: lightgray;
     background-color: #e0e0e0c0;
 }
 

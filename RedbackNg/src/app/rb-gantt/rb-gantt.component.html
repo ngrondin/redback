@@ -174,6 +174,7 @@
                 *ngFor="let lane of lanes; let i = index"
                 [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
                 [style.height.px]="lane.height"
+                [style.borderBottomWidth.px]="borderWidthPX"
                 [style.cursor]="lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
                 (click)="clickLane(lane)"
                 [rb-drag-object]="lanesConfig.editable == true ? lane : null"
@@ -253,7 +254,8 @@
                     *ngFor="let lane of lanes; let i = index"
                     [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
                     [style.height.px]="lane.height"
-                    [style.width.px]="widthPX">
+                    [style.width.px]="widthPX"
+                    [style.borderBottomWidth.px]="borderWidthPX">
                     <div
                         *ngFor="let spread of lane.backgroundSpreads()"
                         [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
@@ -299,6 +301,7 @@
                     [class]="'rb-gantt-lane'"
                     [style.height.px]="lane.height"
                     [style.width.px]="widthPX"
+                    [style.borderBottomWidth.px]="borderWidthPX"
                     (rb-drag-dropzone)="droppedOn($event, lane)"
                     [rb-drag-changeform]="getDragSizeForObjectCallback">
                     <div
@@ -332,7 +335,9 @@
                 class="rb-gantt-laneslayer rb-gantt-canvaslayer">
                 <canvas
                     #canvas
-                    class="rb-gantt-canvas">
+                    class="rb-gantt-canvas"
+                    [width]="widthPX"
+                    [height]="heightPX">
                 </canvas>
             </div>
             <div

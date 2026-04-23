@@ -52,6 +52,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   heightPX: number;
   spreadHeightPX: number;
   spreadMarginPX: number;
+  borderWidthPX: number;
   headerWidthPX: number;
   doDragFilter: boolean = false;
   groupOverlaps: boolean = false;
@@ -422,7 +423,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.pxPerMS = clientWidthPX / this.zoomMS
     this.widthPX = this.spanMS * this.pxPerMS;
     this.spreadHeightPX = Math.min(0.0167 * window.innerWidth, 32);
-    this.spreadMarginPX = Math.min(0.0041 * window.innerWidth, 8);
+    this.spreadMarginPX = Math.min(0.004175 * window.innerWidth, 8);
+    this.borderWidthPX = Math.min(0.000521875 * window.innerWidth, 1);
     this.markMajorIntervalMS = 3600000;
     this.markMinorIntervalMS = 900000;
     while(this.markMajorIntervalMS * this.pxPerMS < 50) {
@@ -435,7 +437,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   private calcLanes() {
     let accHeight = 0;
-    let laneHeight = this.spreadHeightPX + (2*this.spreadMarginPX);
+    //let laneHeight = this.spreadHeightPX + (2*this.spreadMarginPX);
     this.lanes = [];
     this.spreads = [];
     this.spreadMap = {};
@@ -456,7 +458,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         if(this.showEmptyLanes || spreads.filter(s => !s.ghost && !s.config.isBackground).length > 0) {
           lane.setSpreads(spreads);
           this.lanes.push(lane);
-          accHeight += lane.height + 1; 
+          accHeight += lane.height + this.borderWidthPX; 
         }
       }
     }
@@ -545,23 +547,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   private calcDependencies() {
     for(var spread of this.spreads) {
-      let deps = spread.config.dependencyAttribute != null ? spread.object.get(spread.config.dependencyAttribute) : null;
-      if(deps != null) {
-        for(var uid of Object.keys(deps)) {
-          let depSpread = this.spreadMap[`${spread.object.objectname}.${uid}`];
-          if(depSpread != null) {
-            let rt = deps[uid];
-            if(rt == 'DU') {
-              spread.dependencies.push({spread: depSpread, type: GanttDependencyType.DU});
-              depSpread.dependencies.push({spread: spread, type: GanttDependencyType.DU});
-            } else if(rt == 'AF') {
-              spread.dependencies.push({spread: depSpread, type: GanttDependencyType.SF});
-              depSpread.dependencies.push({spread: spread, type: GanttDependencyType.FS});
-            } else if(rt == 'SS') {
-              spread.dependencies.push({spread: depSpread, type: GanttDependencyType.SS});
-              depSpread.dependencies.push({spread: spread, type: GanttDependencyType.SS});
-            }
-          }
+      for(var dep of this.getDependenciesForObject(spread.object, spread.config)) {
+        let depSpread = this.spreadMap[`${dep.object.objectname}.${dep.object.uid}`]
+        if(depSpread != null) {
+          spread.dependencies.push({spread: depSpread, type: dep.type});
+          depSpread.dependencies.push({spread: spread, type: dep.type == GanttDependencyType.SF ? GanttDependencyType.FS : dep.type});
         }
       }
     }
@@ -855,14 +845,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
     if(!ignoreTime) {
       let pos = this.getXYRelativeToTarget(event.mouseEvent, "rb-gantt-lane");
-      let left = pos.x - event.offset.x;
-      let spreadsToSnapToEnd = lane.spreads.filter(s => s.object != masterObject && s.end - 15 < left && s.end + 15 > left).sort((s1, s2) => Math.abs(s1.end - left) - Math.abs(s2.end - left));
-      if(spreadsToSnapToEnd.length > 0) {
-        let [ststStartMS, ststEndMS, ststDurMS] = this.getObjectStartEndDur(spreadsToSnapToEnd[0].object, this.getSeriesConfigForObject(spreadsToSnapToEnd[0].object));
-        masterNewStartMS = ststEndMS;      
-      } else {
-        masterNewStartMS = Math.round(this.startMS + (left / this.pxPerMS));
-      }
+      let left = this.snap(masterObject, pos.x - event.offset.x, lane);
+      masterNewStartMS = Math.round(this.startMS + (left / this.pxPerMS));
       let prevStartStr = masterObject.get(cfg.start.attribute);
       if(prevStartStr != null) {
         timeDiffMS = Math.round(masterNewStartMS - (new Date(prevStartStr)).getTime());
@@ -967,6 +951,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
   }
 
+  public onScroll(event) {
+    this.scrollLeft = event.target.scrollLeft;
+    this.scrollTop = event.target.scrollTop;
+  }
+
+  //Utils
+
   public getDragSizeForObject(data: any) : any {
     let obj = Array.isArray(data) ? data[0] : data;
     if(obj instanceof RbObject) {
@@ -987,13 +978,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       };
     }
   }
-
-  public onScroll(event) {
-    this.scrollLeft = event.target.scrollLeft;
-    this.scrollTop = event.target.scrollTop;
-  }
-
-  //Utils
 
   private getStartAndWidthPX(obj: RbObject, cfg: GanttTimeBasedConfig) {
     let [startMS, endMS, durationMS] = this.getObjectStartEndDur(obj, cfg);
@@ -1034,6 +1018,32 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return [startMS, endMS, durationMS];
   }
 
+  snap(object: RbObject, droppedLeft: number, lane: GanttLane) {
+    let left = null;
+    let dist = null;
+    let config = this.getBestSeriesConfigForObject(object);
+    for(const dep of this.getDependenciesForObject(object, config)) {
+      let depSpread = this.spreadMap[`${dep.object.objectname}.${dep.object.uid}`]
+      if(depSpread != null) {
+        if(dep.type == GanttDependencyType.SS || dep.type == GanttDependencyType.DU) {
+          let d = Math.abs(depSpread.start - droppedLeft);
+          if(d < 15 && (dist == null || (dist != null && d < dist))) {
+            left = depSpread.start;
+            dist = d;
+          }
+        }
+      }
+    }
+    for(const otherSpread of lane.spreads) {
+      let d = Math.abs(otherSpread.end - droppedLeft);
+      if(d < 15 && (dist == null || (dist != null && d < dist))) {
+        left = otherSpread.end;
+        dist = d;
+      }
+    }
+    return left != null ? left : droppedLeft;
+  }
+
   getBestSeriesConfigForObject(object: RbObject) : GanttSeriesConfig {
     let cfg: GanttSeriesConfig = this.getSeriesConfigForObject(object);
     if(cfg == null) { // This will happen when a drag comes from an external dataset
@@ -1047,6 +1057,29 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   getDatasetForLanesConfig() {
       return this.datasetgroup != null ? this.datasetgroup.datasets[this.lanesConfig.dataset] : this.dataset;
+  }
+
+  getDependenciesForObject(object: RbObject, config?: GanttSeriesConfig) {
+    let ret = [];
+    if(config == null) config = this.getBestSeriesConfigForObject(object);
+    let deps = config.dependencyAttribute != null ? object.get(config.dependencyAttribute) : null;
+    if(deps != null) {
+      let dataset = this.getDatasetForConfig(config);
+      for(var uid of Object.keys(deps)) {
+        let depObject = dataset.list.find(o => o.uid == uid);
+        if(depObject != null) {
+          let rt = deps[uid];
+          if(rt == 'DU') {
+            ret.push({object: depObject, type: GanttDependencyType.DU});
+          } else if(rt == 'AF') {
+            ret.push({object: depObject, type: GanttDependencyType.SF});
+          } else if(rt == 'SS') {
+            ret.push({object: depObject, type: GanttDependencyType.SS});
+          }
+        }
+      }
+    }
+    return ret;
   }
 
   linkValuesMatch(a: string[], b: string[]) {
