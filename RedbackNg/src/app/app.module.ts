@@ -167,6 +167,7 @@ import { RbRepeaterComponent } from './rb-repeater/rb-repeater.component';
 import { RbPivotTableComponent } from './graphs/rb-pivot-table/rb-pivot-table.component';
 import { RbAboutComponent } from './rb-about/rb-about.component';
 import { RbInlineInputComponent } from './inputs/rb-inline-input/rb-inline-input.component';
+import { RbTextConsoleComponent } from './rb-text-console/rb-text-console.component';
 
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -342,7 +343,8 @@ window.redback = window.redback || {};
         RbRepeaterComponent,
         RbPivotTableComponent,
         RbAboutComponent,
-        RbInlineInputComponent
+        RbInlineInputComponent,
+        RbTextConsoleComponent
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

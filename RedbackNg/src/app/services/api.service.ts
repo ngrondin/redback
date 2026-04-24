@@ -53,14 +53,14 @@ export class ApiService {
   }
 
 
-  private requestService(service: string, request: any, timeout?: number) {
+  private requestService(service: string, request: any, timeout?: number, tag?: string) {
     return new Observable<any>((observer) => {
       if(service != null && service != "") {
         this.securityService.checkToken().subscribe({
           error: (err) => observer.error(err),
           complete: () => {
             if(this.canStream()) {
-              this.clientWSService.requestService(service, request, timeout).subscribe({
+              this.clientWSService.requestService(service, request, timeout, tag).subscribe({
                 next: (value) => observer.next(value),
                 error: (err) => observer.error(err),
                 complete: () => observer.complete()
@@ -84,13 +84,13 @@ export class ApiService {
     });
   }
 
-  private requestStream(service: string, request: any, autoNext: boolean) {
+  private requestStream(service: string, request: any, autoNext: boolean, tag?: string) {
     return new Observable<any>((observer) => {
       if(this.canStream() && service != null && service != "") {
         this.securityService.checkToken().subscribe({
           error: (err) => observer.error(err),
           complete: () => {
-            this.clientWSService.requestStream(service, request, autoNext).subscribe({
+            this.clientWSService.requestStream(service, request, autoNext, tag).subscribe({
               next: (value) => observer.next(value),
               error: (err) => observer.error(err),
               complete: () => observer.complete()   
@@ -153,7 +153,7 @@ export class ApiService {
         addvalidation: true
       }
     };
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, "get." + name);
   }
 
   listObjects(name: string, filter: any, search: string, sort: any, page: number, pageSize: number, addRelated: boolean): Observable<any> {
@@ -170,10 +170,10 @@ export class ApiService {
       }
     };
     if(search != null) req['search'] = search;
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, "list." + name);
   }
 
-  streamObjects(name: string, filter: any, search: string, sort: any/*, addRelated: boolean*/): Observable<any> {
+  streamObjects(name: string, filter: any, search: string, sort: any): Observable<any> {
     const req = {
       action: 'list',
       object: name,
@@ -182,12 +182,11 @@ export class ApiService {
       chunksize: 250,
       advance: 1,
       options: {
-        //addrelated: addRelated,
         addvalidation: true
       }
     };
     if(search != null) req['search'] = search;
-    return this.requestStream(this.objectService, req, false);
+    return this.requestStream(this.objectService, req, false, "stream." + name);
   }
 
   listRelatedObjects(name: string, uid: string, attribute: string, filter: any, search: string, sort: any, addRelated: boolean): Observable<any> {
@@ -204,7 +203,7 @@ export class ApiService {
       }
     };
     if(search != null) req['search'] = search;
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, "listrel." + name);
   }
 
   listScripts(category: string): Observable<any> {
@@ -226,7 +225,7 @@ export class ApiService {
         addvalidation: true
       }
     };
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, "update." + name);
   }
 
   createObject(name: string, uid: string, data: any) {
@@ -242,7 +241,7 @@ export class ApiService {
     if(uid != null) {
       req['uid'] = uid;
     }
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, "create." + name);
   }
 
   deleteObject(name: string, uid: string) {
@@ -251,7 +250,7 @@ export class ApiService {
       object: name,
       uid: uid
     };
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, "delete." + name);
   }
 
   countObjects(name: string, filter: any, search: string): Observable<any> {
@@ -261,7 +260,7 @@ export class ApiService {
       filter: filter,
     };
     if(search != null) req['search'] = search;
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, "count." + name);
   }  
 
   executeObject(name: string, uid: string, func: string, param?: any, timeout?: number) {
@@ -276,7 +275,7 @@ export class ApiService {
       }
     };
     if(param != null) req["param"] = param;
-    return this.requestService(this.objectService, req, timeout);
+    return this.requestService(this.objectService, req, timeout, "execute." + name);
   }
   
   executeGlobal(func: string, param: any, timeout?: number) {
@@ -285,7 +284,7 @@ export class ApiService {
       function: func,
       param: param
     };
-    return this.requestService(this.objectService, req, timeout);
+    return this.requestService(this.objectService, req, timeout, "executeglobal." + func);
   }
 
   aggregateObjects(name: string, filter: any, search: string, tuple: any, metrics: any, base: any, page: number = 0, pageSize: number = 50): Observable<any> {
@@ -303,7 +302,7 @@ export class ApiService {
       }
     };
     if(base != null) req["base"] = base;
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, "aggregate." + name);
   }
 
   exportObjects(name: string, filter: any, search: string): Observable<any> {
@@ -330,7 +329,7 @@ export class ApiService {
       action: 'multi',
       multi: reqs
     };
-    return this.requestService(this.objectService, req);
+    return this.requestService(this.objectService, req, undefined, 'multi');
   }
 
   /******* Files *********/

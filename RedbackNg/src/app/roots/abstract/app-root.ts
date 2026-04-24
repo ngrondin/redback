@@ -38,6 +38,7 @@ export abstract class AppRootComponent implements OnInit {
     
     title: string = "Welcome";
     showNLBox: boolean = false;
+    showWSConsole: boolean = false;
     //showDrawer: boolean = false;
     
     configService : ConfigService;
@@ -144,6 +145,10 @@ export abstract class AppRootComponent implements OnInit {
 
     toggleNLBox() {
       this.showNLBox = !this.showNLBox;
+    }
+
+    toggleWSConsole() {
+      this.showWSConsole = !this.showWSConsole;
     }
 
     closeRightDrawer() {

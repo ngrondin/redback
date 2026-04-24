@@ -61,6 +61,21 @@ export class Upload {
   }
 }
 
+class Request {
+  observer: Observer<any>;
+  service: string;
+  tag: string;
+  start: number;
+  end: number;
+
+  constructor(o: Observer<any>, s: string, t: string) {
+    this.observer = o;
+    this.service = s;
+    this.tag = t;
+    this.start = (new Date()).getTime();
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -74,8 +89,8 @@ export class ClientWSService {
   public notificationObservers: Observer<any>[] = [];
   public chatObservers: Observer<any>[] = [];
   public clientPingObservers: Observer<String>[] = [];
-  public requestObservers: any = {};
-  public streamObservers: any = {};
+  public requests: {[key: string]: Request} = {};
+  public requestHistory: Request[] = [];
   public uploads: any = {};
   public uniqueObjectSubscriptions: any[] = [];
   public filterObjectSubscriptions: any = {};
@@ -162,32 +177,33 @@ export class ClientWSService {
       } else if(msg.type == 'notification') {
         this.notificationObservers.forEach((observer) => observer.next(msg.notification))
       } else if(msg.type == 'serviceresponse' || msg.type == 'serviceerror') {
-        let observer: Observer<any> = this.requestObservers[msg.requid];
-        if(observer != null) {
+        let request = this.requests[msg.requid];
+        if(request != null) {
           if(msg.type == 'serviceresponse') {
-            observer.next(msg.response);
-            observer.complete();
+            request.observer.next(msg.response);
+            request.observer.complete();
           } else if(msg.type == 'serviceerror') {
-            observer.error(msg.error);
+            request.observer.error(msg.error);
           }
-          delete this.requestObservers[msg.requid];
+          delete this.requests[msg.requid];
         }
       } else if(msg.type == 'streamdata' || msg.type == 'streamcomplete' || msg.type == 'streamerror') {
-        let observer: Observer<any> = this.streamObservers[msg.requid];
-        if(observer != null) {
+        let request = this.requests[msg.requid];
+        if(request != null) {
           if(msg.type == 'streamdata') {
-            observer.next(msg.data);
+            request.observer.next(msg.data);
             this.websocket.next({
               type:"streamnext",
               requid: msg.requid
             });
           } else {
             if(msg.type == 'streamcomplete') {
-              observer.complete();
+              request.observer.complete();
             } else if(msg.type == 'streamerror') {
-              observer.error(msg.error);
+              request.observer.error(msg.error);
             }
-            delete this.streamObservers[msg.requid];
+            this.addtoHistory(request);
+            delete this.requests[msg.requid];
           }
         }
       } else if(msg.type == 'uploadctl') {
@@ -231,9 +247,6 @@ export class ClientWSService {
     if(this.heartbeatFreq > 0) {
       this.websocket.next({type:"heartbeat"});
       setTimeout(() => {
-        this.logService.debug("WSS Heartbeat send, pending requests");
-        let pending = Object.keys(this.requestObservers).length;
-        if(pending > 0) this.logService.info("Pending WS Requests: " + pending); 
         this.heartbeat();        
       }, this.heartbeatFreq);
     }
@@ -304,6 +317,10 @@ export class ClientWSService {
     return this.connected;
   }
 
+  getPendingRequestCount(): number { 
+    return Object.keys(this.requests).length;
+  }
+
   subscribeToUniqueObjectUpdate(objectname: string, uid: string) {
     this.uniqueObjectSubscriptions.push({objectname: objectname, uid: uid, sent:false});
     //this.logService.debug(`ClientWS: Subscribing to object ${objectname}:${uid}`);
@@ -324,11 +341,19 @@ export class ClientWSService {
     }
   }
 
-  requestService(service: string, request: any, timeout: number) : Observable<any> {
+  addtoHistory(req: Request) {
+    let now = (new Date()).getTime();
+    let mark = now - 60000;
+    this.requestHistory = this.requestHistory.filter(r => r.start > mark);
+    req.end = now;
+    this.requestHistory.push(req);
+  }
+
+  requestService(service: string, request: any, timeout: number, tag?: string) : Observable<any> {
     if(this.connected) {
       return new Observable((observer) => {
         let ruid = UUID.UUID();
-        this.requestObservers[ruid] = observer;
+        this.requests[ruid] = new Request(observer, service, tag);
         this.websocket.next({
           type:"servicerequest",
           servicename: service,
@@ -342,11 +367,11 @@ export class ClientWSService {
     }
   }
 
-  requestStream(service: string, request: any, autoNext: boolean) : Observable<any> {
+  requestStream(service: string, request: any, autoNext: boolean, tag?: string) : Observable<any> {
     if(this.connected) {
       return new Observable((observer) => {
         let ruid = UUID.UUID();
-        this.streamObservers[ruid] = observer;
+        this.requests[ruid] = new Request(observer, service, tag);
         this.websocket.next({
           type:"streamrequest",
           servicename: service,
@@ -389,6 +414,12 @@ export class ClientWSService {
         token: token
       });
     }
+  }
+
+  get consoletext(): string[] {
+    let ret = this.requestHistory.map(r => r.service + (r.tag != null ? " [" + r.tag + "]: " : ":") + (r.start % 100000) + " -> " + (r.end) % 100000 + " (" + (r.end - r.start) + "ms)");
+    ret = ret.concat(ret, Object.values(this.requests).map(r => r.service + (r.tag != null ? " [" + r.tag + "]: " : ":") + (r.start % 100000)));
+    return ret;
   }
 }
 
