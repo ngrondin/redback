@@ -280,10 +280,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return this._spans;
   }
 
-  /*get headerWidth() : string {
-    return 'min(' + (0.88 * this._headerwidth) + 'vw, ' + (17 * this._headerwidth) + 'px)';
-  }*/
-
   get extraContext() : any {
     return {
       ganttstart: this.startDate.toISOString(), 
@@ -403,10 +399,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.calcOverlayLanes();
     this.calcMarks();
     this.logService.debug("Gantt " + this.id + ": calc, lanes: " + this.lanes.length + ", overlays: " + this.overlays.length + ", spreads: " + this.spreads.length + ", dragging: " + this.spreads.filter(s => s.dragging == true).length);
-    if(this.canvas.element.nativeElement.width != this.widthPX || this.canvas.element.nativeElement.height != this.heightPX) {
+    /*if(this.canvas.element.nativeElement.width != this.widthPX || this.canvas.element.nativeElement.height != this.heightPX) {
       this.canvas.element.nativeElement.width = this.widthPX;
       this.canvas.element.nativeElement.height = this.heightPX;
-    }
+    }*/
     this.drawCanvas();
     if(this.doFocus == true) {
       this.focus();
@@ -437,7 +433,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   private calcLanes() {
     let accHeight = 0;
-    //let laneHeight = this.spreadHeightPX + (2*this.spreadMarginPX);
     this.lanes = [];
     this.spreads = [];
     this.spreadMap = {};
@@ -479,8 +474,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           if(this.linkValuesMatch(objLinkValues, laneValues)) {
             let [startPX, widthPX] = this.getStartAndWidthPX(obj, cfg);
             if(startPX != null && widthPX != null) {
+              let endPX = startPX + widthPX;
               let label = null;
-              let loading = false;
+              //let loading = false;
               if(cfg.labelAttribute != null) {
                 label = obj.get(cfg.labelAttribute); 
               } else if(cfg.labelExpression != null) {
@@ -488,7 +484,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
               }
               if(label == RELATED_LOADING) {
                 label = "...";
-                loading = true;
+                //loading = true;
               }
               let labelWidth = this.graphctx.measureText(label).width;
               if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
@@ -509,7 +505,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                 do {
                   hasOverlap = false;
                   for(var os of laneSpreads) {
-                    if(!os.config.isBackground && startPX < os.start + os.width && os.start < startPX + widthPX && sublane == os.sublane) {
+                    if(!os.config.isBackground && startPX < os.end && os.start < endPX && sublane == os.sublane) {
                       hasOverlap = true;
                     }
                   }
@@ -845,8 +841,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
     if(!ignoreTime) {
       let pos = this.getXYRelativeToTarget(event.mouseEvent, "rb-gantt-lane");
-      let left = this.snap(masterObject, pos.x - event.offset.x, lane);
-      masterNewStartMS = Math.round(this.startMS + (left / this.pxPerMS));
+      masterNewStartMS = this.snap(masterObject, pos.x - event.offset.x, lane);
       let prevStartStr = masterObject.get(cfg.start.attribute);
       if(prevStartStr != null) {
         timeDiffMS = Math.round(masterNewStartMS - (new Date(prevStartStr)).getTime());
@@ -1019,29 +1014,26 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   snap(object: RbObject, droppedLeft: number, lane: GanttLane) {
-    let left = null;
-    let dist = null;
+    let candidates = [];
     let config = this.getBestSeriesConfigForObject(object);
     for(const dep of this.getDependenciesForObject(object, config)) {
       let depSpread = this.spreadMap[`${dep.object.objectname}.${dep.object.uid}`]
-      if(depSpread != null) {
-        if(dep.type == GanttDependencyType.SS || dep.type == GanttDependencyType.DU) {
-          let d = Math.abs(depSpread.start - droppedLeft);
-          if(d < 15 && (dist == null || (dist != null && d < dist))) {
-            left = depSpread.start;
-            dist = d;
-          }
-        }
+      if(depSpread != null && dep.type == GanttDependencyType.SS || dep.type == GanttDependencyType.DU) {
+        let [startMS, endMS, durMS] = this.getObjectStartEndDur(depSpread.object, depSpread.config);
+        candidates.push({d: Math.abs(depSpread.start - droppedLeft), t: startMS});        
       }
     }
-    for(const otherSpread of lane.spreads) {
-      let d = Math.abs(otherSpread.end - droppedLeft);
-      if(d < 15 && (dist == null || (dist != null && d < dist))) {
-        left = otherSpread.end;
-        dist = d;
-      }
+    for(const otherSpread of lane.spreads.filter(s => s.object != object)) {
+      let [startMS, endMS, durMS] = this.getObjectStartEndDur(otherSpread.object, otherSpread.config);
+      candidates.push({d: Math.abs(otherSpread.end - droppedLeft), t: endMS});        
     }
-    return left != null ? left : droppedLeft;
+    candidates = candidates.filter(c => c.d < 15);
+    candidates.sort((a, b) => a.d - b.d);
+    if(candidates.length > 0) {
+      return candidates[0].t;
+    } else {
+      return Math.round(this.startMS + (droppedLeft / this.pxPerMS));
+    }
   }
 
   getBestSeriesConfigForObject(object: RbObject) : GanttSeriesConfig {

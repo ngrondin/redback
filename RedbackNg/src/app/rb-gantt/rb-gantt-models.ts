@@ -1,5 +1,5 @@
 import { SeriesConfig } from "app/abstract/rb-datacalc";
-import { RbObject } from "app/datamodel";
+import { RbObject, RELATED_LOADING } from "app/datamodel";
 import { ColorConfig, Evaluator, LinkConfig, VAEConfig } from "app/helpers";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
