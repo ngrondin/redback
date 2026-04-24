@@ -306,13 +306,13 @@ public class RedbackAccessManager extends AccessManager
 					for(int i = 0; i < ops.length; i++) {
 						DataEntity toOp = toRights.get(ops[i]);
 						DataEntity fromOp = fromRights.get(ops[i]);
-						if(toOp instanceof DataLiteral && ((DataLiteral)toOp).getBoolean() == false || fromOp instanceof DataLiteral && ((DataLiteral)fromOp).getBoolean() == false) {
-							toRights.put(ops[i], false);
+						if(toOp instanceof DataLiteral && ((DataLiteral)toOp).getBoolean() == true || fromOp instanceof DataLiteral && ((DataLiteral)fromOp).getBoolean() == true) {
+							toRights.put(ops[i], true);
 						} else if(toOp instanceof DataMap && fromOp instanceof DataMap) {
 							((DataMap)toOp).merge((DataMap)fromOp);
 							canBeShort = false;
-						} else if(toOp instanceof DataLiteral && ((DataLiteral)toOp).getBoolean() == true && fromOp instanceof DataLiteral && ((DataLiteral)fromOp).getBoolean() == true) {
-							toRights.put(ops[i], true);
+						} else if(toOp instanceof DataLiteral && ((DataLiteral)toOp).getBoolean() == false && fromOp instanceof DataLiteral && ((DataLiteral)fromOp).getBoolean() == false) {
+							toRights.put(ops[i], false);
 						} else {
 							toRights.put(ops[i], fromOp);
 							canBeShort = false;
