@@ -67,12 +67,29 @@ class Request {
   tag: string;
   start: number;
   end: number;
+  lastevent: number;
+  waitingserver: number;
+  waitingclient: number;
 
   constructor(o: Observer<any>, s: string, t: string) {
     this.observer = o;
     this.service = s;
     this.tag = t;
     this.start = (new Date()).getTime();
+    this.lastevent = this.start;
+    this.waitingserver = 0;
+    this.waitingclient = 0;
+  }
+
+  event(type: string) {
+    let now = (new Date()).getTime();
+    let dur = now - this.lastevent;
+    if(type == 'receiveserver') {
+      this.waitingserver += dur;
+    } else if(type == 'completeclient') {
+      this.waitingclient += dur;
+    }
+    this.lastevent = now;
   }
 }
 
@@ -179,19 +196,24 @@ export class ClientWSService {
       } else if(msg.type == 'serviceresponse' || msg.type == 'serviceerror') {
         let request = this.requests[msg.requid];
         if(request != null) {
+          request.event("receiveserver");
           if(msg.type == 'serviceresponse') {
             request.observer.next(msg.response);
             request.observer.complete();
+            request.event("completeclient");
           } else if(msg.type == 'serviceerror') {
             request.observer.error(msg.error);
           }
+          this.addtoHistory(request);
           delete this.requests[msg.requid];
         }
       } else if(msg.type == 'streamdata' || msg.type == 'streamcomplete' || msg.type == 'streamerror') {
         let request = this.requests[msg.requid];
         if(request != null) {
+          request.event("receiveserver");
           if(msg.type == 'streamdata') {
             request.observer.next(msg.data);
+            request.event("completeclient");
             this.websocket.next({
               type:"streamnext",
               requid: msg.requid
@@ -417,7 +439,7 @@ export class ClientWSService {
   }
 
   get consoletext(): string[] {
-    let ret = this.requestHistory.map(r => r.service + (r.tag != null ? " [" + r.tag + "]: " : ":") + (r.start % 100000) + " -> " + (r.end) % 100000 + " (" + (r.end - r.start) + "ms)");
+    let ret = this.requestHistory.map(r => r.service + (r.tag != null ? " [" + r.tag + "]: " : ":") + (r.start % 100000) + " -> " + (r.end) % 100000 + " (" + (r.end - r.start) + "ms, " + r.waitingserver + "s/" + r.waitingclient + "c)");
     ret = ret.concat(ret, Object.values(this.requests).map(r => r.service + (r.tag != null ? " [" + r.tag + "]: " : ":") + (r.start % 100000)));
     return ret;
   }
