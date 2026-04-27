@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+//import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { UUID } from 'angular2-uuid';
 import { Platform } from '@angular/cdk/platform';
 import * as pako from 'pako';
@@ -14,12 +14,12 @@ export class Upload {
   chunkSize = 262144;
   file: File;
   observer: Observer<any>;
-  websocket: WebSocketSubject<any>;
+  send: Function;
 
-  constructor(f: File, o: Observer<any>, w: WebSocketSubject<any>) {
+  constructor(f: File, o: Observer<any>, s: Function) {
     this.file = f;
     this.observer = o;
-    this.websocket = w;
+    this.send = s;
   }
 
   receiveCtl(msg: any) : boolean {
@@ -30,7 +30,7 @@ export class Upload {
         var chunk = this.file.slice(start, start + this.chunkSize);
         const reader = new FileReader();
         reader.onload = () => {
-          this.websocket.next({
+          this.send({
             type: "upload",
             uploaduid: this.uploaduid,
             sequence: this.chunkSeq,
@@ -38,12 +38,11 @@ export class Upload {
           });
           this.chunkSeq++;  
           const prog = Math.round(100 * start / this.file.size);
-          //("File upload progress " + prog);
           this.observer.next({type:"progress", value: prog});
         }
         reader.readAsDataURL(chunk);
       } else {
-        this.websocket.next({
+        this.send({
           type: "upload",
           uploaduid: this.uploaduid,
           complete: true
@@ -100,12 +99,13 @@ export class ClientWSService {
   public deviceId: string;
   public baseUrl: string;
   public path: string;
-  public websocket: WebSocketSubject<any>;
+  public websocket: any;
   public stateObservers: Observer<boolean>[] = [];
   public objectUpdateObservers: Observer<any>[] = [];
   public notificationObservers: Observer<any>[] = [];
   public chatObservers: Observer<any>[] = [];
   public clientPingObservers: Observer<String>[] = [];
+  public requestQueue: Request[] = [];
   public requests: {[key: string]: Request} = {};
   public requestHistory: Request[] = [];
   public uploads: any = {};
@@ -115,7 +115,6 @@ export class ClientWSService {
   public connected: boolean = false;
   public versions: any = {};
   public heartbeatFreq: number = 0;
-
 
   constructor(
     private securityService: SecurityService,
@@ -139,13 +138,6 @@ export class ClientWSService {
 
   initWebsocket() : Observable<boolean> {
     if(this.path != null && this.path != "" && this.websocket == null) {
-      this.websocket = webSocket({
-        url: this.url,
-        binaryType: "arraybuffer",
-        deserializer: msg => msg.data,
-        openObserver: {next: () => this.opened()},
-        closeObserver: {next: (closeEvent) => this.closed(closeEvent)}
-      });
       this.initWebsocketSubscribe();
     }
     return this.getStateObservable();
@@ -154,10 +146,11 @@ export class ClientWSService {
   initWebsocketSubscribe() {
     this.securityService.checkToken().subscribe({
       next:() => {
-        this.websocket.subscribe({
-          next: (msg) => this.receive(msg),
-          error: (err) => this.error(err)
-        });
+        this.websocket = new WebSocket(this.url);
+        this.websocket.addEventListener("open", () => this.opened());
+        this.websocket.addEventListener("message", (event) => this.receive(event));
+        this.websocket.addEventListener("error", (event) => this.error(event));
+        this.websocket.addEventListener("close", (event) => this.closed(event));
       },
       error: (err) => {
         setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
@@ -170,7 +163,7 @@ export class ClientWSService {
     this.heartbeat();
   }
 
-  receive(data: any) {
+  async receive(event: any) {
     try {
       if(this.connected == false) {
         this.connected = true;
@@ -180,12 +173,14 @@ export class ClientWSService {
         this.heartbeatFreq = 10000;
         this.stateObservers.forEach((observer) => observer.next(true));
       }
-
+      let data = event.data;
       let msg = null;
       if(typeof data == 'string') {
         msg = JSON.parse(data);
       } else {
-        let str = pako.ungzip(data, { to: 'string' });
+        const arrayBuffer = await data.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        let str = pako.ungzip(uint8Array, { to: 'string' });
         msg = JSON.parse(str);
       }
 
@@ -214,7 +209,7 @@ export class ClientWSService {
           if(msg.type == 'streamdata') {
             request.observer.next(msg.data);
             request.event("completeclient");
-            this.websocket.next({
+            this.send({
               type:"streamnext",
               requid: msg.requid
             });
@@ -235,7 +230,7 @@ export class ClientWSService {
           if(done) delete this.uploads[msg.uploaduid];
         }
       } else if(msg.type == 'serverkeepalive') {
-        this.websocket.next({type:"clientisalive"});
+        this.send({type:"clientisalive"});
         this.logService.debug("WSS Received serverkeepalive")
       } else if(msg.type == 'chatupdate') {
         this.chatObservers.forEach((observer) => observer.next(msg.data));
@@ -257,6 +252,7 @@ export class ClientWSService {
     if(this.connected) {
       this.heartbeatFreq = 0;
       this.connected = false;
+      this.websocket = null;
       this.uniqueObjectSubscriptions.forEach(item => item.sent = false);
       Object.keys(this.filterObjectSubscriptions).forEach(key => this.filterObjectSubscriptions[key].sent = false);
       this.logService.info("WSS Connection closed");
@@ -264,10 +260,16 @@ export class ClientWSService {
     }
     setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
   }
+
+  send(data: any) {
+    if(this.websocket != null) {
+      this.websocket.send(JSON.stringify(data));
+    }
+  }
   
   heartbeat() {
     if(this.heartbeatFreq > 0) {
-      this.websocket.next({type:"heartbeat"});
+      this.send({type:"heartbeat"});
       setTimeout(() => {
         this.heartbeat();        
       }, this.heartbeatFreq);
@@ -275,7 +277,7 @@ export class ClientWSService {
   }
 
   sendDeviceInfo() {
-    let req = {
+    this.send({
       type:"clientinfo",
       data:{
        deviceid: this.deviceId,
@@ -285,8 +287,7 @@ export class ClientWSService {
        screensize: window.innerWidth + "x" + window.innerHeight ,
        
       }
-    };
-    this.websocket.next(req);
+    });
   }
 
   sendUnsentSubscriptionRequests() {
@@ -306,7 +307,7 @@ export class ClientWSService {
       }
     });
     let end = (new Date()).getTime();
-    this.websocket.next(subreq);    
+    this.send(subreq);    
     this.subscriptionRequestPending = false;
     //this.logService.debug(`ClientWS: Sent ${subreq.list.length} subscription requests in ${end - start}ms`);
   }
@@ -357,9 +358,7 @@ export class ClientWSService {
     this.uniqueObjectSubscriptions = [];
     this.filterObjectSubscriptions = {};
     if(this.connected) {
-      this.websocket.next({
-        type: "unsubscribe"
-      });
+      this.send({type: "unsubscribe"});
     }
   }
 
@@ -376,7 +375,7 @@ export class ClientWSService {
       return new Observable((observer) => {
         let ruid = UUID.UUID();
         this.requests[ruid] = new Request(observer, service, tag);
-        this.websocket.next({
+        this.send({
           type:"servicerequest",
           servicename: service,
           requid: ruid,
@@ -394,7 +393,7 @@ export class ClientWSService {
       return new Observable((observer) => {
         let ruid = UUID.UUID();
         this.requests[ruid] = new Request(observer, service, tag);
-        this.websocket.next({
+        this.send({
           type:"streamrequest",
           servicename: service,
           requid: ruid,
@@ -410,9 +409,9 @@ export class ClientWSService {
   upload(file: File, object: string, uid: string) : Observable<number> {
     if(this.connected) {
       return new Observable((observer) => {
-        let upload = new Upload(file, observer, this.websocket);
+        let upload = new Upload(file, observer, (data) => this.send(data));
         this.uploads[upload.uploaduid] = upload;
-        this.websocket.next({
+        this.send({
           type:"upload",
           uploaduid: upload.uploaduid,
           request: {
@@ -431,7 +430,7 @@ export class ClientWSService {
 
   updateToken(token: string)  {
     if(this.connected) {
-      this.websocket.next({
+      this.send({
         type:"tokenupdate",
         token: token
       });
