@@ -29,7 +29,7 @@ public class FirebusJSWrapper extends ObjectJSWrapper
 					String serviceName = (String)arguments[0];
 					DataMap requestObject = (DataMap)(arguments[1]);
 					DataMap metaData = (DataMap)(arguments.length >= 3 ? arguments[2] : null);
-					int timeout = arguments.length >= 4 ? (Integer)arguments[3] : 10000;
+					int timeout = (int)(arguments.length >= 4 ? (Long)arguments[3] : 10000L);
 					if(serviceName != null)
 					{
 						try

@@ -7,12 +7,13 @@ import { AppInjector } from "app/app.module";
 
 @Component({template: ''})
 export abstract class RbComponent implements OnInit {
-    @Input('id') id: string;
-    @Input('activator') activator: RbActivatorComponent;
+    @Input('id') id: string | null = null;
+    @Input('activator') activator: RbActivatorComponent | null = null;
 
     public initiated: boolean = false;
     public active: boolean = false;
-    private activatorSubscription: Subscription;
+    public compTarget: any = null;
+    private activatorSubscription: Subscription | null = null;
 
     constructor() {}
   
@@ -42,9 +43,13 @@ export abstract class RbComponent implements OnInit {
       this.onActivationEvent(state);
     }
 
-    abstract componentInit();
+    onCompTargetEvent(ct: any) {
+      this.compTarget = ct; 
+    }
 
-    abstract componentDestroy();
+    abstract componentInit() : void;
 
-    abstract onActivationEvent(state: boolean);
+    abstract componentDestroy() : void;
+
+    abstract onActivationEvent(state: boolean) : void;
 }

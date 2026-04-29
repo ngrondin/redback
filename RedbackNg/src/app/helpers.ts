@@ -470,6 +470,7 @@ export class LinkConfig {
     modal: string;
     reset: boolean;
     datatargets: LinkConfigDataTarget[];
+    comptargets: LinkConfigCompTarget[];
     
     constructor(json: any) {
         this.target = json.target;
@@ -502,7 +503,16 @@ export class LinkConfig {
                     select: item.select
                 });
             }  
-        }    
+        }
+        this.comptargets = [];
+        if(json.comptargets != null) {
+            for(var item of json.comptargets) {
+                this.comptargets.push({
+                    compid: item.compid,
+                    data: item.data
+                });
+            }    
+        }
     }
 
     getNavigationEvent(object: RbObject, dataset: RbDatasetComponent, extraContext?: any): NavigateEvent {
@@ -512,7 +522,8 @@ export class LinkConfig {
             tab: this.tab,
             modal: this.modal,
             reset: this.reset,
-            datatargets: []
+            datatargets: [],
+            comptargets: []
         };
         event.objectname = this.view == null && this.objectname != null ? this.objectname : null;
         for(var datatarget of this.datatargets) {
@@ -539,6 +550,13 @@ export class LinkConfig {
             }
             event.datatargets.push({objectname: datatarget.objectname, datasetid: datatarget.datasetid, filter: filter, sort: sort, select: select}); 
         }
+        for(var comptarget of this.comptargets) {
+            if(comptarget.data != null) {
+                let filterService: FilterService = AppInjector.get(FilterService);
+                let rData = filterService.resolveFilter(comptarget.data, object, dataset, null, null, null, extraContext);
+                event.comptargets?.push({compid: comptarget.compid, data: rData});
+            }
+        }
         return event;
     }
 }
@@ -551,6 +569,11 @@ export class LinkConfigDataTarget{
     filtersingleobject: boolean;
     sort: any;
     select: any;
+}
+
+export class LinkConfigCompTarget{
+    compid: string;
+    data: any;
 }
 
 export class VAEConfig {

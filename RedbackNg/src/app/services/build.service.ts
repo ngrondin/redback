@@ -16,6 +16,7 @@ import { LogService } from './log.service';
 import { VirtualSelector } from 'app/helpers';
 import { RbVcollapseComponent } from 'app/rb-vcollapse/rb-vcollapse.component';
 import { RbHcollapseComponent } from 'app/rb-hcollapse/rb-hcollapse.component';
+import { RbComponent } from 'app/abstract/rb-component';
 
 
 @Injectable({
@@ -79,6 +80,9 @@ export class BuildService {
         }
         if(newInstance instanceof RbTabSectionComponent) {
           loadedView.tabSections.push(newInstance);
+        }
+        if(newInstance instanceof RbComponent && newInstance.id != null) {
+          loadedView.compsWithIds.push(newInstance);
         }
         if(newInstance instanceof RbModalComponent) {
           this.modalService.register(newInstance.name, loadedView.name, newInstance);

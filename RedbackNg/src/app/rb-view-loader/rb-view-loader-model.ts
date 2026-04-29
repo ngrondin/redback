@@ -1,8 +1,9 @@
 import { ComponentRef, Component, ViewContainerRef } from "@angular/core";
 import { RbActivatorComponent } from "app/abstract/rb-activator";
+import { RbComponent } from "app/abstract/rb-component";
 import { RbSetComponent } from "app/abstract/rb-set";
 import { AppInjector } from "app/app.module";
-import { DataTarget } from "app/datamodel";
+import { CompTarget, DataTarget } from "app/datamodel";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.component";
 import { LogService } from "app/services/log.service";
@@ -13,6 +14,7 @@ export class LoadedView extends RbActivatorComponent {
     rootComponentRefs: ComponentRef<Component>[] = [];
     topSets: RbSetComponent[] = [];
     tabSections: RbTabSectionComponent[] = [];
+    compsWithIds: RbComponent[] = [];
     logService: LogService;
   
     constructor(
@@ -57,7 +59,7 @@ export class LoadedView extends RbActivatorComponent {
   
     /** This function will match targets with only one dataset. Any unmatched dataset 
      * will have a new created empty target in order to save its state for return navigation */
-    setTarget(dataTargets: DataTarget[]) : DataTarget[] {
+    setDataTargets(dataTargets: DataTarget[]) : DataTarget[] {
       let targets = [...dataTargets];
       let newTargets = [];
       for(let dataset of this.topSets.filter(s => s.ignoretarget == false)) {
@@ -79,6 +81,17 @@ export class LoadedView extends RbActivatorComponent {
         }
       }
       return newTargets;
+    }
+
+    setCompTargets(compTargets: CompTarget[]): void {
+      for(let comp of this.compsWithIds) {
+        for(let compTarget of compTargets) {
+          if(compTarget.appliesTo(comp)) {
+            comp.onCompTargetEvent(compTarget.data);
+            break;
+          }
+        }
+      }
     }
   
     openTab(tabid: String) {

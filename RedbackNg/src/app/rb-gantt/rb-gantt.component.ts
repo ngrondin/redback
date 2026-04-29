@@ -64,28 +64,28 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   _zooms: any[] = [{label:"12 Hours", val:43200000}, {label:"1 Day", val:86400000}, {label:"2 Days", val:172800000}, {label:"3 Days", val:259200000}, {label:"7 Days", val:604800000}];
   _spans: any[] = [{label:"12 Hours", val:43200000}, {label:"1 Day", val:86400000}, {label:"3 Days", val:259200000}, {label:"7 Days", val:604800000}, {label:"14 Days", val:1209600000}];
   labelAlts: any[] = [];
-  lanes: GanttLane[];
-  spreads: GanttSpread[];
+  lanes: GanttLane[] = [];
+  spreads: GanttSpread[] = [];
   marks: GanttMark[] = [];
-  overlays: GanttOverlayLane[];
+  overlays: GanttOverlayLane[] = [];
   selectedOverlayLaneIndex = -1;
-  selectedLabelAlt: string = null;
+  selectedLabelAlt: string | null = null;
   spreadMap: any = {};
 
   dragSelecting: boolean = false;
-  dragSelectStart: XY = null;
-  dragSelectTopLeft: XY = null;
-  dragSelectSize: XY = null;
+  dragSelectStart: XY  | null = null;
+  dragSelectTopLeft: XY | null  = null;
+  dragSelectSize: XY | null = null;
 
-  doFocus = false;
-  showEmptyLanes = true;
-  focusStartPX = null;
-  focusTopPX = null;
+  doFocus: boolean = false;
+  showEmptyLanes: boolean = true;
+  focusStartPX: number | null = null;
+  focusTopPX: number | null = null;
 
-  public getDragSizeForObjectCallback: Function;
-  public droppedOutCallback: Function;
-  public enhanceDragDataCallback: Function;
-  dragSubscription: Subscription;
+  public getDragSizeForObjectCallback?: Function;
+  public droppedOutCallback?: Function;
+  public enhanceDragDataCallback?: Function;
+  dragSubscription?: Subscription;
 
   //canvas = null
   graphctx = null;
@@ -153,10 +153,15 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
       if(this.spanVariable != null) this.spanMS = window.redback[this.spanVariable];
       if(this.zoomVariable != null) this.zoomMS = Math.min(this.spanMS, window.redback[this.zoomVariable]);
+      if(this.compTarget != null) {
+        if(this.compTarget.start != null) {
+          this._startDate = typeof this.compTarget.start == 'string' ? new Date(this.compTarget.start) : this.compTarget.start.getTime != null ? this.compTarget.start : this._startDate;
+        }
+      } 
       let selectionTarget = null;
       for(let cfg of this.seriesConfigs) {
         let dataset = this.getDatasetForConfig(cfg);
-        //Retrieve the start of the Gantt from any of the datasets
+        //Retrieve the start of the Gantt from any of the datasets -- Deprecated, to be removed
         if(cfg.timeFromAttributes && dataset.resolvedFilter != null) {
           let start = null;
           let end = null;
@@ -171,6 +176,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
             this._startDate = new Date(start);
             this.spanMS = ((new Date(end)).getTime() - this._startDate.getTime());
             if(this.zoomMS > this.spanMS) this.zoomMS = this.spanMS;
+            console.log("DEPRECATED USE OF GANTT START FROM DATASET");
           }
         }  
         //Retrieve the selection target from any of the datasets
@@ -399,10 +405,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.calcOverlayLanes();
     this.calcMarks();
     this.logService.debug("Gantt " + this.id + ": calc, lanes: " + this.lanes.length + ", overlays: " + this.overlays.length + ", spreads: " + this.spreads.length + ", dragging: " + this.spreads.filter(s => s.dragging == true).length);
-    /*if(this.canvas.element.nativeElement.width != this.widthPX || this.canvas.element.nativeElement.height != this.heightPX) {
-      this.canvas.element.nativeElement.width = this.widthPX;
-      this.canvas.element.nativeElement.height = this.heightPX;
-    }*/
     this.drawCanvas();
     if(this.doFocus == true) {
       this.focus();
@@ -428,7 +430,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       this.markMinorIntervalMS = this.markMajorIntervalMS;
     }
     this.focusStartPX = null;
-    this.focusTopPX = null;
+    this.focusTopPX = null;   
   }
 
   private calcLanes() {

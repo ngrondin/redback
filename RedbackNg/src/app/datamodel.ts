@@ -6,6 +6,7 @@ import { FileService } from './services/file.service';
 import { LogService } from './services/log.service';
 import { AppInjector } from './app.module';
 import { RbSetComponent } from './abstract/rb-set';
+import { RbComponent } from './abstract/rb-component';
 
 export const RELATED_LOADING = Symbol('RelatedLoading');
 
@@ -541,6 +542,7 @@ export class NavigateEvent {
     label?: string;
     reset?: boolean;
     datatargets?: NavigateEventDataTarget[];
+    comptargets?: NavigateEventCompTarget[];
 }
 
 export class NavigateEventDataTarget {
@@ -551,17 +553,23 @@ export class NavigateEventDataTarget {
     sort?: any;
     select?: any;
 }
+
+export class NavigateEventCompTarget {
+    compid?: string;
+    data?: any;
+}
   
 export class NavigateData {
     domain: string;
     view: string;
     tab: string;
     modal: string;
-    title: string;
-    additionalTitle: string;
-    _breadcrumbLabel: string;
-    mode: string;
+    title?: string | null;
+    additionalTitle?: string;
+    _breadcrumbLabel?: string;
+    mode?: string;
     dataTargets: DataTarget[];
+    compTargets: CompTarget[];
   
     constructor(dom: string, v: string, t:string, m: string) {
       this.domain = dom;
@@ -570,17 +578,22 @@ export class NavigateData {
       this.modal = m;
       this.title = null;
       this.dataTargets = [];
+      this.compTargets = [];
     }
 
     addDataTarget(dt: DataTarget) {
         this.dataTargets.push(dt);
     }
 
+    addCompTarget(ct: CompTarget) {
+        this.compTargets.push(ct);
+    }
+
     get fulltitle() : string {
         return (this.title != null ? this.title : '') + (this.additionalTitle != null ? (this.title != null ? " - " : "") + this.additionalTitle : "");
     }
   
-    get breadcrumbLabel(): string {
+    get breadcrumbLabel(): string | null {
       if(this._breadcrumbLabel != null) {
         return this._breadcrumbLabel;
       } else {
@@ -615,6 +628,21 @@ export class DataTarget {
         if(this.datasetid != null && this.datasetid != dataset.id) return false;
         if(this.objectname != null && this.objectname != dataset.objectname) return false;
         return true;
+    }
+}
+
+export class CompTarget {
+    compid: string;
+    data: any;
+  
+    constructor(i: string, d: any) {
+      this.compid = i;
+      this.data = d;
+    }
+
+    appliesTo(comp: RbComponent) : boolean {
+        if(this.compid != null && this.compid == comp.id) return true;
+        return false;
     }
 }
 

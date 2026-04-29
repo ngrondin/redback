@@ -77,9 +77,9 @@ export class RbViewLoaderComponent implements OnInit {
     if(entry != null) {
       this.currentLoadedView = entry;
       window.redback.currentLoadedView = entry;
-      let newEmptyTargets = entry.setTarget(navData.dataTargets);
-      newEmptyTargets.forEach(target => navData.dataTargets.push(target));      
-      //if(navData.tab != null) entry.openTab(navData.tab);
+      let newEmptyDataTargets = entry.setDataTargets(navData.dataTargets);
+      newEmptyDataTargets.forEach(target => navData.dataTargets.push(target));      
+      entry.setCompTargets(navData.compTargets);
       entry.attachTo(this.container);
     }
     this.logService.info("ViewLoader - Loaded view " + navData.view);

@@ -64,7 +64,7 @@ export class ActionService {
       } else if(_action == 'externallink') {
         return this.launchExternalLink(dataset, (target ?? param));
       } else if(_action == 'refresh') {
-        return this.refresh(dataset);
+        return this.refresh(dataset, datasetgroup);
       } else if(dataset != null && dataset.selectedObject != null) {
         return this.execute(dataset, _action, param, extraContext, timeout);
       } else {
@@ -314,11 +314,13 @@ export class ActionService {
     });
   }
 
-  public refresh(dataset: RbDatasetComponent): Observable<null> {
+  public refresh(dataset: RbDatasetComponent, datasetgroup: RbDatasetGroupComponent): Observable<null> {
     return new Observable((observer) => {
-      if(dataset != null) {
+      if(datasetgroup != null) {
+        datasetgroup.refreshAllData();
+      } else if(dataset != null) {
         dataset.refreshData();
-      }
+      } 
       observer.next(null);
       observer.complete();
     });

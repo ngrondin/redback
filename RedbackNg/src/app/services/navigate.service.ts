@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NavigateEvent, NavigateData, DataTarget } from 'app/datamodel';
+import { NavigateEvent, NavigateData, DataTarget, CompTarget } from 'app/datamodel';
 import { RbViewLoaderComponent } from 'app/rb-view-loader/rb-view-loader.component';
 import { ConfigService } from './config.service';
 import { UserprefService } from './userpref.service';
@@ -51,6 +51,12 @@ export class NavigateService {
           let datatarget = new DataTarget(eventtarget.datasetid, eventtarget.objectname || event.objectname, eventtarget.filter, eventtarget.search, eventtarget.sort, eventtarget.select);
           navdata.addDataTarget(datatarget);  
         }      
+      }
+      if(event.comptargets != null) {
+        for(let eventtarget of event.comptargets) {
+          let comptarget = new CompTarget(eventtarget.compid, eventtarget.data);
+          navdata.addCompTarget(comptarget);  
+        } 
       }
       if(objectConfig != null && navdata.dataTargets.length == 1 && navdata.dataTargets[0].filter != null && navdata.dataTargets[0].filter[objectConfig.labelattribute] != null) {
         navdata.breadcrumbLabel = eval(navdata.dataTargets[0].filter[objectConfig.labelattribute]);
