@@ -136,7 +136,7 @@ export class ApiService {
     return this.get(reqUrl);
   }
 
-  getView(name: string, domain: string) {
+  getView(name: string, domain?: string) {
     let reqUrl = this.baseUrl + "/" + this.uiService + "/view/" + (domain != null ? domain + '/' : '')  + name;
     return this.get(reqUrl);
   }

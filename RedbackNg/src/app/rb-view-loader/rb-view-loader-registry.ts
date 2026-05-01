@@ -71,8 +71,9 @@ import { RbIconComponent } from "app/rb-icon/rb-icon.component";
 import { RbRepeaterComponent } from "app/rb-repeater/rb-repeater.component";
 import { RbPivotTableComponent } from "app/graphs/rb-pivot-table/rb-pivot-table.component";
 import { RbInlineInputComponent } from "app/inputs/rb-inline-input/rb-inline-input.component";
+import { RbComponent } from "app/abstract/rb-component";
 
-export const componentRegistry = {
+export const componentRegistry: {[key:string]: any} = {
     "dataset": RbDatasetComponent,
     "datasetgroup": RbDatasetGroupComponent,
     "layout": RbLayoutComponent,

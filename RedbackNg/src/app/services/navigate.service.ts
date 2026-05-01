@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NavigateEvent, NavigateData, DataTarget, CompTarget } from 'app/datamodel';
+import { NavigateEvent, NavigateBackData } from 'app/datamodel';
 import { RbViewLoaderComponent } from 'app/rb-view-loader/rb-view-loader.component';
 import { ConfigService } from './config.service';
 import { UserprefService } from './userpref.service';
@@ -12,8 +12,8 @@ import { LogService } from './log.service';
   providedIn: 'root'
 })
 export class NavigateService {
-  targetViewLoaders: {[key: string]: {component: RbViewLoaderComponent, stack: NavigateData[]}} = {};
-  navigateObservers: Observer<NavigateData>[] = [];
+  targetViewLoaders: {[key: string]: {component: RbViewLoaderComponent, stack: NavigateBackData[]}} = {};
+  navigateObservers: Observer<NavigateEvent>[] = [];
 
   constructor(
     private configService: ConfigService,
@@ -21,7 +21,7 @@ export class NavigateService {
     private modalService: ModalService,
     private logService: LogService
   ) { 
-    window.redback.navigateTo = (event) => this.navigateTo(event);
+    window.redback.navigateTo = (event: NavigateEvent) => this.navigateTo(event);
   }
 
   registerTarget(name: string, comp: RbViewLoaderComponent) {
@@ -34,18 +34,30 @@ export class NavigateService {
     delete this.targetViewLoaders[key];
   }
 
-  getNavigateObservable() : Observable<NavigateData>  {
-    return new Observable<NavigateData>((observer) => {
+  getNavigateObservable() : Observable<NavigateEvent>  {
+    return new Observable<NavigateEvent>((observer) => {
       this.navigateObservers.push(observer);
     });
   }
 
   async navigateTo(event: NavigateEvent) {
     let targetViewLoader = this.targetViewLoaders[event.target ?? "default"];  
-    let objectConfig: any = event.objectname != null ? this.configService.getObjectConfig(event.objectname) : null;
-    let view: string = (event.view != null ? event.view : (objectConfig != null ? objectConfig.view : null));
-    if(view != null) {
-      let navdata = new NavigateData(event.domain, view, event.tab, event.modal); 
+    let view: string | undefined = event.view;
+    if(view == null && event.objectname != null) {
+      let objectConfig: any = this.configService.getObjectConfig(event.objectname);
+      if(objectConfig != null) {
+        view = objectConfig.view
+      }
+    }
+
+    if(view != null && targetViewLoader != null) {
+      if(event.reset == false) {
+        //Extract current situation and create a NavigateBack item
+
+
+      }
+
+      /*let navdata = new NavigateData(event.domain, view, event.tab, event.modal);
       if(event.datatargets != null) {
         for(let eventtarget of event.datatargets) {
           let datatarget = new DataTarget(eventtarget.datasetid, eventtarget.objectname || event.objectname, eventtarget.filter, eventtarget.search, eventtarget.sort, eventtarget.select);
@@ -57,7 +69,7 @@ export class NavigateService {
           let comptarget = new CompTarget(eventtarget.compid, eventtarget.data);
           navdata.addCompTarget(comptarget);  
         } 
-      }
+      }*/
       if(objectConfig != null && navdata.dataTargets.length == 1 && navdata.dataTargets[0].filter != null && navdata.dataTargets[0].filter[objectConfig.labelattribute] != null) {
         navdata.breadcrumbLabel = eval(navdata.dataTargets[0].filter[objectConfig.labelattribute]);
       }

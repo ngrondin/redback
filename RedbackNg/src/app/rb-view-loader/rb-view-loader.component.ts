@@ -1,7 +1,7 @@
 import { Component, ViewChild, ViewContainerRef, ComponentRef, ComponentFactoryResolver, OnInit, Input, Output, EventEmitter, SimpleChange, TypeDecorator } from '@angular/core';
 import { __asyncDelegator } from 'tslib';
 import { ApiService } from 'app/services/api.service';
-import { NavigateData } from 'app/datamodel';
+import { NavigateBackData } from 'app/datamodel';
 import { componentRegistry } from './rb-view-loader-registry';
 import { BuildService } from 'app/services/build.service';
 import { NavigateService } from 'app/services/navigate.service';
@@ -17,9 +17,9 @@ import { LogService } from 'app/services/log.service';
 })
 export class RbViewLoaderComponent implements OnInit {
   @Input('name') name = 'default';
-  @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
+  @ViewChild('container', { read: ViewContainerRef, static: true }) container?: ViewContainerRef;
 
-  public currentLoadedView: LoadedView = null;
+  public currentLoadedView: LoadedView | null = null;
   private viewCache: any = {};
   private factoryRegistry: any = {};
 
@@ -41,11 +41,11 @@ export class RbViewLoaderComponent implements OnInit {
     this.navigateService.registerTarget(this.name, this);
   }
 
-  navigateTo(navData: NavigateData): Promise<void> {
+  navigateTo(viewName: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.apiService.getView(navData.view, navData.domain).subscribe({
+      this.apiService.getView(viewName).subscribe({
         next: (resp) => {
-          this.showView(navData, resp);
+          this.showView(viewName, resp);
           resolve();
         },
         error: (err) => reject(err),
@@ -54,15 +54,15 @@ export class RbViewLoaderComponent implements OnInit {
     })
   }
 
-  showView(navData: NavigateData, viewConfig: any) {
+  showView(viewName: string, viewConfig: any) {
     if(this.currentLoadedView != null) {
-      this.currentLoadedView.detachFrom(this.container);
+      this.currentLoadedView.detachFrom(this.container!);
     }
-    navData.title = viewConfig.label;
+    //navData.title = viewConfig.label;
     let hash = JSON.stringify(viewConfig).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
-      entry = new LoadedView(navData.view, viewConfig.label);
+      entry = new LoadedView(viewName, viewConfig.label);
       if(viewConfig['content'] != null) {
         for(let item of viewConfig['content']) {
           let context: any = {activator: entry};
@@ -77,12 +77,12 @@ export class RbViewLoaderComponent implements OnInit {
     if(entry != null) {
       this.currentLoadedView = entry;
       window.redback.currentLoadedView = entry;
-      let newEmptyDataTargets = entry.setDataTargets(navData.dataTargets);
-      newEmptyDataTargets.forEach(target => navData.dataTargets.push(target));      
-      entry.setCompTargets(navData.compTargets);
-      entry.attachTo(this.container);
+      //let newEmptyDataTargets = entry.setDataTargets(navData.dataTargets);
+      //newEmptyDataTargets.forEach(target => navData.dataTargets.push(target));      
+      //entry.setCompTargets(navData.compTargets);
+      entry.attachTo(this.container!);
     }
-    this.logService.info("ViewLoader - Loaded view " + navData.view);
+    this.logService.info("ViewLoader - Loaded view " + viewName);
   }
   
 }

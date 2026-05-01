@@ -38,7 +38,7 @@ export class BuildService {
     }
   }
 
-  buildConfigRecursive(parent: ViewContainerRef, config: any, context: any, loadedView?: LoadedView) {
+  buildConfigRecursive(parent: ViewContainerRef | null, config: any, context: any, loadedView?: LoadedView) {
     let newComponentRef: ComponentRef<Component> = null;
     let factory = this.factoryRegistry[config.type]; 
     if(factory != null) {

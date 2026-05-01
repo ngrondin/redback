@@ -11,7 +11,7 @@ import { RbComponent } from './abstract/rb-component';
 export const RELATED_LOADING = Symbol('RelatedLoading');
 
 export class ObjectResp {
-    objects: object;
+    objects?: object;
 }
 
 export class RbObjectTransaction {
@@ -22,7 +22,7 @@ export class RbObject {
     objectname: string;
     uid: string;
     domain: string;
-    lastupdate: number;
+    lastupdate?: number;
     data: any = {};
     related: any = {};
     validation: any = {};
@@ -31,7 +31,7 @@ export class RbObject {
     deleted: boolean = false;
     dataService: DataService;
     logService: LogService;
-    lastUpdated: number;
+    lastUpdated?: number;
     datasets: RbDatasetComponent[] = [];
     
     constructor(json: any) {
@@ -122,8 +122,8 @@ export class RbObject {
                             if(isArray) this.related[attribute].push(relatedObject);
                             else this.related[attribute] = relatedObject;
                         } else {
-                            let callback = (object) => {
-                                this.loadingRelated = this.loadingRelated.filter(a => a != attribute);
+                            let callback = (object: RbObject) => {
+                                this.loadingRelated = this.loadingRelated.filter((a: any) => a != attribute);
                                 if(isArray) this.related[attribute].push(object);
                                 else this.related[attribute] = object;
                                 this._adviseSetsOfChange();
@@ -170,8 +170,8 @@ export class RbObject {
         return ret;
     }
 
-    getRelated(attr: string) : RbObject {
-        let ret: RbObject = null;
+    getRelated(attr: string) : RbObject | null {
+        let ret: RbObject | null = null;
         if(attr != null) {
             if(attr.indexOf('.') == -1) {
                 ret = this.related[attr];
@@ -218,7 +218,7 @@ export class RbObject {
         this._afterSetValue(ret, tx);
     }    
 
-    _setValueAndRelated(attribute: string, value: any, related: RbObject) : boolean {
+    _setValueAndRelated(attribute: string, value: any, related: RbObject | null) : boolean {
         if(attribute == 'uid') {
             if(this.uid == null) {
                 this.uid = value;
@@ -361,7 +361,7 @@ export class RbNotification {
     label: string;
     message: string;
     contextlabel: string;
-    actions: RbNotificationAction[];
+    actions: RbNotificationAction[] = [];
     data: any;
     notificationService: NotificationService;
 
@@ -421,7 +421,7 @@ export class Time {
     constructor(iso?: string) {
         if(iso != null) {
             let str: string = iso;
-            let timeStr: string = null;
+            let timeStr: string | null = null;
             this.zoneId = Intl.DateTimeFormat().resolvedOptions().timeZone;
             if(str.startsWith("T")) str = str.substring(1);
             let pos1: number = str.indexOf("[");
@@ -536,7 +536,7 @@ export class NavigateEvent {
     target?: string;
     domain?: string;
     view?: string;
-    objectname?: string;
+    objectname?: string; //When the target view is not known, it can be looked up based on the objectname
     tab?: string;
     modal?: string;
     label?: string;
@@ -559,8 +559,8 @@ export class NavigateEventCompTarget {
     data?: any;
 }
   
-export class NavigateData {
-    domain: string;
+export class NavigateBackData {
+    //domain: string;
     view: string;
     tab: string;
     modal: string;
@@ -568,32 +568,32 @@ export class NavigateData {
     additionalTitle?: string;
     _breadcrumbLabel?: string;
     mode?: string;
-    dataTargets: DataTarget[];
-    compTargets: CompTarget[];
+    dataTargets: NavigateEventDataTarget[];
+    //compTargets: CompTarget[];
   
-    constructor(dom: string, v: string, t:string, m: string) {
-      this.domain = dom;
+    constructor(/*dom: string, */v: string, t:string, m: string) {
+      //this.domain = dom;
       this.view = v;
       this.tab = t;
       this.modal = m;
       this.title = null;
       this.dataTargets = [];
-      this.compTargets = [];
+      //this.compTargets = [];
     }
 
-    addDataTarget(dt: DataTarget) {
+    addDataTarget(dt: NavigateEventDataTarget) {
         this.dataTargets.push(dt);
     }
 
-    addCompTarget(ct: CompTarget) {
+    /*addCompTarget(ct: CompTarget) {
         this.compTargets.push(ct);
-    }
+    }*/
 
     get fulltitle() : string {
         return (this.title != null ? this.title : '') + (this.additionalTitle != null ? (this.title != null ? " - " : "") + this.additionalTitle : "");
     }
   
-    get breadcrumbLabel(): string | null {
+    get breadcrumbLabel(): string | null | undefined {
       if(this._breadcrumbLabel != null) {
         return this._breadcrumbLabel;
       } else {
@@ -606,7 +606,7 @@ export class NavigateData {
     }
 }
 
-export class DataTarget {
+/*export class DataTarget {
     datasetid: string;
     objectname: string;
     filter: any;
@@ -629,9 +629,9 @@ export class DataTarget {
         if(this.objectname != null && this.objectname != dataset.objectname) return false;
         return true;
     }
-}
+}*/
 
-export class CompTarget {
+/*export class CompTarget {
     compid: string;
     data: any;
   
@@ -644,7 +644,7 @@ export class CompTarget {
         if(this.compid != null && this.compid == comp.id) return true;
         return false;
     }
-}
+}*/
 
 export class ChatUser {
     id: string;
@@ -667,7 +667,7 @@ export class ChatUser {
 export class ChatMessage {
     id: string;
     date: Date;
-    from: ChatUser;
+    from?: ChatUser;
     body: string;
     readby: ChatUser[];
 

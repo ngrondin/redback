@@ -115,7 +115,7 @@ public unresolveFilter(__inMap: any) : any {
   return __outMap;
 }
   
-  private evalExpression(expr, params: string[], args: any[]): any {
+  private evalExpression(expr: string, params: string[], args: any[]): any {
     var ret = null;
     if(expr != null && expr != "") {
       try { 
