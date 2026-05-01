@@ -76,11 +76,15 @@ export class NavigateService {
           if(target.component.currentLoadedView != null) {
             let dataTargets = target.component.currentLoadedView.extractNavigateEventDataTargets();
             let backData = new NavigateBackData(target.component.currentLoadedView.name, target.component.currentLoadedView.getCurrentlyOpenTab(), this.modalService.currentlyOpenModal);
+            backData._breadcrumbLabel = target.component.currentLoadedView.title;
             backData.dataTargets = dataTargets;
             target.stack.push(backData)
           }
         } else {
           target.stack = [];
+        }
+        if(event.comptargets.length > 0) {
+
         }
         /*if(objectConfig != null && navdata.dataTargets.length == 1 && navdata.dataTargets[0].filter != null && navdata.dataTargets[0].filter[objectConfig.labelattribute] != null) {
           navdata.breadcrumbLabel = eval(navdata.dataTargets[0].filter[objectConfig.labelattribute]);
@@ -107,7 +111,7 @@ export class NavigateService {
     }
   }
 
-  async executeViewChange(viewLoader: RbViewLoaderComponent, viewName: string, modal?: string, tab?: string) : Promise<LoadedView> {
+  private async executeViewChange(viewLoader: RbViewLoaderComponent, viewName: string, modal?: string, tab?: string) : Promise<LoadedView> {
     try {
       this.modalService.closeAll();
       viewLoader.detachCurrentLoadedView();
@@ -128,7 +132,7 @@ export class NavigateService {
     }
   }
 
-  async getLoadedView(viewName: string) : Promise<LoadedView> {
+  private async getLoadedView(viewName: string) : Promise<LoadedView> {
     let viewConfig = await this.loadView(viewName);
     let hash = JSON.stringify(viewConfig).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
     let entry: LoadedView = this.viewCache[hash];
@@ -148,7 +152,7 @@ export class NavigateService {
     return entry;
   }
 
-  async loadView(viewName: string): Promise<any> {
+  private async loadView(viewName: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.apiService.getView(viewName).subscribe({
         next: (resp) => {
@@ -159,7 +163,7 @@ export class NavigateService {
     })
   }
 
-  getCurrentNavigateStack(target?: string): NavigateBackData[] {
+  getCurrentNavigateBackStack(target?: string): NavigateBackData[] {
     return this.getTarget(target)?.stack ?? [];
   }
 

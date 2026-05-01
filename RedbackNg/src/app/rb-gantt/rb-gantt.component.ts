@@ -183,11 +183,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           }
         }  
         //Retrieve the selection target from any of the datasets
-        if(dataset != null && dataset.dataTarget != null && dataset.dataTarget.select != null) {
+        if(dataset != null && dataset.userSelect != null) {
           selectionTarget = {
             cfg: cfg, 
             objectname: dataset.objectname, 
-            filter: dataset.dataTarget.select, 
+            filter: dataset.userSelect, 
             currentlyInSet: dataset.selectedObjects.length > 0
           }
         }

@@ -1,7 +1,7 @@
 <div
     class="rb-vh-textcontainer">
     <div
-        *ngFor="let target of targetStack; let i = index"
+        *ngFor="let item of targetBackStack; let i = index"
         class="rb-vh-stackitem">
         <span
             *ngIf="i > 0"
@@ -10,9 +10,8 @@
         </span>
         <span
             class="rb-vh-bc-link"
-            *ngIf="i < targetStack.length - 1"
             (click)="backTo(i)">
-            {{target.breadcrumbLabel}}
+            {{item.breadcrumbLabel}}
         </span>
     </div>
     <div

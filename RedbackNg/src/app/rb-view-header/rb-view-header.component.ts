@@ -1,11 +1,10 @@
 //import { TOUCH_BUFFER_MS } from '@angular/cdk/a11y';
 import { SimpleChanges } from '@angular/core';
-import { EventEmitter, HostBinding, Output } from '@angular/core';
+import { HostBinding } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { NavigateData } from 'app/datamodel';
+import { NavigateBackData } from 'app/datamodel';
 import { NavigateService } from 'app/services/navigate.service';
-//import { hexToRgb } from '@swimlane/ngx-charts';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -64,16 +63,15 @@ export class RbViewHeaderComponent implements OnInit {
   }
 
   get title() : string {
-    let data = this.navigateService.getCurrentNavigateData(this.targetName);
-    return data != null ? data.fulltitle : "";
+    return this.navigateService.getCurrentLoadedView(this.targetName)?.title;
   }
 
-  get targetStack(): NavigateData[] {
-    return this.navigateService.getCurrentNavigateStack(this.targetName);
+  get targetBackStack(): NavigateBackData[] {
+    return this.navigateService.getCurrentNavigateBackStack(this.targetName);
   }
 
   backTo(index) {
-    this.navigateService.backTo(this.target ?? "default", index);
+    this.navigateService.backTo(index, this.targetName);
   }
 
   selectColor(color: any) {

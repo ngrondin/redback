@@ -77,7 +77,7 @@ export class RbNlboxComponent {
         objectname: contextDS.objectname,
         uid: contextObj != null ? contextObj.uid : null,
         filter: contextDS.resolvedFilter,
-        search: contextDS.userSearch != null ? contextDS.userSearch : contextDS.dataTarget != null ? contextDS.dataTarget.search : null,
+        search: contextDS.userSearch != null ? contextDS.userSearch : null,
         sort: contextDS.baseSort
       }
     }

@@ -95,8 +95,7 @@ export abstract class AppRootComponent implements OnInit {
     }
   
     get currentTitle(): string {
-      let curNavData = this.navigateService.getCurrentNavigateData("default");
-      return curNavData != null ? curNavData.title : "Welcome";
+      return this.navigateService.getCurrentLoadedView("target").title;
     }
   
     setTitle($event) {

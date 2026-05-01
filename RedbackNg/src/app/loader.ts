@@ -77,7 +77,7 @@ import { RbRepeaterComponent } from "app/rb-repeater/rb-repeater.component";
 import { RbPivotTableComponent } from "app/graphs/rb-pivot-table/rb-pivot-table.component";
 import { RbInlineInputComponent } from "app/inputs/rb-inline-input/rb-inline-input.component";
 import { RbComponent } from "app/abstract/rb-component";
-import { NavigateBackData, NavigateEventDataTarget } from "./datamodel";
+import { NavigateBackData, NavigateEventCompTarget, NavigateEventDataTarget } from "./datamodel";
 
 export const componentRegistry: {[key:string]: any} = {
     "dataset": RbDatasetComponent,
@@ -203,42 +203,41 @@ export class LoadedView extends RbActivatorComponent {
       }
     }
   
-    /** This function will match targets with only one dataset. Any unmatched dataset 
-     * will have a new created empty target in order to save its state for return navigation */
-    /*setDataTargets(dataTargets: DataTarget[]) : DataTarget[] {
+    filterSortDataSets(dataTargets: NavigateEventDataTarget[]) {
       let targets = [...dataTargets];
-      let newTargets = [];
       for(let dataset of this.topSets.filter(s => s.ignoretarget == false)) {
-        let found = false;
         for(let target of targets) {
-          if(target.appliesTo(dataset)) {
-            dataset.setDataTarget(target);
-            target.datasetid = dataset.id;
+          if(this.dataTargetMatches(target, dataset)) {
+            dataset.filterSort({
+              filter: target.filter,
+              sort: target.sort,
+              search: target.search,
+              select: target.select
+            });
             targets.splice(targets.indexOf(target), 1);
-            found = true;
             break;
           }
         }
-        if(!found) {
-          let newTarget = new DataTarget(null, null, null, null, null, null);
-          dataset.setDataTarget(newTarget);
-          newTarget.datasetid = dataset.id;
-          newTargets.push(newTarget);
-        }
       }
-      return newTargets;
     }
 
-    setCompTargets(compTargets: CompTarget[]): void {
+    dataTargetMatches(target: NavigateEventDataTarget, dataset: RbSetComponent) : boolean {
+      if(dataset.ignoretarget == true) return false;
+      if(target.datasetid != null && target.datasetid != dataset.id) return false;
+      if(target.objectname != null && target.objectname != dataset.objectname) return false;
+      return true;
+    }
+
+    configureComponents(compTargets: NavigateEventCompTarget[]) {
       for(let comp of this.compsWithIds) {
         for(let compTarget of compTargets) {
-          if(compTarget.appliesTo(comp)) {
-            comp.onCompTargetEvent(compTarget.data);
+          if(compTarget.compid == comp.id) {
+            comp.configure(compTarget.data);
             break;
           }
         }
       }
-    }*/
+    }
   
     openTab(tabid: String) {
       for(let tabsection of this.tabSections) {

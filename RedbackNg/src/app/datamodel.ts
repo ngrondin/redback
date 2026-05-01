@@ -529,9 +529,6 @@ export class Time {
 
 }
 
-
-
-
 export class NavigateEvent {
     target?: string;
     domain?: string;
@@ -581,19 +578,19 @@ export class NavigateBackData {
       //this.compTargets = [];
     }
 
-    addDataTarget(dt: NavigateEventDataTarget) {
+    /*addDataTarget(dt: NavigateEventDataTarget) {
         this.dataTargets.push(dt);
-    }
+    }*/
 
     /*addCompTarget(ct: CompTarget) {
         this.compTargets.push(ct);
     }*/
 
-    get fulltitle() : string {
+    /*get fulltitle() : string {
         return (this.title != null ? this.title : '') + (this.additionalTitle != null ? (this.title != null ? " - " : "") + this.additionalTitle : "");
-    }
+    }*/
   
-    get breadcrumbLabel(): string | null | undefined {
+    /*get breadcrumbLabel(): string | null | undefined {
       if(this._breadcrumbLabel != null) {
         return this._breadcrumbLabel;
       } else {
@@ -603,7 +600,7 @@ export class NavigateBackData {
   
     set breadcrumbLabel(v: string) {
       this._breadcrumbLabel = v;
-    }
+    }*/
 }
 
 /*export class DataTarget {
