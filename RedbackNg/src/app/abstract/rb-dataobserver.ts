@@ -11,20 +11,20 @@ import { Evaluator, VirtualSelector } from "app/helpers";
 
 @Component({template: ''})
 export abstract class RbDataObserverComponent extends RbComponent {
-    @Input('dataset') dataset: RbDatasetComponent;
-    @Input('datasetgroup') datasetgroup: RbDatasetGroupComponent;
-    @Input('aggregateset') aggregateset: RbAggregatesetComponent;
-    @Input('virtualselector') virtualselector: VirtualSelector;
-    @Input('datasetevents') datasetevents: string[] = null;
-    @Input('object') _rbObject: RbObject;
-    @Input('show') showExpr: string;
-    @Input('targetdatasetid') targetdatasetid: string; // Only usefull when observer is linked to a datasetgroup and you want to specify which dataset
+    @Input('dataset') dataset?: RbDatasetComponent;
+    @Input('datasetgroup') datasetgroup?: RbDatasetGroupComponent;
+    @Input('aggregateset') aggregateset?: RbAggregatesetComponent;
+    @Input('virtualselector') virtualselector?: VirtualSelector;
+    @Input('datasetevents') datasetevents?: string[];
+    @Input('object') _rbObject?: RbObject;
+    @Input('show') showExpr?: string;
+    @Input('targetdatasetid') targetdatasetid?: string; // Only usefull when observer is linked to a datasetgroup and you want to specify which dataset
     @HostBinding('style.display') get visitility() { return this.show ? 'flex' : 'none'; }
     
-    public globalSubscription: Subscription;
-    public datasetSubscription: Subscription;
-    public datasetGroupSubscription: Subscription;
-    public aggregatesetSubscription: Subscription;
+    public globalSubscription?: Subscription;
+    public datasetSubscription?: Subscription;
+    public datasetGroupSubscription?: Subscription;
+    public aggregatesetSubscription?: Subscription;
     public show: boolean = true;
 
     componentInit() {

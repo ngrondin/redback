@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, SimpleChange, Output, EventEmitter, ViewChild, ViewContainerRef, Injector } from '@angular/core';
+import { Component, OnInit, Input, SimpleChange, Output, EventEmitter, ViewChild, ViewContainerRef, Injector, ChangeDetectorRef } from '@angular/core';
 import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { RbObject, RbObjectTransaction, RELATED_LOADING, XY } from 'app/datamodel';
 import { BuildService } from 'app/services/build.service';
@@ -22,43 +22,44 @@ import { NavigateService } from 'app/services/navigate.service';
 })
 export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('lanes') lanesInput : any;
-  @Input('overlays') overlaysInput: any[];
-  @Input('layers') layers: any[];
+  @Input('overlays') overlaysInput: any[] = [];
+  @Input('layers') layers: any[] = [];
   @Input('toolbar') toolbarConfig : any;
   @Input('locktonow') locktonow: boolean = false;
   @Input('allowpastdrop') allowpastdrop: boolean = true;
   @Input('allowoverlapgroup') allowoverlapgroup: boolean = false;
+  @Input('snapinterval') snapinterval: number | null = null;
   @Input('headerwidth') _headerwidth: number = 17;
-  @Input('startvariable') startVariable: string = null;
-  @Input('spanvariable') spanVariable: string = null;
-  @Input('zoomvariable') zoomVariable: string = null;
-  @Input('emptymessage') emptyMessage: string = null;
-  @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar: ViewContainerRef;
-  @ViewChild('mainscroll') mainscroll: RbScrollComponent;
-  @ViewChild('canvas', { read: ViewContainerRef, static: true }) canvas: ViewContainerRef;
+  @Input('startvariable') startVariable: string | null = null;
+  @Input('spanvariable') spanVariable: string | null = null;
+  @Input('zoomvariable') zoomVariable: string | null = null;
+  @Input('emptymessage') emptyMessage: string | null = null;
+  @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar?: ViewContainerRef;
+  @ViewChild('mainscroll') mainscroll?: RbScrollComponent;
+  @ViewChild('canvas', { read: ViewContainerRef, static: true }) canvas?: ViewContainerRef;
   
-  lanesConfig: GanttLaneConfig;
-  seriesConfigs: GanttSeriesConfig[];
-  overlayConfigs: GanttOverlayConfig[];
+  lanesConfig: GanttLaneConfig | null = null;
+  seriesConfigs: GanttSeriesConfig[] = [];
+  overlayConfigs: GanttOverlayConfig[] = [];
   _startDate: Date = new Date();
-  spanMS: number;
-  zoomMS: number;
-  markMajorIntervalMS: number;
-  markMinorIntervalMS: number;
-  startMS: number;
-  endMS: number;
-  pxPerMS: number;
-  widthPX: number;
-  heightPX: number;
-  spreadHeightPX: number;
-  spreadMarginPX: number;
-  borderWidthPX: number;
-  headerWidthPX: number;
+  spanMS: number | null = null;
+  zoomMS: number | null = null;
+  markMajorIntervalMS: number | null = null;
+  markMinorIntervalMS: number | null = null;
+  startMS: number | null = null;
+  endMS: number | null = null;
+  pxPerMS: number | null = null;
+  widthPX: number | null = null;
+  heightPX: number | null = null;
+  spreadHeightPX: number | null = null;
+  spreadMarginPX: number | null = null;
+  borderWidthPX: number | null = null;
+  headerWidthPX: number | null = null;
   doDragFilter: boolean = false;
   groupOverlaps: boolean = false;
   overrideAllowPastDrop: boolean = false;
-  scrollTop: number;
-  scrollLeft: number;
+  scrollTop: number | null = null;
+  scrollLeft: number | null = null;
   monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   dayNames: String[] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   _zooms: any[] = [{label:"12 Hours", val:43200000}, {label:"1 Day", val:86400000}, {label:"2 Days", val:172800000}, {label:"3 Days", val:259200000}, {label:"7 Days", val:604800000}];
@@ -98,12 +99,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     private userprefService: UserprefService,
     private buildService: BuildService,
     private dataService: DataService,
-    private logService: LogService
+    private logService: LogService,
+    private cdr: ChangeDetectorRef
   ) {
     super();
   }
 
   dataCalcInit() {
+    //this.cdr.detach();
     this.dragSubscription = this.dragService.getObservable().subscribe(event => this.onDragEvent(event));
     this.getDragSizeForObjectCallback = this.getDragSizeForObject.bind(this);
     this.droppedOutCallback = this.droppedOut.bind(this);
@@ -125,13 +128,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         this.overlayConfigs.push(new GanttOverlayConfig(item, this.userPref));
       }
     }
-    if(this.toolbarConfig != null) {
+    if(this.toolbarConfig != null && this.toolbar != null) {
       for(var item of this.toolbarConfig) {
         var context: any = {dataset: this.dataset, datasetgroup: this.datasetgroup};
         this.buildService.buildConfigRecursive(this.toolbar, item, context);
       }
     }
-    this.graphctx = this.canvas.element.nativeElement.getContext("2d");
+    this.graphctx = this.canvas?.element.nativeElement.getContext("2d");
   }
 
   dataCalcDestroy() {
@@ -409,6 +412,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(this.doFocus == true) {
       this.focus();
     }
+    //this.cdr.detectChanges();
   }
 
   private calcParams() {
@@ -1034,7 +1038,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(candidates.length > 0) {
       return candidates[0].t;
     } else {
-      return Math.round(this.startMS + (droppedLeft / this.pxPerMS));
+      let ms = Math.round(this.startMS + (droppedLeft / this.pxPerMS));
+      if(this.snapinterval != null) {
+        ms = Math.round(ms / this.snapinterval) * this.snapinterval;
+      }
+      return ms;
     }
   }
 
