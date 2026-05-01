@@ -562,8 +562,8 @@ export class NavigateEventCompTarget {
 export class NavigateBackData {
     //domain: string;
     view: string;
-    tab: string;
-    modal: string;
+    tab?: string;
+    modal?: string;
     title?: string | null;
     additionalTitle?: string;
     _breadcrumbLabel?: string;
@@ -571,7 +571,7 @@ export class NavigateBackData {
     dataTargets: NavigateEventDataTarget[];
     //compTargets: CompTarget[];
   
-    constructor(/*dom: string, */v: string, t:string, m: string) {
+    constructor(/*dom: string, */v: string, t?:string, m?: string) {
       //this.domain = dom;
       this.view = v;
       this.tab = t;

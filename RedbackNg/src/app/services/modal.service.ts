@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { RbModalComponent } from 'app/rb-modal/rb-modal.component';
-import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
 import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ModalService {
-  currentView: string = null;
+  currentView?: string;
+  currentlyOpenModal?: string;
   modals: {[view:string]: {[name:string]: RbModalComponent}} = {};
 
   constructor(
@@ -23,18 +23,20 @@ export class ModalService {
     this.currentView = view;
   }
 
-  public open(name: string, view: string = this.currentView) {
+  public open(name: string, view: string = this.currentView ?? "") {
     let currentViewModals = this.modals[view];
     if(currentViewModals != null &&  currentViewModals[name] != null && !currentViewModals[name].isOpen) {
       currentViewModals[name].open();
+      this.currentlyOpenModal = name;
       this.logService.info("Modal called open " + name + " in " + view);
     }
   }
 
-  public close(name: string, view: string = this.currentView) {
+  public close(name: string, view: string = this.currentView ?? "") {
     let currentViewModals = this.modals[view];
     if(currentViewModals != null && currentViewModals[name] != null && currentViewModals[name].isOpen) {
       currentViewModals[name].close();
+      this.currentlyOpenModal = undefined;
       this.logService.info("Modal called close " + name + " in " + view);
     }
   }

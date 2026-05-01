@@ -43,8 +43,8 @@ export abstract class RbComponent implements OnInit {
       this.onActivationEvent(state);
     }
 
-    onCompTargetEvent(ct: any) {
-      this.compTarget = ct; 
+    configure(data: any) { // To be used by the view loader or other components to pass in config data
+
     }
 
     abstract componentInit() : void;

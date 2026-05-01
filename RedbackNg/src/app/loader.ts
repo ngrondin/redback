@@ -77,6 +77,7 @@ import { RbRepeaterComponent } from "app/rb-repeater/rb-repeater.component";
 import { RbPivotTableComponent } from "app/graphs/rb-pivot-table/rb-pivot-table.component";
 import { RbInlineInputComponent } from "app/inputs/rb-inline-input/rb-inline-input.component";
 import { RbComponent } from "app/abstract/rb-component";
+import { NavigateBackData, NavigateEventDataTarget } from "./datamodel";
 
 export const componentRegistry: {[key:string]: any} = {
     "dataset": RbDatasetComponent,
@@ -248,6 +249,16 @@ export class LoadedView extends RbActivatorComponent {
         }
       }
     }
+
+    getCurrentlyOpenTab(): string | undefined {
+      for(let tabsection of this.tabSections) {
+        for(let tab of tabsection.tabs) {
+          if(tab.active) {
+            return tab.id ?? tab.label;
+          }
+        }
+      }      
+    }
   
     forceRefresh() {
       for(let dataset of this.topSets) {
@@ -265,4 +276,20 @@ export class LoadedView extends RbActivatorComponent {
         return ret;
     }
   
+    extractNavigateEventDataTargets() : NavigateEventDataTarget[] {
+      let ret: NavigateEventDataTarget[] = [];
+      for(let set of this.topSets) {
+        if(set instanceof RbDatasetComponent) {
+          let data: NavigateEventDataTarget = {
+            datasetid: set.id ?? undefined,
+            objectname: set.objectname,
+            filter: set.userFilter,
+            search: set.userSearch,
+            sort: set.userSort
+          };
+          ret.push(data);
+        }
+      }
+      return ret;
+    }
   }
