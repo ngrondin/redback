@@ -1,3 +1,8 @@
+import { ComponentRef, Component, ViewContainerRef } from "@angular/core";
+import { RbActivatorComponent } from "app/abstract/rb-activator";
+import { RbSetComponent } from "app/abstract/rb-set";
+import { AppInjector } from "app/app.module";
+import { LogService } from "app/services/log.service";
 import { RbDynamicGraphComponent } from "app/graphs/rb-dynamicgraph/rb-dynamicgraph.component";
 import { RbNumberTilesComponent } from "app/graphs/rb-number-tiles/rb-number-tiles.component";
 import { RbAddressInputComponent } from "app/inputs/rb-address-input/rb-address-input.component";
@@ -148,4 +153,116 @@ export const componentRegistry: {[key:string]: any} = {
     "selector":RbSelectorComponent,
     "repeater":RbRepeaterComponent,
     "pivot":RbPivotTableComponent
+  }
+
+export class LoadedView extends RbActivatorComponent {
+    rootComponentRefs: ComponentRef<Component>[] = [];
+    topSets: RbSetComponent[] = [];
+    tabSections: RbTabSectionComponent[] = [];
+    compsWithIds: RbComponent[] = [];
+    logService: LogService;
+  
+    constructor(
+      public name: string,
+      public title: string,
+    ) {
+      super();
+      this.logService = AppInjector.get(LogService);
+    }
+  
+    activatorInit() {}
+  
+    activatorDestroy() {}
+    
+    onDatasetEvent(event: any) {}
+  
+    onActivationEvent(state: boolean) {}
+  
+    attachTo(container: ViewContainerRef) {
+      this.logService.debug("LoadedView: attaching to container");
+      for(let item of this.rootComponentRefs) {
+        container.insert(item.hostView);
+      }
+      this.logService.debug("LoadedView: activating")
+      this.activate();
+    }  
+  
+    detachFrom(container: ViewContainerRef) {
+      this.logService.debug("LoadedView: deactivating")
+      this.deactivate();
+      this.logService.debug("LoadedView: detaching from container");
+      this.rootComponentRefs.forEach(item => {
+        container.detach(container.indexOf(item.hostView))
+      });
+    }
+  
+    clearData() {
+      for(let set of this.topSets) {
+        set.clear();
+      }
+    }
+  
+    /** This function will match targets with only one dataset. Any unmatched dataset 
+     * will have a new created empty target in order to save its state for return navigation */
+    /*setDataTargets(dataTargets: DataTarget[]) : DataTarget[] {
+      let targets = [...dataTargets];
+      let newTargets = [];
+      for(let dataset of this.topSets.filter(s => s.ignoretarget == false)) {
+        let found = false;
+        for(let target of targets) {
+          if(target.appliesTo(dataset)) {
+            dataset.setDataTarget(target);
+            target.datasetid = dataset.id;
+            targets.splice(targets.indexOf(target), 1);
+            found = true;
+            break;
+          }
+        }
+        if(!found) {
+          let newTarget = new DataTarget(null, null, null, null, null, null);
+          dataset.setDataTarget(newTarget);
+          newTarget.datasetid = dataset.id;
+          newTargets.push(newTarget);
+        }
+      }
+      return newTargets;
+    }
+
+    setCompTargets(compTargets: CompTarget[]): void {
+      for(let comp of this.compsWithIds) {
+        for(let compTarget of compTargets) {
+          if(compTarget.appliesTo(comp)) {
+            comp.onCompTargetEvent(compTarget.data);
+            break;
+          }
+        }
+      }
+    }*/
+  
+    openTab(tabid: String) {
+      for(let tabsection of this.tabSections) {
+        for(let tab of tabsection.tabs) {
+          if(tab.id == tabid || tab.label.toLowerCase() == tabid.toLowerCase()) {
+            tabsection.selectTab(tab);
+          }
+        }
+      }
+    }
+  
+    forceRefresh() {
+      for(let dataset of this.topSets) {
+        dataset.refreshData();
+      }    
+    }
+  
+    getTopActiveDatasets() : RbDatasetComponent[] {
+        let ret = [];
+        for(let set of this.topSets) {
+            if(set instanceof RbDatasetComponent && set.active) {
+                ret.push(set);
+            }
+        }
+        return ret;
+    }
+  
   }
