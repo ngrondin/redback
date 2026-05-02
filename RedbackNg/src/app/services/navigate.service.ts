@@ -9,15 +9,18 @@ import { LogService } from './log.service';
 import { ApiService } from './api.service';
 import { componentRegistry, LoadedView } from 'app/loader';
 import { BuildService } from './build.service';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 class Target {
   component: RbViewLoaderComponent;
-  //currentView: LoadedView | null = null;
   stack: NavigateBackData[] = [];
+  title?: string;
 
   constructor(c: RbViewLoaderComponent) {
     this.component = c;
   }
+
+
 }
 
 @Injectable({
@@ -74,25 +77,18 @@ export class NavigateService {
       if(view != null ) {
         if(event.reset == false) {
           if(target.component.currentLoadedView != null) {
-            let dataTargets = target.component.currentLoadedView.extractNavigateEventDataTargets();
             let backData = new NavigateBackData(target.component.currentLoadedView.name, target.component.currentLoadedView.getCurrentlyOpenTab(), this.modalService.currentlyOpenModal);
-            backData._breadcrumbLabel = target.component.currentLoadedView.title;
-            backData.dataTargets = dataTargets;
+            backData.breadcrumbLabel = target.component.currentLoadedView.title;
+            backData.dataTargets = target.component.currentLoadedView.extractNavigateEventDataTargets();
             target.stack.push(backData)
           }
         } else {
           target.stack = [];
         }
-        if(event.comptargets.length > 0) {
-
-        }
-        /*if(objectConfig != null && navdata.dataTargets.length == 1 && navdata.dataTargets[0].filter != null && navdata.dataTargets[0].filter[objectConfig.labelattribute] != null) {
-          navdata.breadcrumbLabel = eval(navdata.dataTargets[0].filter[objectConfig.labelattribute]);
-        }
-        if(event.label != null) {
-          navdata.additionalTitle = event.label;
-        }*/
         await this.executeViewChange(target.component, view);
+        if(event.label != null) target.title = event.label;
+        if(event.datatargets != null) target.component.currentLoadedView?.filterSortDataSets(event.datatargets);
+        if(event.comptargets != null) target.component.currentLoadedView?.configureComponents(event.comptargets);
         this.notifyObservers(event);
       } else if(event.tab != null) {
         target.component.currentLoadedView?.openTab(event.tab);
@@ -106,7 +102,7 @@ export class NavigateService {
     let target = this.getTarget(targetname);
     if(target != null) {
       let backData = target.stack[index];
-      target.stack.splice(index + 1);
+      target.stack.splice(index);
       await this.executeViewChange(target.component, backData.view);
     }
   }
@@ -163,19 +159,24 @@ export class NavigateService {
     })
   }
 
-  getCurrentNavigateBackStack(target?: string): NavigateBackData[] {
-    return this.getTarget(target)?.stack ?? [];
+  getCurrentNavigateBackStack(targetname?: string): NavigateBackData[] {
+    return this.getTarget(targetname)?.stack ?? [];
   }
 
-  getCurrentLoadedView(target?: string): LoadedView | null {
-    return this.getTarget(target)?.component.currentLoadedView;
+  getCurrentTitle(targetname?: string): string {
+    let target = this.getTarget(targetname);
+    return target.title ?? target.component.currentLoadedView?.title ?? "";
   }
 
-  getTarget(name?: string) : Target {
+  getCurrentTopDataSets(targetname?: string) : RbDatasetComponent[] {
+    return this.getTarget(targetname).component.currentLoadedView?.getTopActiveDatasets() ?? [];
+  }
+
+  private getTarget(name?: string) : Target {
     return this.targets[name ?? "default"];
   }
 
-  notifyObservers(navdata: NavigateEvent) {
+  private notifyObservers(navdata: NavigateEvent) {
     for(const observer of this.navigateObservers) {
       observer.next(navdata);
     }

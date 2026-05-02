@@ -4,15 +4,14 @@
         *ngFor="let item of targetBackStack; let i = index"
         class="rb-vh-stackitem">
         <span
-            *ngIf="i > 0"
-            class="rb-vh-bc-link">
-            &nbsp;&nbsp;&gt;&nbsp;&nbsp;
-        </span>
-        <span
             class="rb-vh-bc-link"
             (click)="backTo(i)">
             {{item.breadcrumbLabel}}
         </span>
+        <span
+            class="rb-vh-bc-link">
+            &nbsp;&nbsp;&gt;&nbsp;&nbsp;
+        </span>        
     </div>
     <div
         class="rb-vh-title">

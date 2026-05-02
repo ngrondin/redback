@@ -95,7 +95,7 @@ export abstract class AppRootComponent implements OnInit {
     }
   
     get currentTitle(): string {
-      return this.navigateService.getCurrentLoadedView("target").title;
+      return this.navigateService.getCurrentTitle();
     }
   
     setTitle($event) {

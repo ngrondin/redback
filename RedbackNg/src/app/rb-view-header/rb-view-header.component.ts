@@ -13,7 +13,7 @@ import { UserprefService } from 'app/services/userpref.service';
   styleUrls: ['./rb-view-header.component.css']
 })
 export class RbViewHeaderComponent implements OnInit {
-  @Input('target') target: string;
+  @Input('target') target?: string;
   @HostBinding('style.color') get foreColor() { return this.color != null ? this.color.fore : "darkblue";}
   @HostBinding('style.backgroundColor') get backColor() { return this.color != null ? this.color.back : "#ffffff";}
   @HostBinding('style.backgroundImage') get backImg() { return this.pattern != null && this.pattern.value != null ? this.sanitizer.bypassSecurityTrustStyle('url("' + this.setFillColor(this.pattern.value, this.darken(this.backColor)) +'")') : null;}
@@ -63,14 +63,14 @@ export class RbViewHeaderComponent implements OnInit {
   }
 
   get title() : string {
-    return this.navigateService.getCurrentLoadedView(this.targetName)?.title;
+    return this.navigateService.getCurrentTitle(this.targetName);
   }
 
   get targetBackStack(): NavigateBackData[] {
     return this.navigateService.getCurrentNavigateBackStack(this.targetName);
   }
 
-  backTo(index) {
+  backTo(index: number) {
     this.navigateService.backTo(index, this.targetName);
   }
 
@@ -111,7 +111,7 @@ export class RbViewHeaderComponent implements OnInit {
   }  
 
 
-  hexToRgb(hex) {
+  hexToRgb(hex: string) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
       r: parseInt(result[1], 16),
@@ -124,7 +124,7 @@ export class RbViewHeaderComponent implements OnInit {
     return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
   }
 
-  darken(hex) : string {
+  darken(hex: string) : string {
     let rgb = this.hexToRgb(hex);
     if(rgb != null) {
       let ratio = 0.88;
@@ -137,7 +137,7 @@ export class RbViewHeaderComponent implements OnInit {
     }
   }
 
-  setFillColor(svg, hex) : string {
+  setFillColor(svg: string, hex: string) : string {
     return svg.replace('%23000000', hex.replace('#', '%23'));
   }
  }

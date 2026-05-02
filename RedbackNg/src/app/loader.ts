@@ -202,7 +202,7 @@ export class LoadedView extends RbActivatorComponent {
         set.clear();
       }
     }
-  
+
     filterSortDataSets(dataTargets: NavigateEventDataTarget[]) {
       let targets = [...dataTargets];
       for(let dataset of this.topSets.filter(s => s.ignoretarget == false)) {
@@ -279,14 +279,15 @@ export class LoadedView extends RbActivatorComponent {
       let ret: NavigateEventDataTarget[] = [];
       for(let set of this.topSets) {
         if(set instanceof RbDatasetComponent) {
-          let data: NavigateEventDataTarget = {
-            datasetid: set.id ?? undefined,
-            objectname: set.objectname,
-            filter: set.userFilter,
-            search: set.userSearch,
-            sort: set.userSort
-          };
-          ret.push(data);
+          if(set.userFilter != null || set.userSearch != null || set.userSort != null) {
+            ret.push({
+              datasetid: set.id ?? undefined,
+              objectname: set.objectname,
+              filter: set.userFilter,
+              search: set.userSearch,
+              sort: set.userSort
+            });
+          }
         }
       }
       return ret;

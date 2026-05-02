@@ -563,7 +563,7 @@ export class NavigateBackData {
     modal?: string;
     title?: string | null;
     additionalTitle?: string;
-    _breadcrumbLabel?: string;
+    breadcrumbLabel?: string;
     mode?: string;
     dataTargets: NavigateEventDataTarget[];
     //compTargets: CompTarget[];
