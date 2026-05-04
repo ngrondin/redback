@@ -13,13 +13,13 @@ import { DialogService } from './dialog.service';
 })
 export class NotificationService {
   notifications: RbNotification[] = [];
-  exceptionCount: number;
+  exceptionCount: number = 0;
   topExceptions: any[] = [];
   topExceptionsByAction: any[] = [];
   topExceptionsByObject: any[] = [];
-  page: number;
+  page: number = 0;
   pageSize: number = 500;
-  lastReceived: Date;
+  lastReceived: Date|null = null;
   private observers: Observer<any>[] = [];
   private loadPromiseResolver: any;
 
@@ -40,7 +40,9 @@ export class NotificationService {
         this.calcStats();
       }
     );
-    this.clientWSService.getStateObservable().subscribe(state => this.onClientConnection(state));
+    this.clientWSService.getStateObservable().subscribe((state: any) => {
+      if(state.connected == true) this.onClientConnection(state);
+    });
   }
 
   onClientConnection(state: boolean) {
@@ -73,7 +75,7 @@ export class NotificationService {
     });
   }
 
-  private fetchNextPage(filter) {
+  private fetchNextPage(filter: any) {
     this.apiService.listAssignments(filter, this.page, this.pageSize).subscribe(
       resp => {
         for(let item of resp.result) {
@@ -138,8 +140,8 @@ export class NotificationService {
     }
   }
 
-  public getNotificationFor(objectname: string, uid: string) : Observable<RbNotification> {
-    const obs = new Observable<RbNotification>((observer) => {
+  public getNotificationFor(objectname: string, uid: string) : Observable<RbNotification|null> {
+    const obs = new Observable<RbNotification|null>((observer) => {
       let sub = this.notifications.filter(item => item.data != null && item.data.objectname == objectname && item.data.uid == uid && item.type != 'notification');
       if(sub.length > 0) {
         observer.next(sub[0]);
@@ -161,7 +163,7 @@ export class NotificationService {
     return obs;
   }
 
-  actionNotification(notification: RbNotification, action: string, confirm: string): Observable<null> {
+  actionNotification(notification: RbNotification, action: string, confirm?: string): Observable<null> {
     if(confirm == null) {
       return new Observable<null>((observer) => {
         this.apiService.actionAssignment(notification.pid, action).subscribe({
@@ -185,7 +187,7 @@ export class NotificationService {
     } else {
       return new Observable((observer) => {
         this.dialogService.openDialog(confirm, [
-          {label:"Ok", focus: true, callback:() => this.actionNotification(notification, action, null).subscribe(() => observer.complete())}, 
+          {label:"Ok", focus: true, callback:() => this.actionNotification(notification, action).subscribe(() => observer.complete())}, 
           {label:"Cancel", focus: false, callback:() => observer.complete()}
         ]);
       })

@@ -9,8 +9,8 @@ import { RbTabSectionComponent } from 'app/rb-tab-section/rb-tab-section.compone
   styleUrls: ['./rb-tab.component.css']
 })
 export class RbTabComponent extends RbActivatorComponent implements OnInit {
-  @Input('tabsection') tabsection : RbTabSectionComponent;
-  @Input('label') label : string;
+  @Input('tabsection') tabsection? : RbTabSectionComponent;
+  @Input('label') label? : string;
   @Input('isdefault') isdefault : boolean = false;
   @HostBinding('style.display') get visitility() {return this.activatorOn && this.show ? 'flex' : 'none';}
 
@@ -21,7 +21,7 @@ export class RbTabComponent extends RbActivatorComponent implements OnInit {
   }
 
   activatorInit() {
-    this.tabsection.register(this);
+    this.tabsection?.register(this);
   }
 
   activatorDestroy() {
@@ -31,6 +31,7 @@ export class RbTabComponent extends RbActivatorComponent implements OnInit {
   }
 
   onActivationEvent(state: boolean) {
+
   }
 
  

@@ -4,6 +4,7 @@ import { ChatService } from 'app/services/chat.service';
 import { NotificationService } from 'app/services/notification.service';
 import { ConfigService } from 'app/services/config.service';
 import { LogService } from 'app/services/log.service';
+import { ClientWSService } from 'app/services/clientws.service';
 
 
 @Component({
@@ -12,15 +13,20 @@ import { LogService } from 'app/services/log.service';
   styleUrls: ['./desktop-root.component.css']
 })
 export class DesktopRootComponent extends AppRootComponent {
+
   
   constructor(
     public chatService: ChatService,
     public notificationService: NotificationService,
+    public clientWSService: ClientWSService
   ) {
     super();
   }
 
+  ngOnInit() {
+    super.ngOnInit()
 
+  }
 
 
 

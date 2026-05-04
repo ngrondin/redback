@@ -21,25 +21,23 @@ import { Observable, Subscription } from "rxjs";
 
 @Component({template: ''})
 export abstract class AppRootComponent implements OnInit {
-    @Input() apptitle : string;
-    @Input() logo : string;
-    @Input() username : string;
-    @Input() userdisplay : string;
-    @Input() initialView : string;
+    @Input() apptitle? : string;
+    @Input() logo? : string;
+    @Input() username? : string;
+    @Input() userdisplay? : string;
+    @Input() initialView? : string;
     @Input() version : string = 'default';
-    @Input() events : Observable<string>;
+    @Input() events? : Observable<string>;
 
-    @ViewChild('usermenubutton', { read: ViewContainerRef }) userMenuContainerRef: ViewContainerRef;
-    //@ViewChild("rightdrawer") rightdrawer: MatSidenav;
+    @ViewChild('usermenubutton', { read: ViewContainerRef }) userMenuContainerRef?: ViewContainerRef;
 
-    drawerShowing: string = null;
+    drawerShowing: string|null = null;
     drawerOpen: boolean = false;
-    subscription: Subscription;
+    subscription?: Subscription;
     
     title: string = "Welcome";
     showNLBox: boolean = false;
     showWSConsole: boolean = false;
-    //showDrawer: boolean = false;
     
     configService : ConfigService;
     dragService: DragService;
@@ -48,12 +46,15 @@ export abstract class AppRootComponent implements OnInit {
     domSanitizer: DomSanitizer;
     cookieService: CookieService;
     apiService: ApiService;
-    clientWSServer: ClientWSService;
+    clientWSService: ClientWSService;
     popupService: PopupService;
     nlActionService: NlactionService;
     navigateService: NavigateService;
     logService: LogService;
     dialog: MatDialog;
+
+    connected: boolean = false;
+    pendingRequests: boolean = false;
 
     constructor(
     ) {
@@ -64,7 +65,7 @@ export abstract class AppRootComponent implements OnInit {
         this.domSanitizer = AppInjector.get(DomSanitizer);
         this.cookieService = AppInjector.get(CookieService);
         this.apiService = AppInjector.get(ApiService);
-        this.clientWSServer = AppInjector.get(ClientWSService);
+        this.clientWSService = AppInjector.get(ClientWSService);
         this.popupService = AppInjector.get(PopupService);
         this.nlActionService = AppInjector.get(NlactionService);
         this.navigateService = AppInjector.get(NavigateService);
@@ -73,51 +74,61 @@ export abstract class AppRootComponent implements OnInit {
      }
   
     ngOnInit() {
-      this.subscription = this.events.subscribe((event) => {
-        if(event == 'init' && this.initialView != null) {
-          let iv = this.userprefService.getInitialView();
-          if(iv != null) {
-            this.navigateService.navigateTo({domain: iv.domain, view: iv.view})
-          } else {
-            this.navigateService.navigateTo({view: this.initialView})
+      if(this.events != null) {
+        this.subscription = this.events.subscribe((event) => {
+          if(event == 'init' && this.initialView != null) {
+            let iv = this.userprefService.getInitialView();
+            if(iv != null) {
+              this.navigateService.navigateTo({domain: iv.domain, view: iv.view})
+            } else {
+              this.navigateService.navigateTo({view: this.initialView})
+            }
           }
-        }
+        });
+      }
+      this.clientWSService.getStateObservable().subscribe((state: any) => {
+        this.connected = state.connected;
+        this.pendingRequests = state.pendingrequests;
       });
-      this.navigateService.getNavigateObservable().subscribe((navdata) => this.navigated());
+      this.navigateService.getNavigateObservable().subscribe((navdata) => {
+        this.navigated();
+      });
     }
   
     ngOnDestroy() {
-      this.subscription.unsubscribe();
+      this.subscription?.unsubscribe();
     }
   
     get logoUrl() : any {
-      return this.domSanitizer.bypassSecurityTrustResourceUrl(this.logo);
+      return this.logo != null ? this.domSanitizer.bypassSecurityTrustResourceUrl(this.logo) : null;
     }
   
     get currentTitle(): string {
       return this.navigateService.getCurrentTitle();
     }
   
-    setTitle($event) {
+    setTitle($event: any) {
       this.title = $event;
     }
 
     openUserMenu() {
-      let popupComponentRef = this.popupService.openPopup(this.userMenuContainerRef, RbUsermenuComponent, {});
-      popupComponentRef.instance.cancelled.subscribe(() => this.popupService.closePopup());
-      popupComponentRef.instance.selected.subscribe(value => {
-        if(value == 'logout') {
-          this.logout();
-        } else if(value == 'prefs') {
-          this.toggleRightDrawer("prefs");
-        } else if(value == 'logs') {
-          this.logService.export();
-        } else if(value == 'about') {
-          this.openAbout();
-        } else {
-          this.navigateService.navigateTo({view: value});
-        }
-      });
+      if(this.userMenuContainerRef != null) {
+        let popupComponentRef = this.popupService.openPopup(this.userMenuContainerRef, RbUsermenuComponent, {});
+        popupComponentRef.instance.cancelled.subscribe(() => this.popupService.closePopup());
+        popupComponentRef.instance.selected.subscribe(value => {
+          if(value == 'logout') {
+            this.logout();
+          } else if(value == 'prefs') {
+            this.toggleRightDrawer("prefs");
+          } else if(value == 'logs') {
+            this.logService.export();
+          } else if(value == 'about') {
+            this.openAbout();
+          } else {
+            this.navigateService.navigateTo({view: value});
+          }
+        });
+      }
     }
   
     logout() {
@@ -125,7 +136,7 @@ export abstract class AppRootComponent implements OnInit {
       window.location.href = "/logout";
     }
   
-    toggleRightDrawer(type) {
+    toggleRightDrawer(type: string) {
       if(this.drawerOpen) {
         if(this.drawerShowing == type) {
           this.closeRightDrawer();
@@ -168,15 +179,15 @@ export abstract class AppRootComponent implements OnInit {
       });
     }
   
-    @HostListener('mouseup', ['$event']) onMouseUp($event) {
+    @HostListener('mouseup', ['$event']) onMouseUp($event: any) {
       this.dragService.endDrag();
     }
   
-    @HostListener('mousemove', ['$event']) onMouseMove($event) {
+    @HostListener('mousemove', ['$event']) onMouseMove($event: any) {
       this.dragService.move($event);
     }
   
-    @HostListener('click', ['$event']) onClick($event) {
+    @HostListener('click', ['$event']) onClick($event: any) {
       this.dialogService.hideTooltip();
     }
   }

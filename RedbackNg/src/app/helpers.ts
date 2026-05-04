@@ -7,6 +7,11 @@ import { UserprefService } from "./services/userpref.service";
 import { RbDatasetComponent } from "./rb-dataset/rb-dataset.component";
 import { LogService } from "./services/log.service";
 
+export async function sleep(ms: number) {
+    return new Promise<void> ((resolve, reject) => {
+        setTimeout(() => resolve(), ms);
+    });
+}
 export class Translator {
     cfg: any;
 
@@ -295,7 +300,7 @@ export class ObserverProxy implements Observer<any> {
 }
 
 export class Evaluator {
-    public static eval(expr: any, object: RbObject, relatedObject: RbObject, dataset: RbDatasetComponent) {
+    public static eval(expr: any, object: RbObject, relatedObject?: RbObject, dataset?: RbDatasetComponent) {
         if(expr == null) {
             return null;
         } else if(expr == 'true' || expr == true) {
@@ -514,7 +519,7 @@ export class LinkConfig {
         }
     }
 
-    getNavigationEvent(object: RbObject, dataset: RbDatasetComponent, extraContext?: any): NavigateEvent {
+    getNavigationEvent(object: RbObject, dataset?: RbDatasetComponent, extraContext?: any): NavigateEvent {
         let event: NavigateEvent = {
             target: this.target,
             view: this.view,

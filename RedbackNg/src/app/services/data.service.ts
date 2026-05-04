@@ -151,7 +151,7 @@ export class DataService {
     });
   }
 
-  fetchEntireList(name: string, filter: any, search: string, sort: any) : Observable<any> {
+  fetchEntireList(name: string, filter: any, search: string|null, sort: any) : Observable<any> {
     return new Observable((observer) => {
       this.fetchCount++;
       if(this.apiService.canStream()) {

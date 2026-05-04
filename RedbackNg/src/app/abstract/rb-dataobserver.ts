@@ -96,11 +96,11 @@ export abstract class RbDataObserverComponent extends RbComponent {
         return this.aggregateset != null ? this.aggregateset.list : null;
     }
 
-    get rbObject() : RbObject {
+    get rbObject() : RbObject | null {
         return this.selectedObject;
     }
 
-    get selectedObject() : RbObject {
+    get selectedObject() : RbObject | null {
         if(this.virtualselector != null) {
             return this.virtualselector.selectedObject;
         } else if(this.dataset != null) {

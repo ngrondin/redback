@@ -12,7 +12,6 @@ export abstract class RbComponent implements OnInit {
 
     public initiated: boolean = false;
     public active: boolean = false;
-    public compTarget: any = null;
     private activatorSubscription: Subscription | null = null;
 
     constructor() {}
@@ -29,7 +28,7 @@ export abstract class RbComponent implements OnInit {
       }
       this.componentInit();
       this.initiated = true;
-      this.internalActivationEvent(this.active);
+      //this.internalActivationEvent(this.active);
     }
 
     ngOnDestroy(): void {

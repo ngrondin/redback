@@ -36,6 +36,5 @@ export class RbViewLoaderComponent implements OnInit {
       this.currentLoadedView = entry;
       entry.attachTo(this.container);
     }
-  }
-  
+  }  
 }

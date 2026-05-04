@@ -180,18 +180,12 @@ export class LoadedView extends RbActivatorComponent {
     onActivationEvent(state: boolean) {}
   
     attachTo(container: ViewContainerRef) {
-      this.logService.debug("LoadedView: attaching to container");
       for(let item of this.rootComponentRefs) {
         container.insert(item.hostView);
       }
-      this.logService.debug("LoadedView: activating")
-      this.activate();
     }  
   
     detachFrom(container: ViewContainerRef) {
-      this.logService.debug("LoadedView: deactivating")
-      this.deactivate();
-      this.logService.debug("LoadedView: detaching from container");
       this.rootComponentRefs.forEach(item => {
         container.detach(container.indexOf(item.hostView))
       });
@@ -252,7 +246,7 @@ export class LoadedView extends RbActivatorComponent {
     getCurrentlyOpenTab(): string | undefined {
       for(let tabsection of this.tabSections) {
         for(let tab of tabsection.tabs) {
-          if(tab.active) {
+          if(tabsection.isTabActive(tab)) {
             return tab.id ?? tab.label;
           }
         }

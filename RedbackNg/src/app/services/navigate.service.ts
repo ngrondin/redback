@@ -1,5 +1,5 @@
 import { ComponentFactoryResolver, Injectable } from '@angular/core';
-import { NavigateEvent, NavigateBackData } from 'app/datamodel';
+import { NavigateEvent, NavigateBackData, NavigateEventDataTarget, NavigateEventCompTarget } from 'app/datamodel';
 import { RbViewLoaderComponent } from 'app/rb-view-loader/rb-view-loader.component';
 import { ConfigService } from './config.service';
 import { UserprefService } from './userpref.service';
@@ -10,6 +10,7 @@ import { ApiService } from './api.service';
 import { componentRegistry, LoadedView } from 'app/loader';
 import { BuildService } from './build.service';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { sleep } from 'app/helpers';
 
 class Target {
   component: RbViewLoaderComponent;
@@ -85,10 +86,8 @@ export class NavigateService {
         } else {
           target.stack = [];
         }
-        await this.executeViewChange(target.component, view);
+        await this.executeViewChange(target.component, view, event.datatargets, event.comptargets, event.tab, event.modal);
         if(event.label != null) target.title = event.label;
-        if(event.datatargets != null) target.component.currentLoadedView?.filterSortDataSets(event.datatargets);
-        if(event.comptargets != null) target.component.currentLoadedView?.configureComponents(event.comptargets);
         this.notifyObservers(event);
       } else if(event.tab != null) {
         target.component.currentLoadedView?.openTab(event.tab);
@@ -103,24 +102,26 @@ export class NavigateService {
     if(target != null) {
       let backData = target.stack[index];
       target.stack.splice(index);
-      await this.executeViewChange(target.component, backData.view);
+      await this.executeViewChange(target.component, backData.view, backData.dataTargets, undefined, backData.tab, backData.modal);
     }
   }
 
-  private async executeViewChange(viewLoader: RbViewLoaderComponent, viewName: string, modal?: string, tab?: string) : Promise<LoadedView> {
+  private async executeViewChange(viewLoader: RbViewLoaderComponent, viewName: string, datatargets?: NavigateEventDataTarget[], comptargets?: NavigateEventCompTarget[], tab?: string, modal?: string) : Promise<LoadedView> {
     try {
       this.modalService.closeAll();
+      viewLoader.currentLoadedView?.deactivate();
       viewLoader.detachCurrentLoadedView();
       let entry: LoadedView = await this.getLoadedView(viewName);
-      viewLoader.attachNewLoadedView(entry);
       window.redback.currentLoadedView = entry;
-      this.userprefService.setCurrentView(viewName);
+      this.userprefService.setCurrentView(viewName); //Some comp inits will use this service, so it needs to be update first
       this.modalService.setCurrentView(viewName);
-      if(tab != null) {
-        setTimeout(() => entry.openTab(tab), 100);
-      } else if(modal != null) {
-        setTimeout(() => this.modalService.open(modal), 100);
-      }
+      viewLoader.attachNewLoadedView(entry);
+      await sleep(1); //This is to make sure the components are fully attached and initiated
+      if(datatargets != null) entry.filterSortDataSets(datatargets);
+      if(comptargets != null) entry.configureComponents(comptargets);
+      entry.activate();
+      if(tab != null) entry.openTab(tab);
+      if(modal != null) this.modalService.open(modal);
       return entry;
     } catch (err) {
       this.logService.error("NavService: Error executing view change :" + err);
