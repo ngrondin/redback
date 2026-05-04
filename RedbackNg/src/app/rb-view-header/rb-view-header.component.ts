@@ -1,11 +1,10 @@
 //import { TOUCH_BUFFER_MS } from '@angular/cdk/a11y';
 import { SimpleChanges } from '@angular/core';
-import { EventEmitter, HostBinding, Output } from '@angular/core';
+import { HostBinding } from '@angular/core';
 import { Component, Input, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { NavigateData } from 'app/datamodel';
+import { NavigateBackData } from 'app/datamodel';
 import { NavigateService } from 'app/services/navigate.service';
-//import { hexToRgb } from '@swimlane/ngx-charts';
 import { UserprefService } from 'app/services/userpref.service';
 
 @Component({
@@ -14,7 +13,7 @@ import { UserprefService } from 'app/services/userpref.service';
   styleUrls: ['./rb-view-header.component.css']
 })
 export class RbViewHeaderComponent implements OnInit {
-  @Input('target') target: string;
+  @Input('target') target?: string;
   @HostBinding('style.color') get foreColor() { return this.color != null ? this.color.fore : "darkblue";}
   @HostBinding('style.backgroundColor') get backColor() { return this.color != null ? this.color.back : "#ffffff";}
   @HostBinding('style.backgroundImage') get backImg() { return this.pattern != null && this.pattern.value != null ? this.sanitizer.bypassSecurityTrustStyle('url("' + this.setFillColor(this.pattern.value, this.darken(this.backColor)) +'")') : null;}
@@ -64,16 +63,15 @@ export class RbViewHeaderComponent implements OnInit {
   }
 
   get title() : string {
-    let data = this.navigateService.getCurrentNavigateData(this.targetName);
-    return data != null ? data.fulltitle : "";
+    return this.navigateService.getCurrentTitle(this.targetName);
   }
 
-  get targetStack(): NavigateData[] {
-    return this.navigateService.getCurrentNavigateStack(this.targetName);
+  get targetBackStack(): NavigateBackData[] {
+    return this.navigateService.getCurrentNavigateBackStack(this.targetName);
   }
 
-  backTo(index) {
-    this.navigateService.backTo(this.target ?? "default", index);
+  backTo(index: number) {
+    this.navigateService.backTo(index, this.targetName);
   }
 
   selectColor(color: any) {
@@ -113,7 +111,7 @@ export class RbViewHeaderComponent implements OnInit {
   }  
 
 
-  hexToRgb(hex) {
+  hexToRgb(hex: string) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
       r: parseInt(result[1], 16),
@@ -126,7 +124,7 @@ export class RbViewHeaderComponent implements OnInit {
     return "#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1);
   }
 
-  darken(hex) : string {
+  darken(hex: string) : string {
     let rgb = this.hexToRgb(hex);
     if(rgb != null) {
       let ratio = 0.88;
@@ -139,7 +137,7 @@ export class RbViewHeaderComponent implements OnInit {
     }
   }
 
-  setFillColor(svg, hex) : string {
+  setFillColor(svg: string, hex: string) : string {
     return svg.replace('%23000000', hex.replace('#', '%23'));
   }
  }

@@ -31,7 +31,7 @@ export class FilterService {
 
 
 
-  public resolveFilter(__inMap: any, obj: RbObject, dataset?: RbDatasetComponent, relatedObject?: RbObject, relatedDataset?: RbDatasetComponent, datasetgroup?: RbDatasetGroupComponent, extraContext?: any) : any {
+  public resolveFilter(__inMap: any, obj?: RbObject, dataset?: RbDatasetComponent, relatedObject?: RbObject, relatedDataset?: RbDatasetComponent, datasetgroup?: RbDatasetGroupComponent, extraContext?: any) : any {
     try {
       let params: string[] = ["obj", "object", "selectedObject", "dataset", "relatedObject", "relatedDataset", "datasetgroup", "userpref", "uid"];
       let args: any[] = [obj, obj, obj, dataset, relatedObject, relatedDataset, datasetgroup, this.userPrefService];
@@ -115,7 +115,7 @@ public unresolveFilter(__inMap: any) : any {
   return __outMap;
 }
   
-  private evalExpression(expr, params: string[], args: any[]): any {
+  private evalExpression(expr: string, params: string[], args: any[]): any {
     var ret = null;
     if(expr != null && expr != "") {
       try { 

@@ -15,7 +15,7 @@ import { NlactionService } from 'app/services/nlaction.service';
 export class RbNlboxComponent {
   @Output() close: EventEmitter<any> = new EventEmitter();
 
-  @ViewChild('historyscroll') historyscroll: RbScrollComponent;
+  @ViewChild('historyscroll') historyscroll?: RbScrollComponent;
 
   history: any[] = []
   historyPointer = -1;
@@ -68,16 +68,15 @@ export class RbNlboxComponent {
 
   post() {
     let context = {};
-    let loadedView = this.navigateService.getCurrentLoadedView();
-    let datasets = loadedView.getTopActiveDatasets();
+    let datasets = this.navigateService.getCurrentTopDataSets();
     if(datasets.length > 0) {
       let contextDS = datasets[0];
-      let contextObj: RbObject = contextDS != null ? contextDS.selectedObject : null;
+      let contextObj: RbObject|null = contextDS != null ? contextDS.selectedObject : null;
       context = {
         objectname: contextDS.objectname,
         uid: contextObj != null ? contextObj.uid : null,
         filter: contextDS.resolvedFilter,
-        search: contextDS.userSearch != null ? contextDS.userSearch : contextDS.dataTarget != null ? contextDS.dataTarget.search : null,
+        search: contextDS.userSearch != null ? contextDS.userSearch : null,
         sort: contextDS.baseSort
       }
     }
@@ -136,7 +135,7 @@ export class RbNlboxComponent {
   }
 
   private scrollToBottom() {
-    this.historyscroll.scrollToBottom();
+    this.historyscroll?.scrollToBottom();
   }
 
 }

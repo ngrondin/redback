@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { DataTarget, RbObject } from '../datamodel';
+import { RbObject } from '../datamodel';
 import { DataService } from '../services/data.service';
 import { FilterService } from 'app/services/filter.service';
 import { Observable, Subscription } from 'rxjs';
@@ -36,6 +36,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public userSearch: string;
   public userFilter: any = null;
   public userSort: any = null;
+  public userSelect: any = null;
   public defaultUserFilter: any = null;
   public defaultUserSort: any = null;
   public mergedFilter: any;
@@ -115,7 +116,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     }
   }
 
-  onDataTargetEvent(dt: DataTarget) {
+  /*onDataTargetEvent(dt: DataTarget) {
     let fetched = this.filterSort({
       filter: dt.filter ?? this.defaultUserFilter, 
       sort: dt.sort ?? this.defaultUserSort, 
@@ -124,7 +125,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(!fetched && dt.select != null) {
       this.selectByFilter(dt.select); 
     }  
-  }
+  }*/
 
   public get list() : RbObject[] {
     return this._list;
@@ -241,8 +242,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public fetchNextPage() {
     this.logService.debug("Dataset " + this.id + ": FetchNextPage (hasMorePages=" + this.hasMorePages + ", fetchAll=" + this.fetchAll + ", resolvedFilter=" + JSON.stringify(this.resolvedFilter) + ")");
     if(this.hasMorePages) {
-      const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
-      const search = this.userSearch != null ? this.userSearch : this.dataTarget != null && this.dataTarget.search != null ? this.dataTarget.search : null;
+      //const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
+      //const search = this.userSearch != null ? this.userSearch : this.dataTarget != null && this.dataTarget.search != null ? this.dataTarget.search : null;
+      const sort = this.userSort != null ? this.userSort : this.baseSort;
+      const search = this.userSearch != null ? this.userSearch : null;
       const addRel = this.fetchAll ? false : this.addrelated;
       let observable = null;
       if(this.fetchAll) {
@@ -293,8 +296,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         this.select(this._list[0]);
       }
     } else if(this._list.length > 1) {
-      if(this.dataTarget != null && this.dataTarget.select != null) {
-        this.selectByFilter(this.dataTarget.select);
+      if(this.userSelect != null) {
+        this.selectByFilter(this.userSelect);
+        this.userSelect = null;
       } else if(this._selectedObjects.length > 0) {
         this._selectedObjects = this._selectedObjects.filter(o => this._list.includes(o));
       }
@@ -345,9 +349,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   public select(object: RbObject) {
     this._selectedObjects = [object];
-    if(this.dataTarget != null && object != null) {
-      this.dataTarget.select = {uid: object.uid};
-    }
     this.publishEvent('select', object);
   }
 
@@ -379,7 +380,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public filterSort(event: any) : boolean {
-    //this.logService.debug("Dataset " + this.id + ": FilterSort ()");
     let fetched = false;
     let newFilter = event.filter;// ?? this.defaultUserFilter;
     let newSort = event.sort;// ?? this.defaultUserSort;
@@ -387,16 +387,13 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     let filterChange = 'filter' in event && ValueComparator.notEqual(newFilter, this.userFilter);
     let sortChange = 'sort' in event && ValueComparator.notEqual(newSort, this.userSort);
     let searchChange = 'search' in event && newSearch != this.userSearch;
-    let change = filterChange || sortChange || searchChange;
+    let change = filterChange || sortChange || searchChange || event.select != null;
     if(change) {
       if(filterChange) this.userFilter = newFilter;
       if(sortChange) this.userSort = newSort;
       if(searchChange) this.userSearch = newSearch;
+      if(event.select != null) this.userSelect = event.select;
       fetched = this.refreshData();
-      if(this.dataTarget != null && this.ignoretarget == false) {
-        if(filterChange) this.dataTarget.filter = newFilter;
-        if(searchChange) this.dataTarget.search = newSearch;
-      }
     }
     return fetched;
   } 

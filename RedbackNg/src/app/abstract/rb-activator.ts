@@ -13,12 +13,12 @@ export abstract class RbActivatorComponent extends RbContainerComponent implemen
   }
 
   containerDestroy() {
-      this.activatorDestroy();
+    this.activatorDestroy();
   }
 
-  abstract activatorInit();
+  abstract activatorInit() : void;
 
-  abstract activatorDestroy();
+  abstract activatorDestroy() : void;
 
   getActivationObservable() : Observable<boolean>  {
     return new Observable<boolean>((observer) => {

@@ -14,15 +14,15 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   @Input('keeplasttab') keeplasttab : boolean = false;
   @Input('secondary') secondary: boolean = false;
 
-  @ViewChild('container', { read: ViewContainerRef, static: true }) container: ViewContainerRef;
+  @ViewChild('container', { read: ViewContainerRef, static: true }) container!: ViewContainerRef;
   
   tabs: RbTabComponent[] = [];
-  selectedTab: RbTabComponent;
+  selectedTab: RbTabComponent | null = null;
 
   cmTop: number = 100;
   cmLeft: number = 100;
   cmShow: boolean = false;
-  cmTab: RbTabComponent;
+  cmTab: RbTabComponent | null = null;
 
   constructor(
     public userpref: UserprefService,
@@ -41,7 +41,6 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   }
 
   onActivationEvent(state: any) {
-    this.logService.debug("TabSection " + this.id + ": Activation event " + state + " (selectedTab:" + this.selectedTab + ")");
     if(state == true) {
       if(this.selectedTab != null) {
         this.selectedTab.activate();
@@ -53,13 +52,15 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     }    
   }
 
+  //Called in tab init
   public register(tab: RbTabComponent) {
-    let showtab = this.userpref.getCurrentViewUISwitch('tab',  tab.label);
+    let tabId = tab.id ?? tab.label ?? "Unnamed";
+    let showtab = this.userpref.getCurrentViewUISwitch('tab', tabId);
     if(showtab == null || showtab == true) {
       this.tabs.push(tab);
       let lasttab = this.keeplasttab == true && this.id != null ? this.userpref.getCurrentViewUISwitch('tabsection', this.id) : null;
       if(this.selectedTab == null && (lasttab == null && tab.isdefault == true) || (lasttab != null && tab.label == lasttab)) {
-        this.selectTab(tab);
+        this.selectedTab = tab;
         if(this.active) {
           this.selectedTab.activate();
         }
@@ -96,19 +97,21 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
   }
 
   hideTabDomain() {
-    this.userpref.setUISwitch('domain', 'tab', this.cmTab.label, false);
-    if(this.tabs.indexOf(this.cmTab) > -1) {
-      this.tabs.splice(this.tabs.indexOf(this.cmTab), 1);
-      if(this.selectedTab == this.cmTab) {
-        this.selectedTab = null;
-        this.cmTab.deactivate();
+    if(this.cmTab != null && this.cmTab.label != null) {
+      this.userpref.setUISwitch('domain', 'tab', this.cmTab.label, false);
+      if(this.tabs.indexOf(this.cmTab) > -1) {
+        this.tabs.splice(this.tabs.indexOf(this.cmTab), 1);
+        if(this.selectedTab == this.cmTab) {
+          this.selectedTab = null;
+          this.cmTab.deactivate();
+        }
       }
+      this.cmShow = false;
+      this.cmTab = null;
     }
-    this.cmShow = false;
-    this.cmTab = null;
   }
 
-  overflows(element) : boolean {
+  overflows(element: any) : boolean {
     if (element.offsetWidth < element.scrollWidth) {
       return true;
     } else {
@@ -116,11 +119,11 @@ export class RbTabSectionComponent extends RbContainerComponent implements OnIni
     } 
   }
 
-  scrollRight(element) {
+  scrollRight(element: any) {
     element.scrollLeft += 60;
   }
 
-  scrollLeft(element) {
+  scrollLeft(element: any) {
     element.scrollLeft -= 60;
   }
 

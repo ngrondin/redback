@@ -154,7 +154,9 @@ export class AppComponent implements OnInit {
     }
 
     this.clientWSService.initWebsocket().subscribe({
-      next: connected => this.firstLoad()
+      next: (state: any) => {
+        if(state.connected == true) this.firstLoad();
+      }
     });
     setTimeout(() => this.firstLoad(), 5000); //If the client websocket doesn't connect in 5s, fallback on http
   }

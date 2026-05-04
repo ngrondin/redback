@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
-//import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { UUID } from 'angular2-uuid';
 import { Platform } from '@angular/cdk/platform';
+// @ts-ignore
 import * as pako from 'pako';
 import { SecurityService } from './security.service';
 import { LogService } from './log.service';
@@ -63,14 +63,14 @@ export class Upload {
 class Request {
   observer: Observer<any>;
   service: string;
-  tag: string;
+  tag?: string;
   start: number;
-  end: number;
+  end?: number;
   lastevent: number;
   waitingserver: number;
   waitingclient: number;
 
-  constructor(o: Observer<any>, s: string, t: string) {
+  constructor(o: Observer<any>, s: string, t?: string) {
     this.observer = o;
     this.service = s;
     this.tag = t;
@@ -97,10 +97,10 @@ class Request {
 })
 export class ClientWSService {
   public deviceId: string;
-  public baseUrl: string;
-  public path: string;
+  public baseUrl?: string;
+  public path?: string;
   public websocket: any;
-  public stateObservers: Observer<boolean>[] = [];
+  public stateObservers: Observer<any>[] = [];
   public objectUpdateObservers: Observer<any>[] = [];
   public notificationObservers: Observer<any>[] = [];
   public chatObservers: Observer<any>[] = [];
@@ -121,19 +121,23 @@ export class ClientWSService {
     private logService: LogService,
     private platform: Platform
   ) {
-    this.deviceId = localStorage.getItem("rbdeviceid");
-    if(this.deviceId == null) {
+    let localDeviceId = localStorage.getItem("rbdeviceid");
+    if(localDeviceId == null) {
       this.deviceId = UUID.UUID();
       localStorage.setItem("rbdeviceid", this.deviceId);
+    } else {
+      this.deviceId = localDeviceId;
     }
     this.securityService.observeToken().subscribe(accessToken => this.updateToken(accessToken));
   }
 
-  get url() : string {
-    let u = this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.path;
-    u = u + '?firebus-timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone;
-    u = u + '&wscangzip=true';
-    return u;
+  get url() : string|undefined {
+    if(this.baseUrl != null) {
+      let u = this.baseUrl.replace('http:', 'ws:').replace('https:', 'wss:') + '/' + this.path;
+      u = u + '?firebus-timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone;
+      u = u + '&wscangzip=true';
+      return u;
+    }
   }
 
   initWebsocket() : Observable<boolean> {
@@ -144,18 +148,20 @@ export class ClientWSService {
   }
 
   initWebsocketSubscribe() {
-    this.securityService.checkToken().subscribe({
-      next:() => {
-        this.websocket = new WebSocket(this.url);
-        this.websocket.addEventListener("open", () => this.opened());
-        this.websocket.addEventListener("message", (event) => this.receive(event));
-        this.websocket.addEventListener("error", (event) => this.error(event));
-        this.websocket.addEventListener("close", (event) => this.closed(event));
-      },
-      error: (err) => {
-        setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
-      }
-    });
+    if(this.url != null) {
+      this.securityService.checkToken().subscribe({
+        next:() => {
+          this.websocket = new WebSocket(this.url!);
+          this.websocket.addEventListener("open", () => this.opened());
+          this.websocket.addEventListener("message", (event: any) => this.receive(event));
+          this.websocket.addEventListener("error", (event: any) => this.error(event));
+          this.websocket.addEventListener("close", (event: any) => this.closed(event));
+        },
+        error: (err) => {
+          setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
+        }
+      });
+    }
   }
 
   opened() {
@@ -171,7 +177,7 @@ export class ClientWSService {
         this.sendUnsentSubscriptionRequests();
         this.sendDeviceInfo();
         this.heartbeatFreq = 10000;
-        this.stateObservers.forEach((observer) => observer.next(true));
+        this.publishState();
       }
       let data = event.data;
       let msg = null;
@@ -201,6 +207,7 @@ export class ClientWSService {
           }
           this.addtoHistory(request);
           delete this.requests[msg.requid];
+          this.publishState();
         }
       } else if(msg.type == 'streamdata' || msg.type == 'streamcomplete' || msg.type == 'streamerror') {
         let request = this.requests[msg.requid];
@@ -221,6 +228,7 @@ export class ClientWSService {
             }
             this.addtoHistory(request);
             delete this.requests[msg.requid];
+            this.publishState()
           }
         }
       } else if(msg.type == 'uploadctl') {
@@ -256,7 +264,7 @@ export class ClientWSService {
       this.uniqueObjectSubscriptions.forEach(item => item.sent = false);
       Object.keys(this.filterObjectSubscriptions).forEach(key => this.filterObjectSubscriptions[key].sent = false);
       this.logService.info("WSS Connection closed");
-      this.stateObservers.forEach((observer) => observer.next(false));
+      this.publishState();
     }
     setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
   }
@@ -264,6 +272,7 @@ export class ClientWSService {
   send(data: any) {
     if(this.websocket != null) {
       this.websocket.send(JSON.stringify(data));
+      this.publishState()
     }
   }
   
@@ -292,7 +301,7 @@ export class ClientWSService {
 
   sendUnsentSubscriptionRequests() {
     let start = (new Date()).getTime();
-    let subreq = {type: "subscribe", list: []};
+    let subreq:any = {type: "subscribe", list: []};
     this.uniqueObjectSubscriptions.forEach(item => {
       if(item.sent == false) {
         subreq.list.push({"objectname": item.objectname, "uid": item.uid});
@@ -384,7 +393,7 @@ export class ClientWSService {
         });
       });
     } else {
-      return null;
+      throw "Web socket not connected";
     }
   }
 
@@ -402,14 +411,14 @@ export class ClientWSService {
         });
       });
     } else {
-      return null;
+      throw "Web socket not connected";
     }
   }
 
   upload(file: File, object: string, uid: string) : Observable<number> {
     if(this.connected) {
       return new Observable((observer) => {
-        let upload = new Upload(file, observer, (data) => this.send(data));
+        let upload = new Upload(file, observer, (data:any) => this.send(data));
         this.uploads[upload.uploaduid] = upload;
         this.send({
           type:"upload",
@@ -424,7 +433,7 @@ export class ClientWSService {
         });       
       })
     } else {
-      return null;
+      throw "Web socket not connected";
     }
   }
 
@@ -438,9 +447,16 @@ export class ClientWSService {
   }
 
   get consoletext(): string[] {
-    let ret = this.requestHistory.map(r => r.service + (r.tag != null ? " [" + r.tag + "]: " : ":") + (r.start % 100000) + " -> " + (r.end) % 100000 + " (" + (r.end - r.start) + "ms, " + r.waitingserver + "s/" + r.waitingclient + "c)");
+    let ret = this.requestHistory.map(r => r.service + (r.tag != null ? " [" + r.tag + "]: " : ":") + (r.start % 100000) + " -> " + (r.end!) % 100000 + " (" + (r.end! - r.start) + "ms, " + r.waitingserver + "s/" + r.waitingclient + "c)");
     ret = ret.concat(ret, Object.values(this.requests).map(r => r.service + (r.tag != null ? " [" + r.tag + "]: " : ":") + (r.start % 100000)));
     return ret;
+  }
+
+  publishState() {
+    this.stateObservers.forEach((observer) => observer.next({
+      connected: this.connected,
+      pendingrequests: this.getPendingRequestCount()
+    }));
   }
 }
 

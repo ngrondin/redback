@@ -24,10 +24,10 @@ export class RbFilterBuilderComponent implements OnInit {
 
   searchTarget: RbSearchTarget;
   userPref: any = {};
-  filterConfig: FilterConfig;
+  filterConfig?: FilterConfig;
   filter: any = {};
   filterConstructs: FilterItemConstruct[][] = [[]];
-  sortConfig: SortConfig;
+  sortConfig?: SortConfig;
   sort: any = {};
   sortConstructs: SortItemConstruct[] = [];
   savedEntries: SavedEntry[] = [];
@@ -35,7 +35,7 @@ export class RbFilterBuilderComponent implements OnInit {
   _attributeToAddToSort: any;
   changed: boolean = false;
   tab: string = "filter";
-  editingEntry: SavedEntry;
+  editingEntry?: SavedEntry;
   uniongroupsMode: boolean = false;
 
   datechoice: any = [
@@ -275,10 +275,9 @@ export class RbFilterBuilderComponent implements OnInit {
   createMenuLink() {
     let entry = this.editingEntry;
     if(entry != null) {
-      let currentView = this.navigateService.getCurrentLoadedView();
       let menuLink = {
         type: "menulink",
-        view: currentView.name,
+        view: this.navigateService.getCurrentTitle(),
         icon: "filter",
         label: entry.name,
         filter: this.filterService.prefixDollarSign(entry.filter)

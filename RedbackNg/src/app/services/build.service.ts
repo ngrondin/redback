@@ -9,14 +9,13 @@ import { RbFilesetComponent } from "app/rb-fileset/rb-fileset.component";
 import { RbModalComponent } from "app/rb-modal/rb-modal.component";
 import { RbTabSectionComponent } from "app/rb-tab-section/rb-tab-section.component";
 import { RbTabComponent } from "app/rb-tab/rb-tab.component";
-import { LoadedView } from 'app/rb-view-loader/rb-view-loader-model';
-import { componentRegistry } from 'app/rb-view-loader/rb-view-loader-registry';
 import { ModalService } from './modal.service';
 import { LogService } from './log.service';
 import { VirtualSelector } from 'app/helpers';
 import { RbVcollapseComponent } from 'app/rb-vcollapse/rb-vcollapse.component';
 import { RbHcollapseComponent } from 'app/rb-hcollapse/rb-hcollapse.component';
 import { RbComponent } from 'app/abstract/rb-component';
+import { componentRegistry, LoadedView } from 'app/loader';
 
 
 @Injectable({
@@ -38,15 +37,11 @@ export class BuildService {
     }
   }
 
-  buildConfigRecursive(parent: ViewContainerRef, config: any, context: any, loadedView?: LoadedView) {
-    let newComponentRef: ComponentRef<Component> = null;
+  buildConfigRecursive(parent: ViewContainerRef | null, config: any, context: any, loadedView?: LoadedView) : ComponentRef<Component> {
+    let newComponentRef: ComponentRef<Component>;
     let factory = this.factoryRegistry[config.type]; 
     if(factory != null) {
-      if(parent != null) {
-        newComponentRef = parent.createComponent(factory);
-      } else {
-        newComponentRef = factory.create(this.injector); 
-      }
+      newComponentRef = parent != null ? parent.createComponent(factory) : factory.create(this.injector); 
       let newInstance = newComponentRef.instance;
       var inputs = factory['componentDef']['declaredInputs'];
       var outputs: any = factory['componentDef']['outputs'];
@@ -119,6 +114,6 @@ export class BuildService {
         }
       }
     }
-    return newComponentRef;
+    return newComponentRef!;
   }
 }

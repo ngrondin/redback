@@ -13,7 +13,7 @@
         [margin]="false"
         [label]="'Start Date'"
         [format]="'YYYY-MM-DD HH:MI'"
-        [(value)]="startDate"
+        [(value)]="timeConfig.startDate"
         [size]="12"
         [tip]="'Set the start of the gantt view'">
     </rb-datetime-input>
@@ -26,10 +26,10 @@
     <mat-menu #zoomMenu="matMenu">
         <button 
             mat-menu-item 
-            *ngFor="let item of zooms" 
-            (click)="setZoom(item.val)"
-            [style.background-color]="zoomMS == item.val ? 'var(--primary-color)' : null"
-            [style.color]="zoomMS == item.val ? 'white' : 'inherit'">
+            *ngFor="let item of timeConfig.zooms" 
+            (click)="timeConfig.setZoom(item.val)"
+            [style.background-color]="timeConfig.zoomMS == item.val ? 'var(--primary-color)' : null"
+            [style.color]="timeConfig.zoomMS == item.val ? 'white' : 'inherit'">
             {{item.label}}
         </button>
     </mat-menu>    
@@ -43,10 +43,10 @@
     <mat-menu #spanMenu="matMenu">
         <button 
             mat-menu-item 
-            *ngFor="let item of spans" 
-            (click)="setSpan(item.val)"
-            [style.background-color]="spanMS == item.val ? 'var(--primary-color)' : null"
-            [style.color]="spanMS == item.val ? 'white' : 'inherit'">
+            *ngFor="let item of timeConfig.spans" 
+            (click)="timeConfig.setSpan(item.val)"
+            [style.background-color]="timeConfig.spanMS == item.val ? 'var(--primary-color)' : null"
+            [style.color]="timeConfig.spanMS == item.val ? 'white' : 'inherit'">
             {{item.label}}
         </button>
     </mat-menu>    
@@ -125,7 +125,7 @@
         class="rb-gantt-headertrackcontainer">
         <div
             class="rb-gantt-headertrack"
-            [style.width.px]="widthPX"
+            [style.width.px]="timeConfig.widthPX"
             [style.left.px]="-scrollLeft">
             <div
                 *ngFor="let overlaylane of overlays"
@@ -143,7 +143,7 @@
             <div
                 class="rb-gantt-daytrack">
                 <div
-                    *ngFor="let mark of dayMarks"
+                    *ngFor="let mark of timeConfig.dayMarks"
                     [style.left.px]="mark.px"
                     class="rb-gantt-mark">
                     &nbsp;{{mark.dayLabel}}
@@ -152,7 +152,7 @@
             <div
                 class="rb-gantt-hourtrack">
                 <div
-                    *ngFor="let mark of majorMarks"
+                    *ngFor="let mark of timeConfig.majorMarks"
                     [style.left.px]="mark.px"
                     class="rb-gantt-mark">
                     &nbsp;{{mark.timeLabel}}
@@ -241,7 +241,7 @@
         #mainscroll>
         <div
             class="rb-gantt-lanes"
-            [style.width.px]="widthPX"
+            [style.width.px]="timeConfig.widthPX"
             [style.height.px]="heightPX"
             (click)="clickBackground()"
             (mousedown)="mouseDownBackground($event)"
@@ -254,7 +254,7 @@
                     *ngFor="let lane of lanes; let i = index"
                     [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
                     [style.height.px]="lane.height"
-                    [style.width.px]="widthPX"
+                    [style.width.px]="timeConfig.widthPX"
                     [style.borderBottomWidth.px]="borderWidthPX">
                     <div
                         *ngFor="let spread of lane.backgroundSpreads()"
@@ -276,7 +276,7 @@
             <div
                 class="rb-gantt-laneslayer">
                 <div
-                    *ngFor="let mark of marks"
+                    *ngFor="let mark of timeConfig.marks"
                     [style.left.px]="mark.px"
                     [class]="'rb-gantt-mark' + (mark.type == 2 ? ' rb-gantt-mark-minor' : (mark.type == 3 ? ' rb-gantt-mark-now' : ''))">
                 </div>
@@ -300,7 +300,7 @@
                     *ngFor="let lane of lanes; let i = index"
                     [class]="'rb-gantt-lane'"
                     [style.height.px]="lane.height"
-                    [style.width.px]="widthPX"
+                    [style.width.px]="timeConfig.widthPX"
                     [style.borderBottomWidth.px]="borderWidthPX"
                     (rb-drag-dropzone)="droppedOn($event, lane)"
                     [rb-drag-changeform]="getDragSizeForObjectCallback">
@@ -336,7 +336,7 @@
                 <canvas
                     #canvas
                     class="rb-gantt-canvas"
-                    [width]="widthPX"
+                    [width]="timeConfig.widthPX"
                     [height]="heightPX">
                 </canvas>
             </div>

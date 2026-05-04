@@ -18,22 +18,22 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     @Input('categories') categories: any;
     @Input('value') value: any;
     @Input('target') target: any;
-    @Input('min') min: number;
-    @Input('max') max: number;
-    @Input('grow') grow: number;
-    @Input('shrink') shrink: number;
-    @Input('width') width: number;
-    @Input('height') height: number;
+    @Input('min') min?: number;
+    @Input('max') max?: number;
+    @Input('grow') grow?: number;
+    @Input('shrink') shrink?: number;
+    @Input('width') width?: number;
+    @Input('height') height?: number;
     @Input('showrefresh') showrefresh: boolean = false;
     @Input('colormap') colormap: any;
-    @Input('linkview') linkview: string;
-    @Input('linkfilter') linkfilter: string;
-    @Input('title') title: string;
-    @Input('aggregateset') aggregateset: RbAggregatesetComponent;
-    @Input('dataset') dataset: RbDatasetComponent;
-    @Input('datasetevents') datasetevents: string[] = null;
-    @Input('virtualselector') virtualselector: VirtualSelector;
-    @Input('script') script: string;
+    @Input('linkview') linkview?: string;
+    @Input('linkfilter') linkfilter?: string;
+    @Input('title') title?: string;
+    @Input('aggregateset') aggregateset?: RbAggregatesetComponent;
+    @Input('dataset') dataset?: RbDatasetComponent;
+    @Input('datasetevents') datasetevents: string[] | null = null;
+    @Input('virtualselector') virtualselector?: VirtualSelector;
+    @Input('script') script?: string;
     @Input('scriptparam') scriptparam: any;
     
     @HostBinding('style.flex-grow') get flexgrow() { return this.sizeIsSet ? 0 : this.grow != null ? this.grow : 1;}
@@ -50,12 +50,12 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     private filterService: FilterService;
     private navigateService: NavigateService;
     private apiService: ApiService;
-    public globalSubscription: Subscription;
-    private aggregatesetSubscription: Subscription;
-    public datasetSubscription: Subscription;
+    public globalSubscription!: Subscription;
+    private aggregatesetSubscription!: Subscription;
+    public datasetSubscription!: Subscription;
     private _isLoading: boolean = false;
-    private lastCalc = null;
-    private calcSched = null;
+    private lastCalc: Date|null = null;
+    private calcSched: any = null;
     
   
     constructor() {
@@ -66,7 +66,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     }
   
     componentInit() {
-      this.globalSubscription = window.redback.getObservable().subscribe(event => this.internalDataEvent(event));
+      this.globalSubscription = window.redback.getObservable().subscribe((event: any) => this.internalDataEvent(event));
       if(this.aggregateset != null) {
         this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.internalDataEvent(event));
       } else if(this.dataset != null) {
@@ -98,11 +98,11 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
       return this.width != null || this.height != null;
     }
   
-    get aggregates(): RbAggregate[] {
+    get aggregates(): RbAggregate[] | null {
       return this.aggregateset != null ? this.aggregateset.aggregates : null;
     }
   
-    get xAxisLabel(): String {
+    get xAxisLabel(): String|null {
       return this.categories != null ? this.categories.label : this.series != null ? this.series.label : null;
     }
   
@@ -122,14 +122,12 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
       return this.aggregateset != null ? this.aggregateset.isLoading : this._isLoading;
     }
 
-    get selectedObject() : RbObject {
+    get selectedObject() : RbObject|undefined {
         if(this.virtualselector != null) {
             return this.virtualselector.selectedObject;
         } else if(this.dataset != null) {
             return this.dataset.selectedObject;
-        } else {
-            return null;
-        }
+        } 
     }
 
     getGraphData() {
@@ -138,7 +136,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         this.lastCalc = now;
         this._isLoading = true;
         if(this.script != null) {
-          let param = this.filterService.resolveFilter(this.scriptparam, this.selectedObject, this.dataset, null, null, null, {});
+          let param = this.filterService.resolveFilter(this.scriptparam, this.selectedObject, this.dataset);
           this.apiService.executeGlobal(this.script, param).subscribe({
             next: (resp) => {
               if(resp.data != null) this.graphData = resp.data;
@@ -162,7 +160,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
   
     calcAggregateData() {
       this.graphData = [];
-      if(this.categories != null) {
+      if(this.categories != null && this.aggregates != null) {
         let cats: String[] = [];
         for(let agg of this.aggregates) {
           let cat = this.nullToEmptyString(agg.getDimension(this.categories.dimension));
@@ -185,31 +183,33 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
       } 
     }
   
-    calcSeriesDataForCategory(cat: String) : any[] {
+    calcSeriesDataForCategory(cat: String|null) : any[] {
       let series: any[] = [];
-      for(let agg of this.aggregates) {
-        let thisCat: String = this.categories != null ? this.nullToEmptyString(agg.getDimension(this.categories.dimension)) : null;
-        if(cat === null || cat === thisCat) {
-          let code: any = this.series != null ? this.nullToEmptyString(agg.getDimension(this.series.dimension)) : null;
-          let label: any = this.series ? this.processLabel(agg.getDimension(this.series.labelattribute), this.series.labelformat) : null;
-          let value = agg.getMetric(this.value.name);
-          if(this.value.convert != null) {
-            value = Converter.convert(value, this.value.convert);
+      if(this.aggregates != null) {
+        for(let agg of this.aggregates) {
+          let thisCat: String|null = this.categories != null ? this.nullToEmptyString(agg.getDimension(this.categories.dimension)) : null;
+          if(cat === null || cat === thisCat) {
+            let code: any = this.series != null ? this.nullToEmptyString(agg.getDimension(this.series.dimension)) : null;
+            let label: any = this.series ? this.processLabel(agg.getDimension(this.series.labelattribute), this.series.labelformat) : null;
+            let value = agg.getMetric(this.value.name);
+            if(this.value.convert != null) {
+              value = Converter.convert(value, this.value.convert);
+            }
+            let target = undefined;
+            if(this.target != null) {
+              target = agg.getMetric(this.target.name);
+            }
+            series.push({code: code, name: label, label: label, value: value, target: target}); //TODO: Tfor legacy reasons
           }
-          let target = undefined;
-          if(this.target != null) {
-            target = agg.getMetric(this.target.name);
-          }
-          series.push({code: code, name: label, label: label, value: value, target: target}); //TODO: Tfor legacy reasons
         }
-      }
-      if(this.series != null) {
-        let sortKey = this.series.sortby == null || this.series.sortby == 'name' ? 'label' : 'value';
-        let sortDir = this.series.sortdir != null ? this.series.sortdir : 1;
-        series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir));
-        if(this.series.top != null) {
-          series = series.filter((value, index, array) => index < this.series.top);
-        }  
+        if(this.series != null) {
+          let sortKey = this.series.sortby == null || this.series.sortby == 'name' ? 'label' : 'value';
+          let sortDir = this.series.sortdir != null ? this.series.sortdir : 1;
+          series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir));
+          if(this.series.top != null) {
+            series = series.filter((value, index, array) => index < this.series.top);
+          }  
+        }
       }
       return series;
     }
@@ -239,19 +239,19 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     }
   
     public onClick(event: any) {
-      let objectname = this.linkview == null && this.aggregateset != null ? this.aggregateset.objectname : null;
+      let objectname = this.linkview == null && this.aggregateset != null ? this.aggregateset.objectname : undefined;
       let view = this.linkview;
       let filter = null;
 
       if(this.linkfilter != null) {
-        filter = this.filterService.resolveFilter(this.linkfilter, this.selectedObject, this.dataset, null, null, null, {cat: event.cat, code: event.code});
+        filter = this.filterService.resolveFilter(this.linkfilter, this.selectedObject, this.dataset, undefined, undefined, undefined, {cat: event.cat, code: event.code});
         filter = this.filterService.unresolveFilter(filter);
       } else if(this.aggregateset != null) {
-        let dimensionFilter = {};
+        let dimensionFilter: any = {};
         if(event.code != null && event.code != "" && this.series.dimension != null) {
           dimensionFilter[this.series.dimension] = "'" + event.code + "'";
         }
-        if(event.name != null && event.name != "") { //For backwards compatibility (remove when dynamic graph is removed)
+        if(event.name != null && event.name != "" && this.aggregates != null) { //For backwards compatibility (remove when dynamic graph is removed)
           const aggregate = this.aggregates.find(agg => agg.getDimension(this.series.labelattribute) == event.name);
           if(aggregate != null) {
             const code = aggregate.getDimension(this.series.dimension);
@@ -288,11 +288,11 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
       this.getGraphData();
     }
   
-    @HostListener('mouseenter', ['$event']) onMouseEnter($event) {
+    @HostListener('mouseenter', ['$event']) onMouseEnter($event: any) {
       this.hovering = true;
     }
   
-    @HostListener('mouseleave', ['$event']) onMouseLeave($event) {
+    @HostListener('mouseleave', ['$event']) onMouseLeave($event: any) {
       this.hovering = false;
     }
 }

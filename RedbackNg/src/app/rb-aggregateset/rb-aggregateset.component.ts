@@ -1,7 +1,7 @@
 import { EventEmitter, Input, Output } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'app/services/data.service';
-import { DataTarget, RbAggregate, RbObject } from 'app/datamodel';
+import { RbAggregate, RbObject } from 'app/datamodel';
 import { FilterService } from 'app/services/filter.service';
 import { RbContainerComponent } from 'app/abstract/rb-container';
 import { Observable, Observer } from 'rxjs';
@@ -55,9 +55,9 @@ export class RbAggregatesetComponent extends RbSetComponent {
     }
   }
 
-  onDataTargetEvent(dt: DataTarget) {
+  /*onDataTargetEvent(dt: DataTarget) {
     
-  }
+  }*/
 
   get relatedObject() : RbObject {
     return this.dataset != null ? this.dataset.selectedObject : null;

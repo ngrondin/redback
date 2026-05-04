@@ -7,6 +7,11 @@ import { UserprefService } from "./services/userpref.service";
 import { RbDatasetComponent } from "./rb-dataset/rb-dataset.component";
 import { LogService } from "./services/log.service";
 
+export async function sleep(ms: number) {
+    return new Promise<void> ((resolve, reject) => {
+        setTimeout(() => resolve(), ms);
+    });
+}
 export class Translator {
     cfg: any;
 
@@ -272,19 +277,19 @@ export class ValueComparator{
 export class ObserverProxy implements Observer<any> {
     constructor(
         public observer: Observer<any>,
-        public callable?: (value) => void,
-        public errorCallable?: (error) => void
+        public callable?: (value: any) => void,
+        public errorCallable?: (error: any) => void
     ) {
         
     }
     closed?: boolean;
-    next(value) {
+    next(value: any) {
         if(this.callable != null) this.callable(value);
         this.observer.next(value);
         this.observer.complete();
     }
     
-    error(error) {
+    error(error: any) {
         if(this.errorCallable != null) this.errorCallable(error);
         this.observer.error(error);
     }
@@ -295,7 +300,7 @@ export class ObserverProxy implements Observer<any> {
 }
 
 export class Evaluator {
-    public static eval(expr: any, object: RbObject, relatedObject: RbObject, dataset: RbDatasetComponent) {
+    public static eval(expr: any, object: RbObject, relatedObject?: RbObject, dataset?: RbDatasetComponent) {
         if(expr == null) {
             return null;
         } else if(expr == 'true' || expr == true) {
@@ -313,12 +318,12 @@ export class Evaluator {
         }
     }
 
-    public static createFunction(expr: string) : Function {
+    public static createFunction(expr: string) : Function | null {
         let func = null;
         if(expr != null) {
             try {
                 func = new Function("object", "relatedObject", "dataset", "return (" + expr + ");");
-            } catch(err) {
+            } catch(err: any) {
                 let logService = AppInjector.get(LogService);
                 logService.error("Error creating expression function for '" + expr + "': " + err.message);
                 func = new Function("object", "relatedObject", "dataset", "return null;");
@@ -338,17 +343,17 @@ export class Hasher {
 export class HtmlParser {
     private static selfEndedTags = ["br"];
 
-    public static parse(str) {
+    public static parse(str: string) {
         let ret = this.recparse(str ?? "", 0);
         return ret.nodes;
     }
     
-    private static recparse(str, pos) {
+    private static recparse(str: string, pos: number) {
         let nodes = [];
         while(pos > -1 && pos < str.length) {
             let lastpos = pos;
             pos = str.indexOf("<", pos);
-            let text = str.substring(lastpos, (pos > -1 ? pos : str.length));
+            let text: string = str.substring(lastpos, (pos > -1 ? pos : str.length));
             if(text.length > 0) {
                 text = text.replaceAll('\r', '').replaceAll('\n', '').replaceAll('\t', '');
                 nodes.push({type:"text", text: text});
@@ -370,7 +375,7 @@ export class HtmlParser {
                         let firstSpacePos = substr.indexOf(" ");
                         let tag = firstSpacePos > -1 ? substr.substring(0, firstSpacePos) : substr;
                         let attrs = firstSpacePos > -1 ? substr.substring(firstSpacePos + 1) : null;
-                        let node = {type: "tag", tag, attrs, selfend};
+                        let node: any = {type: "tag", tag, attrs, selfend};
                         if(selfend) {
                             //seld ended
                         } else if(this.selfEndedTags.indexOf(tag) > -1) {
@@ -388,7 +393,7 @@ export class HtmlParser {
         return {nodes, pos};
     }
 
-    public static stringify(nodes, indent = false, baseindent = 0, wraphtml = false) {
+    public static stringify(nodes: any[], indent = false, baseindent = 0, wraphtml = false) {
         var str = "";
         var basepad = "".padStart(baseindent, "\t");
         for(var node of nodes) {
@@ -469,8 +474,8 @@ export class LinkConfig {
     tab: string;
     modal: string;
     reset: boolean;
-    datatargets: LinkConfigDataTarget[];
-    comptargets: LinkConfigCompTarget[];
+    datatargets: LinkConfigDataTarget[] = [];
+    comptargets: LinkConfigCompTarget[] = [];
     
     constructor(json: any) {
         this.target = json.target;
@@ -479,7 +484,6 @@ export class LinkConfig {
         this.tab = json.tab;
         this.modal = json.modal;
         this.reset = json.reset ?? false;
-        this.datatargets = [];
         if(json.attribute != null || json.objectname != null || json.filter != null || json.filtersingleobject != null || json.select != null) { //This is a deprecated notation
             this.datatargets.push({
                 attribute: json.attribute,
@@ -515,7 +519,7 @@ export class LinkConfig {
         }
     }
 
-    getNavigationEvent(object: RbObject, dataset: RbDatasetComponent, extraContext?: any): NavigateEvent {
+    getNavigationEvent(object: RbObject, dataset?: RbDatasetComponent, extraContext?: any): NavigateEvent {
         let event: NavigateEvent = {
             target: this.target,
             view: this.view,
@@ -525,7 +529,7 @@ export class LinkConfig {
             datatargets: [],
             comptargets: []
         };
-        event.objectname = this.view == null && this.objectname != null ? this.objectname : null;
+        event.objectname = this.view == null && this.objectname != null ? this.objectname : undefined;
         for(var datatarget of this.datatargets) {
             let objectuid = object != null ? (datatarget.attribute != null ? object.get(datatarget.attribute) : object.uid) : null;
             let filter = null;
@@ -533,13 +537,13 @@ export class LinkConfig {
             let select = null;
             if(datatarget.filter != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
-                let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, null, null, null, extraContext);
+                let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, undefined, undefined, undefined, extraContext);
                 filter = filterService.unresolveFilter(rfilter);  //Unresolving this as the DataSet will resolve it
                 sort = datatarget.sort;
             } 
             if(datatarget.select != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
-                select = filterService.resolveFilter(datatarget.select, object, dataset, null, null, null, extraContext);
+                select = filterService.resolveFilter(datatarget.select, object, dataset, undefined, undefined, undefined, extraContext);
             } 
             if(datatarget.filter == null && datatarget.select == null) {
                 if(datatarget.filtersingleobject == false) {
@@ -548,12 +552,12 @@ export class LinkConfig {
                     filter = {uid: "'" + objectuid + "'"};
                 } 
             }
-            event.datatargets.push({objectname: datatarget.objectname, datasetid: datatarget.datasetid, filter: filter, sort: sort, select: select}); 
+            event.datatargets!.push({objectname: datatarget.objectname, datasetid: datatarget.datasetid, filter: filter, sort: sort, select: select}); 
         }
         for(var comptarget of this.comptargets) {
             if(comptarget.data != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
-                let rData = filterService.resolveFilter(comptarget.data, object, dataset, null, null, null, extraContext);
+                let rData = filterService.resolveFilter(comptarget.data, object, dataset, undefined, undefined, undefined, extraContext);
                 event.comptargets?.push({compid: comptarget.compid, data: rData});
             }
         }
@@ -562,18 +566,18 @@ export class LinkConfig {
 }
 
 export class LinkConfigDataTarget{
-    attribute: string;
-    objectname: string;
-    datasetid: string;
-    filter: any;
-    filtersingleobject: boolean;
-    sort: any;
-    select: any;
+    attribute?: string;
+    objectname?: string;
+    datasetid?: string;
+    filter?: any;
+    filtersingleobject?: boolean;
+    sort?: any;
+    select?: any;
 }
 
 export class LinkConfigCompTarget{
-    compid: string;
-    data: any;
+    compid?: string;
+    data?: any;
 }
 
 export class VAEConfig {
@@ -586,7 +590,7 @@ export class VAEConfig {
         this.value = json.value;
         this.attribute = json.attribute;
         this.expression = json.expression;
-        this.function = json.expression != null ? Evaluator.createFunction(json.expression) : null;
+        this.function = json.expression != null ? Evaluator.createFunction(json.expression) : undefined;
     }
 
     getValue(object: RbObject): any {

@@ -10,5 +10,5 @@ export class RbVbarGraphComponent extends RbAggregateDisplayComponent {
   @Input('legendposition') legendposition: string = 'right';
   @Input('verticalxlabels') verticalxlabels: boolean = false;
   @Input('valuetargetlegend') valuetargetlegend: any;
-  @Input('singlecolor') singlecolor: string = null;
+  @Input('singlecolor') singlecolor: string | null = null;
 }

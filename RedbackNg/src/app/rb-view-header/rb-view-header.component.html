@@ -1,19 +1,17 @@
 <div
     class="rb-vh-textcontainer">
     <div
-        *ngFor="let target of targetStack; let i = index"
+        *ngFor="let item of targetBackStack; let i = index"
         class="rb-vh-stackitem">
         <span
-            *ngIf="i > 0"
-            class="rb-vh-bc-link">
-            &nbsp;&nbsp;&gt;&nbsp;&nbsp;
+            class="rb-vh-bc-link"
+            (click)="backTo(i)">
+            {{item.breadcrumbLabel}}
         </span>
         <span
-            class="rb-vh-bc-link"
-            *ngIf="i < targetStack.length - 1"
-            (click)="backTo(i)">
-            {{target.breadcrumbLabel}}
-        </span>
+            class="rb-vh-bc-link">
+            &nbsp;&nbsp;&gt;&nbsp;&nbsp;
+        </span>        
     </div>
     <div
         class="rb-vh-title">

@@ -1,3 +1,8 @@
+import { ComponentRef, Component, ViewContainerRef } from "@angular/core";
+import { RbActivatorComponent } from "app/abstract/rb-activator";
+import { RbSetComponent } from "app/abstract/rb-set";
+import { AppInjector } from "app/app.module";
+import { LogService } from "app/services/log.service";
 import { RbDynamicGraphComponent } from "app/graphs/rb-dynamicgraph/rb-dynamicgraph.component";
 import { RbNumberTilesComponent } from "app/graphs/rb-number-tiles/rb-number-tiles.component";
 import { RbAddressInputComponent } from "app/inputs/rb-address-input/rb-address-input.component";
@@ -71,8 +76,10 @@ import { RbIconComponent } from "app/rb-icon/rb-icon.component";
 import { RbRepeaterComponent } from "app/rb-repeater/rb-repeater.component";
 import { RbPivotTableComponent } from "app/graphs/rb-pivot-table/rb-pivot-table.component";
 import { RbInlineInputComponent } from "app/inputs/rb-inline-input/rb-inline-input.component";
+import { RbComponent } from "app/abstract/rb-component";
+import { NavigateBackData, NavigateEventCompTarget, NavigateEventDataTarget } from "./datamodel";
 
-export const componentRegistry = {
+export const componentRegistry: {[key:string]: any} = {
     "dataset": RbDatasetComponent,
     "datasetgroup": RbDatasetGroupComponent,
     "layout": RbLayoutComponent,
@@ -147,4 +154,136 @@ export const componentRegistry = {
     "selector":RbSelectorComponent,
     "repeater":RbRepeaterComponent,
     "pivot":RbPivotTableComponent
+  }
+
+export class LoadedView extends RbActivatorComponent {
+    rootComponentRefs: ComponentRef<Component>[] = [];
+    topSets: RbSetComponent[] = [];
+    tabSections: RbTabSectionComponent[] = [];
+    compsWithIds: RbComponent[] = [];
+    logService: LogService;
+  
+    constructor(
+      public name: string,
+      public title: string,
+    ) {
+      super();
+      this.logService = AppInjector.get(LogService);
+    }
+  
+    activatorInit() {}
+  
+    activatorDestroy() {}
+    
+    onDatasetEvent(event: any) {}
+  
+    onActivationEvent(state: boolean) {}
+  
+    attachTo(container: ViewContainerRef) {
+      for(let item of this.rootComponentRefs) {
+        container.insert(item.hostView);
+      }
+    }  
+  
+    detachFrom(container: ViewContainerRef) {
+      this.rootComponentRefs.forEach(item => {
+        container.detach(container.indexOf(item.hostView))
+      });
+    }
+  
+    clearData() {
+      for(let set of this.topSets) {
+        set.clear();
+      }
+    }
+
+    filterSortDataSets(dataTargets: NavigateEventDataTarget[]) {
+      let targets = [...dataTargets];
+      for(let dataset of this.topSets.filter(s => s.ignoretarget == false)) {
+        for(let target of targets) {
+          if(this.dataTargetMatches(target, dataset)) {
+            dataset.filterSort({
+              filter: target.filter,
+              sort: target.sort,
+              search: target.search,
+              select: target.select
+            });
+            targets.splice(targets.indexOf(target), 1);
+            break;
+          }
+        }
+      }
+    }
+
+    dataTargetMatches(target: NavigateEventDataTarget, dataset: RbSetComponent) : boolean {
+      if(dataset.ignoretarget == true) return false;
+      if(target.datasetid != null && target.datasetid != dataset.id) return false;
+      if(target.objectname != null && target.objectname != dataset.objectname) return false;
+      return true;
+    }
+
+    configureComponents(compTargets: NavigateEventCompTarget[]) {
+      for(let comp of this.compsWithIds) {
+        for(let compTarget of compTargets) {
+          if(compTarget.compid == comp.id) {
+            comp.configure(compTarget.data);
+            break;
+          }
+        }
+      }
+    }
+  
+    openTab(tabid: String) {
+      for(let tabsection of this.tabSections) {
+        for(let tab of tabsection.tabs) {
+          if(tab.id == tabid || tab.label.toLowerCase() == tabid.toLowerCase()) {
+            tabsection.selectTab(tab);
+          }
+        }
+      }
+    }
+
+    getCurrentlyOpenTab(): string | undefined {
+      for(let tabsection of this.tabSections) {
+        for(let tab of tabsection.tabs) {
+          if(tabsection.isTabActive(tab)) {
+            return tab.id ?? tab.label;
+          }
+        }
+      }      
+    }
+  
+    forceRefresh() {
+      for(let dataset of this.topSets) {
+        dataset.refreshData();
+      }    
+    }
+  
+    getTopActiveDatasets() : RbDatasetComponent[] {
+        let ret = [];
+        for(let set of this.topSets) {
+            if(set instanceof RbDatasetComponent && set.active) {
+                ret.push(set);
+            }
+        }
+        return ret;
+    }
+  
+    extractNavigateEventDataTargets() : NavigateEventDataTarget[] {
+      let ret: NavigateEventDataTarget[] = [];
+      for(let set of this.topSets) {
+        if(set instanceof RbDatasetComponent) {
+          if(set.userFilter != null || set.userSearch != null || set.userSort != null) {
+            ret.push({
+              datasetid: set.id ?? undefined,
+              objectname: set.objectname,
+              filter: set.userFilter,
+              search: set.userSearch,
+              sort: set.userSort
+            });
+          }
+        }
+      }
+      return ret;
+    }
   }

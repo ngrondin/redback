@@ -18,7 +18,7 @@ export class SeriesConfig {
 
 @Component({template: ''})
 export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbDataObserverComponent {
-    @Input('series') series: any[];
+    @Input('series') series?: any[];
     @Input('dofilter') dofilter: boolean = true;
 
     seriesConfigs: T[] = [];
@@ -32,10 +32,10 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     ) {
         super();
         this._logService = AppInjector.get(LogService);
+        this.recalcPlanner = new RecalcPlanner(this.calc.bind(this));
     }
     
     dataObserverInit() {
-        this.recalcPlanner = new RecalcPlanner(this.calc.bind(this));
         if(this.series != null) {
             this.seriesConfigs = [];
             for(let item of this.series) {
@@ -133,24 +133,22 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
         return this.lists != null ? this.lists[config.dataset] : this.list;
     }
 
-    getSeriesConfigForObject(object: RbObject) : T {
+    getSeriesConfigForObject(object: RbObject) : T | undefined {
         for(var cfg of this.seriesConfigs) {
             let dataset = this.getDatasetForConfig(cfg);
-            if(dataset.contains(object)) {
+            if(dataset != null && dataset.contains(object)) {
                 return cfg;
             }
         }
-        return null;
     }
 
-    getDatasetForObject(object: RbObject) : RbDatasetComponent {
+    getDatasetForObject(object: RbObject) : RbDatasetComponent | undefined {
         for(var cfg of this.seriesConfigs) {
             let dataset = this.getDatasetForConfig(cfg);
-            if(dataset.contains(object)) {
+            if(dataset != null && dataset.contains(object)) {
                 return dataset;
             }
         }
-        return null;
     }
 
     getDatasetForConfig(cfg: SeriesConfig) {
@@ -177,14 +175,14 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     
 
-    abstract dataCalcInit();
+    abstract dataCalcInit() : void;
 
-    abstract dataCalcDestroy();
+    abstract dataCalcDestroy() : void;
 
     abstract createSeriesConfig(json: any) : T;
 
     abstract getFilterSortForSeries(config: T) : any;
 
-    abstract calc();
+    abstract calc() : void;
     
 }

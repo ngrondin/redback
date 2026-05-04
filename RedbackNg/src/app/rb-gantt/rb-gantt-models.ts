@@ -14,7 +14,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     iconMap: any;
     orderAttribute: string;
     modal: string;
-    link: LinkConfig;
+    link?: LinkConfig;
     dragfilter: any;
     editable: boolean;
   
@@ -29,7 +29,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.iconMap = json.iconmap;
       this.orderAttribute = json.orderattribute;
       this.modal = json.modal;
-      this.link = json.link != null ? new LinkConfig(json.link) : null;
+      this.link = json.link != null ? new LinkConfig(json.link) : undefined;
       this.dragfilter = json.dragfilter;
       this.editable = json.editable ?? false;
     }
@@ -37,47 +37,65 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
   export abstract class GanttTimeBasedConfig extends SeriesConfig {
     start: VAEConfig;
-    duration: VAEConfig;
-    end: VAEConfig;
+    duration?: VAEConfig;
+    end?: VAEConfig;
 
     constructor(json: any) {
       super(json);
       this.start = json.startattribute != null ? new VAEConfig({attribute: json.startattribute}) : new VAEConfig(json.start);
-      this.duration = json.durationattribute  != null ? new VAEConfig({attribute: json.durationattribute}) : json.duration != null ? new VAEConfig(json.duration) : null;
-      this.end = json.endattribute  != null ? new VAEConfig({attribute: json.endattribute}) : json.end != null ? new VAEConfig(json.end) : null;
+      this.duration = json.durationattribute  != null ? new VAEConfig({attribute: json.durationattribute}) : json.duration != null ? new VAEConfig(json.duration) : undefined;
+      this.end = json.endattribute  != null ? new VAEConfig({attribute: json.endattribute}) : json.end != null ? new VAEConfig(json.end) : undefined;
     }
 
     get timeFromAttributes() : boolean {
       return this.start != null && this.start.attribute != null && ((this.duration != null && this.duration.attribute != null) || (this.end != null && this.end.attribute != null));
     }
+
+    getObjectStartEndDur(obj: RbObject): [number, number, number] {
+      let startMS: number = (new Date(this.start.getValue(obj))).getTime();
+      let durationMS: number|null = null;
+      let endMS: number|null = null;
+      if(this.duration != null) {
+          durationMS = parseInt(this.duration.getValue(obj));
+          endMS = startMS + durationMS;
+      } else if(this.end != null) {
+          endMS = (new Date(this.end.getValue(obj))).getTime();
+          durationMS = endMS - startMS;
+      } else {
+          durationMS = 3600000;
+          endMS = startMS + durationMS;
+      }
+      if(durationMS == null || isNaN(durationMS)) durationMS = 3600000;
+      return [startMS, endMS, durationMS];
+    }   
   }
   
   export class GanttSeriesConfig extends GanttTimeBasedConfig {
     laneAttributes: string[];
     laneForeignAttributes: string[];
-    labelAttribute: string;
-    labelExpression: string;
-    labelAlts: any[];
+    labelAttribute: string | null;
+    labelExpression: string | null;
+    labelAlts: any[] | null;
     centerLabel: boolean;
-    labelColor: string;
-    color: ColorConfig;
-    indicatorAttribute: string;
-    indicatorExpression: string;    
-    dependencyAttribute: string;
+    labelColor: string | null;
+    color: ColorConfig | null;
+    indicatorAttribute: string | null;
+    indicatorExpression: string | null;    
+    dependencyAttribute: string | null;
     isBackground: boolean;
     canEdit: boolean;
     isGhost: boolean;
-    modal: string;
-    link: LinkConfig;
+    modal: string | null;
+    link: LinkConfig | null;
     applyLaneFilter: boolean;
     applyDateFilter: boolean;
-    show: Function;
+    show: Function | null;
   
     constructor(json: any, userpref: any) {
       super(json);
-      let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
-      this.laneAttributes = json.laneattribute != null ? [json.laneattribute] : json.laneattributes != null ? json.laneattributes : null;
-      this.laneForeignAttributes = json.laneforeignattribute != null ? [json.laneforeignattribute] : json.laneforeignattributes != null ? json.laneforeignattributes : null;
+      let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : ["uid"];
+      this.laneAttributes = json.laneattribute != null ? [json.laneattribute] : json.laneattributes != null ? json.laneattributes : ["uid"];
+      this.laneForeignAttributes = json.laneforeignattribute != null ? [json.laneforeignattribute] : json.laneforeignattributes != null ? json.laneforeignattributes : undefined;
       this.labelAlts = json.labelalts;
       this.labelAttribute = subpref != null && subpref.labelattribute != null ? subpref.labelattribute : json.labelattribute;
       this.labelExpression = json.labelexpression;
@@ -90,6 +108,8 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
         this.color = new ColorConfig(json.color);
       } else if(json.color != null || json.colorattribute != null || json.colormap != null || json.colorexpression != null) {
         this.color = new ColorConfig({value: json.color, attribute: json.colorattribute, map: json.colormap, expression: json.colorexpression});
+      } else {
+        this.color = null;
       }
       this.indicatorAttribute = json.indicatorattribute;
       this.indicatorExpression = json.indicatorexpression;
@@ -103,9 +123,9 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   }
   
   export class GanttOverlayConfig extends GanttTimeBasedConfig {
-    label: string;
-    labelAttribute: string;
-    color: ColorConfig;
+    label: string | null;
+    labelAttribute: string | null;
+    color: ColorConfig | null;
     applyDateFilter: boolean;
   
     constructor(json: any, userpref: any) {
@@ -118,6 +138,8 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
         this.color = new ColorConfig(json.color);
       } else if(json.color != null || json.colorattribute != null || json.colormap != null || json.colorexpression != null) {
         this.color = new ColorConfig({color: json.color, attribute: json.colorattribute, map: json.colormap, expression: json.colorexpression});
+      } else {
+        this.color = null;
       }
       this.applyDateFilter = json.applydatefilter != null ? json.applydatefilter : true;
     }
@@ -125,14 +147,14 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
   export class GanttLane {
     //linkValues: string[];
-    label: string;
-    sub: string;
-    image: string;
-    icon: string;
+    label: string | null = null;
+    sub: string | null = null;
+    image: string | null = null;
+    icon: string | null = null;
     spreadHeight: number;
     spreadMargin: number;
     height: number;
-    spreads: GanttSpread[];
+    spreads: GanttSpread[] = [];
     object: RbObject;
     config: GanttLaneConfig;
 
@@ -145,11 +167,11 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       if(cfg.labelAttribute != null) {
         this.label = obj.get(cfg.labelAttribute); 
       } else if(cfg.labelExpression != null) {
-        this.label = Evaluator.eval(cfg.labelExpression, obj, null, null);
+        this.label = Evaluator.eval(cfg.labelExpression, obj);
       }
       if(this.config.iconAttribute != null) {
         this.icon = obj.get(this.config.iconAttribute);
-        if(this.config.iconMap != null) {
+        if(this.config.iconMap != null && this.icon != null) {
           this.icon = this.config.iconMap[this.icon];
         }  
       }
@@ -192,7 +214,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   }
   
   export class GanttSpread {
-    id: string; //currently only used for groupings
+    id: string | null = null; //currently only used for groupings
     label: string;
     start: number;
     end: number;
@@ -207,13 +229,13 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     canEdit: boolean;
     indicator: boolean;
     dragging: boolean;
-    tip: string;
+    tip: string | null;
     dependencies: GanttDependency[];
-    object: RbObject;
-    dataset: RbDatasetComponent;
+    object: RbObject | null;
+    dataset: RbDatasetComponent | null;
     config: GanttSeriesConfig;
   
-    constructor(l: string, s: number, w: number, h: number, m: number, ost: number, sl: number, c: string, lc: string, o: RbObject, ds: RbDatasetComponent, cfg: GanttSeriesConfig) {
+    constructor(l: string, s: number, w: number, h: number, m: number, ost: number, sl: number, c: string, lc: string, o: RbObject|null, ds: RbDatasetComponent|null, cfg: GanttSeriesConfig) {
       this.label = l;
       this.start = s;
       this.width = w;
@@ -225,7 +247,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.laneTop = (this.sublane * h) + (cfg.isBackground == false ? (this.sublane + 1) * m : 0);
       this.color = c;
       this.labelcolor = lc;
-      this.canEdit = o != null ? cfg.canEdit && (cfg.start.attribute != null && o.canEdit(cfg.start.attribute) || cfg.laneAttributes.reduce((acc, la) => acc && o.canEdit(la), true)) : false;
+      this.canEdit = o != null ? cfg.canEdit && ((cfg.start.attribute != null && o.canEdit(cfg.start.attribute)) || (cfg.laneAttributes != null && cfg.laneAttributes.reduce((acc, la) => acc && o.canEdit(la), true))) : false;
       this.indicator = false;
       this.dragging = false;
       this.tip = null;
@@ -235,8 +257,8 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.config = cfg;
     }
 
-    get laneValues(): string[] {
-      return this.config.laneAttributes.map(la => this.object.get(la));
+    get laneValues(): string[] | null {
+      return this.config.laneAttributes != null && this.object != null ? this.config.laneAttributes.map(la => this.object!.get(la)) : null;
     }
 
     get ghost(): boolean {
@@ -244,17 +266,17 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     }
 
     get selected(): boolean {
-      return this.config != null && this.config.isBackground == false && this.dataset != null && this.dataset.isObjectSelected(this.object);
+      return this.config.isBackground == false && this.dataset != null && this.object != null && this.dataset.isObjectSelected(this.object);
     }
   }
 
   export class GanttOverlayLane {
-    id: string;
+    id: string|null;
     label: string;
     height: number;
-    spreads: GanttOverlaySpread[];
+    spreads: GanttOverlaySpread[] = [];
   
-    constructor(i: string, l: string, h: number) {
+    constructor(i: string|null, l: string, h: number) {
       this.id = i;
       this.label = l != null ? l : "";
       this.height = h;
@@ -266,14 +288,14 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   }
 
   export class GanttOverlaySpread {
-    id: string;
+    id: string|null;
     start: number;
     width: number;
     color: string;
     object: RbObject;
     config: GanttOverlayConfig;
   
-    constructor(i: string, s: number, w: number, c: string, o: RbObject, cfg: GanttOverlayConfig) {
+    constructor(i: string|null, s: number, w: number, c: string, o: RbObject, cfg: GanttOverlayConfig) {
       this.id = i;
       this.start = s;
       this.width = w;
@@ -288,11 +310,11 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   }
   export class GanttMark {
     px: number;
-    dayLabel: string;
-    timeLabel: string;
+    dayLabel: string|null;
+    timeLabel: string|null;
     type: GanttMarkType;
   
-    constructor(p: number, dl: string, tl: string, t: GanttMarkType) {
+    constructor(p: number, dl: string|null, tl: string|null, t: GanttMarkType) {
       this.px = p;
       this.dayLabel = dl;
       this.timeLabel = tl;
@@ -306,5 +328,10 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   export class GanttDependency {
     spread: GanttSpread;
     type: GanttDependencyType;
+
+    constructor(s: GanttSpread, t: GanttDependencyType) {
+      this.spread = s;
+      this.type = t;
+    }
 
   }
