@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observer, Subscriber } from 'rxjs';
+import { firstValueFrom, Observer, Subscriber } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 import { LogService } from './log.service';
 
@@ -11,25 +11,15 @@ export class SecurityService {
   private tokenObservers: Observer<string>[] = [];
   private refreshRequesters: Observer<void>[] = [];
   
-  public baseUrl: string;
-  public refreshToken: string;
-  public expiresAt: number;
-  public accessToken: string;
-  public refreshPath: string;
+  public baseUrl!: string;
+  public expiresAt?: number;
+  public accessToken?: string;
+  public refreshPath?: string;
 
   constructor(
     private http: HttpClient,
     private logService: LogService
-  ) { 
-    this.accessToken = localStorage.getItem("access_token");
-    this.refreshToken = localStorage.getItem("refresh_token");
-    this.refreshPath = localStorage.getItem("refresh_path");
-    let expAtStr = localStorage.getItem("expires_at");
-    if(expAtStr != null) {
-      let expAtInt = parseInt(expAtStr);
-      this.expiresAt = !isNaN(expAtInt) ? expAtInt : null;
-    }
-  }
+  ) {  }
 
   public observeToken(): Observable<string> {
     return new Observable((observer) => {
@@ -37,45 +27,63 @@ export class SecurityService {
     });
   }
 
-  public checkToken() {
-    return new Observable((observer) => {
-      let now = (new Date()).getTime();
-      if(this.expiresAt != null && now > this.expiresAt - (180000)) {
+  public get initiated(): boolean {
+    return this.accessToken != null && this.expiresAt != null && this.refreshPath != null;
+  }
+
+  public get expired(): boolean {
+    return this.initiated && (new Date()).getTime() > (this.expiresAt! - 180000);
+  }
+
+  public checkToken(): Observable<void> {
+    return new Observable<void>((observer) => {
+      if(!this.initiated || this.expired) {
         this.refreshRequesters.push(observer);
-        this.logService.info("Access Token has expired");
         if(this.refreshRequesters.length == 1) {
-          this.logService.info("Refreshing tokens");
-          this.http.get<any>(this.baseUrl + this.refreshPath, {headers:{"accept":"application/json"}}).subscribe({
-            next: (value) => {
-              this.accessToken = value.access_token;
-              this.expiresAt = value.expires_at;
-              this.refreshToken = value.refresh_token;
-              this.refreshPath = value.refresh_path;
-              localStorage.setItem("access_token", this.accessToken);
-              localStorage.setItem("expires_at", this.expiresAt.toString());
-              localStorage.setItem("refresh_token", this.refreshToken);
-              localStorage.setItem("refresh_path", this.refreshPath);
-              this.tokenObservers.forEach(o => o.next(this.accessToken));
-              this.refreshRequesters.forEach(o => o.next())
-              this.logService.info("Access Token renewed: " + this.accessToken);
-            },
-            error: (err) => {
-              this.refreshRequesters.forEach(o => o.error(err));
-              this.refreshRequesters = [];
-              this.logService.error("Error refreshing access token: " + err.toString());
-            },
-            complete: () => {
-              this.refreshRequesters.forEach(o => o.complete())
-              this.refreshRequesters = [];
-            }
-          });
-        } else {
-          this.logService.info("Tokens already refreshing");
+          this._checkToken();
         }
       } else {
-        observer.next(null);
+        observer.next();
         observer.complete();
       }  
     });
+  }
+
+  private async _checkToken() {
+    console.log("Checking token, v2");
+    try {
+      if(!this.initiated) {
+        console.log("Retrieving token at " + this.baseUrl + "/check");
+        let resp = await firstValueFrom(this.http.get<any>(this.baseUrl + "/check", {headers:{"accept":"application/json"}}));
+        if(resp.error != null) throw resp.error;
+        this.accessToken = resp.access_token;
+        this.expiresAt = resp.expires_at;
+        this.refreshPath = resp.refresh_path;
+        console.log("Token retrieved");
+      }
+
+      if(this.expired) {
+        console.log("Refreshing token at " + this.baseUrl + this.refreshPath);
+        let resp = await firstValueFrom(this.http.get<any>(this.baseUrl + this.refreshPath, {headers:{"accept":"application/json"}}));
+        this.accessToken = resp.access_token;
+        this.expiresAt = resp.expires_at;
+        this.refreshPath = resp.refresh_path;
+        if(this.accessToken != null) {
+          this.tokenObservers.forEach(o => o.next(this.accessToken!));
+          console.log("Token refreshed");
+        }
+      }
+      this.refreshRequesters.forEach(o => o.next());
+      this.refreshRequesters.forEach(o => o.complete());
+      this.refreshRequesters = [];      
+    } catch(error) {
+      console.log(error);
+      this.logout();
+    }
+    console.log("Checking complete");
+  }
+
+  public logout() {
+    window.location.href = this.baseUrl + this.refreshPath + "?action=invalidate";
   }
 }

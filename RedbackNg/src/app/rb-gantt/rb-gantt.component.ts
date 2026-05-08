@@ -877,7 +877,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(cfg != null) {
       for(const dep of this.getDependenciesForObject(object, cfg)) {
         let depSpread = this.spreadMap[`${dep.object.objectname}.${dep.object.uid}`]
-        if(depSpread != null && dep.type == GanttDependencyType.SS || dep.type == GanttDependencyType.DU) {
+        if(depSpread != null && (dep.type == GanttDependencyType.SS || dep.type == GanttDependencyType.DU)) {
           let [startMS, endMS, durMS] = depSpread.config.getObjectStartEndDur(depSpread.object);
           candidates.push({d: Math.abs(depSpread.start - droppedLeft), t: startMS});        
         }

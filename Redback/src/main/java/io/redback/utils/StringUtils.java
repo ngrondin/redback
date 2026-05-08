@@ -631,20 +631,21 @@ public class StringUtils
     
     public static DataList getUniqueLinesForColumns(DataList data, DataList cols) {
     	DataList out = new DataList();
-    	HashSet<Integer> set = new HashSet<Integer>();
+    	HashSet<String> set = new HashSet<String>();
     	for(int i = 0; i < data.size(); i++) {
     		DataMap obj = data.getObject(i);
     		DataMap outObj = new DataMap();
-    		int hash = 0;
+    		StringBuilder sb = new StringBuilder();
     		for(int j = 0; j < cols.size(); j++) {
     			String col = cols.getString(j);
     			String val = obj.getString(col);
-    			if(val != null) hash ^= val.hashCode();
+    			sb.append(val);
     			outObj.put(col, val);
     		}
-    		if(!set.contains(hash)) {
+    		String uniqueString = sb.toString();
+    		if(!set.contains(uniqueString)) {
         		out.add(outObj);
-        		set.add(hash);
+        		set.add(uniqueString);
     		}
     	}
     	return out;

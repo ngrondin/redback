@@ -15,6 +15,7 @@ import { LogService } from "app/services/log.service";
 import { NavigateService } from "app/services/navigate.service";
 import { NlactionService } from "app/services/nlaction.service";
 import { PopupService } from "app/services/popup.service";
+import { SecurityService } from "app/services/security.service";
 import { UserprefService } from "app/services/userpref.service";
 import { CookieService } from "ngx-cookie-service";
 import { Observable, Subscription } from "rxjs";
@@ -51,6 +52,7 @@ export abstract class AppRootComponent implements OnInit {
     nlActionService: NlactionService;
     navigateService: NavigateService;
     logService: LogService;
+    securityService: SecurityService;
     dialog: MatDialog;
 
     connected: boolean = false;
@@ -70,6 +72,7 @@ export abstract class AppRootComponent implements OnInit {
         this.nlActionService = AppInjector.get(NlactionService);
         this.navigateService = AppInjector.get(NavigateService);
         this.logService = AppInjector.get(LogService);
+        this.securityService = AppInjector.get(SecurityService);
         this.dialog = AppInjector.get(MatDialog);
      }
   
@@ -132,8 +135,7 @@ export abstract class AppRootComponent implements OnInit {
     }
   
     logout() {
-      this.cookieService.deleteAll('/');
-      window.location.href = "/logout";
+      this.securityService.logout();
     }
   
     toggleRightDrawer(type: string) {

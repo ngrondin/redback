@@ -24,25 +24,38 @@
     "secure": false
   },  
   "/rbos": {
-    "target": "http://localhost:8000/rbos",
+    "target": "http://localhost:8000",
     "secure": false
   },
   "/rbpm": {
-    "target": "http://localhost:8000/rbpm",
+    "target": "http://localhost:8000",
     "secure": false
   },
   "/rbfs": {
-    "target": "http://localhost:8000/rbfs",
+    "target": "http://localhost:8000",
     "secure": false
   },
   "/rbrs": {
-    "target": "http://localhost:8000/rbrs",
+    "target": "http://localhost:8000",
     "secure": false
   },
   "/rbdm": {
-    "target": "http://localhost:8000/rbdm",
+    "target": "http://localhost:8000",
     "secure": false
   },
+  "/check": {
+    "target": "http://localhost:8000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/logout": {
+    "target": "http://localhost:8000",
+    "secure": false
+  }, 
+  "/auth/rb/*": {
+    "target": "http://localhost:8000",
+    "secure": false
+  },    
   "/rbup": {
     "target": "http://localhost:8000/rbup",
     "secure": false
@@ -61,5 +74,5 @@
     "target": "ws://localhost:8000/rbcs",
     "secure": false,
     "ws":true
-  }  
+  }   
 }
