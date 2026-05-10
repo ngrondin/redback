@@ -36,7 +36,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('zoomvariable') zoomVariable: string | null = null;
   @Input('emptymessage') emptyMessage: string | null = null;
   @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar?: ViewContainerRef;
-  @ViewChild('mainscroll') mainscroll?: RbScrollComponent;
+  @ViewChild('mainscroll', { read: ViewContainerRef, static: true }) mainscroll?: RbScrollComponent;
   @ViewChild('canvas', { read: ViewContainerRef, static: true }) canvas?: ViewContainerRef;
   
   lanesConfig: GanttLaneConfig | null = null;

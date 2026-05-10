@@ -107,7 +107,7 @@ export class GanttTimeConfig {
 
     private calc(publish: boolean) {
         this.endMS = this.startMS + this.spanMS;
-        let clientWidthPX = this.displayElement != null ? this.displayElement.offsetWidth : 1920;
+        let clientWidthPX = this.displayElement != null && this.displayElement.offsetWidth != 0 ? this.displayElement.offsetWidth : 1920;
         this.pxPerMS = clientWidthPX / this.zoomMS
         this.widthPX = this.spanMS * this.pxPerMS;
         this.markMajorIntervalMS = 3600000;
