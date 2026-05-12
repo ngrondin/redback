@@ -1,6 +1,7 @@
 import { Component, ComponentRef, EventEmitter, HostBinding, Input, Output, ViewChild, ViewContainerRef } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject } from 'app/datamodel';
+import { VAEConfig } from 'app/helpers';
 import { RbPopupHardlistComponent } from 'app/popups/rb-popup-hardlist/rb-popup-hardlist.component';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 import { PopupService } from 'app/services/popup.service';
@@ -13,6 +14,7 @@ import { PopupService } from 'app/services/popup.service';
 export class RbSelectorComponent extends RbDataObserverComponent {
   @Input('label') label: string;
   @Input('displayattribute') displayattribute: string;
+  @Input('displayexpression') displayexpression: string;
   @Input('tip') tip: string;
   @Input('icon') _icon: string;
   @Input('showicon') showicon: boolean = true;
@@ -32,6 +34,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
 
   popupComponentRef: ComponentRef<RbPopupComponent>;
   
+  displayVAE?: VAEConfig;
   isEditing: boolean = false;
   editedValue: any;
   hadUserEdit: boolean = false;
@@ -51,6 +54,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
 
 
   dataObserverInit() {
+    this.displayVAE = new VAEConfig({attribute: this.displayattribute, expression: this.displayexpression});
   }
 
   dataObserverDestroy() {
@@ -121,7 +125,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
     let dataset = this.getDataset();
     let list = [];
     if(dataset != null) {
-      list = dataset.list.map(o => ({display: o.get(this.displayattribute), value: o}));
+      list = dataset.list.map(o => ({display: this.displayVAE.getValue(o), value: o}));
     }
     return list;
   }
@@ -171,7 +175,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
 
   public getPersistedDisplayValue(): any {
     let obj = this.selectedObject;
-    return obj != null ? obj.get(this.displayattribute) : null;
+    return obj != null ? this.displayVAE.getValue(obj) : null;
   }
 
   public getEditingDisplayValue(): any {

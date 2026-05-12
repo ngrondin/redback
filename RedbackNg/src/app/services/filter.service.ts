@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { RbObject } from 'app/datamodel';
+import { RbObject, RELATED_LOADING } from 'app/datamodel';
 import { UserprefService } from './userpref.service';
 import { LogService } from './log.service';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
@@ -145,7 +145,7 @@ public unresolveFilter(__inMap: any) : any {
         }
       } else {
         let oVal = object.get(key);
-        let unresolvedRelated = (oVal == null && key.indexOf('.') > -1 && object.get(key.substring(0, key.indexOf('.'))) != null);
+        let unresolvedRelated = oVal == RELATED_LOADING;
         if(!unresolvedRelated) { //Filter applies by default when a related is not yet resolved
           if(typeof fVal == 'object' && fVal !== null) {
             if(fVal["$in"] != null) {

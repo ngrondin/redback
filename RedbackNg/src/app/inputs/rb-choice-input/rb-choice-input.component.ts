@@ -33,12 +33,7 @@ export class RbChoiceInputComponent extends RbPopupInputComponent {
   }
 
   public get selectedItem(): any {
-    let val: any = null;
-    if(this.rbObject != null) {
-      val = this.rbObject.get(this.attribute);
-    } else {
-      val = this.value;
-    }
+    let val = this.value;
     for(let opt of this.choicelist) {
       if((opt['value'] != null && opt['value'] == val) 
         || (opt['value'] == null && opt === val) 
