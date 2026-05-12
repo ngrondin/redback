@@ -274,7 +274,7 @@ public class RedbackUIServer extends UIServer
 	{
 		DataMap viewPart = new DataMap();
 		String type = componentConfig.getString("type");
-		ResolvedRights rights = parentRights;
+		ResolvedRights rights = parentRights.copy();
 		if(componentConfig.containsKey("accesscat")) {
 			String accessCatRightKey = "rb.accesscat." + componentConfig.getString("accesscat");
 			rights.read = rights.read & session.getUserProfile().canRead(accessCatRightKey);

@@ -25,7 +25,7 @@ export class ReportService {
     });
   }
 
-  public launchReport(name: String, domain: String, filterData: any) {
+  /*public launchReport(name: String, domain: String, filterData: any) {
     let query = 'report=' + name;
     if(Array.isArray(filterData)) {
       query = query + "&sets=" + JSON.stringify(filterData);
@@ -46,20 +46,47 @@ export class ReportService {
     }
     query = query + "&timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone; 
     window.open(this.apiService.baseUrl + '/' + this.apiService.reportService + '?' + query);
-  }
+  }*/
 
+  public launchReport(name: String, domain: String, filterData: any) {
+    let data: any = {
+      report: name,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
 
-  /*public launchReport(name: String, domain: String, object: String, filter: any, search: string) {
-    let query = 'report=' + name + '&object=' + object + '&filter=' + JSON.stringify(filter);
-    if(search != null) {
-      query = query + '$search=' + search;
+    if(Array.isArray(filterData)) {
+      data.sets = JSON.stringify(filterData);
+    } else {
+      data.object = filterData.object;
+      if(filterData.uid != null) {
+        data.uid = filterData.uid;
+      } 
+      if(filterData.filter != null) {
+        data.filter = JSON.stringify(filterData.filter);
+      }
+      if(filterData.search != null) {
+        data.search = filterData.search;
+      }
     }
     if(domain != null) {
-      query = query + '&domain=' + domain;
+      data.domain = domain;
     }
-    query = query + "&timezone=" + Intl.DateTimeFormat().resolvedOptions().timeZone; 
-    window.open(this.apiService.baseUrl + '/' + this.apiService.reportService + '?' + query);
 
-  }*/
+    let postForm = document.createElement("form");
+    postForm.target = "_blank";
+    postForm.method = "POST";
+    postForm.action = this.apiService.baseUrl + '/' + this.apiService.reportService;
+    postForm.style.display = "none";
+    for (var key in data) {
+       var input = document.createElement("input");
+       input.type = "hidden";
+       input.name = key;
+       input.value = data[key];
+       postForm.appendChild(input);
+    }
+    document.body.appendChild(postForm);
+    postForm.submit();
+    document.body.removeChild(postForm);
+  }
 
 }

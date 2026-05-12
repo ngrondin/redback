@@ -14,5 +14,9 @@ public class ResolvedRights {
 	public ResolvedRights and(ResolvedRights other) {
 		return new ResolvedRights(read && other.read, write && other.write, execute && other.execute);
 	}
+	
+	public ResolvedRights copy() {
+		return new ResolvedRights(read, write, execute);
+	}
 
 }
