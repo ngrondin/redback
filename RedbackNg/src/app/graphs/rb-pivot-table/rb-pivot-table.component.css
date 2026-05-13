@@ -5,6 +5,7 @@
     position: relative;
     width: fit-content;
     height: fit-content;
+    margin: var(--v12px);
 }
 
 rb-pivot {

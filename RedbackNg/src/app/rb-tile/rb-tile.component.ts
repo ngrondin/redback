@@ -8,7 +8,7 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
   styleUrls: ['./rb-tile.component.css']
 })
 export class RbTileComponent extends RbContainerComponent {
-  @Input('title') title: string;
+  @Input('title') title: string|null = null;
   @Input('showreload') showreload: boolean = false;
   @HostListener('mouseenter', ['$event']) onMouseEnter($event) { this.hovering = true; }
   @HostListener('mouseleave', ['$event']) onMouseLeave($event) { this.hovering = false; }

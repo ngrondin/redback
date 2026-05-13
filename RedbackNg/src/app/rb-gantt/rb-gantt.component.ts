@@ -136,7 +136,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   configure(data: any): void {
     if(this.active) {
-      this.timeConfig.startDate = typeof data.start == 'string' ? new Date(data.start) : data.start.getTime != null ? data.start : new Date();
+      if(data.start != null) {
+        this.timeConfig.startDate = typeof data.start == 'string' ? new Date(data.start) : data.start.getTime != null ? data.start : new Date();
+      }
+      if(data.span != null) this.timeConfig.span = data.span;
+      if(data.zoom != null) this.timeConfig.zoom = data.zoom;
     } else {
       this.pendingConfig = data;
     }
