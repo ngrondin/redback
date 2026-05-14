@@ -1,5 +1,6 @@
 <!--Toolbar-->
 <div
+    *ngIf="showcontrols"
     class="rb-gantt-toolbar">
     <div
         class="rb-gantt-custom-toolbar">
@@ -74,9 +75,16 @@
             (click)="toggleHideEmptyLanes()">
             <span
                 class="rb-gantt-menuitem">
-                {{ showEmptyLanes ? 'Hide Empty Lanes' : 'Show Empty Lanes'}}
+                {{ hideEmptyLanes ? 'Show Empty Lanes' : 'Hide Empty Lanes'}}
             </span>
-        </rb-clickable>        
+        </rb-clickable> 
+        <rb-clickable 
+            (click)="toggleHideEmptyBackgrounds()">
+            <span
+                class="rb-gantt-menuitem">
+                {{ hideEmptyBackgrounds ? 'Show Empty Backgrounds' : 'Hide Empty Backgrounds'}}
+            </span>
+        </rb-clickable>                  
         <rb-clickable 
             *ngIf="allowpastdrop == false"
             (click)="toggleOverridePastDrop()">

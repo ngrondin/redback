@@ -26,6 +26,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('overlays') overlaysInput: any[] = [];
   @Input('layers') layers: any[] = [];
   @Input('toolbar') toolbarConfig : any;
+  @Input('showcontrols') showcontrols: boolean = true;
   @Input('locktonow') locktonow: boolean = false;
   @Input('allowpastdrop') allowpastdrop: boolean = true;
   @Input('allowoverlapgroup') allowoverlapgroup: boolean = false;
@@ -50,7 +51,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   headerWidthPX: number | null = null;
   doDragFilter: boolean = false;
   groupOverlaps: boolean = false;
-  showEmptyLanes: boolean = true;
+  hideEmptyLanes: boolean = false;
+  hideEmptyBackgrounds: boolean = false;
   overrideAllowPastDrop: boolean = false;
   scrollTop: number | null = null;
   scrollLeft: number | null = null;
@@ -136,11 +138,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   configure(data: any): void {
     if(this.active) {
-      if(data.start != null) {
-        this.timeConfig.startDate = typeof data.start == 'string' ? new Date(data.start) : data.start.getTime != null ? data.start : new Date();
-      }
+      if(data.start != null) this.timeConfig.startDate = typeof data.start == 'string' ? new Date(data.start) : data.start.getTime != null ? data.start : new Date();
       if(data.span != null) this.timeConfig.span = data.span;
       if(data.zoom != null) this.timeConfig.zoom = data.zoom;
+      if(data.hideemptylanes != null) this.hideEmptyLanes = data.showemptylanes;
+      if(data.hideemptybackgrounds != null) this.hideEmptyBackgrounds = data.hideemptybackgrounds;
     } else {
       this.pendingConfig = data;
     }
@@ -229,7 +231,12 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   toggleHideEmptyLanes() {
-    this.showEmptyLanes = !this.showEmptyLanes;
+    this.hideEmptyLanes = !this.hideEmptyLanes;
+    this.redraw();
+  }
+
+  toggleHideEmptyBackgrounds() {
+    this.hideEmptyBackgrounds = !this.hideEmptyBackgrounds;
     this.redraw();
   }
 
@@ -345,7 +352,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         if(show) {     
           let lane = new GanttLane(obj, this.lanesConfig, this.spreadHeightPX, this.spreadMarginPX);
           let spreads: GanttSpread[] = this.calcSpreads(lane, accHeight);
-          if(this.showEmptyLanes || spreads.filter(s => !s.ghost && !s.config.isBackground).length > 0) {
+          let hasForegroundSpreads = spreads.filter(s => !s.ghost && !s.config.isBackground).length > 0;
+          let hasBackgroundStreaps = spreads.filter(s => !s.ghost && s.config.isBackground).length > 0;
+          if(!((!hasForegroundSpreads && this.hideEmptyLanes) || (!hasBackgroundStreaps && this.hideEmptyBackgrounds))) {
             lane.setSpreads(spreads);
             this.lanes.push(lane);
             accHeight += lane.height + this.borderWidthPX; 

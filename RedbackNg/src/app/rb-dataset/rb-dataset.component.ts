@@ -116,17 +116,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     }
   }
 
-  /*onDataTargetEvent(dt: DataTarget) {
-    let fetched = this.filterSort({
-      filter: dt.filter ?? this.defaultUserFilter, 
-      sort: dt.sort ?? this.defaultUserSort, 
-      search: dt.search
-    });
-    if(!fetched && dt.select != null) {
-      this.selectByFilter(dt.select); 
-    }  
-  }*/
-
   public get list() : RbObject[] {
     return this._list;
   }

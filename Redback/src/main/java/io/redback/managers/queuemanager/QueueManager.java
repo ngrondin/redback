@@ -114,6 +114,7 @@ public class QueueManager extends Thread {
 				else firebus.requestService(service, payload);
 				remove(msgUuid);
 			} catch(Exception e) {
+				Logger.severe("rb.rbq.process", e);
 				setFailed(msgUuid);
 			}
 		}
