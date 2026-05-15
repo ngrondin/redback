@@ -159,6 +159,7 @@ export const componentRegistry: {[key:string]: any} = {
 export class LoadedView extends RbActivatorComponent {
     rootComponentRefs: ComponentRef<Component>[] = [];
     topSets: RbSetComponent[] = [];
+    setsWithIds: RbSetComponent[] = [];
     tabSections: RbTabSectionComponent[] = [];
     compsWithIds: RbComponent[] = [];
     logService: LogService;
@@ -285,5 +286,13 @@ export class LoadedView extends RbActivatorComponent {
         }
       }
       return ret;
+    }
+
+    getSet(id: string): RbSetComponent {
+      return this.setsWithIds.find(s => s.id == id);
+    }
+
+    getComp(id: string): RbComponent {
+      return this.compsWithIds.find(s => s.id == id);
     }
   }

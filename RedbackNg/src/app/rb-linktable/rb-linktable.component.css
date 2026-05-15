@@ -128,6 +128,10 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     padding: var(--v5px);
 }
 
+.rb-linktable-rowitem-wrapspan {
+    white-space: wrap!important;
+}
+
 .rb-linktable-rowitem a {
     color: var(--primary-dark-color);
     overflow: hidden;

@@ -10,6 +10,7 @@ export class LinkTableColumnConfig {
     align: string;
     size: number;
     width: number;
+    wrap: boolean;
     showExpr: string;
     link: LinkConfig;
     modal: string;
@@ -30,6 +31,7 @@ export class LinkTableColumnConfig {
       this.align = json.align;
       this.size = json.size;
       this.width = json.size != null ? json.size : 11.3;
+      this.wrap = json.wrap != null ? json.wrap : false;
       this.showExpr = (json.show != null ? json.show : "true");
       this.link = json.link != null ? new LinkConfig(json.link) : null;
       this.modal = json.modal;

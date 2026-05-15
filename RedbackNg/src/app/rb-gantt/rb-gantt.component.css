@@ -20,8 +20,13 @@
     flex: 0 0 auto;
     justify-content: flex-end;
     align-items: center;
-    padding: 4px;
+    /*padding: 4px;*/
     z-index: 3;
+}
+
+.rb-gantt-controls {
+    display: flex;
+    flex-direction: row;
 }
 
 .rb-gantt-custom-toolbar {

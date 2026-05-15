@@ -1,6 +1,5 @@
 <!--Toolbar-->
 <div
-    *ngIf="showcontrols"
     class="rb-gantt-toolbar">
     <div
         class="rb-gantt-custom-toolbar">
@@ -8,109 +7,113 @@
             #customtoolbar>
         </div>
     </div>
-    <rb-datetime-input
-        *ngIf="locktonow == false"
-        class="rb-gantt-header-dateinput"
-        [margin]="false"
-        [label]="'Start Date'"
-        [format]="'YYYY-MM-DD HH:MI'"
-        [(value)]="timeConfig.startDate"
-        [size]="12"
-        [tip]="'Set the start of the gantt view'">
-    </rb-datetime-input>
-    <rb-button
-        [matMenuTriggerFor]="zoomMenu"
-        [icon]="'zoom_in'"
-        [margin]="false"
-        [tip]="'Change the time zoom of the Gantt'">
-    </rb-button>
-    <mat-menu #zoomMenu="matMenu">
-        <button 
-            mat-menu-item 
-            *ngFor="let item of timeConfig.zooms" 
-            (click)="timeConfig.setZoom(item.val)"
-            [style.background-color]="timeConfig.zoomMS == item.val ? 'var(--primary-color)' : null"
-            [style.color]="timeConfig.zoomMS == item.val ? 'white' : 'inherit'">
-            {{item.label}}
-        </button>
-    </mat-menu>    
-    &nbsp;
-    <rb-button
-        [matMenuTriggerFor]="spanMenu"
-        [icon]="'swap_horiz'"
-        [margin]="false"
-        [tip]="'Change the time span of the Gantt'">   
-    </rb-button>
-    <mat-menu #spanMenu="matMenu">
-        <button 
-            mat-menu-item 
-            *ngFor="let item of timeConfig.spans" 
-            (click)="timeConfig.setSpan(item.val)"
-            [style.background-color]="timeConfig.spanMS == item.val ? 'var(--primary-color)' : null"
-            [style.color]="timeConfig.spanMS == item.val ? 'white' : 'inherit'">
-            {{item.label}}
-        </button>
-    </mat-menu>    
-    &nbsp;
-    <rb-button
-        (click)="forceDatasetReload()"
-        [icon]="'refresh'"
-        [margin]="false"
-        [tip]="'Reload the Gantt\'s data'">
-    </rb-button> 
-    &nbsp;
-    <rb-iconbutton
-        [matMenuTriggerFor]="settingsMenu"
-        [icon]="'more_vert'">
-    </rb-iconbutton>
-    <mat-menu #settingsMenu="matMenu">
-        <rb-clickable 
-            (click)="toggleDragFilter()">
-            <span
-                class="rb-gantt-menuitem">
-                {{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}
-            </span>
-        </rb-clickable>
-        <rb-clickable 
-            (click)="toggleHideEmptyLanes()">
-            <span
-                class="rb-gantt-menuitem">
-                {{ hideEmptyLanes ? 'Show Empty Lanes' : 'Hide Empty Lanes'}}
-            </span>
-        </rb-clickable> 
-        <rb-clickable 
-            (click)="toggleHideEmptyBackgrounds()">
-            <span
-                class="rb-gantt-menuitem">
-                {{ hideEmptyBackgrounds ? 'Show Empty Backgrounds' : 'Hide Empty Backgrounds'}}
-            </span>
-        </rb-clickable>                  
-        <rb-clickable 
-            *ngIf="allowpastdrop == false"
-            (click)="toggleOverridePastDrop()">
-            <span
-                class="rb-gantt-menuitem">
-                {{ overrideAllowPastDrop ? 'Prevent Past Planning' : 'Enable Past Planning'}}
-            </span>
-        </rb-clickable>        
+    <div
+        *ngIf="showcontrols"
+        class="rb-gantt-controls">
+        <rb-datetime-input
+            *ngIf="locktonow == false"
+            class="rb-gantt-header-dateinput"
+            [margin]="false"
+            [label]="'Start Date'"
+            [format]="'YYYY-MM-DD HH:MI'"
+            [(value)]="timeConfig.startDate"
+            [size]="12"
+            [tip]="'Set the start of the gantt view'">
+        </rb-datetime-input>
+        <rb-button
+            [matMenuTriggerFor]="zoomMenu"
+            [icon]="'zoom_in'"
+            [margin]="false"
+            [tip]="'Change the time zoom of the Gantt'">
+        </rb-button>
+        <mat-menu #zoomMenu="matMenu">
+            <button 
+                mat-menu-item 
+                *ngFor="let item of timeConfig.zooms" 
+                (click)="timeConfig.setZoom(item.val)"
+                [style.background-color]="timeConfig.zoomMS == item.val ? 'var(--primary-color)' : null"
+                [style.color]="timeConfig.zoomMS == item.val ? 'white' : 'inherit'">
+                {{item.label}}
+            </button>
+        </mat-menu>    
+        &nbsp;
+        <rb-button
+            [matMenuTriggerFor]="spanMenu"
+            [icon]="'swap_horiz'"
+            [margin]="false"
+            [tip]="'Change the time span of the Gantt'">   
+        </rb-button>
+        <mat-menu #spanMenu="matMenu">
+            <button 
+                mat-menu-item 
+                *ngFor="let item of timeConfig.spans" 
+                (click)="timeConfig.setSpan(item.val)"
+                [style.background-color]="timeConfig.spanMS == item.val ? 'var(--primary-color)' : null"
+                [style.color]="timeConfig.spanMS == item.val ? 'white' : 'inherit'">
+                {{item.label}}
+            </button>
+        </mat-menu>    
+        &nbsp;
+        <rb-button
+            (click)="forceDatasetReload()"
+            [icon]="'refresh'"
+            [margin]="false"
+            [tip]="'Reload the Gantt\'s data'">
+        </rb-button> 
+        &nbsp;
+        <rb-iconbutton
+            [matMenuTriggerFor]="settingsMenu"
+            [icon]="'more_vert'">
+        </rb-iconbutton>
+        <mat-menu #settingsMenu="matMenu">
+            <rb-clickable 
+                (click)="toggleDragFilter()">
+                <span
+                    class="rb-gantt-menuitem">
+                    {{ doDragFilter ? 'Disable Drag Filter' : 'Enable Drag Filter'}}
+                </span>
+            </rb-clickable>
+            <rb-clickable 
+                (click)="toggleHideEmptyLanes()">
+                <span
+                    class="rb-gantt-menuitem">
+                    {{ hideEmptyLanes ? 'Show Empty Lanes' : 'Hide Empty Lanes'}}
+                </span>
+            </rb-clickable> 
+            <rb-clickable 
+                (click)="toggleHideEmptyBackgrounds()">
+                <span
+                    class="rb-gantt-menuitem">
+                    {{ hideEmptyBackgrounds ? 'Show Empty Backgrounds' : 'Hide Empty Backgrounds'}}
+                </span>
+            </rb-clickable>                  
+            <rb-clickable 
+                *ngIf="allowpastdrop == false"
+                (click)="toggleOverridePastDrop()">
+                <span
+                    class="rb-gantt-menuitem">
+                    {{ overrideAllowPastDrop ? 'Prevent Past Planning' : 'Enable Past Planning'}}
+                </span>
+            </rb-clickable>        
 
-        <rb-clickable 
-            *ngIf="allowoverlapgroup"
-            (click)="toggleGroupOverlaps()">
-            <span
-                class="rb-gantt-menuitem">
-                {{ groupOverlaps ? 'Ungroup Overlaps' : 'Group Overlaps'}}
-            </span>
-        </rb-clickable>                  
-        <rb-clickable 
-            *ngFor="let alt of availLabelAlts"
-            (click)="useLabels(alt.name)">
-            <span
-                class="rb-gantt-menuitem">
-                {{alt.label}}
-            </span>
-        </rb-clickable>        
-    </mat-menu>         
+            <rb-clickable 
+                *ngIf="allowoverlapgroup"
+                (click)="toggleGroupOverlaps()">
+                <span
+                    class="rb-gantt-menuitem">
+                    {{ groupOverlaps ? 'Ungroup Overlaps' : 'Group Overlaps'}}
+                </span>
+            </rb-clickable>                  
+            <rb-clickable 
+                *ngFor="let alt of availLabelAlts"
+                (click)="useLabels(alt.name)">
+                <span
+                    class="rb-gantt-menuitem">
+                    {{alt.label}}
+                </span>
+            </rb-clickable>        
+        </mat-menu>      
+    </div> 
 </div>
 <!--Overlays and track-->
 <div

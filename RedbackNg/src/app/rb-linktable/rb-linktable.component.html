@@ -56,11 +56,12 @@
                         </a>
                         <a
                             *ngIf="col.icon == null && col.modal != null && !col.loading"
-                            (click)="clickModal(col.modal)">
+                            (click)="clickModal(col.modal, line.object)">
                             {{col.formattedValue}}                
                         </a>
                         <span
-                            *ngIf="col.icon == null && col.link == null && !col.loading">
+                            *ngIf="col.icon == null && col.link == null && col.modal == null && !col.loading"
+                            [class]="col.wrap == true ? 'rb-linktable-rowitem-wrapspan' : 'dd'">
                             {{col.formattedValue}}                
                         </span>
                         <div

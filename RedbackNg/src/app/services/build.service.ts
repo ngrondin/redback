@@ -73,6 +73,9 @@ export class BuildService {
         if(newInstance instanceof RbSetComponent && newInstance['master'] == null) {
           loadedView.topSets.push(newInstance);
         }
+        if(newInstance instanceof RbSetComponent && newInstance.id != null) {
+          loadedView.setsWithIds.push(newInstance);
+        }        
         if(newInstance instanceof RbTabSectionComponent) {
           loadedView.tabSections.push(newInstance);
         }
