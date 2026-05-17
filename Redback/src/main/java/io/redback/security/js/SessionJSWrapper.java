@@ -13,7 +13,7 @@ public class SessionJSWrapper extends ObjectJSWrapper
 	
 	public SessionJSWrapper(Session s)
 	{
-		super(new String[] {"userProfile", "getToken", "expiry", "getUserProfile", "timezone"});
+		super(new String[] {"userProfile", "getToken", "expiry", "getUserProfile", "timezone", "setData", "getData", "isInScript"});
 		session = s;
 	}
 
@@ -71,7 +71,11 @@ public class SessionJSWrapper extends ObjectJSWrapper
 				}
 			};	
 		} else if(key.equals("isInScript")) {
-			return session.isInScript();		
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return session.isInScript();
+				}
+			};		
 		} else {
 			return null;
 		}

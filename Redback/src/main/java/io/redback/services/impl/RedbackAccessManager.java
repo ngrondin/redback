@@ -44,6 +44,7 @@ public class RedbackAccessManager extends AccessManager
 	protected JWTValidator jwtValidator;
 	protected Map<String, Map<String, Role>> roles;
 	protected Map<String, CacheEntry<UserProfile>> cachedUserProfiles;
+	protected String sysUserName;
 
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
@@ -105,9 +106,7 @@ public class RedbackAccessManager extends AccessManager
 		}
 		if(jwt.getClaim("email") == null) 
 			throw new RedbackUnauthorisedException("Email claim not provided");
-		UserProfile profile = getUserProfile(session, jwt);
-		profile.setExpiry(jwt.getExpiresAt().getTime());
-		return profile;
+		return getUserProfile(session, jwt);
 	}
 	
 	protected String getSysUserToken(Session session) throws RedbackException {
@@ -118,7 +117,12 @@ public class RedbackAccessManager extends AccessManager
 		req.put("client_secret", idmClientSecret);
 		req.put("grant_type", "sysuser");
 		DataMap resp = gatewayClient.postForm(idmTokenUrl, req);
-		return resp.getString("access_token");
+		String token = resp.getString("access_token");
+		try {
+			DecodedJWT jwt = jwtValidator.decode(token);
+			sysUserName = jwt.getClaim("email").asString(); //Keeping it cached so we can later determine if a userprofile is the system
+		} catch (JWTValidatorException exception) { }		
+		return token;
 	}
 
 	
@@ -133,7 +137,8 @@ public class RedbackAccessManager extends AccessManager
 		if(ce != null)  return ce.get();
 		
 		try {
-			DataMap userConfig = new DataMap("username", jwt.getClaim("email").asString());
+			DataMap userConfig = new DataMap("username", username);
+			userConfig.put("issystem", sysUserName != null && sysUserName.equals(username));
 			Claim roleClaim = jwt.getClaim("rol").isNull() ? jwt.getClaim("roles") : jwt.getClaim("rol");
 			Claim domainClaim = jwt.getClaim("dom").isNull() ? jwt.getClaim("domains") : jwt.getClaim("dom");
 			Claim attrClaim = jwt.getClaim("attr").isNull() ? jwt.getClaim("attrs") : jwt.getClaim("attr");
@@ -203,11 +208,11 @@ public class RedbackAccessManager extends AccessManager
 				}
 			}
 			userConfig.put("rights", rights);
-			UserProfile userProfile = new UserProfile(userConfig);
 			long expiry = jwt.getExpiresAt().getTime();
 			long maxExpiry = System.currentTimeMillis() + (15*60*1000);
 			if(expiry > maxExpiry) expiry = maxExpiry;
-			userProfile.setExpiry(expiry);
+			userConfig.put("expiry", expiry);
+			UserProfile userProfile = new UserProfile(userConfig);
 			ce = new CacheEntry<UserProfile>(userProfile, expiry);
 			cachedUserProfiles.put(username, ce);
 			return userProfile;

@@ -14,7 +14,7 @@
 </div>
 <rb-scroll
     (rbscroll)="onScroll($event)"
-    [grow]="0">                                                                                                                                                
+    [grow]="0">
     <div
         class="rb-table-body">
         <div
@@ -59,6 +59,16 @@
                     [show]="col.showExpr"
                     [margin]="false">
                 </rb-number-input>
+                <rb-percent-input
+                    *ngIf="col.type == 'percentinput'"
+                    [size]="col.size"
+                    [object]="object"
+                    [attribute]="col.attribute"
+                    [icon]="col.icon"
+                    [editable]="col.editable"
+                    [show]="col.showExpr"
+                    [margin]="false">
+                </rb-percent-input>
                 <rb-currency-input
                     *ngIf="col.type == 'currencyinput'"
                     [size]="col.size"
@@ -68,7 +78,7 @@
                     [editable]="col.editable"
                     [show]="col.showExpr"
                     [margin]="false">
-                </rb-currency-input>                   
+                </rb-currency-input>
                 <rb-datetime-input
                     *ngIf="col.type == 'datepicker'"
                     [size]="col.size"
@@ -89,7 +99,7 @@
                     [editable]="col.editable"
                     [show]="col.showExpr"
                     [margin]="false">
-                </rb-duration-input>                
+                </rb-duration-input>
                 <rb-related-input
                     *ngIf="col.type == 'relatedinput'"
                     [size]="col.size"
@@ -116,7 +126,7 @@
                     [show]="col.showExpr"
                     [tagmode]="false"
                     [margin]="false">
-                </rb-multi-related-input>                
+                </rb-multi-related-input>
                 <rb-switch-input
                     *ngIf="col.type == 'switch'"
                     [size]="col.size"
@@ -126,7 +136,7 @@
                     [editable]="col.editable"
                     [show]="col.showExpr"
                     [margin]="false">
-                </rb-switch-input>     
+                </rb-switch-input>
                 <rb-color-input
                     *ngIf="col.type == 'colorinput'"
                     [size]="col.size"
@@ -136,7 +146,7 @@
                     [editable]="col.editable"
                     [show]="col.showExpr"
                     [margin]="false">
-                </rb-color-input>                               
+                </rb-color-input>
             </div>
             <div
                 class="rb-table-rowbutton">
@@ -145,13 +155,13 @@
                     [icon]="'clear'"
                     [color]="'grey'"
                     (click)="deleteObject(object)">
-                </rb-iconbutton>        
+                </rb-iconbutton>
             </div>
-        </div>  
+        </div>
         <div
             *ngIf="emptymessage != null && list.length == 0"
             class="rb-table-emptymessage">
             {{emptymessage}}
-        </div>  
+        </div>
     </div>
 </rb-scroll>

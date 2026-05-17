@@ -12,7 +12,7 @@ public class UserProfileJSWrapper extends ObjectJSWrapper
 	
 	public UserProfileJSWrapper(UserProfile up)
 	{
-		super(new String[] {"username", "getAttribute", "getRights", "canRead", "canWrite", "canExecute", "getUsername"});
+		super(new String[] {"username", "getAttribute", "getRights", "canRead", "canWrite", "canExecute", "getUsername", "isSystem", "isUser"});
 		userProfile = up;
 	}
 
@@ -59,6 +59,18 @@ public class UserProfileJSWrapper extends ObjectJSWrapper
 					return userProfile.canExecute((String)arguments[0]);
 				}
 			};
+		} else if(key.equals("isSystem")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return userProfile.isSystem();
+				}
+			};
+		} else if(key.equals("isUser")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return userProfile.isUser();
+				}
+			};			
 		} else if(key.equals("username")) {
 			return userProfile.getUsername();
 		} else {

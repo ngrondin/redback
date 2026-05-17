@@ -37,15 +37,25 @@ public class UserProfile
 		return profile.getString("username");
 	}
 	
+	public boolean isSystem()
+	{
+		return profile.containsKey("issystem") && profile.getBoolean("issystem") == true;
+	}
+	
+	public boolean isUser()
+	{
+		return !isSystem();
+	}
+	
 	public long getExpiry()
 	{
 		return profile.getNumber("expiry").longValue();
 	}
 	
-	public void setExpiry(long l)
+	/*public void setExpiry(long l)
 	{
 		profile.put("expiry", l);
-	}
+	}*/
 	
 	public String getPasswordHash()
 	{
