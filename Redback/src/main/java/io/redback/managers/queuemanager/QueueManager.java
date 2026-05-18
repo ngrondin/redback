@@ -46,7 +46,9 @@ public class QueueManager extends Thread {
 		DataMap key = new DataMap("_id", uuid);
 		DataMap data = new DataMap();
 		data.put("session", session.id);
-		data.put("token", session.token);
+		data.put("issystem", session.userProfile.isSystem());
+		if(!session.userProfile.isSystem())
+			data.put("token", session.token);
 		if(session.getDomainLock() != null)
 			data.put("domain", session.getDomainLock());
 		if(session.getTimezone() != null)
@@ -102,7 +104,9 @@ public class QueueManager extends Thread {
 				String service = msg.getString("service");
 				DataMap message = msg.getObject("message");
 				int requestTimeout = msg.containsKey("timeout") ? msg.getNumber("timeout").intValue() : 10000;
-				String token = checkToken(msg.getString("token"));
+				String sessionId = msg.getString("session");
+				boolean isSystem = msg.getBoolean("issystem");
+				String token = isSystem ? sysUserManager.getToken(new Session(sessionId)) : checkToken(msg.getString("token"));
 				Payload payload = new Payload(message);
 				payload.metadata.put("session", msg.getString("session"));
 				payload.metadata.put("token", token);
@@ -152,12 +156,7 @@ public class QueueManager extends Thread {
 		if(up.getExpiry() > System.currentTimeMillis() + 10000) {
 			return token;
 		} else {
-			Session sysUserSession = sysUserManager.getSession();
-			if(up.getUsername().equals(sysUserSession.getUserProfile().getUsername())) {
-				return sysUserSession.getToken();				
-			} else {
-				throw new RedbackUnauthorisedException("Queue message token expired");
-			}
+			throw new RedbackUnauthorisedException("Queue message token expired");
 		}
 	}
 }
