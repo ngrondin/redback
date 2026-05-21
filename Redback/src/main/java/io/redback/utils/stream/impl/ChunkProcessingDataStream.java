@@ -60,7 +60,7 @@ public class ChunkProcessingDataStream<T> extends DataStream<T> {
 	public void waitUntilDone() throws RedbackException {
 		try {
 			synchronized(this) {
-				if(!complete)
+				while(!complete)
 					this.wait(15000);
 			}
 			if(processException != null) {
