@@ -20,8 +20,6 @@ class Target {
   constructor(c: RbViewLoaderComponent) {
     this.component = c;
   }
-
-
 }
 
 @Injectable({

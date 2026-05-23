@@ -7,6 +7,7 @@ import { HostListener } from '@angular/core';
 import { LogService } from 'app/services/log.service';
 import { RbFileviewerComponent } from 'app/rb-fileviewer/rb-fileviewer.component';
 import { MatDialog } from '@angular/material/dialog';
+import { ErrorService } from 'app/services/error.service';
 
 @Component({
   selector: 'rb-file-input',
@@ -15,12 +16,13 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class RbFileInputComponent extends RbInputComponent  {
 
-  @Input('width') width: number;
-  @Input('height') height: number;
+  @Input('width') width?: number;
+  @Input('height') height?: number;
   @Input('shrinkborder') shrinkborder: boolean = true;
+  @Input('validextensions') validextensions: string[] | null = null;
   @Output() dropped: EventEmitter<any> = new EventEmitter();
   @HostBinding('style.width') get hostWidth() { return (this.width != null ? (('min(' + (0.88 * this.width) + 'vw, ' + (17 * this.width) + 'px)')): 'min(4.5vw, 87px)');}
-  @HostBinding('style.height') get hostHeight() { return (this.height != null ? (('min(' + (0.88 * this.height) + 'vw, ' + (17 * this.width) + 'px)')): 'min(3vw, 57px)');}
+  @HostBinding('style.height') get hostHeight() { return (this.height != null ? (('min(' + (0.88 * this.height) + 'vw, ' + (17 * this.width!) + 'px)')): 'min(3vw, 57px)');}
 
   hasFileOver: boolean = false;
   defaultIcon: string = 'description';
@@ -30,6 +32,7 @@ export class RbFileInputComponent extends RbInputComponent  {
   constructor(
     private apiService: ApiService,
     private logService: LogService,
+    private errorService: ErrorService,
     public dialog: MatDialog,
     private domSanitizer: DomSanitizer    
   ) {
@@ -49,7 +52,7 @@ export class RbFileInputComponent extends RbInputComponent  {
     return null;
   }
 
-  get fileUid() : String{
+  get fileUid() : String|null {
     if(this.rbObject != null) {
       let val = this.rbObject.get(this.attribute);
       if(val != null)
@@ -58,7 +61,7 @@ export class RbFileInputComponent extends RbInputComponent  {
     return null;
   } 
 
-    get mime() : String{
+    get mime() : String|null {
     if(this.rbObject != null) {
       let val = this.rbObject.get(this.attribute);
       if(val != null)
@@ -94,12 +97,19 @@ export class RbFileInputComponent extends RbInputComponent  {
   }
 
   uploadFile(file: File) {
-    this.apiService.uploadFile(file, null, null).subscribe(
-      (resp) => {
+    let ext = file.name.substring(file.name.lastIndexOf(".") + 1);
+    if(this.validextensions != null && this.validextensions.indexOf(ext) ==-1) {
+      this.errorService.showError("Invalid file type");
+      return;
+    }
+    this.apiService.uploadFile(file).subscribe({
+      next: (resp) => {
         if(resp.type == "result") this.fileUploaded(resp.result);
       },
-      (error) => { }
-    );
+      error: (error) => {
+        this.errorService.showError(error)
+      }
+    } );
   }
 
   fileUploaded(res: any) {
@@ -138,12 +148,14 @@ export class RbFileInputComponent extends RbInputComponent  {
   }
 
   chooseFile() {
-    var input = document.createElement("input");
+    let input = document.createElement("input");
     input.type = 'file';
-    input.onchange = (event) => {
-      var files = event.target['files'];
-      for(var file of files) {
-        this.uploadFile(file);
+    input.onchange = (event: any) => {
+      if(event != null && event.target != null) {
+        var files = event.target['files'];
+        for(var file of files) {
+          this.uploadFile(file);
+        }
       }
     }
     input.click();

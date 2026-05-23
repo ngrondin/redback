@@ -334,7 +334,7 @@ export class ApiService {
 
   /******* Files *********/
 
-  uploadFile(file: File, object: string, uid: string) : Observable<any> {
+  uploadFile(file: File, object?: string, uid?: string) : Observable<any> {
     if(this.canStream()) {
       return this.clientWSService.upload(file, object, uid);
     } else {

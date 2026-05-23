@@ -57,6 +57,7 @@ export class Upload {
       this.observer.complete();
       return true;
     }
+    return true;
   }
 }
 
@@ -415,7 +416,7 @@ export class ClientWSService {
     }
   }
 
-  upload(file: File, object: string, uid: string) : Observable<number> {
+  upload(file: File, object?: string, uid?: string) : Observable<number> {
     if(this.connected) {
       return new Observable((observer) => {
         let upload = new Upload(file, observer, (data:any) => this.send(data));

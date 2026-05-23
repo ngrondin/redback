@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.security.Session;
 import io.redback.services.FileServer;
 import io.redback.utils.CollectionConfig;
+import io.redback.utils.FileValidator;
 import io.redback.utils.ImageUtils;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
@@ -393,6 +395,7 @@ public class RedbackFileServer extends FileServer
 			new StreamReceiver(fos, streamEndpoint, new StreamReceiver.CompletionListener() {
 				public byte[] completed() throws Exception {
 					fos.close();
+					if(!validateFile(filename, file)) throw new RedbackInvalidRequestException("Invalid file type");
 					RedbackFileMetaData filemd = putFile(session, filename, mime != null ? mime : getMimeType(filename), session.getUserProfile().getUsername(), file);
 					if(objectname != null && objectuid != null)
 						linkFileTo(session, filemd.fileuid, objectname, objectuid);
@@ -433,7 +436,21 @@ public class RedbackFileServer extends FileServer
 
 	}
 
-
-
+	protected boolean validateFile(String filename, File file) {
+		if(this.config.containsKey("validtypes")) {
+			DataList list = config.getList("validtypes");
+			List<String> noMN = Arrays.asList(new String[] {"txt", "csv", "docx", "xlsx"});
+			String extType = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+			String mnType = FileValidator.getFileTypeFromMagicNumber(file);
+			String type = noMN.indexOf(extType) > -1 ? extType : mnType;
+			boolean valid = false;
+			for(int i = 0; i < list.size(); i++)
+				if(list.getString(i).equals(type))
+					valid = true;
+			return valid;
+		}
+		return true;
+	}
+	
 
 }
