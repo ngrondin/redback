@@ -44,7 +44,9 @@ public class RedbackAccessManager extends AccessManager
 	protected JWTValidator jwtValidator;
 	protected Map<String, Map<String, Role>> roles;
 	protected Map<String, CacheEntry<UserProfile>> cachedUserProfiles;
+	protected String sysUserToken;
 	protected String sysUserName;
+	protected long sysUserExpiry;
 
 	public RedbackAccessManager(String n, DataMap c, Firebus f) 
 	{
@@ -109,20 +111,25 @@ public class RedbackAccessManager extends AccessManager
 		return getUserProfile(session, jwt);
 	}
 	
-	protected String getSysUserToken(Session session) throws RedbackException {
+	protected synchronized String getSysUserToken(Session session) throws RedbackException {
 		if(idmTokenUrl == null || idmClientId == null || idmClientSecret == null || gatewayClient == null) 
 			throw new RedbackException("Missing configuration to retreive sysuser");
-		DataMap req = new DataMap();
-		req.put("client_id", idmClientId);
-		req.put("client_secret", idmClientSecret);
-		req.put("grant_type", "sysuser");
-		DataMap resp = gatewayClient.postForm(idmTokenUrl, req);
-		String token = resp.getString("access_token");
-		try {
-			DecodedJWT jwt = jwtValidator.decode(token);
-			sysUserName = jwt.getClaim("email").asString(); //Keeping it cached so we can later determine if a userprofile is the system
-		} catch (JWTValidatorException exception) { }		
-		return token;
+		if(sysUserExpiry > System.currentTimeMillis() + 60000) {
+			return sysUserToken;
+		} else {
+			DataMap req = new DataMap();
+			req.put("client_id", idmClientId);
+			req.put("client_secret", idmClientSecret);
+			req.put("grant_type", "sysuser");
+			DataMap resp = gatewayClient.postForm(idmTokenUrl, req);
+			sysUserToken = resp.getString("access_token");
+			try {
+				DecodedJWT jwt = jwtValidator.decode(sysUserToken);
+				sysUserName = jwt.getClaim("email").asString(); 
+				sysUserExpiry = jwt.getExpiresAt().getTime();
+			} catch (JWTValidatorException exception) { }		
+			return sysUserToken;			
+		}
 	}
 
 	
