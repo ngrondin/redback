@@ -17,20 +17,20 @@ import { LinkTableColumnConfig, LinkTableGroupConfig } from './rb-linktable-mode
 export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('columns') _cols: any;
   @Input('group') _grp: any;
-  @Input('view') view: string;
+  @Input('view') view?: string;
   @Input('grid') grid: boolean = false;
   @Input('flexfill') flexfill: boolean = true;
   @HostBinding('style.flex') get fillSpace() { return this.flexfill ? "1 1 0" : "0 0 auto";}
   
-  columns: LinkTableColumnConfig[];
-  group: LinkTableGroupConfig;
+  columns: LinkTableColumnConfig[] = [];
+  group?: LinkTableGroupConfig;
   reachedBottom: boolean = false;
-  scrollLeft: number;
+  scrollLeft: number = 0;
   groups: any = {};
-  sums: any[];
-  openGroups: string[] = [null];
+  sums: any[] = [];
+  openGroups: string[] = ['_'];
 
-  recalcPlanner: RecalcPlanner;
+  recalcPlanner!: RecalcPlanner;
   
   constructor(
     private modalService: ModalService,
@@ -86,15 +86,15 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     this.groups = {};
     let totalsums = this.columns.map(c => 0);
     for(let object of this.list) {
-      let grpKey = null;
+      let grpKey: string = "_";
       if(this.group != null) {
         if(this.group.expression != null) {
-          grpKey = Evaluator.eval(this.group.expression, object, null, this.dataset);
+          grpKey = this.group.expression(object, undefined, this.dataset);
         } else if(this.group.attribute != null) {
           grpKey = object.get(this.group.attribute);
         }
       }
-      if(this.groups[grpKey] == null) this.groups[grpKey] = {sums:this.columns.map(c => 0), lines: []};
+      if(this.groups[grpKey] == null) this.groups[grpKey] = {sums: this.columns.map(c => 0), backColors: this.columns.map(c => null), lines: []};
       let grp = this.groups[grpKey];
       let cols = [];
       for(let c = 0; c < this.columns.length; c++) {
@@ -103,7 +103,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
           let val = null;
           let loading = false;
           if(cfg.expression != null) {
-            val = Evaluator.eval(cfg.expression, object, null, this.dataset);
+            val = cfg.expression(object, null, this.dataset);
           } else if(cfg.attribute != null) {
             val = object.get(cfg.attribute);
           }
@@ -116,10 +116,10 @@ export class RbLinktableComponent extends RbDataObserverComponent {
           let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
           let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
           let col = {value: val, formattedValue: formatVal, align: cfg.align, wrap: cfg.wrap, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, icon: icon, link: cfg.link, modal: cfg.modal, loading: loading};
-          if(val !== RELATED_LOADING && !isNaN(val)) {
-            grp.sums[c] += val;
-            totalsums[c] += val;
-          }
+          let sumVal = loading ? 0 : cfg.expression == null && cfg.attribute == null ? 1 : !isNaN(val) ? val : 0;
+          grp.sums[c] += sumVal;
+          totalsums[c] += sumVal;
+          if(backColor != null && grp.backColors[c] == null) grp.backColors[c] = backColor;
           cols.push(col);  
         } else {
           cols.push({formattedValue: null});
@@ -129,12 +129,12 @@ export class RbLinktableComponent extends RbDataObserverComponent {
         grp.lines.push({object: object, cols: cols});
     }
     for(var grpKey of Object.keys(this.groups)) {
-      this.groups[grpKey].sums = this.calcSumLines(this.groups[grpKey].sums);
+      this.groups[grpKey].sums = this.calcSumLines(this.groups[grpKey].sums, this.groups[grpKey].backColors);
     }
     this.sums = this.calcSumLines(totalsums);
   }
 
-  calcSumLines(sums: number[]): any[] {
+  calcSumLines(sums: number[], backColors?: string[]): any[] {
     let ret = [];
     let c = 0;
     let firstWidth = 0;//-0.06;
@@ -142,12 +142,13 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       firstWidth += this.columns[c].width;
       c++;
     }
-    ret.push({width: 'min(' + (firstWidth * 0.88) + 'vw, ' + (firstWidth * 16.896) + 'px)'});
+    ret.push({width: 'min(' + (firstWidth * 0.88) + 'vw, ' + (firstWidth * 16.896) + 'px)', link: this.group?.link});
     while(c < this.columns.length) {
       let cfg = this.columns[c];
       if(cfg.sum) {
         let formatVal = cfg.format != null ? Formatter.format(sums[c], cfg.format) : sums[c];
-        ret.push({width: cfg.widthStr, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink});  
+        let backColor = backColors != null ? backColors[c] : null;
+        ret.push({width: cfg.widthStr, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink, backColor: backColor});  
       } else {
         ret.push({width: cfg.widthStr});  
       }
@@ -167,14 +168,16 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
 
   clickColumnHeader(column: LinkTableColumnConfig) {
-    this.dataset.filterSort({
-      sort: {
-        "0": {
-          "attribute":column.attribute,
-          "dir":1
+    if(this.dataset != null) {
+      this.dataset.filterSort({
+        sort: {
+          "0": {
+            "attribute":column.attribute,
+            "dir":1
+          }
         }
-      }
-    });
+      });
+    }
   }
 
 
@@ -184,16 +187,18 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   }
 
   clickModal(modal: string, object: RbObject) {
-    this.dataset.select(object);
-    this.modalService.open(modal);
+    if(this.dataset != null) {
+      this.dataset.select(object);
+      this.modalService.open(modal);
+    }
   }
 
   clickSumLink(link: LinkConfig) {
-    let event = link.getNavigationEvent(null, this.dataset);
+    let event = link.getNavigationEvent(undefined, this.dataset);
     this.navigateService.navigateTo(event);
   }
 
-  toggleGroup(groupKey) {
+  toggleGroup(groupKey: string) {
     if(this.openGroups.indexOf(groupKey) > -1) {
       this.openGroups.splice(this.openGroups.indexOf(groupKey), 1);
     } else {
@@ -206,9 +211,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     return this.columns.reduce((acc, col) => acc || col.sum == true, false);
   }
 
-  onScroll(event) {
+  onScroll(event: any) {
     this.scrollLeft = event.target.scrollLeft;
-    if(event.currentTarget.scrollTop > Math.floor(event.currentTarget.scrollHeight - event.currentTarget.clientHeight - 30) && this.reachedBottom == false) {
+    if(this.dataset != null && event.currentTarget.scrollTop > Math.floor(event.currentTarget.scrollHeight - event.currentTarget.clientHeight - 30) && this.reachedBottom == false) {
       this.dataset.fetchNextPage();
       this.reachedBottom = true;
       setTimeout(() => {this.reachedBottom = false}, 1000);

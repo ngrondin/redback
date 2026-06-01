@@ -741,19 +741,23 @@ public class RedbackObject extends RedbackElement
 		String revLinkVal = uid.getString();
 		if(roc != null && reverseAttribute != null) {
 			if(!oldLinkValue.isNull()) {
-				RedbackObject relObject = fetchRelated(attribute, oldLinkValue);
-				Object reverseValue = relObject.get(reverseAttribute).getObject();
-				if(reverseMapAttribute != null) {
-					DataMap map = reverseValue != null && reverseValue instanceof DataMap ? (DataMap)reverseValue : new DataMap();
-					String mapKey = get(reverseMapAttribute).getString();
-					map.remove(mapKey);
-					relObject.put(reverseAttribute, new Value(map));
-				} else if(reverseMapAttribute == null) {
-					DataList list = reverseValue != null && reverseValue instanceof DataList ? (DataList)reverseValue : new DataList();
-					if(list.contains(revLinkVal)) {
-						list.remove(list.indexOf(revLinkVal));
-						relObject.put(reverseAttribute, new Value(list));
+				try {
+					RedbackObject relObject = fetchRelated(attribute, oldLinkValue);
+					Object reverseValue = relObject.get(reverseAttribute).getObject();
+					if(reverseMapAttribute != null) {
+						DataMap map = reverseValue != null && reverseValue instanceof DataMap ? (DataMap)reverseValue : new DataMap();
+						String mapKey = get(reverseMapAttribute).getString();
+						map.remove(mapKey);
+						relObject.put(reverseAttribute, new Value(map));
+					} else if(reverseMapAttribute == null) {
+						DataList list = reverseValue != null && reverseValue instanceof DataList ? (DataList)reverseValue : new DataList();
+						if(list.contains(revLinkVal)) {
+							list.remove(list.indexOf(revLinkVal));
+							relObject.put(reverseAttribute, new Value(list));
+						}
 					}
+				} catch(Exception e) { //Can survive a bad old data
+					Logger.warning("rb.object.updatereverse", e);
 				}
 			}
 			if(!newLinkValue.isNull()) {

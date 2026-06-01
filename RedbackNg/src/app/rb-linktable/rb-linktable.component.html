@@ -20,17 +20,28 @@
             *ngFor="let groupKey of groupKeys"
             class="rb-linktable-group">
             <div
-                *ngIf="groupKey != 'null'"
+                *ngIf="groupKey != '_'"
                 [class]="'rb-linktable-grouprow'">
                 <div
                     *ngFor="let col of groups[groupKey].sums; index as i"
                     [class]="'rb-linktable-rowitem' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border' : '')"
                     [style.width]="col.width"
+                    [style.background-color]="col.backColor"
                     (click)="toggleGroup(groupKey)">
                     <span
-                        *ngIf="i == 0">
+                        *ngIf="i == 0 && group.link == null && group.modal == null">
                         {{groupKey}}             
-                    </span>   
+                    </span> 
+                    <a
+                        *ngIf="i == 0 && group.link != null && group.modal == null"
+                        (click)="clickLink(col.link, groups[groupKey].lines[0].object)">
+                        {{groupKey}}                
+                    </a>
+                    <a
+                        *ngIf="i == 0 && group.link == null && group.modal != null"
+                        (click)="clickModal(col.modal, groups[groupKey].lines[0].object)">
+                        {{groupKey}}                
+                    </a>                      
                     <span
                         [style.font-weight]="'bold'"
                         *ngIf="i > 0">

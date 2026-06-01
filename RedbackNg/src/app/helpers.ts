@@ -318,18 +318,14 @@ export class Evaluator {
         }
     }
 
-    public static createFunction(expr: string) : Function | null {
-        let func = null;
-        if(expr != null) {
-            try {
-                func = new Function("object", "relatedObject", "dataset", "return (" + expr + ");");
-            } catch(err: any) {
-                let logService = AppInjector.get(LogService);
-                logService.error("Error creating expression function for '" + expr + "': " + err.message);
-                func = new Function("object", "relatedObject", "dataset", "return null;");
-            }
-        } 
-        return func;
+    public static createFunction(expr: string) : Function {
+        try {
+            return new Function("object", "relatedObject", "dataset", "return (" + expr + ");");
+        } catch(err: any) {
+            let logService = AppInjector.get(LogService);
+            logService.error("Error creating expression function for '" + expr + "': " + err.message);
+            return new Function("object", "relatedObject", "dataset", "return null;");
+        }
     }
 }
 
@@ -519,7 +515,7 @@ export class LinkConfig {
         }
     }
 
-    getNavigationEvent(object: RbObject, dataset?: RbDatasetComponent, extraContext?: any): NavigateEvent {
+    getNavigationEvent(object?: RbObject, dataset?: RbDatasetComponent, extraContext?: any): NavigateEvent {
         let event: NavigateEvent = {
             target: this.target,
             view: this.view,
