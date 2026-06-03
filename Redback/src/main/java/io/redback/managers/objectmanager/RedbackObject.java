@@ -757,7 +757,7 @@ public class RedbackObject extends RedbackElement
 						}
 					}
 				} catch(Exception e) { //Can survive a bad old data
-					Logger.warning("rb.object.updatereverse", e);
+					Logger.warning("rb.object.updatereverse", e.getMessage());
 				}
 			}
 			if(!newLinkValue.isNull()) {
