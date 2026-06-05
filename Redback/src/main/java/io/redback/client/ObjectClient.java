@@ -232,8 +232,13 @@ public class ObjectClient extends Client
 	}
 	
 	public MultiResponse multi(Session session, DataList list) throws RedbackException {
+		return multi(session, list, true);
+	}
+	
+	public MultiResponse multi(Session session, DataList list, boolean stopOnError) throws RedbackException {
 		DataMap req = new DataMap();
 		req.put("action", "multi");
+		req.put("stoponerror", stopOnError);
 		req.put("multi", list);
 		DataMap resp = requestDataMap(session, req);
 		return new MultiResponse(resp);

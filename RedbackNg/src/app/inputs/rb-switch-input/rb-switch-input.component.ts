@@ -22,9 +22,6 @@ export class RbSwitchInputComponent extends RbInputComponent {
     this.defaultIcon = 'playlist_add_check_circle';
   }
 
-  inputInit() {
-  }
-
   public get displayvalue(): boolean {
     let ret = this.value;
     if(ret == null) {

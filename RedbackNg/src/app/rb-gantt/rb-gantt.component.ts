@@ -170,7 +170,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     } else {
       super.onDatasetEvent(event);
     }
-    if(this.active && event.dataset.getId() == this.lanesConfig?.dataset && event.event == 'load') {
+    if(this.active && event.event == 'load' && event.dataset != null && event.dataset.getId() == this.lanesConfig?.dataset) {
       super.updateData(true)
     } 
   }

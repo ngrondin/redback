@@ -10,6 +10,7 @@ import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
 
 public class MultiRequest extends ObjectRequest {
+	public boolean stopOnError = true;
 	public Map<String, ObjectRequest> requests = new HashMap<String, ObjectRequest>();;
 	
 	public MultiRequest() {
@@ -19,6 +20,7 @@ public class MultiRequest extends ObjectRequest {
 	
 	public MultiRequest(DataMap data) throws RedbackException {
 		super(data);
+		stopOnError = data.containsKey("stoponerror") ? data.getBoolean("stoponerror") : true;
 		processList(data.getList("multi"));
 	}
 	
@@ -118,6 +120,7 @@ public class MultiRequest extends ObjectRequest {
 	public DataMap getDataMap() {
 		DataMap map = new DataMap();
 		map.put("action", "multi");
+		map.put("stoponerror", stopOnError);
 		map.put("multi", getDataList());
 		return map;
 	}

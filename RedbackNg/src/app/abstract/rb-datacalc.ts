@@ -57,7 +57,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     
     onDatasetEvent(event: any) {
         if(this.active) {
-            this._logService.debug("DataCalc " + this.id + ": Dataset Event (" + event.dataset.id + "." + event.event + ", list=" + event.dataset.list.length + (event.event == 'load' ? ", filter=" + JSON.stringify(event.dataset.resolvedFilter) : "") + (event.object != null ? ", uid=" + event.object.uid : "") + ")");
+            this._logService.debug("DataCalc " + this.id + ": Dataset Event (" + event.dataset?.id + "." + event.event + ", list=" + event.dataset?.list.length + (event.event == 'load' ? ", filter=" + JSON.stringify(event.dataset?.resolvedFilter) : "") + (event.object != null ? ", uid=" + event.object.uid : "") + ")");
             this.redraw()
         }
     }

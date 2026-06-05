@@ -11,32 +11,34 @@ import { UserprefService } from 'app/services/userpref.service';
 
 @Component({template: ''})
 export abstract class RbInputComponent extends RbDataObserverComponent {
-  @Input('attribute') attribute: string;    
+  @Input('attribute') attribute?: string;    
   @Input('value') _value: any = null;
   @Input('variable') variable: any;
-  @Input('label') label: string;
-  @Input('tip') tip: string;
-  @Input('icon') _icon: string;
+  @Input('label') label?: string;
+  @Input('tip') tip?: string;
+  @Input('icon') _icon?: string;
   @Input('showicon') showicon: boolean = true;
-  @Input('size') size: number;
-  @Input('grow') grow: number;
+  @Input('size') size?: number;
+  @Input('grow') grow?: number;
   @Input('editable') editable: boolean = true;
   @Input('mandatory') mandatory: boolean = false;
   @Input('alert') alert: boolean = false;
+  @Input('updatescript') _updatescript?: string;
   @Output('valueChange') valueChange = new EventEmitter();
   
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
   @HostBinding('style.width') get styleWidth() { return (this.size != null ? ('min(' + (0.88 * this.size) + 'vw, ' + (17 * this.size) + 'px)'): this.defaultSize != null ? ('min(' + (0.88 * this.defaultSize) + 'vw, ' + (17 * this.defaultSize) + 'px)'): null);}
 
   previousValue: any;
-  previousObject: RbObject;
+  previousObject: RbObject | null = null;
   flasherOn: boolean = false;
-  defaultIcon: string;
+  defaultIcon: string = "description";
   defaultSize: number = 15;
   mouseIsOver: boolean = false;
   showTip: boolean = false;
   dialogService: DialogService;
   userprefService: UserprefService;
+  updateScript?: Function;
 
 
   constructor( ) {
@@ -57,7 +59,9 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   }
 
   inputInit() {
-    
+    if(this._updatescript != null) {
+      this.updateScript = Function("previousvalue", "value", this._updatescript);
+    }
   }
 
   dataObserverDestroy() {
@@ -108,7 +112,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     if(this.attribute == 'uid') {
       return this.rbObject.uid != null;
     } else {
-      let targetObj = this.rbObject;
+      let targetObj: RbObject | null = this.rbObject;
       let targetAttr = this.attribute;
       if(this.attribute.indexOf(".") > -1) {
         targetObj = this.rbObject.getRelated(this.attribute.substring(0, this.attribute.lastIndexOf(".")));
@@ -153,12 +157,12 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     setTimeout(() => {this.flasherOn = false}, 100);
   }
 
-  public commit(val: any, related: RbObject = null) {
+  public commit(val: any, related: RbObject | null = null) {
     var currentValue = this.value;
     if(currentValue != val) {
       if(this.attribute != null) {
         if(this.rbObject != null) {
-          let targetObj = this.rbObject;
+          let targetObj : RbObject | null = this.rbObject;
           let targetAttr = this.attribute;
           if(this.attribute.indexOf(".") > -1) {
             targetObj = this.rbObject.getRelated(this.attribute.substring(0, this.attribute.lastIndexOf(".")));
@@ -179,6 +183,9 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
         this._value = val;
       }      
       this.valueChange.emit(val);  
+      if(this.updateScript != null) {
+        this.updateScript.call(window.redback, currentValue, val);
+      }
     }
   }
 
@@ -187,7 +194,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     this.mouseIsOver = true;
     if(this.tip != null) {
       setTimeout(() => {
-        if(this.mouseIsOver == true) {
+        if(this.mouseIsOver == true && this.tip != null) {
           this.dialogService.showTooltip(this.tip, event.target, "below");
         }
       }, 1000);  
