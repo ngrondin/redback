@@ -110,6 +110,8 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     } else if(event.event == 'clear') {
       this.notification = null;
       this.calcActionData();
+    } else if(event.event == 'global') {
+      this.calcActionData();
     }
   }
 
