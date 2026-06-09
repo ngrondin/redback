@@ -439,7 +439,7 @@ public class RedbackFileServer extends FileServer
 	protected boolean validateFile(String filename, File file) {
 		if(this.config.containsKey("validtypes")) {
 			DataList list = config.getList("validtypes");
-			List<String> noMN = Arrays.asList(new String[] {"txt", "csv", "docx", "xlsx"});
+			List<String> noMN = Arrays.asList(new String[] {"txt", "csv", "docx", "xlsx", "col"});
 			String extType = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
 			String mnType = FileValidator.getFileTypeFromMagicNumber(file);
 			String type = noMN.indexOf(extType) > -1 ? extType : mnType;
