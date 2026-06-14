@@ -16,6 +16,9 @@ import { ErrorService } from 'app/services/error.service';
 })
 export class RbFileInputComponent extends RbInputComponent  {
 
+  @Input('fileuidattribute') fileuidattribute?: string;
+  @Input('mimeattribute') mimeattribute?: string;
+  @Input('thumbnailattribute') thumbnailattribute?: string;
   @Input('width') width?: number;
   @Input('height') height?: number;
   @Input('shrinkborder') shrinkborder: boolean = true;
@@ -43,41 +46,40 @@ export class RbFileInputComponent extends RbInputComponent  {
   }
 
   public get displayvalue(): any {
-    if(this.rbObject != null) {
-      let val = this.rbObject.get(this.attribute);
-      if(val != null && val.thumbnail != null) {
-        return this.domSanitizer.bypassSecurityTrustResourceUrl(val.thumbnail);;
-      }
-    } 
-    return null;
+    let val = this.thumbnail;
+    return val != null ? this.domSanitizer.bypassSecurityTrustResourceUrl(val) : null;
   }
 
-  get fileUid() : String|null {
-    if(this.rbObject != null) {
-      let val = this.rbObject.get(this.attribute);
-      if(val != null)
-        return val.fileuid;
-    } 
-    return null;
+  get fileUid() : string|null {
+    return this.getMetaValue("fileuid");
   } 
 
-    get mime() : String|null {
-    if(this.rbObject != null) {
-      let val = this.rbObject.get(this.attribute);
-      if(val != null)
-        return val.mime;
-    } 
-    return null;
+  get mime() : string|null {
+    return this.getMetaValue("mime");
   } 
 
-  hasThumbnail(): boolean {
+  get thumbnail() : string|null {
+    return this.getMetaValue("thumbnail");
+  }
+
+  getMetaValue(field: string) : string|null {
+    let val = null;
     if(this.rbObject != null) {
-      let val = this.rbObject.get(this.attribute);
-      if(val != null && val.thumbnail != null) {
-        return true;
+      let fieldAttributeName: string|undefined = (this as any)[field + "attribute"];
+      if(fieldAttributeName != null) {
+        val = this.rbObject.get(fieldAttributeName);
+      } else if(this.attribute != null) {
+        let struct = this.rbObject.get(this.attribute);
+        if(struct != null && struct[field] != null) {
+          val = struct[field];
+        }
       }
     } 
-    return false;
+    return val;    
+  }
+
+  hasThumbnail(): boolean {
+    return this.thumbnail != null;
   }
 
   @HostListener('drop', ['$event'])
@@ -113,36 +115,41 @@ export class RbFileInputComponent extends RbInputComponent  {
   }
 
   fileUploaded(res: any) {
+    if(this.rbObject != null) {
+      if(this.fileuidattribute != null) {
+        this.rbObject.setValue(this.fileuidattribute, res.fileuid);
+      }
+      if(this.mimeattribute != null) {
+        this.rbObject.setValue(this.mimeattribute, res.mime);
+      }
+      if(this.thumbnailattribute != null) {
+        this.rbObject.setValue(this.thumbnailattribute, res.thumbnail);
+      }
+    }
     this.commit(res);
   }
 
   click() {
-    if(this.rbObject != null) {
-      let val = this.rbObject.get(this.attribute);
-      if(val != null && val.fileuid != null) {
-        this.openFile();
-      } else {
-        this.chooseFile();
-      }
+    if(this.fileUid != null) {
+      this.openFile();
+    } else {
+      this.chooseFile();
     }
   }
 
   openFile() {
-    if(this.rbObject != null) {
-      let val = this.rbObject.get(this.attribute);
-      if(val != null && val.fileuid != null) {
-        let isImg = val.mime != null && val.mime.startsWith("image/");
-        if(!isImg) {
-          window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + val.fileuid);
-        } else {
-          this.dialog.open(RbFileviewerComponent, {
-            data: {
-              fileUid: val.fileuid
-            },
-            autoFocus: false,
-            restoreFocus: false
-          });
-        }
+    if(this.fileUid) {
+      let isImg = this.mime != null && this.mime.startsWith("image/");
+      if(!isImg) {
+        window.open(this.apiService.baseUrl + '/' + this.apiService.fileService + '?fileuid=' + this.fileUid);
+      } else {
+        this.dialog.open(RbFileviewerComponent, {
+          data: {
+            fileUid: this.fileUid
+          },
+          autoFocus: false,
+          restoreFocus: false
+        });
       }
     }     
   }
