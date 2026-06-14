@@ -108,6 +108,10 @@ export class AppComponent implements OnInit {
         observer.next(event);
       }); 
     }
+    window.redback.setGlobalVariable = (name: string, value: any) => {
+      window.redback[name] = value;
+      window.redback.publishEvent('global');
+    }
   }
 
   ngOnInit(): void {

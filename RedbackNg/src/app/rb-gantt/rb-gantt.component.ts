@@ -588,7 +588,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       for(var s of lane.foregroundSpreads()) {
         let stop = s.offsetTop + s.laneTop;
         let sbot = stop + s.height;
-        if(s.object != null && s.start > start && (s.start + s.width) < end && stop > top && sbot < bottom) {
+        if(s.object != null && (s.start + s.width) > start &&  s.start < end && sbot > top && stop < bottom) {
           this.addOneToSelection(s.object);
         }
       }
@@ -602,7 +602,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       } else if(event.shiftKey == true) {
         this.addOneToSelection(spread.object);
       } else {
-        this.select(spread.object);
+        let ds = this.getDatasetForConfig(spread.config);
+        let alreadySelected = ds?.isObjectSelected(spread.object);
+        if(!alreadySelected) this.select(spread.object);
+        if(spread.config.click != null) {
+          let event = {alreadyselected: alreadySelected, object: spread.object, dataset: ds};
+          spread.config.click(event);
+        }
         if(spread.config.modal != null) {
           this.modalService.open(spread.config.modal);
         } else if(spread.config.link != null && this.lanesConfig != null) {
