@@ -59,7 +59,7 @@ export class RbTextComponent extends RbDataObserverComponent {
     } else if(this.variable != null) {
       val = window.redback[this.variable];
     } else if(this._expression != null) {
-      val = Evaluator.eval(this._expression, this.selectedObject, this.dataset.relatedObject, this.dataset);
+      val = Evaluator.eval(this._expression, this.selectedObject, this.dataset?.relatedObject, this.dataset);
     } else {
       val = this._value;
     }
