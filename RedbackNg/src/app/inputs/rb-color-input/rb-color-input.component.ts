@@ -12,9 +12,9 @@ import { RbInputComponent } from '../abstract/rb-input';
 export class RbColorInputComponent extends RbInputComponent {
   @Input('margin') margin: boolean = true;
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
-  @ViewChild('colorbox', { read: ViewContainerRef }) colorboxContainerRef: ViewContainerRef;
+  @ViewChild('colorbox', { read: ViewContainerRef }) colorboxContainerRef!: ViewContainerRef;
 
-  popupComponentRef: ComponentRef<RbPopupComponent>;
+  popupComponentRef?: ComponentRef<RbPopupComponent>;
   
   constructor( 
     public popupService: PopupService
@@ -23,7 +23,7 @@ export class RbColorInputComponent extends RbInputComponent {
     this.defaultSize = 5;
   }
 
-  get color(): string {
+  get inputColor(): string {
     return this.value;
   }
 
@@ -33,7 +33,7 @@ export class RbColorInputComponent extends RbInputComponent {
     this.popupComponentRef.instance.cancelled.subscribe(() => this.onPopupCancel());
   }
 
-  onPopupValueSelected(value) {
+  onPopupValueSelected(value: string) {
     this.popupService.closePopup();
     this.commit(value);
   }

@@ -45,6 +45,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
   alertOn = false;
   flasherOn = false;
   readonly = false;
+  color = null;
 
   constructor(
     public popupService: PopupService

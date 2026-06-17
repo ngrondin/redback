@@ -12,7 +12,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
 
   @Output('keydown') keydown = new EventEmitter();
   
-  @ViewChild('input', { read: ViewContainerRef, static: true }) input: ViewContainerRef;
+  @ViewChild('input', { read: ViewContainerRef, static: true }) input!: ViewContainerRef;
 
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
@@ -96,7 +96,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
     if(this.attribute != null && this.dataset != null && this.rbObject == null) {
       let text = this.dataset.list.length == 0 ? 'No record currently exist to edit. ' : 'No record has currently been selected to edit. ';
       text = text + 'Do you want to create a new one?';
-      this.dialogService.openDialog(text, [{label: "Yes", focus:true, callback: () => this.dataset.create()}, {label: "No", focus: false, callback: () => {}}]);
+      this.dialogService.openDialog(text, [{label: "Yes", focus:true, callback: () => this.dataset!.create()}, {label: "No", focus: false, callback: () => {}}]);
     } else if(!this.readonly) {
       this.originalValue = this.value;
       this.isEditing = true;
@@ -118,7 +118,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
     this.editedValue = null;
   }
 
-  public commit(val: any, related: RbObject = null) {
+  public commit(val: any, related: RbObject | null = null) {
     super.commit(val, related);
   }
 

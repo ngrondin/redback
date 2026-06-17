@@ -12,6 +12,7 @@
     <input 
         #input
         [class]="'rb-input-input rb-input-text-color' + (mandatoryOn ? ' rb-input-mandatory' : '') + (alertOn ? ' rb-input-alert' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
+        [style.color]="color != null ? color + '!important' : null"
         [(ngModel)]="displayvalue"
         (focus)="onFocus($event)"
         (blur)="onBlur($event)"

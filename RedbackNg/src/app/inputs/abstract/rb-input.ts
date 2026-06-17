@@ -2,9 +2,11 @@ import { HostBinding, HostListener } from '@angular/core';
 import { Component } from '@angular/core';
 import { SimpleChanges } from '@angular/core';
 import { Input, Output, EventEmitter } from '@angular/core';
+import { Color } from '@swimlane/ngx-charts';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { AppInjector } from 'app/app.module';
 import { RbObject } from 'app/datamodel';
+import { ColorConfig } from 'app/helpers';
 import { DialogService } from 'app/services/dialog.service';
 import { UserprefService } from 'app/services/userpref.service';
 
@@ -23,6 +25,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('editable') editable: boolean = true;
   @Input('mandatory') mandatory: boolean = false;
   @Input('alert') alert: boolean = false;
+  @Input('color') _color: any;
   @Input('updatescript') _updatescript?: string;
   @Output('valueChange') valueChange = new EventEmitter();
   
@@ -39,7 +42,8 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   dialogService: DialogService;
   userprefService: UserprefService;
   updateScript?: Function;
-
+  colorConfig?: ColorConfig;
+  color?: string;
 
   constructor( ) {
     super();
@@ -62,12 +66,20 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     if(this._updatescript != null) {
       this.updateScript = Function("previousvalue", "value", this._updatescript);
     }
+    if(this._color != null) {
+      this.colorConfig = new ColorConfig(this._color);
+    }
   }
 
   dataObserverDestroy() {
   }
 
   onDatasetEvent(event: any) {
+    if(this.active) {
+      if(this.colorConfig != null && this.rbObject != null) {
+        this.color = this.colorConfig.getValue(this.rbObject);
+      }
+    }
   }
 
   onActivationEvent(state: boolean) {
@@ -151,6 +163,8 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   public get alertOn(): boolean {
     return this.alert;
   }
+
+
 
   public flash() {
     setTimeout(() => {this.flasherOn = true}, 1);
