@@ -37,32 +37,30 @@ export class RbLinkComponent extends RbDataObserverComponent {
   }
 
   public navigateTo() {
-    if(this.rbObject != null) {
-      let cfg = {
-        view: this.view,
-        datatargets: this.datatargets
-      };
-      if(this.datatargets == null) {
-        let objectname = this.rbObject.objectname;
-        let objectuid = this.rbObject.uid;
-        if(this.attribute != null) {
-          let related = this.rbObject.getRelated(this.attribute);
-          if(related != null) {
-            objectname = related.objectname;
-            objectuid = related.uid;
-          } else {
-            objectuid = this.rbObject.get(this.attribute);
-          }
-        }
-        if(this.filtersingleobject) {
-          cfg.datatargets = [{objectname: objectname, filter: {uid: "'" + objectuid + "'"}}];
+    let cfg = {
+      view: this.view,
+      datatargets: this.datatargets
+    };
+    if(this.datatargets == null && this.rbObject != null) {
+      let objectname = this.rbObject.objectname;
+      let objectuid = this.rbObject.uid;
+      if(this.attribute != null) {
+        let related = this.rbObject.getRelated(this.attribute);
+        if(related != null) {
+          objectname = related.objectname;
+          objectuid = related.uid;
         } else {
-          cfg.datatargets = [{objectname: objectname, select: {uid: objectuid}}];
+          objectuid = this.rbObject.get(this.attribute);
         }
       }
-      let linkcfg = new LinkConfig(cfg);
-      let event = linkcfg.getNavigationEvent(this.rbObject, this.dataset, {});
-      this.navigateService.navigateTo(event);
+      if(this.filtersingleobject) {
+        cfg.datatargets = [{objectname: objectname, filter: {uid: "'" + objectuid + "'"}}];
+      } else {
+        cfg.datatargets = [{objectname: objectname, select: {uid: objectuid}}];
+      }
     }
+    let linkcfg = new LinkConfig(cfg);
+    let event = linkcfg.getNavigationEvent(this.rbObject || undefined, this.dataset, {});
+    this.navigateService.navigateTo(event);
   }
 }

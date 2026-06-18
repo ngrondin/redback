@@ -16,7 +16,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.firebus.Firebus;
+import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
+import io.firebus.data.DataLiteral;
 import io.firebus.data.DataMap;
 import io.firebus.logging.Logger;
 import io.firebus.script.Function;
@@ -195,11 +197,12 @@ public class RedbackUIServer extends UIServer
 		DataMap view = new DataMap();
 		try {
 			DataMap viewConfig = getViewConfig(session, viewName);
+			DataMap params = new DataMap();
 			ResolvedRights rights = getViewRights(session, viewConfig);
 			if(rights.read) {
 				view.put("label", viewConfig.getString("label"));
 				view.put("onload", viewConfig.getString("onload"));
-				view.put("content", getViewContent(session, viewConfig, rights));	
+				view.put("content", getViewContent(session, viewConfig, params, rights));	
 				if(traceCollection != null && dataClient != null) {
 					dataClient.publishData(traceCollection.getName(), 
 						traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
@@ -216,12 +219,14 @@ public class RedbackUIServer extends UIServer
 	}
 	
 
-	protected DataList getViewContent(Session session, String viewName, ResolvedRights parentRights) throws RedbackException 
+	protected DataList getViewContent(Session session, String viewName, DataMap params, ResolvedRights parentRights) throws RedbackException 
 	{
 		DataMap viewConfig = getViewConfig(session, viewName);
 		if(viewConfig != null) {
+			viewConfig = (DataMap)viewConfig.getCopy(); //This is to apply the paramters without changing the base config
+			applyParams(viewConfig, params);
 			ResolvedRights rights = getViewRights(session, viewConfig).and(parentRights);
-			return getViewContent(session, viewConfig, rights);
+			return getViewContent(session, viewConfig, params, rights);
 		} else { 
 			return new DataList();
 		}
@@ -230,13 +235,27 @@ public class RedbackUIServer extends UIServer
 	protected DataMap getViewConfig(Session session, String name) throws RedbackException {
 		DataMap viewConfig = viewConfigs.get(session, name, false);
 		return viewConfig;
-		/*if(viewConfig != null) {
-			String accessCat = viewConfig.getString("accesscat");
-			if(session.getUserProfile().canRead("rb.views." + name) || session.getUserProfile().canRead("rb.accesscat." + accessCat)) {
-				return viewConfig;
-			} 
+	}
+	
+	protected void applyParams(DataMap raw, DataMap params) {
+		for(String key: raw.keySet()) {
+			DataEntity val = raw.get(key);
+			if(val instanceof DataLiteral && ((DataLiteral)val).getType() == DataLiteral.TYPE_STRING) {
+				String strVal = ((DataLiteral)val).getString();
+				String newVal = StringUtils.replaceParameters(strVal, params);
+				if(newVal != strVal) 
+					raw.put(key, newVal);
+			} else if(val instanceof DataMap) {
+				applyParams((DataMap)val, params);
+			} else if(val instanceof DataList) {
+				DataList list = (DataList)val;
+				for(int i = 0; i < list.size(); i++) {
+					DataEntity listVal = list.get(i);
+					if(listVal instanceof DataMap) 
+						applyParams((DataMap)listVal, params);
+				}
+			}
 		}
-		return null;*/
 	}
 	
 	protected ResolvedRights getViewRights(Session session, DataMap viewConfig) throws RedbackException
@@ -256,13 +275,13 @@ public class RedbackUIServer extends UIServer
 		return new ResolvedRights(read, write, execute);
 	}
 
-	protected DataList getViewContent(Session session, DataMap viewConfig, ResolvedRights rights) throws RedbackException 
+	protected DataList getViewContent(Session session, DataMap viewConfig, DataMap params, ResolvedRights rights) throws RedbackException 
 	{
 		DataList viewContent = new DataList();
 		DataList contentList = viewConfig.getList("content");
 		if(contentList != null) {
 			for(int i = 0; i < contentList.size(); i++) {
-				DataMap viewPart = generateViewPartFromComponentConfig(session, contentList.getObject(i), rights); 
+				DataMap viewPart = generateViewPartFromComponentConfig(session, contentList.getObject(i), params, rights); 
 				if(viewPart != null)
 					viewContent.add(viewPart);
 			}			
@@ -270,7 +289,7 @@ public class RedbackUIServer extends UIServer
 		return viewContent;
 	}
 
-	protected DataMap generateViewPartFromComponentConfig(Session session, DataMap componentConfig, ResolvedRights parentRights) throws RedbackException
+	protected DataMap generateViewPartFromComponentConfig(Session session, DataMap componentConfig, DataMap params, ResolvedRights parentRights) throws RedbackException
 	{
 		DataMap viewPart = new DataMap();
 		String type = componentConfig.getString("type");
@@ -307,12 +326,14 @@ public class RedbackUIServer extends UIServer
 					DataMap childComponentConfig = componentContentList.getObject(i);
 					String childType = childComponentConfig.getString("type");
 					if(childType.equals("view")) {
-						DataList childViewContent = getViewContent(session, childComponentConfig.getString("name"), rights);
+						DataMap newParams = (DataMap)params.getCopy();
+						if(childComponentConfig.containsKey("params")) newParams.merge(childComponentConfig.getObject("params"));
+						DataList childViewContent = getViewContent(session, childComponentConfig.getString("name"), newParams, rights);
 						for(int j = 0; j < childViewContent.size(); j++)
 							viewPartContentList.add(childViewContent.getObject(j));
 						
 					} else {
-						DataMap childViewPart = generateViewPartFromComponentConfig(session, childComponentConfig, rights);
+						DataMap childViewPart = generateViewPartFromComponentConfig(session, childComponentConfig, params, rights);
 						if(childViewPart != null)
 							viewPartContentList.add(childViewPart);
 					}

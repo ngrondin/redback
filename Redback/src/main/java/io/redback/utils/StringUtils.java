@@ -497,6 +497,13 @@ public class StringUtils
         return new String(Base64.getEncoder().encode(bytes));
     }
     
+    public static boolean isAlpah(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        return str.chars().allMatch(Character::isLetter);
+    }
+    
     public static boolean isHtml(String str) {
     	Matcher matcher = htmlPattern.matcher(str);
         return  matcher.find();
@@ -512,6 +519,24 @@ public class StringUtils
     	MailDateFormat mdf = new MailDateFormat();
     	Date dt = mdf.parse(str);
     	return dt;
+    }
+    
+    public static String replaceParameters(String in, DataMap params) {
+    	int pos1 = 0;
+    	String str = in;
+		while((pos1 = str.indexOf("{{", pos1)) != -1) {
+			int pos2 = str.indexOf("}}", pos1);
+			if(pos2 > -1) {
+				String paramKey = str.substring(pos1 + 2, pos2);
+				if(paramKey.chars().allMatch(Character::isLetter)) {
+					String newVal = params.getString(paramKey);
+					if(newVal == null) newVal = "";
+					str = str.substring(0, pos1) + newVal + str.substring(pos2 + 2);
+					pos1 = 0;
+				}						
+			}
+		}
+		return str;
     }
     
     public static DataList decodeCSV(String str)  {

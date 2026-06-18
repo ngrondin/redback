@@ -19,8 +19,10 @@ export abstract class RbComponent implements OnInit {
     ngOnInit(): void {
       if(this.activator != null) {
         this.activatorSubscription = this.activator.getActivationObservable().subscribe(state => {
-          this.active = state;
-          this.internalActivationEvent(state);
+          if(this.active != state) {
+            this.active = state;
+            this.internalActivationEvent(state);
+          }
         });
         this.active = this.activator.activatorOn;
       } else {
@@ -28,7 +30,6 @@ export abstract class RbComponent implements OnInit {
       }
       this.componentInit();
       this.initiated = true;
-      //this.internalActivationEvent(this.active);
     }
 
     ngOnDestroy(): void {
