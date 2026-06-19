@@ -79,6 +79,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     centerLabel: boolean;
     labelColor: string | null;
     color: ColorConfig | null;
+    selectedBorderColor: string | null;
     indicatorAttribute: string | null;
     indicatorExpression: string | null;    
     dependencyAttribute: string | null;
@@ -112,6 +113,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       } else {
         this.color = null;
       }
+      this.selectedBorderColor = json.selectedbordercolor;
       this.indicatorAttribute = json.indicatorattribute;
       this.indicatorExpression = json.indicatorexpression;
       this.dependencyAttribute = json.dependencyattribute;

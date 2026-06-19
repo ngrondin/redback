@@ -297,7 +297,6 @@
 .rb-gantt-spreadbox-selected {
     border: var(--v3px) solid;
     border-color: var(--primary-dark2-color);
-    /*margin: var(--vm3px);*/
 }
 
 .rb-gantt-spreadbackground {

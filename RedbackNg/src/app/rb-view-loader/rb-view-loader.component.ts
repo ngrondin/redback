@@ -33,6 +33,9 @@ export class RbViewLoaderComponent implements OnInit {
 
   attachNewLoadedView(entry: LoadedView) {
     if(entry != null && this.container != null) {
+      if(this.currentLoadedView != null) {
+        this.detachCurrentLoadedView();
+      }
       this.currentLoadedView = entry;
       entry.attachTo(this.container);
     }

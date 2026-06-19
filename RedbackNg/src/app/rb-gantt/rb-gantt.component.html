@@ -330,6 +330,7 @@
                         [style.top.px]="spread.laneTop"
                         [style.background-color]="spread.color"
                         [style.color]="spread.labelcolor"
+                        [style.border-color]="spread.selected ? spread.config.selectedBorderColor : null"
                         [style.justify-content]="spread.config.centerLabel == true ? 'center' : 'start'">
                         <div
                             class="rb-gantt-spreadlabel">

@@ -76,7 +76,7 @@ export class NavigateService {
       if(view != null ) {
         if(event.reset == false) {
           if(target.component.currentLoadedView != null) {
-            let backData = new NavigateBackData(target.component.currentLoadedView.name, target.component.currentLoadedView.getCurrentlyOpenTab(), this.modalService.currentlyOpenModal);
+            let backData = new NavigateBackData(target.component.currentLoadedView.name, target.component.currentLoadedView.getCurrentlyOpenTab(), /*this.modalService.currentlyOpenModal*/ undefined); //For the moment, when going back, don't reopen the model that was open. May need to add an event parameter for this.
             backData.breadcrumbLabel = target.component.currentLoadedView.title;
             backData.dataTargets = target.component.currentLoadedView.extractNavigateEventDataTargets();
             target.stack.push(backData)
