@@ -211,7 +211,9 @@
                     *ngIf="lanesConfig.editable == true"
                     [attribute]="lanesConfig.labelAttribute"
                     [object]="lane.object"
-                    [margin]="false">
+                    [margin]="false"
+                    [grow]="1"
+                    [size]="null">
                 </rb-inline-input>
                 <div
                     *ngIf="lane.sub != null"
