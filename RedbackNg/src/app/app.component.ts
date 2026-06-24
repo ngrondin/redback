@@ -77,6 +77,11 @@ export class AppComponent implements OnInit {
     this.userprefService.userdisplay = this.userdisplay;
     this.userprefService.username = this.username;
 
+    window.addEventListener('wheel', (e) => {
+      console.log("wheel");
+      e.preventDefault(); 
+    });
+
     let currentUrl = window.location.href;
     let pos = currentUrl.indexOf(this.apiService.uiService);
     if(pos > -1) {

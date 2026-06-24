@@ -11,7 +11,7 @@
 </div>
 <div
     *ngIf="showVTrack"
-    class="rb-scroll-vtrack"
+    [class]="'rb-scroll-vtrack' + (isDragging ? 'rb-scroll-track-noaction' : '')"    
     (mouseover)="overVTrack()"
     (mouseout)="outVTrack()">
     <div
@@ -23,7 +23,7 @@
 </div>
 <div
     *ngIf="showHTrack"
-    class="rb-scroll-htrack"
+    [class]="'rb-scroll-htrack' + (isDragging ? 'rb-scroll-track-noaction' : '')"
     (mouseover)="overHTrack()"
     (mouseout)="outHTrack()">
     <div

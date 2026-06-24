@@ -1,5 +1,6 @@
 import { AfterContentInit, Component, ElementRef, EventEmitter, HostListener, Output, ViewChild, ViewContainerRef } from '@angular/core';
 import { RbContainerComponent } from 'app/abstract/rb-container';
+import { DragService } from 'app/services/drag.service';
 
 @Component({
   selector: 'rb-scroll',
@@ -19,12 +20,13 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
   vThumbPosition: number = 0;
   hThumbPosition: number = 0;
 
-  @ViewChild('scroller', { read: ViewContainerRef, static: true }) scroller: ViewContainerRef;
-  @ViewChild('content', { read: ViewContainerRef, static: true }) content: ViewContainerRef;
+  @ViewChild('scroller', { read: ViewContainerRef, static: true }) scroller!: ViewContainerRef;
+  @ViewChild('content', { read: ViewContainerRef, static: true }) content!: ViewContainerRef;
   @Output() rbscroll: EventEmitter<any> = new EventEmitter();
   
   constructor(
-    public element: ElementRef
+    public element: ElementRef,
+    public dragService: DragService
   ) {
     super();
   }
@@ -53,6 +55,10 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
 
   get hThumbBig() {
     return this.isOverHTrack || this.draggingHThumb;
+  }
+
+  get isDragging() {
+    return this.dragService.isDragging;
   }
 
   onResize(event: any) {
@@ -85,7 +91,7 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
     this.isOverHTrack = false;
   }
 
-  startVThumbDrag(event) {
+  startVThumbDrag(event: any) {
     this.draggingVThumb = true;
     let controller = this;
     let startClientY = event.clientY;
@@ -93,7 +99,7 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
     let scrollerH = this.scroller.element.nativeElement.clientHeight;
     let contentH = this.content.element.nativeElement.clientHeight;
     let scrollerNativeElement = this.scroller.element.nativeElement;
-    var whileMove = function(event) {
+    var whileMove = function(event: any) {
       let clientDelta = event.clientY - startClientY;
       let scrollDelta = clientDelta * (contentH / scrollerH);
       scrollerNativeElement.scrollTop = Math.round(startScrollTop + scrollDelta);
@@ -108,7 +114,7 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
     window.addEventListener('mouseup', endMove);   
   }
 
-  startHThumbDrag(event) {
+  startHThumbDrag(event: any) {
     this.draggingHThumb = true;
     let controller = this;
     let startClientX = event.clientX;
@@ -116,7 +122,7 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
     let scrollerW = this.scroller.element.nativeElement.clientWidth;
     let contentW = this.content.element.nativeElement.clientWidth;
     let scrollerNativeElement = this.scroller.element.nativeElement;
-    var whileMove = function(event) {
+    var whileMove = function(event: any) {
       let clientDelta = event.clientX - startClientX;
       let scrollDelta = clientDelta * (contentW / scrollerW);
       scrollerNativeElement.scrollLeft = Math.round(startScrollLeft + scrollDelta);
@@ -132,7 +138,7 @@ export class RbScrollComponent  extends RbContainerComponent implements AfterCon
   }
 
 
-  onScroll(event) {
+  onScroll(event: any) {
     this.rbscroll.emit(event);
     this.calcThumbPositions();
   }

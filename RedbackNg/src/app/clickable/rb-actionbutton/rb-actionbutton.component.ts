@@ -10,11 +10,11 @@ import { ErrorService } from 'app/services/error.service';
   styleUrls: ['../rb-button/rb-button.css']
 })
 export class RbActionButtonComponent extends RbDataButtonComponent {
-  @Input('action') action: string;
-  @Input('target') target: string;
-  @Input('param') param: string;
-  @Input('confirm') confirm: string;
-  @Input('timeout') timeout: number;
+  @Input('action') action?: string;
+  @Input('target') target?: string;
+  @Input('param') param?: string;
+  @Input('confirm') confirm?: string;
+  @Input('timeout') timeout?: number;
   
   constructor(
     public actionService: ActionService

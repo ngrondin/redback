@@ -56,28 +56,29 @@ class ListFieldConfig {
   styleUrls: ['./rb-list4.component.css']
 })
 export class RbList4Component extends RbDataObserverComponent {
-  @Input('mainattribute') mainattribute: string;
-  @Input('mainexpression') mainexpression: string;
-  @Input('mainformat') mainformat: string;
-  @Input('maincolor') maincolor: string;
-  @Input('subattribute') subattribute: string;
-  @Input('subexpression') subexpression: string;
-  @Input('subformat') subformat: string;
-  @Input('subcolor') subcolor: string;
-  @Input('meta1attribute') meta1attribute: string;
-  @Input('meta1expression') meta1expression: string;
-  @Input('meta1format') meta1format: string;
-  @Input('meta1color') meta1color: string;
-  @Input('meta2attribute') meta2attribute: string;
-  @Input('meta2expression') meta2expression: string;
-  @Input('meta2format') meta2format: string;
-  @Input('meta2color') meta2color: string;
-  @Input('imageattribute') imageattribute: string;
-  @Input('color') color: string;
+  @Input('mainattribute') mainattribute?: string;
+  @Input('mainexpression') mainexpression?: string;
+  @Input('mainformat') mainformat?: string;
+  @Input('maincolor') maincolor?: string;
+  @Input('subattribute') subattribute?: string;
+  @Input('subexpression') subexpression?: string;
+  @Input('subformat') subformat?: string;
+  @Input('subcolor') subcolor?: string;
+  @Input('meta1attribute') meta1attribute?: string;
+  @Input('meta1expression') meta1expression?: string;
+  @Input('meta1format') meta1format?: string;
+  @Input('meta1color') meta1color?: string;
+  @Input('meta2attribute') meta2attribute?: string;
+  @Input('meta2expression') meta2expression?: string;
+  @Input('meta2format') meta2format?: string;
+  @Input('meta2color') meta2color?: string;
+  @Input('imageattribute') imageattribute?: string;
+  @Input('color') color?: string;
   @Input('colormap') colormap: any;
-  @Input('colorattribute') colorattribute: string;
-  @Input('modal') modal: string;
-  @Input('navigate') link: string;
+  @Input('colorattribute') colorattribute?: string;
+  @Input('modal') modal?: string;
+  @Input('navigate') link?: string;
+  @Input('clickscript') clickscript?: string;
   @Input('allowdrag') allowdrag: boolean = false;
   @Input('showrefresh') showrefresh: boolean = true;
   @Input('emptytext') emptytext: string = "No records";
@@ -85,15 +86,16 @@ export class RbList4Component extends RbDataObserverComponent {
   enhancedList: any[] = []
   isoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
   reachedBottom: boolean = false;
-  enhanceDragDataCallback: Function;
+  enhanceDragDataCallback?: Function;
+  click?: Function;
 
-  main: ListFieldConfig;
-  sub: ListFieldConfig;
-  meta1: ListFieldConfig;
-  meta2: ListFieldConfig;
-  backColor: ColorConfig;
+  main!: ListFieldConfig;
+  sub!: ListFieldConfig;
+  meta1!: ListFieldConfig;
+  meta2!: ListFieldConfig;
+  backColor!: ColorConfig;
 
-  recalcPlanner: RecalcPlanner;
+  recalcPlanner!: RecalcPlanner;
 
   constructor(
     public userprefService: UserprefService,
@@ -112,6 +114,7 @@ export class RbList4Component extends RbDataObserverComponent {
     this.meta1 = new ListFieldConfig(this.getUserParam("meta1attribute"), this.getUserParam("meta1expression"), this.getUserParam("meta1color"), this.getUserParam("meta1format"));
     this.meta2 = new ListFieldConfig(this.getUserParam("meta2attribute"), this.getUserParam("meta2expression"), this.getUserParam("meta2color"), this.getUserParam("meta2format"));
     this.backColor = new ColorConfig({expression: this.getUserParam("color"), attribute: this.getUserParam("colorattribute"), map: this.getUserParam("colormap")});
+    this.click = this.clickscript != null ? Function("event", this.clickscript) : undefined;
   }
 
   dataObserverDestroy() {
@@ -156,7 +159,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   isSelected(object: RbObject) : boolean {
-    return this.dataset.isObjectSelected(object);
+    return this.dataset?.isObjectSelected(object) || false;
   }
 
   public redraw() {
@@ -176,7 +179,7 @@ export class RbList4Component extends RbDataObserverComponent {
       }
 
       if(this.hasImage()) {
-        let fileVal = obj.get(this.imageattribute);
+        let fileVal = obj.get(this.imageattribute!);
         if(fileVal != null) {
           data.image = 'url(\'' + fileVal.thumbnail + '\')';
         }
@@ -195,7 +198,8 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   private getUserParam(param: string) : any {
-      let val = this[param];
+    let thisAsAny: any = this;
+      let val = thisAsAny[param];
       if(this.userPref != null && this.userPref[param] != null) {
         val = this.userPref[param];
       }
@@ -203,40 +207,44 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   showCount() : boolean {
-    return this.showrefresh && this.dataset.totalCount > 10;
+    return this.showrefresh && this.dataset != null && this.dataset.totalCount > 10;
   }
 
-  getCountText() : string {
-    return this.dataset.totalCount.toString();
+  getCountText() : string | null {
+    return this.dataset != null ? this.dataset.totalCount.toString() : null;
   }
 
   showRefresh() : boolean {
     return this.showrefresh;
   }
 
-  itemClicked(item: RbObject, event: any) {
+  itemClicked(object: RbObject, event: any) {
     if(event.ctrlKey == true || event.metaKey == true) {
-      this.dataset.addOneToSelection(item);
+      this.dataset?.addOneToSelection(object);
     } else if(event.shiftKey == true) {
-      this.dataset.addRangeToSelection(item);
+      this.dataset?.addRangeToSelection(object);
     } else {
-      this.dataset.select(item);
+      let alreadySelected = this.dataset?.isObjectSelected(object);
+      if(!alreadySelected) this.dataset?.select(object);
+      if(this.click != null) {
+        let event = {alreadyselected: alreadySelected, object: object, dataset: this.dataset};
+        this.click(event);
+      }
       if(this.modal != null) {
         this.modalService.open(this.modal);
-      } else if(this.link != null) {
-        let navEvent: NavigateEvent = {
+      } else if(this.link != null && this.rbObject != null) {
+        this.navigateService.navigateTo({
           objectname: this.rbObject.objectname,
           datatargets:[{
             filter: {uid: "'" + this.rbObject.uid + "'"}
           }]
-        };
-        this.navigateService.navigateTo(navEvent);
+        });
       }  
     }
   }
 
   public enhanceDragData(object: RbObject) : any {
-    if(object != null) {
+    if(object != null && this.dataset != null) {
       return [object].concat(this.dataset.selectedObjects.filter(o => o.uid != object.uid));
     } else {
       return null
@@ -244,13 +252,13 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   refresh() {
-    this.dataset.refreshData();
+    this.dataset?.refreshData();
   }
 
-  onScroll(event) {
+  onScroll(event: any) {
     if(event.currentTarget.scrollTop > (event.currentTarget.scrollHeight - (1.5*event.currentTarget.clientHeight)) && this.reachedBottom == false) {
       this.reachedBottom = true;
-      this.dataset.fetchNextPage();
+      this.dataset?.fetchNextPage();
       setTimeout(() => {this.reachedBottom = false}, 1000);
     }
   }
