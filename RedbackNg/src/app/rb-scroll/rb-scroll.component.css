@@ -15,6 +15,7 @@
     line-height: 0px;
     overflow-anchor: none;
     position: relative;
+    overscroll-behavior: contain;
 }
 
 .rb-scroll-scroller::-webkit-scrollbar {

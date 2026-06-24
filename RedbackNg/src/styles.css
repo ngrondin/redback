@@ -42,6 +42,7 @@ html {
 	height: 100%;
 	font-size: var(--v16px);
     font-family: Roboto, "Helvetica Neue", sans-serif; 
+	overscroll-behavior: contain;
 }
 
 body { 
@@ -54,6 +55,7 @@ body {
 	-webkit-user-select: none; /* Safari */
 	-ms-user-select: none; /* IE 10 and IE 11 */
 	user-select: none; /* Standard syntax */
+	overscroll-behavior: contain;
 }
 
 
