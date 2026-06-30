@@ -200,9 +200,12 @@ public class RedbackUIServer extends UIServer
 			DataMap params = new DataMap();
 			ResolvedRights rights = getViewRights(session, viewConfig);
 			if(rights.read) {
+				StringBuilder onLoadBuilder = new StringBuilder();
+				if(viewConfig.containsKey("onload"))
+					onLoadBuilder.append(viewConfig.getString("onload") + "\r\r");
 				view.put("label", viewConfig.getString("label"));
-				view.put("onload", viewConfig.getString("onload"));
-				view.put("content", getViewContent(session, viewConfig, params, rights));	
+				view.put("content", getViewContent(session, viewConfig, params, rights, onLoadBuilder));	
+				view.put("onload", onLoadBuilder.toString());
 				if(traceCollection != null && dataClient != null) {
 					dataClient.publishData(traceCollection.getName(), 
 						traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
@@ -219,14 +222,16 @@ public class RedbackUIServer extends UIServer
 	}
 	
 
-	protected DataList getViewContent(Session session, String viewName, DataMap params, ResolvedRights parentRights) throws RedbackException 
+	protected DataList getViewContent(Session session, String viewName, DataMap params, ResolvedRights parentRights, StringBuilder onLoadBuilder) throws RedbackException 
 	{
 		DataMap viewConfig = getViewConfig(session, viewName);
 		if(viewConfig != null) {
 			viewConfig = (DataMap)viewConfig.getCopy(); //This is to apply the paramters without changing the base config
+			if(viewConfig.containsKey("onload"))
+				onLoadBuilder.append(viewConfig.getString("onload") + "\r\r");
 			applyParams(viewConfig, params);
 			ResolvedRights rights = getViewRights(session, viewConfig).and(parentRights);
-			return getViewContent(session, viewConfig, params, rights);
+			return getViewContent(session, viewConfig, params, rights, onLoadBuilder);
 		} else { 
 			return new DataList();
 		}
@@ -275,13 +280,13 @@ public class RedbackUIServer extends UIServer
 		return new ResolvedRights(read, write, execute);
 	}
 
-	protected DataList getViewContent(Session session, DataMap viewConfig, DataMap params, ResolvedRights rights) throws RedbackException 
+	protected DataList getViewContent(Session session, DataMap viewConfig, DataMap params, ResolvedRights rights, StringBuilder onLoadBuilder) throws RedbackException 
 	{
 		DataList viewContent = new DataList();
 		DataList contentList = viewConfig.getList("content");
 		if(contentList != null) {
 			for(int i = 0; i < contentList.size(); i++) {
-				DataMap viewPart = generateViewPartFromComponentConfig(session, contentList.getObject(i), params, rights); 
+				DataMap viewPart = generateViewPartFromComponentConfig(session, contentList.getObject(i), params, rights, onLoadBuilder); 
 				if(viewPart != null)
 					viewContent.add(viewPart);
 			}			
@@ -289,7 +294,7 @@ public class RedbackUIServer extends UIServer
 		return viewContent;
 	}
 
-	protected DataMap generateViewPartFromComponentConfig(Session session, DataMap componentConfig, DataMap params, ResolvedRights parentRights) throws RedbackException
+	protected DataMap generateViewPartFromComponentConfig(Session session, DataMap componentConfig, DataMap params, ResolvedRights parentRights, StringBuilder onLoadBuilder) throws RedbackException
 	{
 		DataMap viewPart = new DataMap();
 		String type = componentConfig.getString("type");
@@ -328,12 +333,12 @@ public class RedbackUIServer extends UIServer
 					if(childType.equals("view")) {
 						DataMap newParams = (DataMap)params.getCopy();
 						if(childComponentConfig.containsKey("params")) newParams.merge(childComponentConfig.getObject("params"));
-						DataList childViewContent = getViewContent(session, childComponentConfig.getString("name"), newParams, rights);
+						DataList childViewContent = getViewContent(session, childComponentConfig.getString("name"), newParams, rights, onLoadBuilder);
 						for(int j = 0; j < childViewContent.size(); j++)
 							viewPartContentList.add(childViewContent.getObject(j));
 						
 					} else {
-						DataMap childViewPart = generateViewPartFromComponentConfig(session, childComponentConfig, params, rights);
+						DataMap childViewPart = generateViewPartFromComponentConfig(session, childComponentConfig, params, rights, onLoadBuilder);
 						if(childViewPart != null)
 							viewPartContentList.add(childViewPart);
 					}
