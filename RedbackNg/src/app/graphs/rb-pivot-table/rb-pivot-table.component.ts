@@ -7,7 +7,9 @@ import { RbAggregateDisplayComponent } from '../abstract/rb-aggregate-display';
   styleUrls: ['./rb-pivot-table.component.css']
 })
 export class RbPivotTableComponent extends RbAggregateDisplayComponent {
-  @Input('format') format: string = null;
+  @Input('format') format?: string;
+  @Input('showsum') showsum: boolean = true;
+  @Input('fontsize') fontsize: number = 1;
 
   constructor() {
     super();
