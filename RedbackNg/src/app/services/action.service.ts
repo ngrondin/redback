@@ -42,11 +42,11 @@ export class ActionService {
       } else if(_action == 'exportall') {
         return this.exportAll(dataset);
       } else if(_action == 'report') {
-        return this.report(dataset, (target ?? param));
+        return this.report(target != null ? target : param, dataset, target != null ? param : null);
       } else if(_action == 'reportall') {
-        return this.reportAll(dataset, (target ?? param));
+        return this.reportAll(target != null ? target : param, dataset);
       } else if(_action == 'reportlist') {
-        return this.reportList(dataset, datasetgroup, (target ?? param));
+        return this.reportList(target != null ? target : param, dataset, datasetgroup, target != null ? param : null);
       } else if(_action == 'execute') {
         return this.execute(dataset, (target ?? param), (target != null ? param : null), extraContext, timeout);
       } else if(_action == 'executeall') {
@@ -149,18 +149,22 @@ export class ActionService {
     });
   }
 
-  public report(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
+  public report(reportName: string, dataset: RbDatasetComponent, param: any) : Observable<null> {
     return new Observable((observer) => {
-      if(dataset.selectedObject != null) {
-        let filterData = {object: dataset.objectname, filter: {uid:dataset.selectedObject.uid}, uid: dataset.selectedObject.uid};
-        this.reportService.launchReport(reportName, null, filterData);
+      let data = {};
+      if(param != null) {
+        data = this.filterService.resolveFilter(param, dataset.selectedObject, dataset, dataset.relatedObject, null, null, null);
+        
+      } else if(dataset.selectedObject != null) {
+        data = {object: dataset.objectname, filter: {uid:dataset.selectedObject.uid}, uid: dataset.selectedObject.uid};
       }
+      this.reportService.launchReport(reportName, null, data);
       observer.next(null);
       observer.complete(); 
     });
   }
 
-  public reportAll(dataset: RbDatasetComponent, reportName: string) : Observable<null> {
+  public reportAll(reportName: string, dataset: RbDatasetComponent) : Observable<null> {
     return new Observable((observer) => {
       let filterData = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
       this.reportService.launchReport(reportName, null, filterData);
@@ -169,21 +173,23 @@ export class ActionService {
     });
   }
 
-  public reportList(dataset: RbDatasetComponent, datasetgroup: RbDatasetGroupComponent, category: string) : Observable<null> {
+  public reportList(category: string, dataset: RbDatasetComponent, datasetgroup?: RbDatasetGroupComponent, param?: any) : Observable<null> {
     return new Observable((observer) => {
-      let filterData = null;
-      if(datasetgroup != null) {
-        filterData = Object.keys(datasetgroup.datasets).map(ds => {
+      let data = null;
+      if(param != null) {
+        data = this.filterService.resolveFilter(param, dataset.selectedObject, dataset, dataset.relatedObject, null, null, null);
+      } else if(datasetgroup != null) {
+        data = Object.keys(datasetgroup.datasets).map(ds => {
           let dataset = datasetgroup.datasets[ds];
           let fd = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
           if(dataset.selectedObject != null) fd['uid'] = dataset.selectedObject.uid;
           return fd;
         });
       } else if(dataset != null) {
-        filterData = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
-        if(dataset.selectedObject != null) filterData.uid = dataset.selectedObject.uid;
+        data = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
+        if(dataset.selectedObject != null) data.uid = dataset.selectedObject.uid;
       }
-      this.reportService.popupReportList(category, filterData);
+      this.reportService.popupReportList(category, data);
       observer.next(null);
       observer.complete();
     });
