@@ -6,6 +6,7 @@ export class LinkTableColumnConfig {
     attribute: string | null;
     expression: Function | null;
     displayAttribute: string;
+    checkbox: boolean;
     format: string;
     align: string;
     size: number;
@@ -27,6 +28,7 @@ export class LinkTableColumnConfig {
       this.attribute = json.attribute;
       this.expression = userpref != null && userpref.exression != null ? Evaluator.createFunction(userpref.expression) : json.expression != null ? Evaluator.createFunction(json.expression) : null;
       this.displayAttribute = json.displayattribute;
+      this.checkbox = json.checkbox != null ? json.checkbox : false;
       this.format = json.format;
       this.align = json.align;
       this.size = json.size;

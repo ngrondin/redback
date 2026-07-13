@@ -116,8 +116,12 @@ rb-scroll ::ng-deep .rb-scroll-scroller {
     border-width: 0px 0px 0.06vw 0.06vw;
 }
 
-.rb-linktable-rowitem-alighright {
+.rb-linktable-rowitem-alignright {
     justify-content: end;
+}
+
+.rb-linktable-rowitem-aligncenter {
+    justify-content: center;
 }
 
 .rb-linktable-rowitem span {

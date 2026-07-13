@@ -59,19 +59,24 @@
                     [style.background-color]="col.backColor"
                     [style.color]="col.foreColor">
                     <div
-                        [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border-on' : '')">
+                        [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alignright' : col.align == 'center' ? ' rb-linktable-rowitem-aligncenter' : '') + (grid ? ' rb-linktable-border-on' : '')">
                         <a
-                            *ngIf="col.icon == null && col.link != null && !col.loading"
+                            *ngIf="col.icon == null && col.link != null && col.checkbox == null && !col.loading"
                             (click)="clickLink(col.link, line.object)">
                             {{col.formattedValue}}                
                         </a>
                         <a
-                            *ngIf="col.icon == null && col.modal != null && !col.loading"
+                            *ngIf="col.icon == null && col.modal != null && col.checkbox == null && !col.loading"
                             (click)="clickModal(col.modal, line.object)">
                             {{col.formattedValue}}                
                         </a>
+                        <rb-checkbox
+                            *ngIf="col.icon == null && col.link == null && col.modal == null && col.checkbox != null"
+                            [checked]="col.formattedValue"
+                            (change)="toggleCheckbox(col.checkbox, line.object)">
+                        </rb-checkbox>
                         <span
-                            *ngIf="col.icon == null && col.link == null && col.modal == null && !col.loading"
+                            *ngIf="col.icon == null && col.link == null && col.modal == null && col.checkbox == null && !col.loading"
                             [class]="col.wrap == true ? 'rb-linktable-rowitem-wrapspan' : 'dd'">
                             {{col.formattedValue}}                
                         </span>
@@ -104,7 +109,7 @@
             [style.visibility]="col.formattedValue != null ? 'visible' : 'hidden'"
             [style.width]="col.width">
             <div
-                [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border-on' : '')">
+                [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alignright' : col.align == 'center' ? ' rb-linktable-rowitem-alighcenter' : '') + (grid ? ' rb-linktable-border-on' : '')">
                 <a
                     *ngIf="col.link != null"
                     (click)="clickSumLink(col.link)">
