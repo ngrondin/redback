@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
 
 import io.redback.exceptions.RedbackException;
 
-public class BufferedImageJSWrapper  extends ObjectJSWrapper {
+public class BufferedImageJSWrapper extends ObjectJSWrapper {
 	private BufferedImage image;
 	private Graphics2D graphics;
 

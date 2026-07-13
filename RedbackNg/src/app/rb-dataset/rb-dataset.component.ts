@@ -401,7 +401,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public add(obj: RbObject) {
     let index = this._list.indexOf(obj);
     if(index > -1) {
-      this._list.splice(index);
+      this._list.splice(index, 1);
     }
     if(this.addtoend == true) {
       this._list.push(obj);

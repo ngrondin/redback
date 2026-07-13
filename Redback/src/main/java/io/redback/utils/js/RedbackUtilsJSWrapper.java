@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +16,7 @@ import io.redback.exceptions.RedbackException;
 import io.redback.services.impl.RedbackUIServer;
 import io.redback.utils.CronExpression;
 import io.redback.utils.StringUtils;
+import io.redback.utils.XML;
 import io.redback.utils.dataset.DataSet;
 import io.redback.utils.dataset.impl.CSVDataSet;
 import io.redback.utils.dataset.js.DataSetJSWrapper;
@@ -299,6 +299,14 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 					String content = arguments[0].toString();
 					DataSet ds = new CSVDataSet(content);
 					return new DataSetJSWrapper(ds);
+				}	
+			};				
+		} else if(key.equals("createXML")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String tag = arguments[0].toString();
+					XML xml = new XML(tag);
+					return new XMLJSWrapper(xml);
 				}	
 			};				
 		} else {	
