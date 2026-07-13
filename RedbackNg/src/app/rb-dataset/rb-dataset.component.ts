@@ -21,6 +21,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   @Input('basesort') baseSort: any;
   @Input('name') name: string; //To be deprecated
   @Input('fetchall') fetchAll: boolean = false;
+  @Input('alwaysreceiveupdates') allwaysReceiveUpdates: boolean = false;
   @Input('autoselect') autoSelect: string = "whensingle";
   @Input('addrelated') addrelated: boolean = true;
   @Input('addtoend') addtoend: boolean = false;
@@ -307,13 +308,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
   
   private receiveUpdatedObject(object: RbObject) {
-    if(object.objectname == this.objectname && object.deleted == false && this.resolvedFilter != null && this._list.includes(object) == false && this.isLoading == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize)) {
+    if(object.objectname == this.objectname && object.deleted == false && this.resolvedFilter != null && this._list.includes(object) == false && this.isLoading == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize || this.allwaysReceiveUpdates)) {
       if(this.filterService.applies(this.resolvedFilter, object)) {
-        //this.logService.debug("Dataset " + this.id + ": ReceivedUpdateObject (uid: " + object.uid + ", filter: " + JSON.stringify(this.resolvedFilter) + ")");
-        this._list.push(object);
-        object.addSet(this);
-        this.publishEvent('load', object);
-        if(this._list.length == 1) {
+        this.add(object);
+        if(this._list.length == 1 && this.autoSelect == 'whensingle') {
           this._selectedObjects = [this._list[0]];
         }  
       }
