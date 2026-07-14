@@ -426,3 +426,7 @@
     padding: var(--v58px) 0;
     color: var(--light-writing-color);
 }
+
+.rb-gantt-bottomspace {
+    height: var(--v36px);
+}

@@ -102,49 +102,8 @@ export class RbLogComponent extends RbDataObserverComponent {
         object: object
       })
     }
-    console.log(data);
     this.data = data;
   }
-
-  /*hasCategory(object: RbObject): boolean {
-    return this.categoryattribute != null && object.get(this.categoryattribute) != null;
-  }
-
-  getUserForItem(object: RbObject) : string {
-    let str: string = object.get(this.userattribute); 
-    if(str == null || (str != null && str.length == 0)) {
-      str = "Unknown user";
-    }
-    return str;
-  }
-
-  getDateForItem(object: RbObject) : string {
-    let str : string = object.get(this.dateattribute);
-    if(str == null || (str != null && str.length == 0)) {
-      str = "Unknown date";
-    } else {
-      str = Formatter.formatDateTime(new Date(str));
-    }
-    return str;
-  }
-
-  getEntryForItem(object: RbObject) : string {
-    let str : string = object.get(this.entryattribute);
-    if(str == null) {
-      str = "";
-    } else {
-      str = str.split('\r\n').join('<br>').split('\n').join('<br>').split('\t').join('&nbsp;&nbsp;');
-    }
-    return str;
-  }
-
-  getCategoryForItem(object: RbObject) : string {
-    let str:string = null;
-    if(this.categoryattribute != null) {
-      str = object.get(this.categoryattribute); 
-    }
-    return str;
-  }*/
 
   keydown(event: any) {
 

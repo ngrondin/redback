@@ -57,7 +57,7 @@
                     </div>                
                 </div>
                 <div
-                    *ngIf="isEditable && item.canDelete()"
+                    *ngIf="isEditable && item.object.canDelete()"
                     class="rb-log-options">
                     <rb-iconbutton
                         *ngIf="item.object.canDelete()"
