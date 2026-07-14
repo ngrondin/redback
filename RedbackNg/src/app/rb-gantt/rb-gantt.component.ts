@@ -361,7 +361,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           }
         }
       }
-      this.heightPX = accHeight;
+      this.heightPX = accHeight + (this.lanesConfig.editable ? (this.spreadHeightPX + 2 * this.spreadMarginPX) : 0);
     }
   }
 

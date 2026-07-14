@@ -21,11 +21,23 @@
     overflow-x: hidden;
 }
 
+.rb-log-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.rb-log-group-label {
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: white;
+    background-color: var(--primary-color);
+}
+
 .rb-log-card {
     display: flex;
     flex-direction: column;
     border-radius: 3px;
-    margin: var(--v8px) 0px var(--v5px) 0px;
+    margin: var(--v5px) 0px var(--v5px) 0px;
     padding: var(--v10px);
     background-color: #fcfcfc;
     border: 1px solid #dfdfdf;

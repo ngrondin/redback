@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { NavigateEvent, RbObject } from 'app/datamodel';
-import { Formatter } from 'app/helpers';
+import { Formatter, RecalcPlanner } from 'app/helpers';
 import { ActionService } from 'app/services/action.service';
 import { DataService } from 'app/services/data.service';
 import { NavigateService } from 'app/services/navigate.service';
@@ -17,7 +17,8 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('dateattribute') dateattribute: string;
   @Input('entryattribute') entryattribute: string;
   @Input('categoryattribute') categoryattribute: string;
-  @Input('categories') categories: any;
+  @Input('groupattribute') groupattribute: string;
+  //@Input('categories') categories: any;
   @Input('editable') editable: any;
   @Input('linkobjectattribute') linkobjectattribute: string;
   @Input('linkuidattribute') linkuidattribute: string;
@@ -26,7 +27,10 @@ export class RbLogComponent extends RbDataObserverComponent {
 
   public value: string; 
   public isEditable: boolean = false;
-  private reachedBottom: boolean = false;
+  public reachedBottom: boolean = false;
+  public data: any = {};
+
+  recalcPlanner!: RecalcPlanner;
 
   constructor(
     private dataService: DataService,
@@ -36,6 +40,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   }
 
   dataObserverInit() {
+    this.recalcPlanner = new RecalcPlanner(this.calcList.bind(this))
   }
 
   dataObserverDestroy() {
@@ -44,6 +49,9 @@ export class RbLogComponent extends RbDataObserverComponent {
   onDatasetEvent(event: any) {
     if(this.active == true) {
       this.evalEditable();
+      if(event.event == 'load' || event.event == 'removed' || event.event == 'clear' || event.event == 'update') {
+        this.recalcPlanner.request();
+      }      
     } else {
       this.isEditable = false;
     }
@@ -52,6 +60,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   onActivationEvent(event: any) {
     if(this.active == true) {
       this.evalEditable();
+      this.recalcPlanner.request();
     } else {
       this.isEditable = false;
     }
@@ -61,7 +70,43 @@ export class RbLogComponent extends RbDataObserverComponent {
     return this.linkobjectattribute != null && this.linkuidattribute != null;
   }
 
-  hasCategory(object: RbObject): boolean {
+  public get groups(): string[] {
+    return this.data != null ? Object.keys(this.data) : [null];
+  }
+
+  public calcList() {
+    let data = {};
+    for(var object of this.list) {
+      let grp: string|null = this.groupattribute != null ? object.get(this.groupattribute) : null;
+      let user: string|null = object.get(this.userattribute); 
+      if(user == null || (user != null && user.length == 0)) user = "Unknown user";
+      let cat: string|null = this.categoryattribute != null ? object.get(this.categoryattribute) : null;
+      let dtstr : string = object.get(this.dateattribute);
+      if(dtstr == null || (dtstr != null && dtstr.length == 0)) {
+        dtstr = "Unknown date";
+      } else {
+        dtstr = Formatter.formatDateTime(new Date(dtstr));
+      }
+      let entry : string = object.get(this.entryattribute);
+      if(entry == null) {
+        entry = "";
+      } else {
+        entry = entry.split('\r\n').join('<br>').split('\n').join('<br>').split('\t').join('&nbsp;&nbsp;');
+      }
+      if(data[grp] == null) data[grp] = [];
+      data[grp].push({
+        entry: entry,
+        user: user,
+        date: dtstr,
+        category: cat,
+        object: object
+      })
+    }
+    console.log(data);
+    this.data = data;
+  }
+
+  /*hasCategory(object: RbObject): boolean {
     return this.categoryattribute != null && object.get(this.categoryattribute) != null;
   }
 
@@ -99,7 +144,7 @@ export class RbLogComponent extends RbDataObserverComponent {
       str = object.get(this.categoryattribute); 
     }
     return str;
-  }
+  }*/
 
   keydown(event: any) {
 

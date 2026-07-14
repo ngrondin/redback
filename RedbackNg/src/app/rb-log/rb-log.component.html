@@ -19,44 +19,54 @@
 <div
     class="rb-log-container hscroll"
     (scroll)="onScroll($event)">
-    <div
-        [class]="'rb-log-card' + (canClick ? ' rb-log-card-active' : '')"
-        *ngFor="let item of list"
-        (click)="clickCard(item)">
+    <div 
+        *ngFor="let grp of groups"
+        [class]="'rb-log-group'">
+        <span
+            *ngIf="grp != 'null'"
+            class="rb-log-group-label">
+            &nbsp;{{grp}}
+        </span>
         <div
-            class="rb-log-header">
+            [class]="'rb-log-card' + (canClick ? ' rb-log-card-active' : '')"
+            *ngFor="let item of data[grp]"
+            (click)="clickCard(item.object)">
             <div
-                class="rb-log-name">
-                {{getUserForItem(item)}}
-            </div>
-            <div
-                class="rb-log-date">
-                {{getDateForItem(item)}}
-            </div>
-        </div>
-        <div
-            class="rb-log-bodyrow">
-            <div
-                class="rb-log-bodycol">
+                class="rb-log-header">
                 <div
-                    class="rb-log-entry"
-                    [innerHTML]="getEntryForItem(item)">
+                    class="rb-log-name">
+                    {{item.user}}
                 </div>
                 <div
-                    *ngIf="hasCategory(item)"
-                    class="rb-log-category">
-                    {{getCategoryForItem(item)}}
-                </div>                
+                    class="rb-log-date">
+                    {{item.date}}
+                </div>
             </div>
             <div
-                *ngIf="isEditable && item.canDelete()"
-                class="rb-log-options">
-                <rb-iconbutton
-                    *ngIf="item.canDelete()"
-                    [icon]="'close_small'"
-                    (click)="deleteItem(item)">
-                </rb-iconbutton>    
+                class="rb-log-bodyrow">
+                <div
+                    class="rb-log-bodycol">
+                    <div
+                        class="rb-log-entry"
+                        [innerHTML]="item.entry">
+                    </div>
+                    <div
+                        *ngIf="item.category != null"
+                        class="rb-log-category">
+                        {{item.category}}
+                    </div>                
+                </div>
+                <div
+                    *ngIf="isEditable && item.canDelete()"
+                    class="rb-log-options">
+                    <rb-iconbutton
+                        *ngIf="item.object.canDelete()"
+                        [icon]="'close_small'"
+                        (click)="deleteItem(item.object)">
+                    </rb-iconbutton>    
+                </div>
             </div>
-        </div>
-    </div >
+        </div >
+    </div>
+    
 </div>
