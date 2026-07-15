@@ -49,8 +49,7 @@ public class XML {
 			sb.append("\r\n");
 			String subIndentStr = indentStr + "  ";
 			for(XML child: children) 
-				child.writeToStringBuilder(sb, subIndentStr);
-			sb.append("\r\n");		
+				child.writeToStringBuilder(sb, subIndentStr);	
 			sb.append(indentStr);			
 		} else if(text != null) {
 			sb.append(text);
@@ -58,6 +57,7 @@ public class XML {
 		sb.append("</");
 		sb.append(tag);
 		sb.append(">");
+		sb.append("\r\n");
 	}
 	
 	public String toString() {

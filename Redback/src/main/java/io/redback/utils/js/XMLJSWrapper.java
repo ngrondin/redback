@@ -32,7 +32,7 @@ public class XMLJSWrapper extends ObjectJSWrapper {
 		} else if(key.equals("setText")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
-					String val = arguments[0].toString();
+					String val = arguments.length > 0 && arguments[0] != null ? arguments[0].toString() : "";
 					xml.setText(val);
 					return null;
 				}
