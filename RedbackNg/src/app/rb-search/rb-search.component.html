@@ -1,15 +1,23 @@
 <rb-icon
-    *ngIf="showicon"
+    *ngIf="showicon && modes.length <= 1"
     [class]="'rb-input-icon'"
     [icon]="icon">
 </rb-icon>
+<rb-iconbutton
+    #modeselectorbutton
+    *ngIf="modes.length > 1"
+    class="rb-input-trail-iconbutton"
+    [icon]="'apps'"
+    [style.color]="'var(--light-writing-color)'"
+    (click)="openModeSelector()">
+</rb-iconbutton>
 <div
     class="rb-input-container">
     <span
         [class]="'rb-input-label' + ((displayvalue === null || displayvalue === '' || displayvalue === undefined) && !isEditing ? ' rb-input-label-big' : '')">
         {{label}}
-    </span>    
-    <input 
+    </span>
+    <input
         #input
         [class]="'rb-input-input rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
         [(ngModel)]="displayvalue"
@@ -24,8 +32,9 @@
         [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
     </div>
 </div>
-<rb-iconbutton 
-    *ngIf="filterconfig != null"
+
+<rb-iconbutton
+    *ngIf="mode.filterconfig != null"
     class="rb-input-trail-iconbutton"
     [icon]="'filter_list'"
     [style.color]="hasFilter ? 'var(--primary-dark-color)' : 'var(--dark-writing-color)'"

@@ -21,7 +21,7 @@ export class ActionService {
   constructor(
     private dataService: DataService,
     private apiService: ApiService,
-    private filterService: FilterService,    
+    private filterService: FilterService,
     private reportService: ReportService,
     private modalService: ModalService,
     private errorService: ErrorService,
@@ -79,11 +79,11 @@ export class ActionService {
               error: (err) => observer.error(err),
               complete: () => observer.complete()
             });
-          }}, 
+          }},
           {label:"Cancel", focus: false, callback:() => {
             observer.complete();
           }}
-        ], 
+        ],
         () => {
           observer.complete();
         });
@@ -119,17 +119,17 @@ export class ActionService {
     return new Observable((observer) => {
       if(dataset.selectedObject != null) {
         this.dialogService.openDialog(
-          "Delete this record?", 
+          "Delete this record?",
           [
             {
-              label: "Yes", 
+              label: "Yes",
               focus: true,
               callback: () => {
                 this.dataService.delete(dataset.selectedObject).subscribe(new ObserverProxy(observer, () => dataset.removeSelected()));
               }
-            }, 
+            },
             {
-              label: "No", 
+              label: "No",
               focus: false,
               callback: () => {
                 observer.complete();
@@ -154,13 +154,13 @@ export class ActionService {
       let data = {};
       if(param != null) {
         data = this.filterService.resolveFilter(param, dataset.selectedObject, dataset, dataset.relatedObject, null, null, null);
-        
+
       } else if(dataset.selectedObject != null) {
         data = {object: dataset.objectname, filter: {uid:dataset.selectedObject.uid}, uid: dataset.selectedObject.uid};
       }
       this.reportService.launchReport(reportName, null, data);
       observer.next(null);
-      observer.complete(); 
+      observer.complete();
     });
   }
 
@@ -169,7 +169,7 @@ export class ActionService {
       let filterData = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
       this.reportService.launchReport(reportName, null, filterData);
       observer.next(null);
-      observer.complete();   
+      observer.complete();
     });
   }
 
@@ -199,7 +199,7 @@ export class ActionService {
     return new Observable((observer) => {
       if(dataset != null && dataset.selectedObject != null) {
         let paramResolved: any = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, null, extraContext);
-        this.dataService.executeObjectFunction(dataset.selectedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));  
+        this.dataService.executeObjectFunction(dataset.selectedObject, functionName, paramResolved, timeout).subscribe(new ObserverProxy(observer));
       } else {
         observer.complete();
       }
@@ -246,9 +246,9 @@ export class ActionService {
       let paramResolved = {};
       if(functionParams != null) {
         if(dataset != null) {
-          paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, null, extraContext);  
+          paramResolved = this.filterService.resolveFilter(functionParams, dataset.selectedObject, dataset, dataset.relatedObject, null, null, extraContext);
         } else if(datasetgroup != null) {
-          paramResolved = this.filterService.resolveFilter(functionParams, null, null, null, null, datasetgroup, extraContext);            
+          paramResolved = this.filterService.resolveFilter(functionParams, null, null, null, null, datasetgroup, extraContext);
         } else {
           paramResolved = functionParams;
         }
@@ -288,25 +288,25 @@ export class ActionService {
     });
   }
 
-  public executeClientScript(dataset:RbDatasetComponent, script: string) : Observable<null> {
+  public executeClientScript(dataset:RbDatasetComponent|null, script: string) : Observable<null> {
     return new Observable((observer) => {
       try {
         let func = Function("dataset", "obj", "object", "selectedObject", "relatedObject", script);
-        func.call(window.redback, dataset, dataset.selectedObject, dataset.selectedObject, dataset.selectedObject, dataset.relatedObject);
+        func.call(window.redback, dataset, dataset?.selectedObject, dataset?.selectedObject, dataset?.selectedObject, dataset?.relatedObject);
         observer.next(null);
-        observer.complete();  
+        observer.complete();
       } catch(err) {
         this.errorService.showError(err.message); // Explicitly showing error here as most errors are caught on server response
         observer.error(err);
       }
-    });    
+    });
   }
 
   public showModal(modalName: string) : Observable<null> {
     return new Observable((observer) => {
       this.modalService.open(modalName);
       observer.next(null);
-      observer.complete();  
+      observer.complete();
     });
   }
 
@@ -316,7 +316,7 @@ export class ActionService {
       let event = link.getNavigationEvent(dataset.selectedObject, dataset);
       this.navigateService.navigateTo(event);
       observer.next(null);
-      observer.complete();  
+      observer.complete();
     });
   }
 
@@ -326,7 +326,7 @@ export class ActionService {
         datasetgroup.refreshAllData();
       } else if(dataset != null) {
         dataset.refreshData();
-      } 
+      }
       observer.next(null);
       observer.complete();
     });
@@ -338,7 +338,7 @@ export class ActionService {
       let url = eval(linkExpression);
       window.open(url);
       observer.next(null);
-      observer.complete();  
+      observer.complete();
     });
   }
 }

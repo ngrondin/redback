@@ -1,4 +1,4 @@
-import { Component, Input, ViewContainerRef, ComponentRef, Injector, HostBinding } from '@angular/core';
+import { Component, Input, ViewContainerRef, ComponentRef, Injector, ViewChild } from '@angular/core';
 import { OverlayRef, Overlay } from '@angular/cdk/overlay';
 import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
@@ -6,6 +6,11 @@ import { RbFilterBuilderComponent } from 'app/rb-filter-builder/rb-filter-builde
 import { RbFieldInputComponent } from 'app/inputs/abstract/rb-field-input';
 import { RbSearchTarget } from './rb-search-target';
 import { FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder-configs';
+import { SearchMode } from './rb-search-model';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { RbPopupHardlistComponent } from 'app/popups/rb-popup-hardlist/rb-popup-hardlist.component';
+import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+import { PopupService } from 'app/services/popup.service';
 
 @Component({
   selector: 'rb-search',
@@ -13,22 +18,26 @@ import { FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder-con
   styleUrls: ['../inputs/abstract/rb-field-input.css']
 })
 export class RbSearchComponent extends RbFieldInputComponent {
-  @Input('filter') filterconfig: any;
-  @Input('sort') sortconfig: any;
-  @Input('searchtarget') searchtarget: RbSearchTarget;
+  @Input('filter') filterconfig?: any;
+  @Input('sort') sortconfig?: any;
+  @Input('searchtarget') searchtarget?: RbSearchTarget;
+  @Input('modes') _modes?: any;
 
-  
+  @ViewChild('modeselectorbutton', { read: ViewContainerRef }) modeSelectorButtonContainerRef: ViewContainerRef;
+
   overlayRef: OverlayRef;
   filterBuilderComponentRef: ComponentRef<RbFilterBuilderComponent>;
+  modeSelectorPopupComponentRef: ComponentRef<RbPopupComponent>;
 
-  public filterValue: any;
-  public sortValue: any;
   public searchTimer: any = null;
+  public modes: SearchMode[] = [];
+  public mode: SearchMode | null;
 
-  constructor(    
+  constructor(
     public injector: Injector,
     public overlay: Overlay,
-    public viewContainerRef: ViewContainerRef
+    public viewContainerRef: ViewContainerRef,
+    public popupService: PopupService
   ) {
     super();
     this.label = "Search";
@@ -39,28 +48,33 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   inputInit() {
-    if(this.searchtarget == null) {
-      if(this.dataset != null) {
-        this.searchtarget = this.dataset;
-      } else if(this.datasetgroup != null) {
-        if(this.targetdatasetid != null) {
-          this.searchtarget = this.datasetgroup.datasets[this.targetdatasetid];
-        } 
-        if(this.searchtarget == null) { //Didn't find the specified dataset id
-          this.searchtarget = this.datasetgroup;
-        }
+    if (this._modes != null) {
+      for (var item of this._modes) {
+        this.modes.push(new SearchMode(item));
       }
+    } else {
+      this.modes.push(new SearchMode({
+        filter: this.filterconfig,
+        sort: this.sortconfig,
+        label: this.label,
+        targetdatasetid: this.targetdatasetid,
+        searchtarget: this.searchtarget
+      }));
     }
+    for (let mode of this.modes) {
+      if (mode.searchtarget == null) mode.resolveSearchTarget(this.dataset, this.datasetgroup);
+    }
+    this.selectMode(this.modes[0]);
   }
 
   onDatasetEvent(event: any) {
   }
 
   onActivationEvent(state: boolean) {
-    if(this.active == true && this.dataset != null) {
-      this._value = this.dataset.userSearch;
-      this.filterValue = this.dataset.userFilter;
-      this.sortValue = this.dataset.userSort;    
+    if(this.active == true && this.mode.searchtarget instanceof RbDatasetComponent) {
+      this._value = this.mode.searchtarget.userSearch;
+      this.mode.filterValue = this.mode.searchtarget.userFilter;
+      this.mode.sortValue = this.mode.searchtarget.userSort;
     }
   }
 
@@ -70,7 +84,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   public get hasFilter() {
-    return this.filterValue != null || this.sortValue != null;
+    return this.mode.filterValue != null || this.mode.sortValue != null;
   }
 
   searchAfterDelay(val: string) {
@@ -79,7 +93,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   search(val: string) {
-    let fetched = this.searchtarget.filterSort({search: val});
+    let fetched = this.mode.searchtarget.filterSort({search: val});
     if(!fetched) {
       this.searchAfterDelay(val);
     }
@@ -88,6 +102,24 @@ export class RbSearchComponent extends RbFieldInputComponent {
   finishEditing() {
     this.commit(this.editedValue);
     super.finishEditing();
+  }
+
+  openModeSelector() {
+    let config = this.modes.map(m => ({ label: m.label, mode: m }));
+    this.modeSelectorPopupComponentRef = this.popupService.openPopup(this.modeSelectorButtonContainerRef, RbPopupHardlistComponent, config);
+    this.modeSelectorPopupComponentRef.instance.selected.subscribe(value => this.selectMode(value.mode));
+    this.modeSelectorPopupComponentRef.instance.cancelled.subscribe(() => this.closeModeSelector());
+  }
+
+  closeModeSelector() {
+    this.popupService.closePopup();
+    this.modeSelectorPopupComponentRef = null;
+  }
+
+  selectMode(mode: SearchMode) {
+    this.closeModeSelector();
+    this.mode = mode;
+    this.label = mode.label;
   }
 
   openFilterBuilder() {
@@ -100,9 +132,9 @@ export class RbSearchComponent extends RbFieldInputComponent {
     });
 
     let config: FilterBuilderConfig = new FilterBuilderConfig();
-    config.filterConfig = this.filterconfig;
-    config.sortConfig = this.sortconfig;
-    config.searchTarget = this.searchtarget;
+    config.filterConfig = this.mode.filterconfig;
+    config.sortConfig = this.mode.sortconfig;
+    config.searchTarget = this.mode.searchtarget;
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);
@@ -117,9 +149,9 @@ export class RbSearchComponent extends RbFieldInputComponent {
   closeFilterBuilder(event: any) {
     this.overlayRef.dispose();
     this.overlayRef = null;
-    this.filterValue = event.filter;
-    this.sortValue = event.sort;
-    this.searchtarget.filterSort({filter: this.filterValue, sort: this.sortValue});
+    this.mode.filterValue = event.filter;
+    this.mode.sortValue = event.sort;
+    this.mode.searchtarget.filterSort({filter: this.mode.filterValue, sort: this.mode.sortValue});
   }
 
   cancelFilterBuilder() {
