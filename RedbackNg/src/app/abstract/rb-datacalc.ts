@@ -25,36 +25,36 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     initialFilteringDone: boolean = false;
     blockRecalc: boolean = false;
     recalcPlanner: RecalcPlanner;
-    
+
     private _logService: LogService;
-    
+
     constructor(
     ) {
         super();
         this._logService = AppInjector.get(LogService);
         this.recalcPlanner = new RecalcPlanner(this.calc.bind(this));
     }
-    
+
     dataObserverInit() {
         if(this.series != null) {
             this.seriesConfigs = [];
             for(let item of this.series) {
                 this.seriesConfigs.push(this.createSeriesConfig(item));
             }
-        }        
+        }
         this.dataCalcInit();
     }
-    
+
     dataObserverDestroy() {
     }
-    
+
     onActivationEvent(event: any) {
         this._logService.debug("DataCalc " + this.id + ": Activation (" + event + ")");
         if(this.active) {
             this.updateData();
         }
     }
-    
+
     onDatasetEvent(event: any) {
         if(this.active) {
             this._logService.debug("DataCalc " + this.id + ": Dataset Event (" + event.dataset?.id + "." + event.event + ", list=" + event.dataset?.list.length + (event.event == 'load' ? ", filter=" + JSON.stringify(event.dataset?.resolvedFilter) : "") + (event.object != null ? ", uid=" + event.object.uid : "") + ")");
@@ -92,7 +92,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
         } else {
             this.redraw();
             return false;
-        }        
+        }
     }
 
     updateOtherData() : boolean {
@@ -101,7 +101,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
 
     forceDatasetReload() {
         if(this.dataset != null) {
-          this.dataset.refreshData();
+          this.dataset.refreshData(true);
         }
         if(this.datasetgroup != null) {
           this.datasetgroup.refreshAllData();
@@ -173,7 +173,7 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
         return false;
     }
 
-    
+
 
     abstract dataCalcInit() : void;
 
@@ -184,5 +184,5 @@ export abstract class RbDataCalcComponent<T extends SeriesConfig> extends RbData
     abstract getFilterSortForSeries(config: T) : any;
 
     abstract calc() : void;
-    
+
 }

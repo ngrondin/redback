@@ -99,12 +99,12 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       if(event.event == 'select') {
         this.refreshData();
       } else if(event.event == 'load') {
-
+        this.refreshData();
       } else if(event.event == 'clear') {
         this.clear();
       } else if(event.event == 'update') {
         if(this.canLoadData) this.publishEvent('update'); //Child data may need to be redrawn when parent is updated. Only do it if dataset is ready
-        this.refreshData(true);
+        this.refreshData();
       } else if(event.event == 'global') {
         this.refreshData();
       }
@@ -113,7 +113,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   onActivationEvent(state: any) {
     if(state == true && this.refreshOnActivate) {
-      this.refreshData(true);
+      this.refreshData();
     }
   }
 
@@ -147,7 +147,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   public get canLoadData() : boolean {
     return this.initiated
-      && this.active 
+      && this.active
       && (this.master == null || (this.master != null && this.relatedObject != null))
       && (this.requiresuserfilter == false || this.hasUserFilter)
   }
@@ -166,7 +166,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     });
   }
 
-  public refreshData(onlyIfFilterChanged = false) : boolean {
+  public refreshData(force = false) : boolean {
     if(this.canLoadData) {
       //this.logService.debug("Dataset " + this.id + ": RefreshData ()");
       let prevFilter = this.resolvedFilter;
@@ -176,16 +176,18 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       let filterChanged = ValueComparator.notEqual(prevFilter, this.resolvedFilter);
       let searchChanged = ValueComparator.notEqual(prevSearch, this.resolvedSearch);
       let sortChanged = ValueComparator.notEqual(prevSort, this.resolvedSort);
-      if(filterChanged || searchChanged || sortChanged || !onlyIfFilterChanged) {
+      if(filterChanged || searchChanged || sortChanged || force) {
         this.clear(false);
         this.fetchNextPage();
         this.refreshOnActivate = false;
-        return true;  
+        return true;
       } else {
         return false;
       }
-    } else {
+    } else if(this.active == false || this.initiated == false) {
       this.refreshOnActivate = true;
+      return false;
+    } else {
       return false;
     }
   }
@@ -200,10 +202,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       }
       if(this.master != null && this.relatedObject != null) {
         filter = this.filterService.mergeFilters(filter, this.master.relationship);
-      } 
+      }
       if(this.userFilter != null) {
         filter = this.filterService.mergeFilters(filter, this.userFilter);
-      }  
+      }
     }
     this.mergedFilter = filter;
     this.resolvedFilter = this.filterService.resolveFilter(filter, this.relatedObject, this.dataset, this.relatedObject);
@@ -224,7 +226,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     if(resetResolved) {
       this.resolvedFilter = null;
       this.resolvedSort = null;
-      this.resolvedSearch = null;  
+      this.resolvedSearch = null;
     }
     this.publishEvent('clear');
   }
@@ -266,7 +268,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         this._list.push(obj);
         obj.addSet(this);
       }
-    } 
+    }
     if(this.fetchAll == false && data.length < this.pageSize) {
       this.hasMorePages = false
     }
@@ -296,7 +298,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         this.select(this._list[0]);
       }
     }
-    if(this.nextPage == 1) { 
+    if(this.nextPage == 1) {
       if(this.fetchAll == false && this._list.length > 10) {
         this.apiService.countObjects(this.objectname, this.resolvedFilter, this.userSearch).subscribe(data => {
           this.totalCount = data.result
@@ -306,14 +308,14 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       }
     }
   }
-  
+
   private receiveUpdatedObject(object: RbObject) {
     if(object.objectname == this.objectname && object.deleted == false && this.resolvedFilter != null && this._list.includes(object) == false && this.isLoading == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize || this.allwaysReceiveUpdates)) {
       if(this.filterService.applies(this.resolvedFilter, object)) {
         this.add(object);
         if(this._list.length == 1 && this.autoSelect == 'whensingle') {
           this._selectedObjects = [this._list[0]];
-        }  
+        }
       }
     }
   }
@@ -362,8 +364,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public clearSelection() {
-    this._selectedObjects = [];
-    this.publishEvent('select');
+    if (this._selectedObjects.length > 0) {
+      this._selectedObjects = [];
+      this.publishEvent('select');
+    }
   }
 
   public filterSort(event: any) : boolean {
@@ -383,7 +387,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       fetched = this.refreshData();
     }
     return fetched;
-  } 
+  }
 
   public create() {
     this.dataService.create(this.objectname, null, this.resolvedFilter).subscribe(newObject => this.addObjectAndSelect(newObject));
@@ -435,10 +439,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       }
       this.observers.forEach((observer) => {
         observer.next(evt);
-      }); 
+      });
       if(this.datasetgroup != null) {
         this.datasetgroup.groupMemberEvent(evt);
-      }  
+      }
       if(this.eventScript != null) {
         try {
           this.eventScript.call(window.redback, evt);

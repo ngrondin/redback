@@ -9,7 +9,7 @@ export abstract class RbSetComponent extends RbContainerComponent {
     @Input('master') master: any;
     @Input('requiresuserfilter') requiresuserfilter: boolean = false;
     @Input('ignoretarget') ignoretarget: boolean = false;
-    
+
     containerInit(): void {
         this.setInit();
     }
@@ -24,7 +24,7 @@ export abstract class RbSetComponent extends RbContainerComponent {
 
     //abstract onDataTargetEvent(dt: DataTarget);
 
-    public abstract refreshData();
+    public abstract refreshData(force: boolean);
 
     public abstract clear();
 

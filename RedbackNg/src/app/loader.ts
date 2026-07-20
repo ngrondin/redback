@@ -163,7 +163,7 @@ export class LoadedView extends RbActivatorComponent {
     tabSections: RbTabSectionComponent[] = [];
     compsWithIds: RbComponent[] = [];
     logService: LogService;
-  
+
     constructor(
       public name: string,
       public title: string,
@@ -171,27 +171,27 @@ export class LoadedView extends RbActivatorComponent {
       super();
       this.logService = AppInjector.get(LogService);
     }
-  
+
     activatorInit() {}
-  
+
     activatorDestroy() {}
-    
+
     onDatasetEvent(event: any) {}
-  
+
     onActivationEvent(state: boolean) {}
-  
+
     attachTo(container: ViewContainerRef) {
       for(let item of this.rootComponentRefs) {
         container.insert(item.hostView);
       }
-    }  
-  
+    }
+
     detachFrom(container: ViewContainerRef) {
       this.rootComponentRefs.forEach(item => {
         container.detach(container.indexOf(item.hostView))
       });
     }
-  
+
     clearData() {
       for(let set of this.topSets) {
         set.clear();
@@ -233,7 +233,7 @@ export class LoadedView extends RbActivatorComponent {
         }
       }
     }
-  
+
     openTab(tabid: String) {
       for(let tabsection of this.tabSections) {
         for(let tab of tabsection.tabs) {
@@ -251,15 +251,15 @@ export class LoadedView extends RbActivatorComponent {
             return tab.id ?? tab.label;
           }
         }
-      }      
+      }
     }
-  
+
     forceRefresh() {
       for(let dataset of this.topSets) {
-        dataset.refreshData();
-      }    
+        dataset.refreshData(true);
+      }
     }
-  
+
     getTopActiveDatasets() : RbDatasetComponent[] {
         let ret = [];
         for(let set of this.topSets) {
@@ -269,7 +269,7 @@ export class LoadedView extends RbActivatorComponent {
         }
         return ret;
     }
-  
+
     extractNavigateEventDataTargets() : NavigateEventDataTarget[] {
       let ret: NavigateEventDataTarget[] = [];
       for(let set of this.topSets) {
