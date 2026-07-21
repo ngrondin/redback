@@ -44,5 +44,6 @@ export class RbHcollapseComponent extends RbActivatorComponent {
     } else {
       this.deactivate();
     }
+    setTimeout(() => window.redback.publishEvent({ event: 'resize' }), 0);
   }
 }

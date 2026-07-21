@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
   username: string;
   userdisplay: string;
 
-  apptitle: string; 
+  apptitle: string;
   logo: string;
   layout: string;
   initialView: string;
@@ -39,7 +39,7 @@ export class AppComponent implements OnInit {
   events: Subject<string> = new Subject<string>();
   firstConnected: boolean = false;
   appConfigLoadTries: number = 0;
-  
+
 
   constructor(
       private elementRef: ElementRef,
@@ -103,20 +103,23 @@ export class AppComponent implements OnInit {
         window.redback.observers.push(observer);
       });
     }
-    window.redback.publishEvent = (event: string)=> {
+    window.redback.publishEvent = (event: any) => {
       window.redback.observers.forEach((observer) => {
         observer.next(event);
-      }); 
+      });
     }
     window.redback.setGlobalVariable = (name: string, value: any) => {
       window.redback[name] = value;
-      window.redback.publishEvent('global');
+      window.redback.publishEvent({ event: 'globalvariable', variable: name, value: value });
     }
+    window.addEventListener('resize', () => {
+        window.redback.publishEvent({ event: 'resize'});
+    });
   }
 
   ngOnInit(): void {
     this.loadAppConfig();
-  }  
+  }
 
   loadAppConfig() {
     this.apiService.getAppConfig(this.appname).subscribe({
@@ -151,7 +154,7 @@ export class AppComponent implements OnInit {
     if(preferences != null) {
       preferences.forEach(element => {
         this.userprefService.addGlobalPreference(element);
-      });  
+      });
     }
     if(config['onload'] != null) {
       eval("this.onloadFunction = async function() {" + config['onload'] + "}"); // Didn't use Function as this needs to be async

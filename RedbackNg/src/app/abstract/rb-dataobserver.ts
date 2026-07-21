@@ -20,7 +20,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
     @Input('show') showExpr?: string;
     @Input('targetdatasetid') targetdatasetid?: string; // Only usefull when observer is linked to a datasetgroup and you want to specify which dataset
     @HostBinding('style.display') get visitility() { return this.show ? 'flex' : 'none'; }
-    
+
     public globalSubscription?: Subscription;
     public datasetSubscription?: Subscription;
     public datasetGroupSubscription?: Subscription;
@@ -28,7 +28,9 @@ export abstract class RbDataObserverComponent extends RbComponent {
     public show: boolean = true;
 
     componentInit() {
-        this.globalSubscription = window.redback.getObservable().subscribe(event => this.internalDatasetEvent(event));
+        this.globalSubscription = window.redback.getObservable().subscribe(event => {
+          if (event.event == 'globalvariable') this.internalDatasetEvent(event);
+        });
         if(this.dataset != null) {
             this.datasetSubscription = this.dataset.getObservable().subscribe(event => this.internalDatasetEvent(event));
         }
@@ -37,7 +39,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
         }
         if(this.aggregateset != null) {
             this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.internalDatasetEvent(event));
-        }        
+        }
         if(this.showExpr != null) {
             this.evalShow()
         } else {
@@ -56,7 +58,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
         }
         if(this.aggregatesetSubscription != null) {
             this.aggregatesetSubscription.unsubscribe();
-        }          
+        }
         this.dataObserverDestroy();
     }
 
@@ -74,7 +76,7 @@ export abstract class RbDataObserverComponent extends RbComponent {
             if(this.showExpr != null) {
                 this.evalShow();
             }
-            this.onDatasetEvent(event);    
+            this.onDatasetEvent(event);
         }
     }
 

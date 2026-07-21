@@ -1,6 +1,8 @@
 import { Observable, Observer } from "rxjs";
 import { GanttMark, GanttMarkType, GanttTimeBasedConfig } from "./rb-gantt-models";
 import { RbObject } from "app/datamodel";
+import { Subscription } from 'rxjs';
+
 
 export class GanttTimeConfig {
     monthNames: String[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -21,14 +23,19 @@ export class GanttTimeConfig {
     pxPerMS: number = 1;
     widthPX: number = 1920;
     marks: GanttMark[] = [];
-    private observers: Observer<void>[] = [];
     _startDate!: Date;
 
+    private observers: Observer<void>[] = [];
+    resizeSubscription?: Subscription;
+
     constructor(cfg: any) {
+        this.resizeSubscription = window.redback.getObservable().subscribe(event => {
+          if (event.event == "resize") this.calc(true);
+        });
         if(cfg.startVariable != null) this.startVariable = cfg.startVariable;
         if(cfg.spanVariable != null) this.spanVariable = cfg.spanVariable;
         if(cfg.zoomVariable != null)  this.zoomVariable = cfg.zoomVariable;
-        if(cfg.element != null) this.displayElement = cfg.element;
+        if (cfg.element != null) this.displayElement = cfg.element;
         this.reset();
     }
 
@@ -41,16 +48,16 @@ export class GanttTimeConfig {
             let dtvar = window.redback[this.startVariable!];
             this._startDate = typeof dtvar == 'string' ? new Date(dtvar) : dtvar.getTime != null ? dtvar : this._startDate;
             this.startMS = this._startDate.getTime();
-        } 
+        }
         if(this.spanVariable != null) {
             const spvar = window.redback[this.spanVariable!];
             this.spanMS = spvar != null ? parseInt(spvar) : this.spanMS;
-        } 
+        }
         if(this.zoomVariable != null) {
             const zmvar = window.redback[this.zoomVariable!];
             this.zoomMS = Math.min(this.spanMS, zmvar);
-        }  
-        this.calc(false);    
+        }
+        this.calc(false);
     }
 
     get startDate(): Date {
@@ -105,9 +112,14 @@ export class GanttTimeConfig {
         this.span = ms;
     }
 
-    private calc(publish: boolean) {
+    calc(publish: boolean) {
         this.endMS = this.startMS + this.spanMS;
-        let clientWidthPX = this.displayElement != null && this.displayElement.offsetWidth != 0 ? this.displayElement.offsetWidth : 1920;
+        let clientWidthPX = 1920;
+        if (this.displayElement != null && this.displayElement.offsetWidth != 0) {
+          clientWidthPX = this.displayElement.offsetWidth;
+        } else {
+          setTimeout(() => this.calc(true), 0); //Recalc when displayElement is available
+        }
         this.pxPerMS = clientWidthPX / this.zoomMS
         this.widthPX = this.spanMS * this.pxPerMS;
         this.markMajorIntervalMS = 3600000;

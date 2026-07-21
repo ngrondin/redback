@@ -13,7 +13,7 @@ import { UserprefService } from 'app/services/userpref.service';
 
 @Component({template: ''})
 export abstract class RbInputComponent extends RbDataObserverComponent {
-  @Input('attribute') attribute?: string;    
+  @Input('attribute') attribute?: string;
   @Input('value') _value: any = null;
   @Input('variable') variable: any;
   @Input('label') label?: string;
@@ -28,7 +28,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
   @Input('color') _color: any;
   @Input('updatescript') _updatescript?: string;
   @Output('valueChange') valueChange = new EventEmitter();
-  
+
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
   @HostBinding('style.width') get styleWidth() { return (this.size != null ? ('min(' + (0.88 * this.size) + 'vw, ' + (17 * this.size) + 'px)'): this.defaultSize != null ? ('min(' + (0.88 * this.defaultSize) + 'vw, ' + (17 * this.defaultSize) + 'px)'): null);}
 
@@ -96,7 +96,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
               val = this.rbObject.uid;
           } else {
               val = this.rbObject.get(this.attribute);
-          } 
+          }
       } else {
           val = null;
       }
@@ -107,9 +107,9 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
     }
     if(val != null && this.previousValue != val && (this.rbObject == null || (this.rbObject != null && this.previousObject != null && this.previousObject == this.rbObject))) {
         this.flash();
-    }   
+    }
     this.previousValue = val;
-    this.previousObject = this.rbObject; 
+    this.previousObject = this.rbObject;
     return val;
   }
 
@@ -147,14 +147,14 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
           } else if(this.rbObject.validation[this.attribute] != null) {
             return this.mandatory || this.rbObject.validation[this.attribute].mandatory;
           } else {
-            return false;      
+            return false;
           }
         } else {
           return false;
         }
       } else {
         return this.mandatory;
-      }    
+      }
     } else {
       return false;
     }
@@ -187,16 +187,15 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
               return targetObj.setValueAndRelated(targetAttr, val, related)
             } else {
                 return targetObj.setValue(targetAttr, val);
-            } 
+            }
           }
         }
-      } else if(this.variable != null) {
-        window.redback[this.variable] = val;
-        window.redback.publishEvent({event:"global", variable: this.variable});
+      } else if (this.variable != null) {
+        window.redback.setGlobalVariable(this.variable, val);
       } else {
         this._value = val;
-      }      
-      this.valueChange.emit(val);  
+      }
+      this.valueChange.emit(val);
       if(this.updateScript != null) {
         this.updateScript.call(window.redback, currentValue, val);
       }
@@ -211,7 +210,7 @@ export abstract class RbInputComponent extends RbDataObserverComponent {
         if(this.mouseIsOver == true && this.tip != null) {
           this.dialogService.showTooltip(this.tip, event.target, "below");
         }
-      }, 1000);  
+      }, 1000);
     }
   }
 

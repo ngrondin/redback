@@ -105,7 +105,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       } else if(event.event == 'update') {
         if(this.canLoadData) this.publishEvent('update'); //Child data may need to be redrawn when parent is updated. Only do it if dataset is ready
         this.refreshData();
-      } else if(event.event == 'global') {
+      } else if(event.event == 'globalvariable') {
         this.refreshData();
       }
     }

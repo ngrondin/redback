@@ -35,7 +35,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     @Input('virtualselector') virtualselector?: VirtualSelector;
     @Input('script') script?: string;
     @Input('scriptparam') scriptparam: any;
-    
+
     @HostBinding('style.flex-grow') get flexgrow() { return this.sizeIsSet ? 0 : this.grow != null ? this.grow : 1;}
     @HostBinding('style.flex-shrink') get flexshrink() { return this.sizeIsSet ? null : this.shrink != null ? this.shrink : 1;}
     @HostBinding('style.flex-basis') get flexbasis() { return this.sizeIsSet ? "auto" : 0;}
@@ -56,24 +56,26 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     private _isLoading: boolean = false;
     private lastCalc: Date|null = null;
     private calcSched: any = null;
-    
-  
+
+
     constructor() {
       super();
       this.filterService = AppInjector.get(FilterService);
       this.navigateService = AppInjector.get(NavigateService);
       this.apiService = AppInjector.get(ApiService);
     }
-  
+
     componentInit() {
-      this.globalSubscription = window.redback.getObservable().subscribe((event: any) => this.internalDataEvent(event));
+      this.globalSubscription = window.redback.getObservable().subscribe((event: any) => {
+        if (event.event == 'globalvariable') this.internalDataEvent(event);
+      });
       if(this.aggregateset != null) {
         this.aggregatesetSubscription = this.aggregateset.getObservable().subscribe(event => this.internalDataEvent(event));
       } else if(this.dataset != null) {
         this.datasetSubscription = this.dataset.getObservable().subscribe(event => this.internalDataEvent(event));
       }
     }
-  
+
     componentDestroy() {
       if(this.aggregatesetSubscription != null) {
         this.aggregatesetSubscription.unsubscribe();
@@ -81,7 +83,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         this.datasetSubscription.unsubscribe();
       }
     }
-  
+
     onActivationEvent(state: boolean) {
       if(this.active) {
         this.getGraphData();
@@ -97,23 +99,23 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
     get sizeIsSet() {
       return this.width != null || this.height != null;
     }
-  
+
     get aggregates(): RbAggregate[] | null {
       return this.aggregateset != null ? this.aggregateset.aggregates : null;
     }
-  
+
     get xAxisLabel(): String|null {
       return this.categories != null ? this.categories.label : this.series != null ? this.series.label : null;
     }
-  
+
     get yAxisLabel(): String {
       return this.value.label
     }
-  
+
     get is2d(): Boolean {
       return this.categories != null ? true : false;
     }
-  
+
     get showRefresh(): boolean {
       return this.hovering == true;
     }
@@ -127,7 +129,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
             return this.virtualselector.selectedObject;
         } else if(this.dataset != null) {
             return this.dataset.selectedObject;
-        } 
+        }
     }
 
     getGraphData() {
@@ -157,7 +159,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         }, 1000);
       }
     }
-  
+
     calcAggregateData() {
       this.graphData = [];
       if(this.categories != null && this.aggregates != null) {
@@ -174,15 +176,15 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         }
         let sortKey = this.categories.sortby != null ? this.categories.sortby : 'code';
         let sortDir = this.categories.sortdir != null ? this.categories.sortdir : 1;
-        this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir)); 
+        this.graphData.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir));
         if(this.categories.top != null) {
           this.graphData = this.graphData.filter((value, index, array) => index < this.categories.top);
-        }          
+        }
       } else {
         this.graphData = this.calcSeriesDataForCategory(null);
-      } 
+      }
     }
-  
+
     calcSeriesDataForCategory(cat: String|null) : any[] {
       let series: any[] = [];
       if(this.aggregates != null) {
@@ -208,7 +210,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
           series.sort((a, b) => ValueComparator.valueCompare(a, b, sortKey, sortDir));
           if(this.series.top != null) {
             series = series.filter((value, index, array) => index < this.series.top);
-          }  
+          }
         }
       }
       return series;
@@ -224,12 +226,12 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
             return Formatter.formatDateTimeCustom(dt, labelFormat);
           }
           return dt;
-        } 
-      } 
+        }
+      }
       return label;
     }
 
-  
+
    private nullToEmptyString(str: String): String {
       if(str == null) {
         return "";
@@ -237,7 +239,7 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
         return str;
       }
     }
-  
+
     public onClick(event: any) {
       let objectname = this.linkview == null && this.aggregateset != null ? this.aggregateset.objectname : undefined;
       let view = this.linkview;
@@ -280,18 +282,18 @@ export abstract class RbAggregateDisplayComponent extends RbComponent {
       }
       this.navigateService.navigateTo(navEvent);
     }
-  
+
     refresh() {
       if(this.aggregateset != null) {
         this.aggregateset.refreshData();
       }
       this.getGraphData();
     }
-  
+
     @HostListener('mouseenter', ['$event']) onMouseEnter($event: any) {
       this.hovering = true;
     }
-  
+
     @HostListener('mouseleave', ['$event']) onMouseLeave($event: any) {
       this.hovering = false;
     }
