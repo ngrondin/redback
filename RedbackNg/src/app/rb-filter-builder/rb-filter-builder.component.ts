@@ -5,7 +5,7 @@ import { DataService } from 'app/services/data.service';
 import { FilterService } from 'app/services/filter.service';
 import { ValueComparator } from 'app/helpers';
 import { FilterConfig, SortConfig, FilterAttributeConfig, SortAttributeConfig, FilterBuilderConfig } from './rb-filter-builder-configs';
-import { FilterItemConstruct, SavedEntry, SortItemConstruct } from './rb-filter-builder-constructs';
+import { FilterGroupConstruct, FilterItemConstruct, SavedEntry, SortItemConstruct } from './rb-filter-builder-constructs';
 import { UserprefService } from 'app/services/userpref.service';
 import { MenuService } from 'app/services/menu.service';
 import { NavigateService } from 'app/services/navigate.service';
@@ -26,7 +26,8 @@ export class RbFilterBuilderComponent implements OnInit {
   userPref: any = {};
   filterConfig?: FilterConfig;
   filter: any = {};
-  filterConstructs: FilterItemConstruct[][] = [[]];
+  filterGroupConstructs: FilterGroupConstruct[] = [];
+  //filterConstructs: FilterItemConstruct[][] = [[]];
   sortConfig?: SortConfig;
   sort: any = {};
   sortConstructs: SortItemConstruct[] = [];
@@ -52,14 +53,14 @@ export class RbFilterBuilderComponent implements OnInit {
   ]
 
   constructor(
-    @Inject(CONTAINER_DATA) public config: FilterBuilderConfig, 
+    @Inject(CONTAINER_DATA) public config: FilterBuilderConfig,
     public overlayRef: OverlayRef,
     public dataService: DataService,
     private userprefService: UserprefService,
     private filterService: FilterService,
     private menuService: MenuService,
     private navigateService: NavigateService
-  ) { 
+  ) {
     this.searchTarget = this.config.searchTarget;
     this.filter = this.searchTarget.getUserFilter();
     if(this.config.filterConfig != null) {
@@ -98,8 +99,9 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
 
-  get empty() : boolean {
-    return this.filterConstructs.length == 1 && this.filterConstructs[0].length == 0 && this.sortConstructs.length == 0;
+  get empty(): boolean {
+    return this.filterGroupConstructs.length == 1 && this.filterGroupConstructs[0].items.length == 0 && this.sortConstructs.length == 0;
+    //return this.filterConstructs.length == 1 && this.filterConstructs[0].length == 0 && this.sortConstructs.length == 0;
   }
 
   get modeCount() : number {
@@ -127,14 +129,14 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   addFilterGroup() {
-    this.filterConstructs.push([]);
+    this.filterGroupConstructs.push(new FilterGroupConstruct());
   }
- 
-  addAttributeToFilterGroup(group: FilterItemConstruct[], attribute: string) {
+
+  addAttributeToFilterGroup(group: FilterGroupConstruct, attribute: string) {
     let fac = this.filterConfig.attributes.find(ac => ac.attribute == attribute);
     let fic = new FilterItemConstruct(fac, null);
-    if(group == null) group = this.filterConstructs[0];
-    group.push(fic);
+    if(group == null) group = this.filterGroupConstructs[0];
+    group.items.push(fic);
     this.loadOptionsFor(fac);
     this.changed = true;
   }
@@ -146,12 +148,12 @@ export class RbFilterBuilderComponent implements OnInit {
     this.changed = true;
   }
 
-  removeFilterGroup(group: FilterItemConstruct[]) {
-    this.filterConstructs.splice(this.filterConstructs.indexOf(group));
+  removeFilterGroup(group: FilterGroupConstruct) {
+    this.filterGroupConstructs.splice(this.filterGroupConstructs.indexOf(group));
   }
 
-  removeFilterItemFromGroup(group: FilterItemConstruct[], fic: FilterItemConstruct) {
-    group.splice(group.indexOf(fic), 1);
+  removeFilterItemFromGroup(group: FilterGroupConstruct, fic: FilterItemConstruct) {
+    group.items.splice(group.items.indexOf(fic), 1);
     this.changed = true;
   }
 
@@ -188,7 +190,7 @@ export class RbFilterBuilderComponent implements OnInit {
         this.dataService.aggregate(objectname, fltr, null, [fac.attribute], [{function:"count", name:"_cnt"}], null, 0, 2000).subscribe({
           next: (list) => {
             fac.options = list.map(agg => ({
-              name: agg.getDimension(fac.attribute + "." + fac.displayAttribute) ?? 'Empty', 
+              name: agg.getDimension(fac.attribute + "." + fac.displayAttribute) ?? 'Empty',
               value: agg.getDimension(fac.attribute) ?? null,
               count:agg.getMetric("_cnt")
             }));
@@ -203,14 +205,14 @@ export class RbFilterBuilderComponent implements OnInit {
         this.dataService.fetchList(fac.objectName, fltr, null, null, 0, 500, false).subscribe({
           next: (list) => {
             fac.options = list.map(o => ({
-              name: o.get(fac.displayAttribute) ?? 'Empty', 
+              name: o.get(fac.displayAttribute) ?? 'Empty',
               value: o.get(fac.valueAttribute) ?? null
             }));
             fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
           }
         })
       }
-    }  
+    }
   }
 
   selectTab(t) {
@@ -226,7 +228,7 @@ export class RbFilterBuilderComponent implements OnInit {
     if(this.editingEntry == null) {
       this.editingEntry = new SavedEntry(null, {}, {}, false, false);
       this.tab = 'details';
-    } 
+    }
   }
 
   clickOk() {
@@ -248,7 +250,12 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   clickClear() {
-    this.done.emit({filter: null, sort: null});
+    for (var fgc of this.filterGroupConstructs)
+      fgc.items = [];
+    this.filterGroupConstructs = this.filterGroupConstructs.filter(fcg => fcg.items.length != 0 || Object.keys(fcg.residual).length != 0);
+    this.compile();
+    this.done.emit({filter: this.filter, sort: this.sort});
+    //this.done.emit({filter: null, sort: null});
   }
 
   clickCancel() {
@@ -300,23 +307,24 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   decompile() {
-    if(this.filter != null) {
-      let orList = this.filter.hasOwnProperty("$or") ? this.filter["$or"] : [this.filter];
-      this.filterConstructs = [];
-      for(var subfilter of orList) {
-        let list = [];
-        for(let key in subfilter) {
-          let fac: FilterAttributeConfig = this.filterConfig.getAttributeConfig(key);
-          if(fac != null) {
-            let fic = new FilterItemConstruct(fac, subfilter[key]);
-            list.push(fic);
-            this.loadOptionsFor(fac);
-          }
+    let filter = this.filter ?? {};
+    let orList = filter.hasOwnProperty("$or") ? filter["$or"] : [filter];
+    this.filterGroupConstructs = [];
+    for (var subfilter of orList) {
+      let fgc = new FilterGroupConstruct();
+      for(let key in subfilter) {
+        let fac: FilterAttributeConfig = this.filterConfig.getAttributeConfig(key);
+        if(fac != null) {
+          let fic = new FilterItemConstruct(fac, subfilter[key]);
+          fgc.items.push(fic);
+          this.loadOptionsFor(fac);
+        } else {
+          fgc.residual[key] = subfilter[key];
         }
-        this.filterConstructs.push(list);
       }
-      if(this.filterConstructs.length > 1) this.uniongroupsMode = true;
+      this.filterGroupConstructs.push(fgc);
     }
+    if(this.filterGroupConstructs.length > 1) this.uniongroupsMode = true;
 
     if(this.sort != null) {
       this.sortConstructs = [];
@@ -331,9 +339,9 @@ export class RbFilterBuilderComponent implements OnInit {
 
   compile() {
     let orList = [];
-    for(var group of this.filterConstructs) {
-      let flt = {};
-      for(let fic of group) {
+    for(var group of this.filterGroupConstructs) {
+      let flt = group.residual;
+      for(let fic of group.items) {
         flt[fic.config.attribute] = fic.getFilterValue();
       }
       orList.push(flt);
@@ -344,7 +352,7 @@ export class RbFilterBuilderComponent implements OnInit {
       this.sort = {};
       for(let sic of this.sortConstructs) {
         this.sort[sic.order] = sic.getSortValue();
-      }  
+      }
     } else {
       this.sort = null;
     }
@@ -354,9 +362,9 @@ export class RbFilterBuilderComponent implements OnInit {
     if(this.canSave) {
       if(this.userPref == null) this.userPref = {};
       this.userPref.saved = this.savedEntries.map(e => ({
-        name: e.name, 
+        name: e.name,
         filter: this.filterService.prefixDollarSign(e.filter),
-        sort: e.sort, 
+        sort: e.sort,
         default: e.default ?? false,
         persisted: true
       }));

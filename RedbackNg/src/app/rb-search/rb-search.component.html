@@ -12,6 +12,7 @@
     (click)="openModeSelector()">
 </rb-iconbutton>
 <div
+    *ngIf="showsearchfield"
     class="rb-input-container">
     <span
         [class]="'rb-input-label' + ((displayvalue === null || displayvalue === '' || displayvalue === undefined) && !isEditing ? ' rb-input-label-big' : '')">
@@ -32,7 +33,6 @@
         [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
     </div>
 </div>
-
 <rb-iconbutton
     *ngIf="mode.filterconfig != null"
     class="rb-input-trail-iconbutton"

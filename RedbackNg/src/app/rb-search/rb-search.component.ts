@@ -20,6 +20,7 @@ import { PopupService } from 'app/services/popup.service';
 export class RbSearchComponent extends RbFieldInputComponent {
   @Input('filter') filterconfig?: any;
   @Input('sort') sortconfig?: any;
+  @Input('showsearchfield') showsearchfield: boolean = true;
   @Input('searchtarget') searchtarget?: RbSearchTarget;
   @Input('modes') _modes?: any;
 

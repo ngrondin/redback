@@ -3,12 +3,18 @@ import { FilterAttributeConfig, SortAttributeConfig } from "./rb-filter-builder-
 const dateCriteriaStartMinus = "(new Date((new Date()).getTime() - ";
 const dateCriteriaStartPlus = "(new Date((new Date()).getTime() + ";
 const dateCriteriaEnd = ")).toISOString()";
+
+export class FilterGroupConstruct {
+  public items: FilterItemConstruct[] = [];
+  public residual: any = {};
+}
+
 export class FilterItemConstruct {
     public config: FilterAttributeConfig;
     public val1: any;
     public val2: string;
     public val3: string;
-  
+
     constructor(c: FilterAttributeConfig, v: any) {
       this.config = c;
       if(this.config.type == 'string') {
@@ -80,13 +86,13 @@ export class FilterItemConstruct {
         this.val1 = v == true ? true : false;
       }
     }
-  
+
     public getFilterValue() : any {
       if(this.config.type == 'string') {
         if(this.val1 == null) {
           return "null";
         } else {
-          return "'*" + this.val1 + "*'"; 
+          return "'*" + this.val1 + "*'";
         }
       } else if(this.config.type == 'date') {
         if(this.val1 == 'lasthour') {
@@ -126,8 +132,8 @@ export class FilterItemConstruct {
       return part.trim();
     }
   }
-  
-  
+
+
 
 
 
@@ -135,20 +141,20 @@ export class SortItemConstruct {
     public config: SortAttributeConfig;
     public direction: number;
     public order: number;
-  
+
     constructor(c: SortAttributeConfig, o: number, v: any) {
       this.config = c;
       this.order = o;
       if(v != null) {
         this.direction = v.dir;
-      } 
+      }
     }
-  
+
     public getSortValue() : any {
       return {attribute: this.config.attribute, dir: this.direction};
     }
   }
-  
+
 
   export class SavedEntry {
     public name: string;
