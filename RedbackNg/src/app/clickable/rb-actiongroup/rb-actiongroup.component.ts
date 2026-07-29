@@ -52,14 +52,14 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
 
   @Output('actionclicked') actionClicked = new EventEmitter();
 
-  
+
   domainActions: RbActiongroupAction[];
   actionData: RbActiongroupAction[] = [];
   notification: RbNotification;
   notificationRetreived: boolean = false;
   notificationSubscription: Subscription;
   scriptActions: any[];
-  
+
   popupComponentRef: ComponentRef<RbPopupComponent>;
 
   constructor(
@@ -72,10 +72,10 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     super();
     this.label = 'Actions';
   }
-  
+
 
   dataObserverInit() {
-    if(this.showprocessinteraction) {   
+    if(this.showprocessinteraction) {
       this.notificationSubscription = this.notificationService.getObservable().subscribe(event => this.onNotificationEvent(event));
     }
     let category = this.menucategory != null && this.menucategory != "" ? this.menucategory : this.domaincategory != null && this.domaincategory != "" ? this.domaincategory : null;
@@ -110,7 +110,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     } else if(event.event == 'clear') {
       this.notification = null;
       this.calcActionData();
-    } else if(event.event == 'global') {
+    } else if(event.event == 'globalvariable') {
       this.calcActionData();
     }
   }
@@ -135,7 +135,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
           this.notificationRetreived = false;
           this.calcActionData();
         }
-      }  
+      }
     }
   }
 
@@ -162,7 +162,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
         this.getNotification().subscribe(() => {
           this.calcActionData();
           this.openPopup();
-        });        
+        });
       } else {
         this.openPopup();
       }
@@ -170,7 +170,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
       this.closePopup();
     }
   }
-  
+
   public openPopup() {
     this.popupComponentRef = this.popupService.openPopup(this.buttonContainerRef, RbPopupActionsComponent, {actions: this.actionData});
     this.popupComponentRef.instance.selected.subscribe(value => this.clickAction(value));
@@ -181,7 +181,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     this.popupService.closePopup();
     this.popupComponentRef = null;
   }
-  
+
   private calcActionData() {
     this.actionData = [];
     let object = this.rbObject;
