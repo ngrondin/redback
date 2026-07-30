@@ -1,4 +1,4 @@
-/deep/ .rb-clickable-content {
+:host ::ng-deep .rb-clickable-content {
   justify-content: start!important;
 }
 

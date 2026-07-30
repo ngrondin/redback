@@ -30,7 +30,7 @@ class ListFieldConfig {
       return {value: null, type: 'loading'};
     } else if(raw === true || raw === false) {
       return {value: raw, type: 'bool'};
-    } else if(raw !== null && raw !== "" && !isNaN(raw)) { 
+    } else if(raw !== null && raw !== "" && !isNaN(raw)) {
       return {value: raw, type: 'badge'};
     } else {
       const text = this.format != null ? Formatter.format(raw, this.format) : this.autoFormatText(raw);
@@ -184,7 +184,7 @@ export class RbList4Component extends RbDataObserverComponent {
           data.image = 'url(\'' + fileVal.thumbnail + '\')';
         }
       }
-      
+
       if(data.main.type != 'loading' && (data.main.value == null || data.main.value == "")) {
         if(data.sub.value != null && data.sub.value != "") {
           data.main.value = data.sub.value;
@@ -192,8 +192,8 @@ export class RbList4Component extends RbDataObserverComponent {
         } else {
           data.main.value = "No Label"
         }
-      }       
-      this.enhancedList.push(data);                 
+      }
+      this.enhancedList.push(data);
     }
   }
 
@@ -239,7 +239,7 @@ export class RbList4Component extends RbDataObserverComponent {
             filter: {uid: "'" + this.rbObject.uid + "'"}
           }]
         });
-      }  
+      }
     }
   }
 
@@ -252,7 +252,7 @@ export class RbList4Component extends RbDataObserverComponent {
   }
 
   refresh() {
-    this.dataset?.refreshData();
+    this.dataset?.refreshData(true);
   }
 
   onScroll(event: any) {
@@ -262,5 +262,5 @@ export class RbList4Component extends RbDataObserverComponent {
       setTimeout(() => {this.reachedBottom = false}, 1000);
     }
   }
-  
+
 }

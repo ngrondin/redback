@@ -1,3 +1,7 @@
+:host ::ng-deep .rb-clickable-content {
+  justify-content: start!important;
+  overflow: visible!important;
+}
 
 .rb-popup-list-line {
     display: flex;
@@ -14,6 +18,9 @@
     padding: var(--v10px) var(--v12px);
     color: var(--dark-writing-color);
     flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rb-popup-list-button {
