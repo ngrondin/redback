@@ -118,6 +118,8 @@
     border-left: solid var(--v1px) #ddd;
     height: 100%;
     pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .rb-gantt-mark-minor {
@@ -127,7 +129,7 @@
 
 .rb-gantt-mark-now {
     border-left-style: solid;
-    border-color: #ff9595; 
+    border-color: #ff9595;
 }
 
 .rb-gantt-body {
@@ -278,12 +280,12 @@
 
 .rb-gantt-spreadbox {
     border: 1px solid var(--primary-dark-color);
-    top: var(--v5px); 
+    top: var(--v5px);
     background-color: white;
     border-radius: var(--v3px);
-    -webkit-touch-callout: none; 
-    -webkit-user-select: none; 
-    user-select: none; 
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
     cursor: pointer;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -314,7 +316,7 @@
     font-size: smaller;
     overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis; 
+    text-overflow: ellipsis;
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
@@ -326,7 +328,7 @@
     font-size: 0.6rem;
     overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis; 
+    text-overflow: ellipsis;
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
@@ -338,7 +340,7 @@
     font-size: 0.6rem;
     overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis; 
+    text-overflow: ellipsis;
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
