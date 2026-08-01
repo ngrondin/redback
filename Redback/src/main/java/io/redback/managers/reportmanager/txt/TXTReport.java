@@ -8,6 +8,7 @@ import java.util.Map;
 import io.firebus.script.Function;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.reportmanager.ProducedReport;
 import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -28,7 +29,7 @@ public class TXTReport extends Report {
 		}
 	}
 
-	public void produce(List<ReportFilter> filters) throws RedbackException {
+	public ProducedReport produce(List<ReportFilter> filters) throws RedbackException {
 		try {
 			baos = new ByteArrayOutputStream();
 			Map<String, Object> context = new HashMap<String, Object>();
@@ -42,23 +43,16 @@ public class TXTReport extends Report {
 			}
 			context.put("sets", ReportFilter.convertToDataList(filters));
 			Object out = script.call(context);
-			baos.write(out.toString().getBytes());
+			ProducedReport produced = new ProducedReport();
+			produced.bytes = out.toString().getBytes();
+			produced.mime = "txt/plain";
+			produced.filename = reportConfig.getName() + ".txt";
+			produced.filename = produceOutputName(context, reportConfig.getName() + ".csv");
+			return produced;
 		} catch(Exception e) {
 			throw new RedbackException("Error producing TXT report", e);
 		}
 	}
 
-	public String getMime() {
-
-		return "txt/plain";
-	}
-	
-	public String getFilename() {
-		return reportConfig.getName() + ".txt";
-	}
-
-	public byte[] getBytes() throws RedbackException {
-		return baos.toByteArray();
-	}
 
 }

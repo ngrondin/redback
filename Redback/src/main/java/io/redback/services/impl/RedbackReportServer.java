@@ -5,7 +5,7 @@ import java.util.List;
 import io.firebus.Firebus;
 import io.firebus.data.DataMap;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.reportmanager.Report;
+import io.redback.managers.reportmanager.ProducedReport;
 import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
@@ -26,7 +26,7 @@ public class RedbackReportServer extends ReportServer {
 		reportManager.clearCaches();	
 	}
 
-	protected Report produce(Session session, String name, List<ReportFilter> filters) throws RedbackException {
+	protected ProducedReport produce(Session session, String name, List<ReportFilter> filters) throws RedbackException {
 		return reportManager.produce(session, name, filters);
 	}
 

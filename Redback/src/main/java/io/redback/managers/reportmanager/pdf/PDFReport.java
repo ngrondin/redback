@@ -20,6 +20,7 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.reportmanager.ProducedReport;
 import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -103,7 +104,7 @@ public class PDFReport extends Report {
 		}
 	}
 	
-	public void produce(List<ReportFilter> filters) throws RedbackException {
+	public ProducedReport produce(List<ReportFilter> filters) throws RedbackException {
 		try {			
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("session", session);
@@ -135,6 +136,15 @@ public class PDFReport extends Report {
 				context.put("page", (i + 1));
 				renderPage(pages.get(i), header, footer, i);
 			}
+			
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			document.save(baos);
+			document.close();
+			ProducedReport produced = new ProducedReport();
+			produced.bytes = baos.toByteArray();
+			produced.mime = "application/pdf";
+			produced.filename = produceOutputName(context, reportConfig.getName() + ".pdf");
+			return produced;
 		} catch(Exception e) {
 			e.printStackTrace();
 			throw new RedbackException("Error producing report", e);
@@ -243,24 +253,5 @@ public class PDFReport extends Report {
 		} else if(reportBox.type.equals("empty")) {
 			
 		}
-	}
-	
-	public byte[] getBytes() throws RedbackException {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			document.save(baos);
-			document.close();
-			return baos.toByteArray();
-		} catch(Exception e) {
-			throw new RedbackException("Error get the bytes of the pdf document", e);
-		}
-	}
-
-	public String getMime() {
-		return "application/pdf";
-	}
-	
-	public String getFilename() {
-		return reportConfig.getName() + ".pdf";
 	}
 }

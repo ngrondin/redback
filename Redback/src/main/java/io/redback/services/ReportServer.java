@@ -11,7 +11,7 @@ import io.firebus.data.DataMap;
 import io.firebus.information.ServiceInformation;
 import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.reportmanager.Report;
+import io.redback.managers.reportmanager.ProducedReport;
 import io.redback.managers.reportmanager.ReportInfo;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
@@ -57,10 +57,10 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 				session.setTimezone(timezone);
 			
 			if(action.equals("produce")) {
-				Report report = produce(session, reportName, reportFilters);
-				response = new Payload(report.getBytes());
-				response.metadata.put("mime", report.getMime());
-				response.metadata.put("filename", report.getFilename());
+				ProducedReport report = produce(session, reportName, reportFilters);
+				response = new Payload(report.bytes);
+				response.metadata.put("mime", report.mime);
+				response.metadata.put("filename", report.filename);
 			} else if(action.equals("producestore")) {
 				String fileUid = produceAndStore(session, reportName, reportFilters);
 				response = new Payload(new DataMap("fileuid", fileUid));
@@ -93,7 +93,7 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 		return null;
 	}
 	
-	protected abstract Report produce(Session session, String name, List<ReportFilter> filters) throws RedbackException;
+	protected abstract ProducedReport produce(Session session, String name, List<ReportFilter> filters) throws RedbackException;
 	
 	protected abstract String produceAndStore(Session session, String name, List<ReportFilter> filters) throws RedbackException;
 	

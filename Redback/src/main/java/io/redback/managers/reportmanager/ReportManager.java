@@ -109,32 +109,29 @@ public class ReportManager implements Consumer {
 		return scriptFactory;
 	}
 
-	public Report produce(Session session, String name, List<ReportFilter> filters) throws RedbackException {
+	public ProducedReport produce(Session session, String name, List<ReportFilter> filters) throws RedbackException {
 		ReportConfig config = configs.get(session, name);
 		if(!includeLoaded)
 			loadIncludeScripts(session);		
 		Report report = null;
-		if(config != null) {
-			if(config.getType().equals("pdf"))
-				report = new PDFReport(session, this, config);
-			else if(config.getType().equals("csv"))
-				report = new CSVReport(session, this, config);
-			else if(config.getType().equals("excel"))
-				report = new ExcelReport(session, this, config);
-			else if(config.getType().equals("txt"))
-				report = new TXTReport(session, this, config);
-			if(report != null)
-				report.produce(filters);
-			else 
-				throw new RedbackException("Unknown report type");
-		} 
-		return report;
+		if(config.getType().equals("pdf"))
+			report = new PDFReport(session, this, config);
+		else if(config.getType().equals("csv"))
+			report = new CSVReport(session, this, config);
+		else if(config.getType().equals("excel"))
+			report = new ExcelReport(session, this, config);
+		else if(config.getType().equals("txt"))
+			report = new TXTReport(session, this, config);
+		if(report != null)
+			return report.produce(filters);
+		else 
+			throw new RedbackException("Unknown report type");
 	}
 	
 	public String produceAndStore(Session session, String name, List<ReportFilter> filters) throws RedbackException {
-		Report report = produce(session, name, filters);
+		ProducedReport report = produce(session, name, filters);
 		if(report != null) {
-			RedbackFileMetaData filemd = fileClient.putFile(session, name + ".pdf", "application/pdf", session.getUserProfile().getUsername(), report.getBytes());
+			RedbackFileMetaData filemd = fileClient.putFile(session, name + ".pdf", "application/pdf", session.getUserProfile().getUsername(), report.bytes);
 			return filemd.fileuid;
 		} else {
 			return null;

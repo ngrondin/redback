@@ -24,6 +24,7 @@ import io.redback.client.js.ObjectClientJSWrapper;
 import io.redback.client.js.RedbackObjectRemoteJSWrapper;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.jsmanager.ExpressionMap;
+import io.redback.managers.reportmanager.ProducedReport;
 import io.redback.managers.reportmanager.Report;
 import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
@@ -76,7 +77,7 @@ public class CSVReport extends Report {
 		}
 	}
 
-	public void produce(List<ReportFilter> filters) throws RedbackException {
+	public ProducedReport produce(List<ReportFilter> filters) throws RedbackException {
 		try {
 			ObjectClient oc = reportManager.getObjectClient();
 			Map<String, Expression> exprCache = new HashMap<String, Expression>();
@@ -187,21 +188,16 @@ public class CSVReport extends Report {
 				}
 			}
 			bytes = sb.toString().getBytes();
+			
+			ProducedReport produced = new ProducedReport();
+			produced.bytes = bytes;
+			produced.mime = "application/csv";
+			produced.filename = produceOutputName(new HashMap<String, Object>(), reportConfig.getName() + ".csv");
+			return produced;
+			
 		} catch(ScriptException e) {
 			throw new RedbackException("Error producing csv report", e);
 		}
-	}
-
-	public String getMime() {
-		return "application/csv";
-	}
-
-	public byte[] getBytes() throws RedbackException {
-		return bytes;
-	}
-	
-	public String getFilename() {
-		return reportConfig.getName() + ".csv";
 	}
 
 }
