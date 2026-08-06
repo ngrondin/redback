@@ -21,7 +21,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('grid') grid: boolean = false;
   @Input('flexfill') flexfill: boolean = true;
   @HostBinding('style.flex') get fillSpace() { return this.flexfill ? "1 1 0" : "0 0 auto";}
-  
+
   columns: LinkTableColumnConfig[] = [];
   group?: LinkTableGroupConfig;
   reachedBottom: boolean = false;
@@ -31,7 +31,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   openGroups: string[] = ['_'];
 
   recalcPlanner!: RecalcPlanner;
-  
+
   constructor(
     private modalService: ModalService,
     private navigateService: NavigateService,
@@ -116,12 +116,12 @@ export class RbLinktableComponent extends RbDataObserverComponent {
           let foreColor = cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
           let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
           let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
-          let col = {value: val, formattedValue: formatVal, align: cfg.align, wrap: cfg.wrap, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, icon: icon, checkbox: checkboxattr, link: cfg.link, modal: cfg.modal, loading: loading};
+          let col = {value: val, formattedValue: formatVal, align: cfg.align, wrap: cfg.wrap, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, icon: icon, checkbox: cfg.checkbox ?? false, checkboxattr: checkboxattr, checkboxevent: cfg.checkboxevent, link: cfg.link, modal: cfg.modal, loading: loading};
           let sumVal = loading ? 0 : cfg.expression == null && cfg.attribute == null ? 1 : !isNaN(val) ? val : 0;
           grp.sums[c] += sumVal;
           totalsums[c] += sumVal;
           if(backColor != null && grp.backColors[c] == null) grp.backColors[c] = backColor;
-          cols.push(col);  
+          cols.push(col);
         } else {
           cols.push({formattedValue: null});
         }
@@ -149,9 +149,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       if(cfg.sum) {
         let formatVal = cfg.format != null ? Formatter.format(sums[c], cfg.format) : sums[c];
         let backColor = backColors != null ? backColors[c] : null;
-        ret.push({width: cfg.widthStr, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink, backColor: backColor});  
+        ret.push({width: cfg.widthStr, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink, backColor: backColor});
       } else {
-        ret.push({width: cfg.widthStr});  
+        ret.push({width: cfg.widthStr});
       }
       c++;
     }
@@ -163,7 +163,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       var val = object.get(column.attribute);
       if(column.alt[val] != null)
         return column.alt[val];
-    } 
+    }
     return column;
   }
 
@@ -208,10 +208,15 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     this.redraw();
   }
 
-  toggleCheckbox(attribute: string, object: RbObject) {
-    let val = object.get(attribute);
-    val = val == true ? false : true;
-    object.setValue(attribute, val);
+  toggleCheckbox(attribute: string, eventfunc: Function, object: RbObject) {
+    if (attribute != null) {
+      let val = object.get(attribute);
+      val = val == true ? false : true;
+      object.setValue(attribute, val);
+    }
+    if (eventfunc != null) {
+      eventfunc(object);
+    }
   }
 
   showFooter(): boolean {

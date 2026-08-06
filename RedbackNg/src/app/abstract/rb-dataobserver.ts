@@ -86,42 +86,51 @@ export abstract class RbDataObserverComponent extends RbComponent {
 
     abstract onDatasetEvent(event: any);
 
+    get targetDataset(): RbDatasetComponent {
+      if (this.targetdatasetid != null && this.datasetgroup != null) {
+        return this.datasetgroup.datasets[this.targetdatasetid];
+      } else if (this.dataset != null) {
+        return this.dataset;
+      } else {
+        return null;
+      }
+    }
+
     get list(): RbObject[] {
-        return this.dataset != null ? this.dataset.list : null;
+      return this.targetDataset?.list;
     }
 
     get lists(): DatasetListMap {
-        return this.datasetgroup != null ? this.datasetgroup.lists : null;
+        return this.datasetgroup?.lists;
     }
 
     get aggregateList(): any {
-        return this.aggregateset != null ? this.aggregateset.list : null;
+        return this.aggregateset?.list;
     }
 
+    //Deprecated
     get rbObject() : RbObject | null {
         return this.selectedObject;
     }
 
     get selectedObject() : RbObject | null {
         if(this.virtualselector != null) {
-            return this.virtualselector.selectedObject;
-        } else if(this.dataset != null) {
-            return this.dataset.selectedObject;
-        } else if(this.datasetgroup != null) {
-            if(this.targetdatasetid != null && this.datasetgroup.datasets[this.targetdatasetid] != null) {
-                return this.datasetgroup.datasets[this.targetdatasetid].selectedObject;
-            } else {
-                return this.datasetgroup.selectedObject;
-            }
+          return this.virtualselector.selectedObject;
         } else if(this._rbObject != null) {
-            return this._rbObject;
+          return this._rbObject;
+        } else if (this.targetdatasetid != null && this.datasetgroup != null) {
+          return this.datasetgroup.datasets[this.targetdatasetid].selectedObject;
+        } else if (this.dataset != null) {
+          return this.dataset.selectedObject;
+        } else if (this.datasetgroup != null) {
+          return this.datasetgroup.selectedObject;
         } else {
-            return null;
+          return null;
         }
     }
 
-    get relatedObject() : RbObject {
-        return this.dataset != null ? this.dataset.relatedObject : null;
+    get relatedObject(): RbObject {
+      return this.targetDataset?.relatedObject;
     }
 
     get isLoading() : boolean {
@@ -129,6 +138,6 @@ export abstract class RbDataObserverComponent extends RbComponent {
     }
 
     evalShow() {
-        this.show = Evaluator.eval(decodeURIComponent(this.showExpr), this.rbObject, this.relatedObject, this.dataset) ?? false;
+        this.show = Evaluator.eval(decodeURIComponent(this.showExpr), this.selectedObject, this.relatedObject, this.dataset) ?? false;
     }
   }

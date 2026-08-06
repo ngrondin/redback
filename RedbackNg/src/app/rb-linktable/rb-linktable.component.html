@@ -13,7 +13,7 @@
     </div>
 </div>
 <rb-scroll
-    (rbscroll)="onScroll($event)">                                                                                                                                                    
+    (rbscroll)="onScroll($event)">
     <div
         [class]="'rb-linktable-body' + (grid ? ' rb-linktable-body-border-on' : '')">
         <div
@@ -30,24 +30,24 @@
                     (click)="toggleGroup(groupKey)">
                     <span
                         *ngIf="i == 0 && group.link == null && group.modal == null">
-                        {{groupKey}}             
-                    </span> 
+                        {{groupKey}}
+                    </span>
                     <a
                         *ngIf="i == 0 && group.link != null && group.modal == null"
                         (click)="clickLink(col.link, groups[groupKey].lines[0].object)">
-                        {{groupKey}}                
+                        {{groupKey}}
                     </a>
                     <a
                         *ngIf="i == 0 && group.link == null && group.modal != null"
                         (click)="clickModal(col.modal, groups[groupKey].lines[0].object)">
-                        {{groupKey}}                
-                    </a>                      
+                        {{groupKey}}
+                    </a>
                     <span
                         [style.font-weight]="'bold'"
                         *ngIf="i > 0">
-                        {{col.formattedValue}}                
-                    </span>               
-                </div>            
+                        {{col.formattedValue}}
+                    </span>
+                </div>
             </div>
             <div
                 [class]="'rb-linktable-row'"
@@ -61,24 +61,24 @@
                     <div
                         [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alignright' : col.align == 'center' ? ' rb-linktable-rowitem-aligncenter' : '') + (grid ? ' rb-linktable-border-on' : '')">
                         <a
-                            *ngIf="col.icon == null && col.link != null && col.checkbox == null && !col.loading"
+                            *ngIf="col.icon == null && col.link != null && col.checkbox == false && !col.loading"
                             (click)="clickLink(col.link, line.object)">
-                            {{col.formattedValue}}                
+                            {{col.formattedValue}}
                         </a>
                         <a
-                            *ngIf="col.icon == null && col.modal != null && col.checkbox == null && !col.loading"
+                            *ngIf="col.icon == null && col.modal != null && col.checkbox == false && !col.loading"
                             (click)="clickModal(col.modal, line.object)">
-                            {{col.formattedValue}}                
+                            {{col.formattedValue}}
                         </a>
                         <rb-checkbox
-                            *ngIf="col.icon == null && col.link == null && col.modal == null && col.checkbox != null"
+                            *ngIf="col.icon == null && col.link == null && col.modal == null && col.checkbox == true"
                             [checked]="col.formattedValue"
-                            (change)="toggleCheckbox(col.checkbox, line.object)">
+                            (change)="toggleCheckbox(col.checkboxattr, col.checkboxevent, line.object)">
                         </rb-checkbox>
                         <span
-                            *ngIf="col.icon == null && col.link == null && col.modal == null && col.checkbox == null && !col.loading"
+                            *ngIf="col.icon == null && col.link == null && col.modal == null && col.checkbox == false && !col.loading"
                             [class]="col.wrap == true ? 'rb-linktable-rowitem-wrapspan' : 'dd'">
-                            {{col.formattedValue}}                
+                            {{col.formattedValue}}
                         </span>
                         <div
                             *ngIf="col.icon != null && !col.loading"
@@ -86,14 +86,14 @@
                             <rb-icon
                                 [icon]="col.icon">
                             </rb-icon>
-                        </div>  
+                        </div>
                         <div
                             *ngIf="col.loading"
                             class="rb-loadingbox rb-linktable-loading">
                         </div>
-                    </div>              
+                    </div>
                 </div>
-            </div>          
+            </div>
         </div>
     </div>
 </rb-scroll>
@@ -117,9 +117,9 @@
                 </a>
                 <span
                     *ngIf="col.link == null">
-                    {{col.formattedValue}}            
-                </span>  
-            </div>          
+                    {{col.formattedValue}}
+                </span>
+            </div>
         </div>
     </div>
 </div>

@@ -7,6 +7,7 @@ export class LinkTableColumnConfig {
     expression: Function | null;
     displayAttribute: string;
     checkbox: boolean;
+    checkboxevent?: Function;
     format: string;
     align: string;
     size: number;
@@ -21,7 +22,7 @@ export class LinkTableColumnConfig {
     backColor: ColorConfig | null;
     foreColor: ColorConfig | null;
     alt?: {[key: string]: LinkTableColumnConfig};
-  
+
     constructor(json: any, userpref: any) {
       this.id = json.id;
       this.label = json.label;
@@ -29,6 +30,7 @@ export class LinkTableColumnConfig {
       this.expression = userpref != null && userpref.exression != null ? Evaluator.createFunction(userpref.expression) : json.expression != null ? Evaluator.createFunction(json.expression) : null;
       this.displayAttribute = json.displayattribute;
       this.checkbox = json.checkbox != null ? json.checkbox : false;
+      this.checkboxevent = json.checkboxevent != null ? Function("object", json.checkboxevent) : null;
       this.format = json.format;
       this.align = json.align;
       this.size = json.size;
@@ -50,17 +52,17 @@ export class LinkTableColumnConfig {
             newJson = {...newJson, ...json.alt[key]};
             this.alt[key] = new LinkTableColumnConfig(newJson, userpref);
         }
-      }    
+      }
     }
 
     get widthStr() : string {
       return 'min(' + (this.width * 0.88) + 'vw, ' + (this.width * 16.896) + 'px)';
     }
-  
+
     get isClickable() : boolean {
       return this.link != null || this.modal != null;
     }
-  
+
     get isSumClickable() : boolean {
       return this.sumlink != null;
     }
@@ -71,12 +73,12 @@ export class LinkTableColumnConfig {
     expression: Function | null;
     link: LinkConfig | null;
     modal: string;
-  
+
     constructor(json: any) {
       this.attribute = json.attribute;
       this.expression = json.expression != null ? Evaluator.createFunction(json.expression) : null;
       this.link = json.link != null ? new LinkConfig(json.link) : null;
       this.modal = json.modal;
     }
-  
-  }  
+
+  }
