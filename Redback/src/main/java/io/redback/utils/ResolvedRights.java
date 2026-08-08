@@ -1,5 +1,7 @@
 package io.redback.utils;
 
+import io.redback.security.Session;
+
 public class ResolvedRights {
 	public boolean read;
 	public boolean write;
@@ -11,8 +13,25 @@ public class ResolvedRights {
 		execute = x;
 	}
 	
+	public static ResolvedRights calculate(Session session, String rightKey) {
+		boolean read = session.getUserProfile().canRead(rightKey);
+		boolean write = session.getUserProfile().canWrite(rightKey);
+		boolean execute = session.getUserProfile().canExecute(rightKey);
+		return new ResolvedRights(read, write, execute);
+	}
+	
 	public ResolvedRights and(ResolvedRights other) {
-		return new ResolvedRights(read && other.read, write && other.write, execute && other.execute);
+		if(other != null)
+			return new ResolvedRights(read && other.read, write && other.write, execute && other.execute);
+		else
+			return this;
+	}
+	
+	public ResolvedRights or(ResolvedRights other) {
+		if(other != null)
+			return new ResolvedRights(read || other.read, write || other.write, execute || other.execute);
+		else
+			return this;
 	}
 	
 	public ResolvedRights copy() {

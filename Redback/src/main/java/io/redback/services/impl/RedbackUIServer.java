@@ -266,18 +266,9 @@ public class RedbackUIServer extends UIServer
 	protected ResolvedRights getViewRights(Session session, DataMap viewConfig) throws RedbackException
 	{
 		String viewName = viewConfig.getString("name");
-		String rightKey = "rb.views." + viewName;
-		boolean read = session.getUserProfile().canRead(rightKey);
-		boolean write = session.getUserProfile().canWrite(rightKey);
-		boolean execute = session.getUserProfile().canExecute(rightKey);
-		String accessCat = viewConfig.getString("accesscat");
-		if(accessCat != null) {
-			String accessCatRightKey = "rb.accesscat." + accessCat;
-			read = read || session.getUserProfile().canRead(accessCatRightKey);
-			write = write || session.getUserProfile().canWrite(accessCatRightKey);
-			execute = execute || session.getUserProfile().canExecute(accessCatRightKey);
-		}
-		return new ResolvedRights(read, write, execute);
+		ResolvedRights rights = ResolvedRights.calculate(session, "rb.views." + viewName);
+		rights = rights.or(getAccessCatsRights(session, viewConfig));
+		return rights;
 	}
 
 	protected DataList getViewContent(Session session, DataMap viewConfig, DataMap params, ResolvedRights rights, StringBuilder onLoadBuilder) throws RedbackException 
@@ -298,12 +289,7 @@ public class RedbackUIServer extends UIServer
 	{
 		String type = componentConfig.getString("type");
 		ResolvedRights rights = parentRights.copy();
-		if(componentConfig.containsKey("accesscat")) {
-			String accessCatRightKey = "rb.accesscat." + componentConfig.getString("accesscat");
-			rights.read = rights.read & session.getUserProfile().canRead(accessCatRightKey);
-			rights.write = rights.write & session.getUserProfile().canWrite(accessCatRightKey);
-			rights.execute = rights.execute & session.getUserProfile().canExecute(accessCatRightKey);
-		}
+		rights = rights.and(getAccessCatsRights(session, componentConfig));
 		boolean requirementsMet = type != null && !type.equals("view") && rights.read;
 		if(componentConfig.containsKey("requirewrite") && componentConfig.getBoolean("requirewrite") == true) 
 			requirementsMet = requirementsMet && rights.write;
@@ -560,5 +546,24 @@ public class RedbackUIServer extends UIServer
 
 	}
 
-
+	protected ResolvedRights getAccessCatsRights(Session session, DataMap item) {
+		if(item.containsKey("accesscat")) {
+			List<String> accessCats = new ArrayList<String>();
+			DataEntity ac = item.get("accesscat");
+			if(ac instanceof DataList) {
+				DataList list = (DataList)ac;
+				for(int i = 0; i < list.size(); i++)
+					accessCats.add(list.getString(i));
+			} else if(ac instanceof DataLiteral) {
+				accessCats.add(((DataLiteral)ac).getString());
+			}
+			ResolvedRights rights = new ResolvedRights(false, false, false);
+			for(String accessCat: accessCats) {
+				ResolvedRights acRights = ResolvedRights.calculate(session, "rb.accesscat." + accessCat);
+				rights = rights.or(acRights);				
+			}
+			return rights;
+		}
+		return null;
+	}
 }
