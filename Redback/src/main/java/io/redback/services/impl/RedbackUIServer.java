@@ -296,7 +296,6 @@ public class RedbackUIServer extends UIServer
 
 	protected DataMap generateViewPartFromComponentConfig(Session session, DataMap componentConfig, DataMap params, ResolvedRights parentRights, StringBuilder onLoadBuilder) throws RedbackException
 	{
-		DataMap viewPart = new DataMap();
 		String type = componentConfig.getString("type");
 		ResolvedRights rights = parentRights.copy();
 		if(componentConfig.containsKey("accesscat")) {
@@ -313,6 +312,7 @@ public class RedbackUIServer extends UIServer
 		
 		if(requirementsMet)
 		{
+			DataMap viewPart = new DataMap();
 			Iterator<String> it = componentConfig.keySet().iterator();
 			while(it.hasNext()) {
 				String key = it.next();
@@ -345,8 +345,9 @@ public class RedbackUIServer extends UIServer
 				}
 				viewPart.put("content", viewPartContentList);
 			}
+			return viewPart;
 		}
-		return viewPart;
+		return null;		
 	}
 	
 	protected HTML executeJSP(String name, String version, Map<String, Object> context) throws RedbackException

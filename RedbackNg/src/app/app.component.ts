@@ -25,6 +25,7 @@ export class AppComponent implements OnInit {
   version: string;
   username: string;
   userdisplay: string;
+  userroles: string;
 
   apptitle: string;
   logo: string;
@@ -63,6 +64,7 @@ export class AppComponent implements OnInit {
     this.version = native.getAttribute("version");
     this.username = native.getAttribute("username");
     this.userdisplay = native.getAttribute("userdisplay");
+    this.userroles = native.getAttribute("userroles");
 
     this.apiService.uiService = native.getAttribute("uiservice");
     this.apiService.objectService = native.getAttribute("objectservice");
@@ -92,6 +94,7 @@ export class AppComponent implements OnInit {
     this.securityService.baseUrl = currentUrl;
     this.clientWSService.baseUrl = currentUrl;
     window.redback.username = this.username;
+    window.redback.userroles = this.userroles.split(',');
     window.redback.api = this.apiService;
     window.redback.data = this.dataService;
     window.redback.modal = this.modalService;

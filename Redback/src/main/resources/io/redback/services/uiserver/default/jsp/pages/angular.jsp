@@ -28,6 +28,7 @@ var versionOrDefault = version != null ? version : 'default';
     version="<%=versionOrDefault%>"
     username="<%=session.getUserProfile().getUsername()%>"
     userdisplay="<%=session.getUserProfile().getAttribute('fullname')%>"
+    userroles="<%=session.getUserProfile().getRoles().join(',')%>"
     uiservice="<%=servicemap.ui%>"
     objectservice="<%=servicemap.object%>"
     fileservice="<%=servicemap.file%>"

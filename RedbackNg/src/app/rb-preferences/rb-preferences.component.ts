@@ -14,7 +14,7 @@ export class RbPreferencesComponent {
   ) {}
 
   public get preferences() : any {
-    return this.userprefService.getGlobalPreferences()
+    return this.userprefService.getGlobalPreferences().filter(gp => gp.options.length > 0);
   }
 
   public getPreferenceValue(code: string): any {

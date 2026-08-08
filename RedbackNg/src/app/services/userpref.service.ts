@@ -18,15 +18,28 @@ export class GlobalPref {
   code: string;
   label: string;
   icon: string;
-  options: PrefOption[];
+  hardoptions?: PrefOption[];
+  optionsvariable?: string;
 
   constructor(json: any) {
     this.code = json.code;
     this.label = json.label;
     this.icon = json.icon;
-    this.options = [];
     if(json.options != null) {
-      this.options = json.options.map(element => new PrefOption(element));
+      this.hardoptions = json.options.map(element => new PrefOption(element));
+    }
+    if (json.optionsvariable != null) {
+      this.optionsvariable = json.optionsvariable
+    }
+  }
+
+  get options(): PrefOption[] {
+    if (this.hardoptions != null) {
+      return this.hardoptions;
+    } else if (this.optionsvariable != null) {
+      return window.redback[this.optionsvariable];
+    } else {
+      return [];
     }
   }
 }
@@ -45,7 +58,7 @@ export class UserprefService {
 
   constructor(
     private apiService: ApiService
-  ) { 
+  ) {
     for(const entry of defaultGlobalPrefs) {
       this.globalPrefs.push(new GlobalPref(entry));
     };
@@ -79,7 +92,7 @@ export class UserprefService {
           error: error => {
             reject(error);
           }
-        });         
+        });
       } else {
         resolve();
       }
@@ -87,7 +100,7 @@ export class UserprefService {
   }
 
   public addGlobalPreference(json: any) {
-    this.globalPrefs.push(json);
+    this.globalPrefs.push(new GlobalPref(json));
   }
 
   public getGlobalPreferences() : GlobalPref[] {
@@ -117,7 +130,7 @@ export class UserprefService {
       map["_general"][name] = val;
       if(this.apiService.userprefService != null) {
         this.apiService.putUserPreference(level, 'uiswitch', map).subscribe(resp => {});
-      }      
+      }
     }
   }
 
@@ -154,8 +167,8 @@ export class UserprefService {
       map[this.currentView][comp][name] = (typeof currentValue == 'object' && typeof val == 'object' ? {... currentValue, ...val} : val);
       if(this.apiService.userprefService != null) {
         this.apiService.putUserPreference(level, 'uiswitch', map).subscribe(resp => {});
-      }      
-    } 
+      }
+    }
   }
 
  }
