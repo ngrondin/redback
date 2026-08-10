@@ -87,7 +87,19 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 					return null;
 				}
 			};				
-		}			
+		}
+		else if(name.equals("put"))
+		{
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String attribute = (String)arguments[0];
+					Object value = arguments[1];
+					boolean doOnUpdate = arguments.length >= 3 ? (boolean)arguments[2] : true;
+					rbObject.put(attribute, new Value(value), doOnUpdate);
+					return null;
+				}
+			};				
+		}	
 		else if(rbObject.getObjectConfig().getScriptForEvent(name) != null)
 		{
 			return new CallableJSWrapper() {

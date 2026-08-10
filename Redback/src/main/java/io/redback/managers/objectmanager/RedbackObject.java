@@ -387,7 +387,7 @@ public class RedbackObject extends RedbackElement
 		return filter;
 	}
 	
-	public void put(String name, Value value) throws RedbackException
+	public void put(String name, Value value, boolean doOnUpdate) throws RedbackException
 	{
 		AttributeConfig attributeConfig = getObjectConfig().getAttributeConfig(name);
 		if(attributeConfig != null)
@@ -417,14 +417,16 @@ public class RedbackObject extends RedbackElement
 					if(session.hasTxStore()) 
 						session.getTxStore().add("object", key, this);
 					lastUpdated = System.currentTimeMillis();
-					try {
-						if(attributeConfig.getExpression() == null) 
-							scriptContext.put(name, actualValue.getObject());
-						ScriptContext attributeUpdateScriptContext = scriptContext.createChild();
-						attributeUpdateScriptContext.put("previousValue", previousValue.getObject());
-						executeAttributeFunction(name, "onupdate", attributeUpdateScriptContext);
-					} catch(ScriptValueException e) {
-						throw new RedbackException("Error setting script context value", e);
+					if(doOnUpdate) {
+						try {
+							if(attributeConfig.getExpression() == null) 
+								scriptContext.put(name, actualValue.getObject());
+							ScriptContext attributeUpdateScriptContext = scriptContext.createChild();
+							attributeUpdateScriptContext.put("previousValue", previousValue.getObject());
+							executeAttributeFunction(name, "onupdate", attributeUpdateScriptContext);
+						} catch(ScriptValueException e) {
+							throw new RedbackException("Error executing onupdate script", e);
+						}						
 					}
 				}
 				else
@@ -441,10 +443,15 @@ public class RedbackObject extends RedbackElement
 			throw new RedbackException("This attribute '" + name + "' does not exist");
 		}
 	}
+	
+	public void put(String name, Value value) throws RedbackException 
+	{
+		put(name, value, true);
+	}
 
 	public void put(String name, String value) throws RedbackException
 	{
-		put(name, new Value(value));
+		put(name, new Value(value), true);
 	}
 	
 	public void put(String name, RedbackObject relatedObject) throws RedbackException

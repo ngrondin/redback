@@ -1,4 +1,4 @@
-import { Component, Input, ElementRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, Input, ElementRef, OnInit, ViewChild, ViewContainerRef, ApplicationRef, NgZone } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ApiService } from './services/api.service';
@@ -56,7 +56,9 @@ export class AppComponent implements OnInit {
       private menuService: MenuService,
       private modalService: ModalService,
       private chatService: ChatService,
-      private logService: LogService
+      private logService: LogService,
+      private appRef: ApplicationRef,
+      private zone: NgZone
    ) {
     var native = this.elementRef.nativeElement;
 
@@ -118,6 +120,14 @@ export class AppComponent implements OnInit {
     window.addEventListener('resize', () => {
         window.redback.publishEvent({ event: 'resize'});
     });
+
+    /*this.zone.runOutsideAngular(() => {
+      const originalTick = this.appRef.tick.bind(this.appRef);
+      this.appRef.tick = () => {
+        console.warn('Change detection triggered! Trace:', new Error().stack);
+        return originalTick();
+      };
+      });*/
   }
 
   ngOnInit(): void {

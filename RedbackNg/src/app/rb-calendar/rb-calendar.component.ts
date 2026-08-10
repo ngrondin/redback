@@ -140,7 +140,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     this.updateData(true);
   }
 
-  
+
   get activeDatasets() : any {
       return this._activeDatasets;
   }
@@ -195,7 +195,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       this.weeksOfThisMonth.push({display: dt.getDate() + " " + this.months[dt.getMonth()], value: dt});
       dt = new Date(dt.getTime() + (7 * 86400000));
     }
-    let monthEnd = dt;    
+    let monthEnd = dt;
     if(this.mode == 'week') {
       this.startDate = this.weekStarting;
       this.endDate = new Date(this.startDate.getTime() + (7 * 86400000));
@@ -212,10 +212,10 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
         let dateId = dt.getFullYear() + "-" + (dt.getMonth() + 1) + "-" + dt.getDate();
         days.push({
           id: dateId,
-          label: dt.getDate().toString(), 
+          label: dt.getDate().toString(),
           mainMonth: dt.getMonth() == this._month ? true : false,
           filter:{
-            $gt:"'" + dt.toISOString() + "'", 
+            $gt:"'" + dt.toISOString() + "'",
             $lt:"'" + (new Date(dt.getTime() + 86400000)).toISOString() + "'"
           }
         });
@@ -253,16 +253,16 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
           }
         } else if(cfg.color != null) {
           color = cfg.color;
-        }  
+        }
         if(cfg.icon != null) { // TODO: Placeholder for icon map, same as color
           icon = cfg.icon;
-        }     
+        }
         let entry = new CalendarEntry(obj.uid, icon, label, date, color, obj, cfg);
         this.putEntryInData(entry);
       }
     }
   }
-  
+
   putEntryInData(entry: CalendarEntry) {
     if(entry.date.getTime() >= this.startDate.getTime() && entry.date.getTime() <= this.endDate.getTime()) {
       let dateId = entry.date.getFullYear() + "-" + (entry.date.getMonth() + 1) + "-" + entry.date.getDate();
@@ -329,7 +329,8 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
         objectname: object.objectname,
         datatargets: [{
           filter: {uid: "'" + (item.config.linkAttribute != null ? object.get(item.config.linkAttribute) : object.uid) + "'"}
-        }]
+        }],
+        reset: false
       }
       this.navigateService.navigateTo(navEvent);
     }
@@ -356,7 +357,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
   public getSearchTargetType(): string {
     return "calendar";
   }
-  
+
   public getObjectName(): string {
     return null;
   }
@@ -367,7 +368,7 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     for(var ds of datasets) {
       filter = this.filterService.mergeFilters(filter, ds.userFilter);
     }
-    return filter;    
+    return filter;
   }
 
   public getUserSort() {
@@ -383,5 +384,3 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
     return filter;
   }
 }
-
-

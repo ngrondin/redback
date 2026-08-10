@@ -112,13 +112,13 @@ export class GanttTimeConfig {
         this.span = ms;
     }
 
-    calc(publish: boolean) {
+    calc(publish: boolean, retry: boolean = true) {
         this.endMS = this.startMS + this.spanMS;
         let clientWidthPX = 1920;
         if (this.displayElement != null && this.displayElement.offsetWidth != 0) {
           clientWidthPX = this.displayElement.offsetWidth;
-        } else {
-          setTimeout(() => this.calc(true), 0); //Recalc when displayElement is available
+        } else if(retry == true) {
+          setTimeout(() => this.calc(true, false), 0); //Recalc when displayElement is available
         }
         this.pxPerMS = clientWidthPX / this.zoomMS
         this.widthPX = this.spanMS * this.pxPerMS;
