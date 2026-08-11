@@ -41,8 +41,16 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					String objectname = (String)arguments[0];
-					String uid = (String)arguments[1];
-					RedbackObjectRemote ror = objectClient.getObject(session, objectname, uid);
+					RedbackObjectRemote ror = null;
+					if(arguments[1] instanceof String) {
+						String uid = (String)arguments[1];
+						ror = objectClient.getObject(session, objectname, uid);
+					} else if(arguments[1] instanceof DataMap) {
+						DataMap filter = (DataMap)arguments[1];
+						List<RedbackObjectRemote> list = objectClient.listObjects(session, objectname, filter, null, null, false, false, 0, 1);
+						if(list.size() > 0)
+							ror = list.get(0);
+					}
 					if(domainLock == null || (domainLock != null && ror.getDomain().equals(domainLock)))
 						return new RedbackObjectRemoteJSWrapper(ror);
 					else

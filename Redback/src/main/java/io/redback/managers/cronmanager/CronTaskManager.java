@@ -76,7 +76,7 @@ public class CronTaskManager extends Thread {
 								try {
 									runTask(ctc);
 								} catch(Exception e) {
-									Logger.severe("rb.cron.run", "Error while running cron task", e);
+									Logger.severe("rb.cron.run", "Error while running cron task", new DataMap("name", ctc.getName()), e);
 								} finally {
 									unlockTask(ctc, current + ctc.getPeriod() + randomDelay);									
 								}

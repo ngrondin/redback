@@ -1,5 +1,6 @@
 import { SeriesConfig } from "app/abstract/rb-datacalc";
 import { RbObject } from "app/datamodel";
+import { ColorConfig, Evaluator, LinkConfig, VAEConfig } from "app/helpers";
 
 export class FunnelSeriesConfig extends SeriesConfig {
     dataset: string;
@@ -7,13 +8,13 @@ export class FunnelSeriesConfig extends SeriesConfig {
     subLabelAttribute: string;
     colorAttribute: string;
     colorMap: any;
-    groupAttribute: string;
+    group?: VAEConfig;
     phaseAttribute: string;
     linkView: string;
     linkAttribute: string;
     modal: string;
     canEdit: boolean;
-  
+
     constructor(json: any, userpref: any) {
       super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
@@ -21,7 +22,7 @@ export class FunnelSeriesConfig extends SeriesConfig {
       this.subLabelAttribute = subpref != null && subpref.sublabelattribute != null ? subpref.sublabelattribute : json.sublabelattribute;
       this.colorAttribute = json.colorattribute;
       this.colorMap = json.colormap;
-      this.groupAttribute = json.groupattribute;
+      this.group = json.groupattribute != null ? new VAEConfig({attribute: json.groupattribute}) : new VAEConfig(json.group);
       this.phaseAttribute = json.phaseattribute;
       this.linkView = json.linkview;
       this.modal = json.modal;
@@ -48,7 +49,7 @@ export class FunnelPhaseConfig extends SeriesConfig {
     labelAttribute: string;
     orderAttribute: string;
     groupAttribute: string;
-  
+
     constructor(json: any, userpref: any) {
       super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
@@ -102,7 +103,7 @@ export class FunnelPhase {
     object: RbObject;
     config: FunnelPhaseConfig;
     groups: FunnelGroup[] = [];
-  
+
     constructor(i: string, l: string, o: number, obj: RbObject, cfg: FunnelPhaseConfig) {
       this.id = i;
       this.label = l;
@@ -116,15 +117,17 @@ export class FunnelGroup {
     id: string;
     label: string;
     open: boolean;
+    order: number;
     entries: FunnelEntry[] = [];
-  
-    constructor(i: string, l: string, o: boolean) {
+
+    constructor(i: string, l: string, o: boolean, or: number) {
       this.id = i;
       this.label = l;
       this.open = o;
+      this.order = or;
     }
 }
-  
+
 export class FunnelEntry {
     id: string;
     label: string;
@@ -132,7 +135,7 @@ export class FunnelEntry {
     color: string;
     object: RbObject;
     config: FunnelSeriesConfig;
-  
+
     constructor(i: string, l: string, sl: string, c: string, o: RbObject, cfg: FunnelSeriesConfig) {
       this.id = i;
       this.label = l;

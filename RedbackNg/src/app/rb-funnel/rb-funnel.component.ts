@@ -5,6 +5,7 @@ import { UserprefService } from 'app/services/userpref.service';
 import { ValueComparator } from 'app/helpers';
 import { NavigateService } from 'app/services/navigate.service';
 import { NavigateEvent } from 'app/datamodel';
+import { ModalService } from 'app/services/modal.service';
 
 @Component({
   selector: 'rb-funnel',
@@ -21,14 +22,16 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
   phaseGroupConfig: FunnelPhaseGroupConfig = null;
   phasesConfig: FunnelPhaseConfig = null;
   groupConfigs: any = {};
-  
+  openState: any = {};
+
   data: FunnelPhaseGroup[] = [];
 
   colorScheme = ['#EA6A47', '#B54051', '#40B569', '#ADABA7'];
 
   constructor(
     private userPref: UserprefService,
-    private navigateService: NavigateService
+    private navigateService: NavigateService,
+    private modalService: ModalService
   ) {
     super();
   }
@@ -75,14 +78,19 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
         for(let cfg of this.seriesConfigs) {
           var entryList = this.lists[cfg.dataset].filter(rbo => rbo.get(cfg.phaseAttribute) == phaseObject.get(this.phasesConfig.keyAttribute));
           for(let entryObject of entryList) {
-            var groupKey = entryObject.get(cfg.groupAttribute);
+            var groupKey = cfg.group != null ? cfg.group.getValue(entryObject) : null;
             var groupCfg = this.groupConfigs[groupKey];
-            if(groupCfg != null) {
-              if(groups[groupKey] == null) groups[groupKey] = new FunnelGroup(groupKey, groupCfg.label, groupCfg.open);
-              var color = cfg.colorMap[entryObject.get(cfg.colorAttribute)];
-              if(color == null) color = "#888";
+            if (groupCfg != null) {
+              var phaseGroupId = phase.id + "_" + groupKey;
+              let isOpen = this.openState[phaseGroupId] ?? groupCfg.open;
+              if(groups[groupKey] == null) groups[groupKey] = new FunnelGroup(phaseGroupId, groupCfg.label, isOpen, groupCfg.order);
+              var color = color = "#888";
+              if (cfg.colorAttribute != null) {
+                let val = entryObject.get(cfg.colorAttribute);
+                color = cfg.colorMap != null ? cfg.colorMap[val] : val;
+              }
               let entry = new FunnelEntry(entryObject.uid, entryObject.get(cfg.labelAttribute), entryObject.get(cfg.subLabelAttribute), color, entryObject, cfg);
-              groups[groupKey].entries.push(entry);  
+              groups[groupKey].entries.push(entry);
             }
           }
         }
@@ -91,32 +99,37 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
             phase.groups.push(groups[key]);
           }
         }
-        phase.groups = phase.groups.sort((a, b) => this.groupConfigs[a.id].order - this.groupConfigs[b.id].order);
+        phase.groups = phase.groups.sort((a, b) => a.order - b.order);
         phaseGroup.phases.push(phase);
 
-      } 
-      phaseGroup.phases = phaseGroup.phases.sort((a, b) => ValueComparator.valueCompare(a, b, "order")); 
+      }
+      phaseGroup.phases = phaseGroup.phases.sort((a, b) => ValueComparator.valueCompare(a, b, "order"));
     }
-    this.data = this.data.sort((a, b) => ValueComparator.valueCompare(a, b, "order")); 
+    this.data = this.data.sort((a, b) => ValueComparator.valueCompare(a, b, "order"));
   }
 
 
   click(item: FunnelEntry) {
-    let object = item.object;
-    if(object != null) {
-      let navEvent: NavigateEvent = {
-        view: item.config.linkView,
-        objectname: object.objectname,
-        datatargets: [{
-          filter: {uid: "'" + (item.config.linkAttribute != null ? object.get(item.config.linkAttribute) : object.uid) + "'"}
-        }]
+    if (item.object != null) {
+      if (item.config.linkView != null) {
+        let navEvent: NavigateEvent = {
+          view: item.config.linkView,
+          objectname: item.object.objectname,
+          datatargets: [{
+            filter: {uid: "'" + (item.config.linkAttribute != null ? item.object.get(item.config.linkAttribute) : item.object.uid) + "'"}
+          }]
+        }
+        this.navigateService.navigateTo(navEvent);
+      } else if (item.config.modal != null) {
+        this.getDatasetForConfig(item.config)?.select(item.object);
+        this.modalService.open(item.config.modal);
       }
-      this.navigateService.navigateTo(navEvent);
     }
   }
 
   clickGroup(group: FunnelGroup) {
     group.open = !group.open;
+    this.openState[group.id] = group.open;
   }
 
   clickPhaseGroup(group: FunnelPhaseGroup) {
@@ -136,6 +149,3 @@ export class RbFunnelComponent extends RbDataCalcComponent<FunnelSeriesConfig> {
     object.setValue(objectPhaseAttribute, phaseKey)
   }
 }
-
-
-
