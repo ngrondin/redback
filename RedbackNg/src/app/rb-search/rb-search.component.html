@@ -35,8 +35,7 @@
 </div>
 <rb-iconbutton
     *ngIf="mode.filterconfig != null"
-    class="rb-input-trail-iconbutton"
+    [class]="'rb-input-trail-iconbutton ' + (hasFilter ? ' rb-search-filterbutton-active' : ' rb-search-filterbutton')"
     [icon]="'filter_list'"
-    [style.color]="hasFilter ? 'var(--primary-dark-color)' : 'var(--dark-writing-color)'"
     (click)="openFilterBuilder()">
 </rb-iconbutton>

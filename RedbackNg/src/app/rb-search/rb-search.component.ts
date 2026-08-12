@@ -15,7 +15,7 @@ import { PopupService } from 'app/services/popup.service';
 @Component({
   selector: 'rb-search',
   templateUrl: './rb-search.component.html',
-  styleUrls: ['../inputs/abstract/rb-field-input.css']
+  styleUrls: ['../inputs/abstract/rb-field-input.css', './rb-search.component.css']
 })
 export class RbSearchComponent extends RbFieldInputComponent {
   @Input('filter') filterconfig?: any;

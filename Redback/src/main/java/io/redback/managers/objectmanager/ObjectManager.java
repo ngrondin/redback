@@ -1060,13 +1060,30 @@ public class ObjectManager
 	{
 		DataMap dbFilter = new DataMap();
 		if(objectFilter != null) {
-			Iterator<String> it = objectFilter.keySet().iterator();
-			while(it.hasNext())
+			// Preprocess filter to change dot notations into merged sub filters
+			DataMap cleanFilter = new DataMap();
+			for(String key: objectFilter.keySet()) 
 			{
-				String key = it.next();
+				DataEntity val = objectFilter.get(key);
+				if(key.contains(".")) 
+				{
+					String keyRoot = key.substring(0, key.indexOf("."));
+					String remainder = key.substring(key.indexOf(".") + 1);
+					if(!cleanFilter.containsKey(keyRoot)) cleanFilter.put(keyRoot, new DataMap());
+					if(cleanFilter.get(keyRoot) instanceof DataMap)
+						cleanFilter.getObject(keyRoot).put(remainder, val);
+				} 
+				else 
+				{
+					cleanFilter.put(key, val);
+				}
+			}
+			// Convert the filter while resolving sub filters
+			for(String key: cleanFilter.keySet()) 
+			{
 				if(key.equals("$or") || key.equals("$and"))
 				{
-					DataList list = objectFilter.getList(key);
+					DataList list = cleanFilter.getList(key);
 					DataList dbList = new DataList();
 					for(int i = 0; i < list.size(); i++)
 					{
@@ -1074,37 +1091,13 @@ public class ObjectManager
 					}
 					dbFilter.put(key, dbList);
 				}
-				else if(key.contains(".")) //This branch should be deprecated
-				{
-					String rootAttribute = key.substring(0, key.indexOf("."));
-					String remainder = key.substring(key.indexOf(".") + 1);
-					AttributeConfig attributeConfig = objectConfig.getAttributeConfig(rootAttribute);
-					if(attributeConfig.hasRelatedObject())
-					{
-						DataList dbList = new DataList();
-						RelatedObjectConfig roc = attributeConfig.getRelatedObjectConfig();
-						ObjectConfig nextObjectConfig = objectConfigs.get(session, roc.getObjectName());
-						List<RedbackObject> list = listObjects(session, nextObjectConfig.getName(), new DataMap(remainder, objectFilter.get(key)), null, null, false, 0, 1000);
-						if(list.size() > 0) {
-							for(int k = 0; k < list.size(); k++)
-							{
-								RedbackObject resultObject = list.get(k);
-								Value resultObjectLinkValue = resultObject.get(roc.getLinkAttributeName());
-								dbList.add(resultObjectLinkValue.getObject());
-							}
-							dbFilter.put(rootAttribute, new DataMap("$in", dbList));
-						} else {
-							dbFilter.put(rootAttribute, "");
-						}
-					}
-				}
 				else
 				{
 					AttributeConfig attributeConfig = objectConfig.getAttributeConfig(key);
 					String attributeDBKey = key.equals("uid") ? objectConfig.getUIDDBKey() : key.equals("domain") ? objectConfig.getDomainDBKey() : attributeConfig != null ? attributeConfig.getDBKey() : null; 
 					if(attributeDBKey != null)
 					{
-						DataEntity objectFilterValue = objectFilter.get(key);
+						DataEntity objectFilterValue = cleanFilter.get(key);
 						DataEntity dbFilterValue = null;
 						if(objectFilterValue instanceof DataMap)
 						{

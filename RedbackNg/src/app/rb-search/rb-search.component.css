@@ -1,0 +1,12 @@
+.rb-search-filterbutton {
+  color: var(--light-writing-color);
+}
+
+
+.rb-search-filterbutton-active {
+  color: var(--primary-color);
+}
+
+.rb-search-filterbutton-active ::ng-deep rb-icon {
+  font-weight: 900;
+}
