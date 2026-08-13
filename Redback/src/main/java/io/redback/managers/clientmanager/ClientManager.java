@@ -34,6 +34,7 @@ public class ClientManager extends Thread {
 	protected AccessManagementClient accessManagementClient;
 	protected CollectionConfig deviceCollection;
 	protected CollectionConfig userCollection;
+	protected String userUpdateChannel;
 	protected List<ClientHandler> clientHandlers;
 	protected DataMap serviceMap;
 	protected boolean quit;
@@ -51,6 +52,7 @@ public class ClientManager extends Thread {
 		if(config.containsKey("accessmanagementservice")) accessManagementClient = new AccessManagementClient(firebus, config.getString("accessmanagementservice"));		
 		deviceCollection = new CollectionConfig(config.getObject("devicecollection"), "rbcs_device");
 		userCollection = new CollectionConfig(config.getObject("usercollection"), "rbcs_user");
+		userUpdateChannel = config.getString("userupdatechannel");
 		serviceMap = config.getObject("servicemap");
 		setName("rbClientHB");
 		start();
@@ -215,6 +217,29 @@ public class ClientManager extends Thread {
 			for(ClientHandler ch: userHandlers) 
 				ch.receiveNotification(data.getObject(username));
 		}	
+	}
+	
+	public void onUserUpdate(DataMap data) throws RedbackException {
+		DataList domains = data.getList("domains");
+		String username = data.getString("username");
+		if(domains != null && username != null) {
+			List<ClientHandler> handlers = new ArrayList<ClientHandler>();
+			synchronized(clientHandlers) {
+				for(ClientHandler ch: clientHandlers) {
+					if(!ch.getSession().getUserProfile().getUsername().equals(username)) {
+						boolean domainMatch = false;
+						for(String d1: ch.getSession().getUserProfile().getDomains()) 
+							for(int i = 0; i < domains.size(); i++) 
+								if(domains.getString(i).equals(d1))
+									domainMatch = true;
+						if(domainMatch) 
+							handlers.add(ch);					
+					}
+				}
+			}
+			for(ClientHandler ch: handlers) 
+				ch.receiveUserUpdate(data);			
+		}
 	}
 	
 	public void onChatUpdate(DataMap data) throws RedbackException {

@@ -6,6 +6,10 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { NavigateBackData } from 'app/datamodel';
 import { NavigateService } from 'app/services/navigate.service';
 import { UserprefService } from 'app/services/userpref.service';
+import { ClientWSService } from 'app/services/clientws.service';
+import { CollabService, OtherUser } from 'app/services/collab.service';
+import { InitialsMaker } from 'app/helpers';
+
 
 @Component({
   selector: 'rb-view-header',
@@ -21,7 +25,7 @@ export class RbViewHeaderComponent implements OnInit {
   defaultColor: any = {name:"Default", fore:"white", back:"var(--primary-color)"};
   color: any = this.defaultColor;
   colors: any = [
-    this.defaultColor,    
+    this.defaultColor,
     {name:"Dark Blue", fore:"white", back:"#5F71A8"},
     {name:"Light Blue", fore:"white", back:"#0091D5"},
     {name:"Orange", fore:"white", back:"#EA6A47"},
@@ -46,11 +50,12 @@ export class RbViewHeaderComponent implements OnInit {
   constructor(
     public userPref: UserprefService,
     private navigateService: NavigateService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private collabService: CollabService
   ) { }
 
   ngOnInit(): void {
-    
+
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -70,6 +75,11 @@ export class RbViewHeaderComponent implements OnInit {
     return this.navigateService.getCurrentNavigateBackStack(this.targetName);
   }
 
+  get otherUsers(): OtherUser[] {
+    let viewname = this.navigateService.getCurrentViewName(this.targetName);
+    return this.collabService.getOtherUsersOnView(viewname).filter(ou => ou.initials != null);
+  }
+
   backTo(index: number) {
     this.navigateService.backTo(index, this.targetName);
   }
@@ -81,7 +91,7 @@ export class RbViewHeaderComponent implements OnInit {
 
   getPreferredColor() {
     let color = this.userPref.getCurrentViewUISwitch("viewheader", "color");
-    if(color != null) { 
+    if(color != null) {
       this.color = color;
     } else {
       this.color = this.defaultColor;
@@ -99,7 +109,7 @@ export class RbViewHeaderComponent implements OnInit {
 
   getPreferredPattern() {
     let pattern = this.userPref.getCurrentViewUISwitch("viewheader", "pattern");
-    if(pattern != null) { 
+    if(pattern != null) {
       this.pattern = pattern;
     } else {
       this.pattern = this.defaultPattern;
@@ -108,7 +118,7 @@ export class RbViewHeaderComponent implements OnInit {
 
   updatePreferredPattern() {
     this.userPref.setUISwitch("user", "viewheader", "pattern", this.pattern);
-  }  
+  }
 
 
   hexToRgb(hex: string) {
@@ -131,7 +141,7 @@ export class RbViewHeaderComponent implements OnInit {
       rgb.r = Math.floor(rgb.r * ratio);
       rgb.g = Math.floor(rgb.g * ratio);
       rgb.b = Math.floor(rgb.b * ratio);
-      return this.rgbToHex(rgb);  
+      return this.rgbToHex(rgb);
     } else {
       return hex;
     }
@@ -141,4 +151,3 @@ export class RbViewHeaderComponent implements OnInit {
     return svg.replace('%23000000', hex.replace('#', '%23'));
   }
  }
-

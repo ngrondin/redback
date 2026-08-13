@@ -21,7 +21,7 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 					try {
 						onObjectUpdate(payload.getDataMap());
 					} catch(Exception e) {
-						Logger.severe("rb.client.onupdate", "Error receiving object update", e);
+						Logger.severe("rb.client.onobjectupdate", "Error receiving object update", e);
 					}					
 				}
 			}, 10);			
@@ -37,6 +37,17 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 				}
 			}, 10);			
 		}
+		if(c.containsKey("userupdatechannel")) {
+			f.registerConsumer(c.getString("userupdatechannel"), new Consumer() {
+				public void consume(Payload payload) {
+					try {
+						onUserUpdate(payload.getDataMap());
+					} catch(Exception e) {
+						Logger.severe("rb.client.onuserupdate", "Error receiving user update", e);
+					}
+				}
+			}, 10);			
+		}		
 		if(c.containsKey("chatchannel")) {
 			f.registerConsumer(c.getString("chatchannel"), new Consumer() {
 				public void consume(Payload payload) {
@@ -67,6 +78,8 @@ public abstract class ClientServer extends AuthenticatedStreamProvider {
 	protected abstract void onObjectUpdate(DataMap data) throws RedbackException;
 	
 	protected abstract void onNotification(DataMap data) throws RedbackException;
+	
+	protected abstract void onUserUpdate(DataMap data) throws RedbackException;
 	
 	protected abstract void onChatUpdate(DataMap data) throws RedbackException;
 }

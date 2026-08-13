@@ -6,7 +6,7 @@ import { Platform } from '@angular/cdk/platform';
 import * as pako from 'pako';
 import { SecurityService } from './security.service';
 import { LogService } from './log.service';
-import packageJson from '../../../package.json'; 
+import packageJson from '../../../package.json';
 
 export class Upload {
   uploaduid = UUID.UUID();
@@ -36,7 +36,7 @@ export class Upload {
             sequence: this.chunkSeq,
             data: reader.result
           });
-          this.chunkSeq++;  
+          this.chunkSeq++;
           const prog = Math.round(100 * start / this.file.size);
           this.observer.next({type:"progress", value: prog});
         }
@@ -102,8 +102,10 @@ export class ClientWSService {
   public path?: string;
   public websocket: any;
   public stateObservers: Observer<any>[] = [];
+  public statsObservers: Observer<any>[] = [];
   public objectUpdateObservers: Observer<any>[] = [];
   public notificationObservers: Observer<any>[] = [];
+  public userUpdateObservers: Observer<any>[] = [];
   public chatObservers: Observer<any>[] = [];
   public clientPingObservers: Observer<String>[] = [];
   public requestQueue: Request[] = [];
@@ -192,9 +194,11 @@ export class ClientWSService {
       }
 
       if(msg.type == 'objectupdate') {
-        this.objectUpdateObservers.forEach((observer) => observer.next(msg.object || msg.objects));           
+        this.objectUpdateObservers.forEach((observer) => observer.next(msg.object || msg.objects));
       } else if(msg.type == 'notification') {
         this.notificationObservers.forEach((observer) => observer.next(msg.notification))
+      } else if (msg.type == 'userupdate') {
+        this.userUpdateObservers.forEach((observer) => observer.next(msg.update))
       } else if(msg.type == 'serviceresponse' || msg.type == 'serviceerror') {
         let request = this.requests[msg.requid];
         if(request != null) {
@@ -208,7 +212,7 @@ export class ClientWSService {
           }
           this.addtoHistory(request);
           delete this.requests[msg.requid];
-          this.publishState();
+          this.publishStats();
         }
       } else if(msg.type == 'streamdata' || msg.type == 'streamcomplete' || msg.type == 'streamerror') {
         let request = this.requests[msg.requid];
@@ -229,7 +233,7 @@ export class ClientWSService {
             }
             this.addtoHistory(request);
             delete this.requests[msg.requid];
-            this.publishState()
+            this.publishStats()
           }
         }
       } else if(msg.type == 'uploadctl') {
@@ -254,7 +258,7 @@ export class ClientWSService {
   }
 
   error(error: String) {
-    
+
   }
 
   closed(event: any) {
@@ -273,15 +277,15 @@ export class ClientWSService {
   send(data: any) {
     if(this.websocket != null) {
       this.websocket.send(JSON.stringify(data));
-      this.publishState()
+      this.publishStats()
     }
   }
-  
+
   heartbeat() {
     if(this.heartbeatFreq > 0) {
       this.send({type:"heartbeat"});
       setTimeout(() => {
-        this.heartbeat();        
+        this.heartbeat();
       }, this.heartbeatFreq);
     }
   }
@@ -295,9 +299,16 @@ export class ClientWSService {
        appversion: packageJson.version,
        os: "web",
        screensize: window.innerWidth + "x" + window.innerHeight ,
-       
+
       }
     });
+  }
+
+  sendUserUpdate(update: any) {
+    this.send({
+      type: "userupdate",
+      update: update
+    })
   }
 
   sendUnsentSubscriptionRequests() {
@@ -317,7 +328,7 @@ export class ClientWSService {
       }
     });
     let end = (new Date()).getTime();
-    this.send(subreq);    
+    this.send(subreq);
     this.subscriptionRequestPending = false;
     //this.logService.debug(`ClientWS: Sent ${subreq.list.length} subscription requests in ${end - start}ms`);
   }
@@ -325,6 +336,12 @@ export class ClientWSService {
   getStateObservable() : Observable<any>  {
     return new Observable<any>((observer) => {
       this.stateObservers.push(observer);
+    });
+  }
+
+  getStatsObservable() : Observable<any>  {
+    return new Observable<any>((observer) => {
+      this.statsObservers.push(observer);
     });
   }
 
@@ -340,6 +357,12 @@ export class ClientWSService {
     });
   }
 
+  getUserUpdateObservable() : Observable<any>  {
+    return new Observable<any>((observer) => {
+      this.userUpdateObservers.push(observer);
+    });
+  }
+
   getChatObservable() : Observable<any> {
     return new Observable<any>((observer) => {
       this.chatObservers.push(observer);
@@ -350,7 +373,7 @@ export class ClientWSService {
     return this.connected;
   }
 
-  getPendingRequestCount(): number { 
+  getPendingRequestCount(): number {
     return Object.keys(this.requests).length;
   }
 
@@ -431,7 +454,7 @@ export class ClientWSService {
             object: object,
             uid: uid
           }
-        });       
+        });
       })
     } else {
       throw "Web socket not connected";
@@ -455,10 +478,13 @@ export class ClientWSService {
 
   publishState() {
     this.stateObservers.forEach((observer) => observer.next({
-      connected: this.connected,
+      connected: this.connected
+    }));
+  }
+
+  publishStats() {
+    this.statsObservers.forEach((observer) => observer.next({
       pendingrequests: this.getPendingRequestCount()
     }));
   }
 }
-
-

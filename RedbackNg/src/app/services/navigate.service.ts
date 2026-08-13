@@ -40,7 +40,7 @@ export class NavigateService {
     private logService: LogService,
     private buildService: BuildService,
     private componentFactoryResolver:ComponentFactoryResolver,
-  ) { 
+  ) {
     window.redback.navigateTo = (event: NavigateEvent) => this.navigateTo(event);
     for(let key of Object.keys(componentRegistry)) {
       let componentClass = componentRegistry[key];
@@ -129,7 +129,7 @@ export class NavigateService {
 
   private async getLoadedView(viewName: string) : Promise<LoadedView> {
     let viewConfig = await this.loadView(viewName);
-    let hash = JSON.stringify(viewConfig).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);      
+    let hash = JSON.stringify(viewConfig).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
     let entry: LoadedView = this.viewCache[hash];
     if(entry == null) {
       entry = new LoadedView(viewName, viewConfig.label);
@@ -165,6 +165,11 @@ export class NavigateService {
   getCurrentTitle(targetname?: string): string {
     let target = this.getTarget(targetname);
     return target.title ?? target.component.currentLoadedView?.title ?? "";
+  }
+
+  getCurrentViewName(targetname?: string): string {
+    let target = this.getTarget(targetname);
+    return target.component.currentLoadedView?.name ?? "";
   }
 
   getCurrentTopDataSets(targetname?: string) : RbDatasetComponent[] {

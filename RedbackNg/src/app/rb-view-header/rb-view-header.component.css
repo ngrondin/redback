@@ -13,7 +13,7 @@
     align-items: flex-end;
 }
 
-.rb-vh-title { 
+.rb-vh-title {
     font-size: var(--v20px);
     font-weight: 500;
 }
@@ -55,4 +55,17 @@
 .rb-vh-menu-item {
     flex: 1 1 auto;
     padding: var(--v10px)
+}
+
+.rb-vh-otheruser {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-dark-color);
+  color: #ddd;
+  border-radius: 50%;
+  height: var(--v28px);
+  width: var(--v28px);
+  font-size: 0.85rem;
+  font-weight: 700;
 }

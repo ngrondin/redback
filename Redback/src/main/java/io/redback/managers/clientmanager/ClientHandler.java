@@ -47,6 +47,7 @@ public class ClientHandler extends ClientStreamHandler {
 				streams.get(uid).close();
 			for(String uid: uploads.keySet()) 
 				uploads.get(uid).close();
+			sendUserUpdate(new DataMap("connected", false));
 			clientManager.onClientLeave(this);
 			Logger.info("rb.client.disconnect", new DataMap("gatewayconnid", gatewayConnectionId, "stats", getStats()));			
 		} catch(Exception e) {
@@ -227,6 +228,19 @@ public class ClientHandler extends ClientStreamHandler {
 		}			
 	}
 	
+	public void sendUserUpdate(DataMap update) throws RedbackException {
+		if(clientManager.userUpdateChannel != null) {
+			DataMap outUpdate = (DataMap)update.getCopy();
+			outUpdate.put("username", session.getUserProfile().getUsername());
+			DataList domList = new DataList();
+			for(String domain: session.getUserProfile().getDomains())
+				if(!domain.equals("root"))
+					domList.add(domain);
+			outUpdate.put("domains", domList);
+			clientManager.firebus.publish(clientManager.userUpdateChannel, new Payload(outUpdate));
+		}
+	}
+	
 	public void receiveObjectData(DataList list) throws RedbackException {
 		DataMap wrapper = new DataMap();
 		wrapper.put("type", "objectupdate");
@@ -239,6 +253,13 @@ public class ClientHandler extends ClientStreamHandler {
 		wrapper.put("type", "notification");
 		wrapper.put("notification", data);
 		sendClientData(wrapper);
+	}
+	
+	public void receiveUserUpdate(DataMap data) throws RedbackException {
+		DataMap wrapper = new DataMap();
+		wrapper.put("type", "userupdate");
+		wrapper.put("update", data);
+		sendClientData(wrapper);	
 	}
 	
 	public void receiveChatUpdate(DataMap data) throws RedbackException {

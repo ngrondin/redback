@@ -51,6 +51,7 @@ public class RedbackUIServer extends UIServer
 	protected ConfigCache<DataMap> menuConfigs;
 	protected ConfigClient configClient;
 	protected DataClient dataClient;
+	protected String userUpdateChannel; 
 	protected CollectionConfig viewCollection;
 	protected CollectionConfig traceCollection;
 	protected DataMap serviceMap;
@@ -76,6 +77,7 @@ public class RedbackUIServer extends UIServer
 				return KeyEscaper.escape(map);
 			}
 		});
+		userUpdateChannel = config.getString("userupdatechannel");
 		traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(dataClient, config.getObject("tracecollection"), "rbt_trace") : null;
 		serviceMap = config.getObject("servicemap");
 	}

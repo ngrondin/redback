@@ -35,11 +35,11 @@ export abstract class AppRootComponent implements OnInit {
     drawerShowing: string|null = null;
     drawerOpen: boolean = false;
     subscription?: Subscription;
-    
+
     title: string = "Welcome";
     showNLBox: boolean = false;
     showWSConsole: boolean = false;
-    
+
     configService : ConfigService;
     dragService: DragService;
     dialogService: DialogService;
@@ -75,7 +75,7 @@ export abstract class AppRootComponent implements OnInit {
         this.securityService = AppInjector.get(SecurityService);
         this.dialog = AppInjector.get(MatDialog);
      }
-  
+
     ngOnInit() {
       if(this.events != null) {
         this.subscription = this.events.subscribe((event) => {
@@ -91,25 +91,27 @@ export abstract class AppRootComponent implements OnInit {
       }
       this.clientWSService.getStateObservable().subscribe((state: any) => {
         this.connected = state.connected;
+      });
+      this.clientWSService.getStatsObservable().subscribe((state: any) => {
         this.pendingRequests = state.pendingrequests;
       });
       this.navigateService.getNavigateObservable().subscribe((navdata) => {
         this.navigated();
       });
     }
-  
+
     ngOnDestroy() {
       this.subscription?.unsubscribe();
     }
-  
+
     get logoUrl() : any {
       return this.logo != null ? this.domSanitizer.bypassSecurityTrustResourceUrl(this.logo) : null;
     }
-  
+
     get currentTitle(): string {
       return this.navigateService.getCurrentTitle();
     }
-  
+
     setTitle($event: any) {
       this.title = $event;
     }
@@ -133,11 +135,11 @@ export abstract class AppRootComponent implements OnInit {
         });
       }
     }
-  
+
     logout() {
       this.securityService.logout();
     }
-  
+
     toggleRightDrawer(type: string) {
       if(this.drawerOpen) {
         if(this.drawerShowing == type) {
@@ -180,15 +182,15 @@ export abstract class AppRootComponent implements OnInit {
         restoreFocus: false
       });
     }
-  
+
     @HostListener('mouseup', ['$event']) onMouseUp($event: any) {
       this.dragService.endDrag();
     }
-  
+
     @HostListener('mousemove', ['$event']) onMouseMove($event: any) {
       this.dragService.move($event);
     }
-  
+
     @HostListener('click', ['$event']) onClick($event: any) {
       this.dialogService.hideTooltip();
     }

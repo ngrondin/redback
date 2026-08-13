@@ -11,15 +11,21 @@
         <span
             class="rb-vh-bc-link">
             &nbsp;&nbsp;&gt;&nbsp;&nbsp;
-        </span>        
+        </span>
     </div>
     <div
         class="rb-vh-title">
         {{title}}
     </div>
-</div>    
+</div>
 <div
     class="rb-vh-space">
+</div>
+<div
+  *ngFor="let otheruser of otherUsers"
+  class="rb-vh-otheruser"
+  [tip]="otheruser.fullname">
+  {{otheruser.initials}}
 </div>
 <rb-iconbutton
     [icon]="'more_vert'"
@@ -36,7 +42,7 @@
         mat-menu-item
         [matMenuTriggerFor]="headerpattern">
         Header Pattern
-    </button>    
+    </button>
 </mat-menu>
 <mat-menu
     #headercolor="matMenu">

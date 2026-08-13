@@ -31,7 +31,7 @@ export class Translator {
                     }
                 } else {
                     return item;
-                }         
+                }
             } else {
                 return val;
             }
@@ -44,18 +44,19 @@ export class Translator {
 export class InitialsMaker {
 
     get(val: string): string {
-        let ret : string = "";
-        let pickNext: boolean = true;
-        for(let c of val) {
-            if(c == ' ') {
-                pickNext = true;
-            } else if(pickNext) {
-                ret = ret + c.toUpperCase();
-                pickNext = false;
-            }            
-        }
-        return ret;
+      return InitialsMaker.createInitials(val);
     }
+
+  public static createInitials(input: string): string {
+    if (input == "" || input == null) return "-";
+    let clean = input.replace(/\s*\([^)]*\)/g, "").toUpperCase();
+    let parts = clean.split(" ");
+    if (parts.length == 1) {
+      return parts[0].substring(0, 1);
+    } else {
+      return parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1);
+    }
+  }
 }
 
 export class Formatter {
@@ -110,7 +111,7 @@ export class Formatter {
               val = val + " " + seconds + "s";
             if(milli != 0 && !greaterThanMinute)
               val = val + " " + milli + "ms";
-            if(ms == 0) 
+            if(ms == 0)
               val = " 0";
             return val.substr(1);
         } else {
@@ -121,7 +122,7 @@ export class Formatter {
     static formatDateTime(value: any) : string {
         let str = Formatter.formatDate(value);
         if(str != "") str = str + " ";
-        str = str + Formatter.formatTime(value); 
+        str = str + Formatter.formatTime(value);
         return str;
     }
 
@@ -183,11 +184,11 @@ export class Formatter {
             str = str.replace('mm', (dt.getMinutes()).toString().padStart(2, "0"));
         }
         return str;
-    }  
-    
+    }
+
     static formatCurrency(value: number) : string {
         const formatter = new Intl.NumberFormat('en-US', {style: 'currency',  currency: 'USD'});
-        return formatter.format(value);  
+        return formatter.format(value);
     }
 
     static formatInteger(value: number) : string {
@@ -228,7 +229,7 @@ export class Converter {
     }
 }
 
-export class ValueComparator{ 
+export class ValueComparator{
     public static notEqual(a: any, b: any): boolean {
         return !this.equal(a, b);
     }
@@ -280,7 +281,7 @@ export class ObserverProxy implements Observer<any> {
         public callable?: (value: any) => void,
         public errorCallable?: (error: any) => void
     ) {
-        
+
     }
     closed?: boolean;
     next(value: any) {
@@ -288,7 +289,7 @@ export class ObserverProxy implements Observer<any> {
         this.observer.next(value);
         this.observer.complete();
     }
-    
+
     error(error: any) {
         if(this.errorCallable != null) this.errorCallable(error);
         this.observer.error(error);
@@ -309,7 +310,7 @@ export class Evaluator {
             return false;
         } else if(typeof expr == 'string' && !((expr.indexOf("object.") > -1 && object == null) || (expr.indexOf("relatedObject.") > -1 && relatedObject == null))) {
             try {
-                return eval(expr);            
+                return eval(expr);
             } catch(err) {
                 return null;
             }
@@ -331,7 +332,7 @@ export class Evaluator {
 
 export class Hasher {
     public static hash(value: any) {
-        let hash = JSON.stringify(value).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);   
+        let hash = JSON.stringify(value).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
         return hash;
     }
 }
@@ -343,7 +344,7 @@ export class HtmlParser {
         let ret = this.recparse(str ?? "", 0);
         return ret.nodes;
     }
-    
+
     private static recparse(str: string, pos: number) {
         let nodes = [];
         while(pos > -1 && pos < str.length) {
@@ -405,18 +406,18 @@ export class HtmlParser {
                     str = str + this.stringify(node.children, indent, (indent ? baseindent + 1 : 0));
                 }
                 if(node.selfend == false && this.selfEndedTags.indexOf(node.tag) == -1) {
-                    str = str + basepad + "</" + node.tag + ">"; 
+                    str = str + basepad + "</" + node.tag + ">";
                     if(indent) {
                         str = str + "\r\n";
-                    }  
-                }         
+                    }
+                }
             } else if(node.type == 'text') {
                 str = str + basepad + node.text;
                 if(indent) {
                     str = str + "\r\n";
-                }  
+                }
             }
-             
+
         }
         if(wraphtml && !(nodes.length == 1 && nodes[0].type == 'tag' && nodes[0].tag == 'html')) {
             str = "<html>" + str + "</html>";
@@ -436,7 +437,7 @@ export class FileReferenceResolver {
                 let posend = ret.indexOf(endMarker, pos + marker.length);
                 let fileuid = ret.substring(pos + marker.length, posend);
                 ret = ret.substring(0, pos) + "src=\"/" + fileService + "?fileuid=" + fileuid + "\"" + ret.substring(posend + 1);
-            }    
+            }
         }
         return ret;
     }
@@ -446,8 +447,8 @@ export class FileReferenceResolver {
     selector: 'iframe'
   })
   export class CachedSrcDirective {
-  
-      @Input() 
+
+      @Input()
       public get cachedsrc(): string {
           return this.elref.nativeElement.src;
       }
@@ -456,7 +457,7 @@ export class FileReferenceResolver {
               this.renderer.setAttribute(this.elref.nativeElement, 'src', src);
           }
       }
-  
+
       constructor(
           private elref: ElementRef,
           private renderer : Renderer2
@@ -472,7 +473,7 @@ export class LinkConfig {
     reset: boolean;
     datatargets: LinkConfigDataTarget[] = [];
     comptargets: LinkConfigCompTarget[] = [];
-    
+
     constructor(json: any) {
         this.target = json.target;
         this.view = json.view;
@@ -490,7 +491,7 @@ export class LinkConfig {
                 sort: json.sort,
                 select: json.select
             });
-        }  
+        }
         if(json.datatargets != null) {
             for(var item of json.datatargets) {
                 this.datatargets.push({
@@ -502,7 +503,7 @@ export class LinkConfig {
                     sort: item.sort,
                     select: item.select
                 });
-            }  
+            }
         }
         this.comptargets = [];
         if(json.comptargets != null) {
@@ -511,7 +512,7 @@ export class LinkConfig {
                     compid: item.compid,
                     data: item.data
                 });
-            }    
+            }
         }
     }
 
@@ -536,19 +537,19 @@ export class LinkConfig {
                 let rfilter = filterService.resolveFilter(datatarget.filter, object, dataset, undefined, undefined, undefined, extraContext);
                 filter = filterService.unresolveFilter(rfilter);  //Unresolving this as the DataSet will resolve it
                 sort = datatarget.sort;
-            } 
+            }
             if(datatarget.select != null) {
                 let filterService: FilterService = AppInjector.get(FilterService);
                 select = filterService.resolveFilter(datatarget.select, object, dataset, undefined, undefined, undefined, extraContext);
-            } 
+            }
             if(datatarget.filter == null && datatarget.select == null) {
                 if(datatarget.filtersingleobject == false) {
                     select = {uid: objectuid};
                 } else if(datatarget.filtersingleobject == true) {
                     filter = {uid: "'" + objectuid + "'"};
-                } 
+                }
             }
-            event.datatargets!.push({objectname: datatarget.objectname, datasetid: datatarget.datasetid, filter: filter, sort: sort, select: select}); 
+            event.datatargets!.push({objectname: datatarget.objectname, datasetid: datatarget.datasetid, filter: filter, sort: sort, select: select});
         }
         for(var comptarget of this.comptargets) {
             if(comptarget.data != null) {
@@ -581,7 +582,7 @@ export class VAEConfig {
     attribute: string;
     expression: string;
     function: Function;
-    
+
     constructor(json: any) {
         this.value = json.value;
         this.attribute = json.attribute;
@@ -726,7 +727,7 @@ export class CanvasTool {
             } else {
                 let midx = Math.round((sr.x + er.x) / 2);
                 mid1 = new XY(midx, sr.y);
-                mid2 = new XY(midx, er.y);                
+                mid2 = new XY(midx, er.y);
             }
         } else {
             let midy = Math.round((sr.y + er.y) / 2);
@@ -742,11 +743,11 @@ export class CanvasTool {
         graphctx.fill();
         graphctx.beginPath();
         graphctx.moveTo(startx, starty);
-        graphctx.lineTo(sr.x, sr.y); 
-        graphctx.lineTo(mid1.x, mid1.y); 
-        graphctx.lineTo(mid2.x, mid2.y); 
-        graphctx.lineTo(er.x, er.y); 
-        graphctx.lineTo(endx, endy); 
-        graphctx.stroke(); 
+        graphctx.lineTo(sr.x, sr.y);
+        graphctx.lineTo(mid1.x, mid1.y);
+        graphctx.lineTo(mid2.x, mid2.y);
+        graphctx.lineTo(er.x, er.y);
+        graphctx.lineTo(endx, endy);
+        graphctx.stroke();
     }
 }
