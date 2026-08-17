@@ -59,6 +59,9 @@ export class InitialsMaker {
   }
 }
 
+globalThis.InitialsMaker = InitialsMaker;
+
+
 export class Formatter {
     static months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dev"];
     static userPrefService: UserprefService;

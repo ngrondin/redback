@@ -8,21 +8,24 @@
     <span
         [class]="'rb-input-label' + (mandatoryOn ? ' rb-input-label-mandatory' : '') + (alertOn ? ' rb-input-label-alert' : '')  + ((displayvalue === null || displayvalue === '') && !isEditing ? ' rb-input-label-big' : '')">
         {{label}}
-    </span>    
-    <textarea 
-        #input
-        [class]="'rb-input-textarea rb-input-text-color' + (mandatoryOn ? ' rb-input-mandatory' : '') + (alertOn ? ' rb-input-alert' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
-        [style.flex-grow]="rows == null ? 1 : 0"
-        [(ngModel)]="displayvalue"
-        (focus)="onFocus($event)"
-        (blur)="onBlur($event)"
-        (keydown)="onKeydown($event)"
-        (keyup)="onKeyup($event)"
-        [readonly]="readonly"
-        autocomplete="off"
-        spellcheck="true"
-        [rows]="rows">
-    </textarea>
+    </span>
+    <div
+        class="rb-input-row">
+        <textarea
+            #input
+            [class]="'rb-input-textarea rb-input-text-color' + (mandatoryOn ? ' rb-input-mandatory' : '') + (alertOn ? ' rb-input-alert' : '') + (flasherOn ? ' rb-input-text-flash' : '')"
+            [style.flex-grow]="rows == null ? 1 : 0"
+            [(ngModel)]="displayvalue"
+            (focus)="onFocus($event)"
+            (blur)="onBlur($event)"
+            (keydown)="onKeydown($event)"
+            (keyup)="onKeyup($event)"
+            [readonly]="readonly"
+            autocomplete="off"
+            spellcheck="true"
+            [rows]="rows">
+        </textarea>
+    </div>
     <div
         [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
     </div>

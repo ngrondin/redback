@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -308,7 +309,13 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 					XML xml = new XML(tag);
 					return new XMLJSWrapper(xml);
 				}	
-			};				
+			};		
+		} else if(key.equals("uuid")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					return UUID.randomUUID().toString();
+				}	
+			};	
 		} else {	
 			return null;
 		}

@@ -3,7 +3,7 @@
     flex-direction: row;
     align-items: center;
     background-color: white;
-    border-bottom: 0.06vw solid lightgrey;
+    border-bottom: 0.06vw solid #D3D3D3;
 }
 
 .rb-vh-textcontainer {

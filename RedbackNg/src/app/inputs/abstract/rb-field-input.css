@@ -41,7 +41,7 @@
     z-index: 0;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;  
+    text-overflow: ellipsis;
 }
 
 .rb-input-label-mandatory {
@@ -58,11 +58,20 @@
     transition: margin 300ms, font-size 300ms;
 }
 
+.rb-input-row {
+    display: flex;
+    flex-direction: row;
+    border-width: 0px 0px 1px 0px;
+    border-color: #D3D3D3;
+    border-style: solid;
+    width: 100%;
+}
+
 .rb-input-input {
     display: flex;
     font-size: 1rem;
-    border-width: 0px 0px 1px 0px;
-    border-color: lightgrey;
+    border-width: 0px 0px 0px 0px;
+    border-color: #D3D3D3;
     background-color: transparent;
     outline: none;
     margin-top: var(--v16px);
@@ -76,8 +85,8 @@
 .rb-input-textarea {
     display: flex;
     font-size: 1rem;
-    border-width: 0px 0px 1px 0px;
-    border-color: lightgrey;
+    border-width: 0px 0px 0px 0px;
+    border-color: #D3D3D3;
     background-color: transparent;
     outline: none;
     margin-top: var(--v16px);

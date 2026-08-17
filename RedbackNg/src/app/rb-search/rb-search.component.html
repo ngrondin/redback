@@ -18,17 +18,20 @@
         [class]="'rb-input-label' + ((displayvalue === null || displayvalue === '' || displayvalue === undefined) && !isEditing ? ' rb-input-label-big' : '')">
         {{label}}
     </span>
-    <input
-        #input
-        [class]="'rb-input-input rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
-        [(ngModel)]="displayvalue"
-        (focus)="onFocus($event)"
-        (blur)="onBlur($event)"
-        (keydown)="onKeydown($event)"
-        (keyup)="onKeyup($event)"
-        [readonly]="readonly"
-        autocomplete="off"
-        [type]="'text'">
+    <div
+       class="rb-input-row">
+      <input
+          #input
+          [class]="'rb-input-input rb-input-text-color' + (flasherOn ? ' rb-input-text-flash' : '')"
+          [(ngModel)]="displayvalue"
+          (focus)="onFocus($event)"
+          (blur)="onBlur($event)"
+          (keydown)="onKeydown($event)"
+          (keyup)="onKeyup($event)"
+          [readonly]="readonly"
+          autocomplete="off"
+          [type]="'text'">
+      </div>
     <div
         [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
     </div>

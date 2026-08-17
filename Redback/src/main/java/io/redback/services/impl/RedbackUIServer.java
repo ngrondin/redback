@@ -199,22 +199,24 @@ public class RedbackUIServer extends UIServer
 		DataMap view = new DataMap();
 		try {
 			DataMap viewConfig = getViewConfig(session, viewName);
-			DataMap params = new DataMap();
-			ResolvedRights rights = getViewRights(session, viewConfig);
-			if(rights.read) {
-				StringBuilder onLoadBuilder = new StringBuilder();
-				if(viewConfig.containsKey("onload"))
-					onLoadBuilder.append(viewConfig.getString("onload") + "\r\r");
-				view.put("label", viewConfig.getString("label"));
-				view.put("content", getViewContent(session, viewConfig, params, rights, onLoadBuilder));	
-				view.put("onload", onLoadBuilder.toString());
-				if(traceCollection != null && dataClient != null) {
-					dataClient.publishData(traceCollection.getName(), 
-						traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
-						traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", null, "action", "getview", "view", viewName)));
-				}
-			} else {
-				view.put("error", "No access to view " + viewName);
+			if(viewConfig != null) {
+				DataMap params = new DataMap();
+				ResolvedRights rights = getViewRights(session, viewConfig);
+				if(rights.read) {
+					StringBuilder onLoadBuilder = new StringBuilder();
+					if(viewConfig.containsKey("onload"))
+						onLoadBuilder.append(viewConfig.getString("onload") + "\r\r");
+					view.put("label", viewConfig.getString("label"));
+					view.put("content", getViewContent(session, viewConfig, params, rights, onLoadBuilder));	
+					view.put("onload", onLoadBuilder.toString());
+					if(traceCollection != null && dataClient != null) {
+						dataClient.publishData(traceCollection.getName(), 
+							traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
+							traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", null, "action", "getview", "view", viewName)));
+					}
+				} else {
+					view.put("error", "No access to view " + viewName);
+				}	
 			}
 		} catch(Exception e) {
 			view.put("error", "No access to view " + viewName);
