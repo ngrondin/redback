@@ -1,6 +1,6 @@
 import { SeriesConfig } from "app/abstract/rb-datacalc";
 import { RbObject, RELATED_LOADING } from "app/datamodel";
-import { ColorConfig, Evaluator, LinkConfig, VAEConfig } from "app/helpers";
+import { ColorConfig, ColorTool, Evaluator, LinkConfig, VAEConfig } from "app/helpers";
 import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
   export class GanttLaneConfig {
@@ -17,7 +17,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     link?: LinkConfig;
     dragfilter: any;
     editable: boolean;
-  
+
     constructor(json: any, userpref: any) {
       this.dataset = json.dataset;
       this.linkAttributes = json.linkattributes ?? ["uid"];
@@ -67,10 +67,11 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       }
       if(durationMS == null || isNaN(durationMS)) durationMS = 3600000;
       return [startMS, endMS, durationMS];
-    }   
+    }
   }
-  
-  export class GanttSeriesConfig extends GanttTimeBasedConfig {
+
+export class GanttSeriesConfig extends GanttTimeBasedConfig {
+    id: string | null;
     laneAttributes: string[];
     laneForeignAttributes: string[];
     labelAttribute: string | null;
@@ -81,8 +82,10 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     color: ColorConfig | null;
     selectedBorderColor: string | null;
     indicatorAttribute: string | null;
-    indicatorExpression: string | null;    
+    indicatorExpression: string | null;
     dependencyAttribute: string | null;
+    groupOf: string | null;
+    groupAttribute: string | null;
     isBackground: boolean;
     canEdit: boolean;
     isGhost: boolean;
@@ -92,10 +95,11 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     applyLaneFilter: boolean;
     applyDateFilter: boolean;
     show: Function | null;
-  
+
     constructor(json: any, userpref: any) {
       super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : ["uid"];
+      this.id = json.id;
       this.laneAttributes = json.laneattribute != null ? [json.laneattribute] : json.laneattributes != null ? json.laneattributes : ["uid"];
       this.laneForeignAttributes = json.laneforeignattribute != null ? [json.laneforeignattribute] : json.laneforeignattributes != null ? json.laneforeignattributes : undefined;
       this.labelAlts = json.labelalts;
@@ -117,6 +121,8 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.indicatorAttribute = json.indicatorattribute;
       this.indicatorExpression = json.indicatorexpression;
       this.dependencyAttribute = json.dependencyattribute;
+      this.groupOf = json.groupof;
+      this.groupAttribute = json.groupattribute;
       this.modal = json.modal;
       this.link = json.link != null ? new LinkConfig(json.link) : null;
       this.click = json.clickscript != null ? Function("event", json.clickscript) : null;
@@ -125,13 +131,13 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.show = json.show != null ? Function("dataset", "relatedObject", "return (" + json.show + ")") : null;
     }
   }
-  
+
   export class GanttOverlayConfig extends GanttTimeBasedConfig {
     label: string | null;
     labelAttribute: string | null;
     color: ColorConfig | null;
     applyDateFilter: boolean;
-  
+
     constructor(json: any, userpref: any) {
       super(json);
       let subpref = userpref != null && userpref.series != null ? userpref.series[json.dataset] : null;
@@ -169,7 +175,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.spreadMargin = sm;
       this.height = sh + (2*sm);
       if(cfg.labelAttribute != null) {
-        this.label = obj.get(cfg.labelAttribute); 
+        this.label = obj.get(cfg.labelAttribute);
       } else if(cfg.labelExpression != null) {
         this.label = Evaluator.eval(cfg.labelExpression, obj);
       }
@@ -177,7 +183,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
         this.icon = obj.get(this.config.iconAttribute);
         if(this.config.iconMap != null && this.icon != null) {
           this.icon = this.config.iconMap[this.icon];
-        }  
+        }
       }
       if(this.config.imageAttribute != null) {
         let fileVal = obj.get(this.config.imageAttribute);
@@ -187,10 +193,10 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       }
       if(this.config.subAttribute != null) {
         this.sub = obj.get(this.config.subAttribute);
-      }   
+      }
       //this.linkValues = this.config.linkAttributes.map(la => this.object.get(la));
     }
-  
+
     setSpreads(s: GanttSpread[]) {
       this.spreads = s;
       let max: number = this.image != null ? 1 : 0;
@@ -203,11 +209,11 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     }
 
     backgroundSpreads() {
-      return this.spreads.filter(s => s.config.isBackground == true);
+      return this.spreads.filter(s => s.background == true);
     }
 
     foregroundSpreads() {
-      return this.spreads.filter(s => s.config.isBackground == false);
+      return this.spreads.filter(s => s.background == false);
     }
 
     getLinkValuesForSeries(cfg: GanttSeriesConfig) : string[] {
@@ -216,7 +222,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       return linkValues;
     }
   }
-  
+
   export class GanttSpread {
     id: string | null = null; //currently only used for groupings
     label: string;
@@ -226,51 +232,61 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     height: number;
     margin: number;
     offsetTop: number;
-    laneTop: number;
     sublane: number;
     color: string;
     labelcolor: string;
-    canEdit: boolean;
-    indicator: boolean;
-    dragging: boolean;
-    tip: string | null;
-    dependencies: GanttDependency[];
+    indicator: boolean = false;
+    dragging: boolean = false;
+    tip: string | null = null;
+    dependencies: GanttDependency[] = [];
+    background: boolean = false;
+    ghost: boolean = false;
+    centerLabel: boolean = false;
+    selectedBorderColor: string | null;
+    hardLaneValues: string[];
     object: RbObject | null;
     dataset: RbDatasetComponent | null;
     config: GanttSeriesConfig;
-  
-    constructor(l: string, s: number, w: number, h: number, m: number, ost: number, sl: number, c: string, lc: string, o: RbObject|null, ds: RbDatasetComponent|null, cfg: GanttSeriesConfig) {
-      this.label = l;
-      this.start = s;
-      this.width = w;
-      this.end = s + w;
-      this.height = h;
-      this.margin = m;
-      this.offsetTop = ost;
-      this.sublane = sl;
-      this.laneTop = (this.sublane * h) + (cfg.isBackground == false ? (this.sublane + 1) * m : 0);
-      this.color = c;
-      this.labelcolor = lc;
-      this.canEdit = o != null ? cfg.canEdit && ((cfg.start.attribute != null && o.canEdit(cfg.start.attribute)) || (cfg.laneAttributes != null && cfg.laneAttributes.reduce((acc, la) => acc && o.canEdit(la), true))) : false;
-      this.indicator = false;
-      this.dragging = false;
-      this.tip = null;
-      this.dependencies = [];
-      this.object = o;
-      this.dataset = ds;
+    groupKey: string | null = null;
+    groupOf: string | null = null;
+
+    constructor(label: string, start: number, width: number, height: number, margin: number, offsettop: number, sublane: number, object: RbObject|null, dataset: RbDatasetComponent|null, cfg: GanttSeriesConfig) {
+      this.label = label;
+      this.start = start;
+      this.width = width;
+      this.end = start + width;
+      this.height = height;
+      this.margin = margin;
+      this.offsetTop = offsettop;
+      this.sublane = sublane;
+      this.object = object;
+      this.dataset = dataset;
       this.config = cfg;
+      if (this.config != null) {
+        this.background = this.config.isBackground;
+        this.ghost = this.config.isGhost;
+        this.centerLabel = this.config.centerLabel;
+        this.selectedBorderColor = this.config.selectedBorderColor;
+        this.groupOf = this.config.groupOf;
+      }
+      this.color = (this.background ? 'white' : 'var(--primary-light-color)');
+      this.labelcolor = "#333";
     }
 
     get laneValues(): string[] | null {
-      return this.config.laneAttributes != null && this.object != null ? this.config.laneAttributes.map(la => this.object!.get(la)) : null;
+      return this.config != null && this.config.laneAttributes != null && this.object != null ? this.config.laneAttributes.map(la => this.object!.get(la)) : this.hardLaneValues;
     }
 
-    get ghost(): boolean {
-      return this.config.isGhost;
+    get laneTop(): number {
+      return (this.sublane * this.height) + (this.background == false ? (this.sublane + 1) * this.margin : 0);
+    }
+
+    get canEdit(): boolean {
+      return this.object != null && this.config != null ? this.config.canEdit && ((this.config.start.attribute != null && this.object.canEdit(this.config.start.attribute)) || (this.config.laneAttributes != null && this.config.laneAttributes.reduce((acc, la) => acc && this.object.canEdit(la), true))) : false;
     }
 
     get selected(): boolean {
-      return this.config.isBackground == false && this.dataset != null && this.object != null && this.dataset.isObjectSelected(this.object);
+      return this.background == false && this.dataset != null && this.object != null && this.dataset.isObjectSelected(this.object);
     }
   }
 
@@ -279,7 +295,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     label: string;
     height: number;
     spreads: GanttOverlaySpread[] = [];
-  
+
     constructor(i: string|null, l: string, h: number) {
       this.id = i;
       this.label = l != null ? l : "";
@@ -298,7 +314,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     color: string;
     object: RbObject;
     config: GanttOverlayConfig;
-  
+
     constructor(i: string|null, s: number, w: number, c: string, o: RbObject, cfg: GanttOverlayConfig) {
       this.id = i;
       this.start = s;
@@ -317,7 +333,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     dayLabel: string|null;
     timeLabel: string|null;
     type: GanttMarkType;
-  
+
     constructor(p: number, dl: string|null, tl: string|null, t: GanttMarkType) {
       this.px = p;
       this.dayLabel = dl;

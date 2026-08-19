@@ -95,15 +95,6 @@
                     {{ overrideAllowPastDrop ? 'Prevent Past Planning' : 'Enable Past Planning'}}
                 </span>
             </rb-clickable>
-
-            <rb-clickable
-                *ngIf="allowoverlapgroup"
-                (click)="toggleGroupOverlaps()">
-                <span
-                    class="rb-gantt-menuitem">
-                    {{ groupOverlaps ? 'Ungroup Overlaps' : 'Group Overlaps'}}
-                </span>
-            </rb-clickable>
             <rb-clickable
                 *ngFor="let alt of availLabelAlts"
                 (click)="useLabels(alt.name)">
@@ -277,7 +268,7 @@
                         [style.height.px]="lane.height"
                         [style.top.px]="spread.laneTop"
                         [style.background-color]="spread.color"
-                        [style.justify-content]="spread.config.centerLabel ? 'center' : 'start'"
+                        [style.justify-content]="spread.centerLabel ? 'center' : 'start'"
                         [style.color]="spread.labelcolor">
                         <div
                             class="rb-gantt-spreadlabel">
@@ -330,10 +321,10 @@
                         [style.height.px]="spread.height"
                         [style.left.px]="spread.start"
                         [style.top.px]="spread.laneTop"
-                        [style.background-color]="spread.color"
+                        [style.background]="spread.color"
                         [style.color]="spread.labelcolor"
-                        [style.border-color]="spread.selected ? spread.config.selectedBorderColor : null"
-                        [style.justify-content]="spread.config.centerLabel == true ? 'center' : 'start'">
+                        [style.border-color]="spread.selected ? spread.selectedBorderColor : null"
+                        [style.justify-content]="spread.centerLabel == true ? 'center' : 'start'">
                         <div
                             class="rb-gantt-spreadlabel">
                             {{spread.label}}

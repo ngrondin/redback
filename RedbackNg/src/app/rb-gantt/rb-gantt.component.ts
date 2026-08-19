@@ -11,7 +11,7 @@ import { GanttDependencyType, GanttLane, GanttLaneConfig, GanttOverlayConfig, Ga
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
-import { CanvasTool, ColorTool, Evaluator, ValueComparator } from 'app/helpers';
+import { Algos, CanvasTool, ColorTool, Evaluator, ValueComparator } from 'app/helpers';
 import { NavigateService } from 'app/services/navigate.service';
 import { GanttTimeConfig } from './rb-gantt-timeconfig';
 
@@ -50,7 +50,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   borderWidthPX: number = 300;
   headerWidthPX: number | null = null;
   doDragFilter: boolean = false;
-  groupOverlaps: boolean = false;
   hideEmptyLanes: boolean = false;
   hideEmptyBackgrounds: boolean = false;
   overrideAllowPastDrop: boolean = false;
@@ -72,6 +71,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   doFocus: boolean = false;
   focusStartPX: number | null = null;
   focusTopPX: number | null = null;
+
+  openGroup: string | null = null;
 
   pendingConfig: any;
 
@@ -207,7 +208,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   get availLabelAlts() : any[] {
-    return this.groupOverlaps == false ? this.labelAlts.filter(a => a.name != this.selectedLabelAlt) : [];
+    return this.labelAlts.filter(a => a.name != this.selectedLabelAlt);
   }
 
   get extraContext() : any {
@@ -223,11 +224,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   toggleDragFilter() {
     this.doDragFilter = !this.doDragFilter;
-  }
-
-  toggleGroupOverlaps() {
-    this.groupOverlaps = !this.groupOverlaps;
-    this.redraw();
   }
 
   toggleHideEmptyLanes() {
@@ -352,8 +348,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         if(show) {
           let lane = new GanttLane(obj, this.lanesConfig, this.spreadHeightPX, this.spreadMarginPX);
           let spreads: GanttSpread[] = this.calcSpreads(lane, accHeight);
-          let hasForegroundSpreads = spreads.filter(s => !s.ghost && !s.config.isBackground).length > 0;
-          let hasBackgroundStreaps = spreads.filter(s => !s.ghost && s.config.isBackground).length > 0;
+          let hasForegroundSpreads = spreads.filter(s => !s.ghost && !s.background).length > 0;
+          let hasBackgroundStreaps = spreads.filter(s => !s.ghost && s.background).length > 0;
           if(!((!hasForegroundSpreads && this.hideEmptyLanes) || (!hasBackgroundStreaps && this.hideEmptyBackgrounds))) {
             lane.setSpreads(spreads);
             this.lanes.push(lane);
@@ -366,23 +362,24 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   private calcSpreads(lane: GanttLane, offsetTop: number) : GanttSpread[] {
-    let laneSpreads : GanttSpread[] = [];
+    let laneSpreads: GanttSpread[] = [];
+    let groups: any = {};
     for(let cfg of this.seriesConfigs) {
-      let laneValues = lane.getLinkValuesForSeries(cfg);
+      let laneLinkValues = lane.getLinkValuesForSeries(cfg);
       let dataset = this.getDatasetForConfig(cfg);
       if(dataset != null) {
-        let show = cfg.show == null || (cfg.show != null && cfg.show(null, dataset, dataset.relatedObject));
-        if(show) {
-          let list: RbObject[] = dataset.list;
-          for(var i in list) {
-            let obj = list[i];
-            let objLinkValues = cfg.laneAttributes.map(la => obj.get(la));
-            if(this.linkValuesMatch(objLinkValues, laneValues)) {
+        let list: RbObject[] = dataset.list;
+        for(var i in list) {
+          let obj = list[i];
+          let objLinkValues = cfg.laneAttributes.map(la => obj.get(la));
+          if(this.linkValuesMatch(objLinkValues, laneLinkValues)) {
+            let show = cfg.show == null || (cfg.show != null && cfg.show(obj, dataset, dataset.relatedObject));
+            let groupKey = cfg.groupAttribute != null ? obj.get(cfg.groupAttribute) : null;
+            if(show && (groupKey == null || (groupKey != null && this.openGroup == groupKey)) && (cfg.groupOf == null || (cfg.groupOf != null && this.openGroup != obj.uid))) {
               let [startPX, widthPX] = this.timeConfig.getStartAndWidthPX(obj, cfg);
-              if(startPX != null && widthPX != null) {
+              if (startPX != null && widthPX != null) {
                 let endPX = startPX + widthPX;
                 let label = null;
-                //let loading = false;
                 if(cfg.labelAttribute != null) {
                   label = obj.get(cfg.labelAttribute);
                 } else if(cfg.labelExpression != null) {
@@ -390,7 +387,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                 }
                 if(label == RELATED_LOADING) {
                   label = "...";
-                  //loading = true;
                 }
                 let labelWidth = this.graphctx?.measureText(label).width;
                 if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
@@ -403,29 +399,18 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
                     }
                   }
                 }
-                let color = cfg.color?.getColor(obj) || (cfg.isBackground ? 'white' : 'var(--primary-light-color)');
-                let labelcolor = cfg.labelColor || ColorTool.contrastWith(color, "#333", "#d8d8d8");
-                let sublane = 0;
-                if(!cfg.isBackground) {
-                  let hasOverlap: boolean;
-                  do {
-                    hasOverlap = false;
-                    for(var os of laneSpreads) {
-                      if(!os.config.isBackground && startPX < os.end && os.start < endPX && sublane == os.sublane) {
-                        hasOverlap = true;
-                      }
-                    }
-                    if(hasOverlap) sublane++;
-                  } while(hasOverlap);
+                let sublane = cfg.isBackground ? 0 : this.getSublaneForSpread(startPX, endPX, laneSpreads);
+                let spread = new GanttSpread(label, startPX, widthPX, this.spreadHeightPX, this.spreadMarginPX, offsetTop, sublane, obj, dataset, cfg);
+                spread.color = cfg.color?.getColor(obj) || (cfg.isBackground ? 'white' : 'var(--primary-light-color)');
+                spread.labelcolor = cfg.labelColor != null ? cfg.labelColor : ColorTool.contrastWith(spread.color, "#333", "#d8d8d8");
+                if (cfg.groupOf != null) {
+                  spread.color = this.calcGroupBackground(obj.uid, spread.color, startPX, this.seriesConfigs.find(c => c.id == cfg.groupOf));
                 }
-                let indicator: boolean = false;
                 if(cfg.indicatorAttribute != null) {
-                  indicator = obj.get(cfg.indicatorAttribute);
+                  spread.indicator = obj.get(cfg.indicatorAttribute);
                 } else if(cfg.indicatorExpression != null) {
-                  indicator = Evaluator.eval(cfg.indicatorExpression, obj);
+                  spread.indicator = Evaluator.eval(cfg.indicatorExpression, obj);
                 }
-                let spread = new GanttSpread(label, startPX, widthPX, this.spreadHeightPX, this.spreadMarginPX, offsetTop, sublane, color, labelcolor, obj, dataset, cfg);
-                spread.indicator = indicator;
                 spread.tip = labelWidth > widthPX ? label : null;
                 spread.dragging = this.isObjectDragging(obj);
                 laneSpreads.push(spread);
@@ -442,10 +427,18 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
       }
     }
-    if(this.groupOverlaps) {
-      laneSpreads = this.groupOverlappingSpreads(laneSpreads);
-    }
     return laneSpreads;
+  }
+
+  private calcGroupBackground(groupKey: string, baseColor: string, startOffset: number, cfg: GanttSeriesConfig): string | null {
+    let dataset = this.getDatasetForConfig(cfg);
+    let list = dataset.list.filter(obj => obj.get(cfg.groupAttribute) == groupKey);
+    let intervals = list.map(obj => this.timeConfig.getStartAndWidthPX(obj, cfg)).map(i => [i[0] - startOffset, i[0] + i[1] - startOffset]);
+    let merged = Algos.intervalMerge(intervals);
+    let transColor = `color-mix(in srgb, ${baseColor} 30%, transparent 70%)`;
+    let blocks = merged.map(i => `${transColor} ${i[0] - 2}px, ${baseColor} ${i[0] + 2}px, ${baseColor} ${i[1] - 2}px, ${transColor} ${i[1] + 2}px`);
+    let bg = `linear-gradient(to right, ${blocks.join(', ')})`;
+    return bg;
   }
 
   private calcDependencies() {
@@ -460,52 +453,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         }
       }
     }
-  }
-
-  private groupOverlappingSpreads(spreads: GanttSpread[]) {
-    let nextid = 0;
-    let out = [];
-    let groups = [];
-    let groupmap: any = {};
-    for(var spread of spreads) {
-      if(spread.config.isBackground == false) {
-        let firstGroupFound = null;
-        for(var i = 0; i < groups.length; i++) {
-          var group = groups[i];
-          if(spread.config == group.config && spread.start < group.start + group.width && group.start < spread.start + spread.width) {
-            if(firstGroupFound == null) {
-              firstGroupFound = group;
-              let newstart = Math.min(group.start, spread.start);
-              let newend = Math.max(group.start + group.width, spread.start + spread.width);
-              group.start = newstart;
-              group.width = newend - newstart;
-              groupmap[group.id!] = groupmap[group.id!] + 1;
-              group.label = groupmap[group.id!] + " items";
-            } else {
-              let newstart = Math.min(group.start, firstGroupFound.start);
-              let newend = Math.max(group.start + group.width, firstGroupFound.start + firstGroupFound.width);
-              firstGroupFound.start = newstart;
-              firstGroupFound.width = newend - newstart;
-              groupmap[firstGroupFound.id!] = groupmap[firstGroupFound.id!] + groupmap[group.id!];
-              firstGroupFound.label = groupmap[firstGroupFound.id!] + " items";
-              groups.splice(i, 1);
-              i--;
-            }
-          }
-        }
-        if(firstGroupFound == null) {
-          let id = nextid++;
-          let group = new GanttSpread("1 item", spread.start, spread.width, this.spreadHeightPX, this.spreadMarginPX, 0, 0, 'var(--primary-light-color)', '#333', null, null, spread.config);
-          group.id = id.toString();
-          groupmap[group.id] = 1
-          groups.push(group);
-        }
-      } else {
-        out.push(spread);
-      }
-    }
-    groups.forEach(g => out.push(g));
-    return out;
   }
 
   private calcOverlayLanes() {
@@ -524,12 +471,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
             }
           }
         }
-        if(spreads.length > 0) {
-          let label = cfg.label != null ? cfg.label : (cfg.labelAttribute != null ? spreads[0].object.get(cfg.labelAttribute) : null);
-          let lane = new GanttOverlayLane(null, label, this.spreadHeightPX);
-          lane.setSpreads(spreads);
-          this.overlays.push(lane);
-        }
+        let label = cfg.label != null ? cfg.label : (cfg.labelAttribute != null ? spreads[0].object.get(cfg.labelAttribute) : null);
+        let lane = new GanttOverlayLane(null, label, this.spreadHeightPX);
+        lane.setSpreads(spreads);
+        this.overlays.push(lane);
       }
     }
   }
@@ -614,6 +559,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
         } else if(spread.config.link != null && this.lanesConfig != null) {
           let navEvent = spread.config.link.getNavigationEvent(spread.object, this.getDatasetForObject(spread.object), this.extraContext);
           this.navigateService.navigateTo(navEvent);
+        } else if (spread.config.groupOf != null) {
+          this.openGroup = spread.object.uid;
+          this.redraw();
         }
       }
     }
@@ -644,7 +592,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public clickBackground() {
-
+    if (this.openGroup != null) {
+      this.openGroup = null;
+      this.redraw();
+    }
   }
 
   public clickOverlayLaneIndex(i: number) {
@@ -959,6 +910,21 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
     }
     return ret;
+  }
+
+  getSublaneForSpread(startPX: number, endPX: number, spreads: GanttSpread[]) {
+    let sublane = 0;
+    let hasOverlap: boolean;
+    do {
+      hasOverlap = false;
+      for(var os of spreads) {
+        if((os.config == null || (os.config != null && os.config.isBackground == false)) && startPX < os.end && os.start < endPX && sublane == os.sublane) {
+          hasOverlap = true;
+        }
+      }
+      if(hasOverlap) sublane++;
+    } while(hasOverlap);
+    return sublane;
   }
 
   linkValuesMatch(a: string[], b: string[]) {
