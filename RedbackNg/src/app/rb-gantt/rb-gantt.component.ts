@@ -471,7 +471,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
             }
           }
         }
-        let label = cfg.label != null ? cfg.label : (cfg.labelAttribute != null ? spreads[0].object.get(cfg.labelAttribute) : null);
+        let label = cfg.label != null ? cfg.label : (cfg.labelAttribute != null && spreads.length > 0 ? spreads[0].object.get(cfg.labelAttribute) : null);
         let lane = new GanttOverlayLane(null, label, this.spreadHeightPX);
         lane.setSpreads(spreads);
         this.overlays.push(lane);

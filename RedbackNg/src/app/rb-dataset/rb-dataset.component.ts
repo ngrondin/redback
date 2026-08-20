@@ -431,7 +431,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   private publishEvent(event: string, object?: RbObject) {
-    if(this.muteevents.indexOf(event) == -1) {
+    if (this.muteevents.indexOf(event) == -1) {
       let evt = {
         event: event,
         dataset: this,
