@@ -17,6 +17,7 @@ import io.redback.managers.objectmanager.RedbackAggregate;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.managers.objectmanager.js.RedbackAggregateJSWrapper;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
+import io.redback.utils.XML;
 import io.redback.utils.dataset.DataSet;
 import io.redback.utils.dataset.js.DataSetJSWrapper;
 
@@ -55,6 +56,8 @@ public class Converter {
 			return new RedbackAggregateJSWrapper((RedbackAggregate)o);			
 		} else if(o instanceof DataSet) {
 			return new DataSetJSWrapper((DataSet)o);
+		} else if(o instanceof XML) {
+			return new XMLJSWrapper((XML)o);
 		} else {
 			return io.firebus.script.Converter.convertIn(o);
 		}
@@ -101,6 +104,8 @@ public class Converter {
 			return ((RedbackAggregateJSWrapper)v).getRedbackAggregate();
 		} else if(v instanceof DataSetJSWrapper) {
 			return ((DataSetJSWrapper)v).getDataSet();
+		} else if(v instanceof XMLJSWrapper) {
+			return ((XMLJSWrapper)v).getXML();
 		} else {
 			return io.firebus.script.Converter.convertOut(v);
 		}

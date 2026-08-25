@@ -1,6 +1,9 @@
 package io.redback.utils.js;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -309,7 +312,16 @@ public class RedbackUtilsJSWrapper extends ObjectJSWrapper
 					XML xml = new XML(tag);
 					return new XMLJSWrapper(xml);
 				}	
-			};		
+			};
+		} else if(key.equals("readXML")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String content = arguments[0].toString();
+					InputStream stream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+					XML xml = new XML(stream);
+					return new XMLJSWrapper(xml);
+				}	
+			};			
 		} else if(key.equals("uuid")) {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {

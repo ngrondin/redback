@@ -33,8 +33,10 @@ public class Watchdog extends Thread {
 				Logger.info("rb.watch.firebus", sb.toString());
 				Thread.sleep(60000);
 			} catch(Exception e) {
-				e.printStackTrace();
-			}			
+				Logger.severe("rb.watch", "General error in watchdog thread", e);
+			} catch(OutOfMemoryError e) {
+				Logger.severe("rb.watch.outofmemory", e);
+			}
 		}
 	}
 	

@@ -92,6 +92,8 @@ public class CronTaskManager extends Thread {
 					Thread.sleep(sleep);
 				} catch(Exception e) {
 					Logger.severe("rb.cron.run", "General error in CronTaskManager thread", e);
+				} catch(OutOfMemoryError e) {
+					Logger.severe("rb.cron.outofmemory", e);
 				}
 			}
 		} catch(Exception e) {
