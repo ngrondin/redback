@@ -369,14 +369,44 @@ public class RedbackFileServer extends FileServer
 		}
 	}
 	
-	public String getMimeType(String filename)
+	protected static Map<String, String> mimeTypes = Map.ofEntries(
+		Map.entry("jpg", "image/jpeg"),
+		Map.entry("png", "image/png"),
+		Map.entry("gif", "image/gif"),
+		Map.entry("bmp", "image/bmp"),
+		Map.entry("tiff", "image/tiff"),
+		Map.entry("pdf", "application/pdf"),
+		Map.entry("zip", "application/zip"),
+		Map.entry("rar", "application/vnd.rar"),
+		Map.entry("csv", "text/csv"),
+		Map.entry("txt", "text/plain"),
+		Map.entry("xml", "application/xml"),
+		Map.entry("parquet", "application/vnd.apache.parquet")
+	);
+
+	/**
+	 * Determines the mime type from the file extension and the file magic number.
+	 * When both are known they must agree. Returns an empty string when the type
+	 * cannot be determined, so it is never trusted downstream.
+	 */
+	public static String getMimeType(String filename, File file)
 	{
-		String type = "";
-		if(filename.toLowerCase().endsWith(".jpg"))
-			type = "image/jpg";
-		else if(filename.toLowerCase().endsWith(".png"))
-			type = "image/png";
-		return type;
+		String extType = null;
+		int dot = filename.lastIndexOf(".");
+		if(dot > -1 && dot < filename.length() - 1)
+			extType = filename.substring(dot + 1).toLowerCase();
+		if("jpeg".equals(extType))
+			extType = "jpg";
+		String mnType = file != null ? FileValidator.getFileTypeFromMagicNumber(file) : null;
+		String type = null;
+		if(extType != null && mnType != null)
+			type = extType.equals(mnType) ? extType : null;
+		else if(mnType != null)
+			type = mnType;
+		else
+			type = extType;
+		String mime = type != null ? mimeTypes.get(type) : null;
+		return mime != null ? mime : "";
 	}
 
 	public RedbackFileMetaData acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException {
@@ -396,7 +426,7 @@ public class RedbackFileServer extends FileServer
 				public byte[] completed() throws Exception {
 					fos.close();
 					if(!validateFile(filename, file)) throw new RedbackInvalidRequestException("Invalid file type");
-					RedbackFileMetaData filemd = putFile(session, filename, mime != null ? mime : getMimeType(filename), session.getUserProfile().getUsername(), file);
+					RedbackFileMetaData filemd = putFile(session, filename, mime != null && !mime.isEmpty() ? mime : getMimeType(filename, file), session.getUserProfile().getUsername(), file);
 					if(objectname != null && objectuid != null)
 						linkFileTo(session, filemd.fileuid, objectname, objectuid);
 					DataMap resp = new DataMap();
