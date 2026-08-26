@@ -577,7 +577,8 @@ public class ObjectManager
 				long count = dataClient.countData(objectConfig.getCollection(), dbFilter);
 				return count;
 			} else {
-				throw new RedbackException("Cannot count non-persistent objects '" + objectName + "'");
+				return -1;
+				//throw new RedbackException("Cannot count non-persistent objects '" + objectName + "'");
 			}
 		}
 		catch(Exception e)

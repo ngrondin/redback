@@ -284,7 +284,7 @@ export class RbFilterBuilderComponent implements OnInit {
     if(entry != null) {
       let menuLink = {
         type: "menulink",
-        view: this.navigateService.getCurrentTitle(),
+        view: this.navigateService.getCurrentViewName(),
         icon: "filter",
         label: entry.name,
         filter: this.filterService.prefixDollarSign(entry.filter)
