@@ -706,18 +706,20 @@ public class RedbackObject extends RedbackElement
 	protected Object execute(Function function, String functionName, ScriptContext context) throws RedbackException
 	{
 		Object retVal = null;
+		session.pushDomainLock(getDomain().getString());
+		session.pushScriptLevel(functionName);
 		try
 		{
-			session.pushDomainLock(getDomain().getString());
-			session.pushScriptLevel(functionName);
 			retVal = function.call(context);
-			session.popScriptLevel();
-			session.popDomainLock();
 		} 
 		catch (ScriptException e)
 		{
 			throw new RedbackException("Problem occurred executing script " + functionName, e);
-		}		
+		} 
+		finally {
+			session.popScriptLevel();
+			session.popDomainLock();			
+		}
 		return retVal;
 	}
 	

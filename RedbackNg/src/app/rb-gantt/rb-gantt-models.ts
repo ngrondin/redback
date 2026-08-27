@@ -70,7 +70,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     }
   }
 
-export class GanttSeriesConfig extends GanttTimeBasedConfig {
+  export class GanttSeriesConfig extends GanttTimeBasedConfig {
     id: string | null;
     laneAttributes: string[];
     laneForeignAttributes: string[];
@@ -161,19 +161,21 @@ export class GanttSeriesConfig extends GanttTimeBasedConfig {
     sub: string | null = null;
     image: string | null = null;
     icon: string | null = null;
-    spreadHeight: number;
-    spreadMargin: number;
+    sizes: GanttSizes;
+    /*spreadHeight: number;
+    spreadMargin: number;*/
     height: number;
     spreads: GanttSpread[] = [];
     object: RbObject;
     config: GanttLaneConfig;
 
-    constructor(obj: RbObject, cfg: GanttLaneConfig, sh: number, sm: number) {
+    constructor(obj: RbObject, cfg: GanttLaneConfig, sizes: GanttSizes) {
       this.object = obj;
       this.config = cfg;
-      this.spreadHeight = sh;
-      this.spreadMargin = sm;
-      this.height = sh + (2*sm);
+      this.sizes = sizes;
+      /*this.spreadHeight = sh;
+      this.spreadMargin = sm;*/
+      this.height = sizes.laneHeight;
       if(cfg.labelAttribute != null) {
         this.label = obj.get(cfg.labelAttribute);
       } else if(cfg.labelExpression != null) {
@@ -199,13 +201,11 @@ export class GanttSeriesConfig extends GanttTimeBasedConfig {
 
     setSpreads(s: GanttSpread[]) {
       this.spreads = s;
-      let max: number = this.image != null ? 1 : 0;
-      for(let i = 0; i < this.spreads.length; i++) {
-        if(this.spreads[i].sublane > max) {
-          max = this.spreads[i].sublane;
-        }
+      let max: number = 1;  //this.image != null ? 1 : 0;
+      for (let i = 0; i < this.spreads.length; i++) {
+        max = Math.max(max, this.spreads[i].sublaneIndex + this.spreads[i].sublaneSpan);
       }
-      this.height = ((max + 1) * (this.spreadHeight + this.spreadMargin)) + this.spreadMargin;
+      this.height = (max * this.sizes.laneHeight);
     }
 
     backgroundSpreads() {
@@ -213,7 +213,11 @@ export class GanttSeriesConfig extends GanttTimeBasedConfig {
     }
 
     foregroundSpreads() {
-      return this.spreads.filter(s => s.background == false);
+      return this.spreads.filter(s => s.background == false && s.group == false);
+    }
+
+    groupSpreads() {
+      return this.spreads.filter(s => s.background == false && s.group == true)
     }
 
     getLinkValuesForSeries(cfg: GanttSeriesConfig) : string[] {
@@ -229,10 +233,10 @@ export class GanttSeriesConfig extends GanttTimeBasedConfig {
     start: number;
     end: number;
     width: number;
-    height: number;
-    margin: number;
+    sizes: GanttSizes;
     offsetTop: number;
-    sublane: number;
+    sublaneIndex: number;
+    sublaneSpan: number;
     color: string;
     labelcolor: string;
     indicator: boolean = false;
@@ -240,6 +244,7 @@ export class GanttSeriesConfig extends GanttTimeBasedConfig {
     tip: string | null = null;
     dependencies: GanttDependency[] = [];
     background: boolean = false;
+    group: boolean = false;
     ghost: boolean = false;
     centerLabel: boolean = false;
     selectedBorderColor: string | null;
@@ -250,15 +255,15 @@ export class GanttSeriesConfig extends GanttTimeBasedConfig {
     groupKey: string | null = null;
     groupOf: string | null = null;
 
-    constructor(label: string, start: number, width: number, height: number, margin: number, offsettop: number, sublane: number, object: RbObject|null, dataset: RbDatasetComponent|null, cfg: GanttSeriesConfig) {
+    constructor(label: string, start: number, width: number, offsettop: number, object: RbObject|null, dataset: RbDatasetComponent|null, cfg: GanttSeriesConfig, sizes: GanttSizes) {
       this.label = label;
       this.start = start;
       this.width = width;
       this.end = start + width;
-      this.height = height;
-      this.margin = margin;
+      this.sizes = sizes;
       this.offsetTop = offsettop;
-      this.sublane = sublane;
+      this.sublaneIndex = 0;
+      this.sublaneSpan = 1;
       this.object = object;
       this.dataset = dataset;
       this.config = cfg;
@@ -277,8 +282,12 @@ export class GanttSeriesConfig extends GanttTimeBasedConfig {
       return this.config != null && this.config.laneAttributes != null && this.object != null ? this.config.laneAttributes.map(la => this.object!.get(la)) : this.hardLaneValues;
     }
 
+    get height(): number {
+      return (this.sizes.laneHeight * this.sublaneSpan) - (this.background == false && this.group == false ? (2 * this.sizes.marginSize) : 0);
+    }
+
     get laneTop(): number {
-      return (this.sublane * this.height) + (this.background == false ? (this.sublane + 1) * this.margin : 0);
+      return (this.sublaneIndex * this.sizes.laneHeight) + (this.background == false && this.group == false ? this.sizes.marginSize : 0);
     }
 
     get canEdit(): boolean {
@@ -339,6 +348,22 @@ export class GanttSeriesConfig extends GanttTimeBasedConfig {
       this.dayLabel = dl;
       this.timeLabel = tl;
       this.type = t;
+    }
+  }
+
+  export class GanttSizes {
+    laneHeight: number;
+    marginSize: number;
+    borderWidth: number;
+
+    constructor() {
+      this.calc();
+    }
+
+    calc() {
+      this.laneHeight = Math.min(0.02505 * window.innerWidth, 48);
+      this.marginSize = Math.min(0.004175 * window.innerWidth, 8);
+      this.borderWidth = Math.min(0.000521875 * window.innerWidth, 1);
     }
   }
 

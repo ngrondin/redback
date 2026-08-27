@@ -306,6 +306,12 @@
     color: lightgray;
 }
 
+.rb-gantt-spreadgroup {
+  background-color: #f8f8f8;
+  border-radius: var(--v5px);
+  border: var(--v1px) solid #bbb;
+}
+
 .rb-gantt-spread-ghost {
     filter:opacity(.25);
 }

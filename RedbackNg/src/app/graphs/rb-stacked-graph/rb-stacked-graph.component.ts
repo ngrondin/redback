@@ -8,9 +8,10 @@ import { RbAggregateDisplayComponent } from '../abstract/rb-aggregate-display';
 })
 export class RbStackedGraphComponent extends RbAggregateDisplayComponent  {
   @Input('legendposition') legendposition: string = 'right';
-  @Input('codeorder') codeorder?: string;
   @Input('verticalxlabels') verticalxlabels: boolean = false;
-  
+  @Input('valuetargetlegend') valuetargetlegend: any;
+  @Input('codeorder') codeorder?: string;
+
   constructor() {
     super();
   }

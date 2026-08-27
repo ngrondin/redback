@@ -9,7 +9,7 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
 })
 export class RbHcollapseComponent extends RbActivatorComponent {
   @Input('label') label: string = null;
-  @Input('control') control: string = 'separator';
+  @Input('control') controltype: string = 'separator';
   @Input('defaultopen') defaultopen: boolean = false;
 
   open: boolean = false;

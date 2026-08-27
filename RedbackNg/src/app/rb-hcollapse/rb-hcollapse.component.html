@@ -1,5 +1,5 @@
 <div
-    *ngIf="control == 'separator'"
+    *ngIf="controltype == 'separator'"
     class="rb-hcollapse-header">
     <div
         class="rb-hcollapse-preline">
@@ -21,13 +21,13 @@
     </div>
 </div>
 <div
-    [class]="'rb-hcollapse-container' + (control == 'tab' ? ' rb-hcollapse-container-border' : '')"
+    [class]="'rb-hcollapse-container' + (controltype == 'tab' ? ' rb-hcollapse-container-border' : '')"
     [style.display]="isOpen ? 'flex' : 'none'">
     <ng-content></ng-content>
-    <div #container></div>    
+    <div #container></div>
 </div>
 <div
-    *ngIf="control == 'tab'"
+    *ngIf="controltype == 'tab'"
     class="rb-hcollapse-tab"
     (click)="toggle()">
     <span>{{label ?? (isOpen ? 'Close' : 'Open')}}</span>

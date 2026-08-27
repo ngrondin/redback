@@ -601,22 +601,23 @@ public class ObjectManager
 		if(scriptCfg != null) {
 			if(session.getUserProfile().canExecute("rb.scripts." + functionName) || session.getUserProfile().canExecute("rb.accesscat." + scriptCfg.getAccessCategory())) {
 				DomainScriptLogger domainScriptLogger = null;	
+				Function function = scriptCfg.getFunction();
+				session.pushScriptLevel(functionName);
+				ScriptContext context = session.getScriptContext().createChild();
+				if(scriptCfg.getDomain() != null) {
+					session.pushDomainLock(scriptCfg.getDomain());
+					domainScriptLogger = new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info");
+				}
 				try {
-					ScriptContext context = session.getScriptContext().createChild();
 					context.put("param", io.redback.utils.js.Converter.convertIn(param));
 					if(scriptCfg.getDomain() != null) {
-						session.pushDomainLock(scriptCfg.getDomain());
-						domainScriptLogger = new DomainScriptLogger(dataClient, scriptLogCollection, session, scriptCfg.getDomain(), scriptCfg.getName(), "info");
 						context.declare("log", domainScriptLogger);
 						context.put("dc", new DomainClientJSWrapper(getDomainClient(), session, scriptCfg.getDomain()));
 						context.put("ic", new IntegrationClientJSWrapper(getIntegrationClient(), session, scriptCfg.getDomain()));
 					} else {
 						context.put("ic", new IntegrationClientJSWrapper(getIntegrationClient(), session));
 					}
-					Function function = scriptCfg.getFunction();
-					session.pushScriptLevel(functionName);
 					ret = function.call(context);
-					session.popScriptLevel();
 				} catch(Exception e) {
 					if(domainScriptLogger != null)
 						domainScriptLogger.log(StringUtils.rollUpExceptions(e));
@@ -626,7 +627,8 @@ public class ObjectManager
 						session.popDomainLock();
 						domainScriptLogger.commit();
 					}
-				}
+					session.popScriptLevel();
+				}	
 			} else {
 				throw new RedbackUnauthorisedException("No rights to execute script " + functionName);
 			}			

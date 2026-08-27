@@ -7,13 +7,14 @@ import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { Subscription } from 'rxjs';
-import { GanttDependencyType, GanttLane, GanttLaneConfig, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread } from './rb-gantt-models';
+import { GanttDependencyType, GanttLane, GanttLaneConfig, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread, GanttSizes } from './rb-gantt-models';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
 import { Algos, CanvasTool, ColorTool, Evaluator, ValueComparator } from 'app/helpers';
 import { NavigateService } from 'app/services/navigate.service';
 import { GanttTimeConfig } from './rb-gantt-timeconfig';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 
 
 @Component({
@@ -45,9 +46,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   overlayConfigs: GanttOverlayConfig[] = [];
   timeConfig!: GanttTimeConfig;
   heightPX: number | null = null;
-  spreadHeightPX: number = 42;
+  sizes: GanttSizes;
+  /*spreadHeightPX: number = 42;
   spreadMarginPX: number = 4;
-  borderWidthPX: number = 300;
+  borderWidthPX: number = 300;*/
   headerWidthPX: number | null = null;
   doDragFilter: boolean = false;
   hideEmptyLanes: boolean = false;
@@ -74,8 +76,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   openGroup: string | null = null;
 
-  pendingConfig: any;
-
   public getDragSizeForObjectCallback?: Function;
   public droppedOutCallback?: Function;
   public enhanceDragDataCallback?: Function;
@@ -99,6 +99,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   dataCalcInit() {
     //this.cdr.detach();
+    this.sizes = new GanttSizes();
     this.timeConfig = new GanttTimeConfig({startVariable: this.startVariable, spanVariable: this.spanVariable, zoomVariable: this.zoomVariable, element: this.mainscroll?.element.nativeElement});
     this.timeConfig.changes().subscribe(() => this.updateData(true));
     this.dragSubscription = this.dragService.getObservable().subscribe(event => this.onDragEvent(event));
@@ -137,16 +138,12 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return new GanttSeriesConfig(json, this.userPref);
   }
 
-  configure(data: any): void {
-    if(this.active) {
-      if(data.start != null) this.timeConfig.startDate = typeof data.start == 'string' ? new Date(data.start) : data.start.getTime != null ? data.start : new Date();
-      if(data.span != null) this.timeConfig.span = data.span;
-      if(data.zoom != null) this.timeConfig.zoom = data.zoom;
-      if(data.hideemptylanes != null) this.hideEmptyLanes = data.showemptylanes;
-      if(data.hideemptybackgrounds != null) this.hideEmptyBackgrounds = data.hideemptybackgrounds;
-    } else {
-      this.pendingConfig = data;
-    }
+  componentControl(data: any): void {
+    if(data.start != null) this.timeConfig.startDate = typeof data.start == 'string' ? new Date(data.start) : data.start.getTime != null ? data.start : new Date();
+    if(data.span != null) this.timeConfig.span = data.span;
+    if(data.zoom != null) this.timeConfig.zoom = data.zoom;
+    if (data.hideemptylanes != null) this.hideEmptyLanes = data.hideemptylanes;
+    if(data.hideemptybackgrounds != null) this.hideEmptyBackgrounds = data.hideemptybackgrounds;
   }
 
   onActivationEvent(event: any) {
@@ -157,10 +154,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       let [dataStartDate, dataSpan] = this.getStartDateAndSpanFromDatasetFilters();
       if(dataStartDate != null) this.timeConfig.startDate = dataStartDate;
       if(dataSpan != null) this.timeConfig.span = dataSpan;
-      if(this.pendingConfig) {
-        this.configure(this.pendingConfig);
-        this.pendingConfig = null;
-      }
       super.onActivationEvent(event);
     }
   }
@@ -311,9 +304,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   calc() {
-    this.spreadHeightPX = Math.min(0.0167 * window.innerWidth, 32);
+    this.sizes.calc();
+    /*this.spreadHeightPX = Math.min(0.0167 * window.innerWidth, 32);
     this.spreadMarginPX = Math.min(0.004175 * window.innerWidth, 8);
-    this.borderWidthPX = Math.min(0.000521875 * window.innerWidth, 1);
+    this.borderWidthPX = Math.min(0.000521875 * window.innerWidth, 1);*/
     this.focusStartPX = null;
     this.focusTopPX = null;
 
@@ -346,14 +340,14 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       for(let obj of list) {
         let show = laneFilter != null && !this.filterService.applies(laneFilter, obj) ? false : true;
         if(show) {
-          let lane = new GanttLane(obj, this.lanesConfig, this.spreadHeightPX, this.spreadMarginPX);
+          let lane = new GanttLane(obj, this.lanesConfig, this.sizes);
           let spreads: GanttSpread[] = this.calcSpreads(lane, accHeight);
           let hasForegroundSpreads = spreads.filter(s => !s.ghost && !s.background).length > 0;
           let hasBackgroundStreaps = spreads.filter(s => !s.ghost && s.background).length > 0;
           if(!((!hasForegroundSpreads && this.hideEmptyLanes) || (!hasBackgroundStreaps && this.hideEmptyBackgrounds))) {
             lane.setSpreads(spreads);
             this.lanes.push(lane);
-            accHeight += lane.height + this.borderWidthPX;
+            accHeight += lane.height + this.sizes.borderWidth;
           }
         }
       }
@@ -363,63 +357,37 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   private calcSpreads(lane: GanttLane, offsetTop: number) : GanttSpread[] {
     let laneSpreads: GanttSpread[] = [];
-    let groups: any = {};
-    for(let cfg of this.seriesConfigs) {
-      let laneLinkValues = lane.getLinkValuesForSeries(cfg);
-      let dataset = this.getDatasetForConfig(cfg);
-      if(dataset != null) {
-        let list: RbObject[] = dataset.list;
-        for(var i in list) {
-          let obj = list[i];
-          let objLinkValues = cfg.laneAttributes.map(la => obj.get(la));
-          if(this.linkValuesMatch(objLinkValues, laneLinkValues)) {
-            let show = cfg.show == null || (cfg.show != null && cfg.show(obj, dataset, dataset.relatedObject));
-            let groupKey = cfg.groupAttribute != null ? obj.get(cfg.groupAttribute) : null;
-            if(show && (groupKey == null || (groupKey != null && this.openGroup == groupKey)) && (cfg.groupOf == null || (cfg.groupOf != null && this.openGroup != obj.uid))) {
-              let [startPX, widthPX] = this.timeConfig.getStartAndWidthPX(obj, cfg);
-              if (startPX != null && widthPX != null) {
-                let endPX = startPX + widthPX;
-                let label = null;
-                if(cfg.labelAttribute != null) {
-                  label = obj.get(cfg.labelAttribute);
-                } else if(cfg.labelExpression != null) {
-                  label = Evaluator.eval(cfg.labelExpression, obj);
-                }
-                if(label == RELATED_LOADING) {
-                  label = "...";
-                }
-                let labelWidth = this.graphctx?.measureText(label).width;
-                if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
-                  let alt = cfg.labelAlts.find(a => a.name == this.selectedLabelAlt);
-                  if(alt != null) {
-                    if(alt.attribute != null) {
-                      label = obj.get(alt.attribute);
-                    } else if(alt.expression != null) {
-                      label = Evaluator.eval(alt.expression, obj);
+    for (let cfg of this.seriesConfigs) {
+      if (cfg.groupAttribute == null) {  //Only group parents or non-grouped series
+        let laneLinkValues = lane.getLinkValuesForSeries(cfg);
+        let dataset = this.getDatasetForConfig(cfg);
+        if(dataset != null) {
+          for(var obj of dataset.list) {
+            let objLinkValues = cfg.laneAttributes.map(la => obj.get(la));
+            if(this.linkValuesMatch(objLinkValues, laneLinkValues)) {
+              let show = cfg.show == null || (cfg.show != null && cfg.show(obj, dataset, dataset.relatedObject));
+              if (show) {
+                let spread = this.calcSpread(obj, dataset, cfg, offsetTop);
+                if (spread != null) {
+                  let childrenSpreads = [];
+                  if (cfg.groupOf != null && this.openGroup == obj.uid) {
+                    let childCfg = this.seriesConfigs.find(c => c.id == cfg.groupOf)
+                    let childDataset = this.getDatasetForConfig(childCfg);
+                    let children = childDataset.list.filter(obj => obj.get(childCfg.groupAttribute) == this.openGroup);
+                    for (var childSpread of children.map(o => this.calcSpread(o, childDataset, childCfg, offsetTop)).filter(s => s != null)) {
+                      childSpread.sublaneIndex = this.getSublaneForSpread(childSpread, childrenSpreads);
+                      childrenSpreads.push(childSpread);
                     }
+                    spread.sublaneSpan = childrenSpreads.reduce((acc, s) => Math.max(acc, s.sublaneIndex + 1), 1);
+                    spread.group = true;
                   }
-                }
-                let sublane = cfg.isBackground ? 0 : this.getSublaneForSpread(startPX, endPX, laneSpreads);
-                let spread = new GanttSpread(label, startPX, widthPX, this.spreadHeightPX, this.spreadMarginPX, offsetTop, sublane, obj, dataset, cfg);
-                spread.color = cfg.color?.getColor(obj) || (cfg.isBackground ? 'white' : 'var(--primary-light-color)');
-                spread.labelcolor = cfg.labelColor != null ? cfg.labelColor : ColorTool.contrastWith(spread.color, "#333", "#d8d8d8");
-                if (cfg.groupOf != null) {
-                  spread.color = this.calcGroupBackground(obj.uid, spread.color, startPX, this.seriesConfigs.find(c => c.id == cfg.groupOf));
-                }
-                if(cfg.indicatorAttribute != null) {
-                  spread.indicator = obj.get(cfg.indicatorAttribute);
-                } else if(cfg.indicatorExpression != null) {
-                  spread.indicator = Evaluator.eval(cfg.indicatorExpression, obj);
-                }
-                spread.tip = labelWidth > widthPX ? label : null;
-                spread.dragging = this.isObjectDragging(obj);
-                laneSpreads.push(spread);
-                this.spreads.push(spread);
-                this.spreadMap[`${obj.objectname}.${obj.uid}`] = spread;
-                if(spread.selected) {
-                  if(this.focusStartPX == null || (this.focusStartPX != null && startPX < this.focusStartPX)) this.focusStartPX = startPX;
-                  let topPX = offsetTop + spread.laneTop;
-                  if(this.focusTopPX == null || (this.focusTopPX != null && topPX < this.focusTopPX)) this.focusTopPX = topPX;
+                  let sublane = cfg.isBackground ? 0 : this.getSublaneForSpread(spread, laneSpreads);
+                  spread.sublaneIndex = sublane;
+                  laneSpreads.push(spread);
+                  if (childrenSpreads.length > 0) {
+                    childrenSpreads.forEach(cs => cs.sublaneIndex += spread.sublaneIndex);
+                    childrenSpreads.forEach(cs => laneSpreads.push(cs));
+                  }
                 }
               }
             }
@@ -428,6 +396,54 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       }
     }
     return laneSpreads;
+  }
+
+  private calcSpread(obj: RbObject, dataset: RbDatasetComponent, cfg: GanttSeriesConfig,  offsetTop: number): GanttSpread | null {
+    let spread: GanttSpread | null = null;
+    let [startPX, widthPX] = this.timeConfig.getStartAndWidthPX(obj, cfg);
+    if (startPX != null && widthPX != null) {
+      let label = null;
+      if(cfg.labelAttribute != null) {
+        label = obj.get(cfg.labelAttribute);
+      } else if(cfg.labelExpression != null) {
+        label = Evaluator.eval(cfg.labelExpression, obj);
+      }
+      if(label == RELATED_LOADING) {
+        label = "...";
+      }
+      let labelWidth = this.graphctx?.measureText(label).width;
+      if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
+        let alt = cfg.labelAlts.find(a => a.name == this.selectedLabelAlt);
+        if(alt != null) {
+          if(alt.attribute != null) {
+            label = obj.get(alt.attribute);
+          } else if(alt.expression != null) {
+            label = Evaluator.eval(alt.expression, obj);
+          }
+        }
+      }
+      spread = new GanttSpread(label, startPX, widthPX, offsetTop, obj, dataset, cfg, this.sizes);
+      spread.color = cfg.color?.getColor(obj) || (cfg.isBackground ? 'white' : 'var(--primary-light-color)');
+      spread.labelcolor = cfg.labelColor != null ? cfg.labelColor : ColorTool.contrastWith(spread.color, "#333", "#d8d8d8");
+      if (cfg.groupOf != null) {
+        spread.color = this.calcGroupBackground(obj.uid, spread.color, startPX, this.seriesConfigs.find(c => c.id == cfg.groupOf));
+      }
+      if(cfg.indicatorAttribute != null) {
+        spread.indicator = obj.get(cfg.indicatorAttribute);
+      } else if(cfg.indicatorExpression != null) {
+        spread.indicator = Evaluator.eval(cfg.indicatorExpression, obj);
+      }
+      spread.tip = labelWidth > widthPX ? label : null;
+      spread.dragging = this.isObjectDragging(obj);
+      this.spreads.push(spread);
+      this.spreadMap[`${obj.objectname}.${obj.uid}`] = spread;
+      if(spread.selected) {
+        if(this.focusStartPX == null || (this.focusStartPX != null && startPX < this.focusStartPX)) this.focusStartPX = startPX;
+        let topPX = offsetTop + spread.laneTop;
+        if(this.focusTopPX == null || (this.focusTopPX != null && topPX < this.focusTopPX)) this.focusTopPX = topPX;
+      }
+    }
+    return spread;
   }
 
   private calcGroupBackground(groupKey: string, baseColor: string, startOffset: number, cfg: GanttSeriesConfig): string | null {
@@ -472,7 +488,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           }
         }
         let label = cfg.label != null ? cfg.label : (cfg.labelAttribute != null && spreads.length > 0 ? spreads[0].object.get(cfg.labelAttribute) : null);
-        let lane = new GanttOverlayLane(null, label, this.spreadHeightPX);
+        let lane = new GanttOverlayLane(null, label, this.sizes.laneHeight);
         lane.setSpreads(spreads);
         this.overlays.push(lane);
       }
@@ -489,9 +505,9 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           let startdir = dep.type == GanttDependencyType.FS ? 'right' : dep.type == GanttDependencyType.SF ? 'left' : dep.type == GanttDependencyType.SS ? 'left' : spread.offsetTop + spread.laneTop < dep.spread.offsetTop + dep.spread.laneTop ? 'bottom' : 'top';
           let enddir = dep.type == GanttDependencyType.FS ? 'left' : dep.type == GanttDependencyType.SF ? 'right' : dep.type == GanttDependencyType.SS ? 'left' : spread.offsetTop + spread.laneTop < dep.spread.offsetTop + dep.spread.laneTop ? 'top' : 'bottom';
           let startx = spread.start + (startdir == 'left' ? 0 : startdir == 'right' ? spread.width : spread.width / 2);
-          let starty = spread.offsetTop + spread.laneTop + (startdir == 'top' ? 0 : startdir == 'bottom' ? this.spreadHeightPX : this.spreadHeightPX / 2);
+          let starty = spread.offsetTop + spread.laneTop + (startdir == 'top' ? 0 : startdir == 'bottom' ? spread.height : spread.height / 2);
           let endx = dep.spread.start + (enddir == 'left' ? 0 : enddir == 'right' ? dep.spread.width : dep.spread.width / 2);
-          let endy = dep.spread.offsetTop + dep.spread.laneTop + (enddir == 'top' ? 0 : enddir == 'bottom' ? this.spreadHeightPX : this.spreadHeightPX / 2);
+          let endy = dep.spread.offsetTop + dep.spread.laneTop + (enddir == 'top' ? 0 : enddir == 'bottom' ? spread.height : spread.height / 2);
           CanvasTool.drawPolyline(this.graphctx, startx, starty, startdir, endx, endy, enddir);
         }
       }
@@ -591,13 +607,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     dataset?.create();
   }
 
-  public clickBackground() {
-    if (this.openGroup != null) {
-      this.openGroup = null;
-      this.redraw();
-    }
-  }
-
   public clickOverlayLaneIndex(i: number) {
     if(this.selectedOverlayLaneIndex == -1 || this.selectedOverlayLaneIndex != i) {
       this.selectedOverlayLaneIndex = i;
@@ -614,6 +623,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       this.dragSelectStart = this.getXYRelativeToTarget(event, "rb-gantt-lanes");
       this.dragSelectTopLeft = this.dragSelectStart;
       this.dragSelectSize = new XY(0, 0);
+    }
+    if (this.openGroup != null) {
+      this.openGroup = null;
+      this.redraw();
     }
   }
 
@@ -828,7 +841,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       if(cfg != null) {
         return {
           x: this.timeConfig.getWidthOfObject(obj, cfg),
-          y: this.spreadHeightPX
+          y: this.sizes.laneHeight - (2*this.sizes.marginSize)
         };
       } else {
         return {x: 100, y: 20};
@@ -912,13 +925,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return ret;
   }
 
-  getSublaneForSpread(startPX: number, endPX: number, spreads: GanttSpread[]) {
+  getSublaneForSpread(spread: GanttSpread, spreads: GanttSpread[]) {
     let sublane = 0;
     let hasOverlap: boolean;
     do {
       hasOverlap = false;
-      for(var os of spreads) {
-        if((os.config == null || (os.config != null && os.config.isBackground == false)) && startPX < os.end && os.start < endPX && sublane == os.sublane) {
+      for(var os of spreads.filter(s => s.background == false)) {
+        if(spread.start < os.end && os.start < spread.end && sublane <= os.sublaneIndex + os.sublaneSpan - 1 && os.sublaneIndex <= sublane + spread.sublaneSpan - 1) {
           hasOverlap = true;
         }
       }

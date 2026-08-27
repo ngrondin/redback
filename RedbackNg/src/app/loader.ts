@@ -227,7 +227,7 @@ export class LoadedView extends RbActivatorComponent {
       for(let comp of this.compsWithIds) {
         for(let compTarget of compTargets) {
           if(compTarget.compid == comp.id) {
-            comp.configure(compTarget.data);
+            comp.control(compTarget.data);
             break;
           }
         }

@@ -176,7 +176,7 @@
                 *ngFor="let lane of lanes; let i = index"
                 [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
                 [style.height.px]="lane.height"
-                [style.borderBottomWidth.px]="borderWidthPX"
+                [style.borderBottomWidth.px]="sizes.borderWidth"
                 [style.cursor]="lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
                 (click)="clickLane(lane)"
                 [rb-drag-object]="lanesConfig.editable == true ? lane : null"
@@ -247,7 +247,6 @@
             class="rb-gantt-lanes"
             [style.width.px]="timeConfig.widthPX"
             [style.height.px]="heightPX"
-            (click)="clickBackground()"
             (mousedown)="mouseDownBackground($event)"
             (mouseup)="mouseUpBackground($event)"
             (mousemove)="mouseMoveBackground($event)"
@@ -259,7 +258,7 @@
                     [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
                     [style.height.px]="lane.height"
                     [style.width.px]="timeConfig.widthPX"
-                    [style.borderBottomWidth.px]="borderWidthPX">
+                    [style.borderBottomWidth.px]="sizes.borderWidth">
                     <div
                         *ngFor="let spread of lane.backgroundSpreads()"
                         [class]="'rb-gantt-spread rb-gantt-spreadbackground '"
@@ -288,6 +287,25 @@
             <div
                 class="rb-gantt-laneslayer">
                 <div
+                    *ngFor="let lane of lanes"
+                    [class]="'rb-gantt-lane'"
+                    [style.height.px]="lane.height"
+                    [style.width.px]="timeConfig.widthPX"
+                    [style.borderBottomWidth.px]="sizes.borderWidth">
+                    <div
+                        *ngFor="let spread of lane.groupSpreads()"
+                        [class]="'rb-gantt-spread rb-gantt-spreadgroup '"
+                        [style.width.px]="spread.width"
+                        [style.left.px]="spread.start"
+                        [style.height.px]="spread.height"
+                        [style.top.px]="spread.laneTop"
+                        [style.color]="spread.labelcolor">
+                    </div>
+                </div>
+            </div>
+            <div
+                class="rb-gantt-laneslayer">
+                <div
                     *ngFor="let overlayspread of selectedOverlaySpreads()"
                     [class]="'rb-gantt-overlay-spread'"
                     [style.width.px]="overlayspread.width"
@@ -305,7 +323,7 @@
                     [class]="'rb-gantt-lane'"
                     [style.height.px]="lane.height"
                     [style.width.px]="timeConfig.widthPX"
-                    [style.borderBottomWidth.px]="borderWidthPX"
+                    [style.borderBottomWidth.px]="sizes.borderWidth"
                     (rb-drag-dropzone)="droppedOn($event, lane)"
                     [rb-drag-changeform]="getDragSizeForObjectCallback">
                     <div

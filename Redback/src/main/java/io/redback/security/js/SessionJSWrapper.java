@@ -47,8 +47,9 @@ public class SessionJSWrapper extends ObjectJSWrapper
 							function.call();
 						} catch(ScriptException e) {
 							throw new RedbackException("Error in fordomain", e);
-						}							
-						session.popDomainLock();
+						} finally {
+							session.popDomainLock();							
+						}
 						return null;
 					} else {
 						throw new RedbackException("Requires an executable argument");
