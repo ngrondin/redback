@@ -188,6 +188,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.refreshOnActivate = true;
       return false;
     } else {
+      if(this.master != null && this.relatedObject == null && this._list.length > 0) {
+        this.clear(); //The master no longer has a selection, so this data relates to nothing and reverts to its initial empty state
+      }
       return false;
     }
   }
