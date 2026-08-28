@@ -8,7 +8,7 @@ import { PopupService } from 'app/services/popup.service';
 
 @Component({
   selector: 'rb-selector',
-  templateUrl: '../inputs/abstract/rb-field-input.html',
+  templateUrl: './rb-selector.component.html',
   styleUrls: ['../inputs/abstract/rb-field-input.css']
 })
 export class RbSelectorComponent extends RbDataObserverComponent {
@@ -21,6 +21,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
   @Input('size') size: number;
   @Input('grow') grow: number;
   @Input('margin') margin: boolean = true;
+  @Input('candeselect') candeselect: boolean = true;
 
 
   @Output('valueChange') valueChange = new EventEmitter();
@@ -101,7 +102,23 @@ export class RbSelectorComponent extends RbDataObserverComponent {
   }
   
   public onKeyTyped(keyCode: number) {
+    if(keyCode == 8 && (this.editedValue == null || this.editedValue == "")) {
+      this.clearValue();
+    }
+  }
 
+  public clearValue(event: any = null) {
+    if(event != null) event.stopPropagation();
+    if(this.candeselect == false) return;
+    this.cancelEditing();
+    let dataset = this.getDataset();
+    if(dataset != null) {
+      dataset.clearSelection();
+    }
+  }
+
+  public get showclear(): boolean {
+    return this.candeselect && this.readonly == false && this.selectedObject != null;
   }
 
   public onPopupCancel() {
