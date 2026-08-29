@@ -162,8 +162,6 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     image: string | null = null;
     icon: string | null = null;
     sizes: GanttSizes;
-    /*spreadHeight: number;
-    spreadMargin: number;*/
     height: number;
     spreads: GanttSpread[] = [];
     object: RbObject;
@@ -173,8 +171,6 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.object = obj;
       this.config = cfg;
       this.sizes = sizes;
-      /*this.spreadHeight = sh;
-      this.spreadMargin = sm;*/
       this.height = sizes.laneHeight;
       if(cfg.labelAttribute != null) {
         this.label = obj.get(cfg.labelAttribute);
@@ -205,7 +201,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       for (let i = 0; i < this.spreads.length; i++) {
         max = Math.max(max, this.spreads[i].sublaneIndex + this.spreads[i].sublaneSpan);
       }
-      this.height = (max * this.sizes.laneHeight);
+      this.height = (max * (this.sizes.laneHeight - this.sizes.marginSize)) + this.sizes.marginSize;
     }
 
     backgroundSpreads() {
@@ -283,11 +279,11 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     }
 
     get height(): number {
-      return (this.sizes.laneHeight * this.sublaneSpan) - (this.background == false && this.group == false ? (2 * this.sizes.marginSize) : 0);
+      return this.background == true ? -1 : this.group == true ?  (((this.sizes.laneHeight - this.sizes.marginSize) * this.sublaneSpan) ) : (((this.sizes.laneHeight - this.sizes.marginSize) * this.sublaneSpan) - this.sizes.marginSize);
     }
 
     get laneTop(): number {
-      return (this.sublaneIndex * this.sizes.laneHeight) + (this.background == false && this.group == false ? this.sizes.marginSize : 0);
+      return this.background == true ? 0 : (this.sublaneIndex * (this.sizes.laneHeight - this.sizes.marginSize)) + (this.group == false ? this.sizes.marginSize : (this.sizes.marginSize / 2));
     }
 
     get canEdit(): boolean {
