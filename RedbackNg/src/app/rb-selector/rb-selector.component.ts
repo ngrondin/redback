@@ -25,15 +25,15 @@ export class RbSelectorComponent extends RbDataObserverComponent {
 
   @Output('valueChange') valueChange = new EventEmitter();
   @Output('keydown') keydown = new EventEmitter();
-  
+
   @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
-  
+
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
   @HostBinding('style.flex-grow') get flexgrow() { return this.grow != null ? this.grow : 0;}
   @HostBinding('style.width') get styleWidth() { return (this.size != null ? ((0.88 * this.size) + 'vw'): this.defaultSize != null ? ((0.88 * this.defaultSize) + 'vw'): null);}
 
   popupComponentRef: ComponentRef<RbPopupComponent>;
-  
+
   displayVAE?: VAEConfig;
   isEditing: boolean = false;
   editedValue: any;
@@ -78,13 +78,13 @@ export class RbSelectorComponent extends RbDataObserverComponent {
       }
     }
   }
-  
+
   public onBlur(event: any) {
     if(this.popupComponentRef != null) {
       this.inputContainerRef.element.nativeElement.focus();
     }
   }
-  
+
   public onKeydown(event: any) {
     if(event.keyCode == 9) {
         this.finishEditing()
@@ -99,14 +99,14 @@ export class RbSelectorComponent extends RbDataObserverComponent {
         }
     }
   }
-  
+
   public onKeyTyped(keyCode: number) {
 
   }
 
   public onPopupCancel() {
     this.cancelEditing();
-  }  
+  }
 
   public onPopupValueSelected(value: any) {
     this.finishEditingWithSelection(value);
@@ -142,14 +142,19 @@ export class RbSelectorComponent extends RbDataObserverComponent {
   }
 
   public finishEditingWithSelection(value: any) {
-    this.closePopup();
-    this.isEditing = false;
-    this.editedValue = null;  
-    this.hadUserEdit = false; 
+    this.cancelEditing();
     let dataset = this.getDataset();
     if(dataset != null) {
       dataset.select(value);
-    }    
+    }
+  }
+
+  public clearValue() {
+    this.cancelEditing();
+    let dataset = this.getDataset();
+    if(dataset != null) {
+      dataset.clearSelection();
+    }
   }
 
   public cancelEditing() {
@@ -157,7 +162,6 @@ export class RbSelectorComponent extends RbDataObserverComponent {
     this.editedValue = null;
     this.closePopup();
   }
-
 
   public onKeyup(event: any) {
   }
@@ -172,7 +176,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
     } else {
       return this.getPersistedDisplayValue();
     }
-  } 
+  }
 
   public getPersistedDisplayValue(): any {
     let obj = this.selectedObject;
@@ -190,7 +194,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
   public setDisplayValue(val: any) {
     if(this.isEditing) {
       this.editedValue = val;
-    } 
+    }
   }
 
   public initEditedValue() {
@@ -206,7 +210,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
     if(this.dataset != null) {
       dataset = this.dataset;
     } if(this.datasetgroup != null && this.targetdatasetid != null) {
-      dataset = this.datasetgroup.datasets[this.targetdatasetid]; 
+      dataset = this.datasetgroup.datasets[this.targetdatasetid];
     }
     return dataset;
   }

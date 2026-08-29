@@ -96,8 +96,12 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   onDatasetEvent(event: any) {
     if(event.datasetgroup == null) { //When a dataset is part of a datasetgroup, it will receive events from other datasets. Need to filter them out.
-      if(event.event == 'select') {
-        this.refreshData();
+      if (event.event == 'select') {
+        if (event.object == null) {
+          this.clear();
+        } else {
+          this.refreshData();
+        }
       } else if(event.event == 'load') {
         this.refreshData();
       } else if(event.event == 'clear') {

@@ -24,7 +24,13 @@
            autocomplete="off"
            data-lpignore="true"
            [type]="inputType">
-     </div>
+       <div
+         *ngIf="isEditing"
+         class="material-symbols-outlined rb-input-clear"
+         (mousedown)="clearValue()">
+           close
+       </div>
+    </div>
     <div
         [class]="'rb-input-underline' + (isEditing ? ' rb-input-underline-editing' : '')">
     </div>

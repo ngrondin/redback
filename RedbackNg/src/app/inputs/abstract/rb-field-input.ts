@@ -11,7 +11,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
   @Input('margin') margin: boolean = true;
 
   @Output('keydown') keydown = new EventEmitter();
-  
+
   @ViewChild('input', { read: ViewContainerRef, static: true }) input!: ViewContainerRef;
 
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
@@ -23,7 +23,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
   hadUserEdit: boolean = false;
   originalValue: any;
   inputType: string = 'text';
-  
+
   constructor() {
     super();
     this.defaultIcon = "description";
@@ -68,7 +68,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
     } else {
       return this.getPersistedDisplayValue();
     }
-  } 
+  }
 
   public getPersistedDisplayValue(): any {
     return this.value;
@@ -85,7 +85,7 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
   public setDisplayValue(val: any) {
     if(this.isEditing) {
       this.editedValue = val;
-    } 
+    }
   }
 
   public initEditedValue() {
@@ -103,19 +103,24 @@ export abstract class RbFieldInputComponent extends RbInputComponent {
       this.hadUserEdit = false;
       this.initEditedValue();
       this.checkPersistedValueChangedWhileEditing();
-    } 
+    }
 
   }
 
   public finishEditing() {
     this.isEditing = false;
-    this.editedValue = null;  
-    this.hadUserEdit = false;  
+    this.editedValue = null;
+    this.hadUserEdit = false;
   }
 
   public cancelEditing() {
     this.isEditing = false;
     this.editedValue = null;
+  }
+
+  //This is linked to the mousedown event so that it triggers before anything else when the overlay is open
+  public clearValue() {
+    super.commit(null);
   }
 
   public commit(val: any, related: RbObject | null = null) {

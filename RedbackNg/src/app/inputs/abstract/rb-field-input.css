@@ -61,6 +61,7 @@
 .rb-input-row {
     display: flex;
     flex-direction: row;
+    align-items: end;
     border-width: 0px 0px 1px 0px;
     border-color: #D3D3D3;
     border-style: solid;
@@ -95,6 +96,19 @@
     z-index: 1;
     resize: none;
 
+}
+
+.rb-input-clear {
+  font-size: 0.95rem;
+  color: var(--light-writing-color);
+  font-size: var(--v20px);
+  border-radius: 50%;
+  padding: var(--v3px);
+  cursor: pointer;
+}
+
+.rb-input-clear:hover {
+  background-color: #eee;
 }
 
 .rb-input-mandatory {

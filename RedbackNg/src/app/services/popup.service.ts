@@ -3,13 +3,14 @@ import { ComponentPortal, PortalInjector } from '@angular/cdk/portal';
 import { Injectable, Injector, ViewContainerRef } from '@angular/core';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 import { CONTAINER_DATA } from 'app/tokens';
+import { takeUntil } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PopupService {
   overlayRef: OverlayRef;
-  
+
   constructor(
     public injector: Injector,
     public overlay: Overlay
@@ -41,20 +42,21 @@ export class PopupService {
 
     this.overlayRef = this.overlay.create({
       positionStrategy: positionStrategy,
-      hasBackdrop: true,
+      hasBackdrop: false,
       backdropClass: 'cdk-overlay-transparent-backdrop',
       maxHeight: maxHeight
     });
-    
+
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, configData);
     let inj : PortalInjector = new PortalInjector(this.injector, injectorTokens);
-    
-    
+
+
     const popupPortal = new ComponentPortal<RbPopupComponent>(popupClass, anchorElementRef, inj);
     const popupComponentRef = this.overlayRef.attach(popupPortal);
-    this.overlayRef.backdropClick().subscribe(() => popupComponentRef.instance.onOverlayClick());
+    let ignoreNext = true; //When the overlay opens, the current click event is still processing, so will get picked up as the first event
+    this.overlayRef.outsidePointerEvents().subscribe(() => { if (ignoreNext) { ignoreNext = false } else { popupComponentRef.instance.onOverlayClick(); } })
     return popupComponentRef;
   }
 
