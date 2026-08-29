@@ -17,6 +17,7 @@ class TableColumnConfig {
   width: string;
   editable: boolean;
   linkview: string;
+  modal: string;
   showExpr: string;
   alt: {[key: string]: TableColumnConfig};
 
@@ -31,9 +32,9 @@ class TableColumnConfig {
     this.icon = json.icon;
     this.size = json.size ?? 17;
     this.width = 'min(' + (0.88 * this.size) + 'vw, ' + (17 * this.size) + 'px)';
-    //this.width = (json.size != null ? (json.size * 15) + 15 : 250);
     this.editable = (json.editable != null ? json.editable : true);
     this.linkview = json.linkview;
+    this.modal = json.modal;
     this.showExpr = (json.show != null ? json.show : "true");
     if(json.alt != null) {
       this.alt = {};
@@ -122,6 +123,10 @@ export class RbTableComponent extends RbDataObserverComponent {
         }
       }
     });
+  }
+
+  clickRow(object: RbObject) {
+    this.dataset.select(object);
   }
 
   deleteObject(object: RbObject) {

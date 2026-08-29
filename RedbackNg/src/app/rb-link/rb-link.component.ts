@@ -13,11 +13,12 @@ export class RbLinkComponent extends RbDataObserverComponent {
   @Input('attribute') attribute: string;
   @Input('datatargets') datatargets: any[];
   @Input('view') view: string;
+  @Input('modal') modal: string;
   @Input('margin') margin: boolean = true;
   @Input('filtersingleobject') filtersingleobject: boolean = true;
 
   @HostBinding('style.margin-top') get topmargin() { return this.margin ? 'min(1.144vw, 22px)' : '0px'; }
-    
+
   constructor(
     private navigateService: NavigateService
   ) {
@@ -39,6 +40,7 @@ export class RbLinkComponent extends RbDataObserverComponent {
   public navigateTo() {
     let cfg = {
       view: this.view,
+      modal: this.modal,
       datatargets: this.datatargets
     };
     if(this.datatargets == null && this.rbObject != null) {

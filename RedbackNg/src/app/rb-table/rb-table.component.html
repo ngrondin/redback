@@ -20,6 +20,7 @@
         <div
             class="rb-table-row"
             *ngFor="let object of orderedList"
+            (click)="clickRow(object)"
             [rb-drag-object]="canOrder ? object : null"
             (rb-drag-dropzone)="droppedOn($event, object)">
             <rb-icon
@@ -37,6 +38,7 @@
                     [object]="object"
                     [attribute]="col.attribute"
                     [view]="col.linkview"
+                    [modal]="col.modal"
                     [margin]="false">
                 </rb-link>
                 <rb-string-input
