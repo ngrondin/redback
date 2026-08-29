@@ -190,7 +190,7 @@ export class RbFilterBuilderComponent implements OnInit {
         this.dataService.aggregate(objectname, fltr, null, [fac.attribute], [{function:"count", name:"_cnt"}], null, 0, 2000).subscribe({
           next: (list) => {
             fac.options = list.map(agg => ({
-              name: agg.getDimension(fac.attribute + "." + fac.displayAttribute) ?? 'Empty',
+              name: agg.getDimension(fac.displayAttribute != null ? fac.attribute + "." + fac.displayAttribute : fac.attribute) ?? 'Empty',
               value: agg.getDimension(fac.attribute) ?? null,
               count:agg.getMetric("_cnt")
             }));
