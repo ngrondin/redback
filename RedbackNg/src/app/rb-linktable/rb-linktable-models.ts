@@ -1,4 +1,4 @@
-import { LinkConfig, ColorConfig, Evaluator } from "app/helpers";
+import { LinkConfig, ColorConfig, Evaluator, VAEConfig } from "app/helpers";
 
 export class LinkTableColumnConfig {
     id: string;
@@ -21,6 +21,7 @@ export class LinkTableColumnConfig {
     iconmap: any;
     backColor: ColorConfig | null;
     foreColor: ColorConfig | null;
+    bold: VAEConfig | null;
     alt?: {[key: string]: LinkTableColumnConfig};
 
     constructor(json: any, userpref: any) {
@@ -42,8 +43,12 @@ export class LinkTableColumnConfig {
       this.sum = json.sum;
       this.sumlink = json.sumlink != null ? new LinkConfig(json.sumlink) : null;
       this.iconmap = json.iconmap;
-      this.backColor = userpref != null && userpref.backcolor != null ? new ColorConfig(userpref.backcolor) : (json.backcolor != null ? new ColorConfig(json.backcolor) : null);
-      this.foreColor = userpref != null && userpref.foreColor != null ? new ColorConfig(userpref.foreColor) : (json.foreColor != null ? new ColorConfig(json.foreColor) : null);
+      let bc = userpref?.backcolor || json.backcolor;
+      this.backColor = (bc != null ? new ColorConfig(bc) : null);
+      let fc = userpref?.forecolor || json.forecolor || json.foreColor;
+      this.foreColor = (fc != null ? new ColorConfig(fc) : null);
+      let bld = userpref?.bold || json.bold;
+      this.bold = (bld != null ? new VAEConfig(bld) : null);
       if(json.alt != null) {
         this.alt = {};
         for(const key in json.alt) {

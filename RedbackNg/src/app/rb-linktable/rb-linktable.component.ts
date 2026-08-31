@@ -102,8 +102,10 @@ export class RbLinktableComponent extends RbDataObserverComponent {
         if(cfg != null) {
           let val = null;
           let loading = false;
-          if(cfg.expression != null) {
-            val = cfg.expression(object, null, this.dataset);
+          if (cfg.expression != null) {
+            try {
+              val = cfg.expression(object, null, this.dataset);
+            } catch (err) { }
           } else if(cfg.attribute != null) {
             val = object.get(cfg.attribute);
           }
@@ -115,8 +117,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
           let formatVal = cfg.format != null ? Formatter.format(val, cfg.format) : val;
           let foreColor = cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
           let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
+          let bold = cfg.bold != null ? cfg.bold.getValue(object) : null;
           let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
-          let col = {value: val, formattedValue: formatVal, align: cfg.align, wrap: cfg.wrap, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, icon: icon, checkbox: cfg.checkbox ?? false, checkboxattr: checkboxattr, checkboxevent: cfg.checkboxevent, link: cfg.link, modal: cfg.modal, loading: loading};
+          let col = { value: val, formattedValue: formatVal, align: cfg.align, wrap: cfg.wrap, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, bold: bold, icon: icon, checkbox: cfg.checkbox ?? false, checkboxattr: checkboxattr, checkboxevent: cfg.checkboxevent, link: cfg.link, modal: cfg.modal, loading: loading};
           let sumVal = loading ? 0 : cfg.expression == null && cfg.attribute == null ? 1 : !isNaN(val) ? val : 0;
           grp.sums[c] += sumVal;
           totalsums[c] += sumVal;

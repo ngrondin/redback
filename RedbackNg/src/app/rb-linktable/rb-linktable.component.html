@@ -56,17 +56,20 @@
                     *ngFor="let col of line.cols; index as i"
                     [class]="'rb-linktable-rowitem'"
                     [style.width]="col.width"
-                    [style.background-color]="col.backColor"
-                    [style.color]="col.foreColor">
+                    [style.background-color]="col.backColor">
                     <div
                         [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alignright' : col.align == 'center' ? ' rb-linktable-rowitem-aligncenter' : '') + (grid ? ' rb-linktable-border-on' : '')">
                         <a
                             *ngIf="col.icon == null && col.link != null && col.checkbox == false && !col.loading"
+                            [style.color]="col.foreColor"
+                            [style.font-weight]="col.bold == true ? 700 : null"
                             (click)="clickLink(col.link, line.object)">
                             {{col.formattedValue}}
                         </a>
                         <a
                             *ngIf="col.icon == null && col.modal != null && col.checkbox == false && !col.loading"
+                            [style.color]="col.foreColor"
+                            [style.font-weight]="col.bold == true ? 700 : null"
                             (click)="clickModal(col.modal, line.object)">
                             {{col.formattedValue}}
                         </a>
@@ -77,7 +80,9 @@
                         </rb-checkbox>
                         <span
                             *ngIf="col.icon == null && col.link == null && col.modal == null && col.checkbox == false && !col.loading"
-                            [class]="col.wrap == true ? 'rb-linktable-rowitem-wrapspan' : 'dd'">
+                            [class]="col.wrap == true ? 'rb-linktable-rowitem-wrapspan' : ''"
+                            [style.color]="col.foreColor"
+                            [style.font-weight]="col.bold == true ? 700 : null">
                             {{col.formattedValue}}
                         </span>
                         <div
