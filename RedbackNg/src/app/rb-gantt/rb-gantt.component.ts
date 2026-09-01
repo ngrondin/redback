@@ -656,7 +656,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let startHeaderWidthPX = this.headerWidthPX ?? 300;
     var whileMove = function(event: any) {
       let clientDelta = event.clientX - startClientX;
-      controller.headerWidthPX = startHeaderWidthPX + clientDelta;
+      controller.headerWidthPX = Math.max(0, startHeaderWidthPX + clientDelta);
     }
     var endMove = function () {
       window.removeEventListener('mousemove', whileMove);

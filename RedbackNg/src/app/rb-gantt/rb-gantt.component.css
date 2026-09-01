@@ -65,6 +65,7 @@
 .rb-gantt-overlay-lanehead span {
     padding-right: var(--v16px);
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .rb-gantt-corner-space {
