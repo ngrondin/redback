@@ -193,7 +193,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
     }
     if(this.actions != null) {
       this.actions.forEach(item => {
-        if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject, this.dataset) == true))) {
+        if(item.show == null || item.show == true || (typeof item.show == 'string' && (Evaluator.eval(item.show, this.rbObject, this.relatedObject, this.targetDataset) == true))) {
           let swtch = this.userpref.getCurrentViewUISwitch('action',  item.action + "_" + item.param);
           if(swtch == null || swtch == true) {
             this.actionData.push(new RbActiongroupAction(item.action, item.target, item.param, item.timeout, item.label, item.icon, item.confirm, false, null));
@@ -278,7 +278,7 @@ export class RbActiongroupComponent extends RbDataButtonComponent {
       });
     } else {
       this.running = true;
-      this.actionService.action(this.dataset, this.datasetgroup, action.action, action.target, action.param, null, action.confirm, action.timeout).subscribe({
+      this.actionService.action(this.targetDataset, this.datasetgroup, action.action, action.target, action.param, null, action.confirm, action.timeout).subscribe({
         error: (err) => this.running = false,
         complete: () => this.running = false,
       });

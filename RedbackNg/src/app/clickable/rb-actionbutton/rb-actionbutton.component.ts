@@ -24,7 +24,7 @@ export class RbActionButtonComponent extends RbDataButtonComponent {
 
   click() {
     this.running = true;
-    this.actionService.action(this.dataset, this.datasetgroup, this.action, this.target, this.param, null, this.confirm, this.timeout).subscribe({
+    this.actionService.action(this.targetDataset, this.datasetgroup, this.action, this.target, this.param, null, this.confirm, this.timeout).subscribe({
       next: (val) => {},
       error: (err) => {this.running = false},
       complete: () => {this.running = false;}
