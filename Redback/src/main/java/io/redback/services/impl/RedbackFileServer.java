@@ -91,9 +91,11 @@ public class RedbackFileServer extends FileServer
 		    FileInputStream fis = new FileInputStream(file);
 		    MessageDigest localDigest = MessageDigest.getInstance("SHA-1");
 		    byte[] byteArray = new byte[1024];
+		    int fileSize = 0;
 		    int bytesCount = 0; 
 		    while ((bytesCount = fis.read(byteArray)) != -1) {
 		    	localDigest.update(byteArray, 0, bytesCount);
+		    	fileSize += bytesCount;
 		    };
 		    fis.close();
 			byte[] hash = localDigest.digest();
@@ -111,7 +113,7 @@ public class RedbackFileServer extends FileServer
 			    }
 			}
 			if(filemd == null) {
-				filemd = new RedbackFileMetaData(null, null, null, null, null, null, hashStr);
+				filemd = new RedbackFileMetaData(null, null, null, null, null, null, fileSize, hashStr);
 			}
 			return filemd;
 		} catch(Exception e) {
@@ -253,7 +255,7 @@ public class RedbackFileServer extends FileServer
 				filemd.date = new Date();
 				dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), filemd.fileuid), fileCollection.convertObjectToSpecific(filemd.getDataMap(true)));
 	
-				storeFile(filemd.fileuid, file);
+				storeFile(filemd.fileuid, filemd.size, file);
 				return filemd; 
 		    }
 		    else
@@ -266,35 +268,23 @@ public class RedbackFileServer extends FileServer
 		}
 	}	
 	
-	public void storeFile(String fileUid, File file) throws RedbackException {
+	public void storeFile(String fileUid, int size, File file) throws RedbackException {
 		try {
 			if(defaultFileStream != null) {
 				FileInputStream fis = new FileInputStream(file);
 				DataMap req = new DataMap();
-				req.put("filename", fileUid);
 				req.put("action", "put");
+				req.put("filename", fileUid);
+				req.put("size", size);
 				StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(req), 5000);
-				new StreamSender(fis, sep, new StreamSender.CompletionListener() {
-					public void completed(byte[] bytes) {
-						try {
-							sep.close();
-							fis.close();
-							file.delete();
-						} catch(Exception e2) {
-							Logger.severe("rb.file.store.complete", "Error sending file to storage service", e2);
-						}
-					}
-
-					public void error(Throwable error) {
-						Logger.severe("rb.file.store", "Error sending file to storage service", error);
-					}					
-				});
+				StreamSender sender = new StreamSender(fis, sep);
+				sender.sync();
+				file.delete();
 			} else if(defaultFileService != null) {
 				byte[] bytes = Files.readAllBytes(file.toPath());
 				Payload filePayload = new Payload(bytes);
 				filePayload.metadata.put("filename", fileUid);
 				firebus.publish(defaultFileService, filePayload);
-				file.delete();
 			}
 		} catch(Exception e) {
 			throw new RedbackException("Error sending file to storage service", e);
@@ -417,7 +407,7 @@ public class RedbackFileServer extends FileServer
 		return md;
 	}
 
-	public void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException {
+	public void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, String mime, String objectname, String objectuid) throws RedbackException {
 		try {
 			String tempFilename = UUID.randomUUID().toString();
 			final File file = new File(tempFilename);
@@ -427,22 +417,21 @@ public class RedbackFileServer extends FileServer
 					fos.close();
 					if(!validateFile(filename, file)) throw new RedbackInvalidRequestException("Invalid file type");
 					RedbackFileMetaData filemd = putFile(session, filename, mime != null && !mime.isEmpty() ? mime : getMimeType(filename, file), session.getUserProfile().getUsername(), file);
+					file.delete();
 					if(objectname != null && objectuid != null)
 						linkFileTo(session, filemd.fileuid, objectname, objectuid);
 					DataMap resp = new DataMap();
 					resp.put("fileuid", filemd.fileuid);
-					resp.put("thumbnail", filemd.thumbnail);
+					resp.put("filename", filemd.fileName);
 					resp.put("mime", filemd.mime);
+					resp.put("thumbnail", filemd.thumbnail);
 					byte[] completionBytes = resp.toString().getBytes();
 					return completionBytes;
 				}
 	
 				public void error(Throwable error) {
 					Logger.severe("rb.file.put", "Error putting file", error);
-					try {
-						fos.close();
-						file.delete();
-					} catch(Exception e) {}
+					file.delete();
 				}
 			});
 		} catch(Exception e) {

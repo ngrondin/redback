@@ -10,6 +10,7 @@ import io.firebus.Payload;
 import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
+import io.firebus.utils.InputStream;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.RedbackFile;
@@ -33,7 +34,8 @@ public class FileClient extends Client {
 			String username = resp.metadata.get("username");
 			String dateStr = resp.metadata.get("date");
 			String thumbnail = resp.metadata.get("thumbnail");
-			RedbackFileMetaData filemd = new RedbackFileMetaData(fileUid, filename, mime, thumbnail, username, Date.from(ZonedDateTime.parse(dateStr).toInstant()), null);
+			int size = Integer.parseInt(resp.metadata.get("size"));
+			RedbackFileMetaData filemd = new RedbackFileMetaData(fileUid, filename, mime, thumbnail, username, Date.from(ZonedDateTime.parse(dateStr).toInstant()), size, null);
 			byte[] bytes = resp.getBytes();
 			return new RedbackFile(filemd, bytes);
 		} catch(Exception e) {
@@ -41,9 +43,22 @@ public class FileClient extends Client {
 		}
 	}
 	
+	public InputStream getFileInputStream(Session session, String fileUid) throws RedbackException {
+		try {
+			DataMap req = new DataMap();
+			req.put("action", "get");
+			req.put("fileuid", fileUid);
+			StreamEndpoint sep = this.requestStream(session, req);
+			return new InputStream(sep);
+		} catch(Exception e) {
+			throw new RedbackException("Error getting file", e);
+		}	
+	}
+	
 	public StreamEndpoint getFileStream(Session session, String fileUid) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
+			req.put("action", "get");
 			req.put("fileuid", fileUid);
 			StreamEndpoint sep = this.requestStream(session, req);
 			return sep;
@@ -52,13 +67,13 @@ public class FileClient extends Client {
 		}	
 	}
 	
-	public DataMap getMetadata(Session session, String fileUid) throws RedbackException {
+	public RedbackFileMetaData getMetadata(Session session, String fileUid) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "getmetadata");
 			req.put("fileuid", fileUid);
 			DataMap resp = requestDataMap(session, req);
-			return resp;
+			return new RedbackFileMetaData(resp);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
 		}
@@ -135,18 +150,17 @@ public class FileClient extends Client {
 			payload.metadata.put("mime", mime);
 			Payload respPayload = requestPayload(session, payload);
 			DataMap resp = new DataMap(respPayload.getString());
-			return new RedbackFileMetaData(resp.getString("fileuid"), fileName, mime, resp.getString("thumbnail"), username, new Date(), null);
+			return new RedbackFileMetaData(resp.getString("fileuid"), fileName, mime, resp.getString("thumbnail"), username, new Date(), bytes.length, null);
 		} catch(Exception e) {
 			throw new RedbackException("Error link files to object", e);
 		}			
 	}
 	
-	public StreamEndpoint putFileStream(Session session, String fileName, int filesize, String mime) throws RedbackException {
+	public StreamEndpoint putFileStream(Session session, String fileName, String mime) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "put");
 			req.put("filename", fileName);
-			req.put("filesize", filesize);
 			req.put("mime", mime);
 			req.put("username", session.getUserProfile().getUsername());
 			StreamEndpoint sep = requestStream(session, req);

@@ -11,15 +11,17 @@ public class RedbackFileMetaData {
 	public String thumbnail;
 	public String username;
 	public Date date;
+	public int size;
 	public String hash;
 	
-	public RedbackFileMetaData(String u, String fn, String m, String tn, String un, Date d, String h) {
+	public RedbackFileMetaData(String u, String fn, String m, String tn, String un, Date d, int s, String h) {
 		fileuid = u;
 		fileName = fn;
 		mime = m;
 		thumbnail = tn;
 		username = un;
 		date = d;
+		size = s;
 		hash = h;
 	}
 	
@@ -32,6 +34,7 @@ public class RedbackFileMetaData {
 		thumbnail = config.getString("thumbnail");
 		username = config.getString("username");
 		date = config.getDate("date");
+		size = config.containsKey("size") ? config.getNumber("size").intValue() : -1;
 		hash = config.getString("hash");
 	}
 	
@@ -42,6 +45,7 @@ public class RedbackFileMetaData {
 		fileInfo.put("mime", mime);
 		fileInfo.put("username", username);
 		fileInfo.put("date", date != null ? date.toInstant().toString() : null);
+		fileInfo.put("size", size);
 		fileInfo.put("hash", hash);
 		if(addThumbnail) 
 			fileInfo.put("thumbnail", thumbnail);

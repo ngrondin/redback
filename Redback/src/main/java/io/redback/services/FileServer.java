@@ -90,6 +90,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 						response.metadata.put("uid", file.metadata.fileuid);
 						response.metadata.put("username", file.metadata.username);
 						response.metadata.put("date", file.metadata.date.toInstant().toString());
+						response.metadata.put("size", "" + file.metadata.size);
 					} 
 					else if(action.equals("getmetadata")) 
 					{
@@ -177,7 +178,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 				String fileuid = request.getString("fileuid");
 				if(fileuid != null) {
 					RedbackFileMetaData fmd = acceptGetStream(session, streamEndpoint, fileuid);
-					acceptPayload = new Payload(new DataMap("filename", fmd.fileName, "mime", fmd.mime));
+					acceptPayload = new Payload(fmd.getDataMap(false));
 				} else { // For backwards compatibility, to be removed
 					String objectname = request.getString("object");
 					String objectuid = request.getString("uid");
@@ -187,11 +188,10 @@ public abstract class FileServer extends AuthenticatedDualProvider
 				}
 			} else if(action.equals("put")) {
 				final String fileName = request.getString("filename");
-				final int fileSize = request.containsKey("filesize") ? request.getNumber("filesize").intValue() : -1;
 				final String mime = request.getString("mime");
 				final String objectname = request.getString("object");
 				final String objectuid = request.getString("uid");
-				acceptPutStream(session, streamEndpoint, fileName, fileSize, mime, objectname, objectuid);
+				acceptPutStream(session, streamEndpoint, fileName, mime, objectname, objectuid);
 			} else if(action.equals("list")) { // This section is only for backwards compatibility of getting the list on the same get path
 				String objectname = request.getString("object");
 				String objectuid = request.getString("uid");
@@ -236,7 +236,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 
 	public abstract RedbackFileMetaData acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException;
 	
-	public abstract void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, int filesize, String mime, String objectname, String objectuid) throws RedbackException;
+	public abstract void acceptPutStream(Session session, StreamEndpoint streamEndpoint, String filename, String mime, String objectname, String objectuid) throws RedbackException;
 	
 	public abstract void acceptListFilesForStream(Session session, StreamEndpoint streamEndpoint, String objectname, String objectuid) throws RedbackException;
 	
