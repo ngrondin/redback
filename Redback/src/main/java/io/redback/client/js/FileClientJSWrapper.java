@@ -63,7 +63,8 @@ public class FileClientJSWrapper extends ObjectJSWrapper {
 			return new CallableJSWrapper() {
 				public Object call(Object... arguments) throws RedbackException {
 					String fileUid = arguments[0].toString();
-					return fileClient.getMetadata(session, fileUid);
+					RedbackFileMetaData md = fileClient.getMetadata(session, fileUid);
+					return md.getDataMap(true);
 				}
 			};
 		} else if(key.equals("getFile")) {
