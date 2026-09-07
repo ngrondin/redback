@@ -215,7 +215,7 @@ public abstract class FileServer extends AuthenticatedDualProvider
 	}
 
 	public int getStreamIdleTimeout() {
-		return 10000;
+		return 15000;
 	}
 
 	public abstract RedbackFile getFile(Session session, String fileUid) throws RedbackException;

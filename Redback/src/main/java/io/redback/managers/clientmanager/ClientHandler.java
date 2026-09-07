@@ -164,7 +164,7 @@ public class ClientHandler extends ClientStreamHandler {
 
 	public void startUpload(String uploaduid, String filename, int filesize, String mime, String object, String uid) throws RedbackException {
 		try {
-			StreamEndpoint sep = clientManager.getFileClient().putFileStream(session, filename, mime, 15000);
+			StreamEndpoint sep = clientManager.getFileClient().putFileStream(session, filename, mime);
 			registerUpload(uploaduid, sep);
 			sep.setHandler(new StreamHandler() {
 				public void receiveStreamData(Payload payload) {
