@@ -43,12 +43,12 @@ public class FileClient extends Client {
 		}
 	}
 	
-	public InputStream getFileInputStream(Session session, String fileUid) throws RedbackException {
+	public InputStream getFileInputStream(Session session, String fileUid, int timeout) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "get");
 			req.put("fileuid", fileUid);
-			StreamEndpoint sep = this.requestStream(session, req);
+			StreamEndpoint sep = this.requestStream(session, req, timeout);
 			return new InputStream(sep);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
@@ -56,11 +56,15 @@ public class FileClient extends Client {
 	}
 	
 	public StreamEndpoint getFileStream(Session session, String fileUid) throws RedbackException {
+		return getFileStream(session, fileUid);
+	}
+	
+	public StreamEndpoint getFileStream(Session session, String fileUid, int timeout) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "get");
 			req.put("fileuid", fileUid);
-			StreamEndpoint sep = this.requestStream(session, req);
+			StreamEndpoint sep = requestStream(session, req, timeout);
 			return sep;
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
@@ -157,13 +161,17 @@ public class FileClient extends Client {
 	}
 	
 	public StreamEndpoint putFileStream(Session session, String fileName, String mime) throws RedbackException {
+		return putFileStream(session, fileName, mime, 5000);
+	}
+	
+	public StreamEndpoint putFileStream(Session session, String fileName, String mime, int timeout) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "put");
 			req.put("filename", fileName);
 			req.put("mime", mime);
 			req.put("username", session.getUserProfile().getUsername());
-			StreamEndpoint sep = requestStream(session, req);
+			StreamEndpoint sep = requestStream(session, req, timeout);
 			return sep;
 		} catch(Exception e) {
 			throw new RedbackException("Error link files to object", e);

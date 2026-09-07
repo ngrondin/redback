@@ -149,7 +149,7 @@ public class RedbackFileServer extends FileServer
 			DataMap streamReq = new DataMap();
 			streamReq.put("action", "get");
 			streamReq.put("filename", fileUid);
-			StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(streamReq), 5000);
+			StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(streamReq), 15000);
 			return sep;
 		} catch(FunctionErrorException | FunctionTimeoutException e) {
 			if(e instanceof FunctionErrorException && ((FunctionErrorException)e).getErrorCode() >= 400 && ((FunctionErrorException)e).getErrorCode() < 500)
@@ -261,7 +261,7 @@ public class RedbackFileServer extends FileServer
 					req.put("action", "put");
 					req.put("filename", filemd.fileuid);
 					req.put("size", filemd.size);
-					StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(req), 5000);
+					StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(req), 15000);
 					StreamSender sender = new StreamSender(fis, sep);
 					sender.sync();
 				} else if(defaultFileService != null) {
@@ -280,29 +280,6 @@ public class RedbackFileServer extends FileServer
 			throw new RedbackException("Error putting file", e);
 		}
 	}	
-	
-	/*public void storeFile(String fileUid, int size, File file) throws RedbackException {
-		try {
-			if(defaultFileStream != null) {
-				FileInputStream fis = new FileInputStream(file);
-				DataMap req = new DataMap();
-				req.put("action", "put");
-				req.put("filename", fileUid);
-				req.put("size", size);
-				StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(req), 5000);
-				StreamSender sender = new StreamSender(fis, sep);
-				sender.sync();
-				file.delete();
-			} else if(defaultFileService != null) {
-				byte[] bytes = Files.readAllBytes(file.toPath());
-				Payload filePayload = new Payload(bytes);
-				filePayload.metadata.put("filename", fileUid);
-				firebus.publish(defaultFileService, filePayload);
-			}
-		} catch(Exception e) {
-			throw new RedbackException("Error sending file to storage service", e);
-		}
-	}*/
 	
 	public void linkFileTo(Session session, String fileUid, String object, String uid) throws RedbackException {
 		try {

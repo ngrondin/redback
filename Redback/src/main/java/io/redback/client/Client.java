@@ -102,22 +102,26 @@ public class Client {
 		}
 	}
 	
-	protected StreamEndpoint requestStream(Session session, DataMap req) throws RedbackException
+	protected StreamEndpoint requestStream(Session session, DataMap req) throws RedbackException {
+		return requestStream(session, req, 5000);
+	}
+
+	protected StreamEndpoint requestStream(Session session, DataMap req, int timeout) throws RedbackException
 	{
 		Payload reqP = new Payload(req);
 		reqP.metadata.put("mime", "application/json");
-		StreamEndpoint sep = requestStream(session, reqP);
+		StreamEndpoint sep = requestStream(session, reqP, timeout);
 		return sep;
 	}
 	
-	protected StreamEndpoint requestStream(Session session, Payload reqP) throws RedbackException 
+	protected StreamEndpoint requestStream(Session session, Payload reqP, int timeout) throws RedbackException 
 	{
 		if(serviceName != null)
 		{
 			try
 			{
 				setSessionMeta(session, reqP);
-				StreamEndpoint sep = firebus.requestStream(serviceName, reqP, 5000);
+				StreamEndpoint sep = firebus.requestStream(serviceName, reqP, timeout);
 				return sep;
 			}
 			catch(Exception e)
