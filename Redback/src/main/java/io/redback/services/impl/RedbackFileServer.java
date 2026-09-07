@@ -229,7 +229,9 @@ public class RedbackFileServer extends FileServer
 			String tempFileName = UUID.randomUUID().toString();
 			File file = new File(tempFileName);
 			Files.write(file.toPath(), bytes);
-			return putFile(session, fileName, mime, username, file);
+			RedbackFileMetaData metaData = putFile(session, fileName, mime, username, file);
+			file.delete();
+			return metaData;
 		} catch(Exception e) {
 			throw new RedbackException("Error putting file", e);
 		}
@@ -239,8 +241,7 @@ public class RedbackFileServer extends FileServer
 	{
 		try {
 			RedbackFileMetaData filemd = getMetadata(session, file);
-		    if(filemd.fileuid == null) 
-		    {
+		    if(filemd.fileuid == null)  {
 				filemd.fileuid = getNewId(session);
 				if(mime.startsWith("image")) {
 					filemd.thumbnail = ImageUtils.getBase64ThumbnailOfImage(Files.readAllBytes(file.toPath()));
@@ -253,14 +254,26 @@ public class RedbackFileServer extends FileServer
 				filemd.mime = mime;
 				filemd.username = username;
 				filemd.date = new Date();
-				dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), filemd.fileuid), fileCollection.convertObjectToSpecific(filemd.getDataMap(true)));
-	
-				storeFile(filemd.fileuid, filemd.size, file);
+				
+				if(defaultFileStream != null) {
+					FileInputStream fis = new FileInputStream(file);
+					DataMap req = new DataMap();
+					req.put("action", "put");
+					req.put("filename", filemd.fileuid);
+					req.put("size", filemd.size);
+					StreamEndpoint sep = firebus.requestStream(defaultFileStream, new Payload(req), 5000);
+					StreamSender sender = new StreamSender(fis, sep);
+					sender.sync();
+				} else if(defaultFileService != null) {
+					byte[] bytes = Files.readAllBytes(file.toPath());
+					Payload filePayload = new Payload(bytes);
+					filePayload.metadata.put("filename", filemd.fileuid);
+					firebus.publish(defaultFileService, filePayload);
+				}
+				
+				dataClient.putData(fileCollection.getName(), new DataMap(fileCollection.getField("fileuid"), filemd.fileuid), fileCollection.convertObjectToSpecific(filemd.getDataMap(true)));				
 				return filemd; 
-		    }
-		    else
-		    {
-		    	file.delete();
+		    } else {
 				return filemd;
 		    }
 		} catch(Exception e) {
@@ -268,7 +281,7 @@ public class RedbackFileServer extends FileServer
 		}
 	}	
 	
-	public void storeFile(String fileUid, int size, File file) throws RedbackException {
+	/*public void storeFile(String fileUid, int size, File file) throws RedbackException {
 		try {
 			if(defaultFileStream != null) {
 				FileInputStream fis = new FileInputStream(file);
@@ -289,7 +302,7 @@ public class RedbackFileServer extends FileServer
 		} catch(Exception e) {
 			throw new RedbackException("Error sending file to storage service", e);
 		}
-	}
+	}*/
 	
 	public void linkFileTo(Session session, String fileUid, String object, String uid) throws RedbackException {
 		try {
