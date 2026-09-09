@@ -17,6 +17,7 @@ export class DragService {
   offset: XY;
   position: XY;
   size: XY;
+  parts: any[];
   droppedOnElement: ElementRef;
 
   constructor() { }
@@ -65,7 +66,8 @@ export class DragService {
     this.mouseOrigin = null;
     this.offset = null;
     this.position = null;
-    this.size = null;       
+    this.size = null;
+    this.parts = null;
     if(this.isDragging) {
       this.isDragging = false;
       if(this.draggingElement != null && this.draggingElement.nativeElement != null) {

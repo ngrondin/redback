@@ -172,6 +172,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   onDragEvent(event: any) {
     if(this.active) {
       this.logService.debug("Gantt " + this.id + ": DragEvent ( event: " +event.type + ", dragitems: " + (Array.isArray(event.data) ? event.data.length : event.data != null ? 1 : 0) + ")");
+      if(event.type == 'start') {
+        let parts = this.getDragSizeForObject(event.data)?.parts;
+        if(parts != null && parts.length > 0) this.dragService.parts = parts; // the formation, from the gantt the bars were grabbed in
+      }
       if(event.type == 'start' && !this.doDragFilter) {
         for(var obj of (Array.isArray(event.data) ? event.data : [event.data])) {
           if(obj != null && obj instanceof RbObject) {
@@ -839,10 +843,16 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(obj instanceof RbObject) {
       let cfg = this.getBestSeriesConfigForObject(obj);
       if(cfg != null) {
-        return {
+        let form: any = {
           x: this.timeConfig.getWidthOfObject(obj, cfg),
           y: this.sizes.laneHeight - (2*this.sizes.marginSize)
         };
+        let main = this.spreadMap[`${obj.objectname}.${obj.uid}`];
+        if(Array.isArray(data) && main != null) {
+          form.parts = data.slice(1).map(o => this.spreadMap[`${o.objectname}.${o.uid}`]).filter(s => s != null)
+            .map(s => ({dx: s.start - main.start, dy: (s.offsetTop + s.laneTop) - (main.offsetTop + main.laneTop), x: s.width, y: s.height}));
+        }
+        return form;
       } else {
         return {x: 100, y: 20};
       }

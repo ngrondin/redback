@@ -21,6 +21,7 @@ export class RbDragChangeformDirective {
       let newForm: any = this.changeFormFunc(this.dragService.data);
       this.dragService.size.x = newForm.x;
       this.dragService.size.y = newForm.y;
+      this.dragService.parts = newForm.parts;
       this.dragService.offset.x = xProp * newForm.x;
       this.dragService.offset.y = yProp * newForm.y;
     }
