@@ -305,9 +305,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   calc() {
     this.sizes.calc();
-    /*this.spreadHeightPX = Math.min(0.0167 * window.innerWidth, 32);
-    this.spreadMarginPX = Math.min(0.004175 * window.innerWidth, 8);
-    this.borderWidthPX = Math.min(0.000521875 * window.innerWidth, 1);*/
     this.focusStartPX = null;
     this.focusTopPX = null;
 
@@ -319,7 +316,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(this.doFocus == true) {
       this.focus();
     }
-    //this.cdr.detectChanges();
   }
 
   private calcLanes() {
@@ -453,7 +449,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let merged = Algos.intervalMerge(intervals);
     let transColor = `color-mix(in srgb, ${baseColor} 30%, transparent 70%)`;
     let blocks = merged.map(i => `${transColor} ${i[0] - 2}px, ${baseColor} ${i[0] + 2}px, ${baseColor} ${i[1] - 2}px, ${transColor} ${i[1] + 2}px`);
-    let bg = `linear-gradient(to right, ${blocks.join(', ')})`;
+    let bg = blocks.length > 0 ? `linear-gradient(to right, ${blocks.join(', ')})` : `${transColor}`
     return bg;
   }
 
