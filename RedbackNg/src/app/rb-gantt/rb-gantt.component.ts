@@ -172,10 +172,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   onDragEvent(event: any) {
     if(this.active) {
       this.logService.debug("Gantt " + this.id + ": DragEvent ( event: " +event.type + ", dragitems: " + (Array.isArray(event.data) ? event.data.length : event.data != null ? 1 : 0) + ")");
-      if(event.type == 'start') {
-        let parts = this.getDragSizeForObject(event.data)?.parts;
-        if(parts != null && parts.length > 0) this.dragService.parts = parts; // the formation, from the gantt the bars were grabbed in
-      }
       if(event.type == 'start' && !this.doDragFilter) {
         for(var obj of (Array.isArray(event.data) ? event.data : [event.data])) {
           if(obj != null && obj instanceof RbObject) {

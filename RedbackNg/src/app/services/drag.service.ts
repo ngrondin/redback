@@ -94,4 +94,14 @@ export class DragService {
       observer.next(event);
     });  
   }
+
+  setNewForm(newForm: any) {
+    let xProp = this.offset.x / this.size.x;
+    let yProp = this.offset.y / this.size.y;
+    this.size.x = newForm.x;
+    this.size.y = newForm.y;
+    this.parts = newForm.parts;
+    this.offset.x = xProp * newForm.x;
+    this.offset.y = yProp * newForm.y;
+  }
 }
