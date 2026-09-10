@@ -17,6 +17,7 @@ export class DragService {
   offset: XY;
   position: XY;
   size: XY;
+  parts: any[];
   droppedOnElement: ElementRef;
 
   constructor() { }
@@ -65,7 +66,8 @@ export class DragService {
     this.mouseOrigin = null;
     this.offset = null;
     this.position = null;
-    this.size = null;       
+    this.size = null;
+    this.parts = null;
     if(this.isDragging) {
       this.isDragging = false;
       if(this.draggingElement != null && this.draggingElement.nativeElement != null) {
@@ -91,5 +93,15 @@ export class DragService {
     this.dragObservers.forEach((observer) => {
       observer.next(event);
     });  
+  }
+
+  setNewForm(newForm: any) {
+    let xProp = this.offset.x / this.size.x;
+    let yProp = this.offset.y / this.size.y;
+    this.size.x = newForm.x;
+    this.size.y = newForm.y;
+    this.parts = newForm.parts;
+    this.offset.x = xProp * newForm.x;
+    this.offset.y = yProp * newForm.y;
   }
 }

@@ -7,6 +7,7 @@ import { DragService } from 'app/services/drag.service';
 export class RbDragObjectDirective {
   @Input('rb-drag-object') object: any;
   @Input('rb-drag-enhancedata') enhanceData: any;
+  @Input('rb-drag-getform') getForm: any;
   @Input('rb-drag-droppedout') droppedout: any;
 
   constructor(
@@ -22,11 +23,12 @@ export class RbDragObjectDirective {
         if(this.droppedout != null) {
           this.droppedout({data: data, mouseEvent: $event});
         }
-      }); 
+      });
+     if(this.getForm != null) {
+       let newForm: any = this.getForm(data);
+       this.dragService.setNewForm(newForm);
+     } 
     }
     $event.stopPropagation();
   }
-
-  
-
 }

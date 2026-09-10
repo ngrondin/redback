@@ -839,10 +839,16 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     if(obj instanceof RbObject) {
       let cfg = this.getBestSeriesConfigForObject(obj);
       if(cfg != null) {
-        return {
+        let form: any = {
           x: this.timeConfig.getWidthOfObject(obj, cfg),
           y: this.sizes.laneHeight - (2*this.sizes.marginSize)
         };
+        let main = this.spreadMap[`${obj.objectname}.${obj.uid}`];
+        if(Array.isArray(data) && main != null) {
+          form.parts = data.slice(1).map(o => this.spreadMap[`${o.objectname}.${o.uid}`]).filter(s => s != null)
+            .map(s => ({dx: s.start - main.start, dy: (s.offsetTop + s.laneTop) - (main.offsetTop + main.laneTop), x: s.width, y: s.height}));
+        }
+        return form;
       } else {
         return {x: 100, y: 20};
       }

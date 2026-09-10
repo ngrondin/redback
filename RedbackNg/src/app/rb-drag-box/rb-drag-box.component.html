@@ -1,0 +1,16 @@
+<div
+    class="rb-drag-box"
+    [style.visibility]="dragService.isDragging ? 'visible' : 'hidden'"
+    [style.left.px]="dragService.position != null ? dragService.position.x : 0"
+    [style.top.px]="dragService.position != null ? dragService.position.y : 0"
+    [style.width.px]="dragService.size != null ? dragService.size.x : 0"
+    [style.height.px]="dragService.size != null ? dragService.size.y : 0">
+    <div
+        *ngFor="let part of dragService.parts"
+        class="rb-drag-box rb-drag-box-part"
+        [style.left.px]="part.dx"
+        [style.top.px]="part.dy"
+        [style.width.px]="part.x"
+        [style.height.px]="part.y">
+    </div>
+</div>

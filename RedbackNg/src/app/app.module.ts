@@ -67,6 +67,7 @@ import { FilterService } from './services/filter.service';
 import { RbDynamicGraphComponent } from './graphs/rb-dynamicgraph/rb-dynamicgraph.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { RbDragChangeformDirective } from './rb-drag/rb-drag-changeform.directive';
+import { RbDragBoxComponent } from './rb-drag-box/rb-drag-box.component';
 import { AgmOverlays } from "agm-overlays"
 import { RbChatComponent } from './rb-chat/rb-chat.component';
 import { RbAddressInputComponent } from './inputs/rb-address-input/rb-address-input.component';
@@ -275,6 +276,7 @@ window.redback = window.redback || {};
         RbDragObjectDirective,
         RbDragDropzoneDirective,
         RbDragChangeformDirective,
+        RbDragBoxComponent,
         RbAggregatesetComponent,
         RbDynamicGraphComponent,
         RbChatComponent,

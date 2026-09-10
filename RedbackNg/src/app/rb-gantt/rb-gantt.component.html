@@ -331,6 +331,7 @@
                         [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '') + (spread.ghost ? ' rb-gantt-spread-ghost' : '')"
                         [rb-drag-object]="spread.canEdit ? spread.object : null"
                         [rb-drag-enhancedata]="enhanceDragDataCallback"
+                        [rb-drag-getform]="getDragSizeForObjectCallback"
                         [rb-drag-droppedout]="droppedOutCallback"
                         [tip]="spread.tip"
                         (click)="clickSpread(spread, $event); $event.stopPropagation();"
