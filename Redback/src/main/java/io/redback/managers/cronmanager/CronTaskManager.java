@@ -89,6 +89,7 @@ public class CronTaskManager extends Thread {
 					if(sleep < 10000)
 						sleep = 10000;
 					sleep -= randomDelay;
+					Logger.info("rb.cron.run", new DataMap("sleep", sleep));
 					Thread.sleep(sleep);
 				} catch(Exception e) {
 					Logger.severe("rb.cron.run", "General error in CronTaskManager thread", e);
@@ -166,7 +167,7 @@ public class CronTaskManager extends Thread {
 			req.metadata.put("session", session.id);
 			req.metadata.put("token", session.getToken());
 			req.metadata.put("mime", "application/json");
-			Logger.info("rb.cron.runtask", new DataMap("task", ctc.getName()));
+			Logger.info("rb.cron.runtask", new DataMap("task", ctc.getName(), "session", session.id));
 			if(faf)
 				firebus.requestServiceAndForget(serviceName, req);
 			else

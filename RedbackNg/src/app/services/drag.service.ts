@@ -96,8 +96,8 @@ export class DragService {
   }
 
   setNewForm(newForm: any) {
-    let xProp = this.offset.x / this.size.x;
-    let yProp = this.offset.y / this.size.y;
+    let xProp = this.size.x > 0 ? this.offset.x / this.size.x : 0;
+    let yProp = this.size.y > 0 ? this.offset.y / this.size.y : 0;
     this.size.x = newForm.x;
     this.size.y = newForm.y;
     this.parts = newForm.parts;
