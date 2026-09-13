@@ -10,7 +10,7 @@ public abstract class CallableJSWrapper extends SCallable {
 	
 	public SValue call(SValue... arguments) throws ScriptCallException {
 		try {
-			Object[] javaArgs = new Object[arguments.length];
+			Object[] javaArgs = new Object[arguments.length]; 
 			for(int i = 0; i < arguments.length; i++) {
 				javaArgs[i] = Converter.convertOut(arguments[i]);
 			}
