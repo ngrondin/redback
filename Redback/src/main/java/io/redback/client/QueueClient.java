@@ -19,6 +19,10 @@ public class QueueClient extends Client {
 	}
 	
 	public void enqueue(Session session, String service, DataMap message, long timeout, Date schedule, String uniqueKey) throws RedbackException {
+		enqueue(session, service, message, timeout, schedule, uniqueKey, false);
+	}
+	
+	public void enqueue(Session session, String service, DataMap message, long timeout, Date schedule, String uniqueKey, boolean nolog) throws RedbackException {
 		try {
 			DataMap req = new DataMap();
 			req.put("action", "enqueue");
@@ -30,7 +34,7 @@ public class QueueClient extends Client {
 				req.put("schedule", schedule);
 			if(uniqueKey != null)
 				req.put("uniquekey", uniqueKey);
-			requestDataMap(session, req);
+			requestDataMap(session, req, false, nolog);
 		} catch(Exception e) {
 			throw new RedbackException("Error enqueing message", e);
 		}

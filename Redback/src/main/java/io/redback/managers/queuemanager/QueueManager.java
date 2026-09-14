@@ -37,7 +37,7 @@ public class QueueManager extends Thread {
 		setName("rbQueue");
 	}
 		
-	public synchronized void enqueue(Session session, String service, DataMap message, int requestTimeout, Date schedule, String uniqueKey) throws RedbackException {
+	public synchronized void enqueue(Session session, String service, DataMap message, int requestTimeout, Date schedule, String uniqueKey, boolean nolog) throws RedbackException {
 		String uuid = null;
 		if(uniqueKey != null) 
 			uuid = getUUIDofUniqueKey(uniqueKey);
@@ -61,6 +61,7 @@ public class QueueManager extends Thread {
 			data.put("schedule", schedule);
 		if(uniqueKey != null)
 			data.put("uniquekey", uniqueKey);
+		data.put("nolog", nolog);
 		data.put("lock", null);
 		data.put("failed", null);
 		collection.putData(key, data);
@@ -106,10 +107,13 @@ public class QueueManager extends Thread {
 				int requestTimeout = msg.containsKey("timeout") ? msg.getNumber("timeout").intValue() : 10000;
 				String sessionId = msg.getString("session");
 				boolean isSystem = msg.getBoolean("issystem");
+				boolean nolog = msg.containsKey("nolog") ? msg.getBoolean("nolog") : false;
 				String token = isSystem ? sysUserManager.getToken(new Session(sessionId)) : checkToken(msg.getString("token"));
 				Payload payload = new Payload(message);
 				payload.metadata.put("session", msg.getString("session"));
 				payload.metadata.put("token", token);
+				if(nolog)
+					payload.metadata.put("nolog", "true");
 				if(msg.containsKey("timezone"))
 					payload.metadata.put("timezone", msg.getString("timezone"));
 				if(msg.containsKey("domain"))

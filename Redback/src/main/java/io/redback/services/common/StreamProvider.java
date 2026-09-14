@@ -22,7 +22,7 @@ public abstract class StreamProvider extends Provider implements io.firebus.inte
 			Session session = getSession(payload);
 			checkStarted();
 			Payload acceptPayload = redbackAcceptStream(session, payload, streamEndpoint);
-			if(writeRequestLog)
+			if(canWriteLog(payload))
 				Logger.info("rb.stream", new DataMap("ms", timer.mark(), "req", payload.getDataObject(), "session", session.getStats()));
 			return acceptPayload;
 		} catch(Exception e) {

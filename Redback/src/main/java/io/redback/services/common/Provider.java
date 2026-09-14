@@ -52,6 +52,10 @@ public abstract class Provider
 			Logger.userError(event, StringUtils.rollUpExceptions(e), data);
 		return new FunctionErrorException(msg, e, errorCode);
 	}
+	
+	protected boolean canWriteLog(Payload payload) {
+		return writeRequestLog == true && !(payload.metadata.containsKey("nolog") && payload.metadata.get("nolog").equals("true"));
+	}
 
 	protected void checkStarted() {
 		if(started) return;

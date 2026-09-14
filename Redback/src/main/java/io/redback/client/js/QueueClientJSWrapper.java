@@ -30,7 +30,8 @@ public class QueueClientJSWrapper extends ObjectJSWrapper {
 					long timeout = arguments.length >= 3 ? (long)arguments[2] : 0;
 					Date schedule = arguments.length >= 4 ? (Date)arguments[3] : null;
 					String uniqueKey = arguments.length >= 5 ? (String)arguments[4] : null;
-					queueClient.enqueue(session, service, message, timeout, schedule, uniqueKey);
+					boolean nolog = arguments.length >= 6 ? (boolean)arguments[5] : false;
+					queueClient.enqueue(session, service, message, timeout, schedule, uniqueKey, nolog);
 					return null;
 				}
 			};

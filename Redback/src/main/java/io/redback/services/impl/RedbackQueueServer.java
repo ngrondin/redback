@@ -22,8 +22,8 @@ public class RedbackQueueServer extends QueueServer {
 		queueManager.start();
 	}
 
-	protected void enqueue(Session session, String service, DataMap message, int timeout, Date schedule, String uniqueKey) throws RedbackException {
-		queueManager.enqueue(session, service, message, timeout, schedule, uniqueKey);
+	protected void enqueue(Session session, String service, DataMap message, int timeout, Date schedule, String uniqueKey, boolean nolog) throws RedbackException {
+		queueManager.enqueue(session, service, message, timeout, schedule, uniqueKey, nolog);
 		
 	}
 

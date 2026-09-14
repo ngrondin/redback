@@ -37,7 +37,12 @@ public class Client {
 	
 	protected DataMap requestDataMap(Session session, DataMap req, boolean async) throws RedbackException
 	{
-		Payload resp = requestPayload(session, req, async);
+		return requestDataMap(session, req, async, false);
+	}
+	
+	protected DataMap requestDataMap(Session session, DataMap req, boolean async, boolean nolog) throws RedbackException
+	{
+		Payload resp = requestPayload(session, req, async, nolog);
 		try {
 			return resp.getDataMap();
 		} catch(DataException e) {
@@ -64,17 +69,25 @@ public class Client {
 			throw new RedbackException("Return data from " + serviceName + " is not a DataList", e);
 		}
 	}
-	
-	protected Payload requestPayload(Session session, DataMap req, boolean async) throws RedbackException 
-	{
-		Payload reqP = new Payload(req);
-		reqP.metadata.put("mime", "application/json");
-		return requestPayload(session, reqP, async);
-	}
-	
+
 	protected Payload requestPayload(Session session, Payload reqP) throws RedbackException 
 	{
 		return requestPayload(session, reqP, false);
+	}
+	
+	protected Payload requestPayload(Session session, DataMap req, boolean async) throws RedbackException 
+	{
+		return requestPayload(session, req, async, false);
+	}
+	
+	protected Payload requestPayload(Session session, DataMap req, boolean async, boolean nolog) throws RedbackException 
+	{
+		Payload reqP = new Payload(req);
+		reqP.metadata.put("mime", "application/json");
+		if(nolog) {
+			reqP.metadata.put("nolog", "true");
+		}
+ 		return requestPayload(session, reqP, async);
 	}
 	
 	protected Payload requestPayload(Session session, Payload reqP, boolean async) throws RedbackException 
