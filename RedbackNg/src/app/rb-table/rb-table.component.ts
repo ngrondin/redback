@@ -19,6 +19,7 @@ class TableColumnConfig {
   linkview: string;
   modal: string;
   showExpr: string;
+  filter: any;
   alt: {[key: string]: TableColumnConfig};
 
   constructor(json: any) {
@@ -36,6 +37,7 @@ class TableColumnConfig {
     this.linkview = json.linkview;
     this.modal = json.modal;
     this.showExpr = (json.show != null ? json.show : "true");
+    this.filter = json.filter;
     if(json.alt != null) {
       this.alt = {};
       for(const key in json.alt) {

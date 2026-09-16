@@ -63,12 +63,12 @@ export class RbMultiRelatedInputComponent extends RbPopupInputComponent {
   }
 
   public getPopupConfig() {
-    let filter = null;
+    let filter = this.getResolvedFilter();
     let arr = this.rbObject.get(this.attribute);
     if(arr != null && !Array.isArray(arr)) arr = [arr];
     if(arr != null && arr.length > 0) {
       let link = this.rbObject.validation[this.attribute].related.link;
-      filter = {};
+      filter = {...filter};
       filter[link] = {$nin: arr};
     }
     return {
