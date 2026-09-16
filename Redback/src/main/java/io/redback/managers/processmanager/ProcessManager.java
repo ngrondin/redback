@@ -347,6 +347,7 @@ public class ProcessManager
 	
 	public void actionProcess(Actionner actionner, String pid, String action, Date date, DataMap data) throws RedbackException
 	{
+		Date cleanDate = date != null && date.getTime() <= (new Date()).getTime() ? date : null; //Prevents future dating process actions
 		ProcessInstance pi = getProcessInstance(actionner, pid);
 		Logger.finer("rb.process.action.start", new DataMap("name", pi.getProcessName(), "pid", pid, "action", action));
 		Process process = getProcess(actionner.getSession(), pi.getProcessName(), pi.getProcessVersion());
@@ -354,7 +355,7 @@ public class ProcessManager
 		if(pu instanceof InteractionUnit)
 		{
 			loadGroupsOf(actionner);
-			process.action(actionner, pi, action, date, data);
+			process.action(actionner, pi, action, cleanDate, data);
 		}
 		else
 		{
