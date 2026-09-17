@@ -59,7 +59,8 @@ export class RbRelatedInputComponent extends RbPopupInputComponent  {
       displayattribute: this.displayattribute, 
       sortattribute: this.sortattribute,
       parentattribute: this.parentattribute, 
-      childattribute: this.childattribute
+      childattribute: this.childattribute,
+      filter: this.getResolvedFilter()
     };
   }
 

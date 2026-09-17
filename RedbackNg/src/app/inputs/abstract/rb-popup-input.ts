@@ -1,19 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ComponentRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
 import { RbFieldInputComponent } from '../abstract/rb-field-input';
 import { PopupService } from 'app/services/popup.service';
+import { FilterService } from 'app/services/filter.service';
+import { AppInjector } from 'app/app.module';
 
 @Component({template: ''})
 export abstract class RbPopupInputComponent extends RbFieldInputComponent {
   @ViewChild('input', { read: ViewContainerRef }) inputContainerRef: ViewContainerRef;
+  @Input('filter') filter: any;
 
   popupComponentRef: ComponentRef<RbPopupComponent>;
+  filterService: FilterService;
 
   constructor(
     public popupService: PopupService
   ) {
     super();
+    this.filterService = AppInjector.get(FilterService);
   }
 
   public onFocus(event: any) {
@@ -68,6 +73,10 @@ export abstract class RbPopupInputComponent extends RbFieldInputComponent {
   public abstract getPopupClass() : any;
 
   public abstract getPopupConfig() : any;
+
+  public getResolvedFilter() : any {
+    return this.filter != null ? this.filterService.resolveFilter(this.filter, this.rbObject, this.dataset, this.relatedObject) : null;
+  }
 
   private closePopup() {
     this.popupService.closePopup();
