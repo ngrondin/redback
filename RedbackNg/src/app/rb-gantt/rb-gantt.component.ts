@@ -31,6 +31,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('locktonow') locktonow: boolean = false;
   @Input('allowpastdrop') allowpastdrop: boolean = true;
   @Input('allowoverlapgroup') allowoverlapgroup: boolean = false;
+  @Input('allowmultipleoverlays') allowMultipleOverlays: boolean = false;
+  @Input('overlaystyle') overlayStyle: string = 'hatch';
   @Input('snapinterval') snapinterval: number | null = null;
   @Input('headerwidth') _headerwidth: number = 17;
   @Input('startvariable') startVariable: string | null = null;
@@ -61,7 +63,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   lanes: GanttLane[] = [];
   spreads: GanttSpread[] = [];
   overlays: GanttOverlayLane[] = [];
-  selectedOverlayLaneIndex = -1;
+  selectedOverlayLaneIndexes: number[] = [];
   selectedLabelAlt: string | null = null;
   spreadMap: any = {};
 
@@ -518,8 +520,17 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
   }
 
-  public selectedOverlaySpreads() : GanttOverlaySpread[] {
-    return this.selectedOverlayLaneIndex > -1 && this.selectedOverlayLaneIndex < this.overlays.length ? this.overlays[this.selectedOverlayLaneIndex].spreads : []
+  public selectedOverlayLanes() : GanttOverlayLane[] {
+    return this.selectedOverlayLaneIndexes.filter(i => i < this.overlays.length).map(i => this.overlays[i]);
+  }
+
+  public isOverlayLaneSelected(i: number) : boolean {
+    return this.selectedOverlayLaneIndexes.includes(i);
+  }
+
+  public overlayHatch(spread: GanttOverlaySpread, position: number) : string {
+    let angle = [45, 135, 90, 0][(position - 1) % 4];
+    return `repeating-linear-gradient(${angle}deg, ${spread.color} 0 2px, transparent 2px 8px)`;
   }
 
   public clearSelection() {
@@ -604,10 +615,12 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public clickOverlayLaneIndex(i: number) {
-    if(this.selectedOverlayLaneIndex == -1 || this.selectedOverlayLaneIndex != i) {
-      this.selectedOverlayLaneIndex = i;
+    if(this.isOverlayLaneSelected(i)) {
+      this.selectedOverlayLaneIndexes = this.selectedOverlayLaneIndexes.filter(s => s != i);
+    } else if(this.allowMultipleOverlays) {
+      this.selectedOverlayLaneIndexes.push(i);
     } else {
-      this.selectedOverlayLaneIndex = -1;
+      this.selectedOverlayLaneIndexes = [i];
     }
   }
 

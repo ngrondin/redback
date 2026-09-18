@@ -68,6 +68,10 @@
     white-space: nowrap;
 }
 
+.rb-gantt-overlay-lanehead-selected span {
+    font-weight: bold;
+}
+
 .rb-gantt-corner-space {
     height: var(--v72px);
 }
@@ -394,6 +398,14 @@
     position: absolute;
     overflow: hidden;
     height: 100%;
+    opacity: 0.5;
+}
+
+.rb-gantt-overlay-outline {
+    box-sizing: border-box;
+    border-left: var(--v2px) solid;
+    border-right: var(--v2px) solid;
+    opacity: 1;
 }
 
 .rb-gantt-loadoverlay {
