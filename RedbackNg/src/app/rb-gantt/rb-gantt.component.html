@@ -114,6 +114,7 @@
         <div
             *ngFor="let overlaylane of overlays; let i = index"
             class="rb-gantt-overlay-lanehead"
+            [class.rb-gantt-overlay-lanehead-selected]="isOverlayLaneSelected(i)"
             [style.width.px]="headerWidthPX"
             (click)="clickOverlayLaneIndex(i)">
             <span>{{overlaylane.label}}</span>
@@ -305,16 +306,21 @@
             </div>
             <div
                 class="rb-gantt-laneslayer">
-                <div
-                    *ngFor="let overlayspread of selectedOverlaySpreads()"
-                    [class]="'rb-gantt-overlay-spread'"
-                    [style.width.px]="overlayspread.width"
-                    [style.left.px]="overlayspread.start"
-                    [style.top.px]="overlayspread.top"
-                    [style.background-color]="overlayspread.color"
-                    [style.opacity]="0.5"
-                    [style.justify-content]="'start'">
-                </div>
+                <ng-container
+                    *ngFor="let overlaylane of selectedOverlayLanes(); let first = first; let i = index">
+                    <div
+                        *ngFor="let overlayspread of overlaylane.spreads"
+                        class="rb-gantt-overlay-spread"
+                        [class.rb-gantt-overlay-outline]="!first && overlayStyle == 'outline'"
+                        [style.width.px]="overlayspread.width"
+                        [style.left.px]="overlayspread.start"
+                        [style.top.px]="overlayspread.top"
+                        [style.background-color]="first ? overlayspread.color : null"
+                        [style.background-image]="!first && overlayStyle == 'hatch' ? overlayHatch(overlayspread, i) : null"
+                        [style.border-color]="overlayspread.color"
+                        [style.justify-content]="'start'">
+                    </div>
+                </ng-container>
             </div>
             <div
                 class="rb-gantt-laneslayer">
