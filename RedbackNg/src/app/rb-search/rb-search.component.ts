@@ -64,7 +64,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
       this.modes.push(mode);
     }
     for (let mode of this.modes) {
-      if (mode.searchtarget == null) mode.resolveSearchTarget(this.dataset, this.datasetgroup);
+      if (mode.searchtarget == null) mode.resolveSearchTarget(this.targetDataset, this.datasetgroup);
     }
     this.selectMode(this.modes[0]);
   }
