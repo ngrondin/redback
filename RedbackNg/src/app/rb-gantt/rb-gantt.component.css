@@ -66,10 +66,13 @@
     padding-right: var(--v16px);
     cursor: pointer;
     white-space: nowrap;
+    color: #888;
+    font-weight: 200;
 }
 
 .rb-gantt-overlay-lanehead-selected span {
-    font-weight: bold;
+    color: #111;
+    font-weight: normal;
 }
 
 .rb-gantt-corner-space {
