@@ -1,5 +1,7 @@
 package io.redback.utils.js;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +60,10 @@ public class Converter {
 			return new DataSetJSWrapper((DataSet)o);
 		} else if(o instanceof XML) {
 			return new XMLJSWrapper((XML)o);
+		} else if(o instanceof InputStream) {
+			return new InputStreamJSWrapper((InputStream)o);
+		} else if(o instanceof OutputStream) {
+			return new OutputStreamJSWrapper((OutputStream)o);
 		} else {
 			return io.firebus.script.Converter.convertIn(o);
 		}
@@ -106,6 +112,10 @@ public class Converter {
 			return ((DataSetJSWrapper)v).getDataSet();
 		} else if(v instanceof XMLJSWrapper) {
 			return ((XMLJSWrapper)v).getXML();
+		} else if(v instanceof InputStreamJSWrapper) {
+			return ((InputStreamJSWrapper)v).getInputStream();
+		} else if(v instanceof OutputStreamJSWrapper) {
+			return ((OutputStreamJSWrapper)v).getOutputStream();			
 		} else {
 			return io.firebus.script.Converter.convertOut(v);
 		}

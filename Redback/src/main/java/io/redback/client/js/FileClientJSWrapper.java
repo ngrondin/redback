@@ -1,6 +1,8 @@
 package io.redback.client.js;
 
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Base64;
 import java.util.List;
 
@@ -12,7 +14,9 @@ import io.redback.security.Session;
 import io.redback.utils.RedbackFile;
 import io.redback.utils.RedbackFileMetaData;
 import io.redback.utils.js.CallableJSWrapper;
+import io.redback.utils.js.InputStreamJSWrapper;
 import io.redback.utils.js.ObjectJSWrapper;
+import io.redback.utils.js.OutputStreamJSWrapper;
 
 public class FileClientJSWrapper extends ObjectJSWrapper {
 	
@@ -90,6 +94,14 @@ public class FileClientJSWrapper extends ObjectJSWrapper {
 					RedbackFile file = fileClient.getFile(session, fileUid);
 					return file.bytes;
 				}
+			};	
+		} else if(key.equals("getFileInputStream")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String fileUid = arguments[0].toString();
+					InputStream is = fileClient.getFileInputStream(session, fileUid);
+					return new InputStreamJSWrapper(is);
+				}
 			};				
 		} else if(key.equals("putFile")) {
 			return new CallableJSWrapper() {
@@ -109,6 +121,15 @@ public class FileClientJSWrapper extends ObjectJSWrapper {
 					ret.put("thumbnail", md.thumbnail);
 					ret.put("fileuid", md.fileuid);
 					return ret;
+				}
+			};		
+		} else if(key.equals("putFileOutputStream")) {
+			return new CallableJSWrapper() {
+				public Object call(Object... arguments) throws RedbackException {
+					String filename = arguments[0].toString();
+					String mime = arguments[1].toString();
+					OutputStream os = fileClient.putFileOutputStream(session, filename, mime);
+					return new OutputStreamJSWrapper(os);
 				}
 			};				
 		} else {

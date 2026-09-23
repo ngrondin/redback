@@ -11,6 +11,7 @@ import io.firebus.StreamEndpoint;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.utils.InputStream;
+import io.firebus.utils.OutputStream;
 import io.redback.exceptions.RedbackException;
 import io.redback.security.Session;
 import io.redback.utils.RedbackFile;
@@ -45,10 +46,7 @@ public class FileClient extends Client {
 	
 	public InputStream getFileInputStream(Session session, String fileUid) throws RedbackException {
 		try {
-			DataMap req = new DataMap();
-			req.put("action", "get");
-			req.put("fileuid", fileUid);
-			StreamEndpoint sep = this.requestStream(session, req);
+			StreamEndpoint sep = getFileStream(session, fileUid);
 			return new InputStream(sep);
 		} catch(Exception e) {
 			throw new RedbackException("Error getting file", e);
@@ -165,6 +163,15 @@ public class FileClient extends Client {
 			req.put("username", session.getUserProfile().getUsername());
 			StreamEndpoint sep = requestStream(session, req);
 			return sep;
+		} catch(Exception e) {
+			throw new RedbackException("Error link files to object", e);
+		}			
+	}
+	
+	public OutputStream putFileOutputStream(Session session, String fileName, String mime) throws RedbackException {
+		try {
+			StreamEndpoint sep = putFileStream(session, fileName, mime);
+			return new OutputStream(sep);
 		} catch(Exception e) {
 			throw new RedbackException("Error link files to object", e);
 		}			
