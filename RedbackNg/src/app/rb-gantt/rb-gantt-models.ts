@@ -137,6 +137,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     labelAttribute: string | null;
     color: ColorConfig | null;
     applyDateFilter: boolean;
+    defaultOn: boolean;
 
     constructor(json: any, userpref: any) {
       super(json);
@@ -152,6 +153,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
         this.color = null;
       }
       this.applyDateFilter = json.applydatefilter != null ? json.applydatefilter : true;
+      this.defaultOn = json.defaulton != null ? json.defaulton : false;
     }
   }
 
