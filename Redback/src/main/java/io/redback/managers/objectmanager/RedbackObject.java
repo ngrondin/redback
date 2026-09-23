@@ -387,7 +387,7 @@ public class RedbackObject extends RedbackElement
 		return filter;
 	}
 	
-	public void put(String name, Value value, boolean doOnUpdate) throws RedbackException
+	public void put(String name, Value value, boolean doOnUpdate, boolean checkEditability) throws RedbackException
 	{
 		AttributeConfig attributeConfig = getObjectConfig().getAttributeConfig(name);
 		if(attributeConfig != null)
@@ -405,7 +405,7 @@ public class RedbackObject extends RedbackElement
 			Value previousValue = get(name);
 			if(!previousValue.equals(actualValue))
 			{
-				if(canWrite  &&  (isEditable(name) || isNewObject))
+				if(canWrite  &&  (!checkEditability || isEditable(name) || isNewObject))
 				{
 					data.put(name, actualValue);
 					related.remove(name);
@@ -446,12 +446,12 @@ public class RedbackObject extends RedbackElement
 	
 	public void put(String name, Value value) throws RedbackException 
 	{
-		put(name, value, true);
+		put(name, value, true, true);
 	}
 
 	public void put(String name, String value) throws RedbackException
 	{
-		put(name, new Value(value), true);
+		put(name, new Value(value), true, true);
 	}
 	
 	public void put(String name, RedbackObject relatedObject) throws RedbackException

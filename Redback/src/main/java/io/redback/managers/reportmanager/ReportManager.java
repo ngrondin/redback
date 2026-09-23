@@ -97,6 +97,10 @@ public class ReportManager implements Consumer {
 		includeLoaded = true;
 	}
 
+	public Firebus getFirebus() {
+		return firebus;
+	}
+	
 	public ObjectClient getObjectClient() {
 		return objectClient;
 	}

@@ -16,6 +16,7 @@ import io.redback.managers.reportmanager.excel.js.ExcelWorkbookJSWrapper;
 import io.redback.security.Session;
 import io.redback.security.js.SessionJSWrapper;
 import io.redback.utils.ReportFilter;
+import io.redback.utils.js.FirebusJSWrapper;
 import jxl.Workbook;
 import jxl.write.WritableWorkbook;
 
@@ -26,18 +27,19 @@ public class ExcelReport extends Report {
 	public ExcelReport(Session s, ReportManager rm, ReportConfig rc) throws RedbackException {
 		super(s, rm, rc);
 		try	{
-			script = rm.getScriptFactory().createFunction(rc.getName(), new String[] {"session", "timezone", "oc", "wb", "filter", "search", "uid", "sets"}, rc.getData().getString("content"));
+			script = rm.getScriptFactory().createFunction(rc.getName(), new String[] {"session", "firebus", "timezone", "oc", "wb", "filter", "search", "uid", "sets"}, rc.getData().getString("content"));
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising excel report", e);
 		}
 	}
 
 	public ProducedReport produce(List<ReportFilter> filters) throws RedbackException {
+		Map<String, Object> context = new HashMap<String, Object>();
 		try {
 			baos = new ByteArrayOutputStream();
 			WritableWorkbook workbook = Workbook.createWorkbook(baos);
-			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("session", new SessionJSWrapper(session));
+			context.put("firebus", new FirebusJSWrapper(reportManager.getFirebus(), session));
 			context.put("timezone", session.getTimezone());
 			context.put("wb", new ExcelWorkbookJSWrapper(session, workbook));
 			context.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));			

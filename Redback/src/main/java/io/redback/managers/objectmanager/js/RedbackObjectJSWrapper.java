@@ -95,7 +95,8 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 					String attribute = (String)arguments[0];
 					Object value = arguments[1];
 					boolean doOnUpdate = arguments.length >= 3 ? (boolean)arguments[2] : true;
-					rbObject.put(attribute, new Value(value), doOnUpdate);
+					boolean checkEditability = arguments.length >= 4 ? (boolean)arguments[3] : true;
+					rbObject.put(attribute, new Value(value), doOnUpdate, checkEditability);
 					return null;
 				}
 			};				
