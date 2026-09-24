@@ -122,6 +122,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       for(var item of this.overlaysInput) {
         this.overlayConfigs.push(new GanttOverlayConfig(item, this.userPref));
       }
+      this.selectedOverlayLaneIndexes = this.overlayConfigs.map((cfg, i) => cfg.defaultOn ? i : -1).filter(i => i > -1).slice(0, this.allowMultipleOverlays ? undefined : 1);
     }
     if(this.toolbarConfig != null && this.toolbar != null) {
       for(var item of this.toolbarConfig) {

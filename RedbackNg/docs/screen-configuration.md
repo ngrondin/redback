@@ -1253,7 +1253,7 @@ Items of `table.columns` / `linktable.columns`:
 | `dragfilter` | filter restricting which dropped objects may attach to this lane. |
 | `editable` | allow drops onto the lane (default `false`). |
 
-**`overlays`** items (`GanttOverlayConfig`): `{ dataset, label, labelattribute, color|colorattribute|colormap|colorexpression, startattribute|start, durationattribute|duration, endattribute|end, applydatefilter }` — read-only marker lanes.
+**`overlays`** items (`GanttOverlayConfig`): `{ dataset, label, labelattribute, color|colorattribute|colormap|colorexpression, startattribute|start, durationattribute|duration, endattribute|end, applydatefilter, defaulton }` — read-only marker lanes. `defaulton: true` shows the overlay over the lanes from the start, as if its label had been clicked; without `allowmultipleoverlays` only the first overlay with it counts.
 
 **`series`** items — see the `GanttSeriesConfig` list in §3.6 (`gantt` entry): time parts (`startattribute`/`durationattribute`/`endattribute` or VAE objects), lane linkage (`laneattribute(s)`/`laneforeignattribute(s)`), labels, colors (`color`/`colorattribute`/`colormap`/`colorexpression`), indicators, dependencies (`dependencyattribute` → SS/FS/SF/DU arrows), grouping (`groupof`/`groupattribute`), background layers (`isbackground`), editing (`canedit`), `modal`, `link`, `clickscript`, visibility `show` expression.
 
