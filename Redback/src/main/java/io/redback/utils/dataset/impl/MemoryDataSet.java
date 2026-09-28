@@ -44,7 +44,7 @@ public class MemoryDataSet implements RandomAccessDataSet {
 	}
 
 	public boolean hasNext() {
-		return cur < data.size();
+		return cur < data.size() - 1;
 	}
 
 	public void next() {
