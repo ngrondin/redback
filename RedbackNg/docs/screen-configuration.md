@@ -965,6 +965,7 @@ Displays a value as text. Re-declares the binding inputs (§2.5-style) plus `exp
 | `size` | number | Text size in size-units. |
 | `margin` | boolean | Spacing (`true` default). |
 | `alert` | boolean | Alert highlight (default `false`). |
+| `bold` | boolean | Bold text (default `false`). |
 | `icon` | string | Leading icon. |
 | `color` | string | Text color. |
 

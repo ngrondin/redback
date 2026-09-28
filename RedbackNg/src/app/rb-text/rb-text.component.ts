@@ -19,8 +19,10 @@ export class RbTextComponent extends RbDataObserverComponent {
   @Input('alert') alert: boolean = false;
   @Input('icon') icon: string;
   @Input('color') _color: string;
+  @Input('bold') bold: boolean = false;
   
   @HostBinding('class.rb-input-margin') get marginclass() { return this.margin }
+  @HostBinding('class.rb-text-bold') get boldclass() { return this.bold }
   @HostBinding('style.width') get styleWidth() { return this.size != null ? ('min(' + (0.88 * this.size) + 'vw, ' + (17 * this.size) + 'px)'): null;}
 
 
