@@ -29,3 +29,7 @@
     color: red;
     /*font-weight: 450;*/
 }
+
+:host(.rb-text-bold) .rb-text-text {
+    font-weight: bold;
+}
