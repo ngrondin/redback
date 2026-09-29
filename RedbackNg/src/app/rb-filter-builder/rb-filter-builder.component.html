@@ -238,6 +238,27 @@
                                 <table
                                     *ngIf="filterConstruct.config.type == 'multiselect' || filterConstruct.config.type == 'relatedmultiselect'"
                                     class="rb-filter-builder-multiselect-table">
+                                    <tr>
+                                        <td
+                                            class="rb-filter-builder-multiselect-tablecell-name">
+                                            Select all
+                                        </td>
+                                        <td
+                                            *ngIf="filterConstruct.config.type == 'multiselect'"
+                                            class="rb-filter-builder-multiselect-tablecell-count">
+                                            {{filterConstruct.totalCount}}
+                                        </td>
+                                        <td
+                                            class="rb-filter-builder-multiselect-tablecell-check">
+                                            <rb-switch-input
+                                                [margin]="false"
+                                                [fieldheight]="false"
+                                                [showicon]="false"
+                                                [value]="filterConstruct.allSelected"
+                                                (valueChange)="filterConstruct.selectAll($event); changed = true">
+                                            </rb-switch-input>
+                                        </td>
+                                    </tr>
                                     <tr
                                         *ngFor="let option of filterConstruct.config.options">
                                         <td
