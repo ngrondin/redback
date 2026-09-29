@@ -123,6 +123,18 @@ export class FilterItemConstruct {
       }
     }
 
+    public get allSelected() : boolean {
+      return this.config.options.length > 0 && this.config.options.every(o => this.val1.includes(o.value));
+    }
+
+    public get totalCount() : number {
+      return this.config.options.reduce((sum, o) => sum + (o.count ?? 0), 0);
+    }
+
+    public selectAll(on: boolean) {
+      this.val1 = on ? this.config.options.map(o => o.value) : [];
+    }
+
     private isRelativeDate(str: string): boolean {
       return (str.startsWith(dateCriteriaStartPlus) || str.startsWith(dateCriteriaStartMinus)) && str.endsWith(dateCriteriaEnd);
     }
