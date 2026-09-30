@@ -23,6 +23,7 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('entryexpression') entryexpression: string;
   @Input('categoryexpression') categoryexpression: string;
   @Input('groupexpression') groupexpression: string;
+  @Input('groupborder') groupborder: boolean = false;
   //@Input('categories') categories: any;
   @Input('editable') editable: any;
   @Input('linkobjectattribute') linkobjectattribute: string;

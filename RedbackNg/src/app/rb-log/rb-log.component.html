@@ -21,7 +21,7 @@
     (scroll)="onScroll($event)">
     <div 
         *ngFor="let grp of groups"
-        [class]="'rb-log-group'">
+        [class]="'rb-log-group' + (groupborder ? ' rb-log-group-bordered' : '')">
         <span
             *ngIf="grp != 'null'"
             class="rb-log-group-label">

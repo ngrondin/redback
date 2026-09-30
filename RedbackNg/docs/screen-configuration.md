@@ -744,6 +744,7 @@ Activity log / comment list: timestamped entries with author, optional categorie
 | `entryexpression` | string | JS expression for the entry text (§4.2); used when `entryattribute` is not set. New entries still need `entryattribute`. |
 | `categoryexpression` | string | JS expression for the entry category (§4.2); used when `categoryattribute` is not set. |
 | `groupexpression` | string | JS expression for the group label (§4.2); used when `groupattribute` is not set. |
+| `groupborder` | boolean | Draw a border round each group's entries, under its label. Default `false`. |
 | `editable` | any | Whether new entries can be added/edited. |
 | `linkobjectattribute` | string | Attribute on the entry referencing a linked object (opens on click). |
 | `linkuidattribute` | string | Attribute on the entry holding the linked object's uid. |
