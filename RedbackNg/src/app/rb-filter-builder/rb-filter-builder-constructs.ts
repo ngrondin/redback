@@ -123,6 +123,10 @@ export class FilterItemConstruct {
       }
     }
 
+    public get optionsCount() : number {
+      return this.config.options.length;
+    }
+    
     public get allSelected() : boolean {
       return this.config.options.length > 0 && this.config.options.every(o => this.val1.includes(o.value));
     }

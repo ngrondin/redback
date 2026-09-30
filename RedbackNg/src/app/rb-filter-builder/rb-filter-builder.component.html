@@ -238,7 +238,8 @@
                                 <table
                                     *ngIf="filterConstruct.config.type == 'multiselect' || filterConstruct.config.type == 'relatedmultiselect'"
                                     class="rb-filter-builder-multiselect-table">
-                                    <tr>
+                                    <tr
+                                        *ngIf="filterConstruct.optionsCount > 3">
                                         <td
                                             class="rb-filter-builder-multiselect-tablecell-name">
                                             Select all
