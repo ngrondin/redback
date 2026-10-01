@@ -47,8 +47,27 @@
                 <div
                     class="rb-log-bodycol">
                     <div
+                        *ngIf="editing != item.object"
                         class="rb-log-entry"
                         [innerHTML]="item.entry">
+                    </div>
+                    <div
+                        *ngIf="editing == item.object"
+                        class="rb-log-post">
+                        <rb-textarea-input
+                            [grow]="1"
+                            [margin]="false"
+                            [rows]="2"
+                            [(value)]="editValue">
+                        </rb-textarea-input>
+                        <rb-button
+                            [label]="'Save'"
+                            (click)="saveEdit()">
+                        </rb-button>
+                        <rb-button
+                            [label]="'Cancel'"
+                            (click)="editing = null">
+                        </rb-button>
                     </div>
                     <div
                         *ngIf="item.category != null"
@@ -57,8 +76,13 @@
                     </div>                
                 </div>
                 <div
-                    *ngIf="isEditable && item.object.canDelete()"
+                    *ngIf="isEditable && (item.object.canDelete() || item.object.canEdit(entryattribute))"
                     class="rb-log-options">
+                    <rb-iconbutton
+                        *ngIf="item.object.canEdit(entryattribute)"
+                        [icon]="'edit'"
+                        (click)="startEdit(item.object)">
+                    </rb-iconbutton>
                     <rb-iconbutton
                         *ngIf="item.object.canDelete()"
                         [icon]="'close_small'"

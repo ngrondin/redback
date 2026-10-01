@@ -35,6 +35,8 @@ export class RbLogComponent extends RbDataObserverComponent {
   public isEditable: boolean = false;
   public reachedBottom: boolean = false;
   public data: any = {};
+  public editing: RbObject = null;
+  public editValue: string;
 
   recalcPlanner!: RecalcPlanner;
   user!: VAEConfig;
@@ -147,6 +149,18 @@ export class RbLogComponent extends RbDataObserverComponent {
       this.navigateService.navigateTo(navEvent);
     }
 
+  }
+
+  startEdit(object: RbObject) {
+    this.editing = object;
+    this.editValue = object.get(this.entryattribute);
+  }
+
+  saveEdit() {
+    if(this.editValue != null && this.editValue.length > 0) {
+      this.editing.setValue(this.entryattribute, this.editValue);
+    }
+    this.editing = null;
   }
 
   deleteItem(object: RbObject) {
