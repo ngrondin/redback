@@ -153,7 +153,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     this.overlayRef = null;
     this.mode.filterValue = event.filter;
     this.mode.sortValue = event.sort;
-    this.mode.searchtarget.filterSort({filter: this.mode.filterValue, sort: this.mode.sortValue});
+    this.mode.searchtarget.filterSort({filter: this.mode.filterValue, sort: this.mode.sortValue, sentence: event.sentence});
   }
 
   cancelFilterBuilder() {

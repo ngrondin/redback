@@ -44,6 +44,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public resolvedFilter: any;
   public resolvedSort: any;
   public resolvedSearch: string;
+  public filterSentence: string = null;
   public nextPage: number;
   public pageSize: number;
   public hasMorePages: boolean = true;
@@ -388,6 +389,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       if(sortChange) this.userSort = newSort;
       if(searchChange) this.userSearch = newSearch;
       if(event.select != null) this.userSelect = event.select;
+      if(filterChange) this.filterSentence = event.sentence;
       fetched = this.refreshData();
     }
     return fetched;

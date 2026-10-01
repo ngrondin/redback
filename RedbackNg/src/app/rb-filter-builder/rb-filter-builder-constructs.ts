@@ -123,6 +123,43 @@ export class FilterItemConstruct {
       }
     }
 
+    public getSentence() : string {
+      let valPart = null;
+      if(this.config.type == 'string') {
+        if(this.val1 != null) {
+          valPart = "contains '" + this.val1 + "'";
+        } 
+      } else if(this.config.type == 'date') {
+        if(this.val1 == 'lasthour') {
+          valPart = "is in the last hour";
+        } else if(this.val1 == 'lastday') {
+          valPart = "is in the last day";
+        } else if(this.val1 == 'sincelast') {
+          valPart = "is in the last " + Math.round(parseInt(this.val2) / 60000) + " minutes";
+        } else if(this.val1 == 'since') {
+          valPart = "is since " + this.val2;
+        } else if(this.val1 == 'nexthour') {
+          valPart = "is in the next hour";
+        } else if(this.val1 == 'nextday') {
+          valPart = "is in the next day";
+        } else if(this.val1 == 'untilnext') {
+          valPart = "is until the next " + Math.round(parseInt(this.val2) / 60000) + " minutes";
+        } else if(this.val1 == 'until') {
+          valPart = "is until " + this.val2;
+        } else if(this.val1 == 'between') {
+          valPart = "is between " + this.val2 + " and  " + this.val3;
+        } else if(this.val1 == 'rollwindow') {
+          valPart = "is between the last " + Math.round(parseInt(this.val2) / 60000) + " minutes and the last " +  Math.round(parseInt(this.val2) / 60000) + " minutes";
+        }
+      } else if(this.config.type == 'multiselect' || this.config.type == 'relatedmultiselect') {
+        var list = this.val1.map(val => this.config.options.find(o => o.value == val)).filter(val => val != null).map(val => "'" + val.name + "'");
+        valPart = list.length == 1 ? "is " + list[0] : list.length > 1 ? "is one of " + list.join(", ") : null;
+      } else if(this.config.type == 'switch') {
+        valPart = "is " + (this.val1 == true ? "true" : "false");
+      }
+      return valPart != null  ? this.config.label + " " + valPart : null;
+    }
+
     public get optionsCount() : number {
       return this.config.options.length;
     }

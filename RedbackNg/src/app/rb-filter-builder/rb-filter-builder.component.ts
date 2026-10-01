@@ -38,6 +38,7 @@ export class RbFilterBuilderComponent implements OnInit {
   tab: string = "filter";
   editingEntry?: SavedEntry;
   uniongroupsMode: boolean = false;
+  sentence: string = null;
 
   datechoice: any = [
     { value: "lasthour", display: "Last Hour"},
@@ -221,7 +222,7 @@ export class RbFilterBuilderComponent implements OnInit {
 
   clickApply() {
     this.compile();
-    this.done.emit({filter: this.filter, sort: this.sort});
+    this.done.emit({filter: this.filter, sort: this.sort, sentence: this.sentence});
   }
 
   clickSave() {
@@ -339,14 +340,20 @@ export class RbFilterBuilderComponent implements OnInit {
 
   compile() {
     let orList = [];
+    let sentenceList = [];
     for(var group of this.filterGroupConstructs) {
       let flt = group.residual;
+      let sentenceSubList = []
       for(let fic of group.items) {
         flt[fic.config.attribute] = fic.getFilterValue();
+        let sentence = fic.getSentence();
+        if(sentence != null) sentenceSubList.push(fic.getSentence())
       }
       orList.push(flt);
+      if(sentenceSubList.length > 0) sentenceList.push(sentenceSubList.join(' and '));
     }
     this.filter = orList.length > 1 ? {$or: orList} : orList.length == 1 ? orList[0] : null;
+    this.sentence = sentenceList.length > 1 ? sentenceList.join(' OR ') : sentenceList[0];
 
     if(this.sortConstructs.length > 0) {
       this.sort = {};
