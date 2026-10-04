@@ -26,6 +26,17 @@
     flex-direction: column;
 }
 
+.rb-log-group-bordered {
+    border: 1px solid var(--primary-color);
+    border-radius: 3px;
+    margin-bottom: var(--v5px);
+    overflow: hidden;
+}
+
+.rb-log-group-bordered .rb-log-card {
+    margin: var(--v5px);
+}
+
 .rb-log-group-label {
     font-weight: 400;
     font-size: 0.85rem;

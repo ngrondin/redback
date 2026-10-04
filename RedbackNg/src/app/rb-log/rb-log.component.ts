@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { NavigateEvent, RbObject } from 'app/datamodel';
-import { Formatter, RecalcPlanner } from 'app/helpers';
+import { Formatter, RecalcPlanner, VAEConfig } from 'app/helpers';
 import { ActionService } from 'app/services/action.service';
 import { DataService } from 'app/services/data.service';
 import { NavigateService } from 'app/services/navigate.service';
@@ -18,6 +18,12 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('entryattribute') entryattribute: string;
   @Input('categoryattribute') categoryattribute: string;
   @Input('groupattribute') groupattribute: string;
+  @Input('userexpression') userexpression: string;
+  @Input('dateexpression') dateexpression: string;
+  @Input('entryexpression') entryexpression: string;
+  @Input('categoryexpression') categoryexpression: string;
+  @Input('groupexpression') groupexpression: string;
+  @Input('groupborder') groupborder: boolean = false;
   //@Input('categories') categories: any;
   @Input('editable') editable: any;
   @Input('linkobjectattribute') linkobjectattribute: string;
@@ -29,8 +35,15 @@ export class RbLogComponent extends RbDataObserverComponent {
   public isEditable: boolean = false;
   public reachedBottom: boolean = false;
   public data: any = {};
+  public editing: RbObject = null;
+  public editValue: string;
 
   recalcPlanner!: RecalcPlanner;
+  user!: VAEConfig;
+  date!: VAEConfig;
+  entry!: VAEConfig;
+  category!: VAEConfig;
+  group!: VAEConfig;
 
   constructor(
     private dataService: DataService,
@@ -41,6 +54,11 @@ export class RbLogComponent extends RbDataObserverComponent {
 
   dataObserverInit() {
     this.recalcPlanner = new RecalcPlanner(this.calcList.bind(this))
+    this.user = new VAEConfig({attribute: this.userattribute, expression: this.userexpression});
+    this.date = new VAEConfig({attribute: this.dateattribute, expression: this.dateexpression});
+    this.entry = new VAEConfig({attribute: this.entryattribute, expression: this.entryexpression});
+    this.category = new VAEConfig({attribute: this.categoryattribute, expression: this.categoryexpression});
+    this.group = new VAEConfig({attribute: this.groupattribute, expression: this.groupexpression});
   }
 
   dataObserverDestroy() {
@@ -77,17 +95,17 @@ export class RbLogComponent extends RbDataObserverComponent {
   public calcList() {
     let data = {};
     for(var object of this.list) {
-      let grp: string|null = this.groupattribute != null ? object.get(this.groupattribute) : null;
-      let user: string|null = object.get(this.userattribute); 
+      let grp: string|null = this.group.getValue(object);
+      let user: string|null = this.user.getValue(object);
       if(user == null || (user != null && user.length == 0)) user = "Unknown user";
-      let cat: string|null = this.categoryattribute != null ? object.get(this.categoryattribute) : null;
-      let dtstr : string = object.get(this.dateattribute);
+      let cat: string|null = this.category.getValue(object);
+      let dtstr : string = this.date.getValue(object);
       if(dtstr == null || (dtstr != null && dtstr.length == 0)) {
         dtstr = "Unknown date";
       } else {
         dtstr = Formatter.formatDateTime(new Date(dtstr));
       }
-      let entry : string = object.get(this.entryattribute);
+      let entry : string = this.entry.getValue(object);
       if(entry == null) {
         entry = "";
       } else {
@@ -131,6 +149,18 @@ export class RbLogComponent extends RbDataObserverComponent {
       this.navigateService.navigateTo(navEvent);
     }
 
+  }
+
+  startEdit(object: RbObject) {
+    this.editing = object;
+    this.editValue = object.get(this.entryattribute);
+  }
+
+  saveEdit() {
+    if(this.editValue != null && this.editValue.length > 0) {
+      this.editing.setValue(this.entryattribute, this.editValue);
+    }
+    this.editing = null;
   }
 
   deleteItem(object: RbObject) {
