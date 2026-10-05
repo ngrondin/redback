@@ -1,6 +1,6 @@
 <div
     class="rb-log-post"
-    *ngIf="isEditable">
+    *ngIf="isEditable && canpost">
     <rb-textarea-input
         [label]="'New Note'"
         [icon]="'create'"
@@ -29,7 +29,9 @@
         </span>
         <div
             [class]="'rb-log-card' + (canClick ? ' rb-log-card-active' : '')"
+            [style.background-color]="item.color"
             *ngFor="let item of data[grp]"
+            [rb-row-view-container-for]="item.object"
             (click)="clickCard(item.object)">
             <div
                 class="rb-log-header">
@@ -58,16 +60,13 @@
                             [grow]="1"
                             [margin]="false"
                             [rows]="2"
+                            [showicon]="false"
                             [(value)]="editValue">
                         </rb-textarea-input>
-                        <rb-button
-                            [label]="'Save'"
+                        <rb-iconbutton
+                            [icon]="'check'"
                             (click)="saveEdit()">
-                        </rb-button>
-                        <rb-button
-                            [label]="'Cancel'"
-                            (click)="editing = null">
-                        </rb-button>
+                        </rb-iconbutton>
                     </div>
                     <div
                         *ngIf="item.category != null"
@@ -76,7 +75,7 @@
                     </div>                
                 </div>
                 <div
-                    *ngIf="isEditable && (item.object.canDelete() || item.object.canEdit(entryattribute))"
+                    *ngIf="isEditable && (item.object.canDelete() || item.object.canEdit(entryattribute) || item.object.canEdit(colorattribute)) && editing == null"
                     class="rb-log-options">
                     <ng-container
                         *ngIf="item.object.canEdit(entryattribute) && item.object.canDelete(); else single">
@@ -93,6 +92,12 @@
                             </button>
                             <button
                                 mat-menu-item
+                                *ngIf="item.object.canEdit(colorattribute)"
+                                (click)="pickColor(item.object)">
+                                Color
+                            </button>                            
+                            <button
+                                mat-menu-item
                                 (click)="deleteItem(item.object)">
                                 Delete
                             </button>
@@ -105,6 +110,11 @@
                             [icon]="'edit'"
                             (click)="startEdit(item.object)">
                         </rb-iconbutton>
+                        <rb-iconbutton
+                            *ngIf="item.object.canEdit(colorattribute)"
+                            [icon]="'palette'"
+                            (click)="pickColor(item.object)">
+                        </rb-iconbutton>                        
                         <rb-iconbutton
                             *ngIf="item.object.canDelete()"
                             [icon]="'close_small'"

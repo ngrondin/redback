@@ -169,6 +169,7 @@ import { RbPivotTableComponent } from './graphs/rb-pivot-table/rb-pivot-table.co
 import { RbAboutComponent } from './rb-about/rb-about.component';
 import { RbInlineInputComponent } from './inputs/rb-inline-input/rb-inline-input.component';
 import { RbTextConsoleComponent } from './rb-text-console/rb-text-console.component';
+import { RbRowViewContainerDirective } from './utils/rowviewcontainer/rb-rowviewcontainer.directive';
 
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -346,7 +347,8 @@ window.redback = window.redback || {};
         RbPivotTableComponent,
         RbAboutComponent,
         RbInlineInputComponent,
-        RbTextConsoleComponent
+        RbTextConsoleComponent,
+        RbRowViewContainerDirective
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

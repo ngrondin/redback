@@ -1,10 +1,13 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, ComponentRef, Input, Output, EventEmitter, ViewChildren, QueryList } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { NavigateEvent, RbObject } from 'app/datamodel';
-import { Formatter, RecalcPlanner, VAEConfig } from 'app/helpers';
-import { ActionService } from 'app/services/action.service';
+import { ColorConfig, Formatter, RecalcPlanner, VAEConfig } from 'app/helpers';
 import { DataService } from 'app/services/data.service';
 import { NavigateService } from 'app/services/navigate.service';
+import { RbPopupColorComponent } from 'app/popups/rb-popup-color/rb-popup-color.component';
+import { RbPopupComponent } from 'app/popups/rb-popup/rb-popup.component';
+import { PopupService } from 'app/services/popup.service';
+import { RbRowViewContainerDirective } from 'app/utils/rowviewcontainer/rb-rowviewcontainer.directive';
 
 @Component({
   selector: 'rb-log',
@@ -24,12 +27,16 @@ export class RbLogComponent extends RbDataObserverComponent {
   @Input('categoryexpression') categoryexpression: string;
   @Input('groupexpression') groupexpression: string;
   @Input('groupborder') groupborder: boolean = false;
-  //@Input('categories') categories: any;
-  @Input('editable') editable: any;
   @Input('linkobjectattribute') linkobjectattribute: string;
   @Input('linkuidattribute') linkuidattribute: string;
+  @Input('colorattribute') colorattribute: string;
+  @Input('colorexpression') colorexpression: string;
+  @Input('editable') editable: any;
+  @Input('canpost') canpost: boolean = true;
   
   @Output() posted: EventEmitter<any> = new EventEmitter();
+
+  @ViewChildren(RbRowViewContainerDirective) viewRowContainers!: QueryList<RbRowViewContainerDirective>;
 
   public value: string; 
   public isEditable: boolean = false;
@@ -44,10 +51,12 @@ export class RbLogComponent extends RbDataObserverComponent {
   entry!: VAEConfig;
   category!: VAEConfig;
   group!: VAEConfig;
+  color!: ColorConfig;
 
   constructor(
     private dataService: DataService,
-    private navigateService: NavigateService
+    private navigateService: NavigateService,
+    public popupService: PopupService
   ) {
     super();
   }
@@ -59,6 +68,7 @@ export class RbLogComponent extends RbDataObserverComponent {
     this.entry = new VAEConfig({attribute: this.entryattribute, expression: this.entryexpression});
     this.category = new VAEConfig({attribute: this.categoryattribute, expression: this.categoryexpression});
     this.group = new VAEConfig({attribute: this.groupattribute, expression: this.groupexpression});
+    this.color = new ColorConfig({attribute: this.colorattribute, expression: this.colorexpression});
   }
 
   dataObserverDestroy() {
@@ -111,13 +121,15 @@ export class RbLogComponent extends RbDataObserverComponent {
       } else {
         entry = entry.split('\r\n').join('<br>').split('\n').join('<br>').split('\t').join('&nbsp;&nbsp;');
       }
+      let color: string|null = this.color.getColor(object);
       if(data[grp] == null) data[grp] = [];
       data[grp].push({
         entry: entry,
         user: user,
         date: dtstr,
         category: cat,
-        object: object
+        object: object,
+        color: color
       })
     }
     this.data = data;
@@ -163,6 +175,17 @@ export class RbLogComponent extends RbDataObserverComponent {
     this.editing = null;
   }
 
+  pickColor(object: RbObject) {
+    let vrc = this.viewRowContainers.toArray().find(v => v.object == object);
+    let popupComponentRef: ComponentRef<RbPopupComponent>;
+    popupComponentRef = this.popupService.openPopup(vrc.viewContainerRef, RbPopupColorComponent, {});
+    popupComponentRef.instance.selected.subscribe(value => {
+      this.popupService.closePopup();
+      object.setValue(this.colorattribute, value);
+    });
+    popupComponentRef.instance.cancelled.subscribe(() => this.popupService.closePopup());
+  }
+  
   deleteItem(object: RbObject) {
     this.dataset.delete(object);
   }
