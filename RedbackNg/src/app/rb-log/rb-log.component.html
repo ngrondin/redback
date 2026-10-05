@@ -77,8 +77,7 @@
                 <div
                     *ngIf="isEditable && (item.object.canDelete() || item.object.canEdit(entryattribute) || item.object.canEdit(colorattribute)) && editing == null"
                     class="rb-log-options">
-                    <ng-container
-                        *ngIf="item.object.canEdit(entryattribute) && item.object.canDelete(); else single">
+                    <ng-container>
                         <rb-iconbutton
                             [icon]="'more_vert'"
                             [matMenuTriggerFor]="itemmenu">
@@ -87,6 +86,7 @@
                             #itemmenu="matMenu">
                             <button
                                 mat-menu-item
+                                *ngIf="item.object.canEdit(entryattribute)"
                                 (click)="startEdit(item.object)">
                                 Edit
                             </button>
@@ -98,29 +98,12 @@
                             </button>                            
                             <button
                                 mat-menu-item
+                                *ngIf="item.object.canDelete()"
                                 (click)="deleteItem(item.object)">
                                 Delete
                             </button>
                         </mat-menu>
                     </ng-container>
-                    <ng-template
-                        #single>
-                        <rb-iconbutton
-                            *ngIf="item.object.canEdit(entryattribute)"
-                            [icon]="'edit'"
-                            (click)="startEdit(item.object)">
-                        </rb-iconbutton>
-                        <rb-iconbutton
-                            *ngIf="item.object.canEdit(colorattribute)"
-                            [icon]="'palette'"
-                            (click)="pickColor(item.object)">
-                        </rb-iconbutton>                        
-                        <rb-iconbutton
-                            *ngIf="item.object.canDelete()"
-                            [icon]="'close_small'"
-                            (click)="deleteItem(item.object)">
-                        </rb-iconbutton>
-                    </ng-template>
                 </div>
             </div>
         </div >
