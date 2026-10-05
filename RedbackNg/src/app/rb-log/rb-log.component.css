@@ -30,7 +30,7 @@
     border: 1px solid var(--primary-color);
     border-radius: 3px;
     margin-bottom: var(--v5px);
-    overflow: hidden;
+    //overflow: hidden;
 }
 
 .rb-log-group-bordered .rb-log-card {
