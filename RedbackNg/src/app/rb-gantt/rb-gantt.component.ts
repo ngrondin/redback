@@ -591,9 +591,13 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     }
   }
 
+  public isLaneSelected(lane: GanttLane) : boolean {
+    return this.getDatasetForLanesConfig()?.isObjectSelected(lane.object) || false;
+  }
+
   public clickLane(lane: GanttLane) {
     if(this.lanesConfig != null) {
-      let laneDataset = this.datasetgroup != null ? this.datasetgroup.datasets[this.lanesConfig.dataset] : this.dataset;
+      let laneDataset = this.getDatasetForLanesConfig();
       if(laneDataset != null) {
         laneDataset.select(lane.object);
         if(this.lanesConfig.modal != null) {

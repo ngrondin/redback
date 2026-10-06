@@ -395,6 +395,10 @@
     background-color: #f4f4f4;
 }
 
+.rb-gantt-lanehead-selected {
+    background-color: #e0e9f2;
+}
+
 .rb-gantt-overlay-spread {
     display: flex;
     flex-direction: row;
