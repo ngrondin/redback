@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.Converter;
 import io.firebus.script.exceptions.ScriptValueException;
@@ -13,6 +14,7 @@ import io.firebus.script.values.abs.SValue;
 import io.redback.exceptions.RedbackException;
 import io.redback.managers.objectmanager.RedbackObject;
 import io.redback.managers.objectmanager.Value;
+import io.redback.utils.Convert;
 import io.redback.utils.js.CallableJSWrapper;
 
 public class RedbackObjectJSWrapper extends SDynamicObject
@@ -133,7 +135,11 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 		else if(name.equals("isUpdated"))
 		{
 			return Converter.tryConvertIn(rbObject.isUpdated());
-		}			
+		}	
+		else if(name.equals("embeddings")) 
+		{
+			return Converter.tryConvertIn(Convert.embeddingsToDataList(rbObject.getEmbeddings()));
+		}
 		else
 		{
 			try {
@@ -177,7 +183,10 @@ public class RedbackObjectJSWrapper extends SDynamicObject
 	public void putMember(String key, SValue value) throws ScriptValueException {
 		try
 		{
-			rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)));
+			if(key.equals("embeddings"))
+				rbObject.setEmbeddings(Convert.dataListToEmbeddings((DataList)Converter.convertOut(value)));
+			else
+				rbObject.put(key, new io.redback.managers.objectmanager.Value(Converter.convertOut(value)));
 		} 
 		catch (Exception e)
 		{

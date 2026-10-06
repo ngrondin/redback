@@ -29,12 +29,14 @@ import io.redback.exceptions.RedbackInvalidConfigException;
 import io.redback.exceptions.RedbackInvalidRequestException;
 import io.redback.managers.objectmanager.js.RedbackObjectJSWrapper;
 import io.redback.security.Session;
+import io.redback.utils.Convert;
 
 public class RedbackObject extends RedbackElement
 {
 	protected Value uid;
 	protected Value domain;
 	protected String key;
+	protected float[] embeddings;
 	protected long lastUpdated;
 	protected boolean canRead;
 	protected boolean canWrite;
@@ -46,6 +48,7 @@ public class RedbackObject extends RedbackElement
 	protected List<DataMap> traceEvents;
 	protected boolean isNewObject;
 	protected boolean isDeleted;
+	protected boolean embeddingsUpdated;
 	protected DataMap cachedDataMap;
 
 	// Initiate existing object from pre-loaded data
@@ -57,6 +60,7 @@ public class RedbackObject extends RedbackElement
 		{
 			uid = new Value(dbData.getString(config.getUIDDBKey()));
 			domain = new Value(config.isDomainManaged() ? dbData.getString(config.getDomainDBKey()) : "root");
+			embeddings = config.getEmbeddingsDBKey() != null ? Convert.dataListToEmbeddings(dbData.getList(config.getEmbeddingsDBKey())) : null;
 			key = config.getName() + ":" + uid.getString();
 			Iterator<String> it = config.getAttributeNames().iterator();
 			while(it.hasNext())
@@ -233,6 +237,11 @@ public class RedbackObject extends RedbackElement
 	public String getKey() 
 	{
 		return key;
+	}
+	
+	public float[] getEmbeddings()
+	{
+		return embeddings;
 	}
 	
 	public boolean isNew()
@@ -479,6 +488,11 @@ public class RedbackObject extends RedbackElement
 		}
 	}
 	
+	public void setEmbeddings(float[] embeds) {
+		embeddings = embeds;
+		embeddingsUpdated = true;
+	}
+	
 	public void clear(String name) throws ScriptException, RedbackException
 	{
 		put(name, new Value(null));
@@ -530,7 +544,7 @@ public class RedbackObject extends RedbackElement
 		
 	public boolean isUpdated() 
 	{
-		return canWrite && (updatedAttributes.size() > 0  ||  isNewObject == true);
+		return canWrite && (updatedAttributes.size() > 0  ||  isNewObject == true || embeddingsUpdated == true);
 	}
 	
 	public boolean canDelete() throws RedbackException
@@ -587,6 +601,8 @@ public class RedbackObject extends RedbackElement
 			DataMap dbData = new DataMap();
 			if(isNewObject && config.isDomainManaged())
 				dbData.put(config.getDomainDBKey(), domain.getObject());
+			if(embeddingsUpdated) 
+				dbData.put(config.getEmbeddingsDBKey(), Convert.embeddingsToDataList(embeddings));
 			for(String attributeName: updatedAttributes)
 			{
 				AttributeConfig attributeConfig = config.getAttributeConfig(attributeName);
@@ -623,7 +639,7 @@ public class RedbackObject extends RedbackElement
 	
 	public void onSave() throws RedbackException
 	{
-		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true) && canWrite)
+		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true || embeddingsUpdated == true) && canWrite)
 		{
 			executeFunction("onsave", scriptContext);
 		}

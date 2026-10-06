@@ -39,4 +39,21 @@ public class Convert {
 		}
 		return dataMap;
 	}
+	
+	public static float[] dataListToEmbeddings(DataList list) {
+		if(list == null) return null;
+		float[] ret = new float[list.size()];
+		for(int i = 0; i < list.size(); i++)
+			ret[i] = list.getNumber(i).floatValue();
+		return ret;
+	}
+	
+	public static DataList embeddingsToDataList(float[] embeds) {
+		if(embeds == null) return null;
+		DataList ret = new DataList();
+		for(int i = 0; i < embeds.length; i++)
+			ret.add(embeds[i]);
+		return ret;
+	}
+	
 }

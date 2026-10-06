@@ -134,6 +134,11 @@ public class ObjectConfig
 		return config.getString("accesscat");
 	}
 	
+	public String getEmbeddingsDBKey() 
+	{
+		return config.getString("embeddingsdbkey");
+	}
+	
 	public boolean traceUpdates()
 	{
 		if(config.containsKey("trace"))
