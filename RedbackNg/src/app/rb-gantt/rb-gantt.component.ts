@@ -410,7 +410,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       if(label == RELATED_LOADING) {
         label = "...";
       }
-      let labelWidth = this.graphctx?.measureText(label).width;
       if(this.selectedLabelAlt != null && cfg.labelAlts != null) {
         let alt = cfg.labelAlts.find(a => a.name == this.selectedLabelAlt);
         if(alt != null) {
@@ -421,6 +420,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
           }
         }
       }
+      let labelWidth = this.graphctx?.measureText(label).width;
       spread = new GanttSpread(label, startPX, widthPX, offsetTop, obj, dataset, cfg, this.sizes);
       spread.color = cfg.color?.getColor(obj) || (cfg.isBackground ? 'white' : 'var(--primary-light-color)');
       spread.labelcolor = cfg.labelColor != null ? cfg.labelColor : ColorTool.contrastWith(spread.color, "#333", "#d8d8d8");
@@ -432,7 +432,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       } else if(cfg.indicatorExpression != null) {
         spread.indicator = Evaluator.eval(cfg.indicatorExpression, obj);
       }
-      spread.tip = labelWidth > widthPX ? label : null;
+      spread.tip = cfg.tip?.getValue(obj) || (labelWidth > widthPX ? label : null);
       spread.dragging = this.isObjectDragging(obj);
       this.spreads.push(spread);
       this.spreadMap[`${obj.objectname}.${obj.uid}`] = spread;
