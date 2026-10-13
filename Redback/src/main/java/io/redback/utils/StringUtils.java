@@ -154,6 +154,7 @@ public class StringUtils
 	
 	public static String unescape(String st)
 	{
+		 if(st == null) return null;
 		 StringBuilder sb = new StringBuilder(st.length());
 		 
 		 for (int i = 0; i < st.length(); i++) 
