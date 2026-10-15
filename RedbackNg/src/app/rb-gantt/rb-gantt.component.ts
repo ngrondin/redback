@@ -339,7 +339,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       for(let obj of list) {
         let show = laneFilter != null && !this.filterService.applies(laneFilter, obj) ? false : true;
         if(show) {
-          let lane = new GanttLane(obj, this.lanesConfig, this.sizes);
+          let lane = new GanttLane(obj, this.lanesConfig, this.sizes, this.getDatasetForLanesConfig());
           let spreads: GanttSpread[] = this.calcSpreads(lane, accHeight);
           let hasForegroundSpreads = spreads.filter(s => !s.ghost && !s.background).length > 0;
           let hasBackgroundStreaps = spreads.filter(s => !s.ghost && s.background).length > 0;

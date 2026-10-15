@@ -1253,6 +1253,7 @@ Items of `table.columns` / `linktable.columns`:
 | `linkattributes` | attributes joining series objects to lanes (default `["uid"]`). |
 | `labelattribute` / `labelexpression` | lane label (expression: §4.2). |
 | `subattribute` | sub-label. |
+| `detailexpression` | line under the lane label (expression: §4.2, `dataset` = the lanes dataset, so `dataset.datasetgroup.lists['<id>']` reads another dataset of the group). |
 | `imageattribute` / `iconattribute` / `iconmap` | lane thumbnail / icon. |
 | `orderattribute` | lane ordering. |
 | `modal` | modal opened on lane click. |
