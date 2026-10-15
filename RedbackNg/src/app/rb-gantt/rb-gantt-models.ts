@@ -128,7 +128,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.click = json.clickscript != null ? Function("event", json.clickscript) : null;
       this.applyLaneFilter = json.applylanefilter != null ? json.applylanefilter : true;
       this.applyDateFilter = json.applydatefilter != null ? json.applydatefilter : true;
-      this.show = json.show != null ? Function("dataset", "relatedObject", "return (" + json.show + ")") : null;
+      this.show = json.show != null ? Function("object", "dataset", "relatedObject", "return (" + json.show + ")") : null;
     }
   }
 
