@@ -199,6 +199,11 @@
                     *ngIf="lanesConfig.editable == false"
                     class="rb-gantt-lanelabel">
                     {{lane.label}}
+                    <div
+                        *ngIf="lane.detail != null"
+                        class="rb-gantt-lanedetail">
+                        {{lane.detail}}
+                    </div>
                 </div>
                 <rb-inline-input
                     *ngIf="lanesConfig.editable == true"

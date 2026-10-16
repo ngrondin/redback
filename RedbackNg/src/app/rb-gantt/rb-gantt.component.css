@@ -201,6 +201,13 @@
     overflow: hidden;
 }
 
+.rb-gantt-lanedetail {
+    font-size: 0.75rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .rb-gantt-lanesublabel {
     display: inline-block;
     padding: var(--v5px);

@@ -9,6 +9,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     labelAttribute: string;
     labelExpression: string;
     subAttribute: string;
+    detailExpression: string;
     imageAttribute: string;
     iconAttribute: string;
     iconMap: any;
@@ -24,6 +25,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.labelAttribute = json.labelattribute;
       this.labelExpression = json.labelexpression;
       this.subAttribute = json.subattribute;
+      this.detailExpression = json.detailexpression;
       this.imageAttribute = json.imageattribute;
       this.iconAttribute = json.iconattribute;
       this.iconMap = json.iconmap;
@@ -163,6 +165,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     //linkValues: string[];
     label: string | null = null;
     sub: string | null = null;
+    detail: string | null = null;
     image: string | null = null;
     icon: string | null = null;
     sizes: GanttSizes;
@@ -171,7 +174,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     object: RbObject;
     config: GanttLaneConfig;
 
-    constructor(obj: RbObject, cfg: GanttLaneConfig, sizes: GanttSizes) {
+    constructor(obj: RbObject, cfg: GanttLaneConfig, sizes: GanttSizes, dataset?: RbDatasetComponent) {
       this.object = obj;
       this.config = cfg;
       this.sizes = sizes;
@@ -195,6 +198,9 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       }
       if(this.config.subAttribute != null) {
         this.sub = obj.get(this.config.subAttribute);
+      }
+      if(this.config.detailExpression != null) {
+        this.detail = Evaluator.eval(this.config.detailExpression, obj, undefined, dataset);
       }
       //this.linkValues = this.config.linkAttributes.map(la => this.object.get(la));
     }
