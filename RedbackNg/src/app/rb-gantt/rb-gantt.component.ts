@@ -49,9 +49,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   timeConfig!: GanttTimeConfig;
   heightPX: number | null = null;
   sizes: GanttSizes;
-  /*spreadHeightPX: number = 42;
-  spreadMarginPX: number = 4;
-  borderWidthPX: number = 300;*/
   headerWidthPX: number | null = null;
   doDragFilter: boolean = false;
   hideEmptyLanes: boolean = false;
@@ -100,7 +97,6 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   dataCalcInit() {
-    //this.cdr.detach();
     this.sizes = new GanttSizes();
     this.timeConfig = new GanttTimeConfig({startVariable: this.startVariable, spanVariable: this.spanVariable, zoomVariable: this.zoomVariable, element: this.mainscroll?.element.nativeElement});
     this.timeConfig.changes().subscribe(() => this.updateData(true));
@@ -425,7 +421,11 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       spread.color = cfg.color?.getColor(obj) || (cfg.isBackground ? 'white' : 'var(--primary-light-color)');
       spread.labelcolor = cfg.labelColor != null ? cfg.labelColor : ColorTool.contrastWith(spread.color, "#333", "#d8d8d8");
       if (cfg.groupOf != null) {
-        spread.color = this.calcGroupBackground(obj.uid, spread.color, startPX, this.seriesConfigs.find(c => c.id == cfg.groupOf));
+        if(this.openGroup == obj.uid) {
+          spread.color = `color-mix(in srgb, ${spread.color} 30%, transparent 70%)`;
+        } else {
+          spread.color = this.calcGroupBackground(obj.uid, spread.color, startPX, this.seriesConfigs.find(c => c.id == cfg.groupOf));          
+        }
       }
       if(cfg.indicatorAttribute != null) {
         spread.indicator = obj.get(cfg.indicatorAttribute);

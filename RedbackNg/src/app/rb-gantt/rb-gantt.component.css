@@ -203,9 +203,9 @@
 
 .rb-gantt-lanedetail {
     font-size: 0.75rem;
-    font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--light-writing-color);
 }
 
 .rb-gantt-lanesublabel {
