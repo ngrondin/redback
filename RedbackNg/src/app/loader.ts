@@ -78,6 +78,7 @@ import { RbPivotTableComponent } from "app/graphs/rb-pivot-table/rb-pivot-table.
 import { RbInlineInputComponent } from "app/inputs/rb-inline-input/rb-inline-input.component";
 import { RbComponent } from "app/abstract/rb-component";
 import { NavigateBackData, NavigateEventCompTarget, NavigateEventDataTarget } from "./datamodel";
+import { RbMultilist4Component } from "./rb-multilist4/rb-multilist4.component";
 
 export const componentRegistry: {[key:string]: any} = {
     "dataset": RbDatasetComponent,
@@ -96,6 +97,7 @@ export const componentRegistry: {[key:string]: any} = {
     "inlineinput": RbInlineInputComponent,
     "list3": RbListComponent,
     "list4": RbList4Component,
+    "multilist4": RbMultilist4Component,
     "tree": RbTreeComponent,
     "button": RbActionButtonComponent,
     "search": RbSearchComponent,

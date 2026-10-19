@@ -90,8 +90,8 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     groupOf: string | null;
     groupAttribute: string | null;
     isBackground: boolean;
-    canEdit: boolean;
-    isGhost: boolean;
+    canEdit: VAEConfig;
+    isGhost: VAEConfig;
     modal: string | null;
     link: LinkConfig | null;
     click: Function | null;
@@ -112,8 +112,8 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.centerLabel = json.centerlabel ?? false;
       this.labelColor = json.labelcolor;
       this.isBackground = json.isbackground ?? false;
-      this.canEdit = json.canedit ?? true;
-      this.isGhost = json.ghost ?? false;
+      this.canEdit = new VAEConfig(json.canedit ?? true);
+      this.isGhost = new VAEConfig(json.ghost ?? false);
       if(json.color != null && typeof json.color === 'object') {
         this.color = new ColorConfig(json.color);
       } else if(json.color != null || json.colorattribute != null || json.colormap != null || json.colorexpression != null) {
@@ -275,7 +275,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.config = cfg;
       if (this.config != null) {
         this.background = this.config.isBackground;
-        this.ghost = this.config.isGhost;
+        this.ghost = this.config.isGhost.getValue(object);
         this.centerLabel = this.config.centerLabel;
         this.selectedBorderColor = this.config.selectedBorderColor;
         this.groupOf = this.config.groupOf;
@@ -297,7 +297,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     }
 
     get canEdit(): boolean {
-      return this.object != null && this.config != null ? this.config.canEdit && ((this.config.start.attribute != null && this.object.canEdit(this.config.start.attribute)) || (this.config.laneAttributes != null && this.config.laneAttributes.reduce((acc, la) => acc && this.object.canEdit(la), true))) : false;
+      return this.object != null && this.config != null ? this.config.canEdit.getValue(this.object) && ((this.config.start.attribute != null && this.object.canEdit(this.config.start.attribute)) || (this.config.laneAttributes != null && this.config.laneAttributes.reduce((acc, la) => acc && this.object.canEdit(la), true))) : false;
     }
 
     get selected(): boolean {

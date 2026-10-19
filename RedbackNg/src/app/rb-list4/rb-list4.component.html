@@ -2,7 +2,7 @@
     (rbscroll)="onScroll($event)">
     <div
         *ngFor="let item of enhancedList"
-        [rb-drag-object]="allowdrag ? item.object : null"
+        [rb-drag-object]="item.allowdrag ? item.object : null"
         [rb-drag-enhancedata]="enhanceDragDataCallback"                
         [class]="'rb-list-repeater' + (isSelected(item.object) ? ' rb-list-repeater-selected' : '')">
         <div
@@ -12,7 +12,7 @@
                 <div
                     class="rb-list-item-row">
                     <div
-                        *ngIf="hasImage()"
+                        *ngIf="item.image != null"
                         class="rb-list-item-image"
                         [style.background-image]="item.image">
                     </div>
@@ -20,28 +20,28 @@
                         class="rb-list-item-col">
                         <div
                             class="rb-list-item-metaline"
-                            *ngIf="hasMetaLine()">
+                            *ngIf="item.meta1 != null || item.meta2 != null">
                             <span
                                 class="rb-list-item-meta1"
                                 [style.color]="item.meta1.color"
-                                *ngIf="item.meta1.type != 'loading'">
+                                *ngIf="item.meta1 != null && item.meta1.type != 'loading'">
                                 {{item.meta1.value}}
                             </span>
                             <div
                                 class="rb-loadingbox rb-list-item-meta-loading"
-                                *ngIf="item.meta1.type == 'loading'">
+                                *ngIf="item.meta1 != null && item.meta1.type == 'loading'">
                             </div>                            
                             <div
                                 class="rb-list-item-metaspacer">
                             </div>
                             <span
-                                *ngIf="(item.meta2.type == 'text' || item.meta2.type == 'badge') && item.meta2.type != 'loading'"
+                                *ngIf="item.meta2 != null && (item.meta2.type == 'text' || item.meta2.type == 'badge') && item.meta2.type != 'loading'"
                                 [ngClass]="'rb-list-item-meta2' + (item.meta2.type == 'badge' ? ' rb-list-item-meta2-badge' : '')"
                                 [style.color]="item.meta2.color">
                                 {{item.meta2.value}}
                             </span>
                             <div
-                                *ngIf="item.meta2.type == 'bool' && item.meta2.type != 'loading'"
+                                *ngIf="item.meta2 != null && item.meta2.type == 'bool' && item.meta2.type != 'loading'"
                                 [ngClass]="'rb-list-item-meta2-checkbox' + (item.meta2.value == true ? ' rb-list-item-meta2-checkbox-checked' : '')">
                                 <svg focusable="false" viewBox="0 0 24 24">
                                     <path fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59">
@@ -50,28 +50,28 @@
                             </div>
                             <div
                                 class="rb-loadingbox rb-list-item-meta-loading"
-                                *ngIf="item.meta2.type == 'loading'">
+                                *ngIf="item.meta2 != null && item.meta2.type == 'loading'">
                             </div>                              
                         </div>
                         <span
                             class="rb-list-item-main"
-                            *ngIf="hasMainLine() && item.main.type != 'loading'"
+                            *ngIf="item.main != null && item.main.type != 'loading'"
                             [style.color]="item.main.color">
                             {{item.main.value}} 
                         </span>
                         <div
                             class="rb-loadingbox rb-list-item-main-loading"
-                            *ngIf="hasMainLine() && item.main.type == 'loading'">
+                            *ngIf="item.main != null && item.main.type == 'loading'">
                         </div>
                         <span
                             class="rb-list-item-sub"
-                            *ngIf="hasSubLine() && item.sub.type != 'loading'"
+                            *ngIf="item.sub != null && item.sub.type != 'loading'"
                             [style.color]="item.sub.color">
                             {{item.sub.value}}
                         </span>
                         <div
                             class="rb-loadingbox rb-list-item-sub-loading"
-                            *ngIf="hasSubLine() && item.sub.type == 'loading'">
+                            *ngIf="item.sub != null && item.sub.type == 'loading'">
                         </div>                        
                     </div>
                 </div>

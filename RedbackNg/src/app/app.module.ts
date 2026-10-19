@@ -170,6 +170,7 @@ import { RbAboutComponent } from './rb-about/rb-about.component';
 import { RbInlineInputComponent } from './inputs/rb-inline-input/rb-inline-input.component';
 import { RbTextConsoleComponent } from './rb-text-console/rb-text-console.component';
 import { RbRowViewContainerDirective } from './utils/rowviewcontainer/rb-rowviewcontainer.directive';
+import { RbMultilist4Component } from './rb-multilist4/rb-multilist4.component';
 
 
 export function createCompiler(compilerFactory: CompilerFactory) {
@@ -348,7 +349,8 @@ window.redback = window.redback || {};
         RbAboutComponent,
         RbInlineInputComponent,
         RbTextConsoleComponent,
-        RbRowViewContainerDirective
+        RbRowViewContainerDirective,
+        RbMultilist4Component
     ],
     providers: [
         { provide: COMPILER_OPTIONS, useValue: {}, multi: true },

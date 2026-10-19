@@ -9,7 +9,7 @@ import { UserprefService } from 'app/services/userpref.service';
 
 const IsoDateRegExp: RegExp = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d(\.\d+|)([+-][0-2]\d:[0-5]\d|Z)/;
 
-class ListFieldConfig {
+export class ListFieldConfig {
   text: VAEConfig;
   color: ColorConfig;
   format: string
@@ -32,7 +32,7 @@ class ListFieldConfig {
       return {value: raw, type: 'bool'};
     } else if(raw !== null && raw !== "" && !isNaN(raw)) {
       return {value: raw, type: 'badge'};
-    } else {
+    } else if(raw != null) {
       const text = this.format != null ? Formatter.format(raw, this.format) : this.autoFormatText(raw);
       const color = this.color.getColor(object);
       return {value: text, type: 'text', color: color};
@@ -142,22 +142,6 @@ export class RbList4Component extends RbDataObserverComponent {
     return this.userPref != null ? this.userPref[attr] : null;
   }
 
-  public hasMainLine() : boolean {
-    return this.main.hasText;
-  }
-
-  public hasSubLine() : boolean {
-    return this.sub.hasText;
-  }
-
-  public hasMetaLine() : boolean {
-    return this.meta1.hasText || this.meta2.hasText;
-  }
-
-  public hasImage() : boolean {
-    return this.imageattribute != null;
-  }
-
   isSelected(object: RbObject) : boolean {
     return this.dataset?.isObjectSelected(object) || false;
   }
@@ -175,13 +159,16 @@ export class RbList4Component extends RbDataObserverComponent {
         sub: this.sub.getValue(obj),
         meta1: this.meta1.getValue(obj),
         meta2: this.meta2.getValue(obj),
-        color: this.backColor.getColor(obj) || 'transparent'
+        color: this.backColor.getColor(obj) || 'transparent',
+        allowdrag: this.allowdrag
       }
 
-      if(this.hasImage()) {
-        let fileVal = obj.get(this.imageattribute!);
+      if(this.imageattribute != null) {
+        let fileVal = obj.get(this.imageattribute);
         if(fileVal != null) {
           data.image = 'url(\'' + fileVal.thumbnail + '\')';
+        } else {
+          data.image = '';
         }
       }
 

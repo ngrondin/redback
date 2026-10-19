@@ -608,11 +608,15 @@ export class VAEConfig {
     expression: string;
     function: Function;
 
-    constructor(json: any) {
-        this.value = json.value;
-        this.attribute = json.attribute;
-        this.expression = json.expression;
-        this.function = json.expression != null ? Evaluator.createFunction(json.expression) : undefined;
+    constructor(input: any) {
+      if(input === true || input === false || input === null) {
+        this.value = input
+      } else if(typeof input === 'object') {
+        this.value = input.value;
+        this.attribute = input.attribute;
+        this.expression = input.expression;
+        this.function = input.expression != null ? Evaluator.createFunction(input.expression) : undefined;        
+      }
     }
 
     getValue(object: RbObject): any {
