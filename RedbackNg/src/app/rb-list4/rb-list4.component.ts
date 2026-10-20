@@ -172,12 +172,12 @@ export class RbList4Component extends RbDataObserverComponent {
         }
       }
 
-      if(data.main.type != 'loading' && (data.main.value == null || data.main.value == "")) {
-        if(data.sub.value != null && data.sub.value != "") {
-          data.main.value = data.sub.value;
-          data.sub.value = "";
+      if(data.main == null || (data.main != null && data.main.type != 'loading' && (data.main.value == null || data.main.value == ""))) {
+        if(data.sub != null && data.sub.value != null && data.sub.value != "") {
+          data.main = data.sub;
+          data.sub = null;
         } else {
-          data.main.value = "No Label"
+          data.main = {value: "No Label"}
         }
       }
       this.enhancedList.push(data);
