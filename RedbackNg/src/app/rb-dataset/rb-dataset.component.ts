@@ -38,6 +38,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public userFilter: any = null;
   public userSort: any = null;
   public userSelect: any = null;
+  public userHighlight: any = null;
+  public highlightUids: Set<string> | null = null; //null when no highlight, objects not in it are dimmed
   public defaultUserFilter: any = null;
   public defaultUserSort: any = null;
   public mergedFilter: any;
@@ -165,6 +167,10 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     return this._selectedObjects.indexOf(object) != -1;
   }
 
+  public isObjectDimmed(object: RbObject) : boolean {
+    return this.highlightUids != null && !this.highlightUids.has(object.uid);
+  }
+
   getObservable() : Observable<any>  {
     return new Observable<any>((observer) => {
       this.observers.push(observer);
@@ -286,6 +292,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.hasMorePages = false;
     }
     this.publishEvent('load');
+    this.refreshHighlight();
     if(this._list.length == 0) {
       this._selectedObjects = [];
     } else if(this._list.length == 1) {
@@ -376,6 +383,11 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public filterSort(event: any) : boolean {
+    if('highlight' in event) {
+      this.userHighlight = event.highlight;
+      this.refreshHighlight();
+      return true;
+    }
     let fetched = false;
     let newFilter = event.filter;// ?? this.defaultUserFilter;
     let newSort = event.sort;// ?? this.defaultUserSort;
@@ -393,6 +405,24 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       fetched = this.refreshData();
     }
     return fetched;
+  }
+
+  //Asks the server which objects of this dataset match the highlight, the list itself is not changed
+  private refreshHighlight() {
+    let hl = this.userHighlight;
+    if(hl == null || ((hl.search == null || hl.search == '') && hl.filter == null) || this.resolvedFilter == null) {
+      this.highlightUids = null;
+      return;
+    }
+    let filter = hl.filter != null ? {"$and": [this.resolvedFilter, this.filterService.resolveFilter(hl.filter, this.relatedObject, this, this.relatedObject)]} : this.resolvedFilter;
+    let search = hl.search != null && hl.search != '' ? hl.search : null;
+    let uids = new Set<string>();
+    this.dataService.fetchEntireList(this.objectname, filter, search, null).subscribe({
+      next: (data) => data.forEach(obj => uids.add(obj.uid)),
+      complete: () => {
+        if(this.userHighlight == hl) this.highlightUids = uids;
+      }
+    });
   }
 
   public create() {

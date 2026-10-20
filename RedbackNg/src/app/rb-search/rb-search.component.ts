@@ -73,7 +73,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   onActivationEvent(state: boolean) {
-    if(this.active == true && this.mode.searchtarget instanceof RbDatasetComponent) {
+    if(this.active == true && this.mode.searchtarget instanceof RbDatasetComponent && !this.mode.highlight) {
       this._value = this.mode.searchtarget.userSearch;
       this.mode.filterValue = this.mode.searchtarget.userFilter;
       this.mode.sortValue = this.mode.searchtarget.userSort;
@@ -95,7 +95,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
   }
 
   search(val: string) {
-    let fetched = this.mode.searchtarget.filterSort({search: val});
+    let fetched = this.mode.searchtarget.filterSort(this.mode.highlight ? {highlight: {search: val, filter: this.mode.filterValue}} : {search: val});
     if(!fetched) {
       this.searchAfterDelay(val);
     }
@@ -120,6 +120,9 @@ export class RbSearchComponent extends RbFieldInputComponent {
 
   selectMode(mode: SearchMode) {
     this.closeModeSelector();
+    if(this.mode != null && this.mode != mode && this.mode.highlight) { //Leaving a highlight mode removes the highlight
+      this.mode.searchtarget.filterSort({highlight: null});
+    }
     this.mode = mode;
     this.label = mode.label;
   }
@@ -153,7 +156,11 @@ export class RbSearchComponent extends RbFieldInputComponent {
     this.overlayRef = null;
     this.mode.filterValue = event.filter;
     this.mode.sortValue = event.sort;
-    this.mode.searchtarget.filterSort({filter: this.mode.filterValue, sort: this.mode.sortValue, sentence: event.sentence});
+    if(this.mode.highlight) {
+      this.mode.searchtarget.filterSort({highlight: {search: this.editedValue, filter: this.mode.filterValue}});
+    } else {
+      this.mode.searchtarget.filterSort({filter: this.mode.filterValue, sort: this.mode.sortValue, sentence: event.sentence});
+    }
   }
 
   cancelFilterBuilder() {

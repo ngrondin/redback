@@ -595,6 +595,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     return this.getDatasetForLanesConfig()?.isObjectSelected(lane.object) || false;
   }
 
+  public isLaneDimmed(lane: GanttLane) : boolean {
+    return this.getDatasetForLanesConfig()?.isObjectDimmed(lane.object) || false;
+  }
+
   public clickLane(lane: GanttLane) {
     if(this.lanesConfig != null) {
       let laneDataset = this.getDatasetForLanesConfig();
