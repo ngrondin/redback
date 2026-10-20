@@ -209,11 +209,7 @@ public class RedbackUIServer extends UIServer
 					view.put("label", viewConfig.getString("label"));
 					view.put("content", getViewContent(session, viewConfig, params, rights, onLoadBuilder));	
 					view.put("onload", onLoadBuilder.toString());
-					if(traceCollection != null && dataClient != null) {
-						dataClient.publishData(traceCollection.getName(), 
-							traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
-							traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", null, "action", "getview", "view", viewName)));
-					}
+					traceGetView(session, viewConfig);
 				} else {
 					view.put("error", "No access to view " + viewName);
 				}	
@@ -569,5 +565,15 @@ public class RedbackUIServer extends UIServer
 			return rights;
 		}
 		return null;
+	}
+	
+	protected void traceGetView(Session session, DataMap viewConfig) throws RedbackException {
+		if(traceCollection != null && dataClient != null) {
+			String viewDomain = viewConfig.getString("domain");
+			if(viewDomain == null) viewDomain = session.userProfile.getDefaultDomain();
+			dataClient.publishData(traceCollection.getName(), 
+				traceCollection.convertObjectToSpecific(new DataMap("_id", UUID.randomUUID().toString())), 
+				traceCollection.convertObjectToSpecific(new DataMap("date", new Date(), "username", session.getUserProfile().getUsername(), "domain", viewDomain, "action", "getview", "view", viewConfig.getString("name"))));
+		}
 	}
 }
