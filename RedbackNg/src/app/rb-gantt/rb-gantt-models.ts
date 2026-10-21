@@ -303,6 +303,10 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     get selected(): boolean {
       return this.background == false && this.dataset != null && this.object != null && this.dataset.isObjectSelected(this.object);
     }
+
+    get dimmed(): boolean {
+      return this.background == false && this.dataset != null && this.object != null && !this.dataset.isObjectHighlighted(this.object);
+    }
   }
 
   export class GanttOverlayLane {

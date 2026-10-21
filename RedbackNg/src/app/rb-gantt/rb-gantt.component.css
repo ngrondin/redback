@@ -331,6 +331,10 @@
     filter:opacity(.25);
 }
 
+.rb-gantt-spread-dimmed {
+    filter:opacity(.25);
+}
+
 .rb-gantt-spreadlabel {
     display: inline-block;
     margin: var(--v5px);
@@ -400,6 +404,10 @@
 
 .rb-gantt-backgroundcolor2 {
     background-color: #f4f4f4;
+}
+
+.rb-gantt-lanehead-dimmed {
+    opacity: .4;
 }
 
 .rb-gantt-lanehead-selected {
