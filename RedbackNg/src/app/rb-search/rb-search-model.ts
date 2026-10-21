@@ -7,6 +7,7 @@ export class SearchMode {
   filterconfig?: any;
   sortconfig?: any;
   targetdatasetid?: string;
+  highlight: boolean;
   searchtarget?: RbSearchTarget;
   filterValue?: any;
   sortValue?: any;
@@ -16,6 +17,7 @@ export class SearchMode {
     this.filterconfig = json.filter;
     this.sortconfig = json.sort;
     this.targetdatasetid = json.targetdatasetid;
+    this.highlight = json.highlight == true;
   }
 
   resolveSearchTarget(dataset: RbDatasetComponent, datasetgroup: RbDatasetGroupComponent) {

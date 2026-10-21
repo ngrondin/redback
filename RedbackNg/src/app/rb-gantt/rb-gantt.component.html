@@ -177,6 +177,7 @@
                 *ngFor="let lane of lanes; let i = index"
                 [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
                 [class.rb-gantt-lanehead-selected]="isLaneSelected(lane)"
+                [class.rb-gantt-lanehead-dimmed]="isLaneDimmed(lane)"
                 [style.height.px]="lane.height"
                 [style.borderBottomWidth.px]="sizes.borderWidth"
                 [style.cursor]="lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
@@ -341,7 +342,7 @@
                     [rb-drag-changeform]="getDragSizeForObjectCallback">
                     <div
                         *ngFor="let spread of lane.foregroundSpreads()"
-                        [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '') + (spread.ghost ? ' rb-gantt-spread-ghost' : '')"
+                        [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '') + (spread.ghost ? ' rb-gantt-spread-ghost' : '') + (spread.dimmed ? ' rb-gantt-spread-dimmed' : '')"
                         [rb-drag-object]="spread.canEdit ? spread.object : null"
                         [rb-drag-enhancedata]="enhanceDragDataCallback"
                         [rb-drag-getform]="getDragSizeForObjectCallback"
