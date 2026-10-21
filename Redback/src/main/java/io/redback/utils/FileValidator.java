@@ -19,7 +19,9 @@ public class FileValidator {
 		entry("rar", new byte[] { 0x52, 0x61, 0x72, 0x21 }),
 		entry("zip", new byte[] { 0x50, 0x4b }),
 		entry("xsl", new byte[] { (byte)0xD0, (byte)0xCF, 0x11, (byte)0xE0, (byte)0xA1, (byte)0xB1, (byte)0x1A, (byte)0xE1 }),
-		entry("parquet", new byte[] { 0x50, 0x41, 0x52, 0x31 })
+		entry("parquet", new byte[] { 0x50, 0x41, 0x52, 0x31 }),
+		entry("col", new byte[] { (byte)0xFA, (byte)0xCE, (byte)0xAB, (byte)0xED }),
+		entry("model", new byte[] { (byte)0xFA, (byte)0xCE, (byte)0xAB, (byte)0xEB })
 	);
 	
 	public static String getFileTypeFromMagicNumber(File file) {

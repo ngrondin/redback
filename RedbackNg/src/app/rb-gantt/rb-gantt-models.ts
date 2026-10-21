@@ -343,6 +343,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   export enum GanttMarkType {
     Day, Major, Minor, Now
   }
+
   export class GanttMark {
     px: number;
     dayLabel: string|null;
@@ -376,6 +377,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
   export enum GanttDependencyType {
     SS, FS, SF, DU
   }
+
   export class GanttDependency {
     spread: GanttSpread;
     type: GanttDependencyType;
