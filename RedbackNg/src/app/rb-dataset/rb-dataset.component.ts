@@ -33,19 +33,20 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   private dataSubscription: Subscription;
   private _list: RbObject[] = [];
   private _selectedObjects: RbObject[] = [];
+  private _highlightedObjects: RbObject[] | null = null; //null when no highlight
   public totalCount: number = -1;
   public userSearch: string;
   public userFilter: any = null;
   public userSort: any = null;
   public userSelect: any = null;
   public userHighlight: any = null;
-  public highlightUids: Set<string> | null = null; //null when no highlight, objects not in it are dimmed
   public defaultUserFilter: any = null;
   public defaultUserSort: any = null;
   public mergedFilter: any;
   public resolvedFilter: any;
   public resolvedSort: any;
   public resolvedSearch: string;
+  public resolvedHighlight: any;
   public filterSentence: string = null;
   public nextPage: number;
   public pageSize: number;
@@ -167,8 +168,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     return this._selectedObjects.indexOf(object) != -1;
   }
 
-  public isObjectDimmed(object: RbObject) : boolean {
-    return this.highlightUids != null && !this.highlightUids.has(object.uid);
+  public isObjectHighlighted(object: RbObject) : boolean {
+    return this._highlightedObjects == null || this._highlightedObjects.indexOf(object) != -1;
   }
 
   getObservable() : Observable<any>  {
@@ -183,14 +184,20 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       let prevFilter = this.resolvedFilter;
       let prevSearch = this.resolvedSearch;
       let prevSort = this.resolvedSort;
+      let prevHighlight = this.resolvedHighlight;
       this.resolveFilterSort();
       let filterChanged = ValueComparator.notEqual(prevFilter, this.resolvedFilter);
       let searchChanged = ValueComparator.notEqual(prevSearch, this.resolvedSearch);
       let sortChanged = ValueComparator.notEqual(prevSort, this.resolvedSort);
+      let highlightChanged = ValueComparator.notEqual(prevHighlight, this.resolvedHighlight);
       if(filterChanged || searchChanged || sortChanged || force) {
         this.clear(false);
         this.fetchNextPage();
+        this.fetchHighlight();
         this.refreshOnActivate = false;
+        return true;
+      } else if(highlightChanged) {
+        this.fetchHighlight();
         return true;
       } else {
         return false;
@@ -223,6 +230,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.dataService.subscribeToCreation(this.uid, this.objectname, this.resolvedFilter);
     this.resolvedSort = this.userSort != null ? this.userSort : this.baseSort;
     this.resolvedSearch = this.userSearch;
+    this.resolvedHighlight = this.userHighlight;
   }
 
   public clear(resetResolved = true) {
@@ -238,6 +246,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.resolvedFilter = null;
       this.resolvedSort = null;
       this.resolvedSearch = null;
+      this.resolvedHighlight = null;
+      this._highlightedObjects = null;
     }
     this.publishEvent('clear');
   }
@@ -292,7 +302,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
       this.hasMorePages = false;
     }
     this.publishEvent('load');
-    this.refreshHighlight();
     if(this._list.length == 0) {
       this._selectedObjects = [];
     } else if(this._list.length == 1) {
@@ -383,11 +392,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public filterSort(event: any) : boolean {
-    if('highlight' in event) {
-      this.userHighlight = event.highlight;
-      this.refreshHighlight();
-      return true;
-    }
     let fetched = false;
     let newFilter = event.filter;// ?? this.defaultUserFilter;
     let newSort = event.sort;// ?? this.defaultUserSort;
@@ -395,11 +399,13 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     let filterChange = 'filter' in event && ValueComparator.notEqual(newFilter, this.userFilter);
     let sortChange = 'sort' in event && ValueComparator.notEqual(newSort, this.userSort);
     let searchChange = 'search' in event && newSearch != this.userSearch;
-    let change = filterChange || sortChange || searchChange || event.select != null;
+    let highlightChange = 'highlight' in event && ValueComparator.notEqual(event.highlight, this.userHighlight);
+    let change = filterChange || sortChange || searchChange || highlightChange || event.select != null;
     if(change) {
       if(filterChange) this.userFilter = newFilter;
       if(sortChange) this.userSort = newSort;
       if(searchChange) this.userSearch = newSearch;
+      if(highlightChange) this.userHighlight = event.highlight;
       if(event.select != null) this.userSelect = event.select;
       if(filterChange) this.filterSentence = event.sentence;
       fetched = this.refreshData();
@@ -408,19 +414,19 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   //Asks the server which objects of this dataset match the highlight, the list itself is not changed
-  private refreshHighlight() {
-    let hl = this.userHighlight;
-    if(hl == null || ((hl.search == null || hl.search == '') && hl.filter == null) || this.resolvedFilter == null) {
-      this.highlightUids = null;
+  private fetchHighlight() {
+    let hl = this.resolvedHighlight;
+    if(hl == null || ((hl.search == null || hl.search == '') && hl.filter == null)) {
+      this._highlightedObjects = null;
       return;
     }
     let filter = hl.filter != null ? {"$and": [this.resolvedFilter, this.filterService.resolveFilter(hl.filter, this.relatedObject, this, this.relatedObject)]} : this.resolvedFilter;
     let search = hl.search != null && hl.search != '' ? hl.search : null;
-    let uids = new Set<string>();
+    let found: RbObject[] = [];
     this.dataService.fetchEntireList(this.objectname, filter, search, null).subscribe({
-      next: (data) => data.forEach(obj => uids.add(obj.uid)),
+      next: (data) => found.push(...data),
       complete: () => {
-        if(this.userHighlight == hl) this.highlightUids = uids;
+        if(this.resolvedHighlight == hl) this._highlightedObjects = found;
       }
     });
   }

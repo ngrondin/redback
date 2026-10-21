@@ -305,7 +305,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     }
 
     get dimmed(): boolean {
-      return this.background == false && this.dataset != null && this.object != null && this.dataset.isObjectDimmed(this.object);
+      return this.background == false && this.dataset != null && this.object != null && !this.dataset.isObjectHighlighted(this.object);
     }
   }
 

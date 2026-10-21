@@ -596,7 +596,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public isLaneDimmed(lane: GanttLane) : boolean {
-    return this.getDatasetForLanesConfig()?.isObjectDimmed(lane.object) || false;
+    let dataset = this.getDatasetForLanesConfig();
+    return dataset != null && !dataset.isObjectHighlighted(lane.object);
   }
 
   public clickLane(lane: GanttLane) {
