@@ -1,7 +1,7 @@
 import { Component, HostBinding, Input } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject, RELATED_LOADING } from 'app/datamodel';
-import { ColorConfig, Evaluator, Formatter, LinkConfig, RecalcPlanner } from 'app/helpers';
+import { ColorConfig, Evaluator, Formatter, LinkConfig, RecalcPlanner, ValueComparator } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
 import { UserprefService } from 'app/services/userpref.service';
@@ -29,6 +29,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   groups: any = {};
   sums: any[] = [];
   openGroups: string[] = ['_'];
+  localSort: {column: LinkTableColumnConfig, dir: number} | null = null;
 
   recalcPlanner!: RecalcPlanner;
 
@@ -134,6 +135,11 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     }
     for(var grpKey of Object.keys(this.groups)) {
       this.groups[grpKey].sums = this.calcSumLines(this.groups[grpKey].sums, this.groups[grpKey].backColors);
+      if(this.localSort != null) {
+        let c = this.columns.indexOf(this.localSort.column);
+        let dir = this.localSort.dir;
+        this.groups[grpKey].lines.sort((a: any, b: any) => ValueComparator.sort(a.cols[c].value, b.cols[c].value) * dir);
+      }
     }
     this.sums = this.calcSumLines(totalsums);
   }
@@ -171,17 +177,35 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   }
 
 
+  //Only an own attribute of the object can be sorted on the database, expressions and related paths (aircraft.code) sort the loaded rows
+  isDatabaseSort(column: LinkTableColumnConfig): boolean {
+    return column.expression == null && column.attribute != null && column.attribute.indexOf('.') == -1;
+  }
+
+  getSortDir(column: LinkTableColumnConfig): number | null {
+    if(this.localSort != null) {
+      return this.localSort.column == column ? this.localSort.dir : null;
+    }
+    let sort = this.dataset?.getUserSort()?.["0"];
+    return sort != null && this.isDatabaseSort(column) && sort.attribute == column.attribute ? sort.dir : null;
+  }
+
   clickColumnHeader(column: LinkTableColumnConfig) {
-    if(this.dataset != null) {
-      this.dataset.filterSort({
+    let dir = this.getSortDir(column) == 1 ? -1 : 1;
+    if(this.isDatabaseSort(column)) {
+      this.localSort = null;
+      this.dataset?.filterSort({
         sort: {
           "0": {
             "attribute":column.attribute,
-            "dir":1
+            "dir":dir
           }
         }
       });
+    } else {
+      this.localSort = {column: column, dir: dir};
     }
+    this.redraw();
   }
 
 
