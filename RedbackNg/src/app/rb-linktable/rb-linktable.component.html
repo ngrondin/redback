@@ -9,6 +9,11 @@
             [style.width]="col.widthStr"
             (click)="clickColumnHeader(col)">
             <span>{{col.label}}</span>
+            <rb-icon
+                *ngIf="getSortDir(col) != null"
+                class="rb-linktable-sorticon"
+                [icon]="getSortDir(col) == 1 ? 'arrow_upward' : 'arrow_downward'">
+            </rb-icon>
         </div>
     </div>
 </div>
