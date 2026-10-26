@@ -31,6 +31,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
 
   public uid: string;
   private dataSubscription: Subscription;
+  private fetchSubscription: Subscription | null = null;
   private _list: RbObject[] = [];
   private _selectedObjects: RbObject[] = [];
   private _highlightedObjects: RbObject[] | null = null; //null when no highlight
@@ -234,6 +235,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   }
 
   public clear(resetResolved = true) {
+    this.fetchSubscription?.unsubscribe();
+    this._loading = false;
     this.nextPage = 0;
     this.hasMorePages = true;
     this.totalCount = -1;
@@ -267,7 +270,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         observable = this.dataService.fetchList(this.objectname, this.resolvedFilter, search, sort, this.nextPage, this.pageSize, addRel);
         this.nextPage++;
       }
-      observable.subscribe({
+      this.fetchSubscription = observable.subscribe({
         next: (data) => {
           this.setData(data);
         },
