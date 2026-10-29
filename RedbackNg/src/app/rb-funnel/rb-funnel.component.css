@@ -76,15 +76,24 @@
 }
 
 .rb-funnel-phase-title {
-    display: inline-block;
+    display: flex;
     flex: 0 0 auto;
+    flex-direction: row;
     padding: var(--v10px) var(--v8px) var(--v10px) var(--v16px);
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
     align-items: center;
     color: white;
     background-color: var(--primary-color);
+}
+.rb-funnel-phase-title-name {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 12px;
+}
+.rb-funnel-phase-title-count {
+    flex: 0 0 auto;
 }
 
 .rb-funnel-scroll {

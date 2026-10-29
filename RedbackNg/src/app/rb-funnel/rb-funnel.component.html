@@ -20,7 +20,14 @@
                     *ngFor="let phase of phasegroup.phases">
                     <div
                         class="rb-funnel-phase-title">
-                        {{phase.label}}
+                        <div
+                            class="rb-funnel-phase-title-name">
+                            {{phase.label}}
+                        </div>
+                        <div
+                            class="rb-funnel-phase-title-count">
+                            {{phase.count}}
+                        </div>
                     </div>
                     <rb-scroll
                         class="rb-funnel-vscroll"
