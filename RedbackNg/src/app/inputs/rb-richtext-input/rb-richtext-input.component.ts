@@ -71,6 +71,7 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
             container: "#quilltoolbar_" + this.uniqueId
           }
         },
+        bounds: '.rb-richtext-quillcontainer',
         theme: 'snow'
       });
       this.editor.root.addEventListener("focus", ($event) => {
@@ -115,5 +116,3 @@ export class RbRichtextInputComponent extends RbFieldInputComponent {
   }
 
 }
-
-
