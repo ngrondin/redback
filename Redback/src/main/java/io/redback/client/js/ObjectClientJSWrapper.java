@@ -74,7 +74,7 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 						} else if(arguments[2] instanceof String) {
 							search = arguments[2].toString();
 							if(arguments.length > 3) {
-								sort = (DataMap)(arguments[2]);
+								sort = (DataMap)(arguments[3]);
 								if(arguments.length > 4) {
 									addRelated = (boolean)(arguments[4]);
 								}
@@ -104,7 +104,7 @@ public class ObjectClientJSWrapper extends ObjectJSWrapper {
 						} else if(arguments[2] instanceof String) {
 							search = arguments[2].toString();
 							if(arguments.length > 3) {
-								sort = (DataMap)(arguments[2]);
+								sort = (DataMap)(arguments[3]);
 								if(arguments.length > 4) {
 									addRelated = (boolean)(arguments[4]);
 								}
