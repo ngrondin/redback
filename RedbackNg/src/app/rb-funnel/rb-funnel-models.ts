@@ -111,6 +111,10 @@ export class FunnelPhase {
       this.object = obj;
       this.config = cfg;
     }
+
+    get count(): number {
+      return this.groups.reduce((sum, group) => sum + group.entries.length, 0);
+    }
 }
 
 export class FunnelGroup {
