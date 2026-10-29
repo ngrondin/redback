@@ -38,17 +38,18 @@ public abstract class ReportServer extends AuthenticatedServiceProvider {
 			String object = request.getString("object");
 			DataMap filter = request.containsKey("filter") ? (request.get("filter") instanceof DataMap ? request.getObject("filter") : new DataMap(request.getString("filter"))) : null;
 			String search = request.getString("search");
+			DataMap sort = request.containsKey("sort") ? (request.get("sort") instanceof DataMap ? request.getObject("sort") : new DataMap(request.getString("sort"))) : null;
 			String uid = request.getString("uid");
 			DataList sets = request.containsKey("sets") ? (request.get("sets") instanceof DataList ? request.getList("sets") : new DataList(request.getString("sets"))) : null;
 			List<ReportFilter> reportFilters = new ArrayList<ReportFilter>();
 			if(sets != null) {
 				for(int i = 0; i < sets.size(); i++) {
 					DataMap setItem = sets.getObject(i);
-					ReportFilter reportFilter = new ReportFilter(setItem.getString("object"), setItem.getObject("filter"), setItem.getString("search"), setItem.getString("uid"));
+					ReportFilter reportFilter = new ReportFilter(setItem.getString("object"), setItem.getObject("filter"), setItem.getString("search"), setItem.getObject("sort"), setItem.getString("uid"));
 					reportFilters.add(reportFilter);
 				}
 			} else {
-				ReportFilter reportFilter = new ReportFilter(object, filter, search, uid);
+				ReportFilter reportFilter = new ReportFilter(object, filter, search, sort, uid);
 				reportFilters.add(reportFilter);
 			}
 			if(action == null) 

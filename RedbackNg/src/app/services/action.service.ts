@@ -166,7 +166,7 @@ export class ActionService {
 
   public reportAll(reportName: string, dataset: RbDatasetComponent) : Observable<null> {
     return new Observable((observer) => {
-      let filterData = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
+      let filterData = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch, sort: dataset.getUserSort()};
       this.reportService.launchReport(reportName, null, filterData);
       observer.next(null);
       observer.complete();
@@ -181,12 +181,12 @@ export class ActionService {
       } else if(datasetgroup != null) {
         data = Object.keys(datasetgroup.datasets).map(ds => {
           let dataset = datasetgroup.datasets[ds];
-          let fd = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
+          let fd = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch, sort: dataset.getUserSort()};
           if(dataset.selectedObject != null) fd['uid'] = dataset.selectedObject.uid;
           return fd;
         });
       } else if(dataset != null) {
-        data = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch};
+        data = {object: dataset.objectname, filter: dataset.resolvedFilter, search: dataset.resolvedSearch, sort: dataset.getUserSort()};
         if(dataset.selectedObject != null) data.uid = dataset.selectedObject.uid;
       }
       this.reportService.popupReportList(category, data);

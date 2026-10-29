@@ -67,6 +67,9 @@ export class ReportService {
       if(filterData.search != null) {
         data.search = filterData.search;
       }
+      if(filterData.sort != null) {
+        data.sort = JSON.stringify(filterData.sort);
+      }
     }
     if(domain != null) {
       data.domain = domain;
