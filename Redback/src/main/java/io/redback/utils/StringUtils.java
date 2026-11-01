@@ -625,14 +625,33 @@ public class StringUtils
 		Pattern pattern = Pattern.compile("(\\+[A-Za-z0-9=]{2,4}-)");
 		Matcher matcher = pattern.matcher(str);
 		if(matcher.find()) {
-			int count = matcher.groupCount();
-			return count >= 1;			
+			return true;		
 		} else {
 			return false;
 		}
     }
     
     public static String decodeUTF7(String str) {
+    	StringBuilder sb = new StringBuilder();
+		Pattern pattern = Pattern.compile("(\\+[A-Za-z0-9=]{2,4}-)");
+		Matcher matcher = pattern.matcher(str);
+		int cur = 0;
+		while(matcher.find()) {
+			int start = matcher.start();
+			int end = matcher.end();
+			sb.append(str.substring(cur, start));
+			String sub = str.substring(start + 1, end - 1);
+			byte[] bytes = Base64.getDecoder().decode(sub);
+			int l = (bytes.length / 2) * 2;
+			String s = new String(bytes, 0, l, Charset.forName("UTF-16"));
+			sb.append(s);
+			cur = end;
+		}
+		sb.append(str.substring(cur));
+    	return sb.toString();
+    }
+    
+    /*public static String decodeUTF7(String str) {
     	StringBuilder sb = new StringBuilder();
     	int lastStart = 0;
     	int nextPlus = 0;
@@ -643,6 +662,8 @@ public class StringUtils
     			return str; //Failed
     		} else if(nextMinus == nextPlus + 1) {
     			sb.append("+");
+    		} else if(str.substring(nextPlus + 1, nextMinus).contains(" ")) {
+    			sb.append(str.substring(nextPlus, nextMinus + 1));
     		} else {
     			String sub = str.substring(nextPlus + 1, nextMinus);
     			byte[] bytes = Base64.getDecoder().decode(sub);
@@ -653,7 +674,7 @@ public class StringUtils
     		lastStart = nextMinus + 1;
     	}
     	return sb.toString();
-    }
+    }*/
     
     public static DataList getUniqueLinesForColumns(DataList data, DataList cols) {
     	DataList out = new DataList();
