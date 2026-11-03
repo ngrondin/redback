@@ -461,6 +461,16 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     this.publishEvent("load", obj);
   }
 
+  /**
+   * Reorders the objects already loaded, without fetching again.
+   * - compare: the usual Array.sort function, (a, b) => number
+   * - publishes a 'sort' event so the views on this dataset redraw
+   */
+  public sortList(compare: (a: RbObject, b: RbObject) => number) {
+    this._list.sort(compare);
+    this.publishEvent("sort");
+  }
+
   public removeSelected() {
     this.remove(this.selectedObject);
     this.selectedObject = null;
