@@ -46,7 +46,17 @@
 .rb-table-rowitem {
     display: flex;
     flex-direction: row;
-    margin: 0px var(--v10px) 0px 0px
+    margin: 0px var(--v10px) 0px 0px;
+    height: var(--v42px);
+    align-items: end;
+}
+
+.rb-table-rowitem rb-link {
+  margin: var(--vm4px);
+}
+
+.rb-table-rowitem rb-switch-input {
+  margin: var(--v2px);
 }
 
 .rb-table-rowbutton {

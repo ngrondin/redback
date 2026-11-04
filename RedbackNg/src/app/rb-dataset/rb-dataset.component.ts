@@ -56,6 +56,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   private observers: Observer<any>[] = [];
   public refreshOnActivate: boolean = true;
   private eventScript: Function;
+  private memorySorter: (a: RbObject, b: RbObject) => number = null;
 
 
   constructor(
@@ -258,8 +259,6 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
   public fetchNextPage() {
     this.logService.debug("Dataset " + this.id + ": FetchNextPage (hasMorePages=" + this.hasMorePages + ", fetchAll=" + this.fetchAll + ", resolvedFilter=" + JSON.stringify(this.resolvedFilter) + ")");
     if(this.hasMorePages) {
-      //const sort = this.userSort != null ? this.userSort : this.dataTarget != null && this.dataTarget.sort != null ? this.dataTarget.sort : this.baseSort;
-      //const search = this.userSearch != null ? this.userSearch : this.dataTarget != null && this.dataTarget.search != null ? this.dataTarget.search : null;
       const sort = this.userSort != null ? this.userSort : this.baseSort;
       const search = this.userSearch != null ? this.userSearch : null;
       const addRel = this.fetchAll ? false : this.addrelated;
@@ -292,6 +291,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
         this._list.push(obj);
         obj.addSet(this);
       }
+    }
+    if(this.memorySorter != null) {
+      this._list.sort(this.memorySorter);
     }
     if(this.fetchAll == false && data.length < this.pageSize) {
       this.hasMorePages = false
@@ -457,6 +459,9 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     } else {
       this._list.unshift(obj);
     }
+    if(this.memorySorter != null) {
+      this._list.sort(this.memorySorter);
+    }
     obj.addSet(this);
     this.publishEvent("load", obj);
   }
@@ -466,7 +471,8 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
    * - compare: the usual Array.sort function, (a, b) => number
    * - publishes a 'sort' event so the views on this dataset redraw
    */
-  public sortList(compare: (a: RbObject, b: RbObject) => number) {
+  public setMemorySorter(compare: (a: RbObject, b: RbObject) => number) {
+    this.memorySorter = compare;
     this._list.sort(compare);
     this.publishEvent("sort");
   }
