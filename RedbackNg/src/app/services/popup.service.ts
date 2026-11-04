@@ -17,7 +17,7 @@ export class PopupService {
   ) { }
 
 
-  public openPopup(anchorElementRef: ViewContainerRef, popupClass, configData) {
+  public openPopup(anchorElementRef: ViewContainerRef, popupClass, configData, ignoreNextClick: boolean = false) {
     if(this.overlay != null) {
       this.closePopup();
     }
@@ -55,8 +55,8 @@ export class PopupService {
 
     const popupPortal = new ComponentPortal<RbPopupComponent>(popupClass, anchorElementRef, inj);
     const popupComponentRef = this.overlayRef.attach(popupPortal);
-    let ignoreNext = true; //When the overlay opens, the current click event is still processing, so will get picked up as the first event
-    this.overlayRef.outsidePointerEvents().subscribe(() => { if (ignoreNext) { ignoreNext = false } else { popupComponentRef.instance.onOverlayClick(); } })
+    var ignoreNext = ignoreNextClick;
+    this.overlayRef.outsidePointerEvents().subscribe(() => {if(ignoreNext) { ignoreNext = false; } else { popupComponentRef.instance.onOverlayClick(); }})
     return popupComponentRef;
   }
 

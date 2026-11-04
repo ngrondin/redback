@@ -26,12 +26,13 @@ public abstract class Provider
 		config = c;
 		firebus = f;
 		if(config.containsKey("requestlog")) writeRequestLog = config.getBoolean("requestlog");
-
 	}
 
 	protected Session getSession(Payload payload) {
 		Session session = new Session(payload.metadata.get("session"));
 		session.setTimezone(payload.metadata.get("timezone"));
+		if(payload.metadata.get("timeout") != null) 
+			session.setTimeout(Integer.parseInt(payload.metadata.get("timeout")));
 		if(Thread.currentThread() instanceof FirebusThread) 
 			((FirebusThread)Thread.currentThread()).setTrackingId(session.getId());
 		return session;

@@ -18,6 +18,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     link?: LinkConfig;
     dragfilter: any;
     editable: boolean;
+    mainIsEditable: boolean;
 
     constructor(json: any, userpref: any) {
       this.dataset = json.dataset;
@@ -34,6 +35,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.link = json.link != null ? new LinkConfig(json.link) : undefined;
       this.dragfilter = json.dragfilter;
       this.editable = json.editable ?? false;
+      this.mainIsEditable = json.maineditable ?? false;
     }
   }
 

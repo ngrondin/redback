@@ -35,6 +35,8 @@ public class SessionJSWrapper extends ObjectJSWrapper
 		} else if(key.equals("expiry")) {
 			return session.getUserProfile().getExpiry();
 		} else if(key.equals("timezone")) {
+			return session.getTimeout();
+		} else if(key.equals("timeout")) {
 			return session.getTimezone();
 		} else if(key.equals("fordomain")) {
 			return new CallableJSWrapper() {

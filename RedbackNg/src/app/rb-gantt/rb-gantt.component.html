@@ -197,7 +197,7 @@
                     [style.background-image]="lane.image">
                 </div>
                 <div
-                    *ngIf="lanesConfig.editable == false"
+                    *ngIf="lanesConfig.mainIsEditable == false"
                     class="rb-gantt-lanelabel">
                     {{lane.label}}
                     <div
@@ -207,7 +207,7 @@
                     </div>
                 </div>
                 <rb-inline-input
-                    *ngIf="lanesConfig.editable == true"
+                    *ngIf="lanesConfig.mainIsEditable == true"
                     [attribute]="lanesConfig.labelAttribute"
                     [object]="lane.object"
                     [margin]="false"

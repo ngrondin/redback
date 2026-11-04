@@ -5,6 +5,8 @@ import { RbFieldInputComponent } from '../abstract/rb-field-input';
 import { PopupService } from 'app/services/popup.service';
 import { FilterService } from 'app/services/filter.service';
 import { AppInjector } from 'app/app.module';
+import { RbObject } from 'app/datamodel';
+
 
 @Component({template: ''})
 export abstract class RbPopupInputComponent extends RbFieldInputComponent {
@@ -25,7 +27,7 @@ export abstract class RbPopupInputComponent extends RbFieldInputComponent {
     if(this.popupComponentRef == null) {
       this.startEditing();
       if(this.isEditing) {
-        this.popupComponentRef = this.popupService.openPopup(this.inputContainerRef, this.getPopupClass(), this.getPopupConfig());
+        this.popupComponentRef = this.popupService.openPopup(this.inputContainerRef, this.getPopupClass(), this.getPopupConfig(), true);
         this.popupComponentRef.instance.selected.subscribe(value => this.onPopupValueSelected(value));
         this.popupComponentRef.instance.cancelled.subscribe(() => this.onPopupCancel());
         event.target.select();
@@ -79,9 +81,11 @@ export abstract class RbPopupInputComponent extends RbFieldInputComponent {
   }
 
   private closePopup() {
-    this.popupService.closePopup();
-    this.popupComponentRef = null;
-    this.inputContainerRef.element.nativeElement.blur();
+    if(this.popupComponentRef != null) {
+      this.popupService.closePopup();
+      this.popupComponentRef = null;
+      this.inputContainerRef.element.nativeElement.blur();      
+    }
   }
 
   public finishEditing() {
@@ -101,5 +105,10 @@ export abstract class RbPopupInputComponent extends RbFieldInputComponent {
   public cancelEditing() {
     super.cancelEditing();
     this.closePopup();
+  }
+
+  public clearValue() {
+    this.finishEditingWithSelection(null);
+    this.commit(null);
   }
 }

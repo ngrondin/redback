@@ -22,6 +22,7 @@ public class Session
 	public UserProfile userProfile;
 	public String elevatedUserToken;
 	public UserProfile elevatedUserProfile;
+	public long timeout;
 	public String timezone;
 	public String domainLock;
 	public int domainLockLevel = 0;
@@ -98,6 +99,10 @@ public class Session
 	{
 		timezone = zoneId;
 	}
+	
+	public void setTimeout(long to) {
+		timeout = to;
+	}
 
 	public void setScriptContext(ScriptContext sc) 
 	{
@@ -132,6 +137,11 @@ public class Session
 	public String getTimezone()
 	{
 		return timezone;
+	}
+	
+	public long getTimeout()
+	{
+		return timeout;
 	}
 	
 	public void pushDomainLock(String domain) throws RedbackException
