@@ -116,11 +116,12 @@ export class RbLinktableComponent extends RbDataObserverComponent {
           }
           let checkboxattr = cfg.checkbox == true && cfg.attribute != null ? cfg.attribute : null;
           let formatVal = cfg.format != null ? Formatter.format(val, cfg.format) : val;
+          let orderVal = cfg.orderAttribute != null ? object.get(cfg.orderAttribute) : val;
           let foreColor = cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
           let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
           let bold = cfg.bold != null ? cfg.bold.getValue(object) : null;
           let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
-          let col = { value: val, formattedValue: formatVal, align: cfg.align, wrap: cfg.wrap, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, bold: bold, icon: icon, checkbox: cfg.checkbox ?? false, checkboxattr: checkboxattr, checkboxevent: cfg.checkboxevent, link: cfg.link, modal: cfg.modal, loading: loading};
+          let col = { value: val, formattedValue: formatVal, orderValue: orderVal, align: cfg.align, wrap: cfg.wrap, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, bold: bold, icon: icon, checkbox: cfg.checkbox ?? false, checkboxattr: checkboxattr, checkboxevent: cfg.checkboxevent, link: cfg.link, modal: cfg.modal, loading: loading};
           let sumVal = loading ? 0 : cfg.expression == null && cfg.attribute == null ? 1 : !isNaN(val) ? val : 0;
           grp.sums[c] += sumVal;
           totalsums[c] += sumVal;
@@ -138,7 +139,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       if(this.localSort != null) {
         let c = this.columns.indexOf(this.localSort.column);
         let dir = this.localSort.dir;
-        this.groups[grpKey].lines.sort((a: any, b: any) => ValueComparator.sort(a.cols[c].value, b.cols[c].value) * dir);
+        this.groups[grpKey].lines.sort((a: any, b: any) => ValueComparator.sort(a.cols[c].orderValue, b.cols[c].orderValue) * dir);
       }
     }
     this.sums = this.calcSumLines(totalsums);
@@ -179,7 +180,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
   //Only an own attribute of the object can be sorted on the database, expressions and related paths (aircraft.code) sort the loaded rows
   isDatabaseSort(column: LinkTableColumnConfig): boolean {
-    return column.expression == null && column.attribute != null && column.attribute.indexOf('.') == -1;
+    return column.expression == null && column.orderAttribute != null && column.orderAttribute.indexOf('.') == -1;
   }
 
   getSortDir(column: LinkTableColumnConfig): number | null {
@@ -187,7 +188,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       return this.localSort.column == column ? this.localSort.dir : null;
     }
     let sort = this.dataset?.getUserSort()?.["0"];
-    return sort != null && this.isDatabaseSort(column) && sort.attribute == column.attribute ? sort.dir : null;
+    return sort != null && this.isDatabaseSort(column) && sort.attribute == column.orderAttribute ? sort.dir : null;
   }
 
   clickColumnHeader(column: LinkTableColumnConfig) {
@@ -197,7 +198,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       this.dataset?.filterSort({
         sort: {
           "0": {
-            "attribute":column.attribute,
+            "attribute":column.orderAttribute,
             "dir":dir
           }
         }
