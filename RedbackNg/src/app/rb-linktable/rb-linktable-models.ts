@@ -2,6 +2,7 @@ import { LinkConfig, ColorConfig, Evaluator, VAEConfig } from "app/helpers";
 
 export class LinkTableColumnConfig {
     id: string;
+    key: string;
     label: string;
     attribute: string | null;
     expression: Function | null;
@@ -27,6 +28,7 @@ export class LinkTableColumnConfig {
 
     constructor(json: any, userpref: any) {
       this.id = json.id;
+      this.key = json.id ?? json.label;
       this.label = json.label;
       this.attribute = json.attribute;
       this.expression = userpref != null && userpref.exression != null ? Evaluator.createFunction(userpref.expression) : json.expression != null ? Evaluator.createFunction(json.expression) : null;
