@@ -22,6 +22,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('flexfill') flexfill: boolean = true;
   @HostBinding('style.flex') get fillSpace() { return this.flexfill ? "1 1 0" : "0 0 auto";}
 
+  allColumns: LinkTableColumnConfig[] = [];
   columns: LinkTableColumnConfig[] = [];
   group?: LinkTableGroupConfig;
   reachedBottom: boolean = false;
@@ -30,6 +31,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   sums: any[] = [];
   openGroups: string[] = ['_'];
   localSort: {column: LinkTableColumnConfig, dir: number} | null = null;
+  pickerTop: number = 0;
+  pickerLeft: number = 0;
+  pickerShow: boolean = false;
 
   recalcPlanner!: RecalcPlanner;
 
@@ -43,13 +47,14 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
   dataObserverInit() {
     this.recalcPlanner = new RecalcPlanner(this.calc.bind(this));
-    this.columns = [];
+    this.allColumns = [];
     for(let item of this._cols) {
       let colPref = this.userPref != null && this.userPref.cols != null ? this.userPref.cols[item.id] : null;
       if(!(colPref == false || (colPref != null && colPref.hide == true))) {
-        this.columns.push(new LinkTableColumnConfig(item, colPref));
+        this.allColumns.push(new LinkTableColumnConfig(item, colPref));
       }
     }
+    this.setShownColumns();
     if(this._grp != null) {
       this.group = new LinkTableGroupConfig(this._grp);
     }
@@ -67,8 +72,16 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     this.redraw();
   }
 
+  get prefName() : string | null {
+    return this.id ?? this.dataset?.getId() ?? null;
+  }
+
   get userPref() : any {
-    return this.id != null ? this.userprefService.getCurrentViewUISwitch("linktable", this.id) : null;
+    return this.prefName != null ? this.userprefService.getCurrentViewUISwitch("linktable", this.prefName) : null;
+  }
+
+  get pickerColumns(): LinkTableColumnConfig[] {
+    return this.allColumns.filter(c => c.label != null);
   }
 
   get hasGroup(): boolean {
@@ -209,6 +222,38 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     this.redraw();
   }
 
+
+  setShownColumns() {
+    let hidden = this.userPref?.hiddencols ?? [];
+    this.columns = this.allColumns.filter(c => !hidden.includes(c.key));
+    if(this.localSort != null && !this.columns.includes(this.localSort.column)) this.localSort = null;
+  }
+
+  openColumnPicker(event: any) {
+    event.preventDefault();
+    if(this.prefName != null) {
+      this.pickerTop = event.clientY;
+      this.pickerLeft = Math.min(event.clientX, window.innerWidth - 240);
+      this.pickerShow = true;
+    }
+  }
+
+  closeColumnPicker() {
+    this.pickerShow = false;
+  }
+
+  //The last shown column stays, the header is what opens the picker
+  canToggleColumn(column: LinkTableColumnConfig): boolean {
+    return this.columns.length > 1 || !this.columns.includes(column);
+  }
+
+  toggleColumn(column: LinkTableColumnConfig) {
+    let hidden = this.userPref?.hiddencols ?? [];
+    hidden = this.columns.includes(column) ? [...hidden, column.key] : hidden.filter((k: string) => k != column.key);
+    this.userprefService.setUISwitch('user', 'linktable', this.prefName, {hiddencols: hidden});
+    this.setShownColumns();
+    this.redraw();
+  }
 
   clickLink(link: LinkConfig, object: RbObject) {
     let event = link.getNavigationEvent(object, this.dataset);

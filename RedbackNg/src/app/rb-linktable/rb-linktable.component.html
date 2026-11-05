@@ -7,7 +7,8 @@
             class="rb-linktable-colheader"
             *ngFor="let col of columns"
             [style.width]="col.widthStr"
-            (click)="clickColumnHeader(col)">
+            (click)="clickColumnHeader(col)"
+            (contextmenu)="openColumnPicker($event)">
             <span>{{col.label}}</span>
             <rb-icon
                 *ngIf="getSortDir(col) != null"
@@ -130,6 +131,28 @@
                     {{col.formattedValue}}
                 </span>
             </div>
+        </div>
+    </div>
+</div>
+<div
+    *ngIf="pickerShow"
+    class="rb-linktable-picker-back"
+    (click)="closeColumnPicker()"
+    (contextmenu)="$event.preventDefault(); closeColumnPicker()">
+    <div
+        class="rb-linktable-picker"
+        [style.top.px]="pickerTop"
+        [style.left.px]="pickerLeft"
+        (click)="$event.stopPropagation()">
+        <div
+            class="rb-linktable-picker-row"
+            *ngFor="let col of pickerColumns">
+            <rb-checkbox
+                [checked]="columns.includes(col)"
+                [disabled]="!canToggleColumn(col)"
+                (change)="toggleColumn(col)">
+            </rb-checkbox>
+            <span>{{col.label}}</span>
         </div>
     </div>
 </div>
