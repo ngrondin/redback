@@ -71,7 +71,7 @@ export class RbSelectorComponent extends RbDataObserverComponent {
     if(this.popupComponentRef == null) {
       this.startEditing();
       if(this.isEditing) {
-        this.popupComponentRef = this.popupService.openPopup(this.inputContainerRef, this.getPopupClass(), this.getPopupConfig());
+        this.popupComponentRef = this.popupService.openPopup(this.inputContainerRef, this.getPopupClass(), this.getPopupConfig(), true);
         this.popupComponentRef.instance.selected.subscribe(value => this.onPopupValueSelected(value));
         this.popupComponentRef.instance.cancelled.subscribe(() => this.onPopupCancel());
         event.target.select();

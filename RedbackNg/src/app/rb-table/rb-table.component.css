@@ -56,7 +56,7 @@
 }
 
 .rb-table-rowitem rb-switch-input {
-  margin: var(--v2px);
+  /*margin: var(--v2px);*/
 }
 
 .rb-table-rowbutton {
