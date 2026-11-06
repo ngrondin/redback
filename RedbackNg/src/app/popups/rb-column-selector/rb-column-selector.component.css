@@ -1,0 +1,8 @@
+.rb-column-selector-row {
+    display: flex;
+    align-items: center;
+    gap: var(--v8px);
+    padding: var(--v5px) var(--v12px);
+    white-space: nowrap;
+    font-size: 0.95rem;
+}

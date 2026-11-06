@@ -161,6 +161,7 @@ import { FileiconComponent } from './utils/fileicon/fileicon.component';
 import { RbTipDirective } from './utils/tip/rb-tip.directive';
 import { RbColorInputComponent } from './inputs/rb-color-input/rb-color-input.component';
 import { RbPopupColorComponent } from './popups/rb-popup-color/rb-popup-color.component';
+import { RbColumnSelectorComponent } from './popups/rb-column-selector/rb-column-selector.component';
 import { RbIconComponent } from './rb-icon/rb-icon.component';
 import { RbCheckboxComponent } from './rb-checkbox/rb-checkbox.component';
 import { RbSwitchComponent } from './rb-switch/rb-switch.component';
@@ -341,6 +342,7 @@ window.redback = window.redback || {};
         RbTipDirective,
         RbColorInputComponent,
         RbPopupColorComponent,
+        RbColumnSelectorComponent,
         RbIconComponent,
         RbCheckboxComponent,
         RbSwitchComponent,

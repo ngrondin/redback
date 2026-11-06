@@ -1,10 +1,13 @@
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding, Input, QueryList, ViewChildren } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject, RELATED_LOADING } from 'app/datamodel';
 import { ColorConfig, Evaluator, Formatter, LinkConfig, RecalcPlanner, ValueComparator } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
+import { PopupService } from 'app/services/popup.service';
 import { UserprefService } from 'app/services/userpref.service';
+import { RbColumnSelectorComponent } from 'app/popups/rb-column-selector/rb-column-selector.component';
+import { RbRowViewContainerDirective } from 'app/utils/rowviewcontainer/rb-rowviewcontainer.directive';
 import { LinkTableColumnConfig, LinkTableGroupConfig } from './rb-linktable-models';
 
 
@@ -21,6 +24,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('grid') grid: boolean = false;
   @Input('flexfill') flexfill: boolean = true;
   @HostBinding('style.flex') get fillSpace() { return this.flexfill ? "1 1 0" : "0 0 auto";}
+  @ViewChildren(RbRowViewContainerDirective) headers: QueryList<RbRowViewContainerDirective>;
 
   allColumns: LinkTableColumnConfig[] = [];
   columns: LinkTableColumnConfig[] = [];
@@ -31,9 +35,6 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   sums: any[] = [];
   openGroups: string[] = ['_'];
   localSort: {column: LinkTableColumnConfig, dir: number} | null = null;
-  pickerTop: number = 0;
-  pickerLeft: number = 0;
-  pickerShow: boolean = false;
 
   recalcPlanner!: RecalcPlanner;
 
@@ -41,6 +42,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     private modalService: ModalService,
     private navigateService: NavigateService,
     public userprefService: UserprefService,
+    private popupService: PopupService,
   ) {
     super();
   }
@@ -78,10 +80,6 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
   get userPref() : any {
     return this.prefName != null ? this.userprefService.getCurrentViewUISwitch("linktable", this.prefName) : null;
-  }
-
-  get pickerColumns(): LinkTableColumnConfig[] {
-    return this.allColumns.filter(c => c.label != null);
   }
 
   get hasGroup(): boolean {
@@ -229,30 +227,19 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     if(this.localSort != null && !this.columns.includes(this.localSort.column)) this.localSort = null;
   }
 
-  openColumnPicker(event: any) {
+  openColumnSelector(event: any, column: LinkTableColumnConfig) {
     event.preventDefault();
     if(this.prefName != null) {
-      this.pickerTop = event.clientY;
-      this.pickerLeft = Math.min(event.clientX, window.innerWidth - 240);
-      this.pickerShow = true;
+      let items = this.allColumns.filter(c => c.label != null).map(c => ({key: c.key, label: c.label, shown: this.columns.includes(c)}));
+      let anchor = this.headers.find(h => h.object == column).viewContainerRef;
+      let popup = this.popupService.openPopup(anchor, RbColumnSelectorComponent, {items: items}, event.buttons != 0);
+      popup.instance.selected.subscribe(selected => {
+        this.popupService.closePopup();
+        this.userprefService.setUISwitch('user', 'linktable', this.prefName, {hiddencols: selected.filter((i: any) => !i.shown).map((i: any) => i.key)});
+        this.setShownColumns();
+        this.redraw();
+      });
     }
-  }
-
-  closeColumnPicker() {
-    this.pickerShow = false;
-  }
-
-  //The last shown column stays, the header is what opens the picker
-  canToggleColumn(column: LinkTableColumnConfig): boolean {
-    return this.columns.length > 1 || !this.columns.includes(column);
-  }
-
-  toggleColumn(column: LinkTableColumnConfig) {
-    let hidden = this.userPref?.hiddencols ?? [];
-    hidden = this.columns.includes(column) ? [...hidden, column.key] : hidden.filter((k: string) => k != column.key);
-    this.userprefService.setUISwitch('user', 'linktable', this.prefName, {hiddencols: hidden});
-    this.setShownColumns();
-    this.redraw();
   }
 
   clickLink(link: LinkConfig, object: RbObject) {

@@ -1,0 +1,10 @@
+<div
+    class="rb-column-selector-row"
+    *ngFor="let item of config.items">
+    <rb-checkbox
+        [checked]="item.shown"
+        [disabled]="!canToggle(item)"
+        (change)="toggle(item)">
+    </rb-checkbox>
+    <span>{{item.label}}</span>
+</div>
