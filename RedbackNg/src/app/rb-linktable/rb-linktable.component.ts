@@ -1,10 +1,13 @@
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding, Input, QueryList, ViewChildren } from '@angular/core';
 import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
 import { RbObject, RELATED_LOADING } from 'app/datamodel';
 import { ColorConfig, Evaluator, Formatter, LinkConfig, RecalcPlanner, ValueComparator } from 'app/helpers';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
+import { PopupService } from 'app/services/popup.service';
 import { UserprefService } from 'app/services/userpref.service';
+import { RbColumnSelectorComponent } from 'app/popups/rb-column-selector/rb-column-selector.component';
+import { RbRowViewContainerDirective } from 'app/utils/rowviewcontainer/rb-rowviewcontainer.directive';
 import { LinkTableColumnConfig, LinkTableGroupConfig } from './rb-linktable-models';
 
 
@@ -21,7 +24,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
   @Input('grid') grid: boolean = false;
   @Input('flexfill') flexfill: boolean = true;
   @HostBinding('style.flex') get fillSpace() { return this.flexfill ? "1 1 0" : "0 0 auto";}
+  @ViewChildren(RbRowViewContainerDirective) headers: QueryList<RbRowViewContainerDirective>;
 
+  allColumns: LinkTableColumnConfig[] = [];
   columns: LinkTableColumnConfig[] = [];
   group?: LinkTableGroupConfig;
   reachedBottom: boolean = false;
@@ -37,19 +42,21 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     private modalService: ModalService,
     private navigateService: NavigateService,
     public userprefService: UserprefService,
+    private popupService: PopupService,
   ) {
     super();
   }
 
   dataObserverInit() {
     this.recalcPlanner = new RecalcPlanner(this.calc.bind(this));
-    this.columns = [];
+    this.allColumns = [];
     for(let item of this._cols) {
       let colPref = this.userPref != null && this.userPref.cols != null ? this.userPref.cols[item.id] : null;
       if(!(colPref == false || (colPref != null && colPref.hide == true))) {
-        this.columns.push(new LinkTableColumnConfig(item, colPref));
+        this.allColumns.push(new LinkTableColumnConfig(item, colPref));
       }
     }
+    this.setShownColumns();
     if(this._grp != null) {
       this.group = new LinkTableGroupConfig(this._grp);
     }
@@ -67,8 +74,12 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     this.redraw();
   }
 
+  get prefName() : string | null {
+    return this.id ?? this.dataset?.getId() ?? null;
+  }
+
   get userPref() : any {
-    return this.id != null ? this.userprefService.getCurrentViewUISwitch("linktable", this.id) : null;
+    return this.prefName != null ? this.userprefService.getCurrentViewUISwitch("linktable", this.prefName) : null;
   }
 
   get hasGroup(): boolean {
@@ -209,6 +220,27 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     this.redraw();
   }
 
+
+  setShownColumns() {
+    let hidden = this.userPref?.hiddencols ?? [];
+    this.columns = this.allColumns.filter(c => !hidden.includes(c.key));
+    if(this.localSort != null && !this.columns.includes(this.localSort.column)) this.localSort = null;
+  }
+
+  openColumnSelector(event: any, column: LinkTableColumnConfig) {
+    event.preventDefault();
+    if(this.prefName != null) {
+      let items = this.allColumns.filter(c => c.label != null).map(c => ({key: c.key, label: c.label, shown: this.columns.includes(c)}));
+      let anchor = this.headers.find(h => h.object == column).viewContainerRef;
+      let popup = this.popupService.openPopup(anchor, RbColumnSelectorComponent, {items: items}, event.buttons != 0);
+      popup.instance.selected.subscribe(selected => {
+        this.popupService.closePopup();
+        this.userprefService.setUISwitch('user', 'linktable', this.prefName, {hiddencols: selected.filter((i: any) => !i.shown).map((i: any) => i.key)});
+        this.setShownColumns();
+        this.redraw();
+      });
+    }
+  }
 
   clickLink(link: LinkConfig, object: RbObject) {
     let event = link.getNavigationEvent(object, this.dataset);
