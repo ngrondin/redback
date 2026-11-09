@@ -151,8 +151,10 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       this.groups[grpKey].sums = this.calcSumLines(this.groups[grpKey].sums, this.groups[grpKey].backColors);
       if(this.localSort != null) {
         let c = this.columns.indexOf(this.localSort.column);
-        let dir = this.localSort.dir;
-        this.groups[grpKey].lines.sort((a: any, b: any) => ValueComparator.sort(a.cols[c].orderValue, b.cols[c].orderValue) * dir);
+        if(c > -1 && c < this.columns.length) {
+          let dir = this.localSort.dir;
+          this.groups[grpKey].lines.sort((a: any, b: any) => ValueComparator.sort(a.cols[c].orderValue, b.cols[c].orderValue) * dir);          
+        }
       }
     }
     this.sums = this.calcSumLines(totalsums);
@@ -230,7 +232,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     let startHeaderWidthPX = column.width;
     let moveListener = (event) => {
       let delta = (event.clientX - startClientX) / 16.8;
-      column.width = Math.max(0, Math.round(startHeaderWidthPX + delta));
+      column.setWidth(Math.max(0, Math.round(startHeaderWidthPX + delta)));
     };
     let upListener = (event) => {
       window.removeEventListener('mousemove', moveListener);
@@ -325,7 +327,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       for(var key of Object.keys(widths)) {
         var col = this.allColumns.find(c => c.key == key);
         if(col != null) {
-          col.width = widths[key];
+          col.setWidth(widths[key]);
         }
       }
     }

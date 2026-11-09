@@ -64,6 +64,15 @@ export class LinkTableColumnConfig {
       }
     }
 
+    setWidth(w: number) {
+      this.width = w;
+      if(this.alt != null) {
+        for(var key of Object.keys(this.alt)) {
+          this.alt[key].setWidth(w);
+        }
+      }
+    }
+
     getWidthStr() : string {
       return 'min(' + (this.width * 0.88) + 'vw, ' + (this.width * 16.896) + 'px)';
     }
