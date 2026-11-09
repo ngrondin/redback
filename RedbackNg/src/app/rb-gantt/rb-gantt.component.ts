@@ -15,6 +15,9 @@ import { Algos, CanvasTool, ColorTool, Evaluator, ValueComparator } from 'app/he
 import { NavigateService } from 'app/services/navigate.service';
 import { GanttTimeConfig } from './rb-gantt-timeconfig';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+import { PopupService } from 'app/services/popup.service';
+import { ActionService } from 'app/services/action.service';
+import { RbPopupActionsComponent } from 'app/popups/rb-popup-actions/rb-popup-actions.component';
 
 
 @Component({
@@ -42,6 +45,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @ViewChild('customtoolbar', { read: ViewContainerRef, static: true }) toolbar?: ViewContainerRef;
   @ViewChild('mainscroll', { read: ViewContainerRef, static: true }) mainscroll?: RbScrollComponent;
   @ViewChild('canvas', { read: ViewContainerRef, static: true }) canvas?: ViewContainerRef;
+  @ViewChild('contextanchor', { read: ViewContainerRef, static: true }) contextAnchorRef?: ViewContainerRef;
 
   lanesConfig: GanttLaneConfig | null = null;
   seriesConfigs: GanttSeriesConfig[] = [];
@@ -74,6 +78,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   focusTopPX: number | null = null;
 
   openGroup: string | null = null;
+  contextAnchor: XY | null = null;
 
   public getDragSizeForObjectCallback?: Function;
   public droppedOutCallback?: Function;
@@ -91,6 +96,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     private buildService: BuildService,
     private dataService: DataService,
     private logService: LogService,
+    private popupService: PopupService,
+    private actionService: ActionService,
     private cdr: ChangeDetectorRef
   ) {
     super();
@@ -667,6 +674,61 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       event.stopPropagation();
     }
     this.dragSelecting = false;
+  }
+
+  public contextMenuOnLane(event: any, lane: GanttLane) {
+    if(event.target != event.currentTarget) return;
+    let pos = this.getXYRelativeToTarget(event, "rb-gantt-lanes");
+    let startMS = this.timeConfig.getTimeOfLeftPX(pos.x);
+    if(this.snapinterval != null) {
+      startMS = Math.round(startMS / this.snapinterval) * this.snapinterval;
+    }
+    if(this.allowpastdrop == false && this.overrideAllowPastDrop == false && startMS < (new Date()).getTime()) return;
+    let actions = this.getCreateActions(lane, startMS);
+    if(actions.length == 0) return;
+    event.preventDefault();
+    this.contextAnchor = pos;
+    this.cdr.detectChanges();
+    let popup = this.popupService.openPopup(this.contextAnchorRef, RbPopupActionsComponent, {actions: actions}, event.buttons != 0);
+    popup.instance.selected.subscribe(item => {
+      this.popupService.closePopup();
+      this.actionService.action(item.dataset, null, item.action, item.target, item.param, null, item.confirm, item.timeout).subscribe();
+    });
+    popup.instance.cancelled.subscribe(() => this.popupService.closePopup());
+  }
+
+  getCreateActions(lane: GanttLane, startMS: number) : any[] {
+    let ret = [];
+    for(let cfg of this.seriesConfigs) {
+      let dataset = this.getDatasetForConfig(cfg);
+      if(dataset == null || cfg.actions.length == 0 || cfg.timeFromAttributes == false) continue;
+      let times: any = {};
+      times[cfg.start.attribute] = "'" + (new Date(startMS)).toISOString() + "'";
+      if(cfg.duration?.attribute != null) {
+        times[cfg.duration.attribute] = 3600000;
+      } else {
+        times[cfg.end.attribute] = "'" + (new Date(startMS + 3600000)).toISOString() + "'";
+      }
+      if(!(cfg.laneAttributes.length == 1 && cfg.laneAttributes[0] == 'uid')) {
+        let laneValues = lane.getLinkValuesForSeries(cfg);
+        cfg.laneAttributes.forEach((la, i) => { if(laneValues[i] != null) times[la] = "'" + laneValues[i] + "'"; });
+      }
+      for(let action of cfg.actions) {
+        if(action.show != null && Evaluator.eval(action.show, null, dataset.relatedObject, dataset) != true) continue;
+        let paramIsName = typeof action.param == 'string';
+        ret.push({
+          dataset: dataset,
+          action: action.action,
+          target: action.target ?? (paramIsName ? action.param : null),
+          param: Object.assign({}, paramIsName ? {} : action.param, times),
+          label: action.label,
+          icon: action.icon,
+          confirm: action.confirm,
+          timeout: action.timeout
+        });
+      }
+    }
+    return ret;
   }
 
   public mouseDownHeaderbar(event: any) {

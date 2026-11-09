@@ -100,6 +100,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     applyLaneFilter: boolean;
     applyDateFilter: boolean;
     show: Function | null;
+    actions: any[];
 
     constructor(json: any, userpref: any) {
       super(json);
@@ -135,6 +136,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.applyLaneFilter = json.applylanefilter != null ? json.applylanefilter : true;
       this.applyDateFilter = json.applydatefilter != null ? json.applydatefilter : true;
       this.show = json.show != null ? Function("object", "dataset", "relatedObject", "return (" + json.show + ")") : null;
+      this.actions = json.actions ?? [];
     }
   }
 
