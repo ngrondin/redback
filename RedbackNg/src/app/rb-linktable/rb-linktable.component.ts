@@ -56,7 +56,8 @@ export class RbLinktableComponent extends RbDataObserverComponent {
         this.allColumns.push(new LinkTableColumnConfig(item, colPref));
       }
     }
-    this.setShownColumns();
+    this.columns = this.allColumns;
+    this.loadPrefs();
     if(this._grp != null) {
       this.group = new LinkTableGroupConfig(this._grp);
     }
@@ -125,14 +126,15 @@ export class RbLinktableComponent extends RbDataObserverComponent {
             val = null;
             loading = true;
           }
+          
           let checkboxattr = cfg.checkbox == true && cfg.attribute != null ? cfg.attribute : null;
           let formatVal = cfg.format != null ? Formatter.format(val, cfg.format) : val;
-          let orderVal = cfg.orderAttribute != null ? object.get(cfg.orderAttribute) : val;
+          let orderVal = cfg.orderAttribute != null && object.get(cfg.orderAttribute) !== RELATED_LOADING ? object.get(cfg.orderAttribute) : val;
           let foreColor = cfg.foreColor != null ? cfg.foreColor.getColor(object) : null;
           let backColor = cfg.backColor != null ? cfg.backColor.getColor(object) : null;
           let bold = cfg.bold != null ? cfg.bold.getValue(object) : null;
           let icon = cfg.iconmap != null ? cfg.iconmap[val] : null;
-          let col = { value: val, formattedValue: formatVal, orderValue: orderVal, align: cfg.align, wrap: cfg.wrap, width: cfg.widthStr, backColor: backColor, foreColor: foreColor, bold: bold, icon: icon, checkbox: cfg.checkbox ?? false, checkboxattr: checkboxattr, checkboxevent: cfg.checkboxevent, link: cfg.link, modal: cfg.modal, loading: loading};
+          let col = { value: val, formattedValue: formatVal, orderValue: orderVal, align: cfg.align, wrap: cfg.wrap, backColor: backColor, foreColor: foreColor, bold: bold, icon: icon, checkbox: cfg.checkbox ?? false, checkboxattr: checkboxattr, checkboxevent: cfg.checkboxevent, link: cfg.link, modal: cfg.modal, loading: loading, getWidthStr: () => cfg.getWidthStr() };
           let sumVal = loading ? 0 : cfg.expression == null && cfg.attribute == null ? 1 : !isNaN(val) ? val : 0;
           grp.sums[c] += sumVal;
           totalsums[c] += sumVal;
@@ -158,24 +160,28 @@ export class RbLinktableComponent extends RbDataObserverComponent {
 
   calcSumLines(sums: number[], backColors?: string[]): any[] {
     let ret = [];
-    let c = 0;
-    let firstWidth = 0;//-0.06;
-    while(c < this.columns.length && this.columns[c].sum != true) {
-      firstWidth += this.columns[c].width;
-      c++;
-    }
-    ret.push({width: 'min(' + (firstWidth * 0.88) + 'vw, ' + (firstWidth * 16.896) + 'px)', link: this.group?.link});
-    while(c < this.columns.length) {
-      let cfg = this.columns[c];
-      if(cfg.sum) {
-        let formatVal = cfg.format != null ? Formatter.format(sums[c], cfg.format) : sums[c];
-        let backColor = backColors != null ? backColors[c] : null;
-        ret.push({width: cfg.widthStr, align: cfg.align, formattedValue: formatVal, link: cfg.sumlink, backColor: backColor});
-      } else {
-        ret.push({width: cfg.widthStr});
+    let firstSumIndex = this.columns.findIndex(col => col.sum == true);
+    if(firstSumIndex > -1) {
+      let getFirstWidthStr = () => {
+        let firstWidth = 0;//-0.06;
+        for(var c = 0; c < firstSumIndex; c++) {
+          firstWidth += this.columns[c].width;
+        }
+        return'min(' + (firstWidth * 0.88) + 'vw, ' + (firstWidth * 16.896) + 'px)';
       }
-      c++;
+      ret.push({getWidthStr: () => getFirstWidthStr(), link: this.group?.link});
+      for(var c = firstSumIndex; c < this.columns.length; c++) {
+        let cfg = this.columns[c];
+        if(cfg.sum) {
+          let formatVal = cfg.format != null ? Formatter.format(sums[c], cfg.format) : sums[c];
+          let backColor = backColors != null ? backColors[c] : null;
+          ret.push({getWidthStr: () => cfg.getWidthStr(), align: cfg.align, formattedValue: formatVal, link: cfg.sumlink, backColor: backColor});
+        } else {
+          ret.push({getWidthStr: () => cfg.getWidthStr()});
+        }
+      }
     }
+    
     return ret;
   }
 
@@ -187,7 +193,6 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     }
     return column;
   }
-
 
   //Only an own attribute of the object can be sorted on the database, expressions and related paths (aircraft.code) sort the loaded rows
   isDatabaseSort(column: LinkTableColumnConfig): boolean {
@@ -220,11 +225,21 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     this.redraw();
   }
 
-
-  setShownColumns() {
-    let hidden = this.userPref?.hiddencols ?? [];
-    this.columns = this.allColumns.filter(c => !hidden.includes(c.key));
-    if(this.localSort != null && !this.columns.includes(this.localSort.column)) this.localSort = null;
+  mousedownHeaderDrag(event: any, column: LinkTableColumnConfig) {
+    let startClientX = event.clientX;
+    let startHeaderWidthPX = column.width;
+    let moveListener = (event) => {
+      let delta = (event.clientX - startClientX) / 16.8;
+      column.width = Math.max(0, Math.round(startHeaderWidthPX + delta));
+    };
+    let upListener = (event) => {
+      window.removeEventListener('mousemove', moveListener);
+      window.removeEventListener('mouseup', upListener);
+      this.savePrefs();
+    };
+    event.stopPropagation();
+    window.addEventListener('mousemove', moveListener);
+    window.addEventListener('mouseup', upListener);
   }
 
   openColumnSelector(event: any, column: LinkTableColumnConfig) {
@@ -235,8 +250,9 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       let popup = this.popupService.openPopup(anchor, RbColumnSelectorComponent, {items: items}, event.buttons != 0);
       popup.instance.selected.subscribe(selected => {
         this.popupService.closePopup();
-        this.userprefService.setUISwitch('user', 'linktable', this.prefName, {hiddencols: selected.filter((i: any) => !i.shown).map((i: any) => i.key)});
-        this.setShownColumns();
+        let selectedKeys = selected.filter(s => s.shown == true).map(s => s.key);
+        this.columns = this.allColumns.filter(c => selectedKeys.includes(c.key));
+        this.savePrefs();
         this.redraw();
       });
     }
@@ -290,5 +306,29 @@ export class RbLinktableComponent extends RbDataObserverComponent {
       this.reachedBottom = true;
       setTimeout(() => {this.reachedBottom = false}, 1000);
     }
+  }
+
+  savePrefs() {
+    let data = {
+      //hiddencols: selected.filter((i: any) => !i.shown).map((i: any) => i.key),
+      hiddencols: this.allColumns.filter(c => !this.columns.includes(c)).map(c => c.key),
+      colwidths: this.columns.reduce((acc, c) => {acc[c.key] = c.width; return acc;}, {})
+    };
+    this.userprefService.setUISwitch('user', 'linktable', this.prefName, data);
+  }
+
+  loadPrefs() {
+    let hidden = this.userPref?.hiddencols ?? [];
+    this.columns = this.allColumns.filter(c => !hidden.includes(c.key));
+    let widths = this.userPref?.colwidths;
+    if(widths != null) {
+      for(var key of Object.keys(widths)) {
+        var col = this.allColumns.find(c => c.key == key);
+        if(col != null) {
+          col.width = widths[key];
+        }
+      }
+    }
+    if(this.localSort != null && !this.columns.includes(this.localSort.column)) this.localSort = null;
   }
 }

@@ -6,16 +6,26 @@
         <div
             class="rb-linktable-colheader"
             *ngFor="let col of columns"
-            [style.width]="col.widthStr"
-            (click)="clickColumnHeader(col)"
+            [style.width]="col.getWidthStr()"
             [rb-row-view-container-for]="col"
             (contextmenu)="openColumnSelector($event, col)">
-            <span>{{col.label}}</span>
+            <span
+              (click)="clickColumnHeader(col)">
+              {{col.label}}
+            </span>
             <rb-icon
                 *ngIf="getSortDir(col) != null"
                 class="rb-linktable-sorticon"
+                (click)="clickColumnHeader(col)"
                 [icon]="getSortDir(col) == 1 ? 'arrow_upward' : 'arrow_downward'">
             </rb-icon>
+            <div
+              class="rb-linktable-header-spacer">
+            </div>
+            <div
+              [class]="'rb-linktable-header-drag'"
+              (mousedown)="mousedownHeaderDrag($event, col)">    
+            </div>
         </div>
     </div>
 </div>
@@ -32,7 +42,7 @@
                 <div
                     *ngFor="let col of groups[groupKey].sums; index as i"
                     [class]="'rb-linktable-rowitem' + (col.align == 'right' ? ' rb-linktable-rowitem-alighright' : '') + (grid ? ' rb-linktable-border' : '')"
-                    [style.width]="col.width"
+                    [style.width]="col.getWidthStr()"
                     [style.background-color]="col.backColor"
                     (click)="toggleGroup(groupKey)">
                     <span
@@ -62,7 +72,7 @@
                 <div
                     *ngFor="let col of line.cols; index as i"
                     [class]="'rb-linktable-rowitem'"
-                    [style.width]="col.width"
+                    [style.width]="col.getWidthStr()"
                     [style.background-color]="col.backColor">
                     <div
                         [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alignright' : col.align == 'center' ? ' rb-linktable-rowitem-aligncenter' : '') + (grid ? ' rb-linktable-border-on' : '')">
@@ -119,7 +129,7 @@
             *ngFor="let col of sums"
             [class]="'rb-linktable-colfooter'"
             [style.visibility]="col.formattedValue != null ? 'visible' : 'hidden'"
-            [style.width]="col.width">
+            [style.width]="col.getWidthStr()">
             <div
                 [class]="'rb-linktable-border' + (col.align == 'right' ? ' rb-linktable-rowitem-alignright' : col.align == 'center' ? ' rb-linktable-rowitem-alighcenter' : '') + (grid ? ' rb-linktable-border-on' : '')">
                 <a

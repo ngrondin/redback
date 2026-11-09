@@ -41,16 +41,27 @@
     flex-direction: row;
     align-items: center;
     font-size: 0.9rem;
-    cursor: pointer;
     /*border-right: 0.06vw solid transparent;*/
 }
 
 .rb-linktable-colheader span {
     padding: 0px var(--v5px);
+    cursor: pointer;
 }
 
 .rb-linktable-sorticon {
     font-size: 0.9rem;
+    cursor: pointer;    
+}
+
+.rb-linktable-header-spacer {
+  flex-grow: 1;
+}
+
+.rb-linktable-header-drag {
+  width: var(--v5px);
+  cursor: ew-resize;
+  height: var(--v20px);
 }
 
 rb-scroll {

@@ -64,7 +64,7 @@ export class LinkTableColumnConfig {
       }
     }
 
-    get widthStr() : string {
+    getWidthStr() : string {
       return 'min(' + (this.width * 0.88) + 'vw, ' + (this.width * 16.896) + 'px)';
     }
 
