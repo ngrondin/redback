@@ -16,6 +16,7 @@ export class MultiList4SeriesConfig extends SeriesConfig {
   link?: string;
   clickscript?: Function;
   allowdrag!: boolean;
+  show: Function | null;
 
   constructor(json: any) {
     super(json);
@@ -29,5 +30,6 @@ export class MultiList4SeriesConfig extends SeriesConfig {
     this.link = json.navigate;
     this.clickscript = json.clickscript != null ? Function("event", json.clickscript) : undefined;
     this.allowdrag = json.allowdrag || false;
+    this.show = json.show != null ? Function("object", "dataset", "relatedObject", "return (" + json.show + ")") : null;
   }
 }

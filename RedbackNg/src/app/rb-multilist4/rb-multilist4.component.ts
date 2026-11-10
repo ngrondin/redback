@@ -1,9 +1,7 @@
 import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { MultiList4SeriesConfig } from './rb-multilist4-model';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { RbDataObserverComponent } from 'app/abstract/rb-dataobserver';
-import { NavigateEvent, RbObject, RELATED_LOADING } from 'app/datamodel';
-import { ColorConfig, Evaluator, Formatter, RecalcPlanner, VAEConfig } from 'app/helpers';
+import { Component, Input } from '@angular/core';
+import { RbObject, RELATED_LOADING } from 'app/datamodel';
 import { ApiService } from 'app/services/api.service';
 import { ModalService } from 'app/services/modal.service';
 import { NavigateService } from 'app/services/navigate.service';
@@ -55,34 +53,37 @@ export class RbMultilist4Component extends RbDataCalcComponent<MultiList4SeriesC
       let dataset = this.getDatasetForConfig(cfg);
       if(dataset != null) {
         for(var obj of dataset.list) {
-          let data: any = {
-            object: obj,
-            main: cfg.main.getValue(obj),
-            sub: cfg.sub.getValue(obj),
-            meta1: cfg.meta1.getValue(obj),
-            meta2: cfg.meta2.getValue(obj),
-            color: cfg.backColor.getColor(obj) || 'transparent',
-            allowdrag: cfg.allowdrag
-          }
-    
-          if(cfg.imageattribute != null) {
-            let fileVal = obj.get(cfg.imageattribute);
-            if(fileVal != null) {
-              data.image = 'url(\'' + fileVal.thumbnail + '\')';
-            } else {
-              data.image = '';
+          let show = cfg.show == null || (cfg.show != null && cfg.show(obj, dataset, dataset.relatedObject));
+          if(show) {
+            let data: any = {
+              object: obj,
+              main: cfg.main.getValue(obj),
+              sub: cfg.sub.getValue(obj),
+              meta1: cfg.meta1.getValue(obj),
+              meta2: cfg.meta2.getValue(obj),
+              color: cfg.backColor.getColor(obj) || 'transparent',
+              allowdrag: cfg.allowdrag
             }
-          }
-    
-          if(data.main == null || (data.main != null && data.main.type != 'loading' && (data.main.value == null || data.main.value == ""))) {
-            if(data.sub != null && data.sub.value != null && data.sub.value != "") {
-              data.main = data.sub;
-              data.sub = null;
-            } else {
-              data.main = {value: "No Label"}
+      
+            if(cfg.imageattribute != null) {
+              let fileVal = obj.get(cfg.imageattribute);
+              if(fileVal != null) {
+                data.image = 'url(\'' + fileVal.thumbnail + '\')';
+              } else {
+                data.image = '';
+              }
             }
+      
+            if(data.main == null || (data.main != null && data.main.type != 'loading' && (data.main.value == null || data.main.value == ""))) {
+              if(data.sub != null && data.sub.value != null && data.sub.value != "") {
+                data.main = data.sub;
+                data.sub = null;
+              } else {
+                data.main = {value: "No Label"}
+              }
+            }
+            this.enhancedList.push(data);
           }
-          this.enhancedList.push(data);
         }
       }
     }
