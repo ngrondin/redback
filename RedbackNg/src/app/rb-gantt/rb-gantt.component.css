@@ -473,3 +473,10 @@
 .rb-gantt-bottomspace {
     height: var(--v36px);
 }
+
+.rb-gantt-contextanchor {
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    pointer-events: none;
+}

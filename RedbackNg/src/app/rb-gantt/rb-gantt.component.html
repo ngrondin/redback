@@ -339,7 +339,8 @@
                     [style.width.px]="timeConfig.widthPX"
                     [style.borderBottomWidth.px]="sizes.borderWidth"
                     (rb-drag-dropzone)="droppedOn($event, lane)"
-                    [rb-drag-changeform]="getDragSizeForObjectCallback">
+                    [rb-drag-changeform]="getDragSizeForObjectCallback"
+                    (contextmenu)="contextMenuOnLane($event, lane)">
                     <div
                         *ngFor="let spread of lane.foregroundSpreads()"
                         [class]="'rb-gantt-spread rb-gantt-spreadbox' + (spread.canEdit ? ' rb-gantt-spreadbox-editable' : '') + (spread.selected ? ' rb-gantt-spreadbox-selected' : '') + (spread.ghost ? ' rb-gantt-spread-ghost' : '') + (spread.dimmed ? ' rb-gantt-spread-dimmed' : '')"
@@ -385,6 +386,12 @@
                     class="rb-gantt-emptymessage">
                     {{emptyMessage}}
                 </div>
+            </div>
+            <div
+                class="rb-gantt-contextanchor"
+                [style.left.px]="contextAnchor?.x"
+                [style.top.px]="contextAnchor?.y"
+                #contextanchor>
             </div>
             <div
                 class="rb-gantt-dragselect"
