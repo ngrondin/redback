@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.firebus.Firebus;
+import io.firebus.logging.Logger;
 import io.firebus.data.DataEntity;
 import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
@@ -16,13 +17,28 @@ import io.redback.client.DataClient;
 import io.redback.client.FileClient;
 import io.redback.client.GatewayClient;
 import io.redback.exceptions.RedbackException;
+import io.redback.managers.secretmanager.SecretManager;
 import io.redback.security.Session;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.js.LoggerJSFunction;
 import io.redback.utils.js.RedbackUtilsJSWrapper;
 
+/**
+ * Runs the integration clients (S3, SFTP, Gmail, Outlook...) for each domain, from the client data rows.
+ *
+ * Secrets: with a "secrets" config block (same keys as the secrets service) the secret fields of a client data row
+ * are kept encrypted by the SecretManager, and the row only holds the marker "(secret)".
+ * - a raw value found in a row is moved to the secrets on read, and the row gets the marker
+ * - refreshed tokens are written to the secrets, never into the row
+ * - an empty field means not set, so the existing disconnect script still works
+ * - without a key the rows are used as they are, like before
+ * Config:
+ * - secrets: dataservice, keys, currentkey (see SecretManager)
+ * - secretfields: list of client data fields kept as secrets, default access_token, refresh_token, client_secret, secret
+ */
 public class IntegrationManager {
+	public static final String SECRET_MARKER = "(secret)";
 	protected String name;
 	protected Firebus firebus;
 	protected ScriptFactory scriptFactory;
@@ -38,6 +54,8 @@ public class IntegrationManager {
 	protected FileClient fileClient;
 	protected CollectionConfig clientDataCollection;
 	protected ConfigCache<ClientConfig> clientConfigs;
+	protected SecretManager secretManager;
+	protected List<String> secretFields;
 
 	public IntegrationManager(String n, DataMap config, Firebus fb) throws RedbackException {
 		try {
@@ -57,6 +75,22 @@ public class IntegrationManager {
 			gatewayClient = new GatewayClient(firebus, gatewayServiceName);
 			fileClient = new FileClient(firebus, fileServiceName);
 			clientDataCollection = new CollectionConfig(config.getObject("clientdatacollection"), "rbin_clientdata");
+			DataMap secretsConfig = config.getObject("secrets");
+			if(secretsConfig != null && hasKey(secretsConfig))
+				secretManager = new SecretManager(secretsConfig, fb);
+			else if(secretsConfig != null)
+				Logger.warning("rb.integration.nosecretkey", "No secrets key set, client secrets stay in the client data");
+			secretFields = new ArrayList<String>();
+			DataList fieldList = config.getList("secretfields");
+			if(fieldList != null) {
+				for(int i = 0; i < fieldList.size(); i++)
+					secretFields.add(fieldList.getString(i));
+			} else {
+				secretFields.add("access_token");
+				secretFields.add("refresh_token");
+				secretFields.add("client_secret");
+				secretFields.add("secret");
+			}
 			final IntegrationManager im = this;
 			clientConfigs = new ConfigCache<ClientConfig>(configClient, "rbin", "client", 3600000, new ConfigCache.ConfigFactory<ClientConfig>() {
 				public ClientConfig createConfig(DataMap map) throws Exception {
@@ -92,6 +126,7 @@ public class IntegrationManager {
 			DataMap resp = dataClient.getData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(filter), null);
 			if(resp != null && resp.getList("result") != null && resp.getList("result").size() > 0) {
 				clientData = resp.getList("result").getObject(0);
+				openSecrets(domain, name, clientData);
 				return clientData;
 			} else {
 				throw new RedbackException("Could not find tokens for client " + name + " and domain " + domain);
@@ -124,17 +159,17 @@ public class IntegrationManager {
 					}					
 					DataMap refreshResp = gatewayClient.postForm(config.tokenUrl, form);
 					if(refreshResp != null) {
+						DataMap changed = new DataMap();
 						if(refreshResp.getString("refresh_token") != null)
-							clientData.put("refresh_token", refreshResp.getString("refresh_token"));
+							changed.put("refresh_token", refreshResp.getString("refresh_token"));
 						if(refreshResp.getString("access_token") != null)
-							clientData.put("access_token", refreshResp.getString("access_token"));
+							changed.put("access_token", refreshResp.getString("access_token"));
 						if(refreshResp.getNumber("expires_in") != null)
-							clientData.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
-						clientData.put("lastupdate", new Date());
-						DataMap key = new DataMap();
-						key.put("name", name);
-						key.put("domain", domain);
-						dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key), clientData);
+							changed.put("expiry", System.currentTimeMillis() + (refreshResp.getNumber("expires_in").longValue() * 1000));
+						changed.put("lastupdate", new Date());
+						for(String k: changed.keySet())
+							clientData.put(k, changed.get(k));
+						putClientData(domain, name, changed);
 					} else {
 						throw new RedbackException("Error refreshing tokens");
 					}				
@@ -246,13 +281,81 @@ public class IntegrationManager {
 			client.setData(clientData);
 			String remoteDoamin = client.getRemoteDomain();
 			clientData.put("remotedomain", remoteDoamin);
-			DataMap key = new DataMap();
-			key.put("name", state);
-			key.put("domain", domain);
-			dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key), clientData);		
+			putClientData(domain, state, clientData);
 		} else {
 			throw new RedbackException("Error exchanging authorization code");
 		}			
+	}
+
+	/** Moves the raw secrets of every client data row of the domain into the secrets. Returns the number of rows changed. */
+	public int moveSecrets(Session session, String domain) throws RedbackException {
+		if(secretManager == null)
+			throw new RedbackException("No secrets key set");
+		if(domain == null || !session.hasAccessToDomain(domain) || !session.getUserProfile().canWrite("rb.accesscat.admin"))
+			throw new RedbackException("No rights to move the integration secrets");
+		DataMap resp = dataClient.getData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(new DataMap("domain", domain)), null);
+		int count = 0;
+		DataList rows = resp != null ? resp.getList("result") : null;
+		for(int i = 0; rows != null && i < rows.size(); i++) {
+			DataMap row = rows.getObject(i);
+			if(openSecrets(domain, row.getString("name"), row))
+				count++;
+		}
+		return count;
+	}
+
+	/** Puts the plain secret values into the row in memory. Raw values still in the db row are moved to the secrets first. */
+	protected boolean openSecrets(String domain, String clientName, DataMap clientData) throws RedbackException {
+		if(secretManager == null) return false;
+		DataMap moved = new DataMap();
+		for(String field: secretFields) {
+			String value = clientData.getString(field);
+			if(value == null || value.equals("")) continue;
+			if(value.equals(SECRET_MARKER)) {
+				clientData.put(field, secretManager.get(domain, secretName(clientName, field)));
+			} else {
+				secretManager.putAsSystem(domain, secretName(clientName, field), value, "rbin");
+				moved.put(field, SECRET_MARKER);
+			}
+		}
+		if(moved.keySet().size() > 0)
+			dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key(domain, clientName)), clientDataCollection.convertObjectToSpecific(moved));
+		return moved.keySet().size() > 0;
+	}
+
+	/** Writes fields to the client data row, the secret ones go to the secrets and the row gets the marker. */
+	protected void putClientData(String domain, String clientName, DataMap data) throws RedbackException {
+		DataMap row = new DataMap();
+		for(String field: data.keySet()) {
+			Object value = data.get(field);
+			if(secretManager != null && secretFields.contains(field) && value instanceof String && !((String)value).equals("") && !value.equals(SECRET_MARKER)) {
+				secretManager.putAsSystem(domain, secretName(clientName, field), (String)value, "rbin");
+				row.put(field, SECRET_MARKER);
+			} else {
+				row.put(field, value);
+			}
+		}
+		dataClient.putData(clientDataCollection.getName(), clientDataCollection.convertObjectToSpecific(key(domain, clientName)), clientDataCollection.convertObjectToSpecific(row));
+	}
+
+	protected String secretName(String clientName, String field) {
+		return "intclient:" + clientName + ":" + field;
+	}
+
+	protected DataMap key(String domain, String clientName) {
+		DataMap key = new DataMap();
+		key.put("name", clientName);
+		key.put("domain", domain);
+		return key;
+	}
+
+	protected boolean hasKey(DataMap secretsConfig) {
+		DataMap keys = secretsConfig.getObject("keys");
+		if(keys == null) return false;
+		for(String id: keys.keySet())
+			if(keys.getString(id) != null && keys.getString(id).length() > 0)
+				return true;
+		return false;
 	}
 
 }

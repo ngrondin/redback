@@ -14,7 +14,7 @@ import io.redback.utils.CollectionConfig;
  *
  * - users can set, clear and see the status of a secret, never read its value
  * - only code running in the same process (for example the integration manager) reads a value, with get
- * - a secret name is free text made of letters, digits and . _ : - (for example "intclient:sftp1:secret")
+ * - a secret name is free text made of letters, digits, spaces and . _ : - (for example "intclient:sftp1:secret")
  *
  * Config:
  * - dataservice: the data service holding the collection
@@ -95,7 +95,7 @@ public class SecretManager {
 	}
 
 	protected void checkName(String name) throws RedbackException {
-		if(name == null || !name.matches("[A-Za-z0-9._:\\-]{1,200}"))
+		if(name == null || !name.matches("[A-Za-z0-9._: \\-]{1,200}"))
 			throw new RedbackException("Invalid secret name");
 	}
 
