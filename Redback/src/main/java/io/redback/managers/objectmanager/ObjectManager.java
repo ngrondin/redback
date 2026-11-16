@@ -28,6 +28,7 @@ import io.redback.client.DataClient;
 import io.redback.client.DataClient.DataTransaction;
 import io.redback.client.DomainClient;
 import io.redback.client.FileClient;
+import io.redback.client.GatewayClient;
 import io.redback.client.GeoClient;
 import io.redback.client.IntegrationClient;
 import io.redback.client.NotificationClient;
@@ -36,6 +37,7 @@ import io.redback.client.QueueClient;
 import io.redback.client.ReportClient;
 import io.redback.client.js.DomainClientJSWrapper;
 import io.redback.client.js.FileClientJSWrapper;
+import io.redback.client.js.GatewayClientJSWrapper;
 import io.redback.client.js.GeoClientJSWrapper;
 import io.redback.client.js.IntegrationClientJSWrapper;
 import io.redback.client.js.NotificationClientJSWrapper;
@@ -91,6 +93,7 @@ public class ObjectManager
 	protected String domainServiceName;
 	protected String integrationServiceName;
 	protected String queueServiceName;
+	protected String gatewayServiceName;
 	protected String objectUpdateChannel;
 	protected DataMap globalVariables;
 	protected ConfigCache<ObjectConfig> objectConfigs;
@@ -112,6 +115,7 @@ public class ObjectManager
 	protected QueueClient queueClient;
 	protected DomainClient domainClient;
 	protected IntegrationClient integrationClient;
+	protected GatewayClient gatewayClient;
 	protected boolean useMultiDBTransactions;
 	protected Cache<DataMap> searchCache;
 	protected SysUserManager sysUserManager;
@@ -138,6 +142,7 @@ public class ObjectManager
 			queueServiceName = config.getString("queueservice");
 			integrationServiceName = config.getString("integrationservice");
 			objectUpdateChannel = config.getString("objectupdatechannel");
+			gatewayServiceName = config.getString("gatewayservice");
 			globalVariables = config.getObject("globalvariables");
 			useMultiDBTransactions = config.containsKey("multidbtransactions") ? config.getBoolean("multidbtransactions") : false;
 			accessManagementClient = new AccessManagementClient(firebus, accessManagerServiceName);
@@ -152,6 +157,7 @@ public class ObjectManager
 			domainClient = new DomainClient(firebus, domainServiceName);
 			queueClient = new QueueClient(firebus, queueServiceName);
 			integrationClient = new IntegrationClient(firebus, integrationServiceName);
+			gatewayClient = new GatewayClient(firebus, gatewayServiceName);
 			traceCollection = config.containsKey("tracecollection") ? new CollectionConfig(dataClient, config.getObject("tracecollection"), null) : null;
 			settingsCollection = config.containsKey("settingscollection") ? new CollectionConfig(dataClient, config.getObject("settingscollection"), null) : null;
 			scriptLogCollection = config.containsKey("scriptlogcollection") ? new CollectionConfig(dataClient, config.getObject("scriptlogcollection"), null) : null;
@@ -173,6 +179,7 @@ public class ObjectManager
 			scriptFactory.setGlobals(globalVariables);
 			scriptFactory.setInRootScope("log", new LoggerJSFunction());
 			scriptFactory.setInRootScope("rbutils", new RedbackUtilsJSWrapper());
+			scriptFactory.setInRootScope("gw", new GatewayClientJSWrapper(getGetewayClient()));
 			if(config.containsKey("scriptobjects")) {
 				DataList scriptObjects = config.getList("scriptobjects");
 				for(int i = 0; i < scriptObjects.size(); i++) {
@@ -247,6 +254,11 @@ public class ObjectManager
 	public QueueClient getQueueClient()
 	{
 		return queueClient;
+	}
+	
+	public GatewayClient getGetewayClient()
+	{
+		return gatewayClient;
 	}
 	
 	public SysUserManager getSysUserManager() {

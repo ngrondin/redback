@@ -15,6 +15,7 @@ import io.redback.managers.reportmanager.ReportConfig;
 import io.redback.managers.reportmanager.ReportManager;
 import io.redback.security.Session;
 import io.redback.utils.StringUtils;
+import io.redback.utils.js.FirebusJSWrapper;
 
 public abstract class Unit {
 	protected DataMap config;
@@ -109,7 +110,9 @@ public abstract class Unit {
 	
 	protected Map<String, Object> getJSContext(Map<String, Object> context) {
 		Map<String, Object> jsContext = new HashMap<String, Object>();
-		jsContext.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), (Session)context.get("session")));
+		Session session = (Session)context.get("session");
+		jsContext.put("firebus", new FirebusJSWrapper(reportManager.getFirebus(), session));
+		jsContext.put("oc", new ObjectClientJSWrapper(reportManager.getObjectClient(), session));
 		jsContext.put("setfilters",  context.get("sets"));
 		jsContext.put("filterobjectname", context.get("filterobjectname"));
 		jsContext.put("filter", context.get("filter"));
