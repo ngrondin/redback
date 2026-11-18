@@ -5,7 +5,7 @@ import { RbContainerComponent } from 'app/abstract/rb-container';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { Observable, Subscription } from 'rxjs';
 import { Observer } from 'rxjs';
-import { RbSearchTarget } from 'app/rb-search/rb-search-target';
+//import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 import { FilterService } from 'app/services/filter.service';
 
 export type DatasetMap = {
@@ -21,7 +21,7 @@ export type DatasetListMap = {
   templateUrl: './rb-datasetgroup.component.html',
   styleUrls: ['./rb-datasetgroup.component.css']
 })
-export class RbDatasetGroupComponent extends RbContainerComponent implements RbSearchTarget {
+export class RbDatasetGroupComponent extends RbContainerComponent /*implements RbSearchTarget*/ {
   datasets: DatasetMap = {};
   _selectedObject: RbObject;
   private observers: Observer<any>[] = [];
@@ -149,7 +149,7 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
   }
 
   //Getters used mainly for SearchTarget
-  public getId(): string {
+  /*public getId(): string {
     throw this.id;
   }
 
@@ -165,6 +165,10 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
     return null;
   }
 
+  public getMasterFilter() : any {
+    return null;
+  }
+
   public getUserFilter() {
     let filter = {};
     for(var dsId of Object.keys(this.datasets)) {
@@ -175,5 +179,5 @@ export class RbDatasetGroupComponent extends RbContainerComponent implements RbS
 
   public getUserSort() {
     return null;
-  }
+  }*/
 }

@@ -7,7 +7,7 @@ import { ApiService } from 'app/services/api.service';
 import { Observer } from 'rxjs';
 import { ValueComparator } from 'app/helpers';
 import { RbSetComponent } from 'app/abstract/rb-set';
-import { RbSearchTarget } from 'app/rb-search/rb-search-target';
+//import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 import { UserprefService } from 'app/services/userpref.service';
 import { LogService } from 'app/services/log.service';
 
@@ -17,7 +17,7 @@ import { LogService } from 'app/services/log.service';
   templateUrl: './rb-dataset.component.html',
   styleUrls: ['./rb-dataset.component.css']
 })
-export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget  {
+export class RbDatasetComponent extends RbSetComponent /*implements RbSearchTarget*/  {
   @Input('basesort') baseSort: any;
   @Input('name') name: string; //To be deprecated
   @Input('fetchall') fetchAll: boolean = false;
@@ -523,7 +523,7 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     return this.objectname;
   }
 
-  public getSearchTargetType(): string {
+  /*public getSearchTargetType(): string {
     return "dataset";
   }
 
@@ -531,11 +531,15 @@ export class RbDatasetComponent extends RbSetComponent implements RbSearchTarget
     return this.baseFilter;
   }
 
+  public getMasterFilter() : any {
+    return this.master?.relationship;
+  }
+  
   public getUserFilter() {
     return this.userFilter;
   }
 
   public getUserSort() {
     return this.userSort;
-  }
+  }*/
 }

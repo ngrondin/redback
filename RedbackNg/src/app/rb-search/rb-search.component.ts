@@ -4,7 +4,7 @@ import { CONTAINER_DATA } from 'app/tokens';
 import { PortalInjector, ComponentPortal } from '@angular/cdk/portal';
 import { RbFilterBuilderComponent } from 'app/rb-filter-builder/rb-filter-builder.component';
 import { RbFieldInputComponent } from 'app/inputs/abstract/rb-field-input';
-import { RbSearchTarget } from './rb-search-target';
+//import { RbSearchTarget } from './rb-search-target';
 import { FilterBuilderConfig } from 'app/rb-filter-builder/rb-filter-builder-configs';
 import { SearchMode } from './rb-search-model';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
@@ -21,7 +21,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
   @Input('filter') filterconfig?: any;
   @Input('sort') sortconfig?: any;
   @Input('showsearchfield') showsearchfield: boolean = true;
-  @Input('searchtarget') searchtarget?: RbSearchTarget;
+  //@Input('searchtarget') searchtarget?: RbSearchTarget;
   @Input('modes') _modes?: any;
 
   @ViewChild('modeselectorbutton', { read: ViewContainerRef }) modeSelectorButtonContainerRef: ViewContainerRef;
@@ -60,7 +60,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
         label: this.label,
         targetdatasetid: this.targetdatasetid
       });
-      if (this.searchtarget != null) mode.searchtarget = this.searchtarget;
+      //if (this.searchtarget != null) mode.searchtarget = this.searchtarget;
       this.modes.push(mode);
     }
     for (let mode of this.modes) {
@@ -139,7 +139,7 @@ export class RbSearchComponent extends RbFieldInputComponent {
     let config: FilterBuilderConfig = new FilterBuilderConfig();
     config.filterConfig = this.mode.filterconfig;
     config.sortConfig = this.mode.sortconfig;
-    config.searchTarget = this.mode.searchtarget;
+    config.dataset = this.mode.searchtarget;
     const injectorTokens = new WeakMap();
     injectorTokens.set(OverlayRef, this.overlayRef);
     injectorTokens.set(CONTAINER_DATA, config);

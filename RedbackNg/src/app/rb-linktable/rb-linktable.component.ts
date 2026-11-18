@@ -205,7 +205,7 @@ export class RbLinktableComponent extends RbDataObserverComponent {
     if(this.localSort != null) {
       return this.localSort.column == column ? this.localSort.dir : null;
     }
-    let sort = this.dataset?.getUserSort()?.["0"];
+    let sort = this.dataset?.resolvedSort?.["0"];
     return sort != null && this.isDatabaseSort(column) && sort.attribute == column.orderAttribute ? sort.dir : null;
   }
 

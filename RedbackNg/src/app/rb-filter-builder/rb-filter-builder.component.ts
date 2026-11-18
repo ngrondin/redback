@@ -9,7 +9,8 @@ import { FilterGroupConstruct, FilterItemConstruct, SavedEntry, SortItemConstruc
 import { UserprefService } from 'app/services/userpref.service';
 import { MenuService } from 'app/services/menu.service';
 import { NavigateService } from 'app/services/navigate.service';
-import { RbSearchTarget } from 'app/rb-search/rb-search-target';
+import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
+//import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 
 
 
@@ -22,15 +23,16 @@ export class RbFilterBuilderComponent implements OnInit {
 
   @Output() done: EventEmitter<any> = new EventEmitter();
 
-  searchTarget: RbSearchTarget;
+  //searchTarget: RbSearchTarget;
+  dataset: RbDatasetComponent;
   userPref: any = {};
   filterConfig?: FilterConfig;
-  filter: any = {};
   filterGroupConstructs: FilterGroupConstruct[] = [];
-  //filterConstructs: FilterItemConstruct[][] = [[]];
   sortConfig?: SortConfig;
-  sort: any = {};
   sortConstructs: SortItemConstruct[] = [];
+  baseFilter: any = {};
+  filter: any = {};
+  sort: any = {};
   savedEntries: SavedEntry[] = [];
   _attributeToAddToFilter: any;
   _attributeToAddToSort: any;
@@ -62,12 +64,15 @@ export class RbFilterBuilderComponent implements OnInit {
     private menuService: MenuService,
     private navigateService: NavigateService
   ) {
-    this.searchTarget = this.config.searchTarget;
-    this.filter = this.searchTarget.getUserFilter();
+    //this.searchTarget = this.config.searchTarget;
+    this.dataset = this.config.dataset;
+    this.baseFilter = this.filterService.mergeFilters(this.dataset.baseFilter || {}, this.dataset.master?.relationship || {});
+    this.filter = this.dataset.userFilter;
+    //this.filter = this.dataset.resolvedFilter;
     if(this.config.filterConfig != null) {
       this.filterConfig = new FilterConfig(this.config.filterConfig);
     }
-    this.sort = this.searchTarget.getUserSort();
+    this.sort = this.dataset.userSort;
     if(this.config.sortConfig != null) {
       this.sortConfig = new SortConfig(this.config.sortConfig);
     }
@@ -76,7 +81,7 @@ export class RbFilterBuilderComponent implements OnInit {
   ngOnInit() {
     this.decompile();
     if(this.canSave) {
-      this.userPref = this.userprefService.getCurrentViewUISwitch('dataset', this.searchTarget.getId());
+      this.userPref = this.userprefService.getCurrentViewUISwitch('dataset', this.dataset.getId());
       if(this.userPref != null && this.userPref.saved != null) {
         this.savedEntries = this.userPref.saved.map(e => {
           let filter = this.filterService.removePrefixDollarSign(e.filter);
@@ -110,7 +115,7 @@ export class RbFilterBuilderComponent implements OnInit {
   }
 
   get canSave() : boolean {
-    return this.searchTarget.getSearchTargetType() == "dataset" && this.searchTarget.getId != null;
+    return this.dataset.getId() != null;
   }
 
   get hasSavedEntries() : boolean {
@@ -138,7 +143,7 @@ export class RbFilterBuilderComponent implements OnInit {
     let fic = new FilterItemConstruct(fac, null);
     if(group == null) group = this.filterGroupConstructs[0];
     group.items.push(fic);
-    this.loadOptionsFor(fac);
+    this.loadOptionsFor(fic, group.residual);
     this.changed = true;
   }
 
@@ -173,29 +178,27 @@ export class RbFilterBuilderComponent implements OnInit {
     this.changed = true;
   }
 
-  loadOptionsFor(fac: FilterAttributeConfig) {
+  loadOptionsFor(fic: FilterItemConstruct, residualFilter: any) {
+    let fac: FilterAttributeConfig = fic.config;
     if(fac.type == 'multiselect') {
       let fltr = {};
-      for (const key in this.filter) {
-        if(key != fac.attribute) {
-          fltr[key] = this.filter[key];
-        }
+      if(residualFilter != null) {
+        fltr = this.filterService.mergeFilters(fltr, residualFilter);
       }
-      let baseFilter = this.searchTarget.getBaseFilter();
-      if(this.filterConfig.useBaseFilter == true && baseFilter != null) {
-        fltr = this.filterService.mergeFilters(fltr, baseFilter);
+      if(this.baseFilter != null) {
+        fltr = this.filterService.mergeFilters(fltr, this.baseFilter);
       }
-      fltr = this.filterService.resolveFilter(fltr, null);
-      let objectname = fac.objectName ?? this.searchTarget.getObjectName();
+      fltr = this.filterService.resolveFilter(fltr, this.dataset.relatedObject, this.dataset.dataset, this.dataset.relatedObject);
+      let objectname = fac.objectName ?? this.dataset.objectname;
       if(objectname != null) {
         this.dataService.aggregate(objectname, fltr, null, [fac.attribute], [{function:"count", name:"_cnt"}], null, 0, 2000).subscribe({
           next: (list) => {
-            fac.options = list.map(agg => ({
+            fic.options = list.map(agg => ({
               name: agg.getDimension(fac.displayAttribute != null ? fac.attribute + "." + fac.displayAttribute : fac.attribute) ?? 'Empty',
               value: agg.getDimension(fac.attribute) ?? null,
               count:agg.getMetric("_cnt")
             }));
-            fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
+            fic.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
           }
         });
       }
@@ -205,11 +208,11 @@ export class RbFilterBuilderComponent implements OnInit {
         fltr = this.filterService.resolveFilter(fltr, null);
         this.dataService.fetchList(fac.objectName, fltr, null, null, 0, 500, false).subscribe({
           next: (list) => {
-            fac.options = list.map(o => ({
+            fic.options = list.map(o => ({
               name: o.get(fac.displayAttribute) ?? 'Empty',
               value: o.get(fac.valueAttribute) ?? null
             }));
-            fac.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
+            fic.options.sort((a, b) => ValueComparator.valueCompare(a, b, 'name'));
           }
         })
       }
@@ -318,10 +321,12 @@ export class RbFilterBuilderComponent implements OnInit {
         if(fac != null) {
           let fic = new FilterItemConstruct(fac, subfilter[key]);
           fgc.items.push(fic);
-          this.loadOptionsFor(fac);
         } else {
           fgc.residual[key] = subfilter[key];
         }
+      }
+      for(let fic of fgc.items) {
+        this.loadOptionsFor(fic, fgc.residual);
       }
       this.filterGroupConstructs.push(fgc);
     }
@@ -332,8 +337,11 @@ export class RbFilterBuilderComponent implements OnInit {
       for(let key in this.sort) {
         let order: number = parseInt(key);
         let sortItem: any = this.sort[key];
-        let sic = new SortItemConstruct(this.sortConfig.getAttributeConfig(sortItem.attribute), order, sortItem);
-        this.sortConstructs.push(sic);
+        let sac = this.sortConfig.getAttributeConfig(sortItem.attribute);
+        if(sac != null) {
+          let sic = new SortItemConstruct(sac, order, sortItem);
+          this.sortConstructs.push(sic);          
+        }
       }
     }
   }
@@ -375,9 +383,7 @@ export class RbFilterBuilderComponent implements OnInit {
         default: e.default ?? false,
         persisted: true
       }));
-      this.userprefService.setUISwitch("user", "dataset", this.searchTarget.getId(), this.userPref);
+      this.userprefService.setUISwitch("user", "dataset", this.dataset.getId(), this.userPref);
     }
   }
-
-
 }

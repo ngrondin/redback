@@ -4,7 +4,7 @@ import { RbDataCalcComponent } from 'app/abstract/rb-datacalc';
 import { NavigateEvent, RbObject } from 'app/datamodel';
 import { ValueComparator } from 'app/helpers';
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
-import { RbSearchTarget } from 'app/rb-search/rb-search-target';
+//import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 import { FilterService } from 'app/services/filter.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { CalendarSeriesConfig, CalendarEntry } from './rb-calendar-models';
@@ -16,7 +16,7 @@ import { filter } from 'rxjs';
   templateUrl: './rb-calendar.component.html',
   styleUrls: ['./rb-calendar.component.css']
 })
-export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfig>  implements RbSearchTarget {
+export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfig>  /*implements RbSearchTarget*/ {
   @Input('layers') layers: any[];
   @Input('filter') _filterConfig: any;
   //@Output() navigate: EventEmitter<any> = new EventEmitter();
@@ -382,5 +382,9 @@ export class RbCalendarComponent extends RbDataCalcComponent<CalendarSeriesConfi
       $lt: "'" + this.endDate.toISOString() + "'"
     }
     return filter;
+  }
+
+  public getMasterFilter() : any {
+    return null;
   }
 }

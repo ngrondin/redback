@@ -1,6 +1,6 @@
 import { RbDatasetComponent } from 'app/rb-dataset/rb-dataset.component';
 import { RbDatasetGroupComponent } from 'app/rb-datasetgroup/rb-datasetgroup.component';
-import { RbSearchTarget } from './rb-search-target';
+//import { RbSearchTarget } from './rb-search-target';
 
 export class SearchMode {
   label: string;
@@ -8,7 +8,7 @@ export class SearchMode {
   sortconfig?: any;
   targetdatasetid?: string;
   highlight: boolean;
-  searchtarget?: RbSearchTarget;
+  searchtarget?: RbDatasetComponent;
   filterValue?: any;
   sortValue?: any;
 
@@ -29,7 +29,8 @@ export class SearchMode {
           this.searchtarget = datasetgroup.datasets[this.targetdatasetid];
         }
         if(this.searchtarget == null) { //Didn't find the specified dataset id
-          this.searchtarget = datasetgroup;
+          let firstDatasetId = Object.keys(datasetgroup.datasets)[0];
+          this.searchtarget = datasetgroup.datasets[firstDatasetId];
         }
       }
     }

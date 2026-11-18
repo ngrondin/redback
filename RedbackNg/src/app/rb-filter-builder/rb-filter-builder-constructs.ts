@@ -14,6 +14,7 @@ export class FilterItemConstruct {
     public val1: any;
     public val2: string;
     public val3: string;
+    public options: any[] = [];
 
     constructor(c: FilterAttributeConfig, v: any) {
       this.config = c;
@@ -152,7 +153,7 @@ export class FilterItemConstruct {
           valPart = "is between the last " + Math.round(parseInt(this.val2) / 60000) + " minutes and the last " +  Math.round(parseInt(this.val2) / 60000) + " minutes";
         }
       } else if(this.config.type == 'multiselect' || this.config.type == 'relatedmultiselect') {
-        var list = this.val1.map(val => this.config.options.find(o => o.value == val)).filter(val => val != null).map(val => "'" + val.name + "'");
+        var list = this.val1.map(val => this.options.find(o => o.value == val)).filter(val => val != null).map(val => "'" + val.name + "'");
         valPart = list.length == 1 ? "is " + list[0] : list.length > 1 ? "is one of " + list.join(", ") : null;
       } else if(this.config.type == 'switch') {
         valPart = "is " + (this.val1 == true ? "true" : "false");
@@ -161,19 +162,19 @@ export class FilterItemConstruct {
     }
 
     public get optionsCount() : number {
-      return this.config.options.length;
+      return this.options.length;
     }
     
     public get allSelected() : boolean {
-      return this.config.options.length > 0 && this.config.options.every(o => this.val1.includes(o.value));
+      return this.options.length > 0 && this.options.every(o => this.val1.includes(o.value));
     }
 
     public get totalCount() : number {
-      return this.config.options.reduce((sum, o) => sum + (o.count ?? 0), 0);
+      return this.options.reduce((sum, o) => sum + (o.count ?? 0), 0);
     }
 
     public selectAll(on: boolean) {
-      this.val1 = on ? this.config.options.map(o => o.value) : [];
+      this.val1 = on ? this.options.map(o => o.value) : [];
     }
 
     private isRelativeDate(str: string): boolean {

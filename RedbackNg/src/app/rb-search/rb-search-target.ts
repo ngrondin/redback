@@ -1,5 +1,5 @@
 
-export interface RbSearchTarget {
+/*export interface RbSearchTarget {
 
     filterSort(event: any) : boolean;
 
@@ -13,5 +13,7 @@ export interface RbSearchTarget {
 
     getUserSort() : any;
 
-    getBaseFilter() : any;    
-}
+    getBaseFilter() : any; 
+ 
+    getMasterFilter() : any;
+}*/

@@ -1,12 +1,6 @@
 <div
     class="rb-cal-toolbar">
-    <rb-search
-        [searchtarget]="this"
-        [filter]="filterConfig"
-        [size]="15"
-        [grow]="0"
-        [margin]="true">
-    </rb-search>
+
     <rb-choice-input
         *ngIf="layerOptions != null"
         [choicelist]="layerOptions"

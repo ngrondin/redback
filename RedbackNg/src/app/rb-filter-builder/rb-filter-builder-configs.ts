@@ -1,9 +1,12 @@
-import { RbSearchTarget } from "app/rb-search/rb-search-target";
+//import { RbSearchTarget } from "app/rb-search/rb-search-target";
+
+import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
 
   export class FilterBuilderConfig {
     filterConfig: any;
     sortConfig: any;
-    searchTarget: RbSearchTarget
+    //searchTarget: RbSearchTarget
+    dataset: RbDatasetComponent
   }
   
   
@@ -40,7 +43,6 @@ import { RbSearchTarget } from "app/rb-search/rb-search-target";
     public objectName: string;
     public valueAttribute: string;
     public filter: any;
-    public options: any[] = [];
   
     constructor(json: any) {
       this.attribute = json.attribute;
@@ -86,4 +88,3 @@ export class SortConfig {
       this.label = json.label;
     }
   }
-  
