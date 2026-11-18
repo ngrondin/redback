@@ -49,6 +49,7 @@ public class RedbackFileServer extends FileServer
 	protected CollectionConfig fileCollection;
 	protected CollectionConfig linkCollection;
 	protected DataClient dataClient;
+	protected DataMap cleanupConfig;
 
 	public RedbackFileServer(String n, DataMap c, Firebus f) 
 	{
@@ -67,6 +68,7 @@ public class RedbackFileServer extends FileServer
 		fileCollection = new CollectionConfig(dataClient, config.getObject("filecollection"), "rbfs_file");
 		if(config.containsKey("linkcollection"))
 			linkCollection = new CollectionConfig(dataClient, config.getObject("linkcollection"), "rbfs_link");
+		cleanupConfig = config.containsKey("cleanup") ? config.getObject("cleanup") : new DataMap();
 	}
 
 	public RedbackFileMetaData getMetadata(Session session, String fileUid) throws RedbackException
@@ -337,6 +339,72 @@ public class RedbackFileServer extends FileServer
 		}		
 	}
 	
+	/**
+	 * Deletes files that nothing points to, from the file store first and then from the file collection.
+	 * A file counts as linked when its uid is in the link collection or in one of the configured file fields.
+	 * Config "cleanup":
+	 * - olderthandays: only files older than this are looked at, default 14
+	 * - batch: most files deleted in one run, default 500
+	 * - maxseconds: a run stops after this time, default 300
+	 * - filefields: list of {collection, field}, field is the db path holding the file uid (e.g. "file.fileuid")
+	 */
+	public DataMap cleanupUnlinkedFiles(Session session) throws RedbackException {
+		if(linkCollection == null || defaultFileStream == null)
+			throw new RedbackException("File cleanup needs a link collection and a stream adapter");
+		int olderThanDays = cleanupConfig.containsKey("olderthandays") ? cleanupConfig.getNumber("olderthandays").intValue() : 14;
+		int batch = cleanupConfig.containsKey("batch") ? cleanupConfig.getNumber("batch").intValue() : 500;
+		long maxMs = (cleanupConfig.containsKey("maxseconds") ? cleanupConfig.getNumber("maxseconds").longValue() : 300) * 1000;
+		DataList fileFields = cleanupConfig.containsKey("filefields") ? cleanupConfig.getList("filefields") : new DataList();
+		long start = System.currentTimeMillis();
+		Date cutoff = new Date(start - (olderThanDays * 86400000L));
+		int pageSize = 200, kept = 0, deleted = 0, failed = 0;
+		boolean more = true;
+		while(more && deleted < batch && System.currentTimeMillis() - start < maxMs) {
+			DataList files = fileCollection.getData(new DataMap("date", new DataMap("$lt", cutoff)), kept / pageSize, pageSize).getList("result");
+			int skip = kept % pageSize;
+			more = files.size() == pageSize;
+			DataList uids = new DataList();
+			for(int i = skip; i < files.size(); i++)
+				uids.add(files.getObject(i).getString("fileuid"));
+			if(uids.size() == 0) break;
+			List<String> linked = getLinkedFileUids(uids, fileFields);
+			for(int i = 0; i < uids.size(); i++) {
+				String fileUid = uids.getString(i);
+				if(linked.contains(fileUid) || deleted >= batch || System.currentTimeMillis() - start >= maxMs) {
+					kept++;
+				} else {
+					try {
+						firebus.requestService(defaultFileStream, new Payload(new DataMap("action", "delete", "filename", fileUid)), 10000);
+						fileCollection.deleteData(new DataMap("fileuid", fileUid));
+						deleted++;
+					} catch(Exception e) {
+						Logger.warning("rb.file.cleanup.error", new DataMap("fileuid", fileUid), e);
+						kept++;
+						failed++;
+					}
+				}
+			}
+		}
+		DataMap result = new DataMap("deleted", deleted, "failed", failed, "kept", kept, "cutoff", cutoff, "ms", System.currentTimeMillis() - start);
+		Logger.info("rb.file.cleanup", result);
+		return result;
+	}
+
+	protected List<String> getLinkedFileUids(DataList uids, DataList fileFields) throws RedbackException {
+		List<String> linked = new ArrayList<String>();
+		DataList links = linkCollection.getData(new DataMap("fileuid", new DataMap("$in", uids)), 0, 10000).getList("result");
+		for(int i = 0; i < links.size(); i++)
+			linked.add(links.getObject(i).getString("fileuid"));
+		for(int i = 0; i < fileFields.size(); i++) {
+			String collection = fileFields.getObject(i).getString("collection");
+			String field = fileFields.getObject(i).getString("field");
+			DataList rows = dataClient.getData(collection, new DataMap(field, new DataMap("$in", uids)), null, 0, 10000).getList("result");
+			for(int j = 0; j < rows.size(); j++)
+				linked.add(rows.getObject(j).getString(field));
+		}
+		return linked;
+	}
+
 	public String getNewId(Session session) throws RedbackException {
 		try {
 			Payload idRequest = new Payload(idName);

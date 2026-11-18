@@ -15,6 +15,7 @@ import io.firebus.information.ServiceInformation;
 import io.firebus.information.StreamInformation;
 import io.redback.exceptions.RedbackException;
 import io.redback.exceptions.RedbackInvalidRequestException;
+import io.redback.exceptions.RedbackUnauthorisedException;
 import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedDualProvider;
 import io.redback.utils.RedbackFile;
@@ -131,6 +132,13 @@ public abstract class FileServer extends AuthenticatedDualProvider
 						response = new Payload(resp);
 						response.metadata.put("mime", "application/json");
 					}
+					else if(action.equals("cleanup"))
+					{
+						if(!session.getUserProfile().canWrite("rb.accesscat.admin"))
+							throw new RedbackUnauthorisedException("No rights to clean up files");
+						response = new Payload(cleanupUnlinkedFiles(session));
+						response.metadata.put("mime", "application/json");
+					}
 					else if(action.equals("listmulti"))
 					{
 						List<RedbackObjectIdentifier> objectIdentifiers = new ArrayList<RedbackObjectIdentifier>();
@@ -233,6 +241,8 @@ public abstract class FileServer extends AuthenticatedDualProvider
 	public abstract RedbackFileMetaData putFile(Session session, String fileName, String mime, String username, byte[] bytes) throws RedbackException;
 	
 	public abstract void deleteFile(Session session, String fileUid) throws RedbackException;
+
+	public abstract DataMap cleanupUnlinkedFiles(Session session) throws RedbackException;
 
 	public abstract RedbackFileMetaData acceptGetStream(Session session, StreamEndpoint streamEndpoint, String fileUid) throws RedbackException;
 	
