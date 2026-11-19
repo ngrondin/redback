@@ -480,3 +480,12 @@
     height: 0px;
     pointer-events: none;
 }
+
+.rb-gantt-lanegrouphead {
+  background-color: #eceff3;
+  color: #333;
+}
+
+.rb-gantt-lanegroup {
+  background-color: #f3f5f8;
+}

@@ -175,16 +175,60 @@
             [style.top.px]="-scrollTop">
             <div
                 *ngFor="let lane of lanes; let i = index"
-                [class]="'rb-gantt-lanehead ' + ((i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
+                [class]="'rb-gantt-lanehead ' + (lane.isGroup ? 'rb-gantt-lanegrouphead' : (i % 2) == 1 ? 'rb-gantt-backgroundcolor1' : 'rb-gantt-backgroundcolor2')"
                 [class.rb-gantt-lanehead-selected]="isLaneSelected(lane)"
                 [class.rb-gantt-lanehead-dimmed]="isLaneDimmed(lane)"
                 [style.height.px]="lane.height"
                 [style.borderBottomWidth.px]="sizes.borderWidth"
-                [style.cursor]="lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
+                [style.cursor]="lane.isGroup || lanesConfig.modal != null || lanesConfig.link != null ? 'pointer' : ''"
                 (click)="clickLane(lane)"
-                [rb-drag-object]="lanesConfig.editable == true ? lane : null"
+                [rb-drag-object]="lanesConfig.editable == true && lane.object != null ? lane : null"
                 (rb-drag-dropzone)="droppedOn($event, lane, true)"
                 [rb-drag-changeform]="getDragSizeForObjectCallback">
+                <ng-container *ngIf="lane.isGroup">
+                <rb-icon
+                    class="rb-gantt-lanedragindicator"
+                    *ngIf="lanesConfig.editable == true"
+                    [style.visibility]="lane.object != null ? 'visible' : 'hidden'"
+                    [icon]="'drag_indicator'"
+                    [color]="'#D3D3D3'">
+                </rb-icon>
+                <rb-icon
+                    [icon]="lane.collapsed ? 'chevron_right' : 'expand_more'">
+                </rb-icon>
+                <div
+                    *ngIf="lanesConfig.editable != true || lane.object == null"
+                    class="rb-gantt-lanelabel">
+                    {{lane.label}}
+                </div>
+                <rb-inline-input
+                    *ngIf="lanesConfig.editable == true && lane.object != null"
+                    [attribute]="lanesConfig.group.labelAttribute"
+                    [object]="lane.object"
+                    [margin]="false"
+                    [grow]="1"
+                    [size]="null"
+                    (click)="$event.stopPropagation()">
+                </rb-inline-input>
+                <div
+                    class="rb-gantt-lanesublabel">
+                    {{lane.lanes.length}}
+                </div>
+                <rb-iconbutton
+                    *ngIf="lanesConfig.editable == true"
+                    [icon]="'add'"
+                    [color]="'#D3D3D3'"
+                    (click)="addLane(lane); $event.stopPropagation();">
+                </rb-iconbutton>
+                <rb-iconbutton
+                    *ngIf="lanesConfig.editable == true"
+                    [style.visibility]="lane.object != null ? 'visible' : 'hidden'"
+                    [icon]="'clear'"
+                    [color]="'#D3D3D3'"
+                    (click)="deleteLaneGroup(lane); $event.stopPropagation();">
+                </rb-iconbutton>
+                </ng-container>
+                <ng-container *ngIf="!lane.isGroup">
                 <rb-icon
                     class="rb-gantt-lanedragindicator"
                     *ngIf="lanesConfig.editable == true"
@@ -230,12 +274,19 @@
                     [color]="'#D3D3D3'"
                     (click)="deleteLane(lane); $event.stopPropagation();">
                 </rb-iconbutton>
+                </ng-container>
             </div>
             <rb-iconbutton
                 *ngIf="lanesConfig.editable == true"
                 [icon]="'add'"
                 [color]="'#D3D3D3'"
                 (click)="addLane()">
+            </rb-iconbutton>
+            <rb-iconbutton
+                *ngIf="lanesConfig.editable == true && lanesConfig.group != null"
+                [icon]="'create_new_folder'"
+                [color]="'#D3D3D3'"
+                (click)="addLaneGroup()">
             </rb-iconbutton>
         </div>
         <div
@@ -263,7 +314,7 @@
                 class="rb-gantt-laneslayer">
                 <div
                     *ngFor="let lane of lanes; let i = index"
-                    [class]="'rb-gantt-lane ' + ((i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
+                    [class]="'rb-gantt-lane ' + (lane.isGroup ? 'rb-gantt-lanegroup' : (i % 2) == 1 ? 'rb-gantt-lanecolor1' : 'rb-gantt-lanecolor2')"
                     [style.height.px]="lane.height"
                     [style.width.px]="timeConfig.widthPX"
                     [style.borderBottomWidth.px]="sizes.borderWidth">
