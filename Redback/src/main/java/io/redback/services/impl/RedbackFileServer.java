@@ -377,10 +377,10 @@ public class RedbackFileServer extends FileServer
 					kept++;
 				} else {
 				    deleteFile(session, fileUid);
+					deleted++;
 					/*try {
 						firebus.requestService(defaultFileStream, new Payload(new DataMap("action", "delete", "filename", fileUid)), 10000);
 						fileCollection.deleteData(new DataMap("fileuid", fileUid));
-						deleted++;
 					} catch(Exception e) {
 						Logger.warning("rb.file.cleanup.error", new DataMap("fileuid", fileUid), e);
 						kept++;
