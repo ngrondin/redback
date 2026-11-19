@@ -329,11 +329,14 @@ public class RedbackFileServer extends FileServer
 	public void deleteFile(Session session, String fileUid) throws RedbackException {
 		try {
 			if(linkCollection != null) {
-				DataMap key = new DataMap(linkCollection.getField("fileuid"), fileUid);
-				dataClient.deleteData(linkCollection.getName(), key);
+				//DataMap key = new DataMap(linkCollection.getField("fileuid"), fileUid);
+				//dataClient.deleteData(linkCollection.getName(), key);
+				linkCollection.deleteData(new DataMap("fileuid", fileUid));
 			} 
-			DataMap key = new DataMap(fileCollection.getField("fileuid"), fileUid);
-			dataClient.deleteData(fileCollection.getName(), key);			
+			//DataMap key = new DataMap(fileCollection.getField("fileuid"), fileUid);
+			//dataClient.deleteData(fileCollection.getName(), key);			
+			firebus.requestService(defaultFileStream, new Payload(new DataMap("action", "delete", "filename", fileUid)), 10000);
+			fileCollection.deleteData(new DataMap("fileuid", fileUid));
 		} catch(Exception e) {
 			throw new RedbackException("Error deleting file");
 		}		
@@ -373,7 +376,8 @@ public class RedbackFileServer extends FileServer
 				if(linked.contains(fileUid) || deleted >= batch || System.currentTimeMillis() - start >= maxMs) {
 					kept++;
 				} else {
-					try {
+				    deleteFile(session, fileUid);
+					/*try {
 						firebus.requestService(defaultFileStream, new Payload(new DataMap("action", "delete", "filename", fileUid)), 10000);
 						fileCollection.deleteData(new DataMap("fileuid", fileUid));
 						deleted++;
@@ -381,7 +385,7 @@ public class RedbackFileServer extends FileServer
 						Logger.warning("rb.file.cleanup.error", new DataMap("fileuid", fileUid), e);
 						kept++;
 						failed++;
-					}
+					}*/
 				}
 			}
 		}
