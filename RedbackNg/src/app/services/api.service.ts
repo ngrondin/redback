@@ -37,6 +37,7 @@ export class ApiService {
   public useCSForAPI: boolean = false;
   public chatService: string; 
   public aiService: string;
+  public secretService: string;
   public placesAutocompleteService: any;
 
   constructor(
@@ -532,6 +533,25 @@ export class ApiService {
     })
   }
 
+
+  /********* Secrets **********/
+
+  secretStatus(domain: string, name: string): Observable<any> {
+    return this.requestService(this.secretService, {
+      action: 'status',
+      domain: domain,
+      name: name
+    });
+  }
+
+  secretPut(domain: string, name: string, value: string): Observable<any> {
+    return this.requestService(this.secretService, {
+      action: 'put',
+      domain: domain,
+      name: name,
+      value: value
+    });
+  }
 
   /********* AI **********/  
 
