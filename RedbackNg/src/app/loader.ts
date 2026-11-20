@@ -72,6 +72,7 @@ import { RbTagsInputComponent } from "app/inputs/rb-tags-input/rb-tags.component
 import { RbSelectorComponent } from "app/rb-selector/rb-selector.component";
 import { RbMultiRelatedInputComponent } from "app/inputs/rb-multi-related-input/rb-multi-related-input.component";
 import { RbColorInputComponent } from "app/inputs/rb-color-input/rb-color-input.component";
+import { RbPasswordInputComponent } from "app/inputs/rb-password-input/rb-password-input.component";
 import { RbIconComponent } from "app/rb-icon/rb-icon.component";
 import { RbRepeaterComponent } from "app/rb-repeater/rb-repeater.component";
 import { RbPivotTableComponent } from "app/graphs/rb-pivot-table/rb-pivot-table.component";
@@ -121,6 +122,7 @@ export const componentRegistry: {[key:string]: any} = {
     "dateinput": RbDatetimeInputComponent,
     "urlinput": RbUrlInputComponent,
     "colorinput": RbColorInputComponent,
+    "passwordinput": RbPasswordInputComponent,
     "gantt": RbGanttComponent,
     "link": RbLinkComponent,
     "log": RbLogComponent,
