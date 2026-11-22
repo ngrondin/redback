@@ -19,6 +19,7 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     dragfilter: any;
     editable: boolean;
     mainIsEditable: boolean;
+    group?: GanttLaneGroupConfig;
 
     constructor(json: any, userpref: any) {
       this.dataset = json.dataset;
@@ -36,6 +37,22 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       this.dragfilter = json.dragfilter;
       this.editable = json.editable ?? false;
       this.mainIsEditable = json.maineditable ?? false;
+      this.group = json.group != null ? new GanttLaneGroupConfig({...json.group, editable: this.editable}, userpref) : undefined;
+    }
+  }
+
+  /**
+   * Swimlane groups: a second dataset whose objects are drawn as header rows, each above the lanes that point to it.
+   * - laneattribute: the lane attribute holding the uid of its group (null = the lane is in no group)
+   * - labelattribute / orderattribute: as for lanes, read on the group objects
+   * - editable comes from the lanes config
+   */
+  export class GanttLaneGroupConfig extends GanttLaneConfig {
+    laneAttribute: string;
+
+    constructor(json: any, userpref: any) {
+      super(json, userpref);
+      this.laneAttribute = json.laneattribute;
     }
   }
 
@@ -177,12 +194,14 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
     spreads: GanttSpread[] = [];
     object: RbObject;
     config: GanttLaneConfig;
+    isGroup: boolean = false;
 
     constructor(obj: RbObject, cfg: GanttLaneConfig, sizes: GanttSizes, dataset?: RbDatasetComponent) {
       this.object = obj;
       this.config = cfg;
       this.sizes = sizes;
       this.height = sizes.laneHeight;
+      if(obj == null) return;
       if(cfg.labelAttribute != null) {
         this.label = obj.get(cfg.labelAttribute);
       } else if(cfg.labelExpression != null) {
@@ -234,6 +253,23 @@ import { RbDatasetComponent } from "app/rb-dataset/rb-dataset.component";
       let linkAttributes = cfg.laneForeignAttributes || this.config.linkAttributes;
       let linkValues = linkAttributes.map(la => this.object.get(la));
       return linkValues;
+    }
+  }
+
+  /**
+   * A group header row. It sits in the same row list as the lanes so every lane layer stays aligned.
+   * The object is null for the "No group" row that holds the lanes outside any group.
+   */
+  export class GanttLaneGroup extends GanttLane {
+    lanes: GanttLane[] = [];
+    collapsed: boolean;
+
+    constructor(obj: RbObject | null, cfg: GanttLaneGroupConfig, sizes: GanttSizes, collapsed: boolean) {
+      super(obj, cfg, sizes);
+      this.isGroup = true;
+      this.collapsed = collapsed;
+      this.height = Math.round(sizes.laneHeight * 0.75);
+      if(obj == null) this.label = "No group";
     }
   }
 

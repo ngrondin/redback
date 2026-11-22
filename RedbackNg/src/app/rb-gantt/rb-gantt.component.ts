@@ -7,7 +7,7 @@ import { FilterService } from 'app/services/filter.service';
 import { ModalService } from 'app/services/modal.service';
 import { UserprefService } from 'app/services/userpref.service';
 import { Subscription } from 'rxjs';
-import { GanttDependencyType, GanttLane, GanttLaneConfig, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread, GanttSizes } from './rb-gantt-models';
+import { GanttDependencyType, GanttLane, GanttLaneConfig, GanttLaneGroup, GanttOverlayConfig, GanttOverlayLane, GanttOverlaySpread, GanttSeriesConfig, GanttSpread, GanttSizes } from './rb-gantt-models';
 import { RbScrollComponent } from 'app/rb-scroll/rb-scroll.component';
 import { DataService } from 'app/services/data.service';
 import { LogService } from 'app/services/log.service';
@@ -78,6 +78,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   focusTopPX: number | null = null;
 
   openGroup: string | null = null;
+  collapsedLaneGroups: (string | null)[] = [];
   contextAnchor: XY | null = null;
 
   public getDragSizeForObjectCallback?: Function;
@@ -339,22 +340,44 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
       if(this.lanesConfig.orderAttribute != null) {
         list.sort((a, b) => ValueComparator.sort(a.get(this.lanesConfig!.orderAttribute), b.get(this.lanesConfig!.orderAttribute)));
       }
-      for(let obj of list) {
-        let show = laneFilter != null && !this.filterService.applies(laneFilter, obj) ? false : true;
-        if(show) {
-          let lane = new GanttLane(obj, this.lanesConfig, this.sizes, this.getDatasetForLanesConfig());
+      list = list.filter(obj => laneFilter == null || this.filterService.applies(laneFilter, obj));
+      let rows: GanttLane[] = this.lanesConfig.group != null ? this.calcLaneGroupRows(list) : list.map(obj => new GanttLane(obj, this.lanesConfig!, this.sizes, this.getDatasetForLanesConfig()));
+      for(let lane of rows) {
+        if(!lane.isGroup) {
           let spreads: GanttSpread[] = this.calcSpreads(lane, accHeight);
           let hasForegroundSpreads = spreads.filter(s => !s.ghost && !s.background).length > 0;
           let hasBackgroundStreaps = spreads.filter(s => !s.ghost && s.background).length > 0;
-          if(!((!hasForegroundSpreads && this.hideEmptyLanes) || (!hasBackgroundStreaps && this.hideEmptyBackgrounds))) {
-            lane.setSpreads(spreads);
-            this.lanes.push(lane);
-            accHeight += lane.height + this.sizes.borderWidth;
-          }
+          if((!hasForegroundSpreads && this.hideEmptyLanes) || (!hasBackgroundStreaps && this.hideEmptyBackgrounds)) continue;
+          lane.setSpreads(spreads);
         }
+        this.lanes.push(lane);
+        accHeight += lane.height + this.sizes.borderWidth;
       }
       this.heightPX = accHeight;
     }
+  }
+
+  // Group header rows in group order, each followed by its lanes unless collapsed. Lanes in no group go under a last "No group" row.
+  private calcLaneGroupRows(list: RbObject[]) : GanttLane[] {
+    let groupCfg = this.lanesConfig!.group!;
+    let groups: RbObject[] = (this.lists != null ? this.lists[groupCfg.dataset] : null) ?? [];
+    if(groupCfg.orderAttribute != null) {
+      groups.sort((a, b) => ValueComparator.sort(a.get(groupCfg.orderAttribute), b.get(groupCfg.orderAttribute)));
+    }
+    let groupUids = groups.map(g => g.uid);
+    let free = list.filter(obj => !groupUids.includes(obj.get(groupCfg.laneAttribute)));
+    let headers = groups.map(g => new GanttLaneGroup(g, groupCfg, this.sizes, this.collapsedLaneGroups.includes(g.uid)));
+    if(groups.length > 0 && (free.length > 0 || this.lanesConfig!.editable)) {
+      headers.push(new GanttLaneGroup(null, groupCfg, this.sizes, this.collapsedLaneGroups.includes(null)));
+    }
+    let rows: GanttLane[] = [];
+    for(let header of headers) {
+      let members = header.object != null ? list.filter(obj => obj.get(groupCfg.laneAttribute) == header.object.uid) : free;
+      header.lanes = members.map(obj => new GanttLane(obj, this.lanesConfig!, this.sizes, this.getDatasetForLanesConfig()));
+      rows.push(header);
+      if(!header.collapsed) rows.push(...header.lanes);
+    }
+    return headers.length > 0 ? rows : free.map(obj => new GanttLane(obj, this.lanesConfig!, this.sizes, this.getDatasetForLanesConfig()));
   }
 
   private calcSpreads(lane: GanttLane, offsetTop: number) : GanttSpread[] {
@@ -599,16 +622,21 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public isLaneSelected(lane: GanttLane) : boolean {
+    if(lane.isGroup) return false;
     return this.getDatasetForLanesConfig()?.isObjectSelected(lane.object) || false;
   }
 
   public isLaneDimmed(lane: GanttLane) : boolean {
     let dataset = this.getDatasetForLanesConfig();
-    return dataset != null && !dataset.isObjectHighlighted(lane.object);
+    return !lane.isGroup && dataset != null && !dataset.isObjectHighlighted(lane.object);
   }
 
   public clickLane(lane: GanttLane) {
-    if(this.lanesConfig != null) {
+    if(lane instanceof GanttLaneGroup) {
+      let key = lane.object?.uid ?? null;
+      this.collapsedLaneGroups = lane.collapsed ? this.collapsedLaneGroups.filter(k => k != key) : this.collapsedLaneGroups.concat([key]);
+      this.redraw();
+    } else if(this.lanesConfig != null) {
       let laneDataset = this.getDatasetForLanesConfig();
       if(laneDataset != null) {
         laneDataset.select(lane.object);
@@ -626,9 +654,34 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     this.dataService.delete(lane.object).subscribe(result => {});
   }
 
-  public addLane() {
+  public addLane(group?: GanttLaneGroup) {
     var dataset = this.getDatasetForLanesConfig();
-    dataset?.create();
+    if(group?.object != null && dataset != null) {
+      let data = {...dataset.resolvedFilter, [this.lanesConfig!.group!.laneAttribute]: group.object.uid};
+      this.dataService.create(dataset.objectname, null, data).subscribe(newObject => dataset!.addObjectAndSelect(newObject));
+    } else {
+      dataset?.create();
+    }
+  }
+
+  public addLaneGroup() {
+    let groupCfg = this.lanesConfig?.group;
+    let dataset = groupCfg != null ? this.datasetgroup?.datasets[groupCfg.dataset] : null;
+    if(groupCfg != null && dataset != null) {
+      let data = {...dataset.resolvedFilter};
+      if(groupCfg.orderAttribute != null) {
+        data[groupCfg.orderAttribute] = dataset.list.reduce((acc, g) => Math.max(acc, g.get(groupCfg!.orderAttribute) ?? -1), -1) + 1;
+      }
+      this.dataService.create(dataset.objectname, null, data).subscribe(newObject => dataset!.add(newObject));
+    }
+  }
+
+  // The lanes of a deleted group stay, in no group
+  public deleteLaneGroup(group: GanttLaneGroup) {
+    let tx = new RbObjectTransaction();
+    group.lanes.forEach(lane => lane.object.setValue(this.lanesConfig!.group!.laneAttribute, null, tx));
+    this.dataService.pushTransactionToServer(tx);
+    this.dataService.delete(group.object).subscribe(result => {});
   }
 
   public clickOverlayLaneIndex(i: number) {
@@ -677,7 +730,7 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   }
 
   public contextMenuOnLane(event: any, lane: GanttLane) {
-    if(event.target != event.currentTarget) return;
+    if(event.target != event.currentTarget || lane.isGroup) return;
     let pos = this.getXYRelativeToTarget(event, "rb-gantt-lanes");
     let startMS = this.timeConfig.getTimeOfLeftPX(pos.x);
     if(this.snapinterval != null) {
@@ -760,8 +813,10 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
 
   public droppedOn(event: any, lane: GanttLane, ignoreTime: boolean = false) {
     let firstObj = Array.isArray(event.data) ? event.data[0] : event.data;
-    if(firstObj instanceof RbObject) {
-      this.objectsDroppedOnLane(event, lane, ignoreTime);
+    if(firstObj instanceof GanttLaneGroup) {
+      if(lane instanceof GanttLaneGroup) this.laneGroupDroppedOnLaneGroup(firstObj, lane);
+    } else if(firstObj instanceof RbObject) {
+      if(!lane.isGroup) this.objectsDroppedOnLane(event, lane, ignoreTime);
     } else if(firstObj instanceof GanttLane) {
       this.laneDroppedOnLane(firstObj, lane);
     }
@@ -839,25 +894,47 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     //Don't recalc here, the recalc will be done on the end drag event;
   }
 
+  // A lane dropped on a lane takes that lane's group and its place; dropped on a group row it only joins the group
   public laneDroppedOnLane(droppedLane: GanttLane, lane: GanttLane, ignoreTime: boolean = false) {
-    if(this.lanesConfig != null && this.lanesConfig.orderAttribute != null) {
-      let tx = new RbObjectTransaction();
+    if(this.lanesConfig == null) return;
+    let tx = new RbObjectTransaction();
+    let groupCfg = this.lanesConfig.group;
+    if(groupCfg != null) {
+      let newGroup = lane.isGroup ? (lane.object?.uid ?? null) : lane.object.get(groupCfg.laneAttribute);
+      if(droppedLane.object.get(groupCfg.laneAttribute) != newGroup) {
+        droppedLane.object.setValue(groupCfg.laneAttribute, newGroup, tx);
+      }
+    }
+    if(!lane.isGroup && this.lanesConfig.orderAttribute != null) {
       let list: RbObject[] = this.lists != null ? this.lists[this.lanesConfig.dataset] : this.list;
-      list.sort((a, b) => ValueComparator.sort(a.get(this.lanesConfig!.orderAttribute), b.get(this.lanesConfig!.orderAttribute)));
-      if(list.map(o => o.get(this.lanesConfig!.orderAttribute)).filter(v => v == null).length > 0) {
-        for(let i = 0; i < list.length; i++) {
-          list[i].setValue(this.lanesConfig.orderAttribute, i, tx);
-        }
-      }
+      this.moveInOrder(list, this.lanesConfig.orderAttribute, droppedLane.object, lane.object, tx);
+    }
+    this.dataService.pushTransactionToServer(tx);
+  }
 
-      let allOrderValues = list.map(o => o.get(this.lanesConfig!.orderAttribute));
-      let newList = list.filter(o => o != droppedLane.object);
-      let index = newList.indexOf(lane.object);
-      newList.splice(index, 0, droppedLane.object);
-      for(let i = 0; i < newList.length; i++) {
-        newList[i].setValue(this.lanesConfig.orderAttribute, allOrderValues[i], tx);
-      }
+  public laneGroupDroppedOnLaneGroup(droppedGroup: GanttLaneGroup, group: GanttLaneGroup) {
+    let groupCfg = this.lanesConfig?.group;
+    if(groupCfg?.orderAttribute != null && group.object != null && this.lists != null) {
+      let tx = new RbObjectTransaction();
+      this.moveInOrder(this.lists[groupCfg.dataset], groupCfg.orderAttribute, droppedGroup.object, group.object, tx);
       this.dataService.pushTransactionToServer(tx);
+    }
+  }
+
+  // Puts 'moved' just before 'target', keeping the order values the list already uses
+  private moveInOrder(list: RbObject[], orderAttribute: string, moved: RbObject, target: RbObject, tx: RbObjectTransaction) {
+    list.sort((a, b) => ValueComparator.sort(a.get(orderAttribute), b.get(orderAttribute)));
+    if(list.map(o => o.get(orderAttribute)).filter(v => v == null).length > 0) {
+      for(let i = 0; i < list.length; i++) {
+        list[i].setValue(orderAttribute, i, tx);
+      }
+    }
+    let allOrderValues = list.map(o => o.get(orderAttribute));
+    let newList = list.filter(o => o != moved);
+    let index = newList.indexOf(target);
+    newList.splice(index, 0, moved);
+    for(let i = 0; i < newList.length; i++) {
+      newList[i].setValue(orderAttribute, allOrderValues[i], tx);
     }
   }
 
