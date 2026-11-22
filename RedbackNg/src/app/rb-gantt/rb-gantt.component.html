@@ -185,95 +185,96 @@
                 [rb-drag-object]="lanesConfig.editable == true && lane.object != null ? lane : null"
                 (rb-drag-dropzone)="droppedOn($event, lane, true)"
                 [rb-drag-changeform]="getDragSizeForObjectCallback">
-                <ng-container *ngIf="lane.isGroup">
-                <rb-icon
-                    class="rb-gantt-lanedragindicator"
-                    *ngIf="lanesConfig.editable == true"
-                    [style.visibility]="lane.object != null ? 'visible' : 'hidden'"
-                    [icon]="'drag_indicator'"
-                    [color]="'#D3D3D3'">
-                </rb-icon>
-                <rb-icon
-                    [icon]="lane.collapsed ? 'chevron_right' : 'expand_more'">
-                </rb-icon>
-                <div
-                    *ngIf="lanesConfig.editable != true || lane.object == null"
-                    class="rb-gantt-lanelabel">
-                    {{lane.label}}
-                </div>
-                <rb-inline-input
-                    *ngIf="lanesConfig.editable == true && lane.object != null"
-                    [attribute]="lanesConfig.group.labelAttribute"
-                    [object]="lane.object"
-                    [margin]="false"
-                    [grow]="1"
-                    [size]="null"
-                    (click)="$event.stopPropagation()">
-                </rb-inline-input>
-                <div
-                    class="rb-gantt-lanesublabel">
-                    {{lane.lanes.length}}
-                </div>
-                <rb-iconbutton
-                    *ngIf="lanesConfig.editable == true"
-                    [icon]="'add'"
-                    [color]="'#D3D3D3'"
-                    (click)="addLane(lane); $event.stopPropagation();">
-                </rb-iconbutton>
-                <rb-iconbutton
-                    *ngIf="lanesConfig.editable == true"
-                    [style.visibility]="lane.object != null ? 'visible' : 'hidden'"
-                    [icon]="'clear'"
-                    [color]="'#D3D3D3'"
-                    (click)="deleteLaneGroup(lane); $event.stopPropagation();">
-                </rb-iconbutton>
+                <ng-container 
+                  *ngIf="lane.isGroup">
+                  <rb-icon
+                      class="rb-gantt-lanedragindicator"
+                      *ngIf="lanesConfig.editable == true"
+                      [style.visibility]="lane.object != null ? 'visible' : 'hidden'"
+                      [icon]="'drag_indicator'"
+                      [color]="'#D3D3D3'">
+                  </rb-icon>
+                  <rb-icon
+                      [icon]="lane.collapsed ? 'chevron_right' : 'expand_more'">
+                  </rb-icon>
+                  <div
+                      *ngIf="lanesConfig.editable != true || lane.object == null"
+                      class="rb-gantt-lanelabel">
+                      {{lane.label}}
+                  </div>
+                  <rb-inline-input
+                      *ngIf="lanesConfig.editable == true && lane.object != null"
+                      [attribute]="lanesConfig.group.labelAttribute"
+                      [object]="lane.object"
+                      [margin]="false"
+                      [grow]="1"
+                      [size]="null"
+                      (click)="$event.stopPropagation()">
+                  </rb-inline-input>
+                  <div
+                      class="rb-gantt-lanesublabel">
+                      {{lane.lanes.length}}
+                  </div>
+                  <rb-iconbutton
+                      *ngIf="lanesConfig.editable == true"
+                      [icon]="'add'"
+                      [color]="'#D3D3D3'"
+                      (click)="addLane(lane); $event.stopPropagation();">
+                  </rb-iconbutton>
+                  <rb-iconbutton
+                      *ngIf="lanesConfig.editable == true"
+                      [style.visibility]="lane.object != null ? 'visible' : 'hidden'"
+                      [icon]="'clear'"
+                      [color]="'#D3D3D3'"
+                      (click)="deleteLaneGroup(lane); $event.stopPropagation();">
+                  </rb-iconbutton>
                 </ng-container>
                 <ng-container *ngIf="!lane.isGroup">
-                <rb-icon
-                    class="rb-gantt-lanedragindicator"
-                    *ngIf="lanesConfig.editable == true"
-                    [icon]="'drag_indicator'"
-                    [color]="'#D3D3D3'">
-                </rb-icon>
-                <div
-                    class="rb-gantt-laneimage"
-                    *ngIf="lane.image != null"
-                    [style.background-image]="lane.image">
-                </div>
-                <div
-                    *ngIf="lanesConfig.mainIsEditable == false"
-                    class="rb-gantt-lanelabel">
-                    {{lane.label}}
-                    <div
-                        *ngIf="lane.detail != null"
-                        class="rb-gantt-lanedetail">
-                        {{lane.detail}}
-                    </div>
-                </div>
-                <rb-inline-input
-                    *ngIf="lanesConfig.mainIsEditable == true"
-                    [attribute]="lanesConfig.labelAttribute"
-                    [object]="lane.object"
-                    [margin]="false"
-                    [grow]="1"
-                    [size]="null">
-                </rb-inline-input>
-                <div
-                    *ngIf="lane.sub != null"
-                    class="rb-gantt-lanesublabel">
-                    {{lane.sub}}
-                </div>
-                <rb-icon
-                    *ngIf="lane.icon != null"
-                    [class]="'rb-gantt-laneicon'"
-                    [icon]="lane.icon">
-                </rb-icon>
-                <rb-iconbutton
-                    *ngIf="lanesConfig.editable == true"
-                    [icon]="'clear'"
-                    [color]="'#D3D3D3'"
-                    (click)="deleteLane(lane); $event.stopPropagation();">
-                </rb-iconbutton>
+                  <rb-icon
+                      class="rb-gantt-lanedragindicator"
+                      *ngIf="lanesConfig.editable == true"
+                      [icon]="'drag_indicator'"
+                      [color]="'#D3D3D3'">
+                  </rb-icon>
+                  <div
+                      class="rb-gantt-laneimage"
+                      *ngIf="lane.image != null"
+                      [style.background-image]="lane.image">
+                  </div>
+                  <div
+                      *ngIf="lanesConfig.mainIsEditable == false"
+                      class="rb-gantt-lanelabel">
+                      {{lane.label}}
+                      <div
+                          *ngIf="lane.detail != null"
+                          class="rb-gantt-lanedetail">
+                          {{lane.detail}}
+                      </div>
+                  </div>
+                  <rb-inline-input
+                      *ngIf="lanesConfig.mainIsEditable == true"
+                      [attribute]="lanesConfig.labelAttribute"
+                      [object]="lane.object"
+                      [margin]="false"
+                      [grow]="1"
+                      [size]="null">
+                  </rb-inline-input>
+                  <div
+                      *ngIf="lane.sub != null"
+                      class="rb-gantt-lanesublabel">
+                      {{lane.sub}}
+                  </div>
+                  <rb-icon
+                      *ngIf="lane.icon != null"
+                      [class]="'rb-gantt-laneicon'"
+                      [icon]="lane.icon">
+                  </rb-icon>
+                  <rb-iconbutton
+                      *ngIf="lanesConfig.editable == true"
+                      [icon]="'clear'"
+                      [color]="'#D3D3D3'"
+                      (click)="deleteLane(lane); $event.stopPropagation();">
+                  </rb-iconbutton>
                 </ng-container>
             </div>
             <rb-iconbutton
