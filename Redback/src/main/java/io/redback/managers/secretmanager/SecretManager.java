@@ -12,8 +12,10 @@ import io.redback.utils.CollectionConfig;
 /**
  * Keeps secrets encrypted in their own collection, one row per domain and name.
  *
- * - users can set, clear and see the status of a secret, never read its value
- * - only code running in the same process (for example the integration manager) reads a value, with get
+ * Used only inside the secrets service. Every call checks the session it gets:
+ * - put, status: the system user, or a user with write (put) or read (status) rights on the access category
+ * - get: the system user only, so a value never goes back to a user
+ * - and always access to the domain
  * - a secret name is free text made of letters, digits, spaces and . _ : - (for example "intclient:sftp1:secret")
  *
  * Config:
@@ -61,20 +63,13 @@ public class SecretManager {
 		return status;
 	}
 
-	/** The plain value, or null when not set. In-process use only, never returned to a user. */
-	public String get(String domain, String name) throws RedbackException {
+	/** The plain value, or null when not set. System user only. */
+	public String get(Session session, String domain, String name) throws RedbackException {
+		checkDomain(session, domain, name);
+		if(!session.getUserProfile().isSystem())
+			throw new RedbackException("Only the system user can read a secret");
 		DataMap row = getRow(domain, name);
 		return row != null ? cipher.decrypt(slot(domain, name), row.getString("value")) : null;
-	}
-
-	/** Sets a value from in-process code, for example a refreshed token. */
-	public void putAsSystem(String domain, String name, String value, String by) throws RedbackException {
-		checkName(name);
-		DataMap data = new DataMap();
-		data.put("value", cipher.encrypt(slot(domain, name), value));
-		data.put("updated", new Date());
-		data.put("updatedby", by);
-		dataClient.putData(collection.getName(), collection.convertObjectToSpecific(key(domain, name)), collection.convertObjectToSpecific(data));
 	}
 
 	protected DataMap getRow(String domain, String name) throws RedbackException {
@@ -85,13 +80,19 @@ public class SecretManager {
 	}
 
 	protected void checkAccess(Session session, String domain, String name, boolean write) throws RedbackException {
-		checkName(name);
-		if(domain == null || !session.hasAccessToDomain(domain))
-			throw new RedbackException("No access to domain " + domain);
+		checkDomain(session, domain, name);
+		if(session.getUserProfile().isSystem())
+			return;
 		String right = "rb.accesscat." + accessCat;
 		boolean ok = write ? session.getUserProfile().canWrite(right) : session.getUserProfile().canRead(right);
 		if(!ok)
 			throw new RedbackException("No rights on secrets");
+	}
+
+	protected void checkDomain(Session session, String domain, String name) throws RedbackException {
+		checkName(name);
+		if(domain == null || !session.hasAccessToDomain(domain))
+			throw new RedbackException("No access to domain " + domain);
 	}
 
 	protected void checkName(String name) throws RedbackException {

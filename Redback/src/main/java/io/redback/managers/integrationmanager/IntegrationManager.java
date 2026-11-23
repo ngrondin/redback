@@ -13,12 +13,14 @@ import io.firebus.data.DataList;
 import io.firebus.data.DataMap;
 import io.firebus.script.ScriptFactory;
 import io.redback.client.ConfigClient;
+import io.redback.client.AccessManagementClient;
 import io.redback.client.DataClient;
 import io.redback.client.FileClient;
+import io.redback.client.SecretsClient;
 import io.redback.client.GatewayClient;
 import io.redback.exceptions.RedbackException;
-import io.redback.managers.secretmanager.SecretManager;
 import io.redback.security.Session;
+import io.redback.security.SysUserManager;
 import io.redback.utils.CollectionConfig;
 import io.redback.utils.ConfigCache;
 import io.redback.utils.js.LoggerJSFunction;
@@ -27,14 +29,15 @@ import io.redback.utils.js.RedbackUtilsJSWrapper;
 /**
  * Runs the integration clients (S3, SFTP, Gmail, Outlook...) for each domain, from the client data rows.
  *
- * Secrets: with a "secrets" config block (same keys as the secrets service) the secret fields of a client data row
- * are kept encrypted by the SecretManager, and the row only holds the marker "(secret)".
+ * Secrets: with a "secretservice" set, the secret fields of a client data row are kept encrypted by the secrets
+ * service, reached over firebus as the system user, and the row only holds the marker "(secret)".
  * - a raw value found in a row is moved to the secrets on read, and the row gets the marker
  * - refreshed tokens are written to the secrets, never into the row
  * - an empty field means not set, so the existing disconnect script still works
- * - without a key the rows are used as they are, like before
+ * - while the secrets service has no key the rows are used as they are, like before
  * Config:
- * - secrets: dataservice, keys, currentkey (see SecretManager)
+ * - secretservice: name of the secrets service
+ * - accessmanagementservice: used for the system user session
  * - secretfields: list of client data fields kept as secrets, default access_token, refresh_token, client_secret, secret
  */
 public class IntegrationManager {
@@ -54,7 +57,10 @@ public class IntegrationManager {
 	protected FileClient fileClient;
 	protected CollectionConfig clientDataCollection;
 	protected ConfigCache<ClientConfig> clientConfigs;
-	protected SecretManager secretManager;
+	protected SecretsClient secretsClient;
+	protected SysUserManager sysUserManager;
+	protected boolean secretsEnabled;
+	protected long secretsCheckedAt;
 	protected List<String> secretFields;
 
 	public IntegrationManager(String n, DataMap config, Firebus fb) throws RedbackException {
@@ -75,11 +81,10 @@ public class IntegrationManager {
 			gatewayClient = new GatewayClient(firebus, gatewayServiceName);
 			fileClient = new FileClient(firebus, fileServiceName);
 			clientDataCollection = new CollectionConfig(config.getObject("clientdatacollection"), "rbin_clientdata");
-			DataMap secretsConfig = config.getObject("secrets");
-			if(secretsConfig != null && hasKey(secretsConfig))
-				secretManager = new SecretManager(secretsConfig, fb);
-			else if(secretsConfig != null)
-				Logger.warning("rb.integration.nosecretkey", "No secrets key set, client secrets stay in the client data");
+			if(config.getString("secretservice") != null) {
+				secretsClient = new SecretsClient(firebus, config.getString("secretservice"));
+				sysUserManager = new SysUserManager(new AccessManagementClient(firebus, config.getString("accessmanagementservice")), config);
+			}
 			secretFields = new ArrayList<String>();
 			DataList fieldList = config.getList("secretfields");
 			if(fieldList != null) {
@@ -289,7 +294,7 @@ public class IntegrationManager {
 
 	/** Moves the raw secrets of every client data row of the domain into the secrets. Returns the number of rows changed. */
 	public int moveSecrets(Session session, String domain) throws RedbackException {
-		if(secretManager == null)
+		if(!secretsOn())
 			throw new RedbackException("No secrets key set");
 		if(domain == null || !session.hasAccessToDomain(domain) || !session.getUserProfile().canWrite("rb.accesscat.admin"))
 			throw new RedbackException("No rights to move the integration secrets");
@@ -306,15 +311,16 @@ public class IntegrationManager {
 
 	/** Puts the plain secret values into the row in memory. Raw values still in the db row are moved to the secrets first. */
 	protected boolean openSecrets(String domain, String clientName, DataMap clientData) throws RedbackException {
-		if(secretManager == null) return false;
+		if(!secretsOn()) return false;
+		Session sys = sysUserManager.getSession();
 		DataMap moved = new DataMap();
 		for(String field: secretFields) {
 			String value = clientData.getString(field);
 			if(value == null || value.equals("")) continue;
 			if(value.equals(SECRET_MARKER)) {
-				clientData.put(field, secretManager.get(domain, secretName(clientName, field)));
+				clientData.put(field, secretsClient.get(sys, domain, secretName(clientName, field)));
 			} else {
-				secretManager.putAsSystem(domain, secretName(clientName, field), value, "rbin");
+				secretsClient.put(sys, domain, secretName(clientName, field), value);
 				moved.put(field, SECRET_MARKER);
 			}
 		}
@@ -325,11 +331,12 @@ public class IntegrationManager {
 
 	/** Writes fields to the client data row, the secret ones go to the secrets and the row gets the marker. */
 	protected void putClientData(String domain, String clientName, DataMap data) throws RedbackException {
+		boolean on = secretsOn();
 		DataMap row = new DataMap();
 		for(String field: data.keySet()) {
 			Object value = data.get(field);
-			if(secretManager != null && secretFields.contains(field) && value instanceof String && !((String)value).equals("") && !value.equals(SECRET_MARKER)) {
-				secretManager.putAsSystem(domain, secretName(clientName, field), (String)value, "rbin");
+			if(on && secretFields.contains(field) && value instanceof String && !((String)value).equals("") && !value.equals(SECRET_MARKER)) {
+				secretsClient.put(sysUserManager.getSession(), domain, secretName(clientName, field), (String)value);
 				row.put(field, SECRET_MARKER);
 			} else {
 				row.put(field, value);
@@ -349,13 +356,17 @@ public class IntegrationManager {
 		return key;
 	}
 
-	protected boolean hasKey(DataMap secretsConfig) {
-		DataMap keys = secretsConfig.getObject("keys");
-		if(keys == null) return false;
-		for(String id: keys.keySet())
-			if(keys.getString(id) != null && keys.getString(id).length() > 0)
-				return true;
-		return false;
+	/** Whether the secrets service has a key, asked again every 5 minutes, so a key set later is picked up. */
+	protected boolean secretsOn() throws RedbackException {
+		if(secretsClient == null) return false;
+		long now = System.currentTimeMillis();
+		if(now - secretsCheckedAt > 300000) {
+			secretsEnabled = secretsClient.isEnabled(sysUserManager.getSession());
+			secretsCheckedAt = now;
+			if(!secretsEnabled)
+				Logger.warning("rb.integration.nosecretkey", "The secrets service has no key, client secrets stay in the client data");
+		}
+		return secretsEnabled;
 	}
 
 }

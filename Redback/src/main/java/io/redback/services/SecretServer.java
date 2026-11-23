@@ -9,11 +9,14 @@ import io.redback.security.Session;
 import io.redback.services.common.AuthenticatedServiceProvider;
 
 /**
- * Write-only secrets service. A secret value goes in and never comes back out through this service.
+ * Secrets service. Other services reach it through SecretsClient, never by opening a SecretManager themselves.
+ * Every action checks the caller's session, so it is safe for any request on the network.
  *
  * Actions:
- * - put: name, value, optional domain. An empty value clears the secret.
- * - status: name, optional domain. Returns set, updated and updatedby, never the value.
+ * - put: name, value, optional domain. An empty value clears the secret. System user or write rights.
+ * - status: name, optional domain. Returns set, updated and updatedby, never the value. System user or read rights.
+ * - get: name, optional domain. Returns the value. System user only.
+ * - enabled: returns whether an encryption key is set. Any signed in caller.
  */
 public abstract class SecretServer extends AuthenticatedServiceProvider {
 
@@ -31,11 +34,15 @@ public abstract class SecretServer extends AuthenticatedServiceProvider {
 			String action = request.getString("action");
 			String name = request.getString("name");
 			String domain = request.getString("domain") != null ? request.getString("domain") : session.getUserProfile().getDefaultDomain();
-			if("put".equals(action)) {
+			if("enabled".equals(action)) {
+				return new Payload(new DataMap("enabled", isEnabled()));
+			} else if("put".equals(action)) {
 				put(session, domain, name, request.getString("value"));
 				return new Payload(new DataMap("result", "ok"));
 			} else if("status".equals(action)) {
 				return new Payload(status(session, domain, name));
+			} else if("get".equals(action)) {
+				return new Payload(new DataMap("value", get(session, domain, name)));
 			} else {
 				throw new RedbackException("Unknown action");
 			}
@@ -51,4 +58,8 @@ public abstract class SecretServer extends AuthenticatedServiceProvider {
 	protected abstract void put(Session session, String domain, String name, String value) throws RedbackException;
 
 	protected abstract DataMap status(Session session, String domain, String name) throws RedbackException;
+
+	protected abstract String get(Session session, String domain, String name) throws RedbackException;
+
+	protected abstract boolean isEnabled();
 }
