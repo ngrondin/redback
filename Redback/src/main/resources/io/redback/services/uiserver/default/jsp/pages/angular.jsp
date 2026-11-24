@@ -38,6 +38,7 @@ var versionOrDefault = version != null ? version : 'default';
     userpreferenceservice="<%=servicemap.userpreference%>"
     chatservice="<%=servicemap.chat%>"
     aiservice="<%=servicemap.ai%>"
+    secretservice="<%=servicemap.secret%>"
     clientservice="<%=servicemap.client%>"
     usecsforapi="<%=useclientforapi%>">
   </app-root>

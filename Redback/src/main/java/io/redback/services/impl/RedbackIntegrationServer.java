@@ -52,6 +52,10 @@ public class RedbackIntegrationServer extends IntegrationServer {
 		return integrationManager.getLoginUrl(session, name, domain);
 	}
 
+	protected int moveSecrets(Session session, String domain) throws RedbackException {
+		return integrationManager.moveSecrets(session, domain);
+	}
+
 	protected void exchangeAuthCode(Session session, String name, String domain, String code, String state) throws RedbackException {
 		integrationManager.exchangeAuthCode(session, name, domain, code, state);		
 	}

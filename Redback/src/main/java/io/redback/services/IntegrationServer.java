@@ -109,6 +109,11 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 						throw new RedbackException("The '" + action + "' action is not valid as an object request");
 					}
 				}
+				else if(action.equals("movesecrets"))
+				{
+					if(domain == null) domain = session.getUserProfile().getDefaultDomain();
+					response = new DataMap("moved", moveSecrets(session, domain));
+				}
 				else if(action.equals("execute"))
 				{
 					String function = request.getString("function");
@@ -175,6 +180,8 @@ public abstract class IntegrationServer extends AuthenticatedServiceProvider {
 
 	protected abstract String getLoginUrl(Session session, String name, String domain) throws RedbackException;
 	
+	protected abstract int moveSecrets(Session session, String domain) throws RedbackException;
+
 	protected abstract void exchangeAuthCode(Session session, String name, String domain, String code, String state) throws RedbackException;
 
 }

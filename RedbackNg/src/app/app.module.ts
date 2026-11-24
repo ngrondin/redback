@@ -160,6 +160,7 @@ import { RbMultiRelatedInputComponent } from './inputs/rb-multi-related-input/rb
 import { FileiconComponent } from './utils/fileicon/fileicon.component';
 import { RbTipDirective } from './utils/tip/rb-tip.directive';
 import { RbColorInputComponent } from './inputs/rb-color-input/rb-color-input.component';
+import { RbPasswordInputComponent } from './inputs/rb-password-input/rb-password-input.component';
 import { RbPopupColorComponent } from './popups/rb-popup-color/rb-popup-color.component';
 import { RbColumnSelectorComponent } from './popups/rb-column-selector/rb-column-selector.component';
 import { RbIconComponent } from './rb-icon/rb-icon.component';
@@ -341,6 +342,7 @@ window.redback = window.redback || {};
         FileiconComponent,
         RbTipDirective,
         RbColorInputComponent,
+        RbPasswordInputComponent,
         RbPopupColorComponent,
         RbColumnSelectorComponent,
         RbIconComponent,

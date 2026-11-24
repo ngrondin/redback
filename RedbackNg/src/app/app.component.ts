@@ -76,6 +76,7 @@ export class AppComponent implements OnInit {
     this.apiService.userprefService = native.getAttribute("userpreferenceservice");
     this.apiService.chatService = native.getAttribute("chatservice");
     this.apiService.aiService = native.getAttribute("aiservice");
+    this.apiService.secretService = native.getAttribute("secretservice");
     this.apiService.useCSForAPI = native.getAttribute("usecsforapi") == "true" ? true : false;
     this.clientWSService.path = native.getAttribute("clientservice");
     this.userprefService.userdisplay = this.userdisplay;
