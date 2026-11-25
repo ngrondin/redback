@@ -69,8 +69,8 @@ public class ClientHandler extends ClientStreamHandler {
 		}
 	}
 	
-	public void subscribeFilter(String objectname, DataMap filter, String id) throws RedbackException {
-		clientManager.subsManager.subscribe(this, objectname, filter, id);
+	public void subscribeFilter(String objectname, DataMap filter, String id, int seq) throws RedbackException {
+		clientManager.subsManager.subscribe(this, objectname, filter, id, seq);
 	}
 
 	public void subscribeObject(String objectname, String uid) throws RedbackException {
@@ -94,8 +94,11 @@ public class ClientHandler extends ClientStreamHandler {
 							sendRequestResultData(reqUid, payload.getDataMap());
 						else if(mime.startsWith("text/"))
 							sendRequestResultText(reqUid, payload.getString());
+						else
+							sendRequestError(reqUid, new FunctionErrorException("Response type " + mime + " can't be sent to the client"));
 					} catch(DataException e2) {
 						Logger.severe("rb.client.request", "Client service request error while parsing response json", e2);
+						sendRequestError(reqUid, new FunctionErrorException("Error parsing the response", e2));
 					}
 				}
 
@@ -108,6 +111,7 @@ public class ClientHandler extends ClientStreamHandler {
 				}	
 			}, clientManager.name, timeout > -1 ? timeout : 10000);
 		} catch(Exception e) {
+			sendRequestError(reqUid, new FunctionErrorException("Error requesting service", e));
 			throw new RedbackException("Error requesting service for client", e);
 		}
 	}

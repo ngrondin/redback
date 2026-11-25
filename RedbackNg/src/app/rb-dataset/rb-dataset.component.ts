@@ -10,6 +10,7 @@ import { RbSetComponent } from 'app/abstract/rb-set';
 //import { RbSearchTarget } from 'app/rb-search/rb-search-target';
 import { UserprefService } from 'app/services/userpref.service';
 import { LogService } from 'app/services/log.service';
+import { UUID } from 'angular2-uuid';
 
 
 @Component({
@@ -31,7 +32,10 @@ export class RbDatasetComponent extends RbSetComponent /*implements RbSearchTarg
 
   public uid: string;
   private dataSubscription: Subscription;
+  private connectionSubscription: Subscription;
   private fetchSubscription: Subscription | null = null;
+  private receivedWhileLoading: RbObject[] = [];
+  private loadFailed: boolean = false;
   private _list: RbObject[] = [];
   private _selectedObjects: RbObject[] = [];
   private _highlightedObjects: RbObject[] | null = null; //null when no highlight
@@ -67,12 +71,13 @@ export class RbDatasetComponent extends RbSetComponent /*implements RbSearchTarg
     private userprefService: UserprefService
   ) {
     super();
-    this.uid = "" + Math.floor(Math.random() * 10000);
+    this.uid = UUID.UUID();
 
   }
 
   setInit() {
     this.dataSubscription = this.dataService.getObjectUpdateObservable().subscribe(object => this.receiveUpdatedObject(object));
+    this.connectionSubscription = this.dataService.connected.subscribe(() => this.catchUp());
     this.pageSize = this.fetchAll == true ? 250 : 50;
     this._loading = false;
     this.hasMorePages = true;
@@ -98,6 +103,7 @@ export class RbDatasetComponent extends RbSetComponent /*implements RbSearchTarg
   setDestroy() {
     this.clear();
     this.dataSubscription.unsubscribe();
+    this.connectionSubscription.unsubscribe();
   }
 
   onDatasetEvent(event: any) {
@@ -246,6 +252,8 @@ export class RbDatasetComponent extends RbSetComponent /*implements RbSearchTarg
     }
     this._list = [];
     this._selectedObjects = [];
+    this.receivedWhileLoading = [];
+    this.loadFailed = false;
     if(resetResolved) {
       this.resolvedFilter = null;
       this.resolvedSort = null;
@@ -303,9 +311,14 @@ export class RbDatasetComponent extends RbSetComponent /*implements RbSearchTarg
   private loadComplete(success) {
     this.logService.debug("Dataset " + this.id + ": LoadComplete (success=" + success + ")");
     this._loading = false;
+    this.loadFailed = !success;
     if(this.fetchAll) {
       this.hasMorePages = false;
     }
+    let loaded = new Set(this._list);
+    let missed = this.receivedWhileLoading.filter(object => !loaded.has(object));
+    this.receivedWhileLoading = [];
+    missed.forEach(object => this.receiveUpdatedObject(object));
     this.publishEvent('load');
     if(this._list.length == 0) {
       this._selectedObjects = [];
@@ -335,8 +348,24 @@ export class RbDatasetComponent extends RbSetComponent /*implements RbSearchTarg
     }
   }
 
+  //Once connected (again), gets what was created while there was no connection to hear about it
+  private catchUp() {
+    if(this.resolvedFilter != null) {
+      if(this.loadFailed) {
+        this.clear();
+        this.refreshData();
+      } else if(this.isLoading == false && this.fetchAll) {
+        this.dataService.fetchEntireList(this.objectname, this.resolvedFilter, this.resolvedSearch, this.resolvedSort).subscribe({error: () => {}});
+      } else if(this.isLoading == false) {
+        this.dataService.fetchList(this.objectname, this.resolvedFilter, this.resolvedSearch, this.resolvedSort, 0, this.pageSize, false).subscribe({error: () => {}});
+      }
+    }
+  }
+
   private receiveUpdatedObject(object: RbObject) {
-    if(object.objectname == this.objectname && object.deleted == false && this.resolvedFilter != null && this._list.includes(object) == false && this.isLoading == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize || this.allwaysReceiveUpdates)) {
+    if(this.isLoading) {
+      if(object.objectname == this.objectname) this.receivedWhileLoading.push(object);
+    } else if(object.objectname == this.objectname && object.deleted == false && this.resolvedFilter != null && this._list.includes(object) == false && (this.userSearch == null || this.userSearch == '') && (this.fetchAll == true || this._list.length < this.pageSize || this.allwaysReceiveUpdates)) {
       if(this.filterService.applies(this.resolvedFilter, object)) {
         this.add(object);
         if(this._list.length == 1 && this.autoSelect == 'whensingle') {

@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Observable, Observer } from 'rxjs';
+import { Observable, Observer, throwError } from 'rxjs';
 import { UUID } from 'angular2-uuid';
 import { Platform } from '@angular/cdk/platform';
 // @ts-ignore
 import * as pako from 'pako';
 import { SecurityService } from './security.service';
 import { LogService } from './log.service';
+import { ValueComparator } from '../helpers';
 import packageJson from '../../../package.json';
+
+export const CONNECTION_LOST = "Connection lost";
+const SUBSCRIPTION_RETRY = 10000;
 
 export class Upload {
   uploaduid = UUID.UUID();
@@ -114,7 +118,7 @@ export class ClientWSService {
   public uploads: any = {};
   public uniqueObjectSubscriptions: any[] = [];
   public filterObjectSubscriptions: any = {};
-  public subscriptionRequestPending: boolean = false;
+  public subscriptionSequence: number = 0;
   public connected: boolean = false;
   public versions: any = {};
   public heartbeatFreq: number = 0;
@@ -195,6 +199,8 @@ export class ClientWSService {
 
       if(msg.type == 'objectupdate') {
         this.objectUpdateObservers.forEach((observer) => observer.next(msg.object || msg.objects));
+      } else if(msg.type == 'subscribed') {
+        msg.list.forEach((item: any) => this.confirmSubscription(item));
       } else if(msg.type == 'notification') {
         this.notificationObservers.forEach((observer) => observer.next(msg.notification))
       } else if (msg.type == 'userupdate') {
@@ -267,9 +273,16 @@ export class ClientWSService {
       this.connected = false;
       this.websocket = null;
       this.uniqueObjectSubscriptions.forEach(item => item.sent = false);
-      Object.keys(this.filterObjectSubscriptions).forEach(key => this.filterObjectSubscriptions[key].sent = false);
+      Object.values(this.filterObjectSubscriptions).forEach((item: any) => {
+        item.senttime = 0;
+        item.confirmed = false;
+      });
       this.logService.info("WSS Connection closed");
       this.publishState();
+      let lostRequests = Object.values(this.requests);
+      this.requests = {};
+      lostRequests.forEach(request => request.observer.error(CONNECTION_LOST));
+      this.publishStats();
     }
     setTimeout(() => {this.initWebsocketSubscribe()}, 1000);
   }
@@ -284,6 +297,7 @@ export class ClientWSService {
   heartbeat() {
     if(this.heartbeatFreq > 0) {
       this.send({type:"heartbeat"});
+      this.sendUnsentSubscriptionRequests();
       setTimeout(() => {
         this.heartbeat();
       }, this.heartbeatFreq);
@@ -311,8 +325,14 @@ export class ClientWSService {
     })
   }
 
+  /**
+   * Sends the subscriptions the server does not have yet:
+   * - object subscriptions not sent on this connection
+   * - filter subscriptions not confirmed by the server, again every SUBSCRIPTION_RETRY until they are
+   */
   sendUnsentSubscriptionRequests() {
-    let start = (new Date()).getTime();
+    if(!this.connected) return;
+    let now = (new Date()).getTime();
     let subreq:any = {type: "subscribe", list: []};
     this.uniqueObjectSubscriptions.forEach(item => {
       if(item.sent == false) {
@@ -322,15 +342,17 @@ export class ClientWSService {
     });
     Object.keys(this.filterObjectSubscriptions).forEach(key => {
       let item = this.filterObjectSubscriptions[key];
-      if(item.sent == false) {
-        subreq.list.push({"objectname": item.objectname, "filter": item.filter, "id": key});
-        item.sent = true;
+      if(item.confirmed == false && now - item.senttime >= SUBSCRIPTION_RETRY) {
+        subreq.list.push({"objectname": item.objectname, "filter": item.filter, "id": key, "seq": item.seq});
+        item.senttime = now;
       }
     });
-    let end = (new Date()).getTime();
-    this.send(subreq);
-    this.subscriptionRequestPending = false;
-    //this.logService.debug(`ClientWS: Sent ${subreq.list.length} subscription requests in ${end - start}ms`);
+    if(subreq.list.length > 0) this.send(subreq);
+  }
+
+  private confirmSubscription(confirmation: any) {
+    let item = this.filterObjectSubscriptions[confirmation.id];
+    if(item != null && item.seq == confirmation.seq) item.confirmed = true;
   }
 
   getStateObservable() : Observable<any>  {
@@ -382,9 +404,13 @@ export class ClientWSService {
     //this.logService.debug(`ClientWS: Subscribing to object ${objectname}:${uid}`);
   }
 
-  subscribeToFilterObjectUpdate(objectname: String, filter: any, id: string) {
-    this.filterObjectSubscriptions[id] = {objectname: objectname, filter: filter, sent:false};
-    //this.logService.debug(`ClientWS: Subscribing to filter ${objectname}:${JSON.stringify(filter)}`);
+  //Sent at once and not with the next receipt, so that nothing created while the data is loading is missed
+  subscribeToFilterObjectUpdate(object: String, filter: any, id: string) {
+    let current = this.filterObjectSubscriptions[id];
+    if(current == null || current.objectname != object || ValueComparator.notEqual(current.filter, filter)) {
+      this.filterObjectSubscriptions[id] = {objectname: object, filter: filter, seq: ++this.subscriptionSequence, senttime: 0, confirmed: false};
+      this.sendUnsentSubscriptionRequests();
+    }
   }
 
   clearSubscriptions() {
@@ -417,7 +443,7 @@ export class ClientWSService {
         });
       });
     } else {
-      throw "Web socket not connected";
+      return throwError(() => CONNECTION_LOST);
     }
   }
 
@@ -435,7 +461,7 @@ export class ClientWSService {
         });
       });
     } else {
-      throw "Web socket not connected";
+      return throwError(() => CONNECTION_LOST);
     }
   }
 

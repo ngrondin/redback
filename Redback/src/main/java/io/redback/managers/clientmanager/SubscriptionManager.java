@@ -7,6 +7,7 @@ import java.util.Map;
 
 import io.firebus.data.DataFilter;
 import io.firebus.data.DataMap;
+import io.firebus.logging.Logger;
 import io.redback.exceptions.RedbackException;
 
 public class SubscriptionManager {
@@ -15,15 +16,22 @@ public class SubscriptionManager {
 		public String id;
 		public DataFilter filter;
 		public ClientHandler clientHandler;
+		public int seq;
 		
-		public FilterSubscription(String i, ClientHandler ch, DataMap f) {
+		public FilterSubscription(String i, ClientHandler ch, DataMap f, int s) {
 			id = i;
 			clientHandler = ch;
 			filter = new DataFilter(f);
+			seq = s;
 		}
 
 		public boolean matches(DataMap data) {
-			return filter.apply(data);
+			try {
+				return filter.apply(data);
+			} catch(Exception e) { //One filter that can't be applied should not stop the update for the other subscribers
+				Logger.severe("rb.client.filter", "Error applying the filter of subscription " + id, e);
+				return false;
+			}
 		}
 	}
 	
@@ -81,7 +89,7 @@ public class SubscriptionManager {
 		}
 	}
 	
-	public synchronized void subscribe(ClientHandler clientHandler, String objectname, DataMap filter, String id) throws RedbackException {
+	public synchronized void subscribe(ClientHandler clientHandler, String objectname, DataMap filter, String id, int seq) throws RedbackException {
 		try {
 			Map<String, List<FilterSubscription>> objMap = objectFilterSubscriptions.get(objectname);
 			if(objMap == null) {
@@ -97,12 +105,15 @@ public class SubscriptionManager {
 				FilterSubscription existingFilterSubscription = null;
 				if(id != null)
 					for(FilterSubscription fs: list) 
-						if(fs.id.equals(id)) 
+						if(fs.clientHandler == clientHandler && id.equals(fs.id)) 
 							existingFilterSubscription = fs;
 				if(existingFilterSubscription != null) {
-					existingFilterSubscription.filter = new DataFilter(filter);
+					if(seq >= existingFilterSubscription.seq) { //The messages of a client can be handled out of order
+						existingFilterSubscription.filter = new DataFilter(filter);
+						existingFilterSubscription.seq = seq;
+					}
 				} else {
-					list.add(new FilterSubscription(id, clientHandler, filter));
+					list.add(new FilterSubscription(id, clientHandler, filter, seq));
 				}
 				List<ObjectDomainPointer> pointers = sessionObjectDomainPointers.get(clientHandler);
 				if(pointers == null) {

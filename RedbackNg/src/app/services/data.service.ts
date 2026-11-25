@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable, of, Observer } from 'rxjs';
+import { Observable, of, Observer, Subject } from 'rxjs';
 import { RbObject, RbFile, RbAggregate, RbObjectTransaction } from '../datamodel';
 import { ErrorService } from './error.service';
-import { ClientWSService } from './clientws.service';
+import { ClientWSService, CONNECTION_LOST } from './clientws.service';
 import { FilterService } from './filter.service';
 import { Hasher } from '../helpers';
 import { LogService } from './log.service';
@@ -19,6 +19,7 @@ export class DataService {
   objectUpdateObservers: Observer<RbObject>[] = [];
   deferredFetchQueue: DeferredFetchQueue = new DeferredFetchQueue();
   runningFinalization: boolean = false;
+  connected: Subject<void> = new Subject<void>();
 
   constructor(
     private apiService: ApiService,
@@ -34,6 +35,9 @@ export class DataService {
         list.forEach(json => this.receive(json));
         this.finalizeReceipt();            
       }
+    });
+    this.clientWSService.getStateObservable().subscribe(state => {
+      if(state.connected) this.connected.next();
     });
   }
 
@@ -99,9 +103,7 @@ export class DataService {
           this.finalizeReceipt();
         },
         error: error => {
-          this.errorService.receiveHttpError(error)
-          observer.error(error);
-          this.fetchCount--;
+          this.fetchFailed(observer, error);
         }
       });
     });
@@ -121,9 +123,7 @@ export class DataService {
           this.finalizeReceipt();
         },
         error: error => {
-          this.errorService.receiveHttpError(error)
-          observer.error(error);
-          this.fetchCount--;
+          this.fetchFailed(observer, error);
         }
       })
     });
@@ -143,9 +143,7 @@ export class DataService {
           this.finalizeReceipt();
         },
         error: error => {
-          this.errorService.receiveHttpError(error)
-          observer.error(error);
-          this.fetchCount--;
+          this.fetchFailed(observer, error);
         }
       })
     });
@@ -166,9 +164,7 @@ export class DataService {
             this.finalizeReceipt();
           },
           error: error => {
-            this.errorService.receiveHttpError(error)
-            observer.error(error);
-            this.fetchCount--;
+            this.fetchFailed(observer, error);
           }
         });
       } else {
@@ -191,9 +187,7 @@ export class DataService {
         }
       }, 
       error: error => {
-        this.errorService.receiveHttpError(error)
-        observer.error(error);
-        this.fetchCount--;
+        this.fetchFailed(observer, error);
       }
     })
   } 
@@ -212,12 +206,18 @@ export class DataService {
           this.finalizeReceipt();
         },
         error: error => {
-          this.errorService.receiveHttpError(error)
-          observer.error(error);
-          this.fetchCount--;
+          this.fetchFailed(observer, error);
         }
       });
     });
+  }
+
+  //A lost connection is not shown, the datasets fetch again once it is back
+  private fetchFailed(observer: any, error: any) {
+    if(error != CONNECTION_LOST) this.errorService.receiveHttpError(error);
+    observer.error(error);
+    this.fetchCount--;
+    this.finalizeReceipt();
   }
 
   enqueueDeferredFetch(name: string, uid: string, callback: DefferredCallback) {
@@ -292,8 +292,10 @@ export class DataService {
             },
             error: error => {
               this.logService.error("Error finalizing receipt for " + objectname + ": " + error);
-              this.runningFinalization = false;
-              this.finalizeReceipt();
+              setTimeout(() => {
+                this.runningFinalization = false;
+                this.finalizeReceipt();
+              }, 1000);
             }
           }
         );
@@ -434,9 +436,7 @@ export class DataService {
           this.finalizeReceipt();
         },
         error: (error) => {
-          this.errorService.receiveHttpError(error);
-          observer.error(error);
-          this.fetchCount--;
+          this.fetchFailed(observer, error);
         }
       })
     })

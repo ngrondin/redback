@@ -44,17 +44,9 @@ public abstract class ClientStreamHandler extends StreamHandler {
 					if(data.containsKey("uid")) {
 						this.subscribeObject(data.getString("objectname"), data.getString("uid"));
 					} else if(data.containsKey("filter")) {
-						this.subscribeFilter(data.getString("objectname"), data.getObject("filter"), data.getString("id"));
+						this.subscribeFilter(data.getString("objectname"), data.getObject("filter"), data.getString("id"), 0);
 					} else if(data.containsKey("list")) {
-						DataList list = data.getList("list");
-						for(int i = 0; i < list.size(); i++) {
-							DataMap item = list.getObject(i);
-							if(item.containsKey("uid")) {
-								this.subscribeObject(item.getString("objectname"), item.getString("uid"));
-							} else if(item.containsKey("filter")) {
-								this.subscribeFilter(item.getString("objectname"), item.getObject("filter"), item.getString("id"));
-							}	
-						}
+						subscribeList(data.getList("list"));
 					}
 				} else if(type.equals("servicerequest")) {
 					String reqUid = data.getString("requid");
@@ -115,6 +107,31 @@ public abstract class ClientStreamHandler extends StreamHandler {
 		} catch(Exception e) {
 			throw new RedbackException("error receiving client data", e);
 		}
+	}
+	
+	/**
+	 * One failing item does not stop the rest of the list. 
+	 * Filter items sent with a sequence are confirmed to the client, which sends the unconfirmed ones again. 
+	 */
+	protected void subscribeList(DataList list) {
+		DataList confirmed = new DataList();
+		for(int i = 0; i < list.size(); i++) {
+			DataMap item = list.getObject(i);
+			try {
+				if(item.containsKey("uid")) {
+					this.subscribeObject(item.getString("objectname"), item.getString("uid"));
+				} else if(item.containsKey("filter")) {
+					int seq = item.containsKey("seq") ? item.getNumber("seq").intValue() : 0;
+					this.subscribeFilter(item.getString("objectname"), item.getObject("filter"), item.getString("id"), seq);
+					if(seq > 0)
+						confirmed.add(new DataMap("id", item.getString("id"), "seq", seq));
+				}
+			} catch(Exception e) {
+				logException("rb.client.subscribe", "Error subscribing client to " + item.getString("objectname"), e);
+			}
+		}
+		if(confirmed.size() > 0) 
+			sendClientData(new DataMap("type", "subscribed", "list", confirmed));
 	}
 	
 	public void closed() throws RedbackException {
@@ -250,7 +267,7 @@ public abstract class ClientStreamHandler extends StreamHandler {
 	
 	public abstract void subscribeObject(String objectname, String uid) throws RedbackException;
 	
-	public abstract void subscribeFilter(String objectname, DataMap filter, String id) throws RedbackException;
+	public abstract void subscribeFilter(String objectname, DataMap filter, String id, int seq) throws RedbackException;
 	
 	public abstract void requestService(String requid, String service, DataMap data, int timeout) throws RedbackException;
 
