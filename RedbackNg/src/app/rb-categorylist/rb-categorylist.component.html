@@ -1,0 +1,22 @@
+<rb-scroll
+    (rbscroll)="onScroll($event)">
+    <div
+        *ngFor="let item of enhancedList"
+        class="rb-categorylist-item">
+        <div
+            [class]="'rb-categorylist-box' + (isSelected(item.object) ? ' rb-categorylist-box-selected' : '')">
+            <rb-clickable
+                (click)="itemClicked(item.object, $event)">
+                  <span
+                    class="rb-categorylilst-span">
+                      {{item.label.value}}
+                  </span>
+              </rb-clickable>
+        </div>
+    </div>
+    <div
+        class="rb-categorylist-norecords"
+        *ngIf="enhancedList.length == 0 && isLoading == false">
+        {{emptytext}}
+    </div>
+</rb-scroll>

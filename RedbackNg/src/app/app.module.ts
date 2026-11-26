@@ -99,6 +99,7 @@ import { RbMenuGroupComponent } from './rb-menu-group/rb-menu-group.component';
 import { RbMenuLinkComponent } from './rb-menu-link/rb-menu-link.component';
 import { MenuService } from './services/menu.service';
 import { RbList4Component } from './rb-list4/rb-list4.component';
+import { RbCategorylistComponent } from './rb-categorylist/rb-categorylist.component';
 import { RbActionButtonComponent } from './clickable/rb-actionbutton/rb-actionbutton.component';
 import { RbDatasetGroupComponent } from './rb-datasetgroup/rb-datasetgroup.component';
 import { RbFormComponent } from './rb-form/rb-form.component';
@@ -243,6 +244,7 @@ window.redback = window.redback || {};
         RbDatasetGroupComponent,
         RbListComponent,
         RbList4Component,
+        RbCategorylistComponent,
         RbStringInputComponent,
         RbNumberInputComponent,
         RbTextareaInputComponent,

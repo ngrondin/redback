@@ -918,7 +918,7 @@ public class ObjectManager
 						DataMap param = new DataMap("objectname", objectname, "uid", uid);
 						executeFunction(session, hook.scriptName, param);
 					} catch(Exception e) {
-						Logger.severe("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
+						Logger.userError("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
 					}						
 				}
 			}
@@ -1036,7 +1036,7 @@ public class ObjectManager
 								DataMap param = new DataMap("objectname", objectName, "uid", obj.getUID().getString());
 								executeFunction(session, hook.scriptName, param);
 							} catch(Exception e) {
-								Logger.severe("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
+								Logger.userError("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
 							}
 						}
 					}
@@ -1049,7 +1049,7 @@ public class ObjectManager
 			try {
 				executeFunction(session, hook.scriptName, param);
 			} catch(Exception e) {
-				Logger.severe("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
+				Logger.userError("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
 			}
 		}
 	}

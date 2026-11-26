@@ -560,6 +560,14 @@ Color picker.
 |---|---|---|---|
 | `margin` | boolean | `true` | Spacing. |
 
+#### `passwordinput` — `RbPasswordInputComponent`
+
+Input for a **secret** value (password, token) kept server-side in the secrets service; the value itself never reaches the browser. At rest the field shows only whether the secret is set (and when / by whom). Editing pushes the typed value to the secrets service and stores the marker `(secret)` in the object attribute; clearing the field clears the secret. Inherits §2.5 + §2.6.
+
+| Input | Type | Description |
+|---|---|---|
+| `secret` | string (JS expression) | Expression giving the secret name, evaluated against the object (§4.2), e.g. `"'intclient:' + object.get('name') + ':secret'"`. |
+
 #### `relatedinput` — `RbRelatedInputComponent`
 
 Picker for a **related object** (single). Inherits §2.5 + §2.6 + §2.7 (`filter`).
@@ -689,6 +697,18 @@ The rich list: configurable main/sub/meta lines, colors, images, refresh, drag &
 | `showrefresh` | boolean | `true` | Show a refresh icon. |
 | `emptytext` | string | `"No records"` | Text shown when the list is empty. |
 
+#### `categorylist` — `RbCategorylistComponent`
+
+Compact category list: every object in the linked dataset is shown as a small white rounded box, stacked vertically in a narrow fixed-width (4vw) column. Each box shows a single label taken from `attribute` or `expression`; objects with an empty or unresolved label are not rendered. Clicking a box selects the object in its dataset (ctrl/shift-click extend the selection); the list pages in like `list4` — it fetches the next dataset page when scrolled to the bottom.
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `attribute` | string | — | Attribute supplying the box label. |
+| `expression` | string | — | JS expression for the box label (§4.2); used when `attribute` is not set. |
+| `format` | string | — | Display format for the label value (§4.5). |
+| `clickscript` | string (JS body) | — | Run on click; arg `event` = `{ alreadyselected, object, dataset }`. |
+| `emptytext` | string | `"No records"` | Text shown when the list is empty. |
+
 #### `tree` — `RbTreeComponent`
 
 Hierarchical object list.
@@ -748,6 +768,7 @@ Activity log / comment list: timestamped entries with author, optional categorie
 | `editable` | any | Whether new entries can be added/edited. |
 | `linkobjectattribute` | string | Attribute on the entry referencing a linked object (opens on click). |
 | `linkuidattribute` | string | Attribute on the entry holding the linked object's uid. |
+| `canpost` | boolean | `true` | Whether the add-entry control is shown (in addition to `editable`). |
 
 ### 3.5 Buttons & action controls
 
@@ -1445,7 +1466,7 @@ Notes:
 
 ## 6. Appendix: type → class mapping
 
-All 74 registry keys with their component classes and source files (paths relative to `src/app/`):
+All 77 registry keys with their component classes and source files (paths relative to `src/app/`):
 
 | Type | Class | File |
 |---|---|---|
@@ -1465,6 +1486,8 @@ All 74 registry keys with their component classes and source files (paths relati
 | `inlineinput` | RbInlineInputComponent | `inputs/rb-inline-input/rb-inline-input.component.ts` |
 | `list3` | RbListComponent | `rb-list/rb-list.component.ts` |
 | `list4` | RbList4Component | `rb-list4/rb-list4.component.ts` |
+| `multilist4` | RbMultilist4Component | `rb-multilist4/rb-multilist4.component.ts` |
+| `categorylist` | RbCategorylistComponent | `rb-categorylist/rb-categorylist.component.ts` |
 | `tree` | RbTreeComponent | `rb-tree/rb-tree.component.ts` |
 | `button` | RbActionButtonComponent | `clickable/rb-actionbutton/rb-actionbutton.component.ts` |
 | `search` | RbSearchComponent | `rb-search/rb-search.component.ts` |
@@ -1488,6 +1511,7 @@ All 74 registry keys with their component classes and source files (paths relati
 | `dateinput` | RbDatetimeInputComponent | `inputs/rb-datetime-input/rb-datetime-input.component.ts` |
 | `urlinput` | RbUrlInputComponent | `inputs/rb-url-input/rb-url-input.component.ts` |
 | `colorinput` | RbColorInputComponent | `inputs/rb-color-input/rb-color-input.component.ts` |
+| `passwordinput` | RbPasswordInputComponent | `inputs/rb-password-input/rb-password-input.component.ts` |
 | `gantt` | RbGanttComponent | `rb-gantt/rb-gantt.component.ts` |
 | `link` | RbLinkComponent | `rb-link/rb-link.component.ts` |
 | `log` | RbLogComponent | `rb-log/rb-log.component.ts` |
