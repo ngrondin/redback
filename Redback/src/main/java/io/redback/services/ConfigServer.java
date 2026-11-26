@@ -52,7 +52,9 @@ public abstract class ConfigServer extends ServiceProvider
 			}
 			else if(action.equals("listdomain"))
 			{
-				DataList list = getDomainConfigList(service, category, filter);
+				int page = request.containsKey("page") ? request.getNumber("page").intValue() : 0;
+				int pageSize = request.containsKey("pagesize") ? request.getNumber("pagesize").intValue() : 50;
+				DataList list = getDomainConfigList(service, category, filter, page, pageSize);
 				if(list == null) 
 					list = new DataList();
 				response.setData(new DataMap("result", list));
@@ -76,8 +78,7 @@ public abstract class ConfigServer extends ServiceProvider
 
 	protected abstract DataList getConfigList(String service, String category, DataMap filter) throws RedbackException;
 
-	protected abstract DataList getDomainConfigList(String service, String category, DataMap filter) throws RedbackException;
-
+	protected abstract DataList getDomainConfigList(String service, String category, DataMap filter, int page, int pageSize) throws RedbackException;
 	
 	public ServiceInformation getServiceInformation() 
 	{

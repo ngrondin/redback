@@ -3,8 +3,12 @@ package io.redback.managers.objectmanager;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import io.firebus.Firebus;
 import io.firebus.Payload;
@@ -79,8 +83,6 @@ public class ObjectManager
 	protected ScriptFactory scriptFactory = new ScriptFactory();
 	protected boolean loadAllOnInit;
 	protected int preCompile;
-	protected boolean includeLoaded;
-	protected boolean settingsLoaded;
 	protected String configServiceName;
 	protected String accessManagerServiceName;
 	protected String dataServiceName;
@@ -117,6 +119,9 @@ public class ObjectManager
 	protected IntegrationClient integrationClient;
 	protected GatewayClient gatewayClient;
 	protected boolean useMultiDBTransactions;
+	protected Map<String, List<ScriptHook>> onUpdateHooks = new HashMap<String, List<ScriptHook>>();
+	protected Map<String, List<ScriptHook>> onSaveHooks = new HashMap<String, List<ScriptHook>>();
+	protected Map<String, List<ScriptHook>> afterSaveHooks = new HashMap<String, List<ScriptHook>>();
 	protected Cache<DataMap> searchCache;
 	protected SysUserManager sysUserManager;
 
@@ -125,8 +130,6 @@ public class ObjectManager
 		try {
 			name = n;
 			firebus = fb;
-			includeLoaded = false;
-			settingsLoaded = false;
 			loadAllOnInit = config.containsKey("loadalloninit") ? config.getBoolean("loadalloninit") : true;
 			preCompile = config.containsKey("precompile") ? config.getNumber("precompile").intValue() : 0;
 			configServiceName = config.getString("configservice");
@@ -190,12 +193,16 @@ public class ObjectManager
 					scriptFactory.setInRootScope(scriptObject.getString("name"), jsObj);
 				}
 			}
-			firebus.registerConsumer("_rb_config_rbos_settings_clear", new Consumer() {
+			firebus.registerConsumer("_rb_config_rbos_settings_refresh", new Consumer() {
 				public void consume(Payload payload) {
-					settingsLoaded = false;
 					loadSettings();
 				}
 			}, 1);
+			firebus.registerConsumer("_rb_config_rbos_hooks_refresh", new Consumer() {
+				public void consume(Payload payload) {
+					loadScriptHooks();
+				}
+			}, 1);			
 		} catch(Exception e) {
 			throw new RedbackException("Error initialising Object Manager", e);
 		}
@@ -265,6 +272,7 @@ public class ObjectManager
 		return sysUserManager;
 	}
 
+
 	
 	public ScriptContext createScriptContext(Session session) throws RedbackException
 	{
@@ -292,15 +300,16 @@ public class ObjectManager
 	}
 	
 	public void refreshAllConfigs()
-	{	
-		includeLoaded = false;
-		settingsLoaded = false;
+	{
+		//includeLoaded = false;
+		//settingsLoaded = false;
 		objectConfigs.clear();
 		globalScripts.clear();
 		packConfigs.clear();
 		readRightsFilters.clear();
 		loadAllIncludeScripts();
 		loadSettings();
+		loadScriptHooks();
 	}
 	
 	public void clearDomainObjectConfig(Session session, String object, String domain) throws RedbackException {
@@ -314,19 +323,16 @@ public class ObjectManager
 	protected synchronized void loadAllIncludeScripts()
 	{
 		try {
-			if(includeLoaded == false) {
-				DataMap result = configClient.listConfigs(new Session(), "rbo", "include");
-				DataList resultList = result.getList("result");
-				for(int i = 0; i < resultList.size(); i++)
-				{
-					DataMap cfg = resultList.getObject(i);
-					try {
-						scriptFactory.executeInRootScope("include_" + cfg.getString("name"), cfg.getString("script"));
-					} catch(ScriptException e) {
-						throw new RedbackException("Error loading include scripts", e);
-					}
+			DataMap result = configClient.listConfigs(new Session(), "rbo", "include");
+			DataList resultList = result.getList("result");
+			for(int i = 0; i < resultList.size(); i++)
+			{
+				DataMap cfg = resultList.getObject(i);
+				try {
+					scriptFactory.executeInRootScope("include_" + cfg.getString("name"), cfg.getString("script"));
+				} catch(ScriptException e) {
+					throw new RedbackException("Error loading include scripts", e);
 				}
-				includeLoaded = true;
 			}
 		} catch(Exception e) {
 			Logger.severe("rb.object.loadinclude", e);
@@ -336,18 +342,57 @@ public class ObjectManager
 	protected synchronized void loadSettings()
 	{
 		try {
-			if(settingsLoaded == false && settingsCollection != null) {
-				DataMap result = settingsCollection.getData(new DataMap());
-				DataList resultList = result.getList("result");
-				settings.load(resultList);
-				settingsLoaded = true;
-			}
+			DataMap result = settingsCollection.getData(new DataMap());
+			DataList resultList = result.getList("result");
+			settings.load(resultList);
 			Logger.info("rb.object.loadsettings");
 		} catch(Exception e) {
 			Logger.severe("rb.object.loadsettings", e);
 		}	
 	}
-
+	
+	protected synchronized void loadScriptHooks()
+	{
+		try {
+			onUpdateHooks.clear();
+			onSaveHooks.clear();
+			afterSaveHooks.clear();
+			List<ScriptHook> hooks = new ArrayList<ScriptHook>();
+			int page = 0;
+			final int pageSize = 500;
+			while(true) {
+				DataMap result = configClient.listDomainConfigs(new Session(), "rbo", "hook", new DataMap(), page, pageSize);
+				DataList resultList = (result != null) ? result.getList("result") : null;
+				if(resultList == null) 
+					break;
+				for(int i = 0; i < resultList.size(); i++) {
+					DataMap hookConfig = resultList.getObject(i);
+					ScriptHook hook = new ScriptHook(hookConfig);
+					if(hook.isEnabled())
+						hooks.add(hook);
+				}
+				if(resultList.size() < pageSize)
+					break;
+				page++;
+			}
+			//Map<String, List<ScriptHook>> index = new HashMap<String, List<ScriptHook>>();
+			for(ScriptHook hook: hooks) {
+				String key = hook.domain + ":" + hook.getObject() + "." + hook.getField();
+				Map<String, List<ScriptHook>> index = hook.isOnUpdate() ? onUpdateHooks : hook.isOnSave() ? onSaveHooks : hook.isAfterSave() ? afterSaveHooks : null;
+				if(index != null) {
+					List<ScriptHook> hookList = index.get(key);
+					if(hookList == null) {
+						hookList = new ArrayList<ScriptHook>();
+						index.put(key, hookList);
+					}
+					hookList.add(hook);					
+				}
+			}
+			Logger.info("rb.object.loadhooks " + hooks.size());
+		} catch(Exception e) {
+			Logger.severe("rb.object.loadscripthooks", e);
+		}
+	}
 	
 	protected void addRelatedBulk(Session session, List<RedbackElement> elements) throws RedbackException
 	{
@@ -647,7 +692,7 @@ public class ObjectManager
 		}
 		return ret;
 	}	
-	
+		
 	public void streamPack(Session session, String name, DataStream<RedbackObject> objectStream) throws RedbackException 
 	{
 		final PackConfig packConfig = packConfigs.get(session, name);
@@ -863,6 +908,23 @@ public class ObjectManager
 		return new Value(value);
 	}
 	
+	public void executeUpdateHooks(Session session, String objectname, String field, String domain, String uid) {
+		String key = domain + ":" + objectname+ "." + field;
+		if(onUpdateHooks.containsKey(key)) {
+			List<ScriptHook> hooks = onUpdateHooks.get(key);
+			if(hooks != null) {
+				for(ScriptHook hook: hooks) {
+					try {
+						DataMap param = new DataMap("objectname", objectname, "uid", uid);
+						executeFunction(session, hook.scriptName, param);
+					} catch(Exception e) {
+						Logger.severe("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
+					}						
+				}
+			}
+		}
+	}
+	
 	public void initiateCurrentTransaction(Session session, boolean store)  throws RedbackException
 	{
 		session.setScriptContext(createScriptContext(session));
@@ -889,9 +951,9 @@ public class ObjectManager
 			session.getTxStore().clear("callqueue");
 			
 			int i = 0;
-			List<RedbackObject> objectList = new ArrayList<RedbackObject>();
-			List<RedbackObject> updatedList = new ArrayList<RedbackObject>();
-			List<RedbackObject> deletedList = new ArrayList<RedbackObject>();
+			Set<RedbackObject> objectList = new HashSet<RedbackObject>();
+			Set<RedbackObject> updatedList = new HashSet<RedbackObject>();
+			Set<RedbackObject> deletedList = new HashSet<RedbackObject>();
 			List<DataTransaction> dbtxs = new ArrayList<DataTransaction>();
 			List<Object> txList = session.getTxStore().getAll("object");
 			while(i < txList.size()) { //This is so the list can grow as onSaves are being done (creation of new objects onSave)
@@ -911,6 +973,8 @@ public class ObjectManager
 			}
 			session.getTxStore().clear("object");
 			
+			executeSaveHooks(session, updatedList, false);
+			
 			if(dbtxs.size() > 0) {
 				if(this.useMultiDBTransactions) {
 					dataClient.multi(dbtxs);
@@ -920,12 +984,14 @@ public class ObjectManager
 					}
 				}
 			}
-			
+
 			for(RedbackObject rbObject: deletedList) 
 				rbObject.afterDelete();
 			
 			for(RedbackObject rbObject: updatedList) 
 				rbObject.afterSave();
+
+			executeSaveHooks(session, updatedList, true);
 			
 			signal(objectList);
 			session.setStat("objects", objectList.size());
@@ -939,6 +1005,51 @@ public class ObjectManager
 						session.getTxStore().add("object", key, object);
 					}
 				}
+			}
+		}
+	}
+	
+	protected void executeSaveHooks(Session session, Set<RedbackObject> updatedList, boolean afterSave)
+	{
+		Map<ScriptHook, DataList> bulkCalls = new LinkedHashMap<ScriptHook, DataList>();
+		Map<String, List<ScriptHook>> map = afterSave ? afterSaveHooks : onSaveHooks;
+		for(RedbackObject obj: updatedList) {
+			String objectName = obj.getObjectConfig().getName();
+			String domain = obj.getDomain().getString();
+			List<String> updatedAttributes = new ArrayList<String>(obj.getUpdatedAttributes());
+			for(String attribute: updatedAttributes) {
+				String key = domain + ":" + objectName + "." + attribute;
+				List<ScriptHook> hooks = map.get(key);
+				if(hooks != null) {
+					for(ScriptHook hook: hooks) {
+						if(hook.isBulk()) {
+							String uid = obj.getUID().getString();
+							DataList uids = bulkCalls.get(hook);
+							if(uids == null) {
+								uids = new DataList();
+								bulkCalls.put(hook, uids);
+							}
+							if(!uids.contains(uid))
+								uids.add(uid);
+						} else {
+							try {
+								DataMap param = new DataMap("objectname", objectName, "uid", obj.getUID().getString());
+								executeFunction(session, hook.scriptName, param);
+							} catch(Exception e) {
+								Logger.severe("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
+							}
+						}
+					}
+				}
+			}
+		}
+		for(Map.Entry<ScriptHook, DataList> entry: bulkCalls.entrySet()) {
+			ScriptHook hook = entry.getKey();
+			DataMap param = new DataMap("objectname", hook.getObject(), "uids", entry.getValue());
+			try {
+				executeFunction(session, hook.scriptName, param);
+			} catch(Exception e) {
+				Logger.severe("rb.objectmanager.executesavehook", "Error executing script hooks on save of attribute '" + hook.field + "'", e);
 			}
 		}
 	}
@@ -1253,7 +1364,7 @@ public class ObjectManager
 	}
 
 	
-	protected void signal(List<RedbackObject> list)
+	protected void signal(Set<RedbackObject> list)
 	{
 		if(objectUpdateChannel != null && list.size() > 0) 
 		{
@@ -1274,7 +1385,12 @@ public class ObjectManager
 	
 	protected void sendSettingsClear() 
 	{
-		firebus.publish("_rb_config_rbos_settings_clear", new Payload());
+		firebus.publish("_rb_config_rbos_settings_refresh", new Payload());
+	}
+	
+	protected void sendHookRefresh() 
+	{
+		firebus.publish("_rb_config_rbos_hooks_refresh", new Payload());
 	}
 
 }

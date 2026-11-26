@@ -47,6 +47,12 @@ public class ConfigClient extends Client
 		DataMap req = new DataMap("action", "listdomain", "service", service, "category", category, "filter", filter);
 		return requestDataMap(session, req);
 	}
+	
+	public DataMap listDomainConfigs(Session session, String service, String category, DataMap filter, int page, int pageSize) throws RedbackException
+	{
+		DataMap req = new DataMap("action", "listdomain", "service", service, "category", category, "filter", filter, "page", page, "pagesize", pageSize);
+		return requestDataMap(session, req);
+	}
 
 
 }

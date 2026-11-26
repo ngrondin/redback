@@ -204,14 +204,16 @@ public class RedbackConfigServer extends ConfigServer implements FileWatcherList
 	}
 
 	
-	protected DataList getDomainConfigList(String service, String category, DataMap filter) throws RedbackException
+	protected DataList getDomainConfigList(String service, String category, DataMap filter, int page, int pageSize) throws RedbackException
 	{
 		if(dataClient != null) 
 		{
+			if(filter == null)
+				filter = new DataMap();
 			if(domainConfigCollections.containsKey(service) && domainConfigCollections.get(service).containsKey(category)) 
 			{
 				CollectionConfig collectionConfig = domainConfigCollections.get(service).get(category);
-				DataMap res = dataClient.getData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(filter), null);
+				DataMap res = dataClient.getData(collectionConfig.getName(), collectionConfig.convertObjectToSpecific(filter), null, page, pageSize);
 				if(res.containsKey("result")) 
 				{
 					return res.getList("result");

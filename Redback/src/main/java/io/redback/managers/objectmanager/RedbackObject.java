@@ -435,7 +435,8 @@ public class RedbackObject extends RedbackElement
 							executeAttributeFunction(name, "onupdate", attributeUpdateScriptContext);
 						} catch(ScriptValueException e) {
 							throw new RedbackException("Error executing onupdate script", e);
-						}						
+						}
+						objectManager.executeUpdateHooks(session, config.getName(), name, getDomain().getString(), this.getUID().getString());
 					}
 				}
 				else
@@ -641,7 +642,7 @@ public class RedbackObject extends RedbackElement
 	{
 		if(isDeleted != true && (updatedAttributes.size() > 0  ||  isNewObject == true || embeddingsUpdated == true) && canWrite)
 		{
-			executeFunction("onsave", scriptContext);
+			executeFunction("onsave", scriptContext);	
 		}
 	}
 	
@@ -659,7 +660,6 @@ public class RedbackObject extends RedbackElement
 			} catch(Exception e) {
 				Logger.severe("rb.object.aftersave", "Error in after save trigger", e);
 			}				
-			updatedAttributes.clear();
 		}		
 	}
 	
