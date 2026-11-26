@@ -901,6 +901,8 @@ Gantt chart: lanes from one dataset, spreads (task bars) from series, drop-to-mo
 | `showcontrols` | boolean | `true` | Show the zoom/pan/now controls. |
 | `locktonow` | boolean | `false` | Lock the time window around "now". |
 | `allowpastdrop` | boolean | `true` | Allow dropping spreads in the past. |
+| `locktime` | boolean | `false` | A dropped spread keeps its time: only its lane changes. |
+| `locklane` | boolean | `false` | A dropped spread keeps its lane: only its time changes, and it goes back to its own lane. |
 | `allowoverlapgroup` | boolean | `false` | Allow overlapping spreads in a group lane. |
 | `allowmultipleoverlays` | boolean | `false` | Show more than one overlay over the lanes at the same time: the first overlay picked is drawn as a filled band, every further one in the `overlaystyle`. Off, picking an overlay replaces the one shown. |
 | `overlaystyle` | string | `hatch` | How the overlays after the first are drawn when `allowmultipleoverlays` is on: `hatch` (thin lines in the overlay's colour, at a different angle per position) or `outline` (only the left and right edge of each block, in its colour). |

@@ -33,6 +33,8 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
   @Input('showcontrols') showcontrols: boolean = true;
   @Input('locktonow') locktonow: boolean = false;
   @Input('allowpastdrop') allowpastdrop: boolean = true;
+  @Input('locktime') locktime: boolean = false;
+  @Input('locklane') locklane: boolean = false;
   @Input('allowoverlapgroup') allowoverlapgroup: boolean = false;
   @Input('allowmultipleoverlays') allowMultipleOverlays: boolean = false;
   @Input('overlaystyle') overlayStyle: string = 'hatch';
@@ -830,12 +832,12 @@ export class RbGanttComponent extends RbDataCalcComponent<GanttSeriesConfig> {
     let laneLinkAttributes = (cfg.laneForeignAttributes || this.lanesConfig?.linkAttributes);
     let laneLinkValue = lane.getLinkValuesForSeries(cfg)
     let masterPreviousLaneValues = cfg.laneAttributes.map(la => masterObject.get(la));
-    let masterChangedLanes = !this.linkValuesMatch(masterPreviousLaneValues, laneLinkValue);
+    let masterChangedLanes = !this.locklane && !this.linkValuesMatch(masterPreviousLaneValues, laneLinkValue);
     let masterNewStartMS = null;
     let timeDiffMS = null;
     let tx = new RbObjectTransaction();
 
-    if(!ignoreTime) {
+    if(!ignoreTime && !this.locktime) {
       let pos = this.getXYRelativeToTarget(event.mouseEvent, "rb-gantt-lane");
       masterNewStartMS = this.snap(masterObject, pos.x - event.offset.x, lane);
       let prevStartStr = masterObject.get(cfg.start.attribute);
