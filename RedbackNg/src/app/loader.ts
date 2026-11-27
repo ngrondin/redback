@@ -58,6 +58,7 @@ import { RbRichtextInputComponent } from "app/inputs/rb-richtext-input/rb-richte
 import { RbVseparatorComponent } from "app/rb-vseparator/rb-vseparator.component";
 import { RbDynamicformeditorComponent } from "app/rb-dynamicformeditor/rb-dynamicformeditor.component";
 import { RbFunnelComponent } from "app/rb-funnel/rb-funnel.component";
+import { RbHeatmapComponent } from "app/rb-heatmap/rb-heatmap.component";
 import { RbActionlistComponent } from "app/clickable/rb-actionlist/rb-actionlist.component";
 import { RbUrlInputComponent } from "app/inputs/rb-url-input/rb-url-input.component";
 import { RbStackedGraphComponent } from "app/graphs/rb-stacked-graph/rb-stacked-graph.component";
@@ -150,6 +151,7 @@ export const componentRegistry: {[key:string]: any} = {
     "stars": RbStarsInputComponent,
     "percentinput": RbPercentInputComponent,
     "funnel":RbFunnelComponent,
+    "heatmap":RbHeatmapComponent,
     "listbutton": RbActionlistComponent,
     "scroll":RbScrollComponent,
     "group": RbGroupComponent,
