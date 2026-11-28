@@ -141,7 +141,7 @@ RbComponent
 │   │   ├── RbFieldInputComponent
 │   │   │   └── RbPopupInputComponent
 │   │   └── (some inputs extend RbInput directly)
-│   └── RbDataCalcComponent                (gantt, calendar, timeline, funnel, map)
+│   └── RbDataCalcComponent                (gantt, calendar, timeline, funnel, heatmap, map)
 └── RbAggregateDisplayComponent            (graph, stackedgraph, vbargraph, hbargraph, numbertiles, pivot)
 ```
 
@@ -243,7 +243,7 @@ Used by: `relatedinput`, `multirelatedinput`, `hierarchyinput`, `choiceinput`, `
 
 Used by: `button`, `listbutton`, `actiongroup`, `processactionsbutton`.
 
-### 2.9 `RbDataCalcComponent` — computed datasets (gantt, calendar, timeline, funnel, map)
+### 2.9 `RbDataCalcComponent` — computed datasets (gantt, calendar, timeline, funnel, heatmap, map)
 
 | Input | Type | Default | Description |
 |---|---|---|---|
@@ -965,6 +965,21 @@ Funnel visualization grouped into phases.
 
 **`series` items** (`FunnelSeriesConfig`): `{ dataset, labelattribute, sublabelattribute, colorattribute, colormap, groupattribute | group {value|attribute|expression}, phaseattribute, linkview, modal }`.
 
+#### `heatmap` — `RbHeatmapComponent`
+
+A matrix of boxes: the rows come from one dataset, the columns from another, and each series object is drawn in the box of its row and its column. Needs a `datasetgroup`. Clicking a box selects the series object, its row object and its column object, then runs the series `clickscript`. Nothing is draggable. Stretches to the space it has (`flex: 1 1 auto`); the body scrolls both ways and the column and row headers follow. The user can drag the right edge of a column header, or of the top left corner for the row headers, to change that width (kept while the screen is open).
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `rows` | `{ dataset, keyattribute, label {value\|attribute\|expression} \| labelattribute \| labelexpression }` | — | One row per object, in the dataset order. `keyattribute` (default `uid`) is what a series `rowattribute` points to. |
+| `columns` | same as `rows` | — | One column per object, in the dataset order. |
+| `cellwidth` | number | `60` | Box width in px, until the user drags a column wider or narrower. |
+| `cellheight` | number | `28` | Box height in px. |
+| `rowheaderwidth` | number | `220` | Row header width in px. |
+| `emptymessage` | string | `"Nothing to show"` | Shown when there are no rows or no columns. |
+
+**`series` items** (`HeatmapSeriesConfig`): `{ dataset, rowattribute, colattribute, label {value|attribute|expression} | labelattribute | labelexpression, color {value|attribute|expression|map} | color | colorattribute | colormap | colorexpression, tip {...} | tipattribute | tipexpression, clickscript }`. `clickscript` gets `event = { alreadyselected, object, dataset, row, column }`. Two objects in the same box share it.
+
 #### `map` — `RbMapComponent`
 
 Geographic map of objects.
@@ -1539,6 +1554,7 @@ All 77 registry keys with their component classes and source files (paths relati
 | `stars` | RbStarsInputComponent | `inputs/rb-stars-input/rb-stars-input.component.ts` |
 | `percentinput` | RbPercentInputComponent | `inputs/rb-percent-input/rb-percent-input.component.ts` |
 | `funnel` | RbFunnelComponent | `rb-funnel/rb-funnel.component.ts` |
+| `heatmap` | RbHeatmapComponent | `rb-heatmap/rb-heatmap.component.ts` |
 | `listbutton` | RbActionlistComponent | `clickable/rb-actionlist/rb-actionlist.component.ts` |
 | `scroll` | RbScrollComponent | `rb-scroll/rb-scroll.component.ts` |
 | `group` | RbGroupComponent | `rb-group/rb-group.component.ts` |

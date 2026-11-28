@@ -1,0 +1,64 @@
+<div
+    class="rb-heatmap-scroll">
+    <div
+        *ngIf="!isEmpty"
+        class="rb-heatmap-body"
+        [style.width.px]="bodyWidth">
+        <div
+            class="rb-heatmap-headrow"
+            [style.height.px]="cellHeight">
+            <div
+                class="rb-heatmap-corner"
+                [style.width.px]="rowHeaderWidth">
+                <div
+                    class="rb-heatmap-drag"
+                    (mousedown)="mousedownRowHeaderDrag($event)">
+                </div>
+            </div>
+            <div
+                *ngFor="let col of colHeaders"
+                class="rb-heatmap-colheader"
+                [class.rb-heatmap-header-selected]="isHeaderSelected(col, columnsConfig)"
+                [style.width.px]="colWidth(col)"
+                [title]="col.label">
+                <span class="rb-heatmap-colheader-label">{{col.label}}</span>
+                <div
+                    class="rb-heatmap-drag"
+                    (mousedown)="mousedownColumnDrag($event, col)">
+                </div>
+            </div>
+        </div>
+        <div
+            *ngFor="let row of rowHeaders; let r = index"
+            class="rb-heatmap-row"
+            [style.height.px]="cellHeight">
+            <div
+                class="rb-heatmap-rowheader"
+                [class.rb-heatmap-header-selected]="isHeaderSelected(row, rowsConfig)"
+                [style.width.px]="rowHeaderWidth"
+                [title]="row.label">
+                {{row.label}}
+            </div>
+            <div
+                *ngFor="let col of colHeaders; let c = index"
+                class="rb-heatmap-cell"
+                [style.width.px]="colWidth(col)">
+                <div
+                    *ngFor="let entry of cells[r][c]"
+                    class="rb-heatmap-entry"
+                    [class.rb-heatmap-entry-selected]="isSelected(entry)"
+                    [style.background-color]="entry.color"
+                    [style.color]="entry.textColor"
+                    [title]="entry.tip ?? entry.label"
+                    (click)="clickEntry(entry, r, c)">
+                    {{entry.label}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div
+        *ngIf="isEmpty"
+        class="rb-heatmap-empty">
+        {{emptymessage}}
+    </div>
+</div>

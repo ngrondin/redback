@@ -138,6 +138,7 @@ import { RbDynamicformeditorComponent } from './rb-dynamicformeditor/rb-dynamicf
 import { PortalRootComponent } from './roots/portal-root/portal-root.component';
 import { RbActionlistComponent } from './clickable/rb-actionlist/rb-actionlist.component';
 import { RbFunnelComponent } from './rb-funnel/rb-funnel.component';
+import { RbHeatmapComponent } from './rb-heatmap/rb-heatmap.component';
 import { RbIconbuttonBadgeComponent } from './clickable/rb-iconbutton-badge/rb-iconbutton-badge.component';
 import { RbUrlInputComponent } from './inputs/rb-url-input/rb-url-input.component';
 import { RbPreferencesComponent } from './rb-preferences/rb-preferences.component';
@@ -320,6 +321,7 @@ window.redback = window.redback || {};
         RbDynamicformeditorComponent,
         RbActionlistComponent,
         RbFunnelComponent,
+        RbHeatmapComponent,
         RbIconbuttonBadgeComponent,
         RbUrlInputComponent,
         CachedSrcDirective,
